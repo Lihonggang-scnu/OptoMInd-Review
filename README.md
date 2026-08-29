@@ -2,7 +2,7 @@
 
 [中文说明](README.zh-CN.md)
 
-OptoMind-Review is part of our competition entry developed for the Alibaba Cloud challenge “Research and Application of an AI Scientist Based on Domestic Open-Source Large Models” (Challenge Cup China College Student Entrepreneurship Competition, problem number: XH-202619). Its primary contribution is the end-to-end delivery of a complete English PDF from a user's literature-review request.
+OptoMind-Review is part of our competition entry developed for the Alibaba Cloud challenge “Research and Application of an AI Scientist Based on Domestic Open-Source Large Models” (problem number: XH-202619). Its primary contribution is the end-to-end delivery of a complete English PDF from a user's literature-review request.
 
 Track 1A of the challenge asks participating teams to build an AI application that can address the 125 frontier scientific questions proposed by *Science* through a complete workflow covering “question understanding → knowledge integration → candidate hypothesis generation → evidence organization → research-plan generation → feedback and revision.” In support of this goal, we have implemented a subset of capabilities for scientific-literature understanding, knowledge integration, and evidence organization as a domain-oriented research harness: OptoMind-Review. It progressively turns a natural-language research question into traceable research materials, organizes retrieved literature, structures section-level evidence, generates cited content, builds visual assets, and produces a literature review together with publication files. The result is a substantially complete automated pipeline from “research question → evidence → review → publication.”
 
