@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FullReviewState",
+  "description": "Schema for the FullReviewState pipeline state document (full_review_state.v1).",
+  "type": "object",
+  "required": ["schema_version", "run_id", "status"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "full_review_state.v1",
+      "description": "Must be exactly 'full_review_state.v1'."
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for this pipeline run."
+    },
+    "pipeline_version": { "type": "string" },
+    "domain": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "running",
+        "completed",
+        "failed",
+        "needs_human_review",
+        "paused",
+        "awaiting_human_review",
+        "partial"
+      ],
+      "description": "Overall pipeline run status."
+    },
+    "created_at": { "type": "string" },
+    "updated_at": { "type": "string" },
+    "user_query": { "type": "string" },
+    "manifest_path": { "type": ["string", "null"] },
+    "stage_order": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "stages": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "stage_id": { "type": "string" },
+          "status": { "type": "string" },
+          "attempt": { "type": "integer" },
+          "started_at": { "type": ["string", "null"] },
+          "completed_at": { "type": ["string", "null"] },
+          "input_artifact_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "output_artifact_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "error": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "revision_history": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "artifact_registry": { "type": "object" },
+    "query_plan_ref": { "type": ["object", "null"] },
+    "corpus_ref": { "type": ["object", "null"] },
+    "knowledge_base_ref": { "type": ["object", "null"] },
+    "concept_map_ref": { "type": ["object", "null"] },
+    "review_charter_ref": { "type": ["object", "null"] },
+    "mentor_advice_ref": { "type": ["object", "null"] },
+    "blueprint_candidates_ref": { "type": ["object", "null"] },
+    "selected_blueprint_ref": { "type": ["object", "null"] },
+    "section_contracts_ref": { "type": ["object", "null"] },
+    "evidence_portfolios_ref": { "type": ["object", "null"] },
+    "gap_history_ref": { "type": ["object", "null"] },
+    "visual_plans_ref": { "type": ["object", "null"] },
+    "section_drafts_ref": { "type": ["object", "null"] },
+    "citation_audits_ref": { "type": ["object", "null"] },
+    "cross_section_edit_ref": { "type": ["object", "null"] },
+    "supervisor_review_ref": { "type": ["object", "null"] },
+    "feedback_revision_ref": { "type": ["object", "null"] },
+    "global_review_ref": { "type": ["object", "null"] },
+    "peer_reviews_ref": { "type": ["object", "null"] },
+    "revision_loop_ref": { "type": ["object", "null"] },
+    "final_outputs_ref": { "type": ["object", "null"] }
+  },
+  "additionalProperties": true
+}

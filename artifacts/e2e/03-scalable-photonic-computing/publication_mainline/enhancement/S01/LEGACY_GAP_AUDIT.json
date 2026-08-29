@@ -1,0 +1,57 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S01",
+  "audit": {
+    "verdict": "gaps_found",
+    "gaps": [
+      {
+        "gap_id": "G01",
+        "old_draft_snippet": "Silicon nitride, meanwhile, exhibits a nonlinear susceptibility of approximately 2.5×10⁻¹⁹ m²/W at 1.55 μm, enabling efficient four-wave mixing processes suitable for applications such as Kerr microcomb generation [CITATION][CITATION][CITATION][CITATION]. Si₃N₄ also benefits from ultra-low propagation loss in the visible and near-infrared spectral windows, though its weak electro-optic response similarly necessitates auxiliary modulation schemes.",
+        "scientific_content": "The specific value of silicon nitride's nonlinear susceptibility (2.5×10⁻¹⁹ m²/W at 1.55 μm) and its resulting capability for efficient four-wave mixing (e.g., Kerr microcomb generation), along with its ultra-low propagation loss in visible/near-IR windows, are missing from the new blocks which focus primarily on Silicon vs. TFLN.",
+        "claim_handles": [
+          "C23_SILICON_NITRIDE_SI3N4_EXHIBITS_NONLINEAR_SUSCE"
+        ],
+        "evidence_handles": [
+          "E104_LITHIUM_NIOBATE_PHOTONICS_UNLOCKING_ELECTROMAG"
+        ],
+        "affected_block_indices": [
+          1
+        ]
+      },
+      {
+        "gap_id": "G02",
+        "old_draft_snippet": "Two-photon absorption losses at high optical intensities further constrain the usable power budget in densely packed circuits [CITATION][CITATION][CITATION][CITATION][CITATION].",
+        "scientific_content": "The specific mechanism of two-photon absorption (TPA) losses constraining the power budget in silicon photonics is mentioned in Block 1 but lacks the explicit context that it is a distinct intrinsic material limitation alongside the lack of linear EO effect, whereas Block 1 focuses heavily on thermal crosstalk. While present, the specific quantification or emphasis on TPA as a primary constraint distinct from thermal issues is diluted.",
+        "claim_handles": [],
+        "evidence_handles": [],
+        "affected_block_indices": []
+      }
+    ],
+    "notes": "Gap G01 identifies the omission of Silicon Nitride's specific nonlinear properties and low-loss characteristics, which were a key part of the material platform comparison in the old draft. Gap G02 is borderline; while TPA is mentioned in Block 1, the old draft explicitly linked it to 'high optical intensities' and 'power budget' as a separate constraint from thermal issues. However, since Block 1 does mention TPA, I will remove G02 to be strict about 'genuinely lost' content. The new text says 'significant two-photon absorption losses', so it is covered. Only G01 remains as a clear omission of Si3N4 details.",
+    "warnings": []
+  },
+  "patch_records": [
+    {
+      "gap_id": "G01",
+      "block_index": 1,
+      "applied": true,
+      "used_evidence_handles": [
+        "E12_NEUROLIGHT_PHYSICS_AGNOSTIC_NEURAL_OPERATOR_EN",
+        "E17_LITHIUM_NIOBATE_PHOTONICS_UNLOCKING_ELECTROMAG",
+        "E52_AI_COMPUTATIONAL_SIMULATION_PLATFORM_ADVANCING",
+        "E145_DESIGN_SIMULATION_THERMO_OPTIC_PHASE_SHIFTERS",
+        "E104_LITHIUM_NIOBATE_PHOTONICS_UNLOCKING_ELECTROMAG"
+      ],
+      "gap_evidence_handles": [
+        "E104_LITHIUM_NIOBATE_PHOTONICS_UNLOCKING_ELECTROMAG"
+      ]
+    },
+    {
+      "gap_id": "G02",
+      "block_index": null,
+      "applied": false,
+      "reason": "no_gap_specific_evidence_handles",
+      "detail": "Gap has no valid claim-aligned evidence handle; record-only, no patch applied."
+    }
+  ]
+}

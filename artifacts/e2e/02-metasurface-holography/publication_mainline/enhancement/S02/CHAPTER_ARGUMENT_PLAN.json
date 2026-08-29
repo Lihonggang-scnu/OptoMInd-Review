@@ -1,0 +1,334 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S02",
+  "plan": {
+    "chapter_thesis": "Computational inverse design for metasurface holograms has evolved from analytical superposition to sophisticated gradient-based and machine-learning optimization, yet these methods rely on idealized models that ignore fabrication disorder, creating a critical design-reality gap.",
+    "reader_takeaway": "While modern algorithms can theoretically optimize complex holographic wavefronts, their reliance on idealized simulations without fabrication constraints limits their practical fidelity in real-world devices.",
+    "argument_sequence": [
+      {
+        "step_index": 1,
+        "purpose": "Establish the historical evolution from heuristic/analytical methods to mathematical optimization and deep learning.",
+        "claim_handles": [
+          "C01_INVERSE_DESIGN_METHODS_NANOPHOTONICS_HAVE_EVOL",
+          "C22_COMPUTATIONAL_INVERSE_DESIGN_METASURFACE_HOLOG",
+          "C32_EVOLUTION_INVERSE_DESIGN_METHODS_REFLECTS_SHIF"
+        ],
+        "evidence_handles": [
+          "E01_INVERSE_DESIGN_ELECTROMAGNETIC_METAMATERIALS_I",
+          "E46_COMPUTATIONAL_INVERSE_DESIGN_CASCADED_SYSTEMS"
+        ]
+      },
+      {
+        "step_index": 2,
+        "purpose": "Define the fundamental inverse problem formulation and the shift from forward solvers to direct mapping.",
+        "claim_handles": [
+          "C11_INVERSE_DESIGN_ALGORITHMS_METASURFACES_OPERATE",
+          "C13_INVERSE_DESIGN_METASURFACES_AIMS_DIRECTLY_DETE",
+          "C23_INVERSE_DESIGN_METASURFACES_FUNDAMENTALLY_ILL"
+        ],
+        "evidence_handles": [
+          "E20_INVERSE_DESIGN_TWO_FUNCTION_TRANSMISSION_TYPE",
+          "E26_UNIFIED_MACHINE_LEARNING_FRAMEWORK_AUTOMATED_I"
+        ]
+      },
+      {
+        "step_index": 3,
+        "purpose": "Explain gradient-based and topology optimization mechanisms for continuous profile design.",
+        "claim_handles": [
+          "C04_ADJOINT_BASED_GRADIENT_EVALUATION_FACILITATES",
+          "C06_GRADIENT_BASED_TOPOLOGY_OPTIMIZATION_LEVERAGES"
+        ],
+        "evidence_handles": [
+          "E05_ADJOINT_BASED_GRADIENT_EVALUATION_METASURFACE",
+          "E10_TIME_DOMAIN_TOPOLOGY_OPTIMIZATION_ARBITRARY_DI"
+        ]
+      },
+      {
+        "step_index": 4,
+        "purpose": "Detail the paradigm shift to deep learning surrogate models replacing slow electromagnetic solvers.",
+        "claim_handles": [
+          "C08_ADVENT_DEEP_LEARNING_INTRODUCED_PARADIGM_SHIFT",
+          "C14_NEURAL_NETWORK_BASED_SURROGATE_MODELS_ENABLE_R",
+          "C16_MACHINE_LEARNING_APPROACHES_ADDRESS_COMPUTATIO"
+        ],
+        "evidence_handles": [
+          "E14_INVERSE_DESIGN_METASURFACES_USING_PHYSICS_INFO",
+          "E28_NEURAL_NETWORK_BASED_SURROGATE_MODEL_INVERSE_D"
+        ]
+      },
+      {
+        "step_index": 5,
+        "purpose": "Describe advanced neural architectures (tandem, cascaded, residual) specifically for holography.",
+        "claim_handles": [
+          "C03_CASCADED_NEURAL_NETWORK_ARCHITECTURES_COMPRISI",
+          "C15_DEEP_NEURAL_NETWORKS_INCLUDING_TANDEM_RESIDUAL",
+          "C24_DEEP_LEARNING_ARCHITECTURES_INCLUDING_RESIDUAL"
+        ],
+        "evidence_handles": [
+          "E04_CYCLICAL_DEEP_LEARNING_BASED_FRAMEWORK_SIMULTA",
+          "E32_INVERSE_DESIGN_METASURFACE_HOLOGRAPHY_DEEP_RES"
+        ]
+      },
+      {
+        "step_index": 6,
+        "purpose": "Address limitations of data-driven approaches regarding generalization and the need for hybrid strategies.",
+        "claim_handles": [
+          "C02_NEURAL_NETWORKS_TRAINED_INVERSE_DESIGN_CANNOT",
+          "C18_TRANSFER_LEARNING_ENABLES_INVERSE_DESIGN_NETWO"
+        ],
+        "evidence_handles": [
+          "E03_DEEPADJOINT_ALL_ONE_PHOTONIC_INVERSE_DESIGN_FR",
+          "E40_CROSS_DOMAIN_HETEROGENEOUS_METASURFACE_INVERSE"
+        ]
+      },
+      {
+        "step_index": 7,
+        "purpose": "Highlight the exploitation of high degrees of freedom (multilayer, 3D) enabled by these algorithms.",
+        "claim_handles": [
+          "C07_INVERSE_DESIGN_METHODS_EXPLOIT_HIGH_DEGREES_FR",
+          "C17_INVERSE_DESIGN_TECHNIQUES_BEING_APPLIED_SPECIF",
+          "C30_DEEP_LEARNING_MODELS_ENABLE_INVERSE_DESIGN_REF"
+        ],
+        "evidence_handles": [
+          "E12_OPTICAL_MULTILAYER_THIN_FILM_STRUCTURE_INVERSE",
+          "E37_INVERSE_DESIGN_METASURFACE_BASED_OFF_AXIS_IMAG"
+        ]
+      },
+      {
+        "step_index": 8,
+        "purpose": "Critique the reliance on idealized models and the resulting disconnect with fabrication reality.",
+        "claim_handles": [
+          "C12_OPTIMIZATION_ALGORITHMS_METASURFACES_OFTEN_REL",
+          "C21_HEURISTIC_OPTIMIZATION_METHODS_FREQUENTLY_GENE",
+          "C20_PHYSICS_INFORMED_MACHINE_LEARNING_MODELS_OPTIC"
+        ],
+        "evidence_handles": [
+          "E22_PHASE_CHANGE_NONLOCAL_METASURFACES_DYNAMIC_WAV",
+          "E45_SP2RINT_SPATIALLY_DECOUPLED_PHYSICS_INSPIRED_P"
+        ]
+      }
+    ],
+    "terminology_rows": [
+      {
+        "term": "Inverse Design",
+        "definition_claim_handle": "C11_INVERSE_DESIGN_ALGORITHMS_METASURFACES_OPERATE",
+        "representative_application_claim_handle": "C13_INVERSE_DESIGN_METASURFACES_AIMS_DIRECTLY_DETE",
+        "note": "Mapping target electromagnetic performance directly to structural parameters, reversing conventional forward design.",
+        "explanation_status": "first_use_defined"
+      },
+      {
+        "term": "Adjoint Method",
+        "definition_claim_handle": "C04_ADJOINT_BASED_GRADIENT_EVALUATION_FACILITATES",
+        "representative_application_claim_handle": null,
+        "note": "Gradient evaluation technique facilitating continuous profile optimization in large design spaces.",
+        "explanation_status": "first_use_defined"
+      },
+      {
+        "term": "Surrogate Model",
+        "definition_claim_handle": "C14_NEURAL_NETWORK_BASED_SURROGATE_MODELS_ENABLE_R",
+        "representative_application_claim_handle": "C08_ADVENT_DEEP_LEARNING_INTRODUCED_PARADIGM_SHIFT",
+        "note": "Neural networks trained to approximate expensive electromagnetic simulations for rapid inverse design.",
+        "explanation_status": "first_use_defined"
+      },
+      {
+        "term": "Tandem Network",
+        "definition_claim_handle": "C15_DEEP_NEURAL_NETWORKS_INCLUDING_TANDEM_RESIDUAL",
+        "representative_application_claim_handle": "C03_CASCADED_NEURAL_NETWORK_ARCHITECTURES_COMPRISI",
+        "note": "Dual-network architecture solving the non-uniqueness problem in inverse mapping by combining forward and inverse predictors.",
+        "explanation_status": "first_use_defined"
+      },
+      {
+        "term": "Design-Reality Gap",
+        "definition_claim_handle": "C12_OPTIMIZATION_ALGORITHMS_METASURFACES_OFTEN_REL",
+        "representative_application_claim_handle": "C21_HEURISTIC_OPTIMIZATION_METHODS_FREQUENTLY_GENE",
+        "note": "The discrepancy between simulated idealized performance and actual device behavior due to unmodeled fabrication disorders.",
+        "explanation_status": "evidence_limited"
+      }
+    ],
+    "explanation_block_rows": [
+      {
+        "block_index": 1,
+        "title": "Evolution of Inverse Design Paradigms",
+        "block_type": "introduction_viewpoint",
+        "goal": "Establish the transition from intuition-based heuristics to rigorous mathematical and data-driven optimization.",
+        "claim_handles": [
+          "C01_INVERSE_DESIGN_METHODS_NANOPHOTONICS_HAVE_EVOL",
+          "C22_COMPUTATIONAL_INVERSE_DESIGN_METASURFACE_HOLOG",
+          "C32_EVOLUTION_INVERSE_DESIGN_METHODS_REFLECTS_SHIF"
+        ],
+        "evidence_handles": [
+          "E01_INVERSE_DESIGN_ELECTROMAGNETIC_METAMATERIALS_I",
+          "E46_COMPUTATIONAL_INVERSE_DESIGN_CASCADED_SYSTEMS",
+          "E72_INVERSE_DESIGN_METASURFACE_SPECTRAL_IMAGING"
+        ],
+        "omitted_handle_reasons": {}
+      },
+      {
+        "block_index": 2,
+        "title": "Formulating the Inverse Problem",
+        "block_type": "explanatory_body",
+        "goal": "Define the core mathematical challenge of mapping optical responses to geometry and its ill-posed nature.",
+        "claim_handles": [
+          "C11_INVERSE_DESIGN_ALGORITHMS_METASURFACES_OPERATE",
+          "C13_INVERSE_DESIGN_METASURFACES_AIMS_DIRECTLY_DETE",
+          "C23_INVERSE_DESIGN_METASURFACES_FUNDAMENTALLY_ILL"
+        ],
+        "evidence_handles": [
+          "E20_INVERSE_DESIGN_TWO_FUNCTION_TRANSMISSION_TYPE",
+          "E26_UNIFIED_MACHINE_LEARNING_FRAMEWORK_AUTOMATED_I",
+          "E48_INVERSE_DESIGN_METASURFACES_USING_PHYSICS_INFO"
+        ],
+        "omitted_handle_reasons": {}
+      },
+      {
+        "block_index": 3,
+        "title": "Gradient-Based and Topology Optimization",
+        "block_type": "explanatory_body",
+        "goal": "Explain how adjoint methods and topology optimization leverage continuous parameter spaces for broadband design.",
+        "claim_handles": [
+          "C04_ADJOINT_BASED_GRADIENT_EVALUATION_FACILITATES",
+          "C06_GRADIENT_BASED_TOPOLOGY_OPTIMIZATION_LEVERAGES"
+        ],
+        "evidence_handles": [
+          "E05_ADJOINT_BASED_GRADIENT_EVALUATION_METASURFACE",
+          "E10_TIME_DOMAIN_TOPOLOGY_OPTIMIZATION_ARBITRARY_DI",
+          "E11_PEARSAN_MACHINE_LEARNING_METHOD_INVERSE_DESIGN"
+        ],
+        "omitted_handle_reasons": {}
+      },
+      {
+        "block_index": 4,
+        "title": "Deep Learning Surrogates and Speed",
+        "block_type": "explanatory_body",
+        "goal": "Demonstrate how neural networks replace slow solvers to enable rapid design-on-demand.",
+        "claim_handles": [
+          "C08_ADVENT_DEEP_LEARNING_INTRODUCED_PARADIGM_SHIFT",
+          "C14_NEURAL_NETWORK_BASED_SURROGATE_MODELS_ENABLE_R",
+          "C16_MACHINE_LEARNING_APPROACHES_ADDRESS_COMPUTATIO"
+        ],
+        "evidence_handles": [
+          "E14_INVERSE_DESIGN_METASURFACES_USING_PHYSICS_INFO",
+          "E28_NEURAL_NETWORK_BASED_SURROGATE_MODEL_INVERSE_D",
+          "E34_METASURFACE_INVERSE_DESIGN_USING_MACHINE_LEARN"
+        ],
+        "omitted_handle_reasons": {}
+      },
+      {
+        "block_index": 5,
+        "title": "Advanced Architectures for Holography",
+        "block_type": "explanatory_body",
+        "goal": "Detail specific network topologies like tandem and cascaded networks that resolve non-uniqueness in hologram generation.",
+        "claim_handles": [
+          "C03_CASCADED_NEURAL_NETWORK_ARCHITECTURES_COMPRISI",
+          "C15_DEEP_NEURAL_NETWORKS_INCLUDING_TANDEM_RESIDUAL",
+          "C24_DEEP_LEARNING_ARCHITECTURES_INCLUDING_RESIDUAL"
+        ],
+        "evidence_handles": [
+          "E04_CYCLICAL_DEEP_LEARNING_BASED_FRAMEWORK_SIMULTA",
+          "E32_INVERSE_DESIGN_METASURFACE_HOLOGRAPHY_DEEP_RES",
+          "E51_ADVANCES_DEEP_LEARNING_DRIVEN_METASURFACE_DESI"
+        ],
+        "omitted_handle_reasons": {}
+      },
+      {
+        "block_index": 6,
+        "title": "Generalization Limits and Hybrid Solutions",
+        "block_type": "explanatory_body",
+        "goal": "Address the inability of pure data-driven models to generalize beyond training distributions and the role of transfer learning.",
+        "claim_handles": [
+          "C02_NEURAL_NETWORKS_TRAINED_INVERSE_DESIGN_CANNOT",
+          "C18_TRANSFER_LEARNING_ENABLES_INVERSE_DESIGN_NETWO"
+        ],
+        "evidence_handles": [
+          "E03_DEEPADJOINT_ALL_ONE_PHOTONIC_INVERSE_DESIGN_FR",
+          "E40_CROSS_DOMAIN_HETEROGENEOUS_METASURFACE_INVERSE"
+        ],
+        "omitted_handle_reasons": {}
+      },
+      {
+        "block_index": 7,
+        "title": "Exploiting High-Dimensional Degrees of Freedom",
+        "block_type": "explanatory_body",
+        "goal": "Showcase how algorithms unlock complex geometries like multilayers and 3D nanoantennas for advanced functionality.",
+        "claim_handles": [
+          "C07_INVERSE_DESIGN_METHODS_EXPLOIT_HIGH_DEGREES_FR",
+          "C17_INVERSE_DESIGN_TECHNIQUES_BEING_APPLIED_SPECIF",
+          "C30_DEEP_LEARNING_MODELS_ENABLE_INVERSE_DESIGN_REF"
+        ],
+        "evidence_handles": [
+          "E12_OPTICAL_MULTILAYER_THIN_FILM_STRUCTURE_INVERSE",
+          "E37_INVERSE_DESIGN_METASURFACE_BASED_OFF_AXIS_IMAG",
+          "E68_INVERSE_DESIGN_REFLECTIVE_METASURFACE_ANTENNAS"
+        ],
+        "omitted_handle_reasons": {}
+      },
+      {
+        "block_index": 8,
+        "title": "The Idealization Trap and Design-Reality Gap",
+        "block_type": "scientific_consequence",
+        "goal": "Critique the assumption of perfect geometry in current algorithms and highlight the resulting performance mismatch in fabricated devices.",
+        "claim_handles": [
+          "C12_OPTIMIZATION_ALGORITHMS_METASURFACES_OFTEN_REL",
+          "C21_HEURISTIC_OPTIMIZATION_METHODS_FREQUENTLY_GENE",
+          "C20_PHYSICS_INFORMED_MACHINE_LEARNING_MODELS_OPTIC"
+        ],
+        "evidence_handles": [
+          "E22_PHASE_CHANGE_NONLOCAL_METASURFACES_DYNAMIC_WAV",
+          "E45_SP2RINT_SPATIALLY_DECOUPLED_PHYSICS_INSPIRED_P",
+          "E44_PHYSICS_INFORMED_MACHINE_LEARNING_INVERSE_DESI"
+        ],
+        "omitted_handle_reasons": {}
+      }
+    ],
+    "responsibility_coverage_rows": [
+      {
+        "responsibility": "Evolution from analytical to algorithmic optimization",
+        "status": "covered",
+        "claim_handles": [
+          "C01_INVERSE_DESIGN_METHODS_NANOPHOTONICS_HAVE_EVOL",
+          "C22_COMPUTATIONAL_INVERSE_DESIGN_METASURFACE_HOLOG"
+        ],
+        "note": "Covered in Block 1 with historical context and method shifts."
+      },
+      {
+        "responsibility": "Algorithmic degrees of freedom (geometry, arrangement)",
+        "status": "covered",
+        "claim_handles": [
+          "C07_INVERSE_DESIGN_METHODS_EXPLOIT_HIGH_DEGREES_FR"
+        ],
+        "note": "Covered in Block 7 focusing on multilayer and 3D applications."
+      },
+      {
+        "responsibility": "Impact on holographic quality metrics",
+        "status": "evidence_gap",
+        "claim_handles": [],
+        "note": "No specific claims explicitly quantify FOM, PSNR, or SSIM improvements; implied in performance claims but not directly evidenced."
+      },
+      {
+        "responsibility": "Assumptions breaking down in practice (Design-Reality Gap)",
+        "status": "covered",
+        "claim_handles": [
+          "C12_OPTIMIZATION_ALGORITHMS_METASURFACES_OFTEN_REL",
+          "C21_HEURISTIC_OPTIMIZATION_METHODS_FREQUENTLY_GENE"
+        ],
+        "note": "Central focus of Block 8, linking idealized models to fabrication disorder."
+      }
+    ],
+    "omitted_handle_reasons": {
+      "C09_FAST_DIRECT_SOLVERS_ENABLE_FULL_WAVE_INVERSE_D": "Merged into Block 4 (Deep Learning Surrogates) as a complementary speed-up technique, though specific evidence for cm-scale cylindrical metasurfaces is less central than the general surrogate argument.",
+      "C10_DATA_DRIVEN_FRAMEWORKS_UTILIZING_DIFFERENTIABL": "Merged into Block 4; conceptually redundant with surrogate models and physics-informed ML claims.",
+      "C19_INVERSE_DESIGN_METHODS_ELECTROMAGNETIC_DEVICES": "Merged into Block 1; too generic compared to C01 and C22 which are specific to the evolution narrative.",
+      "C25_GENERATIVE_MODELS_SUCH_DIFFUSION_MODELS_SPECTR": "Merged into Block 5 under 'Advanced Architectures'; treated as a subset of deep learning architectures rather than a separate block to maintain flow.",
+      "C26_MACHINE_LEARNING_APPROACHES_INVERSE_DESIGN_OFT": "Merged into Block 4; redundant with C14 and C16 regarding computational cost reduction.",
+      "C27_MULTI_PHYSICS_COUPLING_METASURFACE_DESIGN_SUCH": "Omitted as out-of-scope for this section's primary thesis on holographic wavefront optimization; thermal/fluidic coupling is a niche application not advancing the main 'design-reality gap' argument.",
+      "C28_END_END_INVERSE_DESIGN_PIPELINES_INTEGRATE_NEU": "Merged into Block 8; the 'fabrication-aware' aspect supports the critique of idealized models, but the specific pipeline claim is subsumed by the broader gap argument.",
+      "C29_COMPUTATIONAL_CHALLENGE_LARGE_SCALE_PHOTONIC_I": "Merged into Block 4; the discretization challenge is background context for why surrogates are needed, not a standalone argument step.",
+      "C31_INVERSE_DESIGN_METASURFACE_HOLOGRAMS_FORMULATE": "Merged into Block 2; the mention of heuristic methods (PSO/GA) is acknowledged in the evolution (Block 1) but the specific formulation claim is covered by C11/C23."
+    },
+    "section_id": "S02",
+    "title": "Computational Inverse Design for Metasurface Holograms: From Forward Models to Algorithmic Optimization"
+  },
+  "warnings": [
+    "usable claim not assigned or omitted: C05_DEEP_LEARNING_INVERSE_DESIGN_MODELS_SUCH_THOSE"
+  ]
+}

@@ -1,0 +1,38 @@
+You receive three inputs:
+1. English problem understanding and scope definition.
+2. Existing scholarly facets.
+3. High-information English summaries extracted from web-crawled content.
+
+Your only task is to generate additional scholarly facets suggested by the web summaries. Add only genuinely new facets. Do not rewrite, delete, reorder, or restate existing facets.
+
+Write all generated fields in English only.
+
+Rules:
+1. Output only facets that are missing from the existing facet list and are worth searching in academic databases.
+2. Avoid duplicates and near-duplicates of existing facets.
+3. Each new facet must be convertible into English scholarly search terms.
+4. Treat web content only as a source of search leads, not as confirmed evidence.
+5. Do not invent papers, DOIs, authors, journals, or experimental data.
+6. If no useful new facet exists, return an empty array.
+
+Return strict JSON:
+{
+  "supplemental_facet_plan": {
+    "supplemental_features": [
+      {
+        "feature_id": "SF01",
+        "feature_name": "XXX durability and environmental aging",
+        "feature_type": "challenge",
+        "description": "Why this is a useful additional scholarly search direction.",
+        "positive_keywords": ["XXX durability", "XXX aging", "XXX stability"],
+        "negative_keywords": [],
+        "retrieval_terms": ["XXX durability", "XXX environmental aging", "XXX long-term stability"],
+        "weight": 0.5,
+        "recall_intent": "Retrieve academic papers about XXX durability and aging."
+      }
+    ]
+  }
+}
+
+Simple example:
+If existing facets already cover XXX material mechanism and XXX fabrication, while web summaries newly mention long-term humid aging as an application bottleneck, add only a facet such as "XXX durability under humid aging". Do not rewrite the existing facets.

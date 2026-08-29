@@ -1,0 +1,477 @@
+{
+  "blocks": [
+    {
+      "block_index": 1,
+      "title": "Foundations of Wavefront Engineering",
+      "block_type": "introduction_viewpoint",
+      "goal": "Establish metasurfaces as the platform for subwavelength light control governed by Maxwell's equations.",
+      "prose": "Metasurfaces enable unprecedented control over light's intrinsic properties, including phase and polarization, by manipulating light-matter interactions at the nanoscale through subwavelength nanostructured elements. This capability relies on advances in nanofabrication technologies, such as two-photon polymerization and focused ion-beam milling, which allow for the manufacturing of complex structures with features near or below the electromagnetic wavelength. The physical foundation for this wavefront engineering is the propagation of electromagnetic fields in free space, which is governed by the Helmholtz equation for time-harmonic fields; solving this equation via methods like the Rayleigh-Sommerfeld diffraction integral describes how secondary spherical wavelets interfere to form a propagated wavefront. By leveraging these principles, metasurfaces manipulate light fields via subwavelength micro/nanostructures to achieve lightweight, easily integrable, and multidimensional optical control that surpasses conventional bulk components. However, while the design space offered by these materials is practically unlimited, exploring it to satisfy multi-objective performance criteria remains computationally challenging, necessitating a shift from intuition-based parameter sweeps to automated inverse design techniques to fully realize the potential of compact and efficient optical systems.",
+      "planned_claim_handles": [
+        "C01_METASURFACES_ENABLE_UNPRECEDENTED_CONTROL_OVER",
+        "C17_PROPAGATION_ELECTROMAGNETIC_WAVE_FIELDS_FREE_S",
+        "C30_METASURFACES_MANIPULATE_LIGHT_FIELDS_VIA_SUBWA"
+      ],
+      "claim_handles": [
+        "C01_METASURFACES_ENABLE_UNPRECEDENTED_CONTROL_OVER",
+        "C17_PROPAGATION_ELECTROMAGNETIC_WAVE_FIELDS_FREE_S",
+        "C30_METASURFACES_MANIPULATE_LIGHT_FIELDS_VIA_SUBWA"
+      ],
+      "evidence_handles": [
+        "E01_TIME_DOMAIN_TOPOLOGY_OPTIMIZATION_ARBITRARY_DI",
+        "E23_36_CHANNEL_SPIN_WAVELENGTH_CO_MULTIPLEXED_META",
+        "E52_MINIMALIST_OPTICAL_SYSTEM_ACHROMATIC_IMAGING_W"
+      ],
+      "covered_claim_handles": [
+        "C01_METASURFACES_ENABLE_UNPRECEDENTED_CONTROL_OVER",
+        "C17_PROPAGATION_ELECTROMAGNETIC_WAVE_FIELDS_FREE_S",
+        "C30_METASURFACES_MANIPULATE_LIGHT_FIELDS_VIA_SUBWA"
+      ],
+      "covered_claim_ids": [
+        "S01-P009",
+        "S01-P041",
+        "S01-P105"
+      ],
+      "markers": [
+        "[REF:6898fb9b38a16056d0997abe1c40d3dcfc2c0b82]",
+        "[REF:262de4d6b9107f243bba6c31015fdae5841c9982]",
+        "[REF:54e53e2aba40ccb8b0f1fa5b22deb4dfe9614917]"
+      ],
+      "explanatory_handles": [
+        "X01_SPECTRAL_SOLUTION_HELMHOLTZ_PARAXIAL",
+        "X02_TECHNIQUE_ENHANCING_ACCURACY_RAYLEIG"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "The physical foundation for this wavefront engineering is the propagation of electromagnetic fields in free space, which is governed by the Helmholtz equation for time-harmonic fields; solving this equation via methods like the Rayleigh-Sommerfeld diffraction integral describes how secondary spherical wavelets interfere to form a propagated wavefront.": [
+          "[REF:doi:10.21236/ada421453]",
+          "[REF:doi:10.1364/ol.509688]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S01-P009",
+        "S01-P041",
+        "S01-P105"
+      ]
+    },
+    {
+      "block_index": 2,
+      "title": "Mechanism I: Geometric Phase Control",
+      "block_type": "explanatory_body",
+      "goal": "Define Pancharatnam-Berry phase, explain its origin in coordinate rotation, and note its polarization selectivity.",
+      "prose": "Building on the foundation of subwavelength light control, the first distinct mechanism for wavefront engineering is the geometric phase, also known as the Pancharatnam-Berry phase. Unlike propagation phase, which arises from optical path length variations within resonant structures, geometric phase relies on the spatial rotation of anisotropic nanostructures to impart a phase shift proportional to twice the orientation angle. This mechanism inherently couples phase control to polarization state; specifically, left-handed and right-handed circularly polarized incident light generate distinct focal points or wavefronts based on their chirality. Representative applications demonstrate this principle through bifocal metalenses where a single unit cell with varying rotation angles efficiently realizes polarization-dependent focusing. Representative applications demonstrate this principle through bifocal metalenses where a single unit cell with varying rotation angles efficiently realizes polarization-dependent focusing. However, this approach faces intrinsic boundaries: because the phase response is tied to the diffractive nature of the geometry, such devices often operate effectively only at single wavelengths, constraining their utility in multispectral imaging without complex spatial segmentation or multi-layer stacking. Consequently, while geometric phase offers a direct route to polarization multiplexing, its chromatic limitations necessitate the complementary mechanisms discussed next.",
+      "planned_claim_handles": [
+        "C07_GEOMETRIC_PHASE_PANCHARATNAM_BERRY_CONTROL_REL",
+        "C18_GEOMETRIC_PHASE_PANCHARATNAM_BERRY_PHASE_PROPA"
+      ],
+      "claim_handles": [
+        "C07_GEOMETRIC_PHASE_PANCHARATNAM_BERRY_CONTROL_REL",
+        "C18_GEOMETRIC_PHASE_PANCHARATNAM_BERRY_PHASE_PROPA"
+      ],
+      "evidence_handles": [
+        "E08_DUAL_WAVELENGTH_POLARIZATION_DEPENDENT_BIFOCAL",
+        "E24_DEEP_LEARNING_ASSISTED_INVERSE_DESIGN_DUAL_SPI"
+      ],
+      "covered_claim_handles": [
+        "C07_GEOMETRIC_PHASE_PANCHARATNAM_BERRY_CONTROL_REL",
+        "C18_GEOMETRIC_PHASE_PANCHARATNAM_BERRY_PHASE_PROPA"
+      ],
+      "covered_claim_ids": [
+        "S01-P018",
+        "S01-P049"
+      ],
+      "markers": [
+        "[REF:9f2e8ccdeff1319517981790c9a85ed8743b13db]",
+        "[REF:867c87ae195e0a5c2016732e0f43a8c703a7a788]"
+      ],
+      "explanatory_handles": [
+        "X03_TOTAL_ANGULAR_MOMENTUM_SORTING_TELEC",
+        "X04_ANALYSIS_DESIGN_ARBITRARY_3D_CURVED",
+        "A01"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Building on the foundation of subwavelength light control, the first distinct mechanism for wavefront engineering is the geometric phase, also known as the Pancharatnam-Berry phase.": [
+          "[REF:doi:10.1364/oe.27.015750]",
+          "[REF:doi:10.1364/oe.568932]"
+        ],
+        "Representative applications demonstrate this principle through bifocal metalenses where a single unit cell with varying rotation angles efficiently realizes polarization-dependent focusing.": [
+          "[REF:9f2e8ccdeff1319517981790c9a85ed8743b13db]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S01-P018",
+        "S01-P049"
+      ]
+    },
+    {
+      "block_index": 3,
+      "title": "Mechanism II: Propagation and Resonant Phase",
+      "block_type": "explanatory_body",
+      "goal": "Explain phase accumulation via optical path length and resonances (BICs/Fano), highlighting chromatic dispersion limits.",
+      "prose": "Distinct from the geometric phase derived from coordinate rotation, propagation phase relies on optical path length variations and resonant delays within individual meta-atoms to accumulate the necessary wavefront shift. This mechanism often exploits bound states in the continuum (BICs) or Fano resonances to achieve high-quality factor resonances and strong electric field confinement, thereby enabling efficient phase modulation through sharp dispersive spectral features. For instance, hybrid metal-dielectric metasurfaces can support these BICs by restraining radiation loss, where symmetry breaking transforms perfectly localized states into quasi-BICs with tunable quality factors reaching up to 873 for active sensing applications. Similarly, all-dielectric metasurfaces utilize high refractive indices to trap optical modes and generate asymmetric Fano profiles via the interference of localized states with the radiation continuum, offering low dissipative losses compared to metallic counterparts. Similarly, all-dielectric metasurfaces utilize high refractive indices to trap optical modes and generate asymmetric Fano profiles via the interference of localized states with the radiation continuum, offering low dissipative losses compared to metallic counterparts. However, this reliance on resonant spectral features introduces a fundamental constraint: chromatic dispersion. Because the phase response is intrinsically linked to wavelength-dependent resonance conditions, maintaining image quality across the visible spectrum often necessitates complex mitigation strategies, such as dedicating separate waveguide channels to specific RGB colors rather than achieving true single-layer achromaticity. This trade-off between the high efficiency offered by resonant confinement and the limited bandwidth imposed by dispersion underscores the physical boundaries that subsequent hybrid approaches aim to navigate.",
+      "planned_claim_handles": [
+        "C08_RESONANT_METASURFACES_UTILIZE_BOUND_STATES_CON",
+        "C10_CHROMATIC_DISPERSION_RESONANT_PHASE_CONTROL_ME"
+      ],
+      "claim_handles": [
+        "C08_RESONANT_METASURFACES_UTILIZE_BOUND_STATES_CON",
+        "C10_CHROMATIC_DISPERSION_RESONANT_PHASE_CONTROL_ME"
+      ],
+      "evidence_handles": [
+        "E09_DYNAMIC_HUMIDITY_MODULATION_QUASI_BOUND_STATES",
+        "E10_IMAGING_THROUGH_FANO_RESONANT_DIELECTRIC_METAS",
+        "E12_ACHROMATIC_METASURFACE_WAVEGUIDE_AUGMENTED_REA"
+      ],
+      "covered_claim_handles": [
+        "C08_RESONANT_METASURFACES_UTILIZE_BOUND_STATES_CON",
+        "C10_CHROMATIC_DISPERSION_RESONANT_PHASE_CONTROL_ME"
+      ],
+      "covered_claim_ids": [
+        "S01-P019",
+        "S01-P021"
+      ],
+      "markers": [
+        "[REF:cc73f5040c5d928b3ca5aeeb38e0df04450efc53]",
+        "[REF:42f2fcc893f3a45ac750a8ffe67752f8533c0c61]",
+        "[REF:94ab4c73d8ea40f73635551d123a18a300d824cb]"
+      ],
+      "explanatory_handles": [
+        "X05_DYNAMIC_HUMIDITY_MODULATION_QUASI_BO",
+        "A03"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "This mechanism often exploits bound states in the continuum (BICs) or Fano resonances to achieve high-quality factor resonances and strong electric field confinement, thereby enabling efficient phase modulation through sharp dispersive spectral features.": [
+          "[REF:cc73f5040c5d928b3ca5aeeb38e0df04450efc53]"
+        ],
+        "Similarly, all-dielectric metasurfaces utilize high refractive indices to trap optical modes and generate asymmetric Fano profiles via the interference of localized states with the radiation continuum, offering low dissipative losses compared to metallic counterparts.": [
+          "[REF:563468d198ed992d93483a34dc7e097ec9f3cc1f]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S01-P019",
+        "S01-P021"
+      ]
+    },
+    {
+      "block_index": 4,
+      "title": "Mechanism III: Hybrid and Dielectric Approaches",
+      "block_type": "explanatory_body",
+      "goal": "Present hybrid metal-dielectric and high-index dielectric strategies as means to balance efficiency and confinement.",
+      "prose": "To address the efficiency losses inherent in purely plasmonic systems and the dispersion challenges of resonant dielectrics, researchers have developed hybrid metal-dielectric metasurfaces that combine metallic and dielectric components to exploit both plasmonic field confinement and low-loss dielectric resonances. This approach seeks a balance between strong field enhancement and optical efficiency, often leveraging bound states in the continuum (BICs) to restrain radiation loss while maintaining high quality factors. For instance, hybrid photonic-plasmonic asymmetric gratings have demonstrated the ability to regulate transitions between quasi-BICs and BICs through symmetry breaking in geometry and permittivity, achieving quality factors up to 873 by suppressing radiation loss. In a humidity-modulated strategy, hybrid photonic-plasmonic asymmetric gratings (HPAGs) composed of alternating dielectric gratings on aluminum oxide and gold films utilize polyvinyl alcohol to regulate transitions between quasi-BICs and BICs. As relative humidity increases, the volume expansion and refractive index reduction of the polymer induce symmetry breaking in geometry and permittivity, thereby suppressing radiation loss. Complementing these hybrid strategies, all-dielectric metasurfaces utilizing high-refractive-index materials such as titanium dioxide on quartz or gallium nitride on sapphire substrates offer a pathway to high optical efficiency in the visible spectrum, providing a robust physical basis for phase control compared to metallic alternatives. However, even these advanced systems face boundaries; practical implementations in the near-infrared reveal that residual phase mismatches and fundamental limits on meta-atom transmittance can cap overall system efficiency, suggesting that while hybrid and high-index dielectric approaches mitigate previous trade-offs, they introduce new constraints related to nonlocal behaviors and fabrication tolerances that must be navigated in subsequent design stages.",
+      "planned_claim_handles": [
+        "C09_HYBRID_METAL_DIELECTRIC_METASURFACES_COMBINE_M",
+        "C32_DIELECTRIC_METASURFACES_UTILIZING_HIGH_REFRACT"
+      ],
+      "claim_handles": [
+        "C09_HYBRID_METAL_DIELECTRIC_METASURFACES_COMBINE_M",
+        "C32_DIELECTRIC_METASURFACES_UTILIZING_HIGH_REFRACT"
+      ],
+      "evidence_handles": [
+        "E11_DYNAMIC_HUMIDITY_MODULATION_QUASI_BOUND_STATES",
+        "E54_MULTI_ELEMENT_METASURFACE_SYSTEM_IMAGING_NEAR"
+      ],
+      "covered_claim_handles": [
+        "C09_HYBRID_METAL_DIELECTRIC_METASURFACES_COMBINE_M",
+        "C32_DIELECTRIC_METASURFACES_UTILIZING_HIGH_REFRACT"
+      ],
+      "covered_claim_ids": [
+        "S01-P020",
+        "S01-P129"
+      ],
+      "markers": [
+        "[REF:cc73f5040c5d928b3ca5aeeb38e0df04450efc53]",
+        "[REF:a148605d4ba86a5a0712cb63c088900b39561267]"
+      ],
+      "explanatory_handles": [
+        "A04"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "In a humidity-modulated strategy, hybrid photonic-plasmonic asymmetric gratings (HPAGs) composed of alternating dielectric gratings on aluminum oxide and gold films utilize polyvinyl alcohol to regulate transitions between quasi-BICs and BICs. As relative humidity increases, the volume expansion and refractive index reduction of the polymer induce symmetry breaking in geometry and permittivity, thereby suppressing radiation loss.": [
+          "[REF:doi:10.1002/adpr.202400191]"
+        ]
+      },
+      "patch_history": [
+        {
+          "gap_id": "G02",
+          "block_index": 4,
+          "applied": true
+        }
+      ],
+      "planned_claim_ids": [
+        "S01-P020",
+        "S01-P129"
+      ]
+    },
+    {
+      "block_index": 5,
+      "title": "Intrinsic Trade-offs and Degrees of Freedom",
+      "block_type": "scientific_consequence",
+      "goal": "Synthesize how meta-atom properties dictate available degrees of freedom and introduce non-uniqueness challenges.",
+      "prose": "While hybrid and dielectric strategies offer pathways to balance efficiency and confinement, the fundamental capacity for wavefront manipulation ultimately rests on the electromagnetic properties of individual meta-atoms, which define the available degrees of freedom for the system. However, translating desired optical responses into physical geometries is complicated by singular point mutations in the mapping between electromagnetic parameters and structural dimensions, creating non-uniqueness challenges that hinder traditional design approaches. Recent advances address this instability by employing deep residual networks combined with electromagnetic property classification to predict meta-atom geometry from transmission coefficients, effectively mitigating inaccurate predictions caused by these singularities and achieving a mean square error below 0.23 across dataset parameters. Complementary frameworks further resolve the many-to-one relationship between design and response spaces by utilizing representation learning to compress high-dimensional data into feature-rich low-dimensional latent spaces, where variational autoencoders coupled with particle swarm optimization can identify global optimal solutions with up to 94% accuracy. These developments underscore that the intrinsic trade-offs of phase control mechanisms necessitate sophisticated inverse design tools to navigate the complex, non-unique landscape of meta-atom engineering, setting the stage for a broader transition from heuristic methods to automated computational frameworks.",
+      "planned_claim_handles": [
+        "C23_ELECTROMAGNETIC_PROPERTIES_INDIVIDUAL_META_ATO"
+      ],
+      "claim_handles": [
+        "C23_ELECTROMAGNETIC_PROPERTIES_INDIVIDUAL_META_ATO"
+      ],
+      "evidence_handles": [
+        "E37_INVERSE_DESIGN_METASURFACE_HOLOGRAPHY_DEEP_RES",
+        "E38_INVERSE_DESIGN_FRAMEWORK_ISOTROPIC_METASURFACE"
+      ],
+      "covered_claim_handles": [
+        "C23_ELECTROMAGNETIC_PROPERTIES_INDIVIDUAL_META_ATO"
+      ],
+      "covered_claim_ids": [
+        "S01-P074"
+      ],
+      "markers": [
+        "[REF:534bc16c467c94bae9323a7fa64364a7c5ee3676]",
+        "[REF:6b6046813d02dc311cd968c95e1e58d819ee229f]"
+      ],
+      "explanatory_handles": [
+        "X07_INVERSE_DESIGN_METASURFACE_HOLOGRAPH",
+        "X06_MODELING_CHARACTERIZATION_ALL_DIELEC"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Recent advances address this instability by employing deep residual networks combined with electromagnetic property classification to predict meta-atom geometry from transmission coefficients, effectively mitigating inaccurate predictions caused by these singularities and achieving a mean square error below 0.23 across dataset parameters.": [
+          "[REF:doi:10.1109/iccem60619.2024.10559188]",
+          "[REF:doi:10.1109/isctis58954.2023.10213114]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S01-P074"
+      ]
+    },
+    {
+      "block_index": 6,
+      "title": "The Shift to Automated Inverse Design",
+      "block_type": "explanatory_body",
+      "goal": "Contrast traditional heuristic design with modern automated frameworks necessitated by complex phase mechanisms.",
+      "prose": "To navigate the complex trade-offs and non-uniqueness challenges inherent in meta-atom properties, metasurface engineering has fundamentally transitioned from traditional heuristic approaches to automated inverse design frameworks. Whereas conventional pattern-to-phase paradigms rely on complex, time-consuming numerical calculations and expert intuition—often limiting the accessible degrees of freedom—modern strategies employ computational methods to directly map desired electromagnetic responses to optimal nanostructure geometries. This shift is exemplified by deep learning architectures that integrate multi-task learning with genetic algorithms, achieving forward prediction accuracies of 96.7% and inverse design success rates of 83.9% for silicon nitride disk arrays, thereby overwhelming conventional neural network performance. Similarly, combining deep neural networks with genetic algorithms enables rapid phase-to-pattern mapping, controlling population generation within preset phase ranges to significantly reduce optimization iterations for devices like orbital angular momentum generators and metalenses. Furthermore, novel time-domain inverse design methods using adjustable pulses have emerged to overcome the lengthy simulation times associated with frequency-domain adjoint optimization, facilitating the creation of high-performance metalenses with uniform broadband responses. By replacing laborious brute-forcing processes with these data-driven and algorithmic tools, researchers can now access larger design spaces and more versatile electromagnetic functionalities, directly addressing the physical constraints outlined in previous sections and setting the stage for specific deep learning implementations that learn non-linear input-output relationships.",
+      "planned_claim_handles": [
+        "C22_METASURFACE_DESIGN_HAS_TRANSITIONED_TRADITIONA",
+        "C27_TRANSITION_HEURISTIC_OR_INTUITION_BASED_DESIGN"
+      ],
+      "claim_handles": [
+        "C22_METASURFACE_DESIGN_HAS_TRANSITIONED_TRADITIONA",
+        "C27_TRANSITION_HEURISTIC_OR_INTUITION_BASED_DESIGN"
+      ],
+      "evidence_handles": [
+        "E34_FORWARD_PREDICTION_INVERSE_DESIGN_METASURFACE",
+        "E35_PHASE_PATTERN_INVERSE_DESIGN_FAST_REALIZATION",
+        "E47_NOVEL_TIME_DOMAIN_INVERSE_DESIGN_HIGH_PERFORMA"
+      ],
+      "covered_claim_handles": [
+        "C22_METASURFACE_DESIGN_HAS_TRANSITIONED_TRADITIONA",
+        "C27_TRANSITION_HEURISTIC_OR_INTUITION_BASED_DESIGN"
+      ],
+      "covered_claim_ids": [
+        "S01-P073",
+        "S01-P088"
+      ],
+      "markers": [
+        "[REF:696cef328f3171c7583907984fa71c43adc0e828]",
+        "[REF:9d2f38e81909f3b55bd54ccc38fdc11afffa416c]",
+        "[REF:9667eeb1c5b558ad616938eebac8ff3586ce96c0]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S01-P073",
+        "S01-P088"
+      ]
+    },
+    {
+      "block_index": 7,
+      "title": "Deep Learning for Non-Linear Mapping",
+      "block_type": "explanatory_body",
+      "goal": "Detail how neural networks learn non-linear input-output relationships to streamline bianisotropic and multifunctional design.",
+      "prose": "Building on the transition from heuristic to automated frameworks, deep learning models now address the core challenge of mapping non-linear geometry-response relationships in metasurface inverse design. These models, trained via non-linear activation functions and backpropagation, intelligently learn complex input-output correlations over large datasets, effectively approximating solutions to Maxwell's equations without explicit knowledge of the governing physics. This data-driven approach streamlines the design of bianisotropic and multifunctional metasurfaces by replacing intuitive fine-tuning with surrogate models that rapidly predict unit cell properties. Advanced implementations utilize Gaussian Mixture Models on latent spaces or Generative Adversarial Networks to optimize specific submanifolds, enabling the precise mapping of desired holographic phase profiles to anisotropic meta-atom geometries. However, this paradigm shift incurs significant upfront computational costs due to the need for extensive, task-specific datasets generated via expensive simulations like FDTD or RCWA, and the resulting performance remains sensitive to dataset quality and hyperparameter optimization. Ultimately, while deep learning expands the accessible design space beyond traditional boundaries, its practical deployment requires careful balancing of data generation expenses against the need for complex, high-fidelity holographic responses.",
+      "planned_claim_handles": [
+        "C03_DEEP_LEARNING_MODELS_TRAINED_VIA_NON_LINEAR_AC",
+        "C11_DATA_DRIVEN_MACHINE_LEARNING_METHODS_HAVE_BEEN",
+        "C12_DEEP_LEARNING_DRIVEN_INVERSE_DESIGN_METHODS_SU"
+      ],
+      "claim_handles": [
+        "C03_DEEP_LEARNING_MODELS_TRAINED_VIA_NON_LINEAR_AC",
+        "C11_DATA_DRIVEN_MACHINE_LEARNING_METHODS_HAVE_BEEN",
+        "C12_DEEP_LEARNING_DRIVEN_INVERSE_DESIGN_METHODS_SU"
+      ],
+      "evidence_handles": [
+        "E04_DEEP_LEARNING_ENABLED_INVERSE_DESIGN_NANOPHOTO",
+        "E13_INVERSE_DESIGN_EXPERIMENTAL_VERIFICATION_BIANI",
+        "E17_ADVANCES_DEEP_LEARNING_DRIVEN_METASURFACE_DESI"
+      ],
+      "covered_claim_handles": [
+        "C03_DEEP_LEARNING_MODELS_TRAINED_VIA_NON_LINEAR_AC",
+        "C11_DATA_DRIVEN_MACHINE_LEARNING_METHODS_HAVE_BEEN",
+        "C12_DEEP_LEARNING_DRIVEN_INVERSE_DESIGN_METHODS_SU"
+      ],
+      "covered_claim_ids": [
+        "S01-P013",
+        "S01-P024",
+        "S01-P025"
+      ],
+      "markers": [
+        "[REF:60df2f3598ea7d56ae24a649121907a6769eb444]",
+        "[REF:2a3fb330497fc0883c9a7acc35de2b94ad7c1af0]",
+        "[REF:14ea4dd97f8227fbe71b806c4574c75050a418dc]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S01-P013",
+        "S01-P024",
+        "S01-P025"
+      ]
+    },
+    {
+      "block_index": 8,
+      "title": "Gradient-Based and Adjoint Optimization",
+      "block_type": "explanatory_body",
+      "goal": "Explain topology optimization and adjoint methods for achieving feasible fabrication results from continuous profiles.",
+      "prose": "While deep learning excels at mapping non-linear relationships, gradient-based topology optimization provides a rigorous framework for exploring material distributions within simulation domains to discover non-intuitive binary layouts. This approach treats the design space as a discretized grid where dielectric structures are iteratively updated to maximize a specific figure of merit. Central to this efficiency is adjoint optimization, a method that computes gradients by running just two full-wave simulations per iteration—one forward and one adjoint—regardless of the number of design parameters. To ensure these continuous mathematical solutions translate to feasible fabrication results, researchers employ affine geometric transformations and robustness algorithms that binarize profiles and filter out sub-30 nm features. For instance, such methods have enabled thermal emitters to reach 92% efficiency through complex freeform geometries that surpass conventional resonators. Furthermore, when combined with neural networks and Fourier-represented loss functions, these inverse design algorithms can rapidly optimize metasurface geometries for high-fidelity wavefront reconstruction, achieving mean squared errors approaching 10^-6 even under noisy conditions. However, while these techniques effectively navigate the trade-offs between efficiency and design flexibility identified earlier, they must still contend with the inherent non-uniqueness of inverse scattering problems, a challenge addressed in the following section.",
+      "planned_claim_handles": [
+        "C04_GRADIENT_BASED_TOPOLOGY_OPTIMIZATION_APPROACHE",
+        "C05_ADJOINT_BASED_GRADIENT_EVALUATION_METHODS_FACI",
+        "C20_INVERSE_DESIGN_ALGORITHMS_PARTICULARLY_THOSE_U"
+      ],
+      "claim_handles": [
+        "C04_GRADIENT_BASED_TOPOLOGY_OPTIMIZATION_APPROACHE",
+        "C05_ADJOINT_BASED_GRADIENT_EVALUATION_METHODS_FACI",
+        "C20_INVERSE_DESIGN_ALGORITHMS_PARTICULARLY_THOSE_U"
+      ],
+      "evidence_handles": [
+        "E05_PEARSAN_MACHINE_LEARNING_METHOD_INVERSE_DESIGN",
+        "E06_ADJOINT_BASED_GRADIENT_EVALUATION_METASURFACE",
+        "E28_END_END_NANOPHOTONIC_INVERSE_DESIGN_IMAGING_PO"
+      ],
+      "covered_claim_handles": [
+        "C04_GRADIENT_BASED_TOPOLOGY_OPTIMIZATION_APPROACHE",
+        "C05_ADJOINT_BASED_GRADIENT_EVALUATION_METHODS_FACI",
+        "C20_INVERSE_DESIGN_ALGORITHMS_PARTICULARLY_THOSE_U"
+      ],
+      "covered_claim_ids": [
+        "S01-P014",
+        "S01-P015",
+        "S01-P057"
+      ],
+      "markers": [
+        "[REF:1af94fcc4f5e3ebcd28f6d5aaecaedcebb0d612b]",
+        "[REF:a801ee6d75d827ef0b99528619e877e3aac72277]",
+        "[REF:cf0ec8bd92d397fa4a2366cda6426152974ae79e]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S01-P014",
+        "S01-P015",
+        "S01-P057"
+      ]
+    },
+    {
+      "block_index": 9,
+      "title": "Resolving Ill-Posed Inverse Problems",
+      "block_type": "scientific_consequence",
+      "goal": "Address the non-uniqueness of inverse scattering and the role of representation learning in stabilizing solutions.",
+      "prose": "While gradient-based and adjoint methods provide efficient pathways to feasible fabrication profiles, they operate within a landscape where the inverse design of metasurfaces for holographic wavefront control remains fundamentally ill-posed. This mathematical difficulty arises because determining a physical structure from a desired spectral response involves resolving inherent ambiguities in phase and amplitude coupling, specifically manifesting as a one-to-many mapping where multiple distinct geometric configurations yield identical optical spectra. Such non-uniqueness confuses deterministic optimization algorithms and traditional regression-based neural networks, often leading to mode averaging and the generation of invalid geometries that fail to produce the target spectrum when verified with a Maxwell solver. Furthermore, practical inverse-design problems are frequently under-constrained or evolve dynamically, such as when intelligent metasurfaces face shifting objectives or updated fabrication limits. To mitigate these challenges, representation learning offers a powerful approach by decoupling the search process into input-side models that provide a reusable, physics-agnostic manifold of device geometries and output-side models that act as fast surrogate solvers. This strategy enables efficient exploration and rapid re-optimization of candidates against new targets without the prohibitive computational cost of full-wave electromagnetic simulations at every evaluation step, thereby stabilizing solutions in a design space where global optimization methods would otherwise become computationally infeasible due to exponential scaling.",
+      "planned_claim_handles": [
+        "C31_INVERSE_DESIGN_METASURFACES_HOLOGRAPHIC_WAVEFR",
+        "C29_INVERSE_DESIGN_PROBLEMS_METASURFACE_HOLOGRAPHY"
+      ],
+      "claim_handles": [
+        "C31_INVERSE_DESIGN_METASURFACES_HOLOGRAPHIC_WAVEFR",
+        "C29_INVERSE_DESIGN_PROBLEMS_METASURFACE_HOLOGRAPHY"
+      ],
+      "evidence_handles": [
+        "E53_INVERSE_DESIGN_METASURFACES_USING_PHYSICS_INFO",
+        "E51_INVERSE_DESIGN_NANOPHOTONICS_VIA_REPRESENTATIO"
+      ],
+      "covered_claim_handles": [
+        "C31_INVERSE_DESIGN_METASURFACES_HOLOGRAPHIC_WAVEFR",
+        "C29_INVERSE_DESIGN_PROBLEMS_METASURFACE_HOLOGRAPHY"
+      ],
+      "covered_claim_ids": [
+        "S01-P113",
+        "S01-P097"
+      ],
+      "markers": [
+        "[REF:9c20a790aa75f24b6f5a130711645c978484455e]",
+        "[REF:1710ffd8f90365fdbef063f85605601e2c7fc9f1]"
+      ],
+      "explanatory_handles": [
+        "X09_INVERSE_DESIGN_FRAMEWORK_ISOTROPIC_M"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "To mitigate these challenges, representation learning offers a powerful approach by decoupling the search process into input-side models that provide a reusable, physics-agnostic manifold of device geometries and output-side models that act as fast surrogate solvers.": [
+          "[REF:doi:10.2139/ssrn.4082312]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S01-P113",
+        "S01-P097"
+      ]
+    },
+    {
+      "block_index": 10,
+      "title": "Enabling Multi-Channel Holography",
+      "block_type": "scientific_consequence",
+      "goal": "Demonstrate how combined mechanisms and advanced algorithms enable spin, wavelength, and spatial multiplexing.",
+      "prose": "Building on the resolution of ill-posed inverse problems, advanced algorithms now enable the practical realization of multi-channel holography by mapping complex macroscopic targets to microscopic geometries. Deep learning-assisted frameworks address this challenge by decomposing the design space; for instance, specific methodologies employ classifiers to distinguish cross-talk types in dual-spin systems, allowing artificial neural networks to fit non-linear functions between structural parameters and phase responses for quad-channel vortex multiplexing. This data-driven approach extends beyond simple classification to global optimization, where evolutionary algorithms embedded within physical propagation models search for optimal phase masks that satisfy rigorous differential optical field constraints. Furthermore, electromagnetic inverse source methods have been generalized from two-dimensional to three-dimensional configurations, utilizing desired power patterns on perpendicular far-field cuts to infer equivalent surface currents and macroscopic properties. By integrating these computational strategies with the physical degrees of freedom offered by hybrid phase mechanisms, researchers can navigate the non-uniqueness of scattering problems to achieve precise wavefront tailoring across spin, wavelength, and spatial domains, directly addressing the fundamental trade-offs outlined in this chapter.",
+      "planned_claim_handles": [
+        "C19_DEEP_LEARNING_ASSISTED_INVERSE_DESIGN_FRAMEWOR",
+        "C21_INVERSE_DESIGN_ALGORITHMS_INCLUDING_DEEP_LEARN",
+        "C24_INVERSE_DESIGN_ALGORITHMS_INCLUDING_ELECTROMAG"
+      ],
+      "claim_handles": [
+        "C19_DEEP_LEARNING_ASSISTED_INVERSE_DESIGN_FRAMEWOR",
+        "C21_INVERSE_DESIGN_ALGORITHMS_INCLUDING_DEEP_LEARN",
+        "C24_INVERSE_DESIGN_ALGORITHMS_INCLUDING_ELECTROMAG"
+      ],
+      "evidence_handles": [
+        "E25_DEEP_LEARNING_ASSISTED_INVERSE_DESIGN_DUAL_SPI",
+        "E30_DATA_DRIVEN_INVERSE_DESIGN_METASURFACE_BASED_O",
+        "E39_INVERSE_METASURFACE_DESIGN_3_D_DESIRED_POWER_P"
+      ],
+      "covered_claim_handles": [
+        "C19_DEEP_LEARNING_ASSISTED_INVERSE_DESIGN_FRAMEWOR",
+        "C21_INVERSE_DESIGN_ALGORITHMS_INCLUDING_DEEP_LEARN",
+        "C24_INVERSE_DESIGN_ALGORITHMS_INCLUDING_ELECTROMAG"
+      ],
+      "covered_claim_ids": [
+        "S01-P056",
+        "S01-P072",
+        "S01-P081"
+      ],
+      "markers": [
+        "[REF:867c87ae195e0a5c2016732e0f43a8c703a7a788]",
+        "[REF:65d6bc572bc0e9d149d0d575f97599cd034c3167]",
+        "[REF:de62632329155c6f1a51699a438f63f077599afa]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S01-P056",
+        "S01-P072",
+        "S01-P081"
+      ]
+    }
+  ]
+}

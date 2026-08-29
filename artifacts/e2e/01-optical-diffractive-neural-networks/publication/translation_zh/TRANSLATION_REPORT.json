@@ -1,0 +1,1963 @@
+{
+  "schema_version": "research_harness.chinese_translation_report.v1",
+  "status": "completed_with_warnings",
+  "source_path": "<local-path>",
+  "translated_path": "<local-path>",
+  "partial_translated_path": "",
+  "source_sha256": "04d920c499eba9a71a7d30f6b681e83b3490c41579a6c5cd7fefca520ac69e22",
+  "prompt_path": "<local-path>",
+  "prompt_hash": "cf97ff02466717524db83409278ef67220ffa8ae4b91488243fecae25a092a18",
+  "state_path": "<local-path>",
+  "primary_model_tier": "c2_model",
+  "fallback_model_tier": "c_model",
+  "repair_model_tier": "b_minus_model",
+  "unit_count": 83,
+  "review_unit_count": 73,
+  "metadata_unit_count": 10,
+  "cache_hit_count": 0,
+  "primary_call_batch_count": 25,
+  "escalated_unit_count": 0,
+  "semantic_audit_enabled": true,
+  "semantic_audit_call_count": 33,
+  "semantic_audit_issue_count": 33,
+  "failed_unit_ids": [
+    "B0019",
+    "B0029"
+  ],
+  "partial_output": true,
+  "citation_marker_count_source": 252,
+  "citation_marker_count_translation": 252,
+  "attempt_input_tokens": 177347,
+  "attempt_output_tokens": 24124,
+  "attempt_estimated_cost_cny": 0.110187,
+  "estimated_input_tokens": 177347,
+  "estimated_output_tokens": 24124,
+  "estimated_cost_cny": 0.110187,
+  "cumulative_input_tokens": 177347,
+  "cumulative_output_tokens": 24124,
+  "cumulative_estimated_cost_cny": 0.110187,
+  "wall_time_seconds": 587.359,
+  "extra_translations": {
+    "title": "光学衍射神经网络：架构、训练与未来方向的全面综述",
+    "abstract": "光学衍射神经网络通过以学习到的相位图案引导的被动光传播取代迭代式电子推理，从而变革了计算成像；然而，其从实验室原型走向可部署的光学人工智能，关键在于解决物理可实现性约束（波长敏感性、制造容差、静态与可重构硬件）与最初推动衍射深度学习的算法灵活性之间的张力。本综述认为，光学衍射神经网络代表了一种根本不同的计算范式——而不仅仅是数字神经网络的光学实现——其中衍射物理既赋予了独特的能力（光速下的超低延迟、高能效推理），也带来了硬性约束（波长依赖性、固定或缓慢可调的相位分布、有限的非线性）。该领域已从单功能衍射透镜演变为通用可训练光学处理器，但其进展受限于硬件瓶颈而非算法瓶颈。未来的发展路径需要混合光电协同设计、标准化基准测试协议以及感知制造的训练策略，即将物理约束视为特征而非事后补救措施。本综述描绘了架构全景，针对物理可实现性评估了训练范式，按性能成熟度梳理了应用领域，并指出了光学衍射神经网络要实现实际应用所必须解决的技术瓶颈。",
+    "keyword_001": "衍射深度神经网络",
+    "keyword_002": "光学衍射神经网络",
+    "keyword_003": "全光神经网络",
+    "keyword_004": "衍射光学元件机器学习",
+    "keyword_005": "相位调制神经网络",
+    "keyword_006": "多层衍射光学网络",
+    "keyword_007": "衍射光学网络的训练",
+    "keyword_008": "基于梯度下降的光学神经网络"
+  },
+  "units": [
+    {
+      "unit_id": "B0001",
+      "source_sha256": "266c21b810ae65751fa70f388a867e94d180e79fd15c69ed54dae7df1d29166b",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "## Abstract",
+      "translation_preview": "## 摘要"
+    },
+    {
+      "unit_id": "B0002",
+      "source_sha256": "4ebe830c20560bd4eda50fade74067d9cdcf3697e1dd3ae9d86086273f2fe363",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Optical Diffractive Neural Networks (ODNNs) have emerged as a distinct computational paradigm, fundamentally replacing electronic weight matrices with spatially varying phase profi",
+      "translation_preview": "光学衍射神经网络（ODNNs）作为一种独特的计算范式应运而生，其通过空间变化的相位分布取代电子权重矩阵，利用衍射实现线性变换。本综述综合了当前研究，旨在评估 ODNNs 不仅作为光加速器，更作为由波动物理定律决定计算表达能力的独特物理计算机。通过利用光的固有并行性，这些系统为特定推理任务提供了超低延迟和卓越的能效，有效解决了传统电子架构相关的冯·诺依曼瓶颈。"
+    },
+    {
+      "unit_id": "B0003",
+      "source_sha256": "ea63ffff9ea7de46f4ba7c8cfffb5161d55e7f5c03379d10bc52aae0c78d9854",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "We systematically examine the critical tensions limiting widespread deployment, specifically the \"nonlinearity bottleneck\" inherent in passive diffractive layers and the persistent",
+      "translation_preview": "我们系统地考察了限制其广泛部署的关键张力，具体包括无源衍射层固有的“非线性瓶颈”，以及由制造公差和材料色散导致的持续存在的“仿真到现实”差距。分析涵盖了多种训练范式，包括物理感知算法和硬件在环优化，并对静态与可重构硬件平台进行了比较评估。尽管成像和模式识别应用已从理论走向功能性原型，但其成熟度差异显著，许多系统仍易受环境扰动的干扰。因此，ODNN 研究似乎正"
+    },
+    {
+      "unit_id": "B0004",
+      "source_sha256": "d753efbab681fa4da82470d9a83b1c202de58f92fd498e77a269c1163bc4714b",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "## Introduction",
+      "translation_preview": "## 引言"
+    },
+    {
+      "unit_id": "B0005",
+      "source_sha256": "ebf0c7133324bd9cb33083dcbafe667f2b66fdf0a3beeca90edb3209e69c641f",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Driven by the relentless demand for higher computational throughput and lower energy consumption in artificial intelligence, intense interest has surged in alternative computing pa",
+      "translation_preview": "在人工智能对更高计算吞吐量和更低能耗的不懈需求驱动下，超越传统电子处理器局限的替代计算范式引发了强烈关注。在这些新兴技术中，光学衍射神经网络（ODNNs），也称为衍射深度神经网络（D2NNs），已成为一类独特的物理计算机。与传统仅在电子工作流中加速特定矩阵运算的光加速器不同，ODNNs 从根本上用空间变化的相位分布取代了电子权重矩阵。这些系统通过菲涅尔或夫琅"
+    },
+    {
+      "unit_id": "B0006",
+      "source_sha256": "554de94ce238e19a3e1fd36a2f054f405c6ef05adc27872a727362a3010d65e3",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Optical Deep Neural Networks (ODNNs) are significant because they address the von Neumann bottleneck, which involves latency and energy overhead from moving data between memory and",
+      "translation_preview": "光学深度神经网络（ODNNs）的重要性在于其解决了冯·诺依曼瓶颈，即电子系统中数据在存储器和处理单元之间移动所产生的延迟和能量开销。通过将信息编码在光波前的相位和振幅中，并通过自由空间传播进行处理，ODNNs 提供了巨大的并行性和超低延迟。最近的理论进展进一步拓展了这一潜力，证明可以通过优化的衍射处理器利用线性光学近似大规模非线性计算，从而有效地作为带限非线"
+    },
+    {
+      "unit_id": "B0007",
+      "source_sha256": "9db69980f53531c55189ccda2b5244871ccbbd3d1a063c83ab265720c897b3db",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "However, the transition from idealized simulations to robust physical deployment is fraught with significant challenges that temper these theoretical advantages. A central tension ",
+      "translation_preview": "然而，从理想化仿真到稳健的物理部署的过渡充满重大挑战，这些挑战削弱了上述理论优势。ODNN研究中的一个核心张力在于“非线性瓶颈”：尽管无源衍射层擅长线性变换，但它们缺乏深度学习架构所需的内在非线性，除非辅以外部机制或混合电子接口。此外，ODNN的保真度严重依赖于其物理实现的精度。“仿真到现实”（simulation-to-reality）的差距仍然是一个普遍"
+    },
+    {
+      "unit_id": "B0008",
+      "source_sha256": "a003cb55ac5046088f0e8d7fca308a03867525d71ba6fe7e3f40d162053ac506",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "This review provides a comprehensive scholarly analysis of the ODNN landscape, structured to guide the reader from fundamental physical principles to future research trajectories. ",
+      "translation_preview": "本综述对ODNN领域进行了全面的学术分析，结构上旨在引导读者从基础物理原理走向未来的研究轨迹。我们首先确立衍射神经层的物理架构，明确界定衍射物理与非线性约束之间的相互作用。随后，我们评估优化这些系统所需的训练范式，强调能够缓解仿真到现实差距的物理感知算法。讨论接着进入硬件实现环节，比较静态和可重构相位调制平台及其在分辨率、带宽和成本方面的各自权衡。我们进一步"
+    },
+    {
+      "unit_id": "B0009",
+      "source_sha256": "fa0e96b23caa588005cdf321360bba0413ecbe7c191ba94ca8c9793ea599913f",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "## Physical Architecture of Diffractive Neural Layers: From Diffractive Lenses to Trainable Optical Networks",
+      "translation_preview": "## 衍射神经层的物理架构：从衍射透镜到可训练光学网络"
+    },
+    {
+      "unit_id": "B0010",
+      "source_sha256": "4e4faa4bb447202d46a04e638708166993fa22b8d5d4556f95e4ff39d6f49189",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "b_minus_model",
+      "errors": [],
+      "audit_warnings": [
+        "semantic_final_audit:minor:The phrase 'linear transformations are executed through discrete arithmetic' in the source is negated in the translation ('并非通过离散算术执行'). While the source sentence structure 'linear transformations are executed through... and emerge from...' is slightly ambiguous, the context of optical computing implies they are *not* digital discrete arithmetic operations. However, the source says 'executed through discrete arithmetic AND emerge from wave propagation'. This is likely a source error or poor phrasing meaning 'unlike electronic systems that use discrete arithmetic, here they emerge from...'. The translator's interpretation ('not via discrete arithmetic') is scientifically accurate for D2NNs, but strictly speaking, it alters the literal meaning if the source intended to say they are *both*. Given the scientific context, the translation is likely more correct than the source, but it constitutes a deviation. I will flag it as minor due to potential source ambiguity vs translation accuracy."
+      ],
+      "semantic_audit_passed": true,
+      "attempt_count": 3,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "b_minus_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "By substituting electronic weight matrices with spatially varying phase profiles that modulate light via Fresnel or Fraunhofer diffraction, Diffractive Deep Neural Networks (D2NNs)",
+      "translation_preview": "通过用空间变化的相位分布取代电子权重矩阵，并借助菲涅耳或夫琅禾费衍射对光进行调制，衍射深度神经网络（D2NN）从根本上重新定义了计算。[REF:doi:10.1126/science.aat8084] [REF:doi:10.1117/12.2675468] 在这一物理范式中，线性变换并非通过离散算术执行，而是源于由傅里叶光学支配的波传播过程；在此过程中，光"
+    },
+    {
+      "unit_id": "B0011",
+      "source_sha256": "20d5482469cb0b8b0c50381c5e8d1a69ccb0ff4b250888e46a9fe54eaea36133",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Physical instantiation of Diffractive Neural Network optical weights as spatially varying phase profiles is required to transition from abstract diffraction integral mathematics to",
+      "translation_preview": "要将抽象的衍射积分数学转化为功能性硬件，必须将衍射神经网络的光学权重物理实例化为空间变化的相位分布。这种物理实现通常依赖于多层薄膜结构，即一种由堆叠材料层构成的光子平台，其厚度范围从几十纳米到几百纳米不等。[REF:doi:10.1039/d5nh00367a] [REF:doi:10.1002/smtd.202400087] 在这些系统中，通过优化材料与层"
+    },
+    {
+      "unit_id": "B0012",
+      "source_sha256": "3f1cac3c9f4e5c57dc669e0c5173ca2ebbca34da02871b09dd9f8b829507b408",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "deterministic",
+          "kind": "terminology_normalization",
+          "notes": [
+            "疫苗接种->免疫训练"
+          ]
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Single-plane diffractive optical elements (SPDOEs) enable compact imaging systems that overcome the space requirements of traditional multi-lens setups, yet their computational exp",
+      "translation_preview": "单平面衍射光学元件（SPDOEs）能够实现紧凑的成像系统，克服了传统多透镜装置对空间的苛刻要求，然而其计算表达能力从根本上受到单次衍射事件物理机制的限制。在具有硬圆形光阑的二维网络中，点扩散函数由第一类贝塞尔函数描述，其傅里叶变换在光阑孔径范围内保持平坦，从而确立了刚性的空间频率响应，限制了单层结构所能执行的变换复杂度。为了突破这些局限，衍射深度神经网络（O"
+    },
+    {
+      "unit_id": "B0013",
+      "source_sha256": "208443cdc0f70cddddedc31c5eb5e68d7ed7735d148ea6524040a1a071aaa7e8",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "To realize the universal approximation capabilities of multi-layer cascades, physical implementation necessitates a mechanism for optimizing the phase profiles of individual layers",
+      "translation_preview": "为实现多层级联结构的通用近似能力，物理实现必须具备优化各层相位分布的机制。这一目标通过衍射传播的可微性得以达成，使得基于梯度的训练能够直接利用输入 - 输出数据对来调整元原子尺寸和层间距等物理参数。[REF:doi:10.1117/12.2661856] [REF:doi:10.1002/mop.70313] 在实践中，前向传播模型利用局部周期假设等近似方法"
+    },
+    {
+      "unit_id": "B0014",
+      "source_sha256": "955848acf8c03956ac0af4de494c0152644a13fdc250e67c2d45d7c45b98ce35",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "deterministic",
+          "kind": "terminology_normalization",
+          "notes": [
+            "designs->设计方案"
+          ]
+        }
+      ],
+      "source_preview": "Leveraging the trainable designs established previously, advanced architectural variants now exploit additional physical degrees of freedom to enhance computational density and fun",
+      "translation_preview": "在先前建立的 trainable 设计方案（可训练设计）基础上，先进的架构变体现在利用额外的物理自由度来提升计算密度和功能。偏振复用使得单个衍射网络能够通过将不同任务编码到不同的输入和输出偏振态中，在同一视场下同时实现一组复值任意线性变换。[REF:04c16f79232a1dba281da8a2626e1933bcb10641] 与采用多个专用子系统相比，"
+    },
+    {
+      "unit_id": "B0015",
+      "source_sha256": "39625ab4f231b810ee3c9f520b3b7da47b0e8b97aa1f41636fcf30bbd6cd6654",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Hybrid architectures expand functional modalities, yet the physical realization of diffractive neural networks remains bound by hard theoretical limits and environmental fragility.",
+      "translation_preview": "混合架构扩展了功能模式，但衍射神经网络的物理实现仍受限于严格的理论极限和环境脆弱性。阿贝-瑞利衍射极限对空间分辨率施加了基本约束，阻止传统远场系统解析微观和纳米尺度特征，除非借助无法穿透生物样本的近场探针，或依赖精确干涉图案的复杂超振荡设计。除了这些理论边界外，实际实施还面临重大的稳定性挑战；谐振器虽然有利于引入必要的非线性激活函数，但对温度波动和机械振动高"
+    },
+    {
+      "unit_id": "B0016",
+      "source_sha256": "f8eca67e2c5ed70347fd33455b688eb3253997ff047ae827ef4601fea9c5caf2",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Despite the physical constraints and environmental sensitivities detailed previously, diffractive neural networks (D2NNs) offer a distinct computational paradigm defined by ultra-l",
+      "translation_preview": "尽管存在前述的物理约束和环境敏感性，衍射神经网络（D2NNs）提供了一种独特的计算范式，其特征为超低延迟、大规模并行性和固有的能效。与受限于内存和处理器之间数据搬运冯·诺依曼瓶颈的电子系统不同，D2NNs 利用光传播以光速执行矩阵向量乘法，功耗极低，因为衍射和相位调制自然发生，无需额外能量消耗。这种架构支持高吞吐量处理，适用于实时边缘应用，例如自动驾驶中的全"
+    },
+    {
+      "unit_id": "B0017",
+      "source_sha256": "2a05d98c6e64bfa20e5d789fa3fe6daee8bf755b743fcf9ea0bfba2c9206c145",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Leveraging the ultra-low latency and parallelism established in prior sections, diffractive neural networks demonstrate unique utility in specialized imaging and security tasks whe",
+      "translation_preview": "利用前文所述的超低延迟和并行性，衍射神经网络在专用成像与安全任务中展现出独特效用，在这些任务中，物理波操纵取代了数字后处理。在安全应用中，物理信息驱动的衍射网络可近似散射介质的逆传输矩阵，从而实现散斑密文的高速全光解密。通过直接作用于光场的振幅和相位，这些系统消除了光电转换固有的延迟，尽管其重建质量从根本上仍受限于系统的空间带宽积以及对对准误差的敏感性。同样"
+    },
+    {
+      "unit_id": "B0018",
+      "source_sha256": "a20dde7c300c5225e5351d53209d2431de98edb28a70f2a154718e204d72dda1",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "## Training Paradigms for Optical Diffractive Networks: Gradient-Based Learning, End-to-End Optimization, and Physics-Aware Algorithms",
+      "translation_preview": "## 光学衍射网络的训练范式：基于梯度的学习、端到端优化与物理感知算法"
+    },
+    {
+      "unit_id": "B0019",
+      "source_sha256": "13403077238391630593a8fec9254e27755570952c9352d383452702f3c096f6",
+      "status": "failed_semantic_audit",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "b_minus_model",
+      "errors": [
+        "semantic_final_audit:major:Technical inaccuracy: The source states parameters are 'updated via backpropagation through the scalar diffraction integral'. The translation says '通过控制正向波行为的标量衍射积分进行反向传播更新' (updated via backpropagation *controlling* the forward wave behavior's scalar diffraction integral). This misrepresents the mechanism; backpropagation calculates gradients *through* the model (the integral), it does not 'control' the integral. Additionally, 'phase profiles' is better translated as '相位分布' or '相位轮廓', but '相位分布' is acceptable. The critical error is the distortion of the relationship between backpropagation and the diffraction integral."
+      ],
+      "audit_warnings": [],
+      "semantic_audit_passed": false,
+      "attempt_count": 3,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "b_minus_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Following the discussion of optical diffractive network applications in the preceding section, it is essential to revisit the foundational training paradigms that enable their phys",
+      "translation_preview": "继前文讨论光学衍射网络的应用之后，有必要重新审视使其物理实现成为可能的基础训练范式。端到端可微分训练通过将物理光传播视为适用于梯度下降的计算图，确立了优化光学衍射神经网络的基础机制。[REF:1716c059da55f246fb44c95094c2c92781424124] [REF:doi:10.1364/oe.533298] 在该框架中，超表面层的相位分"
+    },
+    {
+      "unit_id": "B0020",
+      "source_sha256": "46679b5f00e835933615105e9b04cc9532acf660b1a365d7d4d36cfea764fd28",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "The Diffractive Deep Neural Network (D2NN) framework builds on the differentiable training foundations established previously by leveraging these optimized physical structures to e",
+      "translation_preview": "衍射深度神经网络（D2NN）框架建立在先前确立的可微分训练基础之上，通过利用这些优化的物理结构实现全光学机器学习；其中，特定任务的信息处理完全通过在连续无源层间调制相干光场来完成，无需任何电子中间步骤。该框架利用了光传播固有的并行性，通过自由空间衍射以光速执行计算，相较于传统电子方案，在吞吐量和能效方面具有显著优势。底层物理过程的可微分特性使得能够通过反向传"
+    },
+    {
+      "unit_id": "B0021",
+      "source_sha256": "a3fb4192dad8f505cc731c70081cef25a530c4e625967dbab0712b751df33bcf",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Despite the theoretical efficiency of all-optical inference, a significant simulation-to-reality gap often undermines on-chip schemes, particularly those based on metasurfaces wher",
+      "translation_preview": "尽管全光推理在理论上具有高效性，但显著的仿真与现实差距往往削弱片上方案的性能，尤其是基于超表面的方案，其加工误差会导致物理性能偏离理想化的数值模型。为弥合这一差异，研究人员采用硬件在环（HIL）训练方法，该方法将物理光学装置直接集成到优化循环中，而非仅依赖数学传播模型。在此策略下，硬件充当黑盒前向模型；例如，利用可编程相位空间光调制器（SLM）进行的端到端设"
+    },
+    {
+      "unit_id": "B0022",
+      "source_sha256": "a523010c432dafc2f2430a7567778216a21a8ac165cf528a6786526b7e7d7993",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "b_minus_model",
+      "errors": [],
+      "audit_warnings": [
+        "semantic_final_audit:minor:The translation of 'loss landscape' as '损失景观' is a literal calque. In Chinese scientific literature, the standard term is '损失函数空间' (loss function space) or simply '损失面'. While 'landscape' is used in English, '景观' is rarely used in this specific technical context and may appear unnatural to native readers."
+      ],
+      "semantic_audit_passed": true,
+      "attempt_count": 3,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "b_minus_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Physics-informed optimization strategies explicitly embed fabrication constraints and spectral dispersion directly into the loss landscape to ensure realizability, addressing the n",
+      "translation_preview": "物理信息优化策略将制造约束和光谱色散显式地嵌入损失景观中，以确保设计的可实现性，从而解决了通过硬件在环方法校正物理误差的需求。所提出的网络将多层薄膜结构的逆向设计不仅视为数据拟合问题，更视为一种组合优化问题，其目标是在遵守物理极限的前提下，识别出能够满足所需光学响应的最佳材料与厚度组合。通过引入色散公式（如 Sellmeier 方程）并对多波长目标进行加权，"
+    },
+    {
+      "unit_id": "B0023",
+      "source_sha256": "9de1a760bf65d9028864fcf832d229210b5ff3a3614a7ab466d7d10149d5c300",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Alternative training paradigms address the fundamental breakage of gradient chains caused by discrete device mappings, complementing physics-aware regularization that embeds fabric",
+      "translation_preview": "替代训练范式旨在解决由离散器件映射引起的梯度链根本性断裂问题，并与将制造约束嵌入损失函数的物理感知正则化方法形成互补。直接将离散映射插入可微光学神经网络的反向传播过程中会破坏优化过程，因为模拟光学器件表现出非均匀响应和周期性相位约束，而数字仿真往往忽略这些特性。为了保持模型的可训练性，物理感知可微协同设计框架利用 Gumbel-Softmax 等技术，无论器"
+    },
+    {
+      "unit_id": "B0024",
+      "source_sha256": "00f993ff32a1367907e214512782a373ad76f2c1bf461b297d7643fbe6874c44",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Advanced optimization paradigms now exploit specific physical degrees of freedom to create reconfigurable and multi-functional diffractive networks, moving beyond the resolution of",
+      "translation_preview": "先进的优化范式如今利用特定的物理自由度来构建可重构且多功能的衍射网络，从而克服了训练中基本可微性断裂及非理想性所带来的根本问题。一种主要方法是偏振复用，它通过将不同任务编码到不同的输入和输出偏振态中，使单个静态衍射网络能够在同一输出视场内同时执行多个复值任意线性变换。与部署多个专用子系统相比，由此产生的设计在速度、通用性和紧凑性方面具有显著优势；其仅需添加作"
+    },
+    {
+      "unit_id": "B0025",
+      "source_sha256": "1c49572308a23d95e62c32b631977b0638c87272bc7d2ef57b315490d83afe90",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Leveraging the multiplexing capabilities of reconfigurable architectures, end-to-end differentiable training now scales to high-dimensional tasks that demand robustness against phy",
+      "translation_preview": "利用可重构架构的多路复用能力，端到端可微分训练现已扩展至需要抵抗物理无序并进行复杂场景解释的高维任务。这种可扩展性的一个主要示范是通过未知随机散射体的全光推理：宽带单像素衍射网络学习相位分布以补偿散射，且无需外部计算能力。该光学架构在针对训练期间从未遇到过的全新散射体进行手写数字分类时，实现了约 88.53% 的盲测准确率；通过利用波长复用信息容量，其性能显"
+    },
+    {
+      "unit_id": "B0026",
+      "source_sha256": "1c67a171b47d8f116266e42cd755e04ec754261933de1ccc6daa846c25ca4c4d",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "## Hardware Realization of Diffractive Neural Networks: Phase Modulation Platforms, Fabrication Techniques, and Reconfigurability Trade-offs",
+      "translation_preview": "## 衍射神经网络的硬件实现：相位调制平台、制造技术与可重构性权衡"
+    },
+    {
+      "unit_id": "B0027",
+      "source_sha256": "ac86bbbdf49cb1fecbb4251cd551f972a73ef292f52fa2eb38600c85490c619b",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "The evolution of diffractive neural networks (D2NNs) from theoretical constructs to tangible implementations capitalizes on the inherent parallelism and energy efficiency of light ",
+      "translation_preview": "衍射神经网络（D2NNs）从理论构想走向实体实现的演进，利用了光衍射固有的并行性和能效优势，以接近光速的速度执行推理。与在矩阵乘法期间受限于内存瓶颈的电子对应物不同，这些全光系统利用自由空间互连，使计算在光通过结构化层传播时自然发生。早期的演示通过采用太赫兹源和 3D 打印衍射光栅成功对图像进行分类，确立了这一框架，证明了光学计算可以在推理阶段无需主动能耗的"
+    },
+    {
+      "unit_id": "B0028",
+      "source_sha256": "8f0de3efab95401f24507ed058a76a5309a2b2c248a0abfd803fa10d28ef4a04",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Additive manufacturing has emerged as a primary route for physically realizing diffractive deep neural networks (D2NNs), where 3D-printed phase structures demonstrate experimental ",
+      "translation_preview": "增材制造已成为物理实现衍射深度神经网络（D2NNs）的主要途径，其中 3D 打印的相位结构所展现的实验性能与数值模拟高度吻合。这种快速原型制作的可行性得到了基于溶液的化学方法（如溶胶 - 凝胶工艺）的补充，后者为制备具有可调折射率的大面积多孔薄膜提供了可扩展且低成本的替代方案，这与光刻技术的高精度但高复杂性形成鲜明对比。涂覆工艺的几何细节也至关重要：在定向沉"
+    },
+    {
+      "unit_id": "B0029",
+      "source_sha256": "a0f59eb01e8551199f39c740909177a9e6bd4cd0d932033b20067a738027bbbc",
+      "status": "failed_semantic_audit",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "b_minus_model",
+      "errors": [
+        "semantic_final_audit:major:The translation contains untranslated English words ('fabrication', 'exploiting') and mixed language syntax, which violates the requirement for a professional scholarly review. Specifically: 1) 'static fabrication' is left as '静态 fabrication'; 2) 'through exploiting electromagnetic resonances' is translated as '通过 exploiting 电磁共振', leaving the verb 'exploiting' in English."
+      ],
+      "audit_warnings": [],
+      "semantic_audit_passed": false,
+      "attempt_count": 3,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "b_minus_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Additive manufacturing enables scalable static fabrication but often yields neuron sizes comparable to the wavelength, limiting resolution and introducing high-order diffraction. T",
+      "translation_preview": "增材制造可实现可扩展的静态 fabrication，但往往产生的神经元尺寸与波长相当，从而限制了分辨率并引入高阶衍射。为克服这些限制，基于超表面的衍射神经网络利用亚波长像素分辨率，以传统厚度调制器无法企及的精度调控振幅和相位的空间分布。全介电超表面作为实现这些网络的物理硬件平台，通过 exploiting 电磁共振的光学天线阵列对相干光场进行调制来处理信息。"
+    },
+    {
+      "unit_id": "B0030",
+      "source_sha256": "78b33dc4a2f125f7f4936c0f71a153e977415eada05c39998825393e4f405f37",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Reconfigurable systems, such as Spatial Light Modulators (SLMs) and integrated rewritable metasurfaces, enable the dynamic task switching essential for flexible computing, even tho",
+      "translation_preview": "可重构系统，如空间光调制器（SLMs）和集成可重写超表面，使得灵活计算所需的动态任务切换成为可能，尽管静态超表面具有效率优势。[REF:doi:10.1002/adom.202300561] [REF:doi:10.32446/0368-1025it.2023-12-35-39] 空间光调制器是一种用于可重构相位调制的动态设备，通常作为衍射光学元件的可编程平"
+    },
+    {
+      "unit_id": "B0031",
+      "source_sha256": "4147c9aa24963e35f3b1fb1bb97b99fc1b45363964ebc15f7c475b9fa0099ccb",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Bridging the simulation-to-reality gap through physics-aware codesign is critical for the successful deployment of reconfigurable systems, which offer adaptability. This methodolog",
+      "translation_preview": "通过物理感知协同设计弥合仿真与现实的差距，对于成功部署具备自适应能力的可重构系统至关重要。该方法论之所以关键，是因为将离散物理器件响应直接映射到衍射光学神经网络中会破坏标准反向传播所需的梯度链；模拟光学组件表现出的非均匀性和周期性相位约束往往是数字模型所忽略的。为解决这一问题，可微协同设计框架采用能够在尊重硬件物理极限（如 $2\\pi$ 的相位调制周期性）的"
+    },
+    {
+      "unit_id": "B0032",
+      "source_sha256": "57c9cc51a5e52bcf61c561abb59cc27b8806f41ad973912cee0fedf24b258c89",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "b_minus_model",
+      "errors": [],
+      "audit_warnings": [
+        "semantic_final_audit:minor:The term \"vaccination\" in the context of machine learning robustness is translated as \"免疫训练\" (immune training). While metaphorically related, the standard technical term in Chinese literature for this specific adversarial/robustness training strategy is typically \"疫苗训练\" (vaccine training) or simply described as robust training against perturbations. \"Immune\" implies a biological immune system analogy which is less precise for the algorithmic concept of injecting noise/perturbations during training to build resilience. However, given the context, it is understandable but slightly non-standard terminology."
+      ],
+      "semantic_audit_passed": true,
+      "attempt_count": 3,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "deterministic",
+          "kind": "terminology_normalization",
+          "notes": [
+            "疫苗接种->免疫训练"
+          ]
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "deterministic",
+          "kind": "terminology_normalization",
+          "notes": [
+            "疫苗式->免疫训练式",
+            "免疫训练式->免疫训练"
+          ]
+        },
+        {
+          "tier": "b_minus_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "deterministic",
+          "kind": "terminology_normalization",
+          "notes": [
+            "疫苗式->免疫训练式",
+            "免疫训练式->免疫训练"
+          ]
+        }
+      ],
+      "source_preview": "Beyond fabrication non-idealities, the operational stability of deployed diffractive systems is fundamentally constrained by environmental sensitivity and coherence requirements. P",
+      "translation_preview": "除了制备非理想性之外，已部署衍射系统的工作稳定性从根本上受到环境敏感性和相干性要求的制约。光子神经网络谐振器虽能提供有利于实现激活函数的非线性行为，但仍易受温度波动和机械振动的影响，从而对其性能产生不利影响。同样，衍射光学神经网络的工作稳定性依赖于准单色照明条件，即相干长度需超过层间最大光程差；而在涉及非相干光的实际应用中，这一假设可能并不成立。这些挑战在多"
+    },
+    {
+      "unit_id": "B0033",
+      "source_sha256": "3bd8dd541e81f050f4e0c4dcf0cfcc767e268ec716759ce63690c347c1c1fd2b",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "To meet the demand for operational stability, current advanced integration strategies employ on-chip logic and multiplexing to maximize computational density while maintaining robu",
+      "translation_preview": "为满足运行稳定性的需求，当前先进的集成策略利用片上逻辑和复用技术，在保持鲁棒性的同时最大化计算密度。可见光谱范围内的超表面衍射神经网络利用复用相位分布，与自由空间实现相比，实现了紧凑、静态的硬件实现，具有高分辨率和低功耗。这种微型化延伸至超紧凑型微尺度光学逻辑运算，其中通过双光子聚合打印的三维衍射结构可以在仅 100 × 100 × 50 μm³ 的体积内以"
+    },
+    {
+      "unit_id": "B0034",
+      "source_sha256": "64c484ba6f981674eaa2f157f22377642a32703d6bbf593a0cd3e2fb1e6b06ef",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Synthesizing the hardware landscape reveals that platform selection is fundamentally a constrained optimization between static efficiency and dynamic adaptability. Conventional met",
+      "translation_preview": "综合硬件格局可知，平台选择本质上是在静态效率与动态适应性之间进行的受限优化。传统超表面作为静态的“一次性写入”器件，其光学特性在制造完成后即被固定，尽管具备强大的波前整形能力，但这一特性严重限制了其在动态场景中的灵活性。同样，当前的片上衍射神经网络架构一旦完成训练和物理结构制造便固定不变，若无昂贵的重新制造过程，便无法适应新任务。虽然这些静态平台利用光传播的"
+    },
+    {
+      "unit_id": "B0035",
+      "source_sha256": "ef426310a63d259fd6e646d7bcba1924820cbe6cd37ae2e934b39365d945199d",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "## Wavelength Multiplexing and Spectral Bandwidth in Diffractive Optical Networks: Multi-Wavelength Computation and Chromatic Constraints",
+      "translation_preview": "## 衍射光学网络中的波长复用与光谱带宽：多波长计算与色度约束"
+    },
+    {
+      "unit_id": "B0036",
+      "source_sha256": "137db947c030cc17429e682364c90dd4167d043571b3dacf5e0fef5dd87a1f07",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Optical neural networks based on diffraction (ODNNs) operate as inherently dispersive systems in which the computational transfer function is strictly coupled to the illumination w",
+      "translation_preview": "基于衍射的光学神经网络（ODNNs）作为固有的色散系统运行，其计算传递函数与照明波长严格耦合。这种色散源于固定物理结构所施加的相位调制与波长成反比缩放，导致当输入光谱偏离设计条件时，点扩散函数和衍射角发生偏移。[REF:doi:10.1117/1.oe.65.5.058106] 因此，针对特定单色光源优化的网络在宽带条件下运行时，其线性变换矩阵会发生漂移，除"
+    },
+    {
+      "unit_id": "B0037",
+      "source_sha256": "e9c1305fc5c467cecbc80ae533fc7c449290689ca53a09331d79f9b887969af8",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "The physics of chromatic dispersion establishes that wavelength shifts alter phase delays, yet the practical consequence for diffractive neural networks trained at a single wavelen",
+      "translation_preview": "色度色散的物理原理表明，波长变化会改变相位延迟，但对于在单一波长下训练的衍射神经网络而言，暴露于光谱偏差时的实际后果是推理能力的严重退化。实证研究表明，试图使用浅层架构并行分类多个波长通常会导致性能不佳；例如，旨在区分三种可见光波长的单层和双层网络，其准确率分别仅为 53% 和 60%，经常将不同的输入误分类为占主导地位的中间波长。这种失败不仅源于调制函数在"
+    },
+    {
+      "unit_id": "B0038",
+      "source_sha256": "9a0c04ee332d3db673b76920ba03e14da245a750e2f6b32978b5100b47a445f8",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Published studies have developed achromatic diffractive networks that employ multi-layer architectures and hardware-aware optimization to stabilize phase responses across broad spe",
+      "translation_preview": "已发表的研究开发了消色差衍射网络，这些网络采用多层架构和硬件感知优化策略，旨在稳定宽光谱范围内的相位响应，从而抵消由色散引起的性能退化。一种主要策略是将多层薄膜与双尺度纳米结构相结合，利用多波长加权优化框架协同最小化反射率并校正波前像差；该设计已成功将光谱带宽扩展至 140 nm，同时将低阶误差抑制至毫波长量级。另一种途径是采用双层超透镜架构和 3D 打印的"
+    },
+    {
+      "unit_id": "B0039",
+      "source_sha256": "4e6d53672db442f19d449edd602a405bb236b024c4a58164b15ce24377bcfc4c",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Rather than suppressing chromatic dispersion, diffractive neural networks can exploit optical degrees of freedom to implement multiple independent computational functions within a ",
+      "translation_preview": "衍射神经网络并非抑制色散，而是利用光学自由度在单一物理结构中实现多个独立的计算功能。这种称为波长复用的策略，使静态衍射元件能够通过为不同光谱波段编码独立功能，同时执行不同的任务。该机制依赖于优化级联层的相位分布，使得特定波长触发独特的线性变换，从而无需机械重构即可将输入自由度映射到目标输出。虽然传统设计通常将器件划分为单独的区域，这在单波长照明时会限制效率，"
+    },
+    {
+      "unit_id": "B0040",
+      "source_sha256": "0fe3698bf3338c58170f69e0cbda9db9757c3ffa4b047281176eec1e44f7e79f",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Polarization multiplexing further expands the capacity of a single diffractive network to implement multiple complex-valued linear transformations concurrently within the same outp",
+      "translation_preview": "偏振复用进一步扩展了单个衍射网络的容量，使其能够在相同的输出视场中同时实现多个复值线性变换，这是在将波长作为计算自由度使用的基础上建立的。由此产生的设计利用了光的矢量特性，其中不同的输入和输出偏振态作为独立通道，用于执行目标检测或分类等编程任务，而无需改变底层衍射架构。证据表明，将这些任务集成到一个系统中，与部署多个专用子系统相比，在速度、紧凑性和成本效益方"
+    },
+    {
+      "unit_id": "B0041",
+      "source_sha256": "56d34b908849349bd0559cff6b8437545aae77bf97b36124479f45258608d47e",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Realizing the multi-functional potential of these high-density multiplexed systems, where precise control over wavelength and polarization channels is paramount, requires specializ",
+      "translation_preview": "要实现这些高密度复用系统的多功能潜力（其中对波长和偏振通道的精确控制至关重要），需要专门的训练范式，以弥合理想化模拟与实际硬件限制之间的差距。物理感知可微离散协同设计通过在反向传播过程中保持梯度链，解决了真实光学器件非均匀、模拟特性的问题。与标准量化不同，该框架采用 Gumbel-Softmax 等技术来施加物理边界约束，确保可训练的相位参数遵守周期性限制（"
+    },
+    {
+      "unit_id": "B0042",
+      "source_sha256": "787782918d32b841061ac51e77fe8a38af27428a5c93aa8b6d7ce406f723775f",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Physics-aware optimization establishes the structural blueprint for diffractive networks, yet enhancing their computational expressivity and robustness requires addressing inherent",
+      "translation_preview": "物理感知优化为衍射网络建立了结构蓝图，然而要提升其计算表达能力和鲁棒性，必须解决固有的线性约束和环境敏感性问题。一种策略是集成非线性光子元件，直接在光域内实现激活函数；例如，谐振器为此提供了有利的非线性行为，但也引入了对温度波动和机械振动的脆弱性，从而可能导致性能下降。相比之下，干涉仪擅长操纵相位和振幅以进行复杂计算，但仍易受相位变化影响，需要精确对准。为了"
+    },
+    {
+      "unit_id": "B0043",
+      "source_sha256": "6b1def73655da268643c47e827ffd15bd209f6cdaccfdec116a466c3153faf53",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "b_minus_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 3,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "deterministic",
+          "kind": "terminology_normalization",
+          "notes": [
+            "footprint->器件占地尺寸"
+          ]
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "b_minus_model",
+          "kind": "deterministic_validation_repair",
+          "errors": [
+            "protected_token_mismatch",
+            "citation_marker_mismatch"
+          ]
+        },
+        {
+          "tier": "b_minus_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Balancing inherent physical advantages against current accuracy limitations is ultimately required for deploying diffractive optical neural networks in high-stakes environments. Wh",
+      "translation_preview": "要在高风险环境中部署衍射光学神经网络，最终必须权衡其固有的物理优势与当前的精度局限。尽管数字卷积神经网络在原始分类指标上可能仍优于光学系统，但全光衍射分类器在实时、能效推理方面具有独特优势，使其在对速度和功耗有严苛约束的应用中极具吸引力。这种权衡在自动驾驶等新兴方案中尤为明显：衍射架构旨在通过对 RGB 场景进行直接的全光处理而无需数字预处理，从而提升大规模"
+    },
+    {
+      "unit_id": "B0044",
+      "source_sha256": "61f9e8e7e21334560bc19f4d90989b41b0290609b742970ce1bbaf3434ee4c9f",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "## Applications of Diffractive Neural Networks: Imaging, Classification, Segmentation, and Pattern Recognition",
+      "translation_preview": "## 衍射神经网络的应用：成像、分类、分割与模式识别"
+    },
+    {
+      "unit_id": "B0045",
+      "source_sha256": "0493044a5d0453b4a5ab92fccb9a6076cbf8c6e47012ce0c0f6ebe2b46fd20a4",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "The all-optical machine learning framework known as Diffractive Deep Neural Networks (D2NNs) performs inference at the speed of light by encoding neural network weights into the ph",
+      "translation_preview": "被称为衍射深度神经网络（D2NN）的全光学机器学习框架，通过将神经网络权重编码到衍射层的物理厚度中，以光速执行推理。[REF:doi:10.1021/acsphotonics.4c01284.s001] 与受数据传输瓶颈和晶体管延迟限制的电子处理器不同，D2NN 利用波在自由空间中的传播，在信号穿过系统时即时执行模拟计算。该架构已在多类图像分类中得到实验验证"
+    },
+    {
+      "unit_id": "B0046",
+      "source_sha256": "aa8318e02b237c527dc8916caf4505d05b824b57d81ab560693c7cf3e00b9fda",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "The fundamental physical advantages of diffractive optical neural networks (DONNs) regarding latency and energy consumption serve as the primary motivation for their adoption, exte",
+      "translation_preview": "衍射光学神经网络（DONNs）在延迟和能耗方面的基本物理优势，是其得以应用的主要驱动力，这一优势超越了标准数据集所确立的分类基准。与依赖电子输运和电阻发热的电子电路不同，DONNs 利用光子被动执行计算，从而能够以光速进行推理，并显著降低功耗需求。这种光子硬件加速提供了超宽带宽和大规模并行性，解决了在传统硅基平台上扩展人工神经网络时固有的资源瓶颈。研究表明，"
+    },
+    {
+      "unit_id": "B0047",
+      "source_sha256": "8d11eb75b42b7dfbab240060779e0d9834bb3045118f2297352a9becc44095ca",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "To expand computational density beyond simple intensity modulation, multiple studies have developed multiplexing strategies that leverage the latency and energy advantages of diffr",
+      "translation_preview": "为了将计算密度扩展到简单的强度调制之外，多项研究开发了利用衍射系统延迟和能量优势的复用策略。偏振复用是一种技术，它通过将数据编码到不同的输入和输出偏振态中，使单个衍射网络能够在相同的输出视场中同时执行多个复值任意线性变换。[REF:04c16f79232a1dba281da8a2626e1933bcb10641] 该实现允许检测、分类等各种机器视觉任务集成在"
+    },
+    {
+      "unit_id": "B0048",
+      "source_sha256": "5ad8393ed751697fbd97c511dd62281e596f2e7c63928051846732c75725d568",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Beyond generic classification, diffractive neural networks excel in specialized imaging tasks that address fundamental physical constraints, such as the diffraction limit and chrom",
+      "translation_preview": "超越通用分类，衍射神经网络在解决衍射极限和色差等基础物理约束的专用成像任务中表现卓越。为实现超分辨，这些系统利用光学超振荡，即通过相干波的精确干涉产生的快速亚波长空间变化，从而在不具备荧光显微镜相关光毒性的情况下，实现超越传统阿贝 - 瑞利极限的远场成像。[REF:doi:10.1117/12.2576293] [REF:doi:10.1109/cleo/e"
+    },
+    {
+      "unit_id": "B0049",
+      "source_sha256": "2804200c3ee89abe4d96dd2ee79c9149ee0cadc07ac6ad672f749b3e8176d4d8",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Hybrid optical-electronic convolutional neural networks (CNNs) have emerged as a pragmatic architecture that pushes initial computation into passive optics while retaining electron",
+      "translation_preview": "混合光电子卷积神经网络（CNNs）作为一种务实的架构应运而生，它将初始计算推入无源光学领域，同时保留电子灵活性以进行复杂决策，旨在弥合理论效率与实际部署之间的差距。在该设计中，优化的衍射元件直接在光学域中处理对颜色敏感的核或前端特征提取，解决了单色滤波固有的信息丢失问题，并大幅减轻了电子硬件的计算负担。这种分工对于自动驾驶等对延迟敏感的应用尤为宝贵，因为光学"
+    },
+    {
+      "unit_id": "B0050",
+      "source_sha256": "bff911292abc4907abec52a973e9664c23558d36520fe53e4f8542cf0fe26dc4",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Emerging hardware platforms utilize reconfigurable materials that allow post-fabrication weight updates to overcome the static limitations of fixed diffractive arrays. Digitized ph",
+      "translation_preview": "新兴硬件平台利用可重构材料，允许在制造后更新权重，以克服固定衍射阵列的静态局限性。数字化相变材料异质结堆栈实现了具有可重构性的透射式衍射光学神经网络，通过利用光子极高的并行度和低静态能耗，支持计算机视觉等高吞吐量、节能的机器学习处理应用。或者，磁光衍射深度神经网络利用蒙特卡洛优化，结合随机畴更新和权重翻转，实现在磁光层中的实时可重构学习，其中候选配置根据梅特"
+    },
+    {
+      "unit_id": "B0051",
+      "source_sha256": "65987d348306dba75dd41bee990e3ca6a15c20ea4bd6f0224bd5c4d91d4a554b",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Leveraging the potential for dynamic hardware updates, multifunctional diffractive processors now enable single-device multi-task learning, allowing a physical system to execute di",
+      "translation_preview": "借助动态硬件更新的潜力，多功能衍射处理器现已实现单设备多任务学习，使物理系统能够在无需重新训练或机械重构的情况下执行不同的推理操作。这种能力依赖于软硬件协同设计，其中照明模式或超表面排列在优化过程中被视为可训练参数。例如，最近的框架将“学习到的”结构化照明纳入网络设计，使得在固定衍射层复用的同时，能够迅速切换于MNIST分类、Fashion-MNIST识别和"
+    },
+    {
+      "unit_id": "B0052",
+      "source_sha256": "40b8099b7931a93ea46c70b5bca21c42f8e1249a05d628319b3902dba6e02753",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Despite the demonstrated capacity for multi-task learning, the transition of diffractive deep neural networks from laboratory prototypes to widely adopted technologies is constrain",
+      "translation_preview": "尽管展示了多任务学习的能力，衍射深度神经网络从实验室原型向广泛采用的技术转变，仍受到理论设计与物理鲁棒性之间持久差距的限制。虽然这些系统因超低延迟和高并行光学计算能力而备受赞誉，但其实际部署在环境稳定性和制造精度方面面临重大障碍。光子架构通常利用非线性行为来实现必要的激活函数，然而谐振器等特定组件对外部扰动（如温度波动和机械振动）极为敏感，这会导致性能下降。"
+    },
+    {
+      "unit_id": "B0053",
+      "source_sha256": "f92cd3a7bfa79987d14557e2578e98a8555c36088d8c8246584813e3ad439502",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "## Controversies and Unresolved Debates in Diffractive Neural Network Research",
+      "translation_preview": "## 衍射神经网络研究中的争议与未决辩论"
+    },
+    {
+      "unit_id": "B0054",
+      "source_sha256": "e17b6bbbf121dab075d7c4210c735cd37a8a339887b289fa928780906f870c16",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "A central debate in diffractive neural network research questions whether these systems provide a real computational edge or simply serve as sophisticated engineering showcases of ",
+      "translation_preview": "衍射神经网络研究中的一个核心争论在于：这些系统究竟是提供了真正的计算优势，还是仅仅作为既定光学原理的复杂工程展示。支持者认为，模拟光计算具有固有的并行性、能效和低延迟特性，使其特别擅长处理物体分类和机器视觉等大规模计算任务，而数字系统在这些任务中常面临瓶颈。这一观点得到了衍射深度神经网络（D2NN）等框架的支持；该类框架利用深度学习算法来设计无源衍射面上的光"
+    },
+    {
+      "unit_id": "B0055",
+      "source_sha256": "a93289e78fac0b7f16baef50d30177e76bfed761231cd630004073164d38bd32",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "deterministic",
+          "kind": "terminology_normalization",
+          "notes": [
+            "“疫苗接种”（vaccination）->“免疫训练”（vaccination）"
+          ]
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "deterministic",
+          "kind": "terminology_normalization",
+          "notes": [
+            "疫苗接种->免疫训练"
+          ]
+        }
+      ],
+      "source_preview": "Validating claims of computational advantages is hindered by a critical barrier known as the simulation-to-reality gap, which represents the discrepancy between performance predict",
+      "translation_preview": "验证计算优势的主张受到一个关键障碍的阻碍，即所谓的“仿真到现实差距”（simulation-to-reality gap）。该差距反映了理想化标量衍射模型预测的性能与实际硬件结果之间的差异，其根源在于制造公差和材料非理想性。[REF:doi:10.1117/12.3013482] [REF:doi:10.1117/12.3084472] 尽管使用传输矩阵法等"
+    },
+    {
+      "unit_id": "B0056",
+      "source_sha256": "decc4f34f21f4ee3d31dfafb0fe7d60bae36c6a6ee01faed5500a7aa3fd15ab3",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "End-to-end differentiable training defines a paradigm where backpropagation flows directly through the diffraction integral to optimize optical layers, theoretically enabling high-",
+      "translation_preview": "端到端可微训练定义了一种范式，其中反向传播直接流经衍射积分以优化光学层，理论上能够实现高通量的全光处理。然而，当引入离散器件映射时，所提出的网络遭遇了基本的梯度链断裂，因为物理离散化破坏了标准算法所假设的光滑可微性。虽然理想化模拟表明，此类网络利用无源衍射层可扩展至数千亿个连接，但实际部署揭示了数值建模与物理硬件之间的不匹配，这源于非均匀的器件响应和模拟量约"
+    },
+    {
+      "unit_id": "B0057",
+      "source_sha256": "444f28ee2387353e7773b033e92facb9dc2d718632de83b9e5bc1a7afc6ad208",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "ODNN research now faces a fundamental architectural divide between single-function optimized designs and general-purpose trainable systems. Single-function architectures, such as c",
+      "translation_preview": "ODNN 研究目前面临着单功能优化设计与通用可训练系统之间的根本架构分歧。单功能架构，如色差校正衍射透镜，利用迭代算法优化特定宽带聚焦任务的沟槽高度，在该单一应用中实现卓越性能，但缺乏适应性。相比之下，早期的通用方法往往产生显著的复杂性开销，需要移动光学元件或不同的硬件系统才能在任务之间切换。为了解决这种僵化性，新兴的多波长衍射深度神经网络利用光谱维度，无需"
+    },
+    {
+      "unit_id": "B0058",
+      "source_sha256": "6dea40ca2db3516eb1084178fd005b5e33b03fc3f96940e0a2fb15a6d5bd980b",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Physical implementation bottlenecks ultimately constrain the realization of these diffractive systems, moving beyond the theoretical architectural debate between specialized and fl",
+      "translation_preview": "物理实现的瓶颈最终制约了这些衍射系统的落地，使得专用设计与灵活设计之间的理论架构之争退居其次。尽管光子谐振器为光学激活函数提供了有利的非线性行为，但其性能本质上仍易受温度波动和机械振动等环境干扰的影响。这种敏感性也延伸至照明条件：实际部署要求对非相干光进行稳健处理，然而大多数理论框架依赖于理想的准单色假设，而这些假设在受控实验室之外很少成立。此外，将这些网络"
+    },
+    {
+      "unit_id": "B0059",
+      "source_sha256": "f5c999ccf3a71125dba18259628a2657a26f9bee95c7eac6be4a231d03711214",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "In response to the hardware bottlenecks and integration hurdles previously discussed, emerging counter-narratives propose that diffractive neural networks (DONNs) need not rely on ",
+      "translation_preview": "针对前文所述的硬件瓶颈与集成难题，新兴的反向观点提出，衍射神经网络（DONNs）无需依赖复杂的多层可训练架构即可发挥效能。其中一种途径是采用极简主义 DONNs，其利用简单的光学配置实现高效的计算能力，在图像分类任务中展现出鲁棒性与可扩展性，且避免了深层、全可训练堆栈所带来的复杂性开销。例如，一种极简光学衍射神经网络采用两级量化像素级光学编码，在无需深层、全"
+    },
+    {
+      "unit_id": "B0060",
+      "source_sha256": "48143d5a60007cf53cb4efeb5952fa57a841eb349b1801eab953ff9b225e185d",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "## Bottlenecks and Future Trajectories for Diffractive Neural Networks: Toward Hybrid Electro-Optical Systems and Scalable Optical AI",
+      "translation_preview": "## 衍射神经网络的瓶颈与未来轨迹：迈向混合电光系统与可扩展光学 AI"
+    },
+    {
+      "unit_id": "B0061",
+      "source_sha256": "3d99f2d5e3705359cc88b2910c73fc39125197cd708ed4fee7de1c0e4e6ed4d8",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Current progress in transitioning laboratory prototypes to deployable optical AI is hindered by the intrinsic rigidity of static diffractive neural networks, which function as 'wri",
+      "translation_preview": "当前，将实验室原型转化为可部署的光学人工智能系统所取得的进展，受到静态衍射神经网络固有刚性的阻碍。这些网络作为“一次性写入”硬件，无法在不进行机械干预或完全重新制造的情况下实现动态自适应。尽管近期的多波长设计已证明并行任务处理可以缓解部分吞吐量限制，但这些系统在可重构性方面仍受根本性制约，通常需要为不同的计算目标配置独立的硬件实例。除了缺乏灵活性之外，物理实"
+    },
+    {
+      "unit_id": "B0062",
+      "source_sha256": "8450d7c835016a7b7572fba8e08ef6a0a4c5a9b9b65fcd4c192dd66584fb0181",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "A critical simulation-to-reality gap, defined as the performance degradation observed when models trained in idealized numerical environments encounter the noise and aberrations of",
+      "translation_preview": "一个关键的仿真到现实差距（定义为模型从理想化数值环境转移到实际硬件时观察到的性能下降）阻碍了衍射神经网络从理论设计向物理部署的转化。虽然仿真通常假设使用具有高空间相干的准单色照明，但实际应用需要处理非相干和部分相干光，导致光场在网络层中演化的方式存在根本性差异。[REF:66d76eac8c5cb0c37d44c10bce479d8c301d113b]这种差"
+    },
+    {
+      "unit_id": "B0063",
+      "source_sha256": "4649287100cc89da8791ee6c053c7c7bb29188eadc69fdf6ce0ada3f4f36e68c",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Hybrid electro-optical co-design has emerged as a dominant strategy to address the reconfigurability and nonlinearity bottlenecks identified in static hardware. This architecture i",
+      "translation_preview": "混合光电协同设计已成为解决静态硬件中可重构性与非线性瓶颈的主导策略。该架构将静态衍射层与负责非线性激活和逻辑运算的可重构电子层相结合；其中，静态衍射层利用光传播固有的并行性和低延迟特性，实现高通量特征提取。通过将这类计算密集型的非线性任务卸载至电子器件，此类系统在保持显著能效优势的同时，有效缓解了全光学硬件的刚性局限。代表性实施方案包括基于数字编码超表面阵列"
+    },
+    {
+      "unit_id": "B0064",
+      "source_sha256": "0b399d3b1eacd730a4055d17c78d514d36376064587c35da55710ab3248f200a",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "c_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 2,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "To overcome static hardware constraints, recent approaches incorporate dynamic adaptability via programmable materials and online learning. Programmable metasurfaces, defined as dy",
+      "translation_preview": "为克服静态硬件限制，近期研究通过引入可编程材料与在线学习机制，赋予了系统动态适应能力。可编程超表面被定义为能够通过外部控制信号改变相位分布的动态光学表面，从而解决了被动衍射层的刚性问题。例如，磁光衍射深度神经网络利用法拉第效应，通过磁畴的磁化方向调制光相位，无需复杂的微纳加工工艺，即可实现在线学习技术，动态重构网络以校正对准或制造误差。除了这种线性可重构性外"
+    },
+    {
+      "unit_id": "B0065",
+      "source_sha256": "4856d7e8fae1bf07fa35989bb2b007e914582aadb09d9fb7ff06f26c77561bde",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "b_minus_model",
+      "errors": [],
+      "audit_warnings": [
+        "semantic_final_audit:minor:The phrase 'without relying on complex intrinsic angular dispersion' is repeated verbatim in the translation for two consecutive sentences. While this mirrors the source text's repetition, it creates a tautological and unprofessional reading flow in Chinese ('无需依赖复杂的本征角度色散'). In scientific reviews, such redundancy should typically be resolved by pronoun substitution or omission in the second instance to improve readability, unless the exact rhetorical repetition is critical (which is rare in technical descriptions). However, since the instruction says 'Do not rewrite the text' and 'Style preference alone is not a defect', and the translation is technically accurate, this might be borderline. But looking closer at the source: 'Researchers demonstrated... without relying on complex intrinsic angular dispersion.' The previous sentence also ended with 'without relying on complex intrinsic angular dispersion.' This is likely a copy-paste error in the *source* or a very clumsy source style. Translating it literally preserves the awkwardness. Given the strict constraint against rewriting for style, I will check if there are other issues. Actually, the repetition is in the source. The translator faithfully reproduced it. Is it an issue? 'Report an issue only when revision is materially useful.' Repeating the same clause twice in close proximity is poor style, but translating it faithfully is correct behavior for a translator unless instructed to edit. I will leave it as acceptable because the source itself contains the repetition, and flagging it as a translation error would imply the translator should have edited the source, which violates 'Do not rewrite'. Wait, let me re-read carefully. Source: Sentence A ends with '...without relying on complex intrinsic angular dispersion.' Sentence B starts 'Researchers demonstrated... without relying on complex intrinsic angular dispersion.' Yes, the source repeats it. The translation repeats it. This is faithful. No issue.)\n\nLet's look for other issues.\n\"diffusers\" -> \"扩散体\" (diffusers/scattering media). In optics, 'random diffusers' usually refers to '随机散射介质' or '漫射体'. '扩散体' is acceptable but '散射介质' is more common in physics contexts involving scattering environments. However, 'diffuser' can be translated as '扩散器' or '漫射体'. '扩散体' is understandable. Not a major error.\n\n\"blind testing accuracies\" -> \"盲测准确率\". Correct.\n\n\"accuracy deficit\" -> \"准确率存在约 10% 的亏损\". 'Deficit' here means the monochrome design was ~10% lower. '亏损' usually implies financial loss or a deficit in balance. In performance metrics, '低约10%' or '落后约10%' is better. '亏损' is slightly unnatural for accuracy scores, but not strictly wrong. It's a minor stylistic choice.\n\n\"wavelength multiplexing\" -> \"波长复用\". Correct.\n\n\"physical fabrication constraints\" -> \"物理制造约束\". Correct.\n\n\"training loop\" -> \"训练循环\". Correct.\n\nOverall, the translation is very high quality and faithful. The repetition in the source is preserved. There are no factual errors, terminology errors, or missing numbers.\n\nTherefore, empty issues list."
+      ],
+      "semantic_audit_passed": true,
+      "attempt_count": 3,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "b_minus_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Programmable materials address reconfigurability, yet the operational bandwidth of diffractive systems remains constrained by wavelength-dependent phase delays, necessitating advan",
+      "translation_preview": "可编程材料解决了可重构性问题，然而衍射系统的工作带宽仍受限于波长相关的相位延迟，因此需要先进的设计策略以支持高光谱应用。多元件超表面系统通过利用局部单元中依赖于照明角度的相位延迟，有效解耦了角度自由度，从而在不依赖复杂本征角度色散的情况下实现鲁棒的全息成像。研究人员利用单层自由曲面超表面在可见光波段演示了一种多波长消色差偏转器，实现了宽带操作且无需依赖复杂的"
+    },
+    {
+      "unit_id": "B0066",
+      "source_sha256": "dd674a86e440796fa535c45647ec95fe20a78786a1aea4f541db5267bcf4f464",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Bridging the persistent simulation-to-reality gap requires optimization protocols to evolve from idealized numerical emulation to physics-aware training that embeds hardware constr",
+      "translation_preview": "弥合持续的仿真与现实差距，要求优化协议从理想化的数值模拟演变为物理感知训练，即将硬件约束直接嵌入学习循环中。一个主要挑战在于，直接将离散模拟器件响应映射到衍射光学神经网络（DONN）系统会破坏反向传播所需的梯度链，因为光学组件表现出非均匀、非单调的行为，这与稳定的数字计算不同。物理感知可微离散协同设计通过利用Gumbel-Softmax等技术来解决这一问题，"
+    },
+    {
+      "unit_id": "B0067",
+      "source_sha256": "1cf55f9058dd0c22e1634f34fbb6e567a8cd6a6b72b0bc2fd06c36b361a6f181",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Even with physics-aware optimization protocols embedding constraints directly into the training loop, ODNN research lacks standardized benchmarking datasets necessary to validate p",
+      "translation_preview": "即使采用将约束直接嵌入训练循环的物理感知优化协议，ODNN（光学深度神经网络）研究仍缺乏标准化的基准数据集，无法验证其进展是否超越了狭窄的 2D 空间成像任务。当前的高保真资源虽然严谨，但仅限于固定的细胞样本和基于宽场（widefield）的架构，未能涵盖更广泛部署所需的时空动力学或体积反卷积挑战。这一数据缺口因在线原位训练中的严重计算瓶颈而加剧：在 MNI"
+    },
+    {
+      "unit_id": "B0068",
+      "source_sha256": "abece9be5d3bf3028e54ba3961059494bdd60da33033d660d57d81a6c5c7450d",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Near-term engineering strategies prioritize transfer learning and multifunctional processor designs to bridge the gap between static hardware limitations and the need for dynamic f",
+      "translation_preview": "近期的工程策略优先考虑迁移学习和多功能处理器设计，以弥合静态硬件局限性与动态功能需求之间的差距。迁移学习通过引入部分可重构的光学单元来解决固定物理结构的僵化问题，使预训练层能够适应新任务而无需完全重新制造；例如，此类架构的数值模拟已证明，在 MNIST 数据集上可实现多任务处理，分类准确率达到 98.8%。这些设计验证了极简光学配置可有效部署于特定推理应用，"
+    },
+    {
+      "unit_id": "B0069",
+      "source_sha256": "5c6114f693842484cc2d872a1ee08b537079d1f1aa42ad42cebc79983e6276dc",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "All-optical diffractive classifiers offer distinct advantages in real-time and energy-efficient inference compared to conventional convolutional neural networks, making them attrac",
+      "translation_preview": "与传统的卷积神经网络相比，全光学衍射分类器在实时和能效推理方面具有显著优势，使其在对速度要求关键的应用中具有吸引力，尽管其在原始准确率方面目前仍有不足。虽然衍射深度神经网络（D2NNs）通过高度并行的光学计算提供了超低延迟和低功耗，但其实际部署面临重大瓶颈，包括制造引起的相位误差、多个衍射平面间的对准挑战以及有限的操作带宽。此外，当前研究表明，在静态衍射层的"
+    },
+    {
+      "unit_id": "B0070",
+      "source_sha256": "be031d37bb75d96ef08ca9ec5b0e83bb6f91172f60d3c31a78feae8d7dc4a0b0",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "## Conclusion",
+      "translation_preview": "## 结论"
+    },
+    {
+      "unit_id": "B0071",
+      "source_sha256": "5b76ca16a1fc2e34f0f5fd62d919ff67e949248d8134480274886c6379c14586",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "This review synthesizes the current state of Optical Diffractive Neural Networks (ODNNs), addressing the central inquiry regarding their viability as a computational paradigm disti",
+      "translation_preview": "本综述综合了光学衍射神经网络（ODNNs）的研究现状，探讨了其作为区别于传统电子学的独立计算范式的可行性这一核心问题。物理、训练和硬件领域呈现的证据表明，ODNNs 不仅充当光加速器，更是独特的物理计算机，其中衍射定律决定了计算的表达能力。通过将电子权重矩阵替换为空间变化的相位分布，这些系统利用光的固有并行性，以光速执行线性变换并实现极低的能耗。该架构为解决"
+    },
+    {
+      "unit_id": "B0072",
+      "source_sha256": "90bcbd892b209fe8e0a8a0f7599f6cd350bd61bdf8b212dd4003e6682b66799a",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Tension between idealized mathematical models and physical reality constitutes the primary limitation preventing widespread deployment. A critical barrier is the simulation-to-real",
+      "translation_preview": "理想化数学模型与物理现实之间的张力构成了阻碍广泛部署的主要局限。一个关键障碍是仿真到现实的差距：由于制造公差、表面粗糙度和材料色散，标量衍射模型预测的性能在物理原型中会下降。尽管硬件在环（HIL）优化和对准误差“免疫”等技术显示出弥合这一差距的潜力，但它们也凸显了当前设计的脆弱性。此外，无源衍射层的固有线性引入了非线性瓶颈，限制了网络在不借助外部干预的情况下"
+    },
+    {
+      "unit_id": "B0073",
+      "source_sha256": "225a58bc45ae11a2a6839a3dc625419db4e63c5b48ebe1836a72cd937dcbe8ca",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Looking forward, the trajectory for ODNN research appears to be shifting away from the pursuit of entirely all-optical general-purpose computers toward hybrid electro-optical co-de",
+      "translation_preview": "展望未来，ODNN 研究的发展趋势似乎正从追求完全全光通用计算机转向混合光电协同设计。可扩展光学 AI 最可行的路径是利用衍射层的速度和并行性进行线性特征提取，同时将非线性激活函数和自适应控制卸载给电子组件。这种混合方法缓解了静态硬件的僵化性，并允许进行错误纠正和动态任务切换，而纯光系统目前无法支持这些功能。此外，未来的进展取决于采用物理感知训练范式，将制造"
+    },
+    {
+      "unit_id": "META_title",
+      "source_sha256": "c9c07d0e2f53dc503671bbe205b4f29dda435afc5f5e4de2ee877b1ba5919fbb",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Optical Diffractive Neural Networks: A Comprehensive Review of Architectures, Training, and Future Directions",
+      "translation_preview": "光学衍射神经网络：架构、训练与未来方向的全面综述"
+    },
+    {
+      "unit_id": "META_abstract",
+      "source_sha256": "e0d2538ebce752bc743ea6b922189f390b4e5c5e664ae4efbc7edea1190a83ec",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.5-plus",
+      "model_tier": "b_minus_model",
+      "errors": [],
+      "audit_warnings": [
+        "semantic_final_audit:minor:Translation of 'fabrication-aware training strategies' as '感知制造的训练策略' is semantically awkward and potentially misleading in Chinese. 'Aware' here implies the strategy accounts for or incorporates fabrication constraints, not that it 'perceives' manufacturing. A more accurate term would be '考虑制造因素的' or '面向制造的'. Additionally, 'afterthoughts' translated as '事后补救措施' (remedial measures) slightly shifts the meaning from 'an afterthought' (something neglected or considered last); '事后诸葛亮' or '次要考虑' might be closer, though '事后补救' is acceptable in context. The primary issue is the unnatural phrasing of 'fabrication-aware'."
+      ],
+      "semantic_audit_passed": true,
+      "attempt_count": 3,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "c_model",
+          "kind": "translation"
+        },
+        {
+          "tier": "b_minus_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "Optical diffractive neural networks transform computational imaging by replacing iterative electronic inference with passive light propagation through learned phase patterns; howev",
+      "translation_preview": "光学衍射神经网络通过以学习到的相位图案引导的被动光传播取代迭代式电子推理，从而变革了计算成像；然而，其从实验室原型走向可部署的光学人工智能，关键在于解决物理可实现性约束（波长敏感性、制造容差、静态与可重构硬件）与最初推动衍射深度学习的算法灵活性之间的张力。本综述认为，光学衍射神经网络代表了一种根本不同的计算范式——而不仅仅是数字神经网络的光学实现——其中衍射"
+    },
+    {
+      "unit_id": "META_keyword_001",
+      "source_sha256": "b9c91b4703d4ca1fbb12a14c1ecb5cae44d3831cb3d5c1e67aa6d7e780374d63",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "diffractive deep neural network",
+      "translation_preview": "衍射深度神经网络"
+    },
+    {
+      "unit_id": "META_keyword_002",
+      "source_sha256": "413d7992a285c7825ca47ac4fe40145a4371e6872d2f2d33cd2f07001bdb4fdb",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "optical diffractive neural network",
+      "translation_preview": "光学衍射神经网络"
+    },
+    {
+      "unit_id": "META_keyword_003",
+      "source_sha256": "42331beb38912ec13d0ed3f2fed2e392c97c2cfe551a48f2de848a355e19b0fd",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "all-optical neural network",
+      "translation_preview": "全光神经网络"
+    },
+    {
+      "unit_id": "META_keyword_004",
+      "source_sha256": "2a1b7559b47bff9d1e3f713bc2a050b9e585f9b371fe5cd92536b1d8e7e1d34c",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "diffractive optical element machine learning",
+      "translation_preview": "衍射光学元件机器学习"
+    },
+    {
+      "unit_id": "META_keyword_005",
+      "source_sha256": "647ce10b68205443ce77490869964f32b146be6fa611e7ea252478d9555bbb45",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "phase modulation neural network",
+      "translation_preview": "相位调制神经网络"
+    },
+    {
+      "unit_id": "META_keyword_006",
+      "source_sha256": "04bbaabb6925b30f85e891e9d211707ac31bb79f3459c6a47d14b5d7c9129eca",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "multi-layer diffractive optical network",
+      "translation_preview": "多层衍射光学网络"
+    },
+    {
+      "unit_id": "META_keyword_007",
+      "source_sha256": "3fd67c322252f7571ecdde29b5ee71f69612f94b72c3ac144067bf171ebe1373",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "training diffractive optical networks",
+      "translation_preview": "衍射光学网络的训练"
+    },
+    {
+      "unit_id": "META_keyword_008",
+      "source_sha256": "dc64db2c684180a3e9596f521b37b1f37c3b3073f1e3348f7eba9415e24b234f",
+      "status": "validated",
+      "from_cache": false,
+      "model_name": "qwen3.7-flash",
+      "model_tier": "c2_model",
+      "errors": [],
+      "audit_warnings": [],
+      "semantic_audit_passed": true,
+      "attempt_count": 1,
+      "retry_history": [
+        {
+          "tier": "c2_model",
+          "kind": "translation"
+        }
+      ],
+      "source_preview": "gradient descent optical neural network",
+      "translation_preview": "基于梯度下降的光学神经网络"
+    }
+  ],
+  "translated_metadata_path": "<local-path>",
+  "metadata_resolution_warnings": [
+    "abstract_inferred_from_review_blueprint",
+    "keywords_inferred_from_topic_identity"
+  ]
+}

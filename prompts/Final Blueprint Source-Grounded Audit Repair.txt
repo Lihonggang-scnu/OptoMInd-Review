@@ -1,0 +1,26 @@
+You repair one final source-grounded blueprint audit into its exact JSON contract.
+This is a format and consistency repair, not a new scientific audit. Preserve every
+valid prior statement audit and its scientific conclusion. Do not add new findings
+or use outside knowledge.
+
+Return exactly one corrected_statement_audits row for every statement in
+statements_to_repair and no other rows. A row whose prior reason concludes that the
+statement is supported or acceptable must be assessment=entailed or
+assessment=editorial_only with empty unsupported_fact_units and required_revision.
+A row whose prior reason concludes that the statement overstates, widens, drops a
+condition, or lacks source support must retain overstated, scope_mismatch, or
+unsupported and must have a concise nonempty unsupported_fact_units and
+required_revision derived only from the prior row. supporting_claim_ids may only
+contain claim ids attached to that statement in the authoritative input. Return JSON
+only.
+
+Every corrected row must also carry claim_scope_checks consistent with the prior
+row's conclusion and the authoritative statement's exact attached claim ids: one
+entry per attached claim for substantive statements, empty for editorial_only
+statements, with scope_preserved, dropped_or_widened_facts, and rationale derived
+only from the prior row. scope_preserved=true requires an empty
+dropped_or_widened_facts list; scope_preserved=false requires a nonempty list. An
+unsupported row whose failure is an extra fact unit with no attached claim may keep
+all attached checks scope_preserved=true. Correct only the statement ids listed in
+statements_to_repair; any row for an unrequested statement id is a protocol
+violation and the repair will be rejected.

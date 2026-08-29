@@ -1,0 +1,537 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S02",
+  "status": "enhanced",
+  "mode": "live",
+  "model_tiers": {
+    "planner": "c_model",
+    "block": "c_model",
+    "patch": "c_model",
+    "auditor": "c2_model",
+    "contract_repair": "c2_model",
+    "explanatory": "c2_model",
+    "application_writer": "c2_model",
+    "block_reviewer": "c2_model",
+    "block_reviser": "c_model"
+  },
+  "input_labels": {
+    "packet": "input_packet.json",
+    "old_draft": "SECTION_DRAFT_EN.md"
+  },
+  "word_counts": {
+    "old": 745,
+    "enhanced": 1810
+  },
+  "paragraph_counts": {
+    "old": 5,
+    "enhanced": 7
+  },
+  "block_count": 7,
+  "hard_defects": {
+    "empty_output": false,
+    "unknown_evidence_handle": false,
+    "unknown_citation": false,
+    "core_model_unavailable": false
+  },
+  "soft_warnings": [
+    "representative_application_skipped: block 1 (writer empty_prose)",
+    "representative_application_skipped: block 2 (writer empty_prose)"
+  ],
+  "fail_open_reason": "",
+  "coverage_metrics": {
+    "usable_claim_count": 32,
+    "planned_usable_claim_count": 27,
+    "planned_usable_claim_coverage_ratio": 0.844,
+    "actual_covered_claim_count": 30,
+    "actual_covered_claim_coverage_ratio": 0.938,
+    "evidence_handle_count": 30,
+    "visible_unique_reference_count": 36,
+    "claims_omitted_with_reasons": {
+      "C01_NONLINEAR_OPTICAL_RESONATORS_EXHIBIT_BEHAVIOR": "Merged into broader discussion of hybrid frameworks in Block 5; specific resonator behavior is secondary to the training paradigm focus.",
+      "C02_HYBRID_OPTICAL_ELECTRONIC_CONVOLUTIONAL_NEURAL": "Scope guardrail excludes detailed enumeration of specific hybrid architectures unless they define a new training paradigm; covered generally under hybrid frameworks.",
+      "C04_PHYSICS_INFORMED_DIFFRACTIVE_NEURAL_NETWORKS_C": "Specific application (decryption) is too narrow for the methodological focus; generalized under physics-informed optimization in Block 4.",
+      "C05_TWO_DIMENSIONAL_PHOTONIC_CRYSTAL_DIFFRACTIVE_O": "Specific architecture detail omitted to avoid encyclopedia-style listing; principle covered under multiplexing in Block 6.",
+      "C15_TWO_PHOTON_LITHOGRAPHY_ENABLES_FABRICATION_COM": "Fabrication process details belong to S03; only the impact on training constraints (Block 4) is retained."
+    }
+  },
+  "reference_metrics": {
+    "core_reference_count": 30,
+    "explanatory_reference_count": 6,
+    "explanatory_record_count": 8,
+    "representative_application_reference_count": 3,
+    "explanatory_non_core_count": 4,
+    "representative_application_record_count": 3,
+    "total_deduplicated_bibliography_count": 36
+  },
+  "recovery_diagnostics": [],
+  "explanatory_diagnostics": [],
+  "explanatory_selection_audit": {
+    "soft_target_range": [
+      10,
+      20
+    ],
+    "raw_unique_count": 32,
+    "eligible_unique_count": 18,
+    "selected_unique_count": 5,
+    "selected_score_floor": 0.4,
+    "stop_reason": "below_soft_min_but_not_padded",
+    "score_distribution": {
+      "min": 0.4,
+      "max": 0.95,
+      "mean": 0.77,
+      "bins": {
+        "0.0-0.2": 0,
+        "0.2-0.4": 0,
+        "0.4-0.6": 1,
+        "0.6-0.8": 1,
+        "0.8-1.0": 3
+      }
+    },
+    "route_counts": {
+      "local_only": 1,
+      "local_plus_s2": 1,
+      "s2_only": 1
+    },
+    "semantic_rerank": {
+      "attempted": true,
+      "available": true,
+      "scored_count": 5,
+      "rejected_clear_mismatch_count": 0,
+      "score_distribution": {
+        "min": 0.4,
+        "max": 0.95,
+        "mean": 0.77,
+        "bins": {
+          "0.0-0.2": 0,
+          "0.2-0.4": 0,
+          "0.4-0.6": 1,
+          "0.6-0.8": 1,
+          "0.8-1.0": 3
+        }
+      },
+      "fallback_reason": ""
+    },
+    "selected_helpfulness_floor": 40.0,
+    "representative_application_record_count": 3,
+    "representative_applications_included": true
+  },
+  "representative_application_metrics": {
+    "targets_planned": 5,
+    "target_source": "explanatory_planner",
+    "fallback_used": false,
+    "raw_planner_application_row_count": 9,
+    "accepted_distinct_application_target_count": 5,
+    "application_target_shortfall_vs_soft_min": 0,
+    "application_target_expansion_call_count": 0,
+    "application_target_expansion_reason": "no_shortfall",
+    "local_reuse_hits": 5,
+    "s2_fallbacks": 0,
+    "skipped_targets": 2,
+    "local_candidates_inspected": 22,
+    "s2_candidates_inspected": 0,
+    "examples_attached": 3,
+    "references_added_count": 3,
+    "application_writer_call_count": 2,
+    "per_target_cap_compliance": [
+      {
+        "target_block": 1,
+        "local_candidates_inspected": 6,
+        "local_requested": 6,
+        "s2_candidates_inspected": 0,
+        "s2_requested": 0,
+        "s2_cap_compliant": true,
+        "candidates_selected": 6,
+        "cap_trimmed": false,
+        "route": "local_only"
+      },
+      {
+        "target_block": 2,
+        "local_candidates_inspected": 6,
+        "local_requested": 6,
+        "s2_candidates_inspected": 0,
+        "s2_requested": 0,
+        "s2_cap_compliant": true,
+        "candidates_selected": 3,
+        "cap_trimmed": false,
+        "route": "local_only"
+      },
+      {
+        "target_block": 3,
+        "local_candidates_inspected": 6,
+        "local_requested": 6,
+        "s2_candidates_inspected": 0,
+        "s2_requested": 0,
+        "s2_cap_compliant": true,
+        "candidates_selected": 2,
+        "cap_trimmed": false,
+        "route": "local_only"
+      },
+      {
+        "target_block": 5,
+        "local_candidates_inspected": 2,
+        "local_requested": 6,
+        "s2_candidates_inspected": 0,
+        "s2_requested": 0,
+        "s2_cap_compliant": true,
+        "candidates_selected": 2,
+        "cap_trimmed": false,
+        "route": "local_only"
+      },
+      {
+        "target_block": 5,
+        "local_candidates_inspected": 2,
+        "local_requested": 6,
+        "s2_candidates_inspected": 0,
+        "s2_requested": 0,
+        "s2_cap_compliant": true,
+        "candidates_selected": 1,
+        "cap_trimmed": false,
+        "route": "local_only"
+      }
+    ],
+    "stop_reasons": [
+      "block 1: writer_output_invalid (empty_prose)",
+      "block 2: writer_output_invalid (empty_prose)"
+    ]
+  },
+  "representative_application_diagnostics": [
+    "representative_application_skipped: block 1 (writer empty_prose)",
+    "representative_application_skipped: block 2 (writer empty_prose)"
+  ],
+  "block_scientific_review": {
+    "attempted": true,
+    "available": true,
+    "blocking_count": 0,
+    "advisory_count": 3,
+    "revision_attempted_count": 0,
+    "revision_applied_count": 0,
+    "fallback_reason": ""
+  },
+  "model_usage": {
+    "available": true,
+    "call_count": 17,
+    "total_input_tokens": 242414,
+    "total_output_tokens": 11906,
+    "total_estimated_cost_cny": 0.203269,
+    "calls": [
+      {
+        "agent_name": "ChapterAssetArgumentPlannerAgent",
+        "model_tier": "c_model",
+        "model_name": "qwen3.5-plus",
+        "input_tokens": 28903,
+        "output_tokens": 4341,
+        "estimated_cost_cny": 0.043959200000000004,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.5-plus"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetExplanationBlockWriterAgent",
+        "model_tier": "c_model",
+        "model_name": "qwen3.5-plus",
+        "input_tokens": 6623,
+        "output_tokens": 334,
+        "estimated_cost_cny": 0.006901600000000001,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.5-plus"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetExplanationBlockWriterAgent",
+        "model_tier": "c_model",
+        "model_name": "qwen3.5-plus",
+        "input_tokens": 5492,
+        "output_tokens": 324,
+        "estimated_cost_cny": 0.005948800000000001,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.5-plus"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetExplanationBlockWriterAgent",
+        "model_tier": "c_model",
+        "model_name": "qwen3.5-plus",
+        "input_tokens": 4875,
+        "output_tokens": 314,
+        "estimated_cost_cny": 0.0054072,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.5-plus"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetExplanationBlockWriterAgent",
+        "model_tier": "c_model",
+        "model_name": "qwen3.5-plus",
+        "input_tokens": 4635,
+        "output_tokens": 428,
+        "estimated_cost_cny": 0.005762400000000001,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.5-plus"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetExplanationBlockWriterAgent",
+        "model_tier": "c_model",
+        "model_name": "qwen3.5-plus",
+        "input_tokens": 5244,
+        "output_tokens": 401,
+        "estimated_cost_cny": 0.0061200000000000004,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.5-plus"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetExplanationBlockWriterAgent",
+        "model_tier": "c_model",
+        "model_name": "qwen3.5-plus",
+        "input_tokens": 4781,
+        "output_tokens": 373,
+        "estimated_cost_cny": 0.0056152,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.5-plus"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetExplanationBlockWriterAgent",
+        "model_tier": "c_model",
+        "model_name": "qwen3.5-plus",
+        "input_tokens": 6146,
+        "output_tokens": 391,
+        "estimated_cost_cny": 0.0067936,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.5-plus"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetLegacyGapAuditorAgent",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "input_tokens": 78009,
+        "output_tokens": 686,
+        "estimated_cost_cny": 0.048451799999999996,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetLegacyGapPatchWriterAgent",
+        "model_tier": "c_model",
+        "model_name": "qwen3.5-plus",
+        "input_tokens": 4103,
+        "output_tokens": 406,
+        "estimated_cost_cny": 0.0052312,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.5-plus"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetLegacyGapPatchWriterAgent",
+        "model_tier": "c_model",
+        "model_name": "qwen3.5-plus",
+        "input_tokens": 3288,
+        "output_tokens": 502,
+        "estimated_cost_cny": 0.005039999999999999,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.5-plus"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetLegacyGapPatchWriterAgent",
+        "model_tier": "c_model",
+        "model_name": "qwen3.5-plus",
+        "input_tokens": 3345,
+        "output_tokens": 501,
+        "estimated_cost_cny": 0.0050808,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.5-plus"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetBlockScientificReviewerAgent",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "input_tokens": 78943,
+        "output_tokens": 1039,
+        "estimated_cost_cny": 0.0498594,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetExplanatoryCitationPlannerAgent",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "input_tokens": 4689,
+        "output_tokens": 1105,
+        "estimated_cost_cny": 0.0018218000000000002,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetExplanatorySemanticRerankerAgent",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "input_tokens": 1580,
+        "output_tokens": 484,
+        "estimated_cost_cny": 0.0007032000000000001,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetRepresentativeApplicationWriterAgent",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "input_tokens": 956,
+        "output_tokens": 125,
+        "estimated_cost_cny": 0.00029120000000000003,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      },
+      {
+        "agent_name": "ChapterAssetRepresentativeApplicationWriterAgent",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "input_tokens": 802,
+        "output_tokens": 152,
+        "estimated_cost_cny": 0.000282,
+        "usage_available": true,
+        "success": true,
+        "error": "",
+        "fallback_used": false,
+        "model_fallback_used": false,
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "request_attempt_count": 1,
+        "retry_count": 0
+      }
+    ]
+  },
+  "artifact_paths": {
+    "old_chapter": "OLD_CHAPTER.md",
+    "enhanced_chapter": "ENHANCED_CHAPTER.md",
+    "argument_plan": "CHAPTER_ARGUMENT_PLAN.json",
+    "terminology_registry": "TERMINOLOGY_REGISTRY.json",
+    "explanation_blocks": "EXPLANATION_BLOCKS.json",
+    "claim_to_paragraph_map": "CLAIM_TO_PARAGRAPH_MAP.json",
+    "legacy_gap_audit": "LEGACY_GAP_AUDIT.json",
+    "explanatory_citation_ledger": "EXPLANATORY_CITATION_LEDGER.json",
+    "block_scientific_review": "BLOCK_SCIENTIFIC_REVIEW.json",
+    "enhancement_report": "ENHANCEMENT_REPORT.json"
+  }
+}

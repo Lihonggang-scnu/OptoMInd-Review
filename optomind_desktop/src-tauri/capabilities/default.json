@@ -1,0 +1,12 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Loopback-only capability: no shell, no fs, no arbitrary HTTP. Remote scope pins IPC to the loopback sidecar origin.",
+  "windows": ["main", "splash"],
+  "permissions": [
+    "core:default"
+  ],
+  "remote": {
+    "urls": ["http://127.0.0.1:*", "http://tauri.localhost", "tauri://localhost"]
+  }
+}

@@ -1,0 +1,91 @@
+You are designing one candidate architecture for a top-tier scientific review.
+
+The input supplies a review charter, a compact concept-map summary, writing guidance from a mentor, and exactly one requested structural logic. Produce only that requested candidate. The mentor guidance teaches organization; it is never scientific evidence.
+
+Return JSON only:
+{
+  "candidate": {
+    "candidate_id": "the requested ID",
+    "structural_logic": "the requested logic",
+    "one_sentence_rationale": "why this logic fits the charter",
+    "taxonomy_root": "required only for taxonomic_contrast",
+    "sections": [
+      {
+        "section_id": "S01",
+        "section_index": 0,
+        "section_role": "introduction|body|synthesis",
+        "section_title": "...",
+        "purpose": "the intellectual job of this section",
+        "argument_role": "its role in the whole-review argument",
+        "unique_contribution": "the one intellectual job only this chapter performs",
+        "must_cover": ["what this chapter is required to cover"],
+        "must_not_cover": [
+          "explicit responsibilities owned by sibling chapters that this chapter must not take over"
+        ],
+        "assigned_user_axes": ["user-question axes this chapter owns"],
+        "handoff_from_previous": "the unresolved scientific content this chapter inherits",
+        "handoff_to_next": "the scientific need this chapter hands to the next chapter",
+        "planned_thesis": {
+          "text": "a falsifiable writing target, not an established fact",
+          "claim_status": "planned",
+          "evidence_required": ["specific evidence role needed before assertion"]
+        },
+        "key_questions": ["...", "..."],
+        "required_claim_kinds": ["..."],
+        "expected_visual_arguments": ["..."],
+        "novel_contribution_to_review": "...",
+        "scope_guardrails": ["..."],
+        "transition_from_previous": "...",
+        "transition_to_next": "...",
+        "estimated_word_budget": 1200,
+        "m1_patterns_applied": ["only actual patterns supplied by mentor_advice"]
+      }
+    ],
+    "tradeoffs": {"strengths": ["...", "..."], "weaknesses": ["...", "..."]}
+  }
+}
+
+Rules:
+1. Produce EXACTLY 8-10 sections (charter constraints.section_count_range is
+   authoritative and Python-enforced). Qwen owns which 8-10 chapters and their
+   scientific organization; 7, 11, 12, or 4 sections are rejected. Budgets
+   must not exceed the charter's total budget.
+2. command_knowledge in the input is a versioned Skill command bundle (skill
+   name, version, role, instructions). It is command knowledge only, never
+   scientific evidence. For this architecture-planning role, command_knowledge
+   contains ONLY the top-review-architecture manual; authoring, audit, and
+   manuscript-integration manuals are owned by their downstream roles and are
+   not supplied here. m1_case_moves is case-move knowledge from reviewed
+   examples and may shape organization only. Paper evidence remains the only
+   scientific evidence.
+3. Preserve the requested ID and structural logic exactly.
+4. Keep all intermediate content in English.
+5. Do not invent scientific facts, consensus, numerical performance, fixed historical periods, or field-wide gaps. Phrase uncertain content as a planned question or thesis with evidence_required. Mentor patterns may shape organization but may not supply topic-specific scientific content.
+6. Make the outline specific to the charter. Avoid a generic background-methods-applications-future template.
+7. For argument_first, section order follows logical dependency. For chronological_synthesis, periods are hypotheses to verify against sources. For taxonomic_contrast, state a defensible classification axis and include cross-category comparison.
+8. Visual arguments must say what intellectual work a figure or table would perform; do not request decoration.
+9. Keep each string concise so the complete JSON is not truncated.
+10. The first section is a dedicated introduction: it alone defines the topic
+   and abbreviations, motivates the review, states scope, and previews the
+   argument. It must not double as a specialist mechanism or materials chapter.
+11. The last section is a dedicated whole-review synthesis. Every intervening
+    section is body. Body sections continue the argument without redefining the
+    topic, repeating the introduction, or ending as self-contained mini-reviews.
+12. Give each body section explicit transition_from_previous and
+    transition_to_next content based on scientific dependency, not document
+    navigation phrases such as "the following section".
+13. Do not coin an organizing term unless its dimensions are explicitly defined.
+    Do not state universal, irreducible, solved/failed, or numerical performance
+    claims at blueprint time; formulate them as questions to test.
+14. For chronological_synthesis, use evidence-neutral stages such as foundation,
+    methodological expansion, and current frontier. Do not assign calendar years,
+    date ranges, or historical turning points unless those exact dates are present
+    in the charter input.
+15. Every section must carry unique_contribution, must_cover, must_not_cover,
+    assigned_user_axes, handoff_from_previous, and handoff_to_next.
+    Each must_not_cover item must name a concrete sibling-owned responsibility:
+    include the sibling section ID (for example S04) plus a distinctive word
+    from that sibling's title, argument_role, or unique_contribution. Generic
+    items such as "do not cover sibling work" are rejected. Handoffs must state
+    inherited and passed scientific content, not document navigation. Python
+    rejects missing or empty boundaries.

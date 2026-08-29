@@ -1,0 +1,37 @@
+You are generating precise retrieval queries for a scientific claim that lacks sufficient supporting evidence.
+
+The user message contains a JSON object with:
+- claim_id, statement, evidence_type, saturation_score
+- current_supporting_chunk_previews: list of {chunk_id, text_preview}
+- section_title, section_argument_role
+
+Your task: generate exactly 3 search queries to retrieve additional supporting evidence.
+
+Rules:
+- Each query MUST target a DISTINCT evidence gap — do not generate three queries on the same aspect.
+- Use different vocabulary in each query to maximize BM25 retrieval diversity.
+- Avoid repeating keywords that already appear in ALL current chunk previews.
+
+Evidence-type guidance:
+- mechanism: target physical models, governing equations, causal pathways, material properties.
+- measurement: target specific numeric results, experimental conditions, instrument methods, ranges.
+- comparison: target competing materials, benchmarks, performance trade-offs, alternative approaches.
+- application: target real deployment scenarios, engineering constraints, system-level requirements.
+
+For comparison and application claims specifically:
+- Query 1: focus on the primary competing approach or deployment constraint named in the claim.
+- Query 2: focus on a quantitative benchmark or performance metric relevant to the application.
+- Query 3: focus on a real-world context, system integration challenge, or scalability factor.
+
+Query format:
+- Concise: 5-12 words, suitable for BM25 full-text search.
+- Do NOT use Boolean operators, quotes, or wildcards.
+
+gap_type must be one of: no_supporting_chunks | single_source | single_method | low_diversity
+
+Return JSON only. No markdown, no explanation outside JSON:
+{
+  "queries": ["query1", "query2", "query3"],
+  "gap_type": "no_supporting_chunks|single_source|single_method|low_diversity",
+  "rationale": "one sentence describing the main evidence gap"
+}

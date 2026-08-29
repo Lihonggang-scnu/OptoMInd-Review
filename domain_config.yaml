@@ -1,0 +1,151 @@
+# OptoMind Domain Configuration
+# ============================================================
+# 泛化接口：修改此文件可将整条 pipeline 迁移到任意研究领域
+# 无需改动代码，只改这一个文件。
+# ============================================================
+
+domain:
+  name: "passive_daytime_radiative_cooling"
+  display_name: "日间被动辐射制冷"
+  language: "en"  # 期刊检索的主要语言
+
+# ── M3：缺口驱动 OA 证据补充 ──────────────────────────────
+m3_retrieval:
+  # 用于 M3 gap 检索的领域主题上下文（一段描述性英文短语）
+  topic_context: >
+    passive daytime radiative cooling spectral control polymer film
+    TiO2 Mie scattering solar reflectance atmospheric window emissivity
+    subambient temperature outdoor cooling
+
+  # 检索时优先保留含这些短语的结果
+  query_boost_terms:
+    - "radiative cooling"
+    - "passive cooling"
+    - "daytime radiative cooling"
+    - "atmospheric window"
+    - "emissivity"
+    - "solar reflectance"
+    - "polymer film"
+    - "Mie scattering"
+    - "subambient cooling"
+    - "thermal radiation"
+
+  # saturation_score 低于此值的 claim 触发 M3 补证
+  saturation_threshold: 1.5
+
+  # 每轮最多处理几个低饱和度 claim
+  max_claims_per_loop: 5
+
+  # 检索最早年份
+  from_year: 2015
+
+  # 每个 claim 最多返回几篇 OA 候选
+  top_k: 5
+
+  # 每个后端返回几条原始结果
+  results_per_backend: 5
+
+  # 最多生成几条检索式
+  max_queries: 3
+
+  # citation chase：每个种子论文追踪几条引文
+  references_per_seed: 8
+
+# ── M4：图像论证对齐 ──────────────────────────────────────
+m4_visual:
+  # 优先推荐的图像论证类型（按领域偏好排序）
+  preferred_visual_types:
+    - "mechanism_anchor"       # 机制图（最重要）
+    - "taxonomy_or_roadmap"    # 分类/路线图
+    - "quantitative_comparison"# 性能对比图
+    - "trend_or_parameter_map" # 趋势图
+    - "representative_example" # 代表性材料实例
+
+  # 各章节角色关键词（用于图像与章节的匹配）
+  section_role_keywords:
+    mechanism:
+      - "mechanism"
+      - "physics"
+      - "spectral"
+      - "optical"
+      - "radiative transfer"
+      - "emission"
+      - "Planck"
+      - "Kirchhoff"
+    materials:
+      - "material"
+      - "film"
+      - "polymer"
+      - "coating"
+      - "structure"
+      - "fabrication"
+      - "nanoparticle"
+      - "composite"
+    performance:
+      - "performance"
+      - "cooling"
+      - "temperature"
+      - "efficiency"
+      - "measurement"
+      - "experiment"
+      - "subambient"
+    applications:
+      - "application"
+      - "building"
+      - "agricultural"
+      - "textile"
+      - "outdoor"
+      - "rooftop"
+      - "wearable"
+    challenges:
+      - "challenge"
+      - "limitation"
+      - "gap"
+      - "future"
+      - "prospect"
+      - "unsolved"
+
+# ── M1：综述导师策略 ──────────────────────────────────────
+m1_mentor:
+  # 目标发表场景（指导写作风格）
+  review_style_context: >
+    top-tier optical materials review journal
+    (e.g., Advanced Materials, Nature Reviews Materials,
+    Progress in Photovoltaics, Chemical Reviews)
+
+  # 该领域综述的常见平庸写法（提醒系统要避免）
+  # INTERNAL PIPELINE LANGUAGE: English — these strings flow directly into LLM prompts.
+  anti_patterns:
+    - "Classify materials by type without revealing the underlying logical structure or physical argument"
+    - "Use performance metrics (e.g., temperature drop) as the primary taxonomy, ignoring physical mechanisms"
+    - "Ignore trade-offs and conflicts among competing multi-objective constraints"
+    - "Fill the conclusions section only with a list of research gaps, without proposing actionable future directions"
+    - "Lack a central thesis that runs through the entire review"
+
+  # 该领域的核心张力与矛盾（为主张设计提供参考）
+  # INTERNAL PIPELINE LANGUAGE: English — these strings flow directly into LLM prompts.
+  key_tensions:
+    - "Solar reflectance requirement vs. visible/PAR transmittance (agricultural applications)"
+    - "Mid-infrared emittance vs. visible appearance and color"
+    - "Cooling performance vs. scalable and low-cost manufacturing"
+    - "Sub-ambient cooling vs. comprehensive building energy integration"
+    - "Spectral selectivity vs. material cost and fabrication simplicity"
+
+# ── 蓝图规划 ──────────────────────────────────────────────
+blueprint:
+  min_sections: 4
+  max_sections: 8
+
+  # SUGGESTION ONLY — NOT A CONSTRAINT.
+  # The v4 blueprint planner must NOT be forced to follow these roles.
+  # These are reference archetypes that hint at good coverage.
+  # The planner is free to create different sections, merge roles, or invent
+  # domain-specific structures. Treat this list as a checklist the planner can
+  # consult, not a template it must instantiate.
+  section_roles:
+    - "introduction_and_problem_framing"
+    - "mechanism_and_theory"
+    - "materials_and_design_strategies"
+    - "performance_benchmarks_and_comparisons"
+    - "applications_and_system_integration"
+    - "open_challenges_and_future_directions"

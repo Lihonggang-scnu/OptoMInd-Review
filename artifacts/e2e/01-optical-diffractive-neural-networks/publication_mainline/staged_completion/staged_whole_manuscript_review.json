@@ -1,0 +1,846 @@
+{
+  "schema_version": "optomind.staged_article_completion.v1",
+  "stage": "whole_manuscript_review",
+  "status": "completed",
+  "fingerprint": "8ed7a74a9300a5e1ced073159fae343b1dd4eac35379d27d4d04ae37f1bf34e8",
+  "input_fingerprint": "e11bff493796595eb16ed8c1fb051db277ee49bb4e6b834740209fb1d8cba2ab",
+  "artifact_path": "<local-path>",
+  "approval_required": false,
+  "payload": {
+    "review": {
+      "stage": "whole_manuscript_review",
+      "findings": [
+        {
+          "finding_id": "GMR-001",
+          "issue_key": "missing_transition:S01,S07",
+          "issue_type": "missing_transition",
+          "target_ids": [
+            "S01",
+            "S07"
+          ],
+          "dimension": "continuity",
+          "severity": "major",
+          "consensus": "split",
+          "statement": "S01 establishes the physical architecture of diffractive layers but fails to explicitly frame the inherent linearity of passive diffraction as a fundamental computational bottleneck. Without this early theoretical grounding, the later pivot to hybrid electro-optical architectures in S07 appears as a reactive patch rather than a logically necessitated evolution of the physical paradigm.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-002",
+          "issue_key": "duplicated_explanation:S04,S05",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S04",
+            "S05"
+          ],
+          "dimension": "overlap",
+          "severity": "minor",
+          "consensus": "majority",
+          "statement": "S05-B003 re-explains polarization and orbital angular momentum multiplexing mechanisms that are thoroughly defined as the core subject of S04-B004 and S005. This repetition disrupts the logical progression from physical principles to application-specific outcomes, violating the intended scope narrowing for S05.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-003",
+          "issue_key": "duplicated_explanation:S03,S06,S07",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S03",
+            "S06",
+            "S07"
+          ],
+          "dimension": "overlap",
+          "severity": "minor",
+          "consensus": "majority",
+          "statement": "S07-B001 and S07-B009 extensively reiterate hardware limitations (static rigidity, fabrication variability, environmental sensitivity) that were already established as foundational constraints in S03-B006 and S06-B005. This circular summarization delays the introduction of forward-looking solutions and weakens the argumentative arc toward hybrid electro-optical co-design.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-004",
+          "issue_key": "duplicated_explanation:S02-B006,S04-B004,S04-B005,S05-B003",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S02-B006",
+            "S04-B004",
+            "S04-B005",
+            "S05-B003"
+          ],
+          "dimension": "overlap",
+          "severity": "minor",
+          "consensus": "split",
+          "statement": "The mechanisms and operational benefits of polarization and wavelength multiplexing are explained in substantial detail across S02, S04, and S05. S05 should explicitly reference S04 for mechanical explanations and restrict its scope to application-specific performance metrics (e.g., accuracy, latency) to eliminate redundant exposition.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-005",
+          "issue_key": "duplicated_explanation:S03-B004,S03-B005,S06-B002,S07-B001,S07-B002",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S03-B004",
+            "S03-B005",
+            "S06-B002",
+            "S07-B001",
+            "S07-B002"
+          ],
+          "dimension": "overlap",
+          "severity": "minor",
+          "consensus": "split",
+          "statement": "The simulation-to-reality gap, fabrication-induced phase errors, and static hardware rigidity are exhaustively detailed in S03, critically analyzed in S06, and reiterated again in S07. S07 should condense these established bottlenecks into a single transitional summary to preserve narrative momentum toward proposed solutions and roadmaps.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-006",
+          "issue_key": "duplicated_explanation:S04-B005,S05-B003",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S04-B005",
+            "S05-B003"
+          ],
+          "dimension": "overlap",
+          "severity": "minor",
+          "consensus": "split",
+          "statement": "S05 re-explains polarization and OAM multiplexing mechanisms that were already detailed as the primary subject of S04, creating redundant exposition that dilutes the focus on application-specific performance.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-007",
+          "issue_key": "duplicated_explanation:S03-B001,S07-B001",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S03-B001",
+            "S07-B001"
+          ],
+          "dimension": "overlap",
+          "severity": "minor",
+          "consensus": "split",
+          "statement": "S07 reiterates the static nature, fabrication variability, and environmental instability of ODNNs immediately after they were thoroughly established as core hardware constraints in S03, requiring condensation to avoid narrative fatigue.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-008",
+          "issue_key": "duplicated_explanation:S02-B005",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S02-B005"
+          ],
+          "dimension": "clarity",
+          "severity": "minor",
+          "consensus": "split",
+          "statement": "Block S02-B005 contains verbatim repetition of the OTEOC strategy description within the same paragraph, indicating a copy-paste error that disrupts reading flow and clarity.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-009",
+          "issue_key": "duplicated_explanation:S02,S03",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S02",
+            "S03"
+          ],
+          "dimension": "overlap",
+          "severity": "minor",
+          "consensus": "split",
+          "statement": "S02-B005 and S03-B005 both introduce physics-aware differentiable discrete codesign and Gumbel-Softmax techniques to handle gradient chain breaks. These identical methodological explanations should be consolidated into the training-focused section (S02) to avoid redundant exposition when discussing hardware realization in S03.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-010",
+          "issue_key": "missing_transition:S01-B008,S02-B001",
+          "issue_type": "missing_transition",
+          "target_ids": [
+            "S01-B008",
+            "S02-B001"
+          ],
+          "dimension": "continuity",
+          "severity": "advisory",
+          "consensus": "split",
+          "statement": "S01 concludes by detailing specialized applications in security and imaging, but S02 abruptly returns to foundational differentiable training concepts. A bridging paragraph is required at the start of S02 to justify why training paradigms necessitate re-evaluation after the physical architecture and application landscape have been established.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-011",
+          "issue_key": "missing_transition:S01-B001,S04-B004,S05-B008,S07-B009",
+          "issue_type": "missing_transition",
+          "target_ids": [
+            "S01-B001",
+            "S04-B004",
+            "S05-B008",
+            "S07-B009"
+          ],
+          "dimension": "reader_flow",
+          "severity": "advisory",
+          "consensus": "split",
+          "statement": "The core thesis statement ('ODNNs function not merely as accelerators but as distinct physical computers where diffraction laws dictate computational expressivity') appears nearly verbatim in S01, S04, and S05. The narrative should progressively refine this claim to reflect evolving constraints (e.g., nonlinearity limits, hybridization needs) rather than repeating it statically across sections.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-012",
+          "issue_key": "ordering_break:S01-B007,S01-B008",
+          "issue_type": "ordering_break",
+          "target_ids": [
+            "S01-B007",
+            "S01-B008"
+          ],
+          "dimension": "reader_flow",
+          "severity": "advisory",
+          "consensus": "split",
+          "statement": "S01 concludes with specialized applications (security, compressive sensing) rather than synthesizing architectural principles or transitioning to training/hardware, disrupting the logical progression from physical design to implementation.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-013",
+          "issue_key": "missing_transition:S04-B005,S04-B006",
+          "issue_type": "missing_transition",
+          "target_ids": [
+            "S04-B005",
+            "S04-B006"
+          ],
+          "dimension": "continuity",
+          "severity": "advisory",
+          "consensus": "split",
+          "statement": "S04 abruptly shifts from high-density multiplexing back to general training paradigms (Gumbel-Softmax, convolution simulations) that belong conceptually with S02, lacking a bridging explanation for why training methods are revisited here.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-014",
+          "issue_key": "ordering_break:S01,S02",
+          "issue_type": "ordering_break",
+          "target_ids": [
+            "S01",
+            "S02"
+          ],
+          "dimension": "reader_flow",
+          "severity": "advisory",
+          "consensus": "split",
+          "statement": "S01 prematurely concludes with specialized applications (B007, B008), causing S02 to awkwardly revert to foundational training paradigms. This disrupts the intended architectural progression from physical design to training optimization.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-015",
+          "issue_key": "missing_transition:S02,S03",
+          "issue_type": "missing_transition",
+          "target_ids": [
+            "S02",
+            "S03"
+          ],
+          "dimension": "reader_flow",
+          "severity": "advisory",
+          "consensus": "split",
+          "statement": "The shift from S02's conclusion on scalable task performance to S03's hardware landscape lacks a bridging explanation. Readers are not guided on how training algorithm choices directly constrain or enable specific hardware platform selections.",
+          "advisory": true,
+          "blocking": false
+        }
+      ],
+      "fail_open": true
+    },
+    "reviewers": [
+      {
+        "reviewer_id": "continuity",
+        "role": "continuity",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S02-B006",
+              "S04-B004",
+              "S04-B005",
+              "S05-B003"
+            ],
+            "dimension": "overlap",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "The mechanisms and operational benefits of polarization and wavelength multiplexing are explained in substantial detail across S02, S04, and S05. S05 should explicitly reference S04 for mechanical explanations and restrict its scope to application-specific performance metrics (e.g., accuracy, latency) to eliminate redundant exposition.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S03-B004",
+              "S03-B005",
+              "S06-B002",
+              "S07-B001",
+              "S07-B002"
+            ],
+            "dimension": "overlap",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "The simulation-to-reality gap, fabrication-induced phase errors, and static hardware rigidity are exhaustively detailed in S03, critically analyzed in S06, and reiterated again in S07. S07 should condense these established bottlenecks into a single transitional summary to preserve narrative momentum toward proposed solutions and roadmaps.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "missing_transition",
+            "target_ids": [
+              "S01-B008",
+              "S02-B001"
+            ],
+            "dimension": "continuity",
+            "severity": "advisory",
+            "consensus": "none",
+            "statement": "S01 concludes by detailing specialized applications in security and imaging, but S02 abruptly returns to foundational differentiable training concepts. A bridging paragraph is required at the start of S02 to justify why training paradigms necessitate re-evaluation after the physical architecture and application landscape have been established.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "missing_transition",
+            "target_ids": [
+              "S01-B001",
+              "S04-B004",
+              "S05-B008",
+              "S07-B009"
+            ],
+            "dimension": "reader_flow",
+            "severity": "advisory",
+            "consensus": "none",
+            "statement": "The core thesis statement ('ODNNs function not merely as accelerators but as distinct physical computers where diffraction laws dictate computational expressivity') appears nearly verbatim in S01, S04, and S05. The narrative should progressively refine this claim to reflect evolving constraints (e.g., nonlinearity limits, hybridization needs) rather than repeating it statically across sections.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      },
+      {
+        "reviewer_id": "clarity",
+        "role": "clarity",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S04-B005",
+              "S05-B003"
+            ],
+            "dimension": "overlap",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "S05 re-explains polarization and OAM multiplexing mechanisms that were already detailed as the primary subject of S04, creating redundant exposition that dilutes the focus on application-specific performance.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S03-B001",
+              "S07-B001"
+            ],
+            "dimension": "overlap",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "S07 reiterates the static nature, fabrication variability, and environmental instability of ODNNs immediately after they were thoroughly established as core hardware constraints in S03, requiring condensation to avoid narrative fatigue.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "ordering_break",
+            "target_ids": [
+              "S01-B007",
+              "S01-B008"
+            ],
+            "dimension": "reader_flow",
+            "severity": "advisory",
+            "consensus": "none",
+            "statement": "S01 concludes with specialized applications (security, compressive sensing) rather than synthesizing architectural principles or transitioning to training/hardware, disrupting the logical progression from physical design to implementation.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S02-B005"
+            ],
+            "dimension": "clarity",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "Block S02-B005 contains verbatim repetition of the OTEOC strategy description within the same paragraph, indicating a copy-paste error that disrupts reading flow and clarity.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "missing_transition",
+            "target_ids": [
+              "S04-B005",
+              "S04-B006"
+            ],
+            "dimension": "continuity",
+            "severity": "advisory",
+            "consensus": "none",
+            "statement": "S04 abruptly shifts from high-density multiplexing back to general training paradigms (Gumbel-Softmax, convolution simulations) that belong conceptually with S02, lacking a bridging explanation for why training methods are revisited here.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      },
+      {
+        "reviewer_id": "reader_flow",
+        "role": "reader_flow",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "ordering_break",
+            "target_ids": [
+              "S01",
+              "S02"
+            ],
+            "dimension": "reader_flow",
+            "severity": "advisory",
+            "consensus": "none",
+            "statement": "S01 prematurely concludes with specialized applications (B007, B008), causing S02 to awkwardly revert to foundational training paradigms. This disrupts the intended architectural progression from physical design to training optimization.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S04",
+              "S05"
+            ],
+            "dimension": "reader_flow",
+            "severity": "advisory",
+            "consensus": "none",
+            "statement": "S05-B003 re-explains polarization and wavelength multiplexing mechanisms that were comprehensively detailed in S04. This repetition interrupts the narrative momentum when transitioning into application-specific performance metrics.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "missing_transition",
+            "target_ids": [
+              "S02",
+              "S03"
+            ],
+            "dimension": "reader_flow",
+            "severity": "advisory",
+            "consensus": "none",
+            "statement": "The shift from S02's conclusion on scalable task performance to S03's hardware landscape lacks a bridging explanation. Readers are not guided on how training algorithm choices directly constrain or enable specific hardware platform selections.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S03",
+              "S06",
+              "S07"
+            ],
+            "dimension": "reader_flow",
+            "severity": "advisory",
+            "consensus": "none",
+            "statement": "S07-B001 and S07-B002 re-summarize hardware bottlenecks (static rigidity, fabrication variability, environmental sensitivity) already exhaustively cataloged in S03 and S06. This redundancy stalls the forward-looking trajectory expected in a future directions section.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      },
+      {
+        "reviewer_id": "logic",
+        "role": "logic",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S04",
+              "S05"
+            ],
+            "dimension": "overlap",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "S05-B003 re-explains polarization and orbital angular momentum multiplexing mechanisms that are thoroughly defined as the core subject of S04-B004 and S005. This repetition disrupts the logical progression from physical principles to application-specific outcomes, violating the intended scope narrowing for S05.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S03",
+              "S06",
+              "S07"
+            ],
+            "dimension": "overlap",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "S07-B001 and S07-B009 extensively reiterate hardware limitations (static rigidity, fabrication variability, environmental sensitivity) that were already established as foundational constraints in S03-B006 and S06-B005. This circular summarization delays the introduction of forward-looking solutions and weakens the argumentative arc toward hybrid electro-optical co-design.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "missing_transition",
+            "target_ids": [
+              "S01",
+              "S07"
+            ],
+            "dimension": "continuity",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "S01 establishes the physical architecture of diffractive layers but fails to explicitly frame the inherent linearity of passive diffraction as a fundamental computational bottleneck. Without this early theoretical grounding, the later pivot to hybrid electro-optical architectures in S07 appears as a reactive patch rather than a logically necessitated evolution of the physical paradigm.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S02",
+              "S03"
+            ],
+            "dimension": "overlap",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "S02-B005 and S03-B005 both introduce physics-aware differentiable discrete codesign and Gumbel-Softmax techniques to handle gradient chain breaks. These identical methodological explanations should be consolidated into the training-focused section (S02) to avoid redundant exposition when discussing hardware realization in S03.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      },
+      {
+        "reviewer_id": "overlap",
+        "role": "overlap",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S04",
+              "S05"
+            ],
+            "dimension": "overlap",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "S05 re-explains polarization and orbital angular momentum (OAM) multiplexing mechanisms that were thoroughly detailed as the primary subject of S04. This creates redundant exposition; S05 should instead reference S04's mechanistic explanations and focus strictly on application-level performance metrics enabled by these multiplexing schemes.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S03",
+              "S06",
+              "S07"
+            ],
+            "dimension": "overlap",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "S07 dedicates substantial space to re-summarizing hardware bottlenecks—specifically static write-once rigidity, fabrication-induced phase errors, and environmental sensitivity—that were already comprehensively established in S03 and critically evaluated in S06. To maintain forward momentum, S07 should condense these bottleneck summaries into brief transitional statements and prioritize proposed solutions and roadmaps.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "missing_transition",
+            "target_ids": [
+              "S02",
+              "S03"
+            ],
+            "dimension": "continuity",
+            "severity": "advisory",
+            "consensus": "none",
+            "statement": "The transition from S02 (Training Paradigms) to S03 (Hardware Realization) lacks an explicit bridge connecting algorithmic optimization outcomes to their physical instantiation constraints. S02 concludes with advanced training methods but does not clearly signal how these algorithms dictate or interact with the material and fabrication limits discussed in S03, creating a slight logical seam.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      }
+    ],
+    "status": "reviewed"
+  },
+  "provenance": {
+    "run_fingerprint": "dc2ce930362ff87de11a15e4a4d67c2057f04db3a4341f97c3fe5940ddb4c44c",
+    "stage_order_position": "5",
+    "usage_recorded": "True"
+  },
+  "usage": {
+    "agent_name": "StagedWholeManuscriptReviewer",
+    "model_tier": "c2_model",
+    "call_count": 5,
+    "workers": 4,
+    "total_input_tokens": 360246,
+    "total_output_tokens": 16754,
+    "repair_calls": 0,
+    "repair_used": false,
+    "reviewers": {
+      "continuity": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 73076,
+        "estimated_output_tokens": 731,
+        "input_tokens": 72050,
+        "output_tokens": 3401,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 3401,
+          "completion_tokens_details": {
+            "reasoning_tokens": 2583,
+            "text_tokens": 3401
+          },
+          "prompt_tokens": 72050,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 72050
+          },
+          "total_tokens": 75451
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 2,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      },
+      "clarity": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 73075,
+        "estimated_output_tokens": 714,
+        "input_tokens": 72050,
+        "output_tokens": 2698,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 2698,
+          "completion_tokens_details": {
+            "reasoning_tokens": 1909,
+            "text_tokens": 2698
+          },
+          "prompt_tokens": 72050,
+          "prompt_tokens_details": {
+            "cached_tokens": 70528,
+            "text_tokens": 72050
+          },
+          "total_tokens": 74748
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 2,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      },
+      "reader_flow": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 73077,
+        "estimated_output_tokens": 609,
+        "input_tokens": 72050,
+        "output_tokens": 3191,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 3191,
+          "completion_tokens_details": {
+            "reasoning_tokens": 2524,
+            "text_tokens": 3191
+          },
+          "prompt_tokens": 72050,
+          "prompt_tokens_details": {
+            "cached_tokens": 70528,
+            "text_tokens": 72050
+          },
+          "total_tokens": 75241
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 2,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      },
+      "logic": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 73074,
+        "estimated_output_tokens": 715,
+        "input_tokens": 72048,
+        "output_tokens": 3950,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 3950,
+          "completion_tokens_details": {
+            "reasoning_tokens": 3205,
+            "text_tokens": 3950
+          },
+          "prompt_tokens": 72048,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 72048
+          },
+          "total_tokens": 75998
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 2,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      },
+      "overlap": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 73075,
+        "estimated_output_tokens": 565,
+        "input_tokens": 72048,
+        "output_tokens": 3514,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 3514,
+          "completion_tokens_details": {
+            "reasoning_tokens": 2940,
+            "text_tokens": 3514
+          },
+          "prompt_tokens": 72048,
+          "prompt_tokens_details": {
+            "cached_tokens": 70528,
+            "text_tokens": 72048
+          },
+          "total_tokens": 75562
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 2,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      }
+    }
+  },
+  "error": null,
+  "created_at": "2026-08-28T06:28:58.360638+00:00",
+  "updated_at": "2026-08-28T06:28:58.360638+00:00"
+}

@@ -1,0 +1,151 @@
+/* ============================================================
+   OptoMind design tokens -- the ONLY place raw values live.
+   Components must consume these via Tailwind utilities mapped
+   in tailwind.config.js; hard-coded #hex/rgb/px in components
+   is a gate violation (F3 G3).
+   ============================================================ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+:root {
+  color-scheme: light;
+
+  /* ---- semantic palette (light) ---- */
+  --color-background: #f7f8fa;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-border: #e4e7ec;
+  --color-text-primary: #101828;
+  --color-text-muted: #667085;
+  --color-accent: #175cd3;
+  --color-success: #067647;
+  --color-warning: #b54708;
+  --color-danger: #b42318;
+  --color-running: #175cd3;
+
+  /* ---- type scale: size / line-height pairs ---- */
+  --font-size-display: 1.75rem;   /* 28px */
+  --line-height-display: 2.25rem;
+  --font-size-title: 1.25rem;     /* 20px */
+  --line-height-title: 1.75rem;
+  --font-size-body: 0.9375rem;    /* 15px */
+  --line-height-body: 1.5rem;
+  --font-size-small: 0.8125rem;   /* 13px */
+  --line-height-small: 1.125rem;
+  --font-size-mono: 0.8125rem;
+  --line-height-mono: 1.25rem;
+
+  /* ---- spacing: 4px base, 6 steps ---- */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 24px;
+  --spacing-6: 32px;
+
+  /* ---- radii ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* ---- shadows: quiet, layered ---- */
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-md: 0 2px 6px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-lg: 0 12px 32px rgba(16, 24, 40, 0.12);
+
+  /* ---- motion ---- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+
+  /* ---- static replay observatory palette ---- */
+  --replay-ink: #f4f8ff;
+  --replay-ink-muted: #8ea0b8;
+  --replay-bg: #07111e;
+  --replay-panel: rgba(13, 27, 45, 0.86);
+  --replay-panel-strong: #0e2034;
+  --replay-line: rgba(145, 177, 211, 0.16);
+  --replay-line-strong: rgba(145, 177, 211, 0.3);
+  --replay-cyan: #67e8f9;
+  --replay-cyan-strong: #22d3ee;
+  --replay-violet: #a78bfa;
+  --replay-amber: #f7c873;
+  --replay-green: #6ee7b7;
+  --replay-red: #fb7185;
+  --replay-shadow: 0 26px 80px rgba(0, 0, 0, 0.36);
+}
+
+.dark {
+  color-scheme: dark;
+  --color-background: #0c111d;
+  --color-surface: #161b26;
+  --color-surface-raised: #1f242f;
+  --color-border: #2a313f;
+  --color-text-primary: #f2f4f7;
+  --color-text-muted: #98a2b3;
+  --color-accent: #84adff;
+  --color-success: #75e0a7;
+  --color-warning: #fdb022;
+  --color-danger: #f97066;
+  --color-running: #84adff;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+}
+
+@layer base {
+  html {
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui,
+      -apple-system, sans-serif;
+  }
+  code, pre, .font-mono-token {
+    font-family: "Cascadia Code", Consolas, "JetBrains Mono", monospace;
+    font-size: var(--font-size-mono);
+    line-height: var(--line-height-mono);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer utilities {
+  /* Breathing pulse for the running stage dot; disabled under reduced motion
+     by the global rule above while shape/glyph keep states distinguishable. */
+  .animate-pulse-dot {
+    animation: pulse-dot 1.6s var(--ease-in-out) infinite;
+  }
+}
+
+/* Demo mode: scale the whole rem-based token system up one notch for
+   projector-readable video recordings. */
+html[data-demo="1"] {
+  font-size: 112.5%;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-running) 45%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}

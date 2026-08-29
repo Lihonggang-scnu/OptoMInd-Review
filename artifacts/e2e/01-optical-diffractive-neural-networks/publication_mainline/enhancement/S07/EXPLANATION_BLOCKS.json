@@ -1,0 +1,475 @@
+{
+  "blocks": [
+    {
+      "block_index": 1,
+      "title": "Fundamental Bottlenecks of Static Optical Hardware",
+      "block_type": "introduction_viewpoint",
+      "goal": "Categorize the primary physical limitations of current ODNNs: lack of reconfigurability, sensitivity to fabrication errors, and environmental instability.",
+      "prose": "The transition from laboratory prototypes to deployable optical AI is currently obstructed by the intrinsic rigidity of static diffractive neural networks, which function as 'write-once' hardware incapable of dynamic adaptation without mechanical intervention or complete refabrication. While recent multi-wavelength designs have demonstrated that parallel task processing can alleviate some throughput constraints, these systems remain fundamentally limited in reconfigurability, often requiring separate hardware instances for distinct computational goals. Beyond this lack of flexibility, physical realization introduces severe performance gaps; at shorter wavelengths, even minor fabrication variability in diffractive element sizes can drastically degrade classification accuracy, a challenge compounded by material constraints that limit the number of feasible optical layers. Furthermore, photonic components such as resonators exhibit acute vulnerability to environmental perturbations, including temperature fluctuations and mechanical vibrations, which destabilize phase relationships and compromise inference reliability. These combined bottlenecks—static functionality, manufacturing sensitivity, and environmental instability—establish a clear boundary for all-optical approaches, necessitating a strategic shift toward hybrid electro-optical co-design to enable the robustness required for real-world deployment.",
+      "planned_claim_handles": [
+        "C07_STATIC_DIFFRACTIVE_NEURAL_NETWORKS_FUNDAMENTAL",
+        "C03_FABRICATION_VARIABILITY_SIGNIFICANTLY_IMPACTS",
+        "C01_PHOTONIC_NEURAL_NETWORK_RESONATORS_VULNERABLE",
+        "C14_CONVENTIONAL_STATIC_DIFFRACTIVE_NEURAL_NETWORK"
+      ],
+      "claim_handles": [
+        "C07_STATIC_DIFFRACTIVE_NEURAL_NETWORKS_FUNDAMENTAL",
+        "C03_FABRICATION_VARIABILITY_SIGNIFICANTLY_IMPACTS",
+        "C01_PHOTONIC_NEURAL_NETWORK_RESONATORS_VULNERABLE",
+        "C14_CONVENTIONAL_STATIC_DIFFRACTIVE_NEURAL_NETWORK"
+      ],
+      "evidence_handles": [
+        "E07_OPTICAL_MULTI_TASK_LEARNING_USING_MULTI_WAVELE",
+        "E03_BROADBAND_DIFFRACTIVE_NEURAL_NETWORKS_ENABLING",
+        "E01_EXPLORING_TYPES_PHOTONIC_NEURAL_NETWORKS_IMAGI",
+        "E25_CROSS_SCALE_SYNERGISTIC_OPTIMIZATION_MINIATURE"
+      ],
+      "covered_claim_handles": [
+        "C07_STATIC_DIFFRACTIVE_NEURAL_NETWORKS_FUNDAMENTAL",
+        "C03_FABRICATION_VARIABILITY_SIGNIFICANTLY_IMPACTS",
+        "C01_PHOTONIC_NEURAL_NETWORK_RESONATORS_VULNERABLE",
+        "C14_CONVENTIONAL_STATIC_DIFFRACTIVE_NEURAL_NETWORK"
+      ],
+      "covered_claim_ids": [
+        "S07-P025",
+        "S07-P010",
+        "S07-P001",
+        "S07-P073"
+      ],
+      "markers": [
+        "[REF:cdb2c928e087f4cd2b807836fd131089bf81a711]",
+        "[REF:34d7ba5c285f38e34ad058f6b2f4e7e55c2fc224]",
+        "[REF:77474cdcf483b25f73dacf20deb295cd1c2945b7]",
+        "[REF:d3a8c619f7797527ae0f94573705a517d9aad779]"
+      ],
+      "explanatory_handles": [
+        "X01_DEVELOPMENT_FABRICATION_TECHNIQUES_M"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Beyond this lack of flexibility, physical realization introduces severe performance gaps; at shorter wavelengths, even minor fabrication variability in diffractive element sizes can drastically degrade classification accuracy, a challenge compounded by material constraints that limit the number of feasible optical layers.": [
+          "[REF:doi:10.1109/tmag.2023.3281842]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P025",
+        "S07-P010",
+        "S07-P001",
+        "S07-P073"
+      ]
+    },
+    {
+      "block_index": 2,
+      "title": "The Simulation-to-Reality Deployment Gap",
+      "block_type": "explanatory_body",
+      "goal": "Explain how coherence assumptions, surface roughness, and interlayer reflections create a gap between simulated accuracy and physical performance.",
+      "prose": "The transition from theoretical design to physical deployment in diffractive neural networks is hindered by a critical simulation-to-reality gap, defined as the performance degradation observed when models trained in idealized numerical environments encounter the noise and aberrations of actual hardware. While simulations often assume quasimonochromatic illumination with high spatial coherence, real-world applications necessitate the processing of incoherent and partially coherent light, creating a fundamental mismatch in how optical fields evolve through the network layers. This discrepancy is exacerbated by fabrication-induced surface roughness, which introduces unmodeled phase errors that significantly degrade inference accuracy compared to digital predictions. Furthermore, compact multi-layer designs face additional constraints from interlayer reflections and interpixel interactions; although these effects may be negligible in low-index materials, they become substantial barriers in high-index systems, limiting the fidelity of analytical models. Addressing these bottlenecks requires moving beyond static design toward fabrication-aware training and hardware-in-the-loop optimization, where online retraining can compensate for physical defects and restore designed functionality. These physical realities underscore the necessity of the hybrid electro-optical strategies discussed next, which aim to mitigate such rigidities by integrating electronic flexibility with optical speed.",
+      "planned_claim_handles": [
+        "C10_SIMULATION_REALITY_GAPS_DIFFRACTIVE_NEURAL_NET",
+        "C06_REAL_WORLD_DEPLOYMENT_DONNS_REQUIRES_PROCESSIN",
+        "C11_FABRICATION_INDUCED_SURFACE_ROUGHNESS_INTRODUC",
+        "C29_FABRICATION_INDUCED_PHASE_ERRORS_INTERLAYER_RE"
+      ],
+      "claim_handles": [
+        "C10_SIMULATION_REALITY_GAPS_DIFFRACTIVE_NEURAL_NET",
+        "C06_REAL_WORLD_DEPLOYMENT_DONNS_REQUIRES_PROCESSIN",
+        "C11_FABRICATION_INDUCED_SURFACE_ROUGHNESS_INTRODUC",
+        "C29_FABRICATION_INDUCED_PHASE_ERRORS_INTERLAYER_RE"
+      ],
+      "evidence_handles": [
+        "E11_PROGRAMMABLE_DIFFRACTIVE_DEEP_NEURAL_NETWORKS",
+        "E06_ROLE_SPATIAL_COHERENCE_DIFFRACTIVE_OPTICAL_NEU",
+        "E13_PHYSICS_AWARE_ROUGHNESS_OPTIMIZATION_DIFFRACTI",
+        "E92_EFFECTS_INTERLAYER_REFLECTION_INTERPIXEL_INTER"
+      ],
+      "covered_claim_handles": [
+        "C10_SIMULATION_REALITY_GAPS_DIFFRACTIVE_NEURAL_NET",
+        "C06_REAL_WORLD_DEPLOYMENT_DONNS_REQUIRES_PROCESSIN",
+        "C11_FABRICATION_INDUCED_SURFACE_ROUGHNESS_INTRODUC",
+        "C29_FABRICATION_INDUCED_PHASE_ERRORS_INTERLAYER_RE"
+      ],
+      "covered_claim_ids": [
+        "S07-P049",
+        "S07-P019",
+        "S07-P061",
+        "S07-P123"
+      ],
+      "markers": [
+        "[REF:0e4597e0c87cca5d2b71233828098072cce414df]",
+        "[REF:66d76eac8c5cb0c37d44c10bce479d8c301d113b]",
+        "[REF:ab5c9eaf1dadc8b72da43b27c4312bed466013b1]",
+        "[REF:a7167251b6fb2cfa3339ae6a9eb0367e69dd78f0]"
+      ],
+      "explanatory_handles": [
+        "X03_ROLE_SPATIAL_COHERENCE_DIFFRACTIVE_O"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "While simulations often assume quasimonochromatic illumination with high spatial coherence, real-world applications necessitate the processing of incoherent and partially coherent light, creating a fundamental mismatch in how optical fields evolve through the network layers.": [
+          "[REF:66d76eac8c5cb0c37d44c10bce479d8c301d113b]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P049",
+        "S07-P019",
+        "S07-P061",
+        "S07-P123"
+      ]
+    },
+    {
+      "block_index": 3,
+      "title": "Hybrid Electro-Optical Architectures as a Solution",
+      "block_type": "explanatory_body",
+      "goal": "Present hybrid systems as the dominant strategy to mitigate reconfigurability limits by offloading nonlinearities and updates to electronics.",
+      "prose": "To address the reconfigurability and nonlinearity bottlenecks identified in static hardware, hybrid electro-optical co-design has emerged as a dominant strategy. This architecture integrates static diffractive layers, which leverage the inherent parallelism and low latency of light propagation for high-throughput feature extraction, with reconfigurable electronic layers responsible for nonlinear activation and logic operations. By offloading these computationally intensive nonlinear tasks to electronics, such systems mitigate the rigidity of all-optical hardware while preserving significant energy efficiency gains. Representative implementations include programmable diffractive deep neural networks based on digital-coding metasurface arrays, which retain the flexibility of electronic control to overcome the fixed network architectures of passive devices. Programmable diffractive deep neural networks have been realized using digital-coding metasurface arrays, which leverage electronic control to maintain flexibility and overcome the static nature of passive optical devices. Furthermore, research demonstrates that appending convolutional neural networks to the terminal of all-optical multilayered networks allows for joint training, where electronic components introduce necessary nonlinear functions like ReLU and Sigmoid to enhance overall system capability. While purely optical approaches struggle with arbitrary modulation and precise control, this hybrid pathway effectively bridges the gap between optical speed and electronic adaptability, setting the stage for further dynamic control mechanisms via programmable materials.",
+      "planned_claim_handles": [
+        "C08_HYBRID_ELECTRO_OPTICAL_ARCHITECTURES_INTEGRATE",
+        "C09_HYBRID_ELECTRO_OPTICAL_ARCHITECTURES_INTEGRATE",
+        "C19_HYBRID_ELECTRO_OPTICAL_ARCHITECTURES_CAN_MITIG",
+        "C26_HYBRID_ELECTRO_OPTICAL_SYSTEMS_INTEGRATE_ELECT"
+      ],
+      "claim_handles": [
+        "C08_HYBRID_ELECTRO_OPTICAL_ARCHITECTURES_INTEGRATE",
+        "C09_HYBRID_ELECTRO_OPTICAL_ARCHITECTURES_INTEGRATE",
+        "C19_HYBRID_ELECTRO_OPTICAL_ARCHITECTURES_CAN_MITIG",
+        "C26_HYBRID_ELECTRO_OPTICAL_SYSTEMS_INTEGRATE_ELECT"
+      ],
+      "evidence_handles": [
+        "E08_METASURFACE_BASED_IMAGE_CLASSIFICATION_USING_D",
+        "E10_PROGRAMMABLE_DIFFRACTIVE_DEEP_NEURAL_NETWORK_B",
+        "E76_HIGH_CAPACITY_DIRECTIONAL_INFORMATION_PROCESSO"
+      ],
+      "covered_claim_handles": [
+        "C08_HYBRID_ELECTRO_OPTICAL_ARCHITECTURES_INTEGRATE",
+        "C09_HYBRID_ELECTRO_OPTICAL_ARCHITECTURES_INTEGRATE",
+        "C26_HYBRID_ELECTRO_OPTICAL_SYSTEMS_INTEGRATE_ELECT"
+      ],
+      "covered_claim_ids": [
+        "S07-P033",
+        "S07-P041",
+        "S07-P100"
+      ],
+      "markers": [
+        "[REF:614a70af75ba590cc98dfc4c8aeec02322b5906f]",
+        "[REF:7efb4f8ff9aa6f5e9691e9392b539298ef46ca04]",
+        "[REF:da2b8700882d2dde6f3d32f5018c17c0df41016b]"
+      ],
+      "explanatory_handles": [
+        "A01"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Programmable diffractive deep neural networks have been realized using digital-coding metasurface arrays, which leverage electronic control to maintain flexibility and overcome the static nature of passive optical devices.": [
+          "[REF:7efb4f8ff9aa6f5e9691e9392b539298ef46ca04]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P033",
+        "S07-P041",
+        "S07-P089",
+        "S07-P100"
+      ]
+    },
+    {
+      "block_index": 4,
+      "title": "Enabling Dynamic Adaptability via Programmable Materials",
+      "block_type": "explanatory_body",
+      "goal": "Detail specific mechanisms for dynamic control, including online learning in magneto-optical systems and tunable nonlinear activation functions.",
+      "prose": "Building on the hybrid strategy to mitigate static hardware limits, specific mechanisms now enable dynamic adaptability through programmable materials and online learning. Programmable metasurfaces, defined as dynamic optical surfaces capable of altering phase profiles via external control signals, address the rigidity of passive diffractive layers. For instance, magneto-optical diffractive deep neural networks utilize the Faraday effect, where the magnetization direction of magnetic domains modulates light phase without requiring complex microfabrication, thus allowing for online learning techniques that dynamically reconfigure the network to correct for alignment or fabrication errors. Complementing this linear reconfigurability, the integration of tunable nonlinear activation functions overcomes the bottleneck of fixed optical nonlinearity. By employing photochromic materials like WO3 films, these systems leverage UV excitation to induce intervalent electron transfer, reversibly altering the film's complex amplitude distribution to emulate adaptive neuron-like operations. Adaptive diffractive deep neural networks have utilized WO₃ films to enable tunable nonlinear activation functions, where UV excitation induces intervalent electron transfer to reversibly alter the film's complex amplitude distribution. While such physics-aware training frameworks facilitate the deployment of computer-trained models onto reconfigurable hardware, these approaches primarily serve as a viable near-term trajectory; they leverage optical speed for inference while retaining the electronic flexibility necessary for rapid updates and error correction, rather than achieving fully autonomous all-optical programming.",
+      "planned_claim_handles": [
+        "C12_HYBRID_ELECTRO_OPTICAL_APPROACHES_SUCH_ONLINE",
+        "C16_INTEGRATION_TUNABLE_NONLINEAR_ACTIVATION_FUNCT",
+        "C28_HYBRID_ELECTRO_OPTICAL_ARCHITECTURES_OFFER_VIA"
+      ],
+      "claim_handles": [
+        "C12_HYBRID_ELECTRO_OPTICAL_APPROACHES_SUCH_ONLINE",
+        "C16_INTEGRATION_TUNABLE_NONLINEAR_ACTIVATION_FUNCT",
+        "C28_HYBRID_ELECTRO_OPTICAL_ARCHITECTURES_OFFER_VIA"
+      ],
+      "evidence_handles": [
+        "E17_DEVELOPMENT_ONLINE_LEARNING_TECHNIQUE_MAGNETO",
+        "E34_TUNABLE_NONLINEAR_ACTIVATION_FUNCTIONS_ENABLED",
+        "E85_PHYSICS_AWARE_MACHINE_LEARNING_ADVERSARIAL_ATT"
+      ],
+      "covered_claim_handles": [
+        "C12_HYBRID_ELECTRO_OPTICAL_APPROACHES_SUCH_ONLINE",
+        "C16_INTEGRATION_TUNABLE_NONLINEAR_ACTIVATION_FUNCT",
+        "C28_HYBRID_ELECTRO_OPTICAL_ARCHITECTURES_OFFER_VIA"
+      ],
+      "covered_claim_ids": [
+        "S07-P062",
+        "S07-P083",
+        "S07-P122"
+      ],
+      "markers": [
+        "[REF:44f5e5b7573063092084a20caab78ea8a4e2407e]",
+        "[REF:24d2a9ca84cff6e625a796e7e769916512bfec54]",
+        "[REF:f6af4ed4daa6ec796d382f914919929d6734d819]"
+      ],
+      "explanatory_handles": [
+        "A04"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Adaptive diffractive deep neural networks have utilized WO₃ films to enable tunable nonlinear activation functions, where UV excitation induces intervalent electron transfer to reversibly alter the film's complex amplitude distribution.": [
+          "[REF:doi:10.1002/lpor.202500558]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P062",
+        "S07-P083",
+        "S07-P122"
+      ]
+    },
+    {
+      "block_index": 5,
+      "title": "Overcoming Bandwidth Constraints Through Design",
+      "block_type": "explanatory_body",
+      "goal": "Discuss how multi-element achromatic designs and data-driven inverse design expand operational bandwidth beyond single-wavelength limits.",
+      "prose": "While programmable materials address reconfigurability, the operational bandwidth of diffractive systems remains constrained by wavelength-dependent phase delays, necessitating advanced design strategies to support hyperspectral applications. Multi-element metasurface systems overcome these limitations by harnessing illumination angle-dependent phase delays across local units, effectively decoupling angular degrees of freedom to enable robust holographic imaging without relying on complex intrinsic angular dispersion. Researchers demonstrated a multiwavelength achromatic deflector in the visible spectrum using a single-layer freeform metasurface to achieve broadband operation without relying on complex intrinsic angular dispersion. Complementing this structural approach, data-driven inverse design frameworks utilize differentiable neural simulators to map metasurface geometries directly to spectral responses, allowing for the joint end-to-end optimization of optical encoders and reconstruction networks. This methodology has demonstrated significant improvements in spectral fidelity and noise robustness compared to traditional unoptimized filters. The critical advantage of expanding bandwidth is further evidenced in scattering environments, where broadband single-pixel diffractive networks achieved blind testing accuracies of approximately 88.53% through unknown random diffusers, clearly surpassing the performance of monochrome designs that suffered a roughly 10% accuracy deficit. These findings underscore that wavelength multiplexing offers significant advantages for information processing capacity, while realizing these designs at scale requires embedding physical fabrication constraints directly into the training loop to ensure experimental viability.",
+      "planned_claim_handles": [
+        "C22_MULTI_ELEMENT_METASURFACE_SYSTEMS_ACHROMATIC_D",
+        "C21_DATA_DRIVEN_INVERSE_DESIGN_FRAMEWORKS_USING_DI",
+        "C02_DIFFRACTIVE_NEURAL_NETWORKS_CAN_ACHIEVE_ROBUST"
+      ],
+      "claim_handles": [
+        "C22_MULTI_ELEMENT_METASURFACE_SYSTEMS_ACHROMATIC_D",
+        "C21_DATA_DRIVEN_INVERSE_DESIGN_FRAMEWORKS_USING_DI",
+        "C02_DIFFRACTIVE_NEURAL_NETWORKS_CAN_ACHIEVE_ROBUST"
+      ],
+      "evidence_handles": [
+        "E59_GLOBAL_DESIGNED_ANGLE_MULTIPLEXED_METASURFACE",
+        "E55_INVERSE_DESIGN_METASURFACE_SPECTRAL_IMAGING",
+        "E02_ALL_OPTICAL_IMAGE_CLASSIFICATION_THROUGH_UNKNO"
+      ],
+      "covered_claim_handles": [
+        "C22_MULTI_ELEMENT_METASURFACE_SYSTEMS_ACHROMATIC_D",
+        "C21_DATA_DRIVEN_INVERSE_DESIGN_FRAMEWORKS_USING_DI",
+        "C02_DIFFRACTIVE_NEURAL_NETWORKS_CAN_ACHIEVE_ROBUST"
+      ],
+      "covered_claim_ids": [
+        "S07-P093",
+        "S07-P092",
+        "S07-P009"
+      ],
+      "markers": [
+        "[REF:02c52d6f45a53580144850d4df5677f3c9e63ae6]",
+        "[REF:76a83ea3baed75ad88b7f0782eb9a694a330c853]",
+        "[REF:44b0e870cc19b77b3af6950a66c37fd57acc0558]"
+      ],
+      "explanatory_handles": [
+        "A05"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Researchers demonstrated a multiwavelength achromatic deflector in the visible spectrum using a single-layer freeform metasurface to achieve broadband operation without relying on complex intrinsic angular dispersion.": [
+          "[REF:doi:10.1021/acs.nanolett.4c02995]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P093",
+        "S07-P092",
+        "S07-P009"
+      ]
+    },
+    {
+      "block_index": 6,
+      "title": "Physics-Aware Optimization Protocols",
+      "block_type": "explanatory_body",
+      "goal": "Argue for the necessity of embedding physical constraints (discrete mapping, aberrations) directly into the training loop to ensure robustness.",
+      "prose": "To bridge the persistent simulation-to-reality gap, optimization protocols must evolve from idealized numerical emulation to physics-aware training that embeds hardware constraints directly into the learning loop. A primary challenge arises because directly mapping discrete analog device responses to diffractive optical neural network (DONN) systems breaks the gradient chain required for backpropagation, as optical components exhibit non-uniform, non-monotonic behaviors unlike stable digital computation. Physics-aware differentiable discrete codesign addresses this by utilizing techniques such as Gumbel-Softmax to enable fully differentiable mappings that respect physical periodicity and device-specific ranges, thereby narrowing the discrepancy between training and deployment. Beyond discrete mapping, fabrication-induced phase errors and wavefront aberrations remain critical bottlenecks that degrade fidelity in dielectric metasurfaces. Aberration-adaptive learning mitigates these issues by incorporating generated wavefront distortions, such as those from Zernike polynomials, into every training batch. This approach forces the model to adapt to a wide range of unknown aberrations rather than optimizing for a single ideal state, experimentally stabilizing classification accuracy against variations caused by material shrinkage or thermal expansion. By co-optimizing the optical design with these inevitable physical imperfections, researchers can reduce the precision requirements for fabrication while ensuring robust performance, a necessary step toward the hybrid electro-optical systems proposed as the viable path forward for scalable optical AI.",
+      "planned_claim_handles": [
+        "C05_DIRECTLY_ADDING_DISCRETE_MAPPING_DEVICE_DIFFRA",
+        "C24_ABERRATION_ADAPTIVE_LEARNING_STABILIZES_DIFFRA",
+        "C20_FABRICATION_INDUCED_PHASE_ERRORS_DIELECTRIC_ME"
+      ],
+      "claim_handles": [
+        "C05_DIRECTLY_ADDING_DISCRETE_MAPPING_DEVICE_DIFFRA",
+        "C24_ABERRATION_ADAPTIVE_LEARNING_STABILIZES_DIFFRA",
+        "C20_FABRICATION_INDUCED_PHASE_ERRORS_DIELECTRIC_ME"
+      ],
+      "evidence_handles": [
+        "E05_PHYSICS_AWARE_DIFFERENTIABLE_DISCRETE_CODESIGN",
+        "E68_WAVEFRONT_ABERRATION_TOLERANT_DIFFRACTIVE_DEEP",
+        "E50_MULTI_ELEMENT_METASURFACE_SYSTEM_IMAGING_NEAR"
+      ],
+      "covered_claim_handles": [
+        "C05_DIRECTLY_ADDING_DISCRETE_MAPPING_DEVICE_DIFFRA",
+        "C24_ABERRATION_ADAPTIVE_LEARNING_STABILIZES_DIFFRA",
+        "C20_FABRICATION_INDUCED_PHASE_ERRORS_DIELECTRIC_ME"
+      ],
+      "covered_claim_ids": [
+        "S07-P018",
+        "S07-P098",
+        "S07-P090"
+      ],
+      "markers": [
+        "[REF:1716c059da55f246fb44c95094c2c92781424124]",
+        "[REF:8560e3428b029604da9bd494e485939165b3777e]",
+        "[REF:a148605d4ba86a5a0712cb63c088900b39561267]"
+      ],
+      "explanatory_handles": [
+        "X04_PHYSICS_AWARE_DIFFERENTIABLE_DISCRET",
+        "X05_WAVEFRONT_ABERRATION_TOLERANT_DIFFRA"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Physics-aware differentiable discrete codesign addresses this by utilizing techniques such as Gumbel-Softmax to enable fully differentiable mappings that respect physical periodicity and device-specific ranges, thereby narrowing the discrepancy between training and deployment.": [
+          "[REF:1716c059da55f246fb44c95094c2c92781424124]"
+        ],
+        "Aberration-adaptive learning mitigates these issues by incorporating generated wavefront distortions, such as those from Zernike polynomials, into every training batch.": [
+          "[REF:8560e3428b029604da9bd494e485939165b3777e]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P018",
+        "S07-P098",
+        "S07-P090"
+      ]
+    },
+    {
+      "block_index": 7,
+      "title": "The Imperative for Standardized Benchmarking",
+      "block_type": "scientific_consequence",
+      "goal": "Highlight the current lack of volumetric/hyperspectral benchmarks and the computational bottlenecks of in-situ training as barriers to field maturity.",
+      "prose": "Even with physics-aware optimization protocols embedding constraints directly into the training loop, the field lacks standardized benchmarking datasets necessary to validate progress beyond narrow 2D spatial imaging tasks. Current high-fidelity resources, while rigorous, remain restricted to fixed cellular specimens and widefield-based architectures, failing to encapsulate the spatiotemporal dynamics or volumetric deconvolution challenges required for broader deployment. This data gap is compounded by severe computational bottlenecks in online in-situ training, where compensating for system errors in high-dimensional datasets like MNIST demands processing times that exceed the stability windows of experimental setups affected by temperature and vibration. Consequently, researchers are often forced to rely on offline error compensation rather than dynamic adaptation, highlighting a critical barrier to maturity. Addressing these limitations through unified evaluation protocols and efficient training strategies is essential to transition diffractive neural networks from static laboratory prototypes toward the hybrid electro-optical systems envisioned for scalable optical AI.",
+      "planned_claim_handles": [
+        "C18_STANDARDIZED_BENCHMARKING_DATASETS_DIFFRACTIVE",
+        "C23_ONLINE_SITU_TRAINING_DIFFRACTIVE_NEURAL_NETWOR"
+      ],
+      "claim_handles": [
+        "C18_STANDARDIZED_BENCHMARKING_DATASETS_DIFFRACTIVE",
+        "C23_ONLINE_SITU_TRAINING_DIFFRACTIVE_NEURAL_NETWOR"
+      ],
+      "evidence_handles": [
+        "E42_HIGH_FIDELITY_SUPER_RESOLUTION_MICROSCOPY_DATA",
+        "E64_PHOTONIC_MACHINE_LEARNING_CHIP_DIFFRACTIVE_OPT"
+      ],
+      "covered_claim_handles": [
+        "C18_STANDARDIZED_BENCHMARKING_DATASETS_DIFFRACTIVE",
+        "C23_ONLINE_SITU_TRAINING_DIFFRACTIVE_NEURAL_NETWOR"
+      ],
+      "covered_claim_ids": [
+        "S07-P087",
+        "S07-P097"
+      ],
+      "markers": [
+        "[REF:48b684bf8ee2e5a1bb372a14bbbff0d8bc132c51]",
+        "[REF:dac795899d5e98d409739c3bcfe096491d6b7427]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P087",
+        "S07-P097"
+      ]
+    },
+    {
+      "block_index": 8,
+      "title": "Roadmap: From Near-Term Fixes to Long-Term Goals",
+      "block_type": "scientific_consequence",
+      "goal": "Contrast immediate engineering solutions like transfer learning with the distant goal of fully programmable all-optical networks.",
+      "prose": "To bridge the gap between static hardware limitations and the need for dynamic functionality, near-term engineering strategies prioritize transfer learning and multifunctional processor designs. Transfer learning addresses the rigidity of fixed physical structures by incorporating partially reconfigurable optical units that allow pre-trained layers to adapt to new tasks without full re-fabrication; for instance, numerical simulations of such architectures have demonstrated multi-task processing with classification accuracies reaching 98.8% on MNIST datasets. These approaches validate that minimalist optical configurations can be effectively deployed for specific inference applications, including holographic data storage and image classification, leveraging their inherent computational efficiency despite limited reconfigurability. While early all-optical diffractive deep neural networks successfully demonstrated ultra-low latency and high parallelism using free-space light interconnection, they remain constrained by fixed hardware architectures that prevent post-fabrication updates. Consequently, the realization of fully programmable all-optical networks remains experimentally unachieved, primarily due to the physical challenges of integrating dynamic, low-loss phase modulation into dielectric metasurfaces at scale. Although all-dielectric metasurface-based designs offer a path toward miniaturization and higher spatial neuron density by reducing component sizes below the wavelength scale, they currently serve as proof-of-concept steps rather than complete solutions. Thus, the immediate trajectory favors hybrid electro-optical co-design to inject dynamic functionality, reserving the goal of entirely programmable all-optical systems for long-term material and fabrication breakthroughs.",
+      "planned_claim_handles": [
+        "C32_TRANSFER_LEARNING_MULTIFUNCTIONAL_PROCESSOR_DE",
+        "C15_DIFFRACTIVE_DEEP_NEURAL_NETWORKS_DDNNS_CAN_BE",
+        "C27_FULLY_PROGRAMMABLE_ALL_OPTICAL_DIFFRACTIVE_NEU",
+        "C30_EARLY_ALL_OPTICAL_DIFFRACTIVE_DEEP_NEURAL_NETW"
+      ],
+      "claim_handles": [
+        "C32_TRANSFER_LEARNING_MULTIFUNCTIONAL_PROCESSOR_DE",
+        "C15_DIFFRACTIVE_DEEP_NEURAL_NETWORKS_DDNNS_CAN_BE",
+        "C27_FULLY_PROGRAMMABLE_ALL_OPTICAL_DIFFRACTIVE_NEU",
+        "C30_EARLY_ALL_OPTICAL_DIFFRACTIVE_DEEP_NEURAL_NETW"
+      ],
+      "evidence_handles": [
+        "E108_TRANSFER_LEARNING_BASED_DIFFRACTIVE_OPTICAL_NE",
+        "E29_DIFFRACTIVE_DEEP_NEURAL_NETWORK_BASED_CLASSIFI",
+        "E96_REVIEW_DIFFRACTIVE_DEEP_NEURAL_NETWORKS",
+        "E80_ALL_DIELECTRIC_METASURFACE_BASED_DIFFRACTIVE_N"
+      ],
+      "covered_claim_handles": [
+        "C32_TRANSFER_LEARNING_MULTIFUNCTIONAL_PROCESSOR_DE",
+        "C15_DIFFRACTIVE_DEEP_NEURAL_NETWORKS_DDNNS_CAN_BE",
+        "C30_EARLY_ALL_OPTICAL_DIFFRACTIVE_DEEP_NEURAL_NETW",
+        "C27_FULLY_PROGRAMMABLE_ALL_OPTICAL_DIFFRACTIVE_NEU"
+      ],
+      "covered_claim_ids": [
+        "S07-P132",
+        "S07-P081",
+        "S07-P129",
+        "S07-P121"
+      ],
+      "markers": [
+        "[REF:53a9f2df001fe69891993d790849ad570b3c7609]",
+        "[REF:7185246de5fc911aea2f74f9f0ed144724a4f587]",
+        "[REF:1954aba13cd1673b959abb296e21ea249dc66664]",
+        "[REF:380ec0a572f06fccc4aa9f9225f069bd1a55f4c3]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P132",
+        "S07-P081",
+        "S07-P121",
+        "S07-P129"
+      ]
+    },
+    {
+      "block_index": 9,
+      "title": "Synthesis: Balancing Speed Advantages Against Flexibility Deficits",
+      "block_type": "scientific_consequence",
+      "goal": "Conclude by weighing the ultra-low latency benefits of ODNNs against their current accuracy and rigidity issues, reinforcing the hybrid path forward.",
+      "prose": "All-optical diffractive classifiers offer distinct advantages in real-time and energy-efficient inference compared to conventional convolutional neural networks, making them attractive for applications where speed is critical, even though they currently lag in raw accuracy. While diffractive deep neural networks (D2NNs) provide ultra-low latency and low power consumption through highly parallel optical computing, their practical deployment faces significant bottlenecks, including fabrication-induced phase errors, alignment challenges across multiple diffractive planes, and limited operational bandwidth. Furthermore, current research indicates that training different tasks on separate regions of a static diffractive layer is constrained by area limitations, typically restricting a single device to only two or three fixed functions. These rigidity issues highlight why a purely optical approach remains insufficient for scalable multi-function AI, reinforcing the chapter's thesis that hybrid electro-optical architectures represent the most viable trajectory. By leveraging optical speed for linear sub-tasks while relying on electronic flexibility for error correction and reconfigurability, such hybrid systems can overcome the inherent trade-offs between inference speed and functional adaptability.",
+      "planned_claim_handles": [
+        "C04_ALL_OPTICAL_DIFFRACTIVE_CLASSIFIERS_OFFER_DIST",
+        "C31_WHILE_D2NNS_OFFER_ADVANTAGES_INFERENCE_SPEED_P",
+        "C17_CURRENT_DIFFRACTIVE_NEURAL_NETWORK_RESEARCH_CO"
+      ],
+      "claim_handles": [
+        "C04_ALL_OPTICAL_DIFFRACTIVE_CLASSIFIERS_OFFER_DIST",
+        "C31_WHILE_D2NNS_OFFER_ADVANTAGES_INFERENCE_SPEED_P",
+        "C17_CURRENT_DIFFRACTIVE_NEURAL_NETWORK_RESEARCH_CO"
+      ],
+      "evidence_handles": [
+        "E04_ALL_OPTICAL_CLASSIFICATION_REAL_BIOMEDICAL_CEL",
+        "E101_ROBUSTNESS_PARALLEL_SUBNETWORK_FILTERED_DIFFRA",
+        "E38_MULTI_DIMENSIONAL_RECONFIGURABLE_PHYSICALLY_CO"
+      ],
+      "covered_claim_handles": [
+        "C04_ALL_OPTICAL_DIFFRACTIVE_CLASSIFIERS_OFFER_DIST",
+        "C31_WHILE_D2NNS_OFFER_ADVANTAGES_INFERENCE_SPEED_P",
+        "C17_CURRENT_DIFFRACTIVE_NEURAL_NETWORK_RESEARCH_CO"
+      ],
+      "covered_claim_ids": [
+        "S07-P011",
+        "S07-P130",
+        "S07-P084"
+      ],
+      "markers": [
+        "[REF:56f68ce02f6656afc6453655e57a5ceb11c970e0]",
+        "[REF:13eb4b9451efe574ec7d18cbd4e81218b57bbbd8]",
+        "[REF:e9eb5f09e2404cc46986e623c8ef093ffddadeec]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P011",
+        "S07-P130",
+        "S07-P084"
+      ]
+    }
+  ]
+}

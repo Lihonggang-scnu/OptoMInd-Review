@@ -1,0 +1,62 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S08",
+  "audit": {
+    "verdict": "gaps_found",
+    "gaps": [
+      {
+        "gap_id": "G01",
+        "old_draft_snippet": "Deep learning-based inverse design methods, including capsule networks and generative adversarial networks, have become standard tools for nanophotonic device optimization, though they require significant initial training resources and careful parameter tuning across logarithmic search spaces [[claim:S08-P121]].",
+        "scientific_content": "The specific identification of 'capsule networks' as a standard tool for nanophotonic inverse design, alongside GANs. The new blocks mention neural operators, PINNs, and general deep learning but omit the specific architectural reference to capsule networks which was highlighted in the old draft.",
+        "claim_handles": [
+          "C23_MACHINE_LEARNING_BASED_INVERSE_DESIGN_PARTICUL"
+        ],
+        "evidence_handles": [
+          "E117_FORWARD_PREDICTION_INVERSE_DESIGN_NANOPHOTONIC"
+        ],
+        "affected_block_indices": [
+          1
+        ]
+      },
+      {
+        "gap_id": "G02",
+        "old_draft_snippet": "Purely generative approaches treat inverse design as a direct mapping problem learned through deep generative models, yet they face a persistent Constraint Rigor Gap—a difficulty in strictly enforcing hard physical or chemical constraints that are fundamental in scientific domains.",
+        "scientific_content": "The specific terminology and concept of the 'Constraint Rigor Gap' regarding purely generative approaches. While Block 3 discusses hard constraints via PINNs, it does not explicitly name or define this specific gap associated with generative models (like LLMs/GANs) as a distinct challenge category.",
+        "claim_handles": [
+          "C02_DEEP_LEARNING_BASED_MODELS_NANOPHOTONIC_INVERS"
+        ],
+        "evidence_handles": [
+          "E05_BENCHMARKING_GENERATIVE_AI_AGAINST_BAYESIAN_OP"
+        ],
+        "affected_block_indices": [
+          4
+        ]
+      }
+    ],
+    "notes": "Identified two specific scientific omissions: 1) The explicit mention of 'capsule networks' as a standard inverse design technique, which is absent from the new blocks that focus on operators/PINNs. 2) The specific conceptual framing of the 'Constraint Rigor Gap' for generative models, which provides a specific diagnostic label for the limitations of purely data-driven generative approaches.",
+    "warnings": []
+  },
+  "patch_records": [
+    {
+      "gap_id": "G01",
+      "block_index": null,
+      "applied": false,
+      "reason": "no_gap_specific_evidence_handles",
+      "detail": "Gap has no valid claim-aligned evidence handle; record-only, no patch applied."
+    },
+    {
+      "gap_id": "G02",
+      "block_index": 4,
+      "applied": true,
+      "used_evidence_handles": [
+        "E110_BONNI_GRADIENT_INFORMED_BAYESIAN_INTERIOR_POIN",
+        "E04_BENCHMARKING_DEEP_LEARNING_BASED_MODELS_NANOPH",
+        "E37_ENERGY_AWARE_OPTIMIZATION_NEURAL_NETWORKS_SUST",
+        "E05_BENCHMARKING_GENERATIVE_AI_AGAINST_BAYESIAN_OP"
+      ],
+      "gap_evidence_handles": [
+        "E05_BENCHMARKING_GENERATIVE_AI_AGAINST_BAYESIAN_OP"
+      ]
+    }
+  ]
+}

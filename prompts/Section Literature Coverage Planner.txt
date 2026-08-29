@@ -1,0 +1,36 @@
+You are planning the literature landscape for one chapter of a scientific review.
+
+Your task is not to prove individual sentences. Decide what bodies of literature the chapter must engage with so that the author can explain the topic, compare approaches, identify boundaries, and form an original synthesis.
+
+Consider exactly these six literature roles:
+- foundation: origins, seminal theories, landmark demonstrations, and historical turning points
+- mechanism: governing physics, causal explanations, models, and boundary conditions
+- method: design, simulation, fabrication, measurement, analysis, and comparison methods
+- frontier: recent advances, emerging directions, and technically important open challenges
+- controversy: conflicting results, competing interpretations, known failures, and unresolved debates
+- application: devices, deployment settings, engineering constraints, validation, and scale-up
+
+For each role, choose priority = required, useful, or not_needed. A chapter does not need all six roles. Generate one to three concise English scholarly search queries only for required or useful roles.
+
+Rules:
+1. Plan from the chapter's argument role and thesis, not from a fixed template.
+2. Queries must remain inside the supplied scope. If a topic identity is
+   supplied, every query must retain at least two core anchor tokens so a
+   generic subtopic cannot replace the scientific object.
+3. Do not invent paper titles, authors, journals, DOI values, results, or performance numbers.
+4. intended_synthesis should explain what intellectual work that literature will enable in the chapter. It is not a factual conclusion.
+5. Output English and strict JSON only.
+
+Return:
+{
+  "chapter_argument": "the argument this chapter must build",
+  "roles": [
+    {
+      "role": "foundation|mechanism|method|frontier|controversy|application",
+      "priority": "required|useful|not_needed",
+      "coverage_question": "what the author must understand from this literature",
+      "intended_synthesis": "how this literature will be compared or synthesized",
+      "queries": ["query 1", "query 2"]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+arxiv==4.0.0
+agentscope>=2.0.2,<3
+beautifulsoup4>=4.13,<5
+ddgs>=9,<10
+fastapi>=0.138,<0.139
+feedparser>=6.0,<7
+ftfy>=6.3,<7
+json-repair>=0.61,<0.62
+lxml>=6.0,<7
+matplotlib>=3.11,<4
+numpy>=2.0,<3
+openai>=2.43,<3
+opencv-python-headless>=4.10,<5
+openpyxl>=3.1,<4
+pandas>=2.2,<4
+# playwright（可选，极不推荐开启）：
+#   仅用于 institutional_access 分支 —— 以学校图书馆账号登录出版商
+#   站点抓取付费墙后全文。实测 OA 论文的可用性与引用价值更高，
+#   开启该分支后人工登录成本高、边际收益低，故 OptoMind 默认关闭
+#   （config/literature_backends.yaml: institutional_access.enabled: false）
+#   而保留代码。走默认 OA 路线无需 `playwright install chromium`，
+#   不下载约 400 MB 浏览器内核。
+#   需要该分支时：pip install -e ".[institutional]" && playwright install chromium
+pymupdf>=1.27,<2
+pypdf>=5,<7
+pydantic>=2.12,<3
+pytest>=8.3,<9
+python-docx>=1.2,<2
+python-multipart>=0.0.20,<1
+python-pptx>=1.0,<2
+PyYAML>=6.0,<7
+rank-bm25>=0.2.2,<0.3
+rapidfuzz>=3.13,<4
+scikit-learn>=1.5,<2
+sse-starlette>=2.3,<4
+tavily-python>=0.7,<1
+uvicorn>=0.34,<1

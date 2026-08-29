@@ -1,0 +1,91 @@
+{
+  "schema_version": "optomind.staged_article_completion.v1",
+  "stage": "conclusion",
+  "status": "completed",
+  "fingerprint": "80e2e13f68a5374cc0b6e36d21af1495d5346047b17d6c063ace5ae108f13567",
+  "input_fingerprint": "87d58661f84844d4c3022b6301efee43553f7f2c15ebd7577e69ec88ce9a9926",
+  "artifact_path": "<local-path>",
+  "approval_required": false,
+  "payload": {
+    "workplan": {
+      "derived_from": [
+        "S01: Physical Architecture of Diffractive Neural Layers",
+        "S02: Training Paradigms for Optical Diffractive Networks",
+        "S03: Hardware Realization of Diffractive Neural Networks",
+        "S04: Wavelength Multiplexing and Spectral Bandwidth",
+        "S05: Applications of Diffractive Neural Networks",
+        "S06: Controversies and Unresolved Debates",
+        "S07: Bottlenecks and Future Trajectories"
+      ],
+      "outline": [
+        "Direct answer to the central question: ODNNs function as distinct physical computers leveraging diffraction for ultra-low latency and energy efficiency, yet they currently operate as specialized accelerators rather than general-purpose replacements for electronic systems due to linearity and reconfigurability constraints.",
+        "Key limitations: The simulation-to-reality gap driven by fabrication tolerances, the inherent lack of optical nonlinearity requiring hybrid architectures, and the rigidity of static 'write-once' hardware.",
+        "Forward outlook: A strategic shift toward hybrid electro-optical co-design, physics-aware training protocols, and standardized benchmarking to transition from laboratory prototypes to robust, scalable optical AI."
+      ],
+      "scope_boundaries": [
+        "Must not introduce new hardware platforms or training algorithms not discussed in the body sections.",
+        "Must not claim ODNNs currently surpass electronic systems in general-purpose accuracy or flexibility.",
+        "Must not propose specific numerical performance targets for future systems without explicit support from the provided text.",
+        "Must not revisit detailed mechanistic explanations of multiplexing or diffraction integrals already covered in prior sections."
+      ]
+    },
+    "draft": {
+      "text": "This review synthesizes the current state of Optical Diffractive Neural Networks (ODNNs), addressing the central inquiry regarding their viability as a computational paradigm distinct from conventional electronics. The evidence presented across the physical, training, and hardware domains establishes that ODNNs function not merely as optical accelerators but as unique physical computers where the laws of diffraction dictate computational expressivity. By replacing electronic weight matrices with spatially varying phase profiles, these systems leverage the inherent parallelism of light to perform linear transformations at the speed of light with minimal energy consumption. This architecture offers a compelling solution to the von Neumann bottleneck, enabling ultra-low latency inference for specific tasks such as real-time image classification, all-optical encryption, and compressive sensing. However, the body of literature clarifies that this advantage is currently domain-specific; ODNNs excel in throughput and energy efficiency for linear or pre-defined operations but do not yet constitute a general-purpose replacement for electronic processors due to fundamental physical constraints.\n\nThe primary limitations preventing widespread deployment stem from the tension between idealized mathematical models and physical reality. A critical barrier is the simulation-to-reality gap, where performance predicted by scalar diffraction models degrades in physical prototypes due to fabrication tolerances, surface roughness, and material dispersion. While techniques such as Hardware-in-the-Loop (HIL) optimization and \"vaccination\" against misalignment have shown promise in bridging this divide, they underscore the fragility of current designs. Furthermore, the inherent linearity of passive diffractive layers imposes a nonlinearity bottleneck, restricting the network's ability to solve complex problems without external intervention. This limitation, combined with the static nature of most fabricated metasurfaces and 3D-printed elements, results in \"write-once\" hardware that lacks the reconfigurability essential for dynamic computing environments. Consequently, purely all-optical systems remain vulnerable to environmental perturbations, such as temperature fluctuations and mechanical vibrations, which can destabilize phase relationships and compromise inference reliability.\n\nLooking forward, the trajectory for ODNN research appears to be shifting away from the pursuit of entirely all-optical general-purpose computers toward hybrid electro-optical co-design. The most viable path for scalable optical AI involves leveraging the speed and parallelism of diffractive layers for linear feature extraction while offloading nonlinear activation functions and adaptive control to electronic components. This hybrid approach mitigates the rigidity of static hardware and allows for error correction and dynamic task switching that purely optical systems cannot currently support. Additionally, future progress depends on the adoption of physics-aware training paradigms that embed fabrication constraints and device non-idealities directly into the loss landscape, ensuring that designed networks are robust to manufacturing variances. To validate these advancements, the field must also establish standardized benchmarking protocols that move beyond narrow 2D imaging tasks to evaluate spatiotemporal dynamics and volumetric processing under realistic conditions. In conclusion, while ODNNs have matured from theoretical concepts to functional laboratory prototypes demonstrating unique physical advantages, their transition to robust, deployable technologies will rely on integrating optical speed with electronic flexibility, thereby creating resilient systems capable of operating effectively outside controlled laboratory environments."
+    },
+    "status": "drafted"
+  },
+  "provenance": {
+    "run_fingerprint": "dc2ce930362ff87de11a15e4a4d67c2057f04db3a4341f97c3fe5940ddb4c44c",
+    "stage_order_position": "2",
+    "usage_recorded": "True"
+  },
+  "usage": {
+    "module": "StagedConclusionAuthor",
+    "agent_name": "StagedConclusionAuthor",
+    "model_tier": "c_model",
+    "model_name": "qwen3.5-plus",
+    "task_type": "research_chat",
+    "mock_llm": false,
+    "estimated_input_tokens": 31269,
+    "estimated_output_tokens": 1426,
+    "input_tokens": 29160,
+    "output_tokens": 1680,
+    "token_usage_source": "provider_response",
+    "provider_usage": {
+      "prompt_tokens": 29160,
+      "completion_tokens": 1680,
+      "total_tokens": 30840,
+      "completion_tokens_details": {
+        "reasoning_tokens": 634,
+        "text_tokens": 1680
+      },
+      "prompt_tokens_details": {
+        "text_tokens": 29160
+      }
+    },
+    "success": true,
+    "failure": false,
+    "error_type": "",
+    "fallback_used": false,
+    "api_key_source": "<local-path><private-credential>.txt#1",
+    "api_key_masked": "****",
+    "api_key_candidate_count": 2,
+    "api_key_rotation_count": 0,
+    "key_failures": [],
+    "model_fallback_used": false,
+    "fallback_chain": [],
+    "attempted_models": [
+      "qwen3.5-plus"
+    ],
+    "selected_model_index": 0,
+    "partial_stream": false,
+    "stream_interrupted_error": "",
+    "request_attempt_count": 1,
+    "retry_count": 0,
+    "repair_calls": 0,
+    "repair_used": false
+  },
+  "error": null,
+  "created_at": "2026-08-28T06:26:11.492620+00:00",
+  "updated_at": "2026-08-28T06:26:11.492620+00:00"
+}

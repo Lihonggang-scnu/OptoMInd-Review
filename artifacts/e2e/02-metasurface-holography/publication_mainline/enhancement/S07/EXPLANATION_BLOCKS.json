@@ -1,0 +1,416 @@
+{
+  "blocks": [
+    {
+      "block_index": 1,
+      "title": "The Computational Imperative and the Ill-Posed Nature of Inverse Design",
+      "block_type": "introduction_viewpoint",
+      "goal": "Establish that while deep learning enables exploration of vast design spaces, the fundamental non-uniqueness of metasurface mappings creates an ill-posed problem requiring specialized solutions.",
+      "prose": "Inverse design methods utilize effective mathematical approaches to address optimization problems, making them particularly well-suited for exploring high-dimensional design spaces and achieving higher-complexity design targets that are inaccessible via intuition-based parameterization. While classical iterative methods offer high calculation accuracy, they suffer from excessive computational consumption, prompting the emergence of deep learning frameworks as revolutionary tools for rapid forward prediction and pattern-to-phase mapping. For instance, specific deep learning architectures have demonstrated forward prediction accuracy rates of 96.7% and inverse design success rates of 83.9%, significantly overwhelming conventional neural networks in efficiency. However, the core challenge in metasurface engineering lies in the fact that this inverse problem is mathematically ill-posed due to non-uniqueness, where multiple distinct geometric configurations can yield identical optical spectra. This one-to-many mapping confuses deterministic optimization algorithms and traditional regression-based neural networks, often leading to mode averaging and the generation of invalid geometries that fail to produce the target spectrum when verified with a Maxwell solver. Consequently, while data-driven approaches provide speed, they lack an intrinsic understanding of underlying physics, necessitating the integration of sparsity assumptions or physics-informed constraints to resolve these fundamental ambiguities and enable computationally tractable solutions.",
+      "planned_claim_handles": [
+        "C01_INVERSE_DESIGN_METHODS_PARTICULARLY_THOSE_LEVE",
+        "C20_DEEP_NEURAL_NETWORKS_MACHINE_LEARNING_FRAMEWOR",
+        "C27_INVERSE_DESIGN_METASURFACES_EXHIBITS_NON_UNIQU",
+        "C28_INVERSE_DESIGN_METASURFACES_HOLOGRAPHY_FUNDAME"
+      ],
+      "claim_handles": [
+        "C01_INVERSE_DESIGN_METHODS_PARTICULARLY_THOSE_LEVE",
+        "C20_DEEP_NEURAL_NETWORKS_MACHINE_LEARNING_FRAMEWOR",
+        "C27_INVERSE_DESIGN_METASURFACES_EXHIBITS_NON_UNIQU",
+        "C28_INVERSE_DESIGN_METASURFACES_HOLOGRAPHY_FUNDAME"
+      ],
+      "evidence_handles": [
+        "E01_INVERSE_DESIGN_ELECTROMAGNETIC_METAMATERIALS_I",
+        "E45_FORWARD_PREDICTION_INVERSE_DESIGN_METASURFACE",
+        "E58_DEEP_LEARNING_ENABLED_INVERSE_DESIGN_NANOPHOTO",
+        "E59_INVERSE_DESIGN_METASURFACES_USING_PHYSICS_INFO"
+      ],
+      "covered_claim_handles": [
+        "C01_INVERSE_DESIGN_METHODS_PARTICULARLY_THOSE_LEVE",
+        "C20_DEEP_NEURAL_NETWORKS_MACHINE_LEARNING_FRAMEWOR",
+        "C27_INVERSE_DESIGN_METASURFACES_EXHIBITS_NON_UNIQU",
+        "C28_INVERSE_DESIGN_METASURFACES_HOLOGRAPHY_FUNDAME"
+      ],
+      "covered_claim_ids": [
+        "S07-P001",
+        "S07-P073",
+        "S07-P105",
+        "S07-P113"
+      ],
+      "markers": [
+        "[REF:2d3412a215f8b6d1d395bfaeec7ec0379c2e132e]",
+        "[REF:696cef328f3171c7583907984fa71c43adc0e828]",
+        "[REF:60df2f3598ea7d56ae24a649121907a6769eb444]",
+        "[REF:9c20a790aa75f24b6f5a130711645c978484455e]"
+      ],
+      "explanatory_handles": [
+        "X01_PROBABILISTIC_LEARNING_FRAMEWORK_INV",
+        "X02_NEURAL_ADJOINT_METHOD_INVERSE_DESIGN"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "However, the core challenge in metasurface engineering lies in the fact that this inverse problem is mathematically ill-posed due to non-uniqueness, where multiple distinct geometric configurations can yield identical optical spectra.": [
+          "[REF:doi:10.30560/ijas.v9n1p1]",
+          "[REF:doi:10.1364/oe.419138]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P001",
+        "S07-P073",
+        "S07-P105",
+        "S07-P113"
+      ]
+    },
+    {
+      "block_index": 2,
+      "title": "From Heuristics to Physics-Informed Constraints",
+      "block_type": "explanatory_body",
+      "goal": "Argue that purely data-driven or heuristic methods fail due to physical inconsistencies, necessitating the integration of domain knowledge and explicit constraints.",
+      "prose": "While deep learning offers powerful tools for navigating vast design spaces, purely data-driven or heuristic approaches often fail to produce physically realizable metasurfaces because they neglect the fundamental constraints of wave physics. Heuristic methods that construct transfer matrices frequently oversimplify complex light-matter interactions, leading to idealized phase profiles that cannot be implemented in actual geometries and resulting in significant performance degradation when projected onto feasible structures. This limitation arises because inverse models lacking explicit constraints on design parameters learn only to minimize optical reconstruction error, effectively treating the problem as a black-box mapping that ignores manufacturability and physical validity. To resolve this, physics-informed machine learning integrates domain knowledge, such as Maxwell's equations, directly into the learning process through loss functions, residual modeling, or architectural initialization. By embedding these governing physical principles as regularizers, the model is guided toward a subspace of solutions that inherently satisfy conservation laws and symmetry requirements, thereby improving generalizability and reducing the need for massive labeled datasets. This approach contrasts sharply with unconstrained models that may converge to non-physical local optima, ensuring that the resulting designs are not only optically efficient but also robustly aligned with the underlying physics necessary for practical fabrication.",
+      "planned_claim_handles": [
+        "C02_INTEGRATING_DOMAIN_KNOWLEDGE_SUCH_GOVERNING_PH",
+        "C03_HEURISTIC_METHODS_CONSTRUCTING_TRANSFER_MATRIC",
+        "C25_HEURISTIC_INVERSE_DESIGN_METHODS_OFTEN_GENERAT",
+        "C26_INVERSE_MODELS_LACKING_EXPLICIT_CONSTRAINTS_DE"
+      ],
+      "claim_handles": [
+        "C02_INTEGRATING_DOMAIN_KNOWLEDGE_SUCH_GOVERNING_PH",
+        "C03_HEURISTIC_METHODS_CONSTRUCTING_TRANSFER_MATRIC",
+        "C25_HEURISTIC_INVERSE_DESIGN_METHODS_OFTEN_GENERAT",
+        "C26_INVERSE_MODELS_LACKING_EXPLICIT_CONSTRAINTS_DE"
+      ],
+      "evidence_handles": [
+        "E04_INVERSE_DESIGN_NANOPHOTONICS_VIA_REPRESENTATIO",
+        "E05_PHYSICS_INFORMED_MACHINE_LEARNING_INVERSE_DESI",
+        "E06_SP2RINT_SPATIALLY_DECOUPLED_PHYSICS_INSPIRED_P",
+        "E57_PHYSICS_INFORMED_MACHINE_LEARNING_INVERSE_DESI"
+      ],
+      "covered_claim_handles": [
+        "C02_INTEGRATING_DOMAIN_KNOWLEDGE_SUCH_GOVERNING_PH",
+        "C03_HEURISTIC_METHODS_CONSTRUCTING_TRANSFER_MATRIC",
+        "C26_INVERSE_MODELS_LACKING_EXPLICIT_CONSTRAINTS_DE"
+      ],
+      "covered_claim_ids": [
+        "S07-P002",
+        "S07-P004",
+        "S07-P098"
+      ],
+      "markers": [
+        "[REF:1710ffd8f90365fdbef063f85605601e2c7fc9f1]",
+        "[REF:0d03f30ab91ec0b9411c3e2505550e636df8808e]",
+        "[REF:c9e5de816ca2356737e7f23532658ef28e6b2738]"
+      ],
+      "explanatory_handles": [
+        "X04_SOLVING_BACKWARD_HEAT_TRANSFER_PHYSI",
+        "X03_PHYSICS_INFORMED_MACHINE_LEARNING_SH"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "To resolve this, physics-informed machine learning integrates domain knowledge, such as Maxwell's equations, directly into the learning process through loss functions, residual modeling, or architectural initialization.": [
+          "[REF:doi:10.1007/s40314-026-03818-x]",
+          "[REF:doi:10.48550/arxiv.2606.04143]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P002",
+        "S07-P004",
+        "S07-P097",
+        "S07-P098"
+      ]
+    },
+    {
+      "block_index": 3,
+      "title": "Advanced Architectures for Non-Uniqueness and Convergence",
+      "block_type": "explanatory_body",
+      "goal": "Detail how specific deep learning architectures (tandem, residual, diffusion) and adjoint methods technically resolve the non-uniqueness and speed bottlenecks.",
+      "prose": "Building on the necessity of physics-informed constraints, advanced deep learning architectures now provide specific mechanisms to resolve the non-uniqueness and convergence bottlenecks inherent in metasurface inverse design. Tandem neural networks address the ill-posed mapping by training an inverse network to minimize the error of a re-predicted spectrum rather than direct geometric differences, effectively bypassing the one-to-many problem where distinct geometries yield identical optical responses. Generative approaches have further evolved from Generative Adversarial Networks, which often suffer from mode collapse, to physics-informed diffusion models that reverse a gradual noising process to generate diverse meta-atom shapes under rigorous spectral constraints. For handling singular point mutations in electromagnetic property mappings, deep residual networks combined with property classification have demonstrated the ability to predict geometries with mean square errors below 0.23, stabilizing the design of holographic imaging metasurfaces. At the foundation model scale, frameworks like MOCLIP leverage massive experimental datasets of over 466,000 geometry-spectra pairs to learn a shared latent space, enabling zero-shot prediction speeds of approximately 200,000 spectra per second while incorporating fabrication tolerances missing from purely simulated data. Complementing these data-driven strategies, the Adjoint Variable Method (AVM) offers a gradient-based optimization framework that efficiently acquires sensitivity information for complex geometries, accelerating the search for optimal designs without relying solely on large training corpora. Together, these architectures shift the paradigm from slow, heuristic fine-tuning to rapid, joint optimization of geometry and spectral response, directly addressing the coupled mechanism bottleneck by ensuring that computational speed does not come at the expense of physical validity or manufacturability.",
+      "planned_claim_handles": [
+        "C04_DEEP_LEARNING_BASED_INVERSE_DESIGN_FRAMEWORKS",
+        "C07_DEEP_LEARNING_BASED_INVERSE_DESIGN_PARTICULARL",
+        "C21_INVERSE_DESIGN_USING_DEEP_RESIDUAL_NETWORKS_AD",
+        "C22_ADJOINT_VARIABLE_METHOD_AVM_PROVIDES_GRADIENT"
+      ],
+      "claim_handles": [
+        "C04_DEEP_LEARNING_BASED_INVERSE_DESIGN_FRAMEWORKS",
+        "C07_DEEP_LEARNING_BASED_INVERSE_DESIGN_PARTICULARL",
+        "C21_INVERSE_DESIGN_USING_DEEP_RESIDUAL_NETWORKS_AD",
+        "C22_ADJOINT_VARIABLE_METHOD_AVM_PROVIDES_GRADIENT"
+      ],
+      "evidence_handles": [
+        "E07_MOCLIP_FOUNDATION_MODEL_LARGE_SCALE_NANOPHOTON",
+        "E13_INVERSE_DESIGN_METASURFACES_USING_PHYSICS_INFO",
+        "E48_INVERSE_DESIGN_METASURFACE_HOLOGRAPHY_DEEP_RES",
+        "E50_ADJOINT_VARIABLE_METHOD_UNLEASHED_JOURNEY_INTO"
+      ],
+      "covered_claim_handles": [
+        "C04_DEEP_LEARNING_BASED_INVERSE_DESIGN_FRAMEWORKS",
+        "C07_DEEP_LEARNING_BASED_INVERSE_DESIGN_PARTICULARL",
+        "C21_INVERSE_DESIGN_USING_DEEP_RESIDUAL_NETWORKS_AD",
+        "C22_ADJOINT_VARIABLE_METHOD_AVM_PROVIDES_GRADIENT"
+      ],
+      "covered_claim_ids": [
+        "S07-P009",
+        "S07-P017",
+        "S07-P074",
+        "S07-P082"
+      ],
+      "markers": [
+        "[REF:e4817fc664074ddc772d9ae198871fc6cb7f8b7b]",
+        "[REF:9c20a790aa75f24b6f5a130711645c978484455e]",
+        "[REF:534bc16c467c94bae9323a7fa64364a7c5ee3676]",
+        "[REF:2066503cfc076298771d675eae0ad855e62aec67]"
+      ],
+      "explanatory_handles": [
+        "X08_INVERSE_DESIGN_DIELECTRIC_MATERIALS",
+        "X06_DEEP_LEARNING_ASSISTED_INVERSE_DESIG",
+        "X07_INVERSE_DESIGN_METASURFACES_USING_PH",
+        "X09_OPTIMIZATION_ELECTROMAGNETIC_SENSITI",
+        "X05_INVERSE_DESIGN_ORGANIC_LIGHT_EMITTIN"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Complementing these data-driven strategies, the Adjoint Variable Method (AVM) offers a gradient-based optimization framework that efficiently acquires sensitivity information for complex geometries, accelerating the search for optimal designs without relying solely on large training corpora.": [
+          "[REF:doi:10.2528/pier12020501]",
+          "[REF:doi:10.1109/nemo62710.2025.11215427]"
+        ],
+        "Tandem neural networks address the ill-posed mapping by training an inverse network to minimize the error of a re-predicted spectrum rather than direct geometric differences, effectively bypassing the one-to-many problem where distinct geometries yield identical optical responses.": [
+          "[REF:doi:10.1063/5.0171437]",
+          "[REF:doi:10.1515/nanoph-2021-0434]"
+        ],
+        "Generative approaches have further evolved from Generative Adversarial Networks, which often suffer from mode collapse, to physics-informed diffusion models that reverse a gradual noising process to generate diverse meta-atom shapes under rigorous spectral constraints.": [
+          "[REF:9c20a790aa75f24b6f5a130711645c978484455e]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P009",
+        "S07-P017",
+        "S07-P074",
+        "S07-P082"
+      ]
+    },
+    {
+      "block_index": 4,
+      "title": "Optimization Paradigms: Speed versus Global Optimality",
+      "block_type": "explanatory_body",
+      "goal": "Contrast gradient-based and gradient-free approaches, explaining the trade-offs in navigating nonconvex, high-dimensional parameter spaces.",
+      "prose": "While advanced architectures address non-uniqueness, the fundamental optimization paradigm itself dictates the trade-off between convergence speed and global optimality in navigating high-dimensional, nonconvex design spaces. Inverse design methodologies are currently bifurcating into gradient-based approaches, such as adjoint topology optimization, and gradient-free nature-inspired algorithms. Gradient-based methods leverage the reciprocity theorem to compute the variation of a figure of merit with respect to design parameters, allowing for the simultaneous update of the entire design vector to rapidly reach a local optimum; however, this strategy inherently enforces a local search nature that risks trapping the solution in sub-optimal minima. Conversely, gradient-free techniques, often inspired by natural phenomena like wolf hunting packs, integrate distinct exploration and exploitation phases to escape these local traps without requiring explicit gradient information, yet they frequently suffer from higher computational costs. Traditional heuristic methods like genetic algorithms and particle swarm optimization further illustrate this bottleneck, as they are computationally intensive and non-differentiable, hindering their end-to-end integration with downstream tasks compared to modern differentiable surrogates. This dichotomy reveals that while gradient-based methods offer efficiency for tailored optical functions, they struggle to guarantee global optimality in complex phase landscapes, whereas gradient-free methods offer broader search capabilities at the expense of speed, underscoring the need for strategies that resolve these coupled mechanism bottlenecks.",
+      "planned_claim_handles": [
+        "C10_INVERSE_DESIGN_METHODOLOGIES_METASURFACE_HOLOG",
+        "C32_INVERSE_DESIGN_METASURFACES_TAILORED_OPTICAL_F"
+      ],
+      "claim_handles": [
+        "C10_INVERSE_DESIGN_METHODOLOGIES_METASURFACE_HOLOG",
+        "C32_INVERSE_DESIGN_METASURFACES_TAILORED_OPTICAL_F"
+      ],
+      "evidence_handles": [
+        "E20_BIOMIMICRY_GRADIENT_BASED_ALGORITHM_APPLIED_PH",
+        "E22_INVERSE_DESIGN_SUB_DIFFRACTION_FOCUSING_METALE",
+        "E68_INVERSE_DESIGN_METASURFACE_SPECTRAL_IMAGING"
+      ],
+      "covered_claim_handles": [
+        "C10_INVERSE_DESIGN_METHODOLOGIES_METASURFACE_HOLOG",
+        "C32_INVERSE_DESIGN_METASURFACES_TAILORED_OPTICAL_F"
+      ],
+      "covered_claim_ids": [
+        "S07-P041",
+        "S07-P129"
+      ],
+      "markers": [
+        "[REF:2516273dc5b4511c838bf9236a61f71f4e32f6b5]",
+        "[REF:e29144a60ad5b45d897fa18bce4f835c765d822f]",
+        "[REF:76a83ea3baed75ad88b7f0782eb9a694a330c853]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P041",
+        "S07-P129"
+      ]
+    },
+    {
+      "block_index": 5,
+      "title": "The Coupled Mechanism Bottleneck",
+      "block_type": "scientific_consequence",
+      "goal": "Define the core problem: isolated component design fails because geometric and propagation phases are coupled, and system-level interactions are ignored.",
+      "prose": "While optimization paradigms navigate high-dimensional spaces, they encounter a fundamental 'coupled mechanism bottleneck' where geometric and propagation phases are inextricably linked through shared structural parameters. In dual-spin and frequency-multiplexed metasurfaces, for instance, the phase response at one frequency may depend on a specific subset of nanograting dimensions and orientation angles, while the response at another frequency is determined by the full set of these same variables. This interdependence creates a complex optimization landscape where adjusting a parameter to satisfy one channel inadvertently alters the response of another, introducing significant cross-talk. Current inverse design approaches often attempt to resolve this by treating the metasurface as an isolated component, utilizing classifiers and iterative neural networks to suppress specific phase cross-talks based on preset conditions. However, such methods frequently fail to account for broader system-level interactions, such as coupling between adjacent meta-atoms or substrate effects, because they rely on loss functions that fit target oscillatory behaviors without fully embedding the physical constraints of the entire optical environment. Consequently, treating the device in isolation limits the predictive accuracy of simulation-to-experiment workflows, reinforcing the chapter's thesis that resolving these trade-offs requires moving beyond component-level optimization toward integrated co-design frameworks.",
+      "planned_claim_handles": [
+        "C11_DUAL_SPIN_FREQUENCY_METASURFACE_HOLOGRAPHY_GEO",
+        "C16_CURRENT_INVERSE_DESIGN_PARADIGMS_OFTEN_TREAT_M"
+      ],
+      "claim_handles": [
+        "C11_DUAL_SPIN_FREQUENCY_METASURFACE_HOLOGRAPHY_GEO",
+        "C16_CURRENT_INVERSE_DESIGN_PARADIGMS_OFTEN_TREAT_M"
+      ],
+      "evidence_handles": [
+        "E23_DEEP_LEARNING_ASSISTED_INVERSE_DESIGN_DUAL_SPI",
+        "E35_SUPPLEMENTAL_INFORMATION_ARTIFICIAL_NEURAL_NET"
+      ],
+      "covered_claim_handles": [
+        "C11_DUAL_SPIN_FREQUENCY_METASURFACE_HOLOGRAPHY_GEO",
+        "C16_CURRENT_INVERSE_DESIGN_PARADIGMS_OFTEN_TREAT_M"
+      ],
+      "covered_claim_ids": [
+        "S07-P049",
+        "S07-P064"
+      ],
+      "markers": [
+        "[REF:867c87ae195e0a5c2016732e0f43a8c703a7a788]",
+        "[REF:ab2c0490cf291b46e0ddc2053744f03dd52a5223]"
+      ],
+      "explanatory_handles": [
+        "X10_DEEP_LEARNING_ASSISTED_INVERSE_DESIG",
+        "X11_36_CHANNEL_SPIN_WAVELENGTH_CO_MULTIP"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "In dual-spin and frequency-multiplexed metasurfaces, for instance, the phase response at one frequency may depend on a specific subset of nanograting dimensions and orientation angles, while the response at another frequency is determined by the full set of these same variables.": [
+          "[REF:867c87ae195e0a5c2016732e0f43a8c703a7a788]",
+          "[REF:262de4d6b9107f243bba6c31015fdae5841c9982]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P049",
+        "S07-P064"
+      ]
+    },
+    {
+      "block_index": 6,
+      "title": "Co-Design: Integrating Fabrication and Physical Constraints",
+      "block_type": "explanatory_body",
+      "goal": "Present co-design as the primary solution strategy, where fabrication tolerance and physical validity are embedded in the optimization loop.",
+      "prose": "To resolve the coupled mechanism bottleneck identified previously, co-design frameworks have emerged as a primary strategy, defined here as joint optimization protocols that integrate computational inverse design directly with fabrication-aware constraints. The intuitive premise is that high-fidelity phase control cannot be achieved in isolation from the physical realities of manufacturing disorder; instead, these tolerances must be embedded within the optimization loop itself. Mechanistically, this is realized by constructing combined loss functions or unified machine-learning architectures that account for non-uniqueness and oscillatory behaviors inherent to resonant components. For instance, recent approaches utilize classifiers to distinguish specific cross-talk conditions between geometric and propagation phases, allowing adaptive optimization of meta-atom parameters to satisfy multi-channel wavefront tailoring requirements. Similarly, unified frameworks address incomplete design specifications by mapping feature vectors through conditional decoders while employing pre-trained forward models to mitigate non-uniqueness effects that typically deteriorate convergence. These methods demonstrate significant efficiency gains, reducing design time compared to traditional genetic algorithms while maintaining robustness across expanded parameter ranges. However, while such strategies effectively bridge the gap between idealized simulation and experimental feasibility, consensus on optimal joint optimization protocols remains incomplete, highlighting the need for the broader system-level integration discussed next.",
+      "planned_claim_handles": [
+        "C14_CO_DESIGN_FRAMEWORKS_INTEGRATE_COMPUTATIONAL_I",
+        "C15_INVERSE_DESIGN_FRAMEWORKS_METASURFACE_HOLOGRAP"
+      ],
+      "claim_handles": [
+        "C14_CO_DESIGN_FRAMEWORKS_INTEGRATE_COMPUTATIONAL_I",
+        "C15_INVERSE_DESIGN_FRAMEWORKS_METASURFACE_HOLOGRAP"
+      ],
+      "evidence_handles": [
+        "E29_DEEP_LEARNING_ASSISTED_INVERSE_DESIGN_DUAL_SPI",
+        "E33_SUPPLEMENTAL_INFORMATION_ARTIFICIAL_NEURAL_NET",
+        "E34_UNIFIED_MACHINE_LEARNING_FRAMEWORK_AUTOMATED_I"
+      ],
+      "covered_claim_handles": [
+        "C14_CO_DESIGN_FRAMEWORKS_INTEGRATE_COMPUTATIONAL_I",
+        "C15_INVERSE_DESIGN_FRAMEWORKS_METASURFACE_HOLOGRAP"
+      ],
+      "covered_claim_ids": [
+        "S07-P054",
+        "S07-P057"
+      ],
+      "markers": [
+        "[REF:867c87ae195e0a5c2016732e0f43a8c703a7a788]",
+        "[REF:ab2c0490cf291b46e0ddc2053744f03dd52a5223]",
+        "[REF:39f14359d82511b9283dbcdaaeb9cbdbb08e2db2]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P054",
+        "S07-P057"
+      ]
+    },
+    {
+      "block_index": 7,
+      "title": "End-to-End System Integration and Hybrid Architectures",
+      "block_type": "explanatory_body",
+      "goal": "Extend co-design to the system level, showing how joint optimization with algorithms and hybrid refractive elements resolves remaining trade-offs.",
+      "prose": "Building on the integration of fabrication constraints, co-design must further expand to end-to-end system optimization, where metasurface geometry and downstream computational algorithms are jointly tuned to overcome physical limitations. In this framework, the optical element does not need to form a perfect image independently; instead, it encodes information in a way that a specific post-processing algorithm can optimally reconstruct. For instance, recent work demonstrates that co-optimizing a single-layer metasurface with a nonlinear Planck-regression algorithm enables high-quality temperature map reconstruction from long-wave infrared radiation, effectively bypassing the delay-bandwidth constraints that typically require bulky multi-layer optics. This joint design relies on differentiable electromagnetic simulators that link geometric parameters directly to complex reflection and transmission coefficients, accurately accounting for multiple internal reflections within thin-film layers during the optimization process. Furthermore, hybrid meta-optical systems combine these flat elements with conventional refractive lenses to leverage the strengths of both platforms: refractive components provide bulk optical power while metasurfaces correct aberrations, achieving large spatial-spectral bandwidths suitable for augmented reality thermal imaging. By treating the sensor, optics, and algorithm as a unified differentiable pipeline, these strategies resolve trade-offs between miniaturization and performance that plague independently optimized subsystems, directly addressing the chapter's thesis that breaking the coupled mechanism bottleneck requires holistic design frameworks.",
+      "planned_claim_handles": [
+        "C05_END_END_CO_DESIGN_STRATEGIES_INTEGRATE_METASUR",
+        "C09_DIFFERENTIABLE_ELECTROMAGNETIC_SIMULATORS_ENAB",
+        "C19_HYBRID_META_OPTICAL_SYSTEMS_COMBINE_METASURFAC"
+      ],
+      "claim_handles": [
+        "C05_END_END_CO_DESIGN_STRATEGIES_INTEGRATE_METASUR",
+        "C09_DIFFERENTIABLE_ELECTROMAGNETIC_SIMULATORS_ENAB",
+        "C19_HYBRID_META_OPTICAL_SYSTEMS_COMBINE_METASURFAC"
+      ],
+      "evidence_handles": [
+        "E10_END_END_METASURFACE_DESIGN_TEMPERATURE_IMAGING",
+        "E19_END_END_DIFFERENTIABLE_DESIGN_GEOMETRIC_WAVEGU",
+        "E43_HYBRID_META_OPTICS_ENABLE_LARGE_SPATIAL_SPECTR"
+      ],
+      "covered_claim_handles": [
+        "C05_END_END_CO_DESIGN_STRATEGIES_INTEGRATE_METASUR",
+        "C09_DIFFERENTIABLE_ELECTROMAGNETIC_SIMULATORS_ENAB",
+        "C19_HYBRID_META_OPTICAL_SYSTEMS_COMBINE_METASURFAC"
+      ],
+      "covered_claim_ids": [
+        "S07-P010",
+        "S07-P033",
+        "S07-P067"
+      ],
+      "markers": [
+        "[REF:a17024e845e2f6fd28263e4cb1b08419b14c0cc3]",
+        "[REF:3c433d4fb670f3572b94625719ec5477f8bda472]",
+        "[REF:da22d2c0d7f07d72d16ef8e639439f0d0b8387dd]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P010",
+        "S07-P033",
+        "S07-P067"
+      ]
+    },
+    {
+      "block_index": 8,
+      "title": "Emerging Physical Principles and Multi-Physics Frontiers",
+      "block_type": "scientific_consequence",
+      "goal": "Highlight future directions involving BICs and multi-physics coupling that may fundamentally break current performance limits.",
+      "prose": "While system-level co-design addresses architectural trade-offs, emerging physical principles offer a pathway to fundamentally break performance limits through high-quality resonances. Symmetry-protected bound states in the continuum (BICs) represent modes that are theoretically decoupled from free space; by introducing controlled symmetry-breaking perturbations, such as dimerization, these evolve into leaky quasi-BICs with tunable quality factors (Q-factors) that scale inversely with perturbation strength. This mechanism enables precise wavefront control while maintaining strong field confinement, as demonstrated by toroidal-dipole-driven metasurfaces that achieve complete polarization selectivity and stable operation under wide-angle oblique incidence, outperforming prior designs limited to normal incidence. Toroidal-dipole-driven quasi-bound states in the continuum have been utilized to enable wide-angle near-field image display in dielectric metasurfaces, achieving complete polarization selectivity and stable operation under oblique incidence. Complementing these physical advances, computational frontiers employing frequency transfer techniques based on Euler latent dynamics propose methods to co-optimize metasurfaces under complex multi-physics coupling constraints. Together, these developments suggest that resolving the coupled mechanism bottleneck requires not only integrating fabrication tolerances but also leveraging exotic resonant states and advanced inverse design algorithms to jointly optimize optical efficiency, angular robustness, and system functionality.",
+      "planned_claim_handles": [
+        "C13_SYMMETRY_PROTECTED_BOUND_STATES_CONTINUUM_BICS",
+        "C31_FREQUENCY_TRANSFER_INVERSE_DESIGN_TECHNIQUES_B"
+      ],
+      "claim_handles": [
+        "C13_SYMMETRY_PROTECTED_BOUND_STATES_CONTINUUM_BICS",
+        "C31_FREQUENCY_TRANSFER_INVERSE_DESIGN_TECHNIQUES_B"
+      ],
+      "evidence_handles": [
+        "E27_PHASE_CHANGE_NONLOCAL_METASURFACES_DYNAMIC_WAV",
+        "E28_TOROIDAL_DIPOLE_DRIVEN_POLARIZATION_SELECTIVE",
+        "E67_FREQUENCY_TRANSFER_INVERSE_DESIGN_METASURFACE"
+      ],
+      "covered_claim_handles": [
+        "C13_SYMMETRY_PROTECTED_BOUND_STATES_CONTINUUM_BICS",
+        "C31_FREQUENCY_TRANSFER_INVERSE_DESIGN_TECHNIQUES_B"
+      ],
+      "covered_claim_ids": [
+        "S07-P052",
+        "S07-P124"
+      ],
+      "markers": [
+        "[REF:4a7069f2a07e502040760df66b8687901e360257]",
+        "[REF:5a46bf1115a13c8e88d03d52a56e80871e3550cd]",
+        "[REF:0196bb9874e9d2ccf041c735b0dc90b7d1183390]"
+      ],
+      "explanatory_handles": [
+        "A03"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Toroidal-dipole-driven quasi-bound states in the continuum have been utilized to enable wide-angle near-field image display in dielectric metasurfaces, achieving complete polarization selectivity and stable operation under oblique incidence.": [
+          "[REF:5a46bf1115a13c8e88d03d52a56e80871e3550cd]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S07-P052",
+        "S07-P124"
+      ]
+    }
+  ]
+}

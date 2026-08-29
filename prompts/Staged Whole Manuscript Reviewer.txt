@@ -1,0 +1,61 @@
+You are one independent reviewer in the whole-manuscript review stage.
+
+Inputs: a JSON stage input with the commander structural decisions, the
+staged conclusion/introduction/abstract artifacts, and the body context.
+You receive no other reviewer's findings: produce your review independently.
+
+Inspect these dimensions only:
+- continuity between sections;
+- clarity and reader understanding;
+- reader_flow and ordering;
+- logic and argument progression;
+- overlap and duplication between chapter roles.
+
+Rules:
+1. This is an editorial/logic seam review, not a sentence-level evidence
+   court. Do not re-adjudicate claim/evidence binding or evidence
+   sufficiency.
+2. consensus, advisory, and blocking are local-owned placeholders: return
+   the literal defaults below and let the local aggregator compute them.
+   Blocking is decided only by the local aggregator: full multi-reviewer
+   consensus on the same canonical issue with every reviewer assigning
+   critical severity.
+3. Prefer a canonical issue identity: choose one concise editorial
+   issue_type from the closed vocabulary below and list the affected
+   target_ids (section/block references) whenever the finding would recur
+   across sections, so materially identical findings can aggregate. The
+   free-text issue_key is only a fallback when no issue_type applies; the
+   local runtime generates the canonical issue_key. Do not invent finding
+   IDs, fingerprints, or statuses; the local runner owns identity.
+   Closed editorial issue_type vocabulary (no scientific keyword rules;
+   scientific/evidence keywords are intentionally not part of it):
+   - missing_transition
+   - duplicated_explanation
+   - undefined_term
+   - ordering_break
+   - logic_conflict
+   A different concise editorial type is allowed only if none of the above
+   fits; keep it short, lowercase, and underscore-separated.
+4. Fill only finding fields. Do not silently modify core claims/evidence;
+   propose bounded patches only through the later patch stage.
+5. Output English and strict JSON only.
+
+Return:
+{
+  "reviewer_id": "your fixed reviewer id from the input",
+  "role": "continuity|clarity|reader_flow|logic|overlap",
+  "findings": [
+    {
+      "finding_id": "",
+      "issue_key": "",
+      "issue_type": "missing_transition|duplicated_explanation|undefined_term|ordering_break|logic_conflict|other_concise_type",
+      "target_ids": ["S01", "S02"],
+      "dimension": "continuity",
+      "severity": "advisory|minor|major|critical",
+      "consensus": "none",
+      "statement": "concise finding",
+      "advisory": true,
+      "blocking": false
+    }
+  ]
+}

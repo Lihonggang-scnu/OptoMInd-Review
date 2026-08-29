@@ -1,0 +1,1205 @@
+{
+  "schema_version": "optomind.global_manuscript_commander.role_reviews.v2",
+  "fingerprint": "d117686ae16824b16659b12f3b43eac54462eb9f163de46e04c37942f857fe1c",
+  "roles": {
+    "structure_strategist": {
+      "role": "structure_strategist",
+      "status": "completed",
+      "mode": "live",
+      "model_tier": "c2_model",
+      "result": {
+        "diagnosis": {
+          "strengths": [
+            "The manuscript follows a logical technological pipeline: Physics (S01) -> Design (S02) -> Fabrication (S03) -> Modulation (S04) -> Applications (S05, S06) -> Synthesis (S07).",
+            "Strong central thesis regarding the 'uncoupled treatment' of design, fabrication, and modulation is consistently reinforced across sections.",
+            "Section contracts are well-defined with clear scope guardrails preventing topic bleed between adjacent sections."
+          ],
+          "risks": [
+            "Significant redundancy in Section S05 (Displays), which re-introduces inverse design algorithms (MOCLIP, physics-informed ML) that were exhaustively covered in S02. This breaks the narrative flow by forcing the reader to recall algorithmic details rather than focusing on system-level metrics.",
+            "Section S04 (Active Modulation) contains substantial text on inverse design frameworks (CycleGANs, residual networks) that belongs in S02 or S07, diluting the focus on speed-efficiency-bandwidth trade-offs.",
+            "Repetitive use of 'Building on...' transitions creates a monotonous rhetorical structure that may fatigue the reader.",
+            "S06 (Imaging/Computing) overlaps heavily with S05 in discussing hybrid meta-refractive systems and end-to-end design, blurring the distinction between display and imaging applications."
+          ]
+        },
+        "structure_candidates": [
+          {
+            "candidate_id": "CAND-1",
+            "story_shape": "Linear Pipeline",
+            "narrative_backbone": "Foundations -> Computation -> Realization -> Dynamics -> Application -> Synthesis. The reader moves from understanding the physical limits of light control to the computational tools used to engineer them, then to the physical constraints of manufacturing, followed by dynamic capabilities, and finally to specific application domains.",
+            "section_order": [
+              "S01",
+              "S02",
+              "S03",
+              "S04",
+              "S05",
+              "S06",
+              "S07"
+            ],
+            "reader_path": "1. Understand phase mechanisms and their intrinsic trade-offs. 2. Learn how algorithms translate these into geometries. 3. Recognize how fabrication degrades these ideal designs. 4. See how active materials add tunability but new penalties. 5. Evaluate system performance in displays. 6. Evaluate system performance in imaging/computing. 7. Synthesize cross-cutting bottlenecks.",
+            "rationale": "This preserves the author's intended chronological/logical flow. It is the safest option for maintaining the existing argument structure but requires heavy editing within S05 and S04 to remove redundant algorithmic content.",
+            "risks": [
+              "Reader fatigue due to repeated exposure to inverse design concepts in S05/S04 after they were established in S02.",
+              "S05 and S06 feel repetitive because both discuss hybrid systems and end-to-end optimization without clearly distinguishing the *metrics* of success (e.g., refresh rate vs. resolution)."
+            ]
+          },
+          {
+            "candidate_id": "CAND-2",
+            "story_shape": "Mechanism-Centric Vertical Slice",
+            "narrative_backbone": "Physics -> Design/Fabrication Coupling -> Dynamic Coupling -> Application Domains. This structure groups the 'static' pipeline (Design+Fab) together before introducing 'dynamic' elements, then splits into applications. It emphasizes the 'coupling' theme by keeping design/fab issues together.",
+            "section_order": [
+              "S01",
+              "S02",
+              "S03",
+              "S04",
+              "S06",
+              "S05",
+              "S07"
+            ],
+            "reader_path": "1. Physics limits. 2. Computational translation. 3. Physical realization limits. 4. Dynamic modulation limits. 5. Imaging/Computing applications (often static/high-res). 6. Display applications (often dynamic/brightness-focused). 7. Synthesis.",
+            "rationale": "By moving S06 before S05, we separate 'high-fidelity/static' imaging applications from 'dynamic/display' applications. S05 currently bleeds into S02; moving it later allows S02-S03-S04 to form a tight 'Device Engineering' block. S06 can focus on resolution/channel count, while S05 focuses on brightness/refresh rate.",
+            "risks": [
+              "Disrupts the conventional review structure where displays are often the primary application discussed first.",
+              "Requires careful rewriting of S05 to ensure it doesn't just repeat S04's modulation details but focuses purely on system integration."
+            ]
+          },
+          {
+            "candidate_id": "CAND-3",
+            "story_shape": "Problem-Solution Hierarchy",
+            "narrative_backbone": "The Bottleneck Framework. Instead of a linear pipeline, the review is organized by the *type* of bottleneck: 1. Physical Limits (S01), 2. Design-Fabrication Gap (S02+S03 merged conceptually), 3. Speed-Efficiency Gap (S04), 4. System-Level Integration (S05+S06), 5. Resolution (S07).",
+            "section_order": [
+              "S01",
+              "S02",
+              "S03",
+              "S04",
+              "S05",
+              "S06",
+              "S07"
+            ],
+            "reader_path": "1. What are the hard physical limits? 2. How do we bridge the gap between ideal design and real fabrication? 3. How do we achieve dynamics without losing efficiency? 4. How do we integrate these into functional systems (Displays/Imaging)? 5. How do we co-design to resolve all previous gaps?",
+            "rationale": "This candidate keeps the section order of CAND-1 but proposes a different *internal* organization strategy. It suggests merging the 'inverse design' discussion in S05 back into S02/S07, allowing S05 to focus strictly on *display metrics* (eye-box, gamut, brightness) and S06 on *imaging metrics* (resolution, FOV, SNR). This reduces redundancy significantly.",
+            "risks": [
+              "Requires significant restructuring of S05 and S06 content, potentially moving paragraphs between sections.",
+              "May lose the 'pipeline' narrative if not carefully framed as 'challenges' rather than 'steps'."
+            ]
+          }
+        ],
+        "reader_path_findings": [
+          {
+            "finding_id": "RF-01",
+            "section_id": "S05",
+            "assessment": "Role Overlap: S05 re-introduces detailed inverse design algorithms (MOCLIP, physics-informed ML, tandem networks) that were the core subject of S02. This forces the reader to re-learn algorithmic details instead of evaluating system-level display performance.",
+            "recommendation": "Move detailed algorithmic descriptions from S05 to S02 or S07. Retain only examples where the algorithm specifically enables a unique display feature (e.g., crosstalk suppression for multiplexed holograms). Focus S05 on metrics: viewing angle, color gamut, brightness, eye-box.",
+            "severity": "major",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RF-02",
+            "section_id": "S04",
+            "assessment": "Role Overlap: S04 contains extensive discussion of CycleGANs, residual networks, and gradient-based optimization for active metasurfaces. This belongs in S02 (Inverse Design) or S07 (Co-Design). S04 should focus on the *performance penalties* (speed, efficiency, bandwidth) of these active mechanisms.",
+            "recommendation": "Remove algorithmic architecture details from S04. Keep only the link between the mechanism (e.g., PCM switching) and its impact on holographic fidelity. Move algorithmic discussions to S02 or S07.",
+            "severity": "major",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RF-03",
+            "section_id": "S06",
+            "assessment": "Redundancy: S06 discusses hybrid meta-refractive lenses and end-to-end design, which overlaps with S05. The distinction between 'display' and 'imaging' applications is blurred.",
+            "recommendation": "Sharpen the distinction: S05 focuses on *human-perceived* metrics (brightness, refresh rate, color). S06 focuses on *machine/performance* metrics (resolution, field of view, channel count, SNR). Ensure S06 does not repeat S05's hybrid lens examples unless highlighting a different metric.",
+            "severity": "minor",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RF-04",
+            "section_id": "S01",
+            "assessment": "Structural Risk: S01 covers geometric phase, propagation phase, hybrid approaches, quasi-BICs, achromatic strategies, and static limitations. It is information-dense and risks overwhelming the reader before the pipeline begins.",
+            "recommendation": "Ensure S01 strictly limits itself to *mechanism characterization*. Defer any discussion of 'how to design' these mechanisms to S02. Keep the focus on physical trade-offs (bandwidth vs. efficiency vs. polarization).",
+            "severity": "advisory",
+            "fail_open": true
+          }
+        ],
+        "proposed_section_order": [
+          {
+            "section_id": "S01",
+            "reason": "Establishes physical foundations and mechanism trade-offs. Must come first."
+          },
+          {
+            "section_id": "S02",
+            "reason": "Describes computational translation of mechanisms. Should precede fabrication."
+          },
+          {
+            "section_id": "S03",
+            "reason": "Describes physical realization and disorder. Follows naturally from design."
+          },
+          {
+            "section_id": "S04",
+            "reason": "Introduces dynamics/modulation. Builds on static device understanding."
+          },
+          {
+            "section_id": "S06",
+            "reason": "Examines imaging/computing applications. Often relies on static/high-resolution aspects. Placing before S05 helps distinguish 'resolution/FOV' priorities from 'brightness/refresh' priorities in S05."
+          },
+          {
+            "section_id": "S05",
+            "reason": "Examines display applications. Focus on system integration and human-centric metrics. Moved after S06 to allow clearer separation of application domains."
+          },
+          {
+            "section_id": "S07",
+            "reason": "Synthesizes cross-cutting challenges and co-design strategies. Must be last."
+          }
+        ],
+        "section_decisions": [
+          {
+            "section_id": "S01",
+            "decision": "retain",
+            "rationale": "Strong foundation. Needs minor trimming of algorithmic references to stay focused on physics.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S02",
+            "decision": "retain",
+            "rationale": "Core content. Should serve as the definitive reference for inverse design methods.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S03",
+            "decision": "retain",
+            "rationale": "Essential for establishing the design-reality gap.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S04",
+            "decision": "reposition",
+            "rationale": "Content needs cleaning. Remove algorithmic details (CycleGANs, etc.) and focus on speed-efficiency-bandwidth trilemma.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S05",
+            "decision": "reposition",
+            "rationale": "Move after S06. Remove inverse design algorithm details. Focus on display metrics.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S06",
+            "decision": "reposition",
+            "rationale": "Move before S05. Sharpen focus on resolution/FOV/channel count to distinguish from S05.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S07",
+            "decision": "retain",
+            "rationale": "Critical synthesis. Needs to explicitly call out the redundancies identified in S04/S05 as evidence of the 'uncoupled' problem.",
+            "responsibility": "",
+            "provenance": ""
+          }
+        ],
+        "cross_section_conflicts": [
+          {
+            "conflict_type": "role_overlap",
+            "sections": [
+              "S02",
+              "S04",
+              "S05"
+            ],
+            "description": "Inverse design algorithms (deep learning, surrogate models, adjoint methods) are described in detail in S02, but also re-introduced in S04 (for active modulation) and S05 (for display optimization). This creates redundancy and breaks the narrative flow.",
+            "recommendation": "Consolidate all algorithmic descriptions in S02. In S04 and S05, refer to S02 for algorithmic details and focus only on how those algorithms interact with the specific constraints of modulation or display systems.",
+            "finding_id": ""
+          },
+          {
+            "conflict_type": "redundancy",
+            "sections": [
+              "S05",
+              "S06"
+            ],
+            "description": "Both sections discuss hybrid meta-refractive systems and end-to-end design. The distinction between 'display' and 'imaging' applications is not sharply drawn in the current text.",
+            "recommendation": "Define S05 by human-perception metrics (brightness, refresh rate, color gamut) and S06 by machine-performance metrics (resolution, FOV, SNR, channel count). Remove duplicate examples.",
+            "finding_id": ""
+          }
+        ],
+        "missing_axes": [],
+        "structure_gaps": [],
+        "paragraph_references": [],
+        "repeated_paper_roles": [],
+        "retained_advisory_issues": [
+          "S01 is dense; consider breaking into sub-sections if word count permits.",
+          "Transitions between sections rely heavily on 'Building on...' phrasing; vary rhetorical devices."
+        ],
+        "synthesis_findings": [],
+        "narrative_progression": [],
+        "overlap_recommendations": [],
+        "repeated_paper_role_audit": [],
+        "source_concentration": [],
+        "attribution_issues": [],
+        "citation_audit": [],
+        "retrieval_gap_proposals": [],
+        "visual_work_orders": [],
+        "selected_story_shape": null,
+        "section_argument_gaps": [],
+        "review_structure_gaps": [],
+        "gap_value_decisions": [],
+        "rejected_gap_candidates": [],
+        "coverage_gap_candidates": [],
+        "coverage_audit_summary": "",
+        "coverage_search_notes": "",
+        "affected_section_ids": [],
+        "proposed_patch_set": [],
+        "unresolved_issues": [],
+        "visual_evidence_notes": [],
+        "next_execution_stages": [],
+        "strengths": [],
+        "risks": [],
+        "evidence_outline_discipline": [],
+        "manuscript_diagnosis": "",
+        "read_only_declaration": {
+          "chapter_text_changed": false,
+          "retrieval_launched": false,
+          "note": "Advisory work order only."
+        }
+      },
+      "validation_issues": [],
+      "usage": {
+        "call_count": 1,
+        "api_call_count": 1,
+        "input_tokens": 181233,
+        "output_tokens": 3043,
+        "estimated_cost_cny": 0.116043,
+        "model_tier": "c2_model",
+        "actual_model": "qwen3.7-flash",
+        "token_usage_source": "provider_reported",
+        "cost_provenance": "configured_model_rate"
+      },
+      "repair_used": false,
+      "resume_skipped": false,
+      "updated_at": "2026-08-28T11:13:45.456941+00:00"
+    },
+    "scientific_synthesis_editor": {
+      "role": "scientific_synthesis_editor",
+      "status": "completed",
+      "mode": "live",
+      "model_tier": "c2_model",
+      "result": {
+        "synthesis_findings": [
+          {
+            "section_id": "S01",
+            "paragraph_id": "S01-P03",
+            "finding": "The paragraph introduces deep-learning-assisted inverse design to resolve cross-talk between geometric and propagation phases. This topic is explicitly forbidden in the section contract ('Do not cover computational design methods here—those belong to S02'). The discussion of neural networks and classifiers distracts from the physical characterization of the geometric phase mechanism.",
+            "finding_type": "scope_violation",
+            "source_paper_ids": [
+              "867c87ae195e0a5c2016732e0f43a8c703a7a788"
+            ],
+            "source_paper_trust_types": {
+              "867c87ae195e0a5c2016732e0f43a8c703a7a788": "core_evidence"
+            },
+            "boundary_conditions": "",
+            "finding_id": ""
+          },
+          {
+            "section_id": "S01",
+            "paragraph_id": "S01-P06",
+            "finding": "The text describes hybrid approaches that superimpose geometric and propagation phases. While relevant, it focuses heavily on the stability of resonant properties under rotation, which borders on algorithmic/structural optimization rather than pure physical mechanism definition. It should be tightened to focus strictly on the physical decoupling effect.",
+            "finding_type": "boundary_strengthening",
+            "source_paper_ids": [
+              "2a537b9b3aec2380ca8343d8bd5cc70e6d974970"
+            ],
+            "source_paper_trust_types": {
+              "2a537b9b3aec2380ca8343d8bd5cc70e6d974970": "core_evidence"
+            },
+            "boundary_conditions": "",
+            "finding_id": ""
+          },
+          {
+            "section_id": "S02",
+            "paragraph_id": "S02-P03",
+            "finding": "The text claims topology optimization 'often' requires binarization. In many modern adjoint-based formulations (especially those using density filters), the output is naturally binary or near-binary without a separate post-processing binarization step that degrades performance. This generalization may mislead readers about the state-of-the-art in continuous profile generation.",
+            "finding_type": "terminology_precision",
+            "source_paper_ids": [
+              "e29144a60ad5b45d897fa18bce4f835c765d822f",
+              "6898fb9b38a16056d0997abe1c40d3dcfc2c0b82"
+            ],
+            "source_paper_trust_types": {
+              "e29144a60ad5b45d897fa18bce4f835c765d822f": "core_evidence",
+              "6898fb9b38a16056d0997abe1c40d3dcfc2c0b82": "core_evidence"
+            },
+            "boundary_conditions": "",
+            "finding_id": ""
+          },
+          {
+            "section_id": "S03",
+            "paragraph_id": "S03-P01",
+            "finding": "The opening paragraph re-introduces inverse design definitions and benefits ('Inverse design represents a fundamental shift...'). Since S02 covers this extensively, S03 should immediately pivot to the translation gap (design-to-fabrication) rather than re-establishing the value of inverse design.",
+            "finding_type": "repetition",
+            "source_paper_ids": [
+              "2d3412a215f8b6d1d395bfaeec7ec0379c2e132e"
+            ],
+            "source_paper_trust_types": {
+              "2d3412a215f8b6d1d395bfaeec7ec0379c2e132e": "core_evidence"
+            },
+            "boundary_conditions": "",
+            "finding_id": ""
+          },
+          {
+            "section_id": "S04",
+            "paragraph_id": "S04-P04",
+            "finding": "This paragraph discusses data-driven inverse design frameworks (CycleGANs, VAEs) for active modulation. This content belongs in S02 (Computational Inverse Design). S04 should focus on the *physical* trade-offs of the active materials (speed, loss, bandwidth) once the structure is defined, not the algorithm used to define it.",
+            "finding_type": "scope_violation",
+            "source_paper_ids": [
+              "fd569438fd58ed1920ae43be4366bccc68ae96b0",
+              "534bc16c467c94bae9323a7fa64364a7c5ee3676"
+            ],
+            "source_paper_trust_types": {
+              "fd569438fd58ed1920ae43be4366bccc68ae96b0": "core_evidence",
+              "534bc16c467c94bae9323a7fa64364a7c5ee3676": "core_evidence"
+            },
+            "boundary_conditions": "",
+            "finding_id": ""
+          },
+          {
+            "section_id": "S04",
+            "paragraph_id": "S04-P05",
+            "finding": "Similar to P04, this paragraph details gradient-based optimization and physics-informed diffusion models. This is computational methodology, not active modulation mechanism analysis. It violates the scope guardrail to reserve computational methods for S02.",
+            "finding_type": "scope_violation",
+            "source_paper_ids": [
+              "9c20a790aa75f24b6f5a130711645c978484455e",
+              "2d3412a215f8b6d1d395bfaeec7ec0379c2e132e"
+            ],
+            "source_paper_trust_types": {
+              "9c20a790aa75f24b6f5a130711645c978484455e": "core_evidence",
+              "2d3412a215f8b6d1d395bfaeec7ec0379c2e132e": "core_evidence"
+            },
+            "boundary_conditions": "",
+            "finding_id": ""
+          },
+          {
+            "section_id": "S05",
+            "paragraph_id": "S05-P01",
+            "finding": "The section begins with a detailed explanation of inverse design foundations (MOCLIP, adjoint methods). This is redundant with S02 and S07. S05 should start directly with display architectures (transmissive/reflective) and metrics.",
+            "finding_type": "repetition",
+            "source_paper_ids": [
+              "e4817fc664074ddc772d9ae198871fc6cb7f8b7b",
+              "2d3412a215f8b6d1d395bfaeec7ec0379c2e132e"
+            ],
+            "source_paper_trust_types": {
+              "e4817fc664074ddc772d9ae198871fc6cb7f8b7b": "core_evidence",
+              "2d3412a215f8b6d1d395bfaeec7ec0379c2e132e": "core_evidence"
+            },
+            "boundary_conditions": "",
+            "finding_id": ""
+          },
+          {
+            "section_id": "S05",
+            "paragraph_id": "S05-P03",
+            "finding": "This paragraph discusses tandem architectures, generative models, and representation learning techniques. These are computational design topics that belong in S02. S05 should focus on system-level integration and application readiness.",
+            "finding_type": "scope_violation",
+            "source_paper_ids": [
+              "a881bff2781bda627de54299c45a6708d145c27a",
+              "fa86aab8916cbb533d714bce5861b01dabbf18cb",
+              "1710ffd8f90365fdbef063f85605601e2c7fc9f1"
+            ],
+            "source_paper_trust_types": {
+              "a881bff2781bda627de54299c45a6708d145c27a": "core_evidence",
+              "fa86aab8916cbb533d714bce5861b01dabbf18cb": "core_evidence",
+              "1710ffd8f90365fdbef063f85605601e2c7fc9f1": "core_evidence"
+            },
+            "boundary_conditions": "",
+            "finding_id": ""
+          }
+        ],
+        "reader_path_findings": [
+          {
+            "finding_id": "RP01",
+            "section_id": "S01",
+            "assessment": "The transition from static phase mechanisms to dynamic modulation in P09 is abrupt. The text jumps from discussing achromatic designs to the 'write-once' nature of metasurfaces without clearly signaling the shift from passive optical control to active material requirements.",
+            "recommendation": "Add a transitional sentence at the end of P08 or beginning of P09 explicitly stating that while passive mechanisms optimize static wavefronts, they lack temporal adaptability, necessitating the introduction of active modulation mechanisms.",
+            "severity": "minor",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RP02",
+            "section_id": "S02",
+            "assessment": "The narrative flow in S02 is repetitive regarding the 'design-reality gap'. This concept is introduced in P03, revisited in P08, and again in P09. This redundancy dilutes the impact of the argument.",
+            "recommendation": "Consolidate the discussion of the design-reality gap into a single cohesive argument in P08/P09, removing the premature foreshadowing in P03 to maintain narrative tension until the fabrication section.",
+            "severity": "advisory",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RP03",
+            "section_id": "S04",
+            "assessment": "S04 suffers from significant scope drift. Paragraphs P03-P05 discuss computational algorithms (CycleGANs, diffusion models) instead of the physical mechanisms of active modulation (PCMs, LCs, MEMS). This confuses the reader about whether the section is about hardware or software.",
+            "recommendation": "Rewrite P03-P05 to focus exclusively on the physical properties of active materials (switching speed, insertion loss, thermal/electrical actuation limits). Move all algorithmic discussions to S02.",
+            "severity": "critical",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RP04",
+            "section_id": "S05",
+            "assessment": "S05 begins by re-explaining inverse design concepts covered in S02. This creates a disjointed reading experience where the reader must re-learn computational foundations before reaching the actual display architecture discussion.",
+            "recommendation": "Remove the introductory paragraphs on inverse design (P01-P03) and begin S05 directly with display architectures (transmissive/reflective) and performance metrics.",
+            "severity": "major",
+            "fail_open": true
+          }
+        ],
+        "narrative_progression": [
+          {
+            "from_section_id": "S01",
+            "to_section_id": "S02",
+            "assessment": "The handoff is generally clear, but S01's inclusion of inverse design examples (P03) blurs the boundary. S02 then has to re-establish the context of inverse design evolution.",
+            "recommendation": "Ensure S01 concludes by explicitly stating that the physical limits of these mechanisms drive the need for advanced computational search strategies, setting up S02 cleanly.",
+            "finding_id": ""
+          },
+          {
+            "from_section_id": "S02",
+            "to_section_id": "S03",
+            "assessment": "The transition is strong. S02 ends by highlighting the 'design-reality gap', and S03 immediately addresses how fabrication processes create this gap.",
+            "recommendation": "Maintain this link. Ensure S03 does not re-explain *why* inverse design is hard, but rather *how* fabrication fails to meet the idealized outputs.",
+            "finding_id": ""
+          },
+          {
+            "from_section_id": "S03",
+            "to_section_id": "S04",
+            "assessment": "The transition is weak due to scope violations in S04. S03 ends on scalability/fabrication, but S04 starts by discussing the static nature of devices (good) but quickly devolves into computational design (bad).",
+            "recommendation": "Strengthen the link by framing S04 as the solution to the static limitation identified in S03/S01, focusing strictly on the physical implementation of tunability.",
+            "finding_id": ""
+          },
+          {
+            "from_section_id": "S04",
+            "to_section_id": "S05",
+            "assessment": "The transition is obscured by the repetition of computational topics in S05. S05 should build on the active mechanisms of S04 to show how they are integrated into displays.",
+            "recommendation": "Clarify that S05 evaluates the *system-level* performance of the mechanisms described in S01-S04 within specific display contexts.",
+            "finding_id": ""
+          }
+        ],
+        "overlap_recommendations": [
+          {
+            "sections": [
+              "S01",
+              "S02"
+            ],
+            "paper_id": "867c87ae195e0a5c2016732e0f43a8c703a7a788",
+            "trust_type": "core_evidence",
+            "recommendation": "Move the discussion of deep-learning-assisted inverse design for dual-spin/frequency multiplexing from S01 to S02. S01 should only describe the physical principle of the multiplexing; S02 should describe the algorithm used to achieve it.",
+            "finding_id": ""
+          },
+          {
+            "sections": [
+              "S02",
+              "S04"
+            ],
+            "paper_id": "fd569438fd58ed1920ae43be4366bccc68ae96b0",
+            "trust_type": "core_evidence",
+            "recommendation": "Remove CycleGAN references from S04. This paper supports generative inverse design, which belongs in S02. S04 should focus on the physical realization of the generated structures using phase-change materials.",
+            "finding_id": ""
+          },
+          {
+            "sections": [
+              "S02",
+              "S05"
+            ],
+            "paper_id": "e4817fc664074ddc772d9ae198871fc6cb7f8b7b",
+            "trust_type": "core_evidence",
+            "recommendation": "Remove MOCLIP/foundation model discussions from S05. This is a computational tool discussed in S02. S05 should focus on how such tools enable faster iteration for display prototypes, not the tool itself.",
+            "finding_id": ""
+          },
+          {
+            "sections": [
+              "S02",
+              "S04"
+            ],
+            "paper_id": "9c20a790aa75f24b6f5a130711645c978484455e",
+            "trust_type": "core_evidence",
+            "recommendation": "Move physics-informed diffusion model details from S04 to S02. S04 should only mention that such models exist if necessary to justify the feasibility of the active device design, but the mechanism of the model belongs in S02.",
+            "finding_id": ""
+          }
+        ],
+        "repeated_paper_roles": [],
+        "source_concentration": [],
+        "mechanism_strengthening_recommendations": [
+          {
+            "section_id": "S01",
+            "paragraph_id": "P05",
+            "mechanism_or_boundary": "Quasi-BIC Resonance",
+            "recommendation": "Clarify the boundary condition: Quasi-BICs offer high Q-factors but are extremely sensitive to fabrication disorder. Explicitly link this sensitivity to the upcoming discussion in S03 on tolerances."
+          },
+          {
+            "section_id": "S04",
+            "paragraph_id": "P02",
+            "mechanism_or_boundary": "Phase-Change Materials (VO2)",
+            "recommendation": "Strengthen the efficiency penalty description. Currently, it mentions 'increasing material loss'. Specify that the metallic state of VO2 introduces significant ohmic losses, drastically reducing diffraction efficiency compared to the insulating state."
+          }
+        ],
+        "evidence_outline_discipline": [],
+        "unresolved_issues": [
+          "S04 contains substantial content (P03-P05) that violates the section contract by covering computational inverse design. This needs to be excised or moved to S02.",
+          "S05 contains substantial content (P01-P03) that violates the section contract by re-explaining inverse design foundations. This needs to be removed to allow S05 to focus on display architectures."
+        ],
+        "retained_advisory_issues": [],
+        "proposed_section_order": [],
+        "section_decisions": [],
+        "cross_section_conflicts": [],
+        "missing_axes": [],
+        "structure_gaps": [],
+        "paragraph_references": [],
+        "repeated_paper_role_audit": [],
+        "attribution_issues": [],
+        "citation_audit": [],
+        "retrieval_gap_proposals": [],
+        "visual_work_orders": [],
+        "structure_candidates": [],
+        "selected_story_shape": null,
+        "section_argument_gaps": [],
+        "review_structure_gaps": [],
+        "gap_value_decisions": [],
+        "rejected_gap_candidates": [],
+        "coverage_gap_candidates": [],
+        "coverage_audit_summary": "",
+        "coverage_search_notes": "",
+        "affected_section_ids": [],
+        "proposed_patch_set": [],
+        "visual_evidence_notes": [],
+        "next_execution_stages": [],
+        "strengths": [],
+        "risks": [],
+        "diagnosis": {},
+        "manuscript_diagnosis": "",
+        "read_only_declaration": {
+          "chapter_text_changed": false,
+          "retrieval_launched": false,
+          "note": "Advisory work order only."
+        }
+      },
+      "validation_issues": [
+        "scientific_synthesis_editor: invalid JSON on first attempt (role output is not valid JSON); one bounded repair call used"
+      ],
+      "usage": {
+        "call_count": 2,
+        "api_call_count": 2,
+        "input_tokens": 363637,
+        "output_tokens": 6995,
+        "estimated_cost_cny": 0.23497,
+        "model_tier": "c2_model",
+        "actual_model": "qwen3.7-flash",
+        "token_usage_source": "provider_reported",
+        "cost_provenance": "configured_model_rate"
+      },
+      "repair_used": true,
+      "resume_skipped": false,
+      "updated_at": "2026-08-28T11:14:53.847261+00:00"
+    },
+    "coverage_auditor": {
+      "role": "coverage_auditor",
+      "status": "completed",
+      "mode": "live",
+      "model_tier": "c2_model",
+      "result": {
+        "coverage_audit_summary": "Audited sections S01-S07. The manuscript structure is logically sound, covering the pipeline from mechanisms to fabrication, modulation, and applications. However, a distinct structural gap exists in S04 regarding the specific treatment of Liquid Crystal (LC) integration, which is a dominant platform for dynamic holography but is currently subsumed under generic 'active materials' without addressing its unique coupling with metasurface geometry (e.g., LC-filled holes vs. overlay). Additionally, S06 lacks a dedicated subsection for Beam Steering/Scanning, treating it only as a brief mention, despite it being a primary application driver distinct from imaging.",
+        "section_argument_gap_candidates": [
+          {
+            "candidate_id": "S04-LC-GAP-01",
+            "gap_type": "section_argument_gap",
+            "unique_contribution": "A dedicated analysis of Liquid Crystal (LC) integrated metasurfaces, distinguishing between LC-overlay and LC-infiltrated architectures, and analyzing their specific speed-efficiency-bandwidth trade-offs compared to phase-change materials.",
+            "why_existing_structure_cannot_absorb": "S04 currently groups all active mechanisms together or focuses heavily on Phase-Change Materials (PCMs) like VO2/GST. It mentions LCs only in passing within the scope guardrails and general introduction. The physics of LC modulation (electro-optic effect, reorientation dynamics) differs fundamentally from PCM (structural phase transition), requiring a distinct argumentative role to address the specific trilemma constraints (e.g., lower speed than MEMS but higher efficiency than PCMs).",
+            "expected_nonduplicate_gain": "Clarifies the performance landscape of dynamic holography by separating the high-speed/low-efficiency regime (MEMS/EO) from the medium-speed/high-efficiency regime (LC) and low-speed/non-volatile regime (PCM).",
+            "section_id": "S04",
+            "paragraph_ids": [
+              "S04-P01",
+              "S04-P02"
+            ],
+            "missing_claim_roles": [
+              "liquid_crystal_metasurface_architectures",
+              "lc_modulation_speed_efficiency_tradeoff"
+            ],
+            "fact_units": [],
+            "required_material_strength": {
+              "min_papers": 3,
+              "type": "comparative_performance_data"
+            },
+            "success_criterion": "The new subsection must explicitly compare LC-integrated metasurfaces against PCMs and MEMS along the axes of modulation speed (Hz-kHz), diffraction efficiency (>50%), and spectral bandwidth, citing at least three representative works demonstrating these metrics.",
+            "affected_sections": [
+              "S04",
+              "S05"
+            ],
+            "confidence": "high"
+          },
+          {
+            "candidate_id": "S06-BEAMSTEER-GAP-01",
+            "gap_type": "section_argument_gap",
+            "unique_contribution": "A focused examination of Metasurface Holographic Beam Steering for LiDAR and Free-Space Optical (FSO) communications, highlighting the specific metric priorities (scan angle, beam divergence, eye safety) that differ from display/imaging applications.",
+            "why_existing_structure_cannot_absorb": "S06's current text focuses almost exclusively on computational imaging, microscopy, and endoscopy. Beam steering is mentioned only in the section title and one sentence in P09. This application domain imposes different constraints (e.g., wide-angle scanning, dynamic focal length adjustment) that reveal different facets of the mechanism-coupling problem (e.g., polarization dependence in steering vs. imaging).",
+            "expected_nonduplicate_gain": "Expands the review's applicability scope to include sensing and communications, providing a complete picture of the metasurface holography ecosystem beyond displays and bio-imaging.",
+            "section_id": "S06",
+            "paragraph_ids": [
+              "S06-P01",
+              "S06-P09"
+            ],
+            "missing_claim_roles": [
+              "beam_steering_metrics",
+              "lidar_fso_application_readiness"
+            ],
+            "fact_units": [],
+            "required_material_strength": {
+              "min_papers": 2,
+              "type": "application_demonstration"
+            },
+            "success_criterion": "The new subsection must describe at least two distinct beam steering architectures (e.g., geometric phase based, propagation phase based) and quantify their scan range and resolution, contrasting them with the resolution/FOV priorities of imaging systems discussed elsewhere in S06.",
+            "affected_sections": [
+              "S06",
+              "S07"
+            ],
+            "confidence": "medium"
+          }
+        ],
+        "review_structure_gap_candidates": [],
+        "retained_advisory_issues": [
+          "S04 Scope: Ensure the new LC subsection does not overlap with S05's display readiness discussion; keep S04 focused on the physical mechanism limits and S05 on system integration.",
+          "S06 Scope: Ensure the beam steering content remains distinct from S05's AR/VR waveguide discussions by focusing on free-space propagation and LiDAR-specific metrics."
+        ],
+        "proposed_section_order": [],
+        "section_decisions": [],
+        "cross_section_conflicts": [],
+        "missing_axes": [],
+        "structure_gaps": [],
+        "paragraph_references": [],
+        "synthesis_findings": [],
+        "narrative_progression": [],
+        "overlap_recommendations": [],
+        "repeated_paper_roles": [],
+        "repeated_paper_role_audit": [],
+        "source_concentration": [],
+        "attribution_issues": [],
+        "citation_audit": [],
+        "retrieval_gap_proposals": [],
+        "visual_work_orders": [],
+        "structure_candidates": [],
+        "selected_story_shape": null,
+        "reader_path_findings": [],
+        "section_argument_gaps": [],
+        "review_structure_gaps": [],
+        "gap_value_decisions": [],
+        "rejected_gap_candidates": [],
+        "coverage_gap_candidates": [
+          {
+            "candidate_id": "S04-LC-GAP-01",
+            "gap_type": "section_argument_gap",
+            "unique_contribution": "A dedicated analysis of Liquid Crystal (LC) integrated metasurfaces, distinguishing between LC-overlay and LC-infiltrated architectures, and analyzing their specific speed-efficiency-bandwidth trade-offs compared to phase-change materials.",
+            "why_existing_structure_cannot_absorb": "S04 currently groups all active mechanisms together or focuses heavily on Phase-Change Materials (PCMs) like VO2/GST. It mentions LCs only in passing within the scope guardrails and general introduction. The physics of LC modulation (electro-optic effect, reorientation dynamics) differs fundamentally from PCM (structural phase transition), requiring a distinct argumentative role to address the specific trilemma constraints (e.g., lower speed than MEMS but higher efficiency than PCMs).",
+            "expected_nonduplicate_gain": "Clarifies the performance landscape of dynamic holography by separating the high-speed/low-efficiency regime (MEMS/EO) from the medium-speed/high-efficiency regime (LC) and low-speed/non-volatile regime (PCM).",
+            "section_id": "S04",
+            "paragraph_ids": [
+              "S04-P01",
+              "S04-P02"
+            ],
+            "missing_claim_roles": [
+              "liquid_crystal_metasurface_architectures",
+              "lc_modulation_speed_efficiency_tradeoff"
+            ],
+            "fact_units": [],
+            "required_material_strength": {
+              "min_papers": 3,
+              "type": "comparative_performance_data"
+            },
+            "success_criterion": "The new subsection must explicitly compare LC-integrated metasurfaces against PCMs and MEMS along the axes of modulation speed (Hz-kHz), diffraction efficiency (>50%), and spectral bandwidth, citing at least three representative works demonstrating these metrics.",
+            "affected_sections": [
+              "S04",
+              "S05"
+            ],
+            "confidence": "high",
+            "status": "candidate"
+          },
+          {
+            "candidate_id": "S06-BEAMSTEER-GAP-01",
+            "gap_type": "section_argument_gap",
+            "unique_contribution": "A focused examination of Metasurface Holographic Beam Steering for LiDAR and Free-Space Optical (FSO) communications, highlighting the specific metric priorities (scan angle, beam divergence, eye safety) that differ from display/imaging applications.",
+            "why_existing_structure_cannot_absorb": "S06's current text focuses almost exclusively on computational imaging, microscopy, and endoscopy. Beam steering is mentioned only in the section title and one sentence in P09. This application domain imposes different constraints (e.g., wide-angle scanning, dynamic focal length adjustment) that reveal different facets of the mechanism-coupling problem (e.g., polarization dependence in steering vs. imaging).",
+            "expected_nonduplicate_gain": "Expands the review's applicability scope to include sensing and communications, providing a complete picture of the metasurface holography ecosystem beyond displays and bio-imaging.",
+            "section_id": "S06",
+            "paragraph_ids": [
+              "S06-P01",
+              "S06-P09"
+            ],
+            "missing_claim_roles": [
+              "beam_steering_metrics",
+              "lidar_fso_application_readiness"
+            ],
+            "fact_units": [],
+            "required_material_strength": {
+              "min_papers": 2,
+              "type": "application_demonstration"
+            },
+            "success_criterion": "The new subsection must describe at least two distinct beam steering architectures (e.g., geometric phase based, propagation phase based) and quantify their scan range and resolution, contrasting them with the resolution/FOV priorities of imaging systems discussed elsewhere in S06.",
+            "affected_sections": [
+              "S06",
+              "S07"
+            ],
+            "confidence": "medium",
+            "status": "candidate"
+          }
+        ],
+        "coverage_search_notes": "",
+        "affected_section_ids": [],
+        "proposed_patch_set": [],
+        "unresolved_issues": [],
+        "visual_evidence_notes": [],
+        "next_execution_stages": [],
+        "strengths": [],
+        "risks": [],
+        "evidence_outline_discipline": [],
+        "diagnosis": {},
+        "manuscript_diagnosis": "",
+        "read_only_declaration": {
+          "chapter_text_changed": false,
+          "retrieval_launched": false,
+          "note": "Advisory work order only."
+        }
+      },
+      "validation_issues": [],
+      "usage": {
+        "call_count": 1,
+        "api_call_count": 1,
+        "input_tokens": 181205,
+        "output_tokens": 1135,
+        "estimated_cost_cny": 0.111447,
+        "model_tier": "c2_model",
+        "actual_model": "qwen3.7-flash",
+        "token_usage_source": "provider_reported",
+        "cost_provenance": "configured_model_rate"
+      },
+      "repair_used": false,
+      "resume_skipped": false,
+      "updated_at": "2026-08-28T11:15:17.096517+00:00"
+    },
+    "evidence_attribution_critic": {
+      "role": "evidence_attribution_critic",
+      "status": "completed",
+      "mode": "live",
+      "model_tier": "c2_model",
+      "result": {
+        "section_argument_gaps": [
+          {
+            "gap_id": "GAP-S04-LC-01",
+            "gap_type": "section_argument_gap",
+            "unique_contribution": "A dedicated analysis of Liquid Crystal (LC) integrated metasurfaces, distinguishing between LC-overlay and LC-infiltrated architectures, and analyzing their specific speed-efficiency-bandwidth trade-offs compared to phase-change materials.",
+            "why_existing_structure_cannot_absorb": "S04 currently groups all active mechanisms together or focuses heavily on Phase-Change Materials (PCMs) like VO2/GST. It mentions LCs only in passing within the scope guardrails and general introduction. The physics of LC modulation (electro-optic effect, reorientation dynamics) differs fundamentally from PCM (structural phase transition), requiring a distinct argumentative role to address the specific trilemma constraints (e.g., lower speed than MEMS but higher efficiency than PCMs).",
+            "expected_nonduplicate_gain": "Clarifies the performance landscape of dynamic holography by separating the high-speed/low-efficiency regime (MEMS/EO) from the medium-speed/high-efficiency regime (LC) and low-speed/non-volatile regime (PCM).",
+            "missing_claim_roles": [
+              "liquid_crystal_metasurface_architectures",
+              "lc_modulation_speed_efficiency_tradeoff"
+            ],
+            "fact_units": [],
+            "required_material_strength": {
+              "min_papers": 3,
+              "type": "comparative_performance_data"
+            },
+            "success_criterion": "The new subsection must explicitly compare LC-integrated metasurfaces against PCMs and MEMS along the axes of modulation speed (Hz-kHz), diffraction efficiency (>50%), and spectral bandwidth, citing at least three representative works demonstrating these metrics.",
+            "one_round_stop_reason": "Once the LC subsection is added and validated against the success criterion, the gap is closed as no further structural refinement is needed for this axis.",
+            "affected_sections": [
+              "S04"
+            ],
+            "confidence": "high",
+            "existing_coverage": {
+              "paragraph_ids": [
+                "S04-P01",
+                "S04-P02"
+              ],
+              "summary": "S04-P01 introduces active modulation generally; S04-P02 details Phase-Change Materials (VO2). No dedicated discussion of LC architectures or their specific trade-offs exists."
+            },
+            "residual_gap": "Without this subsection, the review fails to characterize the dominant 'medium-speed/high-efficiency' quadrant of the active modulation trilemma, leaving a blind spot in the assessment of practical dynamic display readiness.",
+            "decision": "approve",
+            "status": "approved"
+          }
+        ],
+        "review_structure_gaps": [],
+        "gap_value_decisions": [
+          {
+            "decision_id": "DEC-S04-LC-01",
+            "gap_id": "GAP-S04-LC-01",
+            "decision": "approve",
+            "confidence": "high",
+            "reason": "The coverage auditor correctly identified that S04 lacks a dedicated section for Liquid Crystals, which are a primary platform for dynamic holography. The current text over-indexes on PCMs and computational design (which belongs in S02/S07). Adding an LC subsection provides necessary unique contribution regarding the speed-efficiency trade-off spectrum.",
+            "provenance_prior_role": "coverage_auditor"
+          }
+        ],
+        "rejected_gap_candidates": [
+          {
+            "rejection_id": "REJ-S06-BEAMSTEER-01",
+            "candidate_id": "S06-BEAMSTEER-GAP-01",
+            "gap_type": "section_argument_gap",
+            "decision": "reject",
+            "reason": "While beam steering is mentioned in the title, the current draft's focus on computational imaging and endoscopy is sufficiently distinct from displays. Beam steering can be adequately covered as a sub-topic within the existing imaging/computing narrative without requiring a full new subsection, especially given the word budget constraints. The 'unique contribution' is marginal compared to the LC gap.",
+            "existing_coverage": {
+              "paragraph_ids": [
+                "S06-P09"
+              ],
+              "summary": "S06-P09 briefly mentions beam steering for LiDAR/FSO. While thin, it establishes the application context. A full subsection is not strictly required to satisfy the section contract."
+            },
+            "residual_gap": "",
+            "provenance_prior_role": "coverage_auditor"
+          }
+        ],
+        "citation_audit": [],
+        "attribution_issues": [],
+        "source_concentration": [],
+        "retrieval_gap_proposals": [],
+        "visual_evidence_notes": [],
+        "coverage_search_notes": "Reviewed S01-S07. Confirmed S04's heavy reliance on PCM/VO2 examples and computational algorithm descriptions (CycleGANs, etc.) which were flagged by scientific synthesis editor as scope violations. The gap for LC integration is structurally necessary to balance the active modulation discussion. S06 beam steering gap rejected as lower priority due to existing brief mention and word budget limits.",
+        "retained_advisory_issues": [],
+        "proposed_section_order": [],
+        "section_decisions": [],
+        "cross_section_conflicts": [],
+        "missing_axes": [],
+        "structure_gaps": [],
+        "paragraph_references": [],
+        "synthesis_findings": [],
+        "narrative_progression": [],
+        "overlap_recommendations": [],
+        "repeated_paper_roles": [],
+        "repeated_paper_role_audit": [],
+        "visual_work_orders": [],
+        "structure_candidates": [],
+        "selected_story_shape": null,
+        "reader_path_findings": [],
+        "coverage_gap_candidates": [],
+        "coverage_audit_summary": "",
+        "affected_section_ids": [],
+        "proposed_patch_set": [],
+        "unresolved_issues": [],
+        "next_execution_stages": [],
+        "strengths": [],
+        "risks": [],
+        "evidence_outline_discipline": [],
+        "diagnosis": {},
+        "manuscript_diagnosis": "",
+        "read_only_declaration": {
+          "chapter_text_changed": false,
+          "retrieval_launched": false,
+          "note": "Advisory work order only."
+        }
+      },
+      "validation_issues": [],
+      "usage": {
+        "call_count": 1,
+        "api_call_count": 1,
+        "input_tokens": 190071,
+        "output_tokens": 1164,
+        "estimated_cost_cny": 0.116836,
+        "model_tier": "c2_model",
+        "actual_model": "qwen3.7-flash",
+        "token_usage_source": "provider_reported",
+        "cost_provenance": "configured_model_rate"
+      },
+      "repair_used": false,
+      "resume_skipped": false,
+      "updated_at": "2026-08-28T11:15:42.998989+00:00"
+    },
+    "commander_synthesis": {
+      "role": "commander_synthesis",
+      "status": "completed",
+      "mode": "live",
+      "model_tier": "c2_model",
+      "result": {
+        "manuscript_diagnosis": "The manuscript follows a logical technological pipeline (Physics -> Design -> Fabrication -> Modulation -> Applications -> Synthesis) but suffers from significant structural redundancy and scope violations. Specifically, Section S05 (Displays) and Section S04 (Active Modulation) re-introduce detailed computational inverse design algorithms (MOCLIP, CycleGANs, physics-informed ML) that were exhaustively covered in S02. This breaks the narrative flow by forcing the reader to re-learn algorithmic details rather than focusing on system-level metrics or physical trade-offs. Additionally, S04 lacks a dedicated analysis of Liquid Crystal (LC) integration, a dominant platform for dynamic holography, while over-indexing on Phase-Change Materials (PCMs). The section order is also suboptimal; moving S06 (Imaging/Computing) before S05 (Displays) allows for a clearer distinction between 'high-fidelity/static' imaging applications and 'dynamic/display' applications.",
+        "structure_candidates": [
+          {
+            "candidate_id": "CAND-1",
+            "story_shape": "Linear Pipeline",
+            "narrative_backbone": "Foundations -> Computation -> Realization -> Dynamics -> Application -> Synthesis. The reader moves from understanding the physical limits of light control to the computational tools used to engineer them, then to the physical constraints of manufacturing, followed by dynamic capabilities, and finally to specific application domains.",
+            "section_order": [
+              "S01",
+              "S02",
+              "S03",
+              "S04",
+              "S05",
+              "S06",
+              "S07"
+            ],
+            "reader_path": "1. Understand phase mechanisms and their intrinsic trade-offs. 2. Learn how algorithms translate these into geometries. 3. Recognize how fabrication degrades these ideal designs. 4. See how active materials add tunability but new penalties. 5. Evaluate system performance in displays. 6. Evaluate system performance in imaging/computing. 7. Synthesize cross-cutting bottlenecks.",
+            "rationale": "This preserves the author's intended chronological/logical flow. It is the safest option for maintaining the existing argument structure but requires heavy editing within S05 and S04 to remove redundant algorithmic content.",
+            "risks": [
+              "Reader fatigue due to repeated exposure to inverse design concepts in S05/S04 after they were established in S02.",
+              "S05 and S06 feel repetitive because both discuss hybrid systems and end-to-end optimization without clearly distinguishing the *metrics* of success (e.g., refresh rate vs. resolution)."
+            ]
+          },
+          {
+            "candidate_id": "CAND-2",
+            "story_shape": "Mechanism-Centric Vertical Slice",
+            "narrative_backbone": "Physics -> Design/Fabrication Coupling -> Dynamic Coupling -> Application Domains. This structure groups the 'static' pipeline (Design+Fab) together before introducing 'dynamic' elements, then splits into applications. It emphasizes the 'coupling' theme by keeping design/fab issues together.",
+            "section_order": [
+              "S01",
+              "S02",
+              "S03",
+              "S04",
+              "S06",
+              "S05",
+              "S07"
+            ],
+            "reader_path": "1. Physics limits. 2. Computational translation. 3. Physical realization limits. 4. Dynamic modulation limits. 5. Imaging/Computing applications (often static/high-res). 6. Display applications (often dynamic/brightness-focused). 7. Synthesis.",
+            "rationale": "By moving S06 before S05, we separate 'high-fidelity/static' imaging applications from 'dynamic/display' applications. S05 currently bleeds into S02; moving it later allows S02-S03-S04 to form a tight 'Device Engineering' block. S06 can focus on resolution/channel count, while S05 focuses on brightness/refresh rate.",
+            "risks": [
+              "Disrupts the conventional review structure where displays are often the primary application discussed first.",
+              "Requires careful rewriting of S05 to ensure it doesn't just repeat S04's modulation details but focuses purely on system integration."
+            ]
+          }
+        ],
+        "selected_story_shape": {
+          "candidate_id": "CAND-2",
+          "story_shape": "Mechanism-Centric Vertical Slice",
+          "rationale": "Selected CAND-2 to resolve the redundancy between S05 and S06 and to create a tighter 'Device Engineering' block (S02-S03-S04). Moving S06 before S05 sharpens the distinction between machine-performance metrics (resolution/FOV in S06) and human-perception metrics (brightness/refresh rate in S05). This structure better supports the central thesis of 'coupled mechanism bottlenecks' by grouping the static device engineering steps before splitting into application-specific evaluations.",
+          "provenance_prior_role": "structure_strategist"
+        },
+        "reader_path_findings": [
+          {
+            "finding_id": "RF-01",
+            "section_id": "S05",
+            "assessment": "Role Overlap: S05 re-introduces detailed inverse design algorithms (MOCLIP, physics-informed ML, tandem networks) that were the core subject of S02. This forces the reader to re-learn algorithmic details instead of evaluating system-level display performance.",
+            "recommendation": "Move detailed algorithmic descriptions from S05 to S02 or S07. Retain only examples where the algorithm specifically enables a unique display feature (e.g., crosstalk suppression for multiplexed holograms). Focus S05 on metrics: viewing angle, color gamut, brightness, eye-box.",
+            "severity": "major",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RF-02",
+            "section_id": "S04",
+            "assessment": "Role Overlap: S04 contains extensive discussion of CycleGANs, residual networks, and gradient-based optimization for active metasurfaces. This belongs in S02 (Inverse Design) or S07 (Co-Design). S04 should focus on the *performance penalties* (speed, efficiency, bandwidth) of these active mechanisms.",
+            "recommendation": "Remove algorithmic architecture details from S04. Keep only the link between the mechanism (e.g., PCM switching) and its impact on holographic fidelity. Move algorithmic discussions to S02 or S07.",
+            "severity": "major",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RF-03",
+            "section_id": "S06",
+            "assessment": "Redundancy: S06 discusses hybrid meta-refractive lenses and end-to-end design, which overlaps with S05. The distinction between 'display' and 'imaging' applications is blurred.",
+            "recommendation": "Sharpen the distinction: S05 focuses on *human-perceived* metrics (brightness, refresh rate, color). S06 focuses on *machine/performance* metrics (resolution, field of view, channel count, SNR). Ensure S06 does not repeat S05's hybrid lens examples unless highlighting a different metric.",
+            "severity": "minor",
+            "fail_open": true
+          }
+        ],
+        "proposed_section_order": [
+          {
+            "section_id": "S01",
+            "reason": "Establishes physical foundations and mechanism trade-offs. Must come first."
+          },
+          {
+            "section_id": "S02",
+            "reason": "Describes computational translation of mechanisms. Should precede fabrication."
+          },
+          {
+            "section_id": "S03",
+            "reason": "Describes physical realization and disorder. Follows naturally from design."
+          },
+          {
+            "section_id": "S04",
+            "reason": "Introduces dynamics/modulation. Builds on static device understanding. Needs cleaning of algorithmic content."
+          },
+          {
+            "section_id": "S06",
+            "reason": "Examines imaging/computing applications. Often relies on static/high-resolution aspects. Placing before S05 helps distinguish 'resolution/FOV' priorities from 'brightness/refresh' priorities in S05."
+          },
+          {
+            "section_id": "S05",
+            "reason": "Examines display applications. Focus on system integration and human-centric metrics. Moved after S06 to allow clearer separation of application domains."
+          },
+          {
+            "section_id": "S07",
+            "reason": "Synthesizes cross-cutting challenges and co-design strategies. Must be last."
+          }
+        ],
+        "section_decisions": [
+          {
+            "section_id": "S01",
+            "decision": "retain",
+            "rationale": "Strong foundation. Needs minor trimming of algorithmic references to stay focused on physics.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S02",
+            "decision": "retain",
+            "rationale": "Core content. Should serve as the definitive reference for inverse design methods.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S03",
+            "decision": "retain",
+            "rationale": "Essential for establishing the design-reality gap.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S04",
+            "decision": "reposition",
+            "rationale": "Content needs cleaning. Remove algorithmic details (CycleGANs, etc.) and focus on speed-efficiency-bandwidth trilemma. Add LC subsection.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S05",
+            "decision": "reposition",
+            "rationale": "Move after S06. Remove inverse design algorithm details. Focus on display metrics.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S06",
+            "decision": "reposition",
+            "rationale": "Move before S05. Sharpen focus on resolution/FOV/channel count to distinguish from S05.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S07",
+            "decision": "retain",
+            "rationale": "Critical synthesis. Needs to explicitly call out the redundancies identified in S04/S05 as evidence of the 'uncoupled' problem.",
+            "responsibility": "",
+            "provenance": ""
+          }
+        ],
+        "cross_section_conflicts": [
+          {
+            "conflict_type": "role_overlap",
+            "sections": [
+              "S02",
+              "S04",
+              "S05"
+            ],
+            "description": "Inverse design algorithms (deep learning, surrogate models, adjoint methods) are described in detail in S02, but also re-introduced in S04 (for active modulation) and S05 (for display optimization). This creates redundancy and breaks the narrative flow.",
+            "recommendation": "Consolidate all algorithmic descriptions in S02. In S04 and S05, refer to S02 for algorithmic details and focus only on how those algorithms interact with the specific constraints of modulation or display systems.",
+            "finding_id": ""
+          },
+          {
+            "conflict_type": "redundancy",
+            "sections": [
+              "S05",
+              "S06"
+            ],
+            "description": "Both sections discuss hybrid meta-refractive systems and end-to-end design. The distinction between 'display' and 'imaging' applications is not sharply drawn in the current text.",
+            "recommendation": "Define S05 by human-perception metrics (brightness, refresh rate, color gamut) and S06 by machine-performance metrics (resolution, FOV, SNR, channel count). Remove duplicate examples.",
+            "finding_id": ""
+          }
+        ],
+        "missing_axes": [],
+        "structure_gaps": [],
+        "section_argument_gaps": [],
+        "review_structure_gaps": [],
+        "gap_value_decisions": [
+          {
+            "decision_id": "DEC-S04-LC-01",
+            "gap_id": "GAP-S04-LC-01",
+            "decision": "approve",
+            "confidence": "high",
+            "reason": "The coverage auditor correctly identified that S04 lacks a dedicated section for Liquid Crystals, which are a primary platform for dynamic holography. The current text over-indexes on PCMs and computational design (which belongs in S02/S07). Adding an LC subsection provides necessary unique contribution regarding the speed-efficiency trade-off spectrum.",
+            "provenance_prior_role": "coverage_auditor"
+          }
+        ],
+        "rejected_gap_candidates": [
+          {
+            "rejection_id": "REJ-S06-BEAMSTEER-01",
+            "candidate_id": "S06-BEAMSTEER-GAP-01",
+            "gap_type": "section_argument_gap",
+            "decision": "reject",
+            "reason": "While beam steering is mentioned in the title, the current draft's focus on computational imaging and endoscopy is sufficiently distinct from displays. Beam steering can be adequately covered as a sub-topic within the existing imaging/computing narrative without requiring a full new subsection, especially given the word budget constraints. The 'unique contribution' is marginal compared to the LC gap.",
+            "existing_coverage": {
+              "paragraph_ids": [
+                "S06-P09"
+              ],
+              "summary": "S06-P09 briefly mentions beam steering for LiDAR/FSO. While thin, it establishes the application context. A full subsection is not strictly required to satisfy the section contract."
+            },
+            "residual_gap": "",
+            "provenance_prior_role": "coverage_auditor"
+          }
+        ],
+        "coverage_audit_summary": "Audited sections S01-S07. The manuscript structure is logically sound, covering the pipeline from mechanisms to fabrication, modulation, and applications. However, a distinct structural gap exists in S04 regarding the specific treatment of Liquid Crystal (LC) integration, which is a dominant platform for dynamic holography but is currently subsumed under generic 'active materials' without addressing its unique coupling with metasurface geometry (e.g., LC-filled holes vs. overlay). Additionally, S06 lacks a dedicated subsection for Beam Steering/Scanning, treating it only as a brief mention, despite it being a primary application driver distinct from imaging.",
+        "repeated_paper_role_audit": [],
+        "visual_work_orders": [],
+        "retrieval_gap_proposals": [],
+        "proposed_patch_set": [
+          {
+            "patch_id": "PATCH-S04-LC-ADD",
+            "section_id": "S04",
+            "operation": "insert_after",
+            "target_paragraph_id": "S04-P03",
+            "new_content_hash": "pending_generation",
+            "rationale": "Insert dedicated LC subsection to balance active modulation coverage."
+          },
+          {
+            "patch_id": "PATCH-S04-ALGO-REMOVE",
+            "section_id": "S04",
+            "operation": "delete",
+            "target_paragraph_ids": [
+              "S04-P04",
+              "S04-P05"
+            ],
+            "rationale": "Remove computational inverse design content (CycleGANs, diffusion models) that violates scope and belongs in S02/S07."
+          },
+          {
+            "patch_id": "PATCH-S05-ALGO-REMOVE",
+            "section_id": "S05",
+            "operation": "delete",
+            "target_paragraph_ids": [
+              "S05-P01",
+              "S05-P02",
+              "S05-P03"
+            ],
+            "rationale": "Remove inverse design foundational content that duplicates S02. Allow S05 to start directly with display architectures."
+          }
+        ],
+        "affected_section_ids": [
+          "S04",
+          "S05",
+          "S06"
+        ],
+        "next_execution_stages": [
+          "Execute PATCH-S04-ALGO-REMOVE to clean S04 scope.",
+          "Execute PATCH-S04-LC-ADD to insert LC analysis.",
+          "Execute PATCH-S05-ALGO-REMOVE to clean S05 scope.",
+          "Reorder sections to S01-S02-S03-S04-S06-S05-S07.",
+          "Run local fail-open review on cleaned sections."
+        ],
+        "retained_advisory_issues": [
+          "S01 is dense; consider breaking into sub-sections if word count permits.",
+          "Transitions between sections rely heavily on 'Building on...' phrasing; vary rhetorical devices."
+        ],
+        "read_only_declaration": {
+          "chapter_text_changed": false,
+          "retrieval_launched": false,
+          "note": "Advisory work order only."
+        },
+        "paragraph_references": [],
+        "synthesis_findings": [],
+        "narrative_progression": [],
+        "overlap_recommendations": [],
+        "repeated_paper_roles": [],
+        "source_concentration": [],
+        "attribution_issues": [],
+        "citation_audit": [],
+        "coverage_gap_candidates": [],
+        "coverage_search_notes": "",
+        "unresolved_issues": [],
+        "visual_evidence_notes": [],
+        "strengths": [],
+        "risks": [],
+        "evidence_outline_discipline": [],
+        "diagnosis": {}
+      },
+      "validation_issues": [
+        "section_argument_gap: dropped entry 0: missing required fields ['existing_coverage', 'residual_gap']"
+      ],
+      "usage": {
+        "call_count": 1,
+        "api_call_count": 1,
+        "input_tokens": 224629,
+        "output_tokens": 4289,
+        "estimated_cost_cny": 0.145071,
+        "model_tier": "c2_model",
+        "actual_model": "qwen3.7-flash",
+        "token_usage_source": "provider_reported",
+        "cost_provenance": "configured_model_rate"
+      },
+      "repair_used": false,
+      "resume_skipped": false,
+      "updated_at": "2026-08-28T11:16:39.025978+00:00"
+    }
+  }
+}

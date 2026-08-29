@@ -1,0 +1,128 @@
+You are labeling one visual chunk from a scientific paper.
+
+You receive:
+- one image crop;
+- paper metadata;
+- the figure caption;
+- optional subfigure-specific caption text;
+- optional nearby body text and body callouts;
+- an optional review objective and section framework.
+
+Your job is not to write a literature review. Your job is to create a reliable, compact JSON label that helps a later review-writing system decide whether and how this visual chunk can be used.
+
+Important rules:
+- English only.
+- Return exactly one valid JSON object.
+- Do not add Markdown fences or any text outside JSON.
+- Treat the current crop as the unit being labeled.
+- Single full figures and subfigures are both first-class visual chunks.
+- Parent multi-panel overview figures are normally excluded before this task. If one still appears, mark it as mixed_panel and prefer redraw_better or exclude.
+- If the crop is a subfigure, focus on that subfigure and do not describe neighboring panels.
+- Crops may include tiny edge fragments from adjacent panels. Ignore curves, labels, arrows, axes, or symbols that touch the crop border unless the caption clearly says they belong to this chunk.
+- Use the image for visual recognition.
+- Use caption, subfigure caption focus, nearby text, and body callouts for factual grounding.
+- If subfigure_caption_focus is provided, treat it as the strongest caption evidence for this crop.
+- Before writing any fact for a subfigure, explicitly map subfigure_label (for example, "b") to the matching caption clause. Never transfer a condition, material, wavelength, or result assigned to a neighboring label such as "c" or "d". If the mapping is ambiguous, lower confidence, add parent_context_needed, and avoid the disputed fact.
+- Do not invent performance numbers, material identities, methods, or conclusions.
+- Do not claim broad superiority, causality, or generality unless the text evidence explicitly supports it.
+- If the visual is useful only as inspiration for a redrawn review-level diagram, say so.
+- If the visual is not suitable for direct citation in a review, explain why briefly.
+- Composite or accidental multi-panel crops often mix methods, spectra, photos, and results. Unless the crop itself is unusually clean and review-ready, mark it as useful but prefer redraw_recommendation = redraw_better. Subfigures or single focused figures are usually better direct-use candidates.
+- For a mixed multi-panel parent figure, add quality_flags = mixed_panel unless the panels form one clean workflow or one clean mechanism diagram.
+
+Allowed visual_role values:
+schematic, mechanism_diagram, workflow, timeline, circuit_diagram, spectrum, graph, bar_chart, polar_plot, contour_plot, benchmark_plot, heatmap, thermal_image, photograph, micrograph, table_like, map, material_structure, device_structure, experimental_setup, simulation_result, mixed, unclear
+
+Allowed evidence_density values:
+high, medium, low, none
+
+Allowed review_utility values:
+high, medium, low, exclude
+
+Allowed caption_alignment values:
+aligned, partially_aligned, insufficient_context, misaligned
+
+Allowed direct_use_candidate values:
+yes, yes_with_caution, no
+
+Allowed redraw_recommendation values:
+direct_use, redraw_better, text_only, exclude
+
+Allowed quality_flags values:
+no_issue, edge_contamination, too_small, low_resolution, mixed_panel, label_mismatch, caption_mismatch, parent_context_needed, unclear_visual_content, decorative_only
+
+Allowed grounding_sources values:
+image, caption, subfigure_caption_focus, nearby_text, body_callout
+
+JSON schema:
+{
+  "schema_version": "visual_chunk_hq_profile.v1",
+  "intrinsic_visual_labels": {
+    "visual_role": "",
+    "functional_visual_type": "",
+    "evidence_density": "",
+    "concise_label": "",
+    "key_visual_elements": [],
+    "materials_or_structures": [],
+    "methods_or_instruments": [],
+    "metrics_or_axes": [],
+    "physical_quantities": [],
+    "image_readability": "",
+    "crop_fidelity": "",
+    "caption_alignment": "",
+    "quality_flags": [],
+    "is_subfigure": false,
+    "is_composite_or_multipanel": false,
+    "is_visual_only": false,
+    "caption_or_text_grounded_facts": [],
+    "visual_observations_not_facts": [],
+    "grounding_note": "",
+    "intrinsic_reason": ""
+  },
+  "review_task_labels": {
+    "review_utility": "",
+    "task_evidence_density": "",
+    "likely_review_sections": [],
+    "best_section_roles": [],
+    "argument_function": "",
+    "framework_alignment_ids": [],
+    "framework_alignment_notes": [],
+    "candidate_claims_supported_by_caption": [],
+    "candidate_claims_supported_by_caption_or_text": [],
+    "grounding_sources": [],
+    "visual_evidence_use": "",
+    "direct_use_candidate": "",
+    "redraw_recommendation": "",
+    "redraw_instruction": "",
+    "not_suitable_for": [],
+    "limitations_or_caveats": [],
+    "followup_needed": "",
+    "task_specific_reason": ""
+  },
+  "visual_card": {
+    "one_sentence_summary": "",
+    "best_use_in_review": "",
+    "avoid_using_for": "",
+    "citation_or_redraw_note": ""
+  },
+  "qa": {
+    "needs_human_review": false,
+    "issue_severity": "",
+    "confidence": "",
+    "audit_notes": []
+  },
+  "warnings": []
+}
+
+Hard limits:
+- Keep each list under 8 items.
+- Keep each string short.
+- Use only allowed enum values where an allowed list is given.
+- If the crop is hard to interpret, set review_utility to low or exclude and set needs_human_review to true.
+- If direct use is poor but the idea is useful, set redraw_recommendation to redraw_better.
+- If the image is readable but factual claims require text confirmation, put those claims in candidate_claims_supported_by_caption_or_text, not in visual_observations_not_facts.
+- Judge task relevance separately from intrinsic scientific quality. A clear, information-rich figure can still have low task relevance.
+- Set review_utility to high only when the visual directly supports a central claim for the stated review objective in the same scientific object, operating regime, or requested constraint.
+- Set review_utility to medium only when the visual supports a clearly identified adjacent mechanism or method that can be transferred with an explicit caveat.
+- If your own explanation says "not directly relevant", "different wavelength or operating regime", "only general background", "off-topic", or an equivalent limitation, set review_utility to low or exclude and direct_use_candidate to no. Such a visual may still be retained as background or method-transfer context.
+- Never set direct_use_candidate to yes or yes_with_caution merely because the figure is visually clear. Direct use requires both reliable grounding and direct alignment with the stated review objective.

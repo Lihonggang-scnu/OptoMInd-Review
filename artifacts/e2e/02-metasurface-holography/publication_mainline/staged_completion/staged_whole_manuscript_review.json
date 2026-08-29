@@ -1,0 +1,721 @@
+{
+  "schema_version": "optomind.staged_article_completion.v1",
+  "stage": "whole_manuscript_review",
+  "status": "completed",
+  "fingerprint": "223a78e017db8dcfa0c09fce79b6b1acf47561bf2b9e2a56087cea4299dbb76c",
+  "input_fingerprint": "b735c307ef32d718d249023b5d258d2af8aabfc2a0d9690794a45edc69b61af9",
+  "artifact_path": "<local-path>",
+  "approval_required": false,
+  "payload": {
+    "review": {
+      "stage": "whole_manuscript_review",
+      "findings": [
+        {
+          "finding_id": "GMR-001",
+          "issue_key": "duplicated_explanation:S02,S04,S05",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S02",
+            "S04",
+            "S05"
+          ],
+          "dimension": "reader_flow",
+          "severity": "major",
+          "consensus": "majority",
+          "statement": "Detailed descriptions of inverse design algorithms (e.g., deep learning surrogates, adjoint methods, tandem networks) appear exhaustively in S02, yet are reintroduced in S04 and S05. This forces the reader to backtrack conceptually rather than advancing into application-specific trade-offs, disrupting the technological pipeline narrative.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-002",
+          "issue_key": "duplicated_explanation:S02,S04,S05,S06",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S02",
+            "S04",
+            "S05",
+            "S06"
+          ],
+          "dimension": "overlap",
+          "severity": "major",
+          "consensus": "split",
+          "statement": "Detailed descriptions of computational inverse design algorithms (e.g., deep learning surrogates, adjoint methods, tandem networks) are repeated across S02, S04, S05, and S06. This forces the reader to re-learn algorithmic fundamentals rather than progressing to application-specific constraints, breaking the intended pipeline narrative.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-003",
+          "issue_key": "duplicated_explanation:S02-B001,S02-B002,S05-B001,S06-B001,S07-B001",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S02-B001",
+            "S02-B002",
+            "S05-B001",
+            "S06-B001",
+            "S07-B001"
+          ],
+          "dimension": "overlap",
+          "severity": "major",
+          "consensus": "split",
+          "statement": "The foundational definition of inverse design, its evolution from heuristics to computational optimization, and the mathematically ill-posed/non-unique nature of geometry-to-response mapping are exhaustively detailed in S02. These exact concepts are then redundantly re-explained in S05, S06, and S07. This forces the reader to re-learn core algorithmic premises rather than advancing the narrative toward application-specific constraints or system-level trade-offs.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-004",
+          "issue_key": "duplicated_explanation:S02-B005,S02-B006,S05-B002,S06-B002,S07-B002,S07-B003",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S02-B005",
+            "S02-B006",
+            "S05-B002",
+            "S06-B002",
+            "S07-B002",
+            "S07-B003"
+          ],
+          "dimension": "overlap",
+          "severity": "major",
+          "consensus": "split",
+          "statement": "Specific advanced algorithmic architectures (tandem/cascaded networks, physics-informed diffusion models, hybrid surrogate-adjoint frameworks, and foundation models like MOCLIP) are described in depth in S02. Nearly identical descriptions recur in S05, S06, and S07. Application-focused sections should instead reference S02 for algorithmic mechanics and focus exclusively on how these tools interact with the distinct physical tolerances, modulation speeds, or display metrics of their respective domains.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-005",
+          "issue_key": "ordering_break:S05,S06",
+          "issue_type": "ordering_break",
+          "target_ids": [
+            "S05",
+            "S06"
+          ],
+          "dimension": "reader_flow",
+          "severity": "minor",
+          "consensus": "majority",
+          "statement": "Placing S05 (Displays) immediately before S06 (Imaging/Computing) conflates human-perception metrics (brightness, refresh rate) with machine-performance metrics (resolution, FOV). Reversing this order would establish a cleaner thematic boundary between high-fidelity static imaging and dynamic display architectures.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-006",
+          "issue_key": "logic_conflict:S04-B003",
+          "issue_type": "logic_conflict",
+          "target_ids": [
+            "S04-B003"
+          ],
+          "dimension": "clarity",
+          "severity": "minor",
+          "consensus": "majority",
+          "statement": "Section title promises analysis of liquid crystal tuning, but the body text exclusively describes hybrid refractive-optic systems and MEMS, mentioning LCs only in a brief transitional phrase. This creates a direct contradiction between the stated topic and delivered content.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-007",
+          "issue_key": "duplicated_explanation:S01-B002,S01-B003",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S01-B002",
+            "S01-B003"
+          ],
+          "dimension": "clarity",
+          "severity": "minor",
+          "consensus": "split",
+          "statement": "Verbatim sentences are duplicated within individual blocks, likely due to generation artifacts, which disrupts reading flow and introduces unnecessary redundancy.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-008",
+          "issue_key": "duplicated_explanation:S03-B008,S04-B004,S05-B005,S06-B008,S07-B002",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S03-B008",
+            "S04-B004",
+            "S05-B005",
+            "S06-B008",
+            "S07-B002"
+          ],
+          "dimension": "continuity",
+          "severity": "minor",
+          "consensus": "split",
+          "statement": "The concept of the 'design-reality gap' (idealized simulations vs. fabrication disorder) is restated verbatim or near-verbatim across five separate blocks. While thematically consistent, the repetitive phrasing without progressive elaboration creates redundancy that dilutes the impact of each section's unique contribution.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-009",
+          "issue_key": "duplicated_explanation:S05-B003,S06-B003,S07-B007",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S05-B003",
+            "S06-B003",
+            "S07-B007"
+          ],
+          "dimension": "overlap",
+          "severity": "minor",
+          "consensus": "split",
+          "statement": "The concept of hybrid meta-refractive architectures and end-to-end co-design (jointly optimizing flat optics with conventional lenses or downstream reconstruction algorithms) is introduced and elaborated upon in S05, S06, and S07 without sufficient differentiation. The examples overlap significantly, blurring the intended distinction between human-perception-driven display applications (S05) and machine-performance-driven imaging/computing applications (S06). Consolidating these examples into a single cross-cutting discussion or clearly partitioning them by application metric would improve structural clarity.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-010",
+          "issue_key": "duplicated_explanation:S05,S06",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S05",
+            "S06"
+          ],
+          "dimension": "overlap",
+          "severity": "advisory",
+          "consensus": "split",
+          "statement": "Both sections independently elaborate on hybrid meta-refractive architectures and end-to-end co-design frameworks (e.g., Planck regression for thermal imaging). This redundancy dilutes the distinct focus each application domain should maintain, requiring consolidation to prevent repetitive exposition.",
+          "advisory": true,
+          "blocking": false
+        }
+      ],
+      "fail_open": true
+    },
+    "reviewers": [
+      {
+        "reviewer_id": "continuity",
+        "role": "continuity",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S02",
+              "S04",
+              "S05"
+            ],
+            "dimension": "overlap",
+            "severity": "advisory",
+            "consensus": "none",
+            "statement": "Inverse design algorithms (deep learning surrogates, tandem networks, adjoint optimization) are exhaustively detailed in S02, yet re-introduced with similar depth in S04 and S05. This role overlap forces readers to re-learn algorithmic foundations rather than focusing on application-specific constraints, breaking the intended pipeline flow.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "ordering_break",
+            "target_ids": [
+              "S05",
+              "S06"
+            ],
+            "dimension": "reader_flow",
+            "severity": "advisory",
+            "consensus": "none",
+            "statement": "The current sequence places Display applications (S05) before Imaging/Computing systems (S06). This ordering obscures the distinction between machine-performance metrics (resolution, FOV) and human-perception metrics (brightness, refresh rate). Reversing to S06 then S05 establishes a clearer logical progression from static/high-fidelity applications to dynamic/display systems.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "logic_conflict",
+            "target_ids": [
+              "S04-B003"
+            ],
+            "dimension": "clarity",
+            "severity": "advisory",
+            "consensus": "none",
+            "statement": "The block title explicitly promises coverage of 'Liquid Crystals and Polymers,' but the prose exclusively describes hybrid meta-refractive systems combining metasurfaces with conventional refractive optics. This title-prose mismatch creates a direct logical contradiction that disrupts reader comprehension and leaves a promised axis unaddressed.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S05",
+              "S06"
+            ],
+            "dimension": "overlap",
+            "severity": "advisory",
+            "consensus": "none",
+            "statement": "Both sections independently elaborate on hybrid meta-refractive architectures and end-to-end co-design frameworks (e.g., Planck regression for thermal imaging). This redundancy dilutes the distinct focus each application domain should maintain, requiring consolidation to prevent repetitive exposition.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      },
+      {
+        "reviewer_id": "clarity",
+        "role": "clarity",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S02",
+              "S04",
+              "S05"
+            ],
+            "dimension": "overlap",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "Inverse design algorithms (e.g., deep learning surrogates, adjoint methods, physics-informed ML) are exhaustively detailed in S02, yet re-introduced and explained again in S04 and S05. This forces the reader to re-learn algorithmic mechanics rather than focusing on how those algorithms interact with modulation/display constraints.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "logic_conflict",
+            "target_ids": [
+              "S04-B003"
+            ],
+            "dimension": "clarity",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "Section title promises analysis of liquid crystal tuning, but the body text exclusively describes hybrid refractive-optic systems and MEMS, mentioning LCs only in a brief transitional phrase. This creates a direct contradiction between the stated topic and delivered content.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S01-B002",
+              "S01-B003"
+            ],
+            "dimension": "clarity",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "Verbatim sentences are duplicated within individual blocks, likely due to generation artifacts, which disrupts reading flow and introduces unnecessary redundancy.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      },
+      {
+        "reviewer_id": "reader_flow",
+        "role": "reader_flow",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S02",
+              "S04",
+              "S05"
+            ],
+            "dimension": "reader_flow",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "Detailed descriptions of inverse design algorithms (e.g., deep learning surrogates, adjoint methods, tandem networks) appear exhaustively in S02, yet are reintroduced in S04 and S05. This forces the reader to backtrack conceptually rather than advancing into application-specific trade-offs, disrupting the technological pipeline narrative.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "ordering_break",
+            "target_ids": [
+              "S05",
+              "S06"
+            ],
+            "dimension": "reader_flow",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "Placing S05 (Displays) immediately before S06 (Imaging/Computing) conflates human-perception metrics (brightness, refresh rate) with machine-performance metrics (resolution, FOV). Reversing this order would establish a cleaner thematic boundary between high-fidelity static imaging and dynamic display architectures.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      },
+      {
+        "reviewer_id": "logic",
+        "role": "logic",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S02",
+              "S04",
+              "S05",
+              "S06"
+            ],
+            "dimension": "overlap",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "Detailed descriptions of computational inverse design algorithms (e.g., deep learning surrogates, adjoint methods, tandem networks) are repeated across S02, S04, S05, and S06. This forces the reader to re-learn algorithmic fundamentals rather than progressing to application-specific constraints, breaking the intended pipeline narrative.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "ordering_break",
+            "target_ids": [
+              "S05",
+              "S06"
+            ],
+            "dimension": "reader_flow",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "Section S05 (Displays) precedes S06 (Imaging/Computing), disrupting the logical distinction between human-centric metrics (refresh rate, brightness) and machine-centric metrics (resolution, FOV). Reversing this order would group static/high-fidelity applications before dynamic/display architectures, improving thematic cohesion.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "logic_conflict",
+            "target_ids": [
+              "S04-B003"
+            ],
+            "dimension": "clarity",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "Block S04-B003 is titled 'Continuous Tuning with Liquid Crystals and Polymers' but the prose exclusively discusses hybrid meta-refractive lens architectures combining metasurfaces with conventional refractive optics. This disconnect misleads the reader regarding the actual modulation mechanism being reviewed and leaves a gap in the expected coverage of LC-based dynamic holography.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S03-B008",
+              "S04-B004",
+              "S05-B005",
+              "S06-B008",
+              "S07-B002"
+            ],
+            "dimension": "continuity",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "The concept of the 'design-reality gap' (idealized simulations vs. fabrication disorder) is restated verbatim or near-verbatim across five separate blocks. While thematically consistent, the repetitive phrasing without progressive elaboration creates redundancy that dilutes the impact of each section's unique contribution.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      },
+      {
+        "reviewer_id": "overlap",
+        "role": "overlap",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S02-B001",
+              "S02-B002",
+              "S05-B001",
+              "S06-B001",
+              "S07-B001"
+            ],
+            "dimension": "overlap",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "The foundational definition of inverse design, its evolution from heuristics to computational optimization, and the mathematically ill-posed/non-unique nature of geometry-to-response mapping are exhaustively detailed in S02. These exact concepts are then redundantly re-explained in S05, S06, and S07. This forces the reader to re-learn core algorithmic premises rather than advancing the narrative toward application-specific constraints or system-level trade-offs.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S02-B005",
+              "S02-B006",
+              "S05-B002",
+              "S06-B002",
+              "S07-B002",
+              "S07-B003"
+            ],
+            "dimension": "overlap",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "Specific advanced algorithmic architectures (tandem/cascaded networks, physics-informed diffusion models, hybrid surrogate-adjoint frameworks, and foundation models like MOCLIP) are described in depth in S02. Nearly identical descriptions recur in S05, S06, and S07. Application-focused sections should instead reference S02 for algorithmic mechanics and focus exclusively on how these tools interact with the distinct physical tolerances, modulation speeds, or display metrics of their respective domains.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S05-B003",
+              "S06-B003",
+              "S07-B007"
+            ],
+            "dimension": "overlap",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "The concept of hybrid meta-refractive architectures and end-to-end co-design (jointly optimizing flat optics with conventional lenses or downstream reconstruction algorithms) is introduced and elaborated upon in S05, S06, and S07 without sufficient differentiation. The examples overlap significantly, blurring the intended distinction between human-perception-driven display applications (S05) and machine-performance-driven imaging/computing applications (S06). Consolidating these examples into a single cross-cutting discussion or clearly partitioning them by application metric would improve structural clarity.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      }
+    ],
+    "status": "reviewed"
+  },
+  "provenance": {
+    "run_fingerprint": "e604ed77e4176bb829ad5d6c3609aeae84fb77a3091e38ade28c749b8cc604ff",
+    "stage_order_position": "5",
+    "usage_recorded": "True"
+  },
+  "usage": {
+    "agent_name": "StagedWholeManuscriptReviewer",
+    "model_tier": "c2_model",
+    "call_count": 5,
+    "workers": 4,
+    "total_input_tokens": 320091,
+    "total_output_tokens": 17257,
+    "repair_calls": 0,
+    "repair_used": false,
+    "reviewers": {
+      "continuity": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 67533,
+        "estimated_output_tokens": 697,
+        "input_tokens": 64019,
+        "output_tokens": 4016,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 4016,
+          "completion_tokens_details": {
+            "reasoning_tokens": 3308,
+            "text_tokens": 4016
+          },
+          "prompt_tokens": 64019,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 64019
+          },
+          "total_tokens": 68035
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 4,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      },
+      "clarity": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 67531,
+        "estimated_output_tokens": 457,
+        "input_tokens": 64019,
+        "output_tokens": 3787,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 3787,
+          "completion_tokens_details": {
+            "reasoning_tokens": 3289,
+            "text_tokens": 3787
+          },
+          "prompt_tokens": 64019,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 64019
+          },
+          "total_tokens": 67806
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 4,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      },
+      "reader_flow": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 67533,
+        "estimated_output_tokens": 352,
+        "input_tokens": 64019,
+        "output_tokens": 2631,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 2631,
+          "completion_tokens_details": {
+            "reasoning_tokens": 2256,
+            "text_tokens": 2631
+          },
+          "prompt_tokens": 64019,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 64019
+          },
+          "total_tokens": 66650
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 4,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      },
+      "logic": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 67530,
+        "estimated_output_tokens": 709,
+        "input_tokens": 64017,
+        "output_tokens": 4104,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 4104,
+          "completion_tokens_details": {
+            "reasoning_tokens": 3346,
+            "text_tokens": 4104
+          },
+          "prompt_tokens": 64017,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 64017
+          },
+          "total_tokens": 68121
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 4,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      },
+      "overlap": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 67531,
+        "estimated_output_tokens": 713,
+        "input_tokens": 64017,
+        "output_tokens": 2719,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 2719,
+          "completion_tokens_details": {
+            "reasoning_tokens": 1961,
+            "text_tokens": 2719
+          },
+          "prompt_tokens": 64017,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 64017
+          },
+          "total_tokens": 66736
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 4,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      }
+    }
+  },
+  "error": null,
+  "created_at": "2026-08-28T12:34:45.616771+00:00",
+  "updated_at": "2026-08-28T12:34:45.616771+00:00"
+}

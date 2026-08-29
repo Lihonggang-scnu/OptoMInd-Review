@@ -1,0 +1,85 @@
+{
+  "schema_version": "optomind.staged_article_completion.v1",
+  "stage": "abstract",
+  "status": "completed",
+  "fingerprint": "10bf9ddfc5ba746194bcd3fd26278dd00aae0e4bd80d5fc36e8027d5062ff187",
+  "input_fingerprint": "3b574861cddc4b694929ad028385947a755e4e162fed387beb08155bd4c4b4fe",
+  "artifact_path": "<local-path>",
+  "approval_required": false,
+  "payload": {
+    "workplan": {
+      "compresses": [
+        "commander_structure",
+        "conclusion",
+        "introduction"
+      ],
+      "outline": [
+        "Contextualize the shift to photonic computing driven by AI energy demands and electronic bottlenecks.",
+        "Define the material trade-off between silicon photonics and thin-film lithium niobate necessitating hybrid integration.",
+        "Summarize architectural primitives (MZI meshes) and their role in matrix multiplication engines for inference.",
+        "Articulate scalability constraints including thermal crosstalk, loss accumulation, and lack of native nonlinearity.",
+        "Present electronic-photonic co-design and inverse design as the critical solution pathway.",
+        "Delineate application scope: viable for static inference and interconnects, limited for dynamic training.",
+        "Conclude with the need for standardized benchmarking to transition from laboratory demonstrations to deployed systems."
+      ]
+    },
+    "draft": {
+      "text": "Scalable photonic computing has emerged as a pivotal response to the escalating energy demands of artificial intelligence and the physical limits of electronic interconnects. This review synthesizes the current state of the field, arguing that practical deployment relies not on a singular material breakthrough, but on the strategic convergence of heterogeneous platforms and rigorous electronic-photonic co-design. We examine the fundamental trade-offs between silicon photonics, which offers dense CMOS-compatible integration, and thin-film lithium niobate, which provides superior modulation efficiency. The analysis suggests that no single platform currently satisfies all requirements for scale and speed, necessitating hybrid integration strategies to leverage complementary strengths.\n\nCentral to this architecture are programmable Mach-Zehnder interferometer meshes that enable universal linear transformations. While these photonic matrix multiplication engines demonstrate transformative energy efficiency for low-precision inference, their scalability is constrained by compounding insertion loss, thermal crosstalk in dense arrays, and the absence of native optical nonlinearity. These physical limitations render purely photonic solutions ill-suited for dynamic training workloads requiring frequent weight updates. Instead, the technology appears most viable as a specialized accelerator for static inference tasks and as an ultra-high-bandwidth fabric for optical interconnects.\n\nTo overcome these systemic bottlenecks, we identify electronic-photonic co-design as the essential paradigm shift. By treating hardware geometry, control electronics, and algorithmic structure as a unified optimization problem, and leveraging physics-informed inverse design, the field can navigate complex design spaces that isolate component optimization cannot address. However, progress is currently impeded by fragmented evaluation methodologies. We conclude that transitioning from laboratory demonstrations to robust system-level deployment requires standardized benchmarking for energy-per-operation and computational fidelity. Ultimately, the trajectory of scalable photonic computing depends on synergistic integration across materials, intelligent design automation, and rigorous system validation."
+    },
+    "status": "drafted"
+  },
+  "provenance": {
+    "run_fingerprint": "a30c6ea9fd41f8f21e6ff7879c0d17d557462d02706df923248d90920f35fbcf",
+    "stage_order_position": "4",
+    "usage_recorded": "True"
+  },
+  "usage": {
+    "module": "StagedAbstractAuthor",
+    "agent_name": "StagedAbstractAuthor",
+    "model_tier": "c_model",
+    "model_name": "qwen3.5-plus",
+    "task_type": "research_chat",
+    "mock_llm": false,
+    "estimated_input_tokens": 8693,
+    "estimated_output_tokens": 833,
+    "input_tokens": 9196,
+    "output_tokens": 3606,
+    "token_usage_source": "provider_response",
+    "provider_usage": {
+      "prompt_tokens": 9196,
+      "completion_tokens": 3606,
+      "total_tokens": 12802,
+      "completion_tokens_details": {
+        "reasoning_tokens": 2996,
+        "text_tokens": 3606
+      },
+      "prompt_tokens_details": {
+        "text_tokens": 9196
+      }
+    },
+    "success": true,
+    "failure": false,
+    "error_type": "",
+    "fallback_used": false,
+    "api_key_source": "<local-path><private-credential>.txt#1",
+    "api_key_masked": "****",
+    "api_key_candidate_count": 4,
+    "api_key_rotation_count": 0,
+    "key_failures": [],
+    "model_fallback_used": false,
+    "fallback_chain": [],
+    "attempted_models": [
+      "qwen3.5-plus"
+    ],
+    "selected_model_index": 0,
+    "partial_stream": false,
+    "stream_interrupted_error": "",
+    "request_attempt_count": 1,
+    "retry_count": 0,
+    "repair_calls": 0,
+    "repair_used": false
+  },
+  "error": null,
+  "created_at": "2026-08-28T18:00:52.521713+00:00",
+  "updated_at": "2026-08-28T18:00:52.521713+00:00"
+}

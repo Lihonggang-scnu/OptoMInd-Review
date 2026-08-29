@@ -1,0 +1,904 @@
+{
+  "schema_version": "optomind.staged_article_completion.v1",
+  "stage": "whole_manuscript_review",
+  "status": "completed",
+  "fingerprint": "feed684b4f5b74e30fe24fee01300052ef5de0d0dd6328206c2fabc2be8fbaa8",
+  "input_fingerprint": "eb9ff239eec7776b6d2795c3fec3d3971fd10a7293b61cecd446662d726fca32",
+  "artifact_path": "<local-path>",
+  "approval_required": false,
+  "payload": {
+    "review": {
+      "stage": "whole_manuscript_review",
+      "findings": [
+        {
+          "finding_id": "GMR-001",
+          "issue_key": "ordering_break:S03,S04,S05,S06,S07",
+          "issue_type": "ordering_break",
+          "target_ids": [
+            "S03",
+            "S04",
+            "S05",
+            "S06",
+            "S07"
+          ],
+          "dimension": "reader_flow",
+          "severity": "major",
+          "consensus": "majority",
+          "statement": "The current section ordering places system-level applications (S04, S05) before the fundamental scalability bottlenecks (S06) and their corresponding solutions via co-design (S07). This disrupts the logical progression from physical constraints to architectural remedies, creating a circular narrative that undermines the structural thesis.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-002",
+          "issue_key": "duplicated_explanation:S01-B001,S01-B003,S02-B008,S03-B007,S04-B001,S05-B008,S06-B002,S07-B006",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S01-B001",
+            "S01-B003",
+            "S02-B008",
+            "S03-B007",
+            "S04-B001",
+            "S05-B008",
+            "S06-B002",
+            "S07-B006"
+          ],
+          "dimension": "overlap",
+          "severity": "major",
+          "consensus": "split",
+          "statement": "The phenomenon of thermal crosstalk is exhaustively defined and analyzed in eight separate blocks across five sections. Nearly identical explanations of its mechanism, impact on signal routing, and mitigation trade-offs are repeated, diluting the unique contribution of each section and violating the principle of distinct chapter roles.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-003",
+          "issue_key": "duplicated_explanation:S01-B005,S01-B006,S02-B003,S02-B004,S03-B003,S03-B004,S04-B003,S04-B004,S05-B002,S05-B003,S06-B005,S06-B006,S07-B002,S07-B003,S08-B001,S08-B002",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S01-B005",
+            "S01-B006",
+            "S02-B003",
+            "S02-B004",
+            "S03-B003",
+            "S03-B004",
+            "S04-B003",
+            "S04-B004",
+            "S05-B002",
+            "S05-B003",
+            "S06-B005",
+            "S06-B006",
+            "S07-B002",
+            "S07-B003",
+            "S08-B001",
+            "S08-B002"
+          ],
+          "dimension": "overlap",
+          "severity": "major",
+          "consensus": "split",
+          "statement": "Inverse design methodologies and deep learning surrogates are introduced and re-explained in nearly every section. While relevant to multiple topics, the repetitive detailing of algorithmic mechanisms, training costs, and generalization limits creates severe redundancy. These concepts should be consolidated into the designated methodology sections and treated as established enablers elsewhere.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-004",
+          "issue_key": "logic_conflict:S03,S06,S07",
+          "issue_type": "logic_conflict",
+          "target_ids": [
+            "S03",
+            "S06",
+            "S07"
+          ],
+          "dimension": "continuity",
+          "severity": "major",
+          "consensus": "split",
+          "statement": "Section S03 concludes by establishing precision and noise constraints, but immediately transitions to S04 (AI Acceleration) without formally defining the systemic scaling barriers. S06 later revisits these exact barriers (loss, crosstalk, control overhead) as if they are new discoveries. This disconnect prevents S07's co-design proposals from logically following as direct responses to the previously stated problems.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-005",
+          "issue_key": "duplicated_explanation:S01,S02,S03,S04,S05,S06,S07",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S01",
+            "S02",
+            "S03",
+            "S04",
+            "S05",
+            "S06",
+            "S07"
+          ],
+          "dimension": "overlap",
+          "severity": "major",
+          "consensus": "split",
+          "statement": "Core technical themes—including thermal crosstalk, inverse design/AI optimization, and heterogeneous BEOL integration—are exhaustively repeated across seven consecutive sections. Each section provides near-identical mechanistic explanations and citations, diluting the unique contribution of individual chapters and creating a circular reading experience.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-006",
+          "issue_key": "ordering_break:S04,S06,S07",
+          "issue_type": "ordering_break",
+          "target_ids": [
+            "S04",
+            "S06",
+            "S07"
+          ],
+          "dimension": "reader_flow",
+          "severity": "major",
+          "consensus": "split",
+          "statement": "The manuscript presents co-design methodologies and system-level applications (S04, S07) before establishing the fundamental scalability bottlenecks (S06). Reversing this sequence to Problem (S06) -> Solution (S07) -> Application (S04, S05) is necessary for logical progression.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-007",
+          "issue_key": "duplicated_explanation:S01,S02,S04,S05,S06,S07,S08",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S01",
+            "S02",
+            "S04",
+            "S05",
+            "S06",
+            "S07",
+            "S08"
+          ],
+          "dimension": "overlap",
+          "severity": "major",
+          "consensus": "split",
+          "statement": "Inverse design and AI-driven optimization are repeatedly explained in full detail across nearly every section. These topics should be centralized in S07 (Co-Design) and referenced elsewhere to avoid diluting each section's unique architectural or application focus.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-008",
+          "issue_key": "duplicated_explanation:S01,S04,S05,S06,S07,S08",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S01",
+            "S04",
+            "S05",
+            "S06",
+            "S07",
+            "S08"
+          ],
+          "dimension": "overlap",
+          "severity": "major",
+          "consensus": "split",
+          "statement": "The description of thin-film lithium niobate (TFLN) bonded to silicon photonics for hybrid integration appears verbatim or near-verbatim in six separate sections, obscuring the unique contribution of each architectural discussion.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-009",
+          "issue_key": "duplicated_explanation:S01,S02,S03,S05,S06,S07",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S01",
+            "S02",
+            "S03",
+            "S05",
+            "S06",
+            "S07"
+          ],
+          "dimension": "overlap",
+          "severity": "major",
+          "consensus": "split",
+          "statement": "The physical mechanism and impact of thermal crosstalk in dense thermo-optic arrays are explained identically across six sections, diluting the distinct focus of each chapter role.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-010",
+          "issue_key": "duplicated_explanation:S01,S02,S03,S04,S05,S06,S07,S08",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S01",
+            "S02",
+            "S03",
+            "S04",
+            "S05",
+            "S06",
+            "S07",
+            "S08"
+          ],
+          "dimension": "overlap",
+          "severity": "major",
+          "consensus": "split",
+          "statement": "The methodology, benefits, and limitations of inverse design and deep learning surrogates are repeatedly detailed throughout the manuscript, creating severe role overlap between architecture, engine, bottleneck, and co-design sections.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-011",
+          "issue_key": "logic_conflict:S01,S06,S07",
+          "issue_type": "logic_conflict",
+          "target_ids": [
+            "S01",
+            "S06",
+            "S07"
+          ],
+          "dimension": "continuity",
+          "severity": "minor",
+          "consensus": "split",
+          "statement": "Section S01 prematurely introduces hybrid integration and inverse design as primary unifying strategies, effectively resolving the material dichotomy before Section S06 formally defines the scaling bottlenecks. This collapses the intended structural tension between physical constraints and algorithmic solutions, weakening the argumentative buildup toward Section S07.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-012",
+          "issue_key": "missing_transition:S03,S04",
+          "issue_type": "missing_transition",
+          "target_ids": [
+            "S03",
+            "S04"
+          ],
+          "dimension": "continuity",
+          "severity": "minor",
+          "consensus": "split",
+          "statement": "The transition from S03 (Matrix Multiplication Engines) to S04 (AI Acceleration) lacks a bridging discussion on how hardware precision limits and control overheads dictate algorithmic workload suitability. Without first establishing these physical boundaries via S06, the shift to system-level AI performance metrics feels abrupt and disconnected from the underlying device physics.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-013",
+          "issue_key": "logic_conflict:S04,S06",
+          "issue_type": "logic_conflict",
+          "target_ids": [
+            "S04",
+            "S06"
+          ],
+          "dimension": "logic",
+          "severity": "minor",
+          "consensus": "split",
+          "statement": "S04 analyzes the performance gap between inference and training workloads, attributing training difficulties to hardware rigidity. However, the physical mechanisms causing this rigidity (thermal crosstalk, cascaded loss) are not defined until S06. Establishing these physical constraints earlier would ground the workload analysis in S04.",
+          "advisory": true,
+          "blocking": false
+        },
+        {
+          "finding_id": "GMR-014",
+          "issue_key": "duplicated_explanation:S01,S03,S06,S07",
+          "issue_type": "duplicated_explanation",
+          "target_ids": [
+            "S01",
+            "S03",
+            "S06",
+            "S07"
+          ],
+          "dimension": "overlap",
+          "severity": "minor",
+          "consensus": "split",
+          "statement": "The impact of fabrication tolerances (waveguide width/thickness variations) on MZI fidelity is restated across multiple sections without advancing the narrative, contributing to structural redundancy.",
+          "advisory": true,
+          "blocking": false
+        }
+      ],
+      "fail_open": true
+    },
+    "reviewers": [
+      {
+        "reviewer_id": "continuity",
+        "role": "continuity",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "ordering_break",
+            "target_ids": [
+              "S03",
+              "S04",
+              "S05",
+              "S06",
+              "S07"
+            ],
+            "dimension": "reader_flow",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "The current section ordering places system-level applications (S04, S05) before the fundamental scalability bottlenecks (S06) and their corresponding solutions via co-design (S07). This disrupts the logical progression from physical constraints to architectural remedies, creating a circular narrative that undermines the structural thesis.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S01-B001",
+              "S01-B003",
+              "S02-B008",
+              "S03-B007",
+              "S04-B001",
+              "S05-B008",
+              "S06-B002",
+              "S07-B006"
+            ],
+            "dimension": "overlap",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "The phenomenon of thermal crosstalk is exhaustively defined and analyzed in eight separate blocks across five sections. Nearly identical explanations of its mechanism, impact on signal routing, and mitigation trade-offs are repeated, diluting the unique contribution of each section and violating the principle of distinct chapter roles.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S01-B005",
+              "S01-B006",
+              "S02-B003",
+              "S02-B004",
+              "S03-B003",
+              "S03-B004",
+              "S04-B003",
+              "S04-B004",
+              "S05-B002",
+              "S05-B003",
+              "S06-B005",
+              "S06-B006",
+              "S07-B002",
+              "S07-B003",
+              "S08-B001",
+              "S08-B002"
+            ],
+            "dimension": "overlap",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "Inverse design methodologies and deep learning surrogates are introduced and re-explained in nearly every section. While relevant to multiple topics, the repetitive detailing of algorithmic mechanisms, training costs, and generalization limits creates severe redundancy. These concepts should be consolidated into the designated methodology sections and treated as established enablers elsewhere.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "logic_conflict",
+            "target_ids": [
+              "S03",
+              "S06",
+              "S07"
+            ],
+            "dimension": "continuity",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "Section S03 concludes by establishing precision and noise constraints, but immediately transitions to S04 (AI Acceleration) without formally defining the systemic scaling barriers. S06 later revisits these exact barriers (loss, crosstalk, control overhead) as if they are new discoveries. This disconnect prevents S07's co-design proposals from logically following as direct responses to the previously stated problems.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      },
+      {
+        "reviewer_id": "clarity",
+        "role": "clarity",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "ordering_break",
+            "target_ids": [
+              "S03",
+              "S04",
+              "S05",
+              "S06",
+              "S07"
+            ],
+            "dimension": "reader_flow",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "The manuscript currently orders system-level applications (S04, S05) before the foundational scalability bottlenecks (S06) and their corresponding co-design solutions (S07). This reverses the logical problem-to-solution arc, causing readers to encounter architectural fixes before the physical limitations they address are fully established.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S01",
+              "S02",
+              "S03",
+              "S04",
+              "S05",
+              "S06",
+              "S07"
+            ],
+            "dimension": "overlap",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "Core technical themes—including thermal crosstalk, inverse design/AI optimization, and heterogeneous BEOL integration—are exhaustively repeated across seven consecutive sections. Each section provides near-identical mechanistic explanations and citations, diluting the unique contribution of individual chapters and creating a circular reading experience.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "logic_conflict",
+            "target_ids": [
+              "S01",
+              "S06",
+              "S07"
+            ],
+            "dimension": "continuity",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "Section S01 prematurely introduces hybrid integration and inverse design as primary unifying strategies, effectively resolving the material dichotomy before Section S06 formally defines the scaling bottlenecks. This collapses the intended structural tension between physical constraints and algorithmic solutions, weakening the argumentative buildup toward Section S07.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      },
+      {
+        "reviewer_id": "reader_flow",
+        "role": "reader_flow",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "ordering_break",
+            "target_ids": [
+              "S03",
+              "S04",
+              "S05",
+              "S06",
+              "S07"
+            ],
+            "dimension": "reader_flow",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "The manuscript presents system-level application evaluations (S04, S05) prior to defining the fundamental scalability bottlenecks (S06) and introducing the co-design methodologies (S07) required to overcome them. This reverses the logical problem-solution progression, forcing readers to encounter architectural solutions before the physical constraints that necessitate them are established.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S01",
+              "S02",
+              "S03",
+              "S04",
+              "S05",
+              "S06",
+              "S07"
+            ],
+            "dimension": "overlap",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "Core mechanisms—specifically inverse design, heterogeneous BEOL integration, and thermal crosstalk—are exhaustively re-explained across nearly every section. This pervasive repetition disrupts reading flow by forcing redundant conceptual grounding instead of building upon previously established context, diluting the distinct analytical focus of each chapter.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "missing_transition",
+            "target_ids": [
+              "S03",
+              "S04"
+            ],
+            "dimension": "continuity",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "The transition from S03 (Matrix Multiplication Engines) to S04 (AI Acceleration) lacks a bridging discussion on how hardware precision limits and control overheads dictate algorithmic workload suitability. Without first establishing these physical boundaries via S06, the shift to system-level AI performance metrics feels abrupt and disconnected from the underlying device physics.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      },
+      {
+        "reviewer_id": "logic",
+        "role": "logic",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "ordering_break",
+            "target_ids": [
+              "S04",
+              "S06",
+              "S07"
+            ],
+            "dimension": "reader_flow",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "The manuscript presents co-design methodologies and system-level applications (S04, S07) before establishing the fundamental scalability bottlenecks (S06). Reversing this sequence to Problem (S06) -> Solution (S07) -> Application (S04, S05) is necessary for logical progression.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S01",
+              "S02",
+              "S04",
+              "S05",
+              "S06",
+              "S07",
+              "S08"
+            ],
+            "dimension": "overlap",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "Inverse design and AI-driven optimization are repeatedly explained in full detail across nearly every section. These topics should be centralized in S07 (Co-Design) and referenced elsewhere to avoid diluting each section's unique architectural or application focus.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "logic_conflict",
+            "target_ids": [
+              "S04",
+              "S06"
+            ],
+            "dimension": "logic",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "S04 analyzes the performance gap between inference and training workloads, attributing training difficulties to hardware rigidity. However, the physical mechanisms causing this rigidity (thermal crosstalk, cascaded loss) are not defined until S06. Establishing these physical constraints earlier would ground the workload analysis in S04.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S01",
+              "S04",
+              "S05",
+              "S06",
+              "S07",
+              "S08"
+            ],
+            "dimension": "overlap",
+            "severity": "advisory",
+            "consensus": "none",
+            "statement": "Heterogeneous BEOL integration (TFLN/SiPh) is described in exhaustive detail across six sections. Consolidating the technical description in S01 and S07, while treating it as a standard platform option in the remaining sections, will streamline the narrative.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      },
+      {
+        "reviewer_id": "overlap",
+        "role": "overlap",
+        "findings": [
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S01",
+              "S02",
+              "S03",
+              "S05",
+              "S06",
+              "S07"
+            ],
+            "dimension": "overlap",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "The physical mechanism and impact of thermal crosstalk in dense thermo-optic arrays are explained identically across six sections, diluting the distinct focus of each chapter role.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S01",
+              "S02",
+              "S03",
+              "S04",
+              "S05",
+              "S06",
+              "S07",
+              "S08"
+            ],
+            "dimension": "overlap",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "The methodology, benefits, and limitations of inverse design and deep learning surrogates are repeatedly detailed throughout the manuscript, creating severe role overlap between architecture, engine, bottleneck, and co-design sections.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S01",
+              "S04",
+              "S05",
+              "S06",
+              "S07",
+              "S08"
+            ],
+            "dimension": "overlap",
+            "severity": "major",
+            "consensus": "none",
+            "statement": "The description of thin-film lithium niobate (TFLN) bonded to silicon photonics for hybrid integration appears verbatim or near-verbatim in six separate sections, obscuring the unique contribution of each architectural discussion.",
+            "advisory": true,
+            "blocking": false
+          },
+          {
+            "finding_id": "",
+            "issue_key": "",
+            "issue_type": "duplicated_explanation",
+            "target_ids": [
+              "S01",
+              "S03",
+              "S06",
+              "S07"
+            ],
+            "dimension": "overlap",
+            "severity": "minor",
+            "consensus": "none",
+            "statement": "The impact of fabrication tolerances (waveguide width/thickness variations) on MZI fidelity is restated across multiple sections without advancing the narrative, contributing to structural redundancy.",
+            "advisory": true,
+            "blocking": false
+          }
+        ]
+      }
+    ],
+    "status": "reviewed"
+  },
+  "provenance": {
+    "run_fingerprint": "a30c6ea9fd41f8f21e6ff7879c0d17d557462d02706df923248d90920f35fbcf",
+    "stage_order_position": "5",
+    "usage_recorded": "True"
+  },
+  "usage": {
+    "agent_name": "StagedWholeManuscriptReviewer",
+    "model_tier": "c2_model",
+    "call_count": 5,
+    "workers": 4,
+    "total_input_tokens": 405886,
+    "total_output_tokens": 19260,
+    "repair_calls": 0,
+    "repair_used": false,
+    "reviewers": {
+      "continuity": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 84278,
+        "estimated_output_tokens": 788,
+        "input_tokens": 81178,
+        "output_tokens": 3798,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 3798,
+          "completion_tokens_details": {
+            "reasoning_tokens": 2881,
+            "text_tokens": 3798
+          },
+          "prompt_tokens": 81178,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 81178
+          },
+          "total_tokens": 84976
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 4,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      },
+      "clarity": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 84276,
+        "estimated_output_tokens": 541,
+        "input_tokens": 81178,
+        "output_tokens": 3894,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 3894,
+          "completion_tokens_details": {
+            "reasoning_tokens": 3328,
+            "text_tokens": 3894
+          },
+          "prompt_tokens": 81178,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 81178
+          },
+          "total_tokens": 85072
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 4,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      },
+      "reader_flow": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 84278,
+        "estimated_output_tokens": 562,
+        "input_tokens": 81178,
+        "output_tokens": 3735,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 3735,
+          "completion_tokens_details": {
+            "reasoning_tokens": 3154,
+            "text_tokens": 3735
+          },
+          "prompt_tokens": 81178,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 81178
+          },
+          "total_tokens": 84913
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 4,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      },
+      "logic": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 84275,
+        "estimated_output_tokens": 654,
+        "input_tokens": 81176,
+        "output_tokens": 3635,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 3635,
+          "completion_tokens_details": {
+            "reasoning_tokens": 2904,
+            "text_tokens": 3635
+          },
+          "prompt_tokens": 81176,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 81176
+          },
+          "total_tokens": 84811
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 4,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      },
+      "overlap": {
+        "module": "StagedWholeManuscriptReviewer",
+        "agent_name": "StagedWholeManuscriptReviewer",
+        "model_tier": "c2_model",
+        "model_name": "qwen3.7-flash",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 84276,
+        "estimated_output_tokens": 559,
+        "input_tokens": 81176,
+        "output_tokens": 4198,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "completion_tokens": 4198,
+          "completion_tokens_details": {
+            "reasoning_tokens": 3560,
+            "text_tokens": 4198
+          },
+          "prompt_tokens": 81176,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 81176
+          },
+          "total_tokens": 85374
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "",
+        "fallback_used": false,
+        "api_key_source": "<local-path><private-credential>.txt#1",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 4,
+        "api_key_rotation_count": 0,
+        "key_failures": [],
+        "model_fallback_used": false,
+        "fallback_chain": [],
+        "attempted_models": [
+          "qwen3.7-flash"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 1,
+        "retry_count": 0,
+        "repair_calls": 0,
+        "repair_used": false
+      }
+    }
+  },
+  "error": null,
+  "created_at": "2026-08-28T18:01:41.845982+00:00",
+  "updated_at": "2026-08-28T18:01:41.845982+00:00"
+}

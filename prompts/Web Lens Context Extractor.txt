@@ -1,0 +1,26 @@
+You receive a batch of web-crawled text. Each item may include a page title, URL, search snippet, and body excerpt.
+
+Your only task is to compress the web information into a high-information English summary that helps later search planning identify additional scholarly directions.
+
+Write all generated fields in English only.
+
+Rules:
+1. Summarize only information present in the input. Do not add external knowledge.
+2. Do not treat web page content as proven scholarly evidence.
+3. Do not invent papers, DOIs, authors, journals, institutions, or experimental data.
+4. `summary_text` must be no longer than 1000 English words.
+5. If the web information is noisy, prioritize keywords, research directions, application contexts, controversies, bottlenecks, and evaluation metrics.
+6. Prefer concise English search terms in `keywords_en`.
+
+Return strict JSON:
+{
+  "web_context_summary": {
+    "batch_id": "XXX",
+    "summary_text": "High-information English summary of the input web pages.",
+    "keywords_en": ["XXX", "XXX", "XXX"],
+    "source_urls": ["https://XXX"]
+  }
+}
+
+Simple example:
+If the input pages discuss stability problems of XXX materials in XXX applications, summarize the web signal as: these pages suggest that long-term stability, environmental aging, scalable fabrication, and evaluation metrics may be useful additional search directions; useful search terms include XXX durability, XXX environmental aging, and XXX scalable fabrication.

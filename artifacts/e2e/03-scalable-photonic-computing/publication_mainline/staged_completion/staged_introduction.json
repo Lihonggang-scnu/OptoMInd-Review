@@ -1,0 +1,92 @@
+{
+  "schema_version": "optomind.staged_article_completion.v1",
+  "stage": "introduction",
+  "status": "completed",
+  "fingerprint": "662d7d6af3f221efa7d0ba4875dee99ba6b31d715c211c4d2b66ddd40383fd88",
+  "input_fingerprint": "b8b4fe203b578aa7440b9231831a222a55459c9ce9105b47f93156b7519c8660",
+  "artifact_path": "<local-path>",
+  "approval_required": false,
+  "payload": {
+    "workplan": {
+      "promises_derived_from": [
+        "conclusion:7b13962459dbfd965cd8636dd5d9eddf922e57097616cf34802b70cb27c6e815",
+        "commander_structure:42a6ef6f09f1404cc6c5373f1e6e2d3623fe37ca7e9cd1eafcfe8770ccfdae70"
+      ],
+      "outline": [
+        "Field Background: Material platforms (SiPh vs. TFLN) and the fundamental trade-off between integration density and electro-optic efficiency.",
+        "Significance: The role of programmable photonic circuits and matrix multiplication engines in enabling energy-efficient AI inference and high-bandwidth interconnects.",
+        "Problem Tension: Scalability bottlenecks including thermal crosstalk, loss accumulation, and the absence of native nonlinearity limiting dynamic training.",
+        "Review Scope/Contribution: Synthesis of electronic-photonic co-design methodologies and inverse design as the primary pathway to overcome physical constraints.",
+        "Roadmap: Sequential analysis from device physics (S01) through architectures (S02), engines (S03), bottlenecks (S06), co-design solutions (S07), to system applications (S04, S05) and final synthesis (S08)."
+      ],
+      "background_sources": [
+        "s2:2ef8ca9e804f03750abd3b64220c5012fb3199d0",
+        "s2:5cb453ce124222aacf978854ca0fabd6709a9479",
+        "s2:00c844c0879cd7fecafa07c470d224ad9ef9ad31",
+        "35b0156c1b02ea4d54610e852cecd49b7b505a71",
+        "s2:e70c39ec2a32c062d64b416be0c71d6fe689bf18",
+        "s2:1a468046a70b88c95528ab546d78374597c82531",
+        "s2:3218840c1db73de31866dea5cdab033a4714dda4"
+      ],
+      "retrieval_proposals": []
+    },
+    "draft": {
+      "text": "The pursuit of scalable photonic computing represents a pivotal shift in the architecture of high-performance systems, driven by the escalating energy demands of artificial intelligence and the physical limits of electronic interconnects. As data-centric workloads increasingly dominate computational landscapes, the traditional reliance on charge-based transport faces fundamental bottlenecks in bandwidth density and energy efficiency. Integrated photonics offers a compelling alternative, leveraging the inherent parallelism of light to perform linear algebra operations with potentially orders-of-magnitude lower energy consumption per operation. However, the transition from isolated device demonstrations to wafer-scale, programmable systems is not merely a matter of scaling component counts. It requires navigating a complex landscape of material trade-offs, architectural constraints, and systemic physical limitations that define the current state of the field.\n\nThe foundation of any scalable photonic system lies in the choice of material platform, a decision that fundamentally constrains achievable performance. Silicon photonics remains the dominant candidate for dense integration due to its compatibility with complementary metal-oxide-semiconductor (CMOS) fabrication ecosystems, yet it suffers from weak electro-optic effects and nonlinear losses at high powers. Conversely, thin-film lithium niobate (TFLN) offers superior modulation efficiency and low loss, as evidenced by recent advances in sunken dual-layer electrode designs achieving half-wave voltage-length products below 1.6 V·cm [REF:s2:2ef8ca9e804f03750abd3b64220c5012fb3199d0]. However, TFLN currently lacks the mature foundry infrastructure required for large-scale logic integration. This dichotomy suggests that no single material platform currently satisfies all requirements for scale, speed, and energy efficiency simultaneously, necessitating hybrid integration strategies that combine disparate materials on a single substrate.\n\nBuilding upon these physical foundations, programmable photonic circuit architectures have emerged as the primary mechanism for implementing reconfigurable linear transformations. The Mach-Zehnder interferometer (MZI) mesh serves as the canonical building block, capable of realizing universal unitary transformations essential for photonic neural networks and quantum information processing. Recent experimental demonstrations on general-purpose silicon photonic platforms have validated the programming of hexagonal waveguide meshes, achieving fidelities exceeding 98% for small-scale unitary matrices [REF:s2:5cb453ce124222aacf978854ca0fabd6709a9479]. These architectures enable the construction of photonic matrix multiplication engines, which exploit optical interference to perform parallel dot-product operations. While such engines demonstrate transformative advantages in energy-per-MAC for low-precision inference, their applicability is structurally limited by the absence of native nonlinearity in passive media. Consequently, photonic accelerators function most effectively as specialized co-processors for static or slowly varying linear transformations, rather than as universal replacements for electronic graphics processing units.\n\nDespite these promising capabilities, the scalability of practical photonic computing systems is constrained by compounding physical effects that degrade signal fidelity in dense arrays. The primary tension in the field arises from the conflict between the theoretical efficiency of optical computing and the practical realities of thermal crosstalk, cascaded insertion loss, and fabrication-induced variations. In dense programmable meshes, thermo-optic phase shifters introduce significant thermal crosstalk, perturbing neighboring elements and necessitating complex calibration protocols that erode energy benefits [REF:35b0156c1b02ea4d54610e852cecd49b7b505a71]. Furthermore, the lack of efficient all-optical activation functions forces reliance on hybrid optoelectronic interfaces for nonlinear operations, introducing latency and power overheads that can negate theoretical gains. This reality is particularly acute for dynamic training workloads requiring frequent weight updates and gradient computations, where the rigidity of optical hardware presents a fundamental mismatch with algorithmic requirements. Recent analyses of photonic transformer accelerators highlight these challenges, noting that while convolutional workloads map well to static photonic cores, attention-based mechanisms demand dynamic reconfiguration that current hardware struggles to support efficiently [REF:s2:1a468046a70b88c95528ab546d78374597c82531].\n\nTo address these systemic bottlenecks, this review synthesizes the emerging paradigm of electronic-photonic co-design, which treats hardware geometry, control electronics, and algorithmic structure as a unified optimization problem. Rather than optimizing devices in isolation, co-design methodologies leverage physics-informed machine learning and inverse design tools to automate the mapping of abstract computational objectives to manufacturable device geometries. Intelligent design automation frameworks, such as those combining fabrication-aware inverse design with routing-informed placement, are beginning to bridge the gap between theoretical performance and practical realizability [REF:s2:e70c39ec2a32c062d64b416be0c71d6fe689bf18]. This approach extends to system-level applications, where optical interconnect fabrics offer an immediately deployable solution for bandwidth bottlenecks. Architectures like OptoLink demonstrate the potential of photonic interconnects to alleviate memory bandwidth constraints in specialized accelerators, achieving terabit-scale throughput with significantly reduced latency compared to electrical networks [REF:s2:3218840c1db73de31866dea5cdab033a4714dda4].\n\nThe structure of this review reflects this logical progression from physical constraints to system-level solutions. Section S01 establishes the material physics governing device performance, followed by Section S02 and Section S03, which detail programmable architectures and matrix multiplication engines, respectively. Section S06 critically examines the scalability bottlenecks of loss, crosstalk, and control complexity that define the problem space. Section S07 then presents electronic-photonic co-design methodologies as the strategic response to these challenges. Finally, Sections S04 and S05 evaluate system-level applications in AI acceleration and optical interconnects, culminating in Section S08, which synthesizes the current trajectory of the field and identifies critical gaps in benchmarking and standardization. Through this structured analysis, we argue that the future of scalable photonic computing lies not in isolated breakthroughs in device metrics, but in the synergistic integration of heterogeneous platforms, intelligent design algorithms, and rigorous system-level validation."
+    },
+    "status": "drafted"
+  },
+  "provenance": {
+    "run_fingerprint": "a30c6ea9fd41f8f21e6ff7879c0d17d557462d02706df923248d90920f35fbcf",
+    "stage_order_position": "3",
+    "usage_recorded": "True"
+  },
+  "usage": {
+    "module": "StagedIntroductionAuthor",
+    "agent_name": "StagedIntroductionAuthor",
+    "model_tier": "c_model",
+    "model_name": "qwen3.5-plus",
+    "task_type": "research_chat",
+    "mock_llm": false,
+    "estimated_input_tokens": 39463,
+    "estimated_output_tokens": 2162,
+    "input_tokens": 41164,
+    "output_tokens": 2978,
+    "token_usage_source": "provider_response",
+    "provider_usage": {
+      "prompt_tokens": 41164,
+      "completion_tokens": 2978,
+      "total_tokens": 44142,
+      "completion_tokens_details": {
+        "reasoning_tokens": 940,
+        "text_tokens": 2978
+      },
+      "prompt_tokens_details": {
+        "text_tokens": 41164
+      }
+    },
+    "success": true,
+    "failure": false,
+    "error_type": "",
+    "fallback_used": false,
+    "api_key_source": "<local-path><private-credential>.txt#1",
+    "api_key_masked": "****",
+    "api_key_candidate_count": 4,
+    "api_key_rotation_count": 0,
+    "key_failures": [],
+    "model_fallback_used": false,
+    "fallback_chain": [],
+    "attempted_models": [
+      "qwen3.5-plus"
+    ],
+    "selected_model_index": 0,
+    "partial_stream": false,
+    "stream_interrupted_error": "",
+    "request_attempt_count": 1,
+    "retry_count": 0,
+    "repair_calls": 0,
+    "repair_used": false
+  },
+  "error": null,
+  "created_at": "2026-08-28T17:59:49.038682+00:00",
+  "updated_at": "2026-08-28T17:59:49.038682+00:00"
+}

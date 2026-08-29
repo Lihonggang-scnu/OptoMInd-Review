@@ -1,0 +1,96 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S06",
+  "audit": {
+    "verdict": "gaps_found",
+    "gaps": [
+      {
+        "gap_id": "G01",
+        "old_draft_snippet": "Unlike interferometric architectures that rely on precise phase matching between two arms, resonant devices depend on constructive interference within a closed loop, making them inherently sensitive to any perturbation that shifts the effective optical path length. Even small temperature variations of a fraction of a degree can detune a resonator from its designed wavelength, causing signal loss or crosstalk between adjacent channels.",
+        "scientific_content": "The specific physical mechanism distinguishing resonant vulnerability from interferometric stability: resonators rely on constructive interference in a closed loop (effective optical path length), whereas interferometers rely on phase matching between two arms. This explains why sub-degree temperature fluctuations cause resonant detuning and channel crosstalk.",
+        "claim_handles": [
+          "C01_RESONANT_PHOTONIC_COMPONENTS_USED_COMPUTING_CI"
+        ],
+        "evidence_handles": [
+          "E01_EXPLORING_TYPES_PHOTONIC_NEURAL_NETWORKS_IMAGI"
+        ],
+        "affected_block_indices": [
+          2
+        ]
+      },
+      {
+        "gap_id": "G02",
+        "old_draft_snippet": "When both physical and geometrical degrees of freedom are large and strongly coupled, the curse of dimensionality becomes significant, requiring PDE-based constraints to provide useful inductive bias for physically consistent learning.",
+        "scientific_content": "The condition under which PDE-based constraints are necessary for inductive bias: specifically when physical and geometrical degrees of freedom are large and strongly coupled, leading to the curse of dimensionality.",
+        "claim_handles": [
+          "C03_DEGREES_FREEDOM_NANOPHOTONIC_INVERSE_DESIGN_PR"
+        ],
+        "evidence_handles": [
+          "E03_INVERSE_DESIGN_NANOPHOTONICS_VIA_REPRESENTATIO"
+        ],
+        "affected_block_indices": [
+          5
+        ]
+      },
+      {
+        "gap_id": "G03",
+        "old_draft_snippet": "Higher dimensional data such as field intensity profiles as well as vectorial field maps carry much more information that can be used for designing functional metalenses and holograms.",
+        "scientific_content": "The limitation of current deep learning inverse design to low-dimensional inputs (spectra/diffraction efficiencies) and the potential benefit of using higher-dimensional data (field intensity profiles, vectorial field maps) for designing complex devices like metalenses and holograms.",
+        "claim_handles": [
+          "C21_INVERSE_DESIGN_METHODOLOGIES_USING_DEEP_LEARNI"
+        ],
+        "evidence_handles": [
+          "E72_INTELLIGENT_NANOPHOTONICS_MERGING_PHOTONICS_AR"
+        ],
+        "affected_block_indices": [
+          5
+        ]
+      }
+    ],
+    "notes": "Identified three gaps where the old draft contained specific scientific mechanisms or conditions (resonant vs interferometric sensitivity physics, PDE constraint necessity conditions, and high-dimensional input benefits) that were omitted or generalized in the new blocks.",
+    "warnings": []
+  },
+  "patch_records": [
+    {
+      "gap_id": "G01",
+      "block_index": 2,
+      "applied": true,
+      "used_evidence_handles": [
+        "E38_DESIGN_SIMULATION_THERMO_OPTIC_PHASE_SHIFTERS",
+        "E110_DESIGN_SIMULATION_THERMO_OPTIC_PHASE_SHIFTERS",
+        "E01_EXPLORING_TYPES_PHOTONIC_NEURAL_NETWORKS_IMAGI",
+        "E26_LITHIUM_NIOBATE_PHOTONICS_UNLOCKING_ELECTROMAG"
+      ],
+      "gap_evidence_handles": [
+        "E01_EXPLORING_TYPES_PHOTONIC_NEURAL_NETWORKS_IMAGI"
+      ]
+    },
+    {
+      "gap_id": "G02",
+      "block_index": 5,
+      "applied": true,
+      "used_evidence_handles": [
+        "E06_INVERSE_DESIGN_NANOPHOTONIC_DEVICES_ENABLED_OP",
+        "E69_BENCHMARKING_DEEP_LEARNING_BASED_MODELS_NANOPH",
+        "E03_INVERSE_DESIGN_NANOPHOTONICS_VIA_REPRESENTATIO"
+      ],
+      "gap_evidence_handles": [
+        "E03_INVERSE_DESIGN_NANOPHOTONICS_VIA_REPRESENTATIO"
+      ]
+    },
+    {
+      "gap_id": "G03",
+      "block_index": 5,
+      "applied": true,
+      "used_evidence_handles": [
+        "E06_INVERSE_DESIGN_NANOPHOTONIC_DEVICES_ENABLED_OP",
+        "E69_BENCHMARKING_DEEP_LEARNING_BASED_MODELS_NANOPH",
+        "E03_INVERSE_DESIGN_NANOPHOTONICS_VIA_REPRESENTATIO",
+        "E72_INTELLIGENT_NANOPHOTONICS_MERGING_PHOTONICS_AR"
+      ],
+      "gap_evidence_handles": [
+        "E72_INTELLIGENT_NANOPHOTONICS_MERGING_PHOTONICS_AR"
+      ]
+    }
+  ]
+}

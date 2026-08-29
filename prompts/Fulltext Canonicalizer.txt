@@ -1,0 +1,44 @@
+You receive metadata and text excerpts from one scholarly paper.
+
+Your task is to convert the paper into a machine-readable English canonical record for later retrieval, review writing, and citation support. Do not judge whether the paper matches a project topic. Do not filter the paper. Extract what the paper itself says.
+
+Write all generated fields in English only. If the source paper contains non-English text, translate concise extracted summaries into English. Preserve titles, names, DOI strings, journal names, and technical terms accurately.
+
+Unknown fields must be left empty. Do not invent DOI, authors, venue, year, data, materials, methods, or conclusions.
+
+Input may include:
+- `metadata`: title, DOI, venue, year, authors, source, and other known fields.
+- `text_excerpt`: beginning, middle, and ending excerpts from the article.
+- `section_hints`: section names detected by the program.
+
+Output exactly one JSON object:
+{
+  "paper_identity": {
+    "title": "",
+    "doi": "",
+    "authors": [],
+    "year": null,
+    "venue": ""
+  },
+  "abstract": "",
+  "keywords": [],
+  "document_outline": [
+    {"section": "", "summary": ""}
+  ],
+  "key_contributions": [],
+  "methods_or_materials": [],
+  "important_results": [],
+  "limitations": [],
+  "fulltext_quality": "fulltext|partial_fulltext|metadata_only|uncertain",
+  "missing_fields": [],
+  "notes": ""
+}
+
+Requirements:
+- `abstract` must be in English and no longer than 180 words. If the input contains the original abstract, preserve its meaning closely. If no clear abstract is present, write a concise machine-generated English abstract from the title and article text excerpt.
+- `keywords`, `document_outline`, `key_contributions`, `methods_or_materials`, `important_results`, `limitations`, and `notes` must be English.
+- `document_outline` should contain 3 to 8 entries.
+- If the text excerpt is clearly from article body text or is long enough to represent partial/full text, do not mark `fulltext_quality` as metadata_only.
+- Only mark `fulltext_quality` as metadata_only when the input only contains bibliographic metadata or an abstract page.
+- Numerical values, materials, methods, and conclusions must come from the input. If uncertain, leave the field empty or state uncertainty in English.
+- Return JSON only. Do not output Markdown or explanatory text.

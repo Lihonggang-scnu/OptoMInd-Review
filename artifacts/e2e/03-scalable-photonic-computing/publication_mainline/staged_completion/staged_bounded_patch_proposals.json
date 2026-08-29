@@ -1,0 +1,155 @@
+{
+  "schema_version": "optomind.staged_article_completion.v1",
+  "stage": "bounded_patch_proposals",
+  "status": "awaiting_approval",
+  "fingerprint": "55e4a0bb176d5157938a1b2bfffdd399d889db35a597a44d0ac693fb6c96e9c2",
+  "input_fingerprint": "c84b412dd3bde1f45164107b83f8103206a6ce08dd2a9f7a71a6b987385b9795",
+  "artifact_path": "<local-path>",
+  "approval_required": true,
+  "payload": {
+    "proposals": [
+      {
+        "patch_id": "",
+        "operation": "move_block",
+        "target": "S06",
+        "rationale": "Reposition Section S06 (Scalability Bottlenecks) to follow Section S03 (Matrix Multiplication Engines) and precede Section S07 (Co-Design), addressing finding GMR-001 and GMR-006 to establish the problem space before presenting solutions.",
+        "approval_required": true,
+        "claim_text_change": false,
+        "evidence_change": false,
+        "provenance": "GMR-001",
+        "status": "proposed"
+      },
+      {
+        "patch_id": "",
+        "operation": "move_block",
+        "target": "S07",
+        "rationale": "Reposition Section S07 (Co-Design Methodologies) to follow the newly positioned Section S06, ensuring the logical flow of Problem (S06) -> Solution (S07) -> Application (S04/S05), addressing finding GMR-006.",
+        "approval_required": true,
+        "claim_text_change": false,
+        "evidence_change": false,
+        "provenance": "GMR-006",
+        "status": "proposed"
+      },
+      {
+        "patch_id": "",
+        "operation": "rewrite_transition",
+        "target": "S01-B004",
+        "rationale": "Modify the transition in S01-B004 to frame Hybrid Integration as a material platform enabler rather than a fully realized solution, deferring detailed methodology to S07 to address finding GMR-011 regarding premature resolution of structural tension.",
+        "approval_required": false,
+        "claim_text_change": false,
+        "evidence_change": false,
+        "provenance": "GMR-011",
+        "status": "proposed"
+      },
+      {
+        "patch_id": "",
+        "operation": "rewrite_transition",
+        "target": "S03-B008",
+        "rationale": "Rewrite the concluding transition of S03 to explicitly foreshadow the systemic scaling barriers (loss, crosstalk, control) that will be formally defined in the upcoming S06, addressing finding GMR-004 and GMR-012.",
+        "approval_required": false,
+        "claim_text_change": false,
+        "evidence_change": false,
+        "provenance": "GMR-004",
+        "status": "proposed"
+      },
+      {
+        "patch_id": "",
+        "operation": "rewrite_transition",
+        "target": "S01-B005",
+        "rationale": "Condense the explanation of inverse design in S01-B005 to a high-level reference, removing detailed algorithmic mechanisms to reduce redundancy identified in finding GMR-003 and GMR-007.",
+        "approval_required": false,
+        "claim_text_change": false,
+        "evidence_change": false,
+        "provenance": "GMR-003",
+        "status": "proposed"
+      },
+      {
+        "patch_id": "",
+        "operation": "rewrite_transition",
+        "target": "S02-B003",
+        "rationale": "Trim the detailed description of inverse design algorithms in S02-B003, referencing S07 for methodological depth to address finding GMR-003 and GMR-010.",
+        "approval_required": false,
+        "claim_text_change": false,
+        "evidence_change": false,
+        "provenance": "GMR-010",
+        "status": "proposed"
+      },
+      {
+        "patch_id": "",
+        "operation": "rewrite_transition",
+        "target": "S06-B002",
+        "rationale": "Refine the thermal crosstalk explanation in S06-B002 to serve as the definitive system-level definition, removing redundant mechanistic details found in S01, S02, and S03 to address finding GMR-002 and GMR-009.",
+        "approval_required": false,
+        "claim_text_change": false,
+        "evidence_change": false,
+        "provenance": "GMR-002",
+        "status": "proposed"
+      },
+      {
+        "patch_id": "",
+        "operation": "rewrite_transition",
+        "target": "S04-B001",
+        "rationale": "Adjust the opening of S04 to acknowledge the physical constraints (precision, noise) established in S03 and S06 before discussing AI acceleration workloads, addressing finding GMR-013.",
+        "approval_required": false,
+        "claim_text_change": false,
+        "evidence_change": false,
+        "provenance": "GMR-013",
+        "status": "proposed"
+      }
+    ]
+  },
+  "provenance": {
+    "run_fingerprint": "a30c6ea9fd41f8f21e6ff7879c0d17d557462d02706df923248d90920f35fbcf",
+    "stage_order_position": "6",
+    "usage_recorded": "True"
+  },
+  "usage": {
+    "module": "StagedCommanderEditor",
+    "agent_name": "StagedCommanderEditor",
+    "model_tier": "c_model",
+    "model_name": "qwen3.5-plus",
+    "task_type": "research_chat",
+    "mock_llm": false,
+    "estimated_input_tokens": 59146,
+    "estimated_output_tokens": 978,
+    "input_tokens": 60725,
+    "output_tokens": 1905,
+    "token_usage_source": "provider_response",
+    "provider_usage": {
+      "prompt_tokens": 60725,
+      "completion_tokens": 1905,
+      "total_tokens": 62630,
+      "completion_tokens_details": {
+        "reasoning_tokens": 731,
+        "text_tokens": 1905
+      },
+      "prompt_tokens_details": {
+        "text_tokens": 60725
+      }
+    },
+    "success": true,
+    "failure": false,
+    "error_type": "",
+    "fallback_used": false,
+    "api_key_source": "<local-path><private-credential>.txt#1",
+    "api_key_masked": "****",
+    "api_key_candidate_count": 4,
+    "api_key_rotation_count": 0,
+    "key_failures": [],
+    "model_fallback_used": false,
+    "fallback_chain": [],
+    "attempted_models": [
+      "qwen3.5-plus"
+    ],
+    "selected_model_index": 0,
+    "partial_stream": false,
+    "stream_interrupted_error": "",
+    "request_attempt_count": 1,
+    "retry_count": 0,
+    "repair_calls": 0,
+    "repair_used": false
+  },
+  "error": null,
+  "created_at": "2026-08-28T18:02:18.729661+00:00",
+  "updated_at": "2026-08-28T18:02:18.729661+00:00"
+}

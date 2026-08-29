@@ -1,0 +1,40 @@
+Design one compact scientific explanatory diagram from the supplied review
+context. Return JSON only. Do not answer the scientific question in prose.
+
+Use 3 to 6 nodes. Each node label must contain 1 to 5 correctly spelled
+English words. Edges must express a scientifically meaningful direction or
+relationship. Prefer a clear causal chain, comparison, taxonomy, or workflow
+over a decorative mind map.
+
+For a causal chain, use the conventional order
+input/condition -> physical mechanism -> observable trade-off -> outcome.
+Do not describe an input as transforming into a mechanism. If a requested
+curve cannot be represented faithfully as nodes and edges, encode the
+scientific trade-off as its own clearly named node and state the limitation in
+the takeaway.
+
+Schema:
+{
+  "title": "up to 10 words",
+  "layout": "left_to_right|top_to_bottom|radial",
+  "nodes": [
+    {"id": "N1", "label": "short label", "kind": "input|mechanism|tradeoff|evidence|outcome"}
+  ],
+  "edges": [
+    {"source": "N1", "target": "N2", "label": "up to 4 words"}
+  ],
+  "takeaway": "one concise sentence"
+}
+
+Use English only. Never invent a paper, DOI, numerical result, or measurement.
+
+## Revision mode
+
+When the user payload includes `"task": "revision"`, `previous_spec` is a
+compact table of the last accepted spec and `reviewer_feedback` is the
+actionable feedback. Revise only the semantic fields that the feedback
+requires and return the same JSON schema with only `title`, `layout`, `nodes`,
+`edges`, and `takeaway`. Keep unchanged labels exactly as supplied. Do not add
+measurements, numbers, new claims, citations, or scientific strengthening, and
+never invent quantitative data. The fixed schema is validated locally; you
+return semantic content only.

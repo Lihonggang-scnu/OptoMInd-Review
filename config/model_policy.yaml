@@ -1,0 +1,122 @@
+model_aliases:
+  # Tier A: use only for final architecture, whole-article synthesis, and
+  # decisive quality checks. Routine pipeline tests explicitly select B+.
+  a_model: qwen3.8-max
+  premium_model: qwen3.8-max
+  # A fixed, full-price model avoids the promotional qwen3.7-max alias while
+  # retaining a strong fallback for the few stages that genuinely need it.
+  a_minus_model: qwen3.7-max-2026-06-08
+
+  # Tier B family. Keep the historical advanced_model alias at B+ so existing
+  # agents retain their quality target while gaining multiple same-family exits.
+  b_plus_model: qwen3.7-flash
+  b_model: qwen3.6-plus
+  b_minus_model: qwen3.6-35b-a3b
+  advanced_model: qwen3.7-flash
+
+  # Tier C: medium-complexity tasks, batch structured extraction, and secondary filtering.
+  c_plus_model: qwen3.6-flash
+  c_model: qwen3.5-plus
+  standard_model: qwen3.6-flash
+
+  # Tier C2: cheap batch labeling, profiling, review, and routine drafting.
+  # Qwen 3.7 Flash keeps the same <=32K input price as 3.5 Flash while
+  # reducing the output list price from CNY 2.0/M to CNY 0.8/M tokens.
+  c2_model: qwen3.7-flash
+  profiler_model: qwen3.7-flash
+  slice_profiler_model: qwen3.7-flash
+
+  # Tier D: low-risk rough screening, formatting, and log summarization.
+  d_model: qwen-flash
+  cheap_model: qwen-flash
+
+  # Current native multimodal models. Legacy qwen-vl-plus/max aliases are not
+  # used on the mainline because current Qwen 3.5/3.6/3.7 models accept images.
+  vision_model: qwen3.6-plus
+  vision_fast_model: qwen3.6-flash
+  vision_plus_model: qwen3.6-plus
+  vision_premium_model: qwen3.7-flash
+
+model_fallbacks:
+  premium_model: [a_minus_model, b_plus_model, b_model]
+  a_model: [a_minus_model, b_plus_model, b_model]
+  a_minus_model: [b_plus_model, b_model, b_minus_model]
+  advanced_model: [b_model, b_minus_model, c_plus_model]
+  b_plus_model: [b_model, b_minus_model, c_plus_model]
+  b_model: [b_minus_model, c_plus_model, c_model]
+  b_minus_model: [c_plus_model, c_model, c2_model]
+  standard_model: [c_model, c2_model, d_model]
+  c_plus_model: [c_model, c2_model, d_model]
+  c_model: [c2_model, d_model]
+  c2_model: [c_plus_model, d_model]
+  profiler_model: [c_plus_model, c2_model, d_model]
+  slice_profiler_model: [c_plus_model, c2_model, d_model]
+  cheap_model: [c2_model, c_plus_model]
+  d_model: [c2_model, c_plus_model]
+  vision_premium_model: [vision_plus_model, vision_fast_model, qwen3.5-plus]
+  vision_plus_model: [vision_fast_model, qwen3.5-plus, qwen3.7-flash]
+  vision_model: [vision_fast_model, qwen3.5-plus, qwen3.7-flash]
+  vision_fast_model: [qwen3.7-flash, qwen3.5-plus]
+
+default_model_tier: standard_model
+
+voucher_eligibility:
+  # Student vouchers do not apply to models under a temporary price campaign.
+  # Keep those aliases out of model_aliases and model_fallbacks entirely.
+  reject_promotional_models: true
+  excluded_models: [qwen3.7-max, qwen3.7-plus]
+  official_pricing_url: https://help.aliyun.com/zh/model-studio/model-pricing
+  verified_at: 2026-08-07
+
+agent_model_policy:
+  QueryPlannerAgent: premium_model
+  AtomicRelevancePlannerAgent: premium_model
+  LiteratureQueryExpansionAgent: standard_model
+  FeatureLevelPaperScorerAgent: standard_model
+  SourceCredibilityAuditorAgent: cheap_model
+  ScrapedPageCacheAuditorAgent: cheap_model
+  WebLensContextExtractorAgent: standard_model
+  SupplementalScholarFacetSynthesizerAgent: advanced_model
+  QueryPlannerFormatRepairAgent: standard_model
+  TaskPlannerAgent: premium_model
+  EvidenceAgent: advanced_model
+  TargetReasonerAgent: advanced_model
+  LLMReviewAgent: premium_model
+  CentralOrchestratorAgent: premium_model
+  WorkflowSecretaryTool: cheap_model
+  # High-volume structured fulltext extraction: the compact B- model proved
+  # more transport-stable than Plus on long JSON generations; later A-tier
+  # review/repair remains responsible for semantic quality escalation.
+  PaperTextCardAgent: b_minus_model
+  ReviewArchitectAgent: premium_model
+  BlueprintCouncil: premium_model
+  BlueprintTournamentJudge: premium_model
+  SectionMaterialMapperAgent: advanced_model
+  SectionWriterAgent: premium_model
+  FigurePlannerAgent: advanced_model
+  PaperCardEnglishNormalizerAgent: advanced_model
+  PerspectiveQuestionAskerAgent: premium_model
+  PerspectiveEnglishRepairAgent: standard_model
+  PerspectiveJsonRepairAgent: standard_model
+  TextSliceRoleProfilerAgent: slice_profiler_model
+  SubfigureVisualTaggerAgent: vision_fast_model
+  ScientificReviewChineseTranslator: c2_model
+  ScientificChineseTranslationAuditor: c2_model
+
+routing_rules:
+  explicit_task:
+    default_tier: advanced_model
+    allow_literature_search: false
+  semi_explicit_task:
+    default_tier: advanced_model
+    allow_literature_search: true
+  ambiguous_task:
+    default_tier: premium_model
+    allow_literature_search: true
+  high_risk_review:
+    default_tier: premium_model
+  logging_or_formatting:
+    default_tier: cheap_model
+
+mock_llm:
+  enabled_when_no_key: true

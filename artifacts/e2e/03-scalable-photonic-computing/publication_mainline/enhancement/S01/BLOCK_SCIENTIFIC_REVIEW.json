@@ -1,0 +1,108 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S01",
+  "attempted": true,
+  "available": true,
+  "fallback_reason": "",
+  "comments": [
+    {
+      "block_index": 1,
+      "sentence": "silicon nitride exhibits a nonlinear susceptibility of approximately 2.5×10⁻¹⁹ m²/W at 1.55 μm",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The text presents a specific numerical value for silicon nitride's nonlinear susceptibility as a fact. The provided evidence (E104) only states that the nonlinear susceptibility is 'of similar in strength to Si3N4', without providing the specific value or confirming it as an established constant in this context.",
+      "suggested_hedge": "silicon nitride exhibits a nonlinear susceptibility comparable to lithium niobate",
+      "claim_handles": [],
+      "evidence_handles": [
+        "E104_LITHIUM_NIOBATE_PHOTONICS_UNLOCKING_ELECTROMAG"
+      ]
+    },
+    {
+      "block_index": 1,
+      "sentence": "reliance on thermo-optic phase shifters introduces inevitable thermal crosstalk that can lead to erroneous signal routing and restricts working capabilities in dense networks",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "The claim attributes 'erroneous signal routing' specifically to thermal crosstalk from thermo-optic phase shifters in the context of general photonic computing. While E145 mentions erroneous signal routing for PN phase shifters or ring resonator based thermal switching networks, it does not explicitly link this specific failure mode to the thermo-optic phase shifters used in the broader silicon photonics platform described here, nor does it support the generalization to 'dense networks' in computing architectures.",
+      "suggested_hedge": "thermal crosstalk can introduce phase errors that may degrade performance in dense arrays",
+      "claim_handles": [
+        "C30_TRADE_OFF_BETWEEN_CMOS_COMPATIBILITY_DENSITY_S"
+      ],
+      "evidence_handles": [
+        "E145_DESIGN_SIMULATION_THERMO_OPTIC_PHASE_SHIFTERS"
+      ]
+    },
+    {
+      "block_index": 2,
+      "sentence": "Diffractive Optical Neural Networks (DONNs)... are now implemented on-chip to enhance compatibility with photonic circuits, offering passive low-power operation and ultrahigh throughput",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The block claims DONNs offer 'passive low-power operation'. Evidence E58 describes them as having 'passive low‐power operation' but notes they are being developed to overcome integration challenges. However, E59 and E60 discuss hybrid or specific implementations. More critically, the block implies this is a settled feature of on-chip DONNs generally, whereas the evidence highlights ongoing development and specific constraints (e.g., E60 mentions 'whole-passive fully-optical manners' for a specific proposed structure). The generalization to all on-chip DONNs as passive and low-power is an overclaim relative to the mixed state of the art in the evidence.",
+      "suggested_hedge": "some on-chip diffractive architectures aim for passive low-power operation",
+      "claim_handles": [
+        "C15_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_DONNS_IMPL"
+      ],
+      "evidence_handles": [
+        "E58_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_PATHWAYS_T",
+        "E60_CHIP_PHOTONIC_DIFFRACTIVE_OPTICAL_NEURAL_NETWO"
+      ]
+    },
+    {
+      "block_index": 5,
+      "sentence": "mechanism typically relies on replacing computationally intensive electromagnetic simulations... with deep learning surrogates that enable efficient gradient-based optimization of complex geometries like scintillators and power splitters",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "The block asserts that inverse design mechanisms 'typically rely' on replacing EM simulations with DL surrogates for 'scintillators'. Evidence E115 discusses scintillators specifically as a case study where a neural network surrogate replaced Monte Carlo simulations. However, this is a niche application (scintillators) and does not support the generalization that this is the 'typical' mechanism for inverse design in nanophotonics broadly, which often uses FDTD/FEM surrogates for photonic devices (as seen in other evidence like E04, E05).",
+      "suggested_hedge": "inverse design methodologies sometimes employ deep learning surrogates to replace computationally intensive simulations",
+      "claim_handles": [
+        "C25_INVERSE_DESIGN_METHODOLOGIES_NANOPHOTONIC_DEVI"
+      ],
+      "evidence_handles": [
+        "E115_NEURAL_NETWORK_INVERSE_DESIGN_NANOPHOTONIC_SCI"
+      ]
+    }
+  ],
+  "blocking_count": 0,
+  "advisory_count": 4,
+  "per_block_revision_outcomes": {
+    "1": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "2": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "3": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "4": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "5": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "6": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "7": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "8": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    }
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S02",
+  "audit": {
+    "verdict": "gaps_found",
+    "gaps": [
+      {
+        "gap_id": "G01",
+        "old_draft_snippet": "Physics-informed diffractive neural networks can approximate the inverse transmission matrix of speckle patterns to enable high-speed all-optical decryption of ciphertexts in real-time, eliminating the computational latency caused by optoelectronic conversion",
+        "scientific_content": "The specific application of physics-informed diffractive networks for all-optical speckle decryption (approximating the inverse transmission matrix) is missing. This represents a distinct functional capability (ciphertext retrieval) not covered by the general classification or segmentation tasks discussed in the new blocks.",
+        "claim_handles": [
+          "C04_PHYSICS_INFORMED_DIFFRACTIVE_NEURAL_NETWORKS_C"
+        ],
+        "evidence_handles": [
+          "E08_HIGH_SPEED_ALL_OPTICAL_SPECKLE_DECRYPTION_EMPO"
+        ],
+        "affected_block_indices": [
+          7
+        ]
+      },
+      {
+        "gap_id": "G02",
+        "old_draft_snippet": "Two-dimensional photonic crystal diffractive optical neural networks integrate on-chip parallel classification schemes capable of multi-wavelength parallel processing... potential applications in real-time multi-object tracking and three-dimensional reconstruction.",
+        "scientific_content": "The specific architecture of 2D photonic crystal diffractive optical neural networks (PhC-DONN) for on-chip multi-wavelength parallel processing and its specific applications in multi-object tracking and 3D reconstruction are lost. The new blocks discuss wavelength multiplexing generally but do not detail this specific integrated photonic implementation.",
+        "claim_handles": [
+          "C05_TWO_DIMENSIONAL_PHOTONIC_CRYSTAL_DIFFRACTIVE_O"
+        ],
+        "evidence_handles": [
+          "E09_MULTI_WAVELENGTH_DIFFRACTIVE_OPTICAL_NEURAL_NE"
+        ],
+        "affected_block_indices": [
+          6
+        ]
+      },
+      {
+        "gap_id": "G03",
+        "old_draft_snippet": "Hybrid optical-electronic convolutional neural networks utilize optimized diffractive optics where color-sensitive kernels are employed to manage spectral information, often requiring narrow bandpass filters for monochromatic imaging at the cost of color data",
+        "scientific_content": "The specific trade-off in hybrid optical-electronic CNNs regarding color-sensitive kernels and the loss of color data when using narrow bandpass filters for monochromatic imaging is missing. Block 5 discusses hybrid strategies but focuses on nonlinear generalization and OTEOC, omitting this specific spectral management limitation.",
+        "claim_handles": [
+          "C02_HYBRID_OPTICAL_ELECTRONIC_CONVOLUTIONAL_NEURAL"
+        ],
+        "evidence_handles": [
+          "E06_HYBRID_OPTICAL_ELECTRONIC_CONVOLUTIONAL_NEURAL"
+        ],
+        "affected_block_indices": [
+          5
+        ]
+      }
+    ],
+    "notes": "Identified three gaps: speckle decryption (Block 7), PhC-DONN architecture/applications (Block 6), and hybrid CNN color-filter trade-offs (Block 5). These represent specific scientific mechanisms or boundary conditions present in the old draft that were omitted from the new block summaries.",
+    "warnings": []
+  },
+  "patch_records": [
+    {
+      "gap_id": "G01",
+      "block_index": 7,
+      "applied": true,
+      "used_evidence_handles": [
+        "E10_ALL_OPTICAL_IMAGE_CLASSIFICATION_THROUGH_UNKNO",
+        "E14_ALL_OPTICAL_SEGMENTATION_VIA_DIFFRACTIVE_NEURA",
+        "E71_SUPER_RESOLUTION_DIFFRACTIVE_NEURAL_NETWORK_AL",
+        "E125_PHYSICS_PRIOR_DEEP_LEARNING_FUSION_SINGLE_PLAN",
+        "E130_LOCATION_AWARE_DIFFRACTIVE_NEURAL_NETWORK_BASE",
+        "E08_HIGH_SPEED_ALL_OPTICAL_SPECKLE_DECRYPTION_EMPO"
+      ],
+      "gap_evidence_handles": [
+        "E08_HIGH_SPEED_ALL_OPTICAL_SPECKLE_DECRYPTION_EMPO"
+      ]
+    },
+    {
+      "gap_id": "G02",
+      "block_index": 6,
+      "applied": true,
+      "used_evidence_handles": [
+        "E07_POLARIZATION_MULTIPLEXED_DIFFRACTIVE_COMPUTING",
+        "E41_LEVERAGING_MULTIPLEXED_METASURFACES_MULTI_TASK",
+        "E65_PROGRAMMABLE_DIFFRACTIVE_DEEP_NEURAL_NETWORK_B",
+        "E09_MULTI_WAVELENGTH_DIFFRACTIVE_OPTICAL_NEURAL_NE"
+      ],
+      "gap_evidence_handles": [
+        "E09_MULTI_WAVELENGTH_DIFFRACTIVE_OPTICAL_NEURAL_NE"
+      ]
+    },
+    {
+      "gap_id": "G03",
+      "block_index": 5,
+      "applied": true,
+      "used_evidence_handles": [
+        "E19_PHYSICS_AWARE_DIFFERENTIABLE_DISCRETE_CODESIGN",
+        "E110_SITU_OPTICAL_BACKPROPAGATION_TRAINING_DIFFRACT",
+        "E115_NOVEL_NONLINEAR_GENERALIZATION_TRAINING_FRAMEW",
+        "E120_ONLY_TRAIN_ELECTRICAL_OPTICAL_CONVERSION_OTEOC",
+        "E06_HYBRID_OPTICAL_ELECTRONIC_CONVOLUTIONAL_NEURAL"
+      ],
+      "gap_evidence_handles": [
+        "E06_HYBRID_OPTICAL_ELECTRONIC_CONVOLUTIONAL_NEURAL"
+      ]
+    }
+  ]
+}

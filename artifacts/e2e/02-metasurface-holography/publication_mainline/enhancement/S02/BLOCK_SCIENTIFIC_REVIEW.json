@@ -1,0 +1,81 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S02",
+  "attempted": true,
+  "available": true,
+  "fallback_reason": "",
+  "comments": [
+    {
+      "block_index": 3,
+      "sentence": "For instance, applying this method to thermal emitters has yielded freeform binary layouts with efficiencies reaching 92%, significantly outperforming conventional resonator designs.",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The claim states that the adjoint method was applied to 'thermal emitters' in this block. However, the chapter thesis and scope are specifically about 'metasurface holograms'. The evidence (E11) discusses thermal emitters (TiN antennas), which is a different application domain than holography. While the efficiency number is supported by the evidence, attributing it as an example of the general method's capability for the current topic (holograms) without clarifying the domain shift is misleading in context. More critically, the text implies this is a general success story for the methods discussed in the context of holographic design evolution, whereas E11 is specific to thermal emission. This is a scope drift/overclaim regarding applicability to the chapter's core subject.",
+      "suggested_hedge": "For instance, similar adjoint-based topology optimization techniques have been applied to other nanophotonic structures, such as thermal emitters, yielding freeform binary layouts with efficiencies reaching 92% (E11).",
+      "claim_handles": [
+        "C06_GRADIENT_BASED_TOPOLOGY_OPTIMIZATION_LEVERAGES"
+      ],
+      "evidence_handles": [
+        "E11_PEARSAN_MACHINE_LEARNING_METHOD_INVERSE_DESIGN"
+      ]
+    },
+    {
+      "block_index": 5,
+      "sentence": "For instance, specific implementations utilize deep residual networks combined with electromagnetic property classification to predict meta-atom geometry from transmission coefficients, a method that mitigates errors caused by singular point mutations in the mapping process and achieves a mean square error of less than 0.23.",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "The block claims this specific implementation (residual networks + classification) is used for 'inverse design of metasurface holograms' (per Claim C15). Evidence E32 confirms the method (residual nets + classification, MSE < 0.23) and mentions designing 'holographic imaging metasurfaces' to verify reliability. However, E32 focuses on *meta-atom* inverse design (unit cell level) to enable holography, not the direct inverse design of the hologram pattern itself using this network. The block conflates unit-cell surrogate modeling with hologram generation. Additionally, the phrase 'mitigates errors caused by singular point mutations' is a specific mechanistic claim from E32 that is correctly cited but presented as a general solution for hologram generation challenges in the block narrative.",
+      "suggested_hedge": "For instance, deep residual networks combined with electromagnetic property classification have been used to predict meta-atom geometry from transmission coefficients, mitigating prediction errors from singular points (MSE < 0.23) and enabling the verification of holographic imaging metasurfaces (E32).",
+      "claim_handles": [
+        "C15_DEEP_NEURAL_NETWORKS_INCLUDING_TANDEM_RESIDUAL"
+      ],
+      "evidence_handles": [
+        "E32_INVERSE_DESIGN_METASURFACE_HOLOGRAPHY_DEEP_RES"
+      ]
+    }
+  ],
+  "blocking_count": 0,
+  "advisory_count": 2,
+  "per_block_revision_outcomes": {
+    "1": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "2": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "3": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "4": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "5": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "6": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "7": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "8": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    }
+  }
+}

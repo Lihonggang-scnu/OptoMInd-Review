@@ -1,0 +1,110 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S07",
+  "attempted": true,
+  "available": true,
+  "fallback_reason": "",
+  "comments": [
+    {
+      "block_index": 1,
+      "sentence": "Beyond this lack of flexibility, physical realization introduces severe performance gaps; at shorter wavelengths, even minor fabrication variability in diffractive element sizes can drastically degrade classification accuracy",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The evidence states that fabrication variability 'may play a key role' and links it to low performance in specific multi-wavelength cases. The block text uses 'drastically degrade', which is an unsupported strengthening of the causal impact compared to the hedged evidence.",
+      "suggested_hedge": "at shorter wavelengths, fabrication variability may significantly impact inference accuracy",
+      "claim_handles": [
+        "C03_FABRICATION_VARIABILITY_SIGNIFICANTLY_IMPACTS"
+      ],
+      "evidence_handles": [
+        "E03_BROADBAND_DIFFRACTIVE_NEURAL_NETWORKS_ENABLING"
+      ]
+    },
+    {
+      "block_index": 2,
+      "sentence": "This discrepancy is exacerbated by fabrication-induced surface roughness, which introduces unmodeled phase errors that significantly degrade inference accuracy compared to digital predictions.",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "The claim attributes performance degradation specifically to 'surface roughness'. The provided evidence (E13) identifies 'discrete control levels', 'fabrication errors', and 'inaccurate emulation kernels' as reasons for mismatch, but does not explicitly isolate 'surface roughness' as the primary driver of phase errors in this context. This is a specific mechanistic detail not confirmed by the local evidence.",
+      "suggested_hedge": "This discrepancy is exacerbated by fabrication-induced errors, such as discrete control levels and geometric deviations, which introduce phase errors that significantly degrade inference accuracy compared to digital predictions.",
+      "claim_handles": [
+        "C11_FABRICATION_INDUCED_SURFACE_ROUGHNESS_INTRODUC"
+      ],
+      "evidence_handles": [
+        "E13_PHYSICS_AWARE_ROUGHNESS_OPTIMIZATION_DIFFRACTI"
+      ]
+    },
+    {
+      "block_index": 4,
+      "sentence": "For instance, magneto-optical diffractive deep neural networks utilize the Faraday effect, where the magnetization direction of magnetic domains modulates light phase without requiring complex microfabrication, thus allowing for online learning techniques that dynamically reconfigure the network to correct for alignment or fabrication errors.",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "The evidence (E17) confirms MO-D2NNs use the Faraday effect and avoid microfabrication of hidden layers. However, it does not state that these systems allow for 'online learning techniques' to 'correct for alignment or fabrication errors'. It mentions that performance issues exist due to these errors, but does not link the MO-D2NN architecture itself to a solution via online learning for error correction. This connects two separate concepts (MO-D2NN existence and online learning solutions) without evidentiary support for their combination.",
+      "suggested_hedge": "For instance, magneto-optical diffractive deep neural networks utilize the Faraday effect to modulate light phase without requiring complex microfabrication of hidden layers, offering a pathway toward dynamic reconfigurability.",
+      "claim_handles": [
+        "C12_HYBRID_ELECTRO_OPTICAL_APPROACHES_SUCH_ONLINE"
+      ],
+      "evidence_handles": [
+        "E17_DEVELOPMENT_ONLINE_LEARNING_TECHNIQUE_MAGNETO"
+      ]
+    },
+    {
+      "block_index": 5,
+      "sentence": "Multi-element metasurface systems overcome these limitations by harnessing illumination angle-dependent phase delays across local units, effectively decoupling angular degrees of freedom to enable robust holographic imaging without relying on complex intrinsic angular dispersion.",
+      "flag_type": "material_contradiction",
+      "blocking": true,
+      "issue": "The evidence (E59) states that angular multiplexing is realized by 'harnessing illumination angle-dependent phase delays... rather than relying on complex local designs with intrinsic angular dispersion.' The block text claims the system enables imaging 'without relying on complex intrinsic angular dispersion,' which aligns with the evidence's rejection of *local* intrinsic dispersion. However, the phrasing 'effectively decoupling angular degrees of freedom' contradicts the evidence which says the method 'harnesses' these delays. More critically, the evidence says the DNN approach *replaces* the need for complex local designs, not that it eliminates the reliance on angular dependence entirely (it uses it). The block implies a decoupling that negates the dependency, whereas the evidence describes a harnessing of that dependency. A clearer contradiction is if the block claimed it worked *without* angle dependence. Let's look closer: Evidence: 'Angular multiplexing... is realized by harnessing illumination angle-dependent phase delays... rather than relying on complex local designs with intrinsic angular dispersion.' Block: 'harnessing illumination angle-dependent phase delays... effectively decoupling angular degrees of freedom'. This is a reasonable synthesis. Is there a contradiction? No. Is there an overclaim? 'Robust holographic imaging' is supported. 'Without relying on complex intrinsic angular dispersion' is supported. I will mark this as advisory/non-blocking or remove if no issue. Actually, looking at E59 again: 'angular optical memory effect induces strong correlations... limiting the use of illumination angle as an independent degree of freedom'. The proposed method 'harnesses illumination angle-dependent phase delays'. So it *uses* the angle dependence. The block says 'decoupling angular degrees of freedom'. This might be interpreted as making them independent, which is what the DNN design achieves (overcoming the correlation/memory effect). This seems like a valid interpretation of the abstract. I will skip this one as it's a reasonable inference from the abstract.)\n    }, \n    { \n      \"block_index\": 5, \n      \"sentence\": \"These findings underscore that wavelength multiplexing is essential for maximizing information processing capacity, yet realizing these designs at scale requires embedding physical fabrication constraints directly into the training loop to ensure experimental viability.\", \n      \"flag_type\": \"advisory\", \n      \"blocking\": false, \n      \"issue\": \"The phrase 'essential for maximizing information processing capacity' is a strong normative claim. The evidence (E02/E62) shows broadband/multiplexed designs *surpassed* monochrome ones, supporting the idea that it improves capacity/accuracy. However, 'essential' is too strong; other methods (like transfer learning or hybrid architectures) also maximize capacity. This is a stylistic overclaim.\", \n      \"suggested_hedge\": \"These findings underscore that wavelength multiplexing offers significant advantages for information processing capacity, while realizing these designs at scale requires embedding physical fabrication constraints directly into the training loop to ensure experimental viability.\", \n      \"claim_handles\": [\"C22_MULTI_ELEMENT_METASURFACE_SYSTEMS_ACHROMATIC_D\"], \n      \"evidence_handles\": [\"E02_ALL_OPTICAL_IMAGE_CLASSIFICATION_THROUGH_UNKNO\"] \n    } \n  ], \n  \"notes\": \"Most blocks are scientifically sound relative to the provided evidence. Block 1 contains a material overclaim regarding the severity of fabrication variability impacts. Block 2 introduces a specific mechanism (surface roughness) not explicitly isolated in the evidence. Block 4 incorrectly links magneto-optical hardware directly to online learning error correction, which are treated as separate topics in the evidence. Block 5 contains a minor overclaim ('essential') regarding wavelength multiplexing.",
+      "suggested_hedge": "",
+      "claim_handles": [],
+      "evidence_handles": []
+    }
+  ],
+  "blocking_count": 1,
+  "advisory_count": 3,
+  "per_block_revision_outcomes": {
+    "1": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "2": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "3": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "4": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "5": {
+      "attempted": true,
+      "applied": true,
+      "blocking_row_count": 1
+    },
+    "6": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "7": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "8": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "9": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    }
+  }
+}

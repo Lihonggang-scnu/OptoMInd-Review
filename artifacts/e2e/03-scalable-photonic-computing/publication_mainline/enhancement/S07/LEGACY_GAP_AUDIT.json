@@ -1,0 +1,88 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S07",
+  "audit": {
+    "verdict": "gaps_found",
+    "gaps": [
+      {
+        "gap_id": "G01",
+        "old_draft_snippet": "Topology optimization utilizes straightforward update rules based on fast gradient computation to rapidly converge in local optima of material structures, while heuristic methods can navigate more complex energy landscapes in search of global optima.",
+        "scientific_content": "The specific distinction between topology optimization (gradient-based, converging to local optima) and heuristic methods (navigating complex landscapes for global optima) is lost. The new blocks discuss deep learning optimizers (Adam, Fromage) and RL but do not retain this fundamental comparison of traditional inverse design algorithmic classes.",
+        "claim_handles": [
+          "C01_NANOPHOTONIC_INVERSE_DESIGN_METHODOLOGIES_INCL"
+        ],
+        "evidence_handles": [
+          "E01_ADVANCING_STATISTICAL_LEARNING_ARTIFICIAL_INTE"
+        ],
+        "affected_block_indices": [
+          2
+        ]
+      },
+      {
+        "gap_id": "G02",
+        "old_draft_snippet": "Multi-wavelength parallel computation in such networks is typically limited to a small number of widely separated wavelengths within a broad spectral band... Integrating diffractive elements with wavelength-selective components such as photonic crystal microcavity arrays offers a pathway to overcoming this limitation...",
+        "scientific_content": "The specific limitation of multi-wavelength parallel computation in Diffractive Optical Neural Networks (DONNs) being restricted to widely separated wavelengths, and the proposed solution of integrating photonic crystal microcavity arrays to overcome this, is absent from the new blocks.",
+        "claim_handles": [
+          "C21_MULTI_WAVELENGTH_PARALLEL_COMPUTATION_DIFFRACT"
+        ],
+        "evidence_handles": [
+          "E65_MULTI_WAVELENGTH_DIFFRACTIVE_OPTICAL_NEURAL_NE"
+        ],
+        "affected_block_indices": [
+          5
+        ]
+      },
+      {
+        "gap_id": "G03",
+        "old_draft_snippet": "Photonic neural networks leveraging resonator nonlinearities for activation functions face additional vulnerability to temperature fluctuations and mechanical vibrations, which can adversely impact performance and require co-designed stabilization strategies",
+        "scientific_content": "The specific vulnerability of resonator-based nonlinear activation functions to environmental factors (temperature fluctuations and mechanical vibrations) is missing. Block 6 discusses thermal crosstalk in phase shifters and fabrication variations in MZIs, but does not mention the specific sensitivity of resonators used for nonlinear activation.",
+        "claim_handles": [
+          "C03_INTEGRATION_NANOPHOTONIC_INVERSE_DESIGN_ARTIFI"
+        ],
+        "evidence_handles": [
+          "E03_EXPLORING_TYPES_PHOTONIC_NEURAL_NETWORKS_IMAGI"
+        ],
+        "affected_block_indices": [
+          6
+        ]
+      }
+    ],
+    "notes": "Identified three gaps: 1) Loss of the specific comparative mechanism between topology optimization and heuristic methods. 2) Loss of the specific technical detail regarding multi-wavelength limitations in DONNs and the photonic crystal solution. 3) Loss of the specific claim about resonator nonlinearity vulnerability to vibration/temperature.",
+    "warnings": []
+  },
+  "patch_records": [
+    {
+      "gap_id": "G01",
+      "block_index": 2,
+      "applied": true,
+      "used_evidence_handles": [
+        "E01_ADVANCING_STATISTICAL_LEARNING_ARTIFICIAL_INTE",
+        "E05_BENCHMARKING_DEEP_LEARNING_BASED_MODELS_NANOPH",
+        "E57_BENCHMARKING_DEEP_LEARNING_BASED_MODELS_NANOPH"
+      ],
+      "gap_evidence_handles": [
+        "E01_ADVANCING_STATISTICAL_LEARNING_ARTIFICIAL_INTE"
+      ]
+    },
+    {
+      "gap_id": "G02",
+      "block_index": 5,
+      "applied": true,
+      "used_evidence_handles": [
+        "E46_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_PATHWAYS_T",
+        "E66_DEEP_PHYSICAL_NEURAL_NETWORKS_TRAINED_BACKPROP",
+        "E65_MULTI_WAVELENGTH_DIFFRACTIVE_OPTICAL_NEURAL_NE"
+      ],
+      "gap_evidence_handles": [
+        "E65_MULTI_WAVELENGTH_DIFFRACTIVE_OPTICAL_NEURAL_NE"
+      ]
+    },
+    {
+      "gap_id": "G03",
+      "block_index": null,
+      "applied": false,
+      "reason": "no_gap_specific_evidence_handles",
+      "detail": "Gap has no valid claim-aligned evidence handle; record-only, no patch applied."
+    }
+  ]
+}

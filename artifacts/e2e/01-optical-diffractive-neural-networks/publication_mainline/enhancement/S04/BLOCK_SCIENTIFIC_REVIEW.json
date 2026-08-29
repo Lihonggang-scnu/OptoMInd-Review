@@ -1,0 +1,81 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S04",
+  "attempted": true,
+  "available": true,
+  "fallback_reason": "",
+  "comments": [
+    {
+      "block_index": 2,
+      "sentence": "single- and two-layer networks designed to distinguish three visible wavelengths achieved accuracies of only 53% and 60%, respectively",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The evidence (E05) states that single- and two-layer DNNs performed poorly with accuracies of 53% and 60%. However, the text attributes this poor performance specifically to 'the addition of a third-wavelength class' and challenges with small input wavelength differences at shorter wavelengths, rather than solely the shallow architecture. The block implies the shallow depth is the primary cause of failure for multi-wavelength tasks generally, whereas the evidence suggests it's a specific limitation of that experimental setup (fabrication constraints preventing deeper layers). More critically, the claim that these are 'shallow architectures' failing is supported, but the phrasing 'often results in poor performance' generalizes a specific experimental result. A more significant issue is the comparison: the text says 'In sharp contrast... these same single-wavelength optimized systems can maintain functional utility... achieving blind testing accuracies exceeding 78%'. Evidence E06 shows a *broadband* network achieved 92.30% and 88.53%, while the *monochrome* network achieved 78.32%. The block claims monochrome is robust (>78%) but performs significantly worse than broadband counterparts. This is supported. However, the first part about 53%/60% is from E05 which discusses classification of *three* wavelengths. The block presents this as a general rule for 'shallow architectures' distinguishing 'multiple wavelengths', which is a reasonable synthesis but borders on overclaim if interpreted as 'shallow networks cannot do multi-wavelength'. It is acceptable as advisory.",
+      "suggested_hedge": "Clarify that the low accuracy was observed in a specific experimental configuration limited by fabrication constraints, rather than a fundamental limit of shallow architectures for all multi-wavelength tasks.",
+      "claim_handles": [
+        "C05_DIFFRACTIVE_NEURAL_NETWORKS_TRAINED_SINGLE_WAV"
+      ],
+      "evidence_handles": [
+        "E05_BROADBAND_DIFFRACTIVE_NEURAL_NETWORKS_ENABLING"
+      ]
+    },
+    {
+      "block_index": 4,
+      "sentence": "research demonstrates that assigning different wavelengths as basebands or carrier frequencies allows a network to balance learning rates and execute multitask operations",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "The phrase 'assigning different wavelengths as basebands or carrier frequencies' and 'balance learning rates' refers to a specific mechanism described in E57 ('Multitask Learning by Multiwave Optical Diffractive Network'). E57 states: 'One is used as baseband and the other is used as a carrier frequency. Therefore, the base band wave can be set to a large learning rate and vice versa.' This is a specific training/optimization strategy involving loss weighting or gradient scaling during the digital training phase, not an inherent optical property of the wavelengths themselves acting as 'basebands/carriers' in the signal processing sense (like in communications). The block's phrasing 'assigning... as basebands or carrier frequencies' might mislead readers into thinking this is an optical modulation scheme. It is a training parameter assignment. Additionally, 'balance learning rates' is a digital training concept applied to the optical weights. While supported by E57, the phrasing is slightly ambiguous regarding whether it's an optical or digital process. Given the context of 'training paradigms' later, it's likely intended as digital, but placed here in 'Exploiting Dispersion'. It is a valid citation of E57, but the mechanism description is technically a training heuristic, not an optical multiplexing mechanism per se. I will flag as advisory for precision.",
+      "suggested_hedge": "Specify that this refers to a training strategy where loss weights or learning rates are adjusted for different wavelength channels during optimization, as demonstrated in specific multi-task learning frameworks.",
+      "claim_handles": [
+        "C13_DIFFRACTIVE_NEURAL_NETWORKS_CAN_EXPLOIT_OPTICA"
+      ],
+      "evidence_handles": [
+        "E57_MULTITASK_LEARNING_MULTIWAVE_OPTICAL_DIFFRACTI"
+      ]
+    }
+  ],
+  "blocking_count": 0,
+  "advisory_count": 2,
+  "per_block_revision_outcomes": {
+    "1": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "2": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "3": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "4": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "5": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "6": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "7": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "8": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    }
+  }
+}

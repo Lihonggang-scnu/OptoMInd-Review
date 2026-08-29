@@ -1,0 +1,72 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S03",
+  "attempted": true,
+  "available": true,
+  "fallback_reason": "",
+  "comments": [
+    {
+      "block_index": 2,
+      "sentence": "Specifically, metasurface holograms are typically fabricated using techniques such as focused ion-beam milling and various lithographic methods...",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "The block explicitly claims that Focused Ion Beam (FIB) is a typical fabrication technique for metasurface *holograms*. The provided evidence (E09, E10) discusses FIB in the context of general nanophotonic structures (metasurfaces/metamaterials) but does not support its use for holographic applications specifically. Holograms require large-area patterning, which FIB cannot provide due to low throughput; this claim introduces a mechanism/usage pattern not supported by the local evidence scope.",
+      "suggested_hedge": "Replace 'focused ion-beam milling' with 'electron-beam lithography' or generalize to 'high-precision lithographic methods', noting that FIB is primarily used for prototyping non-holographic nanostructures.",
+      "claim_handles": [
+        "C04_METASURFACE_HOLOGRAMS_TYPICALLY_FABRICATED_USI"
+      ],
+      "evidence_handles": [
+        "E09_TIME_DOMAIN_TOPOLOGY_OPTIMIZATION_ARBITRARY_DI",
+        "E10_INVERSE_DESIGN_METASURFACE_OPTICAL_FILTERS_USI"
+      ]
+    },
+    {
+      "block_index": 3,
+      "sentence": "Evidence suggests that while such methods can successfully guide the inverse design of nonuniform metasurfaces, the resulting discrepancies often manifest as errors in null realization and sidelobe levels in the far-field radiation pattern.",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The text asserts that discrepancies 'often manifest' as specific far-field errors (null realization/sidelobes). The supporting evidence (E29) presents these as examples from a specific study ('In the examples we have shown...') and notes they were 'acceptable error'. Generalizing this specific observation to a frequent occurrence ('often manifest') across the field is an overclaim not fully supported by the single cited source.",
+      "suggested_hedge": "Rephrase to indicate that such discrepancies 'can manifest' or 'have been observed to manifest' in specific cases, rather than implying a general rule.",
+      "claim_handles": [
+        "C12_MACHINE_LEARNING_OPTIMIZATION_BASED_APPROACHES"
+      ],
+      "evidence_handles": [
+        "E29_COMBINED_MACHINE_LEARNING_OPTIMIZATION_BASED_A"
+      ]
+    }
+  ],
+  "blocking_count": 0,
+  "advisory_count": 2,
+  "per_block_revision_outcomes": {
+    "1": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "2": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "3": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "4": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "5": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "6": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    }
+  }
+}

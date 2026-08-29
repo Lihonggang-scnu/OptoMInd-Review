@@ -1,0 +1,61 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S02",
+  "audit": {
+    "verdict": "gaps_found",
+    "gaps": [
+      {
+        "gap_id": "G01",
+        "old_draft_snippet": "The choice of mesh configuration—rectangular Reck or triangular Clemente arrangements—determines the minimum component count required for full expressivity, with rectangular meshes requiring exactly N(N−1)/2 tunable elements for an N-dimensional transformation.",
+        "scientific_content": "Specific topological configurations (Reck vs. Clemente) and their exact component scaling laws (N(N-1)/2) for universal unitary transformations.",
+        "claim_handles": [],
+        "evidence_handles": [],
+        "affected_block_indices": [
+          1
+        ]
+      },
+      {
+        "gap_id": "G02",
+        "old_draft_snippet": "Wavelength-time interleaving enables single-shot matrix-vector multiplication using a single Mach-Zehnder interferometer data modulator by exploiting wavelength-division multiplexing and precise dispersion management",
+        "scientific_content": "The specific mechanism of Wavelength-Time Interleaving (WTI) for single-shot MVM using a single MZI modulator via WDM and dispersion management.",
+        "claim_handles": [
+          "C07_WAVELENGTH_TIME_INTERLEAVING_ENABLES_SINGLE_SH"
+        ],
+        "evidence_handles": [
+          "E12_SINGLE_SHOT_MATRIX_MATRIX_PHOTONIC_PROCESSOR_B"
+        ],
+        "affected_block_indices": []
+      },
+      {
+        "gap_id": "G03",
+        "old_draft_snippet": "Tensor-compressed training methods further enhance efficiency by utilizing core tensor contraction to reconstruct partial weight matrices, enabling efficient implementation of linear algebra operations within the limited number of available tunable elements",
+        "scientific_content": "Tensor-compressed training methods using core tensor contraction to reconstruct partial weight matrices for efficient implementation in limited-element systems.",
+        "claim_handles": [
+          "C23_TENSOR_COMPRESSED_TRAINING_METHODS_PHOTONIC_NE"
+        ],
+        "evidence_handles": [
+          "E68_TENSOR_COMPRESSED_FULLY_QUANTIZED_TRAINING_NE"
+        ],
+        "affected_block_indices": []
+      }
+    ],
+    "notes": "Gap G01 identifies specific architectural details (Reck/Clemente topology and N(N-1)/2 scaling) lost from Block 1. Gap G02 identifies the specific WTI mechanism lost; it is not covered in any new block (Block 1 focuses on general MZI bottlenecks, others on inverse design). Gap G03 identifies Tensor Compression lost; no new block covers this specific algorithmic optimization.",
+    "warnings": []
+  },
+  "patch_records": [
+    {
+      "gap_id": "G01",
+      "block_index": null,
+      "applied": false,
+      "reason": "no_gap_specific_evidence_handles",
+      "detail": "Gap has no valid claim-aligned evidence handle; record-only, no patch applied."
+    },
+    {
+      "gap_id": "G03",
+      "block_index": null,
+      "applied": false,
+      "reason": "no_gap_specific_evidence_handles",
+      "detail": "Gap has no valid claim-aligned evidence handle; record-only, no patch applied."
+    }
+  ]
+}

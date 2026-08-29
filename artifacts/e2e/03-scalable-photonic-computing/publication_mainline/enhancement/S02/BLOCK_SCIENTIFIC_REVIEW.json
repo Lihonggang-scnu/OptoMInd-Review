@@ -1,0 +1,82 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S02",
+  "attempted": true,
+  "available": true,
+  "fallback_reason": "",
+  "comments": [
+    {
+      "block_index": 4,
+      "sentence": "For instance, ResNet architectures have demonstrated the ability to approximate the spectral response of arbitrary hole vectors within a vast design space after training on thousands of simulation data points, enabling the design of optimized power splitter topologies in a fraction of a second.",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "The block introduces 'ResNet architectures' and 'arbitrary hole vectors' as specific examples. While E30 mentions using a 'ResNet DNN architecture' for 'nanostructured integrated photonic components' (specifically power splitters with 'hole vectors'), it does not support the generalized claim that this applies to 'arbitrary hole vectors within a vast design space' broadly, nor does it explicitly state 'fraction of a second' for *all* such designs, but rather for the specific trained network in that study. This is a specific case being presented as a general mechanism example without sufficient scope qualification relative to the provided evidence snippet.",
+      "suggested_hedge": "For instance, ResNet architectures have been used to approximate the spectral response of specific nanostructured geometries, such as power splitter topologies, enabling rapid design predictions after training.",
+      "claim_handles": [
+        "C12_DEEP_NEURAL_NETWORKS_SERVE_SURROGATE_MODELS_IN"
+      ],
+      "evidence_handles": [
+        "E30_DEEP_NEURAL_NETWORK_INVERSE_DESIGN_INTEGRATED"
+      ]
+    },
+    {
+      "block_index": 5,
+      "sentence": "Furthermore, physics-informed machine learning approaches, including Physics-Informed Neural Networks (PINNs), are being applied to solve the forward and inverse problems associated with photonic device simulation, potentially reducing the computational cost of mesh calibration by embedding governing equations directly into the training process.",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "The text claims PINNs reduce the cost of 'mesh calibration'. Evidence E22 discusses PINNs in PDE-constrained inverse problems generally. Evidence E23 discusses a 'Physics-Inspired Causality-Aware Dynamic Convolutional Neural Operator' for FDTD simulation. Neither evidence source explicitly links PINNs to 'mesh calibration' costs in photonic devices. 'Mesh calibration' is a specific term not supported by the provided evidence spans, which discuss general PDE solving or simulation acceleration. This appears to be an unsupported specific mechanism attribution.",
+      "suggested_hedge": "Furthermore, physics-informed machine learning approaches, including Physics-Informed Neural Networks (PINNs), are being applied to solve forward and inverse problems associated with photonic device simulation, potentially reducing the computational cost of solving governing equations.",
+      "claim_handles": [
+        "C10_PHYSICS_INFORMED_MACHINE_LEARNING_APPROACHES_I"
+      ],
+      "evidence_handles": [
+        "E22_ADJOINT_METHOD_VERSUS_PHYSICS_INFORMED_NEURAL",
+        "E23_PIC2O_SIM_PHYSICS_INSPIRED_CAUSALITY_AWARE_DYN"
+      ]
+    }
+  ],
+  "blocking_count": 0,
+  "advisory_count": 2,
+  "per_block_revision_outcomes": {
+    "1": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "2": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "3": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "4": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "5": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "6": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "7": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "8": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    }
+  }
+}

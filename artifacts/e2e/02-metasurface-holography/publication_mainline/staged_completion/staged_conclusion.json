@@ -1,0 +1,90 @@
+{
+  "schema_version": "optomind.staged_article_completion.v1",
+  "stage": "conclusion",
+  "status": "completed",
+  "fingerprint": "423ea25470a5edb2adf7b6919ec346f209fe76b2b074ea5f4ace67d0f74f1971",
+  "input_fingerprint": "6b362927bfdb6cfe4563bc75a326d99e0f6c5797dd1bb855330468260d9f2194",
+  "artifact_path": "<local-path>",
+  "approval_required": false,
+  "payload": {
+    "workplan": {
+      "derived_from": [
+        "S01: Phase Control Mechanisms in Metasurface Holography: Foundations and Limits",
+        "S02: Computational Inverse Design for Metasurface Holograms: From Forward Models to Algorithmic Optimization",
+        "S03: Nanofabrication of Metasurface Holograms: Tolerances, Disorder, and Scalability",
+        "S04: Active Modulation Mechanisms for Dynamic Metasurface Holography: Speed, Efficiency, and Spectral Trade-offs",
+        "S05: Metasurface Holographic Displays: Architectures, Metrics, and Application Readiness",
+        "S06: Metasurface-Integrated Imaging Systems and Optical Computing: Beyond Display Applications",
+        "S07: Cross-Cutting Challenges and Co-Design Strategies in Metasurface Holography: Resolving the Coupled Mechanism Bottleneck"
+      ],
+      "outline": [
+        "Direct answer: The technological pipeline is defined by a fundamental tension between unlimited computational design spaces and the physical constraints of fabrication and active modulation, creating a 'design-reality gap' that limits commercial readiness.",
+        "Key limitations: The uncoupled optimization of design, fabrication, and system integration leads to the speed-efficiency-bandwidth trilemma in dynamic devices and a lack of validated scalable manufacturing for large-area holograms.",
+        "Forward outlook: Future progress requires a paradigm shift from component-level inverse design to holistic co-design frameworks that jointly optimize geometry, fabrication tolerances, and downstream computational reconstruction algorithms."
+      ],
+      "scope_boundaries": [
+        "Must not introduce new phase control mechanisms or active materials not discussed in the body (e.g., no new material classes beyond PCMs, LCs, MEMS, etc.).",
+        "Must not claim that current inverse design methods have solved the non-uniqueness problem or that scalable fabrication is currently validated at meter-scales.",
+        "Must not propose specific future research experiments or timelines; outlook must remain conceptual based on the synthesized bottlenecks."
+      ]
+    },
+    "draft": {
+      "text": "This review has systematically mapped the technological pipeline of metasurface-based holography, tracing the trajectory from fundamental phase control mechanisms to complex system-level applications. The central finding emerging from this analysis is that while computational inverse design has effectively unlocked theoretically unlimited design spaces, the practical realization of high-fidelity, dynamic holographic systems remains constrained by a persistent \"design-reality gap.\" This gap is not merely a matter of incremental engineering improvement but stems from the uncoupled treatment of physical mechanisms, fabrication tolerances, and system integration throughout the current development lifecycle.\n\nThe foundation of metasurface holography rests on three distinct phase control mechanisms—geometric, propagation, and hybrid approaches—each imposing intrinsic trade-offs among efficiency, bandwidth, and polarization sensitivity. As established, geometric phase offers robust polarization control but suffers from chromatic limitations, while propagation phase provides high efficiency at the cost of narrow bandwidth due to resonant dispersion. Although hybrid strategies attempt to navigate these physical boundaries, they introduce new complexities in design non-uniqueness. To address these challenges, the field has transitioned from intuition-based heuristics to sophisticated computational inverse design frameworks, including deep learning surrogates and adjoint-based topology optimization. These algorithms successfully map desired electromagnetic responses to nanostructure geometries, overcoming the ill-posed nature of the inverse scattering problem. However, these computational successes often rely on idealized models that assume perfect geometric control, ignoring the stochastic realities of nanofabrication.\n\nThis reliance on idealization creates a critical bottleneck when transitioning to physical realization. The review highlights that current nanofabrication processes, particularly serial writing techniques like electron-beam lithography, impose strict tolerance thresholds that systematically degrade holographic fidelity below theoretical predictions. While scalable methods such as nanoimprint lithography offer a pathway to mass production, there is a notable deficit in experimental validation for maintaining nanometer-scale fidelity over meter-scale areas. Consequently, the sophisticated freeform patterns generated by inverse design algorithms frequently encounter a \"fabrication ceiling,\" where the very geometric diversity that enables complex wavefront control becomes a source of uncertainty and performance loss in physical devices.\n\nFurthermore, the extension of metasurfaces into dynamic applications reveals a fundamental \"speed-efficiency-bandwidth trilemma.\" Active modulation mechanisms, ranging from phase-change materials and liquid crystals to MEMS actuators, enable real-time reconfiguration but invariably introduce penalties in diffraction efficiency, spectral range, or switching speed. No single platform currently dominates all three axes, forcing designers to accept specific compromises based on application requirements. This trade-off is exacerbated in display and imaging architectures, where the distinction between human-perception metrics (brightness, refresh rate) and machine-performance metrics (resolution, signal-to-noise ratio) necessitates tailored integration strategies. The recurrence of detailed algorithmic descriptions in application-specific sections underscores a systemic issue: the tendency to re-optimize design parameters in isolation rather than leveraging unified, physics-informed frameworks.\n\nIn conclusion, the primary barrier to the commercial readiness of metasurface holography is no longer the lack of computational tools to generate complex designs, but the failure to integrate these tools with the constraints of manufacturing and system-level operation. The path forward demands a paradigm shift from component-level optimization to holistic co-design. Future advancements will likely depend on frameworks that jointly optimize meta-atom geometry, fabrication-induced disorder, and downstream computational reconstruction algorithms. By embedding physical realizability and system-level metrics directly into the inverse design loop, researchers can bridge the gap between simulated optimality and experimental reality, ultimately enabling the robust, scalable, and dynamic holographic systems envisioned by the field's theoretical foundations."
+    },
+    "status": "drafted"
+  },
+  "provenance": {
+    "run_fingerprint": "e604ed77e4176bb829ad5d6c3609aeae84fb77a3091e38ade28c749b8cc604ff",
+    "stage_order_position": "2",
+    "usage_recorded": "True"
+  },
+  "usage": {
+    "module": "StagedConclusionAuthor",
+    "agent_name": "StagedConclusionAuthor",
+    "model_tier": "c_model",
+    "model_name": "qwen3.5-plus",
+    "task_type": "research_chat",
+    "mock_llm": false,
+    "estimated_input_tokens": 29304,
+    "estimated_output_tokens": 1680,
+    "input_tokens": 26389,
+    "output_tokens": 3358,
+    "token_usage_source": "provider_response",
+    "provider_usage": {
+      "prompt_tokens": 26389,
+      "completion_tokens": 3358,
+      "total_tokens": 29747,
+      "completion_tokens_details": {
+        "reasoning_tokens": 2143,
+        "text_tokens": 3358
+      },
+      "prompt_tokens_details": {
+        "text_tokens": 26389
+      }
+    },
+    "success": true,
+    "failure": false,
+    "error_type": "",
+    "fallback_used": false,
+    "api_key_source": "<local-path><private-credential>.txt#1",
+    "api_key_masked": "****",
+    "api_key_candidate_count": 4,
+    "api_key_rotation_count": 0,
+    "key_failures": [],
+    "model_fallback_used": false,
+    "fallback_chain": [],
+    "attempted_models": [
+      "qwen3.5-plus"
+    ],
+    "selected_model_index": 0,
+    "partial_stream": false,
+    "stream_interrupted_error": "",
+    "request_attempt_count": 1,
+    "retry_count": 0,
+    "repair_calls": 0,
+    "repair_used": false
+  },
+  "error": null,
+  "created_at": "2026-08-28T12:32:11.048392+00:00",
+  "updated_at": "2026-08-28T12:32:11.048392+00:00"
+}

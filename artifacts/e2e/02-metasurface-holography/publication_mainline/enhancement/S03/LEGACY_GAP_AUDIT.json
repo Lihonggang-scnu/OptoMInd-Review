@@ -1,0 +1,56 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S03",
+  "audit": {
+    "verdict": "gaps_found",
+    "gaps": [
+      {
+        "gap_id": "G01",
+        "old_draft_snippet": "Computational efficiency gains have been substantial: paradigms utilizing spatial coupled mode theory or adjoint methods deliver speedups of several orders of magnitude over full-wave simulations, enabling the optimization of complex geometries such as hollow structures and non-uniform bianisotropic unit cells.",
+        "scientific_content": "The old draft explicitly quantifies the computational advantage of specific methods (spatial coupled mode theory and adjoint methods) by stating they offer 'speedups of several orders of magnitude' compared to full-wave simulations. It also specifically identifies 'hollow structures' and 'non-uniform bianisotropic unit cells' as examples of complex geometries enabled by these efficient optimizations. The new blocks mention adjoint methods and hybrid approaches generally but omit the specific quantitative comparison ('orders of magnitude') and the specific geometric examples (hollow/bianisotropic) that illustrate the scope of this efficiency gain.",
+        "claim_handles": [
+          "C03_INVERSE_DESIGN_METHODOLOGIES_METASURFACES_INCL"
+        ],
+        "evidence_handles": [
+          "E24_INVERSE_DESIGN_DIELECTRIC_METASURFACE_SPATIAL",
+          "E25_COMBINED_MACHINE_LEARNING_OPTIMIZATION_BASED_A"
+        ],
+        "affected_block_indices": [
+          1
+        ]
+      },
+      {
+        "gap_id": "G02",
+        "old_draft_snippet": "These methods have enabled demonstrations of dielectric metasurfaces utilizing titanium dioxide on quartz or gallium nitride on sapphire substrates that achieve high optical efficiency in the visible spectrum, establishing viable material platforms for holographic applications",
+        "scientific_content": "The old draft provides specific material-substrate combinations (TiO2 on quartz, GaN on sapphire) and the spectral range (visible spectrum) where high optical efficiency has been demonstrated using research-scale techniques. This concrete evidence establishes the current state-of-the-art for lab-scale fabrication. The new block mentions EBL/FIB and general 'high resolution' but fails to cite these specific successful material platforms and their performance characteristics, which are crucial for contextualizing the limitations of serial processing against known working prototypes.",
+        "claim_handles": [
+          "C04_METASURFACE_HOLOGRAMS_TYPICALLY_FABRICATED_USI"
+        ],
+        "evidence_handles": [
+          "E70_MULTI_ELEMENT_METASURFACE_SYSTEM_IMAGING_NEAR"
+        ],
+        "affected_block_indices": [
+          2
+        ]
+      }
+    ],
+    "notes": "Two gaps identified: 1) Loss of specific quantitative claims regarding computational speedups ('orders of magnitude') and specific geometry types ('hollow', 'bianisotropic') enabled by efficient inverse design methods. 2) Loss of specific material platform examples (TiO2/quartz, GaN/sapphire) and spectral ranges (visible) associated with high-efficiency lab-scale demonstrations.",
+    "warnings": []
+  },
+  "patch_records": [
+    {
+      "gap_id": "G01",
+      "block_index": null,
+      "applied": false,
+      "reason": "no_gap_specific_evidence_handles",
+      "detail": "Gap has no valid claim-aligned evidence handle; record-only, no patch applied."
+    },
+    {
+      "gap_id": "G02",
+      "block_index": null,
+      "applied": false,
+      "reason": "no_gap_specific_evidence_handles",
+      "detail": "Gap has no valid claim-aligned evidence handle; record-only, no patch applied."
+    }
+  ]
+}

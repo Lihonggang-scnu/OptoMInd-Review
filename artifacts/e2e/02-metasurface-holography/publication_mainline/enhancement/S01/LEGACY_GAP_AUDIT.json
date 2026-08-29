@@ -1,0 +1,58 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S01",
+  "audit": {
+    "verdict": "gaps_found",
+    "gaps": [
+      {
+        "gap_id": "G01",
+        "old_draft_snippet": "However, the mechanism is inherently polarization-selective: only one circular polarization state couples efficiently to the desired output channel, halving the theoretical maximum diffraction efficiency at approximately 25% for unpolarized illumination.",
+        "scientific_content": "The specific quantitative limit on diffraction efficiency for geometric phase metasurfaces under unpolarized illumination (approx. 25%), resulting from the inherent polarization selectivity where only one circular polarization state couples efficiently.",
+        "claim_handles": [
+          "C07_GEOMETRIC_PHASE_PANCHARATNAM_BERRY_CONTROL_REL"
+        ],
+        "evidence_handles": [],
+        "affected_block_indices": [
+          2
+        ]
+      },
+      {
+        "gap_id": "G02",
+        "old_draft_snippet": "Titanium dioxide (TiO2) metasurfaces fabricated by electron-beam lithography have demonstrated diffraction efficiencies exceeding 75% in the visible range, substantially outperforming comparable gold-based plasmonic structures limited by absorption losses.",
+        "scientific_content": "Specific performance metrics for dielectric metasurfaces, namely TiO2 achieving >75% diffraction efficiency in the visible spectrum via electron-beam lithography, and the comparative disadvantage of gold-based plasmonic structures due to absorption losses.",
+        "claim_handles": [
+          "C32_DIELECTRIC_METASURFACES_UTILIZING_HIGH_REFRACT"
+        ],
+        "evidence_handles": [
+          "E54_MULTI_ELEMENT_METASURFACE_SYSTEM_IMAGING_NEAR"
+        ],
+        "affected_block_indices": [
+          4
+        ]
+      }
+    ],
+    "notes": "The new blocks describe the mechanisms qualitatively but omit two key scientific details present in the old draft: 1) The specific 25% efficiency cap for geometric phase under unpolarized light, which is a critical design constraint. 2) The specific efficiency benchmark (>75%) for TiO2 metasurfaces compared to plasmonic alternatives, providing a concrete performance baseline for dielectric platforms.",
+    "warnings": []
+  },
+  "patch_records": [
+    {
+      "gap_id": "G01",
+      "block_index": null,
+      "applied": false,
+      "reason": "no_gap_specific_evidence_handles",
+      "detail": "Gap has no valid claim-aligned evidence handle; record-only, no patch applied."
+    },
+    {
+      "gap_id": "G02",
+      "block_index": 4,
+      "applied": true,
+      "used_evidence_handles": [
+        "E11_DYNAMIC_HUMIDITY_MODULATION_QUASI_BOUND_STATES",
+        "E54_MULTI_ELEMENT_METASURFACE_SYSTEM_IMAGING_NEAR"
+      ],
+      "gap_evidence_handles": [
+        "E54_MULTI_ELEMENT_METASURFACE_SYSTEM_IMAGING_NEAR"
+      ]
+    }
+  ]
+}

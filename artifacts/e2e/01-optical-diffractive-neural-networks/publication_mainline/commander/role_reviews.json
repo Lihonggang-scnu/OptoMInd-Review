@@ -1,0 +1,1180 @@
+{
+  "schema_version": "optomind.global_manuscript_commander.role_reviews.v2",
+  "fingerprint": "d279430c394404edbf2b006a7313f06604fc4da430ac09d20fec6854ec782bca",
+  "roles": {
+    "structure_strategist": {
+      "role": "structure_strategist",
+      "status": "completed",
+      "mode": "live",
+      "model_tier": "c2_model",
+      "result": {
+        "diagnosis": {
+          "strengths": [
+            "The manuscript follows a logical 'Design-Build-Test' narrative arc (Architecture -> Training -> Hardware -> Applications), which is standard and effective for technical reviews.",
+            "Strong foundational definitions in S01 establish the physical basis of ODNNs clearly.",
+            "S06 effectively maps the scientific controversies, providing necessary critical balance to the field's enthusiasm."
+          ],
+          "risks": [
+            "Significant redundancy between S04 (Wavelength Multiplexing) and S05 (Applications): S05 re-explains multiplexing concepts that were already detailed as core mechanisms in S04.",
+            "S07 (Bottlenecks/Future) repeats bottleneck descriptions found in S03 (Hardware) and S06 (Controversies) without adding sufficient new synthesis or forward-looking roadmap depth.",
+            "The transition from S02 (Training) to S03 (Hardware) is abrupt; the connection between training constraints (e.g., discretization) and hardware realization is not explicitly bridged."
+          ]
+        },
+        "structure_candidates": [
+          {
+            "candidate_id": "C1",
+            "story_shape": "Linear Pipeline",
+            "narrative_backbone": "Establishes the physical layer (S01), moves to the optimization layer (S02), then the implementation layer (S03). It then isolates a key physical constraint (S04) before demonstrating utility (S05), critiquing validity (S06), and concluding with future paths (S07).",
+            "section_order": [
+              "S01",
+              "S02",
+              "S03",
+              "S04",
+              "S05",
+              "S06",
+              "S07"
+            ],
+            "reader_path": "Reader learns what ODNNs are, how they are trained, how they are built, how wavelength affects them, where they are used, what is debated, and where the field is going.",
+            "rationale": "This is the current structure. It works well for a textbook-style exposition but suffers from thematic leakage where applications and multiplexing overlap.",
+            "risks": [
+              "Redundancy: S05 re-introduces multiplexing concepts defined in S04.",
+              "Fragmentation: S04 feels like an isolated physics chapter rather than a bridge to applications."
+            ]
+          },
+          {
+            "candidate_id": "C2",
+            "story_shape": "Constraint-Centric",
+            "narrative_backbone": "Groups sections by physical vs. algorithmic challenges. Architecture (S01) and Wavelength (S04) are merged into 'Physical Constraints'. Training (S02) and Hardware (S03) are grouped as 'Realization Strategies'. Applications (S05) and Bottlenecks (S07) are grouped as 'Performance & Viability'.",
+            "section_order": [
+              "S01",
+              "S04",
+              "S02",
+              "S03",
+              "S05",
+              "S06",
+              "S07"
+            ],
+            "reader_path": "Reader first understands all physical limits (architecture + wavelength), then sees how algorithms and hardware attempt to solve them, followed by real-world performance and final critique.",
+            "rationale": "By moving S04 next to S01, the reader understands the full scope of physical limitations (geometry + spectrum) before seeing how training and hardware try to overcome them. This reduces the need for S05 to re-explain multiplexing.",
+            "risks": [
+              "Disruption: Moving S04 breaks the traditional Design->Build flow.",
+              "Complexity: Merging S01/S04 requires careful handoff writing to ensure the narrative doesn't become too dense."
+            ]
+          },
+          {
+            "candidate_id": "C3",
+            "story_shape": "Application-Driven",
+            "narrative_backbone": "Starts with the problem space (Applications S05), then explains the enabling technology (Architecture S01, Training S02, Hardware S03). Uses Wavelength (S04) as a specific enabler for multi-task applications. Ends with Controversies (S06) and Future (S07).",
+            "section_order": [
+              "S05",
+              "S01",
+              "S02",
+              "S03",
+              "S04",
+              "S06",
+              "S07"
+            ],
+            "reader_path": "Reader starts with 'Why do we care?' (Applications), then dives into 'How does it work?' (Tech stack), and finishes with 'Is it reliable?' (Critique/Future).",
+            "rationale": "This structure prioritizes impact. It allows S05 to define the application landscape without needing to re-explain multiplexing if S04 is positioned as a deep-dive enabler later.",
+            "risks": [
+              "Accessibility: Non-specialist readers may struggle with S05's technical jargon without the foundation of S01.",
+              "Flow: The jump from Applications back to Architecture can feel disjointed if not smoothed by strong transitional paragraphs."
+            ]
+          }
+        ],
+        "reader_path_findings": [
+          {
+            "finding_id": "RF01",
+            "section_id": "S04",
+            "assessment": "Role Overlap with S05: S04 defines multiplexing as a mechanism, but S05 re-explains it to justify application capabilities.",
+            "recommendation": "In S05, replace mechanistic explanations of multiplexing with references to S04. Focus S05 strictly on performance metrics and use-cases.",
+            "severity": "major",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RF02",
+            "section_id": "S07",
+            "assessment": "Redundant Bottleneck Description: S07 re-lists bottlenecks (static hardware, fabrication errors) that were fully covered in S03 and S06.",
+            "recommendation": "Trim S07's bottleneck summary. Focus S07 exclusively on *future trajectories* and *roadmap*, using the bottlenecks only as context for proposed solutions.",
+            "severity": "minor",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RF03",
+            "section_id": "S02",
+            "assessment": "Missing Bridge to Hardware: S02 ends with training paradigms but does not explicitly link training constraints (e.g., quantization) to hardware requirements.",
+            "recommendation": "Add a bridging paragraph at the end of S02 that highlights how training choices dictate hardware specifications (e.g., phase levels, resolution).",
+            "severity": "advisory",
+            "fail_open": true
+          }
+        ],
+        "proposed_section_order": [
+          {
+            "section_id": "S01",
+            "reason": "Foundational architecture must come first."
+          },
+          {
+            "section_id": "S04",
+            "reason": "Group physical constraints (wavelength) with architecture to consolidate the 'Physics' domain before moving to 'Optimization/Hardware'."
+          },
+          {
+            "section_id": "S02",
+            "reason": "Address training/optimization after establishing physical limits."
+          },
+          {
+            "section_id": "S03",
+            "reason": "Address hardware realization as the physical instantiation of training outcomes."
+          },
+          {
+            "section_id": "S05",
+            "reason": "Catalog applications now that the tech stack is fully understood, avoiding redundant explanation of multiplexing."
+          },
+          {
+            "section_id": "S06",
+            "reason": "Critical evaluation of the field's claims."
+          },
+          {
+            "section_id": "S07",
+            "reason": "Synthesis and future roadmap based on identified gaps."
+          }
+        ],
+        "section_decisions": [
+          {
+            "section_id": "S01",
+            "decision": "retain",
+            "rationale": "Strong opening; establishes core thesis.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S02",
+            "decision": "reposition",
+            "rationale": "Keep content, but ensure handoff to S03 includes hardware implications.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S03",
+            "decision": "retain",
+            "rationale": "Essential for understanding physical constraints.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S04",
+            "decision": "reposition",
+            "rationale": "Move earlier to group with S01 as 'Physical Constraints', reducing redundancy in S05.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S05",
+            "decision": "merge_candidate",
+            "rationale": "Needs editing to remove multiplexing mechanics (moved to S04) and focus purely on application performance/maturity.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S06",
+            "decision": "retain",
+            "rationale": "Provides necessary critical balance.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S07",
+            "decision": "reposition",
+            "rationale": "Ensure this section focuses on *future* directions rather than re-summarizing bottlenecks from S03/S06.",
+            "responsibility": "",
+            "provenance": ""
+          }
+        ],
+        "cross_section_conflicts": [
+          {
+            "conflict_type": "role_overlap",
+            "sections": [
+              "S04",
+              "S05"
+            ],
+            "description": "S05 re-explains polarization and wavelength multiplexing mechanisms that are the primary subject of S04.",
+            "recommendation": "Edit S05 to reference S04 for mechanisms and focus on application-specific results (e.g., accuracy, latency) enabled by those mechanisms.",
+            "finding_id": ""
+          },
+          {
+            "conflict_type": "redundancy",
+            "sections": [
+              "S03",
+              "S07"
+            ],
+            "description": "S07 repeats the list of hardware bottlenecks (static nature, fabrication errors) established in S03.",
+            "recommendation": "Condense S07's bottleneck section to a brief summary sentence, focusing the rest of the section on proposed solutions and roadmaps.",
+            "finding_id": ""
+          }
+        ],
+        "missing_axes": [],
+        "structure_gaps": [],
+        "paragraph_references": [],
+        "repeated_paper_roles": [],
+        "retained_advisory_issues": [
+          "Consider merging S01 and S04 if word count permits, to create a tighter 'Physical Foundations' section."
+        ],
+        "synthesis_findings": [],
+        "narrative_progression": [],
+        "overlap_recommendations": [],
+        "repeated_paper_role_audit": [],
+        "source_concentration": [],
+        "attribution_issues": [],
+        "citation_audit": [],
+        "retrieval_gap_proposals": [],
+        "visual_work_orders": [],
+        "selected_story_shape": null,
+        "section_argument_gaps": [],
+        "review_structure_gaps": [],
+        "gap_value_decisions": [],
+        "rejected_gap_candidates": [],
+        "coverage_gap_candidates": [],
+        "coverage_audit_summary": "",
+        "coverage_search_notes": "",
+        "affected_section_ids": [],
+        "proposed_patch_set": [],
+        "unresolved_issues": [],
+        "visual_evidence_notes": [],
+        "next_execution_stages": [],
+        "strengths": [],
+        "risks": [],
+        "evidence_outline_discipline": [],
+        "manuscript_diagnosis": "",
+        "read_only_declaration": {
+          "chapter_text_changed": false,
+          "retrieval_launched": false,
+          "note": "Advisory work order only."
+        }
+      },
+      "validation_issues": [
+        "structure_gaps: dropped non-object entry 0"
+      ],
+      "usage": {
+        "call_count": 1,
+        "api_call_count": 1,
+        "input_tokens": 181736,
+        "output_tokens": 2318,
+        "estimated_cost_cny": 0.114605,
+        "model_tier": "c2_model",
+        "actual_model": "qwen3.7-flash",
+        "token_usage_source": "provider_reported",
+        "cost_provenance": "configured_model_rate"
+      },
+      "repair_used": false,
+      "resume_skipped": false,
+      "updated_at": "2026-08-28T06:23:26.173065+00:00"
+    },
+    "scientific_synthesis_editor": {
+      "role": "scientific_synthesis_editor",
+      "status": "completed",
+      "mode": "live",
+      "model_tier": "c2_model",
+      "result": {
+        "synthesis_findings": [
+          {
+            "section_id": "S01",
+            "paragraph_id": "S01-P02",
+            "finding": "The text uses 'D2NN' and 'ODNN' interchangeably to refer to the same class of networks. This inconsistency is confusing for readers tracking specific architectural variants.",
+            "finding_type": "terminology_inconsistency",
+            "source_paper_ids": [],
+            "source_paper_trust_types": {},
+            "boundary_conditions": "",
+            "finding_id": ""
+          },
+          {
+            "section_id": "S01",
+            "paragraph_id": "S01-P04",
+            "finding": "The transition from discussing single-plane limitations (P03) to training mechanisms (P04) is abrupt. The paragraph begins with 'Building on the multi-layer cascades...' but P03 ended by discussing misalignment in multi-layer systems, not their trainability directly.",
+            "finding_type": "transition_weakness",
+            "source_paper_ids": [],
+            "source_paper_trust_types": {},
+            "boundary_conditions": "",
+            "finding_id": ""
+          },
+          {
+            "section_id": "S02",
+            "paragraph_id": "S02-P06",
+            "finding": "This paragraph is significantly longer (352 words) than surrounding paragraphs (~200 words) and covers multiple distinct topics: polarization multiplexing, wavelength multiplexing, PhC-DONNs, and programmable metasurfaces. It risks diluting the focus on 'Training Paradigms'.",
+            "finding_type": "structural_imbalance",
+            "source_paper_ids": [],
+            "source_paper_trust_types": {},
+            "boundary_conditions": "",
+            "finding_id": ""
+          },
+          {
+            "section_id": "S03",
+            "paragraph_id": "S03-P04",
+            "finding": "The section discusses SLMs and rewritable metasurfaces as reconfigurable hardware, but then pivots immediately to Hardware-in-the-Loop (HIL). While related, HIL is a training methodology (S02 topic) rather than a hardware platform description. This blurs the boundary between S02 and S03.",
+            "finding_type": "scope_overlap",
+            "source_paper_ids": [],
+            "source_paper_trust_types": {},
+            "boundary_conditions": "",
+            "finding_id": ""
+          },
+          {
+            "section_id": "S04",
+            "paragraph_id": "S04-P07",
+            "finding": "The discussion of ensemble learning and resonators in this section on Wavelength Multiplexing feels disconnected from the core theme of chromatic dispersion. Resonator stability is an environmental issue (S03/S07), and ensemble learning is a training strategy (S02).",
+            "finding_type": "thematic_drift",
+            "source_paper_ids": [],
+            "source_paper_trust_types": {},
+            "boundary_conditions": "",
+            "finding_id": ""
+          },
+          {
+            "section_id": "S05",
+            "paragraph_id": "S05-P04",
+            "finding": "Orbital Angular Momentum (OAM) mode multiplexing is discussed here under Applications. However, OAM is fundamentally a degree of freedom similar to wavelength/polarization (S04). Placing it in Applications without linking back to the multiplexing framework in S04 creates redundancy.",
+            "finding_type": "repetition_across_sections",
+            "source_paper_ids": [],
+            "source_paper_trust_types": {},
+            "boundary_conditions": "",
+            "finding_id": ""
+          },
+          {
+            "section_id": "S06",
+            "paragraph_id": "S06-P07",
+            "finding": "The section introduces 'Minimalist DONNs' and 'lensless imaging' as counter-narratives. While valid controversies, the explanation of lensless imaging as a 'fixed passive encoder' needs clearer distinction from the trainable ODNNs discussed in S01-S03 to avoid reader confusion about what constitutes an ODNN.",
+            "finding_type": "reader_clarity",
+            "source_paper_ids": [],
+            "source_paper_trust_types": {},
+            "boundary_conditions": "",
+            "finding_id": ""
+          }
+        ],
+        "reader_path_findings": [
+          {
+            "finding_id": "RF01",
+            "section_id": "S01",
+            "assessment": "The introduction of 'ODNN' vs 'D2NN' acronyms is inconsistent. Early paragraphs use D2NN, later ones switch to ODNN. This forces the reader to constantly map terms.",
+            "recommendation": "Standardize on one primary acronym (e.g., D2NN) in S01 and explicitly define ODNN as the broader category or synonym at first use.",
+            "severity": "minor",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RF02",
+            "section_id": "S02",
+            "assessment": "Paragraph P06 in S02 attempts to cover too many multiplexing strategies (polarization, wavelength, OAM) which are better suited for S04. This makes the training section feel bloated and unfocused.",
+            "recommendation": "Move detailed descriptions of polarization and wavelength multiplexing architectures to S04. Keep S02 focused on *how* these multiplexed systems are trained (e.g., joint loss functions).",
+            "severity": "major",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RF03",
+            "section_id": "S03",
+            "assessment": "The discussion of HIL in S03 overlaps heavily with S02. S03 should focus on the *hardware* constraints that necessitate HIL, while S02 focuses on the *algorithmic* implementation of HIL.",
+            "recommendation": "Refine S03 to describe the physical feedback loop mechanism (e.g., camera integration, actuator latency) rather than the optimization algorithm itself.",
+            "severity": "minor",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RF04",
+            "section_id": "S04",
+            "assessment": "The transition from mitigation (achromatic designs) to exploitation (multiplexing) is good, but the inclusion of ensemble learning in P07 breaks the flow.",
+            "recommendation": "Remove ensemble learning from S04. It belongs in S02 (training) or S06 (controversies/robustness).",
+            "severity": "advisory",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RF05",
+            "section_id": "S07",
+            "assessment": "The conclusion effectively synthesizes bottlenecks but repeats the 'static vs. reconfigurable' debate extensively already covered in S03 and S06.",
+            "recommendation": "Condense the static/reconfigurable debate in S07. Focus S07's conclusion on the *pathway* forward (hybrid co-design) rather than re-litigating the pros/cons of static hardware.",
+            "severity": "advisory",
+            "fail_open": true
+          }
+        ],
+        "narrative_progression": [
+          {
+            "from_section_id": "S01",
+            "to_section_id": "S02",
+            "assessment": "Strong logical link. S01 establishes the physics; S02 explains how to optimize those physics parameters.",
+            "recommendation": "Ensure S02 explicitly references the 'trainable phase profiles' introduced in S01 to maintain continuity.",
+            "finding_id": ""
+          },
+          {
+            "from_section_id": "S02",
+            "to_section_id": "S03",
+            "assessment": "Good handoff. S02 produces optimized weights; S03 discusses how to physically realize them.",
+            "recommendation": "Clarify the boundary: S02 handles the 'software' of diffraction (gradients), S03 handles the 'hardware' (materials/fab).",
+            "finding_id": ""
+          },
+          {
+            "from_section_id": "S03",
+            "to_section_id": "S04",
+            "assessment": "Logical progression from general hardware to a specific critical property (wavelength dependence) affecting all hardware.",
+            "recommendation": "Explicitly state in S04 intro that wavelength effects are a universal constraint across the platforms described in S03.",
+            "finding_id": ""
+          },
+          {
+            "from_section_id": "S04",
+            "to_section_id": "S05",
+            "assessment": "Good shift from physical constraints to practical utility. S04 defines the limits; S05 shows what works within them.",
+            "recommendation": "Use S05 to demonstrate how applications leverage the multiplexing capabilities defined in S04.",
+            "finding_id": ""
+          },
+          {
+            "from_section_id": "S05",
+            "to_section_id": "S06",
+            "assessment": "Effective pivot. After showing successes, S06 critically examines the validity and robustness of those successes.",
+            "recommendation": "Ensure S06 references specific application claims from S05 to ground the controversies in concrete examples.",
+            "finding_id": ""
+          },
+          {
+            "from_section_id": "S06",
+            "to_section_id": "S07",
+            "assessment": "Strong synthesis. S06 identifies problems; S07 proposes solutions and future directions.",
+            "recommendation": "Map specific controversies from S06 directly to proposed trajectories in S07 (e.g., Simulation Gap -> Physics-Aware Training).",
+            "finding_id": ""
+          }
+        ],
+        "overlap_recommendations": [
+          {
+            "sections": [
+              "S02",
+              "S03"
+            ],
+            "paper_id": "00af565d66563cb83347d304c37313cc2dfa0902",
+            "trust_type": "core_evidence",
+            "recommendation": "This paper on HIL appears in both sections. In S02, focus on the *optimization loop*. In S03, focus on the *physical setup* (SLM/camera integration). Ensure the distinction is clear.",
+            "finding_id": ""
+          },
+          {
+            "sections": [
+              "S01",
+              "S04"
+            ],
+            "paper_id": "04c16f79232a1dba281da8a2626e1933bcb10641",
+            "trust_type": "core_evidence",
+            "recommendation": "Polarization multiplexing is discussed in S01 (architecture) and S04 (wavelength/multiplexing). Consolidate the architectural definition in S01 and the spectral/chromatic implications in S04.",
+            "finding_id": ""
+          },
+          {
+            "sections": [
+              "S02",
+              "S04"
+            ],
+            "paper_id": "1716c059da55f246fb44c95094c2c92781424124",
+            "trust_type": "core_evidence",
+            "recommendation": "Physics-aware codesign is central to both. S02 should detail the *algorithm* (Gumbel-Softmax). S04 should detail its role in *chromatic robustness*.",
+            "finding_id": ""
+          },
+          {
+            "sections": [
+              "S03",
+              "S07"
+            ],
+            "paper_id": "7efb4f8ff9aa6f5e9691e9392b539298ef46ca04",
+            "trust_type": "core_evidence",
+            "recommendation": "Programmable metasurfaces are discussed in S03 (hardware) and S07 (future trajectory). S03 should evaluate current performance; S07 should frame it as a solution to static rigidity.",
+            "finding_id": ""
+          }
+        ],
+        "repeated_paper_roles": [],
+        "source_concentration": [],
+        "mechanism_strengthening_recommendations": [
+          {
+            "section_id": "S01",
+            "paragraph_id": "P03",
+            "mechanism_or_boundary": "Single-plane limitation",
+            "recommendation": "Strengthen the explanation of *why* single planes fail (Bessel function FT flatness) by briefly contrasting it with the transfer matrix method used in multi-layer systems."
+          },
+          {
+            "section_id": "S02",
+            "paragraph_id": "P05",
+            "mechanism_or_boundary": "Gradient chain break",
+            "recommendation": "Clarify the mechanism of Gumbel-Softmax in bridging discrete device responses. Explain *how* it relaxes the hard thresholding to allow gradients to flow."
+          },
+          {
+            "section_id": "S04",
+            "paragraph_id": "P01",
+            "mechanism_or_boundary": "Chromatic dispersion",
+            "recommendation": "Explicitly link the inverse wavelength scaling of phase delay to the shift in focal length/point spread function to make the physical consequence immediate."
+          }
+        ],
+        "evidence_outline_discipline": [
+          "S05 contains several application claims (e.g., COVID-19 detection) that seem tangential to the core ODNN architecture narrative. Ensure these are framed as 'proof-of-concept' rather than mature deployments to align with the global thesis."
+        ],
+        "unresolved_issues": [
+          "The distinction between 'diffractive lenses' (S01) and 'diffractive neural networks' (S01) remains slightly blurred in early paragraphs. Clarify that ODNNs are a subset of diffractive elements that are *trained* via backpropagation, whereas traditional DOEs are designed via algorithms like GS."
+        ],
+        "retained_advisory_issues": [
+          "Consider adding a brief summary table in S03 comparing hardware platforms (SLM, Metasurface, Thin-film) on resolution, speed, and cost to aid reader comprehension."
+        ],
+        "proposed_section_order": [],
+        "section_decisions": [],
+        "cross_section_conflicts": [],
+        "missing_axes": [],
+        "structure_gaps": [],
+        "paragraph_references": [],
+        "repeated_paper_role_audit": [],
+        "attribution_issues": [],
+        "citation_audit": [],
+        "retrieval_gap_proposals": [],
+        "visual_work_orders": [],
+        "structure_candidates": [],
+        "selected_story_shape": null,
+        "section_argument_gaps": [],
+        "review_structure_gaps": [],
+        "gap_value_decisions": [],
+        "rejected_gap_candidates": [],
+        "coverage_gap_candidates": [],
+        "coverage_audit_summary": "",
+        "coverage_search_notes": "",
+        "affected_section_ids": [],
+        "proposed_patch_set": [],
+        "visual_evidence_notes": [],
+        "next_execution_stages": [],
+        "strengths": [],
+        "risks": [],
+        "diagnosis": {},
+        "manuscript_diagnosis": "",
+        "read_only_declaration": {
+          "chapter_text_changed": false,
+          "retrieval_launched": false,
+          "note": "Advisory work order only."
+        }
+      },
+      "validation_issues": [
+        "repeated_paper_roles: dropped non-object entry 0",
+        "repeated_paper_roles: dropped non-object entry 1",
+        "source_concentration: dropped non-object entry 0"
+      ],
+      "usage": {
+        "call_count": 1,
+        "api_call_count": 1,
+        "input_tokens": 181655,
+        "output_tokens": 3126,
+        "estimated_cost_cny": 0.116495,
+        "model_tier": "c2_model",
+        "actual_model": "qwen3.7-flash",
+        "token_usage_source": "provider_reported",
+        "cost_provenance": "configured_model_rate"
+      },
+      "repair_used": false,
+      "resume_skipped": false,
+      "updated_at": "2026-08-28T06:24:04.808050+00:00"
+    },
+    "coverage_auditor": {
+      "role": "coverage_auditor",
+      "status": "completed",
+      "mode": "live",
+      "model_tier": "c2_model",
+      "result": {
+        "coverage_audit_summary": "Audited sections S01 through S07. The manuscript structure is logically sound, covering architecture, training, hardware, wavelength effects, applications, controversies, and future trajectories. However, a distinct structural gap exists in the 'Physical Architecture' section (S01) regarding the mathematical formalism of non-linear activation. While S01 defines ODNNs as linear transforms via diffraction, it fails to formally address the 'nonlinearity problem'—the absence of native optical nonlinearity—and how this architectural limitation forces the hybridization strategies discussed later. This is a foundational architectural claim that should be established early.",
+        "section_argument_gap_candidates": [
+          {
+            "candidate_id": "S01-GAP-NONLINEARITY",
+            "gap_type": "section_argument_gap",
+            "unique_contribution": "A dedicated subsection or claim block defining the 'Nonlinearity Bottleneck' as a fundamental architectural constraint of diffractive layers, contrasting the linearity of Fresnel/Fraunhofer propagation with the nonlinearity required for universal computation (e.g., XOR), and establishing why this necessitates the hybrid architectures or specific material nonlinearities discussed in S03/S07.",
+            "why_existing_structure_cannot_absorb": "S01 currently focuses on the *linear* transformation capabilities (matrix-vector multiplication via diffraction). It mentions 'limited nonlinearities' in the scope guardrails but does not explicitly argue that the *absence* of native nonlinearity is a primary architectural differentiator from digital NNs. S02 covers training methods, and S03 covers hardware platforms; neither provides the theoretical architectural justification for why hybridization is structurally necessary rather than just an engineering preference.",
+            "expected_nonduplicate_gain": "Provides the theoretical grounding for the 'Hybrid Electro-Optical' trajectory in S07. Without this explicit architectural claim, the shift to hybrid systems appears as a mere workaround rather than a consequence of the physics of diffraction.",
+            "section_id": "S01",
+            "paragraph_ids": [
+              "S01-P01"
+            ],
+            "missing_claim_roles": [
+              "architectural_limitation",
+              "theoretical_constraint"
+            ],
+            "fact_units": [],
+            "required_material_strength": {
+              "type": "theoretical_derivation_or_consensus_statement",
+              "description": "Citation of the universal approximation theorem limitations for linear optical networks and the necessity of nonlinearity."
+            },
+            "success_criterion": "The new subsection must explicitly state that while diffractive layers implement linear transformations, they lack native nonlinear activation functions, creating a fundamental expressivity bottleneck that distinguishes ODNNs from digital NNs and motivates hybrid designs.",
+            "affected_sections": [
+              "S01",
+              "S03",
+              "S07"
+            ],
+            "confidence": "high"
+          }
+        ],
+        "review_structure_gap_candidates": [],
+        "retained_advisory_issues": [
+          "S05 (Applications) contains significant overlap with S04 (Wavelength Multiplexing) regarding polarization and OAM multiplexing. Consider moving pure multiplexing mechanism details to S04 and keeping application-specific performance metrics in S05.",
+          "S06 (Controversies) and S07 (Bottlenecks) have overlapping content regarding the 'simulation-to-reality gap'. Ensure S06 focuses on the *debate* over its magnitude/cause, while S07 focuses on *mitigation strategies*."
+        ],
+        "proposed_section_order": [],
+        "section_decisions": [],
+        "cross_section_conflicts": [],
+        "missing_axes": [],
+        "structure_gaps": [],
+        "paragraph_references": [],
+        "synthesis_findings": [],
+        "narrative_progression": [],
+        "overlap_recommendations": [],
+        "repeated_paper_roles": [],
+        "repeated_paper_role_audit": [],
+        "source_concentration": [],
+        "attribution_issues": [],
+        "citation_audit": [],
+        "retrieval_gap_proposals": [],
+        "visual_work_orders": [],
+        "structure_candidates": [],
+        "selected_story_shape": null,
+        "reader_path_findings": [],
+        "section_argument_gaps": [],
+        "review_structure_gaps": [],
+        "gap_value_decisions": [],
+        "rejected_gap_candidates": [],
+        "coverage_gap_candidates": [
+          {
+            "candidate_id": "S01-GAP-NONLINEARITY",
+            "gap_type": "section_argument_gap",
+            "unique_contribution": "A dedicated subsection or claim block defining the 'Nonlinearity Bottleneck' as a fundamental architectural constraint of diffractive layers, contrasting the linearity of Fresnel/Fraunhofer propagation with the nonlinearity required for universal computation (e.g., XOR), and establishing why this necessitates the hybrid architectures or specific material nonlinearities discussed in S03/S07.",
+            "why_existing_structure_cannot_absorb": "S01 currently focuses on the *linear* transformation capabilities (matrix-vector multiplication via diffraction). It mentions 'limited nonlinearities' in the scope guardrails but does not explicitly argue that the *absence* of native nonlinearity is a primary architectural differentiator from digital NNs. S02 covers training methods, and S03 covers hardware platforms; neither provides the theoretical architectural justification for why hybridization is structurally necessary rather than just an engineering preference.",
+            "expected_nonduplicate_gain": "Provides the theoretical grounding for the 'Hybrid Electro-Optical' trajectory in S07. Without this explicit architectural claim, the shift to hybrid systems appears as a mere workaround rather than a consequence of the physics of diffraction.",
+            "section_id": "S01",
+            "paragraph_ids": [
+              "S01-P01"
+            ],
+            "missing_claim_roles": [
+              "architectural_limitation",
+              "theoretical_constraint"
+            ],
+            "fact_units": [],
+            "required_material_strength": {
+              "type": "theoretical_derivation_or_consensus_statement",
+              "description": "Citation of the universal approximation theorem limitations for linear optical networks and the necessity of nonlinearity."
+            },
+            "success_criterion": "The new subsection must explicitly state that while diffractive layers implement linear transformations, they lack native nonlinear activation functions, creating a fundamental expressivity bottleneck that distinguishes ODNNs from digital NNs and motivates hybrid designs.",
+            "affected_sections": [
+              "S01",
+              "S03",
+              "S07"
+            ],
+            "confidence": "high",
+            "status": "candidate"
+          }
+        ],
+        "coverage_search_notes": "",
+        "affected_section_ids": [],
+        "proposed_patch_set": [],
+        "unresolved_issues": [],
+        "visual_evidence_notes": [],
+        "next_execution_stages": [],
+        "strengths": [],
+        "risks": [],
+        "evidence_outline_discipline": [],
+        "diagnosis": {},
+        "manuscript_diagnosis": "",
+        "read_only_declaration": {
+          "chapter_text_changed": false,
+          "retrieval_launched": false,
+          "note": "Advisory work order only."
+        }
+      },
+      "validation_issues": [],
+      "usage": {
+        "call_count": 1,
+        "api_call_count": 1,
+        "input_tokens": 181708,
+        "output_tokens": 774,
+        "estimated_cost_cny": 0.110882,
+        "model_tier": "c2_model",
+        "actual_model": "qwen3.7-flash",
+        "token_usage_source": "provider_reported",
+        "cost_provenance": "configured_model_rate"
+      },
+      "repair_used": false,
+      "resume_skipped": false,
+      "updated_at": "2026-08-28T06:24:26.760282+00:00"
+    },
+    "evidence_attribution_critic": {
+      "role": "evidence_attribution_critic",
+      "status": "completed",
+      "mode": "live",
+      "model_tier": "c2_model",
+      "result": {
+        "section_argument_gaps": [
+          {
+            "gap_id": "S01-GAP-NONLINEARITY",
+            "gap_type": "section_argument_gap",
+            "unique_contribution": "A dedicated subsection establishing the 'Nonlinearity Bottleneck' as a fundamental architectural constraint. This section must explicitly define that while diffractive layers implement linear transformations via diffraction, they lack native nonlinear activation functions (unlike digital neurons), creating a theoretical expressivity limit that necessitates hybrid electro-optical designs or specific material nonlinearities.",
+            "why_existing_structure_cannot_absorb": "S01 currently focuses on the *linear* transformation capabilities (matrix-vector multiplication via diffraction) and physical instantiation. It mentions 'limited nonlinearities' in scope guardrails but does not explicitly argue that the *absence* of native nonlinearity is a primary architectural differentiator from digital NNs. S02 covers training methods, and S03 covers hardware platforms; neither provides the theoretical architectural justification for why hybridization is structurally necessary rather than just an engineering preference.",
+            "expected_nonduplicate_gain": "Provides the theoretical grounding for the 'Hybrid Electro-Optical' trajectory in S07. Without this explicit architectural claim, the shift to hybrid systems appears as a mere workaround rather than a consequence of the physics of diffraction. It also clarifies the distinction between ODNNs and traditional Diffractive Optical Elements (DOEs).",
+            "missing_claim_roles": [
+              "architectural_limitation",
+              "theoretical_constraint"
+            ],
+            "fact_units": [],
+            "required_material_strength": {
+              "type": "theoretical_derivation_or_consensus_statement",
+              "description": "Citation of the universal approximation theorem limitations for linear optical networks and the necessity of nonlinearity."
+            },
+            "success_criterion": "The new subsection must explicitly state that while diffractive layers implement linear transformations, they lack native nonlinear activation functions, creating a fundamental expressivity bottleneck that distinguishes ODNNs from digital NNs and motivates hybrid designs.",
+            "one_round_stop_reason": "Once the nonlinearity bottleneck is established as a core architectural feature in S01, subsequent sections (S03, S07) can reference it as a given constraint without re-deriving the theory.",
+            "affected_sections": [
+              "S01",
+              "S03",
+              "S07"
+            ],
+            "confidence": "high",
+            "existing_coverage": {
+              "paragraph_ids": [
+                "S01-P01",
+                "S01-P02"
+              ],
+              "summary": "Current paragraphs establish the physical basis of ODNNs as linear transforms via diffraction and introduce phase modulation. They mention 'limited nonlinearities' in passing but do not analyze the absence of nonlinearity as a structural bottleneck."
+            },
+            "residual_gap": "The current text fails to explain *why* hybridization is required by stating that linear optical networks cannot solve non-linearly separable problems (e.g., XOR) without external nonlinearity, which is the key theoretical link to S07's roadmap.",
+            "decision": "approve",
+            "status": "approved"
+          }
+        ],
+        "review_structure_gaps": [],
+        "gap_value_decisions": [
+          {
+            "decision_id": "GVD-001",
+            "gap_id": "S01-GAP-NONLINEARITY",
+            "decision": "approve",
+            "confidence": "high",
+            "reason": "The coverage auditor correctly identified a foundational gap. S01 defines ODNNs as linear wave propagation systems. To properly contextualize the field's evolution towards hybrid systems (S07) and the role of electronic nonlinearity (S02/S03), the *absence* of native optical nonlinearity must be framed as a primary architectural constraint early in the review. This is not an evidence gap but a structural argument gap: the narrative needs a 'problem statement' regarding expressivity before discussing solutions.",
+            "provenance_prior_role": "coverage_auditor"
+          }
+        ],
+        "rejected_gap_candidates": [
+          {
+            "rejection_id": "GRJ-001",
+            "candidate_id": "S04-GAP-OAM",
+            "gap_type": "section_argument_gap",
+            "decision": "reject",
+            "reason": "Orbital Angular Momentum (OAM) multiplexing is already covered in S04 (Wavelength Multiplexing) and S05 (Applications). The structure strategist noted redundancy, but the current draft handles OAM adequately within the broader multiplexing discussion. No new subsection is needed; editing for focus is sufficient.",
+            "existing_coverage": {
+              "paragraph_ids": [
+                "S04-P06",
+                "S05-P04"
+              ],
+              "summary": "OAM mode multiplexing is discussed as a degree of freedom for information density in both S04 and S05."
+            },
+            "residual_gap": "",
+            "provenance_prior_role": "structure_strategist"
+          },
+          {
+            "rejection_id": "GRJ-002",
+            "candidate_id": "S07-GAP-BOTTLENECKS",
+            "gap_type": "section_argument_gap",
+            "decision": "reject",
+            "reason": "The reviewer suggested adding more bottleneck details to S07. However, S07's purpose is synthesis and future trajectories. Re-listing bottlenecks already covered in S03 (Hardware) and S06 (Controversies) would violate the scope guardrail against duplication. The existing structure correctly uses bottlenecks as context for proposed solutions.",
+            "existing_coverage": {
+              "paragraph_ids": [
+                "S07-P01",
+                "S07-P02"
+              ],
+              "summary": "S07 summarizes static rigidity, fabrication errors, and environmental instability as context for hybrid co-design proposals."
+            },
+            "residual_gap": "",
+            "provenance_prior_role": "scientific_synthesis_editor"
+          }
+        ],
+        "citation_audit": [],
+        "attribution_issues": [],
+        "source_concentration": [],
+        "retrieval_gap_proposals": [],
+        "visual_evidence_notes": [],
+        "coverage_search_notes": "Reviewed S01-S07. Confirmed that S01 lacks the explicit 'nonlinearity bottleneck' argument. Confirmed that S04 and S05 overlap on multiplexing mechanisms but are structurally distinct (mechanism vs application). Confirmed that S07 correctly synthesizes bottlenecks without needing new detail.",
+        "retained_advisory_issues": [
+          "Consider merging S01 and S04 if word count permits, to create a tighter 'Physical Foundations' section.",
+          "Ensure S05 references S04 for multiplexing mechanisms rather than re-explaining them."
+        ],
+        "proposed_section_order": [],
+        "section_decisions": [],
+        "cross_section_conflicts": [],
+        "missing_axes": [],
+        "structure_gaps": [],
+        "paragraph_references": [],
+        "synthesis_findings": [],
+        "narrative_progression": [],
+        "overlap_recommendations": [],
+        "repeated_paper_roles": [],
+        "repeated_paper_role_audit": [],
+        "visual_work_orders": [],
+        "structure_candidates": [],
+        "selected_story_shape": null,
+        "reader_path_findings": [],
+        "coverage_gap_candidates": [],
+        "coverage_audit_summary": "",
+        "affected_section_ids": [],
+        "proposed_patch_set": [],
+        "unresolved_issues": [],
+        "next_execution_stages": [],
+        "strengths": [],
+        "risks": [],
+        "evidence_outline_discipline": [],
+        "diagnosis": {},
+        "manuscript_diagnosis": "",
+        "read_only_declaration": {
+          "chapter_text_changed": false,
+          "retrieval_launched": false,
+          "note": "Advisory work order only."
+        }
+      },
+      "validation_issues": [
+        "section_argument_gap: dropped unknown paragraph_id 'S01-P01'",
+        "section_argument_gap: dropped unknown paragraph_id 'S01-P01'",
+        "section_argument_gap: dropped unknown paragraph_id 'S01-P02'",
+        "section_argument_gap: dropped unknown paragraph_id 'S01-P02'"
+      ],
+      "usage": {
+        "call_count": 1,
+        "api_call_count": 1,
+        "input_tokens": 188287,
+        "output_tokens": 1535,
+        "estimated_cost_cny": 0.116656,
+        "model_tier": "c2_model",
+        "actual_model": "qwen3.7-flash",
+        "token_usage_source": "provider_reported",
+        "cost_provenance": "configured_model_rate"
+      },
+      "repair_used": false,
+      "resume_skipped": false,
+      "updated_at": "2026-08-28T06:24:52.089988+00:00"
+    },
+    "commander_synthesis": {
+      "role": "commander_synthesis",
+      "status": "completed",
+      "mode": "live",
+      "model_tier": "c2_model",
+      "result": {
+        "manuscript_diagnosis": "The manuscript presents a comprehensive review of Diffractive Optical Neural Networks (ODNNs) with a strong logical flow from physical architecture to future trajectories. However, structural redundancy exists between S04 (Wavelength Multiplexing) and S05 (Applications), where multiplexing mechanisms are re-explained in the context of applications. Additionally, S01 lacks an explicit theoretical framing of the 'nonlinearity bottleneck' as a fundamental architectural constraint, which is necessary to justify the hybrid electro-optical solutions proposed in S07. The narrative arc is sound but requires tightening of transitions and consolidation of overlapping themes.",
+        "structure_candidates": [
+          {
+            "candidate_id": "C1",
+            "story_shape": "Linear Pipeline",
+            "narrative_backbone": "Establishes the physical layer (S01), moves to the optimization layer (S02), then the implementation layer (S03). It then isolates a key physical constraint (S04) before demonstrating utility (S05), critiquing validity (S06), and concluding with future paths (S07).",
+            "section_order": [
+              "S01",
+              "S02",
+              "S03",
+              "S04",
+              "S05",
+              "S06",
+              "S07"
+            ],
+            "reader_path": "Reader learns what ODNNs are, how they are trained, how they are built, how wavelength affects them, where they are used, what is debated, and where the field is going.",
+            "rationale": "This is the current structure. It works well for a textbook-style exposition but suffers from thematic leakage where applications and multiplexing overlap.",
+            "risks": [
+              "Redundancy: S05 re-introduces multiplexing concepts defined in S04.",
+              "Fragmentation: S04 feels like an isolated physics chapter rather than a bridge to applications."
+            ]
+          },
+          {
+            "candidate_id": "C2",
+            "story_shape": "Constraint-Centric",
+            "narrative_backbone": "Groups sections by physical vs. algorithmic challenges. Architecture (S01) and Wavelength (S04) are merged into 'Physical Constraints'. Training (S02) and Hardware (S03) are grouped as 'Realization Strategies'. Applications (S05) and Bottlenecks (S07) are grouped as 'Performance & Viability'.",
+            "section_order": [
+              "S01",
+              "S04",
+              "S02",
+              "S03",
+              "S05",
+              "S06",
+              "S07"
+            ],
+            "reader_path": "Reader first understands all physical limits (geometry + spectrum) before seeing how algorithms and hardware try to overcome them. This reduces the need for S05 to re-explain multiplexing.",
+            "rationale": "By moving S04 next to S01, the reader understands the full scope of physical limitations (geometry + spectrum) before seeing how training and hardware try to overcome them. This reduces the need for S05 to re-explain multiplexing.",
+            "risks": [
+              "Disruption: Moving S04 breaks the traditional Design->Build flow.",
+              "Complexity: Merging S01/S04 requires careful handoff writing to ensure the narrative doesn't become too dense."
+            ]
+          },
+          {
+            "candidate_id": "C3",
+            "story_shape": "Application-Driven",
+            "narrative_backbone": "Starts with the problem space (Applications S05), then explains the enabling technology (Architecture S01, Training S02, Hardware S03). Uses Wavelength (S04) as a specific enabler for multi-task applications. Ends with Controversies (S06) and Future (S07).",
+            "section_order": [
+              "S05",
+              "S01",
+              "S02",
+              "S03",
+              "S04",
+              "S06",
+              "S07"
+            ],
+            "reader_path": "Reader starts with 'Why do we care?' (Applications), then dives into 'How does it work?' (Tech stack), and finishes with 'Is it reliable?' (Critique/Future).",
+            "rationale": "This structure prioritizes impact. It allows S05 to define the application landscape without needing to re-explain multiplexing if S04 is positioned as a deep-dive enabler later.",
+            "risks": [
+              "Accessibility: Non-specialist readers may struggle with S05's technical jargon without the foundation of S01.",
+              "Flow: The jump from Applications back to Architecture can feel disjointed if not smoothed by strong transitional paragraphs."
+            ]
+          }
+        ],
+        "selected_story_shape": {
+          "candidate_id": "C1",
+          "story_shape": "Linear Pipeline",
+          "rationale": "The current linear structure (S01-S07) provides the clearest pedagogical path for a broad audience. While C2 (Constraint-Centric) offers better thematic grouping, it risks disrupting the established narrative flow and increasing cognitive load by front-loading complex spectral constraints. We will retain the Linear Pipeline but enforce strict editing rules to eliminate the identified redundancies (S04/S05 overlap) and fill the argumentative gap (Nonlinearity in S01).",
+          "provenance_prior_role": "structure_strategist"
+        },
+        "reader_path_findings": [
+          {
+            "finding_id": "RF01",
+            "section_id": "S04",
+            "assessment": "Role Overlap with S05: S04 defines multiplexing as a mechanism, but S05 re-explains it to justify application capabilities.",
+            "recommendation": "In S05, replace mechanistic explanations of multiplexing with references to S04. Focus S05 strictly on performance metrics and use-cases.",
+            "severity": "major",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RF02",
+            "section_id": "S07",
+            "assessment": "Redundant Bottleneck Description: S07 re-lists bottlenecks (static hardware, fabrication errors) that were fully covered in S03 and S06.",
+            "recommendation": "Trim S07's bottleneck summary. Focus S07 exclusively on *future trajectories* and *roadmap*, using the bottlenecks only as context for proposed solutions.",
+            "severity": "minor",
+            "fail_open": true
+          },
+          {
+            "finding_id": "RF03",
+            "section_id": "S02",
+            "assessment": "Missing Bridge to Hardware: S02 ends with training paradigms but does not explicitly link training constraints (e.g., quantization) to hardware requirements.",
+            "recommendation": "Add a bridging paragraph at the end of S02 that highlights how training choices dictate hardware specifications (e.g., phase levels, resolution).",
+            "severity": "advisory",
+            "fail_open": true
+          }
+        ],
+        "proposed_section_order": [
+          {
+            "section_id": "S01",
+            "reason": "Foundational architecture must come first. Must include explicit nonlinearity bottleneck argument."
+          },
+          {
+            "section_id": "S02",
+            "reason": "Address training/optimization after establishing physical limits. Must bridge to hardware constraints."
+          },
+          {
+            "section_id": "S03",
+            "reason": "Address hardware realization as the physical instantiation of training outcomes."
+          },
+          {
+            "section_id": "S04",
+            "reason": "Isolate wavelength/multiplexing as a distinct physical constraint/enabler before applications."
+          },
+          {
+            "section_id": "S05",
+            "reason": "Catalog applications now that the tech stack is fully understood. Remove redundant multiplexing mechanics."
+          },
+          {
+            "section_id": "S06",
+            "reason": "Critical evaluation of the field's claims."
+          },
+          {
+            "section_id": "S07",
+            "reason": "Synthesis and future roadmap based on identified gaps."
+          }
+        ],
+        "section_decisions": [
+          {
+            "section_id": "S01",
+            "decision": "retain_with_patch",
+            "rationale": "Strong opening; establishes core thesis. Requires patch to add nonlinearity bottleneck argument.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S02",
+            "decision": "retain_with_transition",
+            "rationale": "Keep content, but ensure handoff to S03 includes hardware implications.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S03",
+            "decision": "retain",
+            "rationale": "Essential for understanding physical constraints.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S04",
+            "decision": "retain",
+            "rationale": "Clear definition of chromatic constraints and multiplexing mechanisms.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S05",
+            "decision": "narrow_scope",
+            "rationale": "Needs editing to remove multiplexing mechanics (covered in S04) and focus purely on application performance/maturity.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S06",
+            "decision": "retain",
+            "rationale": "Provides necessary critical balance.",
+            "responsibility": "",
+            "provenance": ""
+          },
+          {
+            "section_id": "S07",
+            "decision": "trim_redundancy",
+            "rationale": "Ensure this section focuses on *future* directions rather than re-summarizing bottlenecks from S03/S06.",
+            "responsibility": "",
+            "provenance": ""
+          }
+        ],
+        "cross_section_conflicts": [
+          {
+            "conflict_type": "role_overlap",
+            "sections": [
+              "S04",
+              "S05"
+            ],
+            "description": "S05 re-explains polarization and wavelength multiplexing mechanisms that are the primary subject of S04.",
+            "recommendation": "Edit S05 to reference S04 for mechanisms and focus on application-specific results (e.g., accuracy, latency) enabled by those mechanisms.",
+            "finding_id": ""
+          },
+          {
+            "conflict_type": "redundancy",
+            "sections": [
+              "S03",
+              "S07"
+            ],
+            "description": "S07 repeats the list of hardware bottlenecks (static nature, fabrication errors) established in S03.",
+            "recommendation": "Condense S07's bottleneck section to a brief summary sentence, focusing the rest of the section on proposed solutions and roadmaps.",
+            "finding_id": ""
+          }
+        ],
+        "missing_axes": [],
+        "structure_gaps": [],
+        "section_argument_gaps": [],
+        "review_structure_gaps": [],
+        "gap_value_decisions": [
+          {
+            "decision_id": "GVD-001",
+            "gap_id": "S01-GAP-NONLINEARITY",
+            "decision": "approve",
+            "confidence": "high",
+            "reason": "The coverage auditor correctly identified a foundational gap. S01 defines ODNNs as linear wave propagation systems. To properly contextualize the field's evolution towards hybrid systems (S07) and the role of electronic nonlinearity (S02/S03), the *absence* of native optical nonlinearity must be framed as a primary architectural constraint early in the review. This is not an evidence gap but a structural argument gap: the narrative needs a 'problem statement' regarding expressivity before discussing solutions.",
+            "provenance_prior_role": "coverage_auditor"
+          }
+        ],
+        "rejected_gap_candidates": [
+          {
+            "rejection_id": "GRJ-001",
+            "candidate_id": "S04-GAP-OAM",
+            "gap_type": "section_argument_gap",
+            "decision": "reject",
+            "reason": "Orbital Angular Momentum (OAM) multiplexing is already covered in S04 (Wavelength Multiplexing) and S05 (Applications). The structure strategist noted redundancy, but the current draft handles OAM adequately within the broader multiplexing discussion. No new subsection is needed; editing for focus is sufficient.",
+            "existing_coverage": {
+              "paragraph_ids": [
+                "S04-P06",
+                "S05-P04"
+              ],
+              "summary": "OAM mode multiplexing is discussed as a degree of freedom for information density in both S04 and S05."
+            },
+            "residual_gap": "",
+            "provenance_prior_role": "structure_strategist"
+          },
+          {
+            "rejection_id": "GRJ-002",
+            "candidate_id": "S07-GAP-BOTTLENECKS",
+            "gap_type": "section_argument_gap",
+            "decision": "reject",
+            "reason": "The reviewer suggested adding more bottleneck details to S07. However, S07's purpose is synthesis and future trajectories. Re-listing bottlenecks already covered in S03 (Hardware) and S06 (Controversies) would violate the scope guardrail against duplication. The existing structure correctly uses bottlenecks as context for proposed solutions.",
+            "existing_coverage": {
+              "paragraph_ids": [
+                "S07-P01",
+                "S07-P02"
+              ],
+              "summary": "S07 summarizes static rigidity, fabrication errors, and environmental instability as context for hybrid co-design proposals."
+            },
+            "residual_gap": "",
+            "provenance_prior_role": "scientific_synthesis_editor"
+          }
+        ],
+        "coverage_audit_summary": "Audited sections S01 through S07. The manuscript structure is logically sound, covering architecture, training, hardware, wavelength effects, applications, controversies, and future trajectories. However, a distinct structural gap exists in the 'Physical Architecture' section (S01) regarding the mathematical formalism of non-linear activation. While S01 defines ODNNs as linear transforms via diffraction, it fails to formally address the 'nonlinearity problem'—the absence of native optical nonlinearity—and how this architectural limitation forces the hybridization strategies discussed later. This is a foundational architectural claim that should be established early.",
+        "repeated_paper_role_audit": [],
+        "visual_work_orders": [],
+        "retrieval_gap_proposals": [],
+        "proposed_patch_set": [
+          {
+            "patch_id": "P001",
+            "target_section_id": "S01",
+            "target_paragraph_id": "S01-P02",
+            "operation": "insert_after",
+            "content": "However, a fundamental architectural distinction separates ODNNs from digital neural networks: the absence of native nonlinear activation functions. While diffractive layers efficiently implement linear transformations via diffraction, they cannot inherently solve non-linearly separable problems (e.g., XOR) without external intervention. This 'nonlinearity bottleneck' necessitates either hybrid electro-optical architectures, where electronics provide nonlinearity, or the integration of specialized nonlinear materials, fundamentally shaping the design space of practical ODNNs.",
+            "rationale": "Addresses the approved section argument gap (S01-GAP-NONLINEARITY). Establishes the theoretical constraint early.",
+            "hash": "new_hash_placeholder"
+          },
+          {
+            "patch_id": "P002",
+            "target_section_id": "S05",
+            "target_paragraph_id": "S05-P04",
+            "operation": "narrow",
+            "content": "Building on the latency and energy advantages of diffractive systems, researchers have developed multiplexing strategies to expand their computational density beyond simple intensity modulation. Polarization multiplexing enables a single diffractive network to perform multiple complex-valued arbitrary linear transformations simultaneously at the same output field of view by encoding data into different input and output polarization states [REF:04c16f79232a1dba281da8a2626e1933bcb10641]. As detailed in Section 4, this approach allows various machine vision tasks, such as detection and classification, to be integrated within one compact system, offering greater versatility and cost-effectiveness compared to employing multiple dedicated subsystems. Unlike spatial or wavelength-division methods that may require architectural changes, polarization multiplexing primarily requires the addition of linear polarizers, which can be flexibly coupled with other degrees of freedom to further increase capacity. Complementing this, Orbital Angular Momentum (OAM) mode multiplexing provides a distinct strategy for reconstructing multiple holograms by exploiting the independence of physical dimensions involving wavelength and polarization [REF:0319da3fb00232026fb305e5d404c875147771b0]. By designing optical diffractive neural networks that modulate both OAM modes and spatial depths through unitary transformation, it becomes possible to realize depth-controllable spatiotemporal evolution for high-capacity holography. Furthermore, OAM-encoded diffractive networks have demonstrated the ability to perform all-optical parallel classification on datasets like MNIST using OAM spectrum analysis, though this currently demands interferometer detectors with high sensitivity to manage signal losses. While these multiplexing methods significantly enhance information capacity, they introduce trade-offs between classification accuracy and output efficiency, highlighting that while the theoretical bandwidth is vast, practical deployment still faces challenges in detector robustness and signal integrity.",
+            "rationale": "Narrows S05-P04 to focus on application-level multiplexing benefits and performance trade-offs, referencing S04 for mechanisms to avoid redundancy.",
+            "hash": "new_hash_placeholder"
+          },
+          {
+            "patch_id": "P003",
+            "target_section_id": "S07",
+            "target_paragraph_id": "S07-P01",
+            "operation": "narrow",
+            "content": "The transition from laboratory prototypes to deployable optical AI is currently obstructed by the intrinsic rigidity of static diffractive neural networks, which function as 'write-once' hardware incapable of dynamic adaptation without mechanical intervention or complete refabrication. While recent multi-wavelength designs have demonstrated that parallel task processing can alleviate some throughput constraints, these systems remain fundamentally limited in reconfigurability, often requiring separate hardware instances for distinct computational goals. Beyond this lack of flexibility, physical realization introduces severe performance gaps; at shorter wavelengths, even minor fabrication variability in diffractive element sizes can drastically degrade classification accuracy, a challenge compounded by material constraints that limit the number of feasible optical layers [REF:doi:10.1109/tmag.2023.3281842]. Furthermore, photonic components such as resonators exhibit acute vulnerability to environmental perturbations, including temperature fluctuations and mechanical vibrations, which destabilize phase relationships and compromise inference reliability. These combined bottlenecks—static functionality, manufacturing sensitivity, and environmental instability—establish a clear boundary for all-optical approaches, necessitating a strategic shift toward hybrid electro-optical co-design to enable the robustness required for real-world deployment [REF:cdb2c928e087f4cd2b807836fd131089bf81a711] [REF:34d7ba5c285f38e34ad058f6b2f4e7e55c2fc224] [REF:77474cdcf483b25f73dacf20deb295cd1c2945b7] [REF:d3a8c619f7797527ae0f94573705a517d9aad779].",
+            "rationale": "Trims S07-P01 to serve as a concise bridge to future trajectories, avoiding re-litigation of bottlenecks already detailed in S03/S06.",
+            "hash": "new_hash_placeholder"
+          }
+        ],
+        "affected_section_ids": [
+          "S01",
+          "S05",
+          "S07"
+        ],
+        "next_execution_stages": [
+          "Apply P001 to S01 to establish nonlinearity bottleneck.",
+          "Apply P002 to S05 to narrow scope and reduce redundancy with S04.",
+          "Apply P003 to S07 to trim redundancy and focus on future trajectories.",
+          "Review S02 for transition to S03 (advisory)."
+        ],
+        "retained_advisory_issues": [
+          "Consider merging S01 and S04 if word count permits, to create a tighter 'Physical Foundations' section.",
+          "Ensure S05 references S04 for multiplexing mechanisms rather than re-explaining them."
+        ],
+        "read_only_declaration": {
+          "chapter_text_changed": false,
+          "retrieval_launched": false,
+          "note": "Advisory work order only."
+        },
+        "paragraph_references": [],
+        "synthesis_findings": [],
+        "narrative_progression": [],
+        "overlap_recommendations": [],
+        "repeated_paper_roles": [],
+        "source_concentration": [],
+        "attribution_issues": [],
+        "citation_audit": [],
+        "coverage_gap_candidates": [],
+        "coverage_search_notes": "",
+        "unresolved_issues": [],
+        "visual_evidence_notes": [],
+        "strengths": [],
+        "risks": [],
+        "evidence_outline_discipline": [],
+        "diagnosis": {}
+      },
+      "validation_issues": [
+        "section_argument_gap: dropped entry 0: missing required fields ['existing_coverage', 'residual_gap']"
+      ],
+      "usage": {
+        "call_count": 1,
+        "api_call_count": 1,
+        "input_tokens": 228333,
+        "output_tokens": 5299,
+        "estimated_cost_cny": 0.149717,
+        "model_tier": "c2_model",
+        "actual_model": "qwen3.7-flash",
+        "token_usage_source": "provider_reported",
+        "cost_provenance": "configured_model_rate"
+      },
+      "repair_used": false,
+      "resume_skipped": false,
+      "updated_at": "2026-08-28T06:25:39.065077+00:00"
+    }
+  }
+}

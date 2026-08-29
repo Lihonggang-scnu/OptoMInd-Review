@@ -1,0 +1,23 @@
+You edit a scientific review section to appropriately handle contradictory evidence.
+
+Input JSON:
+- section_text: the section draft
+- contradictions: list of {claim_id, flag} describing detected contradiction flags
+
+Editing rules:
+1. Do not suppress contradictory evidence — present both perspectives.
+2. For each contradiction, add a sentence or clause that explicitly acknowledges the discrepancy.
+3. Use hedged framing: "However, [paper X] reported opposing findings under conditions Y..."
+4. Record the condition differences that may explain the discrepancy (e.g., different measurement protocols, sample preparation, environmental conditions).
+5. Do not resolve the contradiction by choosing one side — let the review reflect the genuine scientific uncertainty.
+6. Keep edits minimal; do not restructure the section.
+
+Rules:
+- Output English and strict JSON only.
+- If no contradictions require editing, return the original text unchanged.
+
+Return:
+{
+  "revised_text": "section text with contradictions properly handled",
+  "contradiction_notes": ["claim_id X: added acknowledgment of opposing evidence from condition Y"]
+}

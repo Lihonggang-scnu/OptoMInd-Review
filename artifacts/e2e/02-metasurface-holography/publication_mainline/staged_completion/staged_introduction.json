@@ -1,0 +1,93 @@
+{
+  "schema_version": "optomind.staged_article_completion.v1",
+  "stage": "introduction",
+  "status": "completed",
+  "fingerprint": "bac736fdf6eff2a927db534ec89fc1e19f086be95b375fd972b96b98f0c6ab68",
+  "input_fingerprint": "21d4c4d46c767913c73ed30c613af8f38ec6ec97a8011a9663d7a381b9da447e",
+  "artifact_path": "<local-path>",
+  "approval_required": false,
+  "payload": {
+    "workplan": {
+      "promises_derived_from": [
+        "conclusion:423ea25470a5edb2adf7b6919ec346f209fe76b2b074ea5f4ace67d0f74f1971",
+        "body:S01-S07"
+      ],
+      "outline": [
+        "Field Background: Metasurface holography rests on three phase control mechanisms (geometric, propagation, hybrid) with distinct trade-offs.",
+        "Significance: Computational inverse design has unlocked complex wavefront engineering, transitioning from heuristics to algorithmic optimization.",
+        "Problem Tension: A 'design-reality gap' exists where idealized simulations ignore fabrication disorder and the speed-efficiency-bandwidth trilemma in active systems.",
+        "Review Scope/Contribution: This review maps the full pipeline (Physics -> Design -> Fabrication -> Modulation -> Applications) to identify the uncoupled optimization bottleneck.",
+        "Roadmap: The article proceeds from physical foundations (S01) through inverse design (S02) and fabrication limits (S03), to dynamic modulation (S04), imaging (S06) and display applications (S05), concluding with co-design strategies (S07)."
+      ],
+      "background_sources": [
+        "doi:10.1038/s41467-026-76714-x",
+        "doi:10.2528/pier12020501",
+        "doi:10.48550/arxiv.2506.21748",
+        "doi:10.21236/ada421453",
+        "doi:10.3390/encyclopedia5040197",
+        "doi:10.1002/lpor.71186",
+        "doi:10.1364/oe.559669",
+        "doi:10.48550/arxiv.2603.15210"
+      ],
+      "retrieval_proposals": []
+    },
+    "draft": {
+      "text": "Metasurface holography has emerged as a transformative paradigm in nanophotonics, promising to replace bulky optical trains with ultra-thin, planar devices capable of arbitrary wavefront control. At its physical core, this technology rests on three distinct phase control mechanisms: geometric (Pancharatnam-Berry) phase, propagation (resonant) phase, and hybrid approaches. Each mechanism imposes fundamentally different trade-offs among efficiency, bandwidth, polarization sensitivity, and design flexibility, constraints that dictate the performance ceiling of all downstream applications. While geometric phase offers robust polarization handling, it often suffers from chromatic limitations; conversely, propagation phase provides high efficiency but is constrained by narrow bandwidths due to resonant dispersion. Understanding these foundational physics is prerequisite to navigating the complex design space of modern holographic systems.\n\nTo overcome the limitations of intuition-based design, the field has rapidly evolved toward sophisticated computational inverse design frameworks. These methods, ranging from gradient-based topology optimization [REF:doi:10.2528/pier12020501] to advanced machine learning surrogates, aim to map desired electromagnetic responses directly to nanostructure geometries. Recent breakthroughs, such as foundation models like MOCLIP, demonstrate the potential for high-throughput, zero-shot prediction across vast design spaces, enabling the rapid generation of metasurface patterns that would be intractable via traditional simulation [REF:doi:10.1038/s41467-026-76714-x]. Similarly, generative approaches including diffusion models have been integrated into workflows to address the non-uniqueness of the inverse problem, offering new pathways to initialize complex geometries with low error rates [REF:doi:10.48550/arxiv.2506.21748]. The significance of this computational shift cannot be overstated: it has effectively unlocked theoretically unlimited design spaces, allowing for the realization of freeform holograms and multi-channel multiplexing strategies that were previously inconceivable.\n\nHowever, a critical tension persists between these computational successes and physical reality. The majority of inverse design algorithms operate on idealized models that assume perfect geometric control, neglecting the stochastic realities of nanofabrication. This reliance creates a pronounced \"design-reality gap,\" where the sophisticated patterns generated in silico encounter a \"fabrication ceiling\" when translated to physical devices. Serial writing techniques like electron-beam lithography impose strict tolerance thresholds, while scalable alternatives such as nanoimprint lithography, though promising for high-volume manufacturing, often struggle to maintain nanometer-scale fidelity over large areas [REF:doi:10.3390/encyclopedia5040197]. Furthermore, the extension of metasurfaces into dynamic applications reveals a fundamental \"speed-efficiency-bandwidth trilemma.\" Active modulation mechanisms—spanning phase-change materials, liquid crystals, and MEMS actuators—enable real-time reconfiguration but invariably introduce penalties in diffraction efficiency or spectral range [REF:doi:10.1002/lpor.71186]. No single platform currently resolves this trilemma, forcing designers to accept specific compromises that limit the commercial readiness of dynamic holographic displays.\n\nThis review systematically maps the complete technological pipeline of metasurface-based holography to address these disconnects. We trace the trajectory from fundamental phase control mechanisms through computational inverse design, nanofabrication tolerances, and active modulation, culminating in an analysis of system-level integration for both imaging and display applications. Our primary contribution is the identification of uncoupled optimization as the central bottleneck: the tendency to optimize design, fabrication, and modulation in isolation rather than through a unified framework. By consolidating algorithmic descriptions and distinguishing between human-perception metrics (for displays) and machine-performance metrics (for imaging), we clarify the distinct challenges facing each application domain. We argue that future progress depends not on isolated improvements in inverse design algorithms or fabrication resolution, but on holistic co-design strategies that jointly optimize physical device geometry with manufacturing constraints and downstream computational reconstruction.\n\nThe remainder of this article is structured to reflect this technological pipeline. Section S01 establishes the physical foundations of phase control mechanisms and their intrinsic trade-offs. Section S02 details the evolution of computational inverse design, serving as the definitive reference for algorithmic methods while avoiding redundancy in later sections. Section S03 examines the physical realization of these designs, focusing on fabrication-induced disorder and scalability limits. Section S04 analyzes active modulation mechanisms and the speed-efficiency-bandwidth trilemma. We then distinguish application domains, with Section S06 focusing on high-fidelity imaging and optical computing systems, followed by Section S05 which addresses dynamic display architectures and human-centric metrics. Finally, Section S07 synthesizes these findings to propose cross-cutting co-design strategies, explicitly calling out the redundancies and gaps identified throughout the pipeline as evidence of the need for integrated optimization frameworks."
+    },
+    "status": "drafted"
+  },
+  "provenance": {
+    "run_fingerprint": "e604ed77e4176bb829ad5d6c3609aeae84fb77a3091e38ade28c749b8cc604ff",
+    "stage_order_position": "3",
+    "usage_recorded": "True"
+  },
+  "usage": {
+    "module": "StagedIntroductionAuthor",
+    "agent_name": "StagedIntroductionAuthor",
+    "model_tier": "c_model",
+    "model_name": "qwen3.5-plus",
+    "task_type": "research_chat",
+    "mock_llm": false,
+    "estimated_input_tokens": 26967,
+    "estimated_output_tokens": 1780,
+    "input_tokens": 29198,
+    "output_tokens": 2981,
+    "token_usage_source": "provider_response",
+    "provider_usage": {
+      "prompt_tokens": 29198,
+      "completion_tokens": 2981,
+      "total_tokens": 32179,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1412,
+        "text_tokens": 2981
+      },
+      "prompt_tokens_details": {
+        "text_tokens": 29198
+      }
+    },
+    "success": true,
+    "failure": false,
+    "error_type": "",
+    "fallback_used": false,
+    "api_key_source": "<local-path><private-credential>.txt#1",
+    "api_key_masked": "****",
+    "api_key_candidate_count": 4,
+    "api_key_rotation_count": 0,
+    "key_failures": [],
+    "model_fallback_used": false,
+    "fallback_chain": [],
+    "attempted_models": [
+      "qwen3.5-plus"
+    ],
+    "selected_model_index": 0,
+    "partial_stream": false,
+    "stream_interrupted_error": "",
+    "request_attempt_count": 1,
+    "retry_count": 0,
+    "repair_calls": 0,
+    "repair_used": false
+  },
+  "error": null,
+  "created_at": "2026-08-28T12:33:05.575880+00:00",
+  "updated_at": "2026-08-28T12:33:05.575880+00:00"
+}

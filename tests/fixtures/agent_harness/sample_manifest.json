@@ -1,0 +1,70 @@
+{
+  "run_id": "smoke_test_001",
+  "task_id": "task_read_and_validate",
+  "title": "Sample Research Task — Read Manifest and Find Missing Fields",
+  "goal": "Read the sample_manifest.json artifact, identify any missing or empty required fields (title, authors, abstract, doi), write a note summarizing findings, and validate the result.",
+  "input_artifact_ids": ["sample_manifest.json"],
+  "constraints": [
+    "Only read files listed in input_artifact_ids.",
+    "Do not fabricate field values.",
+    "Write findings to FINDINGS.md before calling validate_task_result."
+  ],
+  "success_criteria": [
+    "sample_manifest.json has been read via read_task_artifact",
+    "FINDINGS.md has been written with a list of missing or empty fields",
+    "validate_task_result has been called and returned VALIDATION_PASSED"
+  ],
+  "expected_outputs": ["FINDINGS.md"],
+  "allowed_tools": [
+    "list_task_artifacts",
+    "read_task_artifact",
+    "write_task_note",
+    "validate_task_result",
+    "create_task",
+    "list_tasks",
+    "get_task",
+    "update_task"
+  ],
+  "model_tier": "standard_model",
+  "max_iters": 8,
+  "wall_time_budget_seconds": 120.0,
+  "token_budget": 20000,
+  "human_intervention_policy": "never",
+  "papers": [
+    {
+      "paper_id": "paper_001",
+      "title": "Advances in Spectral Filtering for Optical Communications",
+      "authors": ["A. Smith", "B. Jones"],
+      "year": 2024,
+      "abstract": "This paper presents new spectral filtering techniques...",
+      "doi": "10.1234/optics.2024.001",
+      "journal": "Optics Express",
+      "fulltext_available": true
+    },
+    {
+      "paper_id": "paper_002",
+      "title": "",
+      "authors": [],
+      "year": 2023,
+      "abstract": "",
+      "doi": "",
+      "journal": "Nature Photonics",
+      "fulltext_available": false
+    },
+    {
+      "paper_id": "paper_003",
+      "title": "Photonic Crystal Bandgap Engineering",
+      "authors": ["C. Lee"],
+      "year": 2022,
+      "abstract": "We demonstrate a novel approach to bandgap engineering...",
+      "doi": "10.5678/photon.2022.003",
+      "journal": "Physical Review Letters",
+      "fulltext_available": true
+    }
+  ],
+  "metadata": {
+    "domain": "optical_science",
+    "created_at": "2026-07-22T00:00:00Z",
+    "version": "1.0"
+  }
+}

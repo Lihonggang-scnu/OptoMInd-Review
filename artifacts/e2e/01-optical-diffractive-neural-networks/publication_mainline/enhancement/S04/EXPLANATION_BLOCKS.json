@@ -1,0 +1,428 @@
+{
+  "blocks": [
+    {
+      "block_index": 1,
+      "title": "The Physics of Chromatic Dispersion in ODNNs",
+      "block_type": "introduction_viewpoint",
+      "goal": "Define the fundamental mechanism where wavelength shifts alter the phase delay and diffraction angles, causing the transfer function to drift from its trained state.",
+      "prose": "Diffractive optical neural networks (ODNNs) are inherently dispersive systems where the computational transfer function is strictly coupled to the illumination wavelength. This chromatic dispersion arises because the phase modulation imparted by a fixed physical structure scales inversely with wavelength, causing the point spread function and diffraction angles to shift as the input spectrum deviates from the design condition. Consequently, a network optimized for a specific monochromatic source experiences a drift in its linear transformation matrix when operated under broadband conditions, leading to degraded computational accuracy unless narrow bandpass filtering is employed to isolate color channels. While this physical dependency imposes strict bandwidth limits on single-task operation, it simultaneously establishes the foundational mechanism for wavelength multiplexing, where distinct spectral components can trigger independent computational pathways within the same static volume. Understanding this dual nature of dispersion is critical, as it defines the boundary between performance loss in uncontrolled environments and the opportunity to harness spectral degrees of freedom for multi-functional optical computing.",
+      "planned_claim_handles": [
+        "C01_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_EXHIBIT_IN",
+        "C18_DIFFRACTIVE_DEEP_NEURAL_NETWORKS_D2NNS_INHEREN",
+        "C19_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_ODNNS_INHE",
+        "C26_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_ODNNS_INHE",
+        "C27_DIFFRACTIVE_NEURAL_NETWORKS_EXHIBIT_INHERENT_C",
+        "C30_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_DONNS_INHE"
+      ],
+      "claim_handles": [
+        "C01_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_EXHIBIT_IN",
+        "C18_DIFFRACTIVE_DEEP_NEURAL_NETWORKS_D2NNS_INHEREN",
+        "C19_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_ODNNS_INHE",
+        "C26_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_ODNNS_INHE",
+        "C27_DIFFRACTIVE_NEURAL_NETWORKS_EXHIBIT_INHERENT_C",
+        "C30_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_DONNS_INHE"
+      ],
+      "evidence_handles": [
+        "E01_HYBRID_OPTICAL_ELECTRONIC_CONVOLUTIONAL_NEURAL",
+        "E42_METASURFACE_BASED_IMAGE_CLASSIFICATION_USING_D",
+        "E97_HARDWARE_LOOP_FREE_SPACE_OPTICAL_COMPUTING_OPT"
+      ],
+      "covered_claim_handles": [
+        "C01_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_EXHIBIT_IN",
+        "C18_DIFFRACTIVE_DEEP_NEURAL_NETWORKS_D2NNS_INHEREN",
+        "C30_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_DONNS_INHE"
+      ],
+      "covered_claim_ids": [
+        "S04-P001",
+        "S04-P033",
+        "S04-P121"
+      ],
+      "markers": [
+        "[REF:b06d7f7742ed94078f512011968ae123e576b59f]",
+        "[REF:614a70af75ba590cc98dfc4c8aeec02322b5906f]",
+        "[REF:a90fa0c5db2d3fae860863e1af0d7f6d62a8a7c4]"
+      ],
+      "explanatory_handles": [
+        "X01_AUTOENCODER_BASED_NONLINEAR_IMPAIRME"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "This chromatic dispersion arises because the phase modulation imparted by a fixed physical structure scales inversely with wavelength, causing the point spread function and diffraction angles to shift as the input spectrum deviates from the design condition.": [
+          "[REF:doi:10.1117/1.oe.65.5.058106]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S04-P001",
+        "S04-P033",
+        "S04-P041",
+        "S04-P073",
+        "S04-P089",
+        "S04-P121"
+      ]
+    },
+    {
+      "block_index": 2,
+      "title": "Performance Degradation Under Broadband Illumination",
+      "block_type": "explanatory_body",
+      "goal": "Demonstrate empirically how single-wavelength optimized networks fail when the input spectrum deviates, quantifying the loss in classification accuracy.",
+      "prose": "While the physics of chromatic dispersion establishes that wavelength shifts alter phase delays, the practical consequence for diffractive neural networks trained at a single wavelength is a severe degradation in inference capability when exposed to spectral deviations. Empirical studies reveal that attempting to classify multiple wavelengths in parallel using shallow architectures often results in poor performance; for instance, single- and two-layer networks designed to distinguish three visible wavelengths achieved accuracies of only 53% and 60%, respectively, frequently misclassifying distinct inputs as a dominant intermediate wavelength. This failure stems not only from the inherent coupling of modulation functions across the spectrum but also from fabrication constraints that limit the number of diffractive layers available to resolve complex spectral features. In sharp contrast, when scattering conditions remain strictly consistent with the monochromatic training environment, these same single-wavelength optimized systems can maintain functional utility, achieving blind testing accuracies exceeding 78% even when imaging through unknown random diffusers. However, this robustness is fragile; comparative analyses indicate that such monochrome designs perform significantly worse than their broadband counterparts under identical challenging conditions, underscoring that the high accuracy of single-wavelength networks is contingent upon a narrow spectral match that rarely exists in practical, broadband illumination scenarios.",
+      "planned_claim_handles": [
+        "C05_DIFFRACTIVE_NEURAL_NETWORKS_TRAINED_SINGLE_WAV",
+        "C06_SINGLE_WAVELENGTH_OPTIMIZED_DIFFRACTIVE_NETWOR"
+      ],
+      "claim_handles": [
+        "C05_DIFFRACTIVE_NEURAL_NETWORKS_TRAINED_SINGLE_WAV",
+        "C06_SINGLE_WAVELENGTH_OPTIMIZED_DIFFRACTIVE_NETWOR"
+      ],
+      "evidence_handles": [
+        "E05_BROADBAND_DIFFRACTIVE_NEURAL_NETWORKS_ENABLING",
+        "E06_ALL_OPTICAL_IMAGE_CLASSIFICATION_THROUGH_UNKNO"
+      ],
+      "covered_claim_handles": [
+        "C05_DIFFRACTIVE_NEURAL_NETWORKS_TRAINED_SINGLE_WAV",
+        "C06_SINGLE_WAVELENGTH_OPTIMIZED_DIFFRACTIVE_NETWOR"
+      ],
+      "covered_claim_ids": [
+        "S04-P009",
+        "S04-P010"
+      ],
+      "markers": [
+        "[REF:34d7ba5c285f38e34ad058f6b2f4e7e55c2fc224]",
+        "[REF:44b0e870cc19b77b3af6950a66c37fd57acc0558]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S04-P009",
+        "S04-P010"
+      ]
+    },
+    {
+      "block_index": 3,
+      "title": "Mitigation Strategies: Achromatic and Broadband Designs",
+      "block_type": "explanatory_body",
+      "goal": "Review engineering solutions such as multi-layer thin films, dual-scale nanostructures, and hardware-in-the-loop optimization that suppress dispersion effects.",
+      "prose": "To counteract the performance degradation caused by chromatic dispersion, researchers have developed achromatic diffractive networks that employ multi-layer architectures and hardware-aware optimization to stabilize phase responses across broad spectra. A primary strategy involves integrating multi-layer thin films with dual-scale nanostructures, where a multi-wavelength weighted optimization framework collaboratively minimizes reflectance and corrects wavefront aberrations; this approach has successfully extended spectral bandwidths to 140 nm while suppressing low-order errors to mere milliwavelengths. Alternatively, bilayer metalens architectures and 3D-printed multilayer structures offer a geometric route to expand operational bandwidth beyond the limits of single-layer counterparts. When fabrication variability threatens performance—particularly at shorter wavelengths where small dimensional errors disproportionately affect inference accuracy—hybrid designs employing hardware-in-the-loop (HIL) optimization provide a robust solution. By embedding a programmable spatial light modulator within the training loop, HIL methods bypass inaccurate mathematical models of wavefront propagation, directly optimizing phase patterns against physical reality to achieve achromatic extended depth-of-field imaging. In the context of hybrid diffractive optics, hardware-in-the-loop methodologies have been employed to design systems for achromatic extended-depth-of-field imaging. By integrating a programmable spatial light modulator directly into the training loop, this approach allows phase patterns to be optimized against physical reality rather than relying on potentially inaccurate mathematical models of wavefront propagation. However, these mitigation strategies face tangible boundaries: increasing the number of diffractive layers to improve multi-wavelength classification is often constrained by polymer properties and the working distance of high-numerical-aperture objectives, which limit the total fabricable height and resolution. Thus, while engineering solutions can significantly suppress dispersion, they must navigate strict trade-offs between structural complexity and manufacturability to maintain the high-efficiency broadband operation required for practical optical computing.",
+      "planned_claim_handles": [
+        "C07_BROADBAND_DIFFRACTIVE_NEURAL_NETWORKS_REQUIRE",
+        "C09_MULTI_LAYER_THIN_FILM_STRUCTURES_DUAL_SCALE_NA",
+        "C22_HYBRID_DIFFRACTIVE_OPTICS_DESIGNS_EMPLOYING_HA",
+        "C28_ACHROMATIC_METALENS_DESIGNS_UTILIZING_BILAYER"
+      ],
+      "claim_handles": [
+        "C07_BROADBAND_DIFFRACTIVE_NEURAL_NETWORKS_REQUIRE",
+        "C09_MULTI_LAYER_THIN_FILM_STRUCTURES_DUAL_SCALE_NA",
+        "C22_HYBRID_DIFFRACTIVE_OPTICS_DESIGNS_EMPLOYING_HA",
+        "C28_ACHROMATIC_METALENS_DESIGNS_UTILIZING_BILAYER"
+      ],
+      "evidence_handles": [
+        "E07_BROADBAND_DIFFRACTIVE_NEURAL_NETWORKS_ENABLING",
+        "E12_ZERNIKE_CORRECTION_MULTI_OBJECTIVE_OPTIMIZATIO",
+        "E61_HYBRID_DIFFRACTIVE_OPTICS_DESIGN_VIA_HARDWARE",
+        "E88_DESIGN_HIGH_EFFICIENCY_ACHROMATIC_METALENS_LAR",
+        "E89_3D_PRINTED_MULTILAYER_STRUCTURES_HIGH_NUMERICA"
+      ],
+      "covered_claim_handles": [
+        "C07_BROADBAND_DIFFRACTIVE_NEURAL_NETWORKS_REQUIRE",
+        "C09_MULTI_LAYER_THIN_FILM_STRUCTURES_DUAL_SCALE_NA",
+        "C22_HYBRID_DIFFRACTIVE_OPTICS_DESIGNS_EMPLOYING_HA",
+        "C28_ACHROMATIC_METALENS_DESIGNS_UTILIZING_BILAYER"
+      ],
+      "covered_claim_ids": [
+        "S04-P011",
+        "S04-P013",
+        "S04-P055",
+        "S04-P106"
+      ],
+      "markers": [
+        "[REF:34d7ba5c285f38e34ad058f6b2f4e7e55c2fc224]",
+        "[REF:c977f316916c59a12a847854a4eef6f49381b590]",
+        "[REF:00af565d66563cb83347d304c37313cc2dfa0902]",
+        "[REF:doi:10.29026/oea.2021.200008]",
+        "[REF:doi:10.1126/sciadv.adj9262]"
+      ],
+      "explanatory_handles": [
+        "A02"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "In the context of hybrid diffractive optics, hardware-in-the-loop methodologies have been employed to design systems for achromatic extended-depth-of-field imaging. By integrating a programmable spatial light modulator directly into the training loop, this approach allows phase patterns to be optimized against physical reality rather than relying on potentially inaccurate mathematical models of wavefront propagation.": [
+          "[REF:00af565d66563cb83347d304c37313cc2dfa0902]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S04-P011",
+        "S04-P013",
+        "S04-P055",
+        "S04-P106"
+      ]
+    },
+    {
+      "block_index": 4,
+      "title": "Exploiting Dispersion: Wavelength Multiplexing for Multi-Task Learning",
+      "block_type": "explanatory_body",
+      "goal": "Reframe chromatic dependence as a resource, explaining how distinct wavelengths can trigger independent linear transformations within the same physical volume.",
+      "prose": "Rather than suppressing chromatic dispersion, diffractive neural networks can exploit optical degrees of freedom to implement multiple independent computational functions within a single physical structure. This strategy, known as wavelength multiplexing, enables a static diffractive element to perform distinct tasks simultaneously by encoding separate functions for different spectral bands. The mechanism relies on optimizing the phase profile of cascaded layers so that specific wavelengths trigger unique linear transformations, effectively mapping input degrees of freedom to targeted outputs without mechanical reconfiguration. While traditional designs often partition devices into separate regions that limit efficiency when illuminated by a single wavelength, multi-layer adaptive designs overcome this by training the entire aperture to focus or classify correctly at multiple target wavelengths concurrently. For instance, research demonstrates that assigning different wavelengths as basebands or carrier frequencies allows a network to balance learning rates and execute multitask operations, such as parallel image recognition, with higher efficacy than single-task baselines. Wavelength division multiplexing has been utilized in 3D holographic imaging with diffractive deep neural networks to leverage chromatic dependence as a functional resource. This method enables distinct wavelengths to trigger independent operations within the same physical volume, facilitating complex tasks such as 3D holographic reconstruction through wavelength-specific signal processing. This approach transforms the inherent spectral sensitivity of diffractive systems from a liability into a resource for high-throughput computing, though it requires careful hardware-software co-design to manage task accuracy trade-offs. Ultimately, leveraging wavelength dependence in this manner aligns with the chapter's thesis that dispersion provides a critical degree of freedom for parallel, multi-functional optical computing.",
+      "planned_claim_handles": [
+        "C13_DIFFRACTIVE_NEURAL_NETWORKS_CAN_EXPLOIT_OPTICA",
+        "C20_WAVELENGTH_MULTIPLEXING_ENABLES_SINGLE_STATIC",
+        "C23_WAVELENGTH_MULTIPLEXING_ENABLES_SINGLE_DIFFRAC",
+        "C21_MULTI_WAVELENGTH_OPTICAL_DIFFRACTIVE_NETWORKS"
+      ],
+      "claim_handles": [
+        "C13_DIFFRACTIVE_NEURAL_NETWORKS_CAN_EXPLOIT_OPTICA",
+        "C20_WAVELENGTH_MULTIPLEXING_ENABLES_SINGLE_STATIC",
+        "C23_WAVELENGTH_MULTIPLEXING_ENABLES_SINGLE_DIFFRAC",
+        "C21_MULTI_WAVELENGTH_OPTICAL_DIFFRACTIVE_NETWORKS"
+      ],
+      "evidence_handles": [
+        "E22_EXPLOITING_OPTICAL_DEGREES_FREEDOM_INFORMATION",
+        "E52_METASURFACE_EMPOWERED_FREELY_ARRANGEABLE_MULTI",
+        "E66_INVERSE_DESIGN_ULTRACOMPACT_MULTI_FOCAL_OPTICA",
+        "E57_MULTITASK_LEARNING_MULTIWAVE_OPTICAL_DIFFRACTI",
+        "E53_MULTI_TASK_LEARNING_DIFFRACTIVE_DEEP_NEURAL_NE"
+      ],
+      "covered_claim_handles": [
+        "C13_DIFFRACTIVE_NEURAL_NETWORKS_CAN_EXPLOIT_OPTICA",
+        "C20_WAVELENGTH_MULTIPLEXING_ENABLES_SINGLE_STATIC",
+        "C23_WAVELENGTH_MULTIPLEXING_ENABLES_SINGLE_DIFFRAC",
+        "C21_MULTI_WAVELENGTH_OPTICAL_DIFFRACTIVE_NETWORKS"
+      ],
+      "covered_claim_ids": [
+        "S04-P017",
+        "S04-P042",
+        "S04-P058",
+        "S04-P052"
+      ],
+      "markers": [
+        "[REF:e265d8653dabb3fa0068ab956b084f8f252bdbcf]",
+        "[REF:7991c4cd79e5e08f9ca67e6a5fd5b509b9c2f4ac]",
+        "[REF:438f30f7d53e93e1f20e50ee62f1029f509ed4e5]",
+        "[REF:a8191fd687585196d26f1c0758b618c56e475696]",
+        "[REF:88f87b34acdb11cf20ad16d6fbdd5399e8617f8f]"
+      ],
+      "explanatory_handles": [
+        "A03"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Wavelength division multiplexing has been utilized in 3D holographic imaging with diffractive deep neural networks to leverage chromatic dependence as a functional resource. This method enables distinct wavelengths to trigger independent operations within the same physical volume, facilitating complex tasks such as 3D holographic reconstruction through wavelength-specific signal processing.": [
+          "[REF:doi:10.1109/acp/ipoc63121.2024.10809872]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S04-P017",
+        "S04-P042",
+        "S04-P058",
+        "S04-P052"
+      ]
+    },
+    {
+      "block_index": 5,
+      "title": "High-Density Multiplexing: Polarization and Orbital Angular Momentum",
+      "block_type": "explanatory_body",
+      "goal": "Extend the multiplexing concept to include polarization states and OAM modes, enabling simultaneous reconstruction of multiple holograms or functions.",
+      "prose": "Building on the use of wavelength as a computational degree of freedom, polarization multiplexing further expands the capacity of a single diffractive network to implement multiple complex-valued linear transformations concurrently within the same output field of view. This approach leverages the vector nature of light, where distinct input and output polarization states act as independent channels for programming tasks such as object detection or classification without altering the underlying diffractive architecture. Evidence demonstrates that integrating these tasks into one system offers significant advantages in speed, compactness, and cost-effectiveness compared to deploying multiple dedicated subsystems, requiring only the addition of readily available linear polarizers as pre-determined hyperparameters between layers. To achieve even higher information density, orbital angular momentum (OAM) mode multiplexing can be combined with wavelength and polarization dimensions, enabling the simultaneous reconstruction of multiple holograms through depth-controllable spatiotemporal evolution. By exploiting multi-plane light conversion within a multi-layer optical diffractive neural network, researchers have successfully modulated both OAM modes and spatial depths to realize deep multiplexing holography with high fidelity. Researchers demonstrated orbital angular momentum deep multiplexing holography by employing an optical diffractive neural network to modulate both OAM modes and spatial depths, achieving high-fidelity results. These advanced schemes illustrate that chromatic dependence is not merely a constraint to be mitigated but a foundational element of a broader strategy where multiple physical dimensions are fused to maximize the functional throughput of static optical processors.",
+      "planned_claim_handles": [
+        "C02_POLARIZATION_MULTIPLEXING_ALLOWS_SINGLE_DIFFRA",
+        "C29_ORBITAL_ANGULAR_MOMENTUM_OAM_MODE_MULTIPLEXING"
+      ],
+      "claim_handles": [
+        "C02_POLARIZATION_MULTIPLEXING_ALLOWS_SINGLE_DIFFRA",
+        "C29_ORBITAL_ANGULAR_MOMENTUM_OAM_MODE_MULTIPLEXING"
+      ],
+      "evidence_handles": [
+        "E02_POLARIZATION_MULTIPLEXED_DIFFRACTIVE_COMPUTING",
+        "E93_ORBITAL_ANGULAR_MOMENTUM_DEEP_MULTIPLEXING_HOL"
+      ],
+      "covered_claim_handles": [
+        "C02_POLARIZATION_MULTIPLEXING_ALLOWS_SINGLE_DIFFRA",
+        "C29_ORBITAL_ANGULAR_MOMENTUM_OAM_MODE_MULTIPLEXING"
+      ],
+      "covered_claim_ids": [
+        "S04-P003",
+        "S04-P113"
+      ],
+      "markers": [
+        "[REF:04c16f79232a1dba281da8a2626e1933bcb10641]",
+        "[REF:0319da3fb00232026fb305e5d404c875147771b0]"
+      ],
+      "explanatory_handles": [
+        "A04"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Researchers demonstrated orbital angular momentum deep multiplexing holography by employing an optical diffractive neural network to modulate both OAM modes and spatial depths, achieving high-fidelity results.": [
+          "[REF:doi:10.1364/oe.447337]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S04-P003",
+        "S04-P113"
+      ]
+    },
+    {
+      "block_index": 6,
+      "title": "Training Paradigms and Physics-Aware Optimization",
+      "block_type": "explanatory_body",
+      "goal": "Describe the computational methods required to design these systems, including differentiable discrete codesign and convolution-based simulations for specific spectral ranges.",
+      "prose": "To realize the multi-functional potential of wavelength-multiplexed systems described previously, specialized training paradigms are required to bridge the gap between idealized simulations and physical hardware constraints. Physics-aware differentiable discrete codesign addresses this by maintaining the gradient chain during backpropagation despite the non-uniform, analog nature of real optical devices. Unlike standard quantization, this framework employs techniques such as Gumbel-Softmax to enforce physical boundaries, ensuring that trainable phase parameters respect periodic limits (e.g., restricted within [0, 2π]) while accommodating device-specific non-monotonic responses. Complementing this, neural network-based design methods utilize convolution simulations of the diffraction integral to optimize diffractive elements for specific spectral ranges, such as the terahertz band. These algorithms can generate unintuitive phase maps that redirect radiation into complex intensity distributions, offering solutions beyond traditional deterministic holography. Ultimately, the design of these layers involves iteratively adjusting complex-valued transmission coefficients for statistical tasks, a process that inherently ties the network's final functionality to the illumination spectrum used during training. By embedding these physical realities directly into the optimization loop, researchers can create robust static structures capable of executing precise multi-wavelength computations.",
+      "planned_claim_handles": [
+        "C14_PHYSICS_AWARE_DIFFERENTIABLE_DISCRETE_CODESIGN",
+        "C15_NEURAL_NETWORK_BASED_DESIGN_METHODS_USING_CONV",
+        "C24_DESIGN_DIFFRACTIVE_LAYERS_INVOLVES_OPTIMIZING"
+      ],
+      "claim_handles": [
+        "C14_PHYSICS_AWARE_DIFFERENTIABLE_DISCRETE_CODESIGN",
+        "C15_NEURAL_NETWORK_BASED_DESIGN_METHODS_USING_CONV",
+        "C24_DESIGN_DIFFRACTIVE_LAYERS_INVOLVES_OPTIMIZING"
+      ],
+      "evidence_handles": [
+        "E26_PHYSICS_AWARE_DIFFERENTIABLE_DISCRETE_CODESIGN",
+        "E30_NEURAL_NETWORK_BASED_DESIGN_TWO_FOCAL_SPOT_TER",
+        "E71_SCALE_SHIFT_ROTATION_INVARIANT_DIFFRACTIVE_OPT"
+      ],
+      "covered_claim_handles": [
+        "C14_PHYSICS_AWARE_DIFFERENTIABLE_DISCRETE_CODESIGN",
+        "C15_NEURAL_NETWORK_BASED_DESIGN_METHODS_USING_CONV",
+        "C24_DESIGN_DIFFRACTIVE_LAYERS_INVOLVES_OPTIMIZING"
+      ],
+      "covered_claim_ids": [
+        "S04-P021",
+        "S04-P022",
+        "S04-P060"
+      ],
+      "markers": [
+        "[REF:1716c059da55f246fb44c95094c2c92781424124]",
+        "[REF:0ee1313bd0d634f5bd393fe89b423ae05cd5ebe3]",
+        "[REF:e21c4bb77ec29f0e6b14e6a98ab872b0dfedd2f5]"
+      ],
+      "explanatory_handles": [
+        "X02_PHYSICS_AWARE_DIFFERENTIABLE_DISCRET"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Unlike standard quantization, this framework employs techniques such as Gumbel-Softmax to enforce physical boundaries, ensuring that trainable phase parameters respect periodic limits (e.g., restricted within [0, 2π]) while accommodating device-specific non-monotonic responses.": [
+          "[REF:1716c059da55f246fb44c95094c2c92781424124]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S04-P021",
+        "S04-P022",
+        "S04-P060"
+      ]
+    },
+    {
+      "block_index": 7,
+      "title": "Enhancing Robustness: Nonlinearities and Ensemble Methods",
+      "block_type": "explanatory_body",
+      "goal": "Discuss integrating nonlinear photonic components for activation functions and using ensemble learning to generalize across varying optical conditions.",
+      "prose": "While physics-aware optimization establishes the structural blueprint for diffractive networks, enhancing their computational expressivity and robustness requires addressing inherent linearity constraints and environmental sensitivities. One strategy involves integrating nonlinear photonic components to implement activation functions directly within the optical domain; resonators, for instance, offer advantageous nonlinear behavior for this purpose but introduce vulnerability to temperature fluctuations and mechanical vibrations that can degrade performance. In contrast, interferometers excel at manipulating phase and amplitude for complex computations yet remain susceptible to phase variations requiring precise alignment. To mitigate such instabilities without relying solely on fragile hardware nonlinearities, ensemble learning strategies have been applied to passive diffractive deep neural networks (D²NNs). By diversifying base models through spatial feature engineering and exploiting parallel processing across multiple independently trained networks, this approach significantly improves statistical inference and generalization capabilities beyond what single deterministic layers achieve. These methods collectively transform the static physical structure from a brittle, single-task processor into a more resilient computing substrate, balancing the trade-off between enhanced functionality and the practical challenges of fabrication precision and environmental stability before considering broader system-level applications.",
+      "planned_claim_handles": [
+        "C03_NONLINEAR_PHOTONIC_COMPONENTS_CAN_BE_INTEGRATE",
+        "C11_ENSEMBLE_LEARNING_STRATEGIES_APPLIED_DIFFRACTI"
+      ],
+      "claim_handles": [
+        "C03_NONLINEAR_PHOTONIC_COMPONENTS_CAN_BE_INTEGRATE",
+        "C11_ENSEMBLE_LEARNING_STRATEGIES_APPLIED_DIFFRACTI"
+      ],
+      "evidence_handles": [
+        "E03_EXPLORING_TYPES_PHOTONIC_NEURAL_NETWORKS_IMAGI",
+        "E14_ENSEMBLE_LEARNING_DIFFRACTIVE_OPTICAL_NETWORKS"
+      ],
+      "covered_claim_handles": [
+        "C03_NONLINEAR_PHOTONIC_COMPONENTS_CAN_BE_INTEGRATE",
+        "C11_ENSEMBLE_LEARNING_STRATEGIES_APPLIED_DIFFRACTI"
+      ],
+      "covered_claim_ids": [
+        "S04-P004",
+        "S04-P015"
+      ],
+      "markers": [
+        "[REF:77474cdcf483b25f73dacf20deb295cd1c2945b7]",
+        "[REF:9f31d98e42fb579c04a4b4255b7bc65fd68bd49d]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S04-P004",
+        "S04-P015"
+      ]
+    },
+    {
+      "block_index": 8,
+      "title": "System-Level Trade-offs and Future Applications",
+      "block_type": "scientific_consequence",
+      "goal": "Synthesize the balance between latency/energy benefits and accuracy limitations, highlighting emerging applications in autonomous driving and biomedical imaging.",
+      "prose": "The deployment of diffractive optical neural networks in high-stakes environments ultimately requires balancing their inherent physical advantages against current accuracy limitations. While digital convolutional neural networks may still outperform optical systems in raw classification metrics, all-optical diffractive classifiers offer distinct benefits in real-time, energy-efficient inference, making them attractive for applications where speed and power consumption are critical constraints. This trade-off is evident in emerging proposals for autonomous driving, where diffractive architectures aim to improve the latency and computational efficiency of large-scale digital models by enabling direct, all-optical processing of RGB scenes without digital preprocessing. In the context of autonomous driving, all-optical segmentation via diffractive neural networks has been proposed to process RGB scenes directly without digital preprocessing, aiming to enhance latency and computational efficiency. The hardware motivation for this shift is reinforced by integrated diffractive photonic computing units, which provide ultra-high bandwidth and massive parallelism compared to electronic counterparts, although scaling these systems often faces challenges related to footprint and energy consumption in programmable components. Historically, the first all-optical diffraction deep neural network systems demonstrated these ultra-low latency and low power advantages using passive 3D-printed layers, yet they operated within strict constraints defined by their static hardware implementation. To overcome such rigidity while maintaining efficiency, recent advancements introduce multifunctional diffractive processors with learned structured illumination; by incorporating illumination patterns as trainable parameters, these systems enable the reuse of static diffractive layers to switch rapidly between independent tasks, such as classification and computational imaging. Thus, while broadband dispersion remains a challenge for single-task accuracy, it simultaneously provides the degrees of freedom necessary for multi-functional optical computing, positioning diffractive networks as a transformative technology for label-free biomedical analysis and resource-constrained edge computing.",
+      "planned_claim_handles": [
+        "C08_ALL_OPTICAL_DIFFRACTIVE_CLASSIFIERS_OFFER_REAL",
+        "C12_DIFFRACTIVE_NEURAL_NETWORKS_BEING_EXTENDED_HIG",
+        "C25_INTEGRATED_DIFFRACTIVE_PHOTONIC_COMPUTING_UNIT",
+        "C31_FIRST_ALL_OPTICAL_DIFFRACTION_DEEP_NEURAL_NETW",
+        "C32_MULTIFUNCTIONAL_DIFFRACTIVE_PROCESSOR_LEARNED"
+      ],
+      "claim_handles": [
+        "C08_ALL_OPTICAL_DIFFRACTIVE_CLASSIFIERS_OFFER_REAL",
+        "C12_DIFFRACTIVE_NEURAL_NETWORKS_BEING_EXTENDED_HIG",
+        "C25_INTEGRATED_DIFFRACTIVE_PHOTONIC_COMPUTING_UNIT",
+        "C31_FIRST_ALL_OPTICAL_DIFFRACTION_DEEP_NEURAL_NETW",
+        "C32_MULTIFUNCTIONAL_DIFFRACTIVE_PROCESSOR_LEARNED"
+      ],
+      "evidence_handles": [
+        "E08_ALL_OPTICAL_CLASSIFICATION_REAL_BIOMEDICAL_CEL",
+        "E18_ALL_OPTICAL_SEGMENTATION_VIA_DIFFRACTIVE_NEURA",
+        "E75_SPACE_EFFICIENT_OPTICAL_COMPUTING_INTEGRATED_C",
+        "E101_REVIEW_DIFFRACTIVE_DEEP_NEURAL_NETWORKS",
+        "E106_OPTICAL_MULTI_TASK_LEARNING_USING_MULTIFUNCTIO"
+      ],
+      "covered_claim_handles": [
+        "C08_ALL_OPTICAL_DIFFRACTIVE_CLASSIFIERS_OFFER_REAL",
+        "C12_DIFFRACTIVE_NEURAL_NETWORKS_BEING_EXTENDED_HIG",
+        "C25_INTEGRATED_DIFFRACTIVE_PHOTONIC_COMPUTING_UNIT",
+        "C31_FIRST_ALL_OPTICAL_DIFFRACTION_DEEP_NEURAL_NETW",
+        "C32_MULTIFUNCTIONAL_DIFFRACTIVE_PROCESSOR_LEARNED"
+      ],
+      "covered_claim_ids": [
+        "S04-P012",
+        "S04-P016",
+        "S04-P062",
+        "S04-P130",
+        "S04-P134"
+      ],
+      "markers": [
+        "[REF:56f68ce02f6656afc6453655e57a5ceb11c970e0]",
+        "[REF:7bf766d777d62c780d0c10658b79c74f0ae3b0af]",
+        "[REF:585c02f3ea677e72535f4ea2af006230e5892445]",
+        "[REF:1954aba13cd1673b959abb296e21ea249dc66664]",
+        "[REF:4ec17510a4fcc9d4756694cc4efa9bba74b83503]"
+      ],
+      "explanatory_handles": [
+        "A05"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "In the context of autonomous driving, all-optical segmentation via diffractive neural networks has been proposed to process RGB scenes directly without digital preprocessing, aiming to enhance latency and computational efficiency.": [
+          "[REF:7bf766d777d62c780d0c10658b79c74f0ae3b0af]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S04-P012",
+        "S04-P016",
+        "S04-P062",
+        "S04-P130",
+        "S04-P134"
+      ]
+    }
+  ]
+}

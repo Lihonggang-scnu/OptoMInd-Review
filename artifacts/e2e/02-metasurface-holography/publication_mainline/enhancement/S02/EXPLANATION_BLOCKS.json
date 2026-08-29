@@ -1,0 +1,430 @@
+{
+  "blocks": [
+    {
+      "block_index": 1,
+      "title": "Evolution of Inverse Design Paradigms",
+      "block_type": "introduction_viewpoint",
+      "goal": "Establish the transition from intuition-based heuristics to rigorous mathematical and data-driven optimization.",
+      "prose": "The design of nanophotonic devices has fundamentally shifted from intuition-based heuristics to rigorous computational inverse design, a transition driven by the need to explore high-dimensional parameter spaces that defy traditional analytical encoding. Inverse design methods utilize effective mathematical approaches to address optimization problems, making them particularly well-suited for achieving complex design targets with extraordinary performance beyond conventional capabilities. This evolution encompasses both classical iterative techniques, such as topology optimization which offers high calculation accuracy at the expense of significant computational consumption, and revolutionary deep learning-based methods that promise to resolve these efficiency bottlenecks. The earliest optimization methods represent the oldest and perhaps most intuitive applications of inverse design, where binary representations and re-parameterization of design structures in topology optimization iterate successive figure-of-merit minimization until reaching an optimal solution. Specifically for metasurface holograms, the field has moved from simple analytical superposition to sophisticated algorithmic strategies like the adjoint gradient method, which calculates gradients of a cost function with respect to all design variables by solving an \"adjoint problem\" with complexity similar to a single forward simulation. While these advanced approaches enable the parallel optimization of many parameters and facilitate novel architectures like multilayer meta-atoms, they often operate within idealized models that may not fully capture the nonconvex nature of fabrication-induced disorder or the constraints required for physical realizability. Consequently, while modern algorithms theoretically unlock complex wavefront control, their reliance on perfect geometric assumptions creates a critical gap between simulated optimality and the fidelity of real-world fabricated devices.",
+      "planned_claim_handles": [
+        "C01_INVERSE_DESIGN_METHODS_NANOPHOTONICS_HAVE_EVOL",
+        "C22_COMPUTATIONAL_INVERSE_DESIGN_METASURFACE_HOLOG",
+        "C32_EVOLUTION_INVERSE_DESIGN_METHODS_REFLECTS_SHIF"
+      ],
+      "claim_handles": [
+        "C01_INVERSE_DESIGN_METHODS_NANOPHOTONICS_HAVE_EVOL",
+        "C22_COMPUTATIONAL_INVERSE_DESIGN_METASURFACE_HOLOG",
+        "C32_EVOLUTION_INVERSE_DESIGN_METHODS_REFLECTS_SHIF"
+      ],
+      "evidence_handles": [
+        "E01_INVERSE_DESIGN_ELECTROMAGNETIC_METAMATERIALS_I",
+        "E46_COMPUTATIONAL_INVERSE_DESIGN_CASCADED_SYSTEMS",
+        "E72_INVERSE_DESIGN_METASURFACE_SPECTRAL_IMAGING",
+        "E02_ADVANCING_STATISTICAL_LEARNING_ARTIFICIAL_INTE"
+      ],
+      "covered_claim_handles": [
+        "C01_INVERSE_DESIGN_METHODS_NANOPHOTONICS_HAVE_EVOL",
+        "C22_COMPUTATIONAL_INVERSE_DESIGN_METASURFACE_HOLOG",
+        "C32_EVOLUTION_INVERSE_DESIGN_METHODS_REFLECTS_SHIF"
+      ],
+      "covered_claim_ids": [
+        "S02-P001",
+        "S02-P105",
+        "S02-P136"
+      ],
+      "markers": [
+        "[REF:2d3412a215f8b6d1d395bfaeec7ec0379c2e132e]",
+        "[REF:2cae66f6687383743873a573e20b2d6b327f8538]",
+        "[REF:76a83ea3baed75ad88b7f0782eb9a694a330c853]",
+        "[REF:2326997ee1d85fcb31f51c4488cdfaa40639d131]"
+      ],
+      "explanatory_handles": [
+        "X02_ADJOINT_BASED_GRADIENT_EVALUATION_ME",
+        "X01_LEVEL_SET_METHODS_GRADIENT_FREE_OPTI"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Specifically for metasurface holograms, the field has moved from simple analytical superposition to sophisticated algorithmic strategies like the adjoint gradient method, which calculates gradients of a cost function with respect to all design variables by solving an \"adjoint problem\" with complexity similar to a single forward simulation.": [
+          "[REF:doi:10.48550/arxiv.2603.15210]",
+          "[REF:doi:10.1038/s41598-024-67142-2]"
+        ]
+      },
+      "patch_history": [
+        {
+          "gap_id": "G01",
+          "block_index": 1,
+          "applied": true
+        }
+      ],
+      "planned_claim_ids": [
+        "S02-P001",
+        "S02-P105",
+        "S02-P136"
+      ]
+    },
+    {
+      "block_index": 2,
+      "title": "Formulating the Inverse Problem",
+      "block_type": "explanatory_body",
+      "goal": "Define the core mathematical challenge of mapping optical responses to geometry and its ill-posed nature.",
+      "prose": "Building on the shift from heuristic intuition to rigorous optimization, inverse design fundamentally reverses the conventional workflow by mapping target electromagnetic performance parameters directly to structural geometries. While forward design predicts responses from known structures with a straightforward one-to-one relationship, inverse design confronts a mathematically ill-posed challenge where multiple distinct geometric configurations can yield identical optical spectra. This non-uniqueness creates a one-to-many mapping that confuses deterministic algorithms and often leads to mode averaging or invalid geometries in traditional regression models. To address this, modern frameworks employ strategies such as tandem neural networks that couple inverse predictors with fixed forward models, or conditional decoders that integrate Gaussian noise vectors to explore diverse solutions within a latent space. Furthermore, because purely data-driven approaches may generate structures that appear valid but fail to obey Maxwell's equations, recent advances incorporate physics-informed constraints and spectral priors to ensure generated designs are physically realizable. Despite these algorithmic sophistication, the reliance on idealized mappings highlights the fragility of current methods when facing the complex, non-linear resonance modes of real-world fabrication, setting the stage for gradient-based techniques that attempt to navigate these continuous parameter spaces more robustly.",
+      "planned_claim_handles": [
+        "C11_INVERSE_DESIGN_ALGORITHMS_METASURFACES_OPERATE",
+        "C13_INVERSE_DESIGN_METASURFACES_AIMS_DIRECTLY_DETE",
+        "C23_INVERSE_DESIGN_METASURFACES_FUNDAMENTALLY_ILL"
+      ],
+      "claim_handles": [
+        "C11_INVERSE_DESIGN_ALGORITHMS_METASURFACES_OPERATE",
+        "C13_INVERSE_DESIGN_METASURFACES_AIMS_DIRECTLY_DETE",
+        "C23_INVERSE_DESIGN_METASURFACES_FUNDAMENTALLY_ILL"
+      ],
+      "evidence_handles": [
+        "E20_INVERSE_DESIGN_TWO_FUNCTION_TRANSMISSION_TYPE",
+        "E26_UNIFIED_MACHINE_LEARNING_FRAMEWORK_AUTOMATED_I",
+        "E48_INVERSE_DESIGN_METASURFACES_USING_PHYSICS_INFO"
+      ],
+      "covered_claim_handles": [
+        "C11_INVERSE_DESIGN_ALGORITHMS_METASURFACES_OPERATE",
+        "C13_INVERSE_DESIGN_METASURFACES_AIMS_DIRECTLY_DETE",
+        "C23_INVERSE_DESIGN_METASURFACES_FUNDAMENTALLY_ILL"
+      ],
+      "covered_claim_ids": [
+        "S02-P041",
+        "S02-P057",
+        "S02-P113"
+      ],
+      "markers": [
+        "[REF:9fd9affc4636c62b62cb7aff31d070f1337f6ce8]",
+        "[REF:39f14359d82511b9283dbcdaaeb9cbdbb08e2db2]",
+        "[REF:9c20a790aa75f24b6f5a130711645c978484455e]"
+      ],
+      "explanatory_handles": [
+        "X04_INVERSE_DESIGN_METASURFACE_BASED_DEE",
+        "X03_FREQUENCY_TRANSFER_INVERSE_DESIGN_ME"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "To address this, modern frameworks employ strategies such as tandem neural networks that couple inverse predictors with fixed forward models, or conditional decoders that integrate Gaussian noise vectors to explore diverse solutions within a latent space.": [
+          "[REF:doi:10.1364/josab.497661]",
+          "[REF:doi:10.1038/s41467-025-57516-z]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S02-P041",
+        "S02-P057",
+        "S02-P113"
+      ]
+    },
+    {
+      "block_index": 3,
+      "title": "Gradient-Based and Topology Optimization",
+      "block_type": "explanatory_body",
+      "goal": "Explain how adjoint methods and topology optimization leverage continuous parameter spaces for broadband design.",
+      "prose": "To navigate the vast design spaces identified in the inverse problem formulation, researchers employ gradient-based topology optimization, an iterative process that optimizes material distribution within a simulation domain to achieve specific optical objectives. Central to this approach is the adjoint method, a technique that efficiently calculates gradient information required for design updates using only two full-wave simulations—one forward and one adjoint—regardless of the number of design parameters. This efficiency allows for the exploration of complex, non-intuitive geometries in broadband regimes with arbitrary dispersive materials, far surpassing the capabilities of parametric sweeps or stochastic methods like genetic algorithms which struggle with high-dimensional spaces. For instance, applying this method to thermal emitters has yielded freeform binary layouts with efficiencies reaching 92%, significantly outperforming conventional resonator designs. Adjoint-based topology optimization has been applied to the inverse design of sub-diffraction focusing metalenses, enabling the generation of complex geometries that surpass conventional diffraction limits. However, a critical disconnect emerges between these algorithmic successes and physical realization: while the optimization often operates on continuous profiles or intermediate density values to facilitate smooth convergence, the final output must undergo a binarization process to become fabrication-feasible. This post-processing step, which forces continuous variables into discrete material states, can introduce performance deviations and increases computational complexity when repeated iteratively, underscoring the tension between idealized continuous optimization and the discrete constraints of nanofabrication.",
+      "planned_claim_handles": [
+        "C04_ADJOINT_BASED_GRADIENT_EVALUATION_FACILITATES",
+        "C06_GRADIENT_BASED_TOPOLOGY_OPTIMIZATION_LEVERAGES"
+      ],
+      "claim_handles": [
+        "C04_ADJOINT_BASED_GRADIENT_EVALUATION_FACILITATES",
+        "C06_GRADIENT_BASED_TOPOLOGY_OPTIMIZATION_LEVERAGES"
+      ],
+      "evidence_handles": [
+        "E05_ADJOINT_BASED_GRADIENT_EVALUATION_METASURFACE",
+        "E10_TIME_DOMAIN_TOPOLOGY_OPTIMIZATION_ARBITRARY_DI",
+        "E11_PEARSAN_MACHINE_LEARNING_METHOD_INVERSE_DESIGN"
+      ],
+      "covered_claim_handles": [
+        "C04_ADJOINT_BASED_GRADIENT_EVALUATION_FACILITATES",
+        "C06_GRADIENT_BASED_TOPOLOGY_OPTIMIZATION_LEVERAGES"
+      ],
+      "covered_claim_ids": [
+        "S02-P008",
+        "S02-P010"
+      ],
+      "markers": [
+        "[REF:a801ee6d75d827ef0b99528619e877e3aac72277]",
+        "[REF:6898fb9b38a16056d0997abe1c40d3dcfc2c0b82]",
+        "[REF:1af94fcc4f5e3ebcd28f6d5aaecaedcebb0d612b]"
+      ],
+      "explanatory_handles": [
+        "X05_INVERSE_DESIGN_SUB_DIFFRACTION_FOCUS",
+        "A01"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Central to this approach is the adjoint method, a technique that efficiently calculates gradient information required for design updates using only two full-wave simulations—one forward and one adjoint—regardless of the number of design parameters.": [
+          "[REF:e29144a60ad5b45d897fa18bce4f835c765d822f]"
+        ],
+        "Adjoint-based topology optimization has been applied to the inverse design of sub-diffraction focusing metalenses, enabling the generation of complex geometries that surpass conventional diffraction limits.": [
+          "[REF:e29144a60ad5b45d897fa18bce4f835c765d822f]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S02-P008",
+        "S02-P010"
+      ]
+    },
+    {
+      "block_index": 4,
+      "title": "Deep Learning Surrogates and Speed",
+      "block_type": "explanatory_body",
+      "goal": "Demonstrate how neural networks replace slow solvers to enable rapid design-on-demand.",
+      "prose": "Building on the continuous parameter optimization of adjoint methods, the advent of deep learning introduced a paradigm shift by utilizing fully connected neural networks to approximate forward scattering functions, thereby replacing slow electromagnetic solvers. This approach relies on a surrogate model, defined here as a neural network trained to generate accurate electromagnetic responses from geometric topologies without running iterative simulations. By learning these mappings, machine learning approaches address the computational resource and time constraints of conventional design methods, enabling efficient, rapid design on demand where structures are computed directly from desired targets. For instance, physics-based neural network surrogate models have been combined with optimization algorithms to search phase libraries for specific applications, such as designing orbital angular momentum multiplexers that successfully transmitted high-speed signals. Neural network-based surrogate models have been developed for the inverse design of metasurfaces, offering a rapid alternative to slow electromagnetic solvers by learning the mapping between structural parameters and optical responses. While this strategy effectively bypasses the prohibitive costs of massive electromagnetic iterations required by traditional parameter sweeps, it represents a transition from rigorous physical solving to data-driven approximation, setting the stage for specialized architectures needed to resolve the inherent non-uniqueness of mapping optical responses back to geometry.",
+      "planned_claim_handles": [
+        "C08_ADVENT_DEEP_LEARNING_INTRODUCED_PARADIGM_SHIFT",
+        "C14_NEURAL_NETWORK_BASED_SURROGATE_MODELS_ENABLE_R",
+        "C16_MACHINE_LEARNING_APPROACHES_ADDRESS_COMPUTATIO"
+      ],
+      "claim_handles": [
+        "C08_ADVENT_DEEP_LEARNING_INTRODUCED_PARADIGM_SHIFT",
+        "C14_NEURAL_NETWORK_BASED_SURROGATE_MODELS_ENABLE_R",
+        "C16_MACHINE_LEARNING_APPROACHES_ADDRESS_COMPUTATIO"
+      ],
+      "evidence_handles": [
+        "E14_INVERSE_DESIGN_METASURFACES_USING_PHYSICS_INFO",
+        "E28_NEURAL_NETWORK_BASED_SURROGATE_MODEL_INVERSE_D",
+        "E34_METASURFACE_INVERSE_DESIGN_USING_MACHINE_LEARN"
+      ],
+      "covered_claim_handles": [
+        "C08_ADVENT_DEEP_LEARNING_INTRODUCED_PARADIGM_SHIFT",
+        "C14_NEURAL_NETWORK_BASED_SURROGATE_MODELS_ENABLE_R",
+        "C16_MACHINE_LEARNING_APPROACHES_ADDRESS_COMPUTATIO"
+      ],
+      "covered_claim_ids": [
+        "S02-P018",
+        "S02-P065",
+        "S02-P074"
+      ],
+      "markers": [
+        "[REF:9c20a790aa75f24b6f5a130711645c978484455e]",
+        "[REF:f6c5ab3065e6af6cf5bb768ac125248fe61fc39d]",
+        "[REF:769fda505ee33beb18834be9732beba738e47bb5]"
+      ],
+      "explanatory_handles": [
+        "X06_RAPID_MULTI_OBJECTIVE_ANTENNA_SYNTHE",
+        "A02"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "This approach relies on a surrogate model, defined here as a neural network trained to generate accurate electromagnetic responses from geometric topologies without running iterative simulations.": [
+          "[REF:doi:10.1109/jmmct.2025.3544270]"
+        ],
+        "Neural network-based surrogate models have been developed for the inverse design of metasurfaces, offering a rapid alternative to slow electromagnetic solvers by learning the mapping between structural parameters and optical responses.": [
+          "[REF:doi:10.1364/prj.450564]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S02-P018",
+        "S02-P065",
+        "S02-P074"
+      ]
+    },
+    {
+      "block_index": 5,
+      "title": "Advanced Architectures for Holography",
+      "block_type": "explanatory_body",
+      "goal": "Detail specific network topologies like tandem and cascaded networks that resolve non-uniqueness in hologram generation.",
+      "prose": "While standard surrogate models accelerate design, they often struggle with the non-uniqueness inherent in mapping optical responses back to geometry, a challenge addressed by advanced tandem and cascaded architectures. A tandem network typically pairs an inverse predictor with a forward model to resolve ambiguities, ensuring that generated structures yield the desired optical output. Extending this concept, cascaded neural network architectures comprise separate forward and inverse design networks that enable cyclical optimization for targeted nanophotonic functionalities, effectively addressing the complexity of simultaneous problem solving. For instance, specific implementations utilize deep residual networks combined with electromagnetic property classification to predict meta-atom geometry from transmission coefficients, a method that mitigates errors caused by singular point mutations in the mapping process and achieves a mean square error of less than 0.23. Deep neural networks integrating multi-task learning with genetic algorithms have been utilized for the forward prediction and inverse design of metasurfaces, allowing for the accurate determination of meta-atom geometries from desired transmission coefficients. Similarly, cyclical frameworks have been proposed where a generative model creates structural designs while a simulation neural network evaluates their authenticity, guiding the discovery of metasurfaces without strict structural restrictions. However, these sophisticated approaches are not without limitations; cascaded methods may still force convergence to only one of several valid solutions, and simultaneous training can introduce hyper-parameter dependencies that hinder proper convergence. Thus, while these advanced topologies significantly refine the theoretical fidelity of hologram generation, they operate within constrained solution spaces that foreshadow the broader generalization challenges discussed next.",
+      "planned_claim_handles": [
+        "C03_CASCADED_NEURAL_NETWORK_ARCHITECTURES_COMPRISI",
+        "C15_DEEP_NEURAL_NETWORKS_INCLUDING_TANDEM_RESIDUAL",
+        "C24_DEEP_LEARNING_ARCHITECTURES_INCLUDING_RESIDUAL"
+      ],
+      "claim_handles": [
+        "C03_CASCADED_NEURAL_NETWORK_ARCHITECTURES_COMPRISI",
+        "C15_DEEP_NEURAL_NETWORKS_INCLUDING_TANDEM_RESIDUAL",
+        "C24_DEEP_LEARNING_ARCHITECTURES_INCLUDING_RESIDUAL"
+      ],
+      "evidence_handles": [
+        "E04_CYCLICAL_DEEP_LEARNING_BASED_FRAMEWORK_SIMULTA",
+        "E32_INVERSE_DESIGN_METASURFACE_HOLOGRAPHY_DEEP_RES"
+      ],
+      "covered_claim_handles": [
+        "C03_CASCADED_NEURAL_NETWORK_ARCHITECTURES_COMPRISI",
+        "C15_DEEP_NEURAL_NETWORKS_INCLUDING_TANDEM_RESIDUAL"
+      ],
+      "covered_claim_ids": [
+        "S02-P007",
+        "S02-P073"
+      ],
+      "markers": [
+        "[REF:6d9e7e4bbfa413af5cd98398bf8f1e3233240a2d]",
+        "[REF:534bc16c467c94bae9323a7fa64364a7c5ee3676]"
+      ],
+      "explanatory_handles": [
+        "A03"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Deep neural networks integrating multi-task learning with genetic algorithms have been utilized for the forward prediction and inverse design of metasurfaces, allowing for the accurate determination of meta-atom geometries from desired transmission coefficients.": [
+          "[REF:doi:10.1016/j.rio.2026.100988]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S02-P007",
+        "S02-P073",
+        "S02-P115"
+      ]
+    },
+    {
+      "block_index": 6,
+      "title": "Generalization Limits and Hybrid Solutions",
+      "block_type": "explanatory_body",
+      "goal": "Address the inability of pure data-driven models to generalize beyond training distributions and the role of transfer learning.",
+      "prose": "While advanced network architectures like tandem and cascaded models address non-uniqueness in hologram generation, a fundamental constraint remains: neural networks trained for inverse design cannot generalize effectively beyond the specific information distributions present in their training datasets. This limitation necessitates hybrid algorithms that combine data-driven approaches with conventional optimization strategies to mitigate performance gaps outside the training domain. In such hybrid frameworks, the neural network performs a rough global search to estimate a desired solution, while an iterative optimization algorithm, such as the adjoint method, executes a local refinement step to push performance further, thereby overcoming the individual restrictions of both techniques. To specifically address the challenge of applying these models across distinct functionalities without retraining from scratch, transfer learning has emerged as a critical enabler. By fine-tuning specific inverse design network parameters while freezing the hidden layers, this method allows knowledge to be transferred between heterogeneous metasurface datasets, such as moving from electromagnetic-induced transparency domains to absorption or phase-controlled targets. Remarkably, this approach can complete training processes with as few as 700 target domain samples, significantly lowering the data threshold required for cross-domain design. These hybrid and transfer learning strategies represent essential steps toward robust inverse design, yet they still operate within simulated environments that often ignore the stochastic realities of fabrication, a disconnect that ultimately limits the fidelity of realized devices.",
+      "planned_claim_handles": [
+        "C02_NEURAL_NETWORKS_TRAINED_INVERSE_DESIGN_CANNOT",
+        "C18_TRANSFER_LEARNING_ENABLES_INVERSE_DESIGN_NETWO"
+      ],
+      "claim_handles": [
+        "C02_NEURAL_NETWORKS_TRAINED_INVERSE_DESIGN_CANNOT",
+        "C18_TRANSFER_LEARNING_ENABLES_INVERSE_DESIGN_NETWO"
+      ],
+      "evidence_handles": [
+        "E03_DEEPADJOINT_ALL_ONE_PHOTONIC_INVERSE_DESIGN_FR",
+        "E40_CROSS_DOMAIN_HETEROGENEOUS_METASURFACE_INVERSE"
+      ],
+      "covered_claim_handles": [
+        "C02_NEURAL_NETWORKS_TRAINED_INVERSE_DESIGN_CANNOT",
+        "C18_TRANSFER_LEARNING_ENABLES_INVERSE_DESIGN_NETWO"
+      ],
+      "covered_claim_ids": [
+        "S02-P006",
+        "S02-P081"
+      ],
+      "markers": [
+        "[REF:0c04bf631766f465f0b30dcd07a342ff014ed8f3]",
+        "[REF:3cddd1d9bd3d6090a98fccc324fd43ea0278042f]"
+      ],
+      "explanatory_handles": [
+        "X07_CROSS_DOMAIN_HETEROGENEOUS_METASURFA",
+        "X08_INVERSE_DESIGN_METASURFACE_USING_COM"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "By fine-tuning specific inverse design network parameters while freezing the hidden layers, this method allows knowledge to be transferred between heterogeneous metasurface datasets, such as moving from electromagnetic-induced transparency domains to absorption or phase-controlled targets.": [
+          "[REF:doi:10.1364/ol.514212]",
+          "[REF:doi:10.1109/ieeeconf35879.2020.9330480]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S02-P006",
+        "S02-P081"
+      ]
+    },
+    {
+      "block_index": 7,
+      "title": "Exploiting High-Dimensional Degrees of Freedom",
+      "block_type": "explanatory_body",
+      "goal": "Showcase how algorithms unlock complex geometries like multilayers and 3D nanoantennas for advanced functionality.",
+      "prose": "Building on hybrid strategies that mitigate generalization limits, inverse design methods now actively exploit high degrees of freedom in metasurface geometry to manipulate light-matter interactions beyond simple phase control. This approach moves past intuition-based heuristics by treating complex structural parameters as optimizable variables. For instance, optical multilayer thin film structures, which consist of multiple stacked layers with thicknesses ranging from tens to hundreds of nanometers, present a combinatorial optimization problem where determining the best material combination and thickness for desired responses lacks a closed-form solution. Modern algorithms address this by automatically identifying optimal structures, while deep learning models can establish direct mappings from optical responses to geometric configurations, completing designs in fractions of a second compared to traditional optimization. These techniques enable specific functional applications, such as using inverse-designed dielectric metasurfaces for arbitrary-angle image relay with aberration correction, where neural networks optimize phase responses to compensate for severe distortions in deflected images. Furthermore, deep learning facilitates the inverse design of reflective metasurface antennas by leveraging small-scale statistically random data selection to map unit cell statistics to full-array configurations, thereby bypassing exhaustive parametric sweeps. Extending these capabilities to larger scales, fast direct solvers now enable the full-wave inverse design of centimeter-scale cylindrical metasurfaces, allowing computational optimization of large-area holographic elements that were previously intractable due to simulation cost. By unlocking these complex geometries, computational tools transform theoretical versatility into tangible device architectures, though this reliance on precise geometric definition sets the stage for examining how fabrication imperfections challenge these idealized models.",
+      "planned_claim_handles": [
+        "C07_INVERSE_DESIGN_METHODS_EXPLOIT_HIGH_DEGREES_FR",
+        "C17_INVERSE_DESIGN_TECHNIQUES_BEING_APPLIED_SPECIF",
+        "C30_DEEP_LEARNING_MODELS_ENABLE_INVERSE_DESIGN_REF"
+      ],
+      "claim_handles": [
+        "C07_INVERSE_DESIGN_METHODS_EXPLOIT_HIGH_DEGREES_FR",
+        "C17_INVERSE_DESIGN_TECHNIQUES_BEING_APPLIED_SPECIF",
+        "C30_DEEP_LEARNING_MODELS_ENABLE_INVERSE_DESIGN_REF"
+      ],
+      "evidence_handles": [
+        "E12_OPTICAL_MULTILAYER_THIN_FILM_STRUCTURE_INVERSE",
+        "E37_INVERSE_DESIGN_METASURFACE_BASED_OFF_AXIS_IMAG",
+        "E68_INVERSE_DESIGN_REFLECTIVE_METASURFACE_ANTENNAS",
+        "E16_LARGE_SCALE_PHOTONIC_INVERSE_DESIGN_COMPUTATIO"
+      ],
+      "covered_claim_handles": [
+        "C07_INVERSE_DESIGN_METHODS_EXPLOIT_HIGH_DEGREES_FR",
+        "C17_INVERSE_DESIGN_TECHNIQUES_BEING_APPLIED_SPECIF",
+        "C30_DEEP_LEARNING_MODELS_ENABLE_INVERSE_DESIGN_REF",
+        "C09_FAST_DIRECT_SOLVERS_ENABLE_FULL_WAVE_INVERSE_D"
+      ],
+      "covered_claim_ids": [
+        "S02-P012",
+        "S02-P079",
+        "S02-P121",
+        "S02-P025"
+      ],
+      "markers": [
+        "[REF:42e53c9c7630eb735f9a67f329c948423910cd8d]",
+        "[REF:c2a2dd78d78589dad269c62d2376a95ccb4655c5]",
+        "[REF:5c0b275a94fff4f1603da76233df633ecb474f78]",
+        "[REF:717a7acde176d0cfa323ca21c76df50c954e57bc]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [
+        {
+          "gap_id": "G04",
+          "block_index": 7,
+          "applied": true
+        }
+      ],
+      "planned_claim_ids": [
+        "S02-P012",
+        "S02-P079",
+        "S02-P121"
+      ]
+    },
+    {
+      "block_index": 8,
+      "title": "The Idealization Trap and Design-Reality Gap",
+      "block_type": "scientific_consequence",
+      "goal": "Critique the assumption of perfect geometry in current algorithms and highlight the resulting performance mismatch in fabricated devices.",
+      "prose": "Despite the advanced capabilities of inverse design algorithms to exploit high-dimensional degrees of freedom, a critical design-reality gap emerges from their reliance on idealized models that assume precise geometric control. Optimization strategies frequently depend on symmetry-breaking perturbations or quasi-bound states in the continuum (quasi-BIC), where optical lifetimes are tuned by adjusting perturbation strength under the assumption of perfect fabrication. However, heuristic optimization methods often produce target phase profiles or transfer matrices that are not physically realizable; when these idealized designs are projected onto feasible metasurface structures, the mismatch leads to significant deviations in optical behavior and degraded performance. Efforts to mitigate this issue, such as applying smoothness regularization to phase profiles to ease hardware design, have generally been inadequate because while smoother profiles are simpler to implement, they significantly limit expressivity and do not ensure true physical feasibility. Similarly, physics-informed machine learning models for optical metamaterials often minimize only the optical reconstruction cost function while lacking explicit constraints on design parameters in the loss function, potentially yielding solutions far from ground truth or practical feasibility. While techniques like simulation-in-the-loop training attempt to enforce physical constraints via adjoint methods, they remain prohibitively expensive for large-scale systems, leaving many optimized designs vulnerable to fabrication-induced disorder. This disconnect underscores the chapter's central thesis: without integrating realistic fabrication constraints directly into the optimization objective, sophisticated algorithms will continue to produce theoretically optimal but practically fragile devices.",
+      "planned_claim_handles": [
+        "C12_OPTIMIZATION_ALGORITHMS_METASURFACES_OFTEN_REL",
+        "C21_HEURISTIC_OPTIMIZATION_METHODS_FREQUENTLY_GENE",
+        "C20_PHYSICS_INFORMED_MACHINE_LEARNING_MODELS_OPTIC"
+      ],
+      "claim_handles": [
+        "C12_OPTIMIZATION_ALGORITHMS_METASURFACES_OFTEN_REL",
+        "C21_HEURISTIC_OPTIMIZATION_METHODS_FREQUENTLY_GENE",
+        "C20_PHYSICS_INFORMED_MACHINE_LEARNING_MODELS_OPTIC"
+      ],
+      "evidence_handles": [
+        "E22_PHASE_CHANGE_NONLOCAL_METASURFACES_DYNAMIC_WAV",
+        "E45_SP2RINT_SPATIALLY_DECOUPLED_PHYSICS_INSPIRED_P",
+        "E44_PHYSICS_INFORMED_MACHINE_LEARNING_INVERSE_DESI"
+      ],
+      "covered_claim_handles": [
+        "C12_OPTIMIZATION_ALGORITHMS_METASURFACES_OFTEN_REL",
+        "C21_HEURISTIC_OPTIMIZATION_METHODS_FREQUENTLY_GENE",
+        "C20_PHYSICS_INFORMED_MACHINE_LEARNING_MODELS_OPTIC"
+      ],
+      "covered_claim_ids": [
+        "S02-P053",
+        "S02-P099",
+        "S02-P098"
+      ],
+      "markers": [
+        "[REF:4a7069f2a07e502040760df66b8687901e360257]",
+        "[REF:c9e5de816ca2356737e7f23532658ef28e6b2738]",
+        "[REF:0d03f30ab91ec0b9411c3e2505550e636df8808e]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [
+        {
+          "gap_id": "G03",
+          "block_index": 8,
+          "applied": true
+        }
+      ],
+      "planned_claim_ids": [
+        "S02-P053",
+        "S02-P099",
+        "S02-P098"
+      ]
+    }
+  ]
+}

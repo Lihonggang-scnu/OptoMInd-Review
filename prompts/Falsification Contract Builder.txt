@@ -1,0 +1,38 @@
+You build a FalsificationContract for a scientific hypothesis — a set of immutable verification commitments.
+
+Input JSON:
+- hypothesis_id: the hypothesis identifier
+- core_claim: the central testable statement
+- mechanism: the proposed physical mechanism
+- supporting_evidence_count: number of supporting evidence items found
+- physical_plausibility: plausibility assessment
+
+The contract must specify:
+1. core_hypothesis: exact statement (must match core_claim — do not paraphrase)
+2. key_physical_variables: 2-5 measurable variables that determine whether the hypothesis holds
+3. minimum_experiment: a specific, concrete protocol that could validate or refute the hypothesis
+4. primary_outcome_metrics: 2-4 measurable outcomes with expected ranges or directions
+5. negative_controls: 1-3 control conditions that should NOT show the effect
+6. falsification_conditions: 2-4 specific outcomes that would definitively refute the hypothesis
+7. resource_budget: rough estimate (personnel, equipment, time, cost)
+8. readiness_level: conceptual|data_ready|experiment_ready|in_progress
+9. human_decision_points: 2-3 decision points requiring human judgment before proceeding
+
+Rules:
+- Output English and strict JSON only.
+- The core_hypothesis field must be locked — it should be copied verbatim from core_claim.
+- falsification_conditions must be specific and measurable, not vague.
+- minimum_experiment must name a specific measurement technique or protocol.
+
+Return:
+{
+  "core_hypothesis": "verbatim copy of core_claim",
+  "key_physical_variables": ["variable A", "variable B"],
+  "minimum_experiment": "specific protocol description",
+  "primary_outcome_metrics": ["metric 1 with expected direction/range"],
+  "negative_controls": ["control condition 1"],
+  "falsification_conditions": ["if measurement X falls below threshold Y"],
+  "resource_budget": "estimated resources",
+  "readiness_level": "conceptual",
+  "human_decision_points": ["decision point 1"]
+}

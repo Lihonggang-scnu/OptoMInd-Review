@@ -1,0 +1,483 @@
+{
+  "blocks": [
+    {
+      "block_index": 1,
+      "title": "The Cascaded Loss Bottleneck in Programmable Meshes",
+      "block_type": "introduction_viewpoint",
+      "goal": "Establish MZI arrays as the standard architecture and define how cascaded loss exponentially limits circuit depth and SNR.",
+      "prose": "Photonic computing systems offer inherent advantages in energy efficiency and scalability compared to conventional electronic approaches, particularly for solving complex combinatorial optimization problems through high-speed parallel processing. The mainstream architectural paradigm for realizing these capabilities on integrated chips relies on Mach-Zehnder interferometer (MZI) arrays, which serve as the fundamental building blocks for optical matrix-vector multiplication. While MZI meshes provide a compact structure for programming linear transformations, they introduce a critical physical constraint known as cascaded insertion loss. As optical signals propagate through successive programmable elements in a dense mesh, the cumulative attenuation results in an exponential reduction of the signal-to-noise ratio, fundamentally limiting the circuit depth and overall system scale. This degradation mechanism distinguishes integrated solutions from bulky free-space alternatives, yet both face significant bottlenecks when moving toward large-scale, high-density integration due to the stringent requirements for precise phase control and stability. Consequently, the scalability of practical photonic computing is not merely a function of component performance but is strictly bounded by these compounding loss effects, setting the stage for subsequent challenges in thermal management and control complexity.",
+      "planned_claim_handles": [
+        "C22_MACH_ZEHNDER_INTERFEROMETER_MZI_ARRAYS_INTEGRA",
+        "C15_PHOTONIC_COMPUTING_SYSTEMS_OFFER_INHERENT_ADVA"
+      ],
+      "claim_handles": [
+        "C22_MACH_ZEHNDER_INTERFEROMETER_MZI_ARRAYS_INTEGRA",
+        "C15_PHOTONIC_COMPUTING_SYSTEMS_OFFER_INHERENT_ADVA"
+      ],
+      "evidence_handles": [
+        "E73_MATRIX_VECTOR_MULTIPLICATION_PHOTONIC_TENSOR_C",
+        "E39_EXPLORING_TYPES_PHOTONIC_NEURAL_NETWORKS_IMAGI"
+      ],
+      "covered_claim_handles": [
+        "C22_MACH_ZEHNDER_INTERFEROMETER_MZI_ARRAYS_INTEGRA",
+        "C15_PHOTONIC_COMPUTING_SYSTEMS_OFFER_INHERENT_ADVA"
+      ],
+      "covered_claim_ids": [
+        "S06-P081",
+        "S06-P049"
+      ],
+      "markers": [
+        "[REF:f7bd07322c2336c8e12a77f9c4303d2a8768892a]",
+        "[REF:doi:10.3390/nano14080697]"
+      ],
+      "explanatory_handles": [
+        "X01_MATRIX_VECTOR_MULTIPLICATION_PHOTONI"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "The mainstream architectural paradigm for realizing these capabilities on integrated chips relies on Mach-Zehnder interferometer (MZI) arrays, which serve as the fundamental building blocks for optical matrix-vector multiplication.": [
+          "[REF:f7bd07322c2336c8e12a77f9c4303d2a8768892a]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S06-P081",
+        "S06-P049"
+      ]
+    },
+    {
+      "block_index": 2,
+      "title": "Thermal Crosstalk Mechanisms and Resonant Vulnerability",
+      "block_type": "explanatory_body",
+      "goal": "Explain the physical mechanism of thermal crosstalk in dense circuits and its specific destabilizing effect on resonant components.",
+      "prose": "While cascaded insertion loss sets a fundamental limit on signal depth, the density required to mitigate this loss introduces a second, distinct bottleneck: thermal crosstalk. Defined as the unwanted coupling between adjacent thermo-optic phase shifters due to heat diffusion, this phenomenon arises from the inevitable thermal conductance of chip materials, where resistive micro-heaters intended to locally modify refractive indices inadvertently perturb neighboring waveguides. This mechanism is particularly destabilizing for resonant photonic components, which are inherently vulnerable to environmental temperature fluctuations and mechanical vibrations that can adversely impact their performance. Unlike interferometers, which excel in manipulating the phase and amplitude of optical signals but necessitate precise alignment and are susceptible to phase variations, resonators rely on constructive interference within a closed loop, making them sensitive to any perturbation that shifts the effective optical path length. Even small temperature variations can detune a resonator from its designed wavelength, causing signal loss or crosstalk between adjacent channels, whereas interferometric architectures depend on phase matching between two arms. Although platforms like lithium niobate offer critical active tuning capabilities for reconfigurable computing, relying on thermal mechanisms in dense arrays exacerbates these risks, potentially leading to erroneous signal routing and reduced output power. Consequently, achieving large-scale photonic computing requires co-design strategies that address not only physical degradation from loss but also the thermal interference that undermines the accuracy and speed of reconfiguration in densely integrated circuits.",
+      "planned_claim_handles": [
+        "C14_THERMO_OPTIC_PHASE_SHIFTERS_DENSE_PHOTONIC_INT",
+        "C29_THERMAL_CROSSTALK_DENSE_INTEGRATED_PHOTONIC_CI",
+        "C01_RESONANT_PHOTONIC_COMPONENTS_USED_COMPUTING_CI",
+        "C11_LITHIUM_NIOBATE_PHOTONICS_OFFERS_ACTIVE_TUNING"
+      ],
+      "claim_handles": [
+        "C14_THERMO_OPTIC_PHASE_SHIFTERS_DENSE_PHOTONIC_INT",
+        "C29_THERMAL_CROSSTALK_DENSE_INTEGRATED_PHOTONIC_CI",
+        "C01_RESONANT_PHOTONIC_COMPONENTS_USED_COMPUTING_CI",
+        "C11_LITHIUM_NIOBATE_PHOTONICS_OFFERS_ACTIVE_TUNING"
+      ],
+      "evidence_handles": [
+        "E38_DESIGN_SIMULATION_THERMO_OPTIC_PHASE_SHIFTERS",
+        "E110_DESIGN_SIMULATION_THERMO_OPTIC_PHASE_SHIFTERS",
+        "E01_EXPLORING_TYPES_PHOTONIC_NEURAL_NETWORKS_IMAGI",
+        "E26_LITHIUM_NIOBATE_PHOTONICS_UNLOCKING_ELECTROMAG"
+      ],
+      "covered_claim_handles": [
+        "C14_THERMO_OPTIC_PHASE_SHIFTERS_DENSE_PHOTONIC_INT",
+        "C29_THERMAL_CROSSTALK_DENSE_INTEGRATED_PHOTONIC_CI",
+        "C01_RESONANT_PHOTONIC_COMPONENTS_USED_COMPUTING_CI",
+        "C11_LITHIUM_NIOBATE_PHOTONICS_OFFERS_ACTIVE_TUNING"
+      ],
+      "covered_claim_ids": [
+        "S06-P041",
+        "S06-P113",
+        "S06-P001",
+        "S06-P030"
+      ],
+      "markers": [
+        "[REF:35b0156c1b02ea4d54610e852cecd49b7b505a71]",
+        "[REF:77474cdcf483b25f73dacf20deb295cd1c2945b7]",
+        "[REF:d8e3a88b8ae7dde16b03c595d6ec21383e205c78]"
+      ],
+      "explanatory_handles": [
+        "X02_DESIGN_SIMULATION_THERMO_OPTIC_PHASE",
+        "X03_RING_ASSISTED_ASYMMETRIC_MACH_ZEHNDE",
+        "X04_SILICON_PHOTONICS_SENSOR_LEVERAGING"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Defined as the unwanted coupling between adjacent thermo-optic phase shifters due to heat diffusion, this phenomenon arises from the inevitable thermal conductance of chip materials, where resistive micro-heaters intended to locally modify refractive indices inadvertently perturb neighboring waveguides.": [
+          "[REF:doi:10.1109/access.2020.3013116]"
+        ],
+        "This mechanism is particularly destabilizing for resonant photonic components, which are inherently vulnerable to environmental temperature fluctuations and mechanical vibrations that can adversely impact their performance.": [
+          "[REF:doi:10.3390/photonics13030300]",
+          "[REF:doi:10.1117/12.3079802]"
+        ]
+      },
+      "patch_history": [
+        {
+          "gap_id": "G01",
+          "block_index": 2,
+          "applied": true
+        }
+      ],
+      "planned_claim_ids": [
+        "S06-P041",
+        "S06-P113",
+        "S06-P001",
+        "S06-P030"
+      ]
+    },
+    {
+      "block_index": 3,
+      "title": "The Electronic Control Energy Wall",
+      "block_type": "explanatory_body",
+      "goal": "Quantify the energy and latency overhead of controlling large-scale tunable elements and its impact on real-time AI applications.",
+      "prose": "Beyond the physical degradation of signals through loss and crosstalk, scalable photonic computing faces a third constraint: the electronic control overhead required to calibrate and maintain thousands of tunable elements. Electronic control overhead refers to the energy and latency costs associated with managing these components, which can ultimately exceed the computation energy budget itself. While photonic neural networks offer theoretical advantages in processing speed and low latency, practical implementation reveals that feedforward realization speed remains a critical bottleneck for real-time AI applications. Evidence suggests that although compatible learning protocols allow for effective training in complex space by unifying amplitude and phase corrections, the underlying computational demands for weight updates and nonlinear activations remain substantial. Furthermore, broader energy-aware optimization frameworks highlight that increased training complexity, often driven by bi-level and stochastic optimization strategies, adds significant computational overhead that limits broader applicability. Consequently, while the optical domain provides speed, the electronic interface required to sustain high-complexity architectures introduces a dominant energy factor that challenges the scalability of these systems, reinforcing the thesis that component performance alone cannot overcome system-level integration barriers.",
+      "planned_claim_handles": [
+        "C12_ENERGY_AWARE_OPTIMIZATION_FRAMEWORKS_NEURAL_NE",
+        "C02_FEEDFORWARD_REALIZATION_SPEED_CRITICAL_BOTTLEN"
+      ],
+      "claim_handles": [
+        "C12_ENERGY_AWARE_OPTIMIZATION_FRAMEWORKS_NEURAL_NE",
+        "C02_FEEDFORWARD_REALIZATION_SPEED_CRITICAL_BOTTLEN"
+      ],
+      "evidence_handles": [
+        "E30_ENERGY_AWARE_OPTIMIZATION_NEURAL_NETWORKS_SUST",
+        "E02_COMPATIBLE_LEARNING_DEEP_PHOTONIC_NEURAL_NETWO"
+      ],
+      "covered_claim_handles": [
+        "C12_ENERGY_AWARE_OPTIMIZATION_FRAMEWORKS_NEURAL_NE",
+        "C02_FEEDFORWARD_REALIZATION_SPEED_CRITICAL_BOTTLEN"
+      ],
+      "covered_claim_ids": [
+        "S06-P031",
+        "S06-P006"
+      ],
+      "markers": [
+        "[REF:0a63b5ab2378ac2c7e3f18f6dbfb9b824424edcf]",
+        "[REF:b765388f3cc18d6e5a0507522822def0e3503ec6]"
+      ],
+      "explanatory_handles": [
+        "X05_SOFTWARE_DEFINED_NETWORKING_CONTROL",
+        "X06_PHOTONICS_BREAKTHROUGHS_2025_PARALLE"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Electronic control overhead refers to the energy and latency costs associated with managing these components, which can ultimately exceed the computation energy budget itself.": [
+          "[REF:doi:10.1364/oe.26.010914]",
+          "[REF:doi:10.1109/jphot.2026.3695696]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S06-P031",
+        "S06-P006"
+      ]
+    },
+    {
+      "block_index": 4,
+      "title": "Fabrication Variations and Fidelity Limits",
+      "block_type": "explanatory_body",
+      "goal": "Detail how fabrication-induced variations introduce phase noise and limit the accuracy of matrix operations in coherent networks.",
+      "prose": "Beyond the energy costs of electronic control, the physical fidelity of photonic circuits is fundamentally limited by fabrication-induced variations (FPVs), which introduce optical phase noise that degrades the accuracy of matrix-vector multiplication in coherent nanophotonic neural networks. The sensitivity of individual Mach-Zehnder Interferometers (MZIs) to these variations depends critically on their nominal waveguide width and thickness, meaning that uncorrected manufacturing deviations can lead to faulty computations in fully connected layers. While on-chip accelerators utilize inverse-designed components to achieve ultra-compact configurations through topology-optimized scattering regions, their scalability remains constrained by the fidelity of the fabrication process itself. Recent characterization efforts demonstrate that optimizing MZI designs for specific variation maps, such as using etched ridge waveguides instead of strip waveguides, can significantly recover nominal accuracy under expected levels of width and thickness non-uniformity. However, this tolerance is not absolute; as the correlation length of variations shortens or the region size increases, the spatial diversity of errors imposes higher penalties on region-based tolerant designs. Consequently, even advanced inverse design workflows that enforce binarized fabrication constraints cannot fully decouple performance from the stochastic realities of manufacturing, reinforcing the chapter's thesis that scalability requires co-design strategies addressing both physical degradation mechanisms and control complexity.",
+      "planned_claim_handles": [
+        "C30_FABRICATION_INDUCED_VARIATIONS_FPVS_INTRODUCE",
+        "C26_CHIP_PHOTONIC_NEURAL_NETWORK_ACCELERATORS_UTIL"
+      ],
+      "claim_handles": [
+        "C30_FABRICATION_INDUCED_VARIATIONS_FPVS_INTRODUCE",
+        "C26_CHIP_PHOTONIC_NEURAL_NETWORK_ACCELERATORS_UTIL"
+      ],
+      "evidence_handles": [
+        "E114_CHARACTERIZATION_OPTIMIZATION_COHERENT_MZI_BAS",
+        "E94_INVERSE_DESIGNED_NANOPHOTONIC_NEURAL_NETWORK_A"
+      ],
+      "covered_claim_handles": [
+        "C30_FABRICATION_INDUCED_VARIATIONS_FPVS_INTRODUCE",
+        "C26_CHIP_PHOTONIC_NEURAL_NETWORK_ACCELERATORS_UTIL"
+      ],
+      "covered_claim_ids": [
+        "S06-P114",
+        "S06-P107"
+      ],
+      "markers": [
+        "[REF:955db7b00b8b503d46c2749d399075e11f40c61b]",
+        "[REF:c0a2dd7d6fabe134e59ca64fa09cfbb3552f90cb]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S06-P114",
+        "S06-P107"
+      ]
+    },
+    {
+      "block_index": 5,
+      "title": "Deep Learning for Inverse Design Complexity",
+      "block_type": "explanatory_body",
+      "goal": "Introduce deep learning-based inverse design as a method to manage the high-dimensional optimization landscape of nanophotonic geometries.",
+      "prose": "To address the fidelity limits imposed by fabrication variations, researchers have turned to inverse design, a computational approach that optimizes device geometry to achieve specific target optical properties rather than relying on intuitive or heuristic shapes. Deep learning-based inverse design methods accelerate this process by training neural networks to map desired optical responses directly to structural parameters, potentially reducing the engineering time required to scale photonic computing circuits compared to manual approaches. Once trained, these artificial intelligence models can generate optimized designs quickly, making them ideal for real-time applications and offering flexibility that conventional optimization algorithms lack. However, this efficiency comes with significant caveats; while deep learning can inverse design devices at a one-time computational cost, the performance of these devices cannot exceed the capabilities within the training dataset and can only mimic their performance. Furthermore, practical application requires managing high-dimensional complexity where problems are often under-constrained. When both physical and geometrical degrees of freedom are large and strongly coupled, the curse of dimensionality becomes significant, necessitating the inclusion of PDE-based constraints to provide a useful inductive bias that promotes physically consistent learning. For instance, due to constraints in existing nanofabrication techniques, structures with high-aspect-ratios or sharp corners generated by models can be difficult or impossible to realize. Therefore, effective methodologies must learn one-to-many mappings to provide a diverse set of designs, allowing researchers to select geometries with smoother shapes that are more amenable to fabrication while maintaining robustness against process variations. A critical limitation of current deep learning applications in nanophotonic inverse design is their restriction to low-dimensional inputs, such as spectra and diffraction efficiencies. While using these inputs ensures data volume remains manageable, it restricts the achievable functionalities of the designed devices. In contrast, higher-dimensional data, including field intensity profiles and vectorial field maps, carry significantly more information that could be leveraged to design complex functional devices like metalenses and holograms. The broader adoption of such data-rich approaches is currently hindered by difficulties in computation power and data storage, but overcoming these barriers is expected to enable a new generation of sophisticated nanophotonic devices. These boundaries highlight that while deep learning manages the optimization landscape, it introduces new challenges regarding computational expense for training, the need for additional optimization processes to surpass dataset limitations, and the current inability to fully exploit high-dimensional physical data, underscoring the necessity for more sophisticated design frameworks.",
+      "planned_claim_handles": [
+        "C06_DEEP_LEARNING_BASED_INVERSE_DESIGN_METHODS_ACC",
+        "C21_INVERSE_DESIGN_METHODOLOGIES_USING_DEEP_LEARNI"
+      ],
+      "claim_handles": [
+        "C06_DEEP_LEARNING_BASED_INVERSE_DESIGN_METHODS_ACC",
+        "C21_INVERSE_DESIGN_METHODOLOGIES_USING_DEEP_LEARNI"
+      ],
+      "evidence_handles": [
+        "E06_INVERSE_DESIGN_NANOPHOTONIC_DEVICES_ENABLED_OP",
+        "E69_BENCHMARKING_DEEP_LEARNING_BASED_MODELS_NANOPH",
+        "E03_INVERSE_DESIGN_NANOPHOTONICS_VIA_REPRESENTATIO",
+        "E72_INTELLIGENT_NANOPHOTONICS_MERGING_PHOTONICS_AR"
+      ],
+      "covered_claim_handles": [
+        "C06_DEEP_LEARNING_BASED_INVERSE_DESIGN_METHODS_ACC",
+        "C21_INVERSE_DESIGN_METHODOLOGIES_USING_DEEP_LEARNI",
+        "C03_DEGREES_FREEDOM_NANOPHOTONIC_INVERSE_DESIGN_PR"
+      ],
+      "covered_claim_ids": [
+        "S06-P010",
+        "S06-P074",
+        "S06-P007"
+      ],
+      "markers": [
+        "[REF:aed4e02073734bc74e53063c0b555f881cc3221d]",
+        "[REF:22583693b2e475539a86ea1680d5f148d67f6467]",
+        "[REF:1710ffd8f90365fdbef063f85605601e2c7fc9f1]",
+        "[REF:bb82053d4229357925b28ffe647377f56d93b06e]"
+      ],
+      "explanatory_handles": [
+        "X09_DEEP_LEARNING_ENABLED_RAPID_INVERSE",
+        "X07_INVERSE_DESIGN_DIFFRACTIVE_METASURFA",
+        "X10_DEEP_LEARNING_BASED_INVERSE_DESIGN_N",
+        "X08_DEEP_LEARNING_DRIVEN_FORWARD_INVERSE"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Deep learning-based inverse design methods accelerate this process by training neural networks to map desired optical responses directly to structural parameters, potentially reducing the engineering time required to scale photonic computing circuits compared to manual approaches.": [
+          "[REF:doi:10.1117/12.3092203]",
+          "[REF:doi:10.1088/2040-8986/ae709e]"
+        ],
+        "To address the fidelity limits imposed by fabrication variations, researchers have turned to inverse design, a computational approach that optimizes device geometry to achieve specific target optical properties rather than relying on intuitive or heuristic shapes.": [
+          "[REF:doi:10.48550/arxiv.2506.21748]",
+          "[REF:doi:10.1039/d4nr03081h]"
+        ]
+      },
+      "patch_history": [
+        {
+          "gap_id": "G02",
+          "block_index": 5,
+          "applied": true
+        },
+        {
+          "gap_id": "G03",
+          "block_index": 5,
+          "applied": true
+        }
+      ],
+      "planned_claim_ids": [
+        "S06-P010",
+        "S06-P074"
+      ]
+    },
+    {
+      "block_index": 6,
+      "title": "Physics-Informed and Hybrid Design Frameworks",
+      "block_type": "explanatory_body",
+      "goal": "Describe how PINNs and hybrid algorithms enforce physical constraints to improve design reliability and reduce simulation costs.",
+      "prose": "To address the reliability challenges introduced by pure data-driven approaches, Physics-Informed Neural Networks (PINNs) incorporate governing physical equations directly into the training objective using automatic differentiation. This method structurally enforces hard constraints, such as boundary conditions, ensuring that generated designs remain electromagnetically valid even when extrapolating beyond training data. Building on this concept, Physics-Informed Graph Neural Networks (PI-GNNs) further refine the process by representing photonic sensors as graphs where nodes correspond to specific components like rings and bus waveguides, allowing the model to propagate information across physically connected regions rather than treating geometric parameters independently. This structured representation reduces reliance on repeated full-wave simulations while capturing nonlinear geometry-spectrum relationships. However, because neural networks cannot generalize too far beyond their training datasets, hybrid algorithms combining deep learning with conventional optimization methods have emerged as a necessary evolution. In these frameworks, the neural network performs a rough global search to identify promising topological structures, which are then refined by iterative optimization algorithms like the adjoint variables method to achieve precise control over optical properties. By integrating these physics-aware and hybrid strategies, designers can mitigate the simulation costs and fidelity limits that threaten the scalability of large-scale photonic computing systems.",
+      "planned_claim_handles": [
+        "C07_PHYSICS_INFORMED_NEURAL_NETWORKS_PINNS_INCORPO",
+        "C13_PHYSICS_INFORMED_GRAPH_NEURAL_NETWORKS_PI_GNNS",
+        "C08_HYBRID_ALGORITHMS_COMBINING_DATA_DRIVEN_MACHIN"
+      ],
+      "claim_handles": [
+        "C07_PHYSICS_INFORMED_NEURAL_NETWORKS_PINNS_INCORPO",
+        "C13_PHYSICS_INFORMED_GRAPH_NEURAL_NETWORKS_PI_GNNS",
+        "C08_HYBRID_ALGORITHMS_COMBINING_DATA_DRIVEN_MACHIN"
+      ],
+      "evidence_handles": [
+        "E10_SPARC_NET_SPECTRAL_CAUSALITY_AWARE_HARD_CONSTR",
+        "E34_PHYSICS_INFORMED_GRAPH_NEURAL_NETWORK_INVERSE",
+        "E15_DEEPADJOINT_ALL_ONE_PHOTONIC_INVERSE_DESIGN_FR"
+      ],
+      "covered_claim_handles": [
+        "C07_PHYSICS_INFORMED_NEURAL_NETWORKS_PINNS_INCORPO",
+        "C13_PHYSICS_INFORMED_GRAPH_NEURAL_NETWORKS_PI_GNNS",
+        "C08_HYBRID_ALGORITHMS_COMBINING_DATA_DRIVEN_MACHIN"
+      ],
+      "covered_claim_ids": [
+        "S06-P014",
+        "S06-P033",
+        "S06-P016"
+      ],
+      "markers": [
+        "[REF:cc39d5405a933620426d86298fa8fe4cd51915c5]",
+        "[REF:22a2efbf652104296dc862cc777459a7beeb53f2]",
+        "[REF:0c04bf631766f465f0b30dcd07a342ff014ed8f3]"
+      ],
+      "explanatory_handles": [
+        "X11_FINITE_BASIS_PHYSICS_INFORMED_NEURAL"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "To address the reliability challenges introduced by pure data-driven approaches, Physics-Informed Neural Networks (PINNs) incorporate governing physical equations directly into the training objective using automatic differentiation.": [
+          "[REF:doi:10.1007/s10444-023-10065-9]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S06-P014",
+        "S06-P033",
+        "S06-P016"
+      ]
+    },
+    {
+      "block_index": 7,
+      "title": "Computational Overhead and Global Design Gaps",
+      "block_type": "explanatory_body",
+      "goal": "Analyze the computational cost of inverse design processes and the current limitations in generalizing across multiple photonic structure classes.",
+      "prose": "While physics-informed frameworks offer a path to reliable design, the computational overhead of inverse design processes remains a critical bottleneck that can offset gains from component miniaturization. These methodologies, which often rely on neural networks or gradient-based optimization, face significant scalability challenges due to the complexity of the objective function landscape and the prohibitive cost of generating training datasets through iterative simulations. For instance, surrogate models intended to replace computationally intensive simulations have shown limited utility when training datasets are insufficient relative to the parameter space, preventing the identification of true global minima and restricting efficacy to densely sampled regions. Furthermore, existing image-based design studies highlight a gap in global capabilities, as they are typically confined to specific structure classes with fixed material properties and two-dimensional topologies rather than offering a unified approach across multiple photonic categories. This limitation underscores that current methods often require prior knowledge of the optimal nanostructure category, a reliance on human intuition that can fail when faced with competing design goals. Consequently, until inverse design can efficiently navigate complex, multi-class landscapes without exhaustive simulation costs, the algorithmic burden will continue to constrain the realization of large-scale photonic computing systems.",
+      "planned_claim_handles": [
+        "C28_COMPUTATIONAL_OVERHEAD_ASSOCIATED_INVERSE_DESI",
+        "C04_EXISTING_IMAGE_BASED_PHOTONICS_DESIGN_STUDIES",
+        "C25_INVERSE_DESIGN_METHODOLOGIES_PHOTONIC_COMPUTIN"
+      ],
+      "claim_handles": [
+        "C28_COMPUTATIONAL_OVERHEAD_ASSOCIATED_INVERSE_DESI",
+        "C04_EXISTING_IMAGE_BASED_PHOTONICS_DESIGN_STUDIES",
+        "C25_INVERSE_DESIGN_METHODOLOGIES_PHOTONIC_COMPUTIN"
+      ],
+      "evidence_handles": [
+        "E104_NEURAL_NETWORK_INVERSE_DESIGN_NANOPHOTONIC_SCI",
+        "E04_GLOBAL_INVERSE_DESIGN_ACROSS_MULTIPLE_PHOTONIC",
+        "E87_NEURAL_NETWORK_INVERSE_DESIGN_NANOPHOTONIC_SCI"
+      ],
+      "covered_claim_handles": [
+        "C28_COMPUTATIONAL_OVERHEAD_ASSOCIATED_INVERSE_DESI",
+        "C04_EXISTING_IMAGE_BASED_PHOTONICS_DESIGN_STUDIES",
+        "C25_INVERSE_DESIGN_METHODOLOGIES_PHOTONIC_COMPUTIN"
+      ],
+      "covered_claim_ids": [
+        "S06-P111",
+        "S06-P008",
+        "S06-P105"
+      ],
+      "markers": [
+        "[REF:df8e9aae69294b110610041b9fc591c9f3d171e7]",
+        "[REF:1788e07c1c3a24bfbd13db23c61fadb8a31227ba]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S06-P111",
+        "S06-P008",
+        "S06-P105"
+      ]
+    },
+    {
+      "block_index": 8,
+      "title": "Architectural Pathways: Integration and Parallelism",
+      "block_type": "scientific_consequence",
+      "goal": "Synthesize emerging solutions like heterogeneous integration and diffractive parallelism that attempt to circumvent scaling bottlenecks.",
+      "prose": "To circumvent the scaling bottlenecks identified in previous sections, emerging architectural pathways leverage heterogeneous integration and diffractive parallelism to decouple performance from component density limits. Heterogeneous integration addresses material constraints by bonding thin-film lithium niobate (TFLN) onto active silicon photonics via back-end-of-line processes, creating a single-chip platform that combines the low loss and superior modulation efficiency of TFLN with the mature CMOS compatibility of silicon circuits. For instance, heterogeneous back-end-of-line integration of thin-film lithium niobate on active silicon photonics has been demonstrated to create single-chip optical transceivers that combine the low loss and superior modulation efficiency of TFLN with the mature CMOS compatibility of silicon circuits. This approach facilitates the integration of high-speed germanium photodetectors with high-performance modulators, paving the way for complex system-level functionalities like coherent multiplexing essential for scalable photonic computing. Complementing this material advancement, diffractive architectures offer a distinct route to scalability through intrinsic parallelism. Photonic crystal diffractive optical neural networks (PhC-DONNs), for instance, utilize multi-wavelength inputs to perform on-chip parallel classification, effectively leveraging spectral multiplexing to reduce the electronic control overhead associated with tuning thousands of individual elements. Research into diffractive optical neural networks highlights pathways toward intelligent and scalable photonic computing by leveraging spectral multiplexing to reduce electronic control overhead. While free-space and on-chip diffractive optical neural networks (DONNs) promise ultrahigh throughput and passive low-power operation, their large-scale deployment faces persistent challenges related to complex optical path management and strict fabrication tolerances. Together, these strategies illustrate that overcoming the compounding effects of loss and control complexity requires moving beyond isolated component optimization toward holistic architectural innovations.",
+      "planned_claim_handles": [
+        "C09_HETEROGENEOUS_INTEGRATION_THIN_FILM_LITHIUM_NI",
+        "C05_PHOTONIC_CRYSTAL_DIFFRACTIVE_OPTICAL_NEURAL_NE",
+        "C16_OPTICAL_NEURAL_NETWORKS_BASED_DIFFRACTIVE_ARCH"
+      ],
+      "claim_handles": [
+        "C09_HETEROGENEOUS_INTEGRATION_THIN_FILM_LITHIUM_NI",
+        "C05_PHOTONIC_CRYSTAL_DIFFRACTIVE_OPTICAL_NEURAL_NE",
+        "C16_OPTICAL_NEURAL_NETWORKS_BASED_DIFFRACTIVE_ARCH"
+      ],
+      "evidence_handles": [
+        "E17_HETEROGENEOUS_BACK_END_LINE_INTEGRATION_THIN_F",
+        "E05_MULTI_WAVELENGTH_DIFFRACTIVE_OPTICAL_NEURAL_NE",
+        "E43_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_PATHWAYS_T"
+      ],
+      "covered_claim_handles": [
+        "C09_HETEROGENEOUS_INTEGRATION_THIN_FILM_LITHIUM_NI",
+        "C05_PHOTONIC_CRYSTAL_DIFFRACTIVE_OPTICAL_NEURAL_NE",
+        "C16_OPTICAL_NEURAL_NETWORKS_BASED_DIFFRACTIVE_ARCH"
+      ],
+      "covered_claim_ids": [
+        "S06-P017",
+        "S06-P009",
+        "S06-P057"
+      ],
+      "markers": [
+        "[REF:9b444e84d20ae6e3d62d2d4df30268b5a53baad2]",
+        "[REF:3ba89be3519e5be4bb45c0cbc483536e1db8bb63]",
+        "[REF:18736e817b036394ff6925eefbc4305014dcde77]"
+      ],
+      "explanatory_handles": [
+        "A01",
+        "A02"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "For instance, heterogeneous back-end-of-line integration of thin-film lithium niobate on active silicon photonics has been demonstrated to create single-chip optical transceivers that combine the low loss and superior modulation efficiency of TFLN with the mature CMOS compatibility of silicon circuits.": [
+          "[REF:9b444e84d20ae6e3d62d2d4df30268b5a53baad2]"
+        ],
+        "Research into diffractive optical neural networks highlights pathways toward intelligent and scalable photonic computing by leveraging spectral multiplexing to reduce electronic control overhead.": [
+          "[REF:doi:10.1002/nap2.70098]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S06-P017",
+        "S06-P009",
+        "S06-P057"
+      ]
+    },
+    {
+      "block_index": 9,
+      "title": "Synthesis: The Case for Co-Design",
+      "block_type": "scientific_consequence",
+      "goal": "Conclude that overcoming these compounding bottlenecks requires co-design across photonic, electronic, and algorithmic domains.",
+      "prose": "Building on the architectural pathways of heterogeneous integration and diffractive parallelism, the path forward necessitates a holistic co-design strategy that unifies photonic hardware with algorithmic training frameworks. Photonic neural networks (PNNs) are increasingly prioritized over analog electronic alternatives because they unlock unique capabilities in deep learning and neuromorphic engineering, leveraging high bandwidth and parallel processing to address scalability limits. These systems show particular promise in demanding domains such as medical diagnostics, image recognition, and autonomous systems, where swift, precise analysis drives the need for scalable hardware implementations. To address the sensitivity of analog optical signals to device noise and the inability of current systems to handle data uncertainty in critical applications like autonomous driving and medical diagnostics, a photonic Bayesian neural network architecture has been proposed. This approach leverages device noise through photonic-noise-based random number generators to enhance robustness and enable uncertainty-aware computing. Specifically, diffractive optical neural networks exploit the high-dimensional degrees of freedom of light and multi-cascade optical interferometry to perform fast, parallel computation, establishing a robust physical basis for next-generation processing. For instance, the Only-train-electrical-to-optical-conversion (OTEOC) approach demonstrates a simple diffractive neural network architecture that leverages optical readout to streamline the processing pipeline. However, realizing this potential requires overcoming significant hurdles, including the development of efficient training algorithms tailored to complex-valued coherent wave dynamics and the mitigation of signal degradation from loss and noise. Consequently, achieving practical large-scale photonic computing depends not merely on optimizing individual components, but on synchronizing advances in fabrication, control electronics, and learning protocols to surmount these compounding bottlenecks.",
+      "planned_claim_handles": [
+        "C31_PHOTONIC_NEURAL_NETWORKS_PNNS_PRIORITIZED_OVER",
+        "C19_PHOTONIC_NEURAL_NETWORKS_SHOW_PROMISE_DOMAINS",
+        "C20_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_LEVERAGE_H"
+      ],
+      "claim_handles": [
+        "C31_PHOTONIC_NEURAL_NETWORKS_PNNS_PRIORITIZED_OVER",
+        "C19_PHOTONIC_NEURAL_NETWORKS_SHOW_PROMISE_DOMAINS",
+        "C20_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_LEVERAGE_H"
+      ],
+      "evidence_handles": [
+        "E118_EXPLORING_TYPES_PHOTONIC_NEURAL_NETWORKS_IMAGI",
+        "E59_EXPLORING_TYPES_PHOTONIC_NEURAL_NETWORKS_IMAGI",
+        "E64_COMPATIBLE_LEARNING_DEEP_PHOTONIC_NEURAL_NETWO"
+      ],
+      "covered_claim_handles": [
+        "C31_PHOTONIC_NEURAL_NETWORKS_PNNS_PRIORITIZED_OVER",
+        "C19_PHOTONIC_NEURAL_NETWORKS_SHOW_PROMISE_DOMAINS",
+        "C20_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_LEVERAGE_H"
+      ],
+      "covered_claim_ids": [
+        "S06-P121",
+        "S06-P072",
+        "S06-P073"
+      ],
+      "markers": [
+        "[REF:77474cdcf483b25f73dacf20deb295cd1c2945b7]",
+        "[REF:b765388f3cc18d6e5a0507522822def0e3503ec6]"
+      ],
+      "explanatory_handles": [
+        "A03",
+        "A04"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "To address the sensitivity of analog optical signals to device noise and the inability of current systems to handle data uncertainty in critical applications like autonomous driving and medical diagnostics, a photonic Bayesian neural network architecture has been proposed. This approach leverages device noise through photonic-noise-based random number generators to enhance robustness and enable uncertainty-aware computing.": [
+          "[REF:doi:10.1002/advs.202500525]"
+        ],
+        "For instance, the Only-train-electrical-to-optical-conversion (OTEOC) approach demonstrates a simple diffractive neural network architecture that leverages optical readout to streamline the processing pipeline.": [
+          "[REF:doi:10.1364/oe.462370]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S06-P121",
+        "S06-P072",
+        "S06-P073"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "schema_version": "optomind.staged_article_completion.v1",
+  "stage": "conclusion",
+  "status": "completed",
+  "fingerprint": "7b13962459dbfd965cd8636dd5d9eddf922e57097616cf34802b70cb27c6e815",
+  "input_fingerprint": "bd0556f1cf0316b621182f70d49f77bc67cda701c5e3710d6fc38478e33f2367",
+  "artifact_path": "<local-path>",
+  "approval_required": false,
+  "payload": {
+    "workplan": {
+      "derived_from": [
+        "S01_Device_Physics_and_Material_Platforms",
+        "S02_Programmable_Photonic_Circuit_Architectures",
+        "S03_Photonic_Matrix_Multiplication_Engines",
+        "S06_Scalability_Bottlenecks",
+        "S07_Electronic_Photonic_Co_Design_Methodologies",
+        "S04_Photonic_AI_Acceleration",
+        "S05_Optical_Interconnect_Fabrics",
+        "S08_State_of_Scalable_Photonic_Computing"
+      ],
+      "outline": [
+        "Direct answer to the central question: Scalable photonic computing is viable not as a universal replacement for electronics, but as a specialized accelerator for low-precision inference and high-bandwidth interconnects, contingent on hybrid integration and co-design.",
+        "Synthesis of key limitations: The fundamental trade-offs between material properties (speed/loss) and fabrication ecosystems, compounded by thermal crosstalk, cascaded insertion loss, and the absence of native nonlinearity.",
+        "Forward outlook: The necessity of shifting from component-level optimization to system-level electronic-photonic co-design, standardized benchmarking, and the maturation of heterogeneous integration platforms."
+      ],
+      "scope_boundaries": [
+        "Must not introduce new material platforms or architectural primitives not discussed in the body sections.",
+        "Must not claim that photonic computing is superior to electronic computing for general-purpose training or high-precision arithmetic.",
+        "Must not propose specific numerical performance targets (e.g., exact FLOPS/Watt) that were not explicitly established in the benchmarking discussions.",
+        "Must not suggest that current inverse design methods have fully solved the manufacturability or generalization gaps identified in the text."
+      ]
+    },
+    "draft": {
+      "text": "The evolution of scalable photonic computing, as synthesized from the preceding analysis of device physics, architectural primitives, and system-level integration, leads to a definitive conclusion: the field has matured beyond the search for a singular \"silver bullet\" material or device. Instead, the path to practical deployment is defined by a strategic convergence of heterogeneous material platforms and rigorous electronic-photonic co-design. The central question of whether photonic systems can scale to meet the demands of next-generation computing is answered affirmatively, but with critical caveats regarding their operational domain. Photonic computing does not appear poised to universally replace electronic processors for general-purpose logic or high-precision training. Rather, its viability is established within a specialized envelope characterized by high-throughput, low-precision inference and ultra-high-bandwidth data movement, where the inherent parallelism and energy efficiency of light offer distinct advantages over charge-based electronics.\n\nThis conclusion rests on the fundamental trade-offs elucidated throughout the review. The dichotomy between silicon photonics, with its CMOS compatibility but weak electro-optic response, and thin-film lithium niobate, offering superior modulation efficiency at the cost of integration density, necessitates hybrid integration strategies. The body of evidence suggests that no single material platform currently satisfies all requirements for scale, speed, and energy efficiency simultaneously. Consequently, heterogeneous back-end-of-line integration emerges as a critical enabler, allowing disparate materials to be combined on a single substrate to leverage their respective strengths. However, this physical convergence is insufficient without addressing the systemic bottlenecks that arise at scale. The review identifies thermal crosstalk, cascaded insertion loss, and fabrication-induced variations as compounding barriers that degrade signal fidelity in dense arrays. These physical limitations are not merely engineering hurdles to be overcome by better fabrication; they represent fundamental boundary conditions that constrain the achievable circuit depth and control complexity.\n\nFurthermore, the absence of native nonlinearity in passive photonic media imposes a structural limit on algorithmic applicability. While photonic matrix multiplication engines excel at linear algebra operations, the reliance on hybrid electronic mechanisms for activation functions and weight updates introduces latency and energy overheads that can erode theoretical performance gains. This reality reinforces the finding that purely photonic solutions are currently ill-suited for dynamic training workloads requiring frequent gradient computations. Instead, the most promising applications lie in static or slowly varying inference tasks and optical interconnect fabrics, where the rigidity of optical hardware aligns with the computational requirements. The success of architectures like OptoLink in alleviating memory bandwidth bottlenecks for Fully Homomorphic Encryption demonstrates that optical interconnects represent the most immediately deployable application of this technology, offering orders-of-magnitude improvements in bandwidth density compared to electrical links.\n\nLooking forward, the trajectory of scalable photonic computing depends less on further component miniaturization and more on the adoption of holistic co-design methodologies. The traditional approach of optimizing devices in isolation is increasingly inadequate for navigating the complex, non-convex design spaces of wafer-scale systems. The integration of physics-informed machine learning and inverse design tools offers a pathway to automate the mapping of abstract algorithmic objectives to manufacturable device geometries, effectively treating hardware constraints as integral parts of the optimization loop. Yet, the realization of this potential is currently hindered by a fragmentation in evaluation methodologies. The lack of standardized benchmarks for energy-per-operation and computational fidelity across diverse photonic modalities impedes fair comparison with electronic alternatives and slows community convergence on best practices.\n\nIn summary, scalable photonic computing stands at an inflection point. The foundational physics and architectural primitives are well-understood, and the potential for transformative impact in specific domains is clear. However, bridging the gap between laboratory demonstrations and robust, system-level deployment requires a paradigm shift. Future progress will likely be driven not by isolated breakthroughs in device performance, but by the synergistic integration of advanced material platforms, intelligent design algorithms, and rigorous system-level validation. By embracing these co-design strategies and addressing the meta-challenges of benchmarking and standardization, the field can transition from promising point solutions to the mature, deployable infrastructure envisioned for the post-Moore's law era."
+    },
+    "status": "drafted"
+  },
+  "provenance": {
+    "run_fingerprint": "a30c6ea9fd41f8f21e6ff7879c0d17d557462d02706df923248d90920f35fbcf",
+    "stage_order_position": "2",
+    "usage_recorded": "True"
+  },
+  "usage": {
+    "module": "StagedConclusionAuthor",
+    "agent_name": "StagedConclusionAuthor",
+    "model_tier": "c_model",
+    "model_name": "qwen3.5-plus",
+    "task_type": "research_chat",
+    "mock_llm": false,
+    "estimated_input_tokens": 36443,
+    "estimated_output_tokens": 1743,
+    "input_tokens": 33155,
+    "output_tokens": 1911,
+    "token_usage_source": "provider_response",
+    "provider_usage": {
+      "prompt_tokens": 33155,
+      "completion_tokens": 1911,
+      "total_tokens": 35066,
+      "completion_tokens_details": {
+        "reasoning_tokens": 629,
+        "text_tokens": 1911
+      },
+      "prompt_tokens_details": {
+        "text_tokens": 33155
+      }
+    },
+    "success": true,
+    "failure": false,
+    "error_type": "",
+    "fallback_used": false,
+    "api_key_source": "<local-path><private-credential>.txt#1",
+    "api_key_masked": "****",
+    "api_key_candidate_count": 4,
+    "api_key_rotation_count": 0,
+    "key_failures": [],
+    "model_fallback_used": false,
+    "fallback_chain": [],
+    "attempted_models": [
+      "qwen3.5-plus"
+    ],
+    "selected_model_index": 0,
+    "partial_stream": false,
+    "stream_interrupted_error": "",
+    "request_attempt_count": 1,
+    "retry_count": 0,
+    "repair_calls": 0,
+    "repair_used": false
+  },
+  "error": null,
+  "created_at": "2026-08-28T17:58:55.104378+00:00",
+  "updated_at": "2026-08-28T17:58:55.104378+00:00"
+}

@@ -1,0 +1,44 @@
+You are verifying a proposed logical edge between two scientific claims in a review paper.
+
+The user message contains a JSON object with three keys:
+  - "claim_a": the source claim (same fields as in the proposer)
+  - "claim_b": the target claim (same fields as in the proposer)
+  - "proposer_output": the proposer judgment containing has_edge, relation_type, direction, confidence, reason
+
+Each claim has: claim_id, statement, primary_evidence_type, secondary_evidence_types,
+evidence_binding_status, evidence_binding_confidence, evidence_binding_reason,
+claim_state, evidence_requirement, closure_disposition, readiness_action,
+evidence_spans, evidence_component_map, missing_evidence_components,
+section_title, section_argument_role, optional review_mentor_advice,
+supporting_text_previews, supporting_visual_previews, source_doi_prefixes.
+
+Your task: confirm or reject the proposed edge, and optionally correct the relation_type.
+
+Rules:
+  - Confirm only if the logical link is specific and satisfies the proposed relation definition, not merely thematic overlap. A supports edge may be corroborating rather than necessary; a depends_on edge must be necessary.
+  - Reject any edge whose rationale introduces a physical property, performance metric, material attribute, or causal bridge that is absent from the verified claim statement and its evidence_spans/evidence_component_map.
+  - The reason field may only paraphrase the supplied claims and verified anchors. Do not add equations, thresholds, layer counts, wavelengths, angles, performance values, or universal qualifiers absent from the input.
+  - For `supports`, the source claim must have the relevant supporting component grounded in evidence_component_map or evidence_spans.
+  - For `contrasts_with`, both claims must make incompatible assertions about the same design variable, measurement, mechanism, or constraint. Reject broad thematic contrasts or assumed bridges.
+  - Judge logical architecture separately from current evidence completeness. Planned, partially grounded, and explicit open-question claims may form provisional structural edges.
+  - Treat `partial` binding, open-question state, and `missing_evidence_components` as confidence reducers. Reject only when the proposed logical bridge itself depends on a missing component or invented fact.
+  - Do not reject an otherwise explicit relationship merely because one endpoint is unverified or awaits M3 retrieval. Confirm it with low or medium confidence and set depends_on_missing_component=false when the relationship is visible in the claim statements without relying on an unsupported component.
+  - `supports` requires grounded source evidence. Other explicit structural relations may remain provisional and should receive at most medium confidence when either endpoint needs evidence follow-up.
+  - Treat review_mentor_advice as a review-writing prior, not as evidence.
+  - If confirmed, you may correct the relation_type if the proposer mislabeled it.
+  - Use confidence "high" only if the link is explicit in the claim statements or evidence previews.
+  - Use confidence "medium" if the link is reasonable but inferred from context.
+  - Use confidence "low" if you are unsure but still confirm.
+  - If you reject, set confirmed to false regardless of proposer confidence.
+
+Relation types:
+  depends_on, supports, motivates, extends, constrains, limits, applies_to, qualifies, contrasts_with
+
+Return JSON only. No markdown, no explanation outside JSON:
+{
+  "confirmed": true or false,
+  "relation_type": "depends_on|supports|motivates|extends|constrains|limits|applies_to|qualifies|contrasts_with",
+  "confidence": "high|medium|low",
+  "depends_on_missing_component": true or false,
+  "reason": "one sentence explaining your verification decision"
+}

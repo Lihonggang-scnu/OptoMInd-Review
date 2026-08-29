@@ -1,0 +1,113 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S02",
+  "audit": {
+    "verdict": "gaps_found",
+    "gaps": [
+      {
+        "gap_id": "G01",
+        "old_draft_snippet": "The first discussed optimization methods represent the oldest and perhaps most intuitive applications of inverse design, where binary representations and re-parameterization of design structures in topology optimization iterate successive figure-of-merit minimization until reaching an optimal solution.",
+        "scientific_content": "The old draft explicitly identifies 'binary representations' and 're-parameterization' as specific mechanisms within topology optimization/heuristic methods for minimizing figure-of-merit. The new blocks discuss topology optimization generally but omit this specific historical/technical detail about binary representation and re-parameterization as a foundational step.",
+        "claim_handles": [
+          "C01_INVERSE_DESIGN_METHODS_NANOPHOTONICS_HAVE_EVOL"
+        ],
+        "evidence_handles": [
+          "E02_ADVANCING_STATISTICAL_LEARNING_ARTIFICIAL_INTE"
+        ],
+        "affected_block_indices": [
+          1
+        ]
+      },
+      {
+        "gap_id": "G02",
+        "old_draft_snippet": "Phase modulation designs often rely on precomputed phase libraries or lookup tables that map required phase shifts to specific nanostructure geometries, serving as a foundational but limited encoding strategy",
+        "scientific_content": "The old draft highlights 'precomputed phase libraries' or 'lookup tables' as a specific, albeit limited, encoding strategy used in phase modulation designs. This specific mechanism is not mentioned in the new blocks, which focus more on deep learning surrogates and adjoint methods without referencing the traditional lookup table approach.",
+        "claim_handles": [],
+        "evidence_handles": [],
+        "affected_block_indices": [
+          4
+        ]
+      },
+      {
+        "gap_id": "G03",
+        "old_draft_snippet": "However, heuristic optimization methods often generate target phase profiles or transfer matrices that are not physically realizable, creating a mismatch when idealized designs are projected onto feasible metasurface structures",
+        "scientific_content": "The old draft specifies that heuristic methods generate 'target phase profiles or transfer matrices' that are not physically realizable. Block 8 mentions 'target phase profiles or transfer matrices' but attributes this primarily to heuristic methods in the context of DONN training (SP2RINT). However, the old draft presents this as a general limitation of heuristic optimization methods broadly, whereas the new text frames it specifically around the SP2RINT/DONN context. The broader claim that heuristic methods *generally* produce non-realizable phase profiles/transfer matrices is slightly obscured by the specific application context in Block 8. More importantly, the old draft links this to 'smoothness regularization' being inadequate. Block 8 discusses smoothness regularization inadequacy but links it to DONN expressivity. The gap is subtle: the old draft establishes the 'heuristic -> non-realizable profile' link as a general principle, while the new draft ties it to specific neural network training issues. A clearer statement of the general heuristic limitation is lost.",
+        "claim_handles": [
+          "C21_HEURISTIC_OPTIMIZATION_METHODS_FREQUENTLY_GENE"
+        ],
+        "evidence_handles": [
+          "E45_SP2RINT_SPATIALLY_DECOUPLED_PHYSICS_INSPIRED_P"
+        ],
+        "affected_block_indices": [
+          8
+        ]
+      },
+      {
+        "gap_id": "G04",
+        "old_draft_snippet": "Fast direct solvers enable full-wave inverse design of cm-scale cylindrical metasurfaces, allowing computational optimization of large-area holographic elements that were previously intractable due to simulation cost",
+        "scientific_content": "The old draft explicitly mentions 'cm-scale cylindrical metasurfaces' as a specific application enabled by fast direct solvers. Block 7 discusses high degrees of freedom and applications like image relay and antennas, but does not mention the specific scale (cm-scale) or geometry (cylindrical) enabled by fast direct solvers. This is a specific quantified result/application lost.",
+        "claim_handles": [
+          "C09_FAST_DIRECT_SOLVERS_ENABLE_FULL_WAVE_INVERSE_D"
+        ],
+        "evidence_handles": [
+          "E16_LARGE_SCALE_PHOTONIC_INVERSE_DESIGN_COMPUTATIO"
+        ],
+        "affected_block_indices": [
+          7
+        ]
+      }
+    ],
+    "notes": "Identified gaps related to specific technical mechanisms (binary representations, lookup tables), specific application scales/geometries (cm-scale cylindrical), and the general framing of heuristic limitations vs. specific neural network contexts.",
+    "warnings": []
+  },
+  "patch_records": [
+    {
+      "gap_id": "G01",
+      "block_index": 1,
+      "applied": true,
+      "used_evidence_handles": [
+        "E01_INVERSE_DESIGN_ELECTROMAGNETIC_METAMATERIALS_I",
+        "E46_COMPUTATIONAL_INVERSE_DESIGN_CASCADED_SYSTEMS",
+        "E72_INVERSE_DESIGN_METASURFACE_SPECTRAL_IMAGING",
+        "E02_ADVANCING_STATISTICAL_LEARNING_ARTIFICIAL_INTE"
+      ],
+      "gap_evidence_handles": [
+        "E02_ADVANCING_STATISTICAL_LEARNING_ARTIFICIAL_INTE"
+      ]
+    },
+    {
+      "gap_id": "G02",
+      "block_index": null,
+      "applied": false,
+      "reason": "no_gap_specific_evidence_handles",
+      "detail": "Gap has no valid claim-aligned evidence handle; record-only, no patch applied."
+    },
+    {
+      "gap_id": "G03",
+      "block_index": 8,
+      "applied": true,
+      "used_evidence_handles": [
+        "E22_PHASE_CHANGE_NONLOCAL_METASURFACES_DYNAMIC_WAV",
+        "E45_SP2RINT_SPATIALLY_DECOUPLED_PHYSICS_INSPIRED_P",
+        "E44_PHYSICS_INFORMED_MACHINE_LEARNING_INVERSE_DESI"
+      ],
+      "gap_evidence_handles": [
+        "E45_SP2RINT_SPATIALLY_DECOUPLED_PHYSICS_INSPIRED_P"
+      ]
+    },
+    {
+      "gap_id": "G04",
+      "block_index": 7,
+      "applied": true,
+      "used_evidence_handles": [
+        "E12_OPTICAL_MULTILAYER_THIN_FILM_STRUCTURE_INVERSE",
+        "E37_INVERSE_DESIGN_METASURFACE_BASED_OFF_AXIS_IMAG",
+        "E68_INVERSE_DESIGN_REFLECTIVE_METASURFACE_ANTENNAS",
+        "E16_LARGE_SCALE_PHOTONIC_INVERSE_DESIGN_COMPUTATIO"
+      ],
+      "gap_evidence_handles": [
+        "E16_LARGE_SCALE_PHOTONIC_INVERSE_DESIGN_COMPUTATIO"
+      ]
+    }
+  ]
+}

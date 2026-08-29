@@ -1,0 +1,383 @@
+{
+  "blocks": [
+    {
+      "block_index": 1,
+      "title": "The Computational Advantage Debate",
+      "block_type": "introduction_viewpoint",
+      "goal": "Frame the central controversy: do ODNNs offer unique computational benefits or just complex optics?",
+      "prose": "The central controversy in diffractive neural network research concerns whether these systems offer a genuine computational advantage or merely represent complex engineering demonstrations of known optical phenomena. Proponents argue that analog optical computing provides inherent parallelism, energy efficiency, and low latency, making it particularly capable of handling massive computational tasks like object classification and machine vision where digital systems face bottlenecks. This perspective is supported by frameworks such as Diffractive Deep Neural Networks (D2NN), which utilize deep learning algorithms to engineer light-matter interactions across passive diffractive surfaces, enabling task-specific inference at the speed of light without continuous electronic power consumption. Furthermore, integrated chip-based approaches aim to overcome the quadratic scaling of footprint and energy consumption seen in traditional silicon photonic circuits by leveraging ultra-high bandwidth and high-density integration. However, critics contend that these theoretical gains are often offset by the intricate, time-consuming design processes and substantial fabrication complexities required to achieve precise modulation capabilities. The field currently lacks consensus on this trade-off, as reported performance metrics frequently depend on specific benchmark datasets and simulation conditions rather than fundamental physical limits, with some analyses suggesting that the absence of nonlinear activation functions in purely optical layers can hinder optimization when paired with powerful electronic back-ends.",
+      "planned_claim_handles": [
+        "C09_DEBATE_OVER_WHETHER_DIFFRACTIVE_DEEP_NEURAL_NE",
+        "C12_COMPUTATIONAL_ADVANTAGE_DIFFRACTIVE_NEURAL_NET",
+        "C15_COMPUTATIONAL_ADVANTAGE_DIFFRACTIVE_NEURAL_NET",
+        "C29_FIELD_LACKS_CONSENSUS_WHETHER_DIFFRACTIVE_NEUR"
+      ],
+      "claim_handles": [
+        "C09_DEBATE_OVER_WHETHER_DIFFRACTIVE_DEEP_NEURAL_NE",
+        "C12_COMPUTATIONAL_ADVANTAGE_DIFFRACTIVE_NEURAL_NET",
+        "C15_COMPUTATIONAL_ADVANTAGE_DIFFRACTIVE_NEURAL_NET",
+        "C29_FIELD_LACKS_CONSENSUS_WHETHER_DIFFRACTIVE_NEUR"
+      ],
+      "evidence_handles": [
+        "E22_METASURFACE_BASED_IMAGE_CLASSIFICATION_USING_D",
+        "E36_DIFFRACTIVE_INTERCONNECTS_ALL_OPTICAL_PERMUTAT",
+        "E48_SPACE_EFFICIENT_OPTICAL_COMPUTING_INTEGRATED_C",
+        "E122_ANALYSIS_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_T"
+      ],
+      "covered_claim_handles": [
+        "C09_DEBATE_OVER_WHETHER_DIFFRACTIVE_DEEP_NEURAL_NE",
+        "C12_COMPUTATIONAL_ADVANTAGE_DIFFRACTIVE_NEURAL_NET",
+        "C15_COMPUTATIONAL_ADVANTAGE_DIFFRACTIVE_NEURAL_NET",
+        "C29_FIELD_LACKS_CONSENSUS_WHETHER_DIFFRACTIVE_NEUR"
+      ],
+      "covered_claim_ids": [
+        "S06-P033",
+        "S06-P042",
+        "S06-P057",
+        "S06-P110"
+      ],
+      "markers": [
+        "[REF:614a70af75ba590cc98dfc4c8aeec02322b5906f]",
+        "[REF:7e610be39d945a2ac2ad1afe66fefe66915511f0]",
+        "[REF:585c02f3ea677e72535f4ea2af006230e5892445]",
+        "[REF:doi:10.1109/jstqe.2019.2921376]"
+      ],
+      "explanatory_handles": [
+        "X01_TUNABLE_PHOTOINDUCED_LIQUID_CRYSTAL"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "This perspective is supported by frameworks such as Diffractive Deep Neural Networks (D2NN), which utilize deep learning algorithms to engineer light-matter interactions across passive diffractive surfaces, enabling task-specific inference at the speed of light without continuous electronic power consumption.": [
+          "[REF:doi:10.1021/acsphotonics.4c01284.s001]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S06-P033",
+        "S06-P042",
+        "S06-P057",
+        "S06-P110"
+      ]
+    },
+    {
+      "block_index": 2,
+      "title": "The Simulation-Reality Performance Gap",
+      "block_type": "explanatory_body",
+      "goal": "Detail how idealized models (scalar diffraction, perfect alignment) inflate performance claims compared to physical prototypes.",
+      "prose": "Building on the debate regarding computational advantages, a critical barrier to validating these claims is the simulation-to-reality gap, defined as the discrepancy between performance predicted by idealized scalar diffraction models and actual hardware results due to fabrication tolerances and material non-idealities. While numerical simulations using methods like the Transfer Matrix Method allow for straightforward prediction of optical responses, the inverse design process often relies on assumptions that do not hold in physical prototypes. Evidence from on-chip implementations indicates that this gap arises specifically from errors introduced during the fabrication process, necessitating algorithmic compensation strategies such as phase and power correction to restore functionality. Furthermore, standard training protocols that assume perfect layer alignment fail to account for the mechanical realities of assembly; however, introducing random misalignment variables during the training phase, a technique termed \"vaccination,\" can significantly improve error tolerance margins against severe layer-to-layer displacements. The reliance on linear materials in many experimental demonstrations also introduces optical losses that must be carefully managed to maintain signal-to-noise ratios, contrasting with lossless theoretical models. Consequently, a significant portion of the reported performance disparity between diffractive and electronic systems may reflect these favorable simulation assumptions rather than inherent physical limitations, suggesting that claimed energy and speed benefits remain overstated until rigorous experimental validation accounts for scattering, absorption, and manufacturing variances.",
+      "planned_claim_handles": [
+        "C04_RELIANCE_IDEALIZED_SIMULATION_MODELS_DIFFRACTI",
+        "C10_SIGNIFICANT_PORTION_REPORTED_PERFORMANCE_GAP_B",
+        "C13_RELIANCE_IDEALIZED_SIMULATION_MODELS_DIFFRACTI",
+        "C14_SIMULATION_REALITY_PERFORMANCE_GAP_EXISTS_CHIP",
+        "C17_SIGNIFICANT_PORTION_PERFORMANCE_GAP_BETWEEN_SI",
+        "C28_CLAIMED_COMPUTATIONAL_ADVANTAGES_DIFFRACTIVE_O"
+      ],
+      "claim_handles": [
+        "C04_RELIANCE_IDEALIZED_SIMULATION_MODELS_DIFFRACTI",
+        "C10_SIGNIFICANT_PORTION_REPORTED_PERFORMANCE_GAP_B",
+        "C13_RELIANCE_IDEALIZED_SIMULATION_MODELS_DIFFRACTI",
+        "C14_SIMULATION_REALITY_PERFORMANCE_GAP_EXISTS_CHIP",
+        "C17_SIGNIFICANT_PORTION_PERFORMANCE_GAP_BETWEEN_SI",
+        "C28_CLAIMED_COMPUTATIONAL_ADVANTAGES_DIFFRACTIVE_O"
+      ],
+      "evidence_handles": [
+        "E04_OPTICAL_MULTILAYER_THIN_FILM_STRUCTURE_INVERSE",
+        "E43_PROGRAMMABLE_DIFFRACTIVE_DEEP_NEURAL_NETWORKS",
+        "E116_MISALIGNMENT_RESILIENT_DIFFRACTIVE_OPTICAL_NET",
+        "E42_ALL_OPTICAL_MACHINE_LEARNING_USING_DIFFRACTIVE",
+        "E28_RESPONSE_COMMENT_ALL_OPTICAL_MACHINE_LEARNING"
+      ],
+      "covered_claim_handles": [
+        "C04_RELIANCE_IDEALIZED_SIMULATION_MODELS_DIFFRACTI",
+        "C14_SIMULATION_REALITY_PERFORMANCE_GAP_EXISTS_CHIP",
+        "C28_CLAIMED_COMPUTATIONAL_ADVANTAGES_DIFFRACTIVE_O",
+        "C13_RELIANCE_IDEALIZED_SIMULATION_MODELS_DIFFRACTI",
+        "C10_SIGNIFICANT_PORTION_REPORTED_PERFORMANCE_GAP_B"
+      ],
+      "covered_claim_ids": [
+        "S06-P015",
+        "S06-P049",
+        "S06-P108",
+        "S06-P045",
+        "S06-P036"
+      ],
+      "markers": [
+        "[REF:42e53c9c7630eb735f9a67f329c948423910cd8d]",
+        "[REF:0e4597e0c87cca5d2b71233828098072cce414df]",
+        "[REF:doi:10.1515/nanoph-2020-0291]",
+        "[REF:5c7e5248d9eb7f373f10277410bf8506160907ea]",
+        "[REF:94f3822c453a2ab6d44c59f1f60026acb15739af]"
+      ],
+      "explanatory_handles": [
+        "X02_COOPERATIVE_OPTIMIZATION_NEURAL_NETW",
+        "X04_MISALIGNMENT_RESILIENT_DIFFRACTIVE_O",
+        "X03_ULTRACOMPACT_EFFICIENT_CHIP_DIFFRACT"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Building on the debate regarding computational advantages, a critical barrier to validating these claims is the simulation-to-reality gap, defined as the discrepancy between performance predicted by idealized scalar diffraction models and actual hardware results due to fabrication tolerances and material non-idealities.": [
+          "[REF:doi:10.1117/12.3013482]",
+          "[REF:doi:10.1117/12.3084472]"
+        ],
+        "Furthermore, standard training protocols that assume perfect layer alignment fail to account for the mechanical realities of assembly; however, introducing random misalignment variables during the training phase, a technique termed \"vaccination,\" can significantly improve error tolerance margins against severe layer-to-layer displacements.": [
+          "[REF:doi:10.1515/nanoph-2020-0291]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S06-P015",
+        "S06-P036",
+        "S06-P045",
+        "S06-P049",
+        "S06-P059",
+        "S06-P108"
+      ]
+    },
+    {
+      "block_index": 3,
+      "title": "Training Paradigm Controversies",
+      "block_type": "explanatory_body",
+      "goal": "Contrast standard end-to-end training with emerging physics-aware methods that address gradient breaks and nonlinearity assumptions.",
+      "prose": "End-to-end differentiable training defines a paradigm where backpropagation flows directly through the diffraction integral to optimize optical layers, theoretically enabling high-throughput all-optical processing. However, this approach encounters a fundamental gradient chain break when discrete device mappings are introduced, as physical discretization disrupts the smooth differentiability assumed by standard algorithms. While idealized simulations suggest that such networks can scale to hundreds of billions of connections using passive diffractive layers, real-world deployment reveals a mismatch between numerical modeling and physical hardware due to non-uniform device responses and analog constraints. Specifically, optical devices exhibit non-monotonic behaviors and periodic phase limits that uniform digital computation fails to capture, necessitating physics-aware frameworks like Gumbel-Softmax to enable flexible, differentiable discrete mappings. Furthermore, because physical diffractive layers lack native nonlinearity, reliance on in-silico training with assumed activation functions creates a simulation-reality gap that often requires hybrid electronic assistance or complex fabrication to approximate. These limitations highlight that while end-to-end training offers theoretical speed benefits, its practical superiority remains contingent on resolving the disconnect between idealized gradient chains and the irregularities of analog optical hardware.",
+      "planned_claim_handles": [
+        "C05_END_END_DIFFERENTIABLE_TRAINING_DIFFRACTIVE_NE",
+        "C11_END_END_DIFFERENTIABLE_TRAINING_THROUGH_DIFFRA",
+        "C16_END_END_DIFFERENTIABLE_TRAINING_THROUGH_DIFFRA",
+        "C23_RELIANCE_IDEALIZED_SILICO_TRAINING_ASSUMED_NON"
+      ],
+      "claim_handles": [
+        "C05_END_END_DIFFERENTIABLE_TRAINING_DIFFRACTIVE_NE",
+        "C11_END_END_DIFFERENTIABLE_TRAINING_THROUGH_DIFFRA",
+        "C16_END_END_DIFFERENTIABLE_TRAINING_THROUGH_DIFFRA",
+        "C23_RELIANCE_IDEALIZED_SILICO_TRAINING_ASSUMED_NON"
+      ],
+      "evidence_handles": [
+        "E06_PHYSICS_AWARE_DIFFERENTIABLE_DISCRETE_CODESIGN",
+        "E34_ALL_OPTICAL_MACHINE_LEARNING_USING_DIFFRACTIVE",
+        "E54_PHYSICS_AWARE_ROUGHNESS_OPTIMIZATION_DIFFRACTI",
+        "E87_HIGH_CAPACITY_DIRECTIONAL_INFORMATION_PROCESSO"
+      ],
+      "covered_claim_handles": [
+        "C05_END_END_DIFFERENTIABLE_TRAINING_DIFFRACTIVE_NE",
+        "C11_END_END_DIFFERENTIABLE_TRAINING_THROUGH_DIFFRA",
+        "C16_END_END_DIFFERENTIABLE_TRAINING_THROUGH_DIFFRA",
+        "C23_RELIANCE_IDEALIZED_SILICO_TRAINING_ASSUMED_NON"
+      ],
+      "covered_claim_ids": [
+        "S06-P017",
+        "S06-P041",
+        "S06-P058",
+        "S06-P097"
+      ],
+      "markers": [
+        "[REF:1716c059da55f246fb44c95094c2c92781424124]",
+        "[REF:5c7e5248d9eb7f373f10277410bf8506160907ea]",
+        "[REF:ab5c9eaf1dadc8b72da43b27c4312bed466013b1]",
+        "[REF:da2b8700882d2dde6f3d32f5018c17c0df41016b]"
+      ],
+      "explanatory_handles": [
+        "X05_PHYSICS_AWARE_DIFFERENTIABLE_DISCRET"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Specifically, optical devices exhibit non-monotonic behaviors and periodic phase limits that uniform digital computation fails to capture, necessitating physics-aware frameworks like Gumbel-Softmax to enable flexible, differentiable discrete mappings.": [
+          "[REF:1716c059da55f246fb44c95094c2c92781424124]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S06-P017",
+        "S06-P041",
+        "S06-P058",
+        "S06-P097"
+      ]
+    },
+    {
+      "block_index": 4,
+      "title": "Architectural Philosophy: Specialization vs. Flexibility",
+      "block_type": "explanatory_body",
+      "goal": "Analyze the trade-off between single-function optimized lenses and general-purpose trainable multi-layer networks.",
+      "prose": "Building on the training controversies, the field now faces a fundamental architectural divide between single-function optimized designs and general-purpose trainable systems. Single-function architectures, such as chromatic-aberration-corrected diffractive lenses, utilize iterative algorithms to optimize groove heights for specific broadband focusing tasks, achieving superior performance for that singular application but lacking adaptability. In contrast, earlier general-purpose approaches often incurred significant complexity overhead, requiring mechanical movement of optical elements or distinct hardware systems to switch between different tasks. To address this rigidity, emerging multi-wavelength diffractive deep neural networks exploit the spectral dimension to perform parallel classification across multiple databases without mechanical reconfiguration, effectively encoding different inputs into separate wavelength channels. Furthermore, multifunctional processors with learned structured illumination incorporate illumination patterns as trainable parameters, enabling the reuse of diffractive layers to rapidly switch between classification and imaging tasks. However, these flexible multi-layer designs introduce practical challenges regarding fabrication tolerances and opto-mechanical assembly, as they are highly sensitive to layer-to-layer misalignments. Recent advances mitigate this through vaccination strategies that model random displacements during training, yet the core tension remains: maximizing efficiency for specific tasks versus maintaining the versatility required for broader applications, a trade-off that directly influences the physical realizability discussed next.",
+      "planned_claim_handles": [
+        "C07_REQUIREMENT_MECHANICAL_RECONFIGURATION_OR_DIST",
+        "C24_FIELD_DIVIDED_BETWEEN_SINGLE_FUNCTION_OPTIMIZE",
+        "C27_GENERAL_PURPOSE_TRAINABLE_DIFFRACTIVE_ARCHITEC",
+        "C32_DEBATE_BETWEEN_SINGLE_FUNCTION_OPTIMIZED_DESIG"
+      ],
+      "claim_handles": [
+        "C07_REQUIREMENT_MECHANICAL_RECONFIGURATION_OR_DIST",
+        "C24_FIELD_DIVIDED_BETWEEN_SINGLE_FUNCTION_OPTIMIZE",
+        "C27_GENERAL_PURPOSE_TRAINABLE_DIFFRACTIVE_ARCHITEC",
+        "C32_DEBATE_BETWEEN_SINGLE_FUNCTION_OPTIMIZED_DESIG"
+      ],
+      "evidence_handles": [
+        "E93_CHROMATIC_ABERRATION_CORRECTED_DIFFRACTIVE_LEN",
+        "E12_OPTICAL_MULTI_TASK_LEARNING_USING_MULTI_WAVELE",
+        "E140_OPTICAL_MULTI_TASK_LEARNING_USING_MULTIFUNCTIO",
+        "E110_MISALIGNMENT_RESILIENT_DIFFRACTIVE_OPTICAL_NET"
+      ],
+      "covered_claim_handles": [
+        "C24_FIELD_DIVIDED_BETWEEN_SINGLE_FUNCTION_OPTIMIZE",
+        "C07_REQUIREMENT_MECHANICAL_RECONFIGURATION_OR_DIST",
+        "C32_DEBATE_BETWEEN_SINGLE_FUNCTION_OPTIMIZED_DESIG",
+        "C27_GENERAL_PURPOSE_TRAINABLE_DIFFRACTIVE_ARCHITEC"
+      ],
+      "covered_claim_ids": [
+        "S06-P100",
+        "S06-P025",
+        "S06-P133",
+        "S06-P107"
+      ],
+      "markers": [
+        "[REF:ec7361fab96328e584523cb899c2afc3b027ccc3]",
+        "[REF:cdb2c928e087f4cd2b807836fd131089bf81a711]",
+        "[REF:4ec17510a4fcc9d4756694cc4efa9bba74b83503]",
+        "[REF:doi:10.1515/nanoph-2020-0291]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S06-P025",
+        "S06-P100",
+        "S06-P107",
+        "S06-P133"
+      ]
+    },
+    {
+      "block_index": 5,
+      "title": "Hardware Implementation Bottlenecks",
+      "block_type": "explanatory_body",
+      "goal": "Discuss physical constraints including coherence sensitivity, lack of native nonlinearity, and CMOS integration hurdles.",
+      "prose": "While the architectural debate between specialized and flexible designs sets the theoretical stage, physical implementation bottlenecks ultimately constrain the realization of these diffractive systems. Although photonic resonators offer advantageous nonlinear behaviors for optical activation functions, their performance remains fundamentally vulnerable to environmental disturbances such as temperature fluctuations and mechanical vibrations. This sensitivity extends to illumination conditions; real-world deployment demands robust processing of incoherent light, yet most theoretical frameworks rely on idealized quasimonochromatic assumptions that rarely hold outside controlled laboratories. Furthermore, integrating these networks with standard semiconductor processes presents a critical hurdle, as current demonstrations are largely confined to proof-of-concept setups rather than scalable, CMOS-compatible platforms. The challenge compounds when attempting to merge multiple optical functionalities, which often necessitates complex encoding schemes or intricate reconstruction algorithms that undermine practical simplicity. Consequently, while diffractive optical neural networks promise passive energy efficiency and low-latency inference through photon-based computation, achieving fully programmable reconfigurability without succumbing to fixed architecture limitations and alignment sensitivities remains a significant engineering barrier.",
+      "planned_claim_handles": [
+        "C01_PHOTONIC_NEURAL_NETWORK_RESONATORS_EXHIBIT_NON",
+        "C06_REAL_WORLD_DEPLOYMENT_DIFFRACTIVE_OPTICAL_NEUR",
+        "C18_INTEGRATION_DIFFRACTIVE_NEURAL_NETWORKS_EXISTI",
+        "C19_INTEGRATION_MULTIPLE_OPTICAL_FUNCTIONALITIES_W",
+        "C30_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_DONNS_OFFE",
+        "C31_HARDWARE_IMPLEMENTABILITY_CHALLENGES_INCLUDING"
+      ],
+      "claim_handles": [
+        "C01_PHOTONIC_NEURAL_NETWORK_RESONATORS_EXHIBIT_NON",
+        "C06_REAL_WORLD_DEPLOYMENT_DIFFRACTIVE_OPTICAL_NEUR",
+        "C18_INTEGRATION_DIFFRACTIVE_NEURAL_NETWORKS_EXISTI",
+        "C19_INTEGRATION_MULTIPLE_OPTICAL_FUNCTIONALITIES_W",
+        "C30_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_DONNS_OFFE",
+        "C31_HARDWARE_IMPLEMENTABILITY_CHALLENGES_INCLUDING"
+      ],
+      "evidence_handles": [
+        "E01_EXPLORING_TYPES_PHOTONIC_NEURAL_NETWORKS_IMAGI",
+        "E11_ROLE_SPATIAL_COHERENCE_DIFFRACTIVE_OPTICAL_NEU",
+        "E65_SPACE_EFFICIENT_OPTICAL_COMPUTING_INTEGRATED_C",
+        "E71_INTEGRATED_SPECTROPOLARIMETER_METASURFACE_BASE",
+        "E128_PHYSICS_AWARE_MACHINE_LEARNING_ADVERSARIAL_ATT"
+      ],
+      "covered_claim_handles": [
+        "C01_PHOTONIC_NEURAL_NETWORK_RESONATORS_EXHIBIT_NON",
+        "C06_REAL_WORLD_DEPLOYMENT_DIFFRACTIVE_OPTICAL_NEUR",
+        "C18_INTEGRATION_DIFFRACTIVE_NEURAL_NETWORKS_EXISTI",
+        "C19_INTEGRATION_MULTIPLE_OPTICAL_FUNCTIONALITIES_W",
+        "C30_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_DONNS_OFFE"
+      ],
+      "covered_claim_ids": [
+        "S06-P001",
+        "S06-P019",
+        "S06-P064",
+        "S06-P065",
+        "S06-P121"
+      ],
+      "markers": [
+        "[REF:77474cdcf483b25f73dacf20deb295cd1c2945b7]",
+        "[REF:66d76eac8c5cb0c37d44c10bce479d8c301d113b]",
+        "[REF:585c02f3ea677e72535f4ea2af006230e5892445]",
+        "[REF:99916fcca704fb4d1c402da3aa3dd30bb1d6345a]",
+        "[REF:f6af4ed4daa6ec796d382f914919929d6734d819]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S06-P001",
+        "S06-P019",
+        "S06-P064",
+        "S06-P065",
+        "S06-P121",
+        "S06-P130"
+      ]
+    },
+    {
+      "block_index": 6,
+      "title": "Emerging Counter-Narratives and Minimalist Approaches",
+      "block_type": "scientific_consequence",
+      "goal": "Present alternative views: minimalist DONNs, passive encoding roles, and spatial multiplexing limits.",
+      "prose": "In response to the hardware bottlenecks and integration hurdles previously discussed, emerging counter-narratives propose that diffractive neural networks (DONNs) need not rely on complex, multi-layer trainable architectures to be effective. One such approach involves minimalist DONNs, which utilize straightforward optical configurations with efficient computational capabilities, demonstrating robustness and scalability in image classification tasks without the overhead of deep, fully trainable stacks. For instance, a minimalist optical diffractive neural network employs two-level quantized pixel-wise optical encoding to achieve robust image classification without the complexity of deep, fully trainable stacks. Alternatively, end-to-end optoelectronic frameworks reframe the diffractive element not as an active computer but as a fixed passive encoder; in these lensless imaging systems, a designed mask modulates light for downstream algorithmic reconstruction, raising fundamental questions about whether the optical layer itself performs computation or merely conditions the data. In lensless imaging systems, such as those described in advances in mask-modulated techniques, a designed mask acts as a fixed passive encoder that modulates light for downstream algorithmic reconstruction rather than performing active computation. While standard end-to-end differentiable training through the diffraction integral has enabled all-optical generalization to unseen scattering environments, allowing reconstruction through unknown diffusers without retraining, this capability is often predicated on idealized scalar diffraction models. These models frequently neglect material dispersion, fabrication-induced surface roughness, and misalignment errors, creating a significant simulation-to-reality gap. To address this, advanced training schemes now introduce random misalignments as continuous variables during the learning phase, effectively \"vaccinating\" the network to maintain performance despite physical assembly tolerances. Furthermore, attempts to increase flexibility by training different tasks on separate spatial regions of a single layer face hard physical area limitations, typically restricting such multiplexed systems to only two or three simultaneous functions. Collectively, these developments suggest that while ODNNs offer theoretical speed benefits, their practical superiority remains contingent on resolving the tension between minimalist passive encoding and the fragility of complex, idealized active computing.",
+      "planned_claim_handles": [
+        "C20_END_END_DIFFERENTIABLE_TRAINING_THROUGH_DIFFRA",
+        "C21_MINIMALIST_DIFFRACTIVE_NEURAL_NETWORKS_DONNS_S",
+        "C22_TRAINING_DIFFERENT_TASKS_SEPARATE_SPATIAL_REGI",
+        "C25_END_END_OPTOELECTRONIC_FRAMEWORKS_LENSLESS_IMA",
+        "C26_RELIANCE_IDEALIZED_SCALAR_DIFFRACTION_MODELS_T"
+      ],
+      "claim_handles": [
+        "C20_END_END_DIFFERENTIABLE_TRAINING_THROUGH_DIFFRA",
+        "C21_MINIMALIST_DIFFRACTIVE_NEURAL_NETWORKS_DONNS_S",
+        "C22_TRAINING_DIFFERENT_TASKS_SEPARATE_SPATIAL_REGI",
+        "C25_END_END_OPTOELECTRONIC_FRAMEWORKS_LENSLESS_IMA",
+        "C26_RELIANCE_IDEALIZED_SCALAR_DIFFRACTION_MODELS_T"
+      ],
+      "evidence_handles": [
+        "E72_COMPUTER_FREE_COMPUTATIONAL_IMAGING_OPTICAL_CO",
+        "E77_MINIMALIST_OPTICAL_NEURAL_COMPUTING_OPTICAL_DI",
+        "E82_MULTI_DIMENSIONAL_RECONFIGURABLE_PHYSICALLY_CO",
+        "E99_ADVANCES_MASK_MODULATED_LENSLESS_IMAGING",
+        "E104_MISALIGNMENT_RESILIENT_DIFFRACTIVE_OPTICAL_NET"
+      ],
+      "covered_claim_handles": [
+        "C20_END_END_DIFFERENTIABLE_TRAINING_THROUGH_DIFFRA",
+        "C21_MINIMALIST_DIFFRACTIVE_NEURAL_NETWORKS_DONNS_S",
+        "C22_TRAINING_DIFFERENT_TASKS_SEPARATE_SPATIAL_REGI",
+        "C25_END_END_OPTOELECTRONIC_FRAMEWORKS_LENSLESS_IMA",
+        "C26_RELIANCE_IDEALIZED_SCALAR_DIFFRACTION_MODELS_T"
+      ],
+      "covered_claim_ids": [
+        "S06-P073",
+        "S06-P081",
+        "S06-P089",
+        "S06-P103",
+        "S06-P105"
+      ],
+      "markers": [
+        "[REF:392900e8878c61c333dd98b27d9496cf27b94ec5]",
+        "[REF:ad1f0c2fd40531b6ade0ea11d655946e458e4fbe]",
+        "[REF:e9eb5f09e2404cc46986e623c8ef093ffddadeec]",
+        "[REF:doi:10.3390/electronics13030617]",
+        "[REF:doi:10.1515/nanoph-2020-0291]"
+      ],
+      "explanatory_handles": [
+        "A04",
+        "A05"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "For instance, a minimalist optical diffractive neural network employs two-level quantized pixel-wise optical encoding to achieve robust image classification without the complexity of deep, fully trainable stacks.": [
+          "[REF:doi:10.1002/lpor.202402303]"
+        ],
+        "In lensless imaging systems, such as those described in advances in mask-modulated techniques, a designed mask acts as a fixed passive encoder that modulates light for downstream algorithmic reconstruction rather than performing active computation.": [
+          "[REF:doi:10.3390/electronics13030617]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S06-P073",
+        "S06-P081",
+        "S06-P089",
+        "S06-P103",
+        "S06-P105"
+      ]
+    }
+  ]
+}

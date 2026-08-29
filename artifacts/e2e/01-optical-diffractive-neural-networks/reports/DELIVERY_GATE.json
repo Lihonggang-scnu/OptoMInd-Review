@@ -1,0 +1,67 @@
+{
+  "schema_version": "research_harness.delivery_gate.v2",
+  "status": "degraded",
+  "passed": false,
+  "blocking_checks": [],
+  "degraded_checks": [
+    "chinese_translation_audit"
+  ],
+  "awaiting_human_checks": [],
+  "english_deliverable": true,
+  "checks": {
+    "english_review_pdf": {
+      "path": "<local-path>",
+      "ok": true,
+      "bytes": 224596,
+      "pages": 37
+    },
+    "english_review_audit": {
+      "ok": true,
+      "status": "passed",
+      "accepted_statuses": [
+        "completed",
+        "passed",
+        "ready"
+      ]
+    },
+    "chinese_review_pdf": {
+      "path": "<local-path>",
+      "ok": true,
+      "bytes": 613594,
+      "pages": 35
+    },
+    "chinese_translation_audit": {
+      "ok": false,
+      "degraded": true,
+      "status": "completed_with_warnings",
+      "failed_unit_ids": [
+        "B0019",
+        "B0029"
+      ],
+      "citation_markers_preserved": true
+    },
+    "latex_audit": {
+      "ok": true,
+      "status": "submission_ready",
+      "accepted_statuses": [
+        "compiled",
+        "compiled_awaiting_metadata",
+        "completed",
+        "submission_ready"
+      ]
+    },
+    "chinese_latex_audit": {
+      "ok": true,
+      "degraded": false,
+      "status": "submission_ready",
+      "accepted_statuses": [
+        "compiled",
+        "compiled_awaiting_metadata",
+        "completed",
+        "submission_ready"
+      ]
+    }
+  },
+  "author_metadata_warning": "author_metadata_placeholder_allowed",
+  "policy": "blocking means a requested artifact is missing or unreadable; degraded means usable content was produced with recorded failures; awaiting_human means a stage legitimately stopped for a decision. Only blocking fails delivery."
+}

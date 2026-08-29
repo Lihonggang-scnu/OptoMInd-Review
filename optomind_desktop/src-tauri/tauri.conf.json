@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "OptoMind",
+  "version": "0.1.0",
+  "identifier": "app.optomind.desktop",
+  "build": {
+    "frontendDist": "../../optomind_ui/static/dist"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "splash",
+        "url": "splash.html",
+        "title": "OptoMind",
+        "width": 470,
+        "height": 340,
+        "resizable": false,
+        "center": true,
+        "visible": true
+      },
+      {
+        "label": "main",
+        "url": "index.html",
+        "title": "OptoMind",
+        "width": 1280,
+        "height": 832,
+        "minWidth": 1024,
+        "minHeight": 680,
+        "center": true,
+        "visible": false
+      }
+    ],
+    "security": {
+      "capabilities": ["default"],
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' http://127.0.0.1:* ws://127.0.0.1:* ipc: http://ipc.localhost; object-src 'none'; frame-src 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["msi"],
+    "icon": [
+      "icons/icon.ico",
+      "icons/32x32.png",
+      "icons/128x128.png"
+    ],
+    "windows": {
+      "wix": { "language": "zh-CN" }
+    }
+  }
+}

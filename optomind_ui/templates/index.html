@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OptoMind · 科研综述工作台</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar"><div class="brand"><span class="brand-mark">O</span><div><strong>OptoMind</strong><span>AI 科研综述工作台</span></div></div><div class="connection"><span class="dot"></span>本机运行环境 · 数据留在本机</div></header>
+<main class="shell">
+<section id="view-home" class="view"><div class="hero"><p class="eyebrow">你的科研搭档</p><h1>我是 OptoMind</h1><p class="hero-copy">把一个想法，变成有证据、有结构、可复核的综述。</p></div><form id="task-form" class="prompt-box"><label for="question">你想研究什么？</label><textarea id="question" rows="4" maxlength="4000" placeholder="例如：请综述日间辐射制冷的光学机制、材料路线与应用进展。"></textarea><div class="prompt-footer"><span>中央长期材料库优先 · 联网检索按需补充</span><button id="submit-task" type="submit"><span>开始研究</span><span class="arrow">→</span></button></div><p id="form-error" class="form-error hidden"></p></form><div class="trust-row"><span>证据可追溯</span><span>断点可恢复</span><span>费用可审计</span><span>中英文 PDF</span></div><section class="recent"><div class="section-head"><h2>最近的研究</h2><button id="refresh-runs" class="quiet-button">刷新</button></div><div id="runs-body">加载中…</div></section></section>
+<section id="view-task" class="view hidden"><div class="task-head"><div><p class="eyebrow">正在研究</p><h1 id="task-question"></h1></div><button id="new-task" class="quiet-button">新建任务</button></div><div class="status-strip"><span class="status-dot"></span><span id="task-status">准备启动</span><span class="status-meta" id="task-meta"></span></div><section class="progress-panel"><div class="progress-track"><div id="progress-line" class="progress-line"></div></div><div id="progress-steps" class="progress-steps"></div></section><section class="metrics-grid"><div class="metric"><span>运行状态</span><strong id="metric-status">—</strong></div><div class="metric"><span>已用费用</span><strong id="metric-cost">¥0.00</strong></div><div class="metric"><span>当前阶段</span><strong id="metric-stage">—</strong></div><div class="metric"><span>错误数</span><strong id="metric-errors">0</strong></div></section><section class="log-panel"><div class="section-head"><h2>运行日志</h2><span id="log-caption">等待第一条日志</span></div><div id="task-log" class="task-log"></div></section><div class="task-actions"><a id="open-run" class="quiet-button" href="#">查看完整运行</a><button id="stop-task" class="danger-button">停止运行</button><button id="stop-refresh" class="quiet-button">暂停刷新（不影响运行）</button></div></section>
+<section id="view-run" class="view hidden"><div class="task-head"><div><p class="eyebrow">运行详情</p><h1 id="run-title"></h1></div><button id="back-home" class="quiet-button">返回首页</button></div><div class="cards" id="run-cards"></div><div id="run-links" class="task-actions"></div><h2>阶段时间轴</h2><table id="timeline-table"><thead><tr><th>阶段</th><th>耗时</th></tr></thead><tbody></tbody></table><h2>交付物</h2><div id="deliverables-body">加载中…</div></section>
+<section id="view-events" class="view hidden"><div class="task-head"><div><p class="eyebrow">可追溯记录</p><h1>事件流</h1></div><button id="events-home" class="quiet-button">返回首页</button></div><div class="pager"><button id="ev-prev">上一页</button><button id="ev-next">下一页</button><span id="ev-pos"></span></div><div id="events-body"></div></section>
+<section id="view-visuals" class="view hidden"><div class="task-head"><div><p class="eyebrow">图表与视觉证据</p><h1>视觉产物</h1></div></div><div id="visuals-body">加载中…</div></section>
+<section id="view-decisions" class="view hidden"><div class="task-head"><div><p class="eyebrow">人在回路</p><h1>待决策事项</h1></div></div><div id="decisions-body">加载中…</div></section>
+</main><footer>OptoMind · AI 辅助生成 · 所有证据、费用与运行状态均保留在本机</footer><script src="/static/app.js"></script>
+</body></html>

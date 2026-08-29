@@ -1,0 +1,82 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S03",
+  "attempted": true,
+  "available": true,
+  "fallback_reason": "",
+  "comments": [
+    {
+      "block_index": 1,
+      "sentence": "Integrated photonic tensor cores perform parallel convolutional processing by exploiting the natural superposition and interference of light to execute dot-product operations at the speed of light",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The claim asserts that integrated photonic tensor cores perform 'parallel convolutional processing'. The provided evidence (E126) cites Feldmann et al. Nature 2021, which describes a 'photonic tensor core' performing 'matrix-vector multiplication' (linear algebra). While the paper notes this can be used for convolution in specific architectures (e.g., sliding window), the core physical operation is matrix-vector multiplication. Equating the engine directly with convolutional processing without qualification is an overclaim relative to the fundamental linear algebra mechanism described.",
+      "suggested_hedge": "Integrated photonic tensor cores perform parallel linear transformations (such as matrix-vector multiplication) by exploiting the natural superposition and interference of light, enabling high-throughput inference tasks including convolutional processing.",
+      "claim_handles": [
+        "C30_INTEGRATED_PHOTONIC_TENSOR_CORES_PERFORM_PARAL"
+      ],
+      "evidence_handles": [
+        "E126_ANALOG_NANOPHOTONIC_COMPUTING_GOING_PRACTICAL"
+      ]
+    },
+    {
+      "block_index": 5,
+      "sentence": "Because optical superposition alone cannot implement these necessary activation functions, the absence of native nonlinearity in passive components necessitates external or hybrid nonlinear insertion points for deep network training.",
+      "flag_type": "advisory",
+      "blocking": false,
+      "issue": "This is a reasonable synthesis of the physics. Passive linear optics cannot implement non-linear activation functions required for deep learning backpropagation. The need for hybrid/nonlinear insertion is well-supported by the evidence (E09, E50-E54). No material contradiction or overclaim detected.",
+      "suggested_hedge": "",
+      "claim_handles": [
+        "C14_ABSENCE_NATIVE_NONLINEARITY_PASSIVE_PHOTONIC_C"
+      ],
+      "evidence_handles": [
+        "E50_EXPLORING_TYPES_PHOTONIC_NEURAL_NETWORKS_IMAGI",
+        "E09_DEEP_PHYSICAL_NEURAL_NETWORKS_TRAINED_BACKPROP"
+      ]
+    }
+  ],
+  "blocking_count": 0,
+  "advisory_count": 2,
+  "per_block_revision_outcomes": {
+    "1": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "2": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "3": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "4": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "5": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "6": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "7": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "8": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    }
+  }
+}

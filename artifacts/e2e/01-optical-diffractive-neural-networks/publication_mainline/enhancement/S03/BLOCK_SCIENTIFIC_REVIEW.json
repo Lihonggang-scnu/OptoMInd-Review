@@ -1,0 +1,109 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S03",
+  "attempted": true,
+  "available": true,
+  "fallback_reason": "",
+  "comments": [
+    {
+      "block_index": 1,
+      "sentence": "Early demonstrations established this paradigm by employing terahertz sources and 3D-printed diffractive gratings to successfully classify images",
+      "flag_type": "advisory",
+      "blocking": false,
+      "issue": "The evidence (E109) specifies the use of a 'terahertz light source' and '3D printing technology', but does not explicitly describe the structures as 'diffractive gratings'. While technically accurate in context, the term is an inference. Additionally, the claim that these systems perform computation 'without active energy expenditure during the inference phase' is supported by E109 ('passive'), but the phrase 'near-light speeds' in E109 refers to the propagation speed, not necessarily the throughput latency compared to electronics, which is a nuance worth preserving.",
+      "suggested_hedge": "Early demonstrations established this paradigm by employing terahertz sources and 3D-printed diffractive structures to successfully classify images",
+      "claim_handles": [
+        "C13_DIFFRACTIVE_NEURAL_NETWORKS_HAVE_BEEN_PHYSICAL"
+      ],
+      "evidence_handles": [
+        "E109_REVIEW_DIFFRACTIVE_DEEP_NEURAL_NETWORKS"
+      ]
+    },
+    {
+      "block_index": 2,
+      "sentence": "This viability for rapid prototyping is complemented by solution-based chemical methods, such as sol-gel processes, which offer scalable and low-cost alternatives for fabricating large-area porous films with tunable refractive indices, contrasting sharply with the precision but higher complexity of lithographic techniques.",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The evidence (E02) supports that sol-gel processes are scalable/low-cost and contrast with other methods, but it does not support the characterization of lithography as having 'higher complexity' relative to sol-gel in a general sense, nor does it explicitly frame the contrast as 'sharply' against lithography specifically in the context of ODNN fabrication fidelity. It contrasts with 'solution-based/chemical methods' generally. The claim overstates the comparative disadvantage of lithography based on the provided text.",
+      "suggested_hedge": "This viability for rapid prototyping is complemented by solution-based chemical methods, such as sol-gel processes, which offer scalable and low-cost alternatives for fabricating large-area porous films with tunable refractive indices, offering different trade-offs compared to lithographic techniques.",
+      "claim_handles": [
+        "C02_SOLUTION_BASED_CHEMICAL_METHODS_SUCH_SOL_GEL_P"
+      ],
+      "evidence_handles": [
+        "E02_SENSITIVITY_TOLERANCE_ANALYSIS_SINGLE_LAYER_MG"
+      ]
+    },
+    {
+      "block_index": 3,
+      "sentence": "By reducing individual neuron sizes to scales significantly smaller than the wavelength, all-dielectric metasurfaces enable fully static implementations that eliminate high-order diffraction and maximize spatial utilization.",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "Evidence E104 states that metasurface-based D2NNs 'completely eliminate high-order diffraction'. However, physically, subwavelength structures suppress *propagating* high-order diffraction orders into evanescent waves, but scattering losses and surface roughness still exist. More importantly, the claim that they 'maximize spatial utilization' is a strong superlative not explicitly supported as a universal truth in the evidence, which focuses on 'higher spatial neuron density'. The word 'eliminate' is too absolute for physical devices which always have some loss/scattering.",
+      "suggested_hedge": "By reducing individual neuron sizes to scales significantly smaller than the wavelength, all-dielectric metasurfaces enable fully static implementations that suppress high-order diffraction and increase spatial utilization.",
+      "claim_handles": [
+        "C29_ALL_DIELECTRIC_METASURFACES_ENABLE_FULLY_STATI"
+      ],
+      "evidence_handles": [
+        "E104_ALL_DIELECTRIC_METASURFACE_BASED_DIFFRACTIVE_N"
+      ]
+    },
+    {
+      "block_index": 5,
+      "sentence": "Beyond discretization, manufacturing imperfections like surface roughness further degrade performance when networks are trained solely on ideal numerical models; physics-aware roughness optimization addresses this by incorporating fabrication errors directly into the training loop to mitigate accuracy loss.",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "Claim C14 references E37 ('Physics-aware Roughness Optimization...'). The provided snippet for E37 cuts off before describing the specific mechanism of 'incorporating fabrication errors directly into the training loop'. It mentions identifying interpixel roughness as a cause of mismatch. Without the full text of E37 confirming the *method* of incorporation (e.g., via stochastic modeling or explicit error maps in the forward pass), asserting the specific mechanism is unsupported by the provided span. The claim assumes a specific implementation detail not visible in the evidence.",
+      "suggested_hedge": "Beyond discretization, manufacturing imperfections like surface roughness further degrade performance when networks are trained solely on ideal numerical models; physics-aware optimization strategies address this by accounting for fabrication errors to mitigate accuracy loss.",
+      "claim_handles": [
+        "C14_PHYSICS_AWARE_ROUGHNESS_OPTIMIZATION_TECHNIQUE"
+      ],
+      "evidence_handles": [
+        "E37_PHYSICS_AWARE_ROUGHNESS_OPTIMIZATION_DIFFRACTI"
+      ]
+    }
+  ],
+  "blocking_count": 0,
+  "advisory_count": 4,
+  "per_block_revision_outcomes": {
+    "1": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "2": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "3": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "4": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "5": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "6": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "7": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "8": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    }
+  }
+}

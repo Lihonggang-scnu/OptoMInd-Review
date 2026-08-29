@@ -1,0 +1,109 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S07",
+  "attempted": true,
+  "available": true,
+  "fallback_reason": "",
+  "comments": [
+    {
+      "block_index": 1,
+      "sentence": "For instance, specific deep learning architectures have demonstrated forward prediction accuracy rates of 96.7% and inverse design success rates of 83.9%, significantly overwhelming conventional neural networks in efficiency.",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The text generalizes a specific result from one study (E45) to 'specific deep learning architectures' broadly and uses the superlative 'overwhelming', which is not supported by the evidence that only compares this specific MG-DNN architecture to 'most of conventional deep neural network (CDNN) thus far'.",
+      "suggested_hedge": "For instance, certain deep learning architectures, such as multi-task learning networks integrated with genetic algorithms, have demonstrated forward prediction accuracy rates of 96.7% and inverse design success rates of 83.9%, outperforming many conventional neural networks in efficiency.",
+      "claim_handles": [
+        "C20_DEEP_NEURAL_NETWORKS_MACHINE_LEARNING_FRAMEWOR"
+      ],
+      "evidence_handles": [
+        "E45_FORWARD_PREDICTION_INVERSE_DESIGN_METASURFACE"
+      ]
+    },
+    {
+      "block_index": 3,
+      "sentence": "For handling singular point mutations in electromagnetic property mappings, deep residual networks combined with property classification have demonstrated the ability to predict geometries with mean square errors below 0.23, stabilizing the design of holographic imaging metasurfaces.",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "The block claims deep residual networks 'stabilize the design of holographic imaging metasurfaces'. The evidence (E48) states the network was used to verify reliability for designing holographic imaging metasurfaces, but does not explicitly state that the method 'stabilizes' the design process itself, nor does it link the MSE metric directly to stability in the way phrased. It is a reasonable inference but technically an unsupported mechanism claim regarding 'stabilization'.",
+      "suggested_hedge": "For handling singular point mutations in electromagnetic property mappings, deep residual networks combined with property classification have demonstrated the ability to predict geometries with mean square errors below 0.23, enabling reliable inverse design of holographic imaging metasurfaces.",
+      "claim_handles": [
+        "C21_INVERSE_DESIGN_USING_DEEP_RESIDUAL_NETWORKS_AD"
+      ],
+      "evidence_handles": [
+        "E48_INVERSE_DESIGN_METASURFACE_HOLOGRAPHY_DEEP_RES"
+      ]
+    },
+    {
+      "block_index": 3,
+      "sentence": "At the foundation model scale, frameworks like MOCLIP leverage massive experimental datasets of over 466,000 geometry-spectra pairs to learn a shared latent space, enabling zero-shot prediction speeds of approximately 200,000 spectra per second while incorporating fabrication tolerances missing from purely simulated data.",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The phrase 'missing from purely simulated data' implies that simulated data *never* includes fabrication tolerances, which is an overgeneralization. The evidence (E07) states the dataset incorporates 'typical missing information from simulations, such as... fabrication tolerances', implying these are often missing in *the specific context of previous large-scale datasets*, not universally absent from all simulation data.",
+      "suggested_hedge": "At the foundation model scale, frameworks like MOCLIP leverage massive experimental datasets of over 466,000 geometry-spectra pairs to learn a shared latent space, enabling zero-shot prediction speeds of approximately 200,000 spectra per second while incorporating fabrication tolerances and measurement uncertainties that are often absent in purely simulated datasets.",
+      "claim_handles": [
+        "C04_DEEP_LEARNING_BASED_INVERSE_DESIGN_FRAMEWORKS"
+      ],
+      "evidence_handles": [
+        "E07_MOCLIP_FOUNDATION_MODEL_LARGE_SCALE_NANOPHOTON"
+      ]
+    },
+    {
+      "block_index": 5,
+      "sentence": "Current inverse design approaches often attempt to resolve this by treating the metasurface as an isolated component, utilizing classifiers and iterative neural networks to suppress specific phase cross-talks based on preset conditions.",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The text attributes the use of 'classifiers and iterative neural networks' to 'current inverse design approaches' generally. The evidence (E23) describes a *specific* methodology ('proposed methodology') for dual-spin/frequency metasurfaces. Generalizing this specific technique to 'current approaches' as a common strategy for resolving the bottleneck is an overclaim.",
+      "suggested_hedge": "Some current inverse design approaches, particularly for complex multiplexed systems, attempt to resolve this by treating the metasurface as an isolated component, utilizing classifiers and iterative neural networks to suppress specific phase cross-talks based on preset conditions.",
+      "claim_handles": [
+        "C16_CURRENT_INVERSE_DESIGN_PARADIGMS_OFTEN_TREAT_M"
+      ],
+      "evidence_handles": [
+        "E23_DEEP_LEARNING_ASSISTED_INVERSE_DESIGN_DUAL_SPI"
+      ]
+    }
+  ],
+  "blocking_count": 0,
+  "advisory_count": 4,
+  "per_block_revision_outcomes": {
+    "1": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "2": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "3": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "4": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "5": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "6": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "7": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "8": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    }
+  }
+}

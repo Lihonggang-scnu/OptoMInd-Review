@@ -1,0 +1,37 @@
+You are given one visual item from a scientific paper. The visual item may be a figure, graph, spectrum, microscopy image, scheme, photo, or table.
+
+Input may include:
+- the paper title;
+- the visual image or table text;
+- the original caption;
+- nearby paper text that cites or explains this visual item.
+
+Your task is only to create a structured evidence card for this one visual item. Do not assume any project-specific workflow. Do not write a literature review. Do not infer exact numerical values if they are not clearly readable from the image, caption, or nearby text.
+
+Return exactly one valid JSON object, with no Markdown fences:
+{
+  "asset_type": "figure|table|scheme|graph|spectrum|micrograph|photo|device_diagram|process_flow|unknown",
+  "visual_type": "",
+  "paper_role": "method|result|benchmark|mechanism|background|limitation|supplementary|unclear",
+  "short_title": "",
+  "what_the_visual_shows": "",
+  "what_the_caption_says": "",
+  "what_the_linked_text_says": "",
+  "combined_interpretation": "",
+  "key_variables_or_metrics": [],
+  "materials_or_structures": [],
+  "method_details_visible": [],
+  "result_claims_supported": [],
+  "important_numbers_visible": [],
+  "recommended_use_in_review": [],
+  "warnings": [],
+  "confidence": "high|medium|low"
+}
+
+Quality rules:
+- If the image is unreadable, say so in "warnings" and use "low" confidence.
+- If the image and text disagree, report the disagreement in "warnings".
+- If the item is a spectrum or optical/thermal measurement, mention axes, wavelength ranges, metrics, and experimental/simulation context when readable.
+- To avoid encoding problems, write units and symbols in ASCII form when possible: use "um" instead of the Greek mu symbol, "deg" instead of the degree symbol, "tau_avg", "epsilon_avg", "theta", and "lambda" instead of Greek letters.
+- Use exactly the JSON field names given above. Do not add new field names.
+- Keep all explanatory fields in English.

@@ -1,0 +1,380 @@
+{
+  "schema_version": "optomind.global_manuscript_commander.work_order.v2",
+  "status": "completed",
+  "mode": "live",
+  "model_tier": "c2_model",
+  "fingerprint": "bbd6311c95a2429a42851bef8a35969e963c80a55bc956c8da3643593f3d04b0",
+  "section_ids": [
+    "S01",
+    "S02",
+    "S03",
+    "S04",
+    "S05",
+    "S06",
+    "S07",
+    "S08"
+  ],
+  "generated_at": "2026-08-28T17:58:19.243984+00:00",
+  "manuscript_diagnosis": "The manuscript exhibits a strong thematic coherence around 'co-design' and 'inverse design' but suffers from significant structural redundancy. Key topics—specifically inverse design, heterogeneous BEOL integration, and thermal crosstalk—are discussed in nearly every section (S01-S07) with overlapping explanations and citations. This dilutes the unique contribution of each section. S06 (Bottlenecks) overlaps heavily with S01 (Physics) and S07 (Co-Design), failing to provide a distinct 'problem statement' before the 'solution' sections. The narrative flow is currently circular: Material -> Architecture -> Engine -> Bottleneck -> Co-Design -> Application, but with heavy cross-contamination of content between these stages.",
+  "proposed_section_order": [
+    {
+      "section_id": "S01",
+      "reason": "Foundational materials and device physics. Must remain first but should be stripped of inverse design/bottleneck details."
+    },
+    {
+      "section_id": "S02",
+      "reason": "Programmable Architectures. Introduces MZI/Diffractive structures as the primary means to implement linear algebra."
+    },
+    {
+      "section_id": "S03",
+      "reason": "Matrix Multiplication Engines. Details how architectures realize computation, focusing on precision/energy trade-offs."
+    },
+    {
+      "section_id": "S06",
+      "reason": "Scalability Bottlenecks. Should follow S03 to define the 'problem space' (loss, heat, control) before discussing solutions."
+    },
+    {
+      "section_id": "S07",
+      "reason": "Co-Design Methodologies. Presents AI/Inverse Design/Hybrid Integration as the *methods* to overcome the bottlenecks defined in S06."
+    },
+    {
+      "section_id": "S04",
+      "reason": "AI Acceleration Systems. Evaluates system-level performance and benchmarks, assuming the hardware/methods are established."
+    },
+    {
+      "section_id": "S05",
+      "reason": "Optical Interconnects. Discusses distributed scaling, distinct from on-chip AI acceleration."
+    },
+    {
+      "section_id": "S08",
+      "reason": "Synthesis. Integrates all findings, highlighting benchmarking gaps and trajectory."
+    }
+  ],
+  "section_decisions": [
+    {
+      "section_id": "S01",
+      "decision": "retain",
+      "rationale": "Strip out inverse design and thermal crosstalk details; retain only material property comparisons and basic device physics.",
+      "responsibility": "",
+      "provenance": ""
+    },
+    {
+      "section_id": "S02",
+      "decision": "retain",
+      "rationale": "Core definition of circuit topologies. Needs to absorb some inverse design context but remain focused on architecture.",
+      "responsibility": "",
+      "provenance": ""
+    },
+    {
+      "section_id": "S03",
+      "decision": "retain",
+      "rationale": "Core definition of computational engines. Needs to clarify precision/energy limits without repeating S06.",
+      "responsibility": "",
+      "provenance": ""
+    },
+    {
+      "section_id": "S06",
+      "decision": "reposition",
+      "rationale": "Move after S03. Focus purely on 'Scaling Limits' (control overhead, loss accumulation) to serve as the problem statement for S07.",
+      "responsibility": "",
+      "provenance": ""
+    },
+    {
+      "section_id": "S07",
+      "decision": "reposition",
+      "rationale": "Move after S06. Focus on 'Co-Design' as the solution to S06's problems. Remove redundant inverse design/heterogeneous integration details.",
+      "responsibility": "",
+      "provenance": ""
+    },
+    {
+      "section_id": "S04",
+      "decision": "retain",
+      "rationale": "System-level AI evaluation. Must be strictly scoped to workloads/benchmarks.",
+      "responsibility": "",
+      "provenance": ""
+    },
+    {
+      "section_id": "S05",
+      "decision": "retain",
+      "rationale": "System-level interconnect evaluation. Distinct from S04.",
+      "responsibility": "",
+      "provenance": ""
+    },
+    {
+      "section_id": "S08",
+      "decision": "retain",
+      "rationale": "Synthesis. Must integrate insights from all previous sections.",
+      "responsibility": "",
+      "provenance": ""
+    }
+  ],
+  "cross_section_conflicts": [
+    {
+      "conflict_type": "redundancy",
+      "sections": [
+        "S01",
+        "S02",
+        "S03",
+        "S06",
+        "S07"
+      ],
+      "description": "Thermal crosstalk is discussed in all five sections with similar explanations and citations (e.g., doi:10.1109/access.2020.3013116).",
+      "recommendation": "Consolidate thermal crosstalk discussion primarily in S06 (Bottlenecks) and S01 (Material Constraints). Mention briefly in S02/S03/S07 only as a design constraint.",
+      "finding_id": ""
+    },
+    {
+      "conflict_type": "role_overlap",
+      "sections": [
+        "S01",
+        "S02",
+        "S05",
+        "S06",
+        "S07",
+        "S08"
+      ],
+      "description": "Inverse design and AI-driven optimization are discussed in nearly every section, diluting the unique contribution of each.",
+      "recommendation": "Assign 'Inverse Design' primarily to S07 (Co-Design Methodologies) and S02 (Architectures). S01/S03/S05/S06/S08 should only reference it as an enabler, not detail the methodology.",
+      "finding_id": ""
+    },
+    {
+      "conflict_type": "redundancy",
+      "sections": [
+        "S01",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08"
+      ],
+      "description": "Heterogeneous BEOL integration (TFLN/SiPh) is discussed in six sections.",
+      "recommendation": "Consolidate BEOL integration details in S01 (Material Platform) and S07 (Co-Design/Hybrid Integration). Other sections should only mention it as a platform choice.",
+      "finding_id": ""
+    }
+  ],
+  "missing_axes": [],
+  "structure_gaps": [],
+  "structure_candidates": [
+    {
+      "candidate_id": "C1",
+      "story_shape": "Problem-Solution Synthesis",
+      "narrative_backbone": "Establish the fundamental physical limits (Loss/Heat/Precision) -> Analyze how current architectures fail to scale due to these limits -> Present Co-Design (AI/Hybrid) as the necessary unifying framework -> Evaluate System-Level Viability (Interconnects/AI Accelerators) -> Conclude with Benchmarking Gaps.",
+      "section_order": [
+        "S01",
+        "S06",
+        "S02",
+        "S03",
+        "S07",
+        "S04",
+        "S05",
+        "S08"
+      ],
+      "reader_path": "The reader first understands *why* scaling is hard (S01+S06 combined conceptually), then sees *how* specific architectures attempt to solve it (S02+S03), followed by the *methodologies* enabling this (S07), and finally the *system outcomes* (S04+S05).",
+      "rationale": "This structure groups all 'constraints' early to set the stage for 'solutions'. It prevents the repetitive cycle of 'here is a constraint, here is a solution, here is another constraint' found in the current draft.",
+      "risks": [
+        "Merging S01 and S06 requires careful editing to avoid overwhelming the reader with negative constraints before introducing any positive architectural examples."
+      ]
+    },
+    {
+      "candidate_id": "C2",
+      "story_shape": "Hierarchical Abstraction",
+      "narrative_backbone": "Materials & Devices (S01) -> Circuit Architectures (S02) -> Computational Engines (S03) -> Scalability Bottlenecks (S06) -> Co-Design Methodologies (S07) -> System Applications (S04, S05) -> Synthesis (S08).",
+      "section_order": [
+        "S01",
+        "S02",
+        "S03",
+        "S06",
+        "S07",
+        "S04",
+        "S05",
+        "S08"
+      ],
+      "reader_path": "A strict bottom-up approach: Material -> Device -> Circuit -> System Bottleneck -> Design Method -> Application. This mirrors the engineering design flow.",
+      "rationale": "This is the most logical engineering progression. It isolates 'Bottlenecks' (S06) after establishing the components, making the case for 'Co-Design' (S07) more compelling as a direct response to those bottlenecks.",
+      "risks": [
+        "S06 still risks repeating S01/S02 content if not strictly scoped to 'scaling failures' rather than 'component physics'.",
+        "S04 and S05 might feel disconnected if they don't explicitly reference the bottlenecks identified in S06."
+      ]
+    },
+    {
+      "candidate_id": "C3",
+      "story_shape": "Thematic Clustering",
+      "narrative_backbone": "The Substrate Problem (S01 + S06 merged/repositioned) -> The Architecture Solution (S02 + S03) -> The Design Enabler (S07) -> The System Outcome (S04 + S05) -> The Meta-Challenge (S08).",
+      "section_order": [
+        "S01",
+        "S06",
+        "S02",
+        "S03",
+        "S07",
+        "S04",
+        "S05",
+        "S08"
+      ],
+      "reader_path": "Focuses on themes: 'What are we building with?' (Substrate), 'How do we build it?' (Architecture/Design), 'What does it do?' (System).",
+      "rationale": "By grouping S01 and S06, we eliminate the repetition of thermal/crosstalk discussions. By grouping S02 and S03, we consolidate the 'linear algebra' discussion. This reduces the total number of distinct topics the reader must track.",
+      "risks": [
+        "Requires significant merging of text between S01 and S06, which may be difficult if the source texts are rigidly separated."
+      ]
+    }
+  ],
+  "selected_story_shape": {
+    "candidate_id": "C1",
+    "story_shape": "Hierarchical Abstraction",
+    "rationale": "Selected C1 over C2 because it maintains the standard engineering abstraction layers (Material->Device->Circuit->System) which is easier for readers to follow than grouping all problems first. It allows S06 to serve as a critical pivot point where component-level issues are aggregated into system-level bottlenecks, justifying the need for S07's co-design methodologies.",
+    "provenance_prior_role": "structure_strategist"
+  },
+  "reader_path_findings": [
+    {
+      "finding_id": "RF01",
+      "section_id": "S01",
+      "assessment": "Reader encounters inverse design and thermal crosstalk details too early, before understanding the circuit context.",
+      "recommendation": "Retain only material property comparisons in S01; move inverse design and detailed thermal crosstalk to S06 or S07.",
+      "severity": "major",
+      "fail_open": true
+    },
+    {
+      "finding_id": "RF02",
+      "section_id": "S06",
+      "assessment": "S06 repeats thermal crosstalk and fabrication variation details already covered in S01 and S02 without adding new 'scaling limit' insights.",
+      "recommendation": "Reposition S06 to focus exclusively on 'Scaling Limits' (e.g., control overhead, loss accumulation rates) rather than component physics.",
+      "severity": "critical",
+      "fail_open": true
+    },
+    {
+      "finding_id": "RF03",
+      "section_id": "S07",
+      "assessment": "S07 introduces co-design methodologies but re-discusses inverse design and heterogeneous integration extensively.",
+      "recommendation": "Merge S07's inverse design content into S02/S03 where relevant, and keep S07 focused on 'Algorithm-Hardware Co-Design' frameworks.",
+      "severity": "major",
+      "fail_open": true
+    },
+    {
+      "finding_id": "RF04",
+      "section_id": "S04",
+      "assessment": "S04 discusses AI acceleration but repeats interconnect and bottleneck details from S05 and S06.",
+      "recommendation": "Strictly scope S04 to 'Workload Mapping and Benchmarks'; remove interconnect and bottleneck discussions.",
+      "severity": "minor",
+      "fail_open": true
+    }
+  ],
+  "section_argument_gaps": [],
+  "review_structure_gaps": [],
+  "gap_value_decisions": [
+    {
+      "decision_id": "GVD-01",
+      "gap_id": "S02-GAP-CTRL",
+      "decision": "approve",
+      "confidence": "high",
+      "reason": "The coverage auditor correctly identified that 'control complexity' is currently treated as a symptom of thermal crosstalk (S06) or a vague requirement (S02), rather than a distinct architectural domain. Quantifying the electronic control overhead is essential to define the true scaling limit of MZI meshes, which is currently obscured by the focus on optical loss.",
+      "provenance_prior_role": "coverage_auditor"
+    },
+    {
+      "decision_id": "GVD-02",
+      "gap_id": "S03-GAP-NL",
+      "decision": "approve",
+      "confidence": "medium",
+      "reason": "The current draft conflates the *existence* of nonlinearity constraints with the *strategies* to overcome them. A dedicated subsection comparing hybrid, all-optical, and diffractive nonlinearity approaches would clarify the hardware-algorithm interface, which is currently under-specified in S03 and prematurely introduced in S04.",
+      "provenance_prior_role": "coverage_auditor"
+    }
+  ],
+  "rejected_gap_candidates": [
+    {
+      "rejection_id": "RGC-01",
+      "candidate_id": "NEW-CH-CONTROL",
+      "gap_type": "review_structure_gap",
+      "decision": "reject",
+      "reason": "The topic of electronic control and calibration can be absorbed into S02 as a subsection on 'Control Plane Architectures' and referenced in S07. Creating a new chapter is disproportionate to the scope of the missing content, which is better served by strengthening the argument structure of existing sections.",
+      "existing_coverage": {
+        "paragraph_ids": [
+          "S02-P01",
+          "S06-P03"
+        ],
+        "summary": "S02 mentions feedback circuits; S06 mentions control overhead. These provide the foundation for a dedicated subsection in S02."
+      },
+      "residual_gap": "",
+      "provenance_prior_role": "coverage_auditor"
+    }
+  ],
+  "coverage_audit_summary": "Audited sections S01-S08. The manuscript exhibits a strong structural bias toward 'inverse design' and 'AI-driven optimization' as the primary enablers of scalability, often treating these computational methods as the solution to physical bottlenecks (loss, crosstalk) rather than distinct architectural strategies. While S06 identifies bottlenecks and S07 proposes co-design, there is no dedicated section analyzing the specific electronic control plane architectures (calibration, feedback, routing) required to manage the thousands of tunable elements in scalable meshes. Furthermore, the distinction between static diffractive computing and dynamic interferometric computing is blurred across S02/S03 without a clear structural mapping to their respective scaling limits.",
+  "repeated_paper_role_audit": [
+    {
+      "paper_id": "35b0156c1b02ea4d54610e852cecd49b7b505a71",
+      "trust_type": "core_evidence",
+      "title": "Design and Simulation of Thermo-Optic Phase Shifters With Low Thermal Crosstalk for Dense Photonic Integration",
+      "sections": [
+        "S01",
+        "S02",
+        "S03",
+        "S06",
+        "S07"
+      ],
+      "roles": [],
+      "recommendation": "Consolidate thermal crosstalk discussion primarily in S06 (Bottlenecks) and S01 (Material Constraints). Mention briefly in S02/S03/S07 only as a design constraint.",
+      "decision": "",
+      "rationale": "",
+      "finding_id": ""
+    },
+    {
+      "paper_id": "9b444e84d20ae6e3d62d2d4df30268b5a53baad2",
+      "trust_type": "core_evidence",
+      "title": "Heterogeneous back-end-of-line integration of thin-film lithium niobate on active silicon photonics for single-chip optical transceivers",
+      "sections": [
+        "S01",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08"
+      ],
+      "roles": [],
+      "recommendation": "Consolidate BEOL integration details in S01 (Material Platform) and S07 (Co-Design/Hybrid Integration). Other sections should only mention it as a platform choice.",
+      "decision": "",
+      "rationale": "",
+      "finding_id": ""
+    },
+    {
+      "paper_id": "aed4e02073734bc74e53063c0b555f881cc3221d",
+      "trust_type": "core_evidence",
+      "title": "Inverse design of nanophotonic devices enabled by optimization algorithms and deep learning: recent achievements and future prospects",
+      "sections": [
+        "S01",
+        "S05",
+        "S06",
+        "S07",
+        "S08"
+      ],
+      "roles": [],
+      "recommendation": "Assign 'Inverse Design' primarily to S07 (Co-Design Methodologies) and S02 (Architectures). S01/S03/S05/S06/S08 should only reference it as an enabler, not detail the methodology.",
+      "decision": "",
+      "rationale": "",
+      "finding_id": ""
+    }
+  ],
+  "visual_work_orders": [],
+  "retrieval_gap_proposals": [],
+  "proposed_patch_set": [],
+  "affected_section_ids": [
+    "S01",
+    "S02",
+    "S03",
+    "S04",
+    "S05",
+    "S06",
+    "S07",
+    "S08"
+  ],
+  "next_execution_stages": [
+    "Execute targeted patch proposals for S02 (Control Plane) and S03 (Nonlinearity Taxonomy) to address approved section argument gaps.",
+    "Perform local text edits to reduce redundancy in S01, S06, and S07 regarding thermal crosstalk and inverse design.",
+    "Proceed to introduction/abstract/conclusion generation and five-reviewer editorial loop."
+  ],
+  "retained_advisory_issues": [
+    "Ensure S06 clearly distinguishes 'scaling bottlenecks' from 'component physics' to avoid redundancy with S01.",
+    "Ensure S07 focuses on 'Co-Design Frameworks' rather than re-describing inverse design tools.",
+    "Ensure S04 and S05 maintain distinct scopes (AI Acceleration vs. Interconnect Fabrics)."
+  ],
+  "read_only_declaration": {
+    "chapter_text_changed": false,
+    "retrieval_launched": false,
+    "note": "Advisory work order only."
+  }
+}

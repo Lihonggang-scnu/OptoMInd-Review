@@ -1,0 +1,101 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S05",
+  "attempted": true,
+  "available": true,
+  "fallback_reason": "",
+  "comments": [
+    {
+      "block_index": 1,
+      "sentence": "specifically, such designs have reached 1.6 TB/s of bandwidth across 128 optical channels, representing a 300-fold latency reduction compared with conventional electronic networks.",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The text generalizes the OptoLink specific result (1.6 TB/s, 300x latency reduction in FHE bootstrapping) to 'such designs' broadly and implies this is a general characteristic of WDM/SDM interconnects, rather than a specific benchmark for that architecture. The evidence supports these numbers only for the OptoLink FHE context.",
+      "suggested_hedge": "specifically, architectures like OptoLink have demonstrated up to 1.6 TB/s of bandwidth across 128 optical channels, representing a 300-fold latency reduction compared with conventional electronic networks in specific workloads.",
+      "claim_handles": [
+        "C09_OPTICAL_SIGNAL_PROCESSING_OFFERS_WIDE_BANDWIDT"
+      ],
+      "evidence_handles": [
+        "E22_OPTOLINK_BREAKING_MEMORY_BANDWIDTH_BOTTLENECKS"
+      ]
+    },
+    {
+      "block_index": 4,
+      "sentence": "For instance, physics-informed reinforcement learning has demonstrated significantly higher sample efficiency in designing freeform metasurfaces compared to standard approaches, while other frameworks achieve faster simulation speeds with reduced prediction errors across unseen settings.",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "The claim attributes 'faster simulation speeds with reduced prediction errors across unseen settings' to 'other frameworks' generally. While E67 supports PIRL's sample efficiency and E68 supports NeurOLight's speed/error metrics, the text conflates distinct mechanisms (RL vs Neural Operators) into a single generalized statement about 'physics-informed' methods without specifying which framework achieves which metric, potentially misleading the reader about the universality of these gains.",
+      "suggested_hedge": "For instance, physics-informed reinforcement learning has demonstrated significantly higher sample efficiency in designing freeform metasurfaces, while physics-agnostic neural operators have achieved faster simulation speeds with reduced prediction errors across unseen settings.",
+      "claim_handles": [
+        "C25_PHYSICS_INFORMED_NEURAL_NETWORKS_DIFFERENTIABL"
+      ],
+      "evidence_handles": [
+        "E67_SAMPLE_EFFICIENT_INVERSE_DESIGN_FREEFORM_NANOP",
+        "E68_NEUROLIGHT_PHYSICS_AGNOSTIC_NEURAL_OPERATOR_EN"
+      ]
+    },
+    {
+      "block_index": 6,
+      "sentence": "The active control required for such dynamic routing stems from lithium niobate's unique ferroelectric properties, where 'electric-field poling' allows the local inversion of spontaneous polarization at room temperature to engineer electro-optic coefficients without obsolete high-temperature diffusion processes.",
+      "flag_type": "advisory",
+      "blocking": false,
+      "issue": "The text links 'dynamic routing' directly to 'electric-field poling'. Evidence E14 states poling engineers phase-velocity matching (momentum conservation) for nonlinear devices or domain inversion, making high-temp diffusion obsolete. It does not explicitly state that poling itself provides the *active control* for dynamic routing (which typically requires applied voltage/modulation). Poling is a static fabrication step to create the nonlinearity/electro-optic effect; the active control comes from the subsequent application of fields to that engineered material. This is a slight mechanistic conflation.",
+      "suggested_hedge": "The active control capabilities stem from lithium niobate's ferroelectric properties, where 'electric-field poling' allows the local inversion of spontaneous polarization to engineer electro-optic coefficients, enabling efficient modulation.",
+      "claim_handles": [
+        "C06_LITHIUM_NIOBATE_LN_PHOTONICS_ENABLES_DYNAMIC_O"
+      ],
+      "evidence_handles": [
+        "E14_LITHIUM_NIOBATE_PHOTONICS_UNLOCKING_ELECTROMAG"
+      ]
+    }
+  ],
+  "blocking_count": 0,
+  "advisory_count": 3,
+  "per_block_revision_outcomes": {
+    "1": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "2": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "3": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "4": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "5": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "6": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "7": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "8": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "9": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    }
+  }
+}

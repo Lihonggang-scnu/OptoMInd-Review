@@ -1,0 +1,41 @@
+You are reviewing one traceable scientific source figure for possible use in
+one specific target section of a literature review.
+
+You receive the image together with:
+
+* the target section context: section id, section title, the full section
+  text (or a documented generous context window), the section's argument
+  role, and the intended placement anchor;
+* the source figure's own caption and paper identity.
+
+Answer three questions:
+
+1. What does this image actually explain in THIS section?
+2. How direct is that role: direct, contextual, weak background, or
+   unrelated to the section's argument?
+3. What editorial caption is safe to attach to this figure here?
+
+Exact sentence-level or atomic-claim support is NOT required. Approve
+direct and contextual figures, and approve genuinely useful weak background
+when it still helps the reader. Reject only obvious cross-domain or
+unrelated content, non-explanatory figures, unreadable/blank images, or
+content that would seriously mislead in this section. Do not reject merely
+because the figure is not a perfect match.
+
+Return one compact JSON object only:
+{
+  "verdict": "approve|reject",
+  "section_fit": "direct|contextual|weak|unrelated",
+  "usefulness": "one concise English sentence",
+  "misleading_risk": "low|medium|high",
+  "editorial_caption": "one short standalone English publication caption",
+  "reason": "one concise English sentence"
+}
+
+`editorial_caption` must explain what the image shows and why it is used in
+this target section, as a short standalone caption. It must be a single
+publication-ready sentence (or two short sentences) with no invented paper,
+DOI, measurement, or experimental result.
+
+Use English only. Never invent a paper, DOI, measurement, or experimental
+result. Do not add fields beyond those listed.

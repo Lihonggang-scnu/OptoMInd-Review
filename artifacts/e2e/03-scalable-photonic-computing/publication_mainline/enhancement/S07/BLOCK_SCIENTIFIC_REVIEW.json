@@ -1,0 +1,81 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S07",
+  "attempted": true,
+  "available": true,
+  "fallback_reason": "",
+  "comments": [
+    {
+      "block_index": 3,
+      "sentence": "While adjoint methods may offer higher accuracy in specific low-dimensional tasks, PINNs provide superior scalability because their computational cost depends on network architecture rather than mesh resolution...",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The text claims PINNs provide 'superior scalability' compared to adjoint methods. The evidence (E78) states that the adjoint method is 'more accurate' and that the 'decisive difference... is in scalability', noting that adjoint methods become 'intractable' in high dimensions due to memory footprint, whereas PINN cost is set by network architecture. While PINNs scale better in *memory/dimensionality*, claiming they are universally 'superior' ignores the significant accuracy penalty noted in the evidence (PINN error is an order of magnitude worse). This is a material overclaim of superiority without acknowledging the trade-off.",
+      "suggested_hedge": "While adjoint methods may offer higher accuracy in specific low-dimensional tasks, PINNs offer different scalability characteristics, as their computational cost depends on network architecture rather than mesh resolution, avoiding the intractable memory footprints of full discrete trajectory storage in high dimensions.",
+      "claim_handles": [
+        "C26_PHYSICS_INFORMED_NEURAL_NETWORKS_PINNS_ADJOINT"
+      ],
+      "evidence_handles": [
+        "E78_ADJOINT_METHOD_VERSUS_PHYSICS_INFORMED_NEURAL"
+      ]
+    },
+    {
+      "block_index": 5,
+      "sentence": "These artificial bandgap materials enable precise manipulation of photon local density of states through periodic dielectric structures; by intentionally disrupting periodicity to create defect modes, they localize photons at specific frequencies to achieve optical signal control with wavelength precision.",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "The block introduces 'photonic crystal microcavity arrays' and the mechanism of using 'defect modes' to localize photons for multi-wavelength control as a solution to DONN limitations. While E65 discusses integrating PhCs with DONNs, it frames this as a proposed architecture ('Here, we propose...') for joint inference, not as a general established mechanism for overcoming DONN limitations in all scenarios. The block presents this specific proposal as a general pathway/standard capability.",
+      "suggested_hedge": "Integrating diffractive elements with advanced wavelength-based modulation devices, such as photonic crystal microcavity arrays which utilize defect modes to localize photons, has been proposed as a pathway to overcome wavelength-dependent phase modulation limitations inherent to conventional diffractive networks.",
+      "claim_handles": [
+        "C15_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_DONNS_IMPL"
+      ],
+      "evidence_handles": [
+        "E65_MULTI_WAVELENGTH_DIFFRACTIVE_OPTICAL_NEURAL_NE"
+      ]
+    }
+  ],
+  "blocking_count": 0,
+  "advisory_count": 2,
+  "per_block_revision_outcomes": {
+    "1": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "2": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "3": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "4": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "5": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "6": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "7": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "8": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    }
+  }
+}

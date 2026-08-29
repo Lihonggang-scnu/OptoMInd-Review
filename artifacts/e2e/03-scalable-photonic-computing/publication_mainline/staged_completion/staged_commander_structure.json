@@ -1,0 +1,149 @@
+{
+  "schema_version": "optomind.staged_article_completion.v1",
+  "stage": "commander_structure",
+  "status": "completed",
+  "fingerprint": "42a6ef6f09f1404cc6c5373f1e6e2d3623fe37ca7e9cd1eafcfe8770ccfdae70",
+  "input_fingerprint": "33e5b1ed548d56970623138ef0a34395f5101d7d5d32979b6b5b962b13fe152d",
+  "artifact_path": "<local-path>",
+  "approval_required": false,
+  "payload": {
+    "schema_version": "optomind.staged_commander_authority.v1",
+    "source_work_order_path": "<local-path>",
+    "fingerprint": "0966007e64c17afdd530b9261380c0219bad474addb16ce5364ec7400ea56788",
+    "section_order": [
+      {
+        "section_id": "S01",
+        "position": 0,
+        "rationale": ""
+      },
+      {
+        "section_id": "S02",
+        "position": 1,
+        "rationale": ""
+      },
+      {
+        "section_id": "S03",
+        "position": 2,
+        "rationale": ""
+      },
+      {
+        "section_id": "S06",
+        "position": 3,
+        "rationale": ""
+      },
+      {
+        "section_id": "S07",
+        "position": 4,
+        "rationale": ""
+      },
+      {
+        "section_id": "S04",
+        "position": 5,
+        "rationale": ""
+      },
+      {
+        "section_id": "S05",
+        "position": 6,
+        "rationale": ""
+      },
+      {
+        "section_id": "S08",
+        "position": 7,
+        "rationale": ""
+      }
+    ],
+    "section_responsibilities": [
+      {
+        "section_id": "S01",
+        "responsibility": "retain | Strip out inverse design and thermal crosstalk details; retain only material property comparisons and basic device physics.",
+        "provenance": "commander_work_order"
+      },
+      {
+        "section_id": "S02",
+        "responsibility": "retain | Core definition of circuit topologies. Needs to absorb some inverse design context but remain focused on architecture.",
+        "provenance": "commander_work_order"
+      },
+      {
+        "section_id": "S03",
+        "responsibility": "retain | Core definition of computational engines. Needs to clarify precision/energy limits without repeating S06.",
+        "provenance": "commander_work_order"
+      },
+      {
+        "section_id": "S06",
+        "responsibility": "reposition | Move after S03. Focus purely on 'Scaling Limits' (control overhead, loss accumulation) to serve as the problem statement for S07.",
+        "provenance": "commander_work_order"
+      },
+      {
+        "section_id": "S07",
+        "responsibility": "reposition | Move after S06. Focus on 'Co-Design' as the solution to S06's problems. Remove redundant inverse design/heterogeneous integration details.",
+        "provenance": "commander_work_order"
+      },
+      {
+        "section_id": "S04",
+        "responsibility": "retain | System-level AI evaluation. Must be strictly scoped to workloads/benchmarks.",
+        "provenance": "commander_work_order"
+      },
+      {
+        "section_id": "S05",
+        "responsibility": "retain | System-level interconnect evaluation. Distinct from S04.",
+        "provenance": "commander_work_order"
+      },
+      {
+        "section_id": "S08",
+        "responsibility": "retain | Synthesis. Must integrate insights from all previous sections.",
+        "provenance": "commander_work_order"
+      }
+    ],
+    "duplication": [
+      {
+        "section_ids": [
+          "S01",
+          "S02",
+          "S03",
+          "S06",
+          "S07"
+        ],
+        "duplication_type": "",
+        "advisory": true
+      },
+      {
+        "section_ids": [
+          "S01",
+          "S04",
+          "S05",
+          "S06",
+          "S07",
+          "S08"
+        ],
+        "duplication_type": "",
+        "advisory": true
+      },
+      {
+        "section_ids": [
+          "S01",
+          "S05",
+          "S06",
+          "S07",
+          "S08"
+        ],
+        "duplication_type": "",
+        "advisory": true
+      }
+    ],
+    "missing_axes": [],
+    "structure_gaps": [],
+    "visual_work_orders": [],
+    "claim_evidence_invariant": "preserved",
+    "read_only": true,
+    "approval_required_for": []
+  },
+  "provenance": {
+    "run_fingerprint": "a30c6ea9fd41f8f21e6ff7879c0d17d557462d02706df923248d90920f35fbcf",
+    "stage_order_position": "1",
+    "usage_recorded": "False"
+  },
+  "usage": {},
+  "error": null,
+  "created_at": "2026-08-28T17:58:19.416056+00:00",
+  "updated_at": "2026-08-28T17:58:19.416056+00:00"
+}

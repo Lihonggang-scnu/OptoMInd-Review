@@ -1,0 +1,92 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S02",
+  "attempted": true,
+  "available": true,
+  "fallback_reason": "",
+  "comments": [
+    {
+      "block_index": 1,
+      "sentence": "The viability of this paradigm was decisively demonstrated by the first all-optical diffractive deep neural network, which employed these principles to classify handwritten digits at near-light speeds using 3D-printed phase masks optimized entirely through simulation.",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The evidence states the system performed classification 'at near-light-speed' (referring to inference latency) and was fabricated via 3D printing. The block claims it was 'optimized entirely through simulation'. While training is typically done in simulation, the evidence does not explicitly confirm that *no* hardware-in-the-loop or physical calibration steps were used for the specific 2018 UCLA D2NN, nor does it support the absolute phrasing 'entirely'. More importantly, 'near-light speeds' refers to propagation delay, not the computational speed of the optimization process itself, creating a potential ambiguity in the claim's scope.",
+      "suggested_hedge": "The viability of this paradigm was demonstrated by early all-optical diffractive deep neural networks, which utilized end-to-end differentiable optimization to train phase profiles for tasks such as handwritten digit classification, achieving inference latencies limited only by light propagation time.",
+      "claim_handles": [
+        "C31_FIRST_ALL_OPTICAL_DIFFRACTIVE_DEEP_NEURAL_NETW"
+      ],
+      "evidence_handles": [
+        "E135_REVIEW_DIFFRACTIVE_DEEP_NEURAL_NETWORKS"
+      ]
+    },
+    {
+      "block_index": 2,
+      "sentence": "Recent advancements, including dual-wavelength differential networks, demonstrate how leveraging complementary optical responses can significantly improve classification accuracy and robustness against noise, validating the potential for orders of magnitude improvements in computation speed.",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "The text links 'dual-wavelength differential networks' directly to 'orders of magnitude improvements in computation speed'. Evidence E104 confirms that dual-wavelength networks improve *classification accuracy* and *robustness*, but does not attribute speed improvements to this specific architecture. Speed improvements are attributed generally to optical computing (E105, E140), not specifically to the dual-wavelength mechanism. This is an unsupported causal link between the specific advancement and the general benefit.",
+      "suggested_hedge": "Recent advancements, including dual-wavelength differential networks, demonstrate how leveraging complementary optical responses can significantly improve classification accuracy and robustness against noise, complementing the inherent high-throughput and low-latency advantages of parallel optical propagation.",
+      "claim_handles": [
+        "C25_OPTICAL_COMPUTING_PARADIGMS_LEVERAGING_LIGHT_P",
+        "C32_DIFFRACTIVE_DEEP_NEURAL_NETWORKS_OFFER_ORDERS"
+      ],
+      "evidence_handles": [
+        "E104_DUAL_WAVELENGTH_DIFFERENTIAL_DIFFRACTIVE_NETWO",
+        "E105_DIFFRACTIVE_OPTICAL_NEURAL_NETWORKS_PATHWAYS_T"
+      ]
+    },
+    {
+      "block_index": 4,
+      "sentence": "This mechanism replaces traditional, computationally expensive electromagnetic solvers with efficient approximations, enabling the joint end-to-end optimization of both the optical encoder and the computational reconstruction network.",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The block claims the mechanism 'replaces' traditional solvers. Evidence E92 states the framework 'replaced traditional electromagnetic solvers... with an efficient approximation' in the context of the *design process*. However, the block implies this replacement enables the joint optimization. While true for the design/training loop, the phrasing suggests the physical solver is replaced during operation or that the approximation is a perfect substitute. A more precise hedge is needed to reflect that the *differentiable simulator* is used for gradient-based optimization, replacing the need for iterative full-wave solves during the training loop.",
+      "suggested_hedge": "Data-driven inverse design frameworks utilize differentiable neural simulators to map metasurface geometries directly to their spectral responses, providing efficient gradients that enable the joint end-to-end optimization of both the optical encoder and the computational reconstruction network without relying on iterative full-wave electromagnetic solvers during training.",
+      "claim_handles": [
+        "C23_DATA_DRIVEN_INVERSE_DESIGN_FRAMEWORKS_USING_DI"
+      ],
+      "evidence_handles": [
+        "E92_INVERSE_DESIGN_METASURFACE_SPECTRAL_IMAGING"
+      ]
+    }
+  ],
+  "blocking_count": 0,
+  "advisory_count": 3,
+  "per_block_revision_outcomes": {
+    "1": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "2": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "3": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "4": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "5": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "6": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "7": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    }
+  }
+}

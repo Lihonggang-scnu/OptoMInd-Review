@@ -1,0 +1,70 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S03",
+  "audit": {
+    "verdict": "gaps_found",
+    "gaps": [
+      {
+        "gap_id": "G01",
+        "old_draft_snippet": "The geometric details of coating processes also matter substantially: coating geometry and directional deposition angles significantly influence film thickness uniformity and interfacial stress in thin films, which directly impacts the phase profile fidelity achievable in practical diffractive optical elements [[claim:S03-P008]].",
+        "scientific_content": "Specific mechanism linking coating geometry and directional deposition angles to film thickness uniformity and interfacial stress, and how these factors impact phase profile fidelity.",
+        "claim_handles": [
+          "C03_COATING_GEOMETRY_DIRECTIONAL_COATING_PROCESSES"
+        ],
+        "evidence_handles": [
+          "E03_REVIEW_ARTICLE_STRESS_THIN_FILMS_COATINGS_CURR"
+        ],
+        "affected_block_indices": [
+          2
+        ]
+      },
+      {
+        "gap_id": "G02",
+        "old_draft_snippet": "Cascade diffractive architectures address some of these limitations by circumventing the need for explicit nonlinear electronic activation functions, relying instead on optical modulation and free-space propagation to achieve computational depth [[claim:S03-P097]].",
+        "scientific_content": "Explanation that cascade diffractive architectures circumvent the need for explicit nonlinear electronic activation functions by relying on optical modulation and free-space propagation.",
+        "claim_handles": [
+          "C19_DIFFRACTIVE_DEEP_NEURAL_NETWORKS_D2NNS_CAN_BE"
+        ],
+        "evidence_handles": [
+          "E62_OPTICAL_PHASE_DROPOUT_DIFFRACTIVE_DEEP_NEURAL"
+        ],
+        "affected_block_indices": [
+          7
+        ]
+      }
+    ],
+    "notes": "Gap G01 identifies a specific fabrication physics detail (coating geometry/stress) present in the old draft but missing from the new blocks. Gap G02 identifies the specific architectural advantage of cascade diffractive networks regarding nonlinearity handling, which was in the old draft but not explicitly covered in the new 'Advanced Integration' block.",
+    "warnings": []
+  },
+  "patch_records": [
+    {
+      "gap_id": "G01",
+      "block_index": 2,
+      "applied": true,
+      "used_evidence_handles": [
+        "E14_ALL_OPTICAL_MACHINE_LEARNING_USING_DIFFRACTIVE",
+        "E02_SENSITIVITY_TOLERANCE_ANALYSIS_SINGLE_LAYER_MG",
+        "E52_MINIMALIST_OPTICAL_NEURAL_COMPUTING_OPTICAL_DI",
+        "E03_REVIEW_ARTICLE_STRESS_THIN_FILMS_COATINGS_CURR"
+      ],
+      "gap_evidence_handles": [
+        "E03_REVIEW_ARTICLE_STRESS_THIN_FILMS_COATINGS_CURR"
+      ]
+    },
+    {
+      "gap_id": "G02",
+      "block_index": 7,
+      "applied": true,
+      "used_evidence_handles": [
+        "E47_TILTED_MODE_ALL_OPTICAL_DIFFRACTIVE_DEEP_NEURA",
+        "E79_CHIP_INTEGRATED_ULTRA_COMPACT_MICROSCALE_OPTIC",
+        "E08_OPTICAL_MULTI_TASK_LEARNING_USING_MULTI_WAVELE",
+        "E94_ORBITAL_ANGULAR_MOMENTUM_DEEP_MULTIPLEXING_HOL",
+        "E62_OPTICAL_PHASE_DROPOUT_DIFFRACTIVE_DEEP_NEURAL"
+      ],
+      "gap_evidence_handles": [
+        "E62_OPTICAL_PHASE_DROPOUT_DIFFRACTIVE_DEEP_NEURAL"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S01",
+  "attempted": true,
+  "available": true,
+  "fallback_reason": "",
+  "comments": [
+    {
+      "block_index": 1,
+      "sentence": "Specifically, the complex field at each layer is computed as the Fourier transform of the previous layer's field, modulated by a phase profile, and propagated over an axial distance",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The text asserts that the field is computed as a Fourier transform. While scalar diffraction theory (e.g., angular spectrum or Fresnel) can be implemented via FFTs in simulation, the physical process is wave propagation governed by diffraction integrals (Rayleigh-Sommerfeld). Equating the physical computation directly to a Fourier transform is an oversimplification that ignores the quadratic phase factor in Fresnel diffraction and the specific kernel used in angular spectrum methods. Evidence supports 'diffraction integrals' and 'Fourier optics methods', but not a strict identity with Fourier transforms for all layers.",
+      "suggested_hedge": "Specifically, the complex field at each layer evolves through free space and phase-modulating layers according to diffraction integrals, which are often modeled using Fourier optics methods.",
+      "claim_handles": [
+        "C11_DIFFRACTIVE_NEURAL_NETWORKS_IMPLEMENT_LINEAR_T"
+      ],
+      "evidence_handles": [
+        "E16_SCALABILITY_CHIP_DIFFRACTIVE_OPTICAL_NEURAL_NE",
+        "E17_ALL_OPTICAL_MACHINE_LEARNING_USING_DIFFRACTIVE"
+      ]
+    },
+    {
+      "block_index": 2,
+      "sentence": "Modern approaches address this by employing deep learning models to map target optical responses directly to structural parameters, effectively automating the creation of these trainable optical substrates.",
+      "flag_type": "advisory",
+      "blocking": false,
+      "issue": "This is a reasonable synthesis of the inverse design problem described in E10. However, it implies a general capability ('effectively automating') that may vary by complexity. The evidence supports the use of DL for inverse design, so this is acceptable as advisory context rather than a hard claim requiring hedging.",
+      "suggested_hedge": "Modern approaches address this by employing deep learning models to map target optical responses directly to structural parameters, offering a faster alternative to traditional optimization-based inverse design.",
+      "claim_handles": [
+        "C09_PHYSICAL_ARCHITECTURE_DIFFRACTIVE_LAYERS_RELIE"
+      ],
+      "evidence_handles": [
+        "E10_OPTICAL_MULTILAYER_THIN_FILM_STRUCTURE_INVERSE"
+      ]
+    },
+    {
+      "block_index": 3,
+      "sentence": "In two-dimensional networks with a hard circular pupil, the point spread function is described by a Bessel function of the first kind, and its Fourier transform remains flat over the pupil aperture",
+      "flag_type": "unsupported_new_mechanism",
+      "blocking": false,
+      "issue": "The block attributes the Bessel function PSF and flat Fourier transform specifically to 'two-dimensional networks'. Evidence E65 describes this property in the context of 'Quantum-limited imaging' and single-plane diffraction physics (hard circular pupil), not necessarily as a defining characteristic of multi-layer D2NN architectures. Applying this single-layer physical constraint description to the general 'network' architecture without qualification is misleading. It conflates the physics of a single aperture with the computational model of a network.",
+      "suggested_hedge": "In single-plane diffractive systems with a hard circular pupil, the point spread function is described by a Bessel function of the first kind, and its Fourier transform remains flat over the pupil aperture, establishing a fundamental spatial frequency response limit.",
+      "claim_handles": [
+        "C21_TWO_DIMENSIONAL_DIFFRACTIVE_OPTICAL_NEURAL_NET"
+      ],
+      "evidence_handles": [
+        "E65_QUANTUM_LIMITED_IMAGING_USING_DIFFRACTIVE_OPTI"
+      ]
+    },
+    {
+      "block_index": 4,
+      "sentence": "While early designs often simplified this process by considering only phase modulation with fixed transmission efficiency, the evolution of the field has highlighted the limitations of passive, fixed architectures that cannot be re-trained for new tasks once fabricated.",
+      "flag_type": "advisory",
+      "blocking": false,
+      "issue": "This is a standard historical narrative supported by E34 and E35. No blocking issues.",
+      "suggested_hedge": "",
+      "claim_handles": [
+        "C15_WHILE_EARLY_DESIGNS_UTILIZED_FIXED_OR_PROGRAMM"
+      ],
+      "evidence_handles": [
+        "E34_PROGRAMMABLE_DIFFRACTIVE_DEEP_NEURAL_NETWORK_B",
+        "E35_REALIZATION_OPTICAL_LOGIC_GATES_USING_CHIP_DIF"
+      ]
+    },
+    {
+      "block_index": 5,
+      "sentence": "Polarization multiplexing enables a single diffractive network to simultaneously implement a group of complex-valued arbitrary linear transformations at the same output field of view by encoding different tasks into distinct input and output polarization states.",
+      "flag_type": "material_overclaim",
+      "blocking": false,
+      "issue": "The claim uses 'arbitrary linear transformations'. Evidence E01 states 'complex-valued arbitrary linear transformations' but notes they are limited by the network's capacity and the specific training. More importantly, the phrase 'at the same output field of view' might imply superposition without separation. E01 clarifies that different transformations cover different tasks programmed into polarization states, implying the *output* is also polarization-encoded or separated. The current phrasing suggests simultaneous independent outputs in the same spatial mode, which requires careful interpretation. However, the biggest issue is 'arbitrary'. While theoretically possible with sufficient depth, practical constraints exist. A safer hedge is 'specific' or 'targeted' transformations.",
+      "suggested_hedge": "Polarization multiplexing enables a single diffractive network to simultaneously implement a group of complex-valued linear transformations at the same output field of view by encoding different tasks into distinct input and output polarization states.",
+      "claim_handles": [
+        "C01_POLARIZATION_MULTIPLEXING_SINGLE_DIFFRACTIVE_N"
+      ],
+      "evidence_handles": [
+        "E01_POLARIZATION_MULTIPLEXED_DIFFRACTIVE_COMPUTING"
+      ]
+    },
+    {
+      "block_index": 6,
+      "sentence": "The Abbe-Rayleigh diffraction limit imposes a fundamental constraint on spatial resolution, preventing traditional far-field systems from resolving micro- and nano-scale features without resorting to near-field probes that cannot penetrate biological samples or complex superoscillatory designs that rely on precise interference patterns.",
+      "flag_type": "advisory",
+      "blocking": false,
+      "issue": "This is a correct summary of the diffraction limit and the workarounds mentioned in E69. It accurately reflects the trade-offs between near-field (penetration issues) and superoscillation (interference precision/efficiency).",
+      "suggested_hedge": "",
+      "claim_handles": [
+        "C22_ABBE_RAYLEIGH_DIFFRACTION_LIMIT_IMPOSES_FUNDAM"
+      ],
+      "evidence_handles": [
+        "E69_SUPERRESOLUTION_IMAGING_USING_SUPEROSCILLATORY"
+      ]
+    },
+    {
+      "block_index": 7,
+      "sentence": "All-optical segmentation via diffractive neural networks provides a low-latency alternative to digital deep neural networks for autonomous driving applications, trading some absolute accuracy for significant gains in inference speed and energy efficiency suitable for real-time edge processing.",
+      "flag_type": "advisory",
+      "blocking": false,
+      "issue": "Evidence E12 discusses the architecture for autonomous driving and claims 'more detailed and accurate segmentation compared to the existing DONN system'. It does not explicitly state a trade-off where accuracy is sacrificed for speed compared to *digital* DNNs. In fact, it aims to match or exceed existing optical baselines while offering speed. Claiming a 'trade-off' of accuracy against digital DNNs is an unsupported comparative assertion not present in the provided evidence snippets.",
+      "suggested_hedge": "All-optical segmentation via diffractive neural networks offers a low-latency alternative to digital deep neural networks for autonomous driving applications, leveraging inherent parallelism for real-time edge processing.",
+      "claim_handles": [
+        "C10_ALL_OPTICAL_SEGMENTATION_VIA_DIFFRACTIVE_NEURA"
+      ],
+      "evidence_handles": [
+        "E12_ALL_OPTICAL_SEGMENTATION_VIA_DIFFRACTIVE_NEURA"
+      ]
+    }
+  ],
+  "blocking_count": 0,
+  "advisory_count": 7,
+  "per_block_revision_outcomes": {
+    "1": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "2": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "3": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "4": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "5": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "6": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "7": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    },
+    "8": {
+      "attempted": false,
+      "applied": false,
+      "reason": "no_blocking_rows"
+    }
+  }
+}

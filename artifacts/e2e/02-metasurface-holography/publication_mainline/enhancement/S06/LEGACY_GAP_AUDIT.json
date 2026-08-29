@@ -1,0 +1,105 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S06",
+  "audit": {
+    "verdict": "gaps_found",
+    "gaps": [
+      {
+        "gap_id": "G01",
+        "old_draft_snippet": "Metalenses offer opportunities for compact, stable, high-resolution three-dimensional tomography without moving parts, expanding beyond traditional display applications into advanced imaging modalities",
+        "scientific_content": "The specific application of metalenses for 3D tomography (optical coherence tomography or similar volumetric imaging) without mechanical scanning is lost. The new blocks focus on standard microscopy and ptychography but omit the distinct modality of 3D tomography enabled by static metalens arrays or single-element focusing properties.",
+        "claim_handles": [
+          "C12_METALENS_BASED_IMAGING_SYSTEMS_UTILIZE_COMPUTA"
+        ],
+        "evidence_handles": [
+          "E31_METALENSES_REVOLUTIONARY_IMAGING"
+        ],
+        "affected_block_indices": [
+          3
+        ]
+      },
+      {
+        "gap_id": "G02",
+        "old_draft_snippet": "High-numerical-aperture aplanatic metalenses leverage large diffractive chromatic dispersion for spectral imaging, enabling wavelength-dependent focus tuning and compact hyperspectral imaging capabilities within a single planar element",
+        "scientific_content": "The mechanism of using *large* diffractive chromatic dispersion (rather than correcting it) to enable hyperspectral imaging via wavelength-dependent focal length tuning in a single element is missing. Block 3 discusses correcting aberrations, but does not cover the intentional exploitation of dispersion for spectral separation/hyperspectral sensing.",
+        "claim_handles": [
+          "C12_METALENS_BASED_IMAGING_SYSTEMS_UTILIZE_COMPUTA"
+        ],
+        "evidence_handles": [],
+        "affected_block_indices": [
+          3
+        ]
+      },
+      {
+        "gap_id": "G03",
+        "old_draft_snippet": "Multi-element metasurface systems composed of triplets can characterize 3D optical intensity distributions, demonstrating the capability of cascaded metasurfaces for complex wavefront shaping required in advanced computational imaging setups",
+        "scientific_content": "The specific use case of multi-element (triplet) cascaded metasurfaces for characterizing 3D optical intensity distributions is absent. While Block 3 mentions cascaded systems for aberration correction, it does not specify the application of 3D intensity distribution characterization.",
+        "claim_handles": [
+          "C07_COMPUTATIONAL_INVERSE_DESIGN_FRAMEWORKS_ENABLE"
+        ],
+        "evidence_handles": [
+          "E17_COMPUTATIONAL_INVERSE_DESIGN_CASCADED_SYSTEMS"
+        ],
+        "affected_block_indices": [
+          3
+        ]
+      },
+      {
+        "gap_id": "G04",
+        "old_draft_snippet": "Metasurfaces provide off-axis optical aberration correction for reflectance imaging in confocal scanning fibre endoscopy, improving image quality in miniaturized medical imaging probes",
+        "scientific_content": "The specific application of off-axis aberration correction for reflectance imaging in confocal scanning fiber endoscopy is lost. Block 4 discusses ptychography and thermography, and Block 5 discusses multiplexing, but neither covers the specific domain of miniaturized medical endoscopy probes.",
+        "claim_handles": [
+          "C12_METALENS_BASED_IMAGING_SYSTEMS_UTILIZE_COMPUTA"
+        ],
+        "evidence_handles": [],
+        "affected_block_indices": [
+          4
+        ]
+      }
+    ],
+    "notes": "The audit identified four gaps where specific application domains (3D tomography, hyperspectral dispersion exploitation, 3D intensity characterization via triplets, and fiber endoscopy) present in the old draft were omitted from the new blocks. The new blocks focus heavily on general inverse design methods, thermal imaging, and ptychography, leaving these specific imaging modalities uncovered.",
+    "warnings": []
+  },
+  "patch_records": [
+    {
+      "gap_id": "G01",
+      "block_index": 3,
+      "applied": true,
+      "used_evidence_handles": [
+        "E31_METALENSES_REVOLUTIONARY_IMAGING",
+        "E17_COMPUTATIONAL_INVERSE_DESIGN_CASCADED_SYSTEMS",
+        "E78_MINIMALIST_OPTICAL_SYSTEM_ACHROMATIC_IMAGING_W"
+      ],
+      "gap_evidence_handles": [
+        "E31_METALENSES_REVOLUTIONARY_IMAGING"
+      ]
+    },
+    {
+      "gap_id": "G02",
+      "block_index": null,
+      "applied": false,
+      "reason": "no_gap_specific_evidence_handles",
+      "detail": "Gap has no valid claim-aligned evidence handle; record-only, no patch applied."
+    },
+    {
+      "gap_id": "G03",
+      "block_index": 3,
+      "applied": true,
+      "used_evidence_handles": [
+        "E31_METALENSES_REVOLUTIONARY_IMAGING",
+        "E17_COMPUTATIONAL_INVERSE_DESIGN_CASCADED_SYSTEMS",
+        "E78_MINIMALIST_OPTICAL_SYSTEM_ACHROMATIC_IMAGING_W"
+      ],
+      "gap_evidence_handles": [
+        "E17_COMPUTATIONAL_INVERSE_DESIGN_CASCADED_SYSTEMS"
+      ]
+    },
+    {
+      "gap_id": "G04",
+      "block_index": null,
+      "applied": false,
+      "reason": "no_gap_specific_evidence_handles",
+      "detail": "Gap has no valid claim-aligned evidence handle; record-only, no patch applied."
+    }
+  ]
+}

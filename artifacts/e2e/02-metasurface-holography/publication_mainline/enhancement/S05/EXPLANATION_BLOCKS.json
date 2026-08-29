@@ -1,0 +1,337 @@
+{
+  "blocks": [
+    {
+      "block_index": 1,
+      "title": "The Computational Imperative: Inverse Design Foundations",
+      "block_type": "introduction_viewpoint",
+      "goal": "Introduce the necessity of inverse design methods for navigating the high-dimensional parameter space of holographic metasurfaces, contrasting them with traditional analytical approaches.",
+      "prose": "The realization of complex holographic wavefronts requires navigating a high-dimensional parameter space that traditional analytical approaches cannot efficiently explore. Inverse design methods address this computational imperative by utilizing effective mathematical strategies to map desired optical responses directly to physical nanostructure geometries, enabling targets beyond conventional capabilities. However, this inverse problem is fundamentally ill-posed due to a one-to-many mapping where multiple distinct geometric configurations yield identical spectra, often confusing deterministic algorithms and leading to invalid designs. To resolve this non-uniqueness and bridge the simulation-reality gap, physics-informed machine learning integrates governing physical equations, such as Maxwell's wave equations, directly into neural network architectures through loss function constraints or residual modeling. This integration acts as a regularizer that reduces the search space, ensuring generated structures obey conservation laws while improving prediction accuracy with less labeled data. Although classical iterative methods offer high calculation accuracy, their substantial computational consumption renders them ineffective for the growing complexity of multi-objective metasurface engineering, positioning deep learning-driven frameworks as essential for advancing from static components to dynamic system prototypes.",
+      "planned_claim_handles": [
+        "C01_INVERSE_DESIGN_METHODS_INCLUDING_DEEP_LEARNING",
+        "C02_PHYSICS_INFORMED_MACHINE_LEARNING_INTEGRATES_G",
+        "C30_INVERSE_DESIGN_METASURFACES_HOLOGRAPHIC_DISPLA"
+      ],
+      "claim_handles": [
+        "C01_INVERSE_DESIGN_METHODS_INCLUDING_DEEP_LEARNING",
+        "C02_PHYSICS_INFORMED_MACHINE_LEARNING_INTEGRATES_G",
+        "C30_INVERSE_DESIGN_METASURFACES_HOLOGRAPHIC_DISPLA"
+      ],
+      "evidence_handles": [
+        "E01_INVERSE_DESIGN_ELECTROMAGNETIC_METAMATERIALS_I",
+        "E04_PHYSICS_INFORMED_MACHINE_LEARNING_INVERSE_DESI",
+        "E67_INVERSE_DESIGN_METASURFACES_USING_PHYSICS_INFO"
+      ],
+      "covered_claim_handles": [
+        "C01_INVERSE_DESIGN_METHODS_INCLUDING_DEEP_LEARNING",
+        "C02_PHYSICS_INFORMED_MACHINE_LEARNING_INTEGRATES_G",
+        "C30_INVERSE_DESIGN_METASURFACES_HOLOGRAPHIC_DISPLA"
+      ],
+      "covered_claim_ids": [
+        "S05-P001",
+        "S05-P002",
+        "S05-P113"
+      ],
+      "markers": [
+        "[REF:2d3412a215f8b6d1d395bfaeec7ec0379c2e132e]",
+        "[REF:0d03f30ab91ec0b9411c3e2505550e636df8808e]",
+        "[REF:9c20a790aa75f24b6f5a130711645c978484455e]"
+      ],
+      "explanatory_handles": [
+        "X02_METASURFACE_INVERSE_DESIGN_VIA_LATEN",
+        "X03_PHYSICS_INFORMED_MACHINE_LEARNING_IN",
+        "X01_NANO_ROUTER_METASURFACE_INVERSE_DESI"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Inverse design methods address this computational imperative by utilizing effective mathematical strategies to map desired optical responses directly to physical nanostructure geometries, enabling targets beyond conventional capabilities.": [
+          "[REF:doi:10.1117/12.3099014]",
+          "[REF:doi:10.1364/ol.567547]"
+        ],
+        "To resolve this non-uniqueness and bridge the simulation-reality gap, physics-informed machine learning integrates governing physical equations, such as Maxwell's wave equations, directly into neural network architectures through loss function constraints or residual modeling.": [
+          "[REF:0d03f30ab91ec0b9411c3e2505550e636df8808e]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S05-P001",
+        "S05-P002",
+        "S05-P113"
+      ]
+    },
+    {
+      "block_index": 2,
+      "title": "Algorithmic Evolution: From Adjoint Methods to Generative Models",
+      "block_type": "explanatory_body",
+      "goal": "Explain how hybrid algorithms, adjoint optimization, and generative models overcome the limitations of local minima and non-uniqueness in design.",
+      "prose": "While foundational inverse design methods map desired optical responses to structural parameters, standard neural networks often fail to generalize beyond their training datasets, limiting their utility for novel holographic profiles. To overcome this, hybrid algorithms have emerged that pair data-driven models with rigorous optimization techniques; here, the neural network performs a rapid global search to estimate a solution, which conventional algorithms then refine through local search to ensure physical accuracy. This synergy is exemplified by frameworks integrating generative models like GANs with adjoint-based gradient evaluation, where the adjoint method efficiently computes topology gradients using only forward and time-reversed simulations regardless of design complexity. Pushing scalability further, foundation models such as MOCLIP leverage massive experimental datasets to learn shared latent spaces for metasurface geometries and spectra, enabling zero-shot prediction speeds orders of magnitude faster than traditional electrodynamic simulations while maintaining high fidelity. These generative and surrogate approaches are critical for navigating multi-physics coupling and exploring complex design spaces that deterministic methods struggle to resolve. Ultimately, these algorithmic evolutions address the non-uniqueness and efficiency bottlenecks in wavefront engineering, yet they set the stage for the next challenge: translating these computationally optimized profiles into tangible transmissive, reflective, or hybrid system architectures.",
+      "planned_claim_handles": [
+        "C03_HYBRID_ALGORITHMS_COMBINING_DATA_DRIVEN_MACHIN",
+        "C05_INVERSE_DESIGN_FRAMEWORKS_INCLUDING_ADJOINT_BA",
+        "C09_GENERATIVE_MODELS_DEEP_LEARNING_SURROGATE_MODE"
+      ],
+      "claim_handles": [
+        "C03_HYBRID_ALGORITHMS_COMBINING_DATA_DRIVEN_MACHIN",
+        "C05_INVERSE_DESIGN_FRAMEWORKS_INCLUDING_ADJOINT_BA",
+        "C09_GENERATIVE_MODELS_DEEP_LEARNING_SURROGATE_MODE"
+      ],
+      "evidence_handles": [
+        "E06_DEEPADJOINT_ALL_ONE_PHOTONIC_INVERSE_DESIGN_FR",
+        "E09_MOCLIP_FOUNDATION_MODEL_LARGE_SCALE_NANOPHOTON",
+        "E21_REVIEW_GENERATIVE_MODELS_INVERSE_DESIGN_NANOPH"
+      ],
+      "covered_claim_handles": [
+        "C03_HYBRID_ALGORITHMS_COMBINING_DATA_DRIVEN_MACHIN",
+        "C05_INVERSE_DESIGN_FRAMEWORKS_INCLUDING_ADJOINT_BA",
+        "C09_GENERATIVE_MODELS_DEEP_LEARNING_SURROGATE_MODE"
+      ],
+      "covered_claim_ids": [
+        "S05-P003",
+        "S05-P010",
+        "S05-P032"
+      ],
+      "markers": [
+        "[REF:0c04bf631766f465f0b30dcd07a342ff014ed8f3]",
+        "[REF:e4817fc664074ddc772d9ae198871fc6cb7f8b7b]",
+        "[REF:fa86aab8916cbb533d714bce5861b01dabbf18cb]"
+      ],
+      "explanatory_handles": [
+        "X05_MOCLIP_FOUNDATION_MODEL_LARGE_SCALE"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Pushing scalability further, foundation models such as MOCLIP leverage massive experimental datasets to learn shared latent spaces for metasurface geometries and spectra, enabling zero-shot prediction speeds orders of magnitude faster than traditional electrodynamic simulations while maintaining high fidelity.": [
+          "[REF:doi:10.1038/s41467-026-76714-x]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S05-P003",
+        "S05-P010",
+        "S05-P032"
+      ]
+    },
+    {
+      "block_index": 3,
+      "title": "System Architectures: Transmissive, Reflective, and Hybrid Integrations",
+      "block_type": "explanatory_body",
+      "goal": "Categorize current display implementations and highlight the emergence of hybrid meta-refractive lenses as a solution for compact, high-quality imaging.",
+      "prose": "Building on the algorithmic foundations established previously, metasurface holographic displays are primarily realized through transmissive or reflective architectures that serve as the core wavefront modulation elements within complete static and dynamic projection systems. While these standalone configurations leverage ultra-miniaturization to achieve lighter weights and larger fields of view, they often face mutual restrictions among numerical aperture, efficiency, and working bandwidth. To address these limitations, hybrid meta-refractive lens architectures have emerged as a viable integration pathway for compact, high-quality imaging. In this approach, refractive elements provide the primary optical power, while metasurfaces are strategically interleaved to correct optical aberrations. This division of labor is enabled by specialized inverse design algorithms, such as scalar field ray-wave hybrid propagation methods, which optimize nanostructures beyond the traditional image space. For instance, in midwave infrared lenses, positioning metasurfaces in both object and image spaces has been shown to elevate average focusing efficiency from 38% to over 90%, significantly outperforming designs restricted to the image space alone. Despite these advances in architectural efficiency, the transition to ultimate commercialization remains hindered by manufacturing complexities and the inherent challenge of achieving continuous 3D holography rather than simple 2D projections with depth cues.",
+      "planned_claim_handles": [
+        "C04_METASURFACE_HOLOGRAPHIC_DISPLAYS_PRIMARILY_IMP",
+        "C17_HYBRID_META_REFRACTIVE_LENS_ARCHITECTURES_WHIC"
+      ],
+      "claim_handles": [
+        "C04_METASURFACE_HOLOGRAPHIC_DISPLAYS_PRIMARILY_IMP",
+        "C17_HYBRID_META_REFRACTIVE_LENS_ARCHITECTURES_WHIC"
+      ],
+      "evidence_handles": [
+        "E07_APPLICATION_METASURFACE_FUTURE_DISPLAYS",
+        "E37_HYBRID_META_REFRACTIVE_LENS_DESIGN_INVERSE_DES"
+      ],
+      "covered_claim_handles": [
+        "C04_METASURFACE_HOLOGRAPHIC_DISPLAYS_PRIMARILY_IMP",
+        "C17_HYBRID_META_REFRACTIVE_LENS_ARCHITECTURES_WHIC"
+      ],
+      "covered_claim_ids": [
+        "S05-P009",
+        "S05-P065"
+      ],
+      "markers": [
+        "[REF:dfa21cd70a71ab37879ca600843b21680f16e478]",
+        "[REF:d54b94b2ee8549d7ab4bf6ec47e0259df06a047a]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S05-P009",
+        "S05-P065"
+      ]
+    },
+    {
+      "block_index": 4,
+      "title": "Functional Multiplexing: Polarization, Wavelength, and Channel Control",
+      "block_type": "explanatory_body",
+      "goal": "Demonstrate specific capabilities achieved through inverse design, such as quad-channel outputs and polarization conversion, which are critical for full-color displays.",
+      "prose": "Building on the hybrid architectures established in the previous section, deep learning-based inverse design now enables the precise mapping of desired electromagnetic responses to specific structural parameters, overcoming the limitations of traditional analytical approaches. This methodology addresses the inherent one-to-many relationship between input and output by employing cyclic structures that combine forward and inverse prediction networks, thereby improving accuracy and saving significant design time compared to conventional processes. Specifically, these models have been successfully applied to synthesize customized single-layer scatterers for linear-to-circular polarization control, effectively solving complex nonlinear mapping problems. Deep learning has been employed to inverse design transmission-type metasurfaces that achieve linear-to-circular polarization control, effectively resolving the complex nonlinear mapping required for such conversion. Extending this capability to multi-channel systems, deep-learning-assisted frameworks facilitate the creation of dual-spin and dual-frequency metasurfaces capable of generating quad-channel off-axis holographic outputs. Deep-learning-assisted frameworks have enabled the creation of dual-spin and dual-frequency metasurfaces capable of generating quad-channel off-axis holographic outputs through vortex multiplexing. By utilizing classifiers to distinguish phase modulation requirements and artificial neural networks to fit nonlinear functions under varying crosstalk conditions, these designs automatically determine the physical parameters needed for complex wavefront tailoring. While these advances demonstrate a clear pathway toward multi-wavelength and multi-polarization display architectures, they also introduce the system-level trade-offs regarding crosstalk and manufacturing ambiguity that will be examined next.",
+      "planned_claim_handles": [
+        "C12_DEEP_LEARNING_BASED_INVERSE_DESIGN_ENABLES_REA",
+        "C15_DEEP_LEARNING_ASSISTED_INVERSE_DESIGN_ENABLES"
+      ],
+      "claim_handles": [
+        "C12_DEEP_LEARNING_BASED_INVERSE_DESIGN_ENABLES_REA",
+        "C15_DEEP_LEARNING_ASSISTED_INVERSE_DESIGN_ENABLES"
+      ],
+      "evidence_handles": [
+        "E28_INVERSE_DESIGN_TRANSMISSION_TYPE_LINEAR_CIRCUL",
+        "E34_DEEP_LEARNING_ASSISTED_INVERSE_DESIGN_DUAL_SPI"
+      ],
+      "covered_claim_handles": [
+        "C12_DEEP_LEARNING_BASED_INVERSE_DESIGN_ENABLES_REA",
+        "C15_DEEP_LEARNING_ASSISTED_INVERSE_DESIGN_ENABLES"
+      ],
+      "covered_claim_ids": [
+        "S05-P042",
+        "S05-P049"
+      ],
+      "markers": [
+        "[REF:a52cc1154f412a7274d108ad735e0bec014d002f]",
+        "[REF:867c87ae195e0a5c2016732e0f43a8c703a7a788]"
+      ],
+      "explanatory_handles": [
+        "A02",
+        "A03"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Deep learning has been employed to inverse design transmission-type metasurfaces that achieve linear-to-circular polarization control, effectively resolving the complex nonlinear mapping required for such conversion.": [
+          "[REF:a52cc1154f412a7274d108ad735e0bec014d002f]"
+        ],
+        "Deep-learning-assisted frameworks have enabled the creation of dual-spin and dual-frequency metasurfaces capable of generating quad-channel off-axis holographic outputs through vortex multiplexing.": [
+          "[REF:867c87ae195e0a5c2016732e0f43a8c703a7a788]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S05-P042",
+        "S05-P049"
+      ]
+    },
+    {
+      "block_index": 5,
+      "title": "Design Bottlenecks: Non-Uniqueness, Crosstalk, and Manufacturability",
+      "block_type": "scientific_consequence",
+      "goal": "Analyze the fundamental trade-offs where increased design complexity leads to channel crosstalk and manufacturing ambiguity due to one-to-many mappings.",
+      "prose": "While functional multiplexing enables complex holographic outputs, the inverse design processes driving these architectures face a fundamental bottleneck: the non-uniqueness of the mapping between desired electromagnetic responses and physical structural parameters. This one-to-many relationship complicates deterministic manufacturing, as distinct meta-atom geometries can yield nearly identical optical properties, creating ambiguity in selecting a fabricable solution. Evidence indicates that without rigorous dataset curation, neural networks trained on such data struggle to converge, as similar electromagnetic signatures corresponding to different structural variables introduce instability during training. Strategies to enforce a one-to-one mapping often involve calculating Euclidean distances to remove redundant data points, though this approach risks discarding valid designs if thresholds are set too aggressively. Furthermore, as design complexity increases to support higher degrees of freedom, crosstalk between channels emerges as a critical barrier, reducing work efficiency and necessitating hybrid integrations with traditional optics that may inflate production costs. These challenges highlight that the primary constraint is no longer merely achieving a specific wavefront, but ensuring that the inverse design yields a unique, manufacturable structure capable of operating without inter-channel interference.",
+      "planned_claim_handles": [
+        "C13_ONE_MANY_MAPPING_RELATIONSHIP_BETWEEN_INPUT_EL",
+        "C26_INCREASING_METASURFACE_DESIGN_COMPLEXITY_INTRO",
+        "C27_INVERSE_DESIGN_NANOPHOTONIC_STRUCTURES_FACES_N"
+      ],
+      "claim_handles": [
+        "C13_ONE_MANY_MAPPING_RELATIONSHIP_BETWEEN_INPUT_EL",
+        "C26_INCREASING_METASURFACE_DESIGN_COMPLEXITY_INTRO",
+        "C27_INVERSE_DESIGN_NANOPHOTONIC_STRUCTURES_FACES_N"
+      ],
+      "evidence_handles": [
+        "E32_INVERSE_DESIGN_TWO_FUNCTION_TRANSMISSION_TYPE",
+        "E60_APPLICATION_METASURFACE_FUTURE_DISPLAYS",
+        "E61_MOCLIP_FOUNDATION_MODEL_LARGE_SCALE_NANOPHOTON"
+      ],
+      "covered_claim_handles": [
+        "C13_ONE_MANY_MAPPING_RELATIONSHIP_BETWEEN_INPUT_EL",
+        "C26_INCREASING_METASURFACE_DESIGN_COMPLEXITY_INTRO",
+        "C27_INVERSE_DESIGN_NANOPHOTONIC_STRUCTURES_FACES_N"
+      ],
+      "covered_claim_ids": [
+        "S05-P043",
+        "S05-P106",
+        "S05-P107"
+      ],
+      "markers": [
+        "[REF:9fd9affc4636c62b62cb7aff31d070f1337f6ce8]",
+        "[REF:dfa21cd70a71ab37879ca600843b21680f16e478]",
+        "[REF:e4817fc664074ddc772d9ae198871fc6cb7f8b7b]"
+      ],
+      "explanatory_handles": [],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {},
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S05-P043",
+        "S05-P106",
+        "S05-P107"
+      ]
+    },
+    {
+      "block_index": 6,
+      "title": "Dynamic Frontiers: Microfluidics and Symmetry-Breaking Modulation",
+      "block_type": "explanatory_body",
+      "goal": "Shift focus from static to dynamic systems, evaluating mechanisms like microfluidics and BIC symmetry breaking for real-time adaptability.",
+      "prose": "Moving beyond the static design bottlenecks identified previously, dynamic metasurface systems now leverage symmetry-breaking mechanisms to achieve real-time adaptability. A key approach involves hybrid metal-dielectric metasurfaces that support bound states in the continuum (BICs), which are resonant states characterized by high-quality factors and strong electric field confinement due to suppressed radiation loss. While transforming between quasi-BICs and true BICs remains challenging, recent work demonstrates that breaking geometric and permittivity symmetry can dynamically regulate this transition. Specifically, humidity-modulated strategies utilize hygroscopic materials like polyvinyl alcohol, which undergo volume expansion and refractive index reduction as relative humidity increases, thereby altering the out-of-plane symmetry of asymmetric gratings to tune resonance quality factors up to 873. Complementing this solid-state modulation, microfluidics-enabled architectures offer a distinct pathway for broadband dynamic control. By coupling electromagnetic design with laminar two-phase flow analysis, researchers have realized adaptive camouflage cloaks where gallium-based liquid metals are displaced by sodium hydroxide solutions within microchannels. Experimental work has demonstrated a broadband dynamically adaptive camouflage cloak enabled by microfluidics, where the system relies on multi-physics coupled analysis to manage the displacement of gallium-based liquid metals by sodium hydroxide solutions within microchannels. This multi-physics integration allows for reconfigurable scattering patterns and multi-illusion operations, proving that fluidic actuation can effectively modify near-field distributions and far-field responses. Together, these symmetry-breaking and microfluidic approaches illustrate the shift toward active components, though they also highlight that achieving the simultaneous refresh rates and eye-box uniformity required for commercial displays demands further system-level integration.",
+      "planned_claim_handles": [
+        "C07_HYBRID_METAL_DIELECTRIC_METASURFACES_EXHIBITIN",
+        "C10_MICROFLUIDICS_ENABLED_METASURFACES_HAVE_BEEN_D"
+      ],
+      "claim_handles": [
+        "C07_HYBRID_METAL_DIELECTRIC_METASURFACES_EXHIBITIN",
+        "C10_MICROFLUIDICS_ENABLED_METASURFACES_HAVE_BEEN_D"
+      ],
+      "evidence_handles": [
+        "E16_DYNAMIC_HUMIDITY_MODULATION_QUASI_BOUND_STATES",
+        "E23_EXPERIMENTAL_REALIZATION_BROADBAND_DYNAMICALLY"
+      ],
+      "covered_claim_handles": [
+        "C07_HYBRID_METAL_DIELECTRIC_METASURFACES_EXHIBITIN",
+        "C10_MICROFLUIDICS_ENABLED_METASURFACES_HAVE_BEEN_D"
+      ],
+      "covered_claim_ids": [
+        "S05-P020",
+        "S05-P033"
+      ],
+      "markers": [
+        "[REF:cc73f5040c5d928b3ca5aeeb38e0df04450efc53]",
+        "[REF:2a1ac67eb9a6793168e50de6831ae02c5372b6b6]"
+      ],
+      "explanatory_handles": [
+        "X07_DYNAMIC_HUMIDITY_MODULATION_QUASI_BO",
+        "X06_DYNAMIC_POLARIZATION_DEPENDENT_BOUND",
+        "A04"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Specifically, humidity-modulated strategies utilize hygroscopic materials like polyvinyl alcohol, which undergo volume expansion and refractive index reduction as relative humidity increases, thereby altering the out-of-plane symmetry of asymmetric gratings to tune resonance quality factors up to 873.": [
+          "[REF:doi:10.1002/adpr.202400191]",
+          "[REF:doi:10.1364/oe.574568]"
+        ],
+        "Experimental work has demonstrated a broadband dynamically adaptive camouflage cloak enabled by microfluidics, where the system relies on multi-physics coupled analysis to manage the displacement of gallium-based liquid metals by sodium hydroxide solutions within microchannels.": [
+          "[REF:doi:10.1002/lpor.202500327]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S05-P020",
+        "S05-P033"
+      ]
+    },
+    {
+      "block_index": 7,
+      "title": "Application Readiness: AR Waveguides and Remaining System Gaps",
+      "block_type": "scientific_consequence",
+      "goal": "Assess the proximity to commercial deployment, citing AR waveguide successes while identifying unresolved gaps in refresh rates and eye-box uniformity.",
+      "prose": "Building on the dynamic modulation mechanisms discussed previously, the transition to commercial application readiness is best exemplified by recent advances in achromatic metasurface waveguides for augmented reality (AR). These systems utilize ultra-thin silicon nitride (SiN) binary nanostructure couplers integrated with a single-plate waveguide to offer a simple and cost-effective fabrication route for full-color displays. Research into achromatic metasurface waveguides for augmented reality displays highlights the use of ultra-thin silicon nitride binary nanostructure couplers integrated with a single-plate waveguide as a simple and cost-effective fabrication route for full-color applications. The mechanism relies on optimizing the optical response to effectively exploit different diffraction orders for red, green, and blue wavelengths in reflection mode, thereby achieving high color and angular uniformity while addressing the longstanding issue of chromatic aberration in diffractive waveguides. However, despite demonstrating unique advantages in compact form factor and large supported field-of-view, current prototypes face specific system-level constraints that prevent immediate deployment. Limitations imposed by wavelength mismatches between utilized and designed RGB light, alongside inherent prototype aberrations, have constrained the full potential of these designs. Furthermore, the polarization selectivity inherent in these systems necessitates future development of two-dimensional polarization-insensitive metasurfaces to broaden applicability. Achieving higher efficiency also requires strategic optimization of the input coupler, potentially through reflective coatings, while suppressing excessive high-order diffraction remains crucial for realizing wide-field displays. Consequently, while inverse design has enabled these functional architectures, the field's primary bottleneck has shifted from single-component performance to the system-level integration required to simultaneously resolve efficiency, polarization independence, and diffraction control for real-time, full-gamut AR experiences.",
+      "planned_claim_handles": [
+        "C29_ACHROMATIC_METASURFACE_WAVEGUIDES_USING_ULTRA"
+      ],
+      "claim_handles": [
+        "C29_ACHROMATIC_METASURFACE_WAVEGUIDES_USING_ULTRA"
+      ],
+      "evidence_handles": [
+        "E66_ACHROMATIC_METASURFACE_WAVEGUIDE_AUGMENTED_REA"
+      ],
+      "covered_claim_handles": [
+        "C29_ACHROMATIC_METASURFACE_WAVEGUIDES_USING_ULTRA"
+      ],
+      "covered_claim_ids": [
+        "S05-P110"
+      ],
+      "markers": [
+        "[REF:94ab4c73d8ea40f73635551d123a18a300d824cb]"
+      ],
+      "explanatory_handles": [
+        "A05"
+      ],
+      "explanatory_markers": [],
+      "explanatory_sentence_markers": {
+        "Research into achromatic metasurface waveguides for augmented reality displays highlights the use of ultra-thin silicon nitride binary nanostructure couplers integrated with a single-plate waveguide as a simple and cost-effective fabrication route for full-color applications.": [
+          "[REF:94ab4c73d8ea40f73635551d123a18a300d824cb]"
+        ]
+      },
+      "patch_history": [],
+      "planned_claim_ids": [
+        "S05-P110"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "schema_version": "chapter_asset_enhancer.v1",
+  "section_id": "S04",
+  "audit": {
+    "verdict": "gaps_found",
+    "gaps": [
+      {
+        "gap_id": "G01",
+        "old_draft_snippet": "Phase-change materials (PCMs) such as germanium–antimony–telluride (GST) and vanadium dioxide (VO2) offer non-volatile refractive-index switching triggered by electrical current, optical pulses, or thermal cycling, providing a pathway to rewrite holographic patterns with microsecond-to-millisecond response times.",
+        "scientific_content": "The old draft explicitly lists GST alongside VO2 as a PCM candidate and specifies the triggering mechanisms (electrical current, optical pulses, thermal cycling) and the specific response time scale (microsecond-to-millisecond). The new Block 2 focuses solely on VO2 and thermal modulation, omitting GST and the broader range of actuation methods and speed metrics provided in the evidence.",
+        "claim_handles": [
+          "C13_DYNAMIC_NONLOCAL_METASURFACES_UTILIZING_PHASE"
+        ],
+        "evidence_handles": [
+          "E27_DYNAMIC_NONLOCAL_METASURFACE_MULTIFUNCTIONAL_I"
+        ],
+        "affected_block_indices": [
+          2
+        ]
+      },
+      {
+        "gap_id": "G02",
+        "old_draft_snippet": "Heuristic optimization methods often produce target phase profiles or transfer matrices that are not physically realizable; when idealized designs are projected onto manufacturable metasurface architectures, the resulting mismatch causes significant deviations in reconstructed image quality.",
+        "scientific_content": "The old draft identifies a specific failure mode of heuristic/idealized design: the production of non-physically realizable phase profiles/transfer matrices that lead to significant image quality deviations upon projection. New Block 6 mentions crosstalk and efficiency degradation but does not capture this specific mechanism of 'non-realizability' leading to 'mismatch' in reconstruction quality.",
+        "claim_handles": [
+          "C08_INVERSE_DESIGN_FRAMEWORKS_INCLUDING_PHYSICS_CO"
+        ],
+        "evidence_handles": [
+          "E57_SP2RINT_SPATIALLY_DECOUPLED_PHYSICS_INSPIRED_P"
+        ],
+        "affected_block_indices": [
+          6
+        ]
+      },
+      {
+        "gap_id": "G03",
+        "old_draft_snippet": "More recently, spatial coupled mode theory combined with differentiable neural simulators has enabled computationally efficient optimization of metasurface geometries for spectral imaging and holographic applications, achieving order-of-magnitude reductions in design cycle time compared to full-wave electromagnetic simulations.",
+        "scientific_content": "The old draft specifically credits 'spatial coupled mode theory' (SCMT) combined with differentiable simulators for enabling efficient optimization in spectral imaging/holography with order-of-magnitude speedups. New Block 4 discusses deep learning surrogates generally but omits the specific mention of SCMT as the underlying physical model enabling these gains, which is a key scientific detail supported by the evidence.",
+        "claim_handles": [
+          "C09_INVERSE_DESIGN_PARADIGMS_UTILIZING_SPATIAL_COU"
+        ],
+        "evidence_handles": [
+          "E16_INVERSE_DESIGN_DIELECTRIC_METASURFACE_SPATIAL",
+          "E17_INVERSE_DESIGN_METASURFACE_SPECTRAL_IMAGING"
+        ],
+        "affected_block_indices": [
+          4
+        ]
+      }
+    ],
+    "notes": "The audit identified three gaps where the new chapter lost specific scientific details present in the old draft: 1) Specific PCM candidates (GST) and actuation modes/speeds were omitted in favor of a single VO2 example; 2) The specific mechanism of heuristic design failure (non-realizable profiles causing mismatch) was replaced by more general statements about complexity; 3) The specific role of Spatial Coupled Mode Theory (SCMT) in enabling fast differentiable simulation was lost.",
+    "warnings": []
+  },
+  "patch_records": [
+    {
+      "gap_id": "G01",
+      "block_index": 2,
+      "applied": true,
+      "used_evidence_handles": [
+        "E27_DYNAMIC_NONLOCAL_METASURFACE_MULTIFUNCTIONAL_I"
+      ],
+      "gap_evidence_handles": [
+        "E27_DYNAMIC_NONLOCAL_METASURFACE_MULTIFUNCTIONAL_I"
+      ]
+    },
+    {
+      "gap_id": "G02",
+      "block_index": null,
+      "applied": false,
+      "reason": "no_gap_specific_evidence_handles",
+      "detail": "Gap has no valid claim-aligned evidence handle; record-only, no patch applied."
+    },
+    {
+      "gap_id": "G03",
+      "block_index": 4,
+      "applied": true,
+      "used_evidence_handles": [
+        "E28_INVERSE_DESIGN_PARADIGM_MULTI_FUNCTIONAL_ELAST",
+        "E16_INVERSE_DESIGN_DIELECTRIC_METASURFACE_SPATIAL",
+        "E17_INVERSE_DESIGN_METASURFACE_SPECTRAL_IMAGING"
+      ],
+      "gap_evidence_handles": [
+        "E16_INVERSE_DESIGN_DIELECTRIC_METASURFACE_SPATIAL",
+        "E17_INVERSE_DESIGN_METASURFACE_SPECTRAL_IMAGING"
+      ]
+    }
+  ]
+}
