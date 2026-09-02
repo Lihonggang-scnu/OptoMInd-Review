@@ -8,6 +8,14 @@ OptoMind-Review 是我们为参加“挑战杯·中国青年科技创新‘揭�
 
 现阶段，我们主要在光学与电磁学领域对 OptoMind-Review 进行了测试和验证。系统的领域知识与任务指令主要通过 `\prompts` 目录下的 `.txt` 提示词文件进行配置，因此其整体 Harness 与工作流本身并不局限于光学领域。我们认为，通过针对不同学科修改相应 prompts，即可较低成本地将现有流程迁移至其他科学领域。
 
+## 在线成果回放
+
+无需下载源码或配置密钥，直接打开：
+
+**<https://lihonggang-scnu.github.io/OptoMInd-Review/>**
+
+云端页面以统一的十三阶段研究主线展示三次真实端到端运行，可切换题目、查看字数与引用规模、模型调用、运行时间和费用，以 10× 速度播放原始过程事件，并打开中英文 PDF、引用映射、质量报告、结构审计和出版源文件。回放只读取已经固化并脱敏的产物，不重新调用模型或文献服务。
+
 
 ## 它能做什么
 
@@ -43,14 +51,13 @@ Token 合计约为 2,479.0 万输入、297.4 万输出；表中“模型调用�
 
 ## 快速开始
 
-需要 Python 3.11 或更高版本。Windows PowerShell 下可以这样创建环境并安装依赖：
+需要 Python 3.11 或更高版本。Windows 用户解压源码后直接双击仓库根目录的 `START_OPTOMIND.cmd`；Linux 或 macOS 用户运行：
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-research.txt
+```bash
+./start_optomind.sh
 ```
 
-也可以使用 `scripts/bootstrap_research_env.ps1` 执行确定性的环境初始化。若希望生成 PDF，建议额外安装包含 `xelatex` 和 `latexmk` 的 TeX 环境；没有 TeX 时，系统仍然可以生成研究文本、参考文献和 LaTeX 源文件，除非显式要求严格 PDF 模式。
+浏览器会打开本地统一前端：成果回放立即可用；“真实提问”会先检查项目资产、密钥、Python 环境、Qwen 和学术文献服务。首次真实测试缺少依赖时，入口会自动创建 `.venv` 并安装，不要求评委手工输入一串环境命令。全部检查通过后，问题输入框才会解锁。若希望完整模式生成 PDF，建议安装包含 `xelatex` 和 `latexmk` 的 TeX 环境；没有 TeX 时可使用快速真实验证模式检查“问题理解—检索—证据—论证—成稿”主链。
 
 ## API key 的放置方式
 
@@ -97,15 +104,7 @@ OptoMind-Review/
 
 ## 静态回放
 
-仓库包含三次历史 E2E 运行的只读回放。必须通过本地 HTTP 服务打开，不能直接双击 HTML 文件：
-
-```powershell
-python -m http.server 18876 --directory replay
-```
-
-然后打开 <http://127.0.0.1:18876/index.html>。直接使用 `file://` 访问时，浏览器可能阻止 JSON 数据加载，从而显示空页面或 404。
-
-回放是展示层；三次运行的最终公开出版物位于 `artifacts/e2e/`。原始运行树、下载的论文全文和运行缓存不包含在本公开副本中。
+仓库包含三次正式 E2E 运行的只读回放。在线版本见 <https://lihonggang-scnu.github.io/OptoMInd-Review/>；下载后双击 `START_OPTOMIND.cmd` 也会打开同一套界面。三次运行的最终公开出版物位于 `artifacts/e2e/`，精简事件记录位于 `replay/`。原始运行树、下载论文全文、运行缓存和真实密钥不包含在公开回放中。
 
 ## 项目目录
 

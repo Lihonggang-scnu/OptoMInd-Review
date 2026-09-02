@@ -1,0 +1,46 @@
+name: Publish Review Replay
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble public replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _site/artifacts
+          cp -R replay/. _site/
+          cp -R artifacts/e2e _site/artifacts/
+          touch _site/.nojekyll
+          test -f _site/index.html
+          test -f _site/replay-manifest.json
+          test -f _site/artifacts/e2e/01-optical-diffractive-neural-networks/publication/latex_zh/main.pdf
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

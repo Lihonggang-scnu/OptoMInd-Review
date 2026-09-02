@@ -1,13 +1,172 @@
 <!doctype html>
-<html data-optomind-mode="static-replay" lang="zh-CN">
+<html lang="zh-CN">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OptoMind 研究运行台</title>
-    <script type="module" crossorigin src="./assets/index-C7BQo4tx.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-CM81Cs-k.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="OptoMind 三组自主光学综述研究的 13 阶段证据回放与本地真实提问入口" />
+    <title>OptoMind Review · 自主综述研究回放</title>
+    <link rel="stylesheet" href="assets/review.css" />
   </head>
   <body>
-    <div id="root"></div>
+    <a class="skip-link" href="#main-content">跳到主要内容</a>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar" aria-label="运行记录导航">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div><p class="brand-name">OptoMind</p><p class="brand-subtitle">Review 研究工作台</p></div>
+        </div>
+
+        <div class="product-mode" aria-label="产品模式">
+          <span>当前模式</span>
+          <strong><i aria-hidden="true">R</i> 科学综述研究</strong>
+          <small>统一入口已预留光学设计 / 科学综述切换协议</small>
+        </div>
+
+        <div class="portal-switch" role="tablist" aria-label="功能选择">
+          <button class="portal-button active" id="replay-tab" role="tab" aria-selected="true" aria-controls="replay-workspace">
+            <span class="portal-icon">▶</span><span><strong>成果回放</strong><small>三组真实端到端运行</small></span>
+          </button>
+          <button class="portal-button" id="live-tab" role="tab" aria-selected="false" aria-controls="live-workspace" disabled>
+            <span class="portal-icon">✦</span><span><strong>真实提问</strong><small id="live-tab-caption">仅在本地下载版开放</small></span>
+          </button>
+        </div>
+
+        <section class="archive-block" aria-labelledby="archive-title">
+          <p class="sidebar-label" id="archive-title">正式研究档案</p>
+          <div class="archive-stats" id="archive-stats"></div>
+        </section>
+        <nav class="run-list" id="run-list" aria-label="可回放研究"></nav>
+
+        <div class="sidebar-footer">
+          <span class="status-dot" aria-hidden="true"></span>
+          <div><strong id="sidebar-status">只读证据回放</strong><small>问题 → 检索 → 论证 → 成稿 → 出版</small></div>
+        </div>
+      </aside>
+
+      <main class="main" id="main-content">
+        <header class="topbar">
+          <button class="mobile-menu" id="mobile-menu" type="button" aria-label="打开运行列表"><span></span><span></span><span></span></button>
+          <div><p class="topbar-kicker">AUTONOMOUS REVIEW RESEARCH</p><h1>自主光学综述研究工作台</h1></div>
+          <div class="topbar-state"><span class="pulse"></span><span id="topbar-state-copy">正在载入固化产物</span></div>
+        </header>
+
+        <section id="replay-workspace" role="tabpanel" aria-labelledby="replay-tab">
+          <div class="loading" id="loading"><span class="loader"></span><strong>正在读取研究档案</strong><small>只解析已经固化并脱敏的端到端产物</small></div>
+          <div class="error-panel" id="error-panel" hidden><strong>回放数据载入失败</strong><p id="error-copy"></p><button id="retry-button">重新读取</button></div>
+
+          <div class="content" id="content" hidden>
+            <section class="run-hero panel-accent">
+              <div class="hero-copy">
+                <div class="eyebrow-row"><span class="group-label">完整端到端研究</span><span class="status-pill">已形成中英文成果</span></div>
+                <h2 id="run-title"></h2>
+                <p class="question" id="run-question"></p>
+                <div class="tag-row" id="run-tags"></div>
+              </div>
+              <div class="hero-result">
+                <span>最终交付</span>
+                <strong id="page-result"></strong>
+                <div class="hero-links"><a id="open-zh-pdf" target="_blank" rel="noreferrer">打开中文 PDF</a><a id="open-en-pdf" target="_blank" rel="noreferrer">英文 PDF</a></div>
+              </div>
+            </section>
+
+            <section class="kpi-grid" id="kpi-grid" aria-label="运行核心指标"></section>
+
+            <section class="section-block" aria-labelledby="timeline-title">
+              <div class="section-heading">
+                <div><span class="section-index">01</span><div><p class="section-kicker">INTERACTIVE REPLAY</p><h2 id="timeline-title">真实运行事件回放</h2></div></div>
+                <p>按原始时间顺序播放已保存事件；10× 只加速展示，不重新调用模型。</p>
+              </div>
+              <article class="panel replay-console">
+                <div class="replay-toolbar">
+                  <div><button class="primary-small" id="play-button">开始 10× 回放</button><button class="secondary-button" id="reset-button">重置</button></div>
+                  <label>速度 <select id="speed-select"><option value="1">1×</option><option value="2">2×</option><option value="5">5×</option><option value="10" selected>10×</option><option value="50">50×</option></select></label>
+                  <strong id="replay-clock">尚未开始</strong>
+                </div>
+                <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+                <div class="event-focus" id="event-focus"><span>等待播放</span><strong>选择“开始 10× 回放”观察研究阶段推进</strong></div>
+                <div class="event-stream" id="event-stream" aria-live="polite"></div>
+              </article>
+            </section>
+
+            <section class="section-block" aria-labelledby="workflow-title">
+              <div class="section-heading">
+                <div><span class="section-index">02</span><div><p class="section-kicker">13-STAGE RESEARCH MAINLINE</p><h2 id="workflow-title">从问题到双语论文的十三阶段</h2></div></div>
+                <p>面向公众合并底层技术步骤；点击任一阶段查看其真实耗时、调用量与证据文件。</p>
+              </div>
+              <div class="workflow" id="workflow"></div>
+              <article class="panel stage-detail" id="stage-detail"></article>
+            </section>
+
+            <section class="section-block" aria-labelledby="evidence-title">
+              <div class="section-heading">
+                <div><span class="section-index">03</span><div><p class="section-kicker">EVIDENCE &amp; SYNTHESIS</p><h2 id="evidence-title">证据规模与研究质量</h2></div></div>
+                <p>统计值直接取自本次运行的质量报告、引用映射和成稿清单。</p>
+              </div>
+              <div class="evidence-layout">
+                <article class="panel evidence-score" id="evidence-score"></article>
+                <article class="panel cost-panel"><div class="panel-heading"><div><p class="section-kicker">RESOURCE TRACE</p><h3>各研究环节资源投入</h3></div></div><div class="cost-bars" id="cost-bars"></div></article>
+              </div>
+            </section>
+
+            <section class="section-block" aria-labelledby="publication-title">
+              <div class="section-heading">
+                <div><span class="section-index">04</span><div><p class="section-kicker">PUBLICATION PACKAGE</p><h2 id="publication-title">可直接核验的最终成果</h2></div></div>
+                <p>同时保留论文、源文件、引用映射、结构审计、质量报告和全过程清单。</p>
+              </div>
+              <div class="publication-grid" id="publication-grid"></div>
+              <div class="preview-grid" id="preview-grid"></div>
+            </section>
+
+            <section class="section-block" aria-labelledby="artifacts-title">
+              <div class="section-heading">
+                <div><span class="section-index">05</span><div><p class="section-kicker">TRACEABLE ARTIFACTS</p><h2 id="artifacts-title">关键证据索引</h2></div></div>
+                <p>每个入口均指向随仓库公开的只读成果；原始缓存与密钥不在发布范围。</p>
+              </div>
+              <div class="artifact-grid" id="artifact-grid"></div>
+            </section>
+
+            <footer class="page-footer"><strong>OptoMind Review Evidence Replay</strong><span>三组真实运行 · 十三阶段 · 双语成果 · 全过程证据可回放</span></footer>
+          </div>
+        </section>
+
+        <section class="live-workspace" id="live-workspace" role="tabpanel" aria-labelledby="live-tab" hidden>
+          <section class="live-intro panel-accent">
+            <div><p class="section-kicker">LOCAL VERIFIED EXECUTION</p><h2>提交一个新问题，启动真实综述研究</h2><p>该入口仅在下载源码后的本机开放。系统先核验项目、密钥、依赖、Qwen 与学术文献服务，全部通过后才允许提交问题。</p></div>
+            <div class="local-badge"><span class="status-dot"></span><strong>仅监听本机</strong><small>一次只运行一个任务，密钥不会显示在页面或日志中</small></div>
+          </section>
+          <div class="live-grid">
+            <article class="panel readiness-panel">
+              <div class="panel-heading"><div><p class="section-kicker">01 · PREFLIGHT</p><h2>运行准备检查</h2></div><span class="readiness-state idle" id="readiness-state">尚未检查</span></div>
+              <p class="panel-note">首次运行可能自动创建隔离环境并安装依赖；真实连通测试只发出最小请求。</p>
+              <div class="diagnostic-list" id="diagnostic-list"></div>
+              <button class="primary-action" id="diagnostic-button">检查并准备真实运行</button>
+            </article>
+            <article class="panel question-panel">
+              <div class="panel-heading"><div><p class="section-kicker">02 · NEW REVIEW</p><h2>输入真实研究问题</h2></div><span class="locked-badge" id="question-lock">等待检查</span></div>
+              <label class="field-label" for="research-question">研究问题与关注范围</label>
+              <textarea id="research-question" maxlength="4000" rows="8" disabled placeholder="例如：请综述可编程集成光子芯片在大规模光计算中的研究进展，重点比较器件平台、矩阵运算架构、训练与校准方法，并总结规模化瓶颈。"></textarea>
+              <div class="question-meta"><span id="question-count">0 / 4000</span><span>只需描述问题，检索、证据组织与成稿由系统完成</span></div>
+              <fieldset class="profile-options" id="profile-options" disabled>
+                <legend>运行规模</legend>
+                <label class="profile-card selected"><input type="radio" name="profile" value="quick" checked><span><strong>快速真实验证</strong><small>保留检索—论证—写作主链，跳过双语 PDF 与图像生成</small></span></label>
+                <label class="profile-card"><input type="radio" name="profile" value="full"><span><strong>完整自主综述</strong><small>沿用正式 E2E 主线，包含双语出版与可视化，通常需要数小时</small></span></label>
+              </fieldset>
+              <button class="primary-action" id="start-run-button" disabled>开始真实研究</button>
+              <p class="form-message" id="form-message"></p>
+            </article>
+          </div>
+          <article class="panel live-run-panel" id="live-run-panel" hidden>
+            <div class="panel-heading"><div><p class="section-kicker">03 · LIVE TRACE</p><h2>当前研究任务</h2></div><span class="readiness-state" id="live-run-status">等待</span></div>
+            <div class="live-run-summary" id="live-run-summary"></div>
+            <div class="progress-track"><div class="progress-fill" id="live-progress-fill"></div></div>
+            <div class="event-focus" id="live-event"></div>
+            <div class="live-actions"><button class="secondary-button" id="refresh-run-button">刷新状态</button><button class="danger-button" id="cancel-run-button">停止任务</button></div>
+          </article>
+        </section>
+      </main>
+    </div>
+    <dialog id="stage-dialog"><div class="dialog-shell"><header><div><p class="section-kicker" id="dialog-kicker"></p><h2 id="dialog-title"></h2></div><button id="dialog-close" aria-label="关闭">×</button></header><div id="dialog-content"></div></div></dialog>
+    <script src="assets/config.js"></script>
+    <script src="assets/review.js" defer></script>
   </body>
 </html>

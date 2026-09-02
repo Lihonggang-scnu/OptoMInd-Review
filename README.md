@@ -8,6 +8,14 @@ Track 1A of the challenge asks participating teams to build an AI application th
 
 OptoMind-Review has so far been tested and validated mainly in optics and electromagnetics. Domain knowledge and task instructions are configured primarily through the `.txt` prompt files in the `prompts/` directory, so the harness and workflow are not inherently limited to optics. By adapting the prompts for another discipline, the current workflow can be migrated to other scientific domains at relatively low cost.
 
+## Online Evidence Replay
+
+Open the public portal without downloading source code or providing an API key:
+
+**<https://lihonggang-scnu.github.io/OptoMInd-Review/>**
+
+The portal presents three completed end-to-end studies as a 13-stage research mainline. It exposes the original questions, core metrics, timestamped process events at 10× replay speed, English and Chinese PDFs, citation maps, quality reports, structural audits, and publication sources. Replay reads only frozen, sanitized artifacts and never calls a model or literature provider.
+
 ## What It Does
 
 The mainline workflow includes:
@@ -42,14 +50,13 @@ All three validations covered the planned chapters and completed English-publica
 
 ## Quick Start
 
-Python 3.11 or newer is required. On Windows PowerShell, create an environment and install the dependencies as follows:
+Python 3.11 or newer is required. On Windows, extract the repository and double-click `START_OPTOMIND.cmd`. On Linux or macOS, run:
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-research.txt
+```bash
+./start_optomind.sh
 ```
 
-You can also use `scripts/bootstrap_research_env.ps1` for deterministic environment initialization. To generate PDFs, install a TeX environment that includes `xelatex` and `latexmk`. Without TeX, the system can still generate the research text, bibliography, and LaTeX source unless strict PDF mode is explicitly requested.
+The browser opens the unified local portal. Results replay is available immediately. Live questioning first checks project assets, credential files, the Python environment, Qwen, and at least one academic literature provider. On the first live run, the launcher creates `.venv` and installs missing dependencies automatically. The question form unlocks only after every required check passes. A TeX environment with `xelatex` and `latexmk` is recommended for the complete publication profile; the quick real-verification profile keeps the question-to-draft research mainline while skipping image generation, translation, and PDF compilation.
 
 ## Where to Place API Keys
 
@@ -95,15 +102,7 @@ The optional research-plan branch is disabled in the example above. The expensiv
 
 ## Static Replay
 
-The repository contains read-only replays of the three historical E2E runs. They must be opened through a local HTTP server rather than by double-clicking the HTML file:
-
-```powershell
-python -m http.server 18876 --directory replay
-```
-
-Then open <http://127.0.0.1:18876/index.html>. When accessed directly through `file://`, the browser may block JSON loading and display an empty page or a 404.
-
-The replay is a presentation layer. The final publications from the three runs are under `artifacts/e2e/`. The original run trees, downloaded paper full texts, and runtime caches are not included in this public copy.
+The online replay is available at <https://lihonggang-scnu.github.io/OptoMInd-Review/>. A downloaded copy opens the same interface through `START_OPTOMIND.cmd` or `start_optomind.sh`. Compact event records are stored under `replay/`, and final public publications are under `artifacts/e2e/`. Original run trees, downloaded full texts, runtime caches, and real credentials are not included in the public replay.
 
 ## Project Structure
 
