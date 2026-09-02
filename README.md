@@ -104,6 +104,10 @@ The optional research-plan branch is disabled in the example above. The expensiv
 
 The online replay is available at <https://lihonggang-scnu.github.io/OptoMInd-Review/>. A downloaded copy opens the same interface through `START_OPTOMIND.cmd` or `start_optomind.sh`. Compact event records are stored under `replay/`, and final public publications are under `artifacts/e2e/`. Original run trees, downloaded full texts, runtime caches, and real credentials are not included in the public replay.
 
+## Agent-assisted Testing
+
+To reduce the impact of machine-specific Python, terminal encoding, port, network-provider, and PDF-tooling differences, the project includes a portable [Agent Skill](.agents/skills/optomind-review-operator/SKILL.md), a generic [Agent entry](AGENTS.md), and a detailed [Chinese Agent manual](AGENT_GUIDE.zh-CN.md). Any repository-aware, terminal-capable Agent can use them to prepare the environment, launch the unified portal, monitor or recover a live run, and verify the resulting evidence package. The operating contract uses repository-relative paths and defines credential protection, read-only formal records, and explicit authorization for paid runs. See the [Review portal guide](docs/REVIEW_PORTAL_GUIDE.zh-CN.md) for the complete evaluator workflow.
+
 ## Project Structure
 
 ```text

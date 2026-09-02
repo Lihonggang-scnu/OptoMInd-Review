@@ -106,6 +106,10 @@ OptoMind-Review/
 
 仓库包含三次正式 E2E 运行的只读回放。在线版本见 <https://lihonggang-scnu.github.io/OptoMInd-Review/>；下载后双击 `START_OPTOMIND.cmd` 也会打开同一套界面。三次运行的最终公开出版物位于 `artifacts/e2e/`，精简事件记录位于 `replay/`。原始运行树、下载论文全文、运行缓存和真实密钥不包含在公开回放中。
 
+## 使用 AI Agent 协助测试
+
+为降低不同设备上的 Python、终端编码、端口、网络和 PDF 工具差异对现场测试的影响，项目提供了开放 `SKILL.md` 格式的 [跨 Agent 操作技能](.agents/skills/optomind-review-operator/SKILL.md)、[通用 Agent 入口](AGENTS.md) 和 [中文 Agent 说明书](AGENT_GUIDE.zh-CN.md)。任何具备仓库读取与终端操作能力的 Agent 都可以依据这些文件完成环境检查、统一前端启动、真实运行监测、断点恢复和成果验收；全部指令使用仓库相对路径，并将密钥保护、正式记录只读和付费运行授权作为明确边界。完整的评委下载测试流程见 [Review 评审测试入口](docs/REVIEW_PORTAL_GUIDE.zh-CN.md)。
+
 ## 项目目录
 
 ```text
