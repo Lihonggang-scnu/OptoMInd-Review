@@ -1,0 +1,77 @@
+schema_version: optomind.domain_pack.v1
+domain_id: metasurface
+display_name: 超表面与纳米光学
+version: 1.0.0
+extends:
+  - ai_for_optics
+merge:
+  append:
+    - domain_boundaries
+    - related_domains
+    - retrieval.query_expansion
+    - retrieval.preferred_sources
+    - evidence.roles
+    - measurements.conversions
+    - outline.priors
+    - visual.preferred_types
+    - migration.compatible_schemas
+    - migration.legacy_names
+  replace:
+    - domain_id
+    - display_name
+    - version
+domain_boundaries:
+  - 亚波长结构、超表面全息、动态调控与计算成像器件
+related_domains:
+  - nanophotonics
+  - computational_imaging
+canonical_concepts:
+  metasurface:
+    - metasurface
+    - meta-optics
+    - 超表面
+  holography:
+    - holography
+    - holographic display
+    - 全息
+  inverse_design:
+    - inverse design
+    - inverse electromagnetic design
+    - 逆向设计
+aliases:
+  fabrication:
+    - nanofabrication
+    - 制造工艺
+retrieval:
+  query_expansion:
+    - metasurface holography
+    - inverse design meta-optics
+    - dynamic holographic display
+    - metasurface imaging
+  preferred_sources:
+    - Optica Publishing Group
+    - Nature Photonics
+evidence:
+  roles:
+    - phase_control
+    - fabrication
+    - dynamic_modulation
+    - imaging_application
+measurements:
+  units:
+    wavelength: [nm, um, μm]
+    efficiency: ["%"]
+    numerical_aperture: []
+  conversions:
+    - wavelength_nm_to_um
+outline:
+  priors:
+    - inverse design and physical constraints
+    - fabrication and device tolerance
+    - dynamic display and imaging application
+visual:
+  preferred_types:
+    - mechanism
+    - device_architecture
+    - fabrication_flow
+    - application_example

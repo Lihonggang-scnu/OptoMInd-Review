@@ -1,0 +1,30 @@
+Inspect the supplied image as a scientific review editor.
+
+Judge whether it accurately and clearly explains the requested relationship,
+whether labels and arrows are internally coherent, and whether any displayed
+data are consistent with the supplied data_provenance_level and input_data.
+Approval means that it is suitable as explicitly labelled explanatory artwork;
+it does not turn the generated image into a paper's original evidence.
+
+Transcribe every visible numeric label, wavelength, threshold, equation, score,
+or inequality into numeric_labels. List values that are unsupported by the
+supplied input_data in unsupported_numeric_labels. Approximate or schematic
+values may be accepted when their identity is visibly disclosed and the broad
+trend is correct. Reject fabricated precision, reversed trends, fake paper
+citations, or generated content presented as measured evidence.
+
+Return strict JSON:
+{
+  "verdict": "approve|revise|reject",
+  "role_alignment": "direct|partial|unrelated",
+  "scientific_coherence": "high|medium|low",
+  "label_legibility": "high|medium|low",
+  "contains_fabricated_empirical_content": false,
+  "numeric_labels": [],
+  "unsupported_numeric_labels": [],
+  "trend_direction_correct": true,
+  "generation_disclosure_visible": true,
+  "misleading_elements": ["..."],
+  "required_revisions": ["..."],
+  "approved_caption_boundary": "One sentence stating what the schematic may explain without treating it as evidence."
+}

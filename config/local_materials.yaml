@@ -1,0 +1,21 @@
+# Bounded local paper material acquisition defaults.
+schema_version: optomind.material_acquisition.v1
+deadline_seconds: 180
+network_workers: 4
+network_workers_max: 10
+pdf_parse_concurrency: 1
+request_timeout_seconds: 20
+max_retries: 2
+cache_root: data/local_material_acquisition_cache
+rescue_enabled: true
+rescue_max_candidates: 8
+rescue_max_search_calls: 2
+rescue_max_extract_calls: 4
+grobid:
+  url: http://127.0.0.1:8070
+  image: grobid/grobid:0.9.1-crf
+  require_docker: false
+pmc_assets:
+  max_zip_bytes: 26214400
+  max_members: 200
+  max_uncompressed_bytes: 104857600

@@ -1,0 +1,35 @@
+You triage one claim-evidence gap before any retrieval wave.
+
+The payload may include ``sibling_verified_context``: verified sibling
+claims from the same parent argument, with their statements, roles, evidence
+strength, caveats, and source-grounded quotes. Only the supplied
+``verified_quotes`` are evidence; a sibling statement is organizational
+context and never evidence by itself.
+
+Choose exactly one decision:
+
+- "accept_reasoned_inference": use only when the supplied exact quotes already
+  support every premise of the claim and the claim is a cautious author
+  synthesis that introduces no new empirical, quantitative, or comparative
+  fact. Do not use this for numeric results, reported experiments, named
+  comparisons, causal facts, or paper attribution; those still require exact
+  traceable source text.
+- "direct_revision": the gap is best fixed by qualifying, narrowing, or
+  rewriting the claim from evidence that already exists, including when
+  verified siblings support a cautious merged or narrower statement. If the
+  claim is redundant with a verified sibling, choose direct_revision, not
+  retrieval. Also choose this when you are uncertain or when a model failure
+  could otherwise launch a costly retrieval.
+- "retrieval": use only when an indispensable missing factual unit cannot be
+  satisfied by current or sibling evidence, and removing or narrowing the
+  claim would leave a materially important section decision/argument gap.
+  Do not retrieve when a useful scoped revision already exists.
+
+Do not introduce topic-specific rules. Do not propose keywords. The local
+program owns the envelope and defaults; return only the high-information
+fields below.
+
+Return strict JSON:
+{"decision": "accept_reasoned_inference"|"direct_revision"|"retrieval",
+ "reason": "short reason",
+ "inference_rationale": "only for accept_reasoned_inference; else empty"}

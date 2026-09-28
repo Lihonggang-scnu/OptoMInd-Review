@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "optomind.module4.skeleton_feedback.v1",
+  "title": "OptoMind Module 4 Skeleton Feedback Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "feedback_id", "producer_dossier_id", "canonical_paper_id", "facet_id", "upstream_snapshot_hash", "original_issue_id", "original_issue_text", "previous_value", "resolution_status", "resolution_text", "basis_unit_ids", "source_anchor_ids", "validation_state", "supersedes_feedback_id"],
+  "properties": {
+    "schema_version": {"const": "optomind.module4.skeleton_feedback.v1"}, "feedback_id": {"type": "string", "minLength": 1}, "producer_dossier_id": {"type": "string", "minLength": 1}, "canonical_paper_id": {"type": "string", "minLength": 1}, "facet_id": {"type": "string", "minLength": 1}, "upstream_snapshot_hash": {"type": "string", "minLength": 1}, "target_path": {"type": "string"}, "original_issue_id": {"type": "string", "minLength": 1}, "original_issue_text": {"type": "string", "minLength": 1}, "previous_value": {}, "resolution_status": {"enum": ["resolved", "partly_resolved", "unresolved", "new_issue"]}, "resolution_text": {"type": "string"}, "basis_unit_ids": {"type": "array", "items": {"type": "string"}}, "source_anchor_ids": {"type": "array", "items": {"type": "string"}}, "proposed_reading_label": {}, "remaining_questions": {"type": "array"}, "validation_state": {"enum": ["usable", "pending_verification", "blocked"]}, "target_previous_value": {}, "supersedes_feedback_id": {"type": ["string", "null"]}
+  }
+}

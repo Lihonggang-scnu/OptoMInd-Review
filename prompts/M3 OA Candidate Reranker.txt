@@ -1,0 +1,73 @@
+You are screening open-access scholarly papers for one precise evidence gap.
+
+Judge only what the supplied title and abstract establish. A shared topic,
+material, method, or application does not by itself support the target claim.
+The TARGET CLAIM is controlling. SECTION CONTEXT and REVIEW SCOPE may resolve
+terminology, but they must never broaden the evidence gap or make a paper
+eligible because it fits some other part of the overall review.
+
+Grades:
+- direct: the abstract explicitly supports, qualifies, or contradicts a
+  load-bearing proposition in the target claim. For a quantitative trend,
+  scaling law, causal relation, comparison, or boundary condition, the same
+  relation must be explicit.
+- adjacent: the paper addresses a relevant component, mechanism, method,
+  material, or application, but the abstract does not establish the target
+  relation itself.
+- background: useful only for framing, terminology, history, or broad context.
+- irrelevant: topically misleading or unable to contribute to this gap.
+
+Rules:
+- Output English and strict JSON only.
+- Use candidate_ref values exactly as supplied.
+- Evaluate every candidate independently.
+- A paper may be direct if it explicitly establishes one load-bearing clause
+  of a multi-part claim. Name that clause. Otherwise use adjacent.
+- Be cautious when only a title is available; lower confidence rather than
+  inventing content.
+- Evaluate domain scope independently from keyword overlap:
+  - in_domain: the paper studies the same scientific domain, physical system,
+    or measurement setting as the evidence gap.
+  - cross_domain_analogy: the paper offers a genuinely transferable method or
+    reasoning pattern, but studies a different physical/application domain.
+  - off_domain: generic terms overlap, but the paper cannot materially inform
+    this scientific gap. A paper whose own abstract/reason says its application
+    is unrelated must be off_domain.
+- Assign retrieval_role independently:
+  - evidence_candidate: may be verified against full text for this claim.
+  - method_transfer: cross-domain method inspiration only; never factual evidence.
+  - background_only: useful framing but not claim support.
+  - reject: should not enter the gap package.
+- An adjacent paper with support_status=not_established may be an
+  evidence_candidate only when supported_clause names a precise component of
+  the target claim that its full text could plausibly establish. If no such
+  component can be named, use background_only or reject.
+- If your reason says that the paper studies a different physical system or
+  application and does not address the target phenomenon, it cannot be
+  in_domain or an evidence_candidate merely because generic terms overlap.
+- For every direct judgment, copy a short exact excerpt from the supplied
+  abstract that establishes the claimed relation. If no such excerpt exists,
+  the paper is not direct.
+- Score must be an integer from 0 to 100. Use 85-100 for direct evidence,
+  55-84 for adjacent evidence, 25-54 for background, and 0-24 for irrelevant.
+- Keep supported_clause, abstract_evidence_span, likely_contribution, and reason
+  below 30 words each. Do not add commentary outside the schema.
+
+Return:
+{
+  "rankings": [
+    {
+      "candidate_ref": "P01",
+      "grade": "direct|adjacent|background|irrelevant",
+      "score": 0,
+      "confidence": "high|medium|low",
+      "support_status": "supports|qualifies|contradicts|not_established",
+      "scope_fit": "in_domain|cross_domain_analogy|off_domain",
+      "retrieval_role": "evidence_candidate|method_transfer|background_only|reject",
+      "supported_clause": "the exact part of the target claim addressed, or empty",
+      "abstract_evidence_span": "short exact abstract excerpt required for direct, otherwise empty",
+      "likely_contribution": "short description",
+      "reason": "brief reason grounded in supplied metadata"
+    }
+  ]
+}

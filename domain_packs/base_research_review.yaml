@@ -1,0 +1,124 @@
+schema_version: optomind.domain_pack.v1
+domain_id: base_research_review
+display_name: 跨学科综述基础规则
+version: 1.0.0
+extends: []
+merge:
+  append: []
+  replace: []
+domain_boundaries:
+  - 从科研问题出发发现、核验、综合和交付公开研究证据
+  - 不替代实验、临床或工程现场的确定性验证
+related_domains:
+  - ai_for_optics
+  - materials_science
+  - computer_science
+canonical_concepts:
+  research_question:
+    - research question
+    - scientific question
+    - 科研问题
+  evidence_synthesis:
+    - evidence synthesis
+    - evidence review
+    - 证据综合
+  literature_review:
+    - literature review
+    - systematic review
+    - 文献综述
+  source_identity:
+    - source identity
+    - paper identity
+    - 文献身份
+aliases:
+  source:
+    - paper
+    - article
+    - publication
+    - 论文
+    - 文献
+  claim:
+    - finding
+    - conclusion
+    - 结论
+    - 主张
+ambiguous_terms:
+  - interface
+  - network
+  - model
+  - system
+retrieval:
+  query_expansion:
+    - literature review
+    - evidence synthesis
+    - research methods
+  prohibited_injections: []
+  preferred_sources:
+    - Semantic Scholar
+    - OpenAlex
+    - Crossref
+  from_year: 2015
+  max_queries: 3
+  results_per_backend: 5
+  saturation_threshold: 1.5
+  max_claims_per_loop: 5
+  top_k: 5
+  references_per_seed: 8
+evidence:
+  roles:
+    - background
+    - method
+    - result
+    - limitation
+    - application
+  strength_order:
+    - direct_full_text
+    - structured_abstract
+    - source_metadata
+    - secondary_summary
+measurements:
+  units: {}
+  conversions: []
+terminology:
+  acronym_policy: 首次出现给出全称与简称，后续保持简称一致
+  definitions: []
+style:
+  review_style_context: evidence-led research review with clear causal structure
+  anti_patterns:
+    - repeat a generic paragraph opening without adding a new relation
+    - present a source list without explaining the evidence relationship
+    - turn a limitation list into a conclusion without an actionable implication
+  key_tensions:
+    - breadth of coverage versus depth of verification
+    - readable synthesis versus precise source qualification
+    - reusable generalization versus domain-specific evidence
+outline:
+  min_sections: 4
+  max_sections: 8
+  priors:
+    - problem framing
+    - evidence landscape
+    - methods and findings
+    - limitations and future directions
+visual:
+  preferred_types:
+    - mechanism
+    - taxonomy
+    - comparison
+    - timeline
+  source_policy: 只使用与证据或研究流程有明确关系的图表
+quality:
+  applicability:
+    - citation_coverage
+    - source_identity
+    - evidence_traceability
+  thresholds:
+    citation_coverage: 0.80
+    source_identity: 0.95
+    evidence_traceability: 0.80
+prompt_assets: []
+migration:
+  compatible_schemas:
+    - optomind.domain_pack.v1
+  legacy_names:
+    - domain_config.yaml

@@ -1,0 +1,61 @@
+You are an expert in academic writing analysis. You will read one full-text
+chunk from a review paper and extract the "intellectual moves" visible in this
+chunk -- the strategic thinking patterns that make the review intellectually
+distinctive and publishable.
+
+The chunk may come from any part of the paper: abstract, introduction, body
+sections, figure/table discussion, outlook, conclusion, or other full-text
+regions. Do not assume it is only an introduction or conclusion.
+
+Your task: extract exactly eleven categories of intellectual moves from this
+chunk only. A downstream program will merge multiple chunks from the same paper.
+
+## Output format (JSON only, no other text)
+
+{
+  "problem_reframing": [
+    "How the authors redefined or reframed the core problem. BAD: 'discusses challenges'. GOOD: 'recasts scalability as a cost-structure problem rather than fabrication, shifting solutions toward roll-to-roll compatible materials.' (max 400 chars each)"
+  ],
+  "central_thesis": [
+    "The overarching judgment the review makes. What single claim organizes all sections? How is this different from a neutral literature survey? (max 400 chars each)"
+  ],
+  "taxonomy_design": [
+    "How the authors' classification framework generates new understanding. What dimensions did they classify along? What insight does the taxonomy reveal about mechanisms, contradictions, evolution, or bottlenecks? (max 400 chars each)"
+  ],
+  "synthesis_moves": [
+    "How the authors connected previously disconnected sub-fields, methods, materials, applications, or scales into a coherent narrative. (max 400 chars each)"
+  ],
+  "section_progression": [
+    "How sections advance the argument. What question does each section answer? How does each push the problem deeper before handing off? (max 400 chars each)"
+  ],
+  "paragraph_moves": [
+    "How individual paragraphs perform specific writing actions: opening topic, organizing literature, pushing the argument forward. (max 400 chars each)"
+  ],
+  "evidence_critique": [
+    "The standards authors used to judge evidence quality. What criteria make a result trustworthy or untrustworthy? What stronger evidence would be needed? (max 400 chars each)"
+  ],
+  "disagreement_handling": [
+    "How the authors addressed contradictions. Root cause identified? Conditional resolution offered? (max 400 chars each)"
+  ],
+  "gap_characterization": [
+    "The precise way authors defined what the field still does not know. What object, boundary, reason, and consequence define the gap? (max 400 chars each)"
+  ],
+  "figure_argument": [
+    "How figures and tables participate in the argument. Classification, mechanism explanation, route comparison, framework proposal? Authors' own framework or reproduced data? (max 400 chars each)"
+  ],
+  "top_journal_publishability": [
+    "Why this review deserved a top journal. What combination of necessity, original perspective, organization, critical depth, and future traction made it more than a competent summary? (max 400 chars each)"
+  ]
+}
+
+## Rules
+
+- Each array must have 0-3 items. Return empty array [] if no clear signal in this chunk.
+- Each item must describe a specific intellectual action by the authors, not a generic statement.
+- Items may reference specific content from this paper (mechanism names, material classes).
+- Do not invent content not present in the excerpts.
+- Do not fill a category just to avoid an empty array. Empty arrays are preferred over weak speculation.
+- For "disagreement_handling", return [] unless the excerpts explicitly mention controversy, contradiction, inconsistent evidence, competing explanations, or unresolved debate.
+- For "figure_argument", return [] unless the excerpts explicitly describe figures, tables, graphical frameworks, roadmaps, taxonomies, schematics, or visual summaries. Never propose a hypothetical figure.
+- Write all items in English, under 400 characters each.
+- Return only valid JSON. No preamble, no markdown fences.

@@ -1,0 +1,89 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "optomind.upgrade3.author_candidate.v1",
+ "title": "AUTHOR_CANDIDATE",
+ "type": "object",
+ "required": [
+  "schema_version",
+  "envelope",
+  "candidate_id",
+  "section_id",
+  "generation_id",
+  "draft_text_sha256",
+  "evidence_packet",
+  "citation_map",
+  "validation_level",
+  "candidate_class"
+ ],
+ "properties": {
+  "schema_version": {
+   "const": "optomind.upgrade3.author_candidate.v1"
+  },
+  "envelope": {
+   "type": "object",
+   "required": [
+    "run_id",
+    "generation_id",
+    "attempt_id",
+    "artifact_id",
+    "producer",
+    "created_at",
+    "content_sha256",
+    "policy_sha256",
+    "prompt_manifest_hash",
+    "model_manifest_hash",
+    "material_snapshot_hash"
+   ],
+   "properties": {
+    "run_id": {
+     "type": "string"
+    },
+    "generation_id": {
+     "type": "string"
+    },
+    "attempt_id": {
+     "type": "string"
+    },
+    "artifact_id": {
+     "type": "string"
+    },
+    "producer": {
+     "type": "string"
+    },
+    "created_at": {
+     "type": "string"
+    },
+    "content_sha256": {
+     "type": "string"
+    },
+    "policy_sha256": {
+     "type": "string"
+    },
+    "prompt_manifest_hash": {
+     "type": "string"
+    },
+    "model_manifest_hash": {
+     "type": "string"
+    },
+    "material_snapshot_hash": {
+     "type": "string"
+    }
+   }
+  },
+  "validation_level": {
+   "enum": [
+    "syntax",
+    "scientific",
+    "none"
+   ]
+  },
+  "candidate_class": {
+   "enum": [
+    "syntax_only",
+    "scientific"
+   ]
+  }
+ },
+ "notes": "syntax候选不得声明scientific类；validation none非法",
+ "x_producer_consumer": true
+}

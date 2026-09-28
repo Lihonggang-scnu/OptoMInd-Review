@@ -1,0 +1,73 @@
+{
+  "version": "1.0",
+  "note": "The single source of truth for the enum vocabularies the query planner may select from. The prompt is rendered from this file and the validator reads it; neither may define its own copy.",
+  "enums": {
+    "publication_type": {
+      "allowed": [
+        "JournalArticle",
+        "Review",
+        "Conference",
+        "Book",
+        "BookSection",
+        "Dataset",
+        "Editorial",
+        "LettersAndComments",
+        "MetaAnalysis",
+        "News",
+        "Study",
+        "CaseReport",
+        "ClinicalTrial",
+        "MagazineArticle",
+        "Preprint",
+        "Tutorial"
+      ],
+      "case_sensitive": true,
+      "spelling_note": "Spelling note: use the exact spelling shown. PascalCase with no space; journal article and review will not match."
+    },
+    "fields_of_study": {
+      "allowed": [
+        "Computer Science",
+        "Medicine",
+        "Chemistry",
+        "Biology",
+        "Materials Science",
+        "Physics",
+        "Geology",
+        "Psychology",
+        "Art",
+        "History",
+        "Geography",
+        "Sociology",
+        "Business",
+        "Political Science",
+        "Economics",
+        "Philosophy",
+        "Mathematics",
+        "Engineering",
+        "Environmental Science",
+        "Agricultural and Food Sciences",
+        "Education",
+        "Law",
+        "Linguistics"
+      ],
+      "case_sensitive": true,
+      "spelling_note": "Spelling note: use the exact spelling shown. Title Case WITH a space; computer science will not match."
+    },
+    "text_availability": {
+      "allowed": [
+        "fulltext",
+        "abstract",
+        "none"
+      ],
+      "case_sensitive": true,
+      "spelling_note": "Spelling note: use the exact spelling shown. All lower case."
+    }
+  },
+  "limits": {
+    "facets_min": 1,
+    "facets_max": 10,
+    "keyword_queries_per_facet_max": 3,
+    "question_queries_per_facet_max": 3,
+    "seeds_max": 3
+  }
+}

@@ -1,0 +1,79 @@
+schema_version: optomind.domain_pack.v1
+domain_id: integrated_photonics
+display_name: 集成光子学与光互连
+version: 1.0.0
+extends:
+  - ai_for_optics
+merge:
+  append:
+    - domain_boundaries
+    - related_domains
+    - retrieval.query_expansion
+    - retrieval.preferred_sources
+    - evidence.roles
+    - measurements.conversions
+    - outline.priors
+    - visual.preferred_types
+    - migration.compatible_schemas
+    - migration.legacy_names
+  replace:
+    - domain_id
+    - display_name
+    - version
+domain_boundaries:
+  - 可编程集成光子芯片、光子计算、人工智能加速与光互连
+related_domains:
+  - photonic_computing
+  - semiconductor_systems
+canonical_concepts:
+  integrated_photonics:
+    - integrated photonics
+    - integrated photonic platform
+    - 集成光子学
+  integrated_photonic_circuit:
+    - integrated photonic circuit
+    - photonic integrated circuit
+    - 集成光子芯片
+  photonic_accelerator:
+    - photonic accelerator
+    - optical accelerator
+    - 光子加速器
+  optical_interconnect:
+    - optical interconnect
+    - 光互连
+aliases:
+  programmability:
+    - programmable photonics
+    - 可编程光子学
+retrieval:
+  query_expansion:
+    - programmable integrated photonics
+    - photonic AI accelerator
+    - optical interconnect
+  preferred_sources:
+    - IEEE Xplore
+    - Nature Electronics
+evidence:
+  roles:
+    - device_platform
+    - programmability
+    - ai_acceleration
+    - energy_efficiency
+    - optical_interconnect
+measurements:
+  units:
+    bandwidth: [Hz, GHz, THz]
+    energy_per_operation: [J, pJ]
+    latency: [s, ms, us, ns]
+  conversions:
+    - bandwidth_ghz_to_thz
+outline:
+  priors:
+    - programmable chip platform
+    - AI acceleration and system metrics
+    - packaging and optical interconnect
+visual:
+  preferred_types:
+    - chip_architecture
+    - system_dataflow
+    - scaling_roadmap

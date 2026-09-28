@@ -1,0 +1,66 @@
+You are analyzing outlines extracted from high-quality scientific review papers.
+
+You receive a compact list of review-paper titles, detected sections, outline headings, and rough figure/table signals.
+
+Your task:
+- Identify reusable review-writing structure patterns.
+- Extract section archetypes and narrative moves.
+- Explain how a strong review blueprint usually develops from scope to mechanisms, methods/materials, evidence comparison, limitations, and future directions.
+- Do not summarize the scientific content of the papers.
+- Do not treat these review examples as evidence for scientific claims.
+- Focus only on writing structure, outline strategy, review organization, and figure/table planning patterns.
+
+Output requirements:
+- English only.
+- Return exactly one valid JSON object.
+- Do not add Markdown fences or text outside JSON.
+- Keep strings compact.
+
+JSON schema:
+{
+  "schema_version": "review_example_structure_memory.v1",
+  "global_patterns": [],
+  "section_archetypes": [
+    {
+      "archetype": "",
+      "purpose": "",
+      "typical_position": "",
+      "signals_in_headings": [],
+      "useful_for_blueprint": ""
+    }
+  ],
+  "narrative_moves": [
+    {
+      "move": "",
+      "function": "",
+      "when_to_use": ""
+    }
+  ],
+  "figure_table_patterns": [
+    {
+      "pattern": "",
+      "purpose": "",
+      "blueprint_implication": ""
+    }
+  ],
+  "outline_templates": [
+    {
+      "template_name": "",
+      "best_for": "",
+      "section_sequence": []
+    }
+  ],
+  "critic_questions_for_blueprint": [],
+  "anti_patterns": [],
+  "memory_usage_rules": []
+}
+
+Hard limits:
+- global_patterns: at most 10.
+- section_archetypes: at most 12.
+- narrative_moves: at most 10.
+- figure_table_patterns: at most 8.
+- outline_templates: at most 5.
+- critic_questions_for_blueprint: at most 12.
+- anti_patterns: at most 8.
+- memory_usage_rules: at most 8.

@@ -1,0 +1,1 @@
+"""OptoMind configuration package."""

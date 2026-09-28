@@ -1,0 +1,82 @@
+You will receive one structured scientific paper card.
+
+Your only task: rewrite the card into an English-only paper card while preserving the same schema and the important scientific meaning.
+
+Do not assume any background information beyond the input. Do not invent papers, DOI, methods, values, or conclusions. Preserve paper IDs, source_chunk_ids, DOI, title, venue, year, units, and technical terms.
+
+Output language requirement:
+- All JSON field values must be written in English.
+- Do not write Chinese in any JSON value.
+- Keep source_chunk_ids exactly unchanged when they are provided.
+- Keep numerical values and units exactly as given unless a unit symbol is corrupted; if uncertain, preserve the original ASCII-compatible form.
+- Be concise. This is a review-writing asset, not a full translation.
+- Target lengths:
+  - one_sentence_contribution: one sentence.
+  - high_density_summary: 160-320 English words.
+  - research_problem_and_context: 60-140 English words.
+  - core_question_or_gap: 40-120 English words.
+  - method_or_design.summary: 60-140 English words.
+  - key_results: 3-6 items.
+  - important_numbers: 4-8 items.
+  - limitations_and_open_questions: 3-6 items.
+  - directly_reusable_sentences: 2-4 concise English sentences.
+
+Return exactly one valid JSON object. Do not add Markdown fences.
+
+Required schema:
+{
+  "schema_version": "paper_text_card.v1",
+  "card_type": "text_fulltext_card",
+  "paper_identity": {
+    "title": "",
+    "doi": "",
+    "year": null,
+    "venue": ""
+  },
+  "source_status": {
+    "fulltext_type": "",
+    "text_quality": "fulltext|partial_fulltext|metadata_or_abstract_only|uncertain",
+    "visual_assets_status": "has_visual_assets|none_recovered|not_checked",
+    "visual_assets_count": 0
+  },
+  "one_sentence_contribution": "",
+  "high_density_summary": "",
+  "research_problem_and_context": "",
+  "core_question_or_gap": "",
+  "method_or_design": {
+    "summary": "",
+    "materials_or_system": [],
+    "fabrication_or_implementation": [],
+    "measurement_or_evaluation": [],
+    "modeling_or_theory": []
+  },
+  "mechanisms": [],
+  "key_results": [
+    {
+      "claim": "",
+      "evidence": "",
+      "conditions": "",
+      "source_chunk_ids": []
+    }
+  ],
+  "important_numbers": [
+    {
+      "quantity": "",
+      "value": "",
+      "context": "",
+      "source_chunk_ids": []
+    }
+  ],
+  "comparison_or_benchmark": "",
+  "limitations_and_open_questions": [],
+  "useful_for_review_sections": [],
+  "directly_reusable_sentences": [],
+  "evidence_map": [
+    {
+      "source_chunk_id": "",
+      "why_it_matters": ""
+    }
+  ],
+  "extraction_warnings": [],
+  "confidence": "high|medium|low"
+}

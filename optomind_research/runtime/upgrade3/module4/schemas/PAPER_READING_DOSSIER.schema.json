@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "optomind.module4.paper_reading_dossier.v1",
+  "title": "OptoMind Module 4 Paper Reading Dossier",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "verification": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {"type": "string", "enum": ["supported_as_report", "supported_as_inference", "partly_supported", "unsupported", "unresolved", "unreviewed"]},
+        "reason": {"type": "string"},
+        "review_role": {"type": "string"},
+        "human_truth": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "anchor": {
+      "type": "object",
+      "required": ["anchor_id", "snapshot_id", "block_id", "quote_original", "binding_status"],
+      "properties": {
+        "anchor_id": {"type": "string", "minLength": 1}, "snapshot_id": {"type": "string", "minLength": 1}, "block_id": {"type": "string", "minLength": 1}, "quote_original": {"type": "string", "minLength": 1},
+        "char_start": {"type": "integer", "minimum": 0}, "char_end": {"type": "integer", "minimum": 1}, "text_hash": {"type": "string", "minLength": 1},
+        "binding_status": {"type": "string", "enum": ["bound", "unresolved", "ambiguous", "quote_missing", "snapshot_mismatch", "block_missing"]}
+      },
+      "additionalProperties": true
+    },
+    "content_unit": {
+      "type": "object",
+      "required": ["unit_id", "kind", "statement", "origin_type", "source_block_ids", "source_anchor_ids", "verification_ref"],
+      "properties": {
+        "unit_id": {"type": "string", "minLength": 1}, "kind": {"type": "string", "minLength": 1}, "statement": {"type": "string", "minLength": 1},
+        "origin_type": {"type": "string", "enum": ["author_report", "author_interpretation", "cited_work_report"]},
+        "source_block_ids": {"type": "array", "items": {"type": "string", "minLength": 1}}, "source_anchor_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "verification_ref": {"$ref": "#/$defs/verification"}
+      },
+      "additionalProperties": true
+    },
+    "answer_block": {
+      "type": "object",
+      "required": ["text", "source_anchor_ids", "verification_ref"],
+      "properties": {"text": {"type": "string", "minLength": 1}, "source_anchor_ids": {"type": "array", "items": {"type": "string", "minLength": 1}}, "verification_ref": {"$ref": "#/$defs/verification"}},
+      "additionalProperties": true
+    },
+    "facet": {
+      "type": "object",
+      "required": ["facet_id", "answer_status", "answer_blocks"],
+      "properties": {
+        "facet_id": {"type": "string", "minLength": 1},
+        "answer_status": {"type": "string", "enum": ["addressed", "partly_addressed", "not_addressed_in_read_material", "uncertain"]},
+        "answer_blocks": {"type": "array", "items": {"$ref": "#/$defs/answer_block"}}, "verification_ref": {"$ref": "#/$defs/verification"}, "relevant_unit_ids": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "additionalProperties": true
+    },
+    "receipt": {
+      "type": "object",
+      "required": ["page_index", "block_ids", "complete"],
+      "properties": {"page_index": {"type": "integer", "minimum": 0}, "block_ids": {"type": "array", "items": {"type": "string", "minLength": 1}}, "complete": {"type": "boolean"}},
+      "additionalProperties": true
+    }
+  },
+  "required": ["schema_version", "dossier_id", "input_fingerprint", "paper_identity_ref", "document_snapshot_ref", "paper_map", "content_units", "facet_analyses", "model_interpretations", "unmapped_observations", "citation_observations", "source_anchors", "issues", "coverage", "verification_summary", "status", "audit_ref", "feedback_ref"],
+  "properties": {
+    "schema_version": {"const": "optomind.module4.paper_reading_dossier.v1"}, "dossier_id": {"type": "string", "minLength": 1}, "input_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "paper_identity_ref": {"type": "object", "required": ["canonical_paper_id"], "properties": {"canonical_paper_id": {"type": "string", "minLength": 1}}, "additionalProperties": true},
+    "document_snapshot_ref": {"type": "object", "required": ["snapshot_id"], "properties": {"snapshot_id": {"type": "string", "minLength": 1}}, "additionalProperties": true},
+    "task_snapshot_ref": {"type": "array", "items": {"type": "object"}}, "paper_identity": {"type": "object"}, "input": {"type": "object"},
+    "paper_map": {"type": "object", "required": ["overview_blocks", "section_cards"], "properties": {"overview_blocks": {"type": "array"}, "section_cards": {"type": "array"}}, "additionalProperties": true},
+    "content_units": {"type": "array", "items": {"$ref": "#/$defs/content_unit"}}, "facet_analyses": {"type": "array", "items": {"$ref": "#/$defs/facet"}},
+    "model_interpretations": {"type": "array", "items": {"type": "object", "required": ["interpretation_id", "statement", "source_anchor_ids"], "properties": {"interpretation_id": {"type": "string", "minLength": 1}, "statement": {"type": "string", "minLength": 1}, "source_anchor_ids": {"type": "array", "items": {"type": "string", "minLength": 1}}}, "additionalProperties": true}},
+    "unmapped_observations": {"type": "array", "items": {"type": "object", "required": ["observation_id", "reason_not_mapped"], "properties": {"observation_id": {"type": "string", "minLength": 1}, "reason_not_mapped": {"type": "string", "minLength": 1}}, "additionalProperties": true}},
+    "citation_observations": {"type": "array", "items": {"type": "object"}}, "source_anchors": {"type": "array", "items": {"$ref": "#/$defs/anchor"}}, "issues": {"type": "array", "items": {"type": "object"}},
+    "coverage": {"type": "object", "required": ["expected_research_block_ids", "successfully_processed_block_ids", "reading_receipts"], "properties": {"expected_research_block_ids": {"type": "array", "items": {"type": "string"}}, "successfully_processed_block_ids": {"type": "array", "items": {"type": "string"}}, "reading_receipts": {"type": "array", "items": {"$ref": "#/$defs/receipt"}}}, "additionalProperties": true},
+    "verification_summary": {"type": "object", "required": ["semantic_review"], "properties": {"semantic_review": {"type": "object", "required": ["status"], "properties": {"status": {"type": "string"}}, "additionalProperties": true}}, "additionalProperties": true},
+    "status": {"type": "object", "required": ["delivery_state", "execution_state"], "properties": {"delivery_state": {"type": "string"}, "execution_state": {"type": "string"}}, "additionalProperties": true}, "audit_ref": {"type": "object"}, "feedback_ref": {"type": "object"}
+  }
+}

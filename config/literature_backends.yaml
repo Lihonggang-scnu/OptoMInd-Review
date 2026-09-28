@@ -1,0 +1,116 @@
+# OptoMind Literature Backend Configuration
+# =========================================
+# Controls which academic search backends are active.
+# No API keys are stored here. Keys come from environment variables.
+
+version: "0.2.0"
+generated: "2026-06-23"
+
+# --- Active backends (no API key required) ---
+enabled_backends:
+  - arxiv
+  - crossref
+  - openalex
+  - local_import
+  - pdf_parser
+  - unpaywall
+
+# --- Optional backends (attempted but may fall back) ---
+optional_backends:
+  - semantic_scholar
+  - browser_mcp
+  - core
+  - github
+  - grobid
+  - docling
+  - marker
+  - unstructured
+  - paperqa2
+  - mcp_servers
+  - institutional_access
+  - chart_extraction
+
+# --- Backends requiring API keys (disabled until configured) ---
+disabled_until_configured:
+  - semantic_scholar
+  - core
+  - institutional_access
+
+# Current migration policy: automatic full-text acquisition is legal OA only.
+# Institutional access remains an explicit future opt-in, never a fallback.
+fulltext_access_policy:
+  mode: oa_only
+  institutional_access: opt_in_only
+
+# --- Environment variable names for API keys ---
+api_key_env_names:
+  semantic_scholar: SEMANTIC_SCHOLAR_API_KEY
+  openalex: OPENALEX_API_KEY
+  core: CORE_API_KEY
+  github: GITHUB_TOKEN
+
+# --- Optional AgentScope 2.0 browser MCP ---
+# The MCP server/tool must return public journal metadata or abstracts as JSON.
+# Browser results remain unverified unless a DOI is present and verified.
+browser_mcp:
+  enabled_when_configured: true
+  url_env_name: OPTOMIND_BROWSER_MCP_URL
+  search_tool_env_name: OPTOMIND_BROWSER_MCP_TOOL
+  public_pages_only: true
+  paywall_bypass: false
+  role: publisher_landing_page_verification_and_abstract_enrichment
+
+# --- Polite contact email for Crossref/Unpaywall (optional) ---
+contact_email_env_name: CONTACT_EMAIL
+
+# --- Workspace paths ---
+workspace:
+  root: literature_workspace
+  pdf_dir: literature_workspace/pdfs
+  parsed_text_dir: literature_workspace/parsed_text
+  chunks_dir: literature_workspace/chunks
+  metadata_dir: literature_workspace/metadata
+  diagnostics_dir: literature_workspace/diagnostics
+
+# --- Rate limits ---
+rate_limits:
+  arxiv_seconds_between_requests: 3
+  crossref_seconds_between_requests: 1
+  openalex_seconds_between_requests: 1
+  semantic_scholar_seconds_between_requests: 1
+  github_seconds_between_requests: 1
+
+# --- GROBID (requires Docker) ---
+grobid:
+  enabled: false
+  docker_image: lfoppiano/grobid:0.8.0
+  service_url: http://localhost:8070
+
+# --- PaperQA2 (requires pip install + LLM backend) ---
+paperqa2:
+  enabled: false
+  install_command: "py -3.11 -m pip install paper-qa"
+  requires_llm: true
+
+# --- Institutional access (requires manual user activation) ---
+institutional_access:
+  enabled: false
+  mode: playwright_manual_login
+  browser_profile_dir: literature_workspace/browser_profiles/scnu
+  credential_file_allowed: false
+  credential_file_path: api_keys/scnu-lib.txt
+  never_log_credentials: true
+
+# --- Cache ---
+cache:
+  enabled: true
+  root: .cache/literature_search
+
+# --- Search defaults ---
+search_defaults:
+  max_results_per_query: 10
+  timeout_seconds: 30
+  arxiv_categories:
+    - physics.optics
+    - cond-mat.mtrl-sci
+    - physics.app-ph

@@ -1,0 +1,126 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "optomind.upgrade3.claim_binding.v1",
+ "title": "CLAIM_BINDING",
+ "type": "object",
+ "required": [
+  "schema_version",
+  "envelope",
+  "claim_id",
+  "revision",
+  "atomic_statement",
+  "importance",
+  "required_components",
+  "support_span_ids",
+  "context_span_ids",
+  "condition_ids",
+  "scope_verdict",
+  "permission",
+  "entailment",
+  "binding_status"
+ ],
+ "properties": {
+  "schema_version": {
+   "const": "optomind.upgrade3.claim_binding.v1"
+  },
+  "envelope": {
+   "type": "object",
+   "required": [
+    "run_id",
+    "generation_id",
+    "attempt_id",
+    "artifact_id",
+    "producer",
+    "created_at",
+    "content_sha256",
+    "policy_sha256",
+    "prompt_manifest_hash",
+    "model_manifest_hash",
+    "material_snapshot_hash"
+   ],
+   "properties": {
+    "run_id": {
+     "type": "string"
+    },
+    "generation_id": {
+     "type": "string"
+    },
+    "attempt_id": {
+     "type": "string"
+    },
+    "artifact_id": {
+     "type": "string"
+    },
+    "producer": {
+     "type": "string"
+    },
+    "created_at": {
+     "type": "string"
+    },
+    "content_sha256": {
+     "type": "string"
+    },
+    "policy_sha256": {
+     "type": "string"
+    },
+    "prompt_manifest_hash": {
+     "type": "string"
+    },
+    "model_manifest_hash": {
+     "type": "string"
+    },
+    "material_snapshot_hash": {
+     "type": "string"
+    }
+   }
+  },
+  "importance": {
+   "enum": [
+    "load_bearing",
+    "supporting",
+    "background"
+   ]
+  },
+  "scope_verdict": {
+   "enum": [
+    "direct",
+    "adjacent",
+    "background",
+    "out_of_scope",
+    "uncertain"
+   ]
+  },
+  "permission": {
+   "enum": [
+    "discovery_only",
+    "background_only",
+    "reported_only",
+    "qualified_support",
+    "direct_support"
+   ]
+  },
+  "entailment": {
+   "enum": [
+    "support",
+    "partial",
+    "contradict",
+    "not_enough_information"
+   ]
+  },
+  "binding_status": {
+   "enum": [
+    "resolved",
+    "unresolved",
+    "invalid"
+   ]
+  },
+  "support_span_ids": {
+   "type": "array"
+  },
+  "context_span_ids": {
+   "type": "array"
+  }
+ },
+ "notes": "核心span缺失不能以context span替换；supported必须resolved；authorable必须resolved核心",
+ "x_producer_consumer": true
+}

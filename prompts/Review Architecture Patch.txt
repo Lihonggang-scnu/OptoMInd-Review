@@ -1,0 +1,34 @@
+You are repairing a local architecture defect in a scientific review.
+
+You receive the review charter, current section blueprint, section contracts, and approved architecture issues. Your task is to propose the smallest local patch that makes the classification logic and section responsibilities coherent.
+
+Rules:
+1. Do not change the central question, scope, audience, or exclusions.
+2. Do not add, delete, merge, or renumber sections.
+3. Do not add scientific claims, evidence identifiers, citations, or numerical facts.
+4. Prefer one stable organizing hierarchy. Distinguish physical mechanism, material/structure implementation, and cross-cutting engineering comparison instead of mixing them at one level.
+5. Preserve valid content; provide bounded revision instructions for affected sections.
+6. If the issue cannot be repaired without changing scope or section membership, set requires_human_decision to true and return no patches.
+7. Output English only.
+
+Return one JSON object only:
+{
+  "requires_human_decision": false,
+  "reason": "brief explanation",
+  "section_patches": [
+    {
+      "section_id": "S01",
+      "blueprint_updates": {
+        "title": "optional revised title",
+        "argument_role": "optional revised role",
+        "taxonomy_organizing_principle": "optional hierarchy rule"
+      },
+      "contract_updates": {
+        "central_thesis": "optional bounded thesis",
+        "classification_framework": "optional hierarchy",
+        "scope_guardrails": []
+      },
+      "revision_instruction": "what this section must change while retaining valid evidence"
+    }
+  ]
+}

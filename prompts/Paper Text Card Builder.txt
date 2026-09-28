@@ -1,0 +1,80 @@
+You are given selected full-text evidence snippets from one scientific paper.
+
+Your task is to compress the paper into a structured paper card for downstream literature review writing. This is not an abstract. It should preserve more useful information than an abstract: problem, context, method/design, materials/system, mechanisms, key results, important numbers, limitations, and how the paper can be used in a review.
+
+Use only the supplied metadata and evidence snippets. Do not invent papers, DOI, figures, numerical values, methods, or conclusions. If evidence is insufficient, say so explicitly.
+
+Language:
+- Write all explanatory fields in English.
+- Keep paper title, material names, method names, metrics, wavelengths, temperatures, units, and technical terms in their original English form when useful.
+- Use ASCII units/symbols when possible, e.g. "um", "degC", "W/m2", "8-13 um", "solar reflectance".
+- Do not write Chinese in any JSON value.
+
+Return exactly one valid JSON object with this schema. Do not add Markdown fences.
+
+{
+  "schema_version": "paper_text_card.v1",
+  "card_type": "text_fulltext_card",
+  "paper_identity": {
+    "title": "",
+    "doi": "",
+    "year": null,
+    "venue": ""
+  },
+  "source_status": {
+    "fulltext_type": "",
+    "text_quality": "fulltext|partial_fulltext|metadata_or_abstract_only|uncertain",
+    "visual_assets_status": "has_visual_assets|none_recovered|not_checked",
+    "visual_assets_count": 0
+  },
+  "one_sentence_contribution": "",
+  "high_density_summary": "",
+  "research_problem_and_context": "",
+  "core_question_or_gap": "",
+  "method_or_design": {
+    "summary": "",
+    "materials_or_system": [],
+    "fabrication_or_implementation": [],
+    "measurement_or_evaluation": [],
+    "modeling_or_theory": []
+  },
+  "mechanisms": [],
+  "key_results": [
+    {
+      "claim": "",
+      "evidence": "",
+      "conditions": "",
+      "source_chunk_ids": []
+    }
+  ],
+  "important_numbers": [
+    {
+      "quantity": "",
+      "value": "",
+      "context": "",
+      "source_chunk_ids": []
+    }
+  ],
+  "comparison_or_benchmark": "",
+  "limitations_and_open_questions": [],
+  "useful_for_review_sections": [],
+  "directly_reusable_sentences": [],
+  "evidence_map": [
+    {
+      "source_chunk_id": "",
+      "why_it_matters": ""
+    }
+  ],
+  "extraction_warnings": [],
+  "confidence": "high|medium|low"
+}
+
+Quality requirements:
+- The "high_density_summary" should usually be 180-450 English words for a research article and 300-700 English words for a review article, unless the input is too short.
+- Every important claim or number should cite at least one supplied "source_chunk_id".
+- "key_results" should focus on findings, measured performance, observed trends, or review-level conclusions; do not fill it with generic background.
+- "method_or_design" should include concrete materials, structures, processing, optical/thermal metrics, or analysis approach when present.
+- "limitations_and_open_questions" should include limitations explicitly stated by the paper or cautiously inferred from supplied evidence. Mark inferred limitations as inferred.
+- "directly_reusable_sentences" must contain 2-5 concise English sentences suitable for a later review draft. Never leave it empty.
+- If the paper is a review, summarize its taxonomy, historical framing, consensus, and unresolved bottlenecks instead of forcing an experimental method.
+- If no article images are available, do not treat the paper as low quality. Mention image absence only in "source_status" or "extraction_warnings" if relevant.

@@ -1,0 +1,281 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "optomind.upgrade3.domain_contract.v1",
+  "title": "DOMAIN_CONTRACT",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/current_producer"
+    },
+    {
+      "$ref": "#/$defs/legacy_read_only"
+    }
+  ],
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "envelope": {
+      "type": "object",
+      "required": [
+        "run_id",
+        "generation_id",
+        "attempt_id",
+        "artifact_id",
+        "producer",
+        "parent_artifact_hashes",
+        "created_at",
+        "content_sha256",
+        "policy_sha256",
+        "prompt_manifest_hash",
+        "model_manifest_hash",
+        "material_snapshot_hash"
+      ],
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attempt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "producer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parent_artifact_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "policy_sha256": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prompt_manifest_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_manifest_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "material_snapshot_hash": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "current_producer": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "envelope",
+        "original_question",
+        "original_question_hash",
+        "object_kind",
+        "object_phrases",
+        "object_aliases",
+        "target_system",
+        "task",
+        "regime",
+        "inclusions",
+        "exclusions",
+        "provenance",
+        "rejected_model_phrases",
+        "required_questions",
+        "comparison_axes",
+        "time_scope",
+        "status",
+        "version"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "optomind.upgrade3.domain_contract.v1"
+        },
+        "envelope": {
+          "$ref": "#/$defs/envelope"
+        },
+        "original_question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "original_question_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "object_kind": {
+          "enum": [
+            "research_object",
+            "methods+target_system"
+          ]
+        },
+        "object_phrases": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "object_aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "target_system": {
+          "type": "string"
+        },
+        "task": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "regime": {
+          "type": "string"
+        },
+        "inclusions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "exclusions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "provenance": {
+          "type": "object"
+        },
+        "rejected_model_phrases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "required_questions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "comparison_axes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "time_scope": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "validated",
+            "frozen",
+            "needs_scope"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "scope_blocker": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true,
+      "description": "唯一当前 DOMAIN_CONTRACT producer shape。"
+    },
+    "legacy_read_only": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "envelope",
+        "topic_fingerprint",
+        "research_object",
+        "task_type",
+        "scope_boundary",
+        "slots",
+        "status",
+        "legacy_read_only"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "optomind.upgrade3.domain_contract.v1"
+        },
+        "envelope": {
+          "$ref": "#/$defs/envelope"
+        },
+        "topic_fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "research_object": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope_boundary": {
+          "type": "object",
+          "properties": {
+            "included_regimes": {
+              "type": "array"
+            },
+            "excluded_regimes": {
+              "type": "array"
+            },
+            "boundary_notes": {
+              "type": "array"
+            }
+          },
+          "additionalProperties": true
+        },
+        "slots": {
+          "type": "object"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "adjudicated",
+            "frozen"
+          ]
+        },
+        "legacy_read_only": {
+          "const": true
+        }
+      },
+      "additionalProperties": true,
+      "deprecated": true,
+      "description": "仅用于旧资产读取的兼容形状；当前 producer 禁止生成。"
+    }
+  },
+  "additionalProperties": true,
+  "notes": "当前 W1 producer 的 original_question/object_phrases/object_kind/task/required_questions/comparison_axes/status/version/envelope 为唯一权威 shape；legacy_read_only 只能作为只读兼容输入。",
+  "x_producer_consumer": true
+}

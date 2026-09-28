@@ -1,0 +1,93 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "optomind.upgrade3.scientific_issue.v1",
+ "title": "SCIENTIFIC_ISSUE",
+ "type": "object",
+ "required": [
+  "schema_version",
+  "envelope",
+  "issue_id",
+  "generation_id",
+  "target_ids",
+  "severity",
+  "issue_type",
+  "lifecycle",
+  "raised_by"
+ ],
+ "properties": {
+  "schema_version": {
+   "const": "optomind.upgrade3.scientific_issue.v1"
+  },
+  "envelope": {
+   "type": "object",
+   "required": [
+    "run_id",
+    "generation_id",
+    "attempt_id",
+    "artifact_id",
+    "producer",
+    "created_at",
+    "content_sha256",
+    "policy_sha256",
+    "prompt_manifest_hash",
+    "model_manifest_hash",
+    "material_snapshot_hash"
+   ],
+   "properties": {
+    "run_id": {
+     "type": "string"
+    },
+    "generation_id": {
+     "type": "string"
+    },
+    "attempt_id": {
+     "type": "string"
+    },
+    "artifact_id": {
+     "type": "string"
+    },
+    "producer": {
+     "type": "string"
+    },
+    "created_at": {
+     "type": "string"
+    },
+    "content_sha256": {
+     "type": "string"
+    },
+    "policy_sha256": {
+     "type": "string"
+    },
+    "prompt_manifest_hash": {
+     "type": "string"
+    },
+    "model_manifest_hash": {
+     "type": "string"
+    },
+    "material_snapshot_hash": {
+     "type": "string"
+    }
+   }
+  },
+  "severity": {
+   "enum": [
+    "critical",
+    "major",
+    "minor"
+   ]
+  },
+  "lifecycle": {
+   "enum": [
+    "open",
+    "revision_proposed",
+    "revision_applied",
+    "independent_review",
+    "resolved",
+    "waived_invalid",
+    "superseded"
+   ]
+  }
+ },
+ "notes": "critical结案必须带independent_review_receipt_hash",
+ "x_producer_consumer": true
+}

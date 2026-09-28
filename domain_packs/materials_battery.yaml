@@ -1,0 +1,78 @@
+schema_version: optomind.domain_pack.v1
+domain_id: materials_battery
+display_name: 固态电池材料
+version: 1.0.0
+extends:
+  - base_research_review
+merge:
+  append:
+    - domain_boundaries
+    - related_domains
+    - retrieval.query_expansion
+    - retrieval.preferred_sources
+    - evidence.roles
+    - measurements.conversions
+    - outline.priors
+    - visual.preferred_types
+    - migration.compatible_schemas
+    - migration.legacy_names
+  replace:
+    - domain_id
+    - display_name
+    - version
+domain_boundaries:
+  - 固态电解质、锂金属负极与界面稳定性的材料证据
+  - 关注离子传输、机械化学稳定性和循环性能之间的关系
+related_domains:
+  - electrochemistry
+  - energy_storage
+canonical_concepts:
+  solid_electrolyte:
+    - solid-state electrolyte
+    - solid electrolyte
+    - 固态电解质
+  lithium_metal:
+    - lithium metal
+    - lithium-metal anode
+    - 锂金属
+  interface_stability:
+    - interface stability
+    - interfacial stability
+    - 界面稳定性
+aliases:
+  cycling:
+    - cycle life
+    - cycling stability
+    - 循环稳定性
+retrieval:
+  query_expansion:
+    - solid-state electrolyte lithium metal interface
+    - dendrite suppression solid battery
+    - interfacial stability cycling
+  preferred_sources:
+    - ACS Publications
+    - ScienceDirect
+evidence:
+  roles:
+    - ionic_conductivity
+    - interface_chemistry
+    - mechanical_stability
+    - cycling_performance
+measurements:
+  units:
+    conductivity: [S/cm, mS/cm]
+    voltage: [V, mV]
+    capacity: [mAh/g, Ah/kg]
+    temperature: [K, °C]
+  conversions:
+    - conductivity_s_per_cm_to_ms_per_cm
+outline:
+  priors:
+    - transport and material structure
+    - interface chemistry and mechanics
+    - cycling evidence and failure modes
+visual:
+  preferred_types:
+    - material_mechanism
+    - interface_schematic
+    - cycling_comparison

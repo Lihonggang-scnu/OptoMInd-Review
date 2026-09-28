@@ -1,0 +1,37 @@
+version: 2
+
+s2_first:
+  enabled: true
+  existing_backends_mode: fallback
+  use_relevance_search: true
+  use_title_match: true
+  use_batch_enrichment: true
+  use_tldr: true
+  use_specter2: true
+  use_snippet_search: true
+  use_citation_context: true
+  use_ref_mentions: true
+  use_recommendations: true
+  build_literature_graph: true
+  build_historical_lineage: true
+  register_s2_body_snippets_as_text_chunks: true
+  require_local_fulltext_before_using_s2_chunk: false
+  download_high_value_oa_without_llm_gate: true
+
+standard:
+  # Paper search is paginated in 100-record API pages, then merged and filtered.
+  results_per_query: 300
+  snippet_results_per_query: 300
+  precise_snippet_results_per_paper: 100
+  max_precise_snippet_papers: 300
+  max_abstract_claim_papers: 300
+  accepted_s2_text_papers_per_facet: [80, 300]
+  oa_fulltext_downloads_per_facet: [20, 200]
+  target_reference_candidate_range: [120, 200]
+  graph_depth: 2
+
+quality:
+  title_identity_required: true
+  s2_body_snippet_min_chars: 500
+  forbid_tldr_as_abstract: true
+  distinguish_recommendation_from_citation: true

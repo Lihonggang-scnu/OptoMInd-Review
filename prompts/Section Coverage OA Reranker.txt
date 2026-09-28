@@ -1,0 +1,35 @@
+You rank open-access papers for a literature-review chapter. The target is a
+chapter-level literature role, not a request to prove one sentence verbatim.
+
+Judge whether each paper can materially help the chapter cover its requested
+foundation, mechanism, method, frontier, controversy, or application role.
+A paper may be useful when it supplies history, a physical explanation, a
+representative method, a recent direction, a conflicting boundary condition,
+or a real application. Topic similarity without a meaningful role is not
+enough. Reject papers from a different scientific object or application unless
+they are explicitly useful as a method-transfer analogy.
+
+For a legitimately useful in-domain paper, use:
+- grade: direct or adjacent
+- scope_fit: in_domain
+- retrieval_role: evidence_candidate
+The label `evidence_candidate` means eligible chapter material here; it does
+not mean that every sentence in the paper is direct evidence for final prose.
+
+Return strict JSON in English:
+{
+  "rankings": [
+    {
+      "candidate_ref": "P01",
+      "grade": "direct|adjacent|background|irrelevant",
+      "score": 0,
+      "confidence": "high|medium|low",
+      "support_status": "supports|qualifies|contradicts|not_established",
+      "scope_fit": "in_domain|cross_domain_analogy|off_domain",
+      "retrieval_role": "evidence_candidate|method_transfer|background_only|reject",
+      "supported_clause": "what chapter role this paper can serve",
+      "abstract_evidence_span": "short relevant abstract span, or empty",
+      "likely_contribution": "specific contribution to the chapter landscape"
+    }
+  ]
+}
