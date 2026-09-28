@@ -103,7 +103,12 @@ class SourceMaterial:
     planning_view: dict[str, Any] = field(default_factory=dict)
     study_summary_a: dict[str, Any] = field(default_factory=dict)
     deep_read_material: dict[str, Any] = field(default_factory=dict)
+    deep_read_materials: list[dict[str, Any]] = field(default_factory=list)
     supplement_material: dict[str, Any] = field(default_factory=dict)
+    supplement_materials: list[dict[str, Any]] = field(default_factory=list)
+    local_passages: dict[str, Any] = field(default_factory=dict)
+    local_passages_variants: list[dict[str, Any]] = field(default_factory=list)
+    tool_supplement_materials: list[dict[str, Any]] = field(default_factory=list)
     aliases: list[str] = field(default_factory=list)
     material_status: str = "resolved"  # resolved | unresolvable_handle | no_material
 
@@ -129,8 +134,20 @@ class SourceMaterial:
                 row["study_summary_A"] = self.study_summary_a
             if self.deep_read_material:
                 row["deep_read_material"] = self.deep_read_material
+            if self.deep_read_materials:
+                row["deep_read_materials"] = [dict(item) for item in self.deep_read_materials]
             if self.supplement_material:
                 row["supplement_material"] = self.supplement_material
+            if self.supplement_materials:
+                row["supplement_materials"] = [dict(item) for item in self.supplement_materials]
+            if self.local_passages:
+                # Kept under its own reading mode so a local passage is never
+                # relabelled as a paid deep read downstream.
+                row["local_passages"] = dict(self.local_passages)
+            if self.local_passages_variants:
+                row["local_passages_variants"] = [dict(item) for item in self.local_passages_variants]
+            if self.tool_supplement_materials:
+                row["tool_supplement_materials"] = [dict(item) for item in self.tool_supplement_materials]
         return row
 
 
@@ -201,6 +218,9 @@ class ChapterView:
     open_questions: list[str]
     id_map_path: str = ""
     packet_path: str = ""
+    # Multi-source or unattributed tool returns for this chapter.  They keep
+    # their whole source set and are exported next to the per-handle catalog.
+    chapter_tool_materials: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self, *, include_material: bool = True) -> dict[str, Any]:
         return {
@@ -220,6 +240,9 @@ class ChapterView:
             "open_questions": list(self.open_questions),
             "id_map_path": self.id_map_path,
             "packet_path": self.packet_path,
+            "chapter_tool_materials": (
+                [dict(item) for item in self.chapter_tool_materials] if include_material else []
+            ),
         }
 
     def arrangement_payload(self, *, max_source_chars: int = 900) -> dict[str, Any]:
@@ -477,6 +500,146 @@ def _case_uses(unit: Mapping[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
+def tool_supplement_entry(item: Mapping[str, Any]) -> dict[str, Any]:
+    """Compact one tool return for attachment to its single clear source.
+
+    Identity comes from the host source record, so the entry carries the
+    research content (question, usable content, conditions, limits) and the
+    need it answers, never a guessed paper identity.
+    """
+
+    return {
+        "need_id": str(item.get("need_id") or ""),
+        "question": str(item.get("question") or ""),
+        "intended_use": str(item.get("intended_use") or ""),
+        "decision": str(item.get("decision") or ""),
+        "usable_content": str(item.get("usable_content") or ""),
+        "conditions": [str(row) for row in (item.get("conditions") or []) if str(row).strip()],
+        "limits": [str(row) for row in (item.get("limits") or []) if str(row).strip()],
+        "still_missing": str(item.get("still_missing") or ""),
+        "allowed_use": [str(row) for row in (item.get("allowed_use") or []) if str(row).strip()],
+    }
+
+
+def compact_chapter_tool_material(item: Mapping[str, Any]) -> dict[str, Any]:
+    """Compact one multi-source tool return for the chapter-level catalog.
+
+    The source set and the task attribution stay intact: a synthesis built on
+    several papers is never folded into one handle, and its chapter/unit
+    ownership travels with it.  Sources that never resolved to a handle keep
+    the identity fields they arrived with (paper_id/DOI/title), so nothing is
+    guessed and nothing is lost.
+    """
+
+    entry = tool_supplement_entry(item)
+    entry["chapter_ids"] = [str(row) for row in (item.get("chapter_ids") or []) if str(row).strip()]
+    entry["unit_key"] = str(item.get("unit_key") or "")
+    entry["sources"] = [
+        {
+            key: str(source.get(key) or "")
+            for key in ("source_handle", "paper_id", "canonical_paper_id", "title", "year", "doi")
+            if str(source.get(key) or "").strip()
+        }
+        for source in (item.get("sources") or ())
+        if isinstance(source, Mapping) and (
+            str(source.get("source_handle") or "").strip()
+            or str(source.get("paper_id") or "").strip()
+            or str(source.get("canonical_paper_id") or "").strip()
+            or str(source.get("doi") or "").strip()
+            or str(source.get("title") or "").strip()
+        )
+    ]
+    return entry
+
+
+def _ordered_source_handles(item: Mapping[str, Any]) -> list[str]:
+    handles: list[str] = []
+    for source in item.get("sources") or ():
+        if isinstance(source, Mapping):
+            handle = str(source.get("source_handle") or "").strip()
+            if handle and handle not in handles:
+                handles.append(handle)
+    return handles
+
+
+def _source_identity_key(source: Any) -> str:
+    """One stable identity per cited source, handle or not.
+
+    A source without a resolved handle still counts as its own paper via
+    paper_id/DOI/title; only a completely anonymous entry is empty.
+    """
+
+    if isinstance(source, str):
+        text = source.strip()
+        return "h:" + text if text else ""
+    if not isinstance(source, Mapping):
+        return ""
+    handle = str(source.get("source_handle") or "").strip()
+    if handle:
+        return "h:" + handle
+    paper = str(source.get("paper_id") or source.get("canonical_paper_id") or "").strip()
+    if paper:
+        return "p:" + paper
+    doi = str(source.get("doi") or "").strip()
+    if doi:
+        return "d:" + doi
+    title = str(source.get("title") or "").strip()
+    return ("t:" + title.casefold()) if title else ""
+
+
+def distinct_tool_material_sources(item: Mapping[str, Any]) -> list[str]:
+    """Distinct source identities a tool return is built on.
+
+    Deciding single-source attachment on this full set — not on the resolved
+    handles alone — is what keeps a synthesis that cites one handle plus one
+    paper_id-only source from being folded into the handle's paper.
+    """
+
+    keys: list[str] = []
+    for source in item.get("sources") or ():
+        key = _source_identity_key(source)
+        if key and key not in keys:
+            keys.append(key)
+    return keys
+
+
+def _tool_supplement_signature(entry: Mapping[str, Any]) -> str:
+    """Canonical identity for a complete tool return.
+
+    A need id groups related rounds but says nothing about whether one round
+    replaces another.  Compare the whole serialized entry so fields such as
+    question, scope and unresolved limitations cannot be lost by projection.
+    """
+    return json.dumps(
+        dict(entry),
+        ensure_ascii=False, sort_keys=True, default=str,
+    )
+
+
+def merge_tool_supplement_entry(
+    entries: Sequence[Mapping[str, Any]],
+    incoming: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    """Fold one tool supplement into a source's existing list.
+
+    ``need_id`` groups rounds of the same information need; it is not by
+    itself a duplicate or replacement signal.  Only a fully identical entry
+    folds onto the kept copy.  Every non-identical entry remains available as
+    complementary material, including entries whose text happens to contain
+    an earlier result.
+    """
+
+    merged_incoming = dict(incoming)
+    incoming_signature = _tool_supplement_signature(merged_incoming)
+    output: list[dict[str, Any]] = []
+    for entry in entries:
+        if _tool_supplement_signature(entry) == incoming_signature:
+            return [dict(item) for item in entries]
+        output.append(dict(entry))
+    output.append(merged_incoming)
+    return output
+
+
 def _source_catalog(packet: Mapping[str, Any], chapter_id: str) -> dict[str, SourceMaterial]:
     """Local catalog of the chapter's sources, keyed by handle."""
 
@@ -499,7 +662,28 @@ def _source_catalog(packet: Mapping[str, Any], chapter_id: str) -> dict[str, Sou
                 planning_view=dict(item.get("review_planning_B") or {}) if isinstance(item.get("review_planning_B"), Mapping) else {},
                 study_summary_a=dict(item.get("study_summary_A") or {}) if isinstance(item.get("study_summary_A"), Mapping) else {},
                 deep_read_material=dict(item.get("deep_read_material") or {}) if isinstance(item.get("deep_read_material"), Mapping) else {},
-                supplement_material=dict(item.get("supplement_gap_material") or {}) if isinstance(item.get("supplement_gap_material"), Mapping) else {},
+                deep_read_materials=[
+                    dict(row) for row in (item.get("deep_read_materials") or [])
+                    if isinstance(row, Mapping)
+                ],
+                supplement_material=dict(
+                    item.get("supplement_gap_material") or item.get("supplement_material") or {})
+                if isinstance(item.get("supplement_gap_material") or item.get("supplement_material"), Mapping)
+                else {},
+                supplement_materials=[
+                    dict(row) for row in (
+                        item.get("supplement_gap_materials") or item.get("supplement_materials") or [])
+                    if isinstance(row, Mapping)
+                ],
+                local_passages=dict(item.get("local_passages") or {}) if isinstance(item.get("local_passages"), Mapping) else {},
+                local_passages_variants=[
+                    dict(row) for row in (item.get("local_passages_variants") or [])
+                    if isinstance(row, Mapping)
+                ],
+                tool_supplement_materials=[
+                    dict(row) for row in (item.get("tool_supplement_materials") or [])
+                    if isinstance(row, Mapping)
+                ],
             )
     identity = packet.get("source_identity_map") if isinstance(packet.get("source_identity_map"), Mapping) else {}
     for handle, row in identity.items():
@@ -517,6 +701,98 @@ def _source_catalog(packet: Mapping[str, Any], chapter_id: str) -> dict[str, Sou
         if not entry.card_path:
             entry.card_path = str(row.get("card_path") or "")
     return catalog
+
+
+def chapter_tool_materials_from_packet(packet: Mapping[str, Any]) -> tuple[dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
+    """Split packet-level tool returns into per-source and chapter-level parts.
+
+    Returns ``(per_source, chapter_level)``.  An item attaches to a single
+    source only when its COMPLETE source set is one distinct identity that
+    resolves to a handle present in the packet's source materials — a second
+    source that never resolved to a handle (paper_id/DOI/title only) keeps
+    the whole item chapter-level with both identities.  Items with several
+    sources, an unknown handle or no handle at all stay chapter-level with
+    their source set intact; ownership is never guessed.
+    """
+
+    catalog_handles = {
+        str(item.get("source_handle") or "").strip()
+        for item in packet.get("source_materials") or ()
+        if isinstance(item, Mapping) and str(item.get("source_handle") or "").strip()
+    }
+    per_source: dict[str, list[dict[str, Any]]] = {}
+    chapter_level: list[dict[str, Any]] = []
+    for raw in packet.get("tool_materials") or ():
+        if not isinstance(raw, Mapping):
+            continue
+        identities = distinct_tool_material_sources(raw)
+        handles = _ordered_source_handles(raw)
+        if len(identities) == 1 and len(handles) == 1 and handles[0] in catalog_handles:
+            per_source[handles[0]] = merge_tool_supplement_entry(
+                per_source.get(handles[0]) or [], tool_supplement_entry(raw))
+            continue
+        chapter_level.append(compact_chapter_tool_material(raw))
+    return per_source, chapter_level
+
+
+def _material_signature(value: Mapping[str, Any]) -> str:
+    """Stable full-content identity for serialized source material."""
+
+    return json.dumps(dict(value), ensure_ascii=False, sort_keys=True, default=str)
+
+
+def _unique_materials(values: Iterable[Any]) -> list[dict[str, Any]]:
+    """Keep every distinct mapping in arrival order."""
+
+    output: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for value in values:
+        if not isinstance(value, Mapping):
+            continue
+        item = dict(value)
+        if not item:
+            continue
+        signature = _material_signature(item)
+        if signature in seen:
+            continue
+        seen.add(signature)
+        output.append(item)
+    return output
+
+
+def _merge_duplicate_source_material(keeper: SourceMaterial, source: SourceMaterial) -> None:
+    """Fold duplicate-record material without overwriting complementary data."""
+
+    deep_reads = _unique_materials([
+        keeper.deep_read_material,
+        *keeper.deep_read_materials,
+        source.deep_read_material,
+        *source.deep_read_materials,
+    ])
+    keeper.deep_read_material = deep_reads[0] if deep_reads else {}
+    keeper.deep_read_materials = deep_reads[1:]
+
+    supplements = _unique_materials([
+        keeper.supplement_material,
+        *keeper.supplement_materials,
+        source.supplement_material,
+        *source.supplement_materials,
+    ])
+    keeper.supplement_material = supplements[0] if supplements else {}
+    keeper.supplement_materials = supplements[1:]
+
+    local_passages = _unique_materials([
+        keeper.local_passages,
+        *keeper.local_passages_variants,
+        source.local_passages,
+        *source.local_passages_variants,
+    ])
+    keeper.local_passages = local_passages[0] if local_passages else {}
+    keeper.local_passages_variants = local_passages[1:]
+
+    for item in source.tool_supplement_materials:
+        keeper.tool_supplement_materials = merge_tool_supplement_entry(
+            keeper.tool_supplement_materials, item)
 
 
 def merge_doi_duplicates(
@@ -548,6 +824,10 @@ def merge_doi_duplicates(
         keeper.aliases = _dedupe([*keeper.aliases, source.source_handle])
         if not keeper.paper_id and source.paper_id:
             keeper.paper_id = source.paper_id
+        # Merged duplicate records keep every distinct material: supplements,
+        # deep reads, local passages and tool returns move to the kept handle
+        # instead of disappearing with the alias or overwriting a colliding key.
+        _merge_duplicate_source_material(keeper, source)
         merged_uses[keeper.source_handle] = [*merged_uses.get(keeper.source_handle, []), *uses.get(source.source_handle, [])]
         merges.append({
             "kept": keeper.source_handle,
@@ -660,9 +940,26 @@ def build_chapter_view(
         material = catalog.get(handle)
         if material is None:
             material = SourceMaterial(source_handle=handle, material_status="unresolvable_handle")
-        elif not (material.planning_view or material.study_summary_a or material.deep_read_material):
+        elif not (material.planning_view or material.study_summary_a
+                  or material.deep_read_material or material.deep_read_materials):
             material.material_status = "no_material"
         sources.append(material)
+
+    # Tool returns that reached the packet only at top level (older merges and
+    # multi-source syntheses) join the local catalog here, never the model
+    # payload: single-source items land on their source, the rest stay
+    # chapter-level with their source set intact.
+    per_source, chapter_level = chapter_tool_materials_from_packet(packet)
+    by_handle = {source.source_handle: source for source in sources}
+    for handle, entries in per_source.items():
+        target = by_handle.get(handle)
+        if target is None:
+            # An entry whose source is not used by this chapter stays out of
+            # the writer view; the packet-level original remains in the packet.
+            continue
+        for entry in entries:
+            target.tool_supplement_materials = merge_tool_supplement_entry(
+                target.tool_supplement_materials, entry)
 
     sources, uses, merges = merge_doi_duplicates(sources, uses)
     for source in sources:
@@ -702,6 +999,7 @@ def build_chapter_view(
         open_questions=[str(item) for item in (packet.get("open_questions") or []) if str(item).strip()],
         id_map_path=str(resolved_id_map),
         packet_path=str(packet_path),
+        chapter_tool_materials=chapter_level,
     )
 
 
@@ -880,6 +1178,12 @@ def build_source_catalog(
             entry["arranged_level"] = arranged_level.get(source.source_handle, "")
         catalog[source.source_handle] = entry
     return catalog
+
+
+def compact_chapter_tool_materials(view: ChapterView) -> list[dict[str, Any]]:
+    """Chapter-level tool materials exported next to the per-handle catalog."""
+
+    return [dict(item) for item in view.chapter_tool_materials]
 
 
 def render_arrangement_markdown(arrangement: Mapping[str, Any], view: ChapterView) -> str:
@@ -1394,9 +1698,14 @@ def validate_arrangement(
                 "columns": [str(item) for item in (raw_table.get("columns") or ())],
                 "row_tasks": rows,
             })
+        unit_title = str(raw_unit.get("unit_title") or raw_unit.get("title") or "").strip()
         units_out.append({
             "unit_id": unit_id,
             "focus": str(raw_unit.get("focus") or known_units[unit_id].substantive_point).strip(),
+            # A model-supplied short title travels with the unit so the
+            # assembly can head the section with it instead of truncating the
+            # focus assertion; the arrangement model payload stays unchanged.
+            **({"unit_title": unit_title} if unit_title else {}),
             "paragraph_tasks": paragraphs,
             "table_tasks": tables,
             "unit_notes": str(raw_unit.get("unit_notes") or "").strip(),
@@ -1534,16 +1843,22 @@ __all__ = [
     "arrangement_messages",
     "build_chapter_view",
     "chapter_identity",
+    "chapter_tool_materials_from_packet",
+    "compact_chapter_tool_material",
+    "compact_chapter_tool_materials",
+    "distinct_tool_material_sources",
     "estimate_arrangement_cost",
     "load_editor_prompt",
     "load_writer_packet",
     "merge_doi_duplicates",
+    "merge_tool_supplement_entry",
     "normalize_doi",
     "normalize_title",
     "parse_arrangement_response",
     "render_arrangement_markdown",
     "run_arrangement",
     "source_usage_summary",
+    "tool_supplement_entry",
     "validate_arrangement",
     "write_view",
 ]

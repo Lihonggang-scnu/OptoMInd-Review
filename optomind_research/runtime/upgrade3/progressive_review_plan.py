@@ -20,6 +20,12 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
+from .chapter_arrangement import (
+    distinct_tool_material_sources,
+    merge_tool_supplement_entry,
+    tool_supplement_entry,
+)
+
 
 SCHEMA_VERSION = "optomind.progressive_review_plan.v1"
 DEFAULT_PLANNER_MODEL = "qwen3.5-plus"
@@ -506,15 +512,15 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
         "相关时，综述中报告的原始研究与直接来源享有同等实质使用权。保留报告综述的来源元数据；原始研究身份已解析时，写作者可以直接引用原始研究，不因材料来自专家综述就要求逐句降格或反复标注‘综述转述’，也不要声称读过原始全文或重新获取它。"
         "保留每个报告综述自己的 R# 命名空间；有 source_handle 就使用它，否则原样保留 supplied paper_id 或 reference。短 handle 到规范身份的映射由本地程序完成。证据足够时使用广泛材料，但不要为了凑数量硬塞来源。"
         "区分关联与因果证据、机制或解释、迁移或应用、验证和不确定性；不要把相关关系、作者提出的解释或同一组材料内的支持误写成因果机制、跨设置迁移或独立验证。"
-        "有限补充检索没有找到匹配研究，不等于该研究不存在；只描述现有材料支持的范围，并纠正前面规划中的过度表述。路由摘要与原始 interpretation_limits 冲突时，以原始限制为准。综述题名中的对象或应用也不自动成为其中每项研究的对象和设置。"
-        "研究条件必须进入 substantive_point、thesis、synthesis 和 transition 本身；不能靠单独的 limitation 字段修补前文过度断言。对不同对象、设置或比较尺度的材料，保留其不可直接等同之处，不把它们排成脱离条件的效果排名。"
+        "有限补充检索没有找到匹配研究，不等于该研究不存在，也不等于整个领域缺乏相关研究或不存在更优路线；未被满足的需求只约束本次可写的结论范围，不得升级为领域层面的缺失判断，也不应让同一缺口反复主导多个章节。只描述现有材料支持的范围，并纠正前面规划中的过度表述。路由摘要与原始 interpretation_limits 冲突时，以原始限制为准。综述题名中的对象或应用也不自动成为其中每项研究的对象和设置。"
+        "研究条件必须进入 substantive_point、thesis、synthesis 和 transition 本身；决定含义的研究对象与研究设置随主张、案例和展开关系一起陈述，而不是全部堆进独立的 limitation 字段；不能靠单独的 limitation 字段修补前文过度断言，也不要求每句都填条件表或给所有判断统一加“可能”。对不同对象、设置或比较尺度的材料，保留其不可直接等同之处，不把它们排成脱离条件的效果排名。"
         "章节标题也用中文。Return JSON only."
     )
     stage_specific = {
         "provisional_scope": (
             "Read every item in candidate_pool. It is the complete B pool, not a sample. Screen all items semantically and "
             "build a source-informed theme inventory from the evidence summaries before drafting the provisional scope. "
-            "材料充分时规划约150篇以上具有明确综述用途的文献，充分安排背景、具体案例、比较和研究发展材料；这是质量目标，不是计数门槛，绝不为数量塞入无关论文。 "
+            "材料充分时追求充分覆盖：背景、具体案例、比较与研究发展材料都得到安排（材料池规模见 pool_row_count）；这是覆盖质量目标，不是计数门槛，绝不为数量塞入无关论文，也不因池小而放弃覆盖。 "
             "Propose a provisional shared scope, central thesis, chapter outline, cross-chapter boundaries, and concise tool "
             "requests. Do not rely on a small prefix or require a per-paper rejection explanation; grouped non-use reasons are fine. "
             "Return keys: review_title, central_question, provisional_scope, material_theme_inventory, provisional_outline "
@@ -546,9 +552,10 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
             "The L1 outline is an initial direction, not a binding template: correct its thesis, scope, chapter titles or emphasis where "
             "the full routed evidence shows an overclaim, missing context, or better organizing logic, while retaining chapter_id values "
             "where possible so tool requests remain attached. Preserve the broad set of useful source handles assigned by routing; do not "
-            "collapse chapters to a few deep-read seed papers. When material supports it, plan a full-length review with roughly 150+ "
-            "relevant literature uses across background, concrete cases, comparisons, and developments; this is a quality aspiration, "
-            "never a count gate or reason to include irrelevant sources. Draft a substantive proposal for each "
+            "collapse chapters to a few deep-read seed papers. When material supports it, plan a full-length review with broad coverage "
+            "across background, concrete cases, comparisons, and developments (the pool size is in candidate_pool_row_count); this is a "
+            "coverage aspiration, never a count gate or reason to include irrelevant sources, nor a reason to shrink to a few core papers. "
+            "Draft a substantive proposal for each "
             "chapter, including relevant source handles, chapter boundaries, ordered themes, concrete cases/comparisons, "
             "cross-paper synthesis, conditions and limitations, transition logic, and any genuinely necessary tool needs. "
             "Do not silently drop a routed source: when an individual source is genuinely out of scope, name it in "
@@ -592,8 +599,10 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
             "Do not do new research. Return a chapter_plan with a clear thesis, reader objective, ordered substantive units, "
             "specific cases and paper references, cross-paper synthesis, conditions and limitations, and transitions. Every "
             "unit must state (1) its substantive point, (2) the ordered development, (3) concrete studies or cases with "
-            "source_handle only (the local program supplies bibliographic identity), (4) what findings agree or conflict and why, (5) evidence conditions and "
-            "limits, and (6) its transition. Within each substantial unit, provide paragraph_briefs: an ordered list of "
+            "source_handle only (the local program supplies bibliographic identity) together with the research object and "
+            "setting that determine what the finding means, (4) what findings agree or conflict and why, (5) evidence "
+            "conditions and limits kept with the claims they qualify rather than parked in a separate list, and (6) its "
+            "transition. Within each substantial unit, provide paragraph_briefs: an ordered list of "
             "paragraph tasks, each with its specific point, development (the actual comparison or reasoning), and source_handles. "
             "A unit may span several distinct paragraphs; do not reduce a rich theme to 'introduce, discuss, summarize'. "
             "Let useful distinctions in the material determine the number of paragraphs, not a fixed quota. "
@@ -606,7 +615,13 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
         ),
         "whole_plan_improvement": (
             "Make one light whole-plan improvement pass. Identify only high-value changes to flow, duplication, scope "
-            "consistency, terminology, and transitions. Do not replace chapter evidence, invent citations, demand new "
+            "consistency, terminology, and transitions. Coordinate by actual content: for each important concept, "
+            "mechanism or method, say which chapter is its primary place of explanation and what a re-appearance in "
+            "another chapter adds for the reader. Judge duplication by explanatory role, not by sentence similarity or "
+            "repeated citations: the same paper may legitimately support several chapters with different uses, so do not "
+            "remove or reassign content merely because a source or a phrasing recurs. A locally unmet retrieval need only "
+            "bounds what the affected chapter can currently conclude; it must not become a field-level absence claim in "
+            "any chapter. Do not replace chapter evidence, invent citations, demand new "
             "research, or reopen settled tool gaps. Return concise improvement_notes, cross_chapter_adjustments, "
             "updated_chapter_plans only for small scalar fields such as thesis, title, or reader objective, and small "
             "shared_outline_adjustments. Do not return full chapter plans or units: if unit structure needs revision, "
@@ -632,17 +647,30 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
             "an updated_plan."
         ),
         "case_groups": (
-            "为已经协调好的写作单元补齐具体文献案例组。阅读全部 source_routing，再对照 unit_catalog，"
-            "挑选能增加实质内容的原始研究、综述、背景、比较或反例材料。整篇长综述以约150–200篇有明确用途的独立文献为目标（不是每章或每批的目标），"
-            "已有案例计入目标；不重复添加已有来源，也不为数量塞入无关文献。只为具体单元补材料，不改章节结构。"
+            "为已经协调好的写作单元挑选可用文献案例。source_materials 提供本批每篇候选来源的实际材料"
+            "（A 概括、B 综述规划，以及已有的精读、补充或本地片段）；阅读全部 source_routing 与 source_materials，"
+            "再对照 unit_catalog，挑选材料确实支持本单元的对象、结果、条件或有用对照。"
+            "整篇综述的广度目标是主题、背景、发展与代表案例得到充分覆盖（当前材料池规模见 pool_sources，已有案例计入覆盖）；"
+            "这是覆盖目标不是数量门槛：不重复添加已有来源，不为数量塞入无关文献，也不把“只用少数核心论文”当统一规则。"
+            "只为具体单元补材料，不改章节结构。"
             "对照已有 cases/supporting_studies 的具体贡献，新论文需补充不同结果、条件、方法、发展阶段或有用对照；仅重复相同概括时留在备选池，additions可为空。"
-            "每篇用约30–60字说明它为本单元增加的具体内容，保留影响解释的关键条件，避免空泛推荐语。"
-            "遵守原卡片 interpretation_limits，不能把类比、方案或其他对象的结果说成本问题的直接实证。"
+            "每篇写约30–60字说明这篇材料能帮助本单元解释什么，可以提出拟议综合；"
+            "但不得改写或虚构论文的方法、结果与结论——具体案例由章节负责人对照材料确认。"
+            "推荐用途不能把类比、方案或其他对象的结果说成本问题的直接实证；material_available 为假的来源没有实际内容，不得凭编号编造用途。"
             "当前调用只负责一个 chapter_id；完整 source_routing 可能已按章节截取，不能据此虚构遗漏来源。"
             "返回 JSON 对象：additions 数组，每项 unit_key、studies 数组（source_handle、contribution）。"
         ),
     }
     stage_text = stage_specific[stage]
+    if planning_revision and stage == "case_groups":
+        stage_text = stage_text.replace(
+            "studies 数组（source_handle、contribution）",
+            "studies 数组（source_handle、proposed_use；兼容 contribution 字段名）",
+        )
+        stage_text = stage_text.replace(
+            "每篇写约30–60字说明这篇材料能帮助本单元解释什么，可以提出拟议综合；",
+            "每篇写 proposed_use：约30–60字说明这篇材料能帮助本单元解释什么（拟议用途），可以提出拟议综合；",
+        )
     if planning_revision:
         stage_text = stage_text.replace("跨研究比较和衔接", "有材料依据的论证关系和衔接")
         stage_text = stage_text.replace("what findings agree or conflict and why", "material-supported relations, conditions or limits")
@@ -658,6 +686,9 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
         role_directives = {
             "chapter_details": (
                 "章节负责人在掌握 A/B/精读材料后建立有材料依据的科学认识、thesis、reader_objective 和具体展开关系。"
+                "决定含义的研究对象与研究设置随主张、案例和展开关系一起陈述；limitations 只收尚未随判断说明的剩余边界，"
+                "不把条件全堆进去，不逐句填条件表，也不给所有判断统一加“可能”。"
+                "工具未回答的需求只约束当前可写结论，不得写成领域缺失或不存在更优路线，也不让同一缺口主导本章结构。"
                 "不要求每个单元都比较研究结果，也不要求每次比较都解释 why；材料若只支持概念关系、方法前提、机制、发展、背景、"
                 "例证或边界，就按该实际功能组织。只有材料确有可比对象和依据时才比较，并明确比较尺度；没有依据时不得补造差异原因。"
                 "相互独立的维度可以并存；除非材料明确支持，不把它们写成互斥且穷尽的二分路径。"
@@ -665,14 +696,21 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
             "affected_chapter_revision": (
                 "章节负责人可以依据 supplied source_materials 和 late material 修正原有 thesis、reader_objective、判断和单位结构；"
                 "这些更新必须同时保留原判断与新增材料的边界，不把编辑意见或单一标签当作证据。按材料实际功能组织，不强制比较或解释差异原因。"
+                "决定含义的对象与设置随修正后的主张一起保留；未被满足的需求仍只约束可写结论，不升级为领域判断。"
                 "相互独立的维度可以并存；除非材料明确支持，不把它们写成互斥且穷尽的二分路径。"
+                "case_suggestions 是选材层的拟议用途，不是论文已有结论：对照该来源的实际材料，把成立的建议展开成"
+                "具体案例（对象、设置、结果、条件）写进相应单元的 supporting_studies，或明确不用；"
+                "材料不含的方法、结果或结论不得写入，material_available 为假的建议保持为待选，不采纳其内容。"
             ),
             "whole_plan_improvement": (
-                "全局协调只检查范围、章节分工、衔接和材料影响；发现实质 thesis/判断变化时输出具体 chapter feedback 交章节负责人落实，"
+                "全局协调只检查范围、章节分工、衔接和材料影响；对重要概念、机制或方法写明主讲章与再现章各自增加的解释，"
+                "按解释职责判断重复——允许同一论文跨章按不同用途复用，不按句子相似或引用重复删内容。"
+                "发现实质 thesis/判断变化时输出具体 chapter feedback 交章节负责人落实，协调结论要落到必要章节的更新，不是只列一张建议表；"
                 "不要用短 scalar 或 chapter_argument 直接替代章节科学认识。跨章调整保持有界。"
             ),
             "case_groups": (
-                "案例扩展只返回来源指针、单元归属和材料用途；案例添加者不能创作或覆盖 A/B、精读或事实内容。"
+                "案例扩展只做选材：阅读所附 source_materials 的实际材料，返回来源指针、单元归属和拟议用途（proposed_use）；"
+                "案例添加者不能创作或覆盖 A/B、精读或事实内容，最终案例由章节负责人对照材料形成。"
             ),
         }
         directive = role_directives.get(stage, (
@@ -768,6 +806,15 @@ def build_local_material_payload(
         "review_planning_B": b,
         "external_calls": 0,
     }
+    # Supplement results are persisted on pool rows under the gap-specific
+    # names. Keep them in candidate fallback payloads so a selected source
+    # does not lose the only substantive material it has.
+    if candidate.get("supplement_gap_material"):
+        material["supplement_gap_material"] = candidate.get("supplement_gap_material")
+        material["supplement_material"] = candidate.get("supplement_gap_material")
+    if candidate.get("supplement_gap_materials"):
+        material["supplement_gap_materials"] = candidate.get("supplement_gap_materials")
+        material["supplement_materials"] = candidate.get("supplement_gap_materials")
     if deep_material:
         material["deep_read_material"] = _compact_reading_material(deep_material)
 
@@ -1031,18 +1078,19 @@ def build_candidate_navigation(
 def _messages_for(stage: str, payload: Mapping[str, Any]) -> list[dict[str, str]]:
     rendered_payload = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), default=_json_default)
     planning_revision = bool(payload.get("planning_revision_mode"))
+    case_field = "proposed_use" if planning_revision else "contribution"
     task_output = {
         "chapter_need_analysis": (
             '本轮只做取材任务规划，不生成或复述综述大纲。只返回 {"supplement_requests": [...], "directed_reads": [...]}。'
             "每项必须说明它具体解决哪个章节问题；已有材料能写好则返回空数组。不要返回 chapters、source_ids、论文清单或已有综述正文。"
         ),
-        "case_groups": '本轮只返回 {"additions": [{"unit_key": "...", "studies": [{"source_handle": "...", "contribution": "..."}]}]}，不复述输入。',
+        "case_groups": f'本轮只返回 {{"additions": [{{"unit_key": "...", "studies": [{{"source_handle": "...", "{case_field}": "..."}}]}}]}}，不复述输入。',
         "source_routing": '本轮只返回 {"source_routes": [...]}，逐篇给出 source_handle、chapter_ids、specific_usable_material，不重写大纲。',
-        "chapter_details": '本轮只返回 {"chapter_plan": {...}}：thesis、reader_objective、units。每个实质单元包含 paragraph_briefs（逐段的point、development、source_handles）、案例对象（source_handle、finding、conditions）、跨研究比较和衔接。不能只列论文编号，也不能用一个宽泛展开句代替逐段任务。不要返回输入的 source_materials 或论文库存清单。',
+        "chapter_details": '本轮只返回 {"chapter_plan": {...}}：thesis、reader_objective、units。每个实质单元包含 paragraph_briefs（逐段的point、development、source_handles）、案例对象（source_handle、finding、conditions，含决定含义的研究对象与设置；条件随所属判断陈述，不整体堆入 limitations）、跨研究比较和衔接。不能只列论文编号，也不能用一个宽泛展开句代替逐段任务。不要返回输入的 source_materials 或论文库存清单。',
         "affected_chapter_revision": '只返回 {"chapter_updates": [{"chapter_id": "...", "updated_plan": {...}}]}。updated_plan是完整章节，保留有效论述与案例，并落实反馈。各实质单元给出paragraph_briefs，每段写清point、development、source_handles，让写作者无需重新发明论证。',
     }.get(stage, "请用中文撰写本阶段要求的内容，只返回本阶段的JSON结果，不照抄输入字段。")
     if planning_revision and stage == "chapter_details":
-        task_output = '本轮只返回 {"chapter_plan": {...}}：thesis、reader_objective、units。每个实质单元包含 paragraph_briefs（逐段的point、development、source_handles）、案例对象（source_handle、finding、conditions）、论证关系和衔接；按材料实际功能组织，不强制比较或解释差异原因。不能只列论文编号，也不能用一个宽泛展开句代替逐段任务。不要返回输入的 source_materials 或论文库存清单。'
+        task_output = '本轮只返回 {"chapter_plan": {...}}：thesis、reader_objective、units。每个实质单元包含 paragraph_briefs（逐段的point、development、source_handles）、案例对象（source_handle、finding、conditions，含决定含义的研究对象与设置；条件随所属判断陈述，不整体堆入 limitations）、论证关系和衔接；按材料实际功能组织，不强制比较或解释差异原因。不能只列论文编号，也不能用一个宽泛展开句代替逐段任务。不要返回输入的 source_materials 或论文库存清单。'
     if planning_revision and stage == "affected_chapter_revision":
         task_output = (
             '本轮只返回 {"status":"updated"或"no_change", "chapter_updates":[{"chapter_id":"...", "updated_plan":{...}}], '
@@ -1835,9 +1883,30 @@ def run_feedback_loop(
     if isinstance(body, str):
         assert_active()
         (artifact_dir / "WRITTEN_BODY.md").write_text(body.rstrip() + "\n", encoding="utf-8")
+    # Consume the REAL writer result shape: a body being present never means
+    # the problem is resolved.  An explicit incomplete flag, a length cutoff,
+    # new writer-issued issues, or a partial multi-unit dispatch all keep the
+    # run partial and surface the pending work in the final report.
+    written_issues = [
+        dict(item) for item in (written.get("issues") or [])
+        if isinstance(item, Mapping)
+    ]
+    writer_complete = written.get("complete")
+    writer_completion = _text(written.get("completion_status"))
+    pending_units = [
+        _text(item) for item in (written.get("affected_units") or [])
+        if _text(item)
+    ] if _text(written.get("status")).casefold() == "partial" else []
+    unresolved_writer = (
+        writer_complete is False
+        or writer_completion in {"partial_length", "partial", "unresolved"}
+        or bool(written_issues)
+        or bool(pending_units)
+    )
     final_status = "partial" if (
         action_result.get("status") in {"partial", "unmet", "failed", "external_research_required"}
         or _text(written.get("status")).casefold() in {"partial", "unresolved", "failed"}
+        or unresolved_writer
         or (not isinstance(written.get("body_markdown"), str) and not written.get("body_path"))
     ) else ("updated_material" if material_changed and owner_status == "no_change" else owner_status or "updated")
     assert_active()
@@ -1848,6 +1917,12 @@ def run_feedback_loop(
         "arrangement": str(rebuilt_arrangement_path),
         "writer": str(writer_path),
         "issues": [dict(item) for item in issues if isinstance(item, Mapping)],
+        # Honest bookkeeping from the real writer result, for the caller's
+        # final report; empty lists mean nothing is pending.
+        "writer_complete": None if writer_complete is None else bool(writer_complete),
+        "writer_completion": writer_completion,
+        "writer_issues": written_issues,
+        "pending_units": pending_units,
         "owner_payload": owner_result.get("owner_payload") or {},
         "action_result": action_result,
         "input_signature": input_signature,
@@ -2396,6 +2471,14 @@ class ProgressiveReviewPlanner:
                         if encoded not in seen:
                             existing.append(dict(row))
                             seen.add(encoded)
+            # Keep the adaptive queue's paid readings in the same local store
+            # the legacy branch uses, so later phases and packet construction
+            # see them without a second retrieval.
+            for group in result.get("directed_results") or []:
+                if isinstance(group, Mapping):
+                    for material in group.get("materials") or []:
+                        if isinstance(material, Mapping) and _text(material.get("paper_id")):
+                            self._read_materials[_text(material.get("paper_id"))] = dict(material)
             return result
 
         def run_cycle() -> dict[str, Any]:
@@ -3051,13 +3134,14 @@ class ProgressiveReviewPlanner:
                         handles = [
                             _text(value) for value in (unit.get("source_handles") or []) if _text(value)
                         ]
+                        prior_key = "case_suggestions" if self.config.planning_revision_enabled else "supporting_studies"
+                        prior_studies = unit.setdefault(prior_key, [])
                         for study in addition.get("studies") or []:
                             if not isinstance(study, Mapping):
                                 continue
                             handle = _text(study.get("source_handle"))
                             if handle and handle not in handles:
                                 handles.append(handle)
-                            prior_studies = unit.setdefault("supporting_studies", [])
                             if handle and not any(_text(item.get("source_handle")) == handle for item in prior_studies):
                                 prior_studies.append(dict(study))
                         if handles:
@@ -3082,6 +3166,25 @@ class ProgressiveReviewPlanner:
                         }
                         for row in batch_unit_rows
                     ]
+                    batch_material_rows = _case_selection_material_rows(
+                        batch_handles, detail_records, pool_rows, self._read_materials)
+                    material_signature = hashlib.sha256(json.dumps(
+                        batch_material_rows, ensure_ascii=False, sort_keys=True, default=_json_default
+                    ).encode("utf-8")).hexdigest()[:16]
+                    # The batch consumes the unit TASKS (points, briefs,
+                    # cases) and the prompt contract, not just the handle
+                    # list: a changed task or contract must not reuse an old
+                    # answer.
+                    task_signature = _case_unit_task_signature(batch_unit_rows, context={
+                        "topic_id": self.config.topic_id,
+                        "research_question": topic,
+                        "source_routing": route_batch,
+                        "source_routing_total": len(relevant_routes),
+                        "batch_count": len(route_batches),
+                        "pool_sources": len(pool_rows),
+                        "review_sources_in_unit_catalog": len(set(re.findall(r"\bP\d{4,}\b", json.dumps(case_catalog, ensure_ascii=False)))),
+                        "planning_revision_mode": self.config.planning_revision_enabled,
+                    })
                     cached: Mapping[str, Any] | None = None
                     if resume and cache_path.is_file():
                         try:
@@ -3093,6 +3196,9 @@ class ProgressiveReviewPlanner:
                                 and int(candidate.get("batch_index") or 0) == batch_index
                                 and list(candidate.get("route_handles") or []) == batch_handles
                                 and list(candidate.get("unit_source_signature") or []) == unit_source_signature
+                                and _text(candidate.get("material_signature")) == material_signature
+                                and _text(candidate.get("task_signature")) == task_signature
+                                and _text(candidate.get("prompt_contract")) == CASE_GROUPS_PROMPT_CONTRACT
                             ):
                                 cached = candidate
                         except (ProgressivePlanError, TypeError, ValueError):
@@ -3119,7 +3225,12 @@ class ProgressiveReviewPlanner:
                         "source_routing_batch_index": batch_index,
                         "source_routing_batch_count": len(route_batches),
                         "review_sources_in_unit_catalog": len(set(re.findall(r"\bP\d{4,}\b", json.dumps(case_catalog, ensure_ascii=False)))),
-                        "review_source_target": [150, 200],
+                        "pool_sources": len(pool_rows),
+                        "breadth_rule": {
+                            "goal": "整篇综述对主题、背景、发展与代表案例的充分覆盖",
+                            "basis": "当前材料池规模与各单元实际材料",
+                            "not_a_quota": "不为数量塞入无关文献，也不把只用少数核心论文当统一规则",
+                        },
                         "output_contract": {
                             "chapter_id": chapter_id,
                             "bounded_unit_count": len(unit_rows),
@@ -3130,6 +3241,11 @@ class ProgressiveReviewPlanner:
                             "one_addition_per_relevant_unit": True,
                         },
                     }
+                    # Selection support: the real material of exactly this
+                    # batch's routed candidates, so the case model judges from
+                    # content instead of inventing experiments for handles.
+                    if batch_material_rows:
+                        payload["source_materials"] = batch_material_rows
                     if self.config.planning_revision_enabled:
                         payload["planning_revision_mode"] = True
                     try:
@@ -3146,6 +3262,9 @@ class ProgressiveReviewPlanner:
                             "batch_count": len(route_batches),
                             "route_handles": batch_handles,
                             "unit_source_signature": unit_source_signature,
+                            "material_signature": material_signature,
+                            "task_signature": task_signature,
+                            "prompt_contract": CASE_GROUPS_PROMPT_CONTRACT,
                             "additions": additions,
                             "telemetry": response_record.get("telemetry") or {},
                         })
@@ -3163,6 +3282,9 @@ class ProgressiveReviewPlanner:
                             "batch_count": len(route_batches),
                             "route_handles": batch_handles,
                             "unit_source_signature": unit_source_signature,
+                            "material_signature": material_signature,
+                            "task_signature": task_signature,
+                            "prompt_contract": CASE_GROUPS_PROMPT_CONTRACT,
                             "error": error,
                         })
                 result = {
@@ -3204,7 +3326,11 @@ class ProgressiveReviewPlanner:
             },
         )
         baseline_detail_records = detail_records
-        detail_records = _attach_case_groups(detail_records, _stage_response(case_record))
+        detail_records = _attach_case_groups(
+            detail_records, _stage_response(case_record),
+            planning_revision=self.config.planning_revision_enabled,
+            candidate_rows=pool_rows,
+        )
         if self.config.planning_revision_enabled:
             detail_records, improvement, whole_review_chapters = self._post_case_review(
                 root=root,
@@ -3395,7 +3521,14 @@ class ProgressiveReviewPlanner:
                 for item in ((row.get("candidate_navigation") or {}).get("candidates") or ())
                 if isinstance(item, Mapping) and not bool((item.get("assignment") or {}).get("selected_in_chapter"))
             ],
+            # Same paper serving several chapters is legitimate when the uses
+            # differ; the coordinator sees the actual overlap and judges by
+            # role instead of mechanically de-duplicating citations.
+            "cross_chapter_source_uses": _cross_chapter_source_uses(detail_records),
             "tool_results_summary": self._compact_tool_feedback({"level1": level1_tool_result, "level2": level2_tool_result}),
+            "tool_feedback_scope": {
+                "unanswered_need_means": "当前池未取得该内容，仅约束受影响章节本次可写结论；不构成领域缺失或不存在更优路线的证据",
+            },
             "editorial_feedback": editorial_feedback,
             "citation_rules": dict(CURRENT_CITATION_RULES),
             "late_material_changes": by_chapter_material,
@@ -3431,15 +3564,37 @@ class ProgressiveReviewPlanner:
         if global_feedback_entries:
             improvement["owner_revision_feedback"] = [dict(item) for item in global_feedback_entries]
         editorial_entries = self._editorial_feedback_entries(editorial_feedback)
+        # Pending case suggestions are a new use of a paper for this chapter,
+        # even when the underlying A/B material is unchanged; the owner must
+        # judge the proposal against the real content.
+        case_suggestions_by_chapter: dict[str, list[dict[str, Any]]] = {}
+        for record in detail_records:
+            chapter = record.get("chapter") if isinstance(record.get("chapter"), Mapping) else {}
+            chapter_id = _text(chapter.get("chapter_id"))
+            if not chapter_id:
+                continue
+            for index, unit in enumerate(_chapter_units(record.get("chapter_plan") or {})):
+                if not isinstance(unit, Mapping):
+                    continue
+                pending = [dict(item) for item in (unit.get("case_suggestions") or [])
+                           if isinstance(item, Mapping)]
+                if pending:
+                    case_suggestions_by_chapter.setdefault(chapter_id, []).append({
+                        "unit_key": f"{chapter_id}:{index + 1}",
+                        "unit_point": _text(unit.get("substantive_point") or unit.get("point")),
+                        "studies": pending,
+                    })
         affected_ids = list(dict.fromkeys([
             *self._affected_chapter_ids(improvement),
             *by_chapter_material,
+            *case_suggestions_by_chapter,
             *[_text(item.get("chapter_id")) for item in editorial_entries if _text(item.get("chapter_id"))],
         ]))
         # In the opt-in path every affected chapter is returned to its owner.
         # A short scalar replacement is still a scientific change when it
         # touches thesis/scope; late material is never bypassed by a label.
         revision_ids = affected_ids
+        reviewed_chapter_ids: set[str] = set()
 
         if revision_ids:
             detail_by_id = {
@@ -3481,7 +3636,15 @@ class ProgressiveReviewPlanner:
                         dict(item) for item in editorial_entries
                         if _text(item.get("chapter_id")) == chapter_id
                     ],
-                    "source_materials": (review_chapter_by_id.get(chapter_id) or {}).get("source_materials") or [],
+                    # Case-layer selection proposals: uses the owner should
+                    # adopt as concrete cases from the real material, or
+                    # reject.  A proposal is never the paper's own finding.
+                    "case_suggestions": case_suggestions_by_chapter.get(chapter_id) or [],
+                    # The owner reviews the plan against the material it must
+                    # correct, including compacted paid deep reads; the
+                    # whole-plan coordinator keeps its compact shape.
+                    "source_materials": _chapter_review_source_materials(
+                        detail_by_id.get(chapter_id) or {}, include_deep_read=True),
                     "late_material_changes": by_chapter_material.get(chapter_id, []),
                     "tool_materials": (review_chapter_by_id.get(chapter_id) or {}).get("tool_materials") or [],
                     "candidate_navigation": (detail_by_id.get(chapter_id) or {}).get("candidate_navigation") or {},
@@ -3559,6 +3722,11 @@ class ProgressiveReviewPlanner:
                     index, result = future.result()
                     indexed[index] = result
             revision_records = [indexed[index] for index in range(len(revision_items))]
+            reviewed_chapter_ids.update(
+                str(item.get("chapter_id"))
+                for item in revision_records
+                if item.get("status") == "complete"
+            )
             revision_entries = [
                 {"chapter_id": record.get("chapter_id"), "updated_plan": record["updated_plan"],
                  "unit_id_remap": record.get("unit_id_remap") or {}, "_complete_chapter_revision": True}
@@ -3591,7 +3759,13 @@ class ProgressiveReviewPlanner:
             }
         else:
             apply_improvement = improvement
-        return self._apply_improvements(detail_records, apply_improvement), improvement, whole_review_chapters
+        final_records = self._apply_improvements(detail_records, apply_improvement)
+        # A completed owner review has judged every pending case suggestion:
+        # adopted ones live in the owner's plan, rejected ones are simply not
+        # there.  The proposals move to a packet-level audit trail so they do
+        # not re-trigger the owner and never read as established content.
+        final_records = _archive_reviewed_case_suggestions(final_records, reviewed_chapter_ids)
+        return final_records, improvement, whole_review_chapters
 
     @staticmethod
     def _attach_routed_sources(
@@ -3729,7 +3903,11 @@ class ProgressiveReviewPlanner:
         route_by_handle = {row.get("source_handle"): row for row in routing_rows}
         l1_materials = self._result_paper_materials(level1_tools)
         l2_materials = self._result_paper_materials(level2_tools)
-        all_materials = {str(row.get("paper_id")): row for row in [*l1_materials, *l2_materials] if _text(row.get("paper_id"))}
+        # Chapter-phase directed reads are real paid readings for this
+        # chapter's own sources; harvesting only level1/level2 left them out of
+        # every packet's deep_read_material.
+        chapter_phase_materials = self._result_paper_materials(chapter_tools or {})
+        all_materials = {str(row.get("paper_id")): row for row in [*l1_materials, *l2_materials, *chapter_phase_materials] if _text(row.get("paper_id"))}
         for row in self.prior_readings:
             if _text(row.get("paper_id")):
                 all_materials.setdefault(_text(row.get("paper_id")), dict(row))
@@ -3857,12 +4035,43 @@ class ProgressiveReviewPlanner:
                     ))
                 ):
                     return index, cached_packet
+            def projected_source(item: Mapping[str, Any]) -> dict[str, Any]:
+                route = route_by_handle.get(item.get("source_handle"))
+                if self.config.planning_revision_enabled:
+                    # The chapter owner's research understanding comes from the
+                    # real A/B material of its assigned sources.  The routing
+                    # note stays available as separate selection advice and
+                    # never replaces the source's own account.
+                    row = {
+                        "source_handle": item.get("source_handle"),
+                        "title": item.get("title"),
+                        "material_depth": item.get("material_depth"),
+                        "study_summary_A": item.get("study_summary_A") or {},
+                        "planning_material": item.get("review_planning_B"),
+                        "supplement_material": item.get("supplement_gap_material") or {},
+                        "supplement_materials": [
+                            dict(supplement) for supplement in (item.get("supplement_gap_materials") or [])
+                            if isinstance(supplement, Mapping)
+                        ],
+                        "deep_read_material": _compact_reading_material(item.get("deep_read_material") or {}),
+                    }
+                    if isinstance(route, Mapping) and route:
+                        row["routing_note"] = {
+                            key: route[key]
+                            for key in ("chapter_ids", "specific_usable_material", "interpretation_limits", "reason")
+                            if key in route
+                        }
+                    return row
+                return {
+                    "source_handle": item.get("source_handle"), "title": item.get("title"),
+                    "material_depth": item.get("material_depth"),
+                    "planning_material": route or item.get("review_planning_B"),
+                    "supplement_material": item.get("supplement_gap_material") or {},
+                    "deep_read_material": _compact_reading_material(item.get("deep_read_material") or {}),
+                }
+
             model_payload = {**payload, "source_materials": [
-                {"source_handle": item.get("source_handle"), "title": item.get("title"),
-                 "material_depth": item.get("material_depth"),
-                 "planning_material": route_by_handle.get(item.get("source_handle")) or item.get("review_planning_B"),
-                 "supplement_material": item.get("supplement_gap_material") or {},
-                 "deep_read_material": _compact_reading_material(item.get("deep_read_material") or {})}
+                projected_source(item)
                 for item in payload["source_materials"]
             ], "relevant_tool_feedback": [item for item in payload["relevant_tool_feedback"] if not item.get("material")]}
             model_payload["chapter"] = {key: value for key, value in chapter.items()
@@ -3871,6 +4080,13 @@ class ProgressiveReviewPlanner:
                 model_payload["candidate_navigation"] = payload.get("candidate_navigation") or {}
                 model_payload["candidate_materials"] = payload.get("candidate_materials") or []
                 model_payload["planning_revision_mode"] = True
+                # An unanswered retrieval need bounds what this chapter may
+                # currently conclude; it is never evidence that the field
+                # lacks the research.  Stated next to the tool feedback it
+                # qualifies, so the owner reads it as scope, not as absence.
+                model_payload["tool_feedback_scope"] = {
+                    "unanswered_need_means": "当前池未取得该内容，仅约束本次可写结论；不构成领域缺失或不存在更优路线的证据",
+                }
                 model_payload["required_behavior"] = {
                     "inspect_relevant_unassigned_candidates": True,
                     "use_candidate_materials_when_relevant": True,
@@ -4329,13 +4545,20 @@ def _chapter_units(plan: Mapping[str, Any]) -> list[Any]:
 
 
 def _unit_study_records(value: Any) -> list[dict[str, Any]]:
-    """Read study entries across the planner's different case field names."""
+    """Read study entries across the planner's different case field names.
+
+    Pending case-layer suggestions (``case_suggestions``) are proposals, not
+    established studies, so they are excluded from study records; the owner
+    review decides which of them become concrete cases.
+    """
     studies: list[dict[str, Any]] = []
     if isinstance(value, Mapping):
         if value.get("source_handle") or value.get("paper_id"):
             studies.append(dict(value))
         else:
-            for child in value.values():
+            for key, child in value.items():
+                if key == "case_suggestions":
+                    continue
                 studies.extend(_unit_study_records(child))
     elif isinstance(value, list):
         for child in value:
@@ -4369,6 +4592,222 @@ def _case_unit_catalog(records: Sequence[Mapping[str, Any]]) -> list[dict[str, A
             catalog.append({"unit_key": f"{chapter_id}:{index + 1}", "chapter_id": chapter_id,
                             "chapter_title": _text(chapter.get("title")), "unit": compact})
     return catalog
+
+
+_CASE_MATERIAL_STRING_LIMIT = 1200
+
+
+def _clip_case_material_strings(value: Any, limit: int = _CASE_MATERIAL_STRING_LIMIT) -> Any:
+    """Bound each free-text string in a case-selection material row."""
+
+    if isinstance(value, str):
+        return value if len(value) <= limit else value[:limit] + "…"
+    if isinstance(value, list):
+        return [_clip_case_material_strings(item, limit) for item in value]
+    if isinstance(value, dict):
+        return {key: _clip_case_material_strings(item, limit) for key, item in value.items()}
+    return value
+
+
+# Bump when the case_groups prompt or output contract changes, so a cached
+# batch answered under an older contract is not reused silently.
+CASE_GROUPS_PROMPT_CONTRACT = "case_groups.review_v2_03"
+
+
+def _case_unit_task_signature(
+    batch_unit_rows: Sequence[Mapping[str, Any]], *, context: Mapping[str, Any] | None = None,
+) -> str:
+    """Content signature of the unit tasks a case batch actually consumes.
+
+    Covers points, briefs, cases and every other unit field the payload
+    sends — a task edit under the same source list must invalidate a cached
+    batch answer.
+    """
+
+    return hashlib.sha256(json.dumps(
+        {"units": list(batch_unit_rows), "context": dict(context or {})},
+        ensure_ascii=False, sort_keys=True, default=_json_default
+    ).encode("utf-8")).hexdigest()[:16]
+
+
+def _case_selection_material_row(row: Mapping[str, Any]) -> dict[str, Any]:
+    """Compact one source row for the case selection model."""
+
+    compact = {
+        key: _clip_case_material_strings(row.get(key))
+        for key in (
+            "source_handle", "paper_id", "title", "doi", "year", "material_depth",
+            "study_summary_A", "review_planning_B", "supplement_gap_material",
+            "supplement_gap_materials", "supplement_material", "supplement_materials",
+            "tool_supplement_materials", "local_passages",
+        )
+        if row.get(key) not in (None, "", [], {})
+    }
+    if row.get("deep_read_material"):
+        compact["deep_read_material"] = _clip_case_material_strings(
+            _compact_reading_material(row.get("deep_read_material")))
+    compact["material_available"] = any(
+        row.get(key) not in (None, "", [], {})
+        for key in (
+            "study_summary_A", "review_planning_B", "supplement_gap_material",
+            "supplement_gap_materials", "supplement_material", "supplement_materials",
+            "tool_supplement_materials", "local_passages", "deep_read_material",
+        )
+    )
+    return compact
+
+
+def _case_selection_material_rows(
+    handles: Sequence[str],
+    records: Sequence[Mapping[str, Any]],
+    pool_rows: Sequence[Mapping[str, Any]],
+    read_materials: Mapping[str, Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Real material for exactly the routed candidates of one case batch.
+
+    The case layer used to see only handles and thin routing notes, which let
+    it invent experiments for papers it had never read.  Selection support now
+    reuses the same material the chapter owner sees: packet source rows first,
+    then bounded local card material from the pool.  Unresolved handles stay
+    as explicitly unavailable candidates — nothing is fetched here.
+    """
+
+    rows_by_handle: dict[str, Mapping[str, Any]] = {}
+    for record in records:
+        for source in record.get("source_materials") or ():
+            if isinstance(source, Mapping):
+                handle = _text(source.get("source_handle"))
+                if handle and handle not in rows_by_handle:
+                    rows_by_handle[handle] = source
+    candidate_by_handle = {
+        _text(row.get("_source_handle")): row
+        for row in pool_rows
+        if isinstance(row, Mapping) and _text(row.get("_source_handle"))
+    }
+    output: list[dict[str, Any]] = []
+    for raw in handles:
+        handle = _text(raw)
+        if not handle:
+            continue
+        row = rows_by_handle.get(handle)
+        if row is None:
+            candidate = candidate_by_handle.get(handle)
+            if candidate is not None:
+                paper_id = _text(candidate.get("_paper_id") or _canonical_paper_id(candidate))
+                row = build_local_material_payload(
+                    candidate,
+                    deep_material_by_paper=read_materials.get(paper_id),
+                )
+        if row is None:
+            output.append({"source_handle": handle, "material_available": False})
+            continue
+        output.append(_case_selection_material_row(row))
+    return output
+
+
+def _proposed_use_text(study: Mapping[str, Any]) -> str:
+    """The selection layer's proposed use, from either field name."""
+
+    return _text(study.get("proposed_use") or study.get("contribution"))
+
+
+def _existing_study_texts(unit: Mapping[str, Any]) -> set[tuple[str, str]]:
+    texts: set[tuple[str, str]] = set()
+    for record in _unit_study_records(unit):
+        handle = _text(record.get("source_handle"))
+        text = _text(
+            record.get("contribution")
+            or record.get("macro_contribution")
+            or record.get("finding")
+            or record.get("use")
+        )
+        if handle and text:
+            texts.add((handle, text))
+    return texts
+
+
+def _cross_chapter_source_uses(records: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Which cited sources serve more than one chapter, and where.
+
+    Given to the whole-plan coordinator so cross-chapter placement is judged
+    from actual use, not from citation counting: a handle listed here is a
+    fact about the plan, not an instruction to remove it.
+    """
+
+    def adopted_content(value: Any) -> Any:
+        if isinstance(value, Mapping):
+            return {key: adopted_content(child) for key, child in value.items()
+                    if key not in {"case_suggestions", "case_suggestions_reviewed"}}
+        if isinstance(value, (list, tuple)):
+            return [adopted_content(child) for child in value]
+        return value
+
+    chapters_by_handle: dict[str, list[str]] = {}
+    for record in records:
+        chapter = record.get("chapter") if isinstance(record.get("chapter"), Mapping) else {}
+        chapter_id = _text(chapter.get("chapter_id"))
+        if not chapter_id:
+            continue
+        handles, _paper_ids = _source_keys_in_value(adopted_content(record.get("chapter_plan") or {}))
+        for handle in sorted(handles):
+            owners = chapters_by_handle.setdefault(handle, [])
+            if chapter_id not in owners:
+                owners.append(chapter_id)
+    return [
+        {"source_handle": handle, "chapter_ids": owners}
+        for handle, owners in sorted(chapters_by_handle.items())
+        if len(owners) > 1
+    ]
+
+
+def _archive_reviewed_case_suggestions(
+    records: Sequence[Mapping[str, Any]],
+    reviewed_chapter_ids: set[str],
+) -> list[dict[str, Any]]:
+    """Move owner-reviewed case suggestions out of the plan, keep them for audit.
+
+    Chapters whose revision completed have had every pending proposal judged.
+    Their ``case_suggestions`` leave the unit (so arrangement and later runs do
+    not treat them as pending or as content) and land in the packet-level
+    ``case_suggestions_reviewed`` trail.  Chapters whose revision did not
+    complete keep their pending suggestions for the next run.
+    """
+
+    output: list[dict[str, Any]] = []
+    for record in records:
+        chapter = record.get("chapter") if isinstance(record.get("chapter"), Mapping) else {}
+        chapter_id = _text(chapter.get("chapter_id"))
+        if chapter_id not in reviewed_chapter_ids:
+            output.append(dict(record))
+            continue
+        plan = record.get("chapter_plan") if isinstance(record.get("chapter_plan"), Mapping) else {}
+        archived = [
+            dict(item) for item in (record.get("case_suggestions_reviewed") or [])
+            if isinstance(item, Mapping)
+        ]
+        units = _chapter_units(plan)
+        pending: list[tuple[int, list[dict[str, Any]]]] = []
+        for index, unit in enumerate(units):
+            if isinstance(unit, Mapping) and unit.get("case_suggestions"):
+                studies = [dict(item) for item in unit.get("case_suggestions") or []
+                           if isinstance(item, Mapping)]
+                pending.append((index, studies))
+        if not pending:
+            output.append(dict(record))
+            continue
+        plan_copy = json.loads(json.dumps(dict(plan), ensure_ascii=False, default=_json_default))
+        copied_units = _chapter_units(plan_copy)
+        for index, studies in pending:
+            unit = copied_units[index]
+            if isinstance(unit, Mapping):
+                unit.pop("case_suggestions", None)
+        for index, studies in pending:
+            archived.append({"unit_key": f"{chapter_id}:{index + 1}", "studies": studies})
+        row = dict(record)
+        row["chapter_plan"] = plan_copy
+        row["case_suggestions_reviewed"] = archived
+        output.append(row)
+    return output
 
 
 def _chapter_retrieval_requests(chapters: Sequence[Mapping[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
@@ -4526,9 +4965,33 @@ def _attach_chapter_candidate_sources(
     return output
 
 
-def _attach_case_groups(records: Sequence[Mapping[str, Any]], response: Mapping[str, Any]) -> list[dict[str, Any]]:
+def _attach_case_groups(
+    records: Sequence[Mapping[str, Any]],
+    response: Mapping[str, Any],
+    *,
+    planning_revision: bool = False,
+    candidate_rows: Sequence[Mapping[str, Any]] = (),
+) -> list[dict[str, Any]]:
+    """Consume the case layer's response into the chapter records.
+
+    Old mode keeps the established contract: accepted studies land directly in
+    ``supporting_studies`` with their contribution text.  In planning-revision
+    mode the response is a selection proposal: each study becomes a
+    ``case_suggestions`` entry (handle + proposed use + whether real material
+    was attached), never an established case.  The program still backfills the
+    selected papers' real material rows into the packet so the chapter owner
+    can judge the proposal against actual content.  A handle with no material
+    anywhere stays a suggestion flagged ``material_available: false``; nothing
+    is adopted for it and nothing is fabricated.
+    """
+
     result = json.loads(json.dumps(records, ensure_ascii=False, default=_json_default))
     all_sources = {source["source_handle"]: source for record in result for source in record.get("source_materials") or [] if source.get("source_handle")}
+    candidate_by_handle = {
+        _text(row.get("_source_handle")): row
+        for row in candidate_rows or ()
+        if isinstance(row, Mapping) and _text(row.get("_source_handle"))
+    }
     destinations = {f"{record['chapter']['chapter_id']}:{i + 1}": (record, unit)
                     for record in result for i, unit in enumerate(_chapter_units(record.get("chapter_plan") or {})) if isinstance(unit, dict)}
     for addition in response.get("additions") or []:
@@ -4536,6 +4999,45 @@ def _attach_case_groups(records: Sequence[Mapping[str, Any]], response: Mapping[
         if not destination:
             continue
         record, unit = destination
+        if planning_revision:
+            suggestions = unit.setdefault("case_suggestions", [])
+            suggested_seen = {
+                (_text(item.get("source_handle")), _text(item.get("proposed_use")))
+                for item in suggestions if isinstance(item, Mapping)
+            }
+            established = _existing_study_texts(unit)
+            packet_handles = {item.get("source_handle") for item in record.get("source_materials") or []}
+            for study in addition.get("studies") or []:
+                if not isinstance(study, Mapping):
+                    continue
+                handle = _text(study.get("source_handle"))
+                proposed_use = _proposed_use_text(study)
+                if not handle:
+                    continue
+                key = (handle, proposed_use)
+                if key in suggested_seen or key in established:
+                    # An exactly repeated use is not a new use; a distinct
+                    # proposal for the same paper still reaches the owner.
+                    continue
+                source = all_sources.get(handle)
+                if source is None and handle in candidate_by_handle:
+                    candidate = candidate_by_handle[handle]
+                    paper_id = _text(candidate.get("_paper_id") or _canonical_paper_id(candidate))
+                    source = build_local_material_payload(candidate)
+                suggestion = {
+                    "source_handle": handle,
+                    "proposed_use": proposed_use,
+                    "material_available": source is not None,
+                }
+                if study.get("paper_id"):
+                    suggestion["paper_id"] = _text(study.get("paper_id"))
+                suggestions.append(suggestion)
+                suggested_seen.add(key)
+                if source is not None and handle not in packet_handles:
+                    record["source_materials"].append(source); packet_handles.add(handle)
+                    record.setdefault("source_identity_map", {})[handle] = {key2: source.get(key2) for key2 in ("paper_id", "title", "doi", "year")}
+                    record["chapter"].setdefault("source_ids", []).append(source.get("paper_id"))
+            continue
         studies = unit.setdefault("supporting_studies", [])
         existing = {item.get("source_handle") for item in _unit_study_records(unit)}
         packet_handles = {item.get("source_handle") for item in record.get("source_materials") or []}
@@ -4546,7 +5048,13 @@ def _attach_case_groups(records: Sequence[Mapping[str, Any]], response: Mapping[
             source = all_sources.get(handle)
             if not source or handle in existing:
                 continue
-            studies.append(dict(study)); existing.add(handle)
+            stored_study = dict(study)
+            # Old mode consumes contribution through the established
+            # arrangement contract. Accept a proposed_use response from a
+            # stale/cache-backed caller without dropping its case text.
+            if not _text(stored_study.get("contribution")) and _text(stored_study.get("proposed_use")):
+                stored_study["contribution"] = _text(stored_study.get("proposed_use"))
+            studies.append(stored_study); existing.add(handle)
             if handle not in packet_handles:
                 record["source_materials"].append(source); packet_handles.add(handle)
                 record.setdefault("source_identity_map", {})[handle] = {key: source.get(key) for key in ("paper_id", "title", "doi", "year")}
@@ -5454,8 +5962,18 @@ def _source_keys_in_value(value: Any) -> tuple[set[str], set[str]]:
     return handles, paper_ids
 
 
-def _chapter_review_source_materials(packet: Mapping[str, Any]) -> list[dict[str, Any]]:
-    """Compact only the A/B material for sources cited by this chapter."""
+def _chapter_review_source_materials(
+    packet: Mapping[str, Any],
+    *,
+    include_deep_read: bool = False,
+) -> list[dict[str, Any]]:
+    """Compact only the A/B material for sources cited by this chapter.
+
+    The whole-plan coordinator gets the compact shape (no deep reads): its job
+    is cross-chapter placement, not re-reading every paper.  A chapter owner's
+    revision call passes ``include_deep_read=True`` so late paid readings are
+    reviewed together with the plan they must correct.
+    """
     raw_materials = [item for item in packet.get("source_materials") or [] if isinstance(item, Mapping)]
     handles, paper_ids = _source_keys_in_value(packet.get("chapter_plan") or {})
     by_paper = {
@@ -5473,15 +5991,19 @@ def _chapter_review_source_materials(packet: Mapping[str, Any]) -> list[dict[str
         if not handle or handle not in used_handles or handle in seen:
             continue
         seen.add(handle)
-        output.append({
+        row = {
             key: item[key]
             for key in (
                 "source_handle", "paper_id", "title", "doi", "year", "material_depth",
                 "study_summary_A", "review_planning_B", "supplement_gap_material",
-                "supplement_gap_materials", "local_passages",
+                "supplement_gap_materials", "supplement_material", "supplement_materials",
+                "local_passages",
             )
             if key in item
-        })
+        }
+        if include_deep_read and item.get("deep_read_material"):
+            row["deep_read_material"] = _compact_reading_material(item.get("deep_read_material"))
+        output.append(row)
     return output
 
 
@@ -5496,6 +6018,18 @@ def merge_tool_materials_into_packets(
     chapter and unit it was gathered for; the packet keeps every item under the
     program-managed handle so the writer can cite it, and the packet records
     which questions are still open.
+
+    Work order review-v2/01: an item attaches to a single source only when its
+    COMPLETE source set is one distinct identity that resolves to a handle
+    present in the chapter's own ``source_materials``; it is then merged into
+    that source's ``tool_supplement_materials`` so the writing side consumes it
+    through the per-source catalog instead of an unread packet top-level list.
+    Items citing further sources that never resolved to a handle (paper_id or
+    DOI only), several sources, or an unknown handle stay at the chapter level
+    with their source set intact; a multi-source synthesis is never folded
+    into one paper's record.  ``need_id`` groups rounds of one information
+    need: fully identical duplicates fold, a clear update replaces the earlier
+    round, complementary content for the same need survives.
     """
 
     by_chapter: dict[str, list[dict[str, Any]]] = {}
@@ -5513,6 +6047,15 @@ def merge_tool_materials_into_packets(
         if not targets:
             unassigned.append(item)
 
+    def item_handles(item: Mapping[str, Any]) -> list[str]:
+        handles: list[str] = []
+        for source in item.get("sources") or ():
+            if isinstance(source, Mapping):
+                handle = _text(source.get("source_handle"))
+                if handle and handle not in handles:
+                    handles.append(handle)
+        return handles
+
     merged: list[dict[str, Any]] = []
     for packet in packets:
         row = dict(packet)
@@ -5520,20 +6063,44 @@ def merge_tool_materials_into_packets(
         chapter_id = _text(row.get("chapter_id") or chapter.get("chapter_id") or chapter.get("id"))
         additions = [*by_chapter.get(chapter_id, []), *unassigned]
         if additions:
+            source_rows = [
+                dict(item) if isinstance(item, Mapping) else item
+                for item in (row.get("source_materials") or [])
+            ]
+            source_by_handle = {
+                _text(item.get("source_handle")): item
+                for item in source_rows
+                if isinstance(item, Mapping) and _text(item.get("source_handle"))
+            }
             existing = [item for item in (row.get("tool_materials") or []) if isinstance(item, Mapping)]
             seen = {key for item in existing for key in _tool_material_keys(item)}
+            attached_any = False
             for item in additions:
+                handles = item_handles(item)
+                identities = distinct_tool_material_sources(item)
+                if len(identities) == 1 and len(handles) == 1 and handles[0] in source_by_handle:
+                    target = source_by_handle[handles[0]]
+                    target["tool_supplement_materials"] = merge_tool_supplement_entry(
+                        target.get("tool_supplement_materials") or [], tool_supplement_entry(item))
+                    attached_any = True
+                    continue
                 keys = _tool_material_keys(item)
                 if all(key in seen for key in keys):
                     continue
                 seen.update(keys)
                 existing.append(item)
-            row["tool_materials"] = [dict(item) for item in existing]
-            row["tool_material_count"] = len(existing)
-            row["open_questions"] = list(dict.fromkeys(
-                [*(row.get("open_questions") or []),
-                 *[_text(item.get("still_missing")) for item in existing if _text(item.get("still_missing"))]]
-            ))
+            if attached_any or existing != list(row.get("tool_materials") or []):
+                row["source_materials"] = source_rows
+                row["tool_materials"] = [dict(item) for item in existing]
+                row["tool_material_count"] = len(existing)
+                row["open_questions"] = list(dict.fromkeys(
+                    [*(row.get("open_questions") or []),
+                     *[_text(entry.get("still_missing"))
+                       for source in source_rows if isinstance(source, Mapping)
+                       for entry in (source.get("tool_supplement_materials") or [])
+                       if isinstance(entry, Mapping) and _text(entry.get("still_missing"))],
+                     *[_text(item.get("still_missing")) for item in existing if _text(item.get("still_missing"))]]
+                ))
         merged.append(row)
     return merged
 

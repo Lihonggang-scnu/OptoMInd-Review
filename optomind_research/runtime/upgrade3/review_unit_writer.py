@@ -160,6 +160,9 @@ class UnitWritingView:
     arrangement_path: str = ""
     view_path: str = ""
     unit_notes: str = ""
+    # Multi-source or unattributed chapter tool returns relevant to this unit.
+    # They keep their whole source set; they are never folded into one paper.
+    chapter_tool_materials: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -181,6 +184,7 @@ class UnitWritingView:
             "arrangement_path": self.arrangement_path,
             "view_path": self.view_path,
             "unit_notes": self.unit_notes,
+            "chapter_tool_materials": self.chapter_tool_materials,
         }
 
     def material_summary(self) -> dict[str, Any]:
@@ -191,6 +195,13 @@ class UnitWritingView:
             "with_deep_read_material": sorted(
                 item["source_handle"] for item in self.materials if item.get("deep_read_material")),
             "with_supplement_material": sum(1 for item in self.materials if item.get("supplement_material")),
+            "with_supplement_materials": sorted(
+                item["source_handle"] for item in self.materials if item.get("supplement_materials")),
+            "with_local_passages": sorted(
+                item["source_handle"] for item in self.materials if item.get("local_passages")),
+            "with_tool_supplement_materials": sorted(
+                item["source_handle"] for item in self.materials if item.get("tool_supplement_materials")),
+            "chapter_tool_materials": len(self.chapter_tool_materials),
             "read_from_disk": sorted(
                 item["source_handle"] for item in self.materials if item.get("material_read_from_disk")),
             "truncated": sorted(
@@ -439,16 +450,62 @@ def _material_entry(
         for key, value in b_material.items():
             if key not in entry["review_planning_B"] and value not in (None, "", [], {}):
                 entry["review_planning_B"][key] = deepcopy(value)
-    if catalog_entry.get("deep_read_material"):
-        deep, deep_note = trim_deep_read_material(
-            catalog_entry["deep_read_material"], keep_references=keep_deep_read_references)
-        entry["deep_read_material"] = _deep_read_text(deep)
+    deep_materials: list[dict[str, Any]] = []
+    deep_signatures: set[str] = set()
+    for raw in [catalog_entry.get("deep_read_material"), *(catalog_entry.get("deep_read_materials") or [])]:
+        if not isinstance(raw, Mapping) or not raw:
+            continue
+        signature = json.dumps(dict(raw), ensure_ascii=False, sort_keys=True, default=str)
+        if signature in deep_signatures:
+            continue
+        deep_signatures.add(signature)
+        deep_materials.append(dict(raw))
+    if deep_materials:
+        trimmed_materials: list[Any] = []
+        trim_notes: list[dict[str, Any]] = []
+        for material in deep_materials:
+            deep, deep_note = trim_deep_read_material(
+                material, keep_references=keep_deep_read_references)
+            trimmed_materials.append(_deep_read_text(deep))
+            if deep_note:
+                trim_notes.append(deep_note)
+        entry["deep_read_material"] = trimmed_materials[0]
+        if len(trimmed_materials) > 1:
+            entry["deep_read_materials"] = trimmed_materials[1:]
         note["paid_deep_read_material"] = True
-        if deep_note:
-            entry["deep_read_material_trimmed"] = deep_note
-            note["deep_read_trimmed"] = deep_note["dropped_keys"]
+        if trim_notes:
+            entry["deep_read_material_trimmed"] = (
+                trim_notes[0] if len(trim_notes) == 1 else trim_notes)
+            note["deep_read_trimmed"] = (
+                trim_notes[0]["dropped_keys"] if len(trim_notes) == 1
+                else [item["dropped_keys"] for item in trim_notes])
     if catalog_entry.get("supplement_material"):
         entry["supplement_material"] = catalog_entry["supplement_material"]
+    if isinstance(catalog_entry.get("supplement_materials"), list) and catalog_entry["supplement_materials"]:
+        entry["supplement_materials"] = [dict(item) for item in catalog_entry["supplement_materials"]
+                                         if isinstance(item, Mapping)]
+    local_passages = [
+        dict(raw) for raw in [catalog_entry.get("local_passages"), *(catalog_entry.get("local_passages_variants") or [])]
+        if isinstance(raw, Mapping) and raw
+    ]
+    if local_passages:
+        # Kept under its own reading mode; a local passage is never merged into
+        # deep_read_material or presented as a paid reading.
+        entry["local_passages"] = local_passages[0]
+        if len(local_passages) > 1:
+            entry["local_passages_variants"] = local_passages[1:]
+    tool_supplements = [dict(item) for item in (catalog_entry.get("tool_supplement_materials") or [])
+                        if isinstance(item, Mapping)]
+    if tool_supplements:
+        # need_id groups rounds of one information need: identical full entries
+        # fold, while every non-identical complementary result reaches the
+        # writing model.
+        from .chapter_arrangement import merge_tool_supplement_entry
+
+        folded: list[dict[str, Any]] = []
+        for item in tool_supplements:
+            folded = merge_tool_supplement_entry(folded, item)
+        entry["tool_supplement_materials"] = folded
 
     locator = catalog_entry.get("locator") or {}
     card_path = str(locator.get("card_path") or "")
@@ -492,6 +549,18 @@ def _material_entry(
     return entry, note
 
 
+def _clip_long_strings(value: Any, keep_chars: int) -> Any:
+    """Clip long free text inside nested material structures, keeping shape."""
+
+    if isinstance(value, str):
+        return value if len(value) <= keep_chars else value[:keep_chars] + "…（本地截断）"
+    if isinstance(value, list):
+        return [_clip_long_strings(item, keep_chars) for item in value]
+    if isinstance(value, dict):
+        return {key: _clip_long_strings(item, keep_chars) for key, item in value.items()}
+    return value
+
+
 def _truncate_entry(entry: dict[str, Any], limit: int) -> dict[str, Any]:
     """Shrink the long free-text fields once each, keeping facts and flags intact.
 
@@ -507,6 +576,16 @@ def _truncate_entry(entry: dict[str, Any], limit: int) -> dict[str, Any]:
             over = len(json.dumps(entry, ensure_ascii=False)) - limit
             keep = len(value) - over - 60
             entry[key] = (value[:keep] + "\n…（本地截断）") if keep > 0 else "（本地截断；原文见定位信息）"
+    # Supplement lists and local passages carry their long text inside nested
+    # structures; they are clipped in place with the recorded truncation note.
+    for key in (
+        "supplement_materials", "tool_supplement_materials", "local_passages",
+        "local_passages_variants", "deep_read_materials",
+    ):
+        if len(json.dumps(entry, ensure_ascii=False)) <= limit:
+            break
+        if entry.get(key):
+            entry[key] = _clip_long_strings(entry[key], 400)
     if len(json.dumps(entry, ensure_ascii=False)) > limit:
         entry.setdefault("material_truncated", {})["still_over_limit"] = True
         entry["material_truncated"]["note"] = (
@@ -610,6 +689,8 @@ def build_unit_view(
         arrangement_path=str(arrangement_file),
         view_path=str(resolved_view_path),
         unit_notes=str(unit.get("unit_notes") or ""),
+        chapter_tool_materials=_unit_relevant_chapter_tool_materials(
+            arrangement.get("chapter_tool_materials") or (), unit_id),
     )
     view.sources = {handle: source_catalog.get(handle) for handle in handles}
     missing = [item["source_handle"] for item in materials if item.get("missing_material")]
@@ -682,6 +763,30 @@ def _with_revision_output(prompt: str) -> str:
     return prompt
 
 
+def _unit_relevant_chapter_tool_materials(
+    items: Sequence[Mapping[str, Any]],
+    unit_id: str,
+) -> list[dict[str, Any]]:
+    """Chapter-level tool returns this unit should see.
+
+    An item that names a target unit only reaches that unit; an item without a
+    unit target serves the whole chapter and reaches every unit once.  Source
+    sets are preserved verbatim.
+    """
+
+    relevant: list[dict[str, Any]] = []
+    for raw in items:
+        if not isinstance(raw, Mapping):
+            continue
+        unit_key = str(raw.get("unit_key") or "").strip()
+        if unit_key:
+            target = unit_key.split(":", 1)[-1].strip()
+            if target and target != unit_id:
+                continue
+        relevant.append(dict(raw))
+    return relevant
+
+
 def unit_payload(view: UnitWritingView, *, language: str = "zh") -> dict[str, Any]:
     """The compact payload the writing model receives (each source only once)."""
 
@@ -695,6 +800,7 @@ def unit_payload(view: UnitWritingView, *, language: str = "zh") -> dict[str, An
         "unit_focus": view.focus,
         "unit_notes": view.unit_notes,
         "sibling_units": view.sibling_units,
+        "chapter_tool_materials": view.chapter_tool_materials,
         "paragraph_tasks": [
             {
                 "paragraph_id": task.get("paragraph_id"),

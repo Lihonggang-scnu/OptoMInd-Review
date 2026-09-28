@@ -58,6 +58,36 @@ class UnitDocument:
     chapter_title: str
     table_purposes: list[str]
     status: str
+    unit_title: str = ""
+    pending_problem: str = ""
+
+
+def _valid_unit_title(value: Any) -> str:
+    """A real title field, not a truncated assertion sentence."""
+
+    text = re.sub(r"\s+", " ", str(value or "").strip())
+    if not text or len(text) > 60:
+        return ""
+    if text.endswith(("。", "．", ".", "！", "！", "?", "？", "；", ";")):
+        return ""
+    return text
+
+
+def _unit_pending_problem(result: Mapping[str, Any]) -> str:
+    """Why this unit's result is not a resolved, complete answer ("" = none)."""
+
+    if result.get("complete") is False or str(result.get("finish_reason") or "") == "length":
+        return str(result.get("completion_status") or "partial_length")
+    issues = result.get("issues") or []
+    if issues:
+        return f"writer_issues:{len(issues)}"
+    return ""
+
+
+def _issue_details(value: Any) -> list[dict[str, Any]]:
+    """Keep writer issue objects available to downstream reports."""
+
+    return [dict(item) for item in value or () if isinstance(item, Mapping)]
 
 
 def _read_json(path: Path) -> Any:
@@ -203,8 +233,6 @@ def load_unit_document(job: Job, result_path: Path, arrangement: Mapping[str, An
         raise AssemblyError(f"simulated_result:{job.unit_id}:{result_path}")
     complete = result.get("complete", True)
     finish_reason = str(result.get("finish_reason") or "")
-    if complete is False or finish_reason == "length":
-        raise AssemblyError(f"partial_result:{job.unit_id}:{finish_reason or 'incomplete'}")
     body = ""
     body_path_value = str(result.get("body_path") or "").strip()
     if body_path_value:
@@ -217,7 +245,16 @@ def load_unit_document(job: Job, result_path: Path, arrangement: Mapping[str, An
         body = str(result.get("body_markdown") or "")
     body = body.strip()
     if not body or body.lower() in {"length", "partial", "none"}:
+        # No usable text at all: nothing to assemble for this unit.
         raise AssemblyError(f"body_missing_or_invalid:{result_path}")
+    # A length-cutoff or incomplete flag with usable text assembles into a
+    # restricted draft: the body is kept, and the unresolved state travels in
+    # unit_rows/pending_problems instead of blocking the whole manuscript.
+    pending_problem = ""
+    if complete is False or finish_reason == "length":
+        pending_problem = str(result.get("completion_status") or "partial_length")
+    elif result.get("issues"):
+        pending_problem = f"writer_issues:{len(result.get('issues') or [])}"
     units = {str(item.get("unit_id")): item for item in arrangement.get("units") or []}
     unit = units.get(job.unit_id) or {}
     focus = str(unit.get("focus") or job.unit_id).strip()
@@ -236,6 +273,8 @@ def load_unit_document(job: Job, result_path: Path, arrangement: Mapping[str, An
         chapter_title=_chapter_title(job.arrangement, arrangement),
         table_purposes=table_purposes,
         status="reused" if job.reused_result else "written",
+        unit_title=_valid_unit_title(unit.get("unit_title") or unit.get("title")),
+        pending_problem=pending_problem,
     )
 
 
@@ -404,6 +443,121 @@ def replace_citations_numbered(
     return CITATION_BRACKET_RE.sub(replace_number, text)
 
 
+def replace_table_handle_cells(
+    text: str, identity: IdentityIndex, number_by_canonical: Mapping[str, int]
+) -> tuple[str, int, list[str]]:
+    """Show formal reference numbers for known handles in TABLE rows only.
+
+    Table source columns are the known residual location for bare ``P1234``
+    handles.  Prose identifiers that merely look like handles are left alone,
+    and handles with no identity mapping are never guessed — they are
+    returned for the run report instead.
+    """
+
+    out: list[str] = []
+    replacements = 0
+    unknown: list[str] = []
+
+    def one(match: re.Match[str]) -> str:
+        nonlocal replacements
+        handle = match.group(0)
+        canonical = identity.reference_key(handle)
+        if canonical is None or canonical not in number_by_canonical:
+            return handle
+        replacements += 1
+        return f"[{number_by_canonical[canonical]}]"
+
+    lines = text.splitlines()
+    in_fence = False
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        if line.strip().startswith("```"):
+            in_fence = not in_fence
+            out.append(line)
+            index += 1
+            continue
+        if not in_fence and index + 1 < len(lines) and line.lstrip().startswith("|") and _is_table_separator(lines[index + 1]):
+            source_columns = _table_source_columns(line)
+            out.append(line)
+            out.append(lines[index + 1])
+            index += 2
+            while index < len(lines) and lines[index].lstrip().startswith("|"):
+                row = lines[index]
+                cells = _table_cells(row)
+                if source_columns and cells:
+                    for column in source_columns:
+                        if column >= len(cells):
+                            continue
+                        cells[column] = HANDLE_RE.sub(one, cells[column])
+                        for handle in HANDLE_RE.findall(cells[column]):
+                            canonical = identity.reference_key(handle)
+                            if (canonical is None or canonical not in number_by_canonical) and handle not in unknown:
+                                unknown.append(handle)
+                    row = _render_table_cells(cells)
+                out.append(row)
+                index += 1
+            continue
+        out.append(line)
+        index += 1
+    return "\n".join(out) + ("\n" if text.endswith("\n") else ""), replacements, unknown
+
+
+_SOURCE_COLUMN_RE = re.compile(
+    r"(?:来源|文献|论文|参考|路线|source|reference|citation|paper|doi|handle|route)",
+    re.IGNORECASE,
+)
+
+
+def _table_cells(line: str) -> list[str]:
+    stripped = line.strip()
+    if stripped.startswith("|"):
+        stripped = stripped[1:]
+    if stripped.endswith("|"):
+        stripped = stripped[:-1]
+    return stripped.split("|")
+
+
+def _render_table_cells(cells: list[str]) -> str:
+    return "|" + "|".join(cells) + "|"
+
+
+def _table_source_columns(header: str) -> set[int]:
+    return {
+        index for index, cell in enumerate(_table_cells(header))
+        if _SOURCE_COLUMN_RE.search(cell.strip())
+    }
+
+
+def _table_source_handles(text: str) -> list[str]:
+    """Return bare handles from explicit source columns in real tables."""
+
+    found: list[str] = []
+    lines = text.splitlines()
+    in_fence = False
+    index = 0
+    while index + 1 < len(lines):
+        line = lines[index]
+        if line.strip().startswith("```"):
+            in_fence = not in_fence
+            index += 1
+            continue
+        if not in_fence and line.lstrip().startswith("|") and _is_table_separator(lines[index + 1]):
+            columns = _table_source_columns(line)
+            index += 2
+            while index < len(lines) and lines[index].lstrip().startswith("|"):
+                cells = _table_cells(lines[index])
+                for column in columns:
+                    if column < len(cells):
+                        for handle in HANDLE_RE.findall(cells[column]):
+                            if handle not in found:
+                                found.append(handle)
+                index += 1
+            continue
+        index += 1
+    return found
+
+
 def _is_table_separator(line: str) -> bool:
     cells = line.strip().strip("|").split("|")
     return len(cells) >= 1 and all(TABLE_SEPARATOR_RE.match(cell) for cell in cells)
@@ -518,6 +672,16 @@ def assemble_documents(
     prepared: list[tuple[str, UnitDocument, str, int]] = []
     # First build the raw handle chapters and establish one citation order for
     # the complete manuscript.  Numbering per unit would restart at [1].
+    def resolved_title(document: UnitDocument) -> str:
+        override = (title_overrides or {}).get(document.job.unit_id, "")
+        if str(override or "").strip():
+            return concise_unit_title(document.focus, override)
+        # A real unit-title field from the arrangement beats a truncated
+        # focus sentence; the concise fallback stays for units without one.
+        return document.unit_title or concise_unit_title(document.focus, "")
+
+    table_handle_replacements = 0
+    unknown_table_handles: list[str] = []
     for chapter_index, (chapter_id, chapter_docs) in enumerate(by_chapter.items(), start=1):
         chapter_title = chapter_docs[0].chapter_title
         argument = chapter_docs[0].chapter_argument
@@ -526,7 +690,7 @@ def assemble_documents(
             handle_parts.extend(["", f"> 本章论断：{argument}"])
         for unit_index, document in enumerate(chapter_docs, start=1):
             clean = clean_unit_body(document.body)
-            title = concise_unit_title(document.focus, (title_overrides or {}).get(document.job.unit_id, ""))
+            title = resolved_title(document)
             normalized_handle, next_table_number = normalize_tables(
                 clean, table_number, title, document.table_purposes
             )
@@ -541,6 +705,9 @@ def assemble_documents(
                 "status": document.status,
                 "body_chars": len(clean),
                 "tables": table_count,
+                "pending_problem": document.pending_problem,
+                "completion_status": str(document.result.get("completion_status") or ""),
+                "issues": _issue_details(document.result.get("issues")),
             })
         handle_chapters[chapter_id] = "\n".join(handle_parts).strip() + "\n"
     ordered_texts = [front_matter] if front_matter.strip() else []
@@ -555,6 +722,12 @@ def assemble_documents(
         for handle in unknown:
             if handle not in unknown_citations:
                 unknown_citations.append(handle)
+        # A bare handle in a declared table source column is an actual use and
+        # must receive a number even when the prose contains no bracketed cite.
+        for handle in _table_source_handles(text):
+            canonical = identity.reference_key(handle)
+            if canonical and canonical not in references_order:
+                references_order.append(canonical)
     number_by_canonical = {canonical: index for index, canonical in enumerate(references_order, start=1)}
     # Render numeric chapters in the same prepared order while retaining the
     # chapter/unit hierarchy from the handle draft.
@@ -566,8 +739,14 @@ def assemble_documents(
         argument = chapter_docs[0].chapter_argument
         numeric_parts = [f"## 第{chapter_index}章 {chapter_title}"]
         for unit_index, (document, normalized_handle) in enumerate(prepared_by_chapter.get(chapter_id, []), start=1):
-            title = concise_unit_title(document.focus, (title_overrides or {}).get(document.job.unit_id, ""))
+            title = resolved_title(document)
             numeric_body = replace_citations_numbered(normalized_handle, identity, number_by_canonical)
+            numeric_body, replaced, unknown_cells = replace_table_handle_cells(
+                numeric_body, identity, number_by_canonical)
+            table_handle_replacements += replaced
+            for handle in unknown_cells:
+                if handle not in unknown_table_handles:
+                    unknown_table_handles.append(handle)
             numeric_body, _ = editorial_cleanup(numeric_body, editorial_repairs)
             numeric_parts.extend(["", f"### {chapter_index}.{unit_index} {title}", "", numeric_body])
         numeric_chapters[chapter_id] = "\n".join(numeric_parts).strip() + "\n"
@@ -607,6 +786,8 @@ def assemble_documents(
         "references_order": references_order,
         "unknown_citations": unknown_citations,
         "table_count": table_number - 1,
+        "table_handle_replacements": table_handle_replacements,
+        "unknown_table_handles": unknown_table_handles,
         "unit_rows": unit_rows,
     }
 
@@ -663,6 +844,86 @@ def _load_table_titles(batch_root: Path) -> dict[int, str]:
     return result
 
 
+def _status_from_value(value: Any, *, default: str = "not_checked") -> str:
+    if isinstance(value, Mapping):
+        value = value.get("status") or value.get("planning_status") or value.get("arrangement_status")
+    text = str(value or "").strip().casefold()
+    return text or default
+
+
+def _status_from_locator(manifest: Mapping[str, Any], manifest_path: Path, keys: tuple[str, ...]) -> str:
+    """Read only an explicitly supplied status or status file locator."""
+
+    for key in keys:
+        if key not in manifest:
+            continue
+        value = manifest.get(key)
+        direct = "" if key.endswith("_path") else _status_from_value(value, default="")
+        if direct:
+            return direct
+        locator = str(value or "").strip()
+        if not locator:
+            continue
+        path = Path(locator)
+        if not path.is_absolute():
+            path = manifest_path.parent / path
+        if path.is_file():
+            raw = _read_json(path)
+            status = _status_from_value(raw, default="")
+            if status:
+                return status
+    return "not_checked"
+
+
+def _delivery_statuses(
+    manifest: Mapping[str, Any], manifest_path: Path,
+    arrangements: Mapping[str, Mapping[str, Any]],
+) -> tuple[str, str, list[dict[str, Any]]]:
+    planning = _status_from_locator(
+        manifest, manifest_path,
+        ("planning_status", "planning", "planning_result_path", "planning_status_path", "planning_report_path"),
+    )
+    arrangement = _status_from_locator(
+        manifest, manifest_path,
+        ("arrangement_status", "arrangement_result_path", "arrangement_status_path", "arrangement_report_path"),
+    )
+    record_statuses: list[str] = []
+    arrangement_issues: list[dict[str, Any]] = []
+    for chapter_id, item in arrangements.items():
+        if not isinstance(item, Mapping):
+            continue
+        validation = item.get("validation") if isinstance(item.get("validation"), Mapping) else {}
+        status = _status_from_value(
+            validation.get("status") or item.get("arrangement_status") or item.get("status"),
+            default="",
+        )
+        if validation.get("needs_arrangement") is True and status not in {"partial", "failed", "incomplete", "unresolved", "needs_arrangement"}:
+            status = "needs_arrangement"
+        if status:
+            record_statuses.append(status)
+        raw_issues = [*list(item.get("issues") or []), *list(validation.get("issues") or []), *list(validation.get("errors") or [])]
+        for issue in raw_issues:
+            if issue in (None, "", [], {}):
+                continue
+            arrangement_issues.append({"chapter_id": chapter_id, "issue": issue})
+        for key in ("missing_sources", "sources_never_mentioned"):
+            values = validation.get(key) or []
+            if values:
+                arrangement_issues.append({"chapter_id": chapter_id, "issue": {key: values}})
+    if record_statuses:
+        unique = set(record_statuses)
+        blockers = {"partial", "failed", "incomplete", "unresolved", "blocked", "not_ready", "not_passed", "needs_arrangement"}
+        if any(status in blockers for status in record_statuses):
+            arrangement = record_statuses[0] if len(unique) == 1 else "partial"
+        elif arrangement in blockers:
+            pass  # An explicit unresolved upstream result is not cleared by loaded records.
+        elif len(unique) == 1:
+            arrangement = record_statuses[0]
+        else:
+            arrangement = "partial"
+    return planning, arrangement, arrangement_issues
+
+
 def _apply_table_titles(text: str, titles: Mapping[int, str]) -> str:
     """Make every table caption a bold ordinary line with one global number."""
 
@@ -700,22 +961,32 @@ def _report_markdown(summary: Mapping[str, Any]) -> str:
         "# 全稿汇编运行报告",
         "",
         f"- 状态：`{summary.get('status', '')}`",
+        f"- 装配齐全：{'是' if summary.get('status') == 'complete' else '否'}；已接入结果中的问题已解决：{'是' if summary.get('problems_resolved') else '否'}（不代表科学内容审校通过）",
+        f"- 规划状态：`{summary.get('planning_status', 'not_checked')}`；编排状态：`{summary.get('arrangement_status', 'not_checked')}`",
         f"- 预计单元数：{summary.get('expected_units', 0)}；已载入：{summary.get('loaded_units', 0)}；缺少：{len(missing)}",
         f"- 实际使用论文数：{summary.get('used_papers', 0)}；未使用论文数：{summary.get('unused_papers', 0)}",
         f"- 全文统一表号：{summary.get('table_count', 0)} 张",
         f"- 未能映射的原始引用 handle：{', '.join(summary.get('unknown_citations') or []) or '无'}",
+        f"- 表格来源栏已换正式编号：{summary.get('table_handle_replacements', 0)} 处；未能映射表格句柄：{', '.join(summary.get('unknown_table_handles') or []) or '无'}",
         "",
         "## 单元状态",
         "",
-        "| 章节 | 单元 | 状态 | 正文字符数 | 结果路径 |",
-        "| --- | --- | --- | ---: | --- |",
+        "| 章节 | 单元 | 状态 | 正文字符数 | 待处理问题 | 结果路径 |",
+        "| --- | --- | --- | ---: | --- | --- |",
     ]
     for row in summary.get("unit_rows") or []:
-        lines.append(f"| {row['chapter_id']} | {row['unit_id']} | {row['status']} | {row['body_chars']} | `{row['result_path']}` |")
+        lines.append(f"| {row['chapter_id']} | {row['unit_id']} | {row['status']} | {row['body_chars']} | {row.get('pending_problem') or '无'} | `{row['result_path']}` |")
     if missing:
         lines.extend(["", "## 缺少单元", "", *[f"- `{item}`" for item in missing]])
     if summary.get("errors"):
         lines.extend(["", "## 结果错误", "", *[f"- `{item}`" for item in summary["errors"]]])
+    if summary.get("pending_problems"):
+        lines.extend(["", "## 待处理问题（不因装配齐全而视为解决）", ""])
+        for item in summary["pending_problems"]:
+            line = f"- `{item.get('unit_id') or '（全局）'}`：{item.get('code')}"
+            if item.get("issues"):
+                line += "；详情：" + json.dumps(item["issues"], ensure_ascii=False, separators=(",", ":"))
+            lines.append(line)
     lines.extend(["", "摘要与结语由主代理在全稿亲审后补写。", ""])
     return "\n".join(lines)
 
@@ -750,7 +1021,7 @@ def run(args: argparse.Namespace) -> int:
         raise AssemblyError("unit_selection_requires_check_only")
     documents, missing, errors = collect_documents(jobs, arrangements, batch_root, selected=selected)
     expected = len([job for job in jobs if selected is None or job.unit_id in selected])
-    if errors:
+    if errors and not args.check_only:
         raise AssemblyError(";".join(errors))
     if missing and not args.allow_partial and not args.check_only:
         raise AssemblyError("missing_units:" + ",".join(missing))
@@ -782,9 +1053,36 @@ def run(args: argparse.Namespace) -> int:
     used_canonicals = set(assembled["references_order"])
     all_canonicals = {identity.reference_key(handle) for handle in identity.entries}
     all_canonicals.discard(None)
+    # "Assembly complete" (every unit loaded) and "problems resolved" (no
+    # partial writer results, writer issues, or unmapped handles) are separate
+    # statements; a restricted draft is allowed to carry both honestly.
+    pending_problems = [
+        {"unit_id": row["unit_id"], "code": row["pending_problem"], "issues": row.get("issues") or []}
+        for row in assembled["unit_rows"] if row.get("pending_problem")
+    ]
+    unknown_table_handles = list(assembled.get("unknown_table_handles") or [])
+    for handle in unknown_table_handles:
+        pending_problems.append({"unit_id": "", "code": f"unmapped_table_handle:{handle}"})
+    planning_status, arrangement_status, arrangement_issues = _delivery_statuses(manifest, manifest_path, arrangements)
+    status_blockers = {
+        "partial", "failed", "incomplete", "unresolved", "blocked", "not_ready", "not_passed", "needs_arrangement",
+    }
+    if planning_status in status_blockers:
+        pending_problems.append({"unit_id": "", "code": f"planning_status:{planning_status}"})
+    if arrangement_status in status_blockers:
+        pending_problems.append({"unit_id": "", "code": f"arrangement_status:{arrangement_status}"})
+    for item in arrangement_issues:
+        pending_problems.append({"unit_id": "", "code": "arrangement_issue", "issues": [item]})
     summary: dict[str, Any] = {
         "schema_version": "optomind.full_review_draft.run_report.v1",
         "status": "complete" if not missing and not errors and selected is None and len(documents) == len(jobs) else "partial_check",
+        "problems_resolved": (
+            not pending_problems
+            and not assembled["unknown_citations"]
+            and not missing
+            and not errors
+        ),
+        "pending_problems": pending_problems,
         "review_title": title,
         "expected_units": expected,
         "manifest_units": len(jobs),
@@ -795,7 +1093,12 @@ def run(args: argparse.Namespace) -> int:
         "unused_papers": len(all_canonicals - used_canonicals),
         "catalog_papers": len(all_canonicals),
         "table_count": assembled["table_count"],
+        "table_handle_replacements": assembled.get("table_handle_replacements", 0),
+        "unknown_table_handles": unknown_table_handles,
         "unknown_citations": assembled["unknown_citations"],
+        "planning_status": planning_status,
+        "arrangement_status": arrangement_status,
+        "arrangement_issues": arrangement_issues,
         "unit_rows": assembled["unit_rows"],
         "editorial_repairs": dict(editorial_repairs),
         "references_path": str(output_root / "REFERENCES.json"),

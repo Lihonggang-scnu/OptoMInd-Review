@@ -32,6 +32,7 @@ from optomind_research.runtime.upgrade3.chapter_arrangement import (
     arrangement_messages,
     build_chapter_view,
     build_source_catalog,
+    compact_chapter_tool_materials,
     estimate_arrangement_cost,
     load_editor_prompt,
     parse_arrangement_response,
@@ -456,6 +457,8 @@ def saved_payload_from(arrangement: Mapping) -> dict:
             {
                 "unit_id": unit.get("unit_id"),
                 "focus": unit.get("focus"),
+                **({"unit_title": str(unit.get("unit_title") or unit.get("title") or "").strip()}
+                   if str(unit.get("unit_title") or unit.get("title") or "").strip() else {}),
                 "unit_notes": unit.get("unit_notes") or "",
                 "paragraph_tasks": [
                     {
@@ -504,6 +507,9 @@ def _export(chapter_dir: Path, view, arrangement: dict) -> None:
     # writer can open a task and reach its material without searching again.
     exported = dict(arrangement)
     exported["source_catalog"] = build_source_catalog(view, arrangement)
+    # Multi-source tool returns travel next to the catalogue with their source
+    # set intact instead of being folded into one paper's record.
+    exported["chapter_tool_materials"] = compact_chapter_tool_materials(view)
     (chapter_dir / "CHAPTER_ARRANGEMENT.json").write_text(
         json.dumps(exported, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     (chapter_dir / "CHAPTER_ARRANGEMENT.md").write_text(
