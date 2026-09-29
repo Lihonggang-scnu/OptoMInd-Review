@@ -1320,7 +1320,13 @@ PLANNING_REVISION_INSTRUCTIONS = (
     "结果，也不要在没有可比材料时补写差异原因。若材料更适合概念解释、方法前提、发展关系、背景、例证"
     "或边界说明，就按实际功能组织；只有确有依据时才比较。若发现科学含义可能需要改变，请在 issues 中"
     "记录具体章节/单元、依据来源和需要章节负责人处理的动作，保留当前任务供调用端回传。相互独立的维度可以并存；"
-    "除非材料明确支持，不把它们写成互斥且穷尽的二分路径。"
+    "除非材料明确支持，不把它们写成互斥且穷尽的二分路径。\n\n"
+    "【段落任务引用合同】existing_paragraph_tasks 是章节负责人已写好的具体任务，其中的研究对象、工况"
+    "（温度/压力等）、数字与分母关系、比较对象和限制条件必须原样保留给写作者。因此：每个 paragraph_task "
+    "用 `source_briefs` 列出它来自哪些 `paragraph_id`（合并写多个 id；拆分把同一 id 写进多个任务，并在 "
+    "`portion` 说明各段讲原任务的哪一部分）。`point`/`development` 可以省略——程序会把负责人原文回填；"
+    "你补充的是顺序、`source_uses`（每篇来源在这段做什么）与衔接意图，不是新的研究描述，也不要把具体"
+    "条件概括成“特定条件”之类的话。每个已有段落 id 都必须被至少一个任务引用，漏掉任何一个都算本任务未完成。"
 )
 
 
@@ -1444,6 +1450,12 @@ def load_editor_prompt(path: str | Path | None = None, *, planning_revision: boo
     ).replace(
         "`development` 要足以让写作者组织比较，不能只写“介绍 A，介绍 B”。",
         "`development` 要足以让写作者组织本段实际论证关系，不能只写“介绍 A，介绍 B”；不强制比较。",
+    ).replace(
+        "4. **保留原有有效任务**：已有段落任务是有用起点，可以重排、合并、扩充或改写，但不要因为输出省字而整段删除。"
+        "确需删除或大幅改动时，在 `unit_notes` 里写明理由。",
+        "4. **引用负责人原任务，不重写研究内容**：用 `source_briefs` 引用 `existing_paragraph_tasks` 的 "
+        "`paragraph_id`；`point`/`development` 可省略，程序会回填负责人原文。你决定的是顺序、来源用途与衔接；"
+        "不要把具体工况概括成“特定条件”。每个已有段落 id 都必须被至少一个任务引用。",
     )
     return prompt + PLANNING_REVISION_INSTRUCTIONS
 
@@ -1578,6 +1590,83 @@ def _normalize_issues(value: Any) -> list[dict[str, Any]]:
     return issues
 
 
+def _restore_owner_paragraph_briefs(
+    unit_id: str,
+    paragraphs: list[dict[str, Any]],
+    raw_rows: Sequence[Mapping[str, Any]],
+    explicit_ids: Sequence[bool],
+    unit: UnitView,
+    known_handles: set[str],
+    errors: list[str],
+) -> list[str]:
+    """Restore the owner's original paragraph tasks in the opt-in mode.
+
+    The arrangement model references tasks instead of rewriting them: each
+    output task lists the original ``paragraph_id`` values it covers in
+    ``source_briefs`` (merge = several ids, split = the same id in several
+    tasks with a ``portion`` note).  The program then puts the owner's
+    point/development back verbatim, so a condensing model cannot strip the
+    conditions that decide what a finding means.  A task without references
+    whose id the MODEL explicitly wrote and that matches an original brief is
+    an explicit reuse and is restored too; an id the program generated from
+    list position is never treated as a claim (no positional guessing), and
+    such tasks keep the model's text and are reported as unmapped.  Every
+    original brief must be claimed by at least one task — an unclaimed brief
+    is a validation error, never a silent drop.  Returns the unmapped task
+    ids for the unit record.
+    """
+
+    briefs_by_id = {brief.paragraph_id: brief for brief in unit.paragraph_briefs}
+    if not briefs_by_id:
+        return []
+    claimed: set[str] = set()
+    unmapped: list[str] = []
+    for entry, raw, explicit_id in zip(paragraphs, raw_rows, explicit_ids):
+        refs_raw = raw.get("source_briefs")
+        refs = [str(item).strip() for item in refs_raw if str(item).strip()] \
+            if isinstance(refs_raw, list) else []
+        bad = [ref for ref in refs if ref not in briefs_by_id]
+        if bad:
+            errors.append(f"brief_reference_unknown:{unit_id}:{','.join(bad)}")
+            refs = [ref for ref in refs if ref in briefs_by_id]
+        if not refs and explicit_id and entry["paragraph_id"] in briefs_by_id:
+            refs = [entry["paragraph_id"]]
+        if refs:
+            claimed.update(refs)
+            briefs = [briefs_by_id[ref] for ref in refs]
+            primary = briefs[0]
+            entry["point"] = primary.point
+            entry["development"] = "\n\n".join(
+                brief.development for brief in briefs if brief.development).strip()
+            entry["source_briefs"] = refs
+            # Keep the complete local owner tasks beside the compact
+            # references. source_uses is an arrangement-level view and
+            # cannot tell the writer which source belonged to which original
+            # brief after a merge.
+            entry["source_brief_details"] = [brief.to_dict() for brief in briefs]
+            entry["carried_over"] = True
+            entry["point_changed_from_brief"] = False
+            # A missing output id already received a unit-local fallback in
+            # validate_arrangement. Keep that unique task id: the owner brief
+            # id is a reference, not the identity of a split output task.
+            existing_handles = {use["source_handle"] for use in entry["source_uses"]}
+            for brief in briefs:
+                for handle in brief.source_handles:
+                    if handle not in existing_handles and handle in known_handles:
+                        entry["source_uses"].append(
+                            {"source_handle": handle, "role": "负责人指定", "use": ""})
+                        existing_handles.add(handle)
+        else:
+            unmapped.append(entry["paragraph_id"])
+        portion = str(raw.get("portion") or "").strip()
+        if portion:
+            entry["portion"] = portion
+    unclaimed = sorted(ref for ref in briefs_by_id if ref not in claimed)
+    if unclaimed:
+        errors.append(f"briefs_unclaimed:{unit_id}:{','.join(unclaimed)}")
+    return unmapped
+
+
 def validate_arrangement(
     payload: Mapping[str, Any],
     view: ChapterView,
@@ -1644,13 +1733,38 @@ def validate_arrangement(
             continue
         seen_units.add(unit_id)
         paragraphs: list[dict[str, Any]] = []
-        for ordinal, raw_paragraph in enumerate(raw_unit.get("paragraph_tasks") or (), start=1):
+        raw_paragraph_rows: list[Mapping[str, Any]] = []
+        explicit_paragraph_ids: list[bool] = []
+        raw_tasks = list(raw_unit.get("paragraph_tasks") or ())
+        explicit_ids_in_output = {
+            str(raw.get("paragraph_id") or "").strip()
+            for raw in raw_tasks
+            if isinstance(raw, Mapping) and str(raw.get("paragraph_id") or "").strip()
+        }
+        generated_ids: set[str] = set()
+        for ordinal, raw_paragraph in enumerate(raw_tasks, start=1):
             if not isinstance(raw_paragraph, Mapping):
                 errors.append(f"paragraph_not_object:{unit_id}")
+                # No paragraph entry is appended, so the three parallel
+                # arrays consumed by _restore_owner_paragraph_briefs remain
+                # aligned for the following valid row.
                 continue
             paragraph_id = str(raw_paragraph.get("paragraph_id") or "").strip()
+            explicit_id = bool(paragraph_id)
+            explicit_paragraph_ids.append(explicit_id)
             if not paragraph_id:
                 paragraph_id = f"{unit_id}_P{ordinal:02d}"
+                if planning_revision and (
+                    paragraph_id in known_paragraphs
+                    or paragraph_id in explicit_ids_in_output
+                    or paragraph_id in generated_ids
+                ):
+                    paragraph_id = f"{unit_id}__TASK_{ordinal:02d}"
+                    suffix = 2
+                    while paragraph_id in known_paragraphs or paragraph_id in explicit_ids_in_output or paragraph_id in generated_ids:
+                        paragraph_id = f"{unit_id}__TASK_{ordinal:02d}_{suffix:02d}"
+                        suffix += 1
+                generated_ids.add(paragraph_id)
             elif paragraph_id in known_paragraphs and not paragraph_id.startswith(unit_id):
                 errors.append(f"paragraph_id_unit_mismatch:{paragraph_id}")
             uses = _normalize_uses(raw_paragraph.get("source_uses"))
@@ -1672,6 +1786,12 @@ def validate_arrangement(
                 "carried_over": reused,
                 "point_changed_from_brief": reused and not kept_point,
             })
+            raw_paragraph_rows.append(raw_paragraph)
+        if planning_revision:
+            unmapped_tasks = _restore_owner_paragraph_briefs(
+                unit_id, paragraphs, raw_paragraph_rows, explicit_paragraph_ids,
+                known_units[unit_id], known_handles, errors,
+            )
         tables: list[dict[str, Any]] = []
         for ordinal, raw_table in enumerate(raw_unit.get("table_tasks") or (), start=1):
             if not isinstance(raw_table, Mapping):
@@ -1699,9 +1819,10 @@ def validate_arrangement(
                 "row_tasks": rows,
             })
         unit_title = str(raw_unit.get("unit_title") or raw_unit.get("title") or "").strip()
+        owner_unit = known_units[unit_id]
         units_out.append({
             "unit_id": unit_id,
-            "focus": str(raw_unit.get("focus") or known_units[unit_id].substantive_point).strip(),
+            "focus": str(raw_unit.get("focus") or owner_unit.substantive_point).strip(),
             # A model-supplied short title travels with the unit so the
             # assembly can head the section with it instead of truncating the
             # focus assertion; the arrangement model payload stays unchanged.
@@ -1709,6 +1830,19 @@ def validate_arrangement(
             "paragraph_tasks": paragraphs,
             "table_tasks": tables,
             "unit_notes": str(raw_unit.get("unit_notes") or "").strip(),
+            **({
+                # Model-added tasks that reference no owner brief: allowed
+                # (connective organization), but visible instead of silent.
+                **({"unmapped_paragraph_tasks": unmapped_tasks} if unmapped_tasks else {}),
+                # The owner unit's own conditions/synthesis/transition travel
+                # with the unit so paragraph-level content is not the only
+                # place those constraints live.
+                "owner_unit_context": {
+                    "evidence_conditions": owner_unit.evidence_conditions,
+                    "synthesis": owner_unit.synthesis,
+                    "transition": owner_unit.transition,
+                },
+            } if planning_revision else {}),
         })
 
     missing_units = [unit_id for unit_id in known_units if unit_id not in seen_units]

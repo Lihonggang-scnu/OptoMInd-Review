@@ -32,6 +32,18 @@ PLANNING_REVISION_INSTRUCTIONS = (
     "封装的 issues 中记录章节/单元、依据来源和建议动作。不要把编排当作新的科学论证入口，不要把每个单元"
     "改写成性能比较；按任务实际要求解释概念、方法前提、机制、发展、背景、例证或边界。只有任务和材料确有"
     "可比依据时才比较，不补造差异原因。相互独立的维度可以并存；除非材料明确支持，不把它们写成互斥且穷尽的二分路径。"
+    "\n\n【原任务消费】paragraph_task 的 `source_brief_details` 是章节负责人已写好的各条原任务，"
+    "每条都是独立主张，各自带 point、development 和 source_handles：逐条讲清各自的研究对象、设置、"
+    "结果与来源关系，再按编排意图综合。顶层 point 只是第一条主张，顶层 development 只是多条的兼容拼接，"
+    "source_uses 是编排用途的并集——三者都不能替代逐条原任务。`portion` 说明本段只展开原任务的哪一部分，"
+    "按它取舍；同一原任务为多个段落提供上下文时，各段讲各自的部分，不重复叙述整体。`owner_unit_context` "
+    "是负责人单元级的条件、综合与衔接，与段落任务共同生效。"
+    "\n\n【写作保真】保留决定判断含义的研究对象与设置（温度/压力/时间/循环等工况）、指标名称与其基准"
+    "（含百分比的分母）、比较关系和限制条件，让它们随所依附的判断出现；不同研究或实验先分开描述再比较，"
+    "不把不同实验的数字拼成同一结果，不把上限或最佳值说成典型值，不悄悄替换比例的基准。不是逐句填条件表，"
+    "也不要求所有数值都进入正文。材料之间冲突且当前无法消解时，分别描述或省略该无法确认的精确数字并继续"
+    "完成论述，不整段拒写。原材料明确支持时可以修正负责人文本的错误；允许依据 A/B/精读做有依据的综合。"
+    "单元内 `sources` 每篇只提供一次，供各段共用，不要因多段使用而重复罗列。"
     '返回 JSON 对象 {"body_markdown": "单元正文 Markdown", "issues": []}。正常写作时 issues 为空；'
     "具体问题写入 issues，包含 unit_id、problem、source_handles 和 action（local_backfill、directed_read、supplement、chapter_owner 或 omit）。"
 )
@@ -163,6 +175,9 @@ class UnitWritingView:
     # Multi-source or unattributed chapter tool returns relevant to this unit.
     # They keep their whole source set; they are never folded into one paper.
     chapter_tool_materials: list[dict[str, Any]] = field(default_factory=list)
+    # The chapter owner's unit-level conditions/synthesis/transition, carried
+    # through the arrangement so paragraph tasks are not their only carrier.
+    owner_unit_context: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -691,6 +706,9 @@ def build_unit_view(
         unit_notes=str(unit.get("unit_notes") or ""),
         chapter_tool_materials=_unit_relevant_chapter_tool_materials(
             arrangement.get("chapter_tool_materials") or (), unit_id),
+        owner_unit_context=(
+            dict(unit["owner_unit_context"]) if isinstance(unit.get("owner_unit_context"), Mapping)
+            else {}),
     )
     view.sources = {handle: source_catalog.get(handle) for handle in handles}
     missing = [item["source_handle"] for item in materials if item.get("missing_material")]
@@ -801,11 +819,17 @@ def unit_payload(view: UnitWritingView, *, language: str = "zh") -> dict[str, An
         "unit_notes": view.unit_notes,
         "sibling_units": view.sibling_units,
         "chapter_tool_materials": view.chapter_tool_materials,
+        **({"owner_unit_context": view.owner_unit_context} if view.owner_unit_context else {}),
         "paragraph_tasks": [
             {
                 "paragraph_id": task.get("paragraph_id"),
+                **({"source_briefs": list(task["source_briefs"])}
+                   if task.get("source_briefs") else {}),
+                **({"source_brief_details": [dict(item) for item in task["source_brief_details"]]}
+                   if task.get("source_brief_details") else {}),
                 "point": task.get("point"),
                 "development": task.get("development"),
+                **({"portion": task["portion"]} if task.get("portion") else {}),
                 "source_uses": [
                     {"source_handle": use.get("source_handle"), "role": use.get("role"),
                      "use": use.get("use")}
