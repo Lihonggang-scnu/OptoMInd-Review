@@ -662,14 +662,23 @@ def run_front_back_stage(
     recordings: Mapping[str, Mapping[str, Any]] | None = None,
     language: str = "zh",
     planning_context: Mapping[str, Any] | None = None,
+    client: Any | None = None,
+    model: str | None = None,
+    max_output_tokens: int | None = None,
+    thinking_budget: int | None = None,
 ) -> dict[str, Any]:
     """Serial generation over the current body, then one final assembly.
 
     Stage N's message is built only after stage N-1's response was parsed,
     so the introduction reads the fresh conclusion and the abstract reads
-    both fresh parts.  Parts come from a labeled manual fixture file or
-    recorded responses; both routes share this real construction and parser.
+    both fresh parts.  Parts come from a labeled manual fixture file,
+    recorded responses, or an explicitly injected live client.  The live
+    route uses the existing module4 ``invoke_client`` protocol and never
+    creates a budget ledger of its own.
     """
+
+    if client is not None and (parts_fixture_path is not None or recordings is not None):
+        raise FrontBackError("live_client_fixture_or_recordings_conflict")
 
     draft_path = Path(draft_path).resolve()
     out_dir = Path(out_dir).resolve()
@@ -686,7 +695,9 @@ def run_front_back_stage(
                   "planning_context": context, "placement_execution": unsupported,
                   "generated": [], "failures": unsupported, "application_log": [],
                   "source_draft": str(draft_path), "final_manuscript": "",
-                  "model_calls": 0, "external_requests": 0}
+                  "model_calls": 0, "successful_model_calls": 0,
+                  "model_attempts": 0, "model_call_records": [],
+                  "external_requests": 0}
         _write_json(out_dir / "FRONT_BACK_REPORT.json", report)
         return report
 
@@ -699,16 +710,22 @@ def run_front_back_stage(
                   "placement_execution": "blocked", "placement_warnings": placement_warnings,
                   "generated": [], "failures": conflicts, "application_log": [],
                   "source_draft": str(draft_path), "final_manuscript": "",
-                  "model_calls": 0, "external_requests": 0}
+                  "model_calls": 0, "successful_model_calls": 0,
+                  "model_attempts": 0, "model_call_records": [],
+                  "external_requests": 0}
         _write_json(out_dir / "FRONT_BACK_REPORT.json", report)
         return report
 
+    from .module4.runtime import invoke_client
     from .review_delivery import ReplayClient, MissingRecording
 
     fixture = None
     replay = None
     parts_source = ""
-    if parts_fixture_path:
+    live = client is not None
+    if live:
+        parts_source = "injected_live_client"
+    elif parts_fixture_path:
         fixture = json.loads(Path(parts_fixture_path).read_text(encoding="utf-8"))
         parts_source = "labeled_manual_fixture:" + str(parts_fixture_path)
     else:
@@ -721,6 +738,49 @@ def run_front_back_stage(
     generated_stages: list[str] = []
     missing_stages: list[str] = []
     failures: list[dict[str, str]] = []
+    model_calls = 0
+    successful_model_calls = 0
+    model_attempts = 0
+    model_call_records: list[dict[str, Any]] = []
+
+    client_kwargs: dict[str, Any] = {}
+    if model is not None:
+        client_kwargs["model"] = model
+    if max_output_tokens is not None:
+        client_kwargs["max_output_tokens"] = int(max_output_tokens)
+    if thinking_budget is not None:
+        client_kwargs["thinking_budget"] = int(thinking_budget)
+
+    def _live_record(stage: str, response: Any = None, error: BaseException | None = None) -> dict[str, Any]:
+        """Keep client telemetry while excluding content and raw response bytes."""
+
+        source: Mapping[str, Any] = response if isinstance(response, Mapping) else {}
+        if not source and error is not None:
+            candidate = getattr(error, "record", None)
+            if isinstance(candidate, Mapping):
+                source = candidate
+        record: dict[str, Any] = {"stage": stage}
+        for key in ("call_id", "requested_model", "returned_model", "finish_reason",
+                    "complete", "request_id", "raw_response_sha256", "status_code",
+                    "key_index"):
+            if key in source:
+                record[key] = source[key]
+        try:
+            attempts = max(1, int(source.get("attempt") or 1))
+        except (TypeError, ValueError):
+            attempts = 1
+        record["attempts"] = attempts
+        usage = source.get("usage")
+        if isinstance(usage, Mapping):
+            record["usage"] = dict(usage)
+        if error is not None:
+            record["error_type"] = type(error).__name__
+        return record
+
+    def _live_complete(response: Any) -> bool:
+        return (isinstance(response, Mapping)
+                and response.get("complete") is True
+                and response.get("finish_reason") == "stop")
 
     for stage in STAGE_ORDER:
         if fixture is not None and stage not in fixture:
@@ -737,6 +797,19 @@ def run_front_back_stage(
         try:
             if fixture is not None:
                 response = fixture[stage]
+            elif live:
+                model_calls += 1
+                response = invoke_client(
+                    client, messages, call_id=f"front_back:{stage}", **client_kwargs)
+                record = _live_record(stage, response)
+                model_call_records.append(record)
+                model_attempts += int(record["attempts"])
+                if _live_complete(response):
+                    successful_model_calls += 1
+                if not _live_complete(response):
+                    raise FrontBackError(
+                        f"front_back_incomplete:{stage}:"
+                        f"finish_reason={record.get('finish_reason')!r}")
             else:
                 key = f"front_back:{stage}"
                 replay.next(key, messages)
@@ -749,6 +822,21 @@ def run_front_back_stage(
         except FrontBackError as exc:
             missing_stages.append(stage)
             failures.append({"stage": stage, "error": str(exc)})
+            if live:
+                # A later part must never be built from an unparsed or
+                # incomplete predecessor.  Fixture/replay compatibility
+                # intentionally keeps its historical continue behavior.
+                break
+        except Exception as exc:
+            if live:
+                record = _live_record(stage, error=exc)
+                model_call_records.append(record)
+                model_attempts += int(record["attempts"])
+                missing_stages.append(stage)
+                failures.append({"stage": stage,
+                                 "error": f"front_back_client_error:{type(exc).__name__}"})
+                break
+            raise
 
     final_text = manuscript
     application_log: list[dict[str, str]] = []
@@ -779,8 +867,11 @@ def run_front_back_stage(
         "application_log": application_log,
         "source_draft": str(draft_path),
         "final_manuscript": str(final_path),
-        "model_calls": 0,
-        "external_requests": 0,
+        "model_calls": model_calls,
+        "successful_model_calls": successful_model_calls,
+        "model_attempts": model_attempts,
+        "model_call_records": model_call_records,
+        "external_requests": model_attempts,
     }
     _write_json(out_dir / "FRONT_BACK_REPORT.json", report)
     return report

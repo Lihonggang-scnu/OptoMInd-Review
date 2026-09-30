@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+from optomind_research.runtime.upgrade3 import progressive_review_plan as planning
 from optomind_research.runtime.upgrade3.progressive_review_plan import (
     ProgressivePlannerConfig, ProgressiveReviewPlanner, ProgressivePlanError,
     PARTS_PLAN_SCHEMA_VERSION, _planner_instructions,
@@ -174,6 +175,58 @@ def test_new_prompt_removes_title_based_shallowness():
     assert "miniature full review" not in new
     assert "miniature full review" in old
     assert "regardless of publication heading" in new
+
+
+@pytest.mark.parametrize("stage", ["provisional_scope", "level1_outline", "whole_plan_improvement"])
+def test_live_planner_call_repeats_parts_contract_after_full_payload(tmp_path, monkeypatch, stage):
+    captured = {}
+
+    class StubQwenDirectClient:
+        def __init__(self, **kwargs):
+            captured["client_kwargs"] = kwargs
+
+    def fake_counter(_tokenizer_path):
+        return lambda _request_bytes, _messages: 100
+
+    def fake_invoke(client, messages, **kwargs):
+        captured["messages"] = messages
+        captured["invoke_kwargs"] = kwargs
+        return {"content": "{}", "complete": True, "finish_reason": "stop"}
+
+    from optomind_research.runtime.upgrade3.module4 import runtime
+    monkeypatch.setattr(planning, "qwen_local_token_counter", fake_counter)
+    monkeypatch.setattr(runtime, "QwenDirectClient", StubQwenDirectClient)
+    monkeypatch.setattr(runtime, "invoke_client", fake_invoke)
+
+    planner = planning.QwenProgressivePlanner(
+        model="qwen3.5-plus",
+        key_file=tmp_path / "missing-key-file.txt",
+        budget_ledger_path=tmp_path / "budget.sqlite",
+        budget_limit_cny=1.0,
+        output_dir=tmp_path / "planner-output",
+        tokenizer_path=tmp_path / "unused-tokenizer.json",
+    )
+    planner(stage, {"planning_revision_mode": True, "topic_id": "fixture", "candidate_pool": []})
+
+    user_message = captured["messages"][1]["content"]
+    delivery = user_message[user_message.index("【本轮交付】"):]
+    assert "manuscript_parts_plan" in delivery
+    assert "context" in delivery and "abstract" in delivery
+    assert "purpose" in delivery and "focus" in delivery
+    assert "boundary" in delivery and "finalize_from" in delivery
+    assert "standalone" in delivery and "embedded" in delivery and "distributed" in delivery
+    assert captured["client_kwargs"]["model"] == "qwen3.5-plus"
+    assert captured["invoke_kwargs"]["model"] == "qwen3.5-plus"
+    if stage == "whole_plan_improvement":
+        assert "manuscript_parts_plan_status" in delivery
+
+
+def test_legacy_message_keeps_generic_delivery_tail():
+    messages = planning._messages_for("provisional_scope", {"planning_revision_mode": False})
+    assert messages[1]["content"].endswith(
+        "【本轮交付】请用中文撰写本阶段要求的内容，只返回本阶段的JSON结果，不照抄输入字段。"
+    )
+    assert "manuscript_parts_plan" not in messages[1]["content"]
 
 
 @pytest.mark.parametrize("stage", ["chapter_details", "affected_chapter_revision"])

@@ -726,6 +726,14 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
     if planning_revision:
         stage_text = stage_text.replace(
             "An introduction establishes context, the review's problem and organizing perspective; it must not become a miniature full review. ", "")
+        if stage == "provisional_scope":
+            stage_text = stage_text.replace(
+                "directed_reads. Every source request must name source_handle;",
+                "directed_reads, manuscript_parts_plan. Every source request must name source_handle;")
+        elif stage == "level1_outline":
+            stage_text = stage_text.replace(
+                "source_selection_principles, and unresolved_limits.",
+                "source_selection_principles, unresolved_limits, and manuscript_parts_plan.")
         if stage in {"provisional_scope", "level1_outline"}:
             stage_text += (
                 "\nFrom this same material-informed global conception, return a complete manuscript_parts_plan: "
@@ -737,7 +745,12 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
                 "Do not add units, cases, paragraph_briefs, routing, quotas or domain templates. "
                 "provisional_outline/shared_outline contain substantive BODY tasks only. Opening/abstract/closing duties "
                 "belong in the separate card. Keep deep teaching, mathematics, methods, evidence and comparison in BODY "
-                "even when the publication heading is Introduction or Conclusion. Calibrate rather than invent final findings."
+                "even when the publication heading is Introduction or Conclusion. Calibrate rather than invent final findings. "
+                "The top-level JSON must include manuscript_parts_plan alongside this stage's BODY keys; do not omit it "
+                "because the BODY outline is large. For automatic application, standalone is executable in this version; "
+                "embedded and distributed remain valid planning modes but currently return unsupported_placement and block "
+                "downstream publication. If no explicit article location is confirmed, prefer standalone; this is a software "
+                "execution boundary, not an academic judgment."
             )
         elif stage == "whole_plan_improvement":
             stage_text += (
@@ -745,7 +758,11 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
                 "cross-chapter judgments. Return manuscript_parts_plan_status=no_change or updated. For updated, "
                 "return the COMPLETE replacement manuscript_parts_plan in the same schema, never a patch. "
                 "Check opening promises, supported closing claims, overlap with Outlook, and placement. "
-                "Preserve embedded/distributed when appropriate; never invent an extra BODY Conclusion."
+                "Preserve embedded/distributed when appropriate; never invent an extra BODY Conclusion. "
+                "The top-level JSON must include manuscript_parts_plan_status. For automatic application, standalone is "
+                "executable in this version; embedded and distributed remain valid planning modes but currently return "
+                "unsupported_placement and block downstream publication. If no explicit article location is confirmed, "
+                "prefer standalone; this is a software execution boundary, not an academic judgment."
             )
         else:
             stage_text += (
@@ -1112,6 +1129,67 @@ def build_candidate_navigation(
     }
 
 
+def _parts_contract_delivery(stage: str) -> str:
+    """Restate the v2 card contract after the serialized global payload."""
+
+    card_shape = (
+        "当返回 manuscript_parts_plan 时，它必须是完整对象，且只能有 context、abstract、introduction、conclusion；"
+        "context 是字符串；每个部件对象必须且只能有 purpose、focus、boundary、placement、finalize_from；"
+        "purpose 是字符串，focus、boundary、finalize_from 都是字符串数组，placement 只能是 {mode, anchor}，"
+        "mode 和 anchor 都是字符串，mode 只能为 standalone、embedded、distributed。"
+        "focus、boundary 必须结合本题真实材料和 BODY 具体职责，避免‘介绍背景’、‘总结全文’等空模板，不提前虚构最终发现。"
+        "不要把 units、cases、paragraph_briefs、source routing 或数量配额放进职责卡。"
+    )
+    required_card_shape = (
+        "manuscript_parts_plan 必须是完整对象，且只能有 context、abstract、introduction、conclusion；"
+        "context 是字符串；每个部件对象必须且只能有 purpose、focus、boundary、placement、finalize_from；"
+        "purpose 是字符串，focus、boundary、finalize_from 都是字符串数组，placement 只能是 {mode, anchor}，"
+        "mode 和 anchor 都是字符串，mode 只能为 standalone、embedded、distributed。"
+        "focus、boundary 必须结合本题真实材料和 BODY 具体职责，避免‘介绍背景’、‘总结全文’等空模板，不提前虚构最终发现。"
+        "不要把 units、cases、paragraph_briefs、source routing 或数量配额放进职责卡。"
+    )
+    card_skeleton = (
+        "字段结构示意（尖括号占位符必须替换，不是科学内容示例）："
+        '{"manuscript_parts_plan":{"context":"<string>",'
+        '"abstract":{"purpose":"<string>","focus":["<string>"],"boundary":["<string>"],'
+        '"placement":{"mode":"<standalone|embedded|distributed>","anchor":"<string>"},'
+        '"finalize_from":["<string>"]},'
+        '"introduction":{"purpose":"<string>","focus":["<string>"],"boundary":["<string>"],'
+        '"placement":{"mode":"<standalone|embedded|distributed>","anchor":"<string>"},'
+        '"finalize_from":["<string>"]},'
+        '"conclusion":{"purpose":"<string>","focus":["<string>"],"boundary":["<string>"],'
+        '"placement":{"mode":"<standalone|embedded|distributed>","anchor":"<string>"},'
+        '"finalize_from":["<string>"]}}}'
+    )
+    capability = (
+        "当前自动应用能力：standalone 可执行；embedded、distributed 在规划合同中仍合法，"
+        "但当前应用会返回 unsupported_placement 并阻止下游发布。若没有已确认的文章承载位置，优先选择 standalone；"
+        "这是软件执行边界，不是学术质量判断。"
+    )
+    if stage == "provisional_scope":
+        return (
+            "只返回本阶段 JSON。顶层必须包含 review_title、central_question、provisional_scope、"
+            "material_theme_inventory、provisional_outline、cross_chapter_rules、grouped_screening_notes、"
+            "supplement_requests、directed_reads，以及 manuscript_parts_plan。"
+            + required_card_shape + card_skeleton + capability
+        )
+    if stage == "level1_outline":
+        return (
+            "只返回本阶段 JSON。顶层必须包含 shared_scope、shared_outline、review_argument、"
+            "source_selection_principles、unresolved_limits，以及 manuscript_parts_plan。"
+            + required_card_shape + card_skeleton + capability
+        )
+    if stage == "whole_plan_improvement":
+        return (
+            "只返回本阶段 JSON。顶层必须包含 manuscript_parts_plan_status，值只能为 no_change 或 updated。"
+            "no_change 表示保持输入职责卡不变；updated 才返回完整替换的 manuscript_parts_plan，不能返回补丁。"
+            "本阶段的 improvement_notes、cross_chapter_adjustments、updated_chapter_plans 等主体反馈字段仍须按原任务返回，"
+            "职责卡规则是附加合同，不替换主体工作。"
+            + card_shape + card_skeleton + capability
+        )
+    raise ValueError(f"parts_contract_delivery_not_supported:{stage}")
+
+
 def _messages_for(stage: str, payload: Mapping[str, Any]) -> list[dict[str, str]]:
     rendered_payload = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), default=_json_default)
     planning_revision = bool(payload.get("planning_revision_mode"))
@@ -1135,6 +1213,8 @@ def _messages_for(stage: str, payload: Mapping[str, Any]) -> list[dict[str, str]
             '若材料和任务无需改变，明确返回 status=no_change 并可复用完整原计划。若拆分或合并单元，所有新单元必须有稳定 unit_id，'
             '并提供显式 unit_id_remap，不能按列表位置猜测对应关系。不要返回只有说明没有 updated_plan 的成功结果。'
         )
+    if planning_revision and stage in {"provisional_scope", "level1_outline", "whole_plan_improvement"}:
+        task_output = _parts_contract_delivery(stage)
     return [
         {"role": "system", "content": _planner_instructions(stage, planning_revision=planning_revision)},
         {"role": "user", "content": "当前任务：" + stage + "\n" + rendered_payload + "\n\n【本轮交付】" + task_output},
