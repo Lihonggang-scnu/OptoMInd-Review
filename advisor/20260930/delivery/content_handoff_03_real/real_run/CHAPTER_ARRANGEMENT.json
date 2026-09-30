@@ -1,0 +1,1885 @@
+{
+  "schema_version": "optomind.chapter_arrangement.output.v1",
+  "chapter_id": "C6",
+  "chapter_argument": "氧化物 - 硫化物复合与混合策略并非单一材料性能的简单叠加，而是对各自工程约束的'重构'。物理混合体系通过引入硫化物作为'粘结剂'显著改善了氧化物的冷压可制造性并提升了电导率，但牺牲了空气稳定性且受限于微观结构敏感性；分层架构利用氧化物的高电压稳定性保护负极、硫化物的高电导率支撑正极，但引入了新的层间界面阻抗和高压枝晶穿透风险。综合而言，最优组分比例高度依赖具体配对，且规模化工艺尚未成熟，复合策略旨在实现特定应用场景下的'情境最优'而非绝对优势。",
+  "units": [
+    {
+      "unit_id": "C6_U01",
+      "focus": "论证复合策略的动机：单一材料无法独立克服离子电导率、界面稳定性与可制造性的工程约束。",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "C6_U01_P01",
+          "point": "单一材料瓶颈综述",
+          "development": "对比硫化物的高电导/低稳定性与氧化物的低电导/高稳定性，指出两者均存在无法独立满足全固态电池需求的根本缺陷。硫化物室温离子电导率可达 10⁻² S/cm 但对空气敏感且电化学窗口窄；氧化物化学稳定性好但室温电导率通常为 10⁻⁵–10⁻³ S/cm 且需高温烧结。",
+          "source_uses": [
+            {
+              "source_handle": "P0018",
+              "role": "背景",
+              "use": "提供硫化物与氧化物无机电解质的基本性能对比数据，作为单一材料局限性的基准。"
+            },
+            {
+              "source_handle": "P0026",
+              "role": "背景",
+              "use": "描述两类材料在离子电导率、界面稳定性及制造工艺（烧结 vs 冷压）上的具体优劣势。"
+            },
+            {
+              "source_handle": "P0030",
+              "role": "背景",
+              "use": "明确两种材料在离子电导率、机械性能和环境敏感性上的固有 trade-offs，构建比较框架。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "C6_U01_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "C6_U01_P01",
+              "unit_id": "C6_U01",
+              "ordinal": 1,
+              "point": "单一材料瓶颈综述",
+              "development": "对比硫化物的高电导/低稳定性与氧化物的低电导/高稳定性，指出两者均存在无法独立满足全固态电池需求的根本缺陷。硫化物室温离子电导率可达 10⁻² S/cm 但对空气敏感且电化学窗口窄；氧化物化学稳定性好但室温电导率通常为 10⁻⁵–10⁻³ S/cm 且需高温烧结。",
+              "source_handles": [
+                "P0018",
+                "P0026",
+                "P0030"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "C6_U01_P02",
+          "point": "复合策略的理论基础",
+          "development": "阐述通过组合不同材料以平衡电化学稳定性、界面接触和加工性的设计逻辑。复合策略旨在利用无机材料提高机械强度和电导率，利用聚合物或软相改善界面润湿性，明确本章将评估其技术可行性而非宣称万能解决方案。",
+          "source_uses": [
+            {
+              "source_handle": "P0018",
+              "role": "主论据",
+              "use": "阐述复合策略的设计逻辑，即通过组合不同材料以平衡电化学稳定性、界面接触和加工性。"
+            },
+            {
+              "source_handle": "P0030",
+              "role": "主论据",
+              "use": "补充说明复合策略旨在利用无机材料提高机械强度和电导率，利用软相改善界面润湿性。"
+            },
+            {
+              "source_handle": "P0026",
+              "role": "发展",
+              "use": "指出复合策略是解决单一材料'不可能三角'的系统性方案，明确本章评估的是技术可行性而非万能解。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "C6_U01_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "C6_U01_P02",
+              "unit_id": "C6_U01",
+              "ordinal": 2,
+              "point": "复合策略的理论基础",
+              "development": "阐述通过组合不同材料以平衡电化学稳定性、界面接触和加工性的设计逻辑。复合策略旨在利用无机材料提高机械强度和电导率，利用聚合物或软相改善界面润湿性，明确本章将评估其技术可行性而非宣称万能解决方案。",
+              "source_handles": [
+                "P0018",
+                "P0030"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "unit_notes": "",
+      "owner_unit_context": {
+        "evidence_conditions": "",
+        "synthesis": "",
+        "transition": "基于上述动机，具体考察两种主要的复合实现路径：物理混合与分层架构。"
+      }
+    },
+    {
+      "unit_id": "C6_U02",
+      "focus": "物理混合体系：硫化物作为'粘结剂'提升制造性与电导率，但牺牲空气稳定性并受工艺窗口限制。",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "C6_U02_P01",
+          "point": "微观结构与致密化机制",
+          "development": "展示 LLZO-LPSC 复合电解质在冷压下的致密化过程。在室温冷压、300 MPa 条件下，LLZO:LPSC=4:6 时复合电解质室温电导率达 1.27×10⁻³ S·cm⁻¹，比纯冷压 LLZO 高 3-4 个数量级。软相硫化物填充硬相氧化物间隙，形成连续离子通道，相对密度从纯 LLZO 的 60.8% 提升至 72.3%。此结论仅适用于 LLZO-LPSC 特定体系。",
+          "source_uses": [
+            {
+              "source_handle": "P0014",
+              "role": "主论据",
+              "use": "展示 LLZO-LPSC 复合电解质在室温冷压下的致密化过程及电导率数据（4:6 比例达 1.27×10⁻³ S·cm⁻¹）。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "C6_U02_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "C6_U02_P01",
+              "unit_id": "C6_U02",
+              "ordinal": 1,
+              "point": "微观结构与致密化机制",
+              "development": "展示 LLZO-LPSC 复合电解质在冷压下的致密化过程。在室温冷压、300 MPa 条件下，LLZO:LPSC=4:6 时复合电解质室温电导率达 1.27×10⁻³ S·cm⁻¹，比纯冷压 LLZO 高 3-4 个数量级。软相硫化物填充硬相氧化物间隙，形成连续离子通道，相对密度从纯 LLZO 的 60.8% 提升至 72.3%。此结论仅适用于 LLZO-LPSC 特定体系。",
+              "source_handles": [
+                "P0014"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "C6_U02_P02",
+          "point": "组分权衡与空气稳定性牺牲",
+          "development": "指出高硫化物比例虽带来高电导率，但以牺牲氧化物提供的空气稳定性为代价。XRD 显示无新反应相生成，但高硫化物含量可能带来稳定性问题，需结合其他文献评估其综合优劣。电导率高度依赖硫化物含量，需明确这种此消彼长的关系。",
+          "source_uses": [
+            {
+              "source_handle": "P0014",
+              "role": "局限",
+              "use": "指出高硫化物比例虽带来高电导率，但以牺牲氧化物提供的空气稳定性为代价，XRD 显示无新反应相但需评估综合优劣。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "C6_U02_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "C6_U02_P02",
+              "unit_id": "C6_U02",
+              "ordinal": 2,
+              "point": "组分权衡与空气稳定性牺牲",
+              "development": "指出高硫化物比例虽带来高电导率，但以牺牲氧化物提供的空气稳定性为代价。XRD 显示无新反应相生成，但高硫化物含量可能带来稳定性问题，需结合其他文献评估其综合优劣。电导率高度依赖硫化物含量，需明确这种此消彼长的关系。",
+              "source_handles": [
+                "P0014"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "C6_U02_P03",
+          "point": "工艺敏感性与非晶化风险",
+          "development": "分析高能球磨强度对 LPS-LLZO 混合体系的影响。在 60 分钟长时混合、10mm 介质、600rpm 条件下，LPS 基体发生显著非晶化，离子电导率从 4.1×10⁻⁵ S/cm 提升至 1.7×10⁻⁴ S/cm。此时添加 LLZO 不再带来额外的界面导电增益，反而因几何阻碍使复合电解质电导率略低于理论修正后的纯 LPS 值。此结论高度依赖特定球磨能量输入，不能直接外推至其他混合技术。",
+          "source_uses": [
+            {
+              "source_handle": "P0017",
+              "role": "比较",
+              "use": "分析高能球磨强度对 LPS-LLZO 混合体系的影响，提供非晶化导致电导率变化的反面案例或边界条件。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "C6_U02_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "C6_U02_P03",
+              "unit_id": "C6_U02",
+              "ordinal": 3,
+              "point": "工艺敏感性与非晶化风险",
+              "development": "分析高能球磨强度对 LPS-LLZO 混合体系的影响。在 60 分钟长时混合、10mm 介质、600rpm 条件下，LPS 基体发生显著非晶化，离子电导率从 4.1×10⁻⁵ S/cm 提升至 1.7×10⁻⁴ S/cm。此时添加 LLZO 不再带来额外的界面导电增益，反而因几何阻碍使复合电解质电导率略低于理论修正后的纯 LPS 值。此结论高度依赖特定球磨能量输入，不能直接外推至其他混合技术。",
+              "source_handles": [
+                "P0017"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [
+        {
+          "table_id": "C6_U02_T01",
+          "purpose": "比较不同物理混合工艺条件对复合电解质微观结构及电导率的影响",
+          "columns": [
+            "体系组成",
+            "工艺条件 (压力/球磨)",
+            "微观结构变化",
+            "离子电导率",
+            "关键约束"
+          ],
+          "row_tasks": [
+            {
+              "content": "LLZO-LPSC 冷压体系 (P0014)",
+              "source_uses": [
+                {
+                  "source_handle": "P0014",
+                  "role": "比较",
+                  "use": "提供 300 MPa 冷压下相对密度提升至 72.3% 及电导率数据。"
+                }
+              ]
+            },
+            {
+              "content": "LPS-LLZO 高能球磨体系 (P0017)",
+              "source_uses": [
+                {
+                  "source_handle": "P0017",
+                  "role": "比较",
+                  "use": "提供 600rpm/60min 球磨下基体非晶化及电导率变化数据。"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "unit_notes": "",
+      "owner_unit_context": {
+        "evidence_conditions": "",
+        "synthesis": "",
+        "transition": "物理混合解决了界面接触问题，但分层架构试图通过空间隔离来更精确地管理正负极侧的不同化学环境。"
+      }
+    },
+    {
+      "unit_id": "C6_U03",
+      "focus": "分层混合架构：利用氧化物稳定性保护负极、硫化物高电导支撑正极，但面临层间界面与机械约束挑战。",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "C6_U03_P01",
+          "point": "界面稳定性与压力管理",
+          "development": "展示 Li|LLZO|LSPS 层状电池的性能。在 12.5 MPa 堆叠压力、80°C 条件下，全电池首圈放电比容量为 126 mAh/g（基于 NCM811 理论容量的 70%），成功完成 22 次循环。LLZO 作为稳定隔膜保护锂金属，而 LSPS 兼容正极。但此最佳压力值依赖于特定的 1.75mm 厚 LLZO 隔膜和微观结构，不同批次或改性隔膜的最佳压力可能不同。",
+          "source_uses": [
+            {
+              "source_handle": "P0025",
+              "role": "主论据",
+              "use": "展示 Li|LLZO|LSPS 层状电池在 12.5 MPa/80°C 下的性能数据（首圈 126 mAh/g，22 次循环）。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "C6_U03_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "C6_U03_P01",
+              "unit_id": "C6_U03",
+              "ordinal": 1,
+              "point": "界面稳定性与压力管理",
+              "development": "展示 Li|LLZO|LSPS 层状电池的性能。在 12.5 MPa 堆叠压力、80°C 条件下，全电池首圈放电比容量为 126 mAh/g（基于 NCM811 理论容量的 70%），成功完成 22 次循环。LLZO 作为稳定隔膜保护锂金属，而 LSPS 兼容正极。但此最佳压力值依赖于特定的 1.75mm 厚 LLZO 隔膜和微观结构，不同批次或改性隔膜的最佳压力可能不同。",
+              "source_handles": [
+                "P0025"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "C6_U03_P02",
+          "point": "高压枝晶与机械失效风险",
+          "development": "分析高压条件下锂枝晶穿透多层界面的风险。在 Li|LLZO|Li 对称电池中，随着压力从 12.5 MPa 增加到 25 MPa，临界电流密度从 382 µA cm⁻²降低到 229 µA cm⁻²。高于 12.5 MPa（如 25-37.5 MPa）时，虽然欧姆阻抗降低，但长期循环后发生短路，归因于高压促进锂枝晶穿透 LLZO 隔膜。不同材料热膨胀系数不匹配也可能导致界面脱粘。",
+          "source_uses": [
+            {
+              "source_handle": "P0025",
+              "role": "局限",
+              "use": "分析高压（25-37.5 MPa）促进锂枝晶穿透 LLZO 隔膜导致短路的风险。"
+            },
+            {
+              "source_handle": "P0016",
+              "role": "背景",
+              "use": "提供界面稳定性机制解释，阐述不同电解质在电极侧的失效模式（如枝晶、MIEC）。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "C6_U03_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "C6_U03_P02",
+              "unit_id": "C6_U03",
+              "ordinal": 2,
+              "point": "高压枝晶与机械失效风险",
+              "development": "分析高压条件下锂枝晶穿透多层界面的风险。在 Li|LLZO|Li 对称电池中，随着压力从 12.5 MPa 增加到 25 MPa，临界电流密度从 382 µA cm⁻²降低到 229 µA cm⁻²。高于 12.5 MPa（如 25-37.5 MPa）时，虽然欧姆阻抗降低，但长期循环后发生短路，归因于高压促进锂枝晶穿透 LLZO 隔膜。不同材料热膨胀系数不匹配也可能导致界面脱粘。",
+              "source_handles": [
+                "P0025",
+                "P0016"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "C6_U03_P03",
+          "point": "新界面的引入与复杂性",
+          "development": "指出分层架构虽然解决了本征不兼容，但引入了新的固 - 固界面。CV 测试中观察到 LSPS/LLZO 混合物在 2.5V、4.0V、4.4V 处出现额外反应峰，但强度随循环迅速降低。实际层状界面的反应动力学可能与粉末混合状态不同，其阻抗演化机制尚不明确。",
+          "source_uses": [
+            {
+              "source_handle": "P0025",
+              "role": "发展",
+              "use": "指出分层架构引入了新的固 - 固界面，CV 测试中观察到额外反应峰但阻抗演化机制尚不明确。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "C6_U03_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "C6_U03_P03",
+              "unit_id": "C6_U03",
+              "ordinal": 3,
+              "point": "新界面的引入与复杂性",
+              "development": "指出分层架构虽然解决了本征不兼容，但引入了新的固 - 固界面。CV 测试中观察到 LSPS/LLZO 混合物在 2.5V、4.0V、4.4V 处出现额外反应峰，但强度随循环迅速降低。实际层状界面的反应动力学可能与粉末混合状态不同，其阻抗演化机制尚不明确。",
+              "source_handles": [
+                "P0025"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "unit_notes": "",
+      "owner_unit_context": {
+        "evidence_conditions": "",
+        "synthesis": "",
+        "transition": "无论是物理混合还是分层架构，均面临从实验室小试向规模化制造转化的工艺复杂性增加问题。"
+      }
+    },
+    {
+      "unit_id": "C6_U04",
+      "focus": "制造可行性与综合合成：复合策略引入新工艺复杂性，缺乏规模化验证，结论为情境最优。",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "C6_U04_P01",
+          "point": "工艺复杂性与规模化缺口",
+          "development": "分析复合电解质制备对混合均匀性、气氛控制及层状对准的高要求。硫化物支持冷压成型，适合大规模生产且能耗低，但对环境湿度极其敏感，需要干燥房；氧化物通常需要高温烧结以实现致密化和良好接触，能耗高且可能导致元素互扩散。目前缺乏>1 Ah 软包验证及长循环数据，规模化工艺尚未成熟。",
+          "source_uses": [
+            {
+              "source_handle": "P0018",
+              "role": "背景",
+              "use": "分析复合电解质制备对混合均匀性、气氛控制及层状对准的高要求。"
+            },
+            {
+              "source_handle": "P0026",
+              "role": "背景",
+              "use": "对比硫化物冷压成型（低能耗但需干燥房）与氧化物高温烧结（高能耗但致密化好）的工艺差异。"
+            },
+            {
+              "source_handle": "P0030",
+              "role": "局限",
+              "use": "指出目前缺乏>1 Ah 软包验证及长循环数据，规模化工艺尚未成熟。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "C6_U04_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "C6_U04_P01",
+              "unit_id": "C6_U04",
+              "ordinal": 1,
+              "point": "工艺复杂性与规模化缺口",
+              "development": "分析复合电解质制备对混合均匀性、气氛控制及层状对准的高要求。硫化物支持冷压成型，适合大规模生产且能耗低，但对环境湿度极其敏感，需要干燥房；氧化物通常需要高温烧结以实现致密化和良好接触，能耗高且可能导致元素互扩散。目前缺乏>1 Ah 软包验证及长循环数据，规模化工艺尚未成熟。",
+              "source_handles": [
+                "P0018",
+                "P0026",
+                "P0030"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "C6_U04_P02",
+          "point": "综合判断：情境最优",
+          "development": "总结复合策略并非万能解，最优组分比例依赖具体配对（如 LLZO-LPSC vs 其他体系），应根据应用场景（如高能量密度 vs 高安全性）选择特定架构。日本和韩国主要聚焦硫化物路线，欧美侧重氧化物路线，中国采取多路线并行策略。复合策略旨在实现特定应用场景下的'情境最优'而非绝对优势。",
+          "source_uses": [
+            {
+              "source_handle": "P0018",
+              "role": "主论据",
+              "use": "总结复合策略并非万能解，最优组分比例依赖具体配对。"
+            },
+            {
+              "source_handle": "P0026",
+              "role": "背景",
+              "use": "提供各国技术路线选择背景（日韩硫化物、欧美氧化物、中国多路线），解释情境最优。"
+            },
+            {
+              "source_handle": "P0030",
+              "role": "主论据",
+              "use": "强调复合策略旨在实现特定应用场景下的'情境最优'而非绝对优势。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "C6_U04_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "C6_U04_P02",
+              "unit_id": "C6_U04",
+              "ordinal": 2,
+              "point": "综合判断：情境最优",
+              "development": "总结复合策略并非万能解，最优组分比例依赖具体配对（如 LLZO-LPSC vs 其他体系），应根据应用场景（如高能量密度 vs 高安全性）选择特定架构。日本和韩国主要聚焦硫化物路线，欧美侧重氧化物路线，中国采取多路线并行策略。复合策略旨在实现特定应用场景下的'情境最优'而非绝对优势。",
+              "source_handles": [
+                "P0018",
+                "P0026",
+                "P0030"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "unit_notes": "",
+      "owner_unit_context": {
+        "evidence_conditions": "",
+        "synthesis": "",
+        "transition": "无。"
+      }
+    }
+  ],
+  "unused_sources": [],
+  "issues": [],
+  "validation": {
+    "ok": true,
+    "contract_ok": true,
+    "needs_arrangement": false,
+    "status": "arranged",
+    "errors": [],
+    "units_returned": 4,
+    "units_expected": 4,
+    "paragraph_tasks": 10,
+    "paragraph_tasks_carried_over": 10,
+    "paragraph_tasks_with_changed_point": 0,
+    "paragraph_ids_reused_with_new_point": [],
+    "table_tasks": 1,
+    "sources_arranged": 7,
+    "sources_marked_unused": 0,
+    "sources_never_mentioned": [],
+    "missing_sources": []
+  },
+  "call": {
+    "call_id": "rv2ch03:arrangement:C6",
+    "model": "qwen3.5-plus",
+    "raw_response_dir": "F:\\OptoMind-Review-2\\outputs\\review_v2_content_handoff\\03_real_test\\real_run\\raw_responses",
+    "finish_reason": "stop",
+    "complete": true,
+    "usage": {
+      "prompt_tokens": 6388,
+      "completion_tokens": 3228,
+      "total_tokens": 9616,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1024,
+        "text_tokens": 3228
+      },
+      "prompt_tokens_details": {
+        "text_tokens": 6388
+      }
+    }
+  },
+  "source_catalog": {
+    "P0014": {
+      "source_handle": "P0014",
+      "paper_id": "80ddbf0c3985deb43790c8e23b8b95bf5fdcd886",
+      "title": "All-Solid-State Lithium-Ion Batteries with Oxide/Sulfide Composite Electrolytes",
+      "year": "2021",
+      "doi": "10.3390/ma14081998",
+      "material_depth": "fulltext",
+      "material_status": "resolved",
+      "aliases": [],
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\ab_run\\cards\\80ddbf0c3985deb43790c8e23b8b95bf5fdcd886\\e41805519d58bb0718049840dd6438d2\\attempt-01\\PAPER_READING_CARD.json",
+      "review_planning_B": {
+        "planning_summary": "该论文提供了氧化物（LLZO）与硫化物（LPSC）复合电解质在室温冷压工艺下的微观结构演变规律及电化学性能数据。对于综述而言，其核心价值在于展示了“硫化物作为粘结剂/致密化助剂”如何弥补氧化物电解质在室温加工性上的缺陷，从而在不牺牲过多空气稳定性的前提下获得接近纯硫化物水平的离子电导率。这为比较两种电解质体系的制造可行性和综合性能提供了具体的实证案例。",
+        "facet_contributions": [
+          {
+            "boundaries": "仅针对LLZO-LPSC特定体系，且未涉及大规模生产成本的评估。",
+            "contribution": "提供了氧化物电解质通过添加硫化物实现室温冷压致密化的具体实验证据。数据显示纯LLZO冷压后孔隙率高（39%），加入LPSC后形成致密结构，解决了氧化物难以室温成型的制造瓶颈。",
+            "facet_id": "F3",
+            "possible_uses": "用于论证硫化物在提升氧化物电解质制造工艺可行性方面的作用，支持“复合策略可改善制造性”的观点。"
+          },
+          {
+            "boundaries": "电导率高度依赖硫化物含量，高硫化物含量可能带来稳定性问题，需结合其他文献评估其综合优劣。",
+            "contribution": "量化了LLZO-LPSC复合电解质的离子电导率随组分变化的规律。在LLZO:LPSC=6:4时电导率达5.14×10⁻⁴ S·cm⁻¹，4:6时达1.27×10⁻³ S·cm⁻¹，显示出硫化物相主导传导的特性。",
+            "facet_id": "F1",
+            "possible_uses": "用于对比复合体系中硫化物对整体电导率的贡献权重，说明如何通过调整比例平衡电导率与其他性能。"
+          },
+          {
+            "boundaries": "仅基于首圈及短期循环（15次）数据，缺乏长期界面稳定性（如电压衰减、阻抗增长）的详细机理分析。",
+            "contribution": "报告了NCM811正极与复合电解质界面的初步接触情况，充放电曲线形态与纯硫化物电池相似，暗示界面离子传输路径畅通。",
+            "facet_id": "F2",
+            "possible_uses": "作为氧化物/硫化物复合体系在正极界面兼容性方面的正面案例，支持复合电解质能维持良好界面接触的论点。"
+          }
+        ],
+        "broader_review_uses": [
+          {
+            "connection_to_review": "提供LLZO和LPSC的具体材料参数对比背景",
+            "material": "LLZO理论密度5.098 g/cm³，LPSC理论密度1.860 g/cm³；LLZO室温电导率~10⁻⁷ S/cm (冷压态)，LPSC ~10⁻³ S/cm。",
+            "purpose": "用于综述中介绍两类电解质本征性质差异的基础数据，解释为何需要复合。"
+          },
+          {
+            "connection_to_review": "展示复合电解质的微观结构特征",
+            "material": "SEM图像显示LLZO多孔，复合后致密；XRD显示无新反应相生成。",
+            "purpose": "作为插图或描述性素材，说明复合电解质内部的双相结构及其对致密化的贡献。"
+          }
+        ],
+        "scope_interpretation_cautions": [
+          "该研究的结论主要适用于LLZO-LPSC这一特定氧化物-硫化物组合，不能直接外推到其他氧化物（如NASICON）或硫化物（如LPS）体系。",
+          "高硫化物比例带来的高电导率是以牺牲部分氧化物提供的空气稳定性为代价的，综述中需注意这种权衡关系。",
+          "文中提到的“无反应相”是基于XRD检测限，可能存在亚纳米级的界面反应未被检测到，需谨慎解读界面稳定性。"
+        ],
+        "topic_handles": [
+          "oxide-sulfide composite electrolytes",
+          "cold pressing manufacturability",
+          "ionic conductivity enhancement mechanisms",
+          "microstructural densification",
+          "all-solid-state cell electrochemical performance"
+        ]
+      },
+      "study_summary_A": {
+        "approach": "采用实验材料合成与表征路线：1) 原料准备：使用商业W掺杂LLZO粉末和机械化学合成的LPSC粉末；2) 样品制备：按不同重量比（10:0至0:10）混合LLZO和LPSC，在300 MPa下进行室温冷压制成 pellet；3) 微观结构与物理性质表征：通过XRD分析相组成，通过密度测量和SEM观察微观结构和相对密度；4) 电化学性能测试：使用交流阻抗谱（EIS）测量离子电导率，组装NCM811|复合电解质|In-Li合金的全固态电池，进行恒流充放电测试评估比容量和库伦效率。",
+        "contribution_and_limits": [
+          {
+            "contribution": "证实了通过室温冷压将软性高导电硫化物（LPSC）与刚性氧化物（LLZO）复合，可以有效填充氧化物颗粒间的孔隙，显著提高复合电解质的致密度和室温离子电导率。",
+            "limits": "所给摘要未交代长期循环稳定性数据（仅提及15次循环）、界面副反应机制的详细分析、以及复合电解质在空气中的长期稳定性表现。"
+          },
+          {
+            "contribution": "提供了LLZO-LPSC复合体系在全固态电池中的具体电化学性能基准数据（比容量、内阻构成），表明当硫化物比例足够高时，离子传输主要由硫化物相主导。",
+            "limits": "未深入探讨氧化物-硫化物界面处的空间电荷效应或化学反应对长期稳定性的潜在负面影响，仅指出在此比例下未见明显有害反应相。"
+          }
+        ],
+        "key_findings": [
+          {
+            "conditions": "室温冷压，LLZO:LPSC = 8:2",
+            "finding": "复合电解质的相对密度从纯LLZO的60.8%提升至72.3%，SEM显示微观结构由多孔变为致密。"
+          },
+          {
+            "conditions": "室温，不同比例",
+            "finding": "随着LPSC比例增加，离子电导率显著提升。LLZO:LPSC = 6:4时达到5.14×10⁻⁴ S·cm⁻¹，4:6时达到1.27×10⁻³ S·cm⁻¹，比纯冷压LLZO高出3-4个数量级。"
+          },
+          {
+            "conditions": "室温，0.1 C倍率，LLZO:LPSC = 7:3",
+            "finding": "全固态电池首次放电比容量为163 mAh·g⁻¹，库伦效率82.7%。"
+          },
+          {
+            "conditions": "室温，0.1 C倍率，LLZO:LPSC = 6:4",
+            "finding": "全固态电池首次放电比容量为167 mAh·g⁻¹，库伦效率99%以上，循环15次容量保持良好。"
+          }
+        ],
+        "paper_kind": "empirical",
+        "problem_or_question": "纯氧化物固体电解质（如LLZO）通常需要高温烧结才能达到高密度和高离子电导率，难以实现室温制造；而纯硫化物电解质虽然室温导电性好且易于冷压成型，但化学稳定性差（遇水分解产生H₂S）。如何结合两者的优势，开发一种既具有高室温离子电导率，又具备良好空气稳定性和可室温加工性的复合电解质？",
+        "research_scope": "全固态锂离子电池（ASSLBs），具体研究对象为石榴石型氧化物电解质LLZO与硫银锗矿型硫化物电解质LPSC的复合体系，以及基于该复合电解质的NCM811正极/In-Li负极全固态电池。",
+        "work_summary": "本研究旨在解决纯氧化物电解质LLZO在室温冷压条件下致密度低、离子电导率差的问题，同时利用硫化物电解质LPSC的高导电性和软性来改善微观结构。研究通过机械混合和室温冷压制备了不同比例的LLZO-LPSC复合电解质，并组装了全固态电池。结果表明，引入LPSC显著提高了复合电解质的相对密度和离子电导率（最高达1.27×10⁻³ S·cm⁻¹），并在LLZO:LPSC=7:3时实现了163 mAh·g⁻¹的比容量，证明了氧化物/硫化物复合策略在提升室温加工性能和电化学性能方面的有效性。"
+      },
+      "locator": {
+        "writer_packet": "F:\\OptoMind-Review-2\\outputs\\review_v2_repair\\05_real_test_20260929\\attempt02_production_path\\UPDATED_WRITER_PACKET.json",
+        "source_handle": "P0014",
+        "card_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\ab_run\\cards\\80ddbf0c3985deb43790c8e23b8b95bf5fdcd886\\e41805519d58bb0718049840dd6438d2\\attempt-01\\PAPER_READING_CARD.json",
+        "resolvable": true
+      },
+      "used_by_tasks": [
+        "C6_U02_P01",
+        "C6_U02_P02",
+        "C6_U02_T01"
+      ],
+      "arranged_level": "paragraph"
+    },
+    "P0016": {
+      "source_handle": "P0016",
+      "paper_id": "8847783381aeef3fc6ba30e16dac7d4bbad76502",
+      "title": "Interlayer‐Driven Interfacial Stabilization in Solid Electrolytes for Lithium Batteries: Promises and Challenges",
+      "year": "2026",
+      "doi": "10.1002/cssc.70673",
+      "material_depth": "fulltext",
+      "material_status": "resolved",
+      "aliases": [],
+      "card_path": "",
+      "review_planning_B": {
+        "planning_summary": "该综述为比较硫化物和卤化物固体电解质提供了关键的界面稳定性数据和机制解释。它详细阐述了两种电解质在不同电极侧的具体失效模式（硫化物侧重正极氧化/SCL和负极枝晶，卤化物侧重负极还原/MIEC），并列举了大量中间层策略的效果对比。这对于回答综述中关于“界面稳定性”的比较至关重要，同时其关于制造工艺（如ALD、喷涂、冷压）的讨论可为“可制造性”维度提供素材。",
+        "facet_contributions": [
+          {
+            "boundaries": "数据来自不同研究的汇总，测试条件（如压力、电流密度）不完全一致，需谨慎进行跨研究的绝对数值比较。",
+            "contribution": "提供了硫化物和卤化物电解质在正负极两侧具体的界面不稳定机制及中间层解决方案的详细对比。对于负极，指出硫化物需防止枝晶和接触损失，而卤化物需阻断电子导电的还原产物；对于正极，硫化物需解决SCL和氧化分解，卤化物则相对较好但仍需应对>4.5V的高压降解。这直接支持了对两者界面稳定性优劣的判断。",
+            "facet_id": "F2",
+            "possible_uses": "用于论证哪种电解质在特定电极侧更容易通过工程手段实现稳定，或者哪种电解质的本征界面特性更利于构建稳定的SEI/CEI。"
+          },
+          {
+            "boundaries": "主要关注中间层工艺的扩展性，未全面评估电解质本身的大规模合成成本及电池组装的整体良率。",
+            "contribution": "在Table 1及正文中讨论了不同中间层策略的加工路线（如ALD、溶胶-凝胶、喷涂、冷压）及其可扩展性。指出ALD虽精度高但成本高、吞吐量低，而喷涂和浆料混合更具规模化潜力。这为评估电解质系统的整体可制造性提供了工艺层面的视角。",
+            "facet_id": "F3",
+            "possible_uses": "用于评估包含中间层的电池系统在规模化生产中的潜在障碍和成本效益，辅助判断“可制造性”维度的优劣。"
+          },
+          {
+            "boundaries": "未提供系统性的体相离子电导率数据对比，重点在于界面阻抗对总阻抗的影响。",
+            "contribution": "虽然主要关注界面，但文中提及硫化物和卤化物均具有“高室温离子电导率”，并指出卤化物电导率范围在0.1–10 mS cm−1。这为比较两者的体相离子传输性能提供了背景信息，尽管未提供详细的体相电导率对比表。",
+            "facet_id": "F1",
+            "possible_uses": "作为背景信息，确认两者均为高离子电导率候选者，重点在于界面如何影响实际器件中的有效离子传输。"
+          }
+        ],
+        "broader_review_uses": [
+          {
+            "connection_to_review": "提供界面失效机制的理论基础",
+            "material": "硫化物在正极侧的空间电荷层形成机制、卤化物在负极侧的金属纳米颗粒渗透机制。",
+            "purpose": "解释为什么某些电解质在特定条件下表现不佳，为比较界面稳定性提供机理支撑。"
+          },
+          {
+            "connection_to_review": "提供中间层策略的分类框架",
+            "material": "无机涂层、聚合物层、金属合金层、复合层等不同类型中间层的作用原理及优缺点。",
+            "purpose": "帮助综述构建“如何通过工程手段弥补电解质缺陷”的分析维度，而非仅比较裸电解质。"
+          },
+          {
+            "connection_to_review": "提供规模化制造的现实约束",
+            "material": "对ALD、喷涂、冷压等工艺在大规模生产中的局限性（如厚度控制、均匀性、成本）的讨论。",
+            "purpose": "丰富“可制造性”维度的讨论，指出即使界面问题解决，制造工艺仍是瓶颈。"
+          }
+        ],
+        "scope_interpretation_cautions": [
+          "本文是综述文章，其结论基于对已有研究的综合，而非新的原始实验数据。",
+          "文中提到的性能提升（如CCD增加、循环寿命延长）依赖于特定的中间层材料和测试条件，不能直接外推至所有硫化物或卤化物体系。",
+          "卤化物对正极的稳定性优于硫化物是本文强调的观点，但这主要基于其较高的氧化电位，实际应用中仍需考虑长期老化和高压下的细微退化。",
+          "不要将文中提到的“卤化物在负极处不稳定”视为绝对结论，文中也提到了某些混合卤化物或特定中间层可实现稳定循环，需保留这种情境依赖性。"
+        ],
+        "topic_handles": [
+          "硫化物电解质 (Sulfide SEs)",
+          "卤化物电解质 (Halide SEs)",
+          "锂金属负极界面 (Li-metal anode interface)",
+          "高电压氧化物正极界面 (High-voltage oxide cathode interface)",
+          "中间层工程 (Interlayer engineering)",
+          "空间电荷层 (Space-charge layer, SCL)",
+          "混合导电界面 (Mixed-conducting interphase, MCI/MIEC)",
+          "阳离子互扩散 (Cation interdiffusion)",
+          "临界电流密度 (Critical current density, CCD)",
+          "界面阻抗 (Interfacial impedance)"
+        ]
+      },
+      "study_summary_A": {
+        "approach": "作为一篇综述，本研究采用系统性文献回顾与综合的方法。首先，基于热力学计算和原位表征实验结果，梳理硫化物和卤化物电解质在负极侧的还原分解机制（如混合导电界面MCI的形成）和在正极侧的氧化分解、空间电荷层（SCL）形成及阳离子互扩散机制。其次，分类归纳现有的中间层策略（无机、有机、金属、复合），对比其在不同体系中的具体应用案例、性能提升数据（如临界电流密度CCD、循环寿命、阻抗变化）及工艺特点。最后，通过横向比较不同策略在电化学稳定性、机械顺应性和可扩展性方面的权衡，提出面向实际应用的设计框架和未来方向。",
+        "contribution_and_limits": [
+          {
+            "contribution": "系统梳理了硫化物和卤化物电解质在正负极两侧的界面失效机制，特别是明确了卤化物在负极处形成混合导电界面（MIEC）的独特风险，以及硫化物在正极处的空间电荷层和阳离子互扩散问题。",
+            "limits": "所给摘要未交代具体的文献检索策略、筛选标准及排除标准，因此无法确认其覆盖的全面性或是否存在发表偏倚。"
+          },
+          {
+            "contribution": "提供了大量具体的中间层材料案例及其性能数据（如CCD提升倍数、循环圈数、阻抗降低幅度），并通过Table 1进行了定量对比，为不同应用场景下的材料选择提供了参考依据。",
+            "limits": "数据主要来源于已发表的独立研究，缺乏统一的测试条件（如堆叠压力、面容量、温度）下的直接对比，不同研究间的差异可能受实验设置影响，难以直接归因于单一因素。"
+          },
+          {
+            "contribution": "提出了中间层设计的统一原则，即平衡电化学稳定性（电子绝缘/离子导电）、机械顺应性（适应体积变化）和制造工艺可行性（可扩展性）。",
+            "limits": "关于“可扩展性”的讨论多为定性描述或基于特定工艺（如ALD vs 喷涂）的一般性分析，缺乏针对大规模生产线成本和技术成熟度的详细量化评估。"
+          }
+        ],
+        "key_findings": [
+          {
+            "conditions": "硫化物电解质与锂金属负极界面",
+            "finding": "硫化物（如LGPS, LPS）与锂接触会发生自发还原，生成Li2S/Li3P等产物。虽然部分产物可形成钝化层，但常伴随体积变化和接触损失，导致阻抗增加和枝晶生长。引入电子绝缘但离子导电的中间层（如LiF-Li3N, ALD氧化铝）可有效抑制副反应并提高CCD。"
+          },
+          {
+            "conditions": "硫化物电解质与高电压正极界面",
+            "finding": "在高电压（>3.8V）下，硫化物易发生氧化分解，形成空间电荷层（SCL）阻碍锂离子传输，且存在过渡金属（Ni, Co等）向电解质扩散的问题。采用表面涂层（如ZrO2, LiNbO3, LLSTO）或聚合物中间层可抑制氧释放、阻断互扩散并维持物理接触。"
+          },
+          {
+            "conditions": "卤化物电解质与锂金属负极界面",
+            "finding": "卤化物（如LIC, LYC）与锂接触会迅速分解，生成金属In/Y纳米颗粒和LiCl，形成电子导电网络（MIEC），导致界面持续恶化。引入硫化物缓冲层（如LPSCl）、磷化物中间层（PI3转化为Li6PI3）或氟化物涂层可阻断电子通路，稳定界面。"
+          },
+          {
+            "conditions": "卤化物电解质与高电压正极界面",
+            "finding": "卤化物对高电压正极具有较好的本征兼容性（氧化极限~4.5-5.0V），但在>4.5V或长期老化过程中仍可能发生界面降解。通过中心金属掺杂（如Ta掺杂）或氟取代可提高稳定性，减少氧氯化物副产物的形成。"
+          }
+        ],
+        "paper_kind": "review",
+        "problem_or_question": "尽管硫化物和卤化物固体电解质具有高离子电导率和良好的机械变形性，但其与电极（特别是锂金属负极和高电压氧化物正极）之间的严重界面不稳定性限制了全固态电池的性能和寿命。如何通过中间层工程有效缓解这些界面问题，并建立通用的设计原则？",
+        "research_scope": "全固态锂金属电池（ASSLBs），聚焦于硫化物（Sulfide）和卤化物（Halide）固体电解质体系，涵盖正极/电解质界面与锂金属负极/电解质界面。",
+        "work_summary": "本文是一篇综述，系统回顾了通过引入功能化中间层（Interlayer）来稳定硫化物和卤化物固体电解质界面的最新进展。文章首先分析了两种电解质在热力学和动力学上面临的界面不稳定性机制：硫化物易被还原形成混合导电相并导致枝晶生长，且在高压下易发生空间电荷层效应和阳离子互扩散；卤化物虽耐高压，但在负极处会分解生成电子导电的金属纳米颗粒，导致持续恶化。随后，综述总结了针对这两种体系的多种中间层工程策略，包括无机涂层、聚合物层、合金缓冲层及复合层等，旨在抑制副反应、均匀锂离子流并改善机械接触。最后，文章提炼了连接电化学稳定性、离子传输和机械顺应性的统一设计原则，并讨论了从实验室向规模化制造转化的挑战。"
+      },
+      "local_passages": {
+        "reading_mode": "focused_local_search",
+        "question": "Compare sulfide and oxide solid electrolytes for all-solid-state lithium batteries: which offers the better combination of ionic conductivity, interfacial stability and manufacturability? 复合与混合策略：能否兼顾硫化物电导率与氧化物稳定性？ 评估氧化物 - 硫化物复合电解质及分层混合架构的技术可行性，论证其本质是'约束重构'而非单纯性能叠加。分析复合体系在电导率、稳定性、制造性上的综合表现及潜在协同效应，引用 C2-C5 的基准数据明确复合带来的增益或牺牲，指出最优组分比例依赖具体配对且规模化工艺尚未成熟。 涵盖物理混合复合电解质（Physical Composites）与分层混合架构（Layered Hybrids）。重点分析 LLZO-LPSC 等典型体系的性能表现与工艺约束。严格区分材料本征性能与器件有效性能，不涉及量化成本分析（因 G2 未 met），不外推长循环寿命（因 G3 未 met），不假设大尺寸电芯验证成功（因 G4 未 met）。论证单一材料瓶颈促使复合策略（P0018）。分析物理混合体系的电导率与微观结构权衡，硫化物作为'粘结剂'但牺牲空气稳定性（P0014, P0017）。评估分层混合架构的界面稳定性与机械约束，高压枝晶风险与压力管理（P0025, P0011）。分析制造可行性与规模化缺口，工艺复杂性增加。总结复合策略为情境最优而非万能解。",
+        "passages": [
+          {
+            "paper_id": "8847783381aeef3fc6ba30e16dac7d4bbad76502",
+            "source_handle": "P0016",
+            "title": "Interlayer‐Driven Interfacial Stabilization in Solid Electrolytes for Lithium Batteries: Promises and Challenges",
+            "year": "2026",
+            "doi": "10.1002/cssc.70673",
+            "segment_kind": "document_block",
+            "section_path": [
+              "Engineering of Cathode/Sulfide SE Interfaces"
+            ],
+            "text": "at cathode particle contraction during delithiation disrupts physical contact with the sulfide electrolyte, contributing to impedance growth and capacity decay. elithiation disrupts physical contact with the sulfide electrolyte, contributing to impedance growth and capacity decay. Together, these observations highlight that both interfacial chemical instability and mechanically driven contact loss critically undermine the performance of sulfide‐based ASSLBs employing high‐Ni layered cathodes [51]. Maintaining stable physical contact between cathode active materials and sulfide electrolytes, therefore, remains a fundamental challenge, owing to the rigid, brittle nature of sulfide electrolytes and the complex chemo‐mechanical behavior of layered oxide cathodes [57, 58]. Cation interdiffusion constitutes another key interfacial degradation pathway at sulfide electrolyte–layered oxide cathode interfaces [59]. Early work by Sakuda",
+            "best_sentence": "Maintaining stable physical contact between cathode active materials and sulfide electrolytes, therefore, remains a fundamental challenge, owing to the rigid, brittle nature of sulfide electrolytes and the complex chemo‐mechanical behavior of layered oxide cathodes [57, 58].",
+            "score": 23.21005,
+            "match_terms": [
+              "compare sulfide oxide solid electrolytes all-solid-state lithium batteries",
+              "interfacial stability manufacturability",
+              "physical composites",
+              "layered hybrids"
+            ],
+            "material_depth": "fulltext",
+            "reading_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\materials\\8847783381aeef3fc6ba30e16dac7d4bbad76502\\snapshot-3b32941c5a75f14f5065be40",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\ab_run\\cards\\8847783381aeef3fc6ba30e16dac7d4bbad76502\\4ec10b6c106a941960b97882ba52aa05\\attempt-01\\PAPER_READING_CARD.json",
+            "pool_action": "already_in_pool",
+            "usable_fields": [],
+            "limits": []
+          }
+        ],
+        "external_calls": 0
+      },
+      "locator": {
+        "writer_packet": "F:\\OptoMind-Review-2\\outputs\\review_v2_repair\\05_real_test_20260929\\attempt02_production_path\\UPDATED_WRITER_PACKET.json",
+        "source_handle": "P0016",
+        "card_path": "",
+        "resolvable": true
+      },
+      "used_by_tasks": [
+        "C6_U03_P02"
+      ],
+      "arranged_level": "paragraph"
+    },
+    "P0017": {
+      "source_handle": "P0017",
+      "paper_id": "9118a4252d8e198addbbda20194fa6dd33d98a1d",
+      "title": "Effect of Mixing Intensity on Electrochemical Performance of Oxide/Sulfide Composite Electrolytes",
+      "year": "2024",
+      "doi": "10.3390/batteries10030095",
+      "material_depth": "fulltext",
+      "material_status": "resolved",
+      "aliases": [],
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\ab_run\\cards\\9118a4252d8e198addbbda20194fa6dd33d98a1d\\55fa33588dd566f0c6c2de8c88eb3998\\attempt-01\\PAPER_READING_CARD.json",
+      "review_planning_B": {
+        "planning_summary": "该论文提供了硫化物基复合电解质在制造过程中“机械活化”与“界面工程”相互作用的实证数据。对于综述而言，其核心价值在于反驳或细化“填料必然通过界面效应提升性能”的简单假设，强调了制造工艺（球磨强度）导致的基体结构演变（非晶化）是决定最终电导率的关键因素，这为比较硫化物体系的 manufacturability 和 conductivity trade-offs 提供了重要的反面案例或边界条件。",
+        "facet_contributions": [
+          {
+            "boundaries": "仅限 LPS-LLZO 体系；高温烧结的纯 LLZO 电导率远高于此，但本文关注的是室温/低温下的复合体系加工。",
+            "contribution": "提供了 LPS-LLZO 复合电解质在不同混合强度下的离子电导率具体数值对比。显示在优化混合条件下（60min, 600rpm），纯 LPS 经非晶化处理后电导率可达 1.7×10^-4 S/cm，而加入 30% LLZO 后并未进一步显著提升，甚至因几何阻碍略低。",
+            "facet_id": "F1",
+            "possible_uses": "用于论证硫化物体系通过机械处理即可大幅提升电导率，且氧化物填料的边际贡献有限，特别是在高能量输入下。"
+          },
+          {
+            "boundaries": "主要基于电化学阻抗模型的推断；未直接测量界面化学稳定性或长期副反应产物。",
+            "contribution": "通过 DRT 分析识别了 LPS-LLZO 界面的额外极化过程，并指出在最佳填充量下，锂离子传输主要发生在硫化物侧的空间电荷层（锂耗尽区），而非跨界面传输。同时提到 LLZO 表面的碳酸盐层可能增加界面电阻。",
+            "facet_id": "F2",
+            "possible_uses": "用于讨论硫化物/氧化物界面的稳定性机制和潜在缺陷来源，解释为何某些复合体系界面阻抗较高。"
+          },
+          {
+            "boundaries": "仅涉及干法球磨工艺；未涉及湿法混合或其他成型工艺。",
+            "contribution": "详细记录了球磨参数（转速、介质大小、时间）对复合材料均匀性和电导率的影响。指出短时间混合导致不均匀和高 CCD 标准差，而长时间混合改善均匀性并提高 CCD，但过高的能量输入可能导致基体过度非晶化从而掩盖填料益处。",
+            "facet_id": "F3",
+            "possible_uses": "用于评估硫化物复合电解质的可制造性（Manufacturability），说明工艺窗口对性能一致性的关键影响。"
+          }
+        ],
+        "broader_review_uses": [
+          {
+            "connection_to_review": "提供硫化物电解质在复合化过程中的微观结构演变证据。",
+            "material": "XRD 和 Raman 数据显示 LPS 随球磨时间增加结晶度降低，形成非晶态结构，这是其电导率提升的主因。",
+            "purpose": "作为背景材料，说明硫化物电解质的性能不仅取决于化学成分，还强烈依赖于合成/加工历史，这在比较不同硫化物体系时需考虑。"
+          },
+          {
+            "connection_to_review": "展示氧化物填料在硫化物基体中的双重角色（促进 vs 阻碍）。",
+            "material": "低填充量时空隙电荷层增强传导，高填充量或充分混合后填料变为几何障碍。",
+            "purpose": "用于讨论复合电解质设计中的权衡（Trade-off），即如何平衡界面效应与几何阻碍，这对确定最优填料含量具有参考价值。"
+          }
+        ],
+        "scope_interpretation_cautions": [
+          "该研究的结论高度依赖于特定的球磨能量输入，不能直接外推至其他混合技术（如搅拌、超声）。",
+          "文中提到的空间电荷层效应是基于模型和间接证据（DRT）提出的，需结合其他文献验证其在不同硫化物/氧化物组合中的普适性。",
+          "电导率提升主要归因于基体非晶化，而非填料本身的离子导电性，因此在比较氧化物和硫化物本征性能时需注意区分复合效应与本征效应。"
+        ],
+        "topic_handles": [
+          "Li3PS4 (LPS)",
+          "Li7La3Zr2O12 (LLZO)",
+          "High-energy ball milling parameters",
+          "Space-charge layer effects",
+          "Amorphization of sulfide matrix",
+          "Distribution of Relaxation Times (DRT) analysis",
+          "Critical Current Density (CCD)"
+        ]
+      },
+      "study_summary_A": {
+        "approach": "采用实验研究方法：将商业 LPS 粉末与不同比例（0-60 wt.%）的 LLZO 粉末在高能球磨机中混合，改变旋转速度（400/600 rpm）、研磨介质尺寸（1 mm/10 mm）和时间（1-60 min）。使用 Raman 光谱和 XRD 表征晶体结构变化，SEM 观察形貌。通过 EIS 测量离子电导率，并利用 DRT 方法解卷积阻抗谱以分离体相、晶界及界面极化过程。测定临界电流密度（CCD）评估抗枝晶能力。",
+        "contribution_and_limits": [
+          {
+            "contribution": "揭示了高能球磨引起的基体非晶化对复合电解质性能的支配作用，指出在充分混合后，填料主要作为几何障碍物，而非通过空间电荷层显著提升整体电导率。",
+            "limits": "所给摘要未交代长期循环稳定性数据（仅提及 CCD 测试）；未详细量化空间电荷层的实际厚度或载流子浓度变化；结论基于特定粒径和纯度的商业原料，可能受表面碳酸盐层等因素影响。"
+          }
+        ],
+        "key_findings": [
+          {
+            "conditions": "5分钟短时混合，20°C测量",
+            "finding": "LLZO 填充量为 30 wt.% 时离子电导率达到峰值（从纯 LPS 的 2.3×10^-5 S/cm 提升至 3.6×10^-5 S/cm），低于此比例时空间电荷效应主导，高于此比例时颗粒阻塞效应主导。"
+          },
+          {
+            "conditions": "60分钟长时混合，10mm介质，600rpm",
+            "finding": "LPS 基体发生显著非晶化，其离子电导率从 4.1×10^-5 S/cm 提升至 1.7×10^-4 S/cm。此时添加 LLZO 不再带来额外的界面导电增益，反而因几何阻碍使复合电解质电导率略低于理论修正后的纯 LPS 值。"
+          },
+          {
+            "conditions": "DRT 分析，<10°C",
+            "finding": "成功分离出 LPS 的体相（Ea=0.34 eV）和晶界（Ea=0.58 eV）过程；高填充量下出现第三个极化过程，对应 LPS-LLZO 界面传输。"
+          }
+        ],
+        "paper_kind": "empirical",
+        "problem_or_question": "尽管已知添加导电氧化物填料可提高硫化物电解质的离子电导率和稳定性，但制备复合材料过程中的混合工艺（特别是能量输入）如何影响最终的离子传输机制和宏观性能尚不清楚。",
+        "research_scope": "全固态锂电池中的氧化物/硫化物复合固体电解质，具体研究对象为 Li3PS4 (LPS) 基体与 Li7La3Zr2O12 (LLZO) 填料的复合材料。研究情境涉及高能球磨工艺参数（转速、研磨介质尺寸、时间）对材料微观结构及电化学性能的影响。",
+        "work_summary": "本研究旨在探究混合强度（通过高能球磨实现）对 LPS-LLZO 复合电解质电化学性能的影响。作者利用电化学阻抗谱（EIS）和弛豫时间分布（DRT）分析，在低温下区分了硫化物基体的体相和晶界极化过程。研究发现，低填充量时 LLZO 填料通过空间电荷层效应增强锂离子传输，但高填充量或长时间高能球磨导致 LPS 基体非晶化，此时填料主要起几何阻碍作用，导电性的提升主要归因于 LPS 基体本身的结构变化而非界面协同效应。"
+      },
+      "locator": {
+        "writer_packet": "F:\\OptoMind-Review-2\\outputs\\review_v2_repair\\05_real_test_20260929\\attempt02_production_path\\UPDATED_WRITER_PACKET.json",
+        "source_handle": "P0017",
+        "card_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\ab_run\\cards\\9118a4252d8e198addbbda20194fa6dd33d98a1d\\55fa33588dd566f0c6c2de8c88eb3998\\attempt-01\\PAPER_READING_CARD.json",
+        "resolvable": true
+      },
+      "used_by_tasks": [
+        "C6_U02_P03",
+        "C6_U02_T01"
+      ],
+      "arranged_level": "paragraph"
+    },
+    "P0018": {
+      "source_handle": "P0018",
+      "paper_id": "ad93e4f1a96de0de7072d7ffab833418af8ee2b6",
+      "title": "Research Progress of Solid Electrolytes in Solid-State Lithium Batteries",
+      "year": "2025",
+      "doi": "10.1051/e3sconf/202560602008",
+      "material_depth": "fulltext",
+      "material_status": "resolved",
+      "aliases": [],
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\ab_run\\cards\\ad93e4f1a96de0de7072d7ffab833418af8ee2b6\\dc5fd5ac9942d5a2b7eead533abb48dc\\attempt-01\\PAPER_READING_CARD.json",
+      "review_planning_B": {
+        "planning_summary": "该综述为固态锂电池电解质提供了清晰的分类视角，特别是将复合电解质细分为无机填料、催化剂和三维结构三类，有助于在综述中组织不同技术路线的对比。它提供了硫化物与氧化物无机电解质的基本性能对比数据，以及GPE在界面润湿性上的优势论述，可作为背景材料和机制解释的来源。",
+        "facet_contributions": [
+          {
+            "boundaries": "提供的电导率数据多为典型值或特定条件下的报道值，未涵盖所有最新极端优化案例；复合电解质的电导率通常低于最佳硫化物，需结合其他性能综合评估。",
+            "contribution": "提供了硫化物和氧化物无机电解质的离子电导率范围对比（硫化物~10^-2 S/cm，氧化物~10^-4-10^-3 S/cm），以及GPE和复合电解质（如SN-GPE ~2.02×10^-3 S/cm，MOF复合~0.63×10^-3 S/cm）的具体数值参考。",
+            "facet_id": "F1",
+            "possible_uses": "用于回答“哪种电解质组合具有更好的离子电导率”的问题，展示从无机到复合材料的电导率梯度及改进潜力。"
+          },
+          {
+            "boundaries": "关于界面稳定性的讨论多集中于物理接触改善和枝晶抑制，缺乏对具体界面副反应动力学或长期循环后界面阻抗演变的详细量化数据；SN催化剂虽提升电导率但明确指出界面性能差。",
+            "contribution": "论述了GPE在改善电极界面接触、降低界面电阻方面的优势，指出其能更好地适应电极表面不平整度；提到MOF和三维结构有助于抑制锂枝晶生长，从而间接提升界面长期稳定性。",
+            "facet_id": "F2",
+            "possible_uses": "用于解释为何需要复合电解质以解决界面问题，以及不同结构（如GPE层、MOF通道）如何影响界面稳定性。"
+          },
+          {
+            "boundaries": "对“manufacturability”（可制造性）的讨论较为宏观，未深入具体的规模化生产步骤、成本分析或良率数据；硫化物的环境敏感性（需惰性气氛处理）虽被提及为缺点，但未展开其制造限制的具体程度。",
+            "contribution": "提及氧化物电解质的制备工艺“secure and quite mature”，暗示其在制造可行性方面具有一定优势；指出固态电池尚未商业化主要受限于界面和电导率，而非单纯的制造难度，但强调了安全稳定的制造工艺是量产前提。",
+            "facet_id": "F3",
+            "possible_uses": "用于背景介绍中关于产业化障碍的讨论，支持氧化物在工艺成熟度上的潜在优势论点，同时指出整体领域仍面临制造挑战。"
+          }
+        ],
+        "broader_review_uses": [
+          {
+            "connection_to_review": "提供固态电解质发展的宏观背景和动机",
+            "material": "化石燃料枯竭背景下，固态电池因安全性（热稳定性、抗枝晶）受到关注；液态电解质存在泄漏和爆炸风险。",
+            "purpose": "作为综述引言部分，阐述研究固态电解质的必要性和驱动力。"
+          },
+          {
+            "connection_to_review": "提供复合电解质设计的理论依据",
+            "material": "单一材料各有短板：无机材料界面接触差、聚合物电导率低。复合策略旨在互补：利用无机材料提高机械强度和电导率，利用聚合物/GPE改善界面润湿性。",
+            "purpose": "用于解释综述中为何关注复合电解质，以及不同组分在复合体系中的角色分工。"
+          },
+          {
+            "connection_to_review": "提供具体材料体系的性能基准",
+            "material": "Table 1列出了LLTO, LGP, LLZO等氧化物的电导率；文中列举了PIN, PMMA, PVDF等聚合物基体及SiO2, MOF等添加剂的性能数据。",
+            "purpose": "作为具体案例数据，支撑对不同材料体系性能的比较分析。"
+          }
+        ],
+        "scope_interpretation_cautions": [
+          "该综述侧重于‘复合’策略，对纯硫化物电解质的最新改性进展覆盖有限，主要将其作为高电导率的基准进行对比。",
+          "文中提到的‘manufacturability’更多指氧化物制备工艺的成熟度，而非整个固态电池产业链的制造可行性，解读时需区分材料制备与器件制造。",
+          "SN催化剂虽然提升了电导率，但明确指出了其与锂负极的界面不良反应，因此在评估‘综合性能’时不能仅看电导率提升，需权衡界面稳定性损失。",
+          "所引用的具体电导率和机械强度数据来自特定研究案例，不代表该类材料的普遍上限，使用时应视为代表性数据而非绝对标准。"
+        ],
+        "topic_handles": [
+          "solid inorganic electrolytes (sulfide vs oxide)",
+          "gel polymer electrolytes (GPE) interface properties",
+          "solid composite electrolytes (SCE) classification",
+          "porous inorganic particle composites (ceramic fillers)",
+          "succinonitrile (SN) catalyst doping",
+          "three-dimensional skeletal structures (MOFs, nanofibers)"
+        ]
+      },
+      "study_summary_A": {
+        "approach": "采用分类综述的方法。首先对基础固态电解质类型（无机vs聚合物/凝胶）进行特性对比；其次，将复合电解质按改性策略分为三类（无机填料复合、有机催化剂掺杂、三维结构设计）进行归纳；最后综合讨论各类方案的现存问题与发展趋势。",
+        "contribution_and_limits": [
+          {
+            "contribution": "提供了固态复合电解质三种主要改性策略（无机填料、SN催化剂、三维骨架）的分类框架和近期研究案例汇总。",
+            "limits": "作为综述，未提供新的实验数据；对硫化物电解质的具体改性细节涉及较少，主要侧重于氧化物和聚合物基复合材料；部分结论基于作者对文献的总结，缺乏对特定比较基准的系统量化分析。"
+          }
+        ],
+        "key_findings": [
+          {
+            "conditions": "硫化物与氧化物无机电解质对比",
+            "finding": "硫化物电解质室温离子电导率高（可达10^-2 S/cm），但环境稳定性和电化学稳定性较差；氧化物电解质（如LLTO, LGP, LLZO）电导率相对较低（10^-4至10^-3 S/cm量级），但热稳定性和安全性更优，制备工艺相对成熟。"
+          },
+          {
+            "conditions": "凝胶聚合物电解质（GPE）",
+            "finding": "GPE结合了液体的离子传导性和固体的机械强度，能有效抑制锂枝晶并改善电极界面接触，降低界面电阻。"
+          },
+          {
+            "conditions": "无机颗粒复合（如SiO2/PVDF）",
+            "finding": "纳米SiO2添加到PVDF基体中可形成厚度仅20μm的复合电解质，机械强度达64 MPa，电导率为4.81×10^-4 S/cm，且系统稳定性好。但纯陶瓷颗粒复合初期电导率提升后可能因孔隙堵塞而下降。"
+          },
+          {
+            "conditions": "添加SN催化剂（PMMA基）",
+            "finding": "掺杂丁二腈（SN）可将电导率提升至2.02×10^-3 S/cm，但SN与锂负极界面反应严重，导致界面性能差。使用MOF构建多层通道渗透LSN电解质可缓解此问题。"
+          },
+          {
+            "conditions": "三维骨架结构（如PEO+LLZO纳米纤维或MOF）",
+            "finding": "三维结构能显著提升机械稳定性和抑制枝晶。例如，双金属MOF填充的PEO电解质表现出良好的离子电导率（0.63×10^-3 S/cm）和机械强度（16.8 MPa）。"
+          }
+        ],
+        "paper_kind": "review",
+        "problem_or_question": "解决传统液态电解质存在的安全隐患（如泄漏、易燃），同时克服单一固态电解质（无机或聚合物）存在的低离子电导率、高界面电阻或机械强度不足等问题，寻找兼具高安全、高导电性和良好界面性能的电解质方案。",
+        "research_scope": "固态锂电池电解质，重点涵盖固体无机电解质（硫化物、氧化物）、凝胶聚合物电解质（GPE）及固态复合电解质（SCE）。",
+        "work_summary": "本文是一篇综述性论文，旨在梳理固态锂电池电解质的研究进展。文章首先对比了固体无机电解质和凝胶聚合物电解质的优缺点，指出单一材料在离子电导率、界面性能和安全性方面的局限。随后，文章重点总结了近年来通过构建固态复合电解质（SCE）来提升电池性能的研究进展，主要从三个技术路线展开：引入多孔无机陶瓷颗粒、添加丁二腈（SN）催化剂以及构建三维骨架结构。最后，文章分析了当前复合电解质面临的挑战，并为未来研究方向提供了建议。"
+      },
+      "locator": {
+        "writer_packet": "F:\\OptoMind-Review-2\\outputs\\review_v2_repair\\05_real_test_20260929\\attempt02_production_path\\UPDATED_WRITER_PACKET.json",
+        "source_handle": "P0018",
+        "card_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\ab_run\\cards\\ad93e4f1a96de0de7072d7ffab833418af8ee2b6\\dc5fd5ac9942d5a2b7eead533abb48dc\\attempt-01\\PAPER_READING_CARD.json",
+        "resolvable": true
+      },
+      "used_by_tasks": [
+        "C6_U01_P01",
+        "C6_U01_P02",
+        "C6_U04_P01",
+        "C6_U04_P02"
+      ],
+      "arranged_level": "paragraph"
+    },
+    "P0025": {
+      "source_handle": "P0025",
+      "paper_id": "d6e51a91deb36b1b90ffed49dc584fde1500e926",
+      "title": "A Layered Hybrid Oxide–Sulfide All-Solid-State Battery with Lithium Metal Anode",
+      "year": "2023",
+      "doi": "10.3390/batteries9100507",
+      "material_depth": "fulltext",
+      "material_status": "resolved",
+      "aliases": [],
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\ab_run\\cards\\d6e51a91deb36b1b90ffed49dc584fde1500e926\\e5f05666d63baab3883ac065ac035e1b\\attempt-01\\PAPER_READING_CARD.json",
+      "review_planning_B": {
+        "planning_summary": "该论文提供了氧化物（LLZO）与硫化物（LSPS）混合电解质在全固态电池中的具体应用案例。其核心价值在于展示了如何通过物理分层策略结合两者的优势：利用LLZO解决锂金属负极的稳定性问题，利用LSPS解决正极侧的高离子电导率和加工性问题。同时，论文详细分析了堆叠压力对这种混合界面稳定性的关键影响，特别是高压下锂枝晶穿透氧化物的风险，这为综述中讨论“界面工程”和“机械约束条件”提供了具体的实证数据和机制解释。",
+        "facet_contributions": [
+          {
+            "boundaries": "该结论基于特定的厚隔膜（1.75mm）和手动混合正极；若使用更薄的LLZO或优化的正极结构，离子电导率的限制可能会显著降低。不能直接外推至所有氧化物电解质。",
+            "contribution": "提供了LLZO与LSPS在混合体系中的离子传输表现对比。虽然LLZO本身电导率较低（2.4×10^-4 S/cm），但在混合正极中，LSPS主导了离子传输路径。论文指出厚LLZO隔膜是限制全电池倍率性能（低功率密度）的主要因素，而非硫化物部分。",
+            "facet_id": "F1",
+            "possible_uses": "用于论证硫化物电解质在高离子电导率方面的优势，以及氧化物电解质在作为隔膜时可能成为离子传输瓶颈的问题。支持关于“需要薄氧化物层”或“优化氧化物微观结构”的观点。"
+          },
+          {
+            "boundaries": "兼容性测试主要在粉末混合状态下进行，与实际层状结构的界面反应可能存在差异；高压下的枝晶穿透现象依赖于LLZO的微观结构和缺陷分布，不同制备工艺的LLZO表现可能不同。",
+            "contribution": "提供了LLZO与LSPS在阴极电位下的化学/电化学兼容性证据。CV显示两者混合仅有轻微副反应，且在半电池循环中表现稳定。同时，揭示了Li|LLZO界面在高压下的不稳定性（锂枝晶穿透），这是氧化物电解质作为隔膜时的主要失效模式。",
+            "facet_id": "F2",
+            "possible_uses": "用于比较氧化物和硫化物在界面稳定性方面的不同挑战：硫化物主要面临与锂金属的直接反应（需隔离），而氧化物面临高压下的机械失效（枝晶穿透）。可用于讨论“界面修饰”或“压力管理”在提高界面稳定性中的作用。"
+          },
+          {
+            "boundaries": "该工艺涉及复杂的层状组装和严格的压力控制，尚未展示大规模生产的可行性；所给摘要未交代成本分析或规模化生产的技术障碍。",
+            "contribution": "展示了硫化物电解质（LSPS）在低温冷压加工中的便利性，以及其与氧化物隔膜在层状结构中的集成方法。论文提到LSPS可使用常规电池制造技术处理，而LLZO需要高温烧结，突出了混合架构在制造工艺上的互补性。",
+            "facet_id": "F3",
+            "possible_uses": "用于论证硫化物电解质在制造便利性方面的优势，以及混合架构如何规避氧化物正极共烧结带来的分解问题。可作为“混合电解质策略提升可制造性”的具体实例。"
+          }
+        ],
+        "broader_review_uses": [
+          {
+            "connection_to_review": "提供混合电解质架构的工程实例",
+            "material": "论文提出的Li | LLZO | LSPS/cNCM层状全电池结构，以及12.5 MPa最佳压力的确定过程。",
+            "purpose": "作为综述中讨论“如何结合不同电解质优势”或“界面机械约束设计”的具体案例，说明物理分层是一种可行的技术路线。"
+          },
+          {
+            "connection_to_review": "提供氧化物隔膜失效机制的证据",
+            "material": "对称电池和全电池在高压下因锂枝晶穿透而导致短路的实验结果（Figure 4, 5, 6）。",
+            "purpose": "用于支持关于“氧化物电解质机械强度不足”或“需要界面缓冲层”的论述，强调单纯依靠氧化物的高理论稳定性不足以应对高压下的枝晶生长问题。"
+          },
+          {
+            "connection_to_review": "提供硫化物正极电解质的兼容性数据",
+            "material": "CV测试中LSPS/LLZO混合物的副反应特征及半电池循环数据。",
+            "purpose": "用于评估硫化物电解质在正极侧应用的化学稳定性，反驳“硫化物完全不适用于正极”的观点，指出在适当隔离下其具有实用价值。"
+          }
+        ],
+        "scope_interpretation_cautions": [
+          "该研究的最佳压力（12.5 MPa）是针对特定厚度（1.75mm）和微观结构的LLZO隔膜得出的，不能直接推广到其他厚度的氧化物隔膜。",
+          "全电池的容量衰减主要归因于厚隔膜的高内阻和未优化的正极形貌，而非电解质本身的根本缺陷；在评估该架构潜力时需考虑这些工程因素。",
+          "CV测试中观察到的副反应是在粉末混合状态下进行的，实际层状界面的反应动力学可能不同，需谨慎推断长期循环中的界面演化。"
+        ],
+        "topic_handles": [
+          "LLZO (Li7La3Zr2O12) 氧化物固态电解质",
+          "LSPS (Li10SnP2S12) 硫化物固态电解质",
+          "层状混合电解质架构 (Layered Hybrid Architecture)",
+          "锂金属负极稳定性",
+          "堆叠压力对界面接触与枝晶生长的影响",
+          "NCM811 正极复合材料",
+          "电化学稳定性窗口 (Cyclic Voltammetry analysis)"
+        ]
+      },
+      "study_summary_A": {
+        "approach": "1. 材料制备：合成Al掺杂LLZO粉末并烧结成致密隔膜；制备LiNbO3包覆的NCM811正极活性物质；使用LSPS作为硫化物电解质。2. 电化学稳定性评估：构建不对称测试电池，利用CV测试纯LSPS、纯LLZO及LSPS/LLZO混合物在0-4.5V范围内的氧化还原行为；构建含不同比例LLZO/LSPS混合正极电解质的半电池进行恒流充放电循环。3. 压力依赖性研究：组装Li|LLZO|Li对称电池，在不同堆叠压力（2.5-37.5 MPa）下进行恒电流极化测试，测定临界电流密度（CCD）和阻抗变化；组装Li|LLZO|LSPS/cNCM全电池，在不同压力下测试初始充放电曲线及短路风险。4. 全电池验证：在确定的最佳压力（12.5 MPa）下，组装全电池并进行多倍率（0.01C至0.1C）长循环测试，监测容量保持率和阻抗演变。",
+        "contribution_and_limits": [
+          {
+            "contribution": "提出了LLZO隔膜与LSPS正极电解质结合的层状混合全固态电池架构，并通过实验证明了其在原理上的可行性。",
+            "limits": "所给摘要未交代商业化所需的薄隔膜优化方案；当前结果受限于较厚的LLZO隔膜（1.75mm）和实验室级手动混合工艺，实际能量密度和功率密度较低。"
+          },
+          {
+            "contribution": "明确了LLZO与LSPS在阴极电位下的电化学兼容性，指出混合体系存在轻微但可接受的副反应。",
+            "limits": "CV测试中观察到的副反应峰值（4.4V）在后续循环中虽减弱但未完全消失，长期稳定性需进一步验证；所给摘要未交代具体的长期老化数据。"
+          },
+          {
+            "contribution": "揭示了堆叠压力对Li|LLZO界面的双重影响：低压导致接触不良，高压促进锂枝晶穿透，确定了12.5 MPa为兼顾接触与安全的最佳压力窗口。",
+            "limits": "该压力最优值依赖于特定的LLZO微观结构和锂电极状态，不同批次或改性隔膜的最佳压力可能不同；所给摘要未交代其他微观结构条件下的压力敏感性对比。"
+          }
+        ],
+        "key_findings": [
+          {
+            "conditions": "CV测试，0-4.5 V vs Li/Li+, 室温或特定温度",
+            "finding": "纯LSPS在3.1V和3.4V处出现降解峰（对应硫元素形成）；LLZO无明显降解峰；LSPS/LLZO混合物在2.5V, 4.0V, 4.4V处出现额外反应峰，但强度随循环迅速降低，表明两者在阴极电位下总体兼容，仅存在轻微副反应。"
+          },
+          {
+            "conditions": "半电池循环，60°C, 50 MPa, LSPS vs LSPS/LLZO混合正极电解质",
+            "finding": "加入LLZO粉末略微增加了内阻并导致容量保持率略低于纯LSPS体系，但整体循环稳定性良好，证实混合正极电解质可行。"
+          },
+          {
+            "conditions": "对称电池Li|LLZO|Li, 30°C, 不同堆叠压力",
+            "finding": "低压力（2.5 MPa）下接触不良导致无法有效放电；12.5 MPa下界面接触良好且稳定；高于12.5 MPa（如25-37.5 MPa）时，虽然欧姆阻抗降低，但临界电流密度下降，且长期循环后发生短路，归因于高压促进锂枝晶穿透LLZO隔膜。"
+          },
+          {
+            "conditions": "全电池Li|LLZO|LSPS/cNCM, 80°C, 不同堆叠压力",
+            "finding": "12.5 MPa下可实现正常充放电（首圈比容量160 mAh/g）；更高压力（≥25 MPa）下电池提前短路或电压异常跌落，证实高压加剧锂穿透风险。"
+          },
+          {
+            "conditions": "全电池长循环，12.5 MPa, 80°C, 0.01C起始",
+            "finding": "成功完成22次循环，证明概念可行性；但容量从首圈的126 mAh/g（70%）降至第22圈的15 mAh/g（8%），且高倍率性能差，主要归因于1.75mm厚LLZO隔膜的高内阻及手动混合正极的未优化形貌。"
+          }
+        ],
+        "paper_kind": "empirical",
+        "problem_or_question": "单一固体电解质难以同时满足高离子电导率、宽电化学窗口、良好的机械/化学稳定性及易加工性。如何结合氧化物（如LLZO）对锂金属的高稳定性与硫化物（如LSPS）的高离子电导率和低温加工优势，构建高性能的全固态电池？特别是如何解决两者在高压下的兼容性及界面接触与枝晶生长的压力权衡问题？",
+        "research_scope": "全固态锂电池（ASSB）中的混合电解质体系，具体为氧化物LLZO与硫化物LSPS的层状组合；研究对象包括Li金属负极、LLZO隔膜、LSPS基复合正极（NCM811）及对称电池界面。",
+        "work_summary": "本研究针对全固态电池中氧化物与硫化物电解质的优势互补问题，提出并验证了一种层状混合全固态电池概念：使用对锂稳定的烧结LLZO作为隔膜，结合易于加工且高离子电导率的LSPS作为正极电解质（catholyte），搭配NCM811正极和锂金属负极。研究首先通过循环伏安法（CV）和半电池循环评估了LLZO与LSPS在阴极电位下的电化学兼容性；随后，通过对称电池和全电池实验，系统研究了堆叠压力对Li|LLZO界面稳定性及全电池性能的影响，确定了最佳操作压力为12.5 MPa，以平衡界面接触与抑制锂枝晶穿透的风险；最后，构建了完整的全电池原型并进行了长循环测试，证明了该混合架构的可行性，同时指出了由于隔膜厚度和界面电阻导致的容量衰减和倍率性能受限等挑战。"
+      },
+      "deep_read_material": {
+        "content": {
+          "question_material": [
+            {
+              "examples": [
+                {
+                  "attribution": "本研究",
+                  "conditions": "测试条件：60°C，50 MPa堆叠压力；电池结构：Li-In阳极 | LSPS隔膜 | (LSPS或LSPS/LLZO混合物)正极；CV扫描范围2.0-4.0 V vs. Li/Li+，扫描速率0.1 mV/s；半电池循环倍率从0.02C至0.1C。",
+                  "finding": "通过循环伏安法（CV）和半电池循环测试，证实了LLZO与LSPS在阴极电位（高达4.2 V）下的电化学兼容性。纯LSPS在3.1 V和3.4 V处出现降解峰，而LLZO/LSPS混合物在2.5 V、4.0 V和4.4 V处出现额外峰值，但这些信号在第二个循环中消失或显著降低。将LLZO粉末掺入LSPS基正极后，电池表现出稳定的循环行为，首圈相对放电容量为70.7%（对比纯LSPS的69.1%），尽管由于内部反应导致内阻略高且容量衰减稍快，但整体稳定性得以保证。",
+                  "reference_ids": [],
+                  "use_in_review": "直接材料：论证混合架构（LLZO隔膜+硫化物正极）的界面稳定性及全电池循环性能。"
+                },
+                {
+                  "attribution": "本研究",
+                  "conditions": "测试条件：80.0°C，12.5 MPa堆叠压力；电池结构：锂金属阳极 | 烧结LLZO隔膜（厚度1.75 mm）| LSPS/cNCM复合正极；初始倍率为0.01C，随后进行不同倍率测试。",
+                  "finding": "构建了Li | LLZO | LSPS/cNC811全电池并在12.5 MPa下进行了22次循环测试，这是首次证明该多层设置可行性的研究。初始放电比容量为126 mAh g_AM^-1（基于NCM811理论容量的70%），但在第22次循环时降至15 mAh g_AM^-1（8%）。在高倍率下放电容量显著下降。容量损失和低倍率性能归因于厚LLZO隔膜（1.75 mm）导致的高内阻以及手动混合正极未优化的形貌。",
+                  "reference_ids": [],
+                  "use_in_review": "直接材料：提供混合架构全电池的具体循环数据，展示概念验证效果及局限性。"
+                }
+              ],
+              "explanation": "混合架构的设计原理在于结合氧化物电解质（LLZO）对锂金属阳极的热力学稳定性和硫化物电解质（LSPS）的高离子电导率及低温加工性。LLZO作为致密陶瓷隔膜，允许锂金属直接接触而不发生剧烈副反应，同时阻挡电子传导；LSPS作为正极导电剂，在低温下与活性物质混合，避免了高温共烧导致的界面分解。界面稳定性通过电化学窗口测试验证，表明尽管存在短暂的界面反应，但系统整体能在阴极电位下稳定工作。",
+              "question_id": "Q01",
+              "remaining_points": [
+                "长循环后的具体失效机制（如SEI层演化、裂纹扩展）未深入分析。",
+                "厚隔膜导致的高内阻是主要瓶颈，未来需优化隔膜厚度。"
+              ]
+            },
+            {
+              "examples": [
+                {
+                  "attribution": "本研究",
+                  "conditions": "测试条件：80.0°C；电池结构：Li | LLZO | LSPS/cNCM；比较对象：不同堆叠压力（2.5, 12.5, 25, 37.5, 50 MPa）；测量方法：恒流恒压充电及恒流放电，倍率0.01C；对称电池测试：Li | LLZO | Li，电流密度10 µA (12.7 µA cm^-2)，温度30°C。",
+                  "finding": "在12.5 MPa压力下，Li | LLZO | LSPS/cNCM全电池能够正常充放电，初始比充电/放电容量分别为160/107 mAh g_AM^-1。相比之下，较低压力（2.5 MPa）下电池虽能充电（6 mAh g_AM^-1）但无法有效放电，原因是LLZO隔膜与复合正极之间接触不足；较高压力（≥25 MPa）下，电池在充电过程中电压降至中等水平（25 MPa时为3.8 V，37.5 MPa时为3.6 V，50 MPa时为3.5 V）并伴随电流流动，表明电池短路。PEIS数据显示高压下阻抗显著下降但未归零，证实是由穿透LLZO隔膜的锂枝晶引起的部分短路。因此，12.5 MPa被确定为平衡层间接触与抑制锂穿透的最佳压力窗口。",
+                  "reference_ids": [],
+                  "use_in_review": "直接材料：提取12.5 MPa压力下的具体循环性能数据及失效模式分析，用于论证压力窗口的实证边界。"
+                },
+                {
+                  "attribution": "本研究",
+                  "conditions": "测试条件：30°C（对称电池极化测试），80°C（临界电流密度测试）；电池结构：Li | LLZO | Li对称电池；变量：堆叠压力（2.5-37.5 MPa）；测量方法：直流极化测试，逐步增加电流密度直至短路。",
+                  "finding": "在Li | LLZO | Li对称电池中，随着压力从12.5 MPa增加到25 MPa，临界电流密度从382 µA cm^-2降低到229 µA cm^-2。长期低电荷密度循环显示，在2.5和12.5 MPa下电位保持稳定，而在更高压力下电位在数小时后下降。阻抗谱分析表明，高压促进了LLZO中锂枝晶的形成，导致电池短路。这解释了全电池在高压下失效的原因：过高的压力虽然改善了接触，但也加剧了锂枝晶对隔膜的穿透风险。",
+                  "reference_ids": [],
+                  "use_in_review": "直接材料：通过对称电池实验揭示压力对锂枝晶生长的影响机制，佐证全电池失效原因。"
+                }
+              ],
+              "explanation": "堆叠压力在全电池性能中起双重作用：一方面提供层间接触，改善复合正极内部的离子传输并抵消活性物质的体积变化（呼吸效应）；另一方面，过高的压力会促进锂枝晶在固态电解质中的生长和穿透。12.5 MPa的压力窗口是在确保LLZO与正极充分接触（降低界面电阻）和防止锂枝晶穿透（维持高临界电流密度）之间找到的平衡点。低于此压力，接触不良导致高阻抗和不可逆容量损失；高于此压力，机械应力加速枝晶生长导致短路。",
+              "question_id": "Q02",
+              "remaining_points": [
+                "不同温度下最佳压力窗口是否发生变化尚不明确。",
+                "更薄的LLZO隔膜是否会改变这一压力平衡关系需要进一步研究。"
+              ]
+            }
+          ]
+        },
+        "material_ready": true,
+        "open_questions": [
+          {
+            "question_id": "Q01",
+            "remaining_points": [
+              "长循环后的具体失效机制（如SEI层演化、裂纹扩展）未深入分析。",
+              "厚隔膜导致的高内阻是主要瓶颈，未来需优化隔膜厚度。"
+            ]
+          },
+          {
+            "question_id": "Q02",
+            "remaining_points": [
+              "不同温度下最佳压力窗口是否发生变化尚不明确。",
+              "更薄的LLZO隔膜是否会改变这一压力平衡关系需要进一步研究。"
+            ]
+          }
+        ],
+        "paper_id": "d6e51a91deb36b1b90ffed49dc584fde1500e926",
+        "paper_title": "A Layered Hybrid Oxide–Sulfide All-Solid-State Battery with Lithium Metal Anode",
+        "plain_text": "",
+        "question_material": [
+          {
+            "examples": [
+              {
+                "attribution": "本研究",
+                "conditions": "测试条件：60°C，50 MPa堆叠压力；电池结构：Li-In阳极 | LSPS隔膜 | (LSPS或LSPS/LLZO混合物)正极；CV扫描范围2.0-4.0 V vs. Li/Li+，扫描速率0.1 mV/s；半电池循环倍率从0.02C至0.1C。",
+                "finding": "通过循环伏安法（CV）和半电池循环测试，证实了LLZO与LSPS在阴极电位（高达4.2 V）下的电化学兼容性。纯LSPS在3.1 V和3.4 V处出现降解峰，而LLZO/LSPS混合物在2.5 V、4.0 V和4.4 V处出现额外峰值，但这些信号在第二个循环中消失或显著降低。将LLZO粉末掺入LSPS基正极后，电池表现出稳定的循环行为，首圈相对放电容量为70.7%（对比纯LSPS的69.1%），尽管由于内部反应导致内阻略高且容量衰减稍快，但整体稳定性得以保证。",
+                "reference_ids": [],
+                "use_in_review": "直接材料：论证混合架构（LLZO隔膜+硫化物正极）的界面稳定性及全电池循环性能。"
+              },
+              {
+                "attribution": "本研究",
+                "conditions": "测试条件：80.0°C，12.5 MPa堆叠压力；电池结构：锂金属阳极 | 烧结LLZO隔膜（厚度1.75 mm）| LSPS/cNCM复合正极；初始倍率为0.01C，随后进行不同倍率测试。",
+                "finding": "构建了Li | LLZO | LSPS/cNC811全电池并在12.5 MPa下进行了22次循环测试，这是首次证明该多层设置可行性的研究。初始放电比容量为126 mAh g_AM^-1（基于NCM811理论容量的70%），但在第22次循环时降至15 mAh g_AM^-1（8%）。在高倍率下放电容量显著下降。容量损失和低倍率性能归因于厚LLZO隔膜（1.75 mm）导致的高内阻以及手动混合正极未优化的形貌。",
+                "reference_ids": [],
+                "use_in_review": "直接材料：提供混合架构全电池的具体循环数据，展示概念验证效果及局限性。"
+              }
+            ],
+            "explanation": "混合架构的设计原理在于结合氧化物电解质（LLZO）对锂金属阳极的热力学稳定性和硫化物电解质（LSPS）的高离子电导率及低温加工性。LLZO作为致密陶瓷隔膜，允许锂金属直接接触而不发生剧烈副反应，同时阻挡电子传导；LSPS作为正极导电剂，在低温下与活性物质混合，避免了高温共烧导致的界面分解。界面稳定性通过电化学窗口测试验证，表明尽管存在短暂的界面反应，但系统整体能在阴极电位下稳定工作。",
+            "question_id": "Q01",
+            "remaining_points": [
+              "长循环后的具体失效机制（如SEI层演化、裂纹扩展）未深入分析。",
+              "厚隔膜导致的高内阻是主要瓶颈，未来需优化隔膜厚度。"
+            ]
+          },
+          {
+            "examples": [
+              {
+                "attribution": "本研究",
+                "conditions": "测试条件：80.0°C；电池结构：Li | LLZO | LSPS/cNCM；比较对象：不同堆叠压力（2.5, 12.5, 25, 37.5, 50 MPa）；测量方法：恒流恒压充电及恒流放电，倍率0.01C；对称电池测试：Li | LLZO | Li，电流密度10 µA (12.7 µA cm^-2)，温度30°C。",
+                "finding": "在12.5 MPa压力下，Li | LLZO | LSPS/cNCM全电池能够正常充放电，初始比充电/放电容量分别为160/107 mAh g_AM^-1。相比之下，较低压力（2.5 MPa）下电池虽能充电（6 mAh g_AM^-1）但无法有效放电，原因是LLZO隔膜与复合正极之间接触不足；较高压力（≥25 MPa）下，电池在充电过程中电压降至中等水平（25 MPa时为3.8 V，37.5 MPa时为3.6 V，50 MPa时为3.5 V）并伴随电流流动，表明电池短路。PEIS数据显示高压下阻抗显著下降但未归零，证实是由穿透LLZO隔膜的锂枝晶引起的部分短路。因此，12.5 MPa被确定为平衡层间接触与抑制锂穿透的最佳压力窗口。",
+                "reference_ids": [],
+                "use_in_review": "直接材料：提取12.5 MPa压力下的具体循环性能数据及失效模式分析，用于论证压力窗口的实证边界。"
+              },
+              {
+                "attribution": "本研究",
+                "conditions": "测试条件：30°C（对称电池极化测试），80°C（临界电流密度测试）；电池结构：Li | LLZO | Li对称电池；变量：堆叠压力（2.5-37.5 MPa）；测量方法：直流极化测试，逐步增加电流密度直至短路。",
+                "finding": "在Li | LLZO | Li对称电池中，随着压力从12.5 MPa增加到25 MPa，临界电流密度从382 µA cm^-2降低到229 µA cm^-2。长期低电荷密度循环显示，在2.5和12.5 MPa下电位保持稳定，而在更高压力下电位在数小时后下降。阻抗谱分析表明，高压促进了LLZO中锂枝晶的形成，导致电池短路。这解释了全电池在高压下失效的原因：过高的压力虽然改善了接触，但也加剧了锂枝晶对隔膜的穿透风险。",
+                "reference_ids": [],
+                "use_in_review": "直接材料：通过对称电池实验揭示压力对锂枝晶生长的影响机制，佐证全电池失效原因。"
+              }
+            ],
+            "explanation": "堆叠压力在全电池性能中起双重作用：一方面提供层间接触，改善复合正极内部的离子传输并抵消活性物质的体积变化（呼吸效应）；另一方面，过高的压力会促进锂枝晶在固态电解质中的生长和穿透。12.5 MPa的压力窗口是在确保LLZO与正极充分接触（降低界面电阻）和防止锂枝晶穿透（维持高临界电流密度）之间找到的平衡点。低于此压力，接触不良导致高阻抗和不可逆容量损失；高于此压力，机械应力加速枝晶生长导致短路。",
+            "question_id": "Q02",
+            "remaining_points": [
+              "不同温度下最佳压力窗口是否发生变化尚不明确。",
+              "更薄的LLZO隔膜是否会改变这一压力平衡关系需要进一步研究。"
+            ]
+          }
+        ],
+        "references": [
+          {
+            "citation": "Challenges in speeding up solid-state battery development JJanek WGZeier 10.1038/nenergy.2016.141 Nat. Energy 8 2023 Janek, J.; Zeier, W.G. Challenges in speeding up solid-state battery development. Nat. Energy 2023, 8, 230-240. https://doi.org/10.1038/s41560-023-01208-9.",
+            "reference_id": "R1",
+            "source_marker": ""
+          },
+          {
+            "citation": "A solid future for battery development JJanek WGZeier 10.1016/j.jpowsour.2013.01.063 Nat. Energy 1 16141 2016 Janek, J.; Zeier, W.G. A solid future for battery development. Nat. Energy 2016, 1, 16141. https://doi.org/10.1038/nenergy.2016.141.",
+            "reference_id": "R2",
+            "source_marker": ""
+          },
+          {
+            "citation": "Comparison of the structural and electrochemical properties of layered Li H.-JNoh SYoun YSun 10.1021/acsami.6b13224 J. Power Sources 2 1 2013 0.5, 0.6, 0.7, 0.8 and 0.85) cathode material for lithium-ion batteries NixCoyMnz Noh, H.-J.; Youn, S.; Sun, Y. Comparison of the structural and electrochemical properties of layered Li[NixCoyMnz]O2 (x = 1/3, 0.5, 0.6, 0.7, 0.8 and 0.85) cathode material for lithium-ion batteries. J. Power Sources 2013, 233, 121-130. https://doi.org/10.1016/j.jpowsour.2013.01.063.",
+            "reference_id": "R3",
+            "source_marker": ""
+          },
+          {
+            "citation": "Are All-Solid-State Lithium-Ion Batteries Really Safe?-Verification by Differential Scanning Calorimetry with an All-Inclusive Microcell TInoue KMukai 10.3390/batteries7010018 ACS Appl. Mater. Interfaces 9 2017 Inoue, T.; Mukai, K. Are All-Solid-State Lithium-Ion Batteries Really Safe?-Verification by Differential Scanning Calorimetry with an All-Inclusive Microcell. ACS Appl. Mater. Interfaces 2017, 9, 1507-1515. https://doi.org/10.1021/acsami.6b13224.",
+            "reference_id": "R4",
+            "source_marker": ""
+          },
+          {
+            "citation": "The Thermal Stability of Lithium Solid Electrolytes with Metallic Lithium RChen AMNolan JLu JWang XYu YMo LChen XHuang HLi 10.1039/C8EE02617C Joule 4 2020 Chen, R.; Nolan, A.M.; Lu, J.; Wang, J.; Yu, X.; Mo, Y.; Chen, L.; Huang, X.; Li, H. The Thermal Stability of Lithium Solid Electrolytes with Metallic Lithium. Joule 2020, 4, 812-821. https://doi.org/10.1016/j.joule.2020.03.012.",
+            "reference_id": "R5",
+            "source_marker": ""
+          },
+          {
+            "citation": "A Performance and Cost Overview of Selected Solid-State Electrolytes: Race between Polymer Electrolytes and Inorganic Sulfide Electrolytes DKarabelli KPBirke MWeeber 10.1002/aenm.201501590 Batteries 7 18 2021 Karabelli, D.; Birke, K.P.; Weeber, M. A Performance and Cost Overview of Selected Solid-State Electrolytes: Race between Polymer Electrolytes and Inorganic Sulfide Electrolytes. Batteries 2021, 7, 18. https://doi.org/10.3390/batteries7010018.",
+            "reference_id": "R6",
+            "source_marker": ""
+          },
+          {
+            "citation": "Enhancing interfacial contact in all solid state batteries with a cathodesupported solid electrolyte membrane framework XChen WHe L.-XDing SWang HWang 10.1021/acsami.5b07517 Energy Environ. Sci 12 2019 Chen, X.; He, W.; Ding, L.-X.; Wang, S.; Wang, H. Enhancing interfacial contact in all solid state batteries with a cathode- supported solid electrolyte membrane framework. Energy Environ. Sci. 2019, 12, 938-944. https://doi.org/10.1039/C8EE02617C.",
+            "reference_id": "R7",
+            "source_marker": ""
+          },
+          {
+            "citation": "Electrochemical Stability of Li10GeP2S12 and Li7La3Zr2O12 Solid Electrolytes FHan YZhu XHe YMo CWang 10.1002/aenm.201501590 Adv. Energy Mater 6 1501590 2016 Han, F.; Zhu, Y.; He, X.; Mo, Y.; Wang, C. Electrochemical Stability of Li10GeP2S12 and Li7La3Zr2O12 Solid Electrolytes. Adv. Energy Mater. 2016, 6, 1501590. https://doi.org/10.1002/aenm.201501590.",
+            "reference_id": "R8",
+            "source_marker": ""
+          },
+          {
+            "citation": "Origin of Outstanding Stability in the Lithium Solid Electrolyte Materials: Insights from Thermodynamic Analyses Based on First-Principles Calculations YZhu XHe YMo 10.1149/2.0201910jes ACS Appl. Mater. Interfaces 7 2015 Zhu, Y.; He, X.; Mo, Y. Origin of Outstanding Stability in the Lithium Solid Electrolyte Materials: Insights from Thermodynamic Analyses Based on First-Principles Calculations. ACS Appl. Mater. Interfaces 2015, 7, 23685-23693. https://doi.org/10.1021/acsami.5b07517.",
+            "reference_id": "R9",
+            "source_marker": ""
+          },
+          {
+            "citation": "First principles study on electrochemical and chemical stability of solid electrolyte-electrode interfaces in all-solid-state Li-ion batteries YZhu XHe YMo 10.1016/j.jpowsour.2010.11.089 J. Mater. Chem. A 4 2016 Zhu, Y.; He, X.; Mo, Y. First principles study on electrochemical and chemical stability of solid electrolyte-electrode interfaces in all-solid-state Li-ion batteries. J. Mater. Chem. A 2016, 4, 3523-3266. https://doi.org/10.1039/C5TA08574H.",
+            "reference_id": "R10",
+            "source_marker": ""
+          },
+          {
+            "citation": "Electrochemical Stability of Garnet-Type Li7La2.75Ca0.25Zr1.75Nb0.25O12 with and without Atomic Layer Deposited-Al2O3 under CO2 and Humidity KHofstetter AJSamson JDai JEGritton LHu EDWachsman VThangadurai 10.1038/nmat4821 J. Electrochem. Soc 1844 2019 Hofstetter, K.; Samson, A.J.; Dai, J.; Gritton, J.E.; Hu, L.; Wachsman, E.D.; Thangadurai, V. Electrochemical Stability of Garnet- Type Li7La2.75Ca0.25Zr1.75Nb0.25O12 with and without Atomic Layer Deposited-Al2O3 under CO2 and Humidity. J. Electrochem. Soc. 2019, 166, A1844. https://doi.org/10.1149/2.0201910jes.",
+            "reference_id": "R11",
+            "source_marker": ""
+          },
+          {
+            "citation": "High lithium ionic conductivity in the garnet-type oxide Li7-XLa3(Zr2-X,NbX)O12 (X = 0-2) SOhta TKobayashi TAsaoka 10.1016/j.jpowsour.2010.11.089 J. Power Sources 196 2011 Ohta, S.; Kobayashi, T.; Asaoka, T. High lithium ionic conductivity in the garnet-type oxide Li7-XLa3(Zr2-X,NbX)O12 (X = 0-2). J. Power Sources 2011, 196, 3342-3345. https://doi.org/10.1016/j.jpowsour.2010.11.089.",
+            "reference_id": "R12",
+            "source_marker": ""
+          },
+          {
+            "citation": "Negating interfacial impedance in garnet-based solid-state Li metal batteries XHan YGong KKFu XHe GTHitz JDai APearse BLiu HWang GRubloff 10.1038/nmat4821 Nature Mater 16 2017 Han, X.; Gong, Y.; Fu, K.K.; He, X.; Hitz, G.T.; Dai, J.; Pearse, A.; Liu, B.; Wang, H.; Rubloff, G.; et al. Negating interfacial imped- ance in garnet-based solid-state Li metal batteries. Nature Mater. 2017, 16, 572-579. https://doi.org/10.1038/nmat4821. References",
+            "reference_id": "R13",
+            "source_marker": ""
+          },
+          {
+            "citation": "Challenges in speeding up solid-state battery development JJanek WGZeier 10.1038/s41560-023-01208-9 Nat. Energy 8 2023 Janek, J.; Zeier, W.G. Challenges in speeding up solid-state battery development. Nat. Energy 2023, 8, 230-240. [CrossRef]",
+            "reference_id": "R14",
+            "source_marker": ""
+          },
+          {
+            "citation": "A solid future for battery development JJanek WGZeier 10.1038/nenergy.2016.141 Nat. Energy 1 16141 2016 Janek, J.; Zeier, W.G. A solid future for battery development. Nat. Energy 2016, 1, 16141. [CrossRef]",
+            "reference_id": "R15",
+            "source_marker": ""
+          },
+          {
+            "citation": "Comparison of the structural and electrochemical properties of layered Li H.-JNoh SYoun YSun 10.1016/j.jpowsour.2013.01.063 Ni x Co y Mn z 2 1 0.5, 0.6, 0.7, 0.8 and 0.85) cathode material for lithium-ion batteries. J. Power Sources 2013 Noh, H.-J.; Youn, S.; Sun, Y. Comparison of the structural and electrochemical properties of layered Li[Ni x Co y Mn z ]O 2 (x = 1/3, 0.5, 0.6, 0.7, 0.8 and 0.85) cathode material for lithium-ion batteries. J. Power Sources 2013, 233, 121-130. [CrossRef]",
+            "reference_id": "R16",
+            "source_marker": ""
+          },
+          {
+            "citation": "Are All-Solid-State Lithium-Ion Batteries Really Safe?-Verification by Differential Scanning Calorimetry with an All-Inclusive Microcell TInoue KMukai 10.1021/acsami.6b13224 ACS Appl. Mater. Interfaces 9 2017 Inoue, T.; Mukai, K. Are All-Solid-State Lithium-Ion Batteries Really Safe?-Verification by Differential Scanning Calorimetry with an All-Inclusive Microcell. ACS Appl. Mater. Interfaces 2017, 9, 1507-1515. [CrossRef]",
+            "reference_id": "R17",
+            "source_marker": ""
+          },
+          {
+            "citation": "The Thermal Stability of Lithium Solid Electrolytes with Metallic Lithium RChen AMNolan JLu JWang XYu YMo LChen XHuang HLi 10.1016/j.joule.2020.03.012 Joule 4 2020 Chen, R.; Nolan, A.M.; Lu, J.; Wang, J.; Yu, X.; Mo, Y.; Chen, L.; Huang, X.; Li, H. The Thermal Stability of Lithium Solid Electrolytes with Metallic Lithium. Joule 2020, 4, 812-821. [CrossRef]",
+            "reference_id": "R18",
+            "source_marker": ""
+          },
+          {
+            "citation": "A Performance and Cost Overview of Selected Solid-State Electrolytes: Race between Polymer Electrolytes and Inorganic Sulfide Electrolytes DKarabelli KPBirke MWeeber 10.3390/batteries7010018 Batteries 7 18 2021 Karabelli, D.; Birke, K.P.; Weeber, M. A Performance and Cost Overview of Selected Solid-State Electrolytes: Race between Polymer Electrolytes and Inorganic Sulfide Electrolytes. Batteries 2021, 7, 18. [CrossRef]",
+            "reference_id": "R19",
+            "source_marker": ""
+          },
+          {
+            "citation": "Enhancing interfacial contact in all solid state batteries with a cathode-supported solid electrolyte membrane framework XChen WHe L.-XDing SWang HWang 10.1039/C8EE02617C Energy Environ. Sci 12 2019 Chen, X.; He, W.; Ding, L.-X.; Wang, S.; Wang, H. Enhancing interfacial contact in all solid state batteries with a cathode-supported solid electrolyte membrane framework. Energy Environ. Sci. 2019, 12, 938-944. [CrossRef]",
+            "reference_id": "R20",
+            "source_marker": ""
+          },
+          {
+            "citation": "Electrochemical Stability of Li 10 GeP 2 S 12 and Li 7 La 3 Zr 2 O 12 Solid Electrolytes FHan YZhu XHe YMo CWang 10.1002/aenm.201501590 Adv. Energy Mater 6 1501590 2016 Han, F.; Zhu, Y.; He, X.; Mo, Y.; Wang, C. Electrochemical Stability of Li 10 GeP 2 S 12 and Li 7 La 3 Zr 2 O 12 Solid Electrolytes. Adv. Energy Mater. 2016, 6, 1501590. [CrossRef]",
+            "reference_id": "R21",
+            "source_marker": ""
+          },
+          {
+            "citation": "Origin of Outstanding Stability in the Lithium Solid Electrolyte Materials: Insights from Thermodynamic Analyses Based on First-Principles Calculations YZhu XHe YMo 10.1021/acsami.5b07517 ACS Appl. Mater. Interfaces 7 2015 Zhu, Y.; He, X.; Mo, Y. Origin of Outstanding Stability in the Lithium Solid Electrolyte Materials: Insights from Thermodynamic Analyses Based on First-Principles Calculations. ACS Appl. Mater. Interfaces 2015, 7, 23685-23693. [CrossRef]",
+            "reference_id": "R22",
+            "source_marker": ""
+          },
+          {
+            "citation": "First principles study on electrochemical and chemical stability of solid electrolyte-electrode interfaces in all-solid-state Li-ion batteries YZhu XHe YMo 10.1039/C5TA08574H J. Mater. Chem. A 4 2016 Zhu, Y.; He, X.; Mo, Y. First principles study on electrochemical and chemical stability of solid electrolyte-electrode interfaces in all-solid-state Li-ion batteries. J. Mater. Chem. A 2016, 4, 3253-3266. [CrossRef]",
+            "reference_id": "R23",
+            "source_marker": ""
+          },
+          {
+            "citation": "Electrochemical Stability of Garnet-Type Li 7 La 2.75 Ca 0.25 Zr 1.75 Nb 0 KHofstetter AJSamson JDai JEGritton LHu EDWachsman VThangadurai 10.1149/2.0201910jes J. Electrochem. Soc A1844 2019 25 O 12 with and without Atomic Layer Deposited -Al 2 O 3 under CO 2 and Humidity Hofstetter, K.; Samson, A.J.; Dai, J.; Gritton, J.E.; Hu, L.; Wachsman, E.D.; Thangadurai, V. Electrochemical Stability of Garnet-Type Li 7 La 2.75 Ca 0.25 Zr 1.75 Nb 0.25 O 12 with and without Atomic Layer Deposited-Al 2 O 3 under CO 2 and Humidity. J. Electrochem. Soc. 2019, 166, A1844. [CrossRef]",
+            "reference_id": "R24",
+            "source_marker": ""
+          },
+          {
+            "citation": "High lithium ionic conductivity in the garnet-type oxide Li 7-X La 3 (Zr 2-X ,Nb X )O 12 (X = 0-2) SOhta TKobayashi TAsaoka 10.1016/j.jpowsour.2010.11.089 J. Power Sources 196 2011 Ohta, S.; Kobayashi, T.; Asaoka, T. High lithium ionic conductivity in the garnet-type oxide Li 7-X La 3 (Zr 2-X ,Nb X )O 12 (X = 0-2). J. Power Sources 2011, 196, 3342-3345. [CrossRef]",
+            "reference_id": "R25",
+            "source_marker": ""
+          },
+          {
+            "citation": "Negating interfacial impedance in garnet-based solid-state Li metal batteries XHan YGong KKFu XHe GTHitz JDai APearse BLiu HWang GRubloff 10.1038/nmat4821 Nature Mater 16 2017 Han, X.; Gong, Y.; Fu, K.K.; He, X.; Hitz, G.T.; Dai, J.; Pearse, A.; Liu, B.; Wang, H.; Rubloff, G.; et al. Negating interfacial impedance in garnet-based solid-state Li metal batteries. Nature Mater. 2017, 16, 572-579. [CrossRef] [PubMed]",
+            "reference_id": "R26",
+            "source_marker": ""
+          },
+          {
+            "citation": "Chemical stability of cubic Li 7 La 3 Zr 2 O 12 with molten lithium at elevated temperature JWolfenstine JLAllen JRead JSakamoto 10.1007/s10853-013-7380-z J. Mater. Sci 48 2013 Wolfenstine, J.; Allen, J.L.; Read, J.; Sakamoto, J. Chemical stability of cubic Li 7 La 3 Zr 2 O 12 with molten lithium at elevated temperature. J. Mater. Sci. 2013, 48, 5846-5851. [CrossRef]",
+            "reference_id": "R27",
+            "source_marker": ""
+          },
+          {
+            "citation": "Compatibility of Li 7 La 3 Zr 2 O 12 Solid Electrolyte to All-Solid-State Battery Using Li Metal Anode MKotobuki HMunakata KKanamura YSato TYoshida 10.1149/1.3474232 J. Electrochem. Soc A1076 2010 Kotobuki, M.; Munakata, H.; Kanamura, K.; Sato, Y.; Yoshida, T. Compatibility of Li 7 La 3 Zr 2 O 12 Solid Electrolyte to All-Solid-State Battery Using Li Metal Anode. J. Electrochem. Soc. 2010, 157, A1076. [CrossRef]",
+            "reference_id": "R28",
+            "source_marker": ""
+          },
+          {
+            "citation": "Characterization of the interface between LiCoO 2 and Li 7 La 3 Zr 2 O 12 in an all-solid-state rechargeable lithium battery KHKim YIriyama KYamamoto SKumazaki TAsaka KTanabe CA JFisher THirayama RMurugan ZOgumi 10.1016/j.jpowsour.2010.07.073 J. Power Sources 196 2011 Kim, K.H.; Iriyama, Y.; Yamamoto, K.; Kumazaki, S.; Asaka, T.; Tanabe, K.; Fisher, C.A.J.; Hirayama, T.; Murugan, R.; Ogumi, Z. Characterization of the interface between LiCoO 2 and Li 7 La 3 Zr 2 O 12 in an all-solid-state rechargeable lithium battery. J. Power Sources 2011, 196, 764-767. [CrossRef]",
+            "reference_id": "R29",
+            "source_marker": ""
+          },
+          {
+            "citation": "Li-Garnet Solid-State Batteries with LLZO Scaffolds KVKravchyk HZhang FOkur MVKovalenko 10.1021/accountsmr.2c00004 Acc. Mater. Res 3 2022 Kravchyk, K.V.; Zhang, H.; Okur, F.; Kovalenko, M.V. Li-Garnet Solid-State Batteries with LLZO Scaffolds. Acc. Mater. Res. 2022, 3, 411-415. [CrossRef]",
+            "reference_id": "R30",
+            "source_marker": ""
+          },
+          {
+            "citation": "A bird's-exe view of Li-stuffed garnet-type Li 7 La 3 Zr 2 O 12 ceramic electrolytes for advanced all-solid-state Li batteries AJSamson KHofstetter SBag VThangadurai 10.1039/C9EE01548E Energy Environ. Sci 12 2019 Samson, A.J.; Hofstetter, K.; Bag, S.; Thangadurai, V. A bird's-exe view of Li-stuffed garnet-type Li 7 La 3 Zr 2 O 12 ceramic electrolytes for advanced all-solid-state Li batteries. Energy Environ. Sci. 2019, 12, 2957-2975. [CrossRef]",
+            "reference_id": "R31",
+            "source_marker": ""
+          },
+          {
+            "citation": "Atmosphere Controlled Processing of Ga-Substituted Garnets for High Li-Ion Conductivity Ceramics CBernuy-Lopez WManalastas JMDel Lopez Amo AAguadero FAguesee JAKilner 10.1021/cm5008069 Chem. Mater 26 2014 Bernuy-Lopez, C.; Manalastas, W.; Del Lopez Amo, J.M.; Aguadero, A.; Aguesee, F.; Kilner, J.A. Atmosphere Controlled Processing of Ga-Substituted Garnets for High Li-Ion Conductivity Ceramics. Chem. Mater. 2014, 26, 3610-3617. [CrossRef]",
+            "reference_id": "R32",
+            "source_marker": ""
+          },
+          {
+            "citation": "Growth of self-textured Ga 3+ -substituted Li 7 La 3 Zr 2 O 12 ceramics by solid state reaction and their significant enhancement in ionic conductivity SQin XZhu YJiang MLing ZHu JZhu 10.1063/1.5019179 Appl. Phys. Lett 112 113901 2018 Qin, S.; Zhu, X.; Jiang, Y.; Ling, M.; Hu, Z.; Zhu, J. Growth of self-textured Ga 3+ -substituted Li 7 La 3 Zr 2 O 12 ceramics by solid state reaction and their significant enhancement in ionic conductivity. Appl. Phys. Lett. 2018, 112, 113901. [CrossRef]",
+            "reference_id": "R33",
+            "source_marker": ""
+          },
+          {
+            "citation": "Chemical compatibility between garnet-like solid state electrolyte Li 6.75 La 3 Zr 1.75 Ta 0.25 O 12 and major commercial lithium battery cathode materials YRen TLiu YShen YLin C.-WNan 10.1016/j.jmat.2016.04.003 J. Mater 2 2016 Ren, Y.; Liu, T.; Shen, Y.; Lin, Y.; Nan, C.-W. Chemical compatibility between garnet-like solid state electrolyte Li 6.75 La 3 Zr 1.75 Ta 0.25 O 12 and major commercial lithium battery cathode materials. J. Mater. 2016, 2, 256-264. [CrossRef]",
+            "reference_id": "R34",
+            "source_marker": ""
+          },
+          {
+            "citation": "Electrochemical Nature of the Cathode Interface for a Solid-State Lithium-Ion Battery: Interface between LiCoO 2 and Garnet-Li 7 La 3 Zr 2 O 12 KPark B.-CYu J.-WJung YLi WZhou HGao SSon JBGoodenough 10.1021/acs.chemmater.6b03870 Chem. Mater 28 2016 Park, K.; Yu, B.-C.; Jung, J.-W.; Li, Y.; Zhou, W.; Gao, H.; Son, S.; Goodenough, J.B. Electrochemical Nature of the Cathode Interface for a Solid-State Lithium-Ion Battery: Interface between LiCoO 2 and Garnet-Li 7 La 3 Zr 2 O 12 . Chem. Mater. 2016, 28, 8051-8059. [CrossRef]",
+            "reference_id": "R35",
+            "source_marker": ""
+          },
+          {
+            "citation": "Structure, Chemistry, and Charge Transfer Resistance of the Interface between Li 7 La 3 Zr 2 O 12 Electrolyte and LiCoO 2 Cathode GVardar WJBowman QLu JWang RJChater AAguadero RSeibert JTerry AHunt IWaluyo 10.1021/acs.chemmater.8b01713 Chem. Mater 30 2018 Vardar, G.; Bowman, W.J.; Lu, Q.; Wang, J.; Chater, R.J.; Aguadero, A.; Seibert, R.; Terry, J.; Hunt, A.; Waluyo, I.; et al. Structure, Chemistry, and Charge Transfer Resistance of the Interface between Li 7 La 3 Zr 2 O 12 Electrolyte and LiCoO 2 Cathode. Chem. Mater. 2018, 30, 6259-6276. [CrossRef]",
+            "reference_id": "R36",
+            "source_marker": ""
+          },
+          {
+            "citation": "Issues and Advances in Scaling up Sulfide-Based All-Solid-State Batteries JLee TLee KChar KJKim JWChoi 10.1021/acs.accounts.1c00333 Acc. Chem. Res 54 2021 Lee, J.; Lee, T.; Char, K.; Kim, K.J.; Choi, J.W. Issues and Advances in Scaling up Sulfide-Based All-Solid-State Batteries. Acc. Chem. Res. 2021, 54, 3390-3402. [CrossRef] [PubMed]",
+            "reference_id": "R37",
+            "source_marker": ""
+          },
+          {
+            "citation": "Sulfide Solid Electrolyte with Favorable Mechanical Property for All-Solid-State Lithium Battery ASakuda AHayashi MTatsumisago 10.1038/srep02261 Sci. Rep 3 2261 2013 Sakuda, A.; Hayashi, A.; Tatsumisago, M. Sulfide Solid Electrolyte with Favorable Mechanical Property for All-Solid-State Lithium Battery. Sci. Rep. 2013, 3, 2261. [CrossRef]",
+            "reference_id": "R38",
+            "source_marker": ""
+          },
+          {
+            "citation": "A lithium superionic conductor NKamaya KHomma YYamakawa MHirayama RKanno MYonemura TKamiyama YKato SHama KKoji 10.1038/nmat3066 Nature 10 2011 Kamaya, N.; Homma, K.; Yamakawa, Y.; Hirayama, M.; Kanno, R.; Yonemura, M.; Kamiyama, T.; Kato, Y.; Hama, S.; Koji, K.; et al. A lithium superionic conductor. Nature 2011, 10, 682-686. [CrossRef]",
+            "reference_id": "R39",
+            "source_marker": ""
+          },
+          {
+            "citation": "Inorganic Solid-State Electrolytes for Lithium Batteries: Mechanisms and Properties Governing Ion Conduction JCBachman SMuy AGrimaud H.-HChang NPour SFLux OPaschos FMaglia SLupart PLamp 10.1021/acs.chemrev.5b00563 Chem. Rev 116 2016 Bachman, J.C.; Muy, S.; Grimaud, A.; Chang, H.-H.; Pour, N.; Lux, S.F.; Paschos, O.; Maglia, F.; Lupart, S.; Lamp, P.; et al. Inorganic Solid-State Electrolytes for Lithium Batteries: Mechanisms and Properties Governing Ion Conduction. Chem. Rev. 2016, 116, 140-162. [CrossRef]",
+            "reference_id": "R40",
+            "source_marker": ""
+          },
+          {
+            "citation": "Sulfide and Oxide Inorganic Solid Electrolytes for All-Solid-State Li Batteries: A Review MVReddy CMJulien AMauger KZaghib 10.3390/nano10081606 Nanomaterials 10 1606 2020 Reddy, M.V.; Julien, C.M.; Mauger, A.; Zaghib, K. Sulfide and Oxide Inorganic Solid Electrolytes for All-Solid-State Li Batteries: A Review. Nanomaterials 2020, 10, 1606. [CrossRef]",
+            "reference_id": "R41",
+            "source_marker": ""
+          },
+          {
+            "citation": "structure and lithium ionic conductivity of solid solutions of Li 10 (Ge 1-x M x )P 2 S 12 (M = Si, Sn) YKato RSaito MSakano AMitsui MHirayama RKanno Synthesis 10.1016/j.jpowsour.2014.07.159 J. Power Sources 271 2014 Kato, Y.; Saito, R.; Sakano, M.; Mitsui, A.; Hirayama, M.; Kanno, R. Synthesis, structure and lithium ionic conductivity of solid solutions of Li 10 (Ge 1-x M x )P 2 S 12 (M = Si, Sn). J. Power Sources 2014, 271, 60-64. [CrossRef]",
+            "reference_id": "R42",
+            "source_marker": ""
+          },
+          {
+            "citation": "Phase stability, electrochemical stability and ionic conductivity of the Li 10±1 MP 2 X 12 (M = Ge, Si, Sn, Al or P, and X = O, S or Se) family of superionic conductors SPOng YMo WDRichards LMiara HSLee GCeder 10.1039/C2EE23355J Energy Environ. Sci 6 2013 Ong, S.P.; Mo, Y.; Richards, W.D.; Miara, L.; Lee, H.S.; Ceder, G. Phase stability, electrochemical stability and ionic conductivity of the Li 10±1 MP 2 X 12 (M = Ge, Si, Sn, Al or P, and X = O, S or Se) family of superionic conductors. Energy Environ. Sci. 2013, 6, 148-156. [CrossRef]",
+            "reference_id": "R43",
+            "source_marker": ""
+          },
+          {
+            "citation": "Direct Observation of the Interfacial Instability of the Fast Ionic Conductor Li 10 GeP 2 S 12 at the Lithium Metal Anode SWenzel SRandau TLeichtweiß DAWeber JSann WGZeier JJanek 10.1021/acs.chemmater.6b00610 Chem. Mater 28 2016 Wenzel, S.; Randau, S.; Leichtweiß, T.; Weber, D.A.; Sann, J.; Zeier, W.G.; Janek, J. Direct Observation of the Interfacial Instability of the Fast Ionic Conductor Li 10 GeP 2 S 12 at the Lithium Metal Anode. Chem. Mater. 2016, 28, 2400-2407. [CrossRef]",
+            "reference_id": "R44",
+            "source_marker": ""
+          },
+          {
+            "citation": "Interface Stability of Argyrodite Li 6 PS 5 Cl toward LiCoO 2 , LiNi 1/3 Co 1/3 Mn 1/3 O 2 , and LiMn 2 O 4 in Bulk All-Solid-State Batteries JAuvergniot J.-BLedeuil VViallet VSeznec RDedryvère 10.1021/acs.chemmater.6b04990 Chem. Mater 29 2017 Auvergniot, J.; Ledeuil, J.-B.; Viallet, V.; Seznec, V.; Dedryvère, R. Interface Stability of Argyrodite Li 6 PS 5 Cl toward LiCoO 2 , LiNi 1/3 Co 1/3 Mn 1/3 O 2 , and LiMn 2 O 4 in Bulk All-Solid-State Batteries. Chem. Mater. 2017, 29, 3883-3890. [CrossRef]",
+            "reference_id": "R45",
+            "source_marker": ""
+          },
+          {
+            "citation": "Capacity Fade in Solid-State Batteries: Interphase Formation and Chemomechanical Processes in Nickel-Rich Layered Oxide Cathodes and Lithium Thiophosphate Solid Electrolytes RKoerver IAygün TLeichtweiß CDietrich WZhang JOBinder PHartmann WGZeier JJanek 10.1021/acs.chemmater.7b00931 Chem. Mater 29 2017 Koerver, R.; Aygün, I.; Leichtweiß, T.; Dietrich, C.; Zhang, W.; Binder, J.O.; Hartmann, P.; Zeier, W.G.; Janek, J. Capacity Fade in Solid-State Batteries: Interphase Formation and Chemomechanical Processes in Nickel-Rich Layered Oxide Cathodes and Lithium Thiophosphate Solid Electrolytes. Chem. Mater. 2017, 29, 5574-5582. [CrossRef]",
+            "reference_id": "R46",
+            "source_marker": ""
+          },
+          {
+            "citation": "From Liquid-to Solid-State Batteries: Ion Transfer Kinetics of Heteroionic Interfaces MWeiss FJSimon MRBusche TNakamura DSchröder FHRichter JJanek 10.1007/s41918-020-00062-7 Electrochem. Energy Rev 3 2020 Weiss, M.; Simon, F.J.; Busche, M.R.; Nakamura, T.; Schröder, D.; Richter, F.H.; Janek, J. From Liquid-to Solid-State Batteries: Ion Transfer Kinetics of Heteroionic Interfaces. Electrochem. Energy Rev. 2020, 3, 221-238. [CrossRef]",
+            "reference_id": "R47",
+            "source_marker": ""
+          },
+          {
+            "citation": "A high conductivity oxide-sulfide composite lithium superionic conductor ERangasamy GSahu JKKeum AJRondinone NJDudney CLiang 10.1039/C3TA15223E J. Mater. Chem. A 2 2014 Rangasamy, E.; Sahu, G.; Keum, J.K.; Rondinone, A.J.; Dudney, N.J.; Liang, C. A high conductivity oxide-sulfide composite lithium superionic conductor. J. Mater. Chem. A 2014, 2, 4111-4116. [CrossRef]",
+            "reference_id": "R48",
+            "source_marker": ""
+          },
+          {
+            "citation": "The \"filler effect\": A study of solid oxide fillers with β-Li 3 PS 4 for lithium conducting electrolytes ZDHood HWang YLi ASPandian MParans Paranthaman CLiang 10.1016/j.ssi.2015.10.014 Solid State Ion 283 2015 Hood, Z.D.; Wang, H.; Li, Y.; Pandian, A.S.; Parans Paranthaman, M.; Liang, C. The \"filler effect\": A study of solid oxide fillers with β-Li 3 PS 4 for lithium conducting electrolytes. Solid State Ion. 2015, 283, 75-80. [CrossRef]",
+            "reference_id": "R49",
+            "source_marker": ""
+          },
+          {
+            "citation": "All-Solid-State Lithium-Ion Batteries with Oxide/Sulfide Composite Electrolytes YSPark JMLee EJYi J.-WMoon HHwang 10.3390/ma14081998 Materials 14 2021. 1998 Park, Y.S.; Lee, J.M.; Yi, E.J.; Moon, J.-W.; Hwang, H. All-Solid-State Lithium-Ion Batteries with Oxide/Sulfide Composite Electrolytes. Materials 2021, 14, 1998. [CrossRef] [PubMed]",
+            "reference_id": "R50",
+            "source_marker": ""
+          },
+          {
+            "citation": "Ultra-low LPS/LLZO interfacial resistance-Towards stable hybrid sold-state batteries with Li-metal anodes JHüttl CSeidl HAuer KNikolowski ALGörne MArnold CHeubner MWolter AMichaelis 10.1016/j.ensm.2021.05.020 Energy Stor. Mater 40 2021 Hüttl, J.; Seidl, C.; Auer, H.; Nikolowski, K.; Görne, A.L.; Arnold, M.; Heubner, C.; Wolter, M.; Michaelis, A. Ultra-low LPS/LLZO interfacial resistance-Towards stable hybrid sold-state batteries with Li-metal anodes. Energy Stor. Mater. 2021, 40, 259-267. [CrossRef]",
+            "reference_id": "R51",
+            "source_marker": ""
+          },
+          {
+            "citation": "Li 2 CO 3 A Critical Issue for Developing Solid Garnet Batteries HHuo JLuo VThangadurai XGuo C.-WNan XSun 10.1021/acsenergylett.9b02401 ACS Energy Lett 5 2020 Huo, H.; Luo, J.; Thangadurai, V.; Guo, X.; Nan, C.-W.; Sun, X. Li 2 CO 3 A Critical Issue for Developing Solid Garnet Batteries. ACS Energy Lett. 2020, 5, 252-262. [CrossRef]",
+            "reference_id": "R52",
+            "source_marker": ""
+          },
+          {
+            "citation": "Experimental Assessment of the Practical Oxidative Stability of Lithium Thiophosphate Solid Electrolytes GFDewald SOhno MAKraft RKoerver PTill NMVargas-Barbosa JJanek WGZeier 10.1021/acs.chemmater.9b01550 Chem. Mater 31 2019 Dewald, G.F.; Ohno, S.; Kraft, M.A.; Koerver, R.; Till, P.; Vargas-Barbosa, N.M.; Janek, J.; Zeier, W.G. Experimental Assessment of the Practical Oxidative Stability of Lithium Thiophosphate Solid Electrolytes. Chem. Mater. 2019, 31, 8328-8337. [CrossRef]",
+            "reference_id": "R53",
+            "source_marker": ""
+          },
+          {
+            "citation": "Chemo-mechanical expansion of lithium electrode materials-On the route to mechanically optimized all-solid-state batteries RKoerver WZhang LDe Biasi SSchweidler AOKondrakov SKolling TBrezesinski PHartmann WGZeier JJanek 10.1039/C8EE00907D Energy Environ. Sci 11 2018 Koerver, R.; Zhang, W.; de Biasi, L.; Schweidler, S.; Kondrakov, A.O.; Kolling, S.; Brezesinski, T.; Hartmann, P.; Zeier, W.G.; Janek, J. Chemo-mechanical expansion of lithium electrode materials-On the route to mechanically optimized all-solid-state batteries. Energy Environ. Sci. 2018, 11, 2142-2158. [CrossRef]",
+            "reference_id": "R54",
+            "source_marker": ""
+          },
+          {
+            "citation": "Designing Cathodes and Cathode Active Materials for Solid-State Batteries PMinnmann FStrauss ABielefeld RRuess PAdelhelm SBurkhardt SLDreyer ETrevisanello HEhrenberg TBrezesinski 10.1002/aenm.202201425 Adv. Energy Mater 12 2201425 2022 Minnmann, P.; Strauss, F.; Bielefeld, A.; Ruess, R.; Adelhelm, P.; Burkhardt, S.; Dreyer, S.L.; Trevisanello, E.; Ehrenberg, H.; Brezesinski, T.; et al. Designing Cathodes and Cathode Active Materials for Solid-State Batteries. Adv. Energy Mater. 2022, 12, 2201425. [CrossRef]",
+            "reference_id": "R55",
+            "source_marker": ""
+          },
+          {
+            "citation": "Pressure effects on sulfide electrolytes for all solid-state batteries J.-MDoux YYang DH STan HNguyen EAWu XWang ABanerjee YSMeng 10.1039/C9TA12889A J. Mater. Chem. A 8 2020 Doux, J.-M.; Yang, Y.; Tan, D.H.S.; Nguyen, H.; Wu, E.A.; Wang, X.; Banerjee, A.; Meng, Y.S. Pressure effects on sulfide electrolytes for all solid-state batteries. J. Mater. Chem. A 2020, 8, 5049-5055. [CrossRef]",
+            "reference_id": "R56",
+            "source_marker": ""
+          },
+          {
+            "citation": "Characterizing the Li-Solid-Electrolyte Interface Dynamics as a Function of Stack Pressure and Current Density MJWang RChoudhury JSakamoto 10.1016/j.joule.2019.06.017 Joule 3 2019 Wang, M.J.; Choudhury, R.; Sakamoto, J. Characterizing the Li-Solid-Electrolyte Interface Dynamics as a Function of Stack Pressure and Current Density. Joule 2019, 3, 2165-2178. [CrossRef]",
+            "reference_id": "R57",
+            "source_marker": ""
+          },
+          {
+            "citation": "Effect of Pressure on Lithium Metal Deposition and Stripping against Sulfide-Based Solid Electrolytes YWang TLiu JKumar 10.1021/acsami.0c06201 ACS Appl. Mater. Interfaces 12 2020 Wang, Y.; Liu, T.; Kumar, J. Effect of Pressure on Lithium Metal Deposition and Stripping against Sulfide-Based Solid Electrolytes. ACS Appl. Mater. Interfaces 2020, 12, 34771-34776. [CrossRef] [PubMed]",
+            "reference_id": "R58",
+            "source_marker": ""
+          },
+          {
+            "citation": "Blocking lithium dendrite growth in solid-state batteries with an ultrathin amorphous Li-La-Zr-O solid electrolyte JSastre MHFutscher LPompizi AAribia APriebe JOverbeck MStiefel ANTiwari YERomanyuk 10.1038/s43246-021-00177-4 Commun. Mater 2 76 2021 Sastre, J.; Futscher, M.H.; Pompizi, L.; Aribia, A.; Priebe, A.; Overbeck, J.; Stiefel, M.; Tiwari, A.N.; Romanyuk, Y.E. Blocking lithium dendrite growth in solid-state batteries with an ultrathin amorphous Li-La-Zr-O solid electrolyte. Commun. Mater. 2021, 2, 76. [CrossRef]",
+            "reference_id": "R59",
+            "source_marker": ""
+          },
+          {
+            "citation": "A 3D Cross-Linking Lithiophilic and Electronically Insulating Interfacial Engineering for Garnet-Type Solid-State Lithium Batteries YRuan YLu YLi CZheng JSu JJin TXiu ZSong MEBadding ZWen 10.1002/adfm.202007815 Adv. Funct. Mater 31 2007815 2021 Ruan, Y.; Lu, Y.; Li, Y.; Zheng, C.; Su, J.; Jin, J.; Xiu, T.; Song, Z.; Badding, M.E.; Wen, Z. A 3D Cross-Linking Lithiophilic and Electronically Insulating Interfacial Engineering for Garnet-Type Solid-State Lithium Batteries. Adv. Funct. Mater. 2021, 31, 2007815. [CrossRef]",
+            "reference_id": "R60",
+            "source_marker": ""
+          },
+          {
+            "citation": "Critical Current Density Limitation of LLZO Solid Electrolyte: Microstructure vs Interface TDussart NRividi MFialin GToussaint PStevens CLaberty-Robert 10.1149/1945-7111/ac44be J. Electrochem. Soc 168 120550 2021 Dussart, T.; Rividi, N.; Fialin, M.; Toussaint, G.; Stevens, P.; Laberty-Robert, C. Critical Current Density Limitation of LLZO Solid Electrolyte: Microstructure vs Interface. J. Electrochem. Soc. 2021, 168, 120550. [CrossRef]",
+            "reference_id": "R61",
+            "source_marker": ""
+          },
+          {
+            "citation": "Effect of Ga 2 O 3 Addition on the Properties of Garnet-Type Ta-Doped Li 7 La 3 Zr 2 O 12 YYamazaki SMiyake KAkimoto RInada 10.3390/batteries8100158 Batteries 8 158 2022 Yamazaki, Y.; Miyake, S.; Akimoto, K.; Inada, R. Effect of Ga 2 O 3 Addition on the Properties of Garnet-Type Ta-Doped Li 7 La 3 Zr 2 O 12 . Batteries 2022, 8, 158. [CrossRef",
+            "reference_id": "R62",
+            "source_marker": ""
+          },
+          {
+            "citation": "editor(s) disclaim responsibility for any injury to people or property resulting from any ideas, methods, instructions or products referred to in the content Disclaimer/Publisher's Note: The statements, opinions and data contained in all publications are solely those of the individual author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the Disclaimer/Publisher's Note: The statements, opinions and data contained in all publications are solely those of the individual author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to people or property resulting from any ideas, methods, instructions or products referred to in the content.",
+            "reference_id": "R63",
+            "source_marker": ""
+          }
+        ],
+        "review_id": "x2_solid_electrolytes_holdout",
+        "schema_version": "optomind.upgrade3.directed_reading.output.v4",
+        "status": "material_ready",
+        "task_id": "dr-task-b659dea564f95934b6d3b051",
+        "workflow": "practical_materials"
+      },
+      "locator": {
+        "writer_packet": "F:\\OptoMind-Review-2\\outputs\\review_v2_repair\\05_real_test_20260929\\attempt02_production_path\\UPDATED_WRITER_PACKET.json",
+        "source_handle": "P0025",
+        "card_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\ab_run\\cards\\d6e51a91deb36b1b90ffed49dc584fde1500e926\\e5f05666d63baab3883ac065ac035e1b\\attempt-01\\PAPER_READING_CARD.json",
+        "resolvable": true
+      },
+      "used_by_tasks": [
+        "C6_U03_P01",
+        "C6_U03_P02",
+        "C6_U03_P03"
+      ],
+      "arranged_level": "paragraph"
+    },
+    "P0026": {
+      "source_handle": "P0026",
+      "paper_id": "d9a2563d8c9eeb2bf9c5abdd8e17fc210c91152b",
+      "title": "Research Progress on Solid-State Electrolytes in Solid-State Lithium Batteries: Classification, Ionic Conductive Mechanism, Interfacial Challenges",
+      "year": "2024",
+      "doi": "10.3390/nano14221773",
+      "material_depth": "fulltext",
+      "material_status": "resolved",
+      "aliases": [],
+      "card_path": "",
+      "review_planning_B": {
+        "planning_summary": "本文是规划员所需的核心素材之一，直接回应了关于硫化物与氧化物固态电解质的对比需求。它提供了两类材料在离子电导率、界面稳定性（特别是对正负极的化学/电化学兼容性）以及制造工艺（如烧结 vs 冷压）上的具体优劣势描述。此外，文中关于产业化现状的章节提供了各国技术路线选择的背景，有助于解释为何在某些地区硫化物更受青睐而在另一些地区氧化物占主导，从而丰富“可制造性”维度的讨论。",
+        "facet_contributions": [
+          {
+            "boundaries": "需注意，高电导率往往伴随着较低的机械强度和化学稳定性；氧化物的电导率虽低，但其体积电导率分布均匀，且不受 grain boundary 严重限制（取决于具体类型如LLZO）。",
+            "contribution": "提供了硫化物和氧化物电解质在室温离子电导率数量级上的直接对比：硫化物可达 10^-2 S/cm，而氧化物通常为 10^-5–10^-3 S/cm。同时指出硫化物的低活化能 (<0.5 eV) 和高离子迁移率源于其软阴离子骨架和缺陷机制。",
+            "facet_id": "F1",
+            "possible_uses": "用于论证硫化物在离子传输动力学上的优势，支持其在高功率应用中的潜力。"
+          },
+          {
+            "boundaries": "文中提到的稳定性是基于特定材料体系（如LGPS vs LLZO）的一般趋势，具体掺杂改性后的表现可能有所不同；未提供长期的循环后界面成分定量分析数据。",
+            "contribution": "详细描述了界面稳定性差异：硫化物与高电压正极（>4V）不相容，易发生氧化分解，需界面修饰；氧化物具有宽电化学窗口（0-5V+），化学稳定性好，但与锂金属负极接触时因刚性导致物理接触不良，且部分氧化物（如LLTO）会被锂还原。",
+            "facet_id": "F2",
+            "possible_uses": "用于分析两种材料在电池全生命周期中的界面退化风险，解释为何硫化物需要复杂的界面工程，而氧化物面临接触阻抗问题。"
+          },
+          {
+            "boundaries": "文中提到氧化物可通过热脉冲烧结（TPS）等新工艺改善接触，但未提供与传统硫化物产线兼容性的详细成本效益分析；产业化部分主要基于企业公告，缺乏第三方审计的成本数据。",
+            "contribution": "对比了制造工艺：硫化物支持冷压成型，适合大规模生产且能耗低，但对环境湿度极其敏感，需要干燥房；氧化物通常需要高温烧结以实现致密化和良好接触，能耗高且可能导致元素互扩散，增加界面电阻。",
+            "facet_id": "F3",
+            "possible_uses": "用于评估两种技术路线的可制造性（Manufacturability），包括设备要求、环境控制成本和潜在的生产缺陷模式。"
+          }
+        ],
+        "broader_review_uses": [
+          {
+            "connection_to_review": "提供产业化背景和技术路线选择的宏观视角。",
+            "material": "第4节“Industrialization Status”，包含中日韩欧美主要企业（Toyota, QuantumScape, CATL等）采用的电解质类型及当前进展（如半固态量产、全固态原型）。",
+            "purpose": "用于说明尽管硫化物在实验室性能上优异，但氧化物在欧美受到重视的原因（可能与供应链、现有技术基础或安全性考量有关）；同时指出半固态是当前过渡期的主流，这影响了全固态技术落地的时间表预期。"
+          },
+          {
+            "connection_to_review": "提供卤化物电解质作为新兴对比对象的信息。",
+            "material": "第2.2.3节关于卤化物电解质（HSEs）的描述，特别是其高氧化稳定性和对锂金属的稳定性。",
+            "purpose": "虽然用户主要关注硫化物与氧化物，但卤化物的高电压稳定性使其成为氧化物在高电压应用中的潜在替代或补充，可作为讨论“界面稳定性”时的额外案例，展示除硫化物外其他解决高压兼容性的思路。"
+          }
+        ],
+        "scope_interpretation_cautions": [
+          "文中对离子电导率的比较基于室温条件，且不同文献间测试条件（如压力、温度）可能存在差异，直接比较时需注明数据来源的不确定性。",
+          "产业化部分的结论基于企业公开信息，可能存在宣传成分，应视为‘声称的进展’而非‘已验证的商业成功’。",
+          "界面稳定性的讨论侧重于化学/电化学兼容性，对于机械应力导致的界面开裂等物理失效机制涉及较少，需在综述中结合其他材料补充。"
+        ],
+        "topic_handles": [
+          "硫化物电解质 (Sulfide SSEs)",
+          "氧化物电解质 (Oxide SSEs)",
+          "离子电导率 (Ionic Conductivity)",
+          "界面阻抗 (Interfacial Resistance)",
+          "电化学稳定性窗口 (Electrochemical Stability Window)",
+          "空气敏感性/水解 (Air Sensitivity/Hydrolysis)",
+          "冷压工艺 (Cold Pressing)",
+          "高温烧结 (High-Temperature Sintering)",
+          "半固态电池 (Semi-Solid State Batteries)"
+        ]
+      },
+      "study_summary_A": {
+        "approach": "采用分类综述法，按材料体系（聚合物、氧化物、硫化物、卤化物、复合材料）组织内容。对每种体系，综合其合成方法、微观结构特征、离子传导机理（如非晶区链段运动、空位跳跃等）及关键性能指标（如室温离子电导率）。针对界面问题，从物理接触、化学/电化学稳定性、空间电荷层效应等角度进行归纳。通过收集全球主要企业（中日韩欧美）的专利、原型电池及量产计划数据，对比不同技术路线的产业化成熟度。",
+        "contribution_and_limits": [
+          {
+            "contribution": "提供了固态电解质各主要类别（特别是硫化物和氧化物）在离子电导率、界面稳定性方面的详细对比数据及机理总结。",
+            "limits": "作为综述，未提供新的实验数据或独立的系统性比较测试；具体数值依赖于所引用的文献，可能存在来源间的测试条件差异。"
+          },
+          {
+            "contribution": "梳理了全球主要企业和国家的产业化路线图及当前进展，区分了半固态与全固态的技术成熟度。",
+            "limits": "产业化信息基于公开报道和企业宣传，缺乏对成本结构和长期可靠性数据的独立验证；不同企业的内部数据透明度不一。"
+          },
+          {
+            "contribution": "明确了界面挑战的具体类型（如空间电荷层、侧反应）及相应的缓解策略（涂层、复合电解质等）。",
+            "limits": "对界面失效机制的解释多为理论模型或单一研究的汇总，缺乏对所有可能失效模式的统一量化评估框架。"
+          }
+        ],
+        "key_findings": [
+          {
+            "conditions": "聚合物电解质 (SPEs)",
+            "finding": "室温离子电导率普遍较低（通常 <10^-4 S/cm），受限于结晶度和玻璃化转变温度；但具有优异的柔韧性和加工性，易于与电极形成良好接触。"
+          },
+          {
+            "conditions": "氧化物电解质 (ISEs-Oxides)",
+            "finding": "具有较高的电化学稳定性和机械强度，但室温离子电导率中等（10^-5–10^-3 S/cm），且由于刚性导致固-固界面接触差，界面电阻高，通常需要高温烧结。"
+          },
+          {
+            "conditions": "硫化物电解质 (ISEs-Sulfides)",
+            "finding": "室温离子电导率最高（可达 10^-2 S/cm，接近液态），机械延展性好，适合冷压成型；但对空气敏感（易水解产生有毒气体），且与高电压正极材料兼容性差，易发生副反应。"
+          },
+          {
+            "conditions": "卤化物电解质 (HSEs)",
+            "finding": "具有高氧化稳定性（适合高压正极）和对锂金属的稳定性，离子电导率中等（10^-4–10^-3 S/cm）；但部分体系对水分敏感，且过渡金属可能与锂负极反应。"
+          },
+          {
+            "conditions": "产业化现状",
+            "finding": "日本和韩国主要聚焦硫化物路线（如丰田、三星）；欧美侧重氧化物路线（如QuantumScape）；中国则采取多路线并行策略，目前半固态电池（混合固液）已实现初步商业化应用，全固态仍处于研发和小批量试制阶段。"
+          }
+        ],
+        "paper_kind": "review",
+        "problem_or_question": "传统液态锂离子电池存在能量密度瓶颈和安全隐患，全固态电池被视为下一代高能量密度且安全的储能方案。然而，固态电解质在离子电导率、界面相容性及规模化制造方面仍面临重大挑战。本文旨在梳理现有解决方案，明确各类材料的优劣及当前工业化的实际水平，以指导后续研发。",
+        "research_scope": "全固态锂电池（SSLBs）中的固态电解质（SSEs），涵盖聚合物、无机物（氧化物、硫化物、卤化物）及有机-无机复合材料，重点讨论离子传导机制、界面挑战及产业化现状。",
+        "work_summary": "该综述系统评估了固态电解质的研究进展，旨在为研究人员提供关于材料选择、机制理解及工业化障碍的综合参考。文章首先分类介绍了各类固态电解质的制备、性能、组成及离子迁移机制；随后深入探讨了固态电池面临的界面挑战，包括高界面电阻、侧反应及界面不稳定性；最后分析了全球不同国家企业在固态电解质领域的工业化研究现状，并提出了未来发展方向。"
+      },
+      "deep_read_material": {
+        "material_ready": true,
+        "paper_id": "d9a2563d8c9eeb2bf9c5abdd8e17fc210c91152b",
+        "paper_title": "Research Progress on Solid-State Electrolytes in Solid-State Lithium Batteries: Classification, Ionic Conductive Mechanism, Interfacial Challenges",
+        "plain_text": "",
+        "question_material": [
+          {
+            "examples": [
+              {
+                "attribution": "Toyota",
+                "conditions": "技术路线：硫化物固态电解质；应用场景：全固态锂电池制造；比较对象：需高温烧结的氧化物电解质。",
+                "finding": "丰田（Toyota）选择了硫化物固态电解质技术路线。在制造过程中，利用硫化物电解质良好的机械变形能力和可延展性，通过冷压（cold-pressed）工艺实现电极与电解质的有效界面接触和规模化生产。",
+                "reference_ids": [],
+                "use_in_review": "作为硫化物固态电池技术路线中采用冷压成型工艺的企业实践案例，用于对比不同企业在电解质成型工艺上的选择差异。"
+              },
+              {
+                "attribution": "QuantumScape",
+                "conditions": "技术路线：氧化物固态电解质；应用场景：全固态锂电池制造；比较对象：可冷压成型的硫化物电解质。",
+                "finding": "QuantumScape 选择了氧化物固态电解质技术路线。由于氧化物电解质具有刚性结构且室温下难以变形，其制造工艺通常依赖于高温烧结步骤来增强电极与电解质之间的结合，以实现良好的界面接触。",
+                "reference_ids": [],
+                "use_in_review": "作为氧化物固态电池技术路线中采用烧结工艺的企业实践案例，用于说明氧化物电解质因刚性结构而依赖高温处理的工艺特点。"
+              }
+            ],
+            "explanation": "文章指出，全球固态电池研发主要分为三条技术路线阵营，其中日本和韩国（以丰田为代表）主要选择硫化物固态电解质，而欧洲和美国（以 QuantumScape 为代表）主要选择氧化物固态电解质。这两种材料体系在物理性质上存在显著差异，直接导致了成型工艺的不同：硫化物电解质具有良好的机械变形能力，适合通过冷压工艺形成有效的电极-电解质界面；而氧化物电解质结构刚性大，通常需要依赖高温烧结步骤来强化界面结合。这种工艺差异反映了不同材料体系在解决固-固界面接触问题时的不同工程策略。",
+            "question_id": "Q01",
+            "remaining_points": []
+          }
+        ],
+        "references": [],
+        "review_id": "x2_solid_electrolytes_holdout",
+        "schema_version": "optomind.upgrade3.directed_reading.output.v4",
+        "status": "material_ready",
+        "task_id": "dr-task-b861ba5b3013bbf78b1f1cb2",
+        "workflow": "practical_materials",
+        "reading_mode": "focused_local_search"
+      },
+      "local_passages": {
+        "reading_mode": "focused_local_search",
+        "question": "Compare sulfide and oxide solid electrolytes for all-solid-state lithium batteries: which offers the better combination of ionic conductivity, interfacial stability and manufacturability? 复合与混合策略：能否兼顾硫化物电导率与氧化物稳定性？ 评估氧化物 - 硫化物复合电解质及分层混合架构的技术可行性，论证其本质是'约束重构'而非单纯性能叠加。分析复合体系在电导率、稳定性、制造性上的综合表现及潜在协同效应，引用 C2-C5 的基准数据明确复合带来的增益或牺牲，指出最优组分比例依赖具体配对且规模化工艺尚未成熟。 涵盖物理混合复合电解质（Physical Composites）与分层混合架构（Layered Hybrids）。重点分析 LLZO-LPSC 等典型体系的性能表现与工艺约束。严格区分材料本征性能与器件有效性能，不涉及量化成本分析（因 G2 未 met），不外推长循环寿命（因 G3 未 met），不假设大尺寸电芯验证成功（因 G4 未 met）。论证单一材料瓶颈促使复合策略（P0018）。分析物理混合体系的电导率与微观结构权衡，硫化物作为'粘结剂'但牺牲空气稳定性（P0014, P0017）。评估分层混合架构的界面稳定性与机械约束，高压枝晶风险与压力管理（P0025, P0011）。分析制造可行性与规模化缺口，工艺复杂性增加。总结复合策略为情境最优而非万能解。",
+        "passages": [
+          {
+            "paper_id": "d9a2563d8c9eeb2bf9c5abdd8e17fc210c91152b",
+            "source_handle": "P0026",
+            "title": "Research Progress on Solid-State Electrolytes in Solid-State Lithium Batteries: Classification, Ionic Conductive Mechanism, Interfacial Challenges",
+            "year": "2024",
+            "doi": "10.3390/nano14221773",
+            "segment_kind": "document_block",
+            "section_path": [
+              "3. Challenges Concerning Solid-State Batteries",
+              "3.2. Interfaces Between the SSEs and the Anode"
+            ],
+            "text": "a multilayer solid electrolyte was designed to maintain the ionic conductivity of the electrolyte and suppress the penetration of Li dendrites at the same time. ned to maintain the ionic conductivity of the electrolyte and suppress the penetration of Li dendrites at the same time. The multilayer electrolyte includes a interlayer with poor stability and double layer with good stability on both sides to contact the lithium metal surface [206]. As shown in Figure 17, there are several methods for inhibiting the growth of lithium dendrites. A lithium metal composite anode was prepared by optimizing the structure or composition of the lithium metal anode, which exhibited high stability in regard to SEs and can effectively impede the growth of lithium dendrites. Sun et al. , which exhibited high stability in regard to SEs and can effectively impede the growth of lithium dendrites. Sun et al. [207] have proposed a novel cationic me",
+            "best_sentence": "The multilayer electrolyte includes a interlayer with poor stability and double layer with good stability on both sides to contact the lithium metal surface [206].",
+            "score": 20.95425,
+            "match_terms": [
+              "compare sulfide oxide solid electrolytes all-solid-state lithium batteries",
+              "offers better combination ionic conductivity",
+              "interfacial stability manufacturability",
+              "physical composites",
+              "layered hybrids"
+            ],
+            "material_depth": "fulltext",
+            "reading_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\materials\\d9a2563d8c9eeb2bf9c5abdd8e17fc210c91152b\\snapshot-77e154bd6cb95b16d41fd6fe",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\ab_run\\cards\\d9a2563d8c9eeb2bf9c5abdd8e17fc210c91152b\\f1d20eae55844912e3794890788449ab\\attempt-01\\PAPER_READING_CARD.json",
+            "pool_action": "already_in_pool",
+            "usable_fields": [],
+            "limits": []
+          },
+          {
+            "paper_id": "d9a2563d8c9eeb2bf9c5abdd8e17fc210c91152b",
+            "source_handle": "P0026",
+            "title": "Research Progress on Solid-State Electrolytes in Solid-State Lithium Batteries: Classification, Ionic Conductive Mechanism, Interfacial Challenges",
+            "year": "2024",
+            "doi": "10.3390/nano14221773",
+            "segment_kind": "card_facet_contribution",
+            "section_path": [
+              "review planning",
+              "facet contribution"
+            ],
+            "text": "异：硫化物与高电压正极（>4V）不相容，易发生氧化分解，需界面修饰；氧化物具有宽电化学窗口（0-5V+），化学稳定性好，但与锂金属负极接触时因刚性导致物理接触不良，且部分氧化物（如LLTO）会被锂还原。\nF2\n用于分析两种材料在电池全生命周期中的界面退化风险，解释为何硫化物需要复杂的界面工程，而氧化物面临接触阻抗问题。 文中提到氧化物可通过热脉冲烧结（TPS）等新工艺改善接触，但未提供与传统硫化物产线兼容性的详细成本效益分析；产业化部分主要基于企业公告，缺乏第三方审计的成本数据。\n对比了制造工艺：硫化物支持冷压成型，适合大规模生产且能耗低，但对环境湿度极其敏感，需要干燥房；氧化物通常需要高温烧结以实现致密化和良好接触，能耗高且可能导致元素互扩散，增加界面电阻。\nF3\n用于评估两种技术路线的可制造性（Manufacturability），包括设备要求、环境控制成本和潜在的生产缺陷模式。",
+            "best_sentence": "文中提到氧化物可通过热脉冲烧结（TPS）等新工艺改善接触，但未提供与传统硫化物产线兼容性的详细成本效益分析；产业化部分主要基于企业公告，缺乏第三方审计的成本数据。\n对比了制造工艺：硫化物支持冷压成型，适合大规模生产且能耗低，但对环境湿度极其敏感，需要干燥房；氧化物通常需要高温烧结以实现致密化和良好接触，能耗高且可能导致元素互扩散，增加界面电阻。\nF3\n用于评估两种技术路线的可制造性（Manufacturability），包括设备要求、环境控制成本和潜在的生产缺陷模式。",
+            "score": 5.078367,
+            "match_terms": [
+              "interfacial stability manufacturability"
+            ],
+            "material_depth": "fulltext",
+            "reading_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\materials\\d9a2563d8c9eeb2bf9c5abdd8e17fc210c91152b\\snapshot-77e154bd6cb95b16d41fd6fe",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\ab_run\\cards\\d9a2563d8c9eeb2bf9c5abdd8e17fc210c91152b\\f1d20eae55844912e3794890788449ab\\attempt-01\\PAPER_READING_CARD.json",
+            "pool_action": "already_in_pool",
+            "usable_fields": [],
+            "limits": []
+          }
+        ],
+        "external_calls": 0
+      },
+      "locator": {
+        "writer_packet": "F:\\OptoMind-Review-2\\outputs\\review_v2_repair\\05_real_test_20260929\\attempt02_production_path\\UPDATED_WRITER_PACKET.json",
+        "source_handle": "P0026",
+        "card_path": "",
+        "resolvable": true
+      },
+      "used_by_tasks": [
+        "C6_U01_P01",
+        "C6_U01_P02",
+        "C6_U04_P01",
+        "C6_U04_P02"
+      ],
+      "arranged_level": "paragraph"
+    },
+    "P0030": {
+      "source_handle": "P0030",
+      "paper_id": "fc5503e3a9c5409d4b3ea15e1ca970f5b5b9769f",
+      "title": "Solid-State Batteries: Chemistry, Battery, and Thermal Management System, Battery Assembly, and Applications—A Critical Review",
+      "year": "2025",
+      "doi": "10.3390/batteries11060212",
+      "material_depth": "fulltext",
+      "material_status": "resolved",
+      "aliases": [],
+      "card_path": "",
+      "review_planning_B": {
+        "planning_summary": "该论文为硫化物与氧化物电解质的对比提供了关键的定性维度和背景信息，特别是在“可制造性”和“界面稳定性”方面提供了具体的机制解释和工艺约束。虽然它没有给出直接的量化胜负结论，但它明确了两种材料在离子电导率、机械性能和环境敏感性上的固有 trade-offs，是构建比较框架的重要素材。",
+        "facet_contributions": [
+          {
+            "boundaries": "数值为文献汇总的典型值，非本综述统一测试条件；未提供同一批次样品在不同条件下的直接对比数据。",
+            "contribution": "提供了硫化物和氧化物电解质在离子电导率方面的典型数值范围及影响因素。指出硫化物可达10^-2 S/cm，接近液态；氧化物通常在10^-4至10^-3 S/cm，且受晶界电阻影响大。",
+            "facet_id": "F1",
+            "possible_uses": "用于回答F1中关于离子电导率的比较，说明硫化物在绝对导电性能上的优势，以及氧化物在低温或高倍率下的潜在限制。"
+          },
+          {
+            "boundaries": "主要基于材料本身的化学性质和一般性界面反应描述，未涉及特定正极/负极组合的详细界面动力学数据。",
+            "contribution": "阐述了两种电解质在界面稳定性上的不同失效机制。硫化物易与水反应生成H2S，且在高压下可能与正极发生氧化还原反应；氧化物化学稳定性高，但与锂金属负极可能存在还原反应风险，且物理接触差导致高界面阻抗。",
+            "facet_id": "F2",
+            "possible_uses": "用于回答F2中关于界面稳定性的比较，区分化学稳定性（氧化物优）与物理/电化学界面兼容性（需涂层或缓冲层解决）的不同挑战。"
+          },
+          {
+            "boundaries": "制造成本评估基于当前实验室到中试阶段的普遍认知，未包含大规模量产后的精确经济模型。",
+            "contribution": "详细对比了制造工艺的差异。氧化物需要高温烧结（>1000°C），能耗高且易导致锂损失；硫化物可在室温下通过冷压致密化，适合卷对卷生产，但需严格干燥环境。",
+            "facet_id": "F3",
+            "possible_uses": "用于回答F3中关于可制造性的比较，明确氧化物的高能耗/复杂工艺与硫化物的低成本/高灵敏度之间的权衡。"
+          }
+        ],
+        "broader_review_uses": [
+          {
+            "connection_to_review": "提供固态电池整体技术成熟度背景，帮助定位硫化物和氧化物在产业化进程中的位置。",
+            "material": "综述中提到固态电池仍处于早期发展阶段，面临规模化生产挑战，且不同应用场景（EV vs. 消费电子）对材料要求不同。",
+            "purpose": "作为引言或背景部分，说明为何需要仔细权衡这三种属性，因为目前尚无单一材料能完美满足所有需求。"
+          },
+          {
+            "connection_to_review": "提供BMS设计对电解质特性的依赖关系，间接支持界面稳定性和离子传输效率的重要性。",
+            "material": "指出固态电池BMS需监控压力和界面阻抗，且传统SoC算法不适用。",
+            "purpose": "在讨论界面稳定性后果时，引用此点说明界面问题不仅影响电化学性能，还直接影响系统级管理策略。"
+          }
+        ],
+        "scope_interpretation_cautions": [
+          "本文对硫化物和氧化物的对比多为类别层面的概括，具体性能高度依赖于掺杂、微观结构和电极配对，阅读时需避免将某一种特定配方的结果泛化为整个类别的绝对结论。",
+          "文中提到的‘硫化物电导率高’是指体相电导率，实际电池性能往往受限于界面阻抗，这一点在规划比较时需特别注意区分体相性质与器件性能。",
+          "环境影响数据（LCA）存在较大不确定性，取决于能源结构和供应链细节，仅可作为趋势性参考，不能作为绝对的环保优劣判据。"
+        ],
+        "topic_handles": [
+          "硫化物电解质 (Sulfide electrolytes)",
+          "氧化物电解质 (Oxide electrolytes)",
+          "离子电导率 (Ionic conductivity)",
+          "界面稳定性 (Interfacial stability)",
+          "制造工艺 (Manufacturing processes: sintering vs. cold pressing)",
+          "全固态电池 (All-solid-state batteries)"
+        ]
+      },
+      "study_summary_A": {
+        "approach": "采用批判性综述方法，按主题模块组织材料：1) 化学体系：按电解质类型（无机氧化物/硫化物、聚合物、复合材料）分类讨论；2) 制造工艺：对比湿法、干法、薄膜沉积等不同加工路径；3) 系统集成：分析BMS拓扑结构、SoC估算模型及热管理需求；4) 环境与应用：引用生命周期评估数据比较环境影响，并列举具体行业应用案例。未进行新的实验或元分析统计，主要基于已有文献进行归纳与对比。",
+        "contribution_and_limits": [
+          {
+            "contribution": "提供了固态电池从材料到系统的全景式技术图谱，特别强调了BMS和热管理在固态电池系统中的特殊需求（如压力控制）。",
+            "limits": "作为综述，未提供新的实验数据；对硫化物与氧化物的直接对比多为定性描述，缺乏统一的定量基准（如相同测试条件下的直接对比数据较少）；部分应用前景预测基于厂商公告而非独立验证数据。"
+          }
+        ],
+        "key_findings": [
+          {
+            "conditions": "电解质类型对比",
+            "finding": "硫化物电解质室温离子电导率高（可达10^-2 S/cm），易于冷压成型，但对水分敏感且产生有毒副产物；氧化物电解质（如LLZO）稳定性好但需高温烧结且脆性大；聚合物电解质加工性好但室温电导率低。"
+          },
+          {
+            "conditions": "热安全性能",
+            "finding": "相比液态电池，固态电池分解温度更高，放热峰值更低，自加热起始温度显著推迟（如聚合物体系比液态体系高约150°C），但在极端条件下仍可能发生热失控。"
+          },
+          {
+            "conditions": "环境影响（LCA）",
+            "finding": "硫化物基全固态电池（ASSB-LSB）在全生命周期评估中表现出最低的全球变暖潜值和资源消耗，主要得益于其高比能量减少了材料用量；而其他化学体系的ASSB因生产能耗高，部分指标可能高于传统锂电池。"
+          },
+          {
+            "conditions": "BMS适配性",
+            "finding": "固态电池需要BMS集成压力监控以维持界面接触，且由于界面阻抗非线性，传统SoC估算方法精度下降，需引入阻抗谱（EIS）或机器学习辅助算法。"
+          }
+        ],
+        "paper_kind": "review",
+        "problem_or_question": "传统液态锂离子电池面临安全性（易燃、泄漏）和能量密度瓶颈，而全固态电池虽具潜力但商业化受阻于离子电导率、界面阻抗及制造复杂性。本研究旨在综合现有文献，厘清不同技术路线的优劣，为克服商业化障碍提供系统性参考。",
+        "research_scope": "全固态电池（ASSBs）的整体技术生态，涵盖电解质化学、制造工艺、电池管理系统（BMS）、热管理及环境性能，并评估其在电动汽车、消费电子、航空航天及可再生能源存储中的应用。",
+        "work_summary": "本文是一篇关于全固态电池的批判性综述，旨在梳理从材料化学到系统集成的最新进展。文章首先对比了液态锂离子电池与固态电池在安全性与能量密度上的差异，随后详细分类介绍了氧化物、硫化物、聚合物及复合电解质的特性与合成方法。接着，综述了湿法、干法、印刷及烧结等制造技术的优缺点。在系统层面，文章分析了针对固态电池特性的BMS架构、荷电状态（SoC）估算算法及热管理策略，并通过生命周期评估（LCA）讨论了其环境影响。最后，总结了各应用场景的现状与挑战。"
+      },
+      "local_passages": {
+        "reading_mode": "focused_local_search",
+        "question": "Compare sulfide and oxide solid electrolytes for all-solid-state lithium batteries: which offers the better combination of ionic conductivity, interfacial stability and manufacturability? 复合与混合策略：能否兼顾硫化物电导率与氧化物稳定性？ 评估氧化物 - 硫化物复合电解质及分层混合架构的技术可行性，论证其本质是'约束重构'而非单纯性能叠加。分析复合体系在电导率、稳定性、制造性上的综合表现及潜在协同效应，引用 C2-C5 的基准数据明确复合带来的增益或牺牲，指出最优组分比例依赖具体配对且规模化工艺尚未成熟。 涵盖物理混合复合电解质（Physical Composites）与分层混合架构（Layered Hybrids）。重点分析 LLZO-LPSC 等典型体系的性能表现与工艺约束。严格区分材料本征性能与器件有效性能，不涉及量化成本分析（因 G2 未 met），不外推长循环寿命（因 G3 未 met），不假设大尺寸电芯验证成功（因 G4 未 met）。论证单一材料瓶颈促使复合策略（P0018）。分析物理混合体系的电导率与微观结构权衡，硫化物作为'粘结剂'但牺牲空气稳定性（P0014, P0017）。评估分层混合架构的界面稳定性与机械约束，高压枝晶风险与压力管理（P0025, P0011）。分析制造可行性与规模化缺口，工艺复杂性增加。总结复合策略为情境最优而非万能解。",
+        "passages": [
+          {
+            "paper_id": "fc5503e3a9c5409d4b3ea15e1ca970f5b5b9769f",
+            "source_handle": "P0030",
+            "title": "Solid-State Batteries: Chemistry, Battery, and Thermal Management System, Battery Assembly, and Applications—A Critical Review",
+            "year": "2025",
+            "doi": "10.3390/batteries11060212",
+            "segment_kind": "document_block",
+            "section_path": [
+              "Inert Fillers"
+            ],
+            "text": ", have been shown to interact with the PEO polymer matrix, particularly in interfacial regions, thereby enhancing ionic conductivity.Their own permanent dipole PEO polymer matrix, particularly in interfacial regions, thereby enhancing ionic conductivity.Their own permanent dipole moments also cause a reduction in interfacial resistance between lithium metal anodes and electrolytes, enhancing interfacial stability [61].Clay fillers have nanoscale particle dimensions or layered structure with high interaction surface area of the polymer matrix.This wide interfacial contact facilitates the higher solubility of the lithium salt and thus improved ionic transport in the composite electrolyte [62]. Active fillers containing lithium ions are considered more effective in enhancing the electrochemical performance of solid composite electrolytes due to their h",
+            "best_sentence": "PEO polymer matrix, particularly in interfacial regions, thereby enhancing ionic conductivity.Their own permanent dipole moments also cause a reduction in interfacial resistance between lithium metal anodes and electrolytes, enhancing interfacial stability [61].Clay fillers have nanoscale particle dimensions or layered structure with high interaction surface area of the polymer matrix.This wide interfacial contact facilitates the higher solubility of the lithium salt and thus improved ionic transport in the composite electrolyte [62].",
+            "score": 22.902928,
+            "match_terms": [
+              "compare sulfide oxide solid electrolytes all-solid-state lithium batteries",
+              "offers better combination ionic conductivity",
+              "interfacial stability manufacturability",
+              "physical composites",
+              "layered hybrids"
+            ],
+            "material_depth": "fulltext",
+            "reading_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\materials\\fc5503e3a9c5409d4b3ea15e1ca970f5b5b9769f\\snapshot-6b4c8959f49fd5a1e86f9bf0",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\ab_run\\cards\\fc5503e3a9c5409d4b3ea15e1ca970f5b5b9769f\\a414c107458c2253a2c8473cd73e9019\\attempt-01\\PAPER_READING_CARD.json",
+            "pool_action": "already_in_pool",
+            "usable_fields": [],
+            "limits": []
+          },
+          {
+            "paper_id": "fc5503e3a9c5409d4b3ea15e1ca970f5b5b9769f",
+            "source_handle": "P0030",
+            "title": "Solid-State Batteries: Chemistry, Battery, and Thermal Management System, Battery Assembly, and Applications—A Critical Review",
+            "year": "2025",
+            "doi": "10.3390/batteries11060212",
+            "segment_kind": "card_topic_handle",
+            "section_path": [
+              "review planning",
+              "topic handles"
+            ],
+            "text": "制造工艺 (Manufacturing processes: sintering vs. cold pressing) 全固态电池 (All-solid-state batteries)",
+            "best_sentence": "全固态电池 (All-solid-state batteries)",
+            "score": 1.489028,
+            "match_terms": [
+              "compare sulfide oxide solid electrolytes all-solid-state lithium batteries"
+            ],
+            "material_depth": "fulltext",
+            "reading_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\materials\\fc5503e3a9c5409d4b3ea15e1ca970f5b5b9769f\\snapshot-6b4c8959f49fd5a1e86f9bf0",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\planning_revision\\holdout_x2_preparation\\ab_run\\cards\\fc5503e3a9c5409d4b3ea15e1ca970f5b5b9769f\\a414c107458c2253a2c8473cd73e9019\\attempt-01\\PAPER_READING_CARD.json",
+            "pool_action": "already_in_pool",
+            "usable_fields": [],
+            "limits": []
+          }
+        ],
+        "external_calls": 0
+      },
+      "locator": {
+        "writer_packet": "F:\\OptoMind-Review-2\\outputs\\review_v2_repair\\05_real_test_20260929\\attempt02_production_path\\UPDATED_WRITER_PACKET.json",
+        "source_handle": "P0030",
+        "card_path": "",
+        "resolvable": true
+      },
+      "used_by_tasks": [
+        "C6_U01_P01",
+        "C6_U01_P02",
+        "C6_U04_P01",
+        "C6_U04_P02"
+      ],
+      "arranged_level": "paragraph"
+    }
+  },
+  "chapter_tool_materials": []
+}

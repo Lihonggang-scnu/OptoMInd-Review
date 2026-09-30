@@ -2392,12 +2392,42 @@ def _find_binary(name: str) -> str:
     return str(discovered or "")
 
 
+_FIGURE_LINE_RE = re.compile(r"^!\[(.+?)\]\(([^)\s]+)\)\s*$")
+_BOLD_FIGURE_CAPTION_RE = re.compile(r"^\*\*(?:图|Fig(?:ure)?)\s*\d")
+
+
+def _blank_alt_before_bold_caption(markdown: str) -> str:
+    """Neutralise pandoc's implicit figure caption for delivery-style blocks.
+
+    The delivery chain emits ``![caption](assets/…)`` directly followed by a
+    bold ``**图 N. caption**`` line — the bold line is THE formal caption.
+    Pandoc turns a paragraph-alone image with non-empty alt into a figure
+    float whose caption duplicates that line.  Blank ONLY the alt of images
+    that carry such a following caption: the image stays inline (adjacent to
+    its caption) and exactly one formal caption survives.  The delivered
+    Markdown is untouched; this normalization applies to the TeX build copy.
+    """
+
+    lines = markdown.splitlines()
+    for index, line in enumerate(lines):
+        match = _FIGURE_LINE_RE.match(line.strip())
+        if not match:
+            continue
+        following = next(
+            (candidate for candidate in lines[index + 1:index + 4]
+             if candidate.strip()), "")
+        if _BOLD_FIGURE_CAPTION_RE.match(following.strip()):
+            lines[index] = f"![]({match.group(2)})"
+    return "\n".join(lines) + ("\n" if markdown.endswith("\n") else "")
+
+
 def _render_main_tex(
     *,
     metadata: dict[str, Any],
     body_tex: str,
     language: str = "en",
     tex_engine: str = "xelatex",
+    include_bibliography: bool = True,
 ) -> str:
     author_parts = []
     for author in metadata["authors"]:
@@ -2433,6 +2463,7 @@ def _render_main_tex(
 \usepackage{graphicx}
 \usepackage{booktabs,longtable}
 \usepackage{array}
+\usepackage{calc}
 \usepackage{siunitx}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage[unicode,hidelinks]{hyperref}
@@ -2444,6 +2475,15 @@ def _render_main_tex(
 \setlength{\parindent}{2em}
 \setlength{\parskip}{0.35em}
 \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\newcounter{none}
+\setcounter{none}{0}
+\setcounter{secnumdepth}{-2}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\providecommand{\pandocbounded}[1]{#1}
 \renewcommand{\abstractname}{摘要}
 """
     elif tex_engine == "xelatex":
@@ -2456,6 +2496,7 @@ def _render_main_tex(
 \usepackage{graphicx}
 \usepackage{booktabs,longtable}
 \usepackage{array}
+\usepackage{calc}
 \usepackage{siunitx}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage[unicode,hidelinks]{hyperref}
@@ -2465,6 +2506,15 @@ def _render_main_tex(
 \graphicspath{{figures/}}
 \setlength{\emergencystretch}{3em}
 \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\newcounter{none}
+\setcounter{none}{0}
+\setcounter{secnumdepth}{-2}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\providecommand{\pandocbounded}[1]{#1}
 """
     else:
         preamble = r"""\documentclass[11pt]{article}
@@ -2477,6 +2527,7 @@ def _render_main_tex(
 \usepackage{graphicx}
 \usepackage{booktabs,longtable}
 \usepackage{array}
+\usepackage{calc}
 \usepackage{siunitx}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage[hidelinks]{hyperref}
@@ -2486,6 +2537,15 @@ def _render_main_tex(
 \graphicspath{{figures/}}
 \setlength{\emergencystretch}{3em}
 \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\newcounter{none}
+\setcounter{none}{0}
+\setcounter{secnumdepth}{-2}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\providecommand{\pandocbounded}[1]{#1}
 """
     return (
         preamble
@@ -2526,10 +2586,18 @@ def _render_main_tex(
         + "\n\n"
         + body_tex
         + acknowledgements
-        + r"""
+        # An empty bibliography (no resolvable entries) still prints a bare
+        # section heading via thebibliography — omit the commands entirely
+        # when there is nothing to list, so no dangling 参考文献 remains.
+        + (
+            r"""
 \bibliographystyle{unsrtnat}
 \bibliography{references}
-\end{document}
+"""
+            if include_bibliography
+            else "\n"
+        )
+        + r"""\end{document}
 """
     )
 
@@ -2693,6 +2761,7 @@ class LatexPublicationRenderer:
     language: str = "en"
     document_type: str = "review"
     enrich_crossref: bool = True
+    enrich_s2: bool = True
     max_crossref_requests: int = 20
     compile_pdf: bool = True
     # F5: when compile_pdf is requested but the LaTeX toolchain is missing,
@@ -2870,6 +2939,7 @@ class LatexPublicationRenderer:
         if unicode_preflight["dangerous_count"]:
             self._warnings.append("dangerous_unicode_detected")
         manuscript_md = self.output_dir / "manuscript.normalized.md"
+        markdown = _blank_alt_before_bold_caption(markdown)
         _write_text(manuscript_md, markdown)
 
         local_records = _collect_source_metadata(run_dir)
@@ -2903,6 +2973,7 @@ class LatexPublicationRenderer:
             local_records=local_records,
             kb_records=kb_records,
             enrich_crossref=self.enrich_crossref,
+            enrich_s2=self.enrich_s2,
             max_crossref_requests=self.max_crossref_requests,
         )
         incomplete_references = [
@@ -3072,6 +3143,7 @@ class LatexPublicationRenderer:
                 body_tex=body_tex,
                 language=self.language,
                 tex_engine=tex_engine,
+                include_bibliography=bool(ordered_ids),
             ),
         )
         _write_text(
@@ -3337,6 +3409,7 @@ def build_latex_publication(
     language: str = "en",
     document_type: str = "review",
     enrich_crossref: bool = True,
+    enrich_s2: bool = True,
     compile_pdf: bool = True,
     pdf_strict: bool = False,
     render_previews: bool = True,
@@ -3351,6 +3424,7 @@ def build_latex_publication(
         language=language,
         document_type=document_type,
         enrich_crossref=enrich_crossref,
+        enrich_s2=enrich_s2,
         compile_pdf=compile_pdf,
         pdf_strict=pdf_strict,
         render_previews=render_previews,
