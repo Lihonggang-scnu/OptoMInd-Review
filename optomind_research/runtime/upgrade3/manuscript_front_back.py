@@ -351,7 +351,7 @@ def _introduction_chapter_heading(
     ]
     numbered_sequence = bool(chapter_like) and len(chapter_like) == len(chapter_roles)
     if not unresolved_explicit_id and numbered_sequence:
-        for row in chapter_roles:
+        for index, row in enumerate(chapter_roles):
             if _is_intro_role(row.get("role")):
                 return chapter_like[index]
 

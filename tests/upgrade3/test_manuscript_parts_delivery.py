@@ -240,3 +240,26 @@ def test_placement_conflict_stops_before_citations_and_publication(tmp_path, mon
     assert "05_publication" not in report["stages"]
     assert body.read_bytes() == original
     assert stale.read_text() == "Stale result must not be consumed"
+
+
+def test_legacy_numbered_sequence_intro_fallback_uses_correct_role_index():
+    """No context/IDs/titles: the bounded legacy fallback selects chapter two."""
+    original = (
+        "# Review\n\n"
+        "## 第1章 Physical principles\n\nFirst BODY stays intact.\n\n"
+        "## 第2章 Reader framework\n\nSecond BODY contains the derivation.\n\n"
+        "## 第3章 Methods\n\nThird BODY stays intact.\n"
+    )
+    roles = [{"role": "physical principles"}, {"role": "introduction"}, {"role": "methods"}]
+    introduction = "New legacy reader entrance."
+    applied, log = fb.apply_front_back(original, {"introduction": introduction}, roles)
+    opening = (
+        "<!-- generated-introduction-start -->\n\n" + introduction +
+        "\n\n<!-- generated-introduction-end -->\n\n"
+    )
+    assert log == [{"part": "introduction",
+                    "position": "body_introduction_chapter_opening_inserted",
+                    "chapter_heading": "## 第2章 Reader framework"}]
+    assert applied.index("## 第2章 Reader framework") < applied.index(opening)
+    assert applied.index(opening) < applied.index("Second BODY contains the derivation.")
+    assert applied.replace(opening, "", 1) == original
