@@ -4596,10 +4596,21 @@ class ProgressiveReviewPlanner:
             if resume and cached.is_file():
                 cached_packet = dict(_read_json(cached))
                 expected_materials = [_tool_material_for_prompt(item) for item in (tool_materials_by_chapter or {}).get(chapter_id, [])]
+                cached_source_materials = cached_packet.get("source_materials")
+                if self.config.planning_revision_enabled:
+                    # Candidate navigation is appended to the packet for
+                    # citation/context, while payload source_materials contains
+                    # assigned sources only.  Compare those two namespaces
+                    # separately; the navigation fields below already carry
+                    # their own cache identity.
+                    cached_source_materials = [
+                        item for item in (cached_source_materials or [])
+                        if not (isinstance(item, Mapping) and item.get("source_role") == "candidate_navigation")
+                    ]
                 if (
                     (not self.config.planning_revision_enabled or cached_packet.get("_parts_cache_inputs") == parts_cache_inputs)
                     and cached_packet.get("_adaptive_input_materials") == expected_materials
-                    and cached_packet.get("source_materials") == payload["source_materials"]
+                    and cached_source_materials == payload["source_materials"]
                     and (not self.config.planning_revision_enabled or (
                         cached_packet.get("candidate_navigation") == payload.get("candidate_navigation")
                         and cached_packet.get("candidate_materials") == payload.get("candidate_materials")

@@ -153,6 +153,81 @@ def test_chapter_details_projection_does_not_change_full_packet_or_legacy(tmp_pa
     assert legacy_source["planning_material"] == card["review_planning"]
 
 
+def test_revision_resume_ignores_appended_navigation_sources_but_tracks_real_changes(tmp_path, monkeypatch):
+    candidate, chapter, card = _chapter_fixture(tmp_path)
+    calls = []
+
+    def model(stage, payload):
+        calls.append(payload)
+        return {"chapter_plan": {
+            "thesis": "thesis", "reader_objective": "objective",
+            "units": [{"unit_id": "U01", "substantive_point": "point", "source_handles": ["P0001"],
+                       "paragraph_briefs": [{"point": "point", "development": "development", "source_handles": ["P0001"]}]}],
+        }}
+
+    nav_version = ["v1"]
+
+    def fake_navigation(**_kwargs):
+        return {
+            "candidate_materials": [{"source_handle": "P0002", "title": "Unassigned candidate", "version": nav_version[0]}],
+            "candidate_count": 1,
+        }
+
+    monkeypatch.setattr(planning, "build_candidate_navigation", fake_navigation)
+    parts_plan = {
+        "context": "body context",
+        **{
+            name: {"purpose": f"{name} purpose", "focus": [], "boundary": [],
+                   "placement": {"mode": "standalone", "anchor": name}, "finalize_from": []}
+            for name in ("abstract", "introduction", "conclusion")
+        },
+    }
+
+    def make_planner(output_dir):
+        planner = ProgressiveReviewPlanner(
+            ProgressivePlannerConfig(topic_id="fixture", plan_path=tmp_path / "PLAN.json", pool_path=tmp_path / "POOL.jsonl",
+                                     output_dir=output_dir, chapter_workers=1, planning_revision_enabled=True),
+            planner=model,
+        )
+        planner._parts_plan = parts_plan
+        return planner
+
+    output = tmp_path / "resume-assigned"
+    make_planner(output)._chapter_details(
+        chapters=[chapter], shared_outline={}, topic="topic", candidates={"paper1": candidate},
+        level1_tools={}, level2_tools={}, resume=False, state={}, candidate_pool=[candidate],
+    )
+    assert len(calls) == 1
+    saved = json.loads((output / "stages" / "chapters" / "CH01.json").read_text(encoding="utf-8"))
+    assert any(item.get("source_role") == "candidate_navigation" for item in saved["source_materials"])
+
+    make_planner(output)._chapter_details(
+        chapters=[chapter], shared_outline={}, topic="topic", candidates={"paper1": candidate},
+        level1_tools={}, level2_tools={}, resume=True, state={}, candidate_pool=[candidate],
+    )
+    assert len(calls) == 1
+
+    card["general_understanding"]["approach"] = "assigned A changed"
+    Path(candidate["card_path"]).write_text(json.dumps(card, ensure_ascii=False), encoding="utf-8")
+    make_planner(output)._chapter_details(
+        chapters=[chapter], shared_outline={}, topic="topic", candidates={"paper1": candidate},
+        level1_tools={}, level2_tools={}, resume=True, state={}, candidate_pool=[candidate],
+    )
+    assert len(calls) == 2
+
+    navigation_output = tmp_path / "resume-navigation"
+    make_planner(navigation_output)._chapter_details(
+        chapters=[chapter], shared_outline={}, topic="topic", candidates={"paper1": candidate},
+        level1_tools={}, level2_tools={}, resume=False, state={}, candidate_pool=[candidate],
+    )
+    nav_version[0] = "v2"
+    make_planner(navigation_output)._chapter_details(
+        chapters=[chapter], shared_outline={}, topic="topic", candidates={"paper1": candidate},
+        level1_tools={}, level2_tools={}, resume=True, state={}, candidate_pool=[candidate],
+    )
+    assert len(calls) == 4
+
+
 def test_actual_ch03_revision_payload_is_within_local_token_budget():
     """Measure the current 418-source CH03 shape without contacting a model."""
     run_root = Path(__file__).resolve().parents[2].parent / "new_plan"
