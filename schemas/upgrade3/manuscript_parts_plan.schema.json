@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "manuscript_parts_plan",
+  "description": "轻量文章职责合同 v1：一个共享语境字段和五个复用的部件职责字段。正文深度任务另由 BODY planner 承担。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "context",
+    "abstract",
+    "introduction",
+    "conclusion"
+  ],
+  "properties": {
+    "context": {
+      "type": "string",
+      "minLength": 1,
+      "description": "共享适用语境：读者、综述用途/文体、与本题相关的知识负担、已确认的期刊格式。避免按学科名称自动套模板；不重复已有central_question/review_argument。"
+    },
+    "abstract": {
+      "$ref": "#/$defs/part"
+    },
+    "introduction": {
+      "$ref": "#/$defs/part"
+    },
+    "conclusion": {
+      "$ref": "#/$defs/part"
+    }
+  },
+  "$defs": {
+    "part": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "purpose",
+        "focus",
+        "boundary",
+        "placement",
+        "finalize_from"
+      ],
+      "properties": {
+        "purpose": {
+          "type": "string",
+          "minLength": 1,
+          "description": "本部件为当前读者完成什么认识任务，不是固定修辞句式。"
+        },
+        "focus": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "本篇应承载的核心问题、组织角度或有条件的主张；早期未定结果应明确保留。不是段落/案例任务列表。"
+        },
+        "boundary": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "说明此处允许的展开程度、与正文的责任分界和合法重现关系。不要泛化为禁止机制、数字、案例或引用。"
+        },
+        "placement": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "anchor"
+          ],
+          "properties": {
+            "mode": {
+              "enum": [
+                "standalone",
+                "embedded",
+                "distributed"
+              ]
+            },
+            "anchor": {
+              "type": "string",
+              "description": "对应已有文章构件或正文职责的定位；不创建正文units，也不是字符偏移或逐段计划。"
+            }
+          }
+        },
+        "finalize_from": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "晚期定稿须据哪些已存在的输入校准承诺/判断，例如最终正文、实际范围、必要材料和已有首尾。不是第二套证据台账。"
+        }
+      }
+    }
+  }
+}

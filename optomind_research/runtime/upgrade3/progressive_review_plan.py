@@ -27,7 +27,13 @@ from .chapter_arrangement import (
 )
 
 
+from .manuscript_parts import (
+    PARTS_CONTRACT_VERSION, ManuscriptPartsError, boundary_projection,
+    validate_manuscript_parts_plan, validate_body_tasks,
+)
+
 SCHEMA_VERSION = "optomind.progressive_review_plan.v1"
+PARTS_PLAN_SCHEMA_VERSION = "optomind.progressive_review_plan.v2"
 DEFAULT_PLANNER_MODEL = "qwen3.5-plus"
 DEFAULT_READER_MODEL = "qwen3.7-flash"
 DEFAULT_POOL_PATH = Path("outputs/planning_support/20260923/practical_refresh/supplement_live/PLANNING_POOL.jsonl")
@@ -717,6 +723,37 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
             "本模式只在显式 opt-in 时启用。章节负责人建立有材料依据的认识；其他角色只能执行其职责并回传具体问题。"
         ))
         stage_text += "\n\n【章节论证模式】" + directive
+    if planning_revision:
+        stage_text = stage_text.replace(
+            "An introduction establishes context, the review's problem and organizing perspective; it must not become a miniature full review. ", "")
+        if stage in {"provisional_scope", "level1_outline"}:
+            stage_text += (
+                "\nFrom this same material-informed global conception, return a complete manuscript_parts_plan: "
+                "context plus abstract/introduction/conclusion. Each part has exactly purpose (reader knowledge task), "
+                "focus (topic-specific issues or conditional claims), boundary (depth and BODY ownership), "
+                "placement {mode: standalone|embedded|distributed, anchor: semantic location}, and finalize_from "
+                "(existing information to revisit before final prose). context describes readers, genre and confirmed format, "
+                "not a copy of central_question/review_argument/shared_scope. focus/boundary/finalize_from are string arrays. "
+                "Do not add units, cases, paragraph_briefs, routing, quotas or domain templates. "
+                "provisional_outline/shared_outline contain substantive BODY tasks only. Opening/abstract/closing duties "
+                "belong in the separate card. Keep deep teaching, mathematics, methods, evidence and comparison in BODY "
+                "even when the publication heading is Introduction or Conclusion. Calibrate rather than invent final findings."
+            )
+        elif stage == "whole_plan_improvement":
+            stage_text += (
+                "\nAlso calibrate the supplied manuscript_parts_plan against actual BODY scope, case material and "
+                "cross-chapter judgments. Return manuscript_parts_plan_status=no_change or updated. For updated, "
+                "return the COMPLETE replacement manuscript_parts_plan in the same schema, never a patch. "
+                "Check opening promises, supported closing claims, overlap with Outlook, and placement. "
+                "Preserve embedded/distributed when appropriate; never invent an extra BODY Conclusion."
+            )
+        else:
+            stage_text += (
+                "\nThis stage handles substantive BODY tasks only. manuscript_parts_boundary is read-only "
+                "division-of-responsibility guidance, not an assignment to generate or expand manuscript parts. "
+                "Develop deep teaching, analysis, methods, mechanisms and evidence fully regardless of publication heading. "
+                "Do not return or modify manuscript_parts_plan."
+            )
     return common + "\n\n" + stage_text
 
 
@@ -2094,13 +2131,101 @@ class ProgressiveReviewPlanner:
         # queue boundary observable without contacting a provider.
         self.retrieval_loop_runner = retrieval_loop_runner
         self._read_materials: dict[str, dict[str, Any]] = {}
+        self._parts_plan: dict[str, Any] = {}
+        self._parts_revision = ""
+        self._run_input_signature = ""
+
+    def _accept_parts(self, stage: str, response: Mapping[str, Any]) -> None:
+        """Validate only the three authoritative checkpoints, including cached responses."""
+        if not self.config.planning_revision_enabled:
+            return
+        try:
+            if stage == "whole_plan_improvement":
+                status = response.get("manuscript_parts_plan_status")
+                if status not in {"no_change", "updated"}:
+                    raise ManuscriptPartsError("manuscript_parts_plan_status_required")
+                if status == "no_change":
+                    if "manuscript_parts_plan" in response and response["manuscript_parts_plan"] != self._parts_plan:
+                        raise ManuscriptPartsError("no_change_with_changed_manuscript_parts_plan")
+                    validate_manuscript_parts_plan(self._parts_plan)
+                else:
+                    self._parts_plan = validate_manuscript_parts_plan(response.get("manuscript_parts_plan"))
+                self._parts_revision = "v2"
+            else:
+                self._parts_plan = validate_manuscript_parts_plan(response.get("manuscript_parts_plan"))
+                self._parts_revision = "v0" if stage == "provisional_scope" else "v1"
+                raw_outline = response.get("provisional_outline" if stage == "provisional_scope" else "shared_outline")
+                if isinstance(raw_outline, list):
+                    validate_body_tasks(raw_outline)
+                rows = _outline_chapter_rows(raw_outline)
+                if not rows:
+                    raise ManuscriptPartsError("body_outline_required")
+                validate_body_tasks(rows)
+        except ManuscriptPartsError as exc:
+            raise ProgressivePlanError(f"{stage}:{exc}") from exc
+
+    def _call(self, stage: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+        """Augment existing calls; never creates an additional model stage."""
+        if not self.config.planning_revision_enabled:
+            return _call_record(self.planner, stage, payload)
+        payload = dict(payload)
+        payload["planning_revision_mode"] = True
+        payload["manuscript_parts_contract_version"] = PARTS_CONTRACT_VERSION
+        if stage in {"provisional_scope", "level1_outline", "whole_plan_improvement"}:
+            if self._parts_plan:
+                payload["manuscript_parts_plan"] = dict(self._parts_plan)
+        else:
+            if self._parts_plan:
+                payload["manuscript_parts_boundary"] = boundary_projection(self._parts_plan)
+            # BODY owners receive the shared argument/outline, not a mutable parts contract.
+            for key in ("shared_level1_outline", "provisional_scope"):
+                if isinstance(payload.get(key), Mapping):
+                    payload[key] = {k: v for k, v in payload[key].items() if k != "manuscript_parts_plan"}
+        record = _call_record(self.planner, stage, payload)
+        response = _stage_response(record)
+        self._validate_body_response(stage, response)
+        return record
+
+    def _validate_body_response(self, stage: str, response: Mapping[str, Any]) -> None:
+        if not self.config.planning_revision_enabled:
+            return
+        if stage not in {"provisional_scope", "level1_outline", "whole_plan_improvement"}:
+            if "manuscript_parts_plan" in response:
+                raise ProgressivePlanError("body_stage_cannot_modify_manuscript_parts_plan:" + stage)
+            for key in ("shared_outline", "chapters", "chapter_proposals"):
+                if key in response:
+                    if isinstance(response[key], list):
+                        validate_body_tasks(response[key])
+                    validate_body_tasks(_outline_chapter_rows(response[key]))
+            for key in ("chapter_plan", "updated_plan"):
+                if key in response:
+                    validate_body_tasks([response[key]])
+            for update in response.get("chapter_updates") or []:
+                if isinstance(update, Mapping) and "updated_plan" in update:
+                    validate_body_tasks([update["updated_plan"]])
+
+    def _parts_metadata(self) -> dict[str, Any]:
+        if not self.config.planning_revision_enabled:
+            return {}
+        return {
+            "schema_version": PARTS_PLAN_SCHEMA_VERSION,
+            "manuscript_parts_contract_version": PARTS_CONTRACT_VERSION,
+            "manuscript_parts_plan_revision": self._parts_revision,
+            "manuscript_parts_plan": validate_manuscript_parts_plan(self._parts_plan),
+        }
+
 
     def _stage(self, name: str, fn: Callable[[], Any], *, resume: bool, state: dict[str, Any], cache_inputs: Any = None) -> Any:
+        if self.config.planning_revision_enabled:
+            cache_inputs = {"contract": PARTS_CONTRACT_VERSION, "run_inputs": self._run_input_signature,
+                            "parts_plan": self._parts_plan, "stage_inputs": cache_inputs}
         path = self.config.output_dir / "stages" / (name + ".json")
         if resume and path.is_file():
             previous = (state.get("stage_inputs") or {}).get(name)
             if cache_inputs is None or previous == cache_inputs:
-                return _read_json(path)
+                cached = _read_json(path)
+                self._validate_body_response(name, _stage_response(cached))
+                return cached
         state.update({"status": "in_progress", "current_stage": name})
         _atomic_json(self.config.output_dir / "RUN_STATE.json", state)
         result = fn()
@@ -2159,7 +2284,7 @@ class ProgressiveReviewPlanner:
                 "rebuild_arrangement_input": {"chapter": dict(chapter), "chapter_plan": dict(chapter_plan),
                                                "source_materials": [dict(item) for item in source_materials if isinstance(item, Mapping)]},
             }
-        record = _call_record(self.planner, "affected_chapter_revision", payload)
+        record = self._call("affected_chapter_revision", payload)
         response = _stage_response(record)
         owner_input_plan = payload.get("chapter_plan") if isinstance(payload.get("chapter_plan"), Mapping) else chapter_plan
         status, updated_plan, unit_id_remap, structural_errors = _classify_owner_response(
@@ -2190,13 +2315,17 @@ class ProgressiveReviewPlanner:
         def propose(chapter: Mapping[str, Any]) -> dict[str, Any]:
             chapter_id = _text(chapter.get("chapter_id") or chapter.get("id"))
             path = root / (_safe_id(chapter_id) + ".json")
+            proposal_cache_inputs = {"outline": outline, "routing": routing,
+                                     "run_inputs": self._run_input_signature, "contract": PARTS_CONTRACT_VERSION}
             if resume and path.is_file():
-                return _read_json(path)
+                cached = _read_json(path)
+                if not self.config.planning_revision_enabled or cached.get("_parts_cache_inputs") == proposal_cache_inputs:
+                    return cached
             routes = [row for row in routing["source_routes"] if chapter_id in (row.get("chapter_ids") or [])]
             material = [{key: row[key] for key in (
                 "question", "usable_content", "still_missing", "conditions", "limits", "source_handles"
             ) if key in row} for row in self.tool_materials_by_chapter.get(chapter_id, [])]
-            record = _call_record(self.planner, "chapter_proposals", {
+            record = self._call("chapter_proposals", {
                 "call_id": "chapter-proposal-" + chapter_id,
                 "topic_id": self.config.topic_id, "research_question": topic,
                 "chapter": dict(chapter), "shared_level1_outline": outline,
@@ -2209,6 +2338,8 @@ class ProgressiveReviewPlanner:
             if not rows:
                 raise ProgressivePlanError("chapter_proposal_missing:" + chapter_id)
             result = {"response": {"chapter_proposals": rows}, "telemetry": record.get("telemetry") or {}}
+            if self.config.planning_revision_enabled:
+                result["_parts_cache_inputs"] = proposal_cache_inputs
             _atomic_json(path, result)
             return result
 
@@ -2259,6 +2390,9 @@ class ProgressiveReviewPlanner:
                     "supplement_material": row.get("supplement_gap_material") or {},
                     "other_supplement_materials": row.get("supplement_gap_materials") or [],
                 })
+            route_cache_inputs = {"outline": _compact_routing_outline(shared_outline),
+                                  "candidates": candidate_batch, "contract": PARTS_CONTRACT_VERSION,
+                                  "boundary": boundary_projection(self._parts_plan) if self._parts_plan else {}}
             expected_handles = [row["source_handle"] for row in candidate_batch]
             valid_chapters = set(chapter_ids)
 
@@ -2331,7 +2465,7 @@ class ProgressiveReviewPlanner:
                     payload["repair_attempt"] = repair_attempt
                     payload["route_only_supplied_handles"] = True
                 try:
-                    record = _call_record(self.planner, "source_routing", payload)
+                    record = self._call("source_routing", payload)
                     response = _stage_response(record)
                     raw_routes = response.get("source_routes") or response.get("routes") or []
                     return normalize_routes(candidates, raw_routes), dict(record.get("telemetry") or {})
@@ -2378,7 +2512,9 @@ class ProgressiveReviewPlanner:
             if resume and cache_path.is_file():
                 try:
                     cached = _read_json(cache_path)
-                    if isinstance(cached, Mapping):
+                    if isinstance(cached, Mapping) and (
+                        not self.config.planning_revision_enabled or cached.get("_parts_cache_inputs") == route_cache_inputs
+                    ):
                         pending, attempted = pending_from_cache(cached)
                         if not pending:
                             return index, dict(cached)
@@ -2395,6 +2531,8 @@ class ProgressiveReviewPlanner:
                 "source_routes": output_routes,
                 "telemetry": telemetry,
             }
+            if self.config.planning_revision_enabled:
+                saved["_parts_cache_inputs"] = route_cache_inputs
             pending, attempted = pending_from_cache(saved)
             if pending:
                 saved = repair_cached(saved, pending, attempted)
@@ -2596,9 +2734,22 @@ class ProgressiveReviewPlanner:
         paper_to_handle = {paper_id: handle for handle, paper_id in source_handle_map.items()}
         b_pool = [dict(row["_b_summary"]) for row in pool_rows]
         candidate_by_id = {str(row["_paper_id"]): row for row in pool_rows}
+        self._parts_plan, self._parts_revision = {}, ""
+        self._run_input_signature = _material_content_signature({
+            "plan": plan, "pool": pool_rows, "prior_readings": self.prior_readings,
+            "tool_materials": self.tool_materials_by_chapter,
+            "local_material_index": str(self.config.local_material_index_path or ""),
+        })
         state_path = root / "RUN_STATE.json"
+        if resume and self.config.planning_revision_enabled and not state_path.is_file():
+            raise ProgressivePlanError("resume_state_required_for_parts_contract")
         if resume and state_path.is_file():
             state = dict(_read_json(state_path))
+            if self.config.planning_revision_enabled and (
+                state.get("schema_version") != PARTS_PLAN_SCHEMA_VERSION
+                or state.get("manuscript_parts_contract_version") != PARTS_CONTRACT_VERSION
+            ):
+                raise ProgressivePlanError("resume_legacy_parts_contract_rejected_use_new_output_directory")
             if str(state.get("topic_id") or "") != self.config.topic_id:
                 raise ProgressivePlanError("resume_topic_id_mismatch")
             if bool(state.get("planning_revision_enabled", False)) != bool(self.config.planning_revision_enabled):
@@ -2616,11 +2767,14 @@ class ProgressiveReviewPlanner:
                 "completed_stages": [],
                 "status": "in_progress",
             }
+            if self.config.planning_revision_enabled:
+                state.update({"schema_version": PARTS_PLAN_SCHEMA_VERSION,
+                              "manuscript_parts_contract_version": PARTS_CONTRACT_VERSION})
             _atomic_json(state_path, state)
 
         provisional_record = self._stage(
             "provisional_scope",
-            lambda: _call_record(self.planner, "provisional_scope", {
+            lambda: self._call("provisional_scope", {
                 "topic_id": self.config.topic_id,
                 "research_question": topic,
                 "original_plan": plan,
@@ -2632,6 +2786,10 @@ class ProgressiveReviewPlanner:
             state=state,
         )
         provisional = _stage_response(provisional_record)
+        self._accept_parts("provisional_scope", provisional)
+        if self.config.planning_revision_enabled:
+            state.update(self._parts_metadata())
+            _atomic_json(state_path, state)
         provisional = _resolve_planner_handles(provisional, source_handle_map)
 
         level1_tool_result = self._tool_cycle(
@@ -2654,7 +2812,7 @@ class ProgressiveReviewPlanner:
         candidate_by_id = {str(row["_paper_id"]): row for row in pool_rows}
         level1_outline_record = self._stage(
             "level1_outline",
-            lambda: _call_record(self.planner, "level1_outline", {
+            lambda: self._call("level1_outline", {
                 "topic_id": self.config.topic_id,
                 "research_question": topic,
                 "provisional_scope": provisional,
@@ -2664,10 +2822,20 @@ class ProgressiveReviewPlanner:
             }),
             resume=resume,
             state=state,
+            cache_inputs=({"provisional": provisional, "tools": self._compact_tool_feedback(level1_tool_result), "pool": b_pool}) if self.config.planning_revision_enabled else None,
         )
         level1_outline = _stage_response(level1_outline_record)
+        self._accept_parts("level1_outline", level1_outline)
+        if self.config.planning_revision_enabled:
+            state.update(self._parts_metadata())
+            _atomic_json(state_path, state)
         if stop_after == "level1":
             partial = self._partial_result(topic, plan, provisional, level1_outline, level1_tool_result, "level1")
+            if self.config.planning_revision_enabled:
+                partial.update(self._parts_metadata())
+                partial.update({"review_argument": level1_outline.get("review_argument", ""),
+                                "shared_scope": level1_outline.get("shared_scope", {}),
+                                "material_theme_inventory": provisional.get("material_theme_inventory", [])})
             _atomic_json(root / "PROGRESSIVE_REVIEW_PLAN.partial.json", partial)
             (root / "PROGRESSIVE_REVIEW_PLAN.partial.md").write_text(render_plan_markdown(partial), encoding="utf-8", newline="\n")
             state.update({"status": "stopped_after_level1", "current_stage": "", "output": str(root / "PROGRESSIVE_REVIEW_PLAN.partial.json")})
@@ -2684,12 +2852,13 @@ class ProgressiveReviewPlanner:
             lambda: self._propose_chapters(topic=topic, outline=level1_outline, routing=routing, resume=resume),
             resume=resume,
             state=state,
+            cache_inputs=({"outline": level1_outline, "routing": routing}) if self.config.planning_revision_enabled else None,
         )
         proposals = self._attach_routed_sources(_normalize_proposal_response(_stage_response(proposals_record)), routing["source_routes"], level1_outline.get("shared_outline"))
         proposals = _resolve_planner_handles(proposals, source_handle_map)
         harmonize_record = self._stage(
             "harmonized_scope",
-            lambda: _call_record(self.planner, "harmonize_scope", {
+            lambda: self._call("harmonize_scope", {
                 "topic_id": self.config.topic_id,
                 "research_question": topic,
                 "shared_level1_outline": level1_outline,
@@ -2700,6 +2869,7 @@ class ProgressiveReviewPlanner:
             }),
             resume=resume,
             state=state,
+            cache_inputs=({"outline": level1_outline, "proposals": proposals, "routing": routing, "tools": self._compact_tool_feedback(level1_tool_result)}) if self.config.planning_revision_enabled else None,
         )
         harmonized = _resolve_planner_handles(_stage_response(harmonize_record), source_handle_map)
         harmonized["chapters"] = self._harmonized_chapters(harmonized, proposals)
@@ -2722,7 +2892,7 @@ class ProgressiveReviewPlanner:
         candidate_by_id = {str(row["_paper_id"]): row for row in pool_rows}
         final_scope_record = self._stage(
             "finalize_chapter_scope",
-            lambda: _call_record(self.planner, "finalize_chapter_scope", {
+            lambda: self._call("finalize_chapter_scope", {
                 "topic_id": self.config.topic_id,
                 "research_question": topic,
                 "harmonized_shared_outline": harmonized.get("shared_outline") or level1_outline.get("shared_outline") or {},
@@ -2738,6 +2908,7 @@ class ProgressiveReviewPlanner:
             }),
             resume=resume,
             state=state,
+            cache_inputs=({"harmonized": harmonized, "tools": self._compact_tool_feedback(level2_tool_result), "pool": [row["_b_summary"] for row in pool_rows]}) if self.config.planning_revision_enabled else None,
         )
         final_scope = _resolve_planner_handles(_stage_response(final_scope_record), source_handle_map)
         harmonized = {
@@ -2748,6 +2919,11 @@ class ProgressiveReviewPlanner:
         chapters = self._harmonized_chapters(final_scope, {"chapter_proposals": harmonized.get("chapters") or proposals.get("chapter_proposals") or []})
         if stop_after == "level2":
             partial = self._partial_result(topic, plan, provisional, level1_outline, level1_tool_result, "level2", harmonized=harmonized, level2_tools=level2_tool_result)
+            if self.config.planning_revision_enabled:
+                partial.update(self._parts_metadata())
+                partial.update({"review_argument": level1_outline.get("review_argument", ""),
+                                "shared_scope": level1_outline.get("shared_scope", {}),
+                                "material_theme_inventory": provisional.get("material_theme_inventory", [])})
             _atomic_json(root / "PROGRESSIVE_REVIEW_PLAN.partial.json", partial)
             (root / "PROGRESSIVE_REVIEW_PLAN.partial.md").write_text(render_plan_markdown(partial), encoding="utf-8", newline="\n")
             state.update({"status": "stopped_after_level2", "current_stage": "", "output": str(root / "PROGRESSIVE_REVIEW_PLAN.partial.json")})
@@ -2758,7 +2934,7 @@ class ProgressiveReviewPlanner:
         if self.retrieval_loop_runner is not None:
             chapter_needs_record = self._stage(
                 "chapter_need_analysis",
-                lambda: _call_record(self.planner, "chapter_need_analysis", {
+                lambda: self._call("chapter_need_analysis", {
                     "topic_id": self.config.topic_id,
                     "research_question": topic,
                     "shared_outline": harmonized.get("shared_outline") or level1_outline.get("shared_outline") or {},
@@ -2856,7 +3032,7 @@ class ProgressiveReviewPlanner:
         whole_record = ({"response": {}}
                         if self.config.planning_revision_enabled else self._stage(
             "whole_plan_improvement",
-            lambda: _call_record(self.planner, "whole_plan_improvement", {
+            lambda: self._call("whole_plan_improvement", {
                 "topic_id": self.config.topic_id,
                 "research_question": topic,
                 "shared_outline": harmonized.get("shared_outline") or level1_outline.get("shared_outline") or {},
@@ -2957,6 +3133,9 @@ class ProgressiveReviewPlanner:
 
             def revise_one(item: tuple[int, tuple[str, Mapping[str, Any]]]) -> tuple[int, dict[str, Any]]:
                 index, (chapter_id, revision_payload) = item
+                if self.config.planning_revision_enabled and self._parts_plan:
+                    revision_payload["manuscript_parts_boundary"] = boundary_projection(self._parts_plan)
+                    revision_payload["manuscript_parts_contract_version"] = PARTS_CONTRACT_VERSION
                 cache_path = revision_root / f"{_safe_id(chapter_id)}.json"
                 if resume and cache_path.is_file():
                     try:
@@ -2970,7 +3149,7 @@ class ProgressiveReviewPlanner:
                     except ProgressivePlanError:
                         pass
                 try:
-                    record = _call_record(self.planner, "affected_chapter_revision", revision_payload)
+                    record = self._call("affected_chapter_revision", revision_payload)
                     response = _stage_response(record)
                     saved = {
                         "chapter_id": chapter_id,
@@ -3184,6 +3363,8 @@ class ProgressiveReviewPlanner:
                         "pool_sources": len(pool_rows),
                         "review_sources_in_unit_catalog": len(set(re.findall(r"\bP\d{4,}\b", json.dumps(case_catalog, ensure_ascii=False)))),
                         "planning_revision_mode": self.config.planning_revision_enabled,
+                        **({"manuscript_parts_boundary": boundary_projection(self._parts_plan)}
+                           if self.config.planning_revision_enabled else {}),
                     })
                     cached: Mapping[str, Any] | None = None
                     if resume and cache_path.is_file():
@@ -3249,7 +3430,7 @@ class ProgressiveReviewPlanner:
                     if self.config.planning_revision_enabled:
                         payload["planning_revision_mode"] = True
                     try:
-                        response_record = _call_record(self.planner, "case_groups", payload)
+                        response_record = self._call("case_groups", payload)
                         response = _stage_response(response_record)
                         additions = [
                             dict(item) for item in response.get("additions") or []
@@ -3366,6 +3547,8 @@ class ProgressiveReviewPlanner:
         plan_output["case_enrichment"] = _stage_response(case_record)
         if plan_output["case_enrichment"].get("status") in {"partial", "not_run_budget"}:
             plan_output["status"] = "initial_draft"
+            if self.config.planning_revision_enabled:
+                plan_output["manuscript_parts_plan_frozen"] = False
         self._write_final_outputs(plan_output)
         state.update({"status": plan_output["status"], "current_stage": "", "output": str(root / "DETAILED_REVIEW_PLAN.json"), "completed_chapters": len(detail_records)})
         _atomic_json(state_path, state)
@@ -3505,6 +3688,10 @@ class ProgressiveReviewPlanner:
                 "late_material_changes": by_chapter_material.get(chapter_id, []),
             })
         whole_inputs = {
+            "manuscript_parts_plan": dict(self._parts_plan),
+            "manuscript_parts_contract_version": PARTS_CONTRACT_VERSION,
+            "review_argument": level1_outline.get("review_argument", ""),
+            "shared_scope": harmonized.get("shared_scope") or level1_outline.get("shared_scope") or {},
             "chapters": whole_review_chapters,
             "original_plan": dict(original_plan or {}),
             "material_theme_inventory": [
@@ -3525,7 +3712,9 @@ class ProgressiveReviewPlanner:
             # differ; the coordinator sees the actual overlap and judges by
             # role instead of mechanically de-duplicating citations.
             "cross_chapter_source_uses": _cross_chapter_source_uses(detail_records),
-            "tool_results_summary": self._compact_tool_feedback({"level1": level1_tool_result, "level2": level2_tool_result}),
+            "tool_results_summary": {"level1": self._compact_tool_feedback(level1_tool_result),
+                                     "level2": self._compact_tool_feedback(level2_tool_result),
+                                     "chapters": self._compact_tool_feedback(chapter_tool_result)},
             "tool_feedback_scope": {
                 "unanswered_need_means": "当前池未取得该内容，仅约束受影响章节本次可写结论；不构成领域缺失或不存在更优路线的证据",
             },
@@ -3536,7 +3725,7 @@ class ProgressiveReviewPlanner:
         }
         whole_record = self._stage(
             "whole_plan_improvement",
-            lambda: _call_record(self.planner, "whole_plan_improvement", {
+            lambda: self._call("whole_plan_improvement", {
                 "topic_id": self.config.topic_id,
                 "research_question": topic,
                 "shared_outline": harmonized.get("shared_outline") or level1_outline.get("shared_outline") or {},
@@ -3553,6 +3742,9 @@ class ProgressiveReviewPlanner:
             cache_inputs=whole_inputs,
         )
         improvement = _stage_response(whole_record)
+        self._accept_parts("whole_plan_improvement", improvement)
+        state.update(self._parts_metadata())
+        _atomic_json(root / "RUN_STATE.json", state)
         improvement = dict(improvement)
         improvement["late_material_changes"] = by_chapter_material
         # In the opt-in path the whole-plan response is feedback for the
@@ -3671,6 +3863,9 @@ class ProgressiveReviewPlanner:
 
             def revise_one(item: tuple[int, tuple[str, Mapping[str, Any]]]) -> tuple[int, dict[str, Any]]:
                 index, (chapter_id, revision_payload) = item
+                if self.config.planning_revision_enabled and self._parts_plan:
+                    revision_payload["manuscript_parts_boundary"] = boundary_projection(self._parts_plan)
+                    revision_payload["manuscript_parts_contract_version"] = PARTS_CONTRACT_VERSION
                 cache_path = revision_root / f"{_safe_id(chapter_id)}.json"
                 if resume and cache_path.is_file():
                     try:
@@ -3684,7 +3879,7 @@ class ProgressiveReviewPlanner:
                     except (ProgressivePlanError, AttributeError):
                         pass
                 try:
-                    record = _call_record(self.planner, "affected_chapter_revision", revision_payload)
+                    record = self._call("affected_chapter_revision", revision_payload)
                     response = _stage_response(record)
                     owner_status, updated_plan, unit_id_remap, structural_errors = _classify_owner_response(
                         revision_payload.get("chapter_plan") or {},
@@ -4022,18 +4217,26 @@ class ProgressiveReviewPlanner:
         def build_one(item: tuple[int, Mapping[str, Any]]) -> tuple[int, dict[str, Any]]:
             index, chapter = item
             chapter_id, payload = chapter_payload(chapter, index)
+            parts_cache_inputs = {
+                "contract": PARTS_CONTRACT_VERSION, "chapter": dict(chapter), "shared_outline": shared_outline,
+                "boundary": boundary_projection(self._parts_plan) if self._parts_plan else {},
+            }
             cached = root / (_safe_id(chapter_id) + ".json")
             if resume and cached.is_file():
                 cached_packet = dict(_read_json(cached))
                 expected_materials = [_tool_material_for_prompt(item) for item in (tool_materials_by_chapter or {}).get(chapter_id, [])]
                 if (
-                    cached_packet.get("_adaptive_input_materials") == expected_materials
+                    (not self.config.planning_revision_enabled or cached_packet.get("_parts_cache_inputs") == parts_cache_inputs)
+                    and cached_packet.get("_adaptive_input_materials") == expected_materials
                     and cached_packet.get("source_materials") == payload["source_materials"]
                     and (not self.config.planning_revision_enabled or (
                         cached_packet.get("candidate_navigation") == payload.get("candidate_navigation")
                         and cached_packet.get("candidate_materials") == payload.get("candidate_materials")
                     ))
                 ):
+                    if self.config.planning_revision_enabled:
+                        validate_body_tasks([cached_packet])
+                        validate_body_tasks([cached_packet.get("chapter_plan", {})])
                     return index, cached_packet
             def projected_source(item: Mapping[str, Any]) -> dict[str, Any]:
                 route = route_by_handle.get(item.get("source_handle"))
@@ -4109,7 +4312,7 @@ class ProgressiveReviewPlanner:
                     "keep_conditions_and_limits": True,
                     "do_not_only_append_citations": True,
                 }
-            record = _call_record(self.planner, "chapter_details", model_payload)
+            record = self._call("chapter_details", model_payload)
             response = _stage_response(record)
             chapter_plan = response.get("chapter_plan") if isinstance(response.get("chapter_plan"), Mapping) else response
             packet_source_materials = [dict(item) for item in payload["source_materials"]]
@@ -4157,6 +4360,10 @@ class ProgressiveReviewPlanner:
                 "planner_telemetry": record.get("telemetry") or {},
                 "_adaptive_input_materials": chapter_tool_materials,
             }
+            if self.config.planning_revision_enabled:
+                packet["_parts_cache_inputs"] = parts_cache_inputs
+                packet["manuscript_parts_boundary"] = boundary_projection(self._parts_plan)
+                packet["schema_version"] = PARTS_PLAN_SCHEMA_VERSION
             _atomic_json(cached, packet)
             md = render_writer_packet_markdown(packet)
             (cached.with_suffix(".md")).write_text(md, encoding="utf-8", newline="\n")
@@ -4418,6 +4625,9 @@ class ProgressiveReviewPlanner:
 
     def _assemble_final(self, *, topic: str, plan: Mapping[str, Any], pool_rows: Sequence[Mapping[str, Any]], provisional: Mapping[str, Any], level1_outline: Mapping[str, Any], harmonized: Mapping[str, Any], chapters: Sequence[Mapping[str, Any]], chapter_records: Sequence[Mapping[str, Any]], level1_tools: Mapping[str, Any], level2_tools: Mapping[str, Any], improvement: Mapping[str, Any], chapter_tools: Mapping[str, Any] | None = None) -> dict[str, Any]:
         # Writer handoff follows the final chapter plans, not superseded proposal text.
+        if self.config.planning_revision_enabled:
+            validate_body_tasks(chapter_records)
+            validate_body_tasks([row.get("chapter_plan", {}) for row in chapter_records])
         chapter_records = json.loads(json.dumps(chapter_records, ensure_ascii=False, default=_json_default))
         all_tool_materials = [
             item for rows in self.tool_materials_by_chapter.values()
@@ -4449,6 +4659,7 @@ class ProgressiveReviewPlanner:
         shared_outline = []
         for packet in chapter_records:
             packet.pop("_adaptive_input_materials", None)
+            packet.pop("_parts_cache_inputs", None)
             detail = packet.get("chapter_plan") or {}
             chapter = packet["chapter"]
             chapter["title"] = detail.get("title") or chapter.get("title")
@@ -4518,6 +4729,17 @@ class ProgressiveReviewPlanner:
                 for row in chapter_records
             ],
         }
+        if self.config.planning_revision_enabled:
+            final.update(self._parts_metadata())
+            final["review_argument"] = level1_outline.get("review_argument", "")
+            final["material_theme_inventory"] = provisional.get("material_theme_inventory") or []
+            final["manuscript_parts_plan_frozen"] = not bool(improvement.get("owner_revision_unresolved"))
+            validate_body_tasks(shared_outline)
+            for packet in final["chapters"]:
+                packet["schema_version"] = PARTS_PLAN_SCHEMA_VERSION
+                packet["manuscript_parts_contract_version"] = PARTS_CONTRACT_VERSION
+                packet["planning_result_path"] = "../DETAILED_REVIEW_PLAN.json"
+                packet["manuscript_parts_boundary"] = boundary_projection(self._parts_plan)
         unresolved_owner = [
             _text(item) for item in (improvement.get("owner_revision_unresolved") or []) if _text(item)
         ]
@@ -6230,6 +6452,9 @@ def render_plan_markdown(plan: Mapping[str, Any]) -> str:
     scope = plan.get("shared_scope") or plan.get("provisional_scope") or {}
     lines.extend(["## 综述范围与论证主线", ""])
     lines.extend(_render_readable(scope, level=3))
+    if plan.get("manuscript_parts_plan"):
+        lines.extend(["", "## 文章级职责规划", ""])
+        lines.extend(_render_readable(plan["manuscript_parts_plan"], level=3))
     lines.extend(["", "## 共同提纲", ""])
     outline = plan.get("shared_outline") or {}
     lines.extend(_render_readable(outline, level=3))

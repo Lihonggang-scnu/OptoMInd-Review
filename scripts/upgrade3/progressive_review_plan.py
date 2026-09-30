@@ -46,7 +46,7 @@ def parser():
     p.add_argument(
         "--planning-revision",
         action="store_true",
-        help="启用默认关闭的 M1 材料导航与本地按需回填路径",
+        help="启用新版 BODY 深度规划与 manuscript_parts_plan 职责合同（新输出目录，不迁移旧规划）",
     )
     return p
 
@@ -71,6 +71,9 @@ def preflight(cfg, args):
                "original_plan": plan, "pool_row_count": len(rows),
                "candidate_pool": [r["_b_summary"] for r in rows],
                "required_behavior": {"read_all_candidates": True, "candidate_pool_is_complete": True, "do_not_force_use": True}}
+    if cfg.planning_revision_enabled:
+        payload["planning_revision_mode"] = True
+        payload["manuscript_parts_contract_version"] = planning.PARTS_CONTRACT_VERSION
     messages = planning._messages_for("provisional_scope", payload)
     count = planning.qwen_local_token_counter(cfg.tokenizer_path)(b"", messages)
     reserved_input = math.ceil(count * planning.TOKEN_MARGIN_MULTIPLIER) + planning.TOKEN_FRAMING_MARGIN
