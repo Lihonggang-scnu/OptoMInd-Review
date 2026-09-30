@@ -34,7 +34,7 @@
 }
 ```
 
-以上仅为增加项，仍需原有 delivery schema、编辑与首尾 fixture/recording 配置。相对路径从配置文件目录解析。`planning_context` 也可显式传紧凑对象，至少包含有效职责卡；真实计划文件需处于 complete/frozen v2，而不能把 partial 作为最终合同。
+以上仅为增加项，仍需原有 delivery schema、编辑与首尾 fixture/recording 配置。相对路径从配置文件目录解析。若 packet/manifest 已能自动解析 planning context，配置也可只提供 `material_records`，在上下文解析完成后补入并验证；找不到任何真实职责合同时明确报错。`planning_context` 也可显式传紧凑对象，至少包含有效职责卡；真实计划文件需处于 complete/frozen v2，而不能把 partial 作为最终合同。
 
 `material_records` 是已存在的真实 A/B 卡或片段对象列表；总序列化文本超过100,000字符会报错，不静默截断。也可直接传到 API。当前版本不自动检索这些记录；card_path/material_access 是定位信息，不冒充已读取全文，也不会自动打开所有全池文件。与历史正文联合测试时须核对引用身份，同号不同文献会拒绝继续。
 
@@ -44,14 +44,14 @@
 - 不因标题是 Introduction/Conclusion 替换实质 BODY。深度教学、公式、机制、证据比较继续由正文链完成
 - embedded/distributed 在 schema 与规划中合法；本版本无可靠 section identity 来自动应用，返回 unsupported_placement，保存原规划、零生成、阻止后续发布
 - anchor 是语义定位，未被当作字符偏移或 string-replace 地址
-- 重复运行只更新自己的标记范围。没有标记的历史首尾不会被自动删掉；做“新卡 + 历史 BODY”测试时应显式提供选择后的 BODY fixture，不能将保留旧首尾的整稿当作已去重稿
+- 重复运行只更新自己的标记范围。没有标记的历史首尾不会被自动删掉；standalone 与未受标记管理的明确部件标题或已定位的章节职责冲突时，在生成/应用前返回 `placement_conflict` 并阻止后续引用、出版。模糊或未定位的情况仅报告 warning；该检测仅用于出版位置安全，不改变 BODY 分类。做“新卡 + 历史 BODY”测试时须先由人工明确承载决策
 - 无合同的旧 fixture 路线仍保留并标为 legacy，不是旧规划迁移
 
 ## 离线验证与内容审查
 
 新测试覆盖 schema、三个规划检查点、完整注入式规划流程、partial/resume、缓存失效、旧状态拒绝、BODY/PartPlan隔离、深度 Introduction 和 Outlook 反例、最终 packet 一致性、manifest/assembly/首尾上下文接线、必要背景引用、失败闭锁与标记幂等。
 
-BODY 编排/写作者核心算法没有修改。新合成案例实际经过现有 arrangement→writer payload，原 paragraph briefs、公式、条件、比较、A/B/deep/local/supplement/tool材料与引用身份保持一致。另用仓库内历史稿验证：6章、23小节、178个唯一引用handle都保留；去掉新生成的专属部件后逐字恢复原稿，历史源文件不改动。
+BODY 编排/写作者核心算法没有修改。新合成案例实际经过现有 arrangement→writer payload，原 paragraph briefs、公式、条件、比较、A/B/deep/local/supplement/tool材料与引用身份保持一致。另用仓库内历史稿验证：6章、23小节、178个唯一引用handle都保留；本次小修对其未标记旧首尾触发冲突并停止生成，历史源文件逐字节不改动。无冲突与已有 owned span 的正向样例继续验证重复应用幂等。
 
 这些是确定性信息保留验收，不是模型质量提升证据。职责卡示例和首尾fixture均为人工标注测试材料，不声称它们来自模型。
 
@@ -87,3 +87,13 @@ python -m compileall -q optomind_research/runtime/upgrade3 scripts/upgrade3
 ```
 
 第二条在精简云端快照中仍会报告上述12个基线失败，不能解读为全套绿灯。新增测试用人工fixture/注入式planner与网络拦截完成；未使用付费模型，未生成新的科学结论。
+
+## 验收后两项小修（2026-09-30）
+
+- 明确的 standalone 承载冲突返回 placement_conflict；冲突清单记录 part、requested_mode、existing_location、reason。原 BODY 不动、不降级 embedded、不写冲突稿；downstream 停在03，不进入04/05
+- 仅在文章级 H1/H2 的明确部件名、编号章节标题或能定位的显式 chapter role 上阻断；技术性 Introduction to…、局部三级小节和代码示例不因此阻断。已有 owned marker 从冲突位置中排除
+- config.material_records 可与自动解析上下文结合。主合同来源优先级不变，显式列表替换原材料列表后走同一 bounded validator；没有任何上下文仍拒绝
+- 材料记录若显式给出与同 handle 的规划身份冲突的 DOI/paper_id，会拒绝；已有 delivery catalog 身份冲突防线保持
+- 本次不改 planner/schema/编排/单元写作、不修历史12项失败、不进行真实模型调用。推送后停止开发，由本地Agent在真实材料与预算环境验收
+
+小修验收结果：manuscript-parts 专项 **91 passed**（原55项，新增36项；部分旧断言按新 fail-closed 要求调整）；整个 `tests/upgrade3` **140 passed / 12 failed**。与修改前 tip 的 **104 passed / 12 failed** 对照，失败测试名集合完全一致。新增 placement 26项、material merge 9项及 downstream阻断1项；`git diff --check`、compileall通过。测试/应用流程零网络、零模型调用；Git读取与发布使用正常网络。推送此独立修复提交后停止开发。

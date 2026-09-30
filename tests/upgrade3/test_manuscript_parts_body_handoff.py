@@ -187,14 +187,12 @@ def test_boundary_projection_is_detached_and_does_not_expand_parts():
     assert parts == before
 
 
-def test_tracked_23_subsection_body_survives_owned_parts_application():
-    """Actual tracked historical text + manual parts fixture; no prose generation.
-
-    This is deliberately not migration: all historical sections, including old
-    unowned front/back text, remain unchanged. Only new owned spans may change.
-    """
+def test_tracked_23_subsection_body_survives_placement_conflict(tmp_path):
+    """Real historical text is preserved by blocking, never by removing BODY."""
     import re
-    from optomind_research.runtime.upgrade3.manuscript_front_back import apply_front_back
+    from optomind_research.runtime.upgrade3.manuscript_front_back import (
+        apply_front_back, run_front_back_stage, FrontBackError,
+    )
 
     historical = (Path(__file__).resolve().parents[2] / "advisor/20260930/delivery/"
                   "real_manuscript/REVIEW_DRAFT_HANDLES.md")
@@ -206,28 +204,17 @@ def test_tracked_23_subsection_body_survives_owned_parts_application():
     assert len(chapters) == 6
     assert len(subsections) == 23
     assert len(set(handles)) == 178
-    parts = {
-        "abstract": "Manual software-test abstract; not a scientific synthesis.",
-        "keywords": ["manual fixture"],
-        "introduction": "Manual software-test entrance; not generated academic prose.",
-        "conclusion": "Manual software-test closure; no new scientific claims.",
-    }
     context = {"manuscript_parts_plan": _parts("standalone")}
-    applied, log = apply_front_back(original, parts, planning_context=context)
-    assert len(log) == 3
-    assert applied.splitlines()[0] == original.splitlines()[0]
-    for name in ("abstract", "introduction", "conclusion"):
-        assert applied.count(f"<!-- manuscript-part:{name}:start -->") == 1
-        assert applied.count(f"<!-- manuscript-part:{name}:end -->") == 1
-    # Remove exactly the newly owned spans and their inserted trailing gap.
-    # Do not strip historical sections or normalize substantive whitespace.
-    recovered = re.sub(
-        r"<!-- manuscript-part:(abstract|introduction|conclusion):start -->"
-        r".*?<!-- manuscript-part:\1:end -->\n\n", "", applied, flags=re.DOTALL)
-    assert recovered == original
-    assert re.findall(r"^## 第\d+章 .+$", applied, re.MULTILINE) == chapters
-    assert re.findall(r"^### .+$", applied, re.MULTILINE) == subsections
-    assert re.findall(r"\[P\d{4}\]", applied) == handles
-    reapplied, _ = apply_front_back(applied, parts, planning_context=context)
-    assert reapplied == applied
+    roles = [{"chapter_id": "CH01", "title": chapters[0][3:], "role": "introduction"}]
+    for _ in range(2):
+        report = run_front_back_stage(draft_path=historical, research_question="fixture", chapter_roles=roles,
+            planning_context=context, out_dir=tmp_path / "out", parts_fixture_path=tmp_path / "must-not-read.json")
+        assert report["status"] == "placement_conflict"
+        assert report["generated"] == [] and report["application_log"] == []
+        assert report["final_manuscript"] == ""
+        assert historical.read_bytes() == original_bytes
+    assert not (tmp_path / "out/messages").exists()
+    assert not (tmp_path / "out/MANUSCRIPT_FINAL.md").exists()
+    with pytest.raises(FrontBackError, match="placement_conflict"):
+        apply_front_back(original, {"introduction": "Manual entrance"}, roles, planning_context=context)
     assert historical.read_bytes() == original_bytes

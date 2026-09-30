@@ -166,6 +166,43 @@ def _input_planning_context(data: Mapping[str, Any], base: Path) -> dict[str, An
         raise DeliveryConfigError("new_contract_requires_resolvable_planning_context")
     return None
 
+def _merge_material_records(
+    context: Mapping[str, Any] | None, records: Any = None,
+) -> dict[str, Any] | None:
+    """Apply explicit material input only after the main context is resolved.
+
+    This never synthesizes a contract or changes its identity map. An explicit
+    record list replaces the current list, matching the original config API.
+    """
+    from .manuscript_front_back import normalize_planning_context
+    if context is None:
+        if records is not None:
+            raise DeliveryConfigError("material_records_require_planning_context")
+        return None
+    candidate = dict(context)
+    if records is not None:
+        candidate["material_records"] = records
+    try:
+        result = normalize_planning_context(candidate)
+    except ValueError as exc:
+        raise DeliveryConfigError(f"invalid_planning_context:{exc}") from exc
+    identities = result.get("source_identity_map") or {}
+    for row in result["material_records"]:
+        handle = str(row.get("source_handle") or "")
+        identity = identities.get(handle) or {}
+        def norm_doi(value):
+            return re.sub(r"^https?://(?:dx\.)?doi\.org/", "", str(value or "").strip().casefold())
+        old_doi, new_doi = norm_doi(identity.get("doi")), norm_doi(row.get("doi"))
+        if old_doi and new_doi:
+            conflict = old_doi != new_doi
+        else:
+            old_id, new_id = str(identity.get("paper_id") or ""), str(row.get("paper_id") or "")
+            conflict = bool(old_id and new_id and old_id != new_id)
+        if conflict:
+            raise DeliveryConfigError(f"planning_identity_conflict:{handle}")
+    return result
+
+
 def run_history_delivery(
     *,
     manifest_path: str | Path,
@@ -618,6 +655,11 @@ def load_delivery_config(path: str | Path) -> dict[str, Any]:
             resolved_assets.append({**dict(asset), "path": str(asset_path)})
         else:
             resolved_assets.append(asset)
+    material_records = None
+    if "material_records" in data:
+        material_records = _resolve_list(data["material_records"], "material_records")
+        if material_records is None:
+            raise DeliveryConfigError("material_records_not_object_list")
     planning_context = None
     if "planning_context" in data:
         entry = data["planning_context"]
@@ -631,17 +673,12 @@ def load_delivery_config(path: str | Path) -> dict[str, Any]:
         if not isinstance(entry, Mapping):
             raise DeliveryConfigError("planning_context_not_object")
         entry = dict(entry)
-        if "material_records" in data:
-            entry["material_records"] = _resolve_list(data["material_records"], "material_records")
-        from .manuscript_front_back import normalize_planning_context
-        try:
-            planning_context = normalize_planning_context(entry)
-        except ValueError as exc:
-            raise DeliveryConfigError(f"invalid_planning_context:{exc}") from exc
-    elif "material_records" in data:
-        raise DeliveryConfigError("material_records_require_planning_context")
+        planning_context = _merge_material_records(entry, material_records)
+    # With no explicit context, defer material validation until the packet or
+    # manifest has supplied the authoritative planning contract.
     return {
         "planning_context": planning_context,
+        "material_records": material_records,
         "config_path": str(config_path),
         "language": str(data.get("language") or "zh"),
         "research_question": str(data.get("research_question") or "").strip(),
@@ -683,7 +720,10 @@ def run_downstream_delivery(
     """
 
     out_dir = Path(out_dir).resolve()
-    planning_context = config.get("planning_context") or assembly_report.get("planning_context")
+    planning_context = config.get("planning_context")
+    if planning_context is None:
+        planning_context = assembly_report.get("planning_context")
+    planning_context = _merge_material_records(planning_context, config.get("material_records"))
     stages: dict[str, Any] = {}
     halt: list[str] = []
 
@@ -753,7 +793,7 @@ def run_downstream_delivery(
                                        "model_calls": 0, "external_requests": 0}
     r3 = stages["03_front_back"]
     final_md = Path(str(r3.get("final_manuscript") or ""))
-    if r3.get("status") in ("pending", "no_parts_generated", "failed", "unsupported_placement") \
+    if r3.get("status") in ("pending", "no_parts_generated", "failed", "unsupported_placement", "placement_conflict") \
             or (planning_context is not None and r3.get("status") != "generated") \
             or not str(r3.get("final_manuscript") or "") or not final_md.is_file():
         halt.append("03_front_back")

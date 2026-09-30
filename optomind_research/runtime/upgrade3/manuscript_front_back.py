@@ -8,8 +8,12 @@ reads both updated parts).  Providers are replay or labeled manual fixtures.
 Empty bodies and ``offline_placeholder`` responses are rejected as failures,
 never recorded as generated.
 
-Application keeps ONE main position per part: an existing 摘要/引言/结语
-section body is replaced in place.  When the body's first chapter already
+With a manuscript-parts contract, application owns only marked spans.
+A clear unowned article-role location conflicts with a new standalone part
+and blocks generation/application without changing BODY.
+
+Legacy fixture application keeps ONE main position per part: an existing
+摘要/引言/结语 section body is replaced in place.  When the body's first chapter already
 serves as the introduction (its title/role says so), the generated
 introduction updates THAT chapter's opening instead of adding a second
 "## 引言" section.  A missing conclusion is inserted before the references
@@ -347,7 +351,7 @@ def _introduction_chapter_heading(
     ]
     numbered_sequence = bool(chapter_like) and len(chapter_like) == len(chapter_roles)
     if not unresolved_explicit_id and numbered_sequence:
-        for index, row in enumerate(chapter_roles):
+        for row in chapter_roles:
             if _is_intro_role(row.get("role")):
                 return chapter_like[index]
 
@@ -449,6 +453,9 @@ def apply_front_back(
     if context is not None:
         if _unsupported_placements(context):
             raise FrontBackError("unsupported_placement")
+        conflicts, _ = _placement_conflicts(manuscript, chapter_roles, context)
+        if conflicts:
+            raise FrontBackError("placement_conflict")
         return _apply_owned_parts(manuscript, parts)
     result = manuscript
     log: list[dict[str, str]] = []
@@ -503,11 +510,105 @@ def apply_front_back(
 
 
 
-def _unowned_part_headings(manuscript: str) -> list[str]:
+_PART_HEADING_NAMES = {
+    "abstract": {"abstract", "摘要"},
+    "introduction": {"introduction", "引言", "绪论"},
+    "conclusion": {"conclusion", "conclusions", "结语", "结论", "总结"},
+}
+_PART_ROLE_NAMES = {
+    "abstract": _PART_HEADING_NAMES["abstract"],
+    "introduction": _PART_HEADING_NAMES["introduction"] | {"opening", "introduction-like", "入口"},
+    "conclusion": _PART_HEADING_NAMES["conclusion"] | {"closing", "conclusion-like", "收束"},
+}
+_CHAPTER_PREFIX = re.compile(
+    r"^(?:第[0-9一二三四五六七八九十百]+章|Chapter\s+[0-9]+|CH[0-9]+)\s*[:：.、-]?\s*",
+    re.IGNORECASE,
+)
+
+
+def _unowned_article_headings(manuscript: str) -> list[str]:
+    """Inspect publication locations only; never classify or change BODY tasks.
+
+    Valid owned spans are excluded, as are fenced code examples and headings
+    below article/chapter level. In particular, a mere occurrence of the word
+    Introduction in a technical title does not establish an article role.
+    """
     unowned = re.sub(r"<!-- manuscript-part:(abstract|introduction|conclusion):start -->.*?"
                      r"<!-- manuscript-part:\1:end -->", "", manuscript, flags=re.DOTALL)
-    return re.findall(r"^#{2,3}\s+(?:Abstract|摘要|Introduction|引言|绪论|Conclusion|结语|结论|总结)\s*$",
-                      unowned, flags=re.MULTILINE | re.IGNORECASE)
+    headings = []
+    fence = ""
+    for line in unowned.splitlines():
+        marker = re.match(r"^ {0,3}(`{3,}|~{3,})", line)
+        if marker:
+            token = marker.group(1)
+            if not fence:
+                fence = token
+            elif token[0] == fence[0] and len(token) >= len(fence):
+                fence = ""
+            continue
+        if not fence and re.match(r"^ {0,3}#{1,2}\s+", line):
+            headings.append(line.strip())
+    return headings
+
+
+def _heading_title(heading: str) -> str:
+    return re.sub(r"\s+#+\s*$", "", heading.lstrip("# ").strip()).strip()
+
+
+def _placement_conflicts(
+    manuscript: str,
+    chapter_roles: Sequence[Mapping[str, Any]],
+    context: Mapping[str, Any],
+) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
+    """Fail closed only on deterministic standalone publication collisions."""
+    headings = _unowned_article_headings(manuscript)
+    conflicts: list[dict[str, str]] = []
+    warnings: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+
+    def record(part: str, location: str) -> None:
+        if (part, location) not in seen:
+            seen.add((part, location))
+            conflicts.append({"part": part, "requested_mode": "standalone",
+                              "existing_location": location,
+                              "reason": "existing_unowned_body_location"})
+
+    for part in STAGE_ORDER:
+        if context["manuscript_parts_plan"][part]["placement"]["mode"] != "standalone":
+            continue
+        # A role is meaningful only when it resolves to an actual unowned
+        # chapter location. Stale or ambiguous metadata alone cannot block.
+        for row in chapter_roles:
+            if str(row.get("role") or "").strip().casefold() not in _PART_ROLE_NAMES[part]:
+                continue
+            chapter_id = str(row.get("chapter_id") or "").strip()
+            title = str(row.get("title") or "").strip()
+            matches = [h for h in headings if chapter_id and re.search(
+                rf"(?<![A-Za-z0-9]){re.escape(chapter_id)}(?![A-Za-z0-9])", _heading_title(h))]
+            if len(matches) != 1:
+                matches = [h for h in headings if title and
+                           (_heading_title(h) == title or _CHAPTER_PREFIX.sub("", _heading_title(h)) == title)]
+            if len(matches) != 1 and re.fullmatch(r"CH[0-9]+", chapter_id, re.IGNORECASE):
+                number = int(chapter_id[2:])
+                matches = [h for h in headings if re.match(
+                    rf"^(?:第0*{number}章|Chapter\s+0*{number}(?![0-9]))(?:\s|[:：.、-]|$)",
+                    _heading_title(h), re.IGNORECASE)]
+            if len(matches) == 1:
+                record(part, matches[0])
+            else:
+                warnings.append({"part": part, "chapter_id": chapter_id,
+                                 "status": "unresolved_part_role",
+                                 "message": "Role does not resolve to one unowned location; BODY preserved."})
+        for heading in headings:
+            title = _CHAPTER_PREFIX.sub("", _heading_title(heading)).casefold()
+            if title in _PART_HEADING_NAMES[part]:
+                record(part, heading)
+            elif any(re.match(re.escape(name) + r"(?:\s|[:：])", title)
+                     for name in _PART_HEADING_NAMES[part]):
+                warnings.append({"part": part, "heading": heading,
+                                 "status": "ambiguous_part_heading",
+                                 "message": "Technical heading alone does not establish article responsibility; BODY preserved."})
+    return conflicts, warnings
 
 
 def _apply_owned_parts(manuscript: str, parts: Mapping[str, Any]) -> tuple[str, list[dict[str, str]]]:
@@ -589,6 +690,19 @@ def run_front_back_stage(
         _write_json(out_dir / "FRONT_BACK_REPORT.json", report)
         return report
 
+    conflicts, placement_warnings = (
+        _placement_conflicts(manuscript, chapter_roles, context)
+        if context is not None else ([], []))
+    if conflicts:
+        report = {"stage": "front_back", "status": "placement_conflict",
+                  "planning_context": context, "conflicts": conflicts,
+                  "placement_execution": "blocked", "placement_warnings": placement_warnings,
+                  "generated": [], "failures": conflicts, "application_log": [],
+                  "source_draft": str(draft_path), "final_manuscript": "",
+                  "model_calls": 0, "external_requests": 0}
+        _write_json(out_dir / "FRONT_BACK_REPORT.json", report)
+        return report
+
     from .review_delivery import ReplayClient, MissingRecording
 
     fixture = None
@@ -658,10 +772,7 @@ def run_front_back_stage(
         "planning_context_source": ("final_planning_artifact" if context and "status" in context
                                     else "explicit_compact_fixture" if context else "legacy"),
         "placement_execution": "standalone" if context is not None else "legacy",
-        "unowned_part_heading_warnings": (
-            [{"heading": heading.strip(), "status": "preserved_unowned_section",
-              "message": "Unowned part-named section preserved; review coexistence before publication."}
-             for heading in _unowned_part_headings(manuscript)] if context is not None else []),
+        "placement_warnings": placement_warnings,
         "generated": generated_stages,
         "missing_stages": missing_stages,
         "failures": failures,

@@ -49,13 +49,13 @@ def no_network(monkeypatch):
 
 def test_contract_messages_supply_real_context_and_serial_parts(tmp_path):
     body = tmp_path / "body.md"
-    body.write_text("# Review\n\n## Introduction\n\nMathematical tutorial E=mc².\n\n## Conclusion\n\nNew grounded synthesis.\n\n## References\n", encoding="utf-8")
+    body.write_text("# Review\n\n## Physical principles\n\nMathematical tutorial E=mc².\n\n## Methods\n\nNew grounded synthesis.\n\n## References\n", encoding="utf-8")
     report = fb.run_front_back_stage(draft_path=body, research_question="q", chapter_roles=[],
         out_dir=tmp_path / "out", parts_fixture_path=write(tmp_path / "parts.json", fixture()), planning_context=context())
     assert report["status"] == "generated"
     text = Path(report["final_manuscript"]).read_text()
-    assert "## Introduction\n\nMathematical tutorial E=mc²." in text
-    assert "## Conclusion\n\nNew grounded synthesis." in text
+    assert "## Physical principles\n\nMathematical tutorial E=mc²." in text
+    assert "## Methods\n\nNew grounded synthesis." in text
     assert text.index("Closing with conditions") < text.index("## References")
     intro = json.loads((tmp_path / "out/messages/front_back_introduction_messages.json").read_text())[1]["content"]
     assert "Closing with conditions" in intro
@@ -177,16 +177,17 @@ def test_historical_body_and_new_pool_identity_conflict_refused(tmp_path, monkey
     assert not (tmp_path / "out/05_publication").exists()
 
 
-def test_owned_abstract_metadata_wins_over_historical_unowned_abstract(tmp_path):
+def test_historical_unowned_abstract_blocks_new_standalone_application(tmp_path):
     body = tmp_path / "body.md"
-    body.write_text("# Old title\n\n## Abstract\n\nHistorical summary.\n\n**关键词：** stale\n\n## BODY\n\nMathematics.")
+    original = "# Old title\n\n## Abstract\n\nHistorical summary.\n\n**关键词：** stale\n\n## BODY\n\nMathematics."
+    body.write_text(original)
     report = fb.run_front_back_stage(draft_path=body, research_question="q", chapter_roles=[],
         out_dir=tmp_path / "out", parts_fixture_path=write(tmp_path / "parts.json", fixture()), planning_context=context())
-    text = Path(report["final_manuscript"]).read_text()
-    assert "Historical summary." in text and "Mathematics." in text
-    assert report["unowned_part_heading_warnings"][0]["heading"] == "## Abstract"
-    meta = delivery._extract_front_matter(text)
-    assert meta == {"title": "Conditional sensing", "abstract": "Conditional summary", "keywords": ["sensing"]}
+    assert report["status"] == "placement_conflict"
+    assert report["generated"] == [] and report["final_manuscript"] == ""
+    assert body.read_text() == original
+    assert not (tmp_path / "out/messages").exists()
+
 
 
 def test_structured_owned_abstract_keeps_internal_headings():
@@ -209,3 +210,33 @@ def test_identity_conflict_matches_first_declaration_resolution(tmp_path, monkey
                {"entries": [{"source_handle": "P0900", "paper_id": "background"}]}]}
     with pytest.raises(delivery.DeliveryConfigError, match="planning_identity_conflict"):
         delivery.run_downstream_delivery(config=cfg, assembly_report={"output_root": str(assembled)}, out_dir=tmp_path / "out")
+
+
+def test_placement_conflict_stops_before_citations_and_publication(tmp_path, monkeypatch):
+    from optomind_research.runtime.upgrade3 import article_text_editor, delivery_citations
+    assembled = tmp_path / "assembled"
+    assembled.mkdir()
+    body = assembled / "REVIEW_DRAFT_HANDLES.md"
+    original = b"# Title\r\n\r\n## Introduction\r\n\r\nDeep mathematics must remain.\r\n"
+    body.write_bytes(original)
+    monkeypatch.setattr(article_text_editor, "run_text_edit_stage",
+                        lambda **kw: {"status": "no_change", "edited_draft": str(body)})
+    def forbidden(**kwargs):
+        pytest.fail("placement conflict must block stages 04 and 05")
+    monkeypatch.setattr(delivery_citations, "run_figures_citations_stage", forbidden)
+    monkeypatch.setattr(delivery, "run_publication_delivery", forbidden)
+    stale = tmp_path / "out/03_front_back/MANUSCRIPT_FINAL.md"
+    stale.parent.mkdir(parents=True)
+    stale.write_text("Stale result must not be consumed")
+    cfg = {"text_edit_fixture": "ignored", "front_back_fixture": tmp_path / "must-not-read.json",
+           "planning_context": context()}
+    report = delivery.run_downstream_delivery(config=cfg,
+        assembly_report={"output_root": str(assembled)}, out_dir=tmp_path / "out")
+    assert report["downstream_status"] == "pending"
+    assert report["halt_reasons"] == ["03_front_back"]
+    assert report["stages"]["03_front_back"]["status"] == "placement_conflict"
+    assert report["stages"]["03_front_back"]["final_manuscript"] == ""
+    assert "04_figures_citations" not in report["stages"]
+    assert "05_publication" not in report["stages"]
+    assert body.read_bytes() == original
+    assert stale.read_text() == "Stale result must not be consumed"
