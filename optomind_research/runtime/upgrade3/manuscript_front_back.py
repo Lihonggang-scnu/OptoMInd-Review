@@ -20,6 +20,7 @@ explicitly — chapter-wise reading is not implemented and must not be claimed.
 
 from __future__ import annotations
 
+import copy
 import json
 import re
 from pathlib import Path
@@ -34,12 +35,56 @@ class FrontBackError(ValueError):
     pass
 
 
+# This is an input projection, not another planning model or literature router.
+_CONTEXT_FIELDS = ("research_question", "review_argument", "shared_scope",
+                   "material_theme_inventory", "source_identity_map",
+                   "manuscript_parts_plan", "material_records", "material_access",
+                   "status", "manuscript_parts_plan_frozen", "manuscript_parts_plan_revision")
+MATERIAL_RECORD_CHAR_LIMIT = 100_000
+
+
+def normalize_planning_context(value: Mapping[str, Any] | None) -> dict[str, Any] | None:
+    """Validate an explicitly supplied new contract; never infer one from history.
+
+    Material records are actual supplied excerpts/cards. Access paths are only
+    locators, and must never be represented to the model as already read text.
+    """
+    if value is None:
+        return None
+    from .manuscript_parts import validate_manuscript_parts_plan
+    if not isinstance(value, Mapping):
+        raise FrontBackError("planning_context_not_object")
+    if "status" in value and value["status"] != "complete":
+        raise FrontBackError("planning_context_not_complete")
+    if value.get("manuscript_parts_plan_frozen") is False:
+        raise FrontBackError("planning_context_not_frozen")
+    if value.get("manuscript_parts_plan_revision") in ("v0", "v1", 0, 1):
+        raise FrontBackError("planning_context_revision_not_final")
+    result = {key: copy.deepcopy(value[key]) for key in _CONTEXT_FIELDS if key in value}
+    result["manuscript_parts_plan"] = validate_manuscript_parts_plan(
+        value.get("manuscript_parts_plan"))
+    records = result.get("material_records", [])
+    if not isinstance(records, list) or any(not isinstance(row, Mapping) for row in records):
+        raise FrontBackError("material_records_not_object_list")
+    if len(json.dumps(records, ensure_ascii=False)) > MATERIAL_RECORD_CHAR_LIMIT:
+        raise FrontBackError("material_records_exceed_bounded_input_limit")
+    result["material_records"] = records
+    return result
+
+
+def _unsupported_placements(context: Mapping[str, Any]) -> list[dict[str, str]]:
+    return [{"stage": stage, "mode": part["placement"]["mode"],
+             "anchor": part["placement"]["anchor"], "error": "unsupported_placement"}
+            for stage, part in context["manuscript_parts_plan"].items()
+            if stage in STAGE_ORDER and part["placement"]["mode"] != "standalone"]
+
+
 def _duty(stage: str) -> str:
     if stage == "conclusion":
         return (
             "提炼这篇综述**实际建立的认识**与边界：综合哪些证据线、得出什么有材料依据的判断、"
             "还有哪些关键限制与未决问题。结语服务正文，不复述章节目录，不罗列每章小节，"
-            "不提出正文没有依据的新主张或宽泛展望。"
+            "允许基于正文证据形成新的综合判断，但不新增无依据的经验性主张或宽泛展望。"
         )
     if stage == "introduction":
         return (
@@ -49,7 +94,7 @@ def _duty(stage: str) -> str:
         )
     return (
         "写摘要与关键词：摘要交代综述范围、组织视角、主要综合判断和关键限制，"
-        "是一个自含的段落而不是章节目录或结论复读；关键词选取正文实际核心概念。"
+        "保持自含，具体格式遵循职责卡中已确认的文体要求；不写成章节目录；关键词选取正文实际核心概念。"
         "题名概括综述的实际范围，不夸大。"
     )
 
@@ -62,6 +107,7 @@ def build_stage_messages(
     chapter_roles: Sequence[Mapping[str, Any]],
     prior_parts: Mapping[str, Any],
     language: str = "zh",
+    planning_context: Mapping[str, Any] | None = None,
 ) -> list[dict[str, str]]:
     """One stage's real message, carrying the parts already parsed."""
     if len(body_text) > FULL_TEXT_SINGLE_PASS_CHAR_LIMIT:
@@ -77,6 +123,19 @@ def build_stage_messages(
         f"【章节职责】\n{roles_block}\n\n"
         f"【正文当前全文】\n{body_text}"
     )
+    context = normalize_planning_context(planning_context)
+    if context is not None:
+        plan = context["manuscript_parts_plan"]
+        stage_context = {key: val for key, val in context.items()
+                         if key != "manuscript_parts_plan"}
+        stage_context["context"] = plan["context"]
+        stage_context["part_plan"] = plan[stage]
+        user += "\n\n【早期职责与最终科研理解】\n" + json.dumps(
+            stage_context, ensure_ascii=False, indent=2)
+        user += ("\n职责卡规定认识任务和边界，不是不可修改的结论。以实际正文、scope和真实材料校准主张；"
+                 "material_records是本轮提供的材料，material_access与card_path只是未必已读取的定位信息，"
+                 "不得把路径当作科学证据。深度教学与证据综合正文无论标题是什么均须保留。"
+                 "引用仅用提供身份对应的原始source handle，勿创造来源。")
     if stage == "introduction" and prior_parts.get("conclusion"):
         user += "\n\n【已提炼的结语（引言承诺须与之一致）】\n" + prior_parts["conclusion"]
     if stage == "abstract":
@@ -378,13 +437,19 @@ def apply_front_back(
     manuscript: str,
     parts: Mapping[str, Any],
     chapter_roles: Sequence[Mapping[str, Any]] = (),
-) -> dict[str, Any]:
+    planning_context: Mapping[str, Any] | None = None,
+) -> tuple[str, list[dict[str, str]]]:
     """Write each part into its single main position; keep 展望 as is.
 
     Returns ``(new_manuscript, application_log)`` where the log records where
     each part landed (useful for acceptance reading).
     """
 
+    context = normalize_planning_context(planning_context)
+    if context is not None:
+        if _unsupported_placements(context):
+            raise FrontBackError("unsupported_placement")
+        return _apply_owned_parts(manuscript, parts)
     result = manuscript
     log: list[dict[str, str]] = []
     title = str(parts.get("title") or "").strip()
@@ -436,6 +501,51 @@ def apply_front_back(
     return result, log
 
 
+
+
+def _unowned_part_headings(manuscript: str) -> list[str]:
+    unowned = re.sub(r"<!-- manuscript-part:(abstract|introduction|conclusion):start -->.*?"
+                     r"<!-- manuscript-part:\1:end -->", "", manuscript, flags=re.DOTALL)
+    return re.findall(r"^#{2,3}\s+(?:Abstract|摘要|Introduction|引言|绪论|Conclusion|结语|结论|总结)\s*$",
+                      unowned, flags=re.MULTILINE | re.IGNORECASE)
+
+
+def _apply_owned_parts(manuscript: str, parts: Mapping[str, Any]) -> tuple[str, list[dict[str, str]]]:
+    """Own only marked part spans; no heading can authorize replacing BODY."""
+    result = manuscript
+    log = []
+    title = str(parts.get("title") or "").strip()
+    if title:
+        result = re.sub(r"^# .*$", lambda _m: "# " + title, result, count=1, flags=re.MULTILINE)
+    for stage, heading in (("abstract", "摘要"), ("introduction", "引言"), ("conclusion", "结语")):
+        text = str(parts.get(stage) or "").strip()
+        if not text:
+            continue
+        if stage == "abstract" and parts.get("keywords"):
+            text += "\n\n**关键词：** " + "；".join(parts["keywords"])
+        start, end = f"<!-- manuscript-part:{stage}:start -->", f"<!-- manuscript-part:{stage}:end -->"
+        block = f"{start}\n## {heading}\n\n{text}\n{end}"
+        pattern = re.compile(re.escape(start) + r".*?" + re.escape(end), re.DOTALL)
+        if start in result or end in result:
+            if result.count(start) != 1 or result.count(end) != 1 or not pattern.search(result):
+                raise FrontBackError(f"invalid_owned_part_markers:{stage}")
+            result = pattern.sub(lambda _m: block, result, count=1)
+            position = "owned_part_replaced"
+        elif stage == "conclusion":
+            result = _insert_before_references(result, block)
+            position = "standalone_before_references"
+        else:
+            abstract_end = "<!-- manuscript-part:abstract:end -->"
+            if stage == "introduction" and abstract_end in result:
+                at = result.index(abstract_end) + len(abstract_end)
+            else:
+                title_match = re.search(r"^# .*$", result, re.MULTILINE)
+                at = title_match.end() if title_match else 0
+            result = result[:at].rstrip() + "\n\n" + block + "\n\n" + result[at:].lstrip("\n")
+            position = "standalone_front"
+        log.append({"part": stage, "position": position})
+    return result, log
+
 # ---------------------------------------------------------------------------
 # runner
 # ---------------------------------------------------------------------------
@@ -450,6 +560,7 @@ def run_front_back_stage(
     parts_fixture_path: str | Path | None = None,
     recordings: Mapping[str, Mapping[str, Any]] | None = None,
     language: str = "zh",
+    planning_context: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Serial generation over the current body, then one final assembly.
 
@@ -466,6 +577,17 @@ def run_front_back_stage(
         raise FrontBackError(
             f"manuscript_too_long_for_single_pass:{len(manuscript)}:"
             "chapter_wise_reading_not_implemented")
+
+    context = normalize_planning_context(planning_context)
+    unsupported = _unsupported_placements(context) if context is not None else []
+    if unsupported:
+        report = {"stage": "front_back", "status": "unsupported_placement",
+                  "planning_context": context, "placement_execution": unsupported,
+                  "generated": [], "failures": unsupported, "application_log": [],
+                  "source_draft": str(draft_path), "final_manuscript": "",
+                  "model_calls": 0, "external_requests": 0}
+        _write_json(out_dir / "FRONT_BACK_REPORT.json", report)
+        return report
 
     from .review_delivery import ReplayClient, MissingRecording
 
@@ -495,7 +617,8 @@ def run_front_back_stage(
         # PARSED in this run (conclusion -> introduction -> abstract).
         messages = build_stage_messages(
             stage, body_text=manuscript, research_question=research_question,
-            chapter_roles=chapter_roles, prior_parts=parts, language=language)
+            chapter_roles=chapter_roles, prior_parts=parts, language=language,
+            planning_context=context)
         _write_json(messages_dir / f"front_back_{stage}_messages.json", messages)
         try:
             if fixture is not None:
@@ -517,7 +640,7 @@ def run_front_back_stage(
     application_log: list[dict[str, str]] = []
     if parts:
         final_text, application_log = apply_front_back(
-            manuscript, parts, chapter_roles)
+            manuscript, parts, chapter_roles, planning_context=context)
     final_path = out_dir / "MANUSCRIPT_FINAL.md"
     final_path.write_text(final_text, encoding="utf-8", newline="\n")
     if not parts:
@@ -530,6 +653,15 @@ def run_front_back_stage(
         "stage": "front_back",
         "status": status,
         "parts_source": parts_source,
+        "contract_mode": "manuscript_parts_plan" if context is not None else "legacy_fixture",
+        "planning_context": context,
+        "planning_context_source": ("final_planning_artifact" if context and "status" in context
+                                    else "explicit_compact_fixture" if context else "legacy"),
+        "placement_execution": "standalone" if context is not None else "legacy",
+        "unowned_part_heading_warnings": (
+            [{"heading": heading.strip(), "status": "preserved_unowned_section",
+              "message": "Unowned part-named section preserved; review coexistence before publication."}
+             for heading in _unowned_part_headings(manuscript)] if context is not None else []),
         "generated": generated_stages,
         "missing_stages": missing_stages,
         "failures": failures,

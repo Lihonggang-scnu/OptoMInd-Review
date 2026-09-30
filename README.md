@@ -54,3 +54,15 @@ PDF 结构化解析可使用 `deploy/grobid/docker-compose.yml`，默认访问 `
 - [统一入口](optomind_research/runtime/upgrade3/review_delivery.py) / [全文编辑](optomind_research/runtime/upgrade3/article_text_editor.py) / [首尾提炼](optomind_research/runtime/upgrade3/manuscript_front_back.py) / [图表引用](optomind_research/runtime/upgrade3/delivery_citations.py)
 
 顾问阅读包与运行输入分离，未来可独立删除。`main`保持旧技术报告链接不变。
+
+## 新规划合同：BODY 与文章首尾职责
+
+`--planning-revision` 现同时启用轻量 `manuscript_parts_plan` 合同（规划 schema v2）。从已有上游研究 PLAN 与材料池重新规划，使用新的输出目录；旧规划/运行状态不迁移，仍可作为历史对照。
+
+- provisional/level1/案例后的全局协调分别完成职责卡 v0/v1/v2，不增加模型阶段
+- 一级/二级规划、材料路由、案例、编排和单元写作继续负责深度 BODY；不按 Introduction/Conclusion 标题删任务
+- 最终职责卡在 `DETAILED_REVIEW_PLAN.json` 顶层，writer packet 通过相对 `planning_result_path` 交给下游
+- 当前首尾执行完整支持 standalone；embedded/distributed 可规划，但自动应用明确返回 unsupported 并阻止发布
+- 下游仍是离线 fixture/recording 接口，未新增真实模型调用入口或自动全文检索
+
+实施与验证：[实施方案](docs/IMPLEMENTATION_PLAN_MANUSCRIPT_PARTS.md) · [使用及验收边界](docs/MANUSCRIPT_PARTS_CONTRACT_V1.md)

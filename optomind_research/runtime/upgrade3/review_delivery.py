@@ -145,12 +145,34 @@ def _assemble(batch_root: Path, manifest_path: Path, output_root: Path,
     return json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.is_file() else {}
 
 
+
+def _input_planning_context(data: Mapping[str, Any], base: Path) -> dict[str, Any] | None:
+    """Resolve only an explicit new-contract handoff, never migrate old plans."""
+    from .manuscript_front_back import normalize_planning_context
+    if data.get("planning_context") is not None:
+        return normalize_planning_context(data["planning_context"])
+    if "manuscript_parts_plan" in data:
+        return normalize_planning_context(data)
+    locator = data.get("planning_result_path")
+    if locator:
+        path = Path(str(locator))
+        if not path.is_absolute():
+            path = base / path
+        if path.is_file():
+            plan = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(plan, Mapping) and "manuscript_parts_plan" in plan:
+                return normalize_planning_context(plan)
+    if data.get("manuscript_parts_contract_version"):
+        raise DeliveryConfigError("new_contract_requires_resolvable_planning_context")
+    return None
+
 def run_history_delivery(
     *,
     manifest_path: str | Path,
     batch_root: str | Path,
     out_dir: str | Path,
     language: str = "zh",
+    planning_context: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Import a written manuscript and re-assemble it offline.
 
@@ -167,12 +189,21 @@ def run_history_delivery(
         raise FileNotFoundError(f"delivery manifest not found: {manifest_path}")
 
     manifest, fallback_jobs, _arrangements = draft.load_manifest(manifest_path)
+    if planning_context is None:
+        planning_context = _input_planning_context(manifest, manifest_path.parent)
     jobs = draft.load_jobs(batch_root, fallback_jobs)
     batch_results = draft._batch_run_paths(batch_root)
     missing = [job.unit_id for job in jobs
                if draft.resolve_result(job, batch_results) is None]
 
-    assembly_manifest = manifest_path
+    if planning_context is not None:
+        manifest = {**dict(manifest), "planning_context": dict(planning_context),
+                    "manuscript_parts_plan": planning_context["manuscript_parts_plan"]}
+        manifest_path_for_assembly = out_dir / "CONTRACT_MANIFEST.json"
+        _write_json(manifest_path_for_assembly, manifest)
+    else:
+        manifest_path_for_assembly = manifest_path
+    assembly_manifest = manifest_path_for_assembly
     assembly_batch = batch_root
     restricted = False
     if missing:
@@ -238,6 +269,7 @@ def run_history_delivery(
             encoding="utf-8")
     report = {
         "start": "history",
+        "planning_context": planning_context or manifest.get("planning_context"),
         "manifest": str(manifest_path),
         "batch_root": str(batch_root),
         "output_root": str(out_dir / "assembled"),
@@ -263,11 +295,15 @@ def run_plan_delivery(
     out_dir: str | Path,
     language: str = "zh",
     models: Mapping[str, str] | None = None,
+    planning_context: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Frozen planning_revision chain with replayed responses, then assembly."""
     packet_path = Path(packet_path).resolve()
     out_dir = Path(out_dir).resolve()
     models = dict(models or {})
+    if planning_context is None:
+        packet_document = json.loads(packet_path.read_text(encoding="utf-8"))
+        planning_context = _input_planning_context(packet_document, packet_path.parent)
     recordings = load_recordings(recordings_path)
     replay = ReplayClient(recordings)
     pending: list[dict[str, str]] = []
@@ -294,6 +330,7 @@ def run_plan_delivery(
         pending.append({"step": key, "status": PENDING_MISSING_RECORDING})
         report = {
             "start": "plan", "packet": str(packet_path), "output_root": str(out_dir),
+        "planning_context": planning_context,
             "replay_modes": replay.modes, "pending": pending,
             "written_units": [],
             "assembly": {}, "model_calls": 0, "external_requests": 0,
@@ -307,6 +344,7 @@ def run_plan_delivery(
                         "errors": [str(e) for e in validation.get("errors") or []]})
         report = {
             "start": "plan", "packet": str(packet_path), "output_root": str(out_dir),
+        "planning_context": planning_context,
             "replay_modes": replay.modes, "pending": pending,
             "written_units": [],
             "assembly": {}, "model_calls": 0, "external_requests": 0,
@@ -415,6 +453,9 @@ def run_plan_delivery(
         "chapters": [{"chapter_id": chapter_id,
                       "arrangement_path": str(assembly_arrangement_path)}],
     }
+    if planning_context is not None:
+        manifest["planning_context"] = dict(planning_context)
+        manifest["manuscript_parts_plan"] = planning_context["manuscript_parts_plan"]
     _write_json(batch_root / "MANIFEST.json", manifest)
     assembly: dict[str, Any] = {}
     if jobs:
@@ -448,6 +489,7 @@ def run_plan_delivery(
                 encoding="utf-8")
     report = {
         "start": "plan", "packet": str(packet_path), "output_root": str(out_dir),
+        "planning_context": planning_context,
         "replay_modes": replay.modes, "pending": pending,
         "written_units": [job["unit_id"] for job in jobs],
         # Original plan size vs what actually entered the assembly; a filtered
@@ -576,7 +618,30 @@ def load_delivery_config(path: str | Path) -> dict[str, Any]:
             resolved_assets.append({**dict(asset), "path": str(asset_path)})
         else:
             resolved_assets.append(asset)
+    planning_context = None
+    if "planning_context" in data:
+        entry = data["planning_context"]
+        if isinstance(entry, Mapping) and set(entry) == {"path"}:
+            context_path = Path(str(entry["path"]))
+            if not context_path.is_absolute():
+                context_path = cfg_dir / context_path
+            if not context_path.is_file():
+                raise DeliveryConfigError(f"delivery_config_file_missing:planning_context:{context_path}")
+            entry = json.loads(context_path.read_text(encoding="utf-8"))
+        if not isinstance(entry, Mapping):
+            raise DeliveryConfigError("planning_context_not_object")
+        entry = dict(entry)
+        if "material_records" in data:
+            entry["material_records"] = _resolve_list(data["material_records"], "material_records")
+        from .manuscript_front_back import normalize_planning_context
+        try:
+            planning_context = normalize_planning_context(entry)
+        except ValueError as exc:
+            raise DeliveryConfigError(f"invalid_planning_context:{exc}") from exc
+    elif "material_records" in data:
+        raise DeliveryConfigError("material_records_require_planning_context")
     return {
+        "planning_context": planning_context,
         "config_path": str(config_path),
         "language": str(data.get("language") or "zh"),
         "research_question": str(data.get("research_question") or "").strip(),
@@ -618,6 +683,7 @@ def run_downstream_delivery(
     """
 
     out_dir = Path(out_dir).resolve()
+    planning_context = config.get("planning_context") or assembly_report.get("planning_context")
     stages: dict[str, Any] = {}
     halt: list[str] = []
 
@@ -674,7 +740,8 @@ def run_downstream_delivery(
         try:
             stages["03_front_back"] = run_front_back_stage(
                 draft_path=edited,
-                research_question=str(config.get("research_question") or ""),
+                research_question=str((planning_context or {}).get("research_question") or config.get("research_question") or ""),
+                planning_context=planning_context,
                 chapter_roles=config.get("chapter_roles") or [],
                 out_dir=out_dir / "03_front_back",
                 parts_fixture_path=config.get("front_back_fixture"),
@@ -686,16 +753,47 @@ def run_downstream_delivery(
                                        "model_calls": 0, "external_requests": 0}
     r3 = stages["03_front_back"]
     final_md = Path(str(r3.get("final_manuscript") or ""))
-    if r3.get("status") in ("pending", "no_parts_generated", "failed") \
+    if r3.get("status") in ("pending", "no_parts_generated", "failed", "unsupported_placement") \
+            or (planning_context is not None and r3.get("status") != "generated") \
             or not str(r3.get("final_manuscript") or "") or not final_md.is_file():
         halt.append("03_front_back")
         return _downstream_report(config, stages, halt)
 
     # ---- 04: figures + citations over the FINAL manuscript -----------------
-    from .delivery_citations import run_figures_citations_stage
+    from .delivery_citations import run_figures_citations_stage, _iter_catalog_identities
+    identity_catalogs = list(config.get("identity_catalogs") or [])
+    if planning_context is not None:
+        namespace = str(identity_catalogs[0].get("namespace") or "") if identity_catalogs else ""
+        pool_entries = [{**dict(row), "source_handle": handle, "handles": [handle]}
+                        for handle, row in (planning_context.get("source_identity_map") or {}).items()
+                        if isinstance(row, Mapping)]
+        # A historical BODY may use the same handle for another paper. Never
+        # silently treat such a collision as the new pool's background source.
+        declared = {}
+        for catalog in identity_catalogs:
+            if str(catalog.get("namespace") or "") != namespace:
+                continue
+            for row in _iter_catalog_identities(catalog):
+                for handle in row.get("handles") or [row.get("source_handle") or row.get("handle") or row.get("source_key")]:
+                    if handle:
+                        declared.setdefault(str(handle), row)
+        for row in pool_entries:
+            previous = declared.get(row["source_handle"], {})
+            def norm_doi(value):
+                return re.sub(r"^https?://(?:dx\.)?doi\.org/", "", str(value or "").strip().casefold())
+            old_doi, new_doi = norm_doi(previous.get("doi")), norm_doi(row.get("doi"))
+            if old_doi and new_doi:
+                conflict = old_doi != new_doi
+            else:
+                old_id, new_id = str(previous.get("paper_id") or ""), str(row.get("paper_id") or "")
+                conflict = bool(old_id and new_id and old_id != new_id)
+            if conflict:
+                raise DeliveryConfigError(f"planning_identity_conflict:{row['source_handle']}")
+        # Same planning run's full pool extends, never overwrites, supplied identity.
+        identity_catalogs.append({"namespace": namespace, "entries": pool_entries})
     stages["04_figures_citations"] = run_figures_citations_stage(
         final_draft_path=final_md,
-        identity_catalogs=config.get("identity_catalogs") or [],
+        identity_catalogs=identity_catalogs,
         out_dir=out_dir / "04_figures_citations",
         figure_assets=config.get("figure_assets") or [],
         table_moves=config.get("table_moves") or None,
@@ -762,16 +860,18 @@ def run_review_delivery(
     publication); missing inputs surface as explicit pending stages.
     """
     out_dir = Path(out_dir)
+    config = load_delivery_config(config_path) if config_path is not None else None
+    planning_context = config.get("planning_context") if config else None
     if start == "history":
         if not manifest_path or not batch_root:
             raise ValueError("history_start_requires_manifest_and_batch_root")
         report = run_history_delivery(manifest_path=manifest_path, batch_root=batch_root,
-                                      out_dir=out_dir, language=language)
+                                      out_dir=out_dir, language=language, planning_context=planning_context)
     elif start == "plan":
         if not packet_path or not recordings_path:
             raise ValueError("plan_start_requires_packet_and_recordings")
         report = run_plan_delivery(packet_path=packet_path, recordings_path=recordings_path,
-                                   out_dir=out_dir, language=language)
+                                   out_dir=out_dir, language=language, planning_context=planning_context)
     else:
         raise ValueError(f"unknown_delivery_start:{start}")
 
@@ -780,7 +880,6 @@ def run_review_delivery(
                   "note": "no delivery config: assembly only, downstream not run"}
         _write_json(out_dir / "DELIVERY_REPORT.json", report)
         return report
-    config = load_delivery_config(config_path)
     downstream = run_downstream_delivery(config=config, assembly_report=report,
                                          out_dir=out_dir)
     merged = {**report, **downstream}
@@ -945,9 +1044,36 @@ def _extract_front_matter(text: str) -> dict[str, Any]:
     title = ""
     abstract = ""
     keywords: list[str] = []
-    lines = text.splitlines()
+    owned_start = "<!-- manuscript-part:abstract:start -->"
+    owned_end = "<!-- manuscript-part:abstract:end -->"
+    if owned_start in text or owned_end in text:
+        owned = re.search(re.escape(owned_start) + r"(.*?)" + re.escape(owned_end), text, re.DOTALL)
+        if text.count(owned_start) != 1 or text.count(owned_end) != 1 or owned is None:
+            raise DeliveryConfigError("invalid_owned_abstract_markers")
+        title_match = re.search(r"^#\s+(.+)$", text, re.MULTILINE)
+        title = title_match.group(1).strip() if title_match else ""
+        # A historical unowned abstract can coexist without becoming current
+        # publication metadata. Never delete it merely because of its heading.
+        lines = owned.group(1).splitlines()
+        abstract_lines = []
+        wrapper_removed = False
+        for line in lines:
+            if not wrapper_removed and _ABSTRACT_HEADING_RE.match(line):
+                wrapper_removed = True
+                continue
+            match = re.search(r"\*\*关键词[：:]\*\*\s*(.+)", line)
+            if match:
+                keywords = [k.strip() for k in match.group(1).split("；") if k.strip()]
+            else:
+                abstract_lines.append(line)
+        # Internal headings belong to a structured abstract and are retained.
+        return {"title": title, "abstract": "\n".join(abstract_lines).strip(), "keywords": keywords}
+    else:
+        lines = text.splitlines()
     in_abstract = False
     for line in lines:
+        if re.fullmatch(r"<!-- manuscript-part:(?:abstract|introduction|conclusion):(?:start|end) -->", line.strip()):
+            continue
         if line.startswith("# ") and not title:
             title = line.lstrip("# ").strip()
         if _ABSTRACT_HEADING_RE.match(line):

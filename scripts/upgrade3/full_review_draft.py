@@ -1075,6 +1075,8 @@ def run(args: argparse.Namespace) -> int:
         pending_problems.append({"unit_id": "", "code": "arrangement_issue", "issues": [item]})
     summary: dict[str, Any] = {
         "schema_version": "optomind.full_review_draft.run_report.v1",
+        "planning_context": manifest.get("planning_context"),
+        "manuscript_parts_plan": manifest.get("manuscript_parts_plan"),
         "status": "complete" if not missing and not errors and selected is None and len(documents) == len(jobs) else "partial_check",
         "problems_resolved": (
             not pending_problems
