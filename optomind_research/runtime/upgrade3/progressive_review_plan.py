@@ -894,6 +894,81 @@ def _compact_reading_material(raw: Any) -> Any:
     return result
 
 
+_CHAPTER_B_IDENTITY_KEYS = {
+    "card_id", "source_handle", "paper_id", "canonical_paper_id", "source_id",
+    "title", "doi", "year", "paper_identity", "source_identity", "topic_handles",
+    "topic_ids", "snapshot_id", "snapshot_sha256", "topic_sha256", "output_provenance",
+    "identity_hash", "content_hash", "material_hash", "planning_hash", "hash",
+}
+
+
+def _copy_json_value(value: Any) -> Any:
+    """Copy JSON-like card material without sharing mutable values with packets."""
+    return json.loads(json.dumps(value, ensure_ascii=False, default=_json_default))
+
+
+def _project_chapter_a_material(raw: Any) -> Any:
+    """Project revision chapter A material while retaining substantive unknown fields.
+
+    The complete card remains in the packet and is used for cache identity.  This
+    projection is only for the chapter-owner prompt: the two duplicated question
+    summaries are omitted, while findings and conditions stay complete.
+    """
+    if not isinstance(raw, Mapping):
+        return _copy_json_value(raw)
+    # A few legacy or repaired cards contain only the two broad question
+    # summaries.  They do not have the normal A fields to project, so keep the
+    # original shape for compatibility instead of returning an empty card.
+    if not any(raw.get(key) for key in ("key_findings", "contribution_and_limits")):
+        return _copy_json_value(raw)
+    return {
+        str(key): _copy_json_value(value)
+        for key, value in raw.items()
+        if str(key) not in {"work_summary", "problem_or_question"}
+    }
+
+
+def _project_chapter_b_material(raw: Any) -> Any:
+    """Project revision chapter B material without dropping unknown substance."""
+    if not isinstance(raw, Mapping):
+        return _copy_json_value(raw)
+    result: dict[str, Any] = {}
+    for key, value in raw.items():
+        key_text = str(key)
+        if key_text in _CHAPTER_B_IDENTITY_KEYS:
+            continue
+        if key_text == "facet_contributions":
+            if isinstance(value, list):
+                result[key_text] = [
+                    {
+                        str(child_key): _copy_json_value(child_value)
+                        for child_key, child_value in child.items()
+                        if str(child_key) != "possible_uses"
+                    }
+                    if isinstance(child, Mapping) else _copy_json_value(child)
+                    for child in value
+                ]
+            else:
+                result[key_text] = _copy_json_value(value)
+            continue
+        if key_text == "broader_review_uses":
+            if isinstance(value, list):
+                result[key_text] = [
+                    {
+                        str(child_key): _copy_json_value(child_value)
+                        for child_key, child_value in child.items()
+                        if str(child_key) != "purpose"
+                    }
+                    if isinstance(child, Mapping) else _copy_json_value(child)
+                    for child in value
+                ]
+            else:
+                result[key_text] = _copy_json_value(value)
+            continue
+        result[key_text] = _copy_json_value(value)
+    return result
+
+
 def _candidate_card_material(candidate: Mapping[str, Any]) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     """Return the saved A, B and identity-facing material for one candidate.
 
@@ -4545,8 +4620,8 @@ class ProgressiveReviewPlanner:
                         "source_handle": item.get("source_handle"),
                         "title": item.get("title"),
                         "material_depth": item.get("material_depth"),
-                        "study_summary_A": item.get("study_summary_A") or {},
-                        "planning_material": item.get("review_planning_B"),
+                        "study_summary_A": _project_chapter_a_material(item.get("study_summary_A") or {}),
+                        "planning_material": _project_chapter_b_material(item.get("review_planning_B") or {}),
                         "supplement_material": item.get("supplement_gap_material") or {},
                         "supplement_materials": [
                             dict(supplement) for supplement in (item.get("supplement_gap_materials") or [])
