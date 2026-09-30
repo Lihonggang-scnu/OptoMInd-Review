@@ -5718,6 +5718,28 @@ def load_prior_readings(paths: Sequence[str | Path], pool_rows: Sequence[Mapping
     return list(output.values())
 
 
+def _supplement_output_dir(base: Path, *, planning_revision_enabled: bool) -> Path:
+    """Choose a fresh supplement output directory for revision retries.
+
+    The supplement writer deliberately rejects a non-empty output directory.
+    Revision retries therefore keep the historical first attempt intact and
+    use the first empty or missing ``attempt_NN`` child. Legacy mode keeps
+    passing the original path so its established behavior is unchanged.
+    """
+    if not planning_revision_enabled or not base.exists():
+        return base
+    if base.is_dir() and not any(base.iterdir()):
+        return base
+    attempt = 2
+    while True:
+        candidate = base / f"attempt_{attempt:02d}"
+        if not candidate.exists():
+            return candidate
+        if candidate.is_dir() and not any(candidate.iterdir()):
+            return candidate
+        attempt += 1
+
+
 def make_planning_supplement_runner(
     config: ProgressivePlannerConfig,
     *,
@@ -5852,7 +5874,10 @@ def make_planning_supplement_runner(
                 "limits": {"max_candidates": 12, "max_acquisitions": 3, "per_query_limit": 12},
             }
             _atomic_json(request_path, request)
-            output_dir = phase_root / "supplements" / gap_id
+            output_dir = _supplement_output_dir(
+                phase_root / "supplements" / gap_id,
+                planning_revision_enabled=config.planning_revision_enabled,
+            )
             try:
                 result = run_planning_supplement(
                     request_path,
