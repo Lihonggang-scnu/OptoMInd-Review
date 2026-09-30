@@ -332,3 +332,87 @@ def test_case_pool_fallback_keeps_card_deep_and_local_material(tmp_path: Path):
     assert rows[0]["review_planning_B"]["planning_summary"] == "useful planning context"
     assert rows[0]["deep_read_material"]["content"]["finding"] == "deep evidence"
     assert rows[0]["supplement_gap_material"]["gap_id"] == "G1"
+
+
+def test_owner_candidate_material_is_validated_promoted_and_cached_without_recall():
+    old_plan = {"units": [{"unit_id": "U01", "substantive_point": "point"}]}
+    updated_plan = {
+        "units": [{
+            "unit_id": "U01",
+            "substantive_point": "point",
+            "paragraph_briefs": [{"source_handles": ["P0614"]}],
+            "cases": [{"source_handle": "P0614", "finding": "finding"}],
+        }],
+    }
+    response = {"status": "updated", "updated_plan": updated_plan}
+    source_materials = [{"source_handle": "P0001", "paper_id": "paper0"}]
+    candidate_materials = [{
+        "source_handle": "P0614",
+        "paper_id": "paper1",
+        "study_summary_A": {"key_findings": ["A"]},
+        "review_planning_B": {"planning_summary": "B"},
+        "deep_read_material": {"content": {"finding": "deep"}},
+        "local_passages": {"passages": [{"text": "local"}]},
+        "supplement_gap_material": {"gap_id": "G1", "useful_material": "supplement"},
+    }]
+
+    status, accepted, _, errors = planning._classify_owner_response(
+        old_plan, response, source_materials, candidate_materials=candidate_materials,
+    )
+    assert status == "updated" and accepted == updated_plan and errors == []
+
+    metadata_only = [{"source_handle": "P0615", "title": "navigation only"}]
+    status, _, _, errors = planning._classify_owner_response(
+        old_plan,
+        {"status": "updated", "updated_plan": {
+            "units": [{"unit_id": "U01", "cases": [{"source_handle": "P0615"}]}],
+        }},
+        source_materials,
+        candidate_materials=metadata_only,
+    )
+    assert status == "unresolved"
+    assert errors == ["updated_unit_sources_unavailable:P0615"]
+
+    packet = {
+        "chapter": {"chapter_id": "CH05", "source_handles": ["P0001"], "source_ids": ["paper0"]},
+        "chapter_plan": old_plan,
+        "source_materials": source_materials,
+        "candidate_materials": candidate_materials,
+    }
+    improvement = {"chapter_updates": [{
+        "chapter_id": "CH05", "updated_plan": updated_plan,
+        "_complete_chapter_revision": True,
+    }]}
+    original_packet = copy.deepcopy(packet)
+    promoted = ProgressiveReviewPlanner._promote_owner_candidate_materials([packet], improvement)[0]
+    assert packet == original_packet
+    promoted_row = next(row for row in promoted["source_materials"] if row.get("source_handle") == "P0614")
+    assert promoted_row["study_summary_A"]["key_findings"] == ["A"]
+    assert promoted_row["deep_read_material"]["content"]["finding"] == "deep"
+    assert promoted_row["supplement_gap_material"]["gap_id"] == "G1"
+    assert "P0614" in promoted["chapter"]["source_handles"]
+
+    cached = {
+        "cache_inputs": {
+            "chapter_plan": old_plan,
+            "source_materials": source_materials,
+            "candidate_materials": candidate_materials,
+        },
+        "status": "partial",
+        "owner_status": "unresolved",
+        "response": response,
+        "updated_plan": None,
+        "structural_errors": ["updated_unit_sources_unavailable:P0614"],
+    }
+    reused = planning._reuse_cached_owner_revision(cached, cached["cache_inputs"])
+    assert reused is not None
+    assert reused["status"] == "complete" and reused["owner_status"] == "updated"
+    assert reused["updated_plan"] == updated_plan
+
+    invalid = dict(cached)
+    invalid["status"] = "complete"
+    invalid["owner_status"] = "updated"
+    invalid["response"] = {"status": "updated", "updated_plan": {
+        "units": [{"unit_id": "U01", "cases": [{"source_handle": "P0615"}]}],
+    }}
+    assert planning._reuse_cached_owner_revision(invalid, cached["cache_inputs"]) is None
