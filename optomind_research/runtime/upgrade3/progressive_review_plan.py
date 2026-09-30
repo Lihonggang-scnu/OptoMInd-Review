@@ -37,6 +37,7 @@ PARTS_PLAN_SCHEMA_VERSION = "optomind.progressive_review_plan.v2"
 # This version is scoped to the level-1 global-outline prompt. Changing it
 # must invalidate only that stage on resume, not provisional scope or tools.
 LEVEL1_OUTLINE_PROMPT_CONTRACT = "level1_outline.review_v2_04"
+RETRIEVAL_STAGE_CONTRACT = "first_round_query_recovery.v2"
 DEFAULT_PLANNER_MODEL = "qwen3.5-plus"
 DEFAULT_READER_MODEL = "qwen3.7-flash"
 DEFAULT_POOL_PATH = Path("outputs/planning_support/20260923/practical_refresh/supplement_live/PLANNING_POOL.jsonl")
@@ -525,6 +526,11 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
         "研究条件必须进入 substantive_point、thesis、synthesis 和 transition 本身；决定含义的研究对象与研究设置随主张、案例和展开关系一起陈述，而不是全部堆进独立的 limitation 字段；不能靠单独的 limitation 字段修补前文过度断言，也不要求每句都填条件表或给所有判断统一加“可能”。对不同对象、设置或比较尺度的材料，保留其不可直接等同之处，不把它们排成脱离条件的效果排名。"
         "章节标题也用中文。Return JSON only."
     )
+    chapter_query_contract = (
+        " Every supplement_requests entry must include gap_id, gap_question, success_criteria, intended_use, and 1-2 targeted_queries;"
+        " each targeted query must be a compact English keyword or self-contained semantic question naming the research object and specific relation."
+        if planning_revision else ""
+    )
     stage_specific = {
         "provisional_scope": (
             "Read every item in candidate_pool. It is the complete B pool, not a sample. Screen all items semantically and "
@@ -570,7 +576,9 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
             "Do not silently drop a routed source: when an individual source is genuinely out of scope, name it in "
             "excluded_source_handles with a concise reason; otherwise retain it as writer-available material. "
             "Return chapter_proposals (each with chapter_id, title, purpose, scope, optional excluded_source_handles, substantive_threads, "
-            "supplement_requests, directed_reads) and screened_sources with non-use reasons. A source may support multiple "
+            "supplement_requests, directed_reads) and screened_sources with non-use reasons."
+            + chapter_query_contract + " "
+            "A source may support multiple "
             "chapters when its evidence actually does so."
         ),
         "harmonize_scope": (
@@ -2180,6 +2188,51 @@ def _normalize_gaps(gaps: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     return normalized
 
 
+def _gap_identity(row: Mapping[str, Any]) -> str:
+    """Return an explicit gap identity; never infer one from prose."""
+
+    for key in ("gap_id", "need_id", "id"):
+        value = _text(row.get(key))
+        if value:
+            return value
+    return ""
+
+
+def _carry_gap_query_fields(
+    rows: Sequence[Mapping[str, Any]],
+    references: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Carry planner queries across stage copies only by explicit gap identity."""
+
+    by_identity: dict[str, Mapping[str, Any]] = {}
+    for reference in references:
+        if not isinstance(reference, Mapping):
+            continue
+        identity = _gap_identity(reference)
+        if identity and (
+            reference.get("targeted_queries")
+            or reference.get("queries")
+            or reference.get("round_specs")
+        ):
+            by_identity.setdefault(identity, reference)
+    output: list[dict[str, Any]] = []
+    for raw in rows:
+        if not isinstance(raw, Mapping):
+            continue
+        row = dict(raw)
+        reference = by_identity.get(_gap_identity(row))
+        if reference is not None:
+            has_new_queries = bool(row.get("targeted_queries") or row.get("queries"))
+            if not has_new_queries:
+                queries = reference.get("targeted_queries") or reference.get("queries")
+                if queries:
+                    row["targeted_queries"] = json.loads(json.dumps(queries, ensure_ascii=False, default=_json_default))
+            if not has_new_queries and not row.get("round_specs") and reference.get("round_specs"):
+                row["round_specs"] = json.loads(json.dumps(reference["round_specs"], ensure_ascii=False, default=_json_default))
+        output.append(row)
+    return output
+
+
 def _all_directed_ids(record: Mapping[str, Any]) -> set[str]:
     output: set[str] = {_text(value) for value in record.get("consumed_paper_ids") or []}
     for item in record.get("directed_results") or []:
@@ -2673,6 +2726,12 @@ class ProgressiveReviewPlanner:
         state: dict[str, Any],
     ) -> dict[str, Any]:
         name = phase.lower() + "_tools"
+        tool_cache_inputs: dict[str, Any] | None = None
+        if self.config.planning_revision_enabled and phase.lower() in {"level2", "chapters"}:
+            # Only the downstream adaptive tool stages need to re-enter after
+            # the query-recovery contract changed.  Upstream pool/routing and
+            # proposal caches remain reusable on a revision-only resume.
+            tool_cache_inputs = {"retrieval_loop_contract": RETRIEVAL_STAGE_CONTRACT}
 
         if self.retrieval_loop_runner is not None:
             def run_adaptive_cycle() -> dict[str, Any]:
@@ -2692,11 +2751,15 @@ class ProgressiveReviewPlanner:
                     raise ProgressivePlanError("retrieval_loop_runner_return_not_object")
                 return dict(result)
 
+            cache_inputs = {
+                "supplement_requests": _normalize_gaps(supplement_requests),
+                "directed_requests": _merge_directed_tasks(directed_requests),
+                "prior_tool_results": dict(prior_tool_results or {}),
+                **(tool_cache_inputs or {}),
+            }
             result = self._stage(
                 name, run_adaptive_cycle, resume=resume, state=state,
-                cache_inputs={"supplement_requests": _normalize_gaps(supplement_requests),
-                              "directed_requests": _merge_directed_tasks(directed_requests),
-                              "prior_tool_results": dict(prior_tool_results or {})},
+                cache_inputs=cache_inputs,
             )
             for chapter_id, rows in (result.get("tool_materials_by_chapter") or {}).items():
                 existing = self.tool_materials_by_chapter.setdefault(str(chapter_id), [])
@@ -2795,7 +2858,7 @@ class ProgressiveReviewPlanner:
                 "budget_deferred_tasks": deferred,
             }
 
-        return self._stage(name, run_cycle, resume=resume, state=state)
+        return self._stage(name, run_cycle, resume=resume, state=state, cache_inputs=tool_cache_inputs)
 
     @staticmethod
     def _collect_tool_result(future: Any, absent_reason: str, requested: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
@@ -2984,10 +3047,41 @@ class ProgressiveReviewPlanner:
             cache_inputs=({"outline": level1_outline, "proposals": proposals, "routing": routing, "tools": self._compact_tool_feedback(level1_tool_result)}) if self.config.planning_revision_enabled else None,
         )
         harmonized = _resolve_planner_handles(_stage_response(harmonize_record), source_handle_map)
-        harmonized["chapters"] = self._harmonized_chapters(harmonized, proposals)
+        harmonized_requests = list(harmonized.get("supplement_requests") or [])
+        if self.config.planning_revision_enabled:
+            harmonized_requests = _carry_gap_query_fields(
+                harmonized_requests,
+                provisional.get("supplement_requests") or [],
+            )
+            harmonized["supplement_requests"] = harmonized_requests
+        merged_harmonized_chapters = self._harmonized_chapters(harmonized, proposals)
+        if self.config.planning_revision_enabled:
+            proposal_gap_requests = [
+                request
+                for chapter in proposals.get("chapter_proposals") or []
+                if isinstance(chapter, Mapping)
+                for request in chapter.get("supplement_requests") or []
+                if isinstance(request, Mapping)
+            ]
+            known_gap_requests = [
+                *[row for row in provisional.get("supplement_requests") or [] if isinstance(row, Mapping)],
+                *[row for row in harmonized_requests if isinstance(row, Mapping)],
+                *proposal_gap_requests,
+            ]
+            harmonized["chapters"] = [
+                {
+                    **dict(chapter),
+                    "supplement_requests": _carry_gap_query_fields(
+                        chapter.get("supplement_requests") or [], known_gap_requests,
+                    ),
+                }
+                for chapter in merged_harmonized_chapters
+            ]
+        else:
+            harmonized["chapters"] = merged_harmonized_chapters
         level2_tool_result = self._tool_cycle(
             phase="level2",
-            supplement_requests=harmonized.get("supplement_requests") or [],
+            supplement_requests=harmonized_requests,
             directed_requests=harmonized.get("directed_reads") or [],
             pool_rows=pool_rows,
             plan=plan,
@@ -3028,7 +3122,20 @@ class ProgressiveReviewPlanner:
             "shared_outline": final_scope.get("shared_outline") or harmonized.get("shared_outline"),
             "final_scope_notes": final_scope.get("final_scope_notes") or [],
         }
-        chapters = self._harmonized_chapters(final_scope, {"chapter_proposals": harmonized.get("chapters") or proposals.get("chapter_proposals") or []})
+        chapters = self._harmonized_chapters(
+            final_scope,
+            {"chapter_proposals": harmonized.get("chapters") or proposals.get("chapter_proposals") or []},
+        )
+        if self.config.planning_revision_enabled:
+            chapters = [
+                {
+                    **dict(chapter),
+                    "supplement_requests": _carry_gap_query_fields(
+                        chapter.get("supplement_requests") or [], known_gap_requests,
+                    ),
+                }
+                for chapter in chapters
+            ]
         if stop_after == "level2":
             partial = self._partial_result(topic, plan, provisional, level1_outline, level1_tool_result, "level2", harmonized=harmonized, level2_tools=level2_tool_result)
             if self.config.planning_revision_enabled:
@@ -6022,7 +6129,9 @@ def make_retrieval_loop_runner(
         )
         loop_result = run_retrieval_loop(
             needs, loop_config, local_triage=local_triage, external_closure=external_closure,
-            resume=resume, refine_queries=refine_queries, prior_consumed_paper_ids=sorted(consumed_ids),
+            resume=resume, refine_queries=refine_queries,
+            refine_empty_first_round=config.planning_revision_enabled,
+            prior_consumed_paper_ids=sorted(consumed_ids),
         )
         materials_by_chapter: dict[str, list[dict[str, Any]]] = {}
         supplement_results: list[dict[str, Any]] = []

@@ -6,9 +6,15 @@ from pathlib import Path
 import pytest
 
 from optomind_research.runtime.upgrade3 import progressive_review_plan as planning
+from optomind_research.runtime.upgrade3 import planning_retrieval_loop as retrieval_loop
 from optomind_research.runtime.upgrade3.progressive_review_plan import (
     ProgressivePlannerConfig, ProgressiveReviewPlanner, ProgressivePlanError,
-    PARTS_PLAN_SCHEMA_VERSION, LEVEL1_OUTLINE_PROMPT_CONTRACT, _planner_instructions,
+    PARTS_PLAN_SCHEMA_VERSION, PARTS_CONTRACT_VERSION, RETRIEVAL_STAGE_CONTRACT,
+    LEVEL1_OUTLINE_PROMPT_CONTRACT, _planner_instructions, make_retrieval_loop_runner,
+    _carry_gap_query_fields, _normalize_gaps,
+)
+from optomind_research.runtime.upgrade3.planning_retrieval_loop import (
+    InformationNeed, LoopConfig, run_retrieval_loop,
 )
 
 
@@ -61,6 +67,285 @@ def make(tmp_path, model=None, enabled=True):
     model = model or OfflinePlanner()
     config = ProgressivePlannerConfig(topic_id="fixture", plan_path=plan, pool_path=pool, output_dir=tmp_path / "out", chapter_workers=1, planning_revision_enabled=enabled)
     return ProgressiveReviewPlanner(config, planner=model), model
+
+
+def _retrieval_fixture(tmp_path, *, max_rounds=1):
+    return LoopConfig(
+        index_path=tmp_path / "missing-index.sqlite",
+        journal_path=tmp_path / "retrieval_loop.jsonl",
+        max_rounds=max_rounds,
+        max_empty_rounds=2,
+        max_queries_per_round=3,
+        shared_deep_read_budget=40,
+    )
+
+
+def _external_stub(calls):
+    def external(*, need, queries, **_kwargs):
+        calls.append((need.need_id, [dict(item) for item in queries]))
+        return {"status": "fulfilled", "usable_content": f"material for {need.need_id}"}
+    return external
+
+
+def test_factory_runner_passes_revision_flag_to_loop(tmp_path, monkeypatch):
+    flags = []
+
+    def fake_loop(*_args, **kwargs):
+        flags.append(kwargs["refine_empty_first_round"])
+        return {"needs": []}
+
+    monkeypatch.setattr(retrieval_loop, "run_retrieval_loop", fake_loop)
+    for enabled in (False, True):
+        config = ProgressivePlannerConfig(
+            topic_id=f"factory-{enabled}", plan_path=tmp_path / f"{enabled}-PLAN.json",
+            pool_path=tmp_path / f"{enabled}-POOL.jsonl", output_dir=tmp_path / str(enabled),
+            planning_revision_enabled=enabled,
+        )
+        runner = make_retrieval_loop_runner(config, allow_external=False)
+        runner(
+            phase="chapters", supplement_requests=[{"gap_id": "G", "gap_question": "specific gap"}],
+            pool_rows=[], plan={"question": "review scope"}, source_handle_map={}, resume=False,
+        )
+    assert flags == [False, True]
+
+
+def test_legacy_harmonized_response_without_supplement_field_stays_absent(tmp_path):
+    planner, _ = make(tmp_path, enabled=False)
+    observed = []
+    original = planner._harmonized_chapters
+
+    def capture(harmonized, proposals):
+        observed.append(dict(harmonized))
+        return original(harmonized, proposals)
+
+    planner._harmonized_chapters = capture
+    planner.run()
+    assert observed
+    assert "supplement_requests" not in observed[0]
+
+
+def test_queryless_archived_chapter_gaps_refine_once_and_resume_without_repay(tmp_path):
+    """The seven archived chapter gaps are recoverable without rerunning planning."""
+    ids = [
+        "N25ad9e23fde4", "Nfa6f3ab1f972", "Nc19e59f8d065",
+        "N0d2029cb5b49", "N8855db84289c", "N9ae5308936be", "Naf87f3d23fd8",
+    ]
+    needs = [
+        InformationNeed(need_id=need_id, question=f"archived chapter gap {need_id}", owners=("CH02",))
+        for need_id in ids
+    ]
+    local = lambda **_kwargs: {"decision": "external_research", "still_missing": "missing evidence"}
+    external_calls = []
+    # This recreates the old cached run: the gaps reached the loop with no
+    # query and were recorded as stopped_no_query.
+    first = run_retrieval_loop(
+        needs, _retrieval_fixture(tmp_path), local_triage=local,
+        external_closure=_external_stub(external_calls), resume=True,
+    )
+    assert all(row["status"] == "stopped" for row in first["needs"])
+    assert external_calls == []
+
+    refine_calls = []
+
+    def refine(need, round_index, previous_queries, usable_content, still_missing):
+        refine_calls.append((need.need_id, round_index, list(previous_queries), still_missing))
+        return [{"query_type": "keyword", "query_text": f"specific query {need.need_id}"}]
+
+    second = run_retrieval_loop(
+        needs, _retrieval_fixture(tmp_path), local_triage=local,
+        refine_queries=refine, refine_empty_first_round=True,
+        external_closure=_external_stub(external_calls), resume=True,
+    )
+    assert len(refine_calls) == 7
+    assert len(external_calls) == 7
+    assert all(row["status"] == "answered" for row in second["needs"])
+    assert all(call[1][0]["query_text"].startswith("specific query N") for call in external_calls)
+
+    # A resume sees the generated query and the completed result in the same
+    # journal; it must not call the refiner or external closure again.
+    third = run_retrieval_loop(
+        needs, _retrieval_fixture(tmp_path), local_triage=local,
+        refine_queries=refine, refine_empty_first_round=True,
+        external_closure=_external_stub(external_calls), resume=True,
+    )
+    assert len(refine_calls) == 7
+    assert len(external_calls) == 7
+    assert all(row["status"] == "answered" for row in third["needs"])
+
+
+def test_empty_first_round_refinement_is_persisted_and_not_repaid(tmp_path):
+    need = InformationNeed(need_id="Nempty", question="a genuinely unresolved gap")
+    refine_calls = []
+
+    def refine(*args):
+        refine_calls.append(args[0].need_id)
+        return []
+
+    local = lambda **_kwargs: {"decision": "external_research", "still_missing": "still missing"}
+    first = run_retrieval_loop(
+        [need], _retrieval_fixture(tmp_path, max_rounds=3), local_triage=local,
+        refine_queries=refine, refine_empty_first_round=True, resume=True,
+    )
+    assert first["needs"][0]["status"] == "stopped"
+    assert refine_calls == ["Nempty"]
+    second = run_retrieval_loop(
+        [need], _retrieval_fixture(tmp_path, max_rounds=3), local_triage=local,
+        refine_queries=refine, refine_empty_first_round=True, resume=True,
+    )
+    assert second["needs"][0]["status"] in {"stopped", "stopped_no_query"}
+    assert refine_calls == ["Nempty"]
+
+
+def test_initialized_query_checkpoint_precedes_interrupted_external_and_resume(tmp_path):
+    need = InformationNeed(need_id="Ninterrupt", question="an interrupted external gap")
+    config = _retrieval_fixture(tmp_path, max_rounds=1)
+    config.max_provider_retries = 0
+    refine_calls = []
+    observed = []
+
+    def refine(need, round_index, previous_queries, usable_content, still_missing):
+        refine_calls.append(need.need_id)
+        return [{"query_type": "keyword", "query_text": "initialized query"}]
+
+    def interrupted_external(*, queries, **_kwargs):
+        entries = [json.loads(line) for line in config.journal_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        observed.append(entries[-1])
+        raise RuntimeError("simulated interruption")
+
+    local = lambda **_kwargs: {"decision": "external_research", "still_missing": "missing"}
+    run_retrieval_loop(
+        [need], config, local_triage=local, refine_queries=refine,
+        refine_empty_first_round=True, external_closure=interrupted_external, resume=True,
+    )
+    assert refine_calls == ["Ninterrupt"]
+    assert observed[-1]["status"] == "initialized_queries"
+    assert observed[-1]["counts_as_round"] is False
+    assert observed[-1]["queries"][0]["query_text"] == "initialized query"
+
+    resumed_external = []
+
+    def resumed_external_call(*, queries, **_kwargs):
+        resumed_external.append(list(queries))
+        return {"status": "fulfilled", "usable_content": "recovered material"}
+
+    run_retrieval_loop(
+        [need], config, local_triage=local,
+        refine_queries=lambda *args: (_ for _ in ()).throw(AssertionError("refinement repaid")),
+        refine_empty_first_round=True, external_closure=resumed_external_call, resume=True,
+    )
+    assert resumed_external == [[{"query_text": "initialized query", "query_type": "keyword", "facet_id": ""}]]
+    assert refine_calls == ["Ninterrupt"]
+
+
+@pytest.mark.parametrize(
+    "need_id,supplied",
+    [
+        (
+            "Nd68c6827caa3",
+            [
+                {"query_type": "keyword", "query_text": "inosine tissue concentration", "facet_id": "F1"},
+                {"query_type": "question", "query_text": "How does tissue inosine relate to ICI response?", "facet_id": "F1"},
+            ],
+        ),
+        (
+            "Nb46ff4756f67",
+            [
+                {"query_type": "keyword", "query_text": "FMT immune adverse events regimen", "facet_id": "F1"},
+                {"query_type": "question", "query_text": "How do FMT adverse events differ by ICI regimen?", "facet_id": "F1"},
+            ],
+        ),
+        (
+            "N2c6c12ab7c7b",
+            [
+                {"query_type": "keyword", "query_text": "phase III microbiome intervention ICI trial", "facet_id": "F1"},
+                {"query_type": "question", "query_text": "Which phase III microbiome ICI trials are registered?", "facet_id": "F1"},
+            ],
+        ),
+    ],
+)
+def test_supplied_round_queries_are_preserved_and_skip_refinement(tmp_path, need_id, supplied):
+    need = InformationNeed(
+        need_id=need_id, question="supplied query gap", concepts=tuple(row["query_text"] for row in supplied),
+        round_specs=({"round": 1, "targeted_queries": supplied},),
+    )
+    refine_calls = []
+    external_calls = []
+    result = run_retrieval_loop(
+        [need], _retrieval_fixture(tmp_path),
+        local_triage=lambda **_kwargs: {"decision": "external_research", "still_missing": "missing"},
+        refine_queries=lambda *args: refine_calls.append(args) or [],
+        external_closure=_external_stub(external_calls), resume=True,
+    )
+    assert result["needs"][0]["status"] == "answered"
+    assert refine_calls == []
+    assert external_calls == [(need_id, supplied)]
+
+
+def test_gap_queries_carry_only_by_explicit_identity():
+    supplied = [{"query_type": "keyword", "query_text": "object relation", "facet_id": "F1"}]
+    replacement = [{"query_type": "keyword", "query_text": "new object relation", "facet_id": "F1"}]
+    rows = [
+        {"gap_id": "same-gap", "gap_question": "rewritten question"},
+        {"gap_id": "different-gap", "gap_question": "same words do not establish identity"},
+        {"gap_id": "replacement-gap", "gap_question": "new query wins",
+         "targeted_queries": replacement},
+    ]
+    carried = _carry_gap_query_fields(
+        rows,
+        [
+            {"gap_id": "same-gap", "targeted_queries": supplied,
+             "round_specs": [{"round": 1, "targeted_queries": supplied}]},
+            {"gap_id": "replacement-gap", "targeted_queries": supplied,
+             "round_specs": [{"round": 1, "targeted_queries": supplied}]},
+        ],
+    )
+    normalized = _normalize_gaps(carried)
+    assert normalized[0]["targeted_queries"] == supplied
+    assert normalized[0]["round_specs"] == [{"round": 1, "targeted_queries": supplied}]
+    assert normalized[1]["targeted_queries"] == []
+    assert normalized[1]["round_specs"] == []
+    assert normalized[2]["targeted_queries"] == replacement
+    assert normalized[2]["round_specs"] == [{"round": 1, "targeted_queries": replacement}]
+
+
+def test_chapter_query_contract_is_revision_only():
+    legacy = _planner_instructions("chapter_proposals", planning_revision=False)
+    revised = _planner_instructions("chapter_proposals", planning_revision=True)
+    assert "Every supplement_requests entry must include gap_id" not in legacy
+    assert "Every supplement_requests entry must include gap_id" in revised
+
+
+def test_revision_tool_cache_contract_reenters_downstream_loop_only(tmp_path):
+    calls = []
+
+    def retrieval_runner(**kwargs):
+        calls.append(kwargs["phase"])
+        return {"tool_materials_by_chapter": {}}
+
+    config = ProgressivePlannerConfig(
+        topic_id="fixture", plan_path=tmp_path / "PLAN.json", pool_path=tmp_path / "POOL.jsonl",
+        output_dir=tmp_path / "out", planning_revision_enabled=True,
+    )
+    planner = ProgressiveReviewPlanner(config, planner=lambda *_args: {}, retrieval_loop_runner=retrieval_runner)
+    planner._run_input_signature = "fixture-input"
+    planner._parts_plan = {}
+    state = {}
+    planner._tool_cycle(
+        phase="level2", supplement_requests=[], directed_requests=[], pool_rows=[], plan={},
+        prior_directed=None, prior_tool_results=None, source_handle_map={}, resume=False, state=state,
+    )
+    assert calls == ["level2"]
+    saved_state = json.loads((tmp_path / "out/RUN_STATE.json").read_text(encoding="utf-8"))
+    stage_input = saved_state["stage_inputs"]["level2_tools"]
+    assert stage_input["stage_inputs"]["retrieval_loop_contract"] == RETRIEVAL_STAGE_CONTRACT
+    stage_input["stage_inputs"].pop("retrieval_loop_contract")
+    (tmp_path / "out/RUN_STATE.json").write_text(json.dumps(saved_state), encoding="utf-8")
+    planner._tool_cycle(
+        phase="level2", supplement_requests=[], directed_requests=[], pool_rows=[], plan={},
+        prior_directed=None, prior_tool_results=None, source_handle_map={}, resume=True, state=saved_state,
+    )
+    assert calls == ["level2", "level2"]
+    assert stage_input["contract"] == PARTS_CONTRACT_VERSION
 
 
 def test_full_flow_preserves_body_and_embedded_closure(tmp_path):

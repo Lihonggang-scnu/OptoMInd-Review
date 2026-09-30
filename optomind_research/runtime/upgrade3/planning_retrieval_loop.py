@@ -422,6 +422,7 @@ def run_retrieval_loop(
     budget_available_cny: float | None = None,
     budget_floor_cny: float = 0.0,
     refine_queries: Callable[..., Any] | None = None,
+    refine_empty_first_round: bool = False,
     prior_consumed_paper_ids: Sequence[str] = (),
     verbose: bool = False,
 ) -> dict[str, Any]:
@@ -509,7 +510,24 @@ def run_retrieval_loop(
                 continue
             need = state.need
             signature = _need_signature(need)
-            if journal.has(need_id, round_index, signature=signature):
+            resume_entries = [
+                item for item in journal.entries_for(need_id)
+                if int(item.get("round") or 0) == round_index
+                and str(item.get("need_signature") or "") == signature
+                and item.get("counts_as_round", True) is not False
+                and str(item.get("status") or "") != "provider_retry"
+            ]
+            latest_resume = resume_entries[-1] if resume_entries else None
+            reopen_queryless = bool(
+                refine_empty_first_round
+                and refine_queries is not None
+                and round_index == 1
+                and isinstance(latest_resume, Mapping)
+                and str(latest_resume.get("status") or "") == "stopped_no_query"
+                and not latest_resume.get("queries")
+                and not latest_resume.get("query_refinement_attempted")
+            )
+            if journal.has(need_id, round_index, signature=signature) and not reopen_queryless:
                 saved = next(
                     entry for entry in reversed(journal.entries_for(need_id))
                     if int(entry.get("round") or 0) == round_index
@@ -541,7 +559,8 @@ def run_retrieval_loop(
                 for handle in state.new_handles:
                     shared_reads.setdefault(handle, round_index)
                     paper_owners.setdefault(handle, set()).update(need.owners)
-                state.status = str(saved.get("status") or state.status)
+                restored_status = str(saved.get("status") or state.status)
+                state.status = "stopped" if refine_empty_first_round and restored_status.startswith("stopped") else restored_status
                 state.action = str(saved.get("action") or state.action)
                 progressed = True
                 continue
@@ -636,7 +655,30 @@ def run_retrieval_loop(
                         _spec_for_round(need, round_index - 1),
                         limit=config.max_queries_per_round,
                     )
-                if not explicit_spec and refine_queries is not None:
+            should_refine = bool(
+                not explicit_spec
+                and refine_queries is not None
+                and (
+                    round_index > 1
+                    or (round_index == 1 and refine_empty_first_round and need.kind == "supplement")
+                )
+            )
+            refinement_entry = None
+            newly_refined = False
+            if should_refine and round_index == 1:
+                same_round_entries = [
+                    item for item in journal.entries_for(need_id)
+                    if int(item.get("round") or 0) == round_index
+                    and str(item.get("need_signature") or "") == signature
+                    and item.get("query_refinement_attempted")
+                ]
+                refinement_entry = same_round_entries[-1] if same_round_entries else None
+            if should_refine:
+                if refinement_entry is not None:
+                    spec = _spec_from_refined_queries({"targeted_queries": refinement_entry.get("queries") or []})
+                    queries = _queries_from_spec(spec, limit=config.max_queries_per_round)
+                    entry["query_refinement_attempted"] = True
+                else:
                     try:
                         refined = refine_queries(
                             need,
@@ -661,6 +703,9 @@ def run_retrieval_loop(
                         continue
                     spec = _spec_from_refined_queries(refined)
                     queries = _queries_from_spec(spec, limit=config.max_queries_per_round)
+                    if refine_empty_first_round:
+                        entry["query_refinement_attempted"] = True
+                    newly_refined = True
                     # Facets are local routing metadata, not something the
                     # query rewriter has to regenerate on every search.
                     default_facet = next((row.get("facet_id") for row in previous_queries if row.get("facet_id")), "")
@@ -669,6 +714,18 @@ def run_retrieval_loop(
                             if not query.get("facet_id"):
                                 query["facet_id"] = default_facet
             entry["queries"] = list(queries)
+            if refine_empty_first_round and newly_refined and queries:
+                # Persist the initialized direction before entering provider
+                # code.  If the process is interrupted there, resume can reuse
+                # this checkpoint without paying the query rewriter again.
+                initialization = dict(entry)
+                initialization.update({
+                    "status": "initialized_queries",
+                    "action": "external_research",
+                    "counts_as_round": False,
+                })
+                journal.record(initialization)
+                state.attempts.append(initialization)
             if round_index > 1 and queries and not queries_changed(previous_queries, queries):
                 entry["status"] = "stopped_same_query"
                 entry["action"] = "stop"
