@@ -1919,6 +1919,7 @@ def run_gap_local_triage(
     passages_per_paper: int = 2,
     max_passages: int = 5,
     read_local: bool = True,
+    source_identity_map: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Answer one gap from already-registered local material before any retrieval.
 
@@ -1963,9 +1964,12 @@ def run_gap_local_triage(
             top_papers=top_papers,
             passages_per_paper=passages_per_paper,
             max_passages=max_passages,
+            source_identity_map=source_identity_map,
         )
         if read_local and judge is not None and judgment.decision == "local_deep_read":
-            judgment = read_local_capture(index, judgment, judge=judge)
+            judgment = read_local_capture(
+                index, judgment, judge=judge, source_identity_map=source_identity_map,
+            )
     payload = judgment.to_dict()
     payload["writer_material"] = build_writer_material(judgment)
     payload["gap_id"] = local_gap.gap_id

@@ -38,6 +38,7 @@ PARTS_PLAN_SCHEMA_VERSION = "optomind.progressive_review_plan.v2"
 # must invalidate only that stage on resume, not provisional scope or tools.
 LEVEL1_OUTLINE_PROMPT_CONTRACT = "level1_outline.review_v2_04"
 RETRIEVAL_STAGE_CONTRACT = "first_round_query_recovery.v2"
+LOCAL_SOURCE_IDENTITY_CONTRACT = "active_pool_identity.v1"
 DEFAULT_PLANNER_MODEL = "qwen3.5-plus"
 DEFAULT_READER_MODEL = "qwen3.7-flash"
 DEFAULT_POOL_PATH = Path("outputs/planning_support/20260923/practical_refresh/supplement_live/PLANNING_POOL.jsonl")
@@ -423,6 +424,10 @@ def _merge_supplement_pool_updates(pool_rows: list[dict[str, Any]], tool_result:
         groups.append(group)
         pending.extend(group.get("results") or [])
     candidate_rows: list[Mapping[str, Any]] = []
+    candidate_rows.extend(
+        row for row in (tool_result.get("local_pool_updates") or [])
+        if isinstance(row, Mapping)
+    )
     for group in groups:
         candidate_rows.extend(row for row in (group.get("candidate_rows") or []) if isinstance(row, Mapping))
         derived_path = Path(str(group.get("derived_pool_path") or ""))
@@ -480,6 +485,75 @@ def _merge_supplement_pool_updates(pool_rows: list[dict[str, Any]], tool_result:
     if changed:
         _refresh_source_handles(pool_rows)
     return pool_rows
+
+
+def _local_triage_pool_candidates(result: Mapping[str, Any], pool_rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Promote useful pool-outside local passages to the current run's pool."""
+
+    known = {_text(row.get("_paper_id")) for row in pool_rows if isinstance(row, Mapping)}
+    known_handles = {_text(row.get("_source_handle")) for row in pool_rows if isinstance(row, Mapping)}
+    passages = result.get("passages") if isinstance(result.get("passages"), list) else []
+    grouped: dict[str, list[Mapping[str, Any]]] = {}
+    for passage in passages:
+        if not isinstance(passage, Mapping):
+            continue
+        paper_id = _text(passage.get("paper_id") or passage.get("canonical_paper_id"))
+        # An exact DOI match may retain an older stable paper ID while already
+        # carrying the current pool handle. It is usable material, not a new
+        # paper to number a second time.
+        if paper_id and paper_id not in known and _text(passage.get("source_handle")) not in known_handles:
+            grouped.setdefault(paper_id, []).append(passage)
+    output: list[dict[str, Any]] = []
+    for paper_id, rows in grouped.items():
+        first = rows[0]
+        title = _text(first.get("title"))
+        doi = _text(first.get("doi"))
+        year = _text(first.get("year"))
+        identity = {
+            "canonical_paper_id": paper_id,
+            "title": title,
+            "doi": doi,
+            "year": year,
+        }
+        output.append({
+            "paper_id": paper_id,
+            "title": title,
+            "doi": doi,
+            "year": year,
+            "identity_status": "local_index_outside_current_pool",
+            "pool_action": "admit_local_material",
+            "planning_view": {
+                "paper_identity": identity,
+                "planning_summary": " ".join(_text(row.get("text")) for row in rows if _text(row.get("text"))),
+                "material_scope": "bounded local triage passage",
+            },
+            "local_passages": [dict(row) for row in rows],
+        })
+    return output
+
+
+def _bind_local_triage_result_handles(result: Mapping[str, Any], pool_rows: Sequence[Mapping[str, Any]]) -> None:
+    """Bind every local result source to the handles assigned by pool inclusion."""
+
+    by_paper = {
+        _text(row.get("_paper_id")): _text(row.get("_source_handle"))
+        for row in pool_rows
+        if isinstance(row, Mapping) and _text(row.get("_paper_id")) and _text(row.get("_source_handle"))
+    }
+
+    def walk(value: Any) -> None:
+        if isinstance(value, dict):
+            paper_id = _text(value.get("paper_id") or value.get("canonical_paper_id"))
+            if paper_id and "source_handle" in value and paper_id in by_paper:
+                value["source_handle"] = by_paper[paper_id]
+            for child in value.values():
+                if isinstance(child, (dict, list, tuple)):
+                    walk(child)
+        elif isinstance(value, (list, tuple)):
+            for child in value:
+                walk(child)
+
+    walk(result)
 
 
 def qwen_local_token_counter(tokenizer_path: str | Path = DEFAULT_TOKENIZER_PATH) -> Callable[[bytes, Sequence[Mapping[str, Any]]], int]:
@@ -2731,7 +2805,10 @@ class ProgressiveReviewPlanner:
             # Only the downstream adaptive tool stages need to re-enter after
             # the query-recovery contract changed.  Upstream pool/routing and
             # proposal caches remain reusable on a revision-only resume.
-            tool_cache_inputs = {"retrieval_loop_contract": RETRIEVAL_STAGE_CONTRACT}
+            tool_cache_inputs = {
+                "retrieval_loop_contract": RETRIEVAL_STAGE_CONTRACT,
+                "local_source_identity_contract": LOCAL_SOURCE_IDENTITY_CONTRACT,
+            }
 
         if self.retrieval_loop_runner is not None:
             def run_adaptive_cycle() -> dict[str, Any]:
@@ -5955,12 +6032,19 @@ def make_retrieval_loop_runner(
                 raw_response_dir=root / "_llm_response_cache",
             )
         working_pool = [dict(row) for row in pool_rows]
+        local_pool_updates: list[dict[str, Any]] = []
         journal_path = root / "retrieval_loop.jsonl"
         if resume and journal_path.is_file():
             for line in journal_path.read_text(encoding="utf-8").splitlines():
                 if not line.strip():
                     continue
                 entry = json.loads(line)
+                if config.planning_revision_enabled:
+                    saved_local = entry.get("local_triage") or {}
+                    saved_candidates = saved_local.get("local_pool_updates") or []
+                    if saved_candidates:
+                        _merge_supplement_pool_updates(working_pool, {"local_pool_updates": saved_candidates})
+                        local_pool_updates.extend(dict(row) for row in saved_candidates if isinstance(row, Mapping))
                 recovered = entry.get("external_results") or [entry.get("external_result")]
                 for result in recovered:
                     if isinstance(result, Mapping):
@@ -6000,16 +6084,44 @@ def make_retrieval_loop_runner(
                 "index_path": index_path, "user_scope": topic, "judge": judge,
                 "output_dir": root / "local_triage" / _safe_id(gap.gap_id), "read_local": True,
             }
+            if config.planning_revision_enabled:
+                # The shared index can contain run-local handles from an older
+                # pool.  Rebind current IDs (or exact DOIs) at the triage
+                # boundary, while leaving unmatched stable identities usable
+                # with an empty handle for the normal pool-inclusion path.
+                kwargs["source_identity_map"] = ProgressiveReviewPlanner._source_identity_map(working_pool)
             try:
                 result = run_gap_local_triage(gap_row, **kwargs)
             except TypeError as exc:
                 # Keep offline compatibility with an older injected helper;
-                # production always uses the read_local-capable API.
-                if "read_local" not in str(exc):
+                # production always uses the identity-aware API.
+                message = str(exc)
+                if "source_identity_map" in message:
+                    kwargs.pop("source_identity_map", None)
+                    try:
+                        result = run_gap_local_triage(gap_row, **kwargs)
+                    except TypeError as retry_exc:
+                        if "read_local" not in str(retry_exc):
+                            raise
+                        kwargs.pop("read_local", None)
+                        result = run_gap_local_triage(gap_row, **kwargs)
+                elif "read_local" not in message:
                     raise
-                kwargs.pop("read_local", None)
-                result = run_gap_local_triage(gap_row, **kwargs)
-            local_results[gap.gap_id] = dict(result)
+                else:
+                    kwargs.pop("read_local", None)
+                    result = run_gap_local_triage(gap_row, **kwargs)
+            result = dict(result)
+            candidates = (
+                _local_triage_pool_candidates(result, working_pool)
+                if config.planning_revision_enabled else []
+            )
+            if candidates:
+                _merge_supplement_pool_updates(working_pool, {"local_pool_updates": candidates})
+                pool_by_id.update({str(row.get("_paper_id")): row for row in working_pool})
+                local_pool_updates.extend(candidates)
+                _bind_local_triage_result_handles(result, working_pool)
+                result["local_pool_updates"] = candidates
+            local_results[gap.gap_id] = result
             return dict(result)
 
         def refine_queries(need: Any, round_index: int, previous_queries: Sequence[Mapping[str, Any]],
@@ -6190,12 +6302,18 @@ def make_retrieval_loop_runner(
                                  "sources": [dict(item) for item in sources if isinstance(item, Mapping)]})
                 for owner in owners:
                     materials_by_chapter.setdefault(owner, []).append(dict(material))
-        return {
+        output = {
             "phase": phase, "status": "complete", "retrieval_loop": loop_result,
             "supplement_results": supplement_results, "directed_results": directed_results,
             "tool_materials_by_chapter": materials_by_chapter,
             "consumed_paper_ids": sorted(consumed_ids),
         }
+        if config.planning_revision_enabled:
+            output.update({
+                "local_pool_updates": local_pool_updates,
+                "pool_rows": [dict(row) for row in working_pool],
+            })
+        return output
     return run
 
 

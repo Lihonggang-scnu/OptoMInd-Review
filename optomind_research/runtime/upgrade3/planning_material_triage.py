@@ -351,6 +351,7 @@ def prepare_local_reading(
     max_passages: int = MAX_PASSAGES,
     passages_per_paper: int = 2,
     top_papers: int = 6,
+    source_identity_map: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> tuple[LocalReadingBundle, SearchResult]:
     """Read the stored material for one question without downloading anything."""
 
@@ -373,8 +374,11 @@ def prepare_local_reading(
     existing = {str(handle) for handle in gap.existing_handles}
     for hit in result.hits[: max(1, int(max_passages))]:
         reading_text = _expanded_hit_text(index, hit)
+        source_handle = _local_source_handle(
+            hit.paper_id, hit.doi, hit.source_handle, source_identity_map,
+        )
         bundle.passages.append(LocalReadingPassage(
-            source_handle=hit.source_handle,
+            source_handle=source_handle,
             paper_id=hit.paper_id,
             title=hit.title,
             year=hit.year,
@@ -386,7 +390,7 @@ def prepare_local_reading(
             material_depth=hit.material_depth,
             reading_path=hit.reading_path,
             card_path=hit.card_path,
-            from_existing_field=hit.source_handle in existing,
+            from_existing_field=source_handle in existing,
             key_sentences=_key_sentences(reading_text, gap.question),
         ))
     bundle.new_task_fields = (
@@ -407,7 +411,56 @@ def prepare_local_reading(
     matched_paper_ids = list(dict.fromkeys(item.paper_id for item in bundle.passages if item.paper_id))
     if matched_paper_ids:
         bundle.paper_contexts = paper_context(index, matched_paper_ids[:4])
+        for context in bundle.paper_contexts:
+            context.source_handle = _local_source_handle(
+                context.paper_id, context.doi, context.source_handle, source_identity_map,
+            )
     return bundle, result
+
+
+def _normalized_doi(value: Any) -> str:
+    text = str(value or "").strip().casefold()
+    text = re.sub(r"^https?://(?:dx\.)?doi\.org/", "", text)
+    return text.rstrip(" .;,)")
+
+
+def _local_source_handle(
+    paper_id: Any,
+    doi: Any,
+    fallback: Any,
+    source_identity_map: Mapping[str, Mapping[str, Any]] | None,
+) -> str:
+    """Bind a local hit to this run's handle without discarding pool-outside material.
+
+    ``None`` means the caller has no current-pool identity map and preserves the
+    historical index handle.  An explicit map is a run boundary: exact paper ID
+    wins, then an unambiguous exact DOI match; an unmatched hit keeps its stable
+    identity but loses the stale run-local handle so the inclusion path can assign
+    a current one later.
+    """
+
+    raw_handle = str(fallback or "").strip()
+    if source_identity_map is None:
+        return raw_handle
+    by_paper: dict[str, Mapping[str, Any]] = {}
+    by_doi: dict[str, list[Mapping[str, Any]]] = {}
+    for key, raw in source_identity_map.items():
+        if not isinstance(raw, Mapping):
+            continue
+        identity = raw
+        identity_paper_id = str(raw.get("paper_id") or key or "").strip()
+        if identity_paper_id:
+            by_paper[identity_paper_id] = identity
+        identity_doi = _normalized_doi(raw.get("doi"))
+        if identity_doi:
+            by_doi.setdefault(identity_doi, []).append(identity)
+    matched = by_paper.get(str(paper_id or "").strip())
+    if matched is None:
+        candidates = by_doi.get(_normalized_doi(doi), [])
+        handles = {str(item.get("source_handle") or "").strip() for item in candidates}
+        if len(candidates) == 1 or (len(handles) == 1 and "" not in handles):
+            matched = candidates[0]
+    return str(matched.get("source_handle") or "").strip() if matched else ""
 
 
 def _concept_present(concept: str, text: str) -> bool:
@@ -448,6 +501,10 @@ def _triage_payload(gap: LocalGap, bundle: LocalReadingBundle) -> dict[str, Any]
         "material_found": [
             {
                 "source_handle": item.source_handle,
+                "paper_id": item.paper_id,
+                "title": item.title,
+                "year": item.year,
+                "doi": item.doi,
                 "type": item.reading_role,
                 "material_depth": item.material_depth,
                 "section": list(item.section_path),
@@ -458,8 +515,13 @@ def _triage_payload(gap: LocalGap, bundle: LocalReadingBundle) -> dict[str, Any]
         "paper_context": [
             {
                 "source_handle": item.source_handle,
+                "paper_id": item.paper_id,
+                "title": item.title,
+                "year": item.year,
+                "doi": item.doi,
                 "opening": item.opening,
                 "sections": list(item.sections),
+                "matched_sections": list(item.matched_sections),
             }
             for item in bundle.paper_contexts
         ],
@@ -665,6 +727,7 @@ def triage_gap(
     top_papers: int = 6,
     passages_per_paper: int = 2,
     policy_override: Mapping[str, str] | None = None,
+    source_identity_map: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> TriageJudgment:
     """Decide direct use / local deep read / external research for one gap.
 
@@ -677,6 +740,7 @@ def triage_gap(
         max_passages=max_passages,
         top_papers=top_papers,
         passages_per_paper=passages_per_paper,
+        source_identity_map=source_identity_map,
     )
     if judge is None or not bundle.passages:
         judgment = _policy_decision(gap, bundle)
@@ -731,15 +795,33 @@ def _with_comparisons(content: str, comparisons: Sequence[Mapping[str, Any]]) ->
     return "\n".join(lines)
 
 
-def read_local_capture(index: PlanningMaterialIndex, judgment: TriageJudgment, *, judge: Judge) -> TriageJudgment:
+def read_local_capture(
+    index: PlanningMaterialIndex,
+    judgment: TriageJudgment,
+    *,
+    judge: Judge,
+    source_identity_map: Mapping[str, Mapping[str, Any]] | None = None,
+) -> TriageJudgment:
     """Actually read additional stored sections for the requested detail."""
     from dataclasses import replace
     focused = replace(judgment.gap, question=judgment.gap.question + "\nRead specifically: " + (judgment.read_focus or judgment.gap.question))
-    bundle, _ = prepare_local_reading(index, focused, max_passages=10, passages_per_paper=3, top_papers=6)
+    bundle, _ = prepare_local_reading(
+        index, focused, max_passages=10, passages_per_paper=3, top_papers=6,
+        source_identity_map=source_identity_map,
+    )
     bundle.gap = judgment.gap
     bundle.new_task_fields = ("focused_local_read",)
     existing = {(p.paper_id, p.text) for p in bundle.passages}
-    bundle.passages.extend(p for p in judgment.passages if (p.paper_id, p.text) not in existing)
+    rebound_prior = [
+        replace(
+            passage,
+            source_handle=_local_source_handle(
+                passage.paper_id, passage.doi, passage.source_handle, source_identity_map,
+            ),
+        )
+        for passage in judgment.passages
+    ]
+    bundle.passages.extend(p for p in rebound_prior if (p.paper_id, p.text) not in existing)
     normalized = _normalize_judgment(judge(judgment.gap, bundle), judgment.gap)
     result = TriageJudgment(gap=judgment.gap, source="judge+focused_local_read", passages=bundle.passages,
                            local_reading=bundle, model_calls=judgment.model_calls+int(getattr(judge, "last_call_count", 1)), **normalized)
@@ -783,6 +865,7 @@ def triage_gaps(
     passages_per_paper: int = 2,
     max_passages: int = MAX_PASSAGES,
     policy_override: Mapping[str, str] | None = None,
+    source_identity_map: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Triage several gaps and write the stage artifacts."""
 
@@ -795,6 +878,7 @@ def triage_gaps(
             passages_per_paper=passages_per_paper,
             max_passages=max_passages,
             policy_override=policy_override,
+            source_identity_map=source_identity_map,
         ))
     summary = {
         "schema_version": SCHEMA_VERSION,

@@ -10,6 +10,7 @@ from optomind_research.runtime.upgrade3 import planning_retrieval_loop as retrie
 from optomind_research.runtime.upgrade3.progressive_review_plan import (
     ProgressivePlannerConfig, ProgressiveReviewPlanner, ProgressivePlanError,
     PARTS_PLAN_SCHEMA_VERSION, PARTS_CONTRACT_VERSION, RETRIEVAL_STAGE_CONTRACT,
+    LOCAL_SOURCE_IDENTITY_CONTRACT,
     LEVEL1_OUTLINE_PROMPT_CONTRACT, _planner_instructions, make_retrieval_loop_runner,
     _carry_gap_query_fields, _normalize_gaps,
 )
@@ -338,6 +339,7 @@ def test_revision_tool_cache_contract_reenters_downstream_loop_only(tmp_path):
     saved_state = json.loads((tmp_path / "out/RUN_STATE.json").read_text(encoding="utf-8"))
     stage_input = saved_state["stage_inputs"]["level2_tools"]
     assert stage_input["stage_inputs"]["retrieval_loop_contract"] == RETRIEVAL_STAGE_CONTRACT
+    assert stage_input["stage_inputs"]["local_source_identity_contract"] == LOCAL_SOURCE_IDENTITY_CONTRACT
     stage_input["stage_inputs"].pop("retrieval_loop_contract")
     (tmp_path / "out/RUN_STATE.json").write_text(json.dumps(saved_state), encoding="utf-8")
     planner._tool_cycle(
