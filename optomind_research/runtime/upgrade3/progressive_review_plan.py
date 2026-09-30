@@ -5300,7 +5300,7 @@ def _case_selection_material_rows(
                 paper_id = _text(candidate.get("_paper_id") or _canonical_paper_id(candidate))
                 row = build_local_material_payload(
                     candidate,
-                    deep_material_by_paper=read_materials.get(paper_id),
+                    deep_material=read_materials.get(paper_id),
                 )
         if row is None:
             output.append({"source_handle": handle, "material_available": False})

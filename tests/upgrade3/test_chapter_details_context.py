@@ -294,3 +294,41 @@ def test_actual_ch03_revision_payload_is_within_local_token_budget():
     raw_tokens = counter(b"", planning._messages_for("chapter_details", payload))
     estimated = int(raw_tokens * planning.TOKEN_MARGIN_MULTIPLIER + 0.999999) + planning.TOKEN_FRAMING_MARGIN
     assert estimated < 900_000
+
+
+def test_case_pool_fallback_keeps_card_deep_and_local_material(tmp_path: Path):
+    """The case fallback uses the single-paper deep-material helper contract."""
+    card_path = tmp_path / "card.json"
+    card_path.write_text(json.dumps({
+        "general_understanding": {"paper_kind": "primary", "key_findings": ["finding"]},
+        "review_planning": {"planning_summary": "useful planning context"},
+    }), encoding="utf-8")
+    candidate = {
+        "_paper_id": "paper1",
+        "_source_handle": "P0591",
+        "card_path": str(card_path),
+        "planning_view": {"paper_identity": {"title": "Example study", "doi": "10/example"}},
+        "_b_summary": {"declared_content_depth": "abstract"},
+        "supplement_gap_material": {"gap_id": "G1", "useful_material": "supplement"},
+        "supplement_gap_materials": [{"gap_id": "G1", "useful_material": "supplement"}],
+    }
+    deep = {"paper_id": "paper1", "content": {"finding": "deep evidence"}}
+    payload = planning.build_local_material_payload(
+        candidate,
+        deep_material=deep,
+        question="local question",
+        hits=[{"paper_id": "paper1", "text": "local passage"}],
+    )
+    assert payload["study_summary_A"]["key_findings"] == ["finding"]
+    assert payload["review_planning_B"]["planning_summary"] == "useful planning context"
+    assert payload["deep_read_material"]["content"]["finding"] == "deep evidence"
+    assert payload["local_passages"]["passages"][0]["text"] == "local passage"
+    assert payload["supplement_gap_material"]["gap_id"] == "G1"
+
+    rows = planning._case_selection_material_rows(
+        ["P0591"], [], [candidate], {"paper1": deep},
+    )
+    assert rows[0]["study_summary_A"]["key_findings"] == ["finding"]
+    assert rows[0]["review_planning_B"]["planning_summary"] == "useful planning context"
+    assert rows[0]["deep_read_material"]["content"]["finding"] == "deep evidence"
+    assert rows[0]["supplement_gap_material"]["gap_id"] == "G1"
