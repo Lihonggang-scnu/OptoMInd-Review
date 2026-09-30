@@ -8,7 +8,7 @@ import pytest
 from optomind_research.runtime.upgrade3 import progressive_review_plan as planning
 from optomind_research.runtime.upgrade3.progressive_review_plan import (
     ProgressivePlannerConfig, ProgressiveReviewPlanner, ProgressivePlanError,
-    PARTS_PLAN_SCHEMA_VERSION, _planner_instructions,
+    PARTS_PLAN_SCHEMA_VERSION, LEVEL1_OUTLINE_PROMPT_CONTRACT, _planner_instructions,
 )
 
 
@@ -206,7 +206,19 @@ def test_live_planner_call_repeats_parts_contract_after_full_payload(tmp_path, m
         output_dir=tmp_path / "planner-output",
         tokenizer_path=tmp_path / "unused-tokenizer.json",
     )
-    planner(stage, {"planning_revision_mode": True, "topic_id": "fixture", "candidate_pool": []})
+    planner(stage, {
+        "planning_revision_mode": True,
+        "topic_id": "fixture",
+        "candidate_pool": [],
+        "original_plan": {"question": "A material-led question", "facets": [{"facet_id": "F1", "question": "A facet"}]},
+        "upstream_material_theme_inventory": ["an upstream material theme"],
+        "global_material_authority": {
+            "upstream_complete_pool_row_count": 0,
+            "upstream_material_summary_is_material_base": True,
+            "tool_results_are_bounded_local_feedback": True,
+            "organizing_claims_must_be_material_driven": True,
+        },
+    })
 
     user_message = captured["messages"][1]["content"]
     delivery = user_message[user_message.index("【本轮交付】"):]
@@ -219,10 +231,55 @@ def test_live_planner_call_repeats_parts_contract_after_full_payload(tmp_path, m
     assert captured["invoke_kwargs"]["model"] == "qwen3.5-plus"
     if stage == "whole_plan_improvement":
         assert "manuscript_parts_plan_status" in delivery
+    if stage == "level1_outline":
+        assert "原始研究计划、上游主题库存和已供上游阶段筛选的完整材料池是全局材料依据" in delivery
+        assert "工具结果只是受影响章节的局部反馈" in delivery
+        assert "不得凭空添加证据等级、A/B/C 分级或证据层级" in delivery
+        assert "本阶段所有说明性文本使用中文" in delivery
 
 
-def test_legacy_message_keeps_generic_delivery_tail():
-    messages = planning._messages_for("provisional_scope", {"planning_revision_mode": False})
+def test_level1_prompt_contract_only_invalidates_level1_cache(tmp_path):
+    planner, model = make(tmp_path)
+    planner.run(stop_after="level1")
+
+    level1_payload = next(payload for stage, payload in model.calls if stage == "level1_outline")
+    assert level1_payload["original_plan"]["facets"]
+    assert level1_payload["upstream_material_theme_inventory"] == ["assumptions", "deployment"]
+    assert level1_payload["global_material_authority"]["tool_results_are_bounded_local_feedback"] is True
+
+    state_path = tmp_path / "out/RUN_STATE.json"
+    state = json.loads(state_path.read_text())
+    level1_inputs = state["stage_inputs"]["level1_outline"]["stage_inputs"]
+    assert level1_inputs["prompt_contract"] == LEVEL1_OUTLINE_PROMPT_CONTRACT
+    level1_tool_inputs = state["stage_inputs"]["level1_tools"]["stage_inputs"]
+    assert level1_tool_inputs is None or "prompt_contract" not in level1_tool_inputs
+    # Model the cache written by the previous prompt contract: only level1
+    # loses its contract marker, while provisional/tools remain reusable.
+    level1_inputs.pop("prompt_contract")
+    state_path.write_text(json.dumps(state))
+
+    resumed, model = make(tmp_path)
+    resumed.run(resume=True, stop_after="level1")
+    assert [stage for stage, _ in model.calls] == ["level1_outline"]
+
+    unchanged, fresh_model = make(tmp_path)
+    unchanged.run(resume=True, stop_after="level1")
+    assert fresh_model.calls == []
+
+
+def test_legacy_level1_payload_keeps_original_shape(tmp_path):
+    planner, model = make(tmp_path, enabled=False)
+    planner.run(stop_after="level1")
+    level1_payload = next(payload for stage, payload in model.calls if stage == "level1_outline")
+    assert set(level1_payload) == {
+        "topic_id", "research_question", "provisional_scope", "actual_tool_results",
+        "full_b_pool_was_semantically_screened", "unavailable_and_failed_tools_are_scope_feedback",
+    }
+
+
+@pytest.mark.parametrize("stage", ["provisional_scope", "level1_outline"])
+def test_legacy_message_keeps_generic_delivery_tail(stage):
+    messages = planning._messages_for(stage, {"planning_revision_mode": False})
     assert messages[1]["content"].endswith(
         "【本轮交付】请用中文撰写本阶段要求的内容，只返回本阶段的JSON结果，不照抄输入字段。"
     )
