@@ -36,7 +36,7 @@ SCHEMA_VERSION = "optomind.progressive_review_plan.v1"
 PARTS_PLAN_SCHEMA_VERSION = "optomind.progressive_review_plan.v2"
 # This version is scoped to the level-1 global-outline prompt. Changing it
 # must invalidate only that stage on resume, not provisional scope or tools.
-LEVEL1_OUTLINE_PROMPT_CONTRACT = "level1_outline.review_v2_04"
+LEVEL1_OUTLINE_PROMPT_CONTRACT = "level1_outline.review_v2_05_body_parts_boundary"
 RETRIEVAL_STAGE_CONTRACT = "first_round_query_recovery.v2"
 LOCAL_SOURCE_IDENTITY_CONTRACT = "active_pool_identity.v1"
 DEFAULT_PLANNER_MODEL = "qwen3.5-plus"
@@ -867,6 +867,14 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
                 "除非用户或 supplied standard 明确提供评价标准，不得凭空添加证据等级、A/B/C 分级或证据层级；若存在标准，按原标准并保留研究对象、设置、条件和限制。"
                 "本阶段所有说明性文本使用中文，科学名称、论文原题和 source_handle 可保留原文。"
             )
+            if planning_revision:
+                stage_text += (
+                    "\n【BODY与首尾职责分离】shared_outline/shared_level1_outline 只承载实质 BODY 任务：保留有真实材料依据的背景知识、"
+                    "概念、理论、机制、方法、案例、比较、研究发展或 Outlook；即使章节标题含 Introduction、Conclusion 或 Outlook，"
+                    "只要其中有这些深度任务就保留并完整展开。纯粹的动机、范围说明、目录/阅读路线提示和全文收束分别归 manuscript_parts_plan 的"
+                    "introduction 或 conclusion 职责卡，不要为这些轻量职责单独增加 BODY 章节，也不要把它们重复写进实质章节。"
+                    "这是按实际职责分离，不是按标题机械删章：混合章节只移走重复的轻量职责，保留其有材料依据的深度单元、证据和展开关系。"
+                )
     return common + "\n\n" + stage_text
 
 
@@ -1348,6 +1356,10 @@ def _parts_contract_delivery(stage: str) -> str:
         return (
             "只返回本阶段 JSON。顶层必须包含 shared_scope、shared_outline、review_argument、"
             "source_selection_principles、unresolved_limits，以及 manuscript_parts_plan。"
+            "shared_outline 只承载实质 BODY 任务：保留有真实材料依据的背景知识、概念、理论、机制、方法、案例、比较、研究发展和 Outlook。"
+            "纯粹的动机、范围说明、目录/阅读路线提示和全文收束分别属于 manuscript_parts_plan 的 introduction 或 conclusion 职责卡，"
+            "不要为这些轻量职责单独增加 BODY 章节，也不要把它们重复写进实质章节。按实际职责分离而不是按标题删章；"
+            "含有深度知识任务的 Introduction、Conclusion 或 Outlook 章节必须保留，混合章节只移走重复的轻量职责。"
             "原始研究计划、上游主题库存和已供上游阶段筛选的完整材料池是全局材料依据；工具结果只是受影响章节的局部反馈，"
             "只能细化相关章节范围和限制，不能按反馈体量取代全局组织论点。上游主题库存是材料摘要，"
             "应回到已提供的材料内容和研究设计核验，不盲从推荐语。来源顺序、近期性或 payload 体量本身不能决定全篇中心，"

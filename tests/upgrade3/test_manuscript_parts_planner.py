@@ -646,6 +646,8 @@ def test_live_planner_call_repeats_parts_contract_after_full_payload(tmp_path, m
         assert "工具结果只是受影响章节的局部反馈" in delivery
         assert "不得凭空添加证据等级、A/B/C 分级或证据层级" in delivery
         assert "本阶段所有说明性文本使用中文" in delivery
+        assert "shared_outline 只承载实质 BODY 任务" in delivery
+        assert "按实际职责分离而不是按标题删章" in delivery
 
 
 def test_level1_prompt_contract_only_invalidates_level1_cache(tmp_path):
@@ -675,6 +677,16 @@ def test_level1_prompt_contract_only_invalidates_level1_cache(tmp_path):
     unchanged, fresh_model = make(tmp_path)
     unchanged.run(resume=True, stop_after="level1")
     assert fresh_model.calls == []
+
+
+def test_revision_level1_body_parts_boundary_is_revision_only():
+    revised = _planner_instructions("level1_outline", planning_revision=True)
+    legacy = _planner_instructions("level1_outline", planning_revision=False)
+    assert "BODY与首尾职责分离" in revised
+    assert "纯粹的动机、范围说明、目录/阅读路线提示和全文收束" in revised
+    assert "混合章节只移走重复的轻量职责" in revised
+    assert "BODY与首尾职责分离" not in legacy
+    assert "纯粹的动机、范围说明、目录/阅读路线提示和全文收束" not in legacy
 
 
 def test_legacy_level1_payload_keeps_original_shape(tmp_path):
