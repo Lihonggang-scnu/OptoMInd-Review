@@ -15,7 +15,7 @@ from optomind_research.runtime.upgrade3.progressive_review_plan import (
     _carry_gap_query_fields, _normalize_gaps,
 )
 from optomind_research.runtime.upgrade3.planning_retrieval_loop import (
-    InformationNeed, LoopConfig, run_retrieval_loop,
+    InformationNeed, LoopConfig, _need_signature, run_retrieval_loop,
 )
 
 
@@ -108,6 +108,254 @@ def test_factory_runner_passes_revision_flag_to_loop(tmp_path, monkeypatch):
             pool_rows=[], plan={"question": "review scope"}, source_handle_map={}, resume=False,
         )
     assert flags == [False, True]
+
+
+def _prior_external_tool_result(need, *, content="prior material", round_count=1):
+    raw_results = []
+    for index in range(round_count):
+        round_content = content if round_count == 1 else f"{content} round {index + 1}"
+        raw_results.append({
+            "status": "completed",
+            "results": [{
+                "gap_id": "diet-gap",
+                "request_id": f"progressive-fixture-level2-diet-gap-{index + 1}",
+                "chapter_ids": [],
+                "fulfillment_judgment": {
+                    "status": "partial",
+                    "useful_material": [round_content],
+                    "remaining_gap": "one limitation remains",
+                },
+                "source_units": [{
+                    "source_unit_id": f"SU01_fixture_{index + 1}",
+                    "record_identity": {"paper_id": "paper1", "title": "Fixture paper"},
+                    "status": "partial",
+                }],
+            }],
+            "external_gap_ids": ["diet-gap"],
+        })
+    state = {
+        "need_id": need.need_id,
+        "need": {**need.to_dict(), "owners": []},
+        "status": "stopped_rounds_exhausted",
+        "rounds": 3,
+        "usable_content": content,
+        "still_missing": "one limitation remains",
+        "new_handles": [],
+        "attempts": [],
+        "external_results": raw_results,
+    }
+    return {"phase": "level2", "retrieval_loop": {"needs": [state]}, "supplement_results": raw_results}
+
+
+def test_factory_runner_reuses_identical_prior_need_without_provider_call(tmp_path):
+    plan = tmp_path / "PLAN.json"
+    pool = tmp_path / "POOL.jsonl"
+    plan.write_text(json.dumps({"question": "fixture review"}), encoding="utf-8")
+    pool.write_text("", encoding="utf-8")
+    config = ProgressivePlannerConfig(
+        topic_id="fixture", plan_path=plan, pool_path=pool,
+        output_dir=tmp_path / "out", planning_revision_enabled=True,
+    )
+    calls = []
+
+    def supplement_runner(*args, **kwargs):
+        calls.append((args, kwargs))
+        return {"status": "completed", "results": []}
+
+    request = {
+        "gap_id": "diet-gap", "gap_question": "same question",
+        "success_criteria": ["same criterion"],
+        "targeted_queries": [{"query_type": "keyword", "query_text": "same query", "facet_id": "F1"}],
+        "chapter_ids": ["CH01"],
+    }
+    need = InformationNeed(
+        need_id=retrieval_loop.need_id_for("same question"), question="same question",
+        owners=(), intended_use="mechanism", user_scope="fixture review",
+        success_criteria=("same criterion",), concepts=("same query",),
+        round_specs=({"round": 1, "targeted_queries": request["targeted_queries"]},),
+    )
+    runner = make_retrieval_loop_runner(
+        config, allow_external=True, supplement_runner=supplement_runner,
+    )
+    result = runner(
+        phase="chapters", supplement_requests=[request], pool_rows=[],
+        plan={"question": "fixture review"}, source_handle_map={},
+        prior_tool_results=_prior_external_tool_result(need), resume=True,
+    )
+    assert calls == []
+    material = result["tool_materials_by_chapter"]["CH01"][0]
+    assert "prior material" in material["usable_content"]
+    assert material["chapter_ids"] == ["CH01"]
+    assert material["sources"][0]["source_unit_id"] == "SU01_fixture_1"
+
+
+def test_factory_runner_changed_need_contract_calls_provider_once(tmp_path):
+    plan = tmp_path / "PLAN.json"
+    pool = tmp_path / "POOL.jsonl"
+    plan.write_text(json.dumps({"question": "fixture review"}), encoding="utf-8")
+    pool.write_text("", encoding="utf-8")
+    config = ProgressivePlannerConfig(
+        topic_id="fixture", plan_path=plan, pool_path=pool,
+        output_dir=tmp_path / "out", planning_revision_enabled=True,
+    )
+    calls = []
+
+    def supplement_runner(gaps, **kwargs):
+        calls.append((gaps, kwargs))
+        return {"status": "completed", "results": []}
+
+    old_request = {
+        "gap_id": "diet-gap", "gap_question": "same question",
+        "success_criteria": ["old criterion"],
+        "targeted_queries": [{"query_type": "keyword", "query_text": "same query", "facet_id": "F1"}],
+        "chapter_ids": ["CH01"],
+    }
+    need = InformationNeed(
+        need_id=retrieval_loop.need_id_for("same question"), question="same question",
+        intended_use="mechanism", user_scope="fixture review",
+        success_criteria=("old criterion",), concepts=("same query",),
+        round_specs=({"round": 1, "targeted_queries": old_request["targeted_queries"]},),
+    )
+    new_request = {**old_request, "success_criteria": ["new criterion"]}
+    runner = make_retrieval_loop_runner(
+        config, allow_external=True, supplement_runner=supplement_runner,
+    )
+    runner(
+        phase="chapters", supplement_requests=[new_request], pool_rows=[],
+        plan={"question": "fixture review"}, source_handle_map={},
+        prior_tool_results=_prior_external_tool_result(need), resume=True,
+    )
+    assert len(calls) == 1
+
+
+def test_factory_runner_merges_current_partial_and_all_prior_rounds(tmp_path):
+    plan = tmp_path / "PLAN.json"
+    pool = tmp_path / "POOL.jsonl"
+    plan.write_text(json.dumps({"question": "fixture review"}), encoding="utf-8")
+    pool.write_text("", encoding="utf-8")
+    output_dir = tmp_path / "out"
+    config = ProgressivePlannerConfig(
+        topic_id="fixture", plan_path=plan, pool_path=pool,
+        output_dir=output_dir, planning_revision_enabled=True,
+    )
+    request = {
+        "gap_id": "diet-gap", "gap_question": "same question",
+        "success_criteria": ["same criterion"],
+        "targeted_queries": [{"query_type": "keyword", "query_text": "same query", "facet_id": "F1"}],
+        "chapter_ids": ["CH01"],
+    }
+    need = retrieval_loop.needs_from_planner_gap_rows(
+        [_normalize_gaps([request])[0]], intended_use="mechanism", user_scope="fixture review",
+    )[0]
+    journal = output_dir / "chapters" / "retrieval_loop.jsonl"
+    journal.parent.mkdir(parents=True)
+    current_entries = []
+    for index in (1, 2):
+        current_entries.append({
+            "need_id": need.need_id, "need_signature": _need_signature(need), "round": index,
+            "owners": ["CH01"], "status": "partial", "action": "external_research",
+            "local_decision": "external_research", "usable_content": f"current round {index}",
+            "still_missing": "one limitation remains", "queries": request["targeted_queries"],
+            "external_results": [{
+                "status": "completed", "results": [{
+                    "fulfillment_judgment": {"status": "partial", "useful_material": [f"current round {index}"]},
+                    "source_units": [{"source_unit_id": f"CURRENT_{index}", "record_identity": {"paper_id": "paper1"}}],
+                }],
+            }],
+        })
+    journal.write_text("".join(json.dumps(item) + "\n" for item in current_entries), encoding="utf-8")
+    calls = []
+
+    def supplement_runner(*args, **kwargs):
+        calls.append((args, kwargs))
+        return {"status": "completed", "results": []}
+
+    result = make_retrieval_loop_runner(
+        config, allow_external=True, supplement_runner=supplement_runner,
+    )(
+        phase="chapters", supplement_requests=[request], pool_rows=[],
+        plan={"question": "fixture review"}, source_handle_map={},
+        prior_tool_results=_prior_external_tool_result(need, round_count=3), resume=True,
+    )
+    assert calls == []
+    state = result["retrieval_loop"]["needs"][0]
+    assert len(state["external_results"]) == 5
+    assert all(f"current round {index}" in state["usable_content"] for index in (1, 2))
+    assert "prior material" in state["usable_content"]
+    material = result["tool_materials_by_chapter"]["CH01"][0]
+    assert "prior material round 1" in material["usable_content"]
+    assert "current round 1" in material["usable_content"]
+
+
+def test_factory_runner_answered_current_clears_prior_missing(tmp_path):
+    plan = tmp_path / "PLAN.json"
+    pool = tmp_path / "POOL.jsonl"
+    plan.write_text(json.dumps({"question": "fixture review"}), encoding="utf-8")
+    pool.write_text("", encoding="utf-8")
+    config = ProgressivePlannerConfig(
+        topic_id="fixture", plan_path=plan, pool_path=pool,
+        output_dir=tmp_path / "out", planning_revision_enabled=True,
+    )
+    request = {
+        "gap_id": "diet-gap", "gap_question": "same question",
+        "success_criteria": ["same criterion"],
+        "targeted_queries": [{"query_type": "keyword", "query_text": "same query", "facet_id": "F1"}],
+        "chapter_ids": ["CH01"],
+    }
+    need = retrieval_loop.needs_from_planner_gap_rows(
+        [_normalize_gaps([request])[0]], intended_use="mechanism", user_scope="fixture review",
+    )[0]
+    journal = config.output_dir / "chapters" / "retrieval_loop.jsonl"
+    journal.parent.mkdir(parents=True)
+    partial = {
+        "need_id": need.need_id, "need_signature": _need_signature(need), "round": 1,
+        "owners": ["CH01"], "status": "partial", "action": "external_research",
+        "local_decision": "external_research", "usable_content": "earlier partial",
+        "still_missing": "stale current gap", "queries": request["targeted_queries"],
+        "external_results": [{
+            "status": "completed", "results": [{
+                "fulfillment_judgment": {"status": "partial", "useful_material": ["earlier partial"]},
+                "source_units": [{"source_unit_id": "EARLIER", "record_identity": {"paper_id": "paper1"}}],
+            }],
+        }],
+    }
+    answered = {
+        "need_id": need.need_id, "need_signature": _need_signature(need), "round": 2,
+        "owners": ["CH01"], "status": "answered", "action": "external_research",
+        "local_decision": "external_research", "usable_content": "current answer",
+        "still_missing": "stale current gap", "queries": request["targeted_queries"],
+        "external_results": [{
+            "status": "completed", "results": [{
+                "fulfillment_judgment": {"status": "fulfilled", "useful_material": ["current answer"]},
+                "source_units": [{"source_unit_id": "CURRENT", "record_identity": {"paper_id": "paper1"}}],
+            }],
+        }],
+    }
+    journal.write_text(
+        "".join(json.dumps(item) + "\n" for item in (partial, answered)), encoding="utf-8"
+    )
+    calls = []
+
+    def supplement_runner(*args, **kwargs):
+        calls.append((args, kwargs))
+        return {"status": "completed", "results": []}
+
+    result = make_retrieval_loop_runner(
+        config, allow_external=True, supplement_runner=supplement_runner,
+    )(
+        phase="chapters", supplement_requests=[request], pool_rows=[],
+        plan={"question": "fixture review"}, source_handle_map={},
+        prior_tool_results=_prior_external_tool_result(need), resume=True,
+    )
+    state = result["retrieval_loop"]["needs"][0]
+    assert calls == []
+    assert state["status"] == "answered"
+    assert state["still_missing"] == ""
+    material = result["tool_materials_by_chapter"]["CH01"][0]
+    assert "earlier partial" in material["usable_content"]
+    assert "current answer" in material["usable_content"]
+    assert "prior material" in material["usable_content"]
+    assert material["still_missing"] == ""
 
 
 def test_legacy_harmonized_response_without_supplement_field_stays_absent(tmp_path):
