@@ -54,3 +54,7 @@ PDF 结构化解析可使用 `deploy/grobid/docker-compose.yml`，默认访问 `
 - [统一入口](optomind_research/runtime/upgrade3/review_delivery.py) / [全文编辑](optomind_research/runtime/upgrade3/article_text_editor.py) / [首尾提炼](optomind_research/runtime/upgrade3/manuscript_front_back.py) / [图表引用](optomind_research/runtime/upgrade3/delivery_citations.py)
 
 顾问阅读包与运行输入分离，未来可独立删除。`main`保持旧技术报告链接不变。
+
+### lihonggang：正文后独立首尾（显式启用）
+
+此分支新增独立后置构思与首尾生成，不改变 `lihonggang` 的正文 planner、编排或单元写作。使用说明与离线/真实测试边界见 [POST_BODY_MANUSCRIPT_PARTS.md](docs/POST_BODY_MANUSCRIPT_PARTS.md)，设计边界见 [IMPLEMENTATION PLAN](docs/POST_BODY_PARTS_IMPLEMENTATION_PLAN.md)。独立入口为 `scripts/upgrade3/manuscript_parts.py`；既有 delivery 仅在 `front_back.mode=post_body` 时选择新模块。离线通过不代表模型内容质量已通过。
