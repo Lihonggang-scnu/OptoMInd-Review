@@ -221,6 +221,10 @@ class ChapterView:
     # Multi-source or unattributed tool returns for this chapter.  They keep
     # their whole source set and are exported next to the per-handle catalog.
     chapter_tool_materials: list[dict[str, Any]] = field(default_factory=list)
+    # Source identities exposed by chapter-level tool material.  These are
+    # kept separate from ``sources`` because they are not task-owned material,
+    # but they still need to be resolvable when a writer cites one.
+    chapter_tool_sources: dict[str, SourceMaterial] = field(default_factory=dict)
 
     def to_dict(self, *, include_material: bool = True) -> dict[str, Any]:
         return {
@@ -973,6 +977,35 @@ def build_chapter_view(
                 use["recorded_under_alias"] = alias
             uses.setdefault(source.source_handle, [])
 
+    # Chapter-level tool returns can legitimately mention a paper that is not
+    # attached to one paragraph task.  Keep only handles that resolve through
+    # this packet's current source material/identity catalogue; do not invent a
+    # source record from a title or a handle appearing in the tool response.
+    chapter_tool_sources: dict[str, SourceMaterial] = {}
+    for item in chapter_level:
+        for raw in item.get("sources") or ():
+            if not isinstance(raw, Mapping):
+                continue
+            handle = str(raw.get("source_handle") or "").strip()
+            source = catalog.get(handle)
+            if not handle or source is None:
+                continue
+            if not any(
+                str(getattr(source, field, "") or "").strip()
+                for field in ("paper_id", "title", "doi", "year", "card_path")
+            ) and not any((
+                source.planning_view,
+                source.study_summary_a,
+                source.deep_read_material,
+                source.deep_read_materials,
+                source.supplement_material,
+                source.supplement_materials,
+                source.local_passages,
+                source.tool_supplement_materials,
+            )):
+                continue
+            chapter_tool_sources.setdefault(handle, source)
+
     other_chapters = [
         {
             "chapter_id": str(row.get("chapter_id") or ""),
@@ -1000,6 +1033,7 @@ def build_chapter_view(
         id_map_path=str(resolved_id_map),
         packet_path=str(packet_path),
         chapter_tool_materials=chapter_level,
+        chapter_tool_sources=chapter_tool_sources,
     )
 
 
@@ -1159,7 +1193,15 @@ def build_source_catalog(
         for row in ((rows or {}).get("sources") or ())
     }
     catalog: dict[str, dict[str, Any]] = {}
-    for source in view.sources:
+    source_rows: list[tuple[SourceMaterial, bool]] = [
+        (source, False) for source in view.sources
+    ]
+    source_rows.extend(
+        (source, True)
+        for handle, source in view.chapter_tool_sources.items()
+        if handle not in {item.source_handle for item in view.sources}
+    )
+    for source, chapter_tool_only in source_rows:
         entry = source.to_dict(include_material=True)
         uses = placed.get(source.source_handle, [])
         for alias in source.aliases:
@@ -1176,6 +1218,8 @@ def build_source_catalog(
         )
         if arranged_level:
             entry["arranged_level"] = arranged_level.get(source.source_handle, "")
+        if chapter_tool_only:
+            entry["chapter_tool_source"] = True
         catalog[source.source_handle] = entry
     return catalog
 

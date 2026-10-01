@@ -234,8 +234,15 @@ def load_unit_document(job: Job, result_path: Path, arrangement: Mapping[str, An
     complete = result.get("complete", True)
     finish_reason = str(result.get("finish_reason") or "")
     body = ""
+    normalized_body_path_value = str(result.get("citation_normalized_body_path") or "").strip()
+    if normalized_body_path_value:
+        normalized_body_path = Path(normalized_body_path_value)
+        if not normalized_body_path.is_absolute():
+            normalized_body_path = result_path.parent / normalized_body_path
+        if normalized_body_path.is_file():
+            body = normalized_body_path.read_text(encoding="utf-8", errors="replace")
     body_path_value = str(result.get("body_path") or "").strip()
-    if body_path_value:
+    if not body and body_path_value:
         body_path = Path(body_path_value)
         if not body_path.is_absolute():
             body_path = result_path.parent / body_path

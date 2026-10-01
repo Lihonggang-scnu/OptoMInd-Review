@@ -175,6 +175,10 @@ class UnitWritingView:
     # Multi-source or unattributed chapter tool returns relevant to this unit.
     # They keep their whole source set; they are never folded into one paper.
     chapter_tool_materials: list[dict[str, Any]] = field(default_factory=list)
+    # Handles from chapter-level material that resolve through the current
+    # arrangement/packet identity catalogue.  They are citation-eligible but
+    # are intentionally kept out of ``materials`` unless a task owns them.
+    chapter_tool_source_handles: list[str] = field(default_factory=list)
     # The chapter owner's unit-level conditions/synthesis/transition, carried
     # through the arrangement so paragraph tasks are not their only carrier.
     owner_unit_context: dict[str, Any] = field(default_factory=dict)
@@ -200,7 +204,16 @@ class UnitWritingView:
             "view_path": self.view_path,
             "unit_notes": self.unit_notes,
             "chapter_tool_materials": self.chapter_tool_materials,
+            "allowed_source_handles": self.citation_handles(),
         }
+
+    def citation_handles(self) -> list[str]:
+        """Handles the writer may cite from this exact input."""
+
+        return list(dict.fromkeys([
+            *self.sources,
+            *self.chapter_tool_source_handles,
+        ]))
 
     def material_summary(self) -> dict[str, Any]:
         return {
@@ -660,6 +673,15 @@ def build_unit_view(
     handles = unit_handles(unit)
     if not handles:
         raise UnitWritingError(f"unit_uses_no_sources:{unit_id}")
+    raw_chapter_tool_materials = _unit_relevant_chapter_tool_materials(
+        arrangement.get("chapter_tool_materials") or (), unit_id)
+    chapter_tool_source_handles = _resolved_chapter_tool_source_handles(
+        raw_chapter_tool_materials,
+        source_catalog=source_catalog,
+        packet_materials=packet_materials,
+    )
+    chapter_tool_materials = _filter_chapter_tool_materials(
+        raw_chapter_tool_materials, chapter_tool_source_handles)
     materials: list[dict[str, Any]] = []
     notes: list[dict[str, Any]] = []
     for handle in handles:
@@ -704,8 +726,8 @@ def build_unit_view(
         arrangement_path=str(arrangement_file),
         view_path=str(resolved_view_path),
         unit_notes=str(unit.get("unit_notes") or ""),
-        chapter_tool_materials=_unit_relevant_chapter_tool_materials(
-            arrangement.get("chapter_tool_materials") or (), unit_id),
+        chapter_tool_materials=chapter_tool_materials,
+        chapter_tool_source_handles=chapter_tool_source_handles,
         owner_unit_context=(
             dict(unit["owner_unit_context"]) if isinstance(unit.get("owner_unit_context"), Mapping)
             else {}),
@@ -805,6 +827,101 @@ def _unit_relevant_chapter_tool_materials(
     return relevant
 
 
+def _stable_source_identity(row: Mapping[str, Any] | None) -> bool:
+    """Whether a packet/catalog row carries a usable current identity."""
+
+    if not isinstance(row, Mapping):
+        return False
+    return any(
+        str(row.get(key) or "").strip()
+        for key in ("paper_id", "canonical_paper_id", "doi", "title", "card_path")
+    )
+
+
+def _resolved_chapter_tool_source_handles(
+    items: Sequence[Mapping[str, Any]],
+    *,
+    source_catalog: Mapping[str, Any],
+    packet_materials: Mapping[str, Any] | None,
+) -> list[str]:
+    """Return only chapter-tool handles backed by this run's packet/catalog.
+
+    Chapter-level tool material can mention candidate handles that were never
+    admitted to the current packet.  Those handles remain visible in the raw
+    tool result but cannot become writer citations through title guessing.
+    """
+
+    resolved: list[str] = []
+    packet_materials = packet_materials or {}
+    for item in items:
+        for raw in item.get("sources") or ():
+            if not isinstance(raw, Mapping):
+                continue
+            handle = str(raw.get("source_handle") or "").strip()
+            if not handle or handle in resolved:
+                continue
+            catalog_row = source_catalog.get(handle)
+            packet_row = packet_materials.get(handle)
+            if not (_stable_source_identity(raw)
+                    and (_stable_source_identity(packet_row)
+                         or _stable_source_identity(catalog_row))):
+                continue
+            resolved.append(handle)
+    return resolved
+
+
+def _filter_chapter_tool_materials(
+    items: Sequence[Mapping[str, Any]],
+    allowed_handles: Sequence[str],
+) -> list[dict[str, Any]]:
+    """Keep all chapter-tool evidence and annotate citation eligibility.
+
+    A source row may carry useful paper identity without a current handle.  It
+    must remain in the model context for multi-source attribution, while the
+    allowed handle list keeps it from becoming a citation by identity guess.
+    """
+
+    allowed = set(allowed_handles)
+    filtered: list[dict[str, Any]] = []
+    for raw in items:
+        if not isinstance(raw, Mapping):
+            continue
+        item = dict(raw)
+        sources = item.get("sources")
+        if isinstance(sources, list):
+            dropped = [
+                str(row.get("source_handle") or "").strip()
+                for row in sources
+                if isinstance(row, Mapping)
+                and str(row.get("source_handle") or "").strip() not in allowed
+                and str(row.get("source_handle") or "").strip()
+            ]
+            item["sources"] = [dict(row) if isinstance(row, Mapping) else row for row in sources]
+            item["citation_eligible_source_handles"] = list(dict.fromkeys(
+                str(row.get("source_handle") or "").strip()
+                for row in sources
+                if isinstance(row, Mapping)
+                and str(row.get("source_handle") or "").strip() in allowed
+            ))
+            if dropped:
+                item["unresolved_source_handles"] = list(dict.fromkeys(dropped))
+            metadata_only = [
+                {
+                    key: str(row.get(key) or "")
+                    for key in ("paper_id", "canonical_paper_id", "doi", "title", "year")
+                    if str(row.get(key) or "").strip()
+                }
+                for row in sources
+                if isinstance(row, Mapping)
+                and not str(row.get("source_handle") or "").strip()
+                and _stable_source_identity(row)
+            ]
+            if metadata_only:
+                item["unresolved_source_identities"] = metadata_only
+        filtered.append(item)
+    return filtered
+
+
 def unit_payload(view: UnitWritingView, *, language: str = "zh") -> dict[str, Any]:
     """The compact payload the writing model receives (each source only once)."""
 
@@ -819,6 +936,7 @@ def unit_payload(view: UnitWritingView, *, language: str = "zh") -> dict[str, An
         "unit_notes": view.unit_notes,
         "sibling_units": view.sibling_units,
         "chapter_tool_materials": view.chapter_tool_materials,
+        "allowed_source_handles": view.citation_handles(),
         **({"owner_unit_context": view.owner_unit_context} if view.owner_unit_context else {}),
         "paragraph_tasks": [
             {
@@ -1060,6 +1178,92 @@ def citations_in(body: str) -> list[str]:
     return found
 
 
+_NUMERIC_MAP_LINE_RE = re.compile(
+    r"(?m)^[ \t]*(?:[-*][ \t]*)?\[(\d+)\][ \t]+(P\d{3,})[ \t]*$"
+)
+_NUMERIC_REF_RE = re.compile(r"\[(\d+)\]")
+
+
+def normalize_numeric_citations(
+    body: str,
+    allowed_source_handles: Sequence[str],
+) -> dict[str, Any]:
+    """Normalize only an explicit, one-to-one numeric citation map.
+
+    The original body is never changed by this function.  A valid map such as
+    ``[1] P0400`` makes the derived body use ``[P0400]``; numeric references
+    without a complete known map remain unresolved and produce an issue for the
+    caller.  We deliberately do not infer a map from source-list order.
+    """
+
+    text = str(body or "")
+    allowed = set(str(handle).strip() for handle in allowed_source_handles if str(handle).strip())
+    map_matches = list(_NUMERIC_MAP_LINE_RE.finditer(text))
+    mapping: dict[int, str] = {}
+    duplicate_numbers: list[int] = []
+    for match in map_matches:
+        number = int(match.group(1))
+        handle = match.group(2)
+        if number in mapping and mapping[number] != handle:
+            duplicate_numbers.append(number)
+        else:
+            mapping[number] = handle
+
+    body_without_map_lines = text
+    for match in reversed(map_matches):
+        body_without_map_lines = (
+            body_without_map_lines[:match.start()]
+            + body_without_map_lines[match.end():]
+        )
+    numeric_refs = [int(match.group(1)) for match in _NUMERIC_REF_RE.finditer(body_without_map_lines)]
+    if not numeric_refs and not map_matches:
+        return {
+            "status": "none",
+            "body": text,
+            "mapping": {},
+            "issues": [],
+        }
+
+    issues: list[dict[str, Any]] = []
+    if duplicate_numbers:
+        issues.append({
+            "code": "numeric_citation_map_ambiguous",
+            "numbers": sorted(set(duplicate_numbers)),
+            "note": "同一数字对应多个来源，保留原文并要求定向重写",
+        })
+    unknown_handles = sorted({handle for handle in mapping.values() if handle not in allowed})
+    if unknown_handles:
+        issues.append({
+            "code": "numeric_citation_map_unknown_handle",
+            "handles": unknown_handles,
+            "note": "数字映射目标不在当前单元允许的来源目录中",
+        })
+    unmapped = sorted({number for number in numeric_refs if number not in mapping})
+    if unmapped:
+        issues.append({
+            "code": "numeric_citations_unresolved",
+            "numbers": unmapped,
+            "note": "没有显式且唯一的数字到来源编号映射；不按来源顺序猜测",
+        })
+    if issues:
+        return {
+            "status": "unresolved",
+            "body": text,
+            "mapping": {str(number): handle for number, handle in sorted(mapping.items())},
+            "issues": issues,
+        }
+
+    normalized = body_without_map_lines
+    normalized = _NUMERIC_REF_RE.sub(
+        lambda match: "[" + mapping[int(match.group(1))] + "]", normalized)
+    return {
+        "status": "normalized",
+        "body": normalized,
+        "mapping": {str(number): handle for number, handle in sorted(mapping.items())},
+        "issues": [],
+    }
+
+
 def simulated_banner(view: UnitWritingView, source: str) -> str:
     return (
         "> ⚠️ **模拟输出（假客户端，不是模型生成的正文）**\n"
@@ -1091,13 +1295,27 @@ def write_unit_output(
 
     target = Path(output_dir)
     target.mkdir(parents=True, exist_ok=True)
-    known = set(view.sources)
-    used = citations_in(body)
+    allowed_handles = view.citation_handles()
+    citation_normalization = normalize_numeric_citations(body, allowed_handles)
+    citation_body = str(citation_normalization.get("body") or body)
+    known = set(allowed_handles)
+    used = citations_in(citation_body)
     unknown = [handle for handle in used if handle not in known]
-    unused = [handle for handle in view.sources if handle not in used]
     banner = simulated_banner(view, simulated_from) if mode == "fake" else ""
     markdown_path = target / ("UNIT_BODY.simulated.md" if mode == "fake" else "UNIT_BODY.md")
     markdown_path.write_text(banner + body.rstrip() + "\n", encoding="utf-8")
+    normalized_path = ""
+    if citation_normalization.get("status") == "normalized":
+        normalized_file = target / "UNIT_BODY.citations.md"
+        normalized_file.write_text(
+            banner + citation_body.rstrip() + "\n", encoding="utf-8")
+        normalized_path = str(normalized_file)
+
+    output_issues = [dict(item) for item in issues if isinstance(item, Mapping)]
+    output_issues.extend(
+        dict(item) for item in citation_normalization.get("issues") or ()
+        if isinstance(item, Mapping)
+    )
 
     result = {
         "schema_version": RESULT_SCHEMA,
@@ -1111,7 +1329,9 @@ def write_unit_output(
         "body_markdown": body,
         "body_path": str(markdown_path),
         "used_source_handles": used,
-        "unused_source_handles": unused,
+        "unused_source_handles": [handle for handle in view.sources if handle not in used],
+        "allowed_source_handles": allowed_handles,
+        "chapter_tool_source_handles": list(view.chapter_tool_source_handles),
         "unknown_citations": unknown,
         "source_count": len(view.sources),
         "material_summary": view.material_summary(),
@@ -1126,7 +1346,9 @@ def write_unit_output(
             else "complete"
         ),
         "partial_error": partial_error,
-        "issues": [dict(item) for item in issues if isinstance(item, Mapping)],
+        "issues": output_issues,
+        "citation_normalization": citation_normalization,
+        "citation_normalized_body_path": normalized_path,
         "arrangement_path": view.arrangement_path,
         "view_path": view.view_path,
         "input_path": str(target / "UNIT_INPUT.json"),
@@ -1181,6 +1403,8 @@ def write_unit_input(
             "table_tasks": len(view.table_tasks),
         },
         "handles": list(view.sources),
+        "allowed_source_handles": view.citation_handles(),
+        "chapter_tool_source_handles": list(view.chapter_tool_source_handles),
     }
     (target / "UNIT_INPUT.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
