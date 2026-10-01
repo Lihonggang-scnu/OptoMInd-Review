@@ -1,0 +1,62 @@
+{
+  "schema_version": "optomind.manuscript_parts.body_driver.run.v1",
+  "stage": "arrange",
+  "status": "complete",
+  "paths": {
+    "root": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\body_run",
+    "arrangement": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\body_run\\arrangement",
+    "writer": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\body_run\\writer",
+    "batch": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\body_run\\batch",
+    "assembly": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\body_run\\assembly"
+  },
+  "ledger": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\budget.sqlite",
+  "tokenizer": "F:\\OptoMind-Review-2\\data\\tokenizers\\qwen3_5_9b\\tokenizer.json",
+  "model_routes": {
+    "arrangement": "qwen3.5-plus",
+    "writer": "qwen3.7-flash"
+  },
+  "commands": {
+    "records": [
+      {
+        "label": "arrangement-live",
+        "command": [
+          "C:\\Anaconda\\python.exe",
+          "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\worktree\\scripts\\upgrade3\\chapter_arrangement.py",
+          "--all-chapters",
+          "--packet-root",
+          "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\new_plan",
+          "--output-root",
+          "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\body_run\\arrangement",
+          "--model",
+          "qwen3.5-plus",
+          "--key-file",
+          "api_keys/<redacted>",
+          "--budget-ledger",
+          "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\budget.sqlite",
+          "--round-cap-cny",
+          "10.0",
+          "--output-tokens",
+          "18000",
+          "--planning-revision",
+          "--no-retry",
+          "--run"
+        ],
+        "returncode": 0,
+        "stdout_tail": "064,\n        \"output_tokens\": 18000,\n        \"thinking_budget\": 12000,\n        \"total_context_tokens\": 49064,\n        \"estimated_cost_cny\": 0.796256,\n        \"model\": \"qwen3.5-plus\"\n      },\n      \"status\": \"arranged\",\n      \"validation\": {\n        \"ok\": true,\n        \"contract_ok\": true,\n        \"needs_arrangement\": false,\n        \"status\": \"arranged\",\n        \"errors\": [],\n        \"units_returned\": 4,\n        \"units_expected\": 4,\n        \"paragraph_tasks\": 12,\n        \"paragraph_tasks_carried_over\": 12,\n        \"paragraph_tasks_with_changed_point\": 0,\n        \"paragraph_ids_reused_with_new_point\": [],\n        \"table_tasks\": 1,\n        \"sources_arranged\": 22,\n        \"sources_marked_unused\": 0,\n        \"sources_never_mentioned\": [],\n        \"missing_sources\": []\n      },\n      \"round_state\": {\n        \"round_prefix\": \"chapter-arrangement:20260926-deepseek:\",\n        \"round_cap_cny\": 10.0,\n        \"round_settled_cny\": 0.16978000000000001,\n        \"round_held_cny\": 0.0,\n        \"round_remaining_cny\": 9.83022,\n        \"ledger_path\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\manuscript_parts_acceptance_20260930\\\\budget.sqlite\"\n      },\n      \"arrangement\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\manuscript_parts_acceptance_20260930\\\\body_run\\\\arrangement\\\\CH04\\\\CHAPTER_ARRANGEMENT.json\",\n      \"markdown\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\manuscript_parts_acceptance_20260930\\\\body_run\\\\arrangement\\\\CH04\\\\CHAPTER_ARRANGEMENT.md\",\n      \"source_usage\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\manuscript_parts_acceptance_20260930\\\\body_run\\\\arrangement\\\\CH04\\\\SOURCE_USAGE.json\"\n    },\n    {\n      \"chapter_id\": \"CH05\",\n      \"packet\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\manuscript_parts_acceptance_20260930\\\\new_plan\\\\writer_packets\\\\CH05.json\",\n      \"view\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\manuscript_parts_acceptance_20260930\\\\body_run\\\\arrangement\\\\CH05\\\\ARRANGEMENT_INPUT.json\",\n      \"input_sources\": 16,\n      \"input_paragraph_level\": 16,\n      \"input_case_only\": 0,\n      \"signature\": \"74b4b8d5ccc7f0ba\",\n      \"estimate\": {\n        \"prompt_tokens_estimate\": 8764,\n        \"reserved_input_tokens\": 18007,\n        \"output_tokens\": 18000,\n        \"thinking_budget\": 12000,\n        \"total_context_tokens\": 48007,\n        \"estimated_cost_cny\": 0.792028,\n        \"model\": \"qwen3.5-plus\"\n      },\n      \"status\": \"arranged\",\n      \"validation\": {\n        \"ok\": true,\n        \"contract_ok\": true,\n        \"needs_arrangement\": false,\n        \"status\": \"arranged\",\n        \"errors\": [],\n        \"units_returned\": 4,\n        \"units_expected\": 4,\n        \"paragraph_tasks\": 13,\n        \"paragraph_tasks_carried_over\": 13,\n        \"paragraph_tasks_with_changed_point\": 0,\n        \"paragraph_ids_reused_with_new_point\": [],\n        \"table_tasks\": 0,\n        \"sources_arranged\": 16,\n        \"sources_marked_unused\": 0,\n        \"sources_never_mentioned\": [],\n        \"missing_sources\": []\n      },\n      \"round_state\": {\n        \"round_prefix\": \"chapter-arrangement:20260926-deepseek:\",\n        \"round_cap_cny\": 10.0,\n        \"round_settled_cny\": 0.2174656,\n        \"round_held_cny\": 0.0,\n        \"round_remaining_cny\": 9.7825344,\n        \"ledger_path\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\manuscript_parts_acceptance_20260930\\\\budget.sqlite\"\n      },\n      \"arrangement\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\manuscript_parts_acceptance_20260930\\\\body_run\\\\arrangement\\\\CH05\\\\CHAPTER_ARRANGEMENT.json\",\n      \"markdown\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\manuscript_parts_acceptance_20260930\\\\body_run\\\\arrangement\\\\CH05\\\\CHAPTER_ARRANGEMENT.md\",\n      \"source_usage\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\manuscript_parts_acceptance_20260930\\\\body_run\\\\arrangement\\\\CH05\\\\SOURCE_USAGE.json\"\n    }\n  ],\n  \"round_after\": {\n    \"round_prefix\": \"chapter-arrangement:20260926-deepseek:\",\n    \"round_cap_cny\": 10.0,\n    \"round_settled_cny\": 0.2174656,\n    \"round_held_cny\": 0.0,\n    \"round_remaining_cny\": 9.7825344,\n    \"ledger_path\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\manuscript_parts_acceptance_20260930\\\\budget.sqlite\"\n  }\n}\n",
+        "stderr_tail": ""
+      }
+    ]
+  },
+  "plan": {
+    "path": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\new_plan\\DETAILED_REVIEW_PLAN.json",
+    "chapter_ids": [
+      "CH01",
+      "CH02",
+      "CH03",
+      "CH04",
+      "CH05"
+    ],
+    "planning_revision": "v2",
+    "frozen": true
+  }
+}

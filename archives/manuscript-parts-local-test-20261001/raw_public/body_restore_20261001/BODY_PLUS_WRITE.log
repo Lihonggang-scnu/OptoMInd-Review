@@ -1,0 +1,38 @@
+{
+  "schema_version": "optomind.manuscript_parts.body_driver.run.v1",
+  "stage": "write",
+  "status": "failed",
+  "paths": {
+    "root": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\body_restore_20261001\\body_plus",
+    "arrangement": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\body_restore_20261001\\body\\arrangement",
+    "writer": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\body_restore_20261001\\body_plus\\writer",
+    "batch": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\body_restore_20261001\\body_plus\\batch",
+    "assembly": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\body_restore_20261001\\body_plus\\assembly"
+  },
+  "ledger": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\budget.sqlite",
+  "tokenizer": "F:\\OptoMind-Review-2\\data\\tokenizers\\qwen3_5_9b\\tokenizer.json",
+  "model_routes": {
+    "arrangement": "qwen3.5-plus",
+    "writer": "qwen3.5-plus"
+  },
+  "writer_settings": {
+    "output_tokens": 12000,
+    "thinking_budget": 4000,
+    "max_writers": 3
+  },
+  "dry_run": false,
+  "commands": [],
+  "plan": {
+    "path": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\body_restore_20261001\\plan\\DETAILED_REVIEW_PLAN.json",
+    "chapter_ids": [
+      "Ch2_Clinical",
+      "Ch3_Mechanisms",
+      "Ch4_Context",
+      "Ch5_Interventions",
+      "Ch6_Challenges"
+    ],
+    "planning_revision": "v2",
+    "frozen": true
+  },
+  "error": "DriverError:writer_result_not_ready:Ch3_Mechanisms:Ch3_Mechanisms_U01:writer_issues_or_unknown_citations"
+}
