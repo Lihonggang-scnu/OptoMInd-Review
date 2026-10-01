@@ -10,6 +10,7 @@ from pathlib import Path
 from optomind_research.runtime.upgrade3.review_unit_writer import (
     UnitWritingView,
     build_unit_view,
+    normalize_numeric_citations,
     unit_payload,
     write_unit_output,
 )
@@ -92,6 +93,44 @@ def test_unmapped_numeric_citations_remain_visible_and_unresolved(tmp_path):
     assert {issue["code"] for issue in result["issues"]} == {"numeric_citations_unresolved"}
     assert not result["citation_normalized_body_path"]
     assert Path(result["body_path"]).read_text(encoding="utf-8").strip() == body
+
+
+def test_unique_allowed_handle_suffix_alias_is_normalized_without_source_order(tmp_path):
+    view = _minimal_view(tmp_path, ["P0097", "P0328", "P0415", "P0511"])
+    body = "黑色素瘤队列[415]，TNBC队列[328]，代谢通路[511]，NSCLC模型[97]。"
+    output = tmp_path / "writer" / "CH02_CH02_U02"
+    result = write_unit_output(
+        view,
+        body,
+        output,
+        model="fixture",
+        language="zh",
+        mode="run",
+        used_messages=[],
+        estimate={},
+    )
+
+    assert result["citation_normalization"] == {
+        "status": "normalized",
+        "body": "黑色素瘤队列[P0415]，TNBC队列[P0328]，代谢通路[P0511]，NSCLC模型[P0097]。",
+        "mapping": {"97": "P0097", "328": "P0328", "415": "P0415", "511": "P0511"},
+        "issues": [],
+    }
+    assert result["used_source_handles"] == ["P0415", "P0328", "P0511", "P0097"]
+    assert Path(result["citation_normalized_body_path"]).read_text(encoding="utf-8").strip() == result["citation_normalization"]["body"]
+    assert Path(result["body_path"]).read_text(encoding="utf-8").strip() == body
+
+
+def test_numeric_suffix_collision_and_nonmatching_ordinal_stay_unresolved():
+    collision = normalize_numeric_citations("证据[97]。", ["P0097", "P097"])
+    assert collision["status"] == "unresolved"
+    assert collision["mapping"] == {}
+    assert collision["issues"][0]["code"] == "numeric_citations_unresolved"
+
+    ordinal = normalize_numeric_citations("证据[1]。", ["P0097", "P0328"])
+    assert ordinal["status"] == "unresolved"
+    assert ordinal["mapping"] == {}
+    assert ordinal["issues"][0]["numbers"] == [1]
 
 
 def test_chapter_tool_source_is_allowed_only_when_current_catalog_resolves_it(tmp_path):

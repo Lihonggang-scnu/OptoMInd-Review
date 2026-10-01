@@ -1182,18 +1182,20 @@ _NUMERIC_MAP_LINE_RE = re.compile(
     r"(?m)^[ \t]*(?:[-*][ \t]*)?\[(\d+)\][ \t]+(P\d{3,})[ \t]*$"
 )
 _NUMERIC_REF_RE = re.compile(r"\[(\d+)\]")
+_HANDLE_SUFFIX_RE = re.compile(r"^P(\d{3,})$")
 
 
 def normalize_numeric_citations(
     body: str,
     allowed_source_handles: Sequence[str],
 ) -> dict[str, Any]:
-    """Normalize only an explicit, one-to-one numeric citation map.
+    """Normalize an explicit map or an unambiguous handle-suffix alias.
 
     The original body is never changed by this function.  A valid map such as
     ``[1] P0400`` makes the derived body use ``[P0400]``; numeric references
-    without a complete known map remain unresolved and produce an issue for the
-    caller.  We deliberately do not infer a map from source-list order.
+    may also use a unique decimal suffix of an allowed handle, such as ``[415]``
+    for the only allowed ``P0415``.  Collisions, missing suffixes, and numeric
+    source-list order remain unresolved and produce an issue for the caller.
     """
 
     text = str(body or "")
@@ -1224,6 +1226,18 @@ def normalize_numeric_citations(
             "issues": [],
         }
 
+    suffix_candidates: dict[int, set[str]] = {}
+    for handle in allowed:
+        suffix_match = _HANDLE_SUFFIX_RE.fullmatch(handle)
+        if suffix_match:
+            suffix_candidates.setdefault(int(suffix_match.group(1)), set()).add(handle)
+    for number in numeric_refs:
+        if number in mapping:
+            continue
+        candidates = suffix_candidates.get(number, set())
+        if len(candidates) == 1:
+            mapping[number] = next(iter(candidates))
+
     issues: list[dict[str, Any]] = []
     if duplicate_numbers:
         issues.append({
@@ -1243,7 +1257,7 @@ def normalize_numeric_citations(
         issues.append({
             "code": "numeric_citations_unresolved",
             "numbers": unmapped,
-            "note": "没有显式且唯一的数字到来源编号映射；不按来源顺序猜测",
+            "note": "没有显式映射或当前允许来源中的唯一数字后缀；不按来源顺序猜测",
         })
     if issues:
         return {
