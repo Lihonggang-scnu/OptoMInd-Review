@@ -1,0 +1,83 @@
+{
+  "acquisition_count": 2,
+  "auxiliary_material": [
+    "The review planning notes highlight that this paper provides methodological context for intracellular metabolism, explaining that nucleotides are primarily intracellular while extracellular purines exist as parent forms due to phosphatase activity. It supports the biological rationale for using PBMCs over RBCs for immune-related metabolic profiling due to de novo synthesis capabilities in nucleated cells. The planning also flags the DBS hydrolysis finding as a cautionary example for sample handling in clinical trials.",
+    "The study details the molecular mechanism (inosine-A2AR-cAMP-CREB signaling) and the context-dependency of inosine effects (requiring co-stimulation like IL-12/IFN-γ). It also reports differential efficacy of the bacterial-metabolite circuit across different colorectal cancer subtypes in mouse models (effective in MMRD and inflammation-associated models, ineffective in APC/KRAS models). These findings support the biological rationale for measuring these metabolites but do not address measurement standardization.",
+    "The authors compare their LC-MS/MS approach with traditional immunoassays (RIA/IA), noting the latter's lack of specificity for structurally similar metabolites. The study establishes reference ranges for 11 thyroid metabolites in 120 pregnant women (third trimester), demonstrating the output of such standardized methods. The distinction between total and free fraction analysis protocols is also detailed."
+  ],
+  "candidate_count": 3,
+  "citation_anchor_count": 0,
+  "citation_anchor_status": "not_applicable",
+  "evidence": [],
+  "limitations": [],
+  "material_ready": true,
+  "model_call": true,
+  "network_call": true,
+  "note": "The gap judgment and ready writing material are reported separately.",
+  "outcome": "content_reviewed_gap_unmet_narrow_or_omit",
+  "outline_action": "Use this study to benchmark technical validation parameters (precision, accuracy, stability) for metabolite quantification methods in the review. Cite the PBMC vs. RBC concentration differences when discussing immune cell metabolic baselines. Continue searching for specific consensus guidelines or validated protocols for serum and tumor tissue samples, and for SCFA measurement methods, as these remain open gaps.",
+  "outline_action_recovered_by_policy": false,
+  "planning_use_contract": {
+    "status": "equal_use"
+  },
+  "query_audits": [
+    {
+      "facet_id": "F1",
+      "provider_attempts": [
+        {
+          "provider": "semantic_scholar",
+          "retryable": false,
+          "returned": 12,
+          "status_code": 200
+        }
+      ],
+      "provider_issue": false,
+      "query_id": "SUP_metabolite_quantification_standard_KQ_01",
+      "query_text": "serum inosine concentration liquid chromatography mass spectrometry solid tumor",
+      "query_type": "keyword",
+      "requested_limit": 12,
+      "retrieval_source": "paper_search",
+      "retryable": false,
+      "returned": 12,
+      "status": 200
+    },
+    {
+      "discovery_target": 0,
+      "facet_id": "F1",
+      "max_snippets_per_paper": 2,
+      "provider_attempts": [
+        {
+          "provider": "semantic_scholar_snippets",
+          "retryable": false,
+          "returned": 12,
+          "status_code": 200
+        }
+      ],
+      "provider_issue": false,
+      "query_id": "SUP_metabolite_quantification_standard_QQ_02",
+      "query_text": "Are there any studies establishing absolute physiological concentration ranges or standardized measurement protocols for inosine in human serum or solid tumor microenvironment samples?",
+      "query_type": "question",
+      "raw_snippet_hits": 12,
+      "requested_limit": 12,
+      "requested_limits": [
+        12
+      ],
+      "requests": 1,
+      "retrieval_source": "snippet_search",
+      "retryable": false,
+      "returned": 12,
+      "status": 200,
+      "unique_papers": 10
+    }
+  ],
+  "query_source": "planner_supplied_targeted_queries",
+  "remaining_gap": "The specific success criteria for standardized measurement in human tumor microenvironment or serum remain unaddressed, as this study focused on blood cell lysates. There is no evidence of a consensus guideline or widely adopted standard for serum/tumor metabolite quantification in this text. Additionally, short-chain fatty acids (SCFAs) are not covered, only purine nucleotides. The study represents a single-laboratory validation rather than a field-wide consensus.",
+  "remaining_gap_recovered_by_policy": false,
+  "status": "unmet",
+  "substantive_gap_status": "unmet",
+  "useful_material": [
+    "This study developed and validated an LC-MS/MS method for quantifying adenosine, guanosine, and inosine nucleotides (mono- and triphosphate forms) in human peripheral blood mononuclear cells (PBMCs), red blood cells (RBCs), and dried blood spots (DBS). The authors reported absolute quantification ranges (e.g., inosine triphosphate 0.25–50 pmol/sample) with interassay precision ≤15% and accuracy within −11.5% to 14.7%. Key findings include significantly higher nucleotide concentrations in PBMCs compared to RBCs (5.6-fold for ITP) and instability of triphosphates in DBS samples (26% lower TP levels due to hydrolysis). The method requires solid-phase extraction and dephosphorylation steps to measure molar equivalent nucleosides, with strict controls for environmental contamination affecting low-abundance analytes like ITP.",
+    "This study investigated the mechanism by which gut microbiota enhance immune checkpoint blockade (ICB) therapy in colorectal cancer using mouse models. The authors identified inosine as a critical bacterial metabolite that promotes Th1 cell differentiation via the A2A receptor. They quantified absolute inosine concentrations in mouse serum and intestinal contents using untargeted metabolomics and fragmentation analysis (e.g., serum inosine in B.p. monocolonized mice was 26.16 ± 3.32µM; duodenal content was 66.13 ±14.23 µM). This material helps the gap by confirming that inosine is a quantifiable metabolite of interest and providing example concentration ranges in a biological system, demonstrating the feasibility of measuring absolute levels (µM) in serum and tissue contexts.",
+    "This study describes a validated high-throughput LC-MS/MS method for absolute quantification of thyroid hormones and metabolites in human serum, employing dansyl chloride derivatization to enhance sensitivity. The authors report detailed validation parameters including recovery (73–115%), precision (CVs 1.2–16.4%), and method limits of quantification (MQL) in pg/mL or ng/mL, adhering to European Analytical Guidelines (2002/657/EC). This provides a concrete methodological template for what a standardized absolute concentration measurement workflow looks like in serum, including sample preparation (protein precipitation, SPE, ultrafiltration), derivatization optimization, and matrix effect evaluation."
+  ]
+}

@@ -1,0 +1,269 @@
+{
+  "response": {
+    "central_question": "肠道微生物组如何通过免疫和代谢途径调节实体瘤患者对免疫检查点抑制剂（ICI）的临床疗效，且哪些宿主和环境因素会影响这一调节作用？",
+    "cross_chapter_rules": [
+      "区分观察性关联与因果证据：在 CH02 中主要陈述关联，在 CH03 中结合临床前数据探讨机制，避免在缺乏干预数据时断言因果。",
+      "肿瘤类型特异性：在 CH02 和 CH05 中需明确区分不同癌种（如黑色素瘤 vs. 肺癌）的证据，避免过度泛化泛癌种结论。",
+      "干预时机与定义：在 CH04 中讨论抗生素影响时，必须区分治疗前、治疗中及治疗后暴露，因不同时间窗效应可能相反。",
+      "机制与干预的边界：CH03 聚焦生物学机制，CH05 聚焦临床应用，避免在机制章节过度讨论未经验证的临床疗法。",
+      "安全性与疗效的解耦：在 CH06 中独立讨论毒性，但在 CH07 中需综合评估疗效 - 毒性平衡对临床决策的影响。"
+    ],
+    "directed_reads": [
+      {
+        "chapter_ids": [
+          "CH02",
+          "CH05"
+        ],
+        "knowledge_gap": "该研究为 II 期试验，需确认其结果是否代表普遍疗效，以及机制解释是否具有普适性。",
+        "paper_id": "P0583",
+        "questions": [
+          "FMT 联合 ICI 在 NSCLC 和黑色素瘤中的具体 ORR 数据是多少？",
+          "FMT 起效机制是依赖于供体菌株定植还是基线有害菌清除？",
+          "供体菌群特征（如 Prevotella）与特定 ICI 方案（双免疫 vs 单药）的毒性交互作用是什么？"
+        ],
+        "reason": "这是目前关于 FMT 联合 ICI 在实体瘤中疗效的关键最新临床证据，直接支撑 CH05 的干预策略评估。",
+        "required_outputs": [
+          "ORR/PFS/OS 具体数值",
+          "微生物定植与临床获益的相关性数据",
+          "严重免疫相关不良反应的发生率及特征"
+        ]
+      },
+      {
+        "chapter_ids": [
+          "CH03"
+        ],
+        "knowledge_gap": "需确认肌苷来源（微生物 vs. 饮食 vs. 肿瘤自身）在人体中的相对贡献。",
+        "paper_id": "P0582",
+        "questions": [
+          "肌苷通过抑制 UBA6 增强 ICI 疗效的具体分子机制是什么？",
+          "该机制在不同肿瘤类型（如黑色素瘤 vs. 结肠癌）中是否一致？",
+          "人体血浆肌苷水平与 ICI 生存获益的关联强度如何？"
+        ],
+        "reason": "提供了微生物代谢物调节肿瘤细胞内在免疫原性的具体分子机制，是 CH03 机制章节的核心素材。",
+        "required_outputs": [
+          "UBA6 抑制的分子通路细节",
+          "不同肿瘤模型中的疗效差异数据",
+          "人体血浆肌苷水平与生存期的统计关联值"
+        ]
+      },
+      {
+        "chapter_ids": [
+          "CH04"
+        ],
+        "knowledge_gap": "需厘清抗生素影响疗效的具体时间依赖性，以指导临床抗生素管理策略。",
+        "paper_id": "P0575",
+        "questions": [
+          "抗生素暴露对 ICI 疗效的负面影响是否主要集中在治疗前特定时间窗？",
+          "不同肿瘤类型（如头颈癌 vs. 肺癌）对抗生素暴露的敏感性是否有差异？",
+          "术后暴露与术前暴露对生存期的影响有何不同？"
+        ],
+        "reason": "提供了关于抗生素使用时机与 ICI 疗效关联的大规模真实世界证据，对 CH04 宿主因素章节至关重要。",
+        "required_outputs": [
+          "不同时间窗暴露的风险比（HR）",
+          "不同肿瘤亚组的敏感性分析结果",
+          "术前 vs 术后暴露的生存期对比数据"
+        ]
+      },
+      {
+        "chapter_ids": [
+          "CH05",
+          "CH07"
+        ],
+        "knowledge_gap": "需理解 FMT 失败的具体原因，以避免过度乐观地推广 FMT 疗法。",
+        "paper_id": "P0578",
+        "questions": [
+          "为何 FMT 在非选择性、快速进展的耐药人群中疗效为 0%？",
+          "基线免疫特征（如髓系细胞丰度）如何预测 FMT 的响应？",
+          "微生物定植持久性与临床获益的具体关联是什么？"
+        ],
+        "reason": "提供了 FMT 在特定耐药人群中失败的阴性结果，对于客观评估干预策略的局限性（CH07）至关重要。",
+        "required_outputs": [
+          "ORR/PFS 数据",
+          "基线免疫生物标志物与预后的关联",
+          "微生物定植持久性数据"
+        ]
+      }
+    ],
+    "grouped_screening_notes": [
+      {
+        "details": "排除血液系统恶性肿瘤（如 P0272, P0539）及非 ICI 免疫疗法（如 CAR-T，除非作为背景对比，如 P0560）。",
+        "reason": "非实体瘤或非 ICI 治疗"
+      },
+      {
+        "details": "排除精神疾病（如 P0020, P0528）、代谢疾病（如 P0519, P0527）及非癌症免疫治疗研究。",
+        "reason": "非肿瘤疾病或非免疫治疗背景"
+      },
+      {
+        "details": "排除仅描述测序技术而无具体生物学关联或临床结局的研究（如部分纯生物信息学流程论文）。",
+        "reason": "纯方法学或无生物学洞察"
+      },
+      {
+        "details": "排除仅关注肿瘤内微生物组且未讨论与肠道菌群互作的研究（如 P0457, P0535），除非作为对比背景。",
+        "reason": "非肠道微生物组"
+      }
+    ],
+    "material_theme_inventory": [
+      {
+        "description": "大量回顾性及前瞻性队列研究证实特定菌属（如 Akkermansia, Faecalibacterium, Bifidobacterium）与 ICI 疗效正相关，而抗生素暴露通常与疗效负相关。证据在不同癌种间存在异质性。",
+        "theme": "临床关联证据"
+      },
+      {
+        "description": "微生物代谢物（如短链脂肪酸、肌苷、胆汁酸、色氨酸衍生物）被确认为关键中介，通过调节免疫细胞功能（如 CD8+ T 细胞、DC 细胞）及肿瘤微环境代谢状态影响疗效。",
+        "theme": "代谢物介导机制"
+      },
+      {
+        "description": "粪菌移植（FMT）、益生菌、饮食干预及抗生素管理是主要干预手段。目前多为 I/II 期试验，缺乏确证性 III 期随机对照试验数据，且 FMT 疗效受供体选择和患者基线状态影响显著。",
+        "theme": "干预策略与临床试验"
+      },
+      {
+        "description": "抗生素使用时机、饮食模式、宿主遗传背景及肿瘤类型显著调节微生物组 -ICI 相互作用。特别是抗生素暴露的时间窗效应存在争议。",
+        "theme": "宿主与环境调节因素"
+      },
+      {
+        "description": "微生物组不仅影响疗效，还与免疫相关不良反应（irAEs）的发生风险相关，存在疗效与毒性解耦的潜在可能。",
+        "theme": "安全性与毒性"
+      },
+      {
+        "description": "研究间存在严重的异质性（测序平台、样本处理、统计方法），缺乏标准化，且因果关系推断受限于观察性设计。",
+        "theme": "方法学挑战"
+      }
+    ],
+    "provisional_outline": {
+      "chapters": [
+        {
+          "chapter_id": "CH01",
+          "purpose": "确立肠道微生物组作为 ICI 疗效关键调节因子的理论基础，概述当前免疫治疗的瓶颈及微生物组研究的演进。",
+          "question": "为何肠道微生物组被视为解释 ICI 疗效异质性的关键因素？",
+          "title": "引言：微生物组 - 免疫 - 肿瘤轴的背景与 rationale"
+        },
+        {
+          "chapter_id": "CH02",
+          "purpose": "综合不同实体瘤类型中微生物组特征（分类学及多样性）与临床结局（ORR, PFS, OS）的观察性证据。",
+          "question": "哪些特定的微生物特征在不同实体瘤中一致性地预测 ICI 疗效？",
+          "title": "肠道微生物组与 ICI 疗效的临床关联证据"
+        },
+        {
+          "chapter_id": "CH03",
+          "purpose": "深入解析微生物组调节宿主免疫系统及肿瘤微环境的具体分子和细胞机制，重点区分代谢物介导与抗原介导路径。",
+          "question": "微生物组通过哪些具体的免疫和代谢途径调节 ICI 的抗肿瘤活性？",
+          "title": "介导疗效的生物学机制：免疫与代谢通路"
+        },
+        {
+          "chapter_id": "CH04",
+          "purpose": "评估抗生素、饮食、益生菌等外部干预及宿主遗传、年龄等因素对微生物组 -ICI 轴的影响。",
+          "question": "哪些宿主和环境因素会增强或削弱微生物组对 ICI 疗效的调节作用？",
+          "title": "外部干预与宿主因素的调节作用"
+        },
+        {
+          "chapter_id": "CH05",
+          "purpose": "评估 FMT、工程菌、益生元等干预手段在临床试验中的安全性、可行性及初步疗效。",
+          "question": "当前微生物组干预策略在克服 ICI 耐药方面的临床证据等级如何？",
+          "title": "微生物组干预策略的临床转化现状"
+        },
+        {
+          "chapter_id": "CH06",
+          "purpose": "探讨微生物组在预测和管理 irAEs 中的作用，分析疗效与毒性之间的潜在权衡。",
+          "question": "微生物组特征是否能同时预测 ICI 疗效与毒性风险？",
+          "title": "安全性维度：微生物组与免疫相关不良反应"
+        },
+        {
+          "chapter_id": "CH07",
+          "purpose": "批判性评估现有研究的方法学异质性，指出因果推断的局限，并提出标准化及 III 期试验的需求。",
+          "question": "当前研究存在哪些方法学局限，未来如何推动从关联到因果的转化？",
+          "title": "方法学挑战、局限性与未来方向"
+        }
+      ]
+    },
+    "provisional_scope": "本综述涵盖所有实体瘤类型（如黑色素瘤、非小细胞肺癌、肾细胞癌、结直肠癌、肝细胞癌等），聚焦于免疫检查点抑制剂（包括抗 PD-1/PD-L1 和抗 CTLA-4 抗体）。纳入证据包括观察性队列研究、临床试验（I-III 期）、及具有临床转化意义的临床前机制研究。重点分析肠道微生物组组成（分类学）、功能（代谢物）与 ICI 疗效（ORR, PFS, OS）及安全性（irAEs）的关联。排除血液系统恶性肿瘤、非 ICI 免疫疗法（如 CAR-T，除非作为对比）、及无临床相关性数据的纯基础微生物学研究。",
+    "review_title": "肠道微生物组调节实体瘤免疫检查点抑制剂疗效的机制与临床证据综述",
+    "supplement_requests": [
+      {
+        "chapter_ids": [
+          "CH05",
+          "CH07"
+        ],
+        "gap_id": "GAP01",
+        "gap_question": "是否存在已完成的、大规模随机对照 III 期试验证实微生物组干预（如 FMT）能显著改善 ICI 疗效？",
+        "intended_use": "application_outcome",
+        "known_papers": [
+          "P0577",
+          "P0578",
+          "P0583",
+          "P0584"
+        ],
+        "optional reuse_plan_facet_ids": [],
+        "reviewed_references": [],
+        "success_criteria": "找到至少一项已完成并发表主要结果的 Phase III RCT，报告 ORR/PFS/OS 及安全性数据。",
+        "targeted_queries": [
+          "phase III randomized controlled trial fecal microbiota transplantation immune checkpoint inhibitor",
+          "microbiome intervention cancer immunotherapy phase 3 results"
+        ]
+      },
+      {
+        "chapter_ids": [
+          "CH03"
+        ],
+        "gap_id": "GAP02",
+        "gap_question": "人体肿瘤微环境内特定微生物代谢物（如肌苷、短链脂肪酸）的生理浓度及其与 ICI 响应的定量关系是什么？",
+        "intended_use": "quantification",
+        "known_papers": [
+          "P0580",
+          "P0581",
+          "P0582"
+        ],
+        "optional reuse_plan_facet_ids": [],
+        "reviewed_references": [],
+        "success_criteria": "找到使用靶向代谢组学（LC-MS/NMR）直接测量人类肿瘤组织或微透析液中特定代谢物浓度并与临床结局关联的研究。",
+        "targeted_queries": [
+          "human tumor microenvironment metabolite concentration inosine SCFA immune checkpoint inhibitor",
+          "intratumoral metabolite quantification cancer immunotherapy response"
+        ]
+      },
+      {
+        "chapter_ids": [
+          "CH04"
+        ],
+        "gap_id": "GAP03",
+        "gap_question": "抗生素暴露对 ICI 疗效的影响是否因抗生素种类、剂量或具体用药时间窗（如治疗前 vs 治疗后）而存在显著差异？",
+        "intended_use": "comparison",
+        "known_papers": [
+          "P0575",
+          "P0576"
+        ],
+        "optional reuse_plan_facet_ids": [],
+        "reviewed_references": [],
+        "success_criteria": "找到详细分层分析不同抗生素类别及精确时间窗与 ICI 结局关联的大型队列或荟萃分析。",
+        "targeted_queries": [
+          "antibiotic class timing immune checkpoint inhibitor efficacy meta-analysis",
+          "antibiotic exposure window survival cancer immunotherapy"
+        ]
+      }
+    ]
+  },
+  "telemetry": {
+    "call_id": "progressive-review:provisional_scope:X1_microbiome_ICI",
+    "complete": true,
+    "elapsed_seconds": 230.23499999998603,
+    "finish_reason": "stop",
+    "prompt_estimation": {
+      "framing_margin": 8192,
+      "hosted_token_count_is_approximate": true,
+      "multiplier": 1.12,
+      "tokenizer": "data/tokenizers/qwen3_5_9b/tokenizer.json"
+    },
+    "requested_model": "qwen3.5-plus",
+    "returned_model": "qwen3.5-plus",
+    "usage": {
+      "completion_tokens": 11503,
+      "completion_tokens_details": {
+        "reasoning_tokens": 8143,
+        "text_tokens": 11503
+      },
+      "prompt_tokens": 516766,
+      "prompt_tokens_details": {
+        "text_tokens": 516766
+      },
+      "total_tokens": 528269
+    }
+  }
+}

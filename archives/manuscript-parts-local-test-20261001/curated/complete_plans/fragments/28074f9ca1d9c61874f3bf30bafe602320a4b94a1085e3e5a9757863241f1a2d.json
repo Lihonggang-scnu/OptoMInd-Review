@@ -1,0 +1,93 @@
+{
+  "acquisition_count": 1,
+  "auxiliary_material": [
+    [
+      "The study primarily utilizes mouse tumor models (B16-F0, B16-GMCSF, 4T1) to demonstrate that systemic administration of inosine synergizes with ICB to overcome resistance and improve survival.",
+      "Mechanistic insights include single-cell RNA sequencing of murine tumors showing increased CD8+ T cells and M1 macrophages after inosine + ICB treatment.",
+      "Chemical proteomics (LiP-SMap) identified UBA6 as the direct target of inosine in tumor cells, leading to reduced FAT10-mediated degradation and upregulated MHC-I expression.",
+      "The study notes that gut microbiota depletion decreases circulating inosine levels, suggesting a microbial origin for this metabolite."
+    ],
+    "The review provides extensive mechanistic context for how metabolites like SCFAs, Inosine, and TMAO modulate immune responses (e.g., HDAC inhibition, A2aR signaling, mTOR pathway regulation) which may influence the TME. It also notes controversies, such as the negative correlation of butyrate with CTLA-4 efficacy, emphasizing the complexity of metabolite-host interactions. These details help frame the biological plausibility of metabolite-TME interactions, even though direct tissue quantification is absent.",
+    "The review discusses mechanisms by which inosine may influence the tumor microenvironment (TME), such as promoting Th1 anti-tumor responses, increasing IFN-γ production, and polarizing macrophages to an M1-like phenotype in murine models. It also notes pro-tumorigenic roles in CRC cells, including serving as an alternative carbon source under glucose restriction and promoting epithelial-mesenchymal transition (EMT) via LACC1 induction. However, these mechanistic insights are based on in vitro cell lines (SW480, HT29) and in vivo mouse models (MC38, CT26), not direct measurements in human patient samples."
+  ],
+  "candidate_count": 3,
+  "citation_anchor_count": 0,
+  "citation_anchor_status": "not_applicable",
+  "evidence": [],
+  "limitations": [],
+  "material_ready": true,
+  "model_call": true,
+  "network_call": true,
+  "note": "The gap judgment and ready writing material are reported separately.",
+  "outcome": "content_reviewed_gap_unmet_narrow_or_omit",
+  "outline_action": "Search for primary studies that perform targeted metabolomics (LC-MS/MS) specifically on human tumor tissue biopsies from ICI-treated patients, reporting absolute concentrations of inosine, butyrate, or SCFAs, and correlating these tissue-specific values with clinical response metrics (ORR, PFS, OS). Prioritize studies that also analyze paired serum/tumor samples to establish local TME concentrations.",
+  "outline_action_recovered_by_policy": false,
+  "planning_use_contract": {
+    "status": "equal_use"
+  },
+  "query_audits": [
+    {
+      "facet_id": "F1",
+      "provider_attempts": [
+        {
+          "provider": "semantic_scholar",
+          "retryable": false,
+          "returned": 0,
+          "status_code": 200
+        },
+        {
+          "error": "",
+          "provider": "openalex",
+          "retryable": false,
+          "returned": 12,
+          "status_code": 200
+        }
+      ],
+      "provider_issue": false,
+      "query_id": "SUP_gap_human_tme_metabolites_refined_KQ_01",
+      "query_text": "human tumor tissue metabolomics absolute concentration butyrate inosine SCFA immune checkpoint inhibitor response",
+      "query_type": "keyword",
+      "requested_limit": 12,
+      "retrieval_source": "paper_search",
+      "retryable": false,
+      "returned": 12,
+      "status": 200
+    },
+    {
+      "discovery_target": 0,
+      "facet_id": "F1",
+      "max_snippets_per_paper": 2,
+      "provider_attempts": [
+        {
+          "provider": "semantic_scholar_snippets",
+          "retryable": false,
+          "returned": 12,
+          "status_code": 200
+        }
+      ],
+      "provider_issue": false,
+      "query_id": "SUP_gap_human_tme_metabolites_refined_QQ_02",
+      "query_text": "Are there primary studies reporting absolute quantitative concentrations (e.g., μM, ng/mg) of microbial metabolites such as butyrate and inosine measured directly in human tumor tissue biopsies from patients treated with immune checkpoint inhibitors?",
+      "query_type": "question",
+      "raw_snippet_hits": 12,
+      "requested_limit": 12,
+      "requested_limits": [
+        12
+      ],
+      "requests": 1,
+      "retrieval_source": "snippet_search",
+      "retryable": false,
+      "returned": 12,
+      "status": 200,
+      "unique_papers": 11
+    }
+  ],
+  "query_source": "planner_supplied_targeted_queries",
+  "remaining_gap": "['The study does not report absolute quantitative concentrations (e.g., μM, ng/mg) of inosine measured directly in human tumor tissue (TME). The clinical analysis relies on plasma metabolomic profiling from public datasets (CheckMate 025), where relative abundance or high/low stratification based on median values is used, rather than absolute quantification in tissue.', 'The study does not measure paired tumor-serum samples to correlate local tissue concentrations with serum levels.', 'The study does not report data for other specific metabolites requested in the gap question, such as Butyrate or other SCFAs, in either human tissue or serum.', \"While the study establishes a correlation between plasma inosine levels and survival outcomes (OS/PFS) in ICI-treated patients, it does not provide the specific statistical correlation coefficients (e.g., Pearson/Spearman r-values) linking absolute concentration values to objective response rates (ORR) or detailed PFS/OS hazard ratios in a way that fulfills the 'absolute quantitative' criterion for tissue measurement.\"]",
+  "remaining_gap_recovered_by_policy": false,
+  "status": "unmet",
+  "substantive_gap_status": "unmet",
+  "useful_material": {
+    "_archive_fragment": "curated/complete_plans/fragments/820e04043bcd35ad2e8e6510febc42e527453ea1d76c47ea57d6cd3a07163b1b.json"
+  }
+}

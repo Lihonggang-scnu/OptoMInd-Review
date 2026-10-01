@@ -1,0 +1,31 @@
+{
+  "approach": "Publication 1: Developed an 8-min mp-qMRI protocol based on Olsson et al.'s 7T work, adapted for 3T using mGRE (TR=30ms, FA=5/32) and EPI for B1 mapping. Validated in phantoms, 5 healthy volunteers (scanned on two Siemens scanners), and 4 BT patients. Assessed accuracy against reference methods and inter-scanner reproducibility using COV and Bland-Altman plots. Publication 2: Compared three MRS quantification methods in 5 healthy volunteers and 1 BT patient: (1) Reference method (literature values for relaxation/correction), (2) Reference method with qMRI (gold standard, using actual qMRI maps), and (3) Proposed method (synthesizing water reference from qMRI H2O map + SV STEAM calibration). Used LCModel for fitting and Friedman’s rm-ANOVA for statistical comparison.",
+  "contribution_and_limits": [
+    {
+      "contribution": "Developed a fast (8 min), vendor-neutral mp-qMRI protocol suitable for multicenter studies. Demonstrated that qMRI-based water content mapping can replace redundant MRS water reference acquisitions without loss of quantification accuracy.",
+      "limits": "Inter-scanner reproducibility tested only within the same vendor (Siemens); inter-vendor compatibility remains unverified. The protocol uses interpolated resolution (1.2mm to 1mm) which may affect apparent resolution. The proposed MRS method assumes a constant correction factor for T2 estimation from T2* in the STEAM voxel, which may introduce error if the assumption does not hold universally. Large brain tumors may suffer from underestimation of water content due to bias field correction issues."
+    }
+  ],
+  "key_findings": [
+    {
+      "conditions": "Phantoms and healthy volunteers; compared to reference T1 mapping",
+      "finding": "The proposed mp-qMRI protocol showed good agreement with reference methods (<1% difference in T1). Inter-scanner reproducibility was high for T1, H2O, and T2* (COV <14%), but unreliable for χ due to near-zero values."
+    },
+    {
+      "conditions": "Healthy volunteers; WM-dominant ROIs (Left/Right)",
+      "finding": "The 'Reference method' (using literature values) significantly underestimated metabolite concentrations compared to methods using individual-specific corrections ('Ref-method-with-qMRI' and 'Proposed method')."
+    },
+    {
+      "conditions": "Brain tumor patient (IDH-mutant astrocytoma)",
+      "finding": "The 'Reference method' overestimated metabolite concentrations in healthy tissue and underestimated them in tumor regions (~15% lower than proposed method) due to inaccurate literature assumptions for pathological tissue."
+    },
+    {
+      "conditions": "Comparison of 'Ref-method-with-qMRI' vs 'Proposed method'",
+      "finding": "No significant differences were observed between the gold standard qMRI-corrected method and the proposed synthesis method. Bias was <0.5%, reducing total scan time by ~8 minutes."
+    }
+  ],
+  "paper_kind": "methods",
+  "problem_or_question": "Standard weighted MRI is insufficient for predicting tumor biology per WHO 2021 guidelines. Existing qMRI protocols are too long (~20+ min) for clinical routine. Additionally, accurate absolute quantification of MRS metabolites requires correcting for water relaxation effects, traditionally done via redundant, time-consuming acquisitions or inaccurate literature values.",
+  "research_scope": "3T MRI scanners (Siemens Prisma and Skyra); healthy volunteers (n=5) and brain tumor patients (n=4-5); phantoms. Focuses on developing a fast multi-parametric quantitative MRI (mp-qMRI) protocol and applying it to absolute quantification of cerebral metabolites via MR Spectroscopy (MRS).",
+  "work_summary": "This dissertation presents two methodological developments for brain tumor imaging. First, it introduces an 8-minute, vendor-neutral mp-qMRI protocol using generalized sequences (mGRE and EPI) to simultaneously map T1, T2*, H2O, and susceptibility (χ). Second, it proposes a novel method for absolute quantification of MRSI metabolites by synthesizing the spectroscopic water reference from the qMRI-derived H2O map, calibrated by a single-voxel STEAM sequence, thereby eliminating the need for a time-consuming separate water reference scan."
+}

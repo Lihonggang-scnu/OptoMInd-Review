@@ -1,0 +1,91 @@
+{
+  "response": {
+    "directed_reads": [],
+    "supplement_requests": [
+      {
+        "chapter_ids": [
+          "CH02",
+          "CH03"
+        ],
+        "gap_id": "CH02_CH03_inosine_tissue_quant",
+        "gap_question": "What are the absolute quantitative concentrations (μM or ng/mL) of inosine measured directly in human solid tumor tissue samples from ICI-treated patients, and how do these correlate with response outcomes?",
+        "intended_use": "quantification",
+        "success_criteria": "Identification of at least one study reporting absolute inosine concentration values in human tumor tissue (not just plasma stratification) with statistical correlation to ICI efficacy endpoints (ORR, PFS, or OS).",
+        "targeted_queries": [
+          {
+            "query_text": "inosine concentration human tumor tissue mass spectrometry immune checkpoint inhibitor metabolomics",
+            "query_type": "keyword"
+          },
+          {
+            "query_text": "What absolute concentrations of inosine have been measured in human tumor microenvironment samples from patients receiving PD-1 or CTLA-4 inhibitors?",
+            "query_type": "question"
+          }
+        ]
+      },
+      {
+        "chapter_ids": [
+          "CH04"
+        ],
+        "gap_id": "CH04_FMT_safety_regimen_comparison",
+        "gap_question": "Are there systematic comparisons of FMT-associated immune-related adverse event rates across different ICI regimens (anti-PD-1 monotherapy vs. anti-PD-1 + anti-CTLA-4 combination) in published trials?",
+        "intended_use": "comparison",
+        "success_criteria": "Identification of comparative safety data showing irAE rates stratified by ICI regimen type in FMT intervention studies, enabling assessment of regimen-dependent toxicity risk.",
+        "targeted_queries": [
+          {
+            "query_text": "fecal microbiota transplantation immune-related adverse events anti-PD-1 versus combination ipilimumab nivolumab",
+            "query_type": "keyword"
+          },
+          {
+            "query_text": "How do grade 3-4 immune-related adverse event rates compare between FMT combined with anti-PD-1 monotherapy versus FMT combined with dual checkpoint blockade in solid tumor trials?",
+            "query_type": "question"
+          }
+        ]
+      },
+      {
+        "chapter_ids": [
+          "CH05"
+        ],
+        "gap_id": "CH05_phase3_trial_registry",
+        "gap_question": "Are there any registered or ongoing Phase III randomized controlled trials of microbiome interventions (FMT, defined consortia, or engineered bacteria) in ICI-treated solid tumor patients, even if results are not yet published?",
+        "intended_use": "study_design",
+        "success_criteria": "Identification of at least one registered Phase III trial (e.g., ClinicalTrials.gov identifier) with microbiome intervention as primary or secondary intervention in ICI-treated solid tumor population, regardless of completion status.",
+        "targeted_queries": [
+          {
+            "query_text": "phase III randomized trial fecal microbiota transplantation immune checkpoint inhibitor ClinicalTrials.gov",
+            "query_type": "keyword"
+          },
+          {
+            "query_text": "What Phase III randomized controlled trials of microbiome-based interventions combined with immune checkpoint inhibitors are currently registered or recruiting for solid tumor indications?",
+            "query_type": "question"
+          }
+        ]
+      }
+    ]
+  },
+  "telemetry": {
+    "call_id": "progressive-review:chapter_need_analysis:X1_microbiome_ICI",
+    "complete": true,
+    "elapsed_seconds": 33.28099999995902,
+    "finish_reason": "stop",
+    "prompt_estimation": {
+      "framing_margin": 8192,
+      "hosted_token_count_is_approximate": true,
+      "multiplier": 1.12,
+      "tokenizer": "data/tokenizers/qwen3_5_9b/tokenizer.json"
+    },
+    "requested_model": "qwen3.5-plus",
+    "returned_model": "qwen3.5-plus",
+    "usage": {
+      "completion_tokens": 1505,
+      "completion_tokens_details": {
+        "reasoning_tokens": 737,
+        "text_tokens": 1505
+      },
+      "prompt_tokens": 171591,
+      "prompt_tokens_details": {
+        "text_tokens": 171591
+      },
+      "total_tokens": 173096
+    }
+  }
+}

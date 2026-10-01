@@ -1,0 +1,114 @@
+{
+  "chapter_id": "CH02",
+  "conditions_and_limitations": "多数菌属 - 疗效关联为观察性数据，不能推断因果；代谢物定量数据主要限于血浆/粪便，肿瘤组织内浓度数据缺失；标志物效力受癌种、ICI 类型、地理及饮食背景显著修饰，不可泛化为通用标准。",
+  "coordinated_scope": "系统评估与实体瘤 ICI 疗效相关的微生物分类学标志物及代谢物特征，区分观察性关联与定量证据，明确生物标志物的情境依赖性。涵盖人类临床队列中的菌群组成（门/属/种/株）及代谢物（SCFA、肌苷等）数据；排除仅动物模型无人类数据支持的特征；明确区分粪便/血浆与肿瘤组织内浓度证据。",
+  "directed_reads": [
+    "P0092",
+    "P0582",
+    "P0298",
+    "P0170",
+    "P0478",
+    "P0015",
+    "P0545"
+  ],
+  "evidence_base": "SCFA 定量研究（Nomura et al. 2020, n=52）、肌苷代谢组学分析（CheckMate 025 队列）、多项 16S rRNA 测序研究",
+  "excluded_source_handles": [],
+  "key_transitions": "承接 CH01 确立的临床关联（抗生素时机、FMT 试验），本章具体化'哪些微生物'在起作用，为 CH03 的机制阐释（'如何起作用'）提供物质基础；强调分类学标志物的异质性将自然引出 CH03 对功能通路和分子机制的深入探讨。",
+  "purpose": "系统评估与实体瘤 ICI 疗效相关的微生物分类学标志物及代谢物特征，区分观察性关联与定量证据，明确生物标志物的情境依赖性。",
+  "scope": "涵盖人类临床队列中的菌群组成（门/属/种/株）及代谢物（SCFA、肌苷等）数据；排除仅动物模型无人类数据支持的特征；明确区分粪便/血浆与肿瘤组织内浓度证据。纳入菌株水平宏基因组研究（Gunjur et al. 2024）、SCFA 定量研究（Nomura et al. 2020, n=52; Botticelli et al. NSCLC n=11）。",
+  "source_handles": {
+    "_archive_fragment": "curated/complete_plans/fragments/8b85ed54fc3b8c5a203cc9b81c98c893bd56e11e6e56b9dbaeb36c98c9012c08.json"
+  },
+  "source_ids": {
+    "_archive_fragment": "curated/complete_plans/fragments/453c2b0ee8c3ff94b93962ee7f041ae79ff1e1ed5c5318b88d22dece0736ce73.json"
+  },
+  "substantive_threads": [
+    {
+      "argument": "早期研究聚焦单一有益菌（如 A. muciniphila），但跨队列复现性低；近期证据支持菌株水平（Gunjur et al. 2024; Liu et al. 2024）及功能通路比分类学丰度更具预测稳定性。菌株分辨率显著优于物种水平预测 ICI 响应（AUC 0.85 vs. 0.67）。",
+      "evidence_type": "Observational (Metagenomic Cohorts)",
+      "limitations": "菌株水平关联仍为观察性，实验性功能验证缺失；队列间异质性大。",
+      "sources": [
+        "P0015",
+        "P0097",
+        "P0179",
+        "P0496",
+        "P0534",
+        "P0598",
+        "P0092"
+      ],
+      "theme": "预测范式的演变：从单一菌种到生态功能"
+    },
+    {
+      "argument": "Akkermansia、Faecalibacterium 在黑色素瘤/NSCLC/RCC 中常与响应正相关，但 Bacteroides 等菌属作用存在癌种及 ICI 类型依赖性；人群地理与饮食背景显著修饰标志物效力。联合免疫治疗（CICB）与单药治疗的微生物标志物不通用。",
+      "evidence_type": "Observational (Cross-cohort Analyses)",
+      "limitations": "队列间测序深度、生信流程不一致；混杂因素（抗生素/PPI）控制不足。",
+      "sources": [
+        "P0298",
+        "P0120",
+        "P0130",
+        "P0170",
+        "P0545",
+        "P0478",
+        "P0021",
+        "P0598"
+      ],
+      "theme": "跨癌种的一致性菌属与情境特异性"
+    },
+    {
+      "argument": "粪便/血浆 SCFA 浓度（如丙酸）与 PFS 正相关且有定量数据支持（粪便丙酸中位浓度：响应者 172.6 μmol/g vs. 无响应者 103.6 μmol/g）；肌苷在人类血浆中与 OS 相关且机制明确，但人类肿瘤微环境内肌苷及 SCFA 的直接浓度测量仍缺失，限制机制外推。",
+      "evidence_type": "Observational (Metabolomic Profiling)",
+      "limitations": "关键缺口：人类 TME 内代谢物直接浓度数据缺失（仅血浆/粪便）；样本量小（n<50）；未配对肿瘤组织测量。",
+      "sources": [
+        "P0092",
+        "P0223",
+        "P0582",
+        "P0587",
+        "P0162",
+        "P0559",
+        "P0595",
+        "P0589"
+      ],
+      "theme": "代谢物定量证据：SCFA 与肌苷的血浆/粪便数据 vs. 肿瘤组织缺口"
+    },
+    {
+      "argument": "16S 与宏基因组测序差异、采样时间点（基线 vs. 纵向）、及混杂因素（抗生素/PPI）导致标志物不一致；需转向多组学整合及标准化流程。",
+      "evidence_type": "Methodological (Comparative Analyses)",
+      "limitations": "标准化协议尚未建立；成本与可及性限制宏基因组广泛应用。",
+      "sources": [
+        "P0354",
+        "P0565",
+        "P0290",
+        "P0171",
+        "P0026",
+        "P0598"
+      ],
+      "theme": "方法学异质性与标志物泛化挑战"
+    }
+  ],
+  "supplement_requests": [
+    {
+      "gap_id": "intratumoral_metabolite_quant",
+      "gap_question": "What are the measured physiological concentrations of inosine and SCFAs inside the human tumour microenvironment correlating with ICI response?",
+      "intended_use": "To explicitly define the evidence gap between systemic metabolite levels (plasma/stool) and local tumor microenvironment concentrations in the review's limitation section.",
+      "known_papers": [],
+      "success_criteria": "Identify prospective human studies reporting absolute concentrations (e.g., μmol/g or μM) of inosine or specific SCFAs in paired tumor tissue and serum/stool from ICI-treated solid tumor patients.",
+      "targeted_queries": [
+        "human tumor tissue metabolite concentration inosine immune checkpoint inhibitor",
+        "intratumoral short-chain fatty acids quantification cancer immunotherapy patients"
+      ]
+    },
+    {
+      "gap_id": "strain_level_functional_validation",
+      "gap_question": "Are there human clinical studies validating strain-specific microbial functions (e.g., specific Bifidobacterium strains) rather than species-level abundance for ICI prediction?",
+      "intended_use": "To support the argument that strain-level resolution is necessary for robust biomarkers and to assess the readiness of live biotherapeutic products.",
+      "known_papers": [],
+      "success_criteria": "Find human cohort studies using strain-level resolution (metagenomics/culturomics) linked to ICI outcomes, distinguishing between different strains of the same species.",
+      "targeted_queries": [
+        "strain-level gut microbiome biomarker immune checkpoint inhibitor human cohort",
+        "specific bacterial strain function immune checkpoint inhibitor response clinical study"
+      ]
+    }
+  ],
+  "title": "微生物特征：预测 ICI 反应的菌分类群与代谢物",
+  "transition_logic": "承接 CH01 确立的临床关联（抗生素时机、FMT 试验），本章具体化‘哪些微生物’在起作用，为 CH03 的机制阐释（‘如何起作用’）提供物质基础；强调分类学标志物的异质性将自然引出 CH03 对功能通路和分子机制的深入探讨。"
+}

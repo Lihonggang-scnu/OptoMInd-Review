@@ -1,0 +1,33 @@
+{
+  "action": "external_research",
+  "counts_as_round": false,
+  "local_decision": "external_research",
+  "local_triage": {
+    "_archive_fragment": "curated/complete_plans/fragments/42bbfad13c0ca788d3f5f508f82557157b399aa2a1da8d5f2ff071ffe531474f.json"
+  },
+  "need_id": "N7eb23dd88ca5",
+  "need_signature": "{\"comparison_object\": \"\", \"concepts\": [\"antibiotic class specific impact on immune checkpoint inhibitor efficacy\", \"fluoroquinolones versus beta-lactams immune checkpoint inhibitor survival\"], \"existing_handles\": [], \"intended_use\": \"mechanism\", \"kind\": \"supplement\", \"need_id\": \"N7eb23dd88ca5\", \"owners\": [], \"question\": \"不同类别抗生素（如β-内酰胺类 vs 氟喹诺酮类）对 ICI 疗效的负面影响是否存在显著差异，是否有特定类别相对安全？\", \"required_concepts\": [], \"round_specs\": [{\"round\": 1, \"targeted_queries\": [{\"facet_id\": \"F1\", \"query_text\": \"antibiotic class specific impact on immune checkpoint inhibitor efficacy\", \"query_type\": \"keyword\"}, {\"facet_id\": \"F1\", \"query_text\": \"fluoroquinolones versus beta-lactams immune checkpoint inhibitor survival\", \"query_type\": \"keyword\"}]}], \"success_criteria\": [\"找到至少 2 项比较不同抗生素类别对 ICI 疗效影响的研究，或明确说明现有材料仅支持'广谱抗生素'整体效应。\"], \"user_scope\": \"How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?\"}",
+  "new_handles": [
+    "P0596",
+    "P0597"
+  ],
+  "new_passages": 5,
+  "owners": [],
+  "queries": [
+    {
+      "facet_id": "F1",
+      "query_text": "antibiotic class comparison immune checkpoint inhibitor efficacy solid tumor beta-lactams fluoroquinolones",
+      "query_type": "keyword"
+    },
+    {
+      "facet_id": "F1",
+      "query_text": "Do specific antibiotic classes such as beta-lactams or fluoroquinolones have a neutral or less detrimental impact on overall survival and progression-free survival in patients with solid tumors treated with immune checkpoint inhibitors compared to broad-spectrum antibiotics?",
+      "query_type": "question"
+    }
+  ],
+  "query_refinement_attempted": true,
+  "round": 2,
+  "status": "initialized_queries",
+  "still_missing": "The success criteria requires at least 2 studies comparing different antibiotic classes, but this material represents only one study. Additionally, while this study compares specific agents (Vancomycin vs. Metronidazole/Piperacillin-Tazobactam), it does not explicitly frame the comparison as 'Beta-lactams vs. Fluoroquinolones' as highlighted in the gap question, though Piperacillin-Tazobactam is a beta-lactam combination. It remains unclear if the neutral effect of Piperacillin-Tazobactam generalizes to other beta-lactams or if the negative effect of Vancomycin is consistent across other tumor types beyond melanoma.",
+  "usable_content": "现有材料在区分不同类别抗生素对ICI疗效的影响方面证据有限且存在情境依赖性。针对实体瘤（IV期黑色素瘤），一项回顾性研究（n=876）发现，总体抗生素暴露与TTD或OS无显著关联，但具体药物分析显示显著差异：万古霉素暴露与较差的TTD（HR=1.26）和OS（HR=1.79）相关，而甲硝唑和哌拉西林他唑巴坦（一种β-内酰胺类复方制剂）暴露则未显示出显著负面影响。这表明在特定实体瘤背景下，负面效应可能并非所有抗生素类的普遍特征，而是具有药物特异性。然而，另一项在霍奇金淋巴瘤（血液肿瘤）患者中的研究（n=237）评估了包括β-内酰胺类、碳青霉烯类、万古霉素等在内的多种抗生素类别，结果显示这些类别均与ORR、PFS或OS的恶化无关。该研究提示，抗生素与ICI的相互作用可能受肿瘤类型（实体瘤 vs 血液肿瘤）、治疗方案（单药ICI vs CPI联合挽救治疗）及患者基线状态的影响。综述文章指出，既往使用广谱抗生素（尤其是β-内酰胺类）通常与更差的预后相关，主要归因于肠道菌群失调，但未提供氟喹诺酮类等其它类别的直接对比数据以确立“安全”类别。因此，目前尚无法确证除万古霉素外的其他特定类别（如氟喹诺酮类）是否普遍安全，也不能将血液肿瘤中的中性结果外推至实体瘤单药ICI治疗场景。\nTime to Treatment Discontinuation (TTD) Hazard Ratio / Stage IV melanoma, ICI therapy, retrospective cohort (2010-2020)：Vancomycin: HR=1.26 (95% CI 1.03–1.53)；Metronidazole: 无显著影响；Pip-Tazo: 无显著影响\nOverall Survival (OS) Hazard Ratio / Stage IV melanoma, ICI therapy, retrospective cohort (2010-2020)：Vancomycin: HR=1.79 (95% CI 1.40–2.29)；Metronidazole: 无显著影响；Pip-Tazo: 无显著影响"
+}

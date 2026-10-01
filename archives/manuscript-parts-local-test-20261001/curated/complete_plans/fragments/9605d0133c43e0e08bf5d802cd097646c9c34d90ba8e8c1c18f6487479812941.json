@@ -1,0 +1,57 @@
+{
+  "chapter_id": "CH02",
+  "conditions_and_limitations": "多数菌属 - 疗效关联为观察性数据，不能推断因果；代谢物定量数据主要限于血浆/粪便，肿瘤组织内浓度数据缺失；标志物效力受癌种、ICI 类型、地理及饮食背景显著修饰，不可泛化为通用标准。",
+  "coordinated_scope": "系统评估与实体瘤 ICI 疗效相关的微生物分类学标志物及代谢物特征，区分观察性关联与定量证据，明确生物标志物的情境依赖性。涵盖人类临床队列中的菌群组成（门/属/种/株）及代谢物（SCFA、肌苷等）数据；排除仅动物模型无人类数据支持的特征；明确区分粪便/血浆与肿瘤组织内浓度证据。",
+  "directed_reads": [
+    "P0092",
+    "P0582",
+    "P0298",
+    "P0170",
+    "P0478",
+    "P0015",
+    "P0545"
+  ],
+  "evidence_base": "SCFA 定量研究（Nomura et al. 2020, n=52）、肌苷代谢组学分析（CheckMate 025 队列）、多项 16S rRNA 测序研究",
+  "excluded_source_handles": [],
+  "key_transitions": "承接 CH01 确立的临床关联（抗生素时机、FMT 试验），本章具体化'哪些微生物'在起作用，为 CH03 的机制阐释（'如何起作用'）提供物质基础；强调分类学标志物的异质性将自然引出 CH03 对功能通路和分子机制的深入探讨。",
+  "purpose": "使读者掌握预测 ICI 疗效的核心微生物特征清单，理解分类学特征与代谢物在预测效力上的差异，明确当前生物标志物研究的证据层级（观察性关联 vs. 定量验证），并识别限制其临床转化的关键方法学与生物学边界。",
+  "scope": "肠道微生物群通过特定的分类学特征（门/属/种/株）与代谢物谱（SCFAs、肌苷等）系统性调节实体瘤 ICI 疗效，但现有证据呈现高度的情境依赖性（癌种、治疗方案、宿主背景）。观察性关联已确立特定菌群与代谢物的预后价值，而定量代谢组学与菌株分辨率研究正推动生物标志物从“物种丰度”向“功能通路”演进；然而，人类肿瘤微环境内代谢物绝对浓度的缺失及跨队列泛化能力的不足，限制了其作为独立临床决策工具的转化就绪度。",
+  "source_handles": {
+    "_archive_fragment": "curated/complete_plans/fragments/07378a354980e8f673b7ff2330a0f6a4eca8f5d55450a171c5a2807c85a0a6f5.json"
+  },
+  "source_ids": {
+    "_archive_fragment": "curated/complete_plans/fragments/a989fd9ee68bc1872bc2905d41eeabb0aff00c5a40483510e865641efc505362.json"
+  },
+  "substantive_threads": [
+    "特定菌属/种的富集与 ICI 响应相关，但效应方向高度依赖癌种与治疗策略，单一通用标志物难以成立。",
+    "粪便与血浆中的 SCFAs 及肌苷浓度提供定量预后信号，但缺乏肿瘤组织内绝对浓度数据，限制机制外推与因果推断。",
+    "菌株水平宏基因组分析揭示种内功能异质性，功能通路预测效力优于单一物种丰度，但实验性功能验证仍待完成。",
+    "现有证据支持微生物组作为 ICI 疗效的预测维度，但转化就绪度受限于方法学异质性、因果链条未闭合及缺乏大型 III 期验证。"
+  ],
+  "supplement_requests": [
+    {
+      "gap_id": "intratumoral_metabolite_quant",
+      "gap_question": "What are the measured physiological concentrations of inosine and SCFAs inside the human tumour microenvironment correlating with ICI response?",
+      "intended_use": "To explicitly define the evidence gap between systemic metabolite levels (plasma/stool) and local tumor microenvironment concentrations in the review's limitation section.",
+      "known_papers": [],
+      "success_criteria": "Identify prospective human studies reporting absolute concentrations (e.g., μmol/g or μM) of inosine or specific SCFAs in paired tumor tissue and serum/stool from ICI-treated solid tumor patients.",
+      "targeted_queries": [
+        "human tumor tissue metabolite concentration inosine immune checkpoint inhibitor",
+        "intratumoral short-chain fatty acids quantification cancer immunotherapy patients"
+      ]
+    },
+    {
+      "gap_id": "strain_level_functional_validation",
+      "gap_question": "Are there human clinical studies validating strain-specific microbial functions (e.g., specific Bifidobacterium strains) rather than species-level abundance for ICI prediction?",
+      "intended_use": "To support the argument that strain-level resolution is necessary for robust biomarkers and to assess the readiness of live biotherapeutic products.",
+      "known_papers": [],
+      "success_criteria": "Find human cohort studies using strain-level resolution (metagenomics/culturomics) linked to ICI outcomes, distinguishing between different strains of the same species.",
+      "targeted_queries": [
+        "strain-level gut microbiome biomarker immune checkpoint inhibitor human cohort",
+        "specific bacterial strain function immune checkpoint inhibitor response clinical study"
+      ]
+    }
+  ],
+  "title": "微生物特征：预测 ICI 反应的菌分类群与代谢物",
+  "transition_logic": "承接 CH01 确立的临床关联（抗生素时机、FMT 试验），本章具体化‘哪些微生物’在起作用，为 CH03 的机制阐释（‘如何起作用’）提供物质基础；强调分类学标志物的异质性将自然引出 CH03 对功能通路和分子机制的深入探讨。"
+}

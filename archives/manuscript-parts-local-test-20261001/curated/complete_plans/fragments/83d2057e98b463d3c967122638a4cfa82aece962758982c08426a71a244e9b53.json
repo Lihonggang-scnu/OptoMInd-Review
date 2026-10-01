@@ -1,0 +1,36 @@
+{
+  "allowed_use": [
+    "background_context",
+    "explicit_objectives",
+    "explicit_method_summaries",
+    "explicit_reported_findings",
+    "explicit_leads"
+  ],
+  "chapter_id": "",
+  "chapter_ids": [
+    "Ch3_Mechanisms"
+  ],
+  "conditions": [],
+  "decision": "external_research",
+  "external_ask": "检索近5-10年内发表的、针对非胰腺癌的其他常见实体瘤（如肺癌、乳腺癌、结直肠癌、黑色素瘤等）中UBA6表达谱的比较研究；以及针对接受过PD-1/PD-L1或CTLA-4抑制剂治疗的患者队列，分析UBA6表达与临床疗效响应关系的临床研究或大型回顾性分析。",
+  "intended_use": "mechanism",
+  "limits": [
+    "需要寻找以下两类新材料：1. 系统性评估UBA6在多种实体瘤（至少3-5种不同组织类型）中蛋白或mRNA表达水平的研究，以明确其泛癌表达谱特征；2. 包含较大样本量（显著大于n=22）且接受过标准化ICI治疗的人类肿瘤队列研究，该研究需直接报告UBA6表达水平（或基因状态）与ICI治疗疗效指标（如客观缓解率ORR、无进展生存期PFS、总生存期OS）之间的统计学关联。"
+  ],
+  "need_id": "N308b0bd81d2a",
+  "provenance": {
+    "downloads": 0,
+    "model_calls": 1,
+    "source": "judge",
+    "whole_paper_rereads": 0
+  },
+  "question": "UBA6 蛋白在人体多种实体瘤中的表达谱及其与 ICI 疗效的大队列验证数据是否存在？",
+  "read_focus": "",
+  "schema_version": "optomind.planning_writer_material.v1",
+  "sources": {
+    "_archive_fragment": "curated/complete_plans/fragments/012b51c6bd1d930c5624230ec84bbcdf4f61e75ec834b99637d9377ba768079f.json"
+  },
+  "still_missing": "The specific success criterion requiring large-scale human tumor cohort data linking UBA6 expression directly to immune checkpoint inhibitor (ICI) clinical efficacy (e.g., response rate, PFS, or OS specifically in ICI-treated patients) remains unaddressed. The cohorts analyzed in this study reflect general PDAC prognosis (mostly surgery/adjuvant chemotherapy context) rather than ICI treatment outcomes. The human ICI validation data beyond the n=22 cohort mentioned in the gap context is not present in this material.",
+  "unit_key": "",
+  "usable_content": "This study provides extensive data on UBA6 expression profiles in human pancreatic ductal adenocarcinoma (PDAC) across multiple independent cohorts (e.g., E-MTAB-6134 n=288, TCGA n=129, and several GEO datasets), confirming significant upregulation at both transcript and protein levels compared to normal tissues. It establishes UBA6 as a robust prognostic biomarker associated with poorer overall survival in these general treatment cohorts. Additionally, it reports a consistent negative correlation between UBA6 expression and estimated CD8+ T cell infiltration across six cohorts, and includes pan-cancer expression analysis via GEPIA3 showing UBA6 overexpression in multiple tumor types. This study performed multiomics analyses using TCGA and CPTAC databases to profile UBA6 expression across tumor types. It reported that UBA6 mRNA levels were elevated in over 13 tumor types compared to normal tissues, and protein overexpression was observed in colon cancer and head and neck squamous cancer. Kaplan–Meier analysis indicated that high tumoral UBA6 levels were associated with worse overall survival in lung adenocarcinoma, kidney chromophobe, and clear cell renal cell carcinoma. The review also summarized that UBA6 knockdown suppressed growth in only 10.9% of analyzed cancer cell lines (n=582) in a CRISPR/Cas9 screening. This study conducted a real-world validation using a large propensity score–matched cohort (n=3,018 evaluable) to evaluate the association between mRNA COVID-19 vaccination around immune checkpoint inhibitor (ICI) initiation and outcomes in patients with advanced/metastatic solid tumors (NSCLC, RCC, bladder cancer, melanoma). The authors found that vaccination within 100 days of ICI initiation was associated with significant improvements in real-world overall survival (rwOS) and progression-free survival (rwPFS), particularly in NSCLC, while melanoma showed no association with rwOS. This material provides a concrete example of large-scale human tumor cohort analysis regarding ICI efficacy modifiers, demonstrating the feasibility of stratifying outcomes by tumor type and external immune interventions. Although it does not measure UBA6, it establishes a benchmark for the scale and design (real-world evidence, propensity score matching) required to validate biomarker-ICI associations in the review context. 该研究在 n=22 的人类肿瘤队列（食管、胃、肺、结肠癌等）中通过免疫组化（IHC）检测了 UBA6 蛋白表达，发现低 UBA6 表达与抗 PD-1 治疗的高客观缓解率（50% vs 17%）及更好的生存相关。此外，作者利用公共数据库（TIDE、GEPIA2）分析了黑色素瘤（n=42 抗 CTLA4，n=47 抗 PD-1）及肾细胞癌（CheckMate 025，n=394）等更大队列，但主要基于 mRNA 表达或代谢物水平，而非 UBA6 蛋白的大规模验证。作者明确指出研究局限性在于验证 UBA6 预测作用的患者数量较少，需扩展至更大队列。 该研究在 n=22 的自有队列之外，分析并报告了多个更大规模的人类肿瘤队列中 UBA6 表达与 ICI 疗效的关联数据。具体包括：1) 计算分析 TIDE 数据库，显示黑色素瘤、转移性三阴性乳腺癌和肺癌中低 UBA6 表达与更好生存相关；2) 分析两个独立的黑色素瘤队列（抗 CTLA4 n=42，抗 PD1 n=47），显示 UBA6 表达显著预测 ICI 治疗患者的无进展生存期（PFS）或总生存期（OS）；3) 重新分析 CheckMate 025 试验的 RCC 患者代谢组数据（n=743），虽主要关联肌苷水平，但结合机制推导支持 UBA6 通路。这些公开数据或外部队列的分析结果直接回应了关于‘更大规模队列数据是否存在’的疑问，提供了除 n=22 外的证据支持。 ['This study confirms UBA6 is significantly upregulated at both transcript and protein levels in pancreatic ductal adenocarcinoma (PDAC) tissues compared to normal tissues, validated across multiple cohorts (TCGA, E-MTAB-6134, etc.).', 'Pan-cancer analysis via GEPIA3 mentioned in this study indicates UBA6 is overexpressed in PAAD and several other cancer types relative to normal tissues, providing a partial expression profile across solid tumors.', 'Elevated UBA6 expression correlates with reduced infiltration of CD8+ T cells across six independent PDAC transcriptomic cohorts, suggesting an immunosuppressive tumor microenvironment.', 'The discussion cites external studies (e.g., Zhang et al., Lee et al.) indicating that UBA6 inhibition or knockout in murine melanoma and breast cancer models increased sensitivity to immune checkpoint blockade (ICB), providing biological rationale for UBA6-ICI interaction though not from human data in this paper.'] This study provides extensive data on UBA6 expression profiles in human pancreatic ductal adenocarcinoma (PDAC) across multiple independent cohorts (e.g., E-MTAB-6134 n=288, TCGA n=129, and several GEO datasets), confirming significant upregulation at both transcript and protein levels compared to normal tissues. It establishes UBA6 as a robust prognostic biomarker associated with poorer overall survival in these general treatment cohorts. Additionally, it reports a consistent negative correlation between UBA6 expression and estimated CD8+ T cell infiltration across six cohorts, and includes pan-cancer expression analysis via GEPIA3 showing UBA6 overexpression in multiple tumor types. This study performed multiomics analyses using TCGA and CPTAC databases to profile UBA6 expression across tumor types. It reported that UBA6 mRNA levels were elevated in over 13 tumor types compared to normal tissues, and protein overexpression was observed in colon cancer and head and neck squamous cancer. Kaplan–Meier analysis indicated that high tumoral UBA6 levels were associated with worse overall survival in lung adenocarcinoma, kidney chromophobe, and clear cell renal cell carcinoma. The review also summarized that UBA6 knockdown suppressed growth in only 10.9% of analyzed cancer cell lines (n=582) in a CRISPR/Cas9 screening."
+}

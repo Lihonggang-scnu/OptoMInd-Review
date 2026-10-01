@@ -1,0 +1,104 @@
+{
+  "boundary_clarifications": [
+    "与 Ch2 的边界：Ch3 不重复报告临床关联的 HR/OR 数值，专注于机制路径的生物学解释",
+    "与 Ch6 的边界：Ch3 报告具体机制的证据局限（如样本量 n=22），Ch6 讨论 broader 方法学挑战（如缺乏标准化测量协议）",
+    "与 Ch4 的边界：Ch3 阐述机制本身，Ch4 讨论情境因素（如饮食、抗生素）如何改变这些机制的底物水平"
+  ],
+  "chapter_id": "Ch3_Mechanisms",
+  "coordinated_scope": "解析代谢物（肌苷、SCFAs、色氨酸衍生物、胆汁酸）、免疫细胞互作（DC 成熟、T 细胞启动）、抗原模拟及细菌易位等具体生物学路径。明确区分动物模型因果验证与人类观察性/替代标志物证据的界限。重点阐述肌苷-UBA6 轴的人类验证数据（CheckMate 025 队列肌苷分层、UBA6 表达验证队列 n=22），同时说明 SCFAs 等缺乏肿瘤微环境绝对浓度数据的局限。",
+  "directed_reads": [
+    "P0582",
+    "P0092",
+    "P0503",
+    "P0317",
+    "P0563"
+  ],
+  "excluded_source_handles": [
+    "P0577",
+    "P0578",
+    "P0104",
+    "P0590",
+    "P0591"
+  ],
+  "excluded_source_ids": [
+    "20c143d5373eab0bfea2067cf66b0e260dfeb1ef",
+    "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+    "2ac422e82a775f345998a6cb146848e3dfa92b95",
+    "CorpusId:290399336",
+    "7f830d32cd369c521fb3c16ea7dacd4444c69523"
+  ],
+  "exclusion_reasons": {
+    "P0104": "主要为 NSCLC 队列微生物特征与 PFS 关联的观察性数据，缺乏具体分子机制，归入 Ch2",
+    "P0577": "主要为 FMT 干预试验临床结局，机制线索已在 P0092/P0503 中覆盖，归入 Ch5 更宜",
+    "P0578": "MITRIC 试验阴性结果及免疫微环境分析，属干预性证据，归入 Ch5",
+    "P0590": "同 P0578，为 MITRIC 试验结果，归入 Ch5",
+    "P0591": "FMT-LUMINate 试验摘要，侧重临床结局与毒性，归入 Ch5"
+  },
+  "key_evidence_types": [
+    "动物模型因果验证",
+    "人类队列代谢组学关联",
+    "体外机制实验",
+    "替代标志物验证（如 UBA6 IHC）"
+  ],
+  "purpose": "使读者掌握微生物组调节ICI疗效的三大机制路径及其分子靶点，清晰区分临床前因果验证与人类观察性证据的边界，理解UBA6作为肌苷作用替代标志物的代理性质，并明确当前绝对浓度测量缺口对转化医学的限制，从而建立从基础机制到临床转化的审慎评估框架。",
+  "scope": "肠道微生物组主要通过代谢物-受体信号轴、免疫细胞启动/迁移及抗原模拟三条核心路径调节实体瘤免疫检查点抑制剂（ICI）疗效；然而，当前人类证据高度依赖观察性关联或替代标志物（如UBA6表达），且肿瘤微环境（TME）中关键代谢物的绝对生理浓度尚未量化。尽管临床前模型已确立明确的因果链条，但人类验证仍受限于替代标志物代理与测量标准缺失，需待III期随机对照试验及标准化多层面闭合链条研究予以确证。",
+  "source_exclusion_notes": [
+    {
+      "reason": "主要为 FMT 干预试验临床结局（ORR、安全性），机制线索（SCFA 产生菌）已在 P0092/P0503 中覆盖，归入 Ch5 更宜。",
+      "source_handle": "P0577"
+    },
+    {
+      "reason": "MITRIC 试验阴性结果及免疫微环境分析，属干预性证据，归入 Ch5。",
+      "source_handle": "P0578"
+    },
+    {
+      "reason": "主要为 NSCLC 队列微生物特征与 PFS 关联的观察性数据，缺乏具体分子机制，归入 Ch2。",
+      "source_handle": "P0104"
+    },
+    {
+      "reason": "同 P0578，为 MITRIC 试验结果，归入 Ch5。",
+      "source_handle": "P0590"
+    },
+    {
+      "reason": "FMT-LUMINate 试验摘要，侧重临床结局与毒性，归入 Ch5。",
+      "source_handle": "P0591"
+    }
+  ],
+  "source_handles": {
+    "_archive_fragment": "curated/complete_plans/fragments/1af4b9146b459b4d546c477d576c19f8cce4048081fc6e4a6a30377b5460fd6a.json"
+  },
+  "source_ids": {
+    "_archive_fragment": "curated/complete_plans/fragments/bddd454fa692cfb24642b33c557775768c963e22e79f5f6f04812fc65d172934.json"
+  },
+  "substantive_threads": [
+    null,
+    null,
+    null
+  ],
+  "supplement_requests": [
+    {
+      "gap_id": "human_metabolite_concentration",
+      "gap_question": "人体肿瘤微环境或配对血清中肌苷及短链脂肪酸的具体生理浓度是多少，且是否与 ICI 响应直接相关？",
+      "intended_use": "用于 Ch3 中明确人类证据的定量缺口，纠正将小鼠模型浓度直接外推至人类的过度断言。",
+      "known_papers": [],
+      "success_criteria": "找到至少一项研究，报告了人类实体瘤患者 TME 或血清中肌苷/SCFAs 的绝对浓度（μM/ng/mL），并提供了与 ORR/PFS 的统计关联。",
+      "targeted_queries": [
+        "human tumor microenvironment inosine concentration immune checkpoint inhibitor response",
+        "human serum short-chain fatty acids concentration PD-1 blockade efficacy"
+      ]
+    },
+    {
+      "gap_id": "uba6_human_expression",
+      "gap_question": "UBA6 蛋白在人体多种实体瘤中的表达谱及其与 ICI 疗效的大队列验证数据是否存在？",
+      "intended_use": "用于评估肌苷 -UBA6 轴作为通用机制的可靠性，支持 Ch3 中关于人类验证有限的论点。",
+      "known_papers": [],
+      "success_criteria": "找到除 P0582 中 n=22 队列外，更大规模的人类肿瘤队列 UBA6 表达与 ICI 疗效的关联数据。",
+      "targeted_queries": [
+        "UBA6 protein expression human solid tumors immune checkpoint inhibitor outcome",
+        "UBA6 prognostic biomarker cancer immunotherapy large cohort"
+      ]
+    }
+  ],
+  "title": "微生物调节免疫治疗的分子与细胞机制",
+  "transition_logic": "承接 Ch2 中观察到的微生物 - 疗效关联（如 Akkermansia、SCFAs），本章深入解析其背后的生物学路径（如 UBA6 抑制、HDAC 抑制），为 Ch4 讨论情境因素（如饮食、抗生素如何改变这些代谢物水平）及 Ch5 评估干预策略（如补充代谢物 vs FMT）提供机制依据。需明确 Ch2 的关联不等于 Ch3 的因果机制，特别是人类数据的局限性。"
+}

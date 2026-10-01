@@ -1,0 +1,35 @@
+{
+  "action": "external_research",
+  "counts_as_round": false,
+  "local_decision": "external_research",
+  "local_triage": {
+    "_archive_fragment": "curated/complete_plans/fragments/9a9940975470d990e4e4279b0a1fbb18c8570fe08fac241980a5c27be7f52dc3.json"
+  },
+  "need_id": "Nb050c724adab",
+  "need_signature": "{\"comparison_object\": \"\", \"concepts\": [\"DIET trial NCT04645680 microbiome mediation analysis high fiber diet immunotherapy melanoma\", \"Has the DIET trial (NCT04645680) published microbiome sequencing data showing specific bacterial taxa or metabolic pathway changes that mediate the clinical efficacy of high-fiber diet intervention in melanoma patients receiving immune checkpoint blockade?\"], \"existing_handles\": [], \"intended_use\": \"application_outcome\", \"kind\": \"supplement\", \"need_id\": \"Nb050c724adab\", \"owners\": [\"Ch5_Interventions\", \"Ch4_Context\"], \"question\": \"Does the DIET trial (NCT04645680) or other human dietary intervention trials report specific gut microbiome compositional or functional changes that statistically mediate the observed clinical efficacy improvements in ICI-treated patients?\", \"required_concepts\": [], \"round_specs\": [{\"round\": 1, \"targeted_queries\": [{\"facet_id\": \"F1\", \"query_text\": \"DIET trial NCT04645680 microbiome mediation analysis high fiber diet immunotherapy melanoma\", \"query_type\": \"keyword\"}, {\"facet_id\": \"F1\", \"query_text\": \"Has the DIET trial (NCT04645680) published microbiome sequencing data showing specific bacterial taxa or metabolic pathway changes that mediate the clinical efficacy of high-fiber diet intervention in melanoma patients receiving immune checkpoint blockade?\", \"query_type\": \"question\"}]}], \"success_criteria\": [\"Identification of a published report from the DIET trial or similar human dietary intervention study that includes: (1) specific microbiome taxa or functional pathway changes associated with the dietary intervention, (2) statistical mediation analysis linking microbiome changes to ICI clinical outcomes (ORR, PFS, OS), or (3) explicit statement that microbiome mediation data is pending/unavailable.\"], \"user_scope\": \"How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?\"}",
+  "new_handles": [
+    "P0643"
+  ],
+  "new_passages": 5,
+  "owners": [
+    "Ch5_Interventions",
+    "Ch4_Context"
+  ],
+  "queries": [
+    {
+      "facet_id": "F1",
+      "query_text": "DIET trial NCT04645680 gut microbiome taxa composition functional pathways mediation analysis clinical response",
+      "query_type": "keyword"
+    },
+    {
+      "facet_id": "F1",
+      "query_text": "Does the DIET trial (NCT04645680) report specific gut microbiome taxonomic or functional changes that statistically mediate the observed clinical efficacy improvements in ICI-treated patients?",
+      "query_type": "question"
+    }
+  ],
+  "query_refinement_attempted": true,
+  "round": 3,
+  "status": "initialized_queries",
+  "still_missing": "This material does not report specific gut microbiome compositional or functional changes that resulted from the intervention, nor does it present statistical mediation analysis linking these changes to clinical efficacy (ORR, PFS, OS). While it confirms the trial plans to collect this data, the actual evidence required to determine if microbiome changes mediate clinical improvements is absent. The success criterion regarding an explicit statement that mediation data is pending is partially met by the 'no datasets generated' statement, but the primary gap of identifying the specific mediating taxa or pathways remains unresolved.",
+  "usable_content": "Inconsistency: Human DIET trial data reports immune profiling and metabolomic changes, whereas causal mediation of ICI efficacy is demonstrated in mouse avatar models; direct statistical mediation linking human microbiome changes to clinical outcomes (ORR/PFS/OS) is not explicitly reported in the provided comparisons. Positive Findings: In the high fiber arm vs control arm at Week 5-8, NanoString showed decreased circulating macrophages (p=.018) and neutrophils (p=.035). CyTOF validation showed reduced classical monocytes (p=.0059) and increased CD8+ (p=.01) and CD4+ effector-memory T cells (p=.032) in the high fiber arm. Paired serum metabolomics showed significant bile acid changes (p<0.05). Mouse avatar models receiving post-high fiber microbiota showed improved ICB response. Non-Significant Trends: NanoString classical monocytes and dendritic cells (p=.06 each) did not reach significance. Subgroup Analysis: Immune findings were more prominent in combination nivolumab + ipilimumab (n=3) vs pembrolizumab or nivolumab monotherapy (n=7). Limitation: Specific statistical mediation analysis of human microbiome taxa or functional pathways to clinical efficacy is not detailed in provided statistics. Applicable Conditions: DIET trial (NCT04645680) early abstracts (6743, 3275, LB109); distinguishes between human observational immune/metabolic data and mouse causal data; does not confirm human microbiome-clinical mediation statistics.\nDIET trial immune profiling (Abstract 6743) / NanoString cell type deconvolution abundance scores / Week 5-8 of dietary intervention：high fiber arm: n=11；control arm: n=4；circulating macrophages p-value: p=.018 (decreased in high fiber)；neutrophils p-value: p=.035 (decreased in high fiber)；classical monocytes p-value (NanoString): p=.06；dendritic cells p-value (NanoString): p=.06\nDIET trial immune profiling (Abstract 6743) / CyTOF mass cytometry protein-level validation / Week 5-8 of dietary intervention：classical monocytes p-value: p=.0059 (reduced in high fiber)；CD8+ effector-memory T cells p-value: p=.01 (increased in high fiber)；CD4+ effector-memory T cells p-value: p=.032 (increased in high fiber)\nDIET trial immune profiling (Abstract 6743) / Subgroup analysis by ICB regimen / Within high fiber arm：combination nivolumab + ipilimumab: n=3 (findings more prominent)；pembrolizumab or nivolumab monotherapy: n=7\nDIET trial bile acid metabolism (Abstract 3275) / Paired serum metabolomics comparison / Equilibration vs week 1-4 (fiber 30-40 g/day in high fiber arm)：high fiber arm: n=6；control arm: n=8；bile acid changes p-value: p<0.05 (Wilcoxon rank sum test)\nDIET trial mouse FMT (Abstract 3275) / Mouse avatar model ICB response / Post-high fiber diet stool recipients vs pre-high fiber：recipients per group: n=5；outcome: improved ICB response with post-high fiber microbiota\nNetwork analysis study (Abstract LB109) / Microbiome taxa identification / 6-week whole-food-based high-fiber intervention：patients enrolled: n=10；keystone taxa: Ruminococcus bromii, Dorea longicatena (increased centrality)"
+}

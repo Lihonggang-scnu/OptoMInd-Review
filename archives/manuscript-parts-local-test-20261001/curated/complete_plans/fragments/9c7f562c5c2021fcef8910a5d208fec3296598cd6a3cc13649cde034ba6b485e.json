@@ -1,0 +1,44 @@
+{
+  "broader_review_uses": [
+    {
+      "connection_to_review": "提供关于irAEs预测局限性的反面案例",
+      "material": "研究发现分类学和功能特征均无法有效预测irAEs，提示irAEs的微生物调控机制可能与疗效不同，可能更依赖于特定菌群的存在而非整体功能潜力。",
+      "purpose": "用于综述中区分ICI疗效与毒性的微生物组决定因素，指出当前模型在预测毒性方面的不足，强调需要针对毒性开发专门的微生物标志物。"
+    },
+    {
+      "connection_to_review": "提供临床变量与微生物组特征整合的参考",
+      "material": "临床变量（年龄、BMI等）单独预测能力差，且与微生物特征结合后未提升性能，反而可能引入噪声。",
+      "purpose": "用于讨论多模态生物标志物整合的策略，提示在某些情况下，微生物功能特征可能具有独立于传统临床因素的强预测力，但也需警惕数据异质性的影响。"
+    }
+  ],
+  "declared_content_depth": "fulltext",
+  "doi": "10.3389/fimmu.2026.1832317",
+  "facet_contributions": [
+    {
+      "boundaries": "结论仅限于NSCLC和日本队列；功能预测基于16S数据的推断，非直接宏基因组测序；预测的是RECIST定义的客观缓解，不包含生存期获益的直接预测（PFS/OS未达显著）。",
+      "contribution": "提供了肠道微生物组功能特征（MetaCyc通路）比分类学特征更能预测NSCLC患者ICI治疗反应的实证比较结果。具体而言，MetaCyc通路特征在统计关联和机器学习预测性能上均优于分类学特征。",
+      "facet_id": "F1",
+      "possible_uses": "可用于综述中论证“功能导向的微生物组分析在预测ICI疗效方面可能优于传统的分类学分析”，支持从物种水平向功能水平转变的研究趋势。"
+    },
+    {
+      "boundaries": "作者明确指出这些机制解释是假设生成的，基于关联性分析，尚未通过实验验证因果关系；16S数据无法精确到菌株水平，难以确定产生这些通路的确切微生物种类。",
+      "contribution": "识别出四个关键代谢通路作为预测响应的核心驱动因素：PWY-4984（尿素循环）、SALVADEHYPOX-PWY（腺苷核苷酸降解）、OANTIGEN-PWY（O-抗原生物合成）和PWY-5088（L-谷氨酸降解至丙酸盐）。SHAP分析揭示了这些通路与响应之间的非线性关系（如双相或单调关系）。",
+      "facet_id": "F2",
+      "possible_uses": "可用于综述中探讨潜在的生物学机制，特别是氮代谢平衡（氨的产生与同化）和短链脂肪酸（丙酸盐）在调节抗肿瘤免疫中的作用。提供具体的代谢物或通路靶点供后续机制研究参考。"
+    }
+  ],
+  "material_scope": "fulltext",
+  "planning_summary": "该论文为综述提供了关于“肠道微生物组功能特征 vs 分类学特征”在预测实体瘤ICI疗效方面的直接对比证据。其核心价值在于通过机器学习框架量化了功能通路（特别是氮代谢和短链脂肪酸合成）的预测优势，并识别出具体驱动通路。这有助于综述回答“哪种微生物组表征方式更有效”以及“哪些具体代谢机制可能介导疗效”的问题。",
+  "root_review_note": {},
+  "scope_interpretation_cautions": [
+    "该研究的功能预测基于16S rRNA测序和PICRUSt2推断，并非直接宏基因组测序，因此功能注释的准确性和分辨率有限，不能等同于真实的转录组或蛋白组活性。",
+    "样本来自单一日本中心，种族和饮食背景单一，外推到其他人群（如西方人群）需谨慎。",
+    "虽然机器学习模型在测试集表现良好，但由于样本量小且特征维度高，可能存在过拟合风险，尽管作者使用了严格的验证策略，但仍需更大规模队列验证。",
+    "SHAP分析揭示的非线性关系（如尿素循环的双相效应）提示简单的线性关联可能掩盖复杂的生物学机制，解读时需避免过度简化。"
+  ],
+  "source_handle": "P0097",
+  "supplement_gap_material": {},
+  "supplement_material_status": "",
+  "title": "Gut microbiome functional pathways outperform taxonomic profiles in predicting immune checkpoint inhibitor response in non-small cell lung cancer: an interpretable machine learning approach with SHAP",
+  "year": "2026"
+}

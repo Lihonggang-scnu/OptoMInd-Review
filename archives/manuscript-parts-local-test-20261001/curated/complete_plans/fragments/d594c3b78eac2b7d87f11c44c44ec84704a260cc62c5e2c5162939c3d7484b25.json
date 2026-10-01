@@ -1,0 +1,65 @@
+{
+  "action": "external_research",
+  "attempts": {
+    "_archive_fragment": "curated/complete_plans/fragments/d958c9305f3c6647238be3faeca29aeb97c96108c4d9b1af639709dc318e24e8.json"
+  },
+  "consumed_paper_ids": [],
+  "empty_rounds": 0,
+  "external_ask": "Search for human dietary intervention trials (e.g., high fiber, polyphenol) in solid tumors receiving ICI that report both gut microbiome compositional changes AND clinical efficacy outcomes (response rate, survival) in the same cohort, establishing a direct correlation or causal link within humans.",
+  "external_results": {
+    "_archive_fragment": "curated/complete_plans/fragments/d91d9bf4497426496fa625b50d91887c1f50b0154031c7c3287d6091ae27dad0.json"
+  },
+  "last_error": "",
+  "local_decision": "external_research",
+  "local_triage": {
+    "_archive_fragment": "curated/complete_plans/fragments/26a5a8b5c908fb98cebb2a5c7a0bbbc2099ea5341bbb61636b61e2ee77aeb914.json"
+  },
+  "need": {
+    "comparison_object": "",
+    "concepts": [
+      "dietary intervention trial microbiome immune checkpoint inhibitor human",
+      "high fiber diet randomized trial immunotherapy efficacy"
+    ],
+    "existing_handles": [],
+    "intended_use": "mechanism",
+    "kind": "supplement",
+    "need_id": "N703f55efd0f8",
+    "owners": [],
+    "question": "在人类 ICI 治疗队列中，是否有干预性研究证实特定饮食模式（如高纤维）通过改变微生物组直接改善了 ICI 疗效？",
+    "required_concepts": [],
+    "round_specs": [
+      {
+        "round": 1,
+        "targeted_queries": [
+          {
+            "facet_id": "F1",
+            "query_text": "dietary intervention trial microbiome immune checkpoint inhibitor human",
+            "query_type": "keyword"
+          },
+          {
+            "facet_id": "F1",
+            "query_text": "high fiber diet randomized trial immunotherapy efficacy",
+            "query_type": "keyword"
+          }
+        ]
+      }
+    ],
+    "success_criteria": [
+      "找到 1 项人类饮食干预试验报告微生物组变化与 ICI 疗效的因果链条，或确认现有证据仅为观察性关联。"
+    ],
+    "user_scope": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?"
+  },
+  "need_id": "N703f55efd0f8",
+  "new_handles": [
+    "P0583",
+    "P0598",
+    "P0599"
+  ],
+  "new_passages": 0,
+  "owners": [],
+  "read_focus": "重点检索DIET试验的全文或其他相关出版物，看是否包含人类参与者的16S或宏基因组测序数据及其与疗效的相关性分析；同时确认BEWELL研究中是否有亚组分析涉及临床结局。",
+  "rounds": 3,
+  "status": "stopped_rounds_exhausted",
+  "still_missing": "The success criterion requires evidence of improved ICI efficacy within the human intervention cohort itself. This study measures ICI efficacy only in mouse models receiving human stool transplants, not in the human participants who consumed the diet. The abstract does not state that the human participants were undergoing ICI treatment or that their clinical outcomes (e.g., tumor response, survival) were measured in relation to the diet. Therefore, the direct causal chain of Diet -> Microbiome -> Human ICI Efficacy remains unconfirmed by this material, leaving the gap question regarding human clinical outcomes unresolved.",
+  "usable_content": "This study conducted a randomized, cross-over dietary intervention trial (BEWELL Study) in humans, administering black raspberry (BRB) nectar versus a matched placebo. The authors reported that the BRB intervention significantly increased the abundance of Lachnospiraceae in the human gut microbiome, with less physically active participants showing a greater increase. To assess the functional impact on immunotherapy, stool samples from participants (pre- and post-intervention) were transferred into tumor-bearing mouse models (mc38, CMT167) which were then treated with anti-PD1. The mice receiving post-BRB human stool exhibited smaller tumor volumes compared to those receiving pre-BRB stool. Additionally, culturing and supplementing a specific Lachnospiraceae isolate into pre-BRB stool recapitulated the improved response to ICB in the mouse model. This establishes a mechanistic chain where a specific human dietary intervention alters the microbiome, and that altered microbiome confers improved ICI efficacy in a preclinical model. ['该综述综合了 49 项研究（机制、临床前、观察性和干预性），明确指出人类 ICI 治疗队列中关于饮食纤维干预的证据主要为观察性关联（如 Spencer 等报告的高纤维摄入与 PFS 改善相关，n=128，自报告数据），而非已完成的干预性因果链条验证。', '文中列举了正在进行的干预性临床试验（如 NCT04107168, NCT03643289 等），旨在评估饮食操纵或益生元补充对微生物组和 ICI 疗效的影响，但表明这些数据尚未发布或不足以确立因果关系。', '提及一项早期病例报告（2 例转移性黑色素瘤患者，nivolumab 联合卡姆卡姆益生元后获得缓解），但明确指出其样本量有限，仅作为正在进行试验的理由，不能确立队列层面的因果链条。', '总结了微生物组介导的潜在机制（纤维发酵产生 SCFA、GPCR 信号、HDAC 抑制、DC 激活、CD8+ T 细胞 priming），为解释观察性关联提供了生物学合理性，但注明这些机制多源于临床前模型或非黑色素瘤癌症。']"
+}

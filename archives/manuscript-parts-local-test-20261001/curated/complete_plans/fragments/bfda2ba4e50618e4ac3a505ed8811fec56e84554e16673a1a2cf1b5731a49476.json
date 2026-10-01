@@ -1,0 +1,94 @@
+{
+  "acquisition_count": 2,
+  "auxiliary_material": [
+    "The study details the biological context of inosine generation via adenosine deaminase (ADA) expressed by engineered probiotics in hypoxic tumor regions. It reports immune outcomes associated with inosine accumulation, such as increased CD8+ T cell infiltration and M1 macrophage polarization in mouse colorectal cancer models. The text notes that inosine can serve as an alternative carbon source for T cells under glucose-depleted conditions and describes the use of lamivudine as an internal standard for quantification.",
+    "The study highlights the importance of controlling for pre-analytical variables, noting significant intra-day and inter-day variances for certain metabolites (e.g., tryptophan) and recommending fasting morning samples to minimize noise. This supports the gap's need for sample processing standards by illustrating the impact of collection timing on metabolite stability. Additionally, the comparison of the metabolomic model's performance against traditional tumor markers (CEA, CA19-9) underscores the potential value of standardized metabolite quantification protocols in improving diagnostic sensitivity, particularly for early-stage cancer, which contextualizes the need for the requested consensus statements.",
+    [
+      {
+        "content": "Method validation details: Calibration curves constructed using linear regression with surrogate matrix (2% bovine albumin in PBS), stability tests (autosampler, bench-top, freeze-thaw) indicating significant decrease (>15%) of inosine concentration after freeze-thaw or bench-top exposure.",
+        "relevance": "Highlights critical pre-analytical conditions affecting inosine stability, useful for protocol optimization."
+      },
+      {
+        "content": "Confounding factor analysis: Study demonstrates that smoking status and medication (e.g., theophylline) significantly impact metabolite profiles, necessitating strict matching or stratification in biomarker studies.",
+        "relevance": "Contextual warning for interpreting reference ranges; suggests that 'standard' ranges may vary by host factors like smoking."
+      },
+      {
+        "content": "Comparison of untargeted vs. targeted workflows: Untargeted LC-HRMS used for discovery, targeted triple-quadrupole MS used for absolute quantification, emphasizing the need for both steps in robust biomarker identification.",
+        "relevance": "Methodological context for how quantification protocols are typically derived in this field."
+      }
+    ]
+  ],
+  "candidate_count": 3,
+  "citation_anchor_count": 0,
+  "citation_anchor_status": "not_applicable",
+  "evidence": [],
+  "limitations": [],
+  "material_ready": true,
+  "model_call": true,
+  "network_call": true,
+  "note": "The gap judgment and ready writing material are reported separately.",
+  "outcome": "gap_partially_fulfilled",
+  "outline_action": "[{'action': 'Search for additional methodological papers specifically targeting acetate, propionate, and butyrate quantification in serum or tumor tissue using GC-MS or LC-MS/MS.', 'reason': \"To fulfill the SCFA component of the gap question which is not covered by this study's succinic acid data.\"}, {'action': 'Look for consensus guidelines or review papers that aggregate reference ranges for inosine and SCFAs across multiple studies to establish healthy control baselines.', 'reason': 'To address the lack of healthy control reference ranges and the absence of a consensus statement in the current material.'}, {'action': \"Extract stability and storage conditions from this study (e.g., inosine sensitivity to freeze-thaw) to inform the 'sample processing standards' section of the review, even if SCFA protocols are found elsewhere.\", 'reason': 'To utilize the direct material usefulness of this study for the inosine component and general pre-analytical warnings.'}]",
+  "outline_action_recovered_by_policy": false,
+  "planning_use_contract": {
+    "status": "equal_use"
+  },
+  "query_audits": [
+    {
+      "facet_id": "F1",
+      "provider_attempts": [
+        {
+          "provider": "semantic_scholar",
+          "retryable": false,
+          "returned": 12,
+          "status_code": 200
+        }
+      ],
+      "provider_issue": false,
+      "query_id": "SUP_metabolite_quantification_protocols_KQ_01",
+      "query_text": "human serum tumor tissue inosine absolute quantification LC-MS/MS method validation",
+      "query_type": "keyword",
+      "requested_limit": 12,
+      "retrieval_source": "paper_search",
+      "retryable": false,
+      "returned": 12,
+      "status": 200
+    },
+    {
+      "discovery_target": 0,
+      "facet_id": "F1",
+      "max_snippets_per_paper": 2,
+      "provider_attempts": [
+        {
+          "provider": "semantic_scholar_snippets",
+          "retryable": false,
+          "returned": 12,
+          "status_code": 200
+        }
+      ],
+      "provider_issue": false,
+      "query_id": "SUP_metabolite_quantification_protocols_QQ_02",
+      "query_text": "What are the validated analytical protocols for the absolute quantification of free inosine in human serum or solid tumor tissues using LC-MS/MS, and are there any established reference ranges for cancer patients?",
+      "query_type": "question",
+      "raw_snippet_hits": 12,
+      "requested_limit": 12,
+      "requested_limits": [
+        12
+      ],
+      "requests": 1,
+      "retrieval_source": "snippet_search",
+      "retryable": false,
+      "returned": 12,
+      "status": 200,
+      "unique_papers": 11
+    }
+  ],
+  "query_source": "planner_supplied_targeted_queries",
+  "remaining_gap": "[{'content': 'Standardized protocols for canonical short-chain fatty acids (acetate, propionate, butyrate) are not provided; the study quantifies succinic acid, which is a dicarboxylic acid and not typically classified as a microbiome-derived SCFA in the context of ICI research.', 'impact': 'The gap question explicitly requests SCFA protocols; this remains unmet for the specific metabolites most relevant to the microbiome topic.'}, {'content': 'Reference ranges are provided against a COPD control group rather than healthy controls; while cancer patient ranges are available, healthy baseline ranges for inosine are not explicitly established in this text.', 'impact': \"Limits the ability to define 'normal' physiological concentrations outside of a disease-matched context.\"}, {'content': 'No consensus statement or multi-center guideline is identified; the material represents a single-center methodological validation.', 'impact': \"The gap asks for consensus statements or standardized protocols; this is a single study's protocol, not a field-wide standard.\"}]",
+  "remaining_gap_recovered_by_policy": false,
+  "status": "partial",
+  "substantive_gap_status": "partial",
+  "useful_material": {
+    "_archive_fragment": "curated/complete_plans/fragments/f037c4256168f0495a5b390af48e0e1c3f5a32fee097750d92c7809ee8e72496.json"
+  }
+}

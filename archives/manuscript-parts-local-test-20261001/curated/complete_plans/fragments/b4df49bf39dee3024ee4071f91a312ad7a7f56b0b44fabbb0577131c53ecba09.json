@@ -1,0 +1,64 @@
+{
+  "broader_review_uses": [
+    {
+      "connection_to_review": "提供NSCLC背景下MTR技术与传统MG/16S技术结果对比的具体实例。",
+      "material": "文中指出Bifidobacterium和Collinsella在MG中与短PFS相关，但在MTR中也显示高转录活性；而Alistipes和Barnesiella在MG中与长PFS相关，但在MTR中无显著差异（转录沉默）。",
+      "purpose": "用于说明仅依赖物种存在（MG）可能遗漏关键的活性信号，或错误关联沉默菌群。强调在评估微生物组-免疫治疗相互作用时，考虑转录活性的重要性。"
+    },
+    {
+      "connection_to_review": "提供古菌（Archaea/Euryarchaeota）在癌症免疫治疗中作用的最新证据。",
+      "material": "发现短PFS患者中古菌门（特别是Euryarchaeota）显著富集，且与低PD-L1表达相关。",
+      "purpose": "扩展综述中对非细菌微生物（如古菌、真菌）在免疫治疗微环境中作用的讨论，提示甲烷生成菌等可能通过代谢副产物（如甲烷导致缺氧）影响免疫细胞功能。"
+    },
+    {
+      "connection_to_review": "展示机器学习模型在整合复杂微生物组数据以预测临床结局中的应用。",
+      "material": "使用RF、SVM、XGBoost对120个基因签名进行分类，AUC>0.84；多变量Cox回归筛选6个关键标志物构建风险评分。",
+      "purpose": "作为方法学参考，展示如何从高通量微生物组数据中提取可操作的预测签名，并结合临床协变量进行验证。"
+    }
+  ],
+  "declared_content_depth": "fulltext",
+  "facet_contributions": [
+    {
+      "boundaries": "仅限NSCLC人群，且为小型队列（n=29）。结果受限于从头组装的技术挑战和数据库注释的不完整性。不能外推至其他癌症类型或二线治疗场景。",
+      "contribution": "提供了肠道微生物组转录特征作为ICI疗效预测因子的实证。发现短PFS患者中放线菌门和古菌门的RNA读数显著高于长PFS患者，而厚壁菌门相反。这表明微生物的转录活跃度比静态丰度更能反映治疗响应状态。",
+      "facet_id": "F1",
+      "possible_uses": "用于论证微生物组的功能状态（转录活性）是预测固体肿瘤免疫治疗疗效的重要维度。可用于对比不同研究中基于16S/宏基因组（MG）与宏转录组（MTR）结果的差异，解释为何某些在MG中与良好预后相关的菌种在MTR中未显示差异（如Alistipes）。"
+    },
+    {
+      "boundaries": "通路富集基于PFAM域，推断机制较为间接。未直接验证代谢物水平或宿主免疫细胞功能。TLS通路的富集可能反映细菌自身的应激适应，而非直接作用于宿主免疫系统。",
+      "contribution": "揭示了潜在的介导机制线索：短PFS患者中富集的通路涉及DNA合成、缺氧响应和跨损伤合成（TLS），提示微生物可能通过加剧局部微环境的应激或适应压力来影响疗效；长PFS患者中富集的代谢通路（氨基酸/羧酸结合）可能与产生抗炎代谢物或维持肠道屏障有关。此外，发现大肠杆菌衍生的PFAM在长PFS中占主导，暗示特定菌株的代谢功能可能有益。",
+      "facet_id": "F2",
+      "possible_uses": "用于探讨微生物组影响免疫治疗的潜在生化机制，特别是代谢产物（如SCFA）与应激反应（如TLS）之间的平衡。可作为‘微生物代谢功能’影响宿主免疫微环境的案例。"
+    }
+  ],
+  "material_scope": "fulltext",
+  "paper_identity": {
+    "canonical_paper_id": "3da21e16b2f9c8e442219805dad047a0ec3284de",
+    "doi": "10.1186/s12967-024-05835-y",
+    "publication_version": "",
+    "snapshot_id": "snapshot-2cdace5fe4bda158d7543fbb",
+    "title": "Gut metatranscriptomics based de novo assembly reveals microbial signatures predicting immunotherapy outcomes in non-small cell lung cancer",
+    "year": "2024"
+  },
+  "planning_summary": "该论文提供了关于肠道微生物组转录活性（而非仅物种组成）如何调节NSCLC患者ICI疗效的具体实证数据。其核心价值在于区分了‘存在’与‘活跃’，指出了特定菌群（如放线菌、古菌）的高转录活性与较差预后相关，而代谢活跃的厚壁菌和大肠杆菌与较好预后相关。这为综述中关于‘微生物功能状态’而非单纯‘物种丰度’影响免疫治疗效果的讨论提供了直接证据，特别是关于DNA修复/应激反应与代谢平衡在决定治疗响应中的作用。",
+  "scope_interpretation_cautions": [
+    "样本量小（n=29），统计效力有限，发现的关联需在更大队列中验证。",
+    "‘短PFS’定义为≤6个月，‘长PFS’为>6个月，此 cutoff 可能掩盖中间状态的异质性。",
+    "多变量分析中仅调整了PD-L1和化疗史，其他潜在混杂因素（如抗生素使用、饮食、合并用药）未完全控制。",
+    "部分生物标志物来自‘未知’真核生物或细菌，功能解释需谨慎，可能存在注释偏差。",
+    "相关性不等于因果性，高转录活性的菌群可能是疾病恶化的结果而非原因。"
+  ],
+  "snapshot_id": "snapshot-2cdace5fe4bda158d7543fbb",
+  "topic_handles": [
+    "gut metatranscriptomics (MTR)",
+    "non-small cell lung cancer (NSCLC)",
+    "immune checkpoint inhibitors (ICIs)",
+    "progression-free survival (PFS)",
+    "Actinomycetota transcriptional activity",
+    "Euryarchaeota abundance",
+    "Bacillota metabolic pathways",
+    "machine learning prediction of immunotherapy response",
+    "multivariate Cox regression with clinical confounders"
+  ],
+  "topic_sha256": "74576e214f127aace5ddfbc178eb0620be3c969925484f99cd1d8cdad042e907"
+}

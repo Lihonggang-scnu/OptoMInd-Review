@@ -1,0 +1,27 @@
+{
+  "approach": "Observational cohort study. 1. Participant selection: 40 recruited, 33 eligible (KRAS-mutated NSCLC, baseline stool collected). 2. Sequencing: Shotgun metagenomics (Illumina HiSeq 2000). 3. Processing: KneadData for host removal, HUMAnN3 for functional profiles, MetaPhlAn3 for taxonomy. Normalization via arcsine square-root (taxa) and log (pathways). 4. Statistical Analysis: Shannon index for alpha-diversity; PCA on clr-transformed data for beta-diversity; PERMANOVA for variance explanation; Bayesian logistic-normal linear regression (Pibble model) to identify differential abundance of species/pathways associated with DCR, PFS12, and irAEs, adjusting for covariates. Credible intervals used for significance (75% and 90%).",
+  "contribution_and_limits": [
+    {
+      "contribution": "First study to profile the gut microbiome exclusively in KRAS-mutated NSCLC patients treated with ICI. Identifies specific microbial signatures (SCFA-producers, Akkermansia) overlapping with findings in other tumor types (melanoma, RCC), suggesting potential tumor-independent mechanisms.",
+      "limits": "Small sample size (n=33), single time-point (baseline only), limited statistical power (wide credible intervals for some associations like Akkermansia). Cannot establish causality. Regional/methodological differences may limit generalizability compared to larger multi-center cohorts."
+    }
+  ],
+  "key_findings": [
+    {
+      "conditions": "Responders (DCR/PFS12) vs Non-responders",
+      "finding": "No significant difference in alpha or beta diversity. Responders enriched in SCFA-producing species (Agathobaculum butyriciproducens, Clostridium leptum, Bifidobacterium longum, Eubacterium ramulus, Fusicatenibacter saccharivorans) and Akkermansia muciniphila (wider CI). Responders also showed higher abundance of pro-inflammatory pathways (LPS, heme synthesis). Non-responders enriched in Bacteroides spp. and Blautia genus."
+    },
+    {
+      "conditions": "Patients with irAEs vs Patients without irAEs",
+      "finding": "No diversity differences. Patients unaffected by irAEs enriched in biotin and SCFA synthesis pathways. Patients developing irAEs enriched in Alistipes finegoldii, Bifidobacterium longum, and Bacteroides uniformis, and amino acid synthesis pathways."
+    },
+    {
+      "conditions": "Covariate analysis (PERMANOVA)",
+      "finding": "Metastatic disease stage and sex explained most variation in species composition. Response, ICI regimen, stage, and age explained 4-6% of pathway variation, but none reached statistical significance."
+    }
+  ],
+  "paper_kind": "empirical",
+  "problem_or_question": "To determine if the gut microbiome composition and function are associated with response to anti-PD-1 immunotherapy and the development of irAEs specifically in patients with KRAS-mutated NSCLC, a population where such associations have not been previously established.",
+  "research_scope": "Advanced KRAS-mutated non-small cell lung cancer (NSCLC) patients treated with anti-PD-1 immune checkpoint inhibitors (ICI). Cohort: 33 patients, baseline stool samples only.",
+  "work_summary": "This study investigates the association between the gut microbiome and clinical outcomes in a homogeneous cohort of advanced KRAS-mutated NSCLC patients receiving ICI therapy. The authors performed shotgun metagenomic sequencing on baseline stool samples to analyze microbial composition and functional pathways. They compared responders versus non-responders (defined by DCR and PFS12) and patients with vs. without immune-related adverse events (irAEs), adjusting for confounders like ICI regimen, metastatic stage, age, sex, and BMI. The study found no differences in overall alpha or beta diversity but identified specific species and metabolic pathways differentially abundant between groups."
+}

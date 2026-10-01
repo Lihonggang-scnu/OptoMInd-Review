@@ -1,0 +1,150 @@
+{
+  "cost_cny": 0.0,
+  "decision": "external_research",
+  "external_ask": "Search for human dietary intervention trials (e.g., high fiber, polyphenol) in solid tumors receiving ICI that report both gut microbiome compositional changes AND clinical efficacy outcomes (response rate, survival) in the same cohort, establishing a direct correlation or causal link within humans.",
+  "external_request": {
+    "chapter_ids": [],
+    "gap_id": "N703f55efd0f8",
+    "gap_question": "在人类 ICI 治疗队列中，是否有干预性研究证实特定饮食模式（如高纤维）通过改变微生物组直接改善了 ICI 疗效？",
+    "intended_use": "mechanism",
+    "local_evidence_reviewed": [
+      {
+        "section_path": [
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0598"
+      },
+      {
+        "section_path": [
+          "Abstract"
+        ],
+        "source_handle": "P0598"
+      },
+      {
+        "section_path": [
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0599"
+      },
+      {
+        "section_path": [
+          "Abstract"
+        ],
+        "source_handle": "P0599"
+      },
+      {
+        "section_path": [
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0586"
+      }
+    ],
+    "local_reading_cost": {
+      "downloads": 0,
+      "whole_paper_rereads": 0
+    },
+    "requested_object": "Search for human dietary intervention trials (e.g., high fiber, polyphenol) in solid tumors receiving ICI that report both gut microbiome compositional changes AND clinical efficacy outcomes (response rate, survival) in the same cohort, establishing a direct correlation or causal link within humans.",
+    "schema_version": "optomind.planning_material_external_request.v1",
+    "still_missing": "需要找到一项人类饮食干预试验，其中不仅报告了微生物组组成的具体变化（如特定菌属/种群的丰度改变），且这些变化与患者自身的ICI临床疗效（如ORR、PFS或OS）有明确的统计关联或因果分析。目前的材料仅提供了免疫表型变化（DIET）或动物模型验证（DIET, BEWELL），未能在同一人类队列中完成“饮食->微生物组->临床疗效”的直接闭环验证。",
+    "success_criteria": [
+      "找到 1 项人类饮食干预试验报告微生物组变化与 ICI 疗效的因果链条，或确认现有证据仅为观察性关联。"
+    ],
+    "user_scope": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?"
+  },
+  "gap": {
+    "chapter_ids": [],
+    "concepts": [
+      "dietary intervention trial microbiome immune checkpoint inhibitor human",
+      "high fiber diet randomized trial immunotherapy efficacy"
+    ],
+    "existing_handles": [],
+    "gap_id": "N703f55efd0f8",
+    "intended_use": "mechanism",
+    "question": "在人类 ICI 治疗队列中，是否有干预性研究证实特定饮食模式（如高纤维）通过改变微生物组直接改善了 ICI 疗效？",
+    "required_concepts": [],
+    "success_criteria": [
+      "找到 1 项人类饮食干预试验报告微生物组变化与 ICI 疗效的因果链条，或确认现有证据仅为观察性关联。"
+    ],
+    "user_scope": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?"
+  },
+  "gap_id": "N703f55efd0f8",
+  "local_reading": {
+    "_archive_fragment": "curated/complete_plans/fragments/707f0b55ef8b5612056007d61f9c766894933aa50744f7ebd91f591b51e5c0de.json"
+  },
+  "material_ready": false,
+  "model_calls": 1,
+  "passages": {
+    "_archive_fragment": "curated/complete_plans/fragments/bdad216083d69ea248c11359c42713a25308bc48bf43c94b163f4265f739b8eb.json"
+  },
+  "quantitative_comparisons": [
+    {
+      "groups": [
+        {
+          "group": "High fiber diet (n=11)",
+          "value": "p=.0059 vs control"
+        },
+        {
+          "group": "Control diet (n=4)",
+          "value": "Baseline/Reference"
+        }
+      ],
+      "research_object": "DIET trial (Melanoma, High Fiber Diet)",
+      "result_or_measure": "Decreased circulating classical monocytes",
+      "setting_or_time": "Week 5-8 of intervention"
+    },
+    {
+      "groups": [
+        {
+          "group": "High fiber diet CD8+ (n=11)",
+          "value": "p=.01 vs control"
+        },
+        {
+          "group": "High fiber diet CD4+ (n=11)",
+          "value": "p=.032 vs control"
+        },
+        {
+          "group": "Control diet (n=4)",
+          "value": "Baseline/Reference"
+        }
+      ],
+      "research_object": "DIET trial (Melanoma, High Fiber Diet)",
+      "result_or_measure": "Increased frequency of effector-memory T cells",
+      "setting_or_time": "Week 5-8 of intervention"
+    },
+    {
+      "groups": [
+        {
+          "group": "Donor FMT (d-FMT)",
+          "value": "24.0 months"
+        },
+        {
+          "group": "Placebo FMT (p-FMT)",
+          "value": "9.0 months"
+        }
+      ],
+      "research_object": "TACITO trial (mRCC, FMT from ICI responders)",
+      "result_or_measure": "Median Progression-Free Survival (months)",
+      "setting_or_time": "Post-randomization follow-up"
+    },
+    {
+      "groups": [
+        {
+          "group": "d-FMT vs p-FMT",
+          "value": "HR = 0.50"
+        }
+      ],
+      "research_object": "TACITO trial (mRCC, FMT from ICI responders)",
+      "result_or_measure": "Hazard Ratio for PFS",
+      "setting_or_time": "Post-randomization follow-up"
+    }
+  ],
+  "read_focus": "重点检索DIET试验的全文或其他相关出版物，看是否包含人类参与者的16S或宏基因组测序数据及其与疗效的相关性分析；同时确认BEWELL研究中是否有亚组分析涉及临床结局。",
+  "reason": "虽然找到了饮食干预影响免疫表型（DIET）和微生物组（BEWELL）以及微生物组干预影响疗效（TACITO）的研究，但没有一项研究直接在人类饮食干预队列中报告了微生物组变化与临床疗效的直接因果链条。DIET试验使用了FMT来证明微生物组依赖性，但未提供人类微生物组数据；BEWELL试验仅提供微生物组数据和动物疗效数据。因此，核心问题未解决。",
+  "schema_version": "optomind.planning_material_triage.v1",
+  "source": "judge",
+  "still_missing": "需要找到一项人类饮食干预试验，其中不仅报告了微生物组组成的具体变化（如特定菌属/种群的丰度改变），且这些变化与患者自身的ICI临床疗效（如ORR、PFS或OS）有明确的统计关联或因果分析。目前的材料仅提供了免疫表型变化（DIET）或动物模型验证（DIET, BEWELL），未能在同一人类队列中完成“饮食->微生物组->临床疗效”的直接闭环验证。",
+  "usable_content": "现有证据表明，特定饮食干预可通过改变微生物组间接改善ICI疗效，但直接证实“人类队列中饮食改变微生物组并直接提升临床疗效”的因果链条尚不完整。在黑色素瘤患者的DIET试验（Phase II）中，高纤维饮食（30-50 g/d）显著降低了循环中的单核细胞（p=.0059）并增加了效应记忆T细胞频率（CD8+ p=.01, CD4+ p=.032），这些免疫变化与更好的ICI反应负相关的单核细胞减少一致；然而，该研究未报告患者自身微生物组的组成变化数据，而是通过将干预后患者粪便移植给小鼠，观察到小鼠对ICI的反应增强，从而推断益处是微生物组依赖性的。类似地，BEWELL研究（肺癌）显示黑莓汁干预增加了Lachnospiraceae丰度，并在小鼠模型中增强了抗PD1疗效，但未提供人类受试者的临床疗效终点数据。相比之下，TACITO试验（肾细胞癌，Phase 2a）直接通过FMT从ICI完全缓解者移植至新患者，显著延长了中位PFS（24.0 vs 9.0个月, HR=0.50），证实了微生物组介导的疗效机制，但这属于微生物组干预而非饮食干预。因此，目前缺乏在人类饮食干预试验中同时报告微生物组具体变化与临床疗效直接关联的证据，现有结论多基于动物模型的外推或免疫表型的间接关联。\nDIET trial (Melanoma, High Fiber Diet) / Decreased circulating classical monocytes / Week 5-8 of intervention：High fiber diet (n=11): p=.0059 vs control；Control diet (n=4): Baseline/Reference\nDIET trial (Melanoma, High Fiber Diet) / Increased frequency of effector-memory T cells / Week 5-8 of intervention：High fiber diet CD8+ (n=11): p=.01 vs control；High fiber diet CD4+ (n=11): p=.032 vs control；Control diet (n=4): Baseline/Reference\nTACITO trial (mRCC, FMT from ICI responders) / Median Progression-Free Survival (months) / Post-randomization follow-up：Donor FMT (d-FMT): 24.0 months；Placebo FMT (p-FMT): 9.0 months\nTACITO trial (mRCC, FMT from ICI responders) / Hazard Ratio for PFS / Post-randomization follow-up：d-FMT vs p-FMT: HR = 0.50",
+  "writer_material": {
+    "_archive_fragment": "curated/complete_plans/fragments/9373d78379969056b63ebd4013664fe4ea98b5a6d584eff8549d7825c7b97ac2.json"
+  }
+}

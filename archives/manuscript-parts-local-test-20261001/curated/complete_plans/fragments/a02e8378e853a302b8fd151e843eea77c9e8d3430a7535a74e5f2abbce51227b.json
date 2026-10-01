@@ -1,0 +1,42 @@
+{
+  "allowed_use": [
+    "background_context",
+    "explicit_objectives",
+    "explicit_method_summaries",
+    "explicit_reported_findings",
+    "explicit_leads"
+  ],
+  "chapter_id": "",
+  "conditions": [
+    "52 solid tumor patients",
+    "During anti-PD-1 therapy (nivolumab or pembrolizumab)",
+    "11 NSCLC patients",
+    "Second-line nivolumab",
+    "Patients treated with anti-CTLA-4 (ipilimumab)",
+    "During treatment",
+    "Mixed solid-tumor population (Phase-2 trial)",
+    "Oral inosine added to PD-1/PD-L1 inhibitor therapy"
+  ],
+  "decision": "external_research",
+  "external_ask": "Search for primary clinical research articles (excluding reviews) that performed targeted metabolomics (e.g., LC-MS/MS, Mass Spectrometry Imaging) on human tumor tissues or paired serum samples from patients treated with immune checkpoint inhibitors, specifically reporting absolute concentration values of microbial metabolites (Inosine, Butyrate, SCFAs) and their correlation with clinical response.",
+  "intended_use": "quantification",
+  "limits": [
+    "Primary clinical studies reporting absolute quantitative concentrations (μM, ng/mL) of microbial metabolites (Inosine, Butyrate, SCFAs) specifically measured in human tumor tissue (TME) or paired tumor-serum samples from ICI-treated patients, with statistical correlation to response (ORR/PFS/OS)."
+  ],
+  "need_id": "Ndbdcd00459f9",
+  "provenance": {
+    "downloads": 0,
+    "model_calls": 2,
+    "source": "judge",
+    "whole_paper_rereads": 0
+  },
+  "question": "Are there any primary studies reporting absolute quantitative concentrations (e.g., μM, ng/mg) of microbial metabolites (specifically Inosine, Butyrate, SCFAs) measured directly in human tumor tissue (TME) or paired tumor-serum samples from ICI-treated patients, and do these levels correlate with response?",
+  "read_focus": "",
+  "schema_version": "optomind.planning_writer_material.v1",
+  "sources": {
+    "_archive_fragment": "curated/complete_plans/fragments/fa2332f3d86313bd6765690d508ecbb4a518a0fba4944f48585a369ce22a760a.json"
+  },
+  "still_missing": "Primary clinical studies reporting absolute quantitative concentrations (μM, ng/mL) of microbial metabolites (Inosine, Butyrate, SCFAs) specifically measured in human tumor tissue (TME) or paired tumor-serum samples from ICI-treated patients, with statistical correlation to response (ORR/PFS/OS).",
+  "unit_key": "",
+  "usable_content": "现有证据在样本类型与疗效方向上存在不一致：抗 PD-1 治疗中较高粪便短链脂肪酸（SCFAs）报告与获益正相关，而抗 CTLA-4 治疗中高血清丁酸盐/丙酸盐却报告与疗效负相关。针对用户关注的肿瘤组织（TME）内代谢物绝对浓度，提供的分组结果主要基于粪便或血清样本，未明确包含配对肿瘤 - 血清的组织内定量数据。具体而言：(1) 52 例实体瘤患者抗 PD-1 治疗期间，较高粪便 SCFA 浓度（乙酸盐、丙酸盐、丁酸盐、戊酸盐）报告与更长无进展生存期（PFS）显著相关；(2) 11 例 NSCLC 患者二线 nivolumab 治疗中，肠道代谢物（丙酸盐、丁酸盐）报告与长期获益显著相关；(3) 抗 CTLA-4 治疗患者中，高血清丁酸盐和丙酸盐浓度报告与 ICI 疗效负相关；(4) 肌苷（Inosine）数据来自口服干预试验（非组织浓度观测），口服肌苷 + ICI 报告可轻度增强疗效并降低毒性。统计显著性依据原文描述，未提供具体 HR 或 P 值，观察性差异不等同于干预因果。\n适用条件：实体瘤；接受 ICI（抗 PD-1/CTLA-4）；代谢物检测样本为粪便或血清（非 TME 直接测量）；结局包含 PFS 或疗效评估。\n52 solid tumor patients / Progression-free survival (PFS) / During anti-PD-1 therapy (nivolumab or pembrolizumab)：Higher fecal SCFA concentrations (acetate, propionate, butyrate, valerate): Significantly associated with longer PFS；Lower fecal SCFA concentrations: Reference (implied shorter PFS)\n11 NSCLC patients / Long-term beneficial effects / Second-line nivolumab：Gut microbial metabolites (propionate, butyrate): Significantly associated with benefit\nPatients treated with anti-CTLA-4 (ipilimumab) / ICI efficacy / During treatment：High serum butyrate and propionate concentrations: Negatively correlated with ICI efficacy\nMixed solid-tumor population (Phase-2 trial) / Efficacy and toxicity / Oral inosine added to PD-1/PD-L1 inhibitor therapy：Oral inosine + ICI: Mild enhancement of efficacy and reduced toxicity"
+}

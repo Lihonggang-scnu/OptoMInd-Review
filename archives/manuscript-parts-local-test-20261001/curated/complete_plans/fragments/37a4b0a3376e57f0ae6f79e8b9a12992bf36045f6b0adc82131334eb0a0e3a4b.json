@@ -1,0 +1,23 @@
+{
+  "approach": "采用回顾性队列设计。纳入标准：诊断为 mRCC、拥有常规临床护理期间收集的 RNA-seq 数据且接受过 ICI 治疗的患者。样本处理：使用福尔马林固定石蜡包埋（FFPE）样本进行肿瘤内微生物组分析。数据分析流程：1. 质控与接头修剪；2. 使用 Burrows-Wheeler alignment (BWA) 工具将 reads 映射至人类基因组以过滤宿主 reads；3. 使用 Kraken2 进行分类学分类；4. 使用 Bracken 估计物种绝对丰度；5. 计算所有非人类物种的相对丰度。统计检验：使用 Student's t-test 比较 ICI 响应者与无响应者之间各物种相对丰度的差异。",
+  "contribution_and_limits": [
+    {
+      "contribution": "提供了 mRCC 患者中肿瘤内微生物组与 ICI 反应关联的首个初步证据，识别出可能与良好预后相关的特定菌种（如嗜麦芽窄食单胞菌和棒状杆菌）。",
+      "limits": "所给摘要未交代独立验证队列或机制实验细节。样本量较小（n=28），且多为回顾性观察，存在选择偏倚风险。作者明确指出需在大队列中验证这些发现，因此当前结果仅为假设生成性质，尚不能确立因果关系或普适性。"
+    }
+  ],
+  "key_findings": [
+    {
+      "conditions": "总体队列（n=28），主要组织学类型为透明细胞癌（86%），多数为 IMDC 中/高危（71%），ICI 总响应率为 50%。",
+      "finding": "在整体队列中，痤疮丙酸杆菌（Cutibacterium acne）、奥斯陆莫拉菌（Moraxella osloensis）和多杀性巴氏杆菌（Pasteurella multocida）具有最高的相对丰度。"
+    },
+    {
+      "conditions": "比较 ICI 响应者与非响应者。",
+      "finding": "发现特定细菌的相对丰度在两组间存在显著差异。其中，嗜麦芽窄食单胞菌（Stenotrophomonas maltophilia, p = 0.037）和棒状杆菌属 sp. zg-917（Corynebacterium sp. zg-917, p = 0.035）在 ICI 响应者中的相对丰度显著高于无响应者。"
+    }
+  ],
+  "paper_kind": "empirical",
+  "problem_or_question": "在 mRCC 患者中，肿瘤内微生物组的组成是否与免疫检查点抑制剂（ICI）的治疗反应存在显著关联？特别是哪些特定菌种可能在响应者中富集？",
+  "research_scope": "转移性肾细胞癌（mRCC）患者，重点考察肿瘤内微生物组与免疫检查点抑制剂（ICI）治疗反应之间的关联。",
+  "work_summary": "该研究旨在探索肿瘤内微生物群对 mRCC 患者 ICI 治疗反应的影响。尽管既往研究多关注肠道微生物组，但本研究聚焦于肿瘤微环境中的细菌增殖情况。研究团队回顾性分析了接受 ICI 治疗的 mRCC 患者的 RNA-seq 数据，通过生物信息学方法鉴定肿瘤内的微生物组成，并比较了治疗响应者与无响应者之间特定菌种的相对丰度差异。"
+}

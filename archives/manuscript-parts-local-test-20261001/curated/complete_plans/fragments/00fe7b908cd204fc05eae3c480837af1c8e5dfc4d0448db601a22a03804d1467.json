@@ -1,0 +1,43 @@
+{
+  "action": "external_research",
+  "consumed_paper_ids": [],
+  "empty_rounds": 0,
+  "external_outcome": "",
+  "external_result": {
+    "_archive_fragment": "curated/complete_plans/fragments/38d62478f68f6e83fa4e02ca857da524e1e97c59930de40740d8c8e83ea5b0f4.json"
+  },
+  "external_results": {
+    "_archive_fragment": "curated/complete_plans/fragments/897748284ba102a128375fadaf1ccfedae4179107752f21147b7f976b2e8f59d.json"
+  },
+  "external_status": "partial",
+  "external_usable_content": true,
+  "gained": true,
+  "local_decision": "external_research",
+  "local_triage": {
+    "_archive_fragment": "curated/complete_plans/fragments/f6a6dcf287057c74443e8810132a19e95a2f49b8566addd1f1ffdacc39d1267a.json"
+  },
+  "need_id": "Ne20711f908f2",
+  "need_signature": "{\"comparison_object\": \"\", \"concepts\": [\"strain-level gut microbiome biomarker immune checkpoint inhibitor human cohort\", \"specific bacterial strain function immune checkpoint inhibitor response clinical study\"], \"existing_handles\": [], \"intended_use\": \"mechanism\", \"kind\": \"supplement\", \"need_id\": \"Ne20711f908f2\", \"owners\": [], \"question\": \"Are there human clinical studies validating strain-specific microbial functions (e.g., specific Bifidobacterium strains) rather than species-level abundance for ICI prediction?\", \"required_concepts\": [], \"round_specs\": [{\"round\": 1, \"targeted_queries\": [{\"facet_id\": \"F1\", \"query_text\": \"strain-level gut microbiome biomarker immune checkpoint inhibitor human cohort\", \"query_type\": \"keyword\"}, {\"facet_id\": \"F1\", \"query_text\": \"specific bacterial strain function immune checkpoint inhibitor response clinical study\", \"query_type\": \"keyword\"}]}], \"success_criteria\": [\"Find human cohort studies using strain-level resolution (metagenomics/culturomics) linked to ICI outcomes, distinguishing between different strains of the same species.\"], \"user_scope\": \"How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?\"}",
+  "new_handles": [
+    "P0594",
+    "P0584"
+  ],
+  "new_passages": 5,
+  "owners": [],
+  "queries": [
+    {
+      "facet_id": "F1",
+      "query_text": "strain-level gut microbiome biomarker immune checkpoint inhibitor human cohort",
+      "query_type": "keyword"
+    },
+    {
+      "facet_id": "F1",
+      "query_text": "specific bacterial strain function immune checkpoint inhibitor response clinical study",
+      "query_type": "keyword"
+    }
+  ],
+  "round": 1,
+  "status": "partial",
+  "still_missing": "While this study establishes strain-level associations and predicts function via gene content, it does not provide experimental validation of the specific strain functions (e.g., isolating the beneficial E. coli strain to confirm causal mechanisms in vivo). The strain-level findings are currently limited to E. coli and F. prausnitzii due to abundance constraints, leaving other species (e.g., Bifidobacterium mentioned in the gap question) unaddressed at this resolution. Additionally, the primary cohort is lung cancer-specific; broader validation across tumor types for these specific strain markers is needed to confirm generalizability.",
+  "usable_content": "This prospective human cohort study (n=54 metagenome, n=49 metabolome) utilized strain-level metagenomic resolution (StrainPhlAn, PanPhlAn) to distinguish specific strains of Escherichia coli and Faecalibacterium prausnitzii linked to ICI outcomes. It identified specific species-level genome bins (SGBs), such as F. prausnitzii SGB15342 and SGB15316_group, that were significantly enriched in the long-term benefit group compared to resistance. For E. coli, it distinguished harmful gene families (toxin-antitoxin, stress response) present in resistance/irAE groups from beneficial clusters absent in benefit groups. These strain-level genomic variations correlated with clinical phenotypes (efficacy and irAEs) independent of species-level abundance, directly addressing the requirement for strain-resolution linked to ICI outcomes. This study analyzed four human fecal metagenomic cohorts (Ashray_2024, Lee_2022, Matson_2018, Frankel_2017) comprising patients treated with immune checkpoint inhibitors (ICI). The authors developed a deep learning model (BioP-VAE) using gene-level microbial abundance features (RPKM) and compared them against taxonomic abundance features at family, genus, species, and strain levels. The results showed that gene-level features outperformed all taxonomic levels for predicting ICI response (AUC 0.89 vs. strain-level AUC 0.72 in Ashray_2024). However, among taxonomic features, strain-level abundance provided better predictive performance for 12-month progression-free survival than species-level abundance (AUC 0.85 vs. 0.67). Feature attribution identified specific microbial genes and pathways (e.g., nitrilase in responders, lipoic acid metabolism in non-responders) and taxa (e.g., Ruminococcaceae, Desulfovibrionaceae) associated with outcomes, suggesting functional capacity is more predictive than taxonomy. This study performed shotgun metagenomic sequencing on stool samples from 165 ICI-naive melanoma patients across five cohorts, integrated with 147 public samples. The authors identified a panel of species associated with responders, including Bifidobacterium pseudocatenulatum, Roseburia spp., and Akkermansia muciniphila, but explicitly stated no single species was a fully consistent biomarker across studies. While the methods section notes the use of bioBakery 3 which includes strain-level profiling tools (StrainPhlAn 3.0), the reported results focus on species-level relative abundances and functional potential (KEGG orthologs). The discussion explicitly highlights that microbial uniqueness is encoded at the strain level and calls for future analytical methods to explore individual-specific microbial diversity at that resolution, acknowledging that current methodology generally lacks the ability to characterize microbiome features at the immunological interface or strain level in this context."
+}

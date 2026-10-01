@@ -1,0 +1,25 @@
+{
+  "best_sentence": "Read Filtering and Host Decontamination Metagenomic-derived sequencing reads for each sample were first downloaded using fasterq-dump from the Sequence Read Archive (SRA) toolkit.",
+  "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\c426f22c38d341a24524f67fd75537f6ef60aaf0\\b5eb82ef9af2ee7bceb529561b14c280\\attempt-01\\PAPER_READING_CARD.json",
+  "doi": "10.1158/2159-8290.cd-24-1669",
+  "from_existing_field": false,
+  "key_sentences": [
+    "Clinical benefit was defined by an objective response or stable disease ≥16 weeks.",
+    "Information on the biopsy location is included in Supplementary Table S4.",
+    "Fecal samples were collected from patients at baseline (before treatment), after the 8-week evaluation (after two cycles of nivolumab, during treatment), and, if possible, at progression.",
+    "Samples were col- lected using the OMNIgene GUT kit (OMR-200) and OMNImet GUT kits (ME-200; DNA Genotek) for metagenomics and metabolomics, respectively.",
+    "Upon receipt, samples were stored at −80°C prior to fur- ther analysis.",
+    "Shotgun metagenomics extraction, quality analysis, and sequencing were performed by CosmosID at a minimum sequencing depth of 6 Gbp per sample using a paired-end (2 × 150 bp) protocol."
+  ],
+  "material_depth": "fulltext",
+  "paper_id": "c426f22c38d341a24524f67fd75537f6ef60aaf0",
+  "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\repaired_materials\\c426f22c38d341a24524f67fd75537f6ef60aaf0\\snapshot-10a4203bcb06ca512959cc8e",
+  "reading_role": "direct_evidence",
+  "section_path": [
+    "PDF text"
+  ],
+  "source_handle": "P0444",
+  "text": "ntary Tables S2 and S3, respectively. Clinical benefit was defined by an objective response or stable disease ≥16 weeks. Tumor biopsies were taken prior to the start of treatment and used for WGS and RNA-seq. Information on the biopsy location is included in Supplementary Table S4. Fecal samples were collected from patients at baseline (before treatment), after the 8-week evaluation (after two cycles of nivolumab, during treatment), and, if possible, at progression. Samples were col- lected using the OMNIgene GUT kit (OMR-200) and OMNImet GUT kits (ME-200; DNA Genotek) for metagenomics and metabolomics, respectively. Upon receipt, samples were stored at −80°C prior to fur- ther analysis. Shotgun metagenomics extraction, quality analysis, and sequencing were performed by CosmosID at a minimum sequencing depth of 6 Gbp per sample using a paired-end (2 × 150 bp) protocol. Read Filtering and Host Decontamination Metagenomic-derived sequencing reads for each sample were first downloaded using fasterq-dump from the Sequence Read Archive (SRA) toolkit. To maintain consistency between sequencing protocols Downloaded from http://aacrjournals.org/cancerdiscovery/article-pdf/16/1/95/3722454/cd-24-1669.pdf by University of Utrecht user on 12 January 2026 RESEARCH ARTICLE Microbial Metabolic Pathways Guide Immunotherapy Response January 2026 CANCER DISCOVERY | 107 from the Microbe-ICB cohort, we subsampled each paired-end sample to 5 Gbp using BBMap after downloading. Sequences were then subjected to adapter filtering and removal of reads that failed base quality (Phred >30) or read length cutoffs (>70% read length) using KneadData. Remaining reads were then filtered for host con- tamination against the hg37_and_human_contamination reference build that includes decoy genomic sequences. Species-Genome Bins–Level Compositional Analysis To perform taxonomic compositional analysis, we made use of the marker-based tool MetaPhlAn (version 4.0.6; RRID:SCR_004915), which is part of the bioBakery3 pipeline (34), using the vOct22 data- base. Briefly, quality-filtered reads were concatenated and run using the rel_ab_w_read_stats setting to gather per-species read count infor- mation. Per-sample count tables were then imported and preprocessed to generate a uniform phyloseq object for each study. To generate the Microbe-ICB dataset, all phyloseq objects were merged into a single object. In total, we processed 9.5 billion metagenomic-derived reads at an average depth of 12.15 million reads per sample (Supplementary Fig. S1C). We detected, on average, 588 ± 158 species per sample (Sup- plementary Fig. S1D).",
+  "title": "Microbial metabolic pathways guide response to immune checkpoint blockade therapy.",
+  "year": "2025"
+}

@@ -1,0 +1,78 @@
+{
+  "action": "external_research",
+  "consumed_paper_ids": [],
+  "empty_rounds": 1,
+  "external_outcome": "",
+  "external_result": {
+    "external_gap_ids": [
+      "gap_human_tme_metabolites_refined"
+    ],
+    "local_triage": [],
+    "results": [
+      {
+        "chapter_ids": [
+          "CH03",
+          "CH06"
+        ],
+        "error": "QwenTransportError",
+        "gap_id": "gap_human_tme_metabolites_refined",
+        "status": "failed"
+      }
+    ],
+    "status": "failed"
+  },
+  "external_results": [
+    {
+      "external_gap_ids": [
+        "gap_human_tme_metabolites_refined"
+      ],
+      "local_triage": [],
+      "results": [
+        {
+          "chapter_ids": [
+            "CH03",
+            "CH06"
+          ],
+          "error": "QwenTransportError",
+          "gap_id": "gap_human_tme_metabolites_refined",
+          "status": "failed"
+        }
+      ],
+      "status": "failed"
+    }
+  ],
+  "external_status": "unmet",
+  "external_usable_content": false,
+  "gained": false,
+  "local_decision": "external_research",
+  "local_triage": {
+    "_archive_fragment": "curated/complete_plans/fragments/b2174750db5e1d484a35854db9c4215375477c039b731dc7e3c6c9269462e122.json"
+  },
+  "need_id": "Ndbdcd00459f9",
+  "need_signature": "{\"comparison_object\": \"\", \"concepts\": [\"human tumor tissue metabolomics immune checkpoint inhibitor short chain fatty acids inosine mass spectrometry\", \"What are the absolute concentrations of gut microbiota-derived metabolites like butyrate and inosine in human tumor microenvironment samples from patients responding to immunotherapy?\"], \"existing_handles\": [], \"intended_use\": \"quantification\", \"kind\": \"supplement\", \"need_id\": \"Ndbdcd00459f9\", \"owners\": [\"CH03\", \"CH06\"], \"question\": \"Are there any primary studies reporting absolute quantitative concentrations (e.g., μM, ng/mg) of microbial metabolites (specifically Inosine, Butyrate, SCFAs) measured directly in human tumor tissue (TME) or paired tumor-serum samples from ICI-treated patients, and do these levels correlate with response?\", \"required_concepts\": [], \"round_specs\": [{\"round\": 1, \"targeted_queries\": [{\"facet_id\": \"F1\", \"query_text\": \"human tumor tissue metabolomics immune checkpoint inhibitor short chain fatty acids inosine mass spectrometry\", \"query_type\": \"keyword\"}, {\"facet_id\": \"F1\", \"query_text\": \"What are the absolute concentrations of gut microbiota-derived metabolites like butyrate and inosine in human tumor microenvironment samples from patients responding to immunotherapy?\", \"query_type\": \"question\"}]}], \"success_criteria\": [\"Identification of at least one primary clinical study (not review) performing targeted metabolomics (e.g., LC-MS/MS, Mass Spectrometry Imaging) on human tumor tissues from ICI-treated cohorts, reporting specific concentration values and statistical correlation with ORR/PFS/OS.\"], \"user_scope\": \"How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?\"}",
+  "new_handles": [
+    "P0590",
+    "P0589"
+  ],
+  "new_passages": 5,
+  "owners": [
+    "CH03",
+    "CH06"
+  ],
+  "queries": [
+    {
+      "facet_id": "F1",
+      "query_text": "human tumor tissue biopsy metabolomics absolute concentration butyrate inosine immune checkpoint inhibitor",
+      "query_type": "keyword"
+    },
+    {
+      "facet_id": "F1",
+      "query_text": "What are the absolute quantitative concentrations of microbial metabolites such as butyrate and inosine measured directly in human tumor tissue biopsies from patients treated with immune checkpoint inhibitors?",
+      "query_type": "question"
+    }
+  ],
+  "round": 2,
+  "status": "partial",
+  "still_missing": "The gap requires primary studies reporting absolute quantitative concentrations of microbial metabolites measured directly in human tumor tissue (TME) or paired tumor-serum samples. This study only reports serum levels (relative comparisons, no absolute values provided in text) and does not provide measurements from human tumor tissue biopsies.",
+  "usable_content": "当前材料中未发现符合要求的含绝对定量浓度（如 μM、ng/mg）的人体肿瘤微环境（TME）或配对肿瘤 - 血清代谢物数据。P0587 报告了临床队列的关联性但明确指出缺乏 TME 绝对浓度阈值：在 52 例实体瘤患者（抗 PD-1）中，粪便 SCFAs（乙酸、丙酸、丁酸、戊酸）水平较高与 PFS 延长显著相关；在 11 例 NSCLC 患者（二线 nivolumab）中，粪便丙酸和丁酸与长期获益相关；但血清丁酸/丙酸高浓度与抗 CTLA-4 疗效负相关，且文中未提供具体血清浓度数值。P0590 在 NSCLC 患者血清中检测到响应者乙酸、丙酸、丁酸水平显著高于无响应者，但明确说明仅报告相对丰度比较，未提供绝对定量值（μM、ng/mg），且未测量人肿瘤组织内浓度。P0589 指出肌苷（Inosine）的证据主要限于小鼠模型（调节 Th1 分化），未提供人体血清或 TME 的生理浓度数据。综上，现有材料确认了粪便/血清代谢物与 ICI 疗效的观察性关联，但人体 TME 绝对定量数据及配对样本分析仍为缺口，不同代谢物（SCFAs vs 肌苷）及不同抗体（PD-1 vs CTLA-4）间的效应方向存在异质性（如丁酸在 PD-1 中为正相关，在 CTLA-4 血清中为负相关），且缺乏统一的人体组织浓度标准。"
+}

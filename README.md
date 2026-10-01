@@ -1,3 +1,5 @@
+> 本分支为2026-10-01本地测试归档，不是生产推荐版本。请先读 [归档README](archives/manuscript-parts-local-test-20261001/README.md)。PLAN/cache仅用于历史研究，不自动作为新链路输入。
+
 # OptoMind-Review — 研究与写作链路
 
 本分支是持续升级中的精简源码版，当前保留上游冻结点 review-v2-content-handoff-20260929，并加入2026-09-30离线交付层；云端采用精简快照，不携带本地完整开发历史。

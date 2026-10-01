@@ -1,0 +1,83 @@
+{
+  "acquisition_count": 1,
+  "auxiliary_material": [
+    "Validation metrics including linearity (R² > 0.99), limits of detection/quantification, inter-day precision (RSD < 10%), and recovery rates (94–109%) for SCFAs in plasma, serum, feces, and mouse cecum tissue. The study compares SCFA composition ratios in human serum (92:7:1 for acetic:propionic:butyric) against previous literature and reports mouse cecum tissue concentrations, which may inform preclinical model comparisons but are not direct human tumor data.",
+    "The text outlines the biological relevance of SCFAs in immune system development, glucose homeostasis, and inflammation, providing context for why these metabolites are monitored. It includes a troubleshooting guide for common GC-MS issues such as vacuum pressure leaks, column bleed, and poor analyte recovery. The authors note that SCFAs are highly hydrophilic and volatile, necessitating specific derivatization to improve detection sensitivity. The paper mentions that the method was validated for micro-scale biological samples and demonstrates excellent linearity (R2 ≥ 0.95) for calibration curves.",
+    "Details regarding whole-genome shotgun metagenomic sequencing (Illumina NovaSeq X, 10 Gbp depth), CAR T-cell product specifications (tisa-cel, anbal-cel), and statistical methods (ANCOM-BC, MaAsLin2) are not relevant to the analytical protocol gap for metabolite quantification."
+  ],
+  "candidate_count": 3,
+  "citation_anchor_count": 0,
+  "citation_anchor_status": "not_applicable",
+  "evidence": [],
+  "limitations": [],
+  "material_ready": true,
+  "model_call": true,
+  "network_call": true,
+  "note": "The gap judgment and ready writing material are reported separately.",
+  "outcome": "gap_partially_fulfilled",
+  "outline_action": "Extract the GC-MS parameters and healthy control serum ranges for SCFAs to address the SCFA portion of the gap. Search specifically for LC-MS/MS or GC-MS protocols for inosine quantification in human serum or tumor tissue. Look for consensus guidelines or methodological papers that report SCFA or inosine concentrations specifically in cancer patient cohorts to address the cancer-specific reference range requirement.",
+  "outline_action_recovered_by_policy": false,
+  "planning_use_contract": {
+    "status": "equal_use"
+  },
+  "query_audits": [
+    {
+      "facet_id": "F1",
+      "provider_attempts": [
+        {
+          "provider": "semantic_scholar",
+          "retryable": false,
+          "returned": 6,
+          "status_code": 200
+        }
+      ],
+      "provider_issue": false,
+      "query_id": "SUP_metabolite_quantification_protocols_KQ_01",
+      "query_text": "human serum tumor tissue inosine short-chain fatty acids absolute quantification LC-MS GC-MS method validation",
+      "query_type": "keyword",
+      "requested_limit": 12,
+      "retrieval_source": "paper_search",
+      "retryable": false,
+      "returned": 6,
+      "status": 200
+    },
+    {
+      "discovery_target": 0,
+      "facet_id": "F1",
+      "max_snippets_per_paper": 1,
+      "provider_attempts": [
+        {
+          "provider": "semantic_scholar_snippets",
+          "retryable": false,
+          "returned": 12,
+          "status_code": 200
+        }
+      ],
+      "provider_issue": false,
+      "query_id": "SUP_metabolite_quantification_protocols_QQ_02",
+      "query_text": "What are the validated analytical protocols for the absolute quantification of inosine and short-chain fatty acids in human serum or solid tumor tissues, and do any consensus guidelines define cancer-specific reference ranges?",
+      "query_type": "question",
+      "raw_snippet_hits": 12,
+      "requested_limit": 12,
+      "requested_limits": [
+        12
+      ],
+      "requests": 1,
+      "retrieval_source": "snippet_search",
+      "retryable": false,
+      "returned": 12,
+      "status": 200,
+      "unique_papers": 12
+    }
+  ],
+  "query_source": "planner_supplied_targeted_queries",
+  "remaining_gap": "No protocol or reference ranges are provided for inosine quantification. The study does not cover human tumor tissue samples (only mouse cecum tissue and human biofluids). Reference ranges are limited to healthy controls; no cancer-specific reference ranges or consensus statements for cancer patients are identified. The method uses GC-MS, while the gap also inquires about LC-MS/MS parameters.",
+  "remaining_gap_recovered_by_policy": false,
+  "status": "partial",
+  "substantive_gap_status": "partial",
+  "useful_material": [
+    "This study provides a validated GC-MS protocol for quantifying short-chain fatty acids (SCFAs) in human serum and plasma, including specific analytical parameters (DB-FFAP column, SIM mode ions, temperature program), sample processing standards (acidification with HCl, MTBE liquid-liquid extraction, storage at −80 °C), and reference concentration ranges for acetic, propionic, butyric, and valeric acid in healthy human controls (e.g., serum acetic acid 4788–8823 ng/mL). The authors also detail a surrogate matrix approach using distilled water for calibration, validated for parallelism and matrix effects in serum.",
+    "This study provides a detailed Basic Protocol for quantifying 14 short-chain fatty acids (SCFAs) in human serum using gas chromatography-mass spectrometry (GC-MS). It specifies analytical platform parameters including the use of an Agilent 7820A GC-5977B MSD system, an HP-5 ms capillary column (30 m x 250 μm x 0.25 μm), oven temperature programming (60 °C to 325 °C), and electron impact ionization at -70 eV. The authors describe sample processing standards involving alkaline extraction (0.1 M NaOH for serum), methanol precipitation, vacuum concentration, and derivatization with N-tert-butyldimethylsilyl-N-methyltrifluoroacetamide (MTBSTFA) at 60 °C. The protocol includes storage recommendations (−80 °C for long-term) and cites the Human Metabolomics Database (HMDB) for normal concentration ranges of acetic acid in human blood (26.8 to 64.2 μM) as a reference for healthy controls.",
+    "This study confirms the application of liquid chromatography-tandem mass spectrometry (LC-MS/MS) for quantifying serum inosine and short-chain fatty acids (acetate, butyrate, isovalerate) in patients with relapsed/refractory diffuse large B-cell lymphoma (R/R-DLBCL). The authors report associations between pretreatment serum inosine levels and progression-free survival, as well as correlations between serum fatty acid profiles and immune-related adverse events. The discussion notes that in vitro experimental concentrations of inosine (10-30 mM) exceed physiological serum levels, highlighting the distinction between experimental dosing and endogenous concentrations."
+  ]
+}

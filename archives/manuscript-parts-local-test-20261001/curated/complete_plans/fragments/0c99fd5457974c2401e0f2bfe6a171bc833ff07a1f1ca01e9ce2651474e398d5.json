@@ -1,0 +1,141 @@
+{
+  "cost_cny": 0.0,
+  "decision": "direct_use",
+  "external_ask": "",
+  "external_request": {
+    "chapter_ids": [
+      "CH02"
+    ],
+    "gap_id": "Ne20711f908f2",
+    "gap_question": "Are there human clinical studies validating strain-specific microbial functions (e.g., specific Bifidobacterium strains) rather than species-level abundance for ICI prediction?",
+    "intended_use": "mechanism",
+    "local_evidence_reviewed": [
+      {
+        "section_path": [
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0596"
+      },
+      {
+        "section_path": [
+          "general understanding",
+          "key finding"
+        ],
+        "source_handle": "P0596"
+      },
+      {
+        "section_path": [
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0597"
+      },
+      {
+        "section_path": [
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0598"
+      },
+      {
+        "section_path": [
+          "review planning",
+          "topic handles"
+        ],
+        "source_handle": "P0598"
+      }
+    ],
+    "local_reading_cost": {
+      "downloads": 0,
+      "whole_paper_rereads": 0
+    },
+    "requested_object": "",
+    "schema_version": "optomind.planning_material_external_request.v1",
+    "still_missing": "",
+    "success_criteria": [
+      "Find human cohort studies using strain-level resolution (metagenomics/culturomics) linked to ICI outcomes, distinguishing between different strains of the same species."
+    ],
+    "user_scope": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?"
+  },
+  "gap": {
+    "chapter_ids": [
+      "CH02"
+    ],
+    "concepts": [
+      "strain-level gut microbiome biomarker immune checkpoint inhibitor human cohort",
+      "specific bacterial strain function immune checkpoint inhibitor response clinical study"
+    ],
+    "existing_handles": [],
+    "gap_id": "Ne20711f908f2",
+    "intended_use": "mechanism",
+    "question": "Are there human clinical studies validating strain-specific microbial functions (e.g., specific Bifidobacterium strains) rather than species-level abundance for ICI prediction?",
+    "required_concepts": [],
+    "success_criteria": [
+      "Find human cohort studies using strain-level resolution (metagenomics/culturomics) linked to ICI outcomes, distinguishing between different strains of the same species."
+    ],
+    "user_scope": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?"
+  },
+  "gap_id": "Ne20711f908f2",
+  "local_reading": {
+    "_archive_fragment": "curated/complete_plans/fragments/ceeb0a11e6a8526f480e295795423f03b6fae28b0e75d35bf54e40bd5c99f96a.json"
+  },
+  "material_ready": true,
+  "model_calls": 1,
+  "passages": {
+    "_archive_fragment": "curated/complete_plans/fragments/34db1e3dc6de54a7c877c5e842c2e374f682303ec7b58210fc5e43f1f3c919b9.json"
+  },
+  "quantitative_comparisons": [
+    {
+      "groups": [
+        {
+          "group": "Custom strain reference database size",
+          "value": "1,397 genomes"
+        }
+      ],
+      "research_object": "Human ICI cohort (CA209-538 trial + meta-analysis)",
+      "result_or_measure": "Strain-level resolution significantly improved machine learning prediction of response and progression-free survival compared to species-level quantification.",
+      "setting_or_time": "Baseline fecal samples from Phase 2 clinical trial (n=106) and meta-analysis of six external studies (n=364)."
+    },
+    {
+      "groups": [
+        {
+          "group": "ICI alone group",
+          "value": "2.5 months PFS"
+        },
+        {
+          "group": "ICI + CBM588 group",
+          "value": "12.7 months PFS"
+        }
+      ],
+      "research_object": "Specific Bifidobacterium strains in human intervention trial (Pal et al., mRCC)",
+      "result_or_measure": "Median progression-free survival increased from 2.5 months to 12.7 months; significant improvement in response rates.",
+      "setting_or_time": "Metastatic renal cell carcinoma patients receiving nivolumab/ipilimumab with/without probiotic CBM588."
+    },
+    {
+      "groups": [
+        {
+          "group": "B.bif_K57",
+          "value": "Synergistic"
+        },
+        {
+          "group": "B.bif_K18",
+          "value": "Synergistic"
+        },
+        {
+          "group": "B.bif_B06",
+          "value": "No synergy"
+        }
+      ],
+      "research_object": "Bifidobacterium strains in mouse models (preclinical)",
+      "result_or_measure": "Synergy with PD-1 inhibitors observed only in specific strains (increased CD8+ T cells, IFN-gamma); others showed no effect.",
+      "setting_or_time": "Mouse models treated with PD-1 inhibitors."
+    }
+  ],
+  "read_focus": "",
+  "reason": "材料中Thomas等人（2024）的研究直接提供了使用菌株分辨率（宏基因组学）的人类队列数据，并明确比较了其与物种水平在ICI预测中的性能差异，满足了“寻找使用菌株分辨率的人类队列研究”的成功标准。同时，其他材料提供了相关的干预试验和预临床机制作为背景补充，但未改变核心结论的存在性。",
+  "schema_version": "optomind.planning_material_triage.v1",
+  "source": "judge",
+  "still_missing": "",
+  "usable_content": "现有证据表明，针对免疫检查点抑制剂（ICI）疗效预测的研究正从物种水平向菌株水平转变，但不同研究在验证性质上存在关键区别。首先，Thomas等人（2024）在人类临床队列中直接证实了菌株分辨率的优势：通过对CA209-538试验（n=106）及六个外部研究（n=364）的基线粪便样本进行深度鸟枪法宏基因组测序，构建了包含1,397个基因组的自定义菌株参考数据库。结果显示，与物种水平定量相比，菌株水平的微生物丰度显著提高了机器学习对治疗反应和无进展生存期（PFS）的预测能力。该研究还揭示了种内功能差异，例如某些Faecalibacterium菌株呈正相关，而Bifidobacterium dentium呈负相关（对比B. longum的正相关），并指出这些菌株-反应特征具有ICI方案特异性（仅适用于抗PD-1/CTLA-4联合疗法，不适用于单药）。然而，该研究的功能性主张主要基于基因组潜力推断，缺乏体外或体内实验的功能验证。其次，虽然Pal等人的临床试验（mRCC患者）证明了特定益生菌菌株（CBM588，含双歧杆菌）与ICI联用能显著提升PFS（从2.5个月增至12.7个月），但这属于干预性验证而非基线预测研究，且未涉及内源性菌株分辨。此外，小鼠模型中的预临床数据进一步支持了菌株特异性机制（如B.bif_K57和B.bif_K18协同增加CD8+ T细胞和IFN-γ，而B.bif_B06无效），但这些结果不能直接外推至人类基线预测场景。综述类材料（2020, 2025）也指出，尽管物种水平关联已被广泛报道，但一致的菌株水平预测签名尚未确立，且现有临床前机制研究多依赖动物模型。因此，目前已有高质量人类临床研究利用高分辨率测序技术建立了菌株水平与ICI结局的统计关联，但尚缺对这些菌株具体生物学功能的实验性因果验证。\nHuman ICI cohort (CA209-538 trial + meta-analysis) / Strain-level resolution significantly improved machine learning prediction of response and progression-free survival compared to species-level quantification. / Baseline fecal samples from Phase 2 clinical trial (n=106) and meta-analysis of six external studies (n=364).：Custom strain reference database size: 1,397 genomes\nSpecific Bifidobacterium strains in human intervention trial (Pal et al., mRCC) / Median progression-free survival increased from 2.5 months to 12.7 months; significant improvement in response rates. / Metastatic renal cell carcinoma patients receiving nivolumab/ipilimumab with/without probiotic CBM588.：ICI alone group: 2.5 months PFS；ICI + CBM588 group: 12.7 months PFS\nBifidobacterium strains in mouse models (preclinical) / Synergy with PD-1 inhibitors observed only in specific strains (increased CD8+ T cells, IFN-gamma); others showed no effect. / Mouse models treated with PD-1 inhibitors.：B.bif_K57: Synergistic；B.bif_K18: Synergistic；B.bif_B06: No synergy",
+  "writer_material": {
+    "_archive_fragment": "curated/complete_plans/fragments/d0f2d80c7928830fc3b8a4d67b9b0b594a7f1cf7830af10115733742c14639b1.json"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "action": "external_research",
+  "attempts": {
+    "_archive_fragment": "curated/complete_plans/fragments/635899f8fef12d406ebb1b6c658f12783dca147f7704f60d1d4c175e4dc47045.json"
+  },
+  "consumed_paper_ids": [],
+  "empty_rounds": 0,
+  "external_ask": "请检索并识别以下类型的研究：1) 包含人体肿瘤活检或ICI治疗患者收集的血清样本的代谢组学分析；2) 明确报告肌苷和SCFAs绝对浓度（单位如μM, ng/mL）并与响应率或生存结果进行统计相关的研究；3) 任何关于人体TME或血清代谢物标准化测量的协议、参考范围或共识声明。",
+  "external_results": {
+    "_archive_fragment": "curated/complete_plans/fragments/842379ae52366805bb3885415cc60e84449676f1c8641e30c45e443cd6049593.json"
+  },
+  "last_error": "",
+  "local_decision": "external_research",
+  "local_triage": {
+    "_archive_fragment": "curated/complete_plans/fragments/b969181842ea45dcdf82c8def108d1a07982a12dad96f61dd8864a249b99b32b.json"
+  },
+  "need": {
+    "comparison_object": "",
+    "concepts": [
+      "standardized absolute quantification metabolite tumor microenvironment microbiome immunotherapy",
+      "consensus guidelines inosine short-chain fatty acids measurement cancer immunotherapy",
+      "human serum inosine concentration reference range immune checkpoint inhibitor"
+    ],
+    "existing_handles": [],
+    "intended_use": "mechanism",
+    "kind": "supplement",
+    "need_id": "N7b936a74b5a5",
+    "owners": [],
+    "question": "人体肿瘤微环境或血清中关键代谢物（肌苷、短链脂肪酸）的绝对生理浓度标准化测量方法是否已建立？",
+    "required_concepts": [],
+    "round_specs": [
+      {
+        "round": 1,
+        "targeted_queries": [
+          {
+            "facet_id": "F1",
+            "query_text": "standardized absolute quantification metabolite tumor microenvironment microbiome immunotherapy",
+            "query_type": "keyword"
+          },
+          {
+            "facet_id": "F1",
+            "query_text": "consensus guidelines inosine short-chain fatty acids measurement cancer immunotherapy",
+            "query_type": "keyword"
+          },
+          {
+            "facet_id": "F1",
+            "query_text": "human serum inosine concentration reference range immune checkpoint inhibitor",
+            "query_type": "keyword"
+          }
+        ]
+      }
+    ],
+    "success_criteria": [
+      "找到具体的标准化测量协议、参考范围或共识声明，或确认仍处于'partial'状态（仅有分层数据如 CheckMate 025 队列）。"
+    ],
+    "user_scope": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?"
+  },
+  "need_id": "N7b936a74b5a5",
+  "new_handles": [
+    "P0282",
+    "P0594",
+    "P0413"
+  ],
+  "new_passages": 0,
+  "owners": [],
+  "read_focus": "重点检索近年的临床试验注册库、已发表的包含代谢组学分析的临床研究论文，特别是那些专门对ICI治疗患者的配对肿瘤组织和血液样本进行代谢物谱分析的研究。关注是否有任何近期研究（2022年后）解决了TME代谢物定量在人体中的转化差距。",
+  "rounds": 3,
+  "status": "stopped_rounds_exhausted",
+  "still_missing": "This study does not provide a measurement protocol for inosine. It does not address sample preparation or quantification specifically for tumor microenvironment (TME) tissue, focusing only on serum and feces. The reference ranges cited are from a general metabolomics database (HMDB) rather than a cancer-specific consensus statement or standardized reference range for tumor patients. The success criterion regarding 'consensus statements' or 'reference ranges' for cancer contexts remains unmet.",
+  "usable_content": "This study provides a detailed Basic Protocol 1 for quantifying 14 short-chain fatty acids (SCFAs) in human serum and feces using gas chromatography-mass spectrometry (GC-MS). It specifies alkaline extraction (pH > 7) using sodium hydroxide, derivatization with MTBSTFA at 60 °C, and specific GC-MS parameters (e.g., oven temperature program, ion source settings). It includes a table of 14 SCFA standards with retention times and quantification masses. It references the Human Metabolomics Database (HMDB) for normal concentration ranges of acetic acid in human blood (26.8 to 64.2 μM). It outlines calibration curve requirements (R2 ≥ 0.95) and sample storage conditions (−80 °C for long-term). 该研究建立并验证了一种用于生物样本（牛血清和牛奶）中短链脂肪酸（SCFA）绝对定量的 LC-MS 方法。核心方案包括使用 3-硝基苯肼（3-NPH）进行衍生化，结合反相液相色谱 - 质谱（RP-LC-MS）分析。方法学验证显示其具有高灵敏度（大多数分析物 LOD ≤ 0.1 µmol/L）、准确性（加标回收率 84–115%）和重现性（RSD < 7%）。该研究证明了在复杂生物基质（含脂质干扰）中检测挥发性 SCFA 的技术可行性，并提供了具体的衍生化反应条件（30°C, 30 min）和色谱分离参数。 This study describes the application of UHPLC-MS/MS to quantify short-chain fatty acids (specifically butyrate) in mouse plasma and feces, and GC-MS for tumor tissue, reporting measurable concentration changes linked to anti-PD-L1 therapy outcomes in a syngeneic NKTCL mouse model."
+}

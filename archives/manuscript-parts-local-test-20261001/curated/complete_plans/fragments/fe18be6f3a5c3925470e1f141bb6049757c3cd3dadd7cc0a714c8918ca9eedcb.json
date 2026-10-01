@@ -1,0 +1,27 @@
+{
+  "approach": "前瞻性观察性队列研究。对象为俄亥俄州立大学皮肤癌诊所收治的>18岁ICI治疗黑色素瘤患者（排除基线使用皮质类固醇者）。数据收集包括：1. 临床终点：每12周通过RECIST v1.1评估客观缓解率（ORR），记录12个月无进展生存期（PFS）；通过CTCAE v5.0评估irAEs。2. 生物样本：在基线、irAE发生后2天内（医生图表审查确认）、治疗12周时收集粪便样本。3. 实验室分析：Illumina NovaSeq 6000进行宏基因组全基因组鸟枪法测序，使用HUMAnN3进行分类。4. 统计分析：使用R包glmm对微生物相对丰度与irAEs的影响进行逻辑回归建模，并校正错误发现率（FDR）。",
+  "contribution_and_limits": [
+    {
+      "contribution": "提供了纵向微生物组数据，识别出能区分不同临床表型（响应/非响应、有/无irAE）的具体细菌和噬菌体标志物。",
+      "limits": "所给摘要未交代因果机制验证结果；仅观察到关联性，作者明确指出未来分析需分配因果角色。样本量较小（n=32可评估响应），且为单中心观察性研究，外推性受限。未涵盖真菌的作用细节（仅提及无关联）。"
+    }
+  ],
+  "key_findings": [
+    {
+      "conditions": "总体响应 vs 非响应（基于ORR）",
+      "finding": "响应者中富集Bacteroides dorei (FDR p=9.5E-07) 和 Blautia species CAG:257 (padj=0.001)；非响应者中富集 Prevotella Stercorea (padj=1.1E-07) 和一种靶向沙门氏菌的噬菌体 (padj=8.3E-09)。"
+    },
+    {
+      "conditions": "有irAE的响应者 vs 无irAE的响应者",
+      "finding": "有irAE的响应者富集 Bacteroides plebeius (padj=4.2E-13) 和 Bacteroides coprophilus (padj=0.0002)；无irAE的响应者富集 Eubacterium siraeum (padj=7.2E-05)。"
+    },
+    {
+      "conditions": "整体微生物组特征与毒性/响应的关联",
+      "finding": "未发现真菌与响应或毒性显著相关。Bacteroides属的高丰度与irAEs显著相关，也与ICI响应一致。富含Bacteroides且缺乏Prevotella的微生物组特征与ICI响应相关。"
+    }
+  ],
+  "paper_kind": "empirical",
+  "problem_or_question": "既往研究表明irAE的发生与治疗响应相关，但二者往往难以解耦。本研究试图解决的核心问题是：肠道微生物组是否能在不同时间点（基线、irAE发生时、12周）独立预测ICI治疗的响应或毒性？特别是能否找到能区分“有效但有副作用”与“有效且无副作用”患者的微生物特征，从而为临床管理提供潜在的生物标志物。",
+  "research_scope": "转移性黑色素瘤患者，接受免疫检查点抑制剂（ICI）治疗；研究聚焦于肠道微生物组在基线、irAE发生期间及12周时的动态变化与临床结局（响应/毒性）的关联。",
+  "work_summary": "本研究旨在确定转移性黑色素瘤患者在ICI治疗过程中，肠道微生物组的组成能否预测治疗响应或免疫相关不良事件（irAEs）。研究纳入了88名患者，其中48名为转移性疾病患者，32名可评估响应。通过纵向采集粪便样本并进行宏基因组鸟枪法测序，分析特定微生物丰度与ORR、PFS及irAEs之间的关联。研究发现某些细菌和噬菌体与响应或非响应显著相关，且存在能够区分“有irAE的响应者”与“无irAE的响应者”的特异性微生物标志物。"
+}

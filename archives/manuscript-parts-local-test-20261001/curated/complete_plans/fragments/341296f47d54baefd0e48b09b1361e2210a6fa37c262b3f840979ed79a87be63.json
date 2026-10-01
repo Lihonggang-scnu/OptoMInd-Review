@@ -1,0 +1,122 @@
+{
+  "cost_cny": 0.0,
+  "decision": "external_research",
+  "external_ask": "寻找在免疫检查点抑制剂（ICI）治疗的实体瘤患者中，直接比较不同抗生素类别（例如β-内酰胺类与氟喹诺酮类）对无进展生存期（PFS）或总生存期（OS）影响的观察性研究或荟萃分析。需明确报告各类别相对于参照组的风险比（HR）或置信区间，以评估是否存在特定的‘相对安全’类别。",
+  "external_request": {
+    "chapter_ids": [
+      "Ch4_Context"
+    ],
+    "gap_id": "Nd61916bae3e4",
+    "gap_question": "不同类别抗生素（如β-内酰胺类 vs. 氟喹诺酮类）对 ICI 疗效的负面影响是否存在显著差异，是否有特定类别相对安全？",
+    "intended_use": "mechanism",
+    "local_evidence_reviewed": [
+      {
+        "section_path": [
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0596"
+      },
+      {
+        "section_path": [
+          "Abstract"
+        ],
+        "source_handle": "P0596"
+      },
+      {
+        "section_path": [
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0605"
+      },
+      {
+        "section_path": [
+          "Abstract"
+        ],
+        "source_handle": "P0605"
+      },
+      {
+        "section_path": [
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0612"
+      }
+    ],
+    "local_reading_cost": {
+      "downloads": 0,
+      "whole_paper_rereads": 0
+    },
+    "requested_object": "寻找在免疫检查点抑制剂（ICI）治疗的实体瘤患者中，直接比较不同抗生素类别（例如β-内酰胺类与氟喹诺酮类）对无进展生存期（PFS）或总生存期（OS）影响的观察性研究或荟萃分析。需明确报告各类别相对于参照组的风险比（HR）或置信区间，以评估是否存在特定的‘相对安全’类别。",
+    "schema_version": "optomind.planning_material_external_request.v1",
+    "still_missing": "需要至少两项专门针对ICI治疗实体瘤患者、并直接比较不同抗生素类别（如β-内酰胺类 vs. 氟喹诺酮类）疗效影响的研究。当前材料中，黑色素瘤研究仅对比了万古霉素与非特定广谱/肠道抗生素，骨髓瘤研究属于非ICI人群，综述未提供具体的类别间统计比较值。",
+    "success_criteria": [
+      "找到至少 2 项比较不同抗生素类别对 ICI 疗效影响的研究，或明确说明现有材料仅支持‘广谱抗生素’整体效应。"
+    ],
+    "user_scope": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?"
+  },
+  "gap": {
+    "chapter_ids": [
+      "Ch4_Context"
+    ],
+    "concepts": [
+      "antibiotic class specific impact on immune checkpoint inhibitor efficacy",
+      "fluoroquinolones versus beta-lactams immune checkpoint inhibitor survival"
+    ],
+    "existing_handles": [],
+    "gap_id": "Nd61916bae3e4",
+    "intended_use": "mechanism",
+    "question": "不同类别抗生素（如β-内酰胺类 vs. 氟喹诺酮类）对 ICI 疗效的负面影响是否存在显著差异，是否有特定类别相对安全？",
+    "required_concepts": [],
+    "success_criteria": [
+      "找到至少 2 项比较不同抗生素类别对 ICI 疗效影响的研究，或明确说明现有材料仅支持‘广谱抗生素’整体效应。"
+    ],
+    "user_scope": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?"
+  },
+  "gap_id": "Nd61916bae3e4",
+  "local_reading": {
+    "_archive_fragment": "curated/complete_plans/fragments/3e3b5e16c5c5571983c632ef1154e74fd68815b004faf9c5408dcc0ffa0962af.json"
+  },
+  "material_ready": false,
+  "model_calls": 1,
+  "passages": {
+    "_archive_fragment": "curated/complete_plans/fragments/18197d2614a03e659ac62329bead6681003fc7650200b2413b162f878abb91d9.json"
+  },
+  "quantitative_comparisons": [
+    {
+      "group_definitions": {
+        "ASCT_MM_BetaLactam": "多发性骨髓瘤患者接受自体干细胞移植(ASCT)且暴露于β-内酰胺类抗生素",
+        "ASCT_MM_Fluoroquinolone": "多发性骨髓瘤患者接受自体干细胞移植(ASCT)且暴露于氟喹诺酮类抗生素",
+        "ICI_Melanoma_PipTazo_Metro": "IV期黑色素瘤患者接受ICI治疗且暴露于哌拉西林他唑巴坦或甲硝唑",
+        "ICI_Melanoma_Vanc": "IV期黑色素瘤患者接受ICI治疗且暴露于万古霉素"
+      },
+      "groups": [
+        {
+          "group": "ICI_Melanoma_Vanc",
+          "value": "TTD HR=1.26 (95% CI 1.03–1.53); OS HR=1.79 (95% CI 1.40–2.29)"
+        },
+        {
+          "group": "ICI_Melanoma_PipTazo_Metro",
+          "value": "无显著影响 (No significant impact on TTD or OS)"
+        },
+        {
+          "group": "ASCT_MM_BetaLactam",
+          "value": "PFS HR=2.25 (95% CI 1.31 - 3.85, p = 0.003)"
+        },
+        {
+          "group": "ASCT_MM_Fluoroquinolone",
+          "value": "Multivariate analysis: No statistical significance for PFS or OS"
+        }
+      ],
+      "result_or_measure": "Hazard Ratio (HR) for Time to Treatment Discontinuation (TTD) / Progression-Free Survival (PFS) and Overall Survival (OS)",
+      "setting_or_time": "Melanoma ICI cohort (2010-2020); ASCT MM cohort (2012-2015)"
+    }
+  ],
+  "read_focus": "检索并阅读涉及ICI治疗的实体瘤（如肾癌、肺癌、黑色素瘤等）的大型回顾性队列研究或荟萃分析，重点关注其中是否包含对不同抗生素类别（特别是β-内酰胺类与氟喹诺酮类）进行直接分层比较或交互作用分析的结果。",
+  "reason": "虽然找到了显示抗生素类别特异性效应的初步证据（黑色素瘤中万古霉素有害而其他类别无害；骨髓瘤中β-内酰胺类在多变量分析中显著），但这些结果要么局限于单一药物对比，要么来自非ICI人群，或者缺乏直接的类别间统计比较。为了回答“是否存在显著差异及是否有特定类别相对安全”的问题，需要更多直接比较不同类别抗生素在ICI背景下效果的实体瘤研究数据。",
+  "schema_version": "optomind.planning_material_triage.v1",
+  "source": "judge",
+  "still_missing": "需要至少两项专门针对ICI治疗实体瘤患者、并直接比较不同抗生素类别（如β-内酰胺类 vs. 氟喹诺酮类）疗效影响的研究。当前材料中，黑色素瘤研究仅对比了万古霉素与非特定广谱/肠道抗生素，骨髓瘤研究属于非ICI人群，综述未提供具体的类别间统计比较值。",
+  "usable_content": "现有证据表明抗生素类别对免疫检查点抑制剂（ICI）疗效的影响存在特异性，但不同研究在“相对安全”的类别认定上存在差异，且直接比较数据有限。在一项针对IV期黑色素瘤患者的回顾性研究中（n=876），暴露于万古霉素与显著缩短的治疗中断时间（TTD, HR=1.26）和更差的总生存期（OS, HR=1.79）相关；相比之下，暴露于具有胃肠道覆盖范围的β-内酰胺类组合（哌拉西林他唑巴坦）或甲硝唑则未显示出对TTD或OS的显著负面影响。这提示在黑色素瘤ICI治疗中，万古霉素的负面效应可能独立于其他常见抗生素类别。然而，另一项针对自体干细胞移植（ASCT）后多发性骨髓瘤患者的研究得出了不同的类别风险模式：在单变量分析中，氟喹诺酮类和β-内酰胺类均与生存期缩短相关，但在多变量分析中，仅β-内酰胺类被证实为进展风险的独立预测因子（HR=2.25），而氟喹诺酮类在多变量模型中未达到统计学显著性。此外，一篇综述指出，尽管有动物机制支持特定菌群耗竭影响ICI疗效，但人类队列研究通常将β-内酰胺类、氟喹诺酮类和宏环内酯类统称为与较差预后相关，缺乏直接的头对头统计比较来确立某一类绝对“安全”。因此，目前尚无足够的一致证据确定一个在所有实体瘤ICI治疗中通用的“安全”抗生素类别，不同肿瘤类型和治疗背景下的类别特异性风险可能存在异质性。\nHazard Ratio (HR) for Time to Treatment Discontinuation (TTD) / Progression-Free Survival (PFS) and Overall Survival (OS) / Melanoma ICI cohort (2010-2020); ASCT MM cohort (2012-2015)：ICI_Melanoma_Vanc: TTD HR=1.26 (95% CI 1.03–1.53); OS HR=1.79 (95% CI 1.40–2.29)；ICI_Melanoma_PipTazo_Metro: 无显著影响 (No significant impact on TTD or OS)；ASCT_MM_BetaLactam: PFS HR=2.25 (95% CI 1.31 - 3.85, p = 0.003)；ASCT_MM_Fluoroquinolone: Multivariate analysis: No statistical significance for PFS or OS",
+  "writer_material": {
+    "_archive_fragment": "curated/complete_plans/fragments/582eeda20a18ee7dafaa2cf27a90e314966f56ce46ec1a05433fbd2ca94f913f.json"
+  }
+}

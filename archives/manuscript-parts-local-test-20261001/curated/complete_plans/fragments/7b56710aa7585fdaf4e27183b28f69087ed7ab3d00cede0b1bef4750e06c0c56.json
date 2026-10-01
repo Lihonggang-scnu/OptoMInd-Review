@@ -1,0 +1,36 @@
+{
+  "action": "external_research",
+  "counts_as_round": false,
+  "local_decision": "external_research",
+  "local_triage": {
+    "_archive_fragment": "curated/complete_plans/fragments/91f5601dc5f71476fa50d79fffa77d33fb2d2a3fd8966a75e4dd592469926717.json"
+  },
+  "need_id": "Nb050c724adab",
+  "need_signature": "{\"comparison_object\": \"\", \"concepts\": [\"DIET trial NCT04645680 microbiome mediation analysis high fiber diet immunotherapy melanoma\", \"Has the DIET trial (NCT04645680) published microbiome sequencing data showing specific bacterial taxa or metabolic pathway changes that mediate the clinical efficacy of high-fiber diet intervention in melanoma patients receiving immune checkpoint blockade?\"], \"existing_handles\": [], \"intended_use\": \"application_outcome\", \"kind\": \"supplement\", \"need_id\": \"Nb050c724adab\", \"owners\": [\"Ch5_Interventions\", \"Ch4_Context\"], \"question\": \"Does the DIET trial (NCT04645680) or other human dietary intervention trials report specific gut microbiome compositional or functional changes that statistically mediate the observed clinical efficacy improvements in ICI-treated patients?\", \"required_concepts\": [], \"round_specs\": [{\"round\": 1, \"targeted_queries\": [{\"facet_id\": \"F1\", \"query_text\": \"DIET trial NCT04645680 microbiome mediation analysis high fiber diet immunotherapy melanoma\", \"query_type\": \"keyword\"}, {\"facet_id\": \"F1\", \"query_text\": \"Has the DIET trial (NCT04645680) published microbiome sequencing data showing specific bacterial taxa or metabolic pathway changes that mediate the clinical efficacy of high-fiber diet intervention in melanoma patients receiving immune checkpoint blockade?\", \"query_type\": \"question\"}]}], \"success_criteria\": [\"Identification of a published report from the DIET trial or similar human dietary intervention study that includes: (1) specific microbiome taxa or functional pathway changes associated with the dietary intervention, (2) statistical mediation analysis linking microbiome changes to ICI clinical outcomes (ORR, PFS, OS), or (3) explicit statement that microbiome mediation data is pending/unavailable.\"], \"user_scope\": \"How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?\"}",
+  "new_handles": [
+    "P0629",
+    "P0630"
+  ],
+  "new_passages": 5,
+  "owners": [
+    "Ch5_Interventions",
+    "Ch4_Context"
+  ],
+  "queries": [
+    {
+      "facet_id": "F1",
+      "query_text": "DIET trial NCT04645680 gut microbiome sequencing taxa composition melanoma",
+      "query_type": "keyword"
+    },
+    {
+      "facet_id": "F1",
+      "query_text": "Does the DIET trial (NCT04645680) report specific gut microbiome taxonomic or functional changes in human melanoma patients that are associated with clinical response to immune checkpoint inhibitors?",
+      "query_type": "question"
+    }
+  ],
+  "query_refinement_attempted": true,
+  "round": 2,
+  "status": "initialized_queries",
+  "still_missing": "This abstract does not list specific gut microbiome taxa compositional changes associated with the intervention in the human cohort, focusing instead on serum metabolite proxies for microbiome function. It does not explicitly report a statistical mediation analysis linking specific microbiome changes (taxa or functional pathways) to clinical outcomes (ORR, PFS, OS) in the human participants, though it links bile acid profiles to response in mouse models and notes numerical response differences in humans. There is no explicit statement that microbiome mediation data is pending or unavailable, but the reported data prioritizes metabolic profiling over microbiome sequencing results.",
+  "usable_content": "关于 DIET 试验（NCT04645680）及其他人类饮食干预试验是否报告了统计上介导 ICI 临床疗效的特定肠道微生物组变化，现有分组结果存在对象与终点的不一致：人类数据主要报告免疫细胞与代谢物变化，小鼠模型报告疗效改善，而提供的人类比较中未包含特定微生物组 taxa 直接介导临床结局（ORR/PFS/OS）的正式统计 mediation 分析。\n\n具体比较结果如下：\n1. 人类免疫与代谢变化（饮食干预第 5-8 周）：与 control 组（n=4）相比，high fiber 组（n=11）显示正向免疫调节迹象，包括 effector-memory CD8+ T cells 频率增加（p=.01）和 effector-memory CD4+ T cells 频率增加（p=.032）；同时 myeloid 系细胞显著减少，包括 circulating macrophages abundance score 降低（p=.018）、circulating neutrophils abundance score 降低（p=.035）及 circulating classical monocytes (CyTOF frequency) 减少（p=.0059）。\n2. 人类代谢物变化（平衡期 vs 第 1-4 周）：high fiber 组（n=6）较 control 组（n=8）血清 bile acids (untargeted metabolomics) 水平降低（p<0.05, Wilcoxon rank sum）。\n3. 人类亚组分析（第 5-8 周）：high fiber arm 中，immune changes 在 nivolumab + ipilimumab 组（n=3）比 pembrolizumab or nivolumab monotherapy 组（n=7）更显著。\n4. 小鼠模型（avatar model）：post-high fiber diet recipients（n=5）较 pre-high fiber diet recipients（n=5）显示 improved ICB response。\n\n综上，高纤维饮食在人类中关联特定的免疫激活与代谢物改变，且在小鼠中通过 FMT 传递疗效获益，但提供的比较数据未直接展示人类肠道微生物组组成变化统计介导临床疗效的证据。\ncirculating macrophages abundance score / p=.018 (decreased in high fiber vs control) / week 5-8 of dietary intervention：high fiber: n=11；control: n=4\ncirculating neutrophils abundance score / p=.035 (decreased in high fiber vs control) / week 5-8 of dietary intervention：high fiber: n=11；control: n=4\ncirculating classical monocytes (CyTOF frequency) / p=.0059 (reduced in high fiber vs control) / week 5-8 of dietary intervention：high fiber: n=11；control: n=4\neffector-memory CD8+ T cells frequency / p=.01 (increased in high fiber vs control) / week 5-8 of dietary intervention：high fiber: n=11；control: n=4\neffector-memory CD4+ T cells frequency / p=.032 (increased in high fiber vs control) / week 5-8 of dietary intervention：high fiber: n=11；control: n=4\nhigh fiber arm subgroup by ICB regimen / immune changes more prominent in combination vs monotherapy / week 5-8 of dietary intervention：nivolumab + ipilimumab: n=3；pembrolizumab or nivolumab monotherapy: n=7\nserum bile acids (untargeted metabolomics) / p<0.05 (reduced in high fiber vs control, Wilcoxon rank sum) / equilibration vs week 1-4：high fiber: n=6；control: n=8\nmouse FMT recipients per group / improved ICB response in post-high fiber stool recipients / mouse avatar model：post-high fiber diet recipients: n=5；pre-high fiber diet recipients: n=5"
+}

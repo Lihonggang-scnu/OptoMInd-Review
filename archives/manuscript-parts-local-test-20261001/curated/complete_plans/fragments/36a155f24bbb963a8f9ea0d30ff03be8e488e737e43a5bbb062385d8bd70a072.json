@@ -1,0 +1,73 @@
+{
+  "action": "external_research",
+  "attempts": {
+    "_archive_fragment": "curated/complete_plans/fragments/712f1e108754ab6b0382bdfbffb0a191b916f6ea31a2e746d20aa52f568d0a9e.json"
+  },
+  "consumed_paper_ids": [],
+  "empty_rounds": 0,
+  "external_ask": "Search for primary research articles (not reviews) that report absolute quantitative concentrations of microbial metabolites (specifically Inosine, Butyrate, SCFAs) measured directly in human tumor tissue biopsies or paired tumor-serum samples from patients treated with immune checkpoint inhibitors, including statistical correlations with clinical response.",
+  "external_results": {
+    "_archive_fragment": "curated/complete_plans/fragments/90b9d83aa3b051a81e19cec53adf3475f7cbf4111973d2ff2ec438f3f0263361.json"
+  },
+  "last_error": "",
+  "local_decision": "external_research",
+  "local_triage": {
+    "_archive_fragment": "curated/complete_plans/fragments/f0cc19b94777a4d48b99a910db25abab0f2e5b67a9c86a7da51686a8ef45ad8c.json"
+  },
+  "need": {
+    "comparison_object": "",
+    "concepts": [
+      "human tumor tissue metabolomics immune checkpoint inhibitor short chain fatty acids inosine mass spectrometry",
+      "What are the absolute concentrations of gut microbiota-derived metabolites like butyrate and inosine in human tumor microenvironment samples from patients responding to immunotherapy?"
+    ],
+    "existing_handles": [],
+    "intended_use": "quantification",
+    "kind": "supplement",
+    "need_id": "Ndbdcd00459f9",
+    "owners": [
+      "CH03",
+      "CH06"
+    ],
+    "question": "Are there any primary studies reporting absolute quantitative concentrations (e.g., μM, ng/mg) of microbial metabolites (specifically Inosine, Butyrate, SCFAs) measured directly in human tumor tissue (TME) or paired tumor-serum samples from ICI-treated patients, and do these levels correlate with response?",
+    "required_concepts": [],
+    "round_specs": [
+      {
+        "round": 1,
+        "targeted_queries": [
+          {
+            "facet_id": "F1",
+            "query_text": "human tumor tissue metabolomics immune checkpoint inhibitor short chain fatty acids inosine mass spectrometry",
+            "query_type": "keyword"
+          },
+          {
+            "facet_id": "F1",
+            "query_text": "What are the absolute concentrations of gut microbiota-derived metabolites like butyrate and inosine in human tumor microenvironment samples from patients responding to immunotherapy?",
+            "query_type": "question"
+          }
+        ]
+      }
+    ],
+    "success_criteria": [
+      "Identification of at least one primary clinical study (not review) performing targeted metabolomics (e.g., LC-MS/MS, Mass Spectrometry Imaging) on human tumor tissues from ICI-treated cohorts, reporting specific concentration values and statistical correlation with ORR/PFS/OS."
+    ],
+    "user_scope": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?"
+  },
+  "need_id": "Ndbdcd00459f9",
+  "new_handles": [
+    "P0587",
+    "P0588",
+    "P0586",
+    "P0590",
+    "P0589"
+  ],
+  "new_passages": 0,
+  "owners": [
+    "CH03",
+    "CH06"
+  ],
+  "read_focus": "",
+  "rounds": 3,
+  "status": "stopped_rounds_exhausted",
+  "still_missing": "['The study does not report absolute quantitative concentrations (e.g., μM, ng/mg) of inosine measured directly in human tumor tissue (TME). The clinical analysis relies on plasma metabolomic profiling from public datasets (CheckMate 025), where relative abundance or high/low stratification based on median values is used, rather than absolute quantification in tissue.', 'The study does not measure paired tumor-serum samples to correlate local tissue concentrations with serum levels.', 'The study does not report data for other specific metabolites requested in the gap question, such as Butyrate or other SCFAs, in either human tissue or serum.', \"While the study establishes a correlation between plasma inosine levels and survival outcomes (OS/PFS) in ICI-treated patients, it does not provide the specific statistical correlation coefficients (e.g., Pearson/Spearman r-values) linking absolute concentration values to objective response rates (ORR) or detailed PFS/OS hazard ratios in a way that fulfills the 'absolute quantitative' criterion for tissue measurement.\"]",
+  "usable_content": "['The study identifies inosine as a metabolite associated with improved overall survival in renal cell carcinoma (RCC) patients treated with nivolumab (ICI), based on re-analysis of the CheckMate 025 trial data.', 'The study reports that higher baseline plasma levels of inosine were associated with longer median overall survival (33 months vs. 22 months) in ICB-treated RCC patients, but this association was not observed in patients treated with everolimus.', 'The study demonstrates that inosine enhances tumor immunogenicity and sensitizes tumor cells to T-cell mediated killing by directly binding to and inhibiting the ubiquitin-activating enzyme UBA6 in tumor cells.', 'The study shows that UBA6 expression in human tumor tissues negatively correlates with ICB response and predicts progression-free survival in melanoma cohorts.'] The study is a narrative review summarizing the role of gut microbial metabolites in cancer immunotherapy. It reports clinical observations where fecal Short-Chain Fatty Acids (SCFAs) concentrations were measured in cohorts of patients receiving PD-1 inhibitors (Nivolumab/Pembrolizumab). Specifically, it cites a cohort of 52 solid tumor patients and an NSCLC cohort of 11 patients, noting that higher fecal SCFA levels (acetate, propionate, butyrate, valerate) were associated with longer progression-free survival and beneficial effects. It also references a study on metastatic melanoma patients treated with anti-CTLA-4, where serum butyrate and propionate were inversely correlated with PFS/OS. The review details mechanisms for SCFAs, Inosine, TMAO, and Tryptophan metabolites, highlighting their potential as predictive biomarkers. The study is a review summarizing the role of inosine in colorectal cancer (CRC) and gut homeostasis. It explicitly states that 'studies reporting the effects of the spatial redistribution of inosine across different intestinal compartments along CRC onset are currently missing since most of the clinical and preclinical data were generated from a bulk metabolomic analysis' and that 'no human studies have longitudinally tracked inosine levels'. The only clinical trial mentioned is a phase-2 study in mixed advanced solid tumors where CRC-specific results were not reported separately. The paper highlights that inosine-producing bacteria (e.g., Bifidobacterium pseudolongum) enhance ICI efficacy in preclinical mouse models via A2A receptor-mediated T cell activation, but these findings are not derived from human tumor tissue metabolite quantification."
+}

@@ -1,0 +1,44 @@
+{
+  "broader_review_uses": [
+    {
+      "connection_to_review": "当综述讨论“如何克服ICI疗效预测中标签稀缺问题”或“多组学数据整合策略”时，此研究提供了一个具体的技术路径示例。",
+      "material": "使用半监督学习将有限临床标签（KEYNOTE-177）扩展至大规模组学队列（TCGA）的策略。",
+      "purpose": "方法论参考"
+    },
+    {
+      "connection_to_review": "有助于综述厘清当前领域共识：微生物组目前更多被视为传统生物标志物的补充而非替代，特别是在MSI-H/dMMR亚型中，微生物组的作用可能需要更精细地分层解析。",
+      "material": "TMB和MSI仍是最高贡献的特征，微生物组作为补充特征。",
+      "purpose": "背景对比"
+    }
+  ],
+  "declared_content_depth": "abstract",
+  "doi": "10.1158/1538-7445.am2023-650",
+  "facet_contributions": [
+    {
+      "boundaries": "仅限于结直肠癌这一特定癌种；微生物组的测量基于16S rRNA或宏基因组测序的相对丰度，未涉及功能通路分析；预测模型的性能指标（AUC 0.97）可能因半监督标签的引入而被高估，需谨慎解读其泛化能力。",
+      "contribution": "提供了具体的微生物属（Actinopolyspora, Bacteroides Eggerthia）与ICI治疗反应正相关的定量证据。数据显示这些菌属在响应者中丰度显著更高，且被纳入高准确率预测模型的关键特征中。",
+      "facet_id": "F1",
+      "possible_uses": "可用于综述中讨论“特定微生物群如何促进ICI疗效”的部分，作为支持微生物组正向调节免疫治疗效果的实证案例。"
+    },
+    {
+      "boundaries": "机制推测基于其他癌症类型（黑色素瘤）的既往文献，本摘要未提供CRC中的直接机制实验数据（如细胞因子水平、T细胞浸润等）。因此，不能据此断定该机制在CRC中同样成立，仅能作为假设生成的依据。",
+      "contribution": "虽然未直接阐明分子机制，但该研究确认了微生物组与ICI反应之间的强统计关联，并指出Bacteroides属此前在黑色素瘤中被报道具有促炎反应，暗示其在CRC中可能也存在类似的免疫调节潜力。",
+      "facet_id": "F2",
+      "possible_uses": "可作为综述中连接“微生物组组成”与“免疫微环境调控”的桥梁性证据，提示需要进一步探索Bacteroides等菌属在CRC中激活抗肿瘤免疫的具体机制。"
+    }
+  ],
+  "material_scope": "abstract_only",
+  "planning_summary": "该论文提供了结直肠癌背景下，肠道微生物组预测免疫检查点抑制剂（ICI）疗效的具体机器学习模型构建案例。其核心价值在于展示了如何将微生物组数据与传统临床生物标志物（TMB, MSI）整合，以提高疗效预测的准确性。对于综述而言，它提供了关于“哪些微生物属可能与ICI反应正相关”的具体实证数据，以及一种处理小样本临床标签与大样本组学数据结合的方法论参考。",
+  "root_review_note": {},
+  "scope_interpretation_cautions": [
+    "该研究为会议摘要，非同行评审全文，细节（如数据预处理、特征工程细节、模型超参数）缺失，解读时需保持谨慎。",
+    "TCGA队列的ICI反应标签是推断的，非实际治疗结果，这意味着模型学习的是“推断的反应”而非“真实的临床反应”，可能存在系统性偏差。",
+    "微生物组数据来源于TCGA，而临床反应数据来源于KEYNOTE-177，两个队列的人群特征、测序平台、批次效应可能不同，虽通过半监督学习尝试对齐，但未明确说明是否进行了严格的批次校正。",
+    "结果中的高AUC值（0.97）是在内部验证集上获得的，缺乏独立外部队列验证，外推至其他人群或癌种时需格外小心。"
+  ],
+  "source_handle": "P0111",
+  "supplement_gap_material": {},
+  "supplement_material_status": "",
+  "title": "Abstract 650: A machine learning model accurately predicts response to immune checkpoint inhibitors in colorectal cancer using the gut microbiome",
+  "year": "2023"
+}

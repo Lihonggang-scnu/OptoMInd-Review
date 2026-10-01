@@ -1,0 +1,57 @@
+{
+  "auxiliary_material": {
+    "contextual_comparison": "Contrasts with smaller studies suggesting pre-ICI antibiotics are detrimental; this large-scale analysis indicates post-initiation exposure carries greater risk. Aligns with Poizeau et al. for melanoma null findings but contrasts with literature characterizing lung cancer as particularly susceptible.",
+    "limitations_noted_in_study": [
+      "Retrospective, correlational design; no causal inference.",
+      "Lacked gut microbiota data (e.g., Akkermansia, Bifidobacterium).",
+      "Lacked granular EHR data on ECOG status and PD-L1 expression.",
+      "Evidence of nonproportional hazards for covariates like age and albumin.",
+      "Subgroup analyses limited by small sample sizes (often n < 300 per window)."
+    ]
+  },
+  "evidence": [],
+  "gap_id": "ici_antibiotic_exposure_outcomes",
+  "judgment_path": "F:\\OptoMind-Review-2\\outputs\\planning_support\\20260923\\practical_refresh\\supplement_live\\source_units\\SU01_search_candidate_2ec5a3c2b3\\FULFILLMENT_JUDGMENT.json",
+  "limitations": [],
+  "material_ready": true,
+  "material_usefulness": "direct",
+  "outline_action": "Incorporate the Zhang et al. retrospective cohort findings into the review's section on 'Timing of Antibiotic Exposure.' Highlight the distinction between pre-only (non-significant long-term effect after adjustment) and post-only (significant 27% increased mortality risk) exposure. Use the tumor-specific subgroup data (significant in Head & Neck, RCC, Breast; non-significant in Lung, Melanoma) to discuss heterogeneity in susceptibility. Note the limitation that these are observational associations without direct microbiome validation.",
+  "outline_action_recovered_by_policy": false,
+  "remaining_gap": "The gap remains partially unmet regarding the specific association with treatment response (e.g., ORR, DCR) and progression-free survival (PFS); this study only reports Overall Survival (OS). Additionally, while timing is addressed, the specific mechanisms linking antibiotic exposure to outcomes remain inferred rather than directly measured due to lack of microbiome data.",
+  "remaining_gap_recovered_by_policy": false,
+  "status": "partial",
+  "useful_material": {
+    "adjusted_results": {
+      "combined_pre_post_exposure": "HR 1.31 (95% CI, 1.23-1.40); significantly associated with higher mortality.",
+      "post_only_exposure": "HR 1.27 (95% CI, 1.20-1.35); significantly associated with higher mortality.",
+      "pre_only_exposure": "HR 1.04 (95% CI, 0.99-1.10); not significantly associated with OS in multivariable model."
+    },
+    "covariates_adjusted_for": [
+      "Demographics",
+      "Tumor type",
+      "Line of therapy",
+      "Baseline health indicators (albumin, NLR)",
+      "Recent hospitalization",
+      "Corticosteroid use"
+    ],
+    "median_survival_days": {
+      "both_windows": 281,
+      "no_exposure": 428,
+      "post_only": 338,
+      "pre_only": 358
+    },
+    "study_details": {
+      "design": "Retrospective cohort study using deidentified electronic health record data from six academic medical centers within the University of California Health system.",
+      "exposure_definition": "Antibiotic exposure windows categorized as pre-only (-60 to -1 days), post-only (+1 to +60 days), both windows, or none. Included systemic oral/IV antibiotics with known microbiome impact (penicillins, cephalosporins, carbapenems, fluoroquinolones, macrolides, tetracyclines, sulfonamides, metronidazole, clindamycin, vancomycin, linezolid). Required >=2 distinct days of administration.",
+      "outcome": "Overall survival (OS) calculated from the first ICI dose.",
+      "population": "21,108 adults with any malignancy who received PD-1, PD-L1, or CTLA-4 inhibitors between January 2014 and December 2024."
+    },
+    "subgroup_findings_by_tumor_type": {
+      "breast_cancer": "Post-only HR 1.24 (95% CI, 1.01-1.54); significant.",
+      "head_and_neck": "Post-only HR 1.46 (95% CI, 1.20-1.77); significant.",
+      "lung_cancer": "Post-only HR 1.09 (95% CI, 0.97-1.23); not significant.",
+      "melanoma": "Post-only HR 1.07 (95% CI, 0.85-1.34); not significant.",
+      "renal_cell_carcinoma": "Post-only HR 1.26 (95% CI, 1.03-1.54); significant."
+    }
+  }
+}

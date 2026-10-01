@@ -1,0 +1,301 @@
+{
+  "provisional_scope": {
+    "central_question": "肠道微生物组如何通过特定菌群、代谢产物及免疫调节机制影响实体瘤患者对免疫检查点抑制剂（ICI）的治疗反应，且哪些干预策略具有临床转化潜力？",
+    "cross_chapter_rules": [
+      "在 Ch2 中报告关联时，必须区分观察性研究与干预性研究，避免将相关性解读为因果性。",
+      "在 Ch3 中讨论机制时，需明确区分动物模型证据与人类临床证据，注明种属差异。",
+      "在 Ch4 中分析异质性时，需结合 Ch2 中的瘤种特异性数据，避免过度泛化单一菌属的作用。",
+      "在 Ch5 中评估干预措施时，需引用 Ch6 中提到的安全性与标准化挑战，平衡疗效与风险。",
+      "所有章节引用 P0577、P0578、P0583 等试验数据时，需明确其试验分期（I/II 期），不得暗示为确证性 III 期结果。"
+    ],
+    "directed_reads": [
+      {
+        "chapter_ids": [
+          "Ch3_Mechanisms"
+        ],
+        "knowledge_gap": "肌苷调节 ICI 疗效的具体分子机制及人体验证数据。",
+        "paper_id": "CorpusId:252309032",
+        "questions": "肌苷是直接作用于肿瘤细胞还是免疫细胞？其具体分子靶点（如 UBA6）在人体肿瘤中的表达情况如何？",
+        "reason": "该论文提供了肌苷通过抑制 UBA6 增强免疫原性的关键机制，是 Ch3 的核心素材。",
+        "required_outputs": "机制路径图、靶点蛋白名称、人体数据关联性强度。"
+      },
+      {
+        "chapter_ids": [
+          "Ch2_Clinical",
+          "Ch4_Context"
+        ],
+        "knowledge_gap": "治疗方案特异性对微生物组 - 疗效关联的修饰作用。",
+        "paper_id": "8016df1aa5a8160b7ccd412fa6851a6a508e2731",
+        "questions": "在不同免疫检查点抑制剂组合方案（PD-1 单药 vs. PD-1+CTLA-4）下，微生物关联特征有何差异？",
+        "reason": "该研究基于 III 期试验（JCOG2007）的附属分析，提供高质量临床证据，适合 Ch2 和 Ch4。",
+        "required_outputs": "不同方案下显著菌属对比表、风险比数据。"
+      }
+    ],
+    "grouped_screening_notes": [
+      {
+        "category": "纳入",
+        "examples": [
+          "P0014",
+          "P0092",
+          "P0582",
+          "P0585"
+        ],
+        "reason": "直接研究实体瘤 ICI 治疗中肠道微生物组与疗效/机制的关联。"
+      },
+      {
+        "category": "纳入（背景/对比）",
+        "examples": [
+          "P0001",
+          "P0346",
+          "P0501"
+        ],
+        "reason": "提供微生物组一般机制、非 ICI 免疫疗法对比或方法学背景。"
+      },
+      {
+        "category": "排除",
+        "examples": [
+          "P0272",
+          "P0404",
+          "P0531"
+        ],
+        "reason": "仅关注血液肿瘤、非免疫治疗、纯毒性无疗效数据或纯方法学无生物学洞察。"
+      },
+      {
+        "category": "谨慎使用",
+        "examples": [
+          "P0578",
+          "P0580",
+          "P0581"
+        ],
+        "reason": "动物模型为主、样本量极小或结果存在显著冲突，需注明局限性。"
+      }
+    ],
+    "manuscript_parts_plan": {
+      "abstract": {
+        "boundary": [
+          "仅限实体瘤",
+          "仅限 ICI 疗法",
+          "包含人类及临床前证据"
+        ],
+        "finalize_from": [
+          "provisional_scope",
+          "material_theme_inventory"
+        ],
+        "focus": [
+          "微生物组 -ICI 临床关联",
+          "代谢物介导机制",
+          "干预性试验结果"
+        ],
+        "placement": {
+          "anchor": "manuscript_start",
+          "mode": "standalone"
+        },
+        "purpose": "提供关于微生物组在 ICI 疗效中作用、关键机制及临床转化状态的简明总结。"
+      },
+      "conclusion": {
+        "boundary": [
+          "无新原始数据",
+          "基于综合材料",
+          "不夸大未证实疗法"
+        ],
+        "finalize_from": [
+          "provisional_outline",
+          "supplement_requests"
+        ],
+        "focus": [
+          "证据总结",
+          "临床转化障碍",
+          "研究优先级建议"
+        ],
+        "placement": {
+          "anchor": "manuscript_end",
+          "mode": "standalone"
+        },
+        "purpose": "综合证据强度，指出关键知识缺口（如 III 期 RCT、代谢物定量），提出标准化与未来研究优先事项。"
+      },
+      "context": "本综述面向肿瘤学家、免疫学家及转化医学研究人员，旨在系统评估肠道微生物组调节实体瘤免疫检查点抑制剂疗效的临床证据与生物学机制。综述将区分观察性关联与因果证据，强调肿瘤类型特异性及干预策略的转化现状，为未来精准免疫治疗提供理论依据与研究方向。",
+      "introduction": {
+        "boundary": [
+          "排除血液系统恶性肿瘤",
+          "聚焦肠道微生物组",
+          "不预设单一因果机制"
+        ],
+        "finalize_from": [
+          "central_question",
+          "provisional_outline"
+        ],
+        "focus": [
+          "ICI 治疗局限性",
+          "微生物组调节 rationale",
+          "综述结构概览"
+        ],
+        "placement": {
+          "anchor": "after_abstract",
+          "mode": "standalone"
+        },
+        "purpose": "建立 ICI 耐药性的临床问题背景，引入微生物组作为可调节因子的理论依据，明确综述范围与核心论点。"
+      }
+    },
+    "material_theme_inventory": [
+      {
+        "description": "特定菌属（如 Akkermansia, Bifidobacterium, Faecalibacterium）与 ICI 疗效正相关；抗生素暴露与疗效负相关；不同瘤种间存在异质性。",
+        "key_sources": [
+          "P0014",
+          "P0033",
+          "P0092",
+          "P0298",
+          "P0543",
+          "P0585"
+        ],
+        "theme": "临床关联证据"
+      },
+      {
+        "description": "微生物代谢物（SCFAs、肌苷、色氨酸衍生物）通过调节树突状细胞成熟、CD8+ T 细胞活化及免疫检查点表达发挥作用；抗原模拟假说。",
+        "key_sources": [
+          "P0009",
+          "P0114",
+          "P0196",
+          "P0447",
+          "P0503",
+          "P0582"
+        ],
+        "theme": "介导机制"
+      },
+      {
+        "description": "粪菌移植（FMT）在部分瘤种中显示逆转耐药潜力，但结果不一；益生菌/益生元/饮食干预处于早期探索阶段；缺乏标准化方案。",
+        "key_sources": [
+          "P0029",
+          "P0178",
+          "P0577",
+          "P0578",
+          "P0583"
+        ],
+        "theme": "干预策略"
+      },
+      {
+        "description": "肿瘤类型、ICI 方案（单药 vs 联合）、抗生素使用时机、宿主饮食及遗传背景显著影响微生物组效应。",
+        "key_sources": [
+          "P0002",
+          "P0398",
+          "P0489",
+          "P0575",
+          "P0585"
+        ],
+        "theme": "情境调节因素"
+      },
+      {
+        "description": "缺乏大规模 III 期 RCT 验证；代谢物定量数据不足；因果推断困难；供体筛选与安全性问题。",
+        "key_sources": [
+          "P0001",
+          "P0354",
+          "P0501",
+          "P0574"
+        ],
+        "theme": "方法学与挑战"
+      }
+    ],
+    "provisional_outline": {
+      "chapters": [
+        {
+          "chapter_id": "Ch1_Intro",
+          "purpose": "确立 ICI 疗效异质性的临床背景，引出肠道微生物组作为关键调节因子的理论依据。",
+          "question": "为何需要关注肠道微生物组在 ICI 疗效中的作用？",
+          "title": "引言：实体瘤免疫治疗的瓶颈与微生物组视角"
+        },
+        {
+          "chapter_id": "Ch2_Clinical",
+          "purpose": "综合不同实体瘤中微生物特征（多样性、特定菌属）与临床结局（生存、响应）的关联数据。",
+          "question": "哪些微生物特征 consistently 预测 ICI 疗效？",
+          "title": "肠道微生物组与 ICI 疗效的临床关联证据"
+        },
+        {
+          "chapter_id": "Ch3_Mechanisms",
+          "purpose": "解析代谢物、免疫细胞互作及抗原模拟等具体生物学路径。",
+          "question": "微生物组通过哪些具体机制介导 ICI 疗效？",
+          "title": "微生物调节免疫治疗的分子与细胞机制"
+        },
+        {
+          "chapter_id": "Ch4_Context",
+          "purpose": "讨论肿瘤类型、治疗方案、抗生素时机及宿主因素对微生物 - 免疫互作的修饰作用。",
+          "question": "为何微生物组效应在不同研究间存在异质性？",
+          "title": "影响微生物组效应的情境因素"
+        },
+        {
+          "chapter_id": "Ch5_Interventions",
+          "purpose": "评估 FMT、益生菌、饮食等干预手段的安全性、有效性及试验进展。",
+          "question": "目前有哪些微生物组干预手段可用于增强 ICI 疗效？",
+          "title": "微生物组干预策略的临床转化现状"
+        },
+        {
+          "chapter_id": "Ch6_Challenges",
+          "purpose": "指出当前证据局限（如缺乏 III 期 RCT、代谢物定量不足），提出标准化与精准医疗建议。",
+          "question": "实现微生物组导向的精准免疫治疗面临哪些障碍？",
+          "title": "方法学挑战与未来研究方向"
+        },
+        {
+          "chapter_id": "Ch7_Conclusion",
+          "purpose": "总结核心发现，强调因果验证与临床转化的必要性。",
+          "question": "肠道微生物组在 ICI 治疗中的最终临床定位是什么？",
+          "title": "结论"
+        }
+      ]
+    },
+    "provisional_scope": "本综述涵盖实体瘤（如黑色素瘤、非小细胞肺癌、肾细胞癌、结直肠癌等）患者接受免疫检查点抑制剂（PD-1/PD-L1、CTLA-4 抑制剂）治疗的情境。重点分析肠道微生物组组成（分类学）、功能（代谢通路）及特定代谢产物（如短链脂肪酸、肌苷、胆汁酸）与 ICI 疗效（ORR、PFS、OS）及毒性（irAEs）的关联。纳入临床观察性研究、干预性试验（FMT、益生菌、饮食）及机制研究（动物模型、体外实验）。排除血液系统恶性肿瘤、非 ICI 免疫疗法（如 CAR-T，除非作为对比背景）及纯方法学论文。",
+    "review_title": "肠道微生物组调节实体瘤免疫检查点抑制剂疗效的机制与临床转化：系统综述",
+    "supplement_requests": [
+      {
+        "chapter_ids": [
+          "Ch5_Interventions",
+          "Ch6_Challenges"
+        ],
+        "gap_id": "large_scale_rct_results",
+        "gap_question": "是否存在已完成的、大规模随机对照 III 期试验证实微生物组干预在 ICI 治疗患者中的疗效？",
+        "intended_use": "clinical_evidence",
+        "known_papers": [
+          {
+            "paper_id": "20c143d5373eab0bfea2067cf66b0e260dfeb1ef"
+          },
+          {
+            "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27"
+          },
+          {
+            "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a"
+          }
+        ],
+        "optional reuse_plan_facet_ids": [
+          "F1"
+        ],
+        "reviewed_references": [
+          "P0584"
+        ],
+        "success_criteria": "识别出已完成的 III 期 RCT 及其主要结局数据。",
+        "targeted_queries": "phase III randomized controlled trial fecal microbiota transplantation immune checkpoint inhibitor cancer"
+      },
+      {
+        "chapter_ids": [
+          "Ch3_Mechanisms"
+        ],
+        "gap_id": "specific_metabolite_quantification",
+        "gap_question": "人体肿瘤微环境或血清中关键代谢物（如肌苷、短链脂肪酸）的具体生理浓度是多少，且是否与 ICI 响应直接相关？",
+        "intended_use": "mechanism",
+        "known_papers": [
+          {
+            "paper_id": "c5e74d5eebf19335caebc97bdb8300261fcb0ee5"
+          },
+          {
+            "paper_id": "5e59b9ca9a72cc8a626d875743ecc0ce1315af76"
+          },
+          {
+            "paper_id": "CorpusId:252309032"
+          }
+        ],
+        "optional reuse_plan_facet_ids": [
+          "F2"
+        ],
+        "reviewed_references": [],
+        "success_criteria": "提供人类样本中特定代谢物的定量数据及其与临床结局的统计关联。",
+        "targeted_queries": "inosine concentration human tumor microenvironment immune checkpoint inhibitor response"
+      }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "approach": "1. 队列设计：纳入29例晚期NSCLC患者，按PFS分为长/短两组。2. 样本处理：收集基线粪便样本，提取总RNA，去除rRNA。3. 数据分析流程：使用Trinity进行从头组装；Kallisto进行伪比对和丰度估计；MMSeqs2进行序列去冗余和分类学注释；CPAT筛选编码潜力；DESeq2进行差异表达分析。4. 功能与通路分析：通过Prodigal预测基因，HMMER扫描PFAM数据库，Reactome进行通路富集。5. 统计与建模：使用Wilcoxon秩和检验比较组间差异；构建RF、SVM、XGBoost机器学习模型进行内部交叉验证；进行单变量及多变量Cox比例风险回归，结合临床协变量（PD-L1, 化疗史）筛选独立预测因子，并计算综合风险评分。",
+  "contribution_and_limits": [
+    {
+      "contribution": "提供了首个针对NSCLC ICI治疗患者的肠道宏转录组学（MTR）数据，揭示了微生物转录活性与ICI疗效的关联，特别是发现了古菌（Euryarchaeota）和放线菌门在短PFS中的高转录活性，以及大肠杆菌衍生的代谢通路在长PFS中的优势。",
+      "limits": "样本量较小（n=29），仅为单中心回顾性/前瞻性混合队列，缺乏外部验证队列。研究为观察性关联，无法确立因果关系。部分转录本因数据库限制无法获得功能注释。未直接测量免疫细胞浸润或宿主转录组变化。"
+    }
+  ],
+  "key_findings": [
+    {
+      "conditions": "比较长PFS (>6月) 与短PFS (≤6月) NSCLC患者",
+      "finding": "Alpha多样性无显著差异；Beta多样性有生物学分离趋势但PERMANOVA不显著。短PFS患者中放线菌门(36.7% vs 5.4%, p<0.001)和广古菌门(1.3% vs 0.002%, p=0.009)显著富集，厚壁菌门(66.2% vs 42.3%, p=0.007)在长PFS中更高。"
+    },
+    {
+      "conditions": "差异表达基因(DEGs)功能注释",
+      "finding": "短PFS患者中富集DNA合成、缺氧响应和跨损伤合成(TLS)通路；长PFS患者中富集氨基酸结合和羧酸结合等代谢通路。短PFS相关PFAM由多种菌群贡献，长PFS相关PFAM主要由大肠杆菌(E. coli)主导。"
+    },
+    {
+      "conditions": "机器学习预测性能",
+      "finding": "基于120个高显著性DEGs的RNA签名，RF、SVM和XGBoost模型的ROC AUC均大于0.84，能较好区分长/短PFS患者。"
+    },
+    {
+      "conditions": "多变量Cox回归分析",
+      "finding": "在调整PD-L1和化疗史后，鉴定出6个独立预测PFS的关键RNA生物标志物。其中Fusobacterium来源蛋白和Lachnospiraceae来源蛋白与较长PFS正相关，而其他几个未知真核生物或细菌蛋白与较短PFS负相关。组合风险评分AUC为0.89。"
+    }
+  ],
+  "paper_kind": "empirical",
+  "problem_or_question": "探究肠道微生物组的转录活性（而非仅存在或丰度）如何影响NSCLC患者对免疫检查点抑制剂（ICI）的治疗反应和无进展生存期（PFS）。具体而言，是否存在特定的宏转录组学签名可以预测ICI疗效，并揭示潜在的耐药机制。",
+  "research_scope": "研究对象为29名接受免疫检查点抑制剂（ICI）治疗的晚期非小细胞肺癌（NSCLC）患者。研究情境为匈牙利一家肺部医院，样本采集于首次静脉注射ICI前后7天内。范围限定于基于粪便样本的肠道微生物组宏转录组学（MTR）分析，旨在探索微生物RNA特征与患者无进展生存期（PFS）之间的关联。",
+  "work_summary": "本研究针对晚期NSCLC患者在接受ICI治疗后的肠道微生物组进行了从头组装（de novo assembly）的宏转录组学分析。研究将患者根据PFS长短（>6个月 vs ≤6个月）分组，通过RNA测序、 Trinity流水线组装、MMSeqs2分类及DESeq2差异表达分析，识别出区分两组患者的特异性微生物RNA签名。研究发现短PFS患者中放线菌门（Actinomycetota）和广古菌门（Euryarchaeota）显著富集，而长PFS患者中厚壁菌门（Bacillota）更活跃。功能上，短PFS相关基因富集于DNA合成和跨损伤合成通路，长PFS相关基因富集于代谢通路。研究利用随机森林、支持向量机和XGBoost模型验证了该RNA签名的预测能力（AUC > 0.84），并通过多变量Cox回归在调整PD-L1表达和化疗史后，确定了6个关键RNA生物标志物，构建了风险评分模型以预测PFS。"
+}

@@ -1,0 +1,283 @@
+{
+  "provisional_scope": {
+    "central_question": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors (ICIs) in solid tumours, and what specific biological mechanisms mediate this effect?",
+    "cross_chapter_rules": [
+      "Mechanisms discussed in CH03 must be explicitly linked to the clinical outcomes described in CH02 (e.g., link Inosine mechanisms to NSCLC/RCC response data).",
+      "Antibiotic effects in CH04 should distinguish between correlation (observational) and causation (mechanistic/animal models) to avoid overstating clinical guidelines.",
+      "Intervention data in CH05 must clearly state trial phase (I/II vs III) and control arm status to accurately reflect evidence strength.",
+      "Heterogeneity issues in CH06 should reference specific examples from CH02 (e.g., conflicting Bacteroides data) to illustrate reproducibility challenges."
+    ],
+    "directed_reads": [
+      {
+        "chapter_ids": [
+          "CH05"
+        ],
+        "knowledge_gap": "Need to accurately represent the efficacy and safety profile of FMT in the context of different ICI regimens (monotherapy vs dual).",
+        "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a",
+        "questions": "What were the specific objective response rates (ORR) for NSCLC and Melanoma cohorts? What was the nature of the toxicity signal in the Melanoma arm (dual ICI)?",
+        "reason": "Key Phase II trial data critical for assessing clinical feasibility and safety risks.",
+        "required_outputs": "Extract ORR, PFS, OS data; detail safety findings (Grade 3+ AEs); note donor selection criteria."
+      },
+      {
+        "chapter_ids": [
+          "CH03"
+        ],
+        "knowledge_gap": "Need to clarify the direct tumour-cell intrinsic mechanism vs immune-mediated mechanism and the availability of human concentration data.",
+        "paper_id": "CorpusId:252309032",
+        "questions": "What is the specific molecular target of Inosine in tumour cells (UBA6)? Does the study provide human plasma concentration data linked to survival?",
+        "reason": "Primary source for the Inosine-UBA6 mechanism, a key example of metabolite-mediated modulation.",
+        "required_outputs": "Extract mechanism details (UBA6 inhibition); note human cohort survival data linked to Inosine levels; clarify if concentrations were measured."
+      },
+      {
+        "chapter_ids": [
+          "CH04"
+        ],
+        "knowledge_gap": "Need to quantify the timing-specific impact of antibiotics on survival to inform clinical stewardship recommendations.",
+        "paper_id": "82ebda249f3476e1948f523a9219bd678f5165c3",
+        "questions": "What is the specific hazard ratio (HR) for post-ICI antibiotic exposure vs pre-ICI exposure? Which tumour types showed significant susceptibility?",
+        "reason": "Large-scale retrospective data providing critical evidence on the timing of antibiotic exposure.",
+        "required_outputs": "Extract HRs for different exposure windows; list tumour subgroups with significant findings; note limitations (retrospective, no microbiome data)."
+      },
+      {
+        "chapter_ids": [
+          "CH02",
+          "CH06"
+        ],
+        "knowledge_gap": "Need to understand the relative utility of different sampling sites and the extent of methodological noise in the field.",
+        "paper_id": "f9ac47c0add070f4c39ec8ed763518f941ddf164",
+        "questions": "How does the predictive value of oral microbiome compare to gut microbiome in NSCLC? What specific methodological heterogeneities are highlighted?",
+        "reason": "Recent review summarizing NSCLC-specific evidence and methodological challenges.",
+        "required_outputs": "Compare oral vs gut predictive performance; list specific sources of heterogeneity (sequencing, confounders)."
+      },
+      {
+        "chapter_ids": [
+          "CH04"
+        ],
+        "knowledge_gap": "Need to synthesize evidence on whether specific antibiotic classes are more detrimental than others.",
+        "paper_id": "CorpusId:286786239",
+        "questions": "What is the consensus on antibiotic class-specific effects? What is the strength of evidence for pre-treatment vs concurrent exposure?",
+        "reason": "Comprehensive review of antibiotic impact, crucial for the 'External Modulators' chapter.",
+        "required_outputs": "Summarize findings on antibiotic classes; compare pre-treatment vs concurrent exposure effects; note confounding factors."
+      }
+    ],
+    "grouped_screening_notes": [
+      {
+        "description": "Studies focusing exclusively on haematological malignancies (e.g., Leukemia, Lymphoma) without solid tumour comparison arms were excluded, as the review scope is solid tumours.",
+        "example_handles": [
+          "P0272",
+          "P0448",
+          "P0539"
+        ],
+        "reason": "Irrelevant Population"
+      },
+      {
+        "description": "Papers discussing microbiome effects on chemotherapy, radiotherapy, or targeted therapy alone, without ICI combination or comparison, were excluded unless they provided essential mechanistic background on immune priming relevant to ICI.",
+        "example_handles": [
+          "P0012",
+          "P0283",
+          "P0441"
+        ],
+        "reason": "Irrelevant Intervention/Exposure"
+      },
+      {
+        "description": "Broad narrative reviews or editorials that reiterate general microbiome-immune concepts without providing specific taxa, metabolites, or pathways relevant to ICI efficacy were deprioritized for mechanism chapters.",
+        "example_handles": [
+          "P0005",
+          "P0031",
+          "P0350"
+        ],
+        "reason": "Insufficient Mechanistic Detail"
+      },
+      {
+        "description": "Multiple publications from the same clinical trial cohort (e.g., FMT-LUMINate, MIMic) were consolidated to avoid double-counting evidence, prioritizing the most recent or comprehensive report.",
+        "example_handles": [
+          "P0577",
+          "P0583"
+        ],
+        "reason": "Duplicate/Overlapping Data"
+      }
+    ],
+    "material_theme_inventory": [
+      {
+        "description": "Specific bacterial taxa associated with improved ICI outcomes (e.g., Akkermansia muciniphila, Bifidobacterium spp., Faecalibacterium prausnitzii, Ruminococcaceae) versus those associated with resistance or toxicity (e.g., certain Bacteroides, Prevotella in specific contexts).",
+        "key_sources": [
+          "P0014",
+          "P0033",
+          "P0049",
+          "P0298",
+          "P0394",
+          "P0565"
+        ],
+        "theme": "Taxonomic Signatures of Response"
+      },
+      {
+        "description": "The role of gut-derived metabolites (SCFAs like butyrate, Inosine, Bile Acids, Tryptophan derivatives, TMAO) in directly modulating tumour microenvironment (TME) immunity, T-cell function, and antigen presentation.",
+        "key_sources": [
+          "P0075",
+          "P0092",
+          "P0369",
+          "P0476",
+          "P0515",
+          "P0559",
+          "P0582"
+        ],
+        "theme": "Microbial Metabolites as Mediators"
+      },
+      {
+        "description": "Impact of concomitant medications (antibiotics, PPIs, corticosteroids) and host factors (diet, geography, genetics) on microbiome composition and ICI efficacy. Emphasis on antibiotic timing and spectrum.",
+        "key_sources": [
+          "P0007",
+          "P0052",
+          "P0339",
+          "P0402",
+          "P0547",
+          "P0575",
+          "P0576"
+        ],
+        "theme": "Clinical Modulators and Confounders"
+      },
+      {
+        "description": "Clinical evidence for microbiome modulation strategies including Faecal Microbiota Transplantation (FMT), defined bacterial consortia, probiotics, and dietary interventions to overcome ICI resistance.",
+        "key_sources": [
+          "P0029",
+          "P0178",
+          "P0355",
+          "P0543",
+          "P0573",
+          "P0577",
+          "P0583"
+        ],
+        "theme": "Therapeutic Interventions"
+      },
+      {
+        "description": "Biological mechanisms linking microbiome to ICI efficacy: dendritic cell maturation, CD8+ T-cell priming/infiltration, barrier integrity, molecular mimicry, and modulation of immune checkpoints (e.g., PD-L2).",
+        "key_sources": [
+          "P0042",
+          "P0114",
+          "P0251",
+          "P0303",
+          "P0464",
+          "P0555",
+          "P0572"
+        ],
+        "theme": "Mechanistic Pathways"
+      },
+      {
+        "description": "Challenges in reproducibility due to methodological differences (sequencing, analysis), cohort variability (diet, geography), and lack of universal biomarkers.",
+        "key_sources": [
+          "P0001",
+          "P0290",
+          "P0478",
+          "P0501",
+          "P0534",
+          "P0566"
+        ],
+        "theme": "Heterogeneity and Standardization"
+      }
+    ],
+    "provisional_outline": [
+      {
+        "chapter_id": "CH01",
+        "purpose": "Establish the clinical need (ICI resistance/toxicity), define the gut microbiome's role as a systemic immune modulator, and outline the review's scope and central thesis.",
+        "question": "Why is the gut microbiome considered a critical determinant of ICI efficacy in solid tumours?",
+        "title": "Introduction: The Microbiome-Immune Checkpoint Axis"
+      },
+      {
+        "chapter_id": "CH02",
+        "purpose": "Synthesize observational data linking specific taxa, diversity, and microbial dynamics to clinical endpoints (ORR, PFS, OS) across major solid tumour types (Melanoma, NSCLC, RCC, CRC).",
+        "question": "Which microbial features consistently predict response or resistance to ICIs across different solid tumours?",
+        "title": "Clinical Evidence: Microbiome Signatures and ICI Outcomes"
+      },
+      {
+        "chapter_id": "CH03",
+        "purpose": "Detail the biological pathways through which the microbiome influences anti-tumour immunity, focusing on metabolites (SCFAs, Inosine), immune cell subsets (DCs, T-cells), and barrier function.",
+        "question": "What are the specific molecular and cellular mechanisms by which gut microbes modulate ICI efficacy?",
+        "title": "Mechanistic Mediators: From Metabolites to Immune Cells"
+      },
+      {
+        "chapter_id": "CH04",
+        "purpose": "Evaluate the impact of concomitant medications (especially antibiotics and PPIs) and lifestyle factors (diet, geography) on the microbiome-ICI relationship.",
+        "question": "How do external factors and host characteristics alter the microbiome's ability to modulate ICI efficacy?",
+        "title": "External Modulators: Antibiotics, Diet, and Host Factors"
+      },
+      {
+        "chapter_id": "CH05",
+        "purpose": "Review clinical trial data (Phase I/II/III) on microbiome-targeted interventions (FMT, consortia, probiotics) to enhance ICI response or manage toxicity.",
+        "question": "Can microbiome modulation reliably improve ICI outcomes in clinical practice, and what are the current barriers?",
+        "title": "Therapeutic Interventions: FMT, Probiotics, and Beyond"
+      },
+      {
+        "chapter_id": "CH06",
+        "purpose": "Critically assess methodological heterogeneity, the lack of Phase III confirmation, safety concerns, and propose a roadmap for personalized microbiome-based oncology.",
+        "question": "What are the major hurdles to translating microbiome research into standard oncology care, and how can they be overcome?",
+        "title": "Challenges, Standardization, and Future Directions"
+      }
+    ],
+    "provisional_scope": "This review focuses on the role of the gut microbiome (bacteria, metabolites) in modulating the clinical efficacy (ORR, PFS, OS) of immune checkpoint inhibitors (anti-PD-1/PD-L1, anti-CTLA-4) in adult patients with solid tumours (e.g., melanoma, NSCLC, RCC, CRC). It encompasses observational clinical evidence, mechanistic pathways (immunological, metabolic), and therapeutic interventions (FMT, probiotics, diet). It excludes haematological malignancies unless used for mechanistic comparison, and excludes non-ICI immunotherapies (e.g., CAR-T) unless directly relevant to microbiome-mediated immune priming. The review will critically evaluate the heterogeneity of findings across cancer types and geographical cohorts, and assess the current status of clinical translation (Phase I/II vs Phase III).",
+    "review_title": "Gut Microbiome Modulation of Immune Checkpoint Inhibitor Efficacy in Solid Tumours: Mechanisms, Clinical Evidence, and Therapeutic Potential",
+    "supplement_requests": [
+      {
+        "chapter_ids": [
+          "CH05",
+          "CH06"
+        ],
+        "gap_id": "gap_phase3_rct_status",
+        "gap_question": "Are there any completed and published Phase III randomized controlled trials of microbiome interventions (FMT, probiotics) in ICI-treated solid tumour patients?",
+        "intended_use": "clinical_effect",
+        "known_papers": [
+          {
+            "paper_id": "20c143d5373eab0bfea2067cf66b0e260dfeb1ef"
+          },
+          {
+            "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a"
+          }
+        ],
+        "optional_reuse_plan_facet_ids": [
+          "F1"
+        ],
+        "reviewed_references": [],
+        "success_criteria": "Confirmation of completion status and primary outcome data (PFS/OS) for specific Phase III trials (e.g., CanBiome2, TACITO).",
+        "targeted_queries": "phase III randomized controlled trial fecal microbiota transplantation immune checkpoint inhibitor solid tumor results"
+      },
+      {
+        "chapter_ids": [
+          "CH03"
+        ],
+        "gap_id": "gap_human_tme_metabolites",
+        "gap_question": "What are the measured physiological concentrations of key microbial metabolites (e.g., Inosine, Butyrate) in human tumour microenvironments or paired serum, and do they correlate with ICI response?",
+        "intended_use": "mechanism",
+        "known_papers": [
+          {
+            "paper_id": "CorpusId:252309032"
+          }
+        ],
+        "optional_reuse_plan_facet_ids": [
+          "F2"
+        ],
+        "reviewed_references": [],
+        "success_criteria": "Quantitative data (e.g., μM, ng/mL) from human cohorts linking specific metabolite levels to ICI outcomes.",
+        "targeted_queries": "human tumor microenvironment metabolite concentration inosine butyrate immune checkpoint inhibitor response"
+      },
+      {
+        "chapter_ids": [
+          "CH06"
+        ],
+        "gap_id": "gap_standardization_protocols",
+        "gap_question": "Are there consensus guidelines or standardized protocols for microbiome sampling, sequencing, and analysis in oncology trials?",
+        "intended_use": "study_design",
+        "known_papers": [
+          {
+            "paper_id": "e145edb862970298294c1300bdf6cf909db2dc89"
+          },
+          {
+            "paper_id": "ee8eab6a2dc467e53087607197bbc6701429b8ae"
+          }
+        ],
+        "optional_reuse_plan_facet_ids": [],
+        "reviewed_references": [],
+        "success_criteria": "Identification of published consensus statements or methodological guidelines from major oncology/microbiome consortia.",
+        "targeted_queries": "consensus guidelines microbiome sampling sequencing analysis oncology trials standardization"
+      }
+    ]
+  }
+}

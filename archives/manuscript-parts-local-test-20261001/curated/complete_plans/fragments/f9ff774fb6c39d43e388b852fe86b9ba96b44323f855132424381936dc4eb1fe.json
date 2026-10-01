@@ -1,0 +1,31 @@
+{
+  "approach": "采用前瞻性观察性研究设计。纳入标准明确，排除近期抗生素/免疫缺陷等干扰因素。样本采集为首次ICI输注前的基线唾液。实验流程包括DNA提取、V1-V3区16S rRNA扩增子测序。数据分析路线：1) 质控与OTU聚类；2) Alpha/Beta多样性比较（Shannon指数, PCoA, PERMANOVA）；3) 差异丰度分析（LEfSe, Mann-Whitney/Kruskal-Wallis检验+FDR校正）；4) 生存分析（Kaplan-Meier, Log-rank检验）；5) 变量筛选与多变量模型构建（LASSO惩罚Cox回归）；6) 内部稳健性验证（1000次Bootstrap重采样）。阈值设定采用数据驱动的ROC分析（Youden指数）。",
+  "contribution_and_limits": [
+    {
+      "contribution": "在NSCLC ICI治疗背景下，首次系统性地识别出唾液Actinomyces丰度与较差预后的独立关联，提供了区别于肠道微生物组的潜在非侵入性生物标志物线索。",
+      "limits": "单中心、小样本（n=70，事件数有限）、回顾性定义阈值导致的过拟合风险（尽管有LASSO和Bootstrap缓解）、缺乏口腔健康状况详细数据（如牙周病、口腔卫生行为）作为混杂因素控制、无法确立因果关系且特异性较低（敏感性高但特异性仅0.44）。"
+    }
+  ],
+  "key_findings": [
+    {
+      "conditions": "70例NSCLC患者，ICI单药治疗，基线唾液测序",
+      "finding": "响应者（PFS≥12个月，n=18）与非响应者（n=52）之间α多样性和β多样性无统计学差异。"
+    },
+    {
+      "conditions": "差异丰度分析（LEfSe及单因素检验）",
+      "finding": "非响应者中放线菌门及其下级分类单元（纲、目、科、属）均显著富集。属水平上，Actinomyces在非响应者中显著更高（p=0.001, FDR≤0.049）。种水平Actinomyces graevenitzii差异未通过FDR校正。"
+    },
+    {
+      "conditions": "基于ROC分析的阈值分层（>11% vs ≤11%）",
+      "finding": "Actinomyces相对丰度>11%的患者中位PFS为3个月，≤11%组为4个月；中位OS分别为5个月和9个月。"
+    },
+    {
+      "conditions": "多变量Cox回归调整ECOG、治疗线数、药物使用、吸烟、组织学及转移部位后",
+      "finding": "Actinomyces >11%独立关联较短PFS（HR=2.16, 95% CI 1.21–3.88, p=0.009）和OS（HR=2.61, 95% CI 1.48–4.61, p<0.001）。Bootstrap验证显示模型稳定（PFS HR中位数2.56, OS HR中位数2.63）。"
+    }
+  ],
+  "paper_kind": "empirical",
+  "problem_or_question": "尽管肠道微生物组已被证实影响ICI疗效，但唾液微生物组在NSCLC中的预测价值尚不明确。鉴于口腔与肺部的解剖学联系及唾液的易获取性，研究试图回答：基线唾液微生物组成能否预测晚期NSCLC患者对ICI单药治疗的反应及生存结局？",
+  "research_scope": "意大利单中心前瞻性队列，70例IV期非小细胞肺癌（NSCLC）患者，接受抗PD-1/PD-L1免疫检查点抑制剂（ICI）单药治疗。研究聚焦于治疗前基线唾液微生物组与临床预后（无进展生存期PFS、总生存期OS及治疗反应）的关联。",
+  "work_summary": "本研究旨在探索唾液微生物组作为NSCLC患者ICI疗效预测生物标志物的潜力。通过对70名患者的基线唾液进行16S rRNA基因测序，分析发现响应者与非响应者在整体微生物多样性上无显著差异，但非响应者中放线菌门（Actinobacteria），特别是放线菌属（Actinomyces）呈现显著富集。通过ROC分析确定了一个探索性的门限值（相对丰度11%），高丰度组患者的PFS和OS显著短于低丰度组。多变量Cox回归校正了ECOG评分、治疗线数、类固醇/阿片类药物使用等混杂因素后，高Actinomyces丰度仍独立预示较差预后。作者结合文献讨论了可能的免疫抑制机制，并强调该发现目前仅为假设生成性，需更大规模独立队列验证。"
+}

@@ -1,0 +1,31 @@
+{
+  "approach": "采用多队列荟萃分析结合体内验证的设计路线。首先，从NCBI/ENA收集8个队列的粪便宏基因组数据，进行标准化质控、去宿主序列及真菌分类学注释。其次，使用MMUPHin校正批次效应，通过Logistic回归和Cox回归筛选与客观缓解率（ORR）、无进展生存期（PFS）及总生存期（OS）相关的真菌物种，并进行Meta分析以识别跨队列一致性的标志物。同时，构建细菌-真菌共现网络分析互作模式，并利用PAM算法定义真菌肠型。最后，在B16F10黑色素瘤小鼠模型中，通过灌胃Debaryomyces hansenii并联合PD-1单抗治疗，观察肿瘤生长、CD8+ T细胞浸润及免疫因子表达，以验证关键真菌的功能性作用。",
+  "contribution_and_limits": [
+    {
+      "contribution": "提供了首个针对多种实体瘤的大规模多队列肠道真菌与ICI疗效关联的证据，识别出具有预测价值的真菌物种（如A. avenaceus, D. hansenii）和肠型。",
+      "limits": "多数样本来自欧洲，地理局限性可能导致外推偏差；部分队列（如NSCLC）样本量小或响应率低，结果需谨慎解读；真菌DNA提取困难导致低丰度信号可能存在技术噪声；体内实验仅验证单一菌种，未阐明完整分子机制。"
+    }
+  ],
+  "key_findings": [
+    {
+      "conditions": "黑色素瘤队列",
+      "finding": "Rhizophagus irregularis高丰度与较差疗效相关；Aspergillus avenaceus高丰度与较好疗效相关；Asper_high肠型比例较高且预后较好；Debaryomyces hansenii高丰度抑制疗效。"
+    },
+    {
+      "conditions": "NSCLC队列",
+      "finding": "Aspergillus pseudonomiae高丰度与良好预后相关；Saccharomyces cerevisiae高丰度与疗效受损相关；Sacc_type肠型在部分指标上显示优势。"
+    },
+    {
+      "conditions": "微生物互作分析",
+      "finding": "黑色素瘤响应者中细菌-真菌互作网络更复杂且正相关性更强；NSCLC中趋势相反，可能受样本量和测序深度影响。"
+    },
+    {
+      "conditions": "小鼠体内验证",
+      "finding": "灌胃Debaryomyces hansenii显著促进肿瘤生长，削弱PD-1单抗疗效，伴随肿瘤组织中CD8+ T细胞比例下降及CCL5/CXCL10/PD-L1表达降低。"
+    }
+  ],
+  "paper_kind": "empirical",
+  "problem_or_question": "既往研究多聚焦于肠道细菌，而肠道真菌在ICIs疗效中的作用尚不明确。本研究试图回答：哪些特定的肠道真菌物种或群落结构与ICIs疗效相关？真菌与细菌的相互作用如何影响治疗反应？是否存在可验证的因果机制？",
+  "research_scope": "研究对象为接受免疫检查点抑制剂（ICIs）治疗的黑色素瘤、非小细胞肺癌（NSCLC）和肾细胞癌（RCC）患者。研究范围涵盖8个队列的976例粪便宏基因组数据，以及小鼠体内验证实验。",
+  "work_summary": "本研究旨在探究肠道真菌对ICIs疗效的影响。通过整合8个队列的宏基因组测序数据，识别与ICI疗效相关的真菌标志物及真菌肠型。研究发现特定真菌丰度与疗效相关，且响应者中细菌-真菌互作更强。进一步通过小鼠模型验证了Debaryomyces hansenii通过减少CD8+ T细胞浸润降低PD-1单抗疗效的机制。"
+}

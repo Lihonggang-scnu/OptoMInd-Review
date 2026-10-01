@@ -1,0 +1,33 @@
+{
+  "allowed_use": [
+    "background_context",
+    "explicit_objectives",
+    "explicit_method_summaries",
+    "explicit_reported_findings",
+    "explicit_leads"
+  ],
+  "chapter_id": "",
+  "conditions": [],
+  "decision": "external_research",
+  "external_ask": "请检索关于‘antibiotic class’或‘beta-lactam vs fluoroquinolone’与‘immune checkpoint inhibitor efficacy’或‘gut microbiome dysbiosis’关系的研究。特别寻找那些在统计模型中调整了抗生素类型，或直接比较不同类别抗生素对ICI响应率、生存期影响的队列研究或回顾性分析。",
+  "intended_use": "mechanism",
+  "limits": [
+    "需要找到直接比较不同类别抗生素（特别是β-内酰胺类 vs 氟喹诺酮类或其他常见类别）对ICI疗效影响的研究数据。当前材料仅提供了广谱抗生素的整体效应或基于给药途径/排泄方式的间接分层，未提供按抗菌谱或化学结构分类的比较结果。"
+  ],
+  "need_id": "N7eb23dd88ca5",
+  "provenance": {
+    "downloads": 0,
+    "model_calls": 1,
+    "source": "judge",
+    "whole_paper_rereads": 0
+  },
+  "question": "不同类别抗生素（如β-内酰胺类 vs 氟喹诺酮类）对 ICI 疗效的负面影响是否存在显著差异，是否有特定类别相对安全？",
+  "read_focus": "检索是否有研究将抗生素按类别（如β-内酰胺、氟喹诺酮、碳青霉烯等）进行分层分析，并报告各类别对ICI疗效（OS, PFS, ORR）的不同影响。重点关注多变量分析中是否包含抗生素类别作为协变量，或是否有亚组分析比较不同类别的效果。",
+  "schema_version": "optomind.planning_writer_material.v1",
+  "sources": {
+    "_archive_fragment": "curated/complete_plans/fragments/7411bd807a60637d6429c867a6874e3b722fafa9228528c417585a1d3d833445.json"
+  },
+  "still_missing": "需要找到直接比较不同类别抗生素（特别是β-内酰胺类 vs 氟喹诺酮类或其他常见类别）对ICI疗效影响的研究数据。当前材料仅提供了广谱抗生素的整体效应或基于给药途径/排泄方式的间接分层，未提供按抗菌谱或化学结构分类的比较结果。",
+  "unit_key": "",
+  "usable_content": "现有材料未能提供不同类别抗生素（如β-内酰胺类与氟喹诺酮类）对ICI疗效影响的具体比较数据，因此无法判断是否存在显著差异或特定类别的安全性。材料主要支持“广谱抗生素”整体对ICI疗效有负面影响的结论，且这种负面影响可能通过诱导肠道菌群失调介导。\n\n具体研究认识如下：\n1. **总体效应与机制假设**：多项研究一致表明，在ICI治疗前使用抗生素（尤其是广谱抗生素）会导致肠道菌群失调，从而削弱ICI的抗肿瘤效果，表现为总生存期（OS）和无进展生存期（PFS）缩短及客观缓解率降低。例如，一项涉及196名患者的前瞻性景观研究显示，ICI治疗前30天内使用抗生素导致anti-PD-1/PD-L1治疗的OS和响应率下降；另一项针对黑色素瘤的研究也报告了类似结果。机制上，肠道微生物群通过激活肠上皮细胞的模式识别受体（PRR），调节先天性和适应性免疫反应，进而影响ICI疗效。\n2. **给药途径与排泄方式的异质性发现**：在一项针对转移性肾细胞癌（mRCC）的大规模真实世界研究中，抗生素暴露与较差的rwOS和rwPFS相关。然而，当按给药途径分层时，发现ICI患者中仅口服（PO）抗生素使用者显示出rwOS的显著负相关（PO: 23.5个月 vs 无抗生素: 33.6个月, P=.012），而静脉注射（IV）组未显示独立显著差异（尽管总体趋势为负）。此外，按排泄方式分析，经肝或经肾排泄的抗生素均与较差的rwOS相关，但差异未达到统计学显著性（P=.086），而在TKI治疗组中则显著相关。这提示抗生素对ICI疗效的影响可能受给药途径或药代动力学特征的影响，但材料未进一步细分抗生素类别。\n3. **使用时长与肿瘤类型的特异性**：在复发性妇科恶性肿瘤的研究中，抗生素使用时长是OS的独立预后因素。ICI前使用抗生素≥14天的患者OS最差，而疾病控制率（DCR）在使用时长分组间无显著差异。这表明长期抗生素使用可能对长期生存获益产生更严重的抑制作用。\n4. **缺乏类别特异性证据**：虽然综述提到主要调查的是β-内酰胺类抗生素，并指出其可能导致菌群失调，但没有提供与其他类别（如氟喹诺酮类、大环内酯类等）的直接头对头比较数据。因此，目前证据不足以区分不同类别抗生素的风险差异，仅能确认广谱抗生素使用前需谨慎评估。\n：no_ABT: rwOS 33.6 months, rwPFS 11.6 months；hepatic: rwOS 25.9 months, rwPFS 8.2 months；renal: rwOS 23.7 months, rwPFS 9.4 months\n：no_ABT: rwOS 33.6 months, rwPFS 11.6 months；IV: rwOS 26.2 months (TKI cohort), rwPFS 9.7 months (TKI cohort)；PO: rwOS 23.5 months, rwPFS 8.8 months\n：no_prior_ABT: DCR 33.3%；<14_days: DCR not significantly different from no prior (p=0.426 vs >=14d group context, but text says DCR did not significantly change regardless of duration)；>=14_days: Worst OS among groups"
+}
