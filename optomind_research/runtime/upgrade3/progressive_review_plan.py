@@ -505,6 +505,7 @@ def qwen_local_token_counter(tokenizer_path: str | Path = DEFAULT_TOKENIZER_PATH
 def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str:
     common = (
         "你是学术综述规划编辑。目标是形成有论证主线的长篇综述，规划内容用中文撰写，论文原题和专名可保留原文；不要写成问答清单。"
+        "\n\n本规划链只规划综述正文中需要实质展开的知识与分析。全篇开场、向读者宣告综述范围与文章组织、摘要，以及收束全文的最终总结，由正文完成后的独立模块负责，不作为本链路的章节或单元任务；也不要将这些职责换名为“背景”“概述”等章节继续规划。理解后续分析所必需的背景、概念、理论教学、机制、方法比较，以及具有具体问题与分析的未来研究方向，仍属于正文，应按解释需要充分展开。每章应有明确的知识问题或分析任务，不能仅以引入全文或总结全文为目的。本链路仍须确定研究范围、组织视角和章节分工，但这些规划信息不等于需要写成一个入口章节。上述职责归属适用于本链路所有阶段。\n\n"
         "章节组织和比较尺度由研究问题、学科语境与现有材料决定，不预设任何单一研究范式为所有主题的共同模板；理论、概念、方法论和设计研究也应按其实际论证结构组织。"
         "以用户研究问题为中心，提出贯穿全文的组织视角和综合判断，再让不同来源承担解释、比较、例证、背景或发展等职责；不要按论文逐篇复述，也不要让某个局部缺口取代全篇主线。综合判断必须由材料中的联系、差异或演进支撑。"
         "根据研究问题和材料本身判断相关性；材料中的推荐语可能夸大用途，应以来源实际的研究对象或材料、研究设置、方法、比较、结果或论证、验证方式和边界为准。"
@@ -590,8 +591,7 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
             "Prepare this chapter's writer-ready plan from the coordinated shared scope and supplied A/B/deep materials. "
             "The chapter object is your only writing assignment. The shared_outline is a map of OTHER chapters as well, "
             "not a list to reproduce as this chapter's units. Keep this chapter within its purpose and scope; briefly signpost "
-            "topics owned by other chapters instead of developing them again. An introduction establishes context, the review's "
-            "problem and organizing perspective; it must not become a miniature full review. Treat the outline as an editorial "
+            "topics owned by other chapters instead of developing them again. Treat the outline as an editorial "
             "assignment, not a factual source: correct factual or terminology mistakes using the supplied A/B and reading material. "
             "Develop the chapter across the supplied collection, not only a few deeply read examples. Organize useful studies "
             "into concrete case and comparison groups attached to the actual content units; identify what each group contributes. "
