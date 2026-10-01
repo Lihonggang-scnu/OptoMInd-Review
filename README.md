@@ -18,7 +18,7 @@
 
 `run_review_harness.py` 保留原有综合入口；升级模块还提供独立 CLI，不能把源码齐全理解成所有新模块已经默认串入综合入口。
 
-新增规划修订路径通过 --planning-revision 显式启用，默认关闭以兼容旧调用。它已经冻结为当前阶段唯一的升级开发基线；旧模式仅作兼容，不是并行候选方案。冻结不代表论文内容零错误，已知边界见 [冻结基线说明](docs/REVIEW_V2_FROZEN_BASELINE.md)。
+新增规划修订路径通过 --planning-revision 显式启用，默认关闭以兼容旧调用。旧模式仅作兼容，不是并行候选方案。历史冻结点见 [冻结基线说明](docs/REVIEW_V2_FROZEN_BASELINE.md)；本地 manuscript-parts 验收中的 BODY 恢复改动见 [正文恢复说明](docs/BODY_RESTORATION_20261001.md)，目前不宣称已完成新一轮内容验收。
 
 ## 本地运行准备
 
@@ -59,8 +59,9 @@ PDF 结构化解析可使用 `deploy/grobid/docker-compose.yml`，默认访问 `
 
 `--planning-revision` 现同时启用轻量 `manuscript_parts_plan` 合同（规划 schema v2）。从已有上游研究 PLAN 与材料池重新规划，使用新的输出目录；旧规划/运行状态不迁移，仍可作为历史对照。
 
-- provisional/level1/案例后的全局协调分别完成职责卡 v0/v1/v2，不增加模型阶段
+- provisional/level1/全局协调分别完成职责卡 v0/v1/v2，不增加模型阶段
 - 一级/二级规划、材料路由、案例、编排和单元写作继续负责深度 BODY；不按 Introduction/Conclusion 标题删任务
+- BODY 恢复成功历史顺序：全局协调→负责人修订→案例扩展直接补入单元→编排→写作；案例用途与真实 A/B、精读和补充材料一起交给下游，不再通过案例后的整章重写删掉未采纳建议
 - 最终职责卡在 `DETAILED_REVIEW_PLAN.json` 顶层，writer packet 通过相对 `planning_result_path` 交给下游
 - 当前首尾执行完整支持 standalone；embedded/distributed 可规划，但自动应用明确返回 unsupported 并阻止发布
 - 下游仍是离线 fixture/recording 接口，未新增真实模型调用入口或自动全文检索

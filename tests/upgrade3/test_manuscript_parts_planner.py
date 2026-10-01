@@ -364,7 +364,7 @@ def test_full_flow_preserves_body_and_embedded_closure(tmp_path):
     assert all(r["chapter_plan"]["units"][0]["paragraph_briefs"] for r in result["chapters"])
     assert all(r["manuscript_parts_boundary"] == result["chapters"][0]["manuscript_parts_boundary"] for r in result["chapters"])
     calls = [s for s, _ in model.calls]
-    assert calls.index("case_groups") < calls.index("whole_plan_improvement")
+    assert calls.index("whole_plan_improvement") < calls.index("case_groups")
     assert calls.count("whole_plan_improvement") == 1
     for stage, payload in model.calls:
         assert payload["planning_revision_mode"] is True
@@ -372,6 +372,129 @@ def test_full_flow_preserves_body_and_embedded_closure(tmp_path):
             assert "manuscript_parts_plan" not in payload
             assert "manuscript_parts_boundary" in payload
     assert "文章级职责规划" in (tmp_path / "out/DETAILED_REVIEW_PLAN.md").read_text()
+
+
+def test_revision_body_adds_case_use_after_owner_revision(tmp_path):
+    class CaseAddingPlanner(OfflinePlanner):
+        def __call__(self, stage, payload):
+            if stage == "case_groups":
+                self.calls.append((stage, copy.deepcopy(payload)))
+                return {"additions": [{
+                    "unit_key": "CH01:1",
+                    "studies": [{
+                        "source_handle": "P0002",
+                        "proposed_use": "作为模型假设与决策条件的具体对照案例。",
+                    }],
+                }]}
+            return super().__call__(stage, payload)
+
+    planner, model = make(tmp_path, CaseAddingPlanner())
+    card_path = tmp_path / "P0002_CARD.json"
+    card_path.write_text(json.dumps({
+        "general_understanding": {"approach": "A material-backed comparison"},
+        "review_planning": {"planning_summary": "B explains the comparison use"},
+    }), encoding="utf-8")
+    with (tmp_path / "pool.jsonl").open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps({
+            "paper_id": "paper2", "title": "Decision caveats",
+            "summary_view": {"finding": "conditional deployment result"},
+            "planning_view": {"planning_summary": "compare deployment caveats"},
+            "card_path": str(card_path),
+        }) + "\n")
+    # The second source is deliberately unassigned in the chapter plan, so
+    # the case append proves that a selected candidate reaches the packet.
+    result = planner.run()
+    calls = [stage for stage, _ in model.calls]
+    assert calls.index("whole_plan_improvement") < calls.index("case_groups")
+    unit = result["chapters"][0]["chapter_plan"]["units"][0]
+    assert unit["supporting_studies"] == [{
+        "source_handle": "P0002",
+        "proposed_use": "作为模型假设与决策条件的具体对照案例。",
+        "contribution": "作为模型假设与决策条件的具体对照案例。",
+        "paper_id": "paper2",
+    }]
+    assert "case_suggestions" not in unit
+    selected = next(item for item in result["chapters"][0]["source_materials"]
+                    if item["source_handle"] == "P0002")
+    assert selected["study_summary_A"]["approach"] == "A material-backed comparison"
+    assert selected["review_planning_B"]["planning_summary"] == "B explains the comparison use"
+
+
+def test_revision_body_direct_append_materializes_unloaded_candidate(tmp_path):
+    card_path = tmp_path / "P0002_CARD.json"
+    card_path.write_text(json.dumps({
+        "general_understanding": {"approach": "A card-backed result"},
+        "review_planning": {"planning_summary": "B card-backed writing use"},
+    }), encoding="utf-8")
+    records = [{
+        "chapter": {"chapter_id": "CH01", "source_ids": []},
+        "chapter_plan": {"units": [{"unit_id": "U01", "supporting_studies": []}]},
+        "source_materials": [],
+    }]
+    out = planning._attach_case_groups(
+        records,
+        {"additions": [{"unit_key": "CH01:1", "studies": [{
+            "source_handle": "P0002", "proposed_use": "Use the card-backed comparison."
+        }]}]},
+        planning_revision=True,
+        body_case_additions=True,
+        candidate_rows=[{
+            "_source_handle": "P0002", "paper_id": "paper2", "title": "Candidate",
+            "summary_view": {"finding": "A result"},
+            "planning_view": {"planning_summary": "B use"},
+            "card_path": str(card_path),
+        }],
+    )
+    unit = out[0]["chapter_plan"]["units"][0]
+    assert unit["supporting_studies"][0]["source_handle"] == "P0002"
+    source = out[0]["source_materials"][0]
+    assert source["study_summary_A"]["approach"] == "A card-backed result"
+    assert source["review_planning_B"]["planning_summary"] == "B card-backed writing use"
+
+
+def test_missing_paragraph_briefs_are_sent_to_existing_owner_revision(tmp_path):
+    class MissingBriefPlanner(OfflinePlanner):
+        def __init__(self):
+            super().__init__()
+            self.revision_payloads = []
+
+        def __call__(self, stage, payload):
+            if stage == "chapter_details":
+                self.calls.append((stage, copy.deepcopy(payload)))
+                return {"chapter_plan": {
+                    "thesis": payload["chapter"]["purpose"],
+                    "reader_objective": "Explain conditional results",
+                    "units": [{
+                        "unit_id": "U01",
+                        "substantive_point": "Posterior validity depends on model assumptions",
+                        "source_handles": ["P0001"],
+                    }],
+                }}
+            if stage == "affected_chapter_revision":
+                self.calls.append((stage, copy.deepcopy(payload)))
+                self.revision_payloads.append(copy.deepcopy(payload))
+                updated = copy.deepcopy(payload["chapter_plan"])
+                for unit in updated["units"]:
+                    unit["paragraph_briefs"] = [{
+                        "point": "State the assumption",
+                        "development": "Relate the assumption to the conditional result",
+                        "source_handles": ["P0001"],
+                    }]
+                return {"status": "updated", "chapter_updates": [{
+                    "chapter_id": payload["chapter_id"], "updated_plan": updated,
+                }]}
+            return super().__call__(stage, payload)
+
+    planner, model = make(tmp_path, MissingBriefPlanner())
+    result = planner.run()
+    revisions = [payload for stage, payload in model.calls if stage == "affected_chapter_revision"]
+    assert {payload["chapter_id"] for payload in revisions} == {"CH01", "CH02"}
+    assert all(any(item.get("issue") == "unit_missing_paragraph_briefs"
+                   for item in payload["chapter_feedback"])
+               for payload in revisions)
+    assert all(unit.get("paragraph_briefs")
+               for packet in result["chapters"]
+               for unit in packet["chapter_plan"]["units"])
 
 
 def test_updated_contract_and_resume_no_new_calls(tmp_path):

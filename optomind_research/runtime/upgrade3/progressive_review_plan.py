@@ -609,7 +609,7 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
         "provisional_scope": (
             "Read every item in candidate_pool. It is the complete B pool, not a sample. Screen all items semantically and "
             "build a source-informed theme inventory from the evidence summaries before drafting the provisional scope. "
-            "材料充分时追求充分覆盖：背景、具体案例、比较与研究发展材料都得到安排（材料池规模见 pool_row_count）；这是覆盖质量目标，不是计数门槛，绝不为数量塞入无关论文，也不因池小而放弃覆盖。 "
+            "材料充分时规划约150篇以上具有明确综述用途的独立文献，充分安排背景、具体案例、比较和研究发展材料；这是质量目标，不是计数门槛，绝不为数量塞入无关论文，也不因池小而放弃覆盖。 "
             "Propose a provisional shared scope, central thesis, chapter outline, cross-chapter boundaries, and concise tool "
             "requests. Do not rely on a small prefix or require a per-paper rejection explanation; grouped non-use reasons are fine. "
             "Return keys: review_title, central_question, provisional_scope, material_theme_inventory, provisional_outline "
@@ -641,9 +641,10 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
             "The L1 outline is an initial direction, not a binding template: correct its thesis, scope, chapter titles or emphasis where "
             "the full routed evidence shows an overclaim, missing context, or better organizing logic, while retaining chapter_id values "
             "where possible so tool requests remain attached. Preserve the broad set of useful source handles assigned by routing; do not "
-            "collapse chapters to a few deep-read seed papers. When material supports it, plan a full-length review with broad coverage "
-            "across background, concrete cases, comparisons, and developments (the pool size is in candidate_pool_row_count); this is a "
-            "coverage aspiration, never a count gate or reason to include irrelevant sources, nor a reason to shrink to a few core papers. "
+            "collapse chapters to a few deep-read seed papers. When material supports it, plan a full-length review with roughly 150–200 "
+            "independent literature uses across background, concrete cases, comparisons, and developments (the pool size is in "
+            "candidate_pool_row_count); this is a quality aspiration, never a count gate or reason to include irrelevant sources, nor a "
+            "reason to shrink to a few core papers. "
             "Draft a substantive proposal for each "
             "chapter, including relevant source handles, chapter boundaries, ordered themes, concrete cases/comparisons, "
             "cross-paper synthesis, conditions and limitations, transition logic, and any genuinely necessary tool needs. "
@@ -741,12 +742,12 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
             "为已经协调好的写作单元挑选可用文献案例。source_materials 提供本批每篇候选来源的实际材料"
             "（A 概括、B 综述规划，以及已有的精读、补充或本地片段）；阅读全部 source_routing 与 source_materials，"
             "再对照 unit_catalog，挑选材料确实支持本单元的对象、结果、条件或有用对照。"
-            "整篇综述的广度目标是主题、背景、发展与代表案例得到充分覆盖（当前材料池规模见 pool_sources，已有案例计入覆盖）；"
-            "这是覆盖目标不是数量门槛：不重复添加已有来源，不为数量塞入无关文献，也不把“只用少数核心论文”当统一规则。"
+            "整篇长综述以约150–200篇具有明确用途的独立文献为目标（不是每章或每批的目标，已有案例计入覆盖）；"
+            "这是质量目标不是数量门槛：不重复添加已有来源，不为数量塞入无关文献，也不把“只用少数核心论文”当统一规则。"
             "只为具体单元补材料，不改章节结构。"
             "对照已有 cases/supporting_studies 的具体贡献，新论文需补充不同结果、条件、方法、发展阶段或有用对照；仅重复相同概括时留在备选池，additions可为空。"
             "每篇写约30–60字说明这篇材料能帮助本单元解释什么，可以提出拟议综合；"
-            "但不得改写或虚构论文的方法、结果与结论——具体案例由章节负责人对照材料确认。"
+            "这段文字是具体写作用途，不是论文结果；论文的方法、结果与结论必须来自随附的 A/B、精读或补充材料。"
             "推荐用途不能把类比、方案或其他对象的结果说成本问题的直接实证；material_available 为假的来源没有实际内容，不得凭编号编造用途。"
             "当前调用只负责一个 chapter_id；完整 source_routing 可能已按章节截取，不能据此虚构遗漏来源。"
             "返回 JSON 对象：additions 数组，每项 unit_key、studies 数组（source_handle、contribution）。"
@@ -800,8 +801,9 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
                 "不要用短 scalar 或 chapter_argument 直接替代章节科学认识。跨章调整保持有界。"
             ),
             "case_groups": (
-                "案例扩展只做选材：阅读所附 source_materials 的实际材料，返回来源指针、单元归属和拟议用途（proposed_use）；"
-                "案例添加者不能创作或覆盖 A/B、精读或事实内容，最终案例由章节负责人对照材料形成。"
+                "案例扩展只做选材：阅读所附 source_materials 的实际材料，返回来源指针、单元归属和具体写作用途（proposed_use）；"
+                "proposed_use 只说明该来源在本单元承担的解释、比较、背景或例证职责，不是论文结果。具体科学内容由随附的 A/B、精读或补充材料提供，"
+                "本阶段直接把已选案例追加到正文计划，不再等待后续负责人确认。"
             ),
         }
         directive = role_directives.get(stage, (
@@ -1386,7 +1388,9 @@ def _messages_for(stage: str, payload: Mapping[str, Any]) -> list[dict[str, str]
             '本轮只返回 {"status":"updated"或"no_change", "chapter_updates":[{"chapter_id":"...", "updated_plan":{...}}], '
             '"unit_id_remap":{"new_unit_id":["old_unit_id"]}}。updated_plan 是完整章节计划；'
             '若材料和任务无需改变，明确返回 status=no_change 并可复用完整原计划。若拆分或合并单元，所有新单元必须有稳定 unit_id，'
-            '并提供显式 unit_id_remap，不能按列表位置猜测对应关系。不要返回只有说明没有 updated_plan 的成功结果。'
+            '并提供显式 unit_id_remap，不能按列表位置猜测对应关系。若 chapter_feedback 指出 unit_missing_paragraph_briefs，'
+            '必须为每个已有实质单元补齐具体 paragraph_briefs（point、development、source_handles），不能用 ordered_development 或一句宽泛摘要替代。'
+            '不要返回只有说明没有 updated_plan 的成功结果。'
         )
     if planning_revision and stage in {"provisional_scope", "level1_outline", "whole_plan_improvement"}:
         task_output = _parts_contract_delivery(stage)
@@ -3639,6 +3643,30 @@ class ProgressiveReviewPlanner:
                 improvement["chapter_updates"] = [*existing_updates, *revision_entries]
         detail_records = self._apply_improvements(detail_records, improvement)
 
+        # BODY follows the historical order: complete the whole-plan and
+        # owner-revision pass before case enrichment.  The manuscript-parts
+        # contract remains attached to the planner messages, but case
+        # selection is a final source/use append and must not trigger a
+        # second BODY rewrite that can archive the selected studies.
+        if self.config.planning_revision_enabled:
+            detail_records, improvement, _ = self._post_case_review(
+                root=root,
+                topic=topic,
+                harmonized=harmonized,
+                level1_outline=level1_outline,
+                detail_records=detail_records,
+                baseline_detail_records=detail_records,
+                case_record={"response": {}},
+                level1_tool_result=level1_tool_result,
+                level2_tool_result=level2_tool_result,
+                chapter_tool_result=chapter_tool_result,
+                editorial_feedback=editorial_feedback,
+                original_plan=plan,
+                material_theme_inventory=provisional.get("material_theme_inventory") or provisional.get("theme_inventory") or [],
+                resume=resume,
+                state=state,
+            )
+
         # Case enrichment is chapter-scoped because the full source-routing
         # ledger can be much larger than a single model context.  Every chapter
         # still gets a call, but each call receives only its bounded unit slice
@@ -3844,6 +3872,7 @@ class ProgressiveReviewPlanner:
                             "batch_index": batch_index,
                             "batch_count": len(route_batches),
                             "one_addition_per_relevant_unit": True,
+                            "review_source_target": [150, 200],
                         },
                     }
                     # Selection support: the real material of exactly this
@@ -3934,26 +3963,9 @@ class ProgressiveReviewPlanner:
         detail_records = _attach_case_groups(
             detail_records, _stage_response(case_record),
             planning_revision=self.config.planning_revision_enabled,
+            body_case_additions=self.config.planning_revision_enabled,
             candidate_rows=pool_rows,
         )
-        if self.config.planning_revision_enabled:
-            detail_records, improvement, whole_review_chapters = self._post_case_review(
-                root=root,
-                topic=topic,
-                harmonized=harmonized,
-                level1_outline=level1_outline,
-                detail_records=detail_records,
-                baseline_detail_records=baseline_detail_records,
-                case_record=case_record,
-                level1_tool_result=level1_tool_result,
-                level2_tool_result=level2_tool_result,
-                chapter_tool_result=chapter_tool_result,
-                editorial_feedback=editorial_feedback,
-                original_plan=plan,
-                material_theme_inventory=provisional.get("material_theme_inventory") or provisional.get("theme_inventory") or [],
-                resume=resume,
-                state=state,
-            )
         plan_output = self._assemble_final(
             topic=topic,
             plan=plan,
@@ -4200,10 +4212,23 @@ class ProgressiveReviewPlanner:
                         "unit_point": _text(unit.get("substantive_point") or unit.get("point")),
                         "studies": pending,
                     })
+        missing_brief_chapters = {
+            _text((record.get("chapter") or {}).get("chapter_id"))
+            for record in detail_records
+            if isinstance(record, Mapping)
+            and any(
+                isinstance(unit, Mapping)
+                and _text(unit.get("substantive_point") or unit.get("point"))
+                and not (isinstance(unit.get("paragraph_briefs"), list) and unit.get("paragraph_briefs"))
+                for unit in _chapter_units(record.get("chapter_plan") or {})
+            )
+            and _text((record.get("chapter") or {}).get("chapter_id"))
+        }
         affected_ids = list(dict.fromkeys([
             *self._affected_chapter_ids(improvement),
             *by_chapter_material,
             *case_suggestions_by_chapter,
+            *missing_brief_chapters,
             *[_text(item.get("chapter_id")) for item in editorial_entries if _text(item.get("chapter_id"))],
         ]))
         # In the opt-in path every affected chapter is returned to its owner.
@@ -4231,6 +4256,12 @@ class ProgressiveReviewPlanner:
                 chapter_id = _text(item.get("chapter_id"))
                 if chapter_id:
                     feedback_by_chapter.setdefault(chapter_id, []).append(dict(item))
+            for chapter_id in missing_brief_chapters:
+                feedback_by_chapter.setdefault(chapter_id, []).append({
+                    "chapter_id": chapter_id,
+                    "issue": "unit_missing_paragraph_briefs",
+                    "required_repair": "为每个已有实质单元补齐具体逐段任务；保留原有证据、单位和 source_handles。",
+                })
             review_chapter_by_id = {
                 _text(item.get("chapter_id")): item
                 for item in whole_review_chapters
@@ -5349,7 +5380,7 @@ def _clip_case_material_strings(value: Any, limit: int = _CASE_MATERIAL_STRING_L
 
 # Bump when the case_groups prompt or output contract changes, so a cached
 # batch answered under an older contract is not reused silently.
-CASE_GROUPS_PROMPT_CONTRACT = "case_groups.review_v2_03"
+CASE_GROUPS_PROMPT_CONTRACT = "case_groups.review_v2_04_body_append"
 
 
 def _case_unit_task_signature(
@@ -5708,19 +5739,21 @@ def _attach_case_groups(
     response: Mapping[str, Any],
     *,
     planning_revision: bool = False,
+    body_case_additions: bool = False,
     candidate_rows: Sequence[Mapping[str, Any]] = (),
 ) -> list[dict[str, Any]]:
     """Consume the case layer's response into the chapter records.
 
     Old mode keeps the established contract: accepted studies land directly in
     ``supporting_studies`` with their contribution text.  In planning-revision
-    mode the response is a selection proposal: each study becomes a
+    mode the response is normally a selection proposal: each study becomes a
     ``case_suggestions`` entry (handle + proposed use + whether real material
-    was attached), never an established case.  The program still backfills the
-    selected papers' real material rows into the packet so the chapter owner
-    can judge the proposal against actual content.  A handle with no material
-    anywhere stays a suggestion flagged ``material_available: false``; nothing
-    is adopted for it and nothing is fabricated.
+    was attached), never an established case.  The BODY path sets
+    ``body_case_additions=True`` after owner revision, restoring the old
+    direct-append behavior while keeping the proposed text as writing use and
+    the actual A/B/deep material in the packet.  A handle with no material
+    anywhere stays a suggestion flagged ``material_available: false``;
+    nothing is adopted for it and nothing is fabricated.
     """
 
     result = json.loads(json.dumps(records, ensure_ascii=False, default=_json_default))
@@ -5737,7 +5770,7 @@ def _attach_case_groups(
         if not destination:
             continue
         record, unit = destination
-        if planning_revision:
+        if planning_revision and not body_case_additions:
             suggestions = unit.setdefault("case_suggestions", [])
             suggested_seen = {
                 (_text(item.get("source_handle")), _text(item.get("proposed_use")))
@@ -5784,6 +5817,13 @@ def _attach_case_groups(
                 continue
             handle = study.get("source_handle")
             source = all_sources.get(handle)
+            # A BODY case can be selected from the routed candidate pool
+            # without having been preloaded into this chapter packet.  Keep
+            # the established direct-append path, but materialize that
+            # candidate's real card (A/B and any attached supplement) before
+            # accepting the study; otherwise the case text is silently lost.
+            if source is None and handle in candidate_by_handle:
+                source = build_local_material_payload(candidate_by_handle[handle])
             if not source or handle in existing:
                 continue
             stored_study = dict(study)
