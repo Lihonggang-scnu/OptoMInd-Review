@@ -67,6 +67,32 @@ def test_contract_messages_supply_real_context_and_serial_parts(tmp_path):
     assert text == again
 
 
+@pytest.mark.parametrize(("language", "expected"), [
+    ("zh", "输出语言要求：中文"),
+    ("en", "输出语言要求：English"),
+    ("fr", "输出语言要求：fr"),
+])
+def test_front_back_messages_state_configured_output_language(language, expected):
+    messages = fb.build_stage_messages(
+        "introduction", body_text="Body", research_question="q",
+        chapter_roles=[], prior_parts={}, language=language)
+    assert messages[0]["role"] == "system"
+    assert expected in messages[0]["content"]
+
+
+def test_front_back_runner_passes_language_to_saved_messages(tmp_path):
+    body = tmp_path / "body.md"
+    body.write_text("# Review\n\n## BODY\n\nEvidence.\n", encoding="utf-8")
+    report = fb.run_front_back_stage(
+        draft_path=body, research_question="q", chapter_roles=[],
+        out_dir=tmp_path / "out", parts_fixture_path=write(tmp_path / "parts.json", fixture()),
+        planning_context=context(), language="en")
+    assert report["status"] == "generated"
+    messages = json.loads(
+        (tmp_path / "out/messages/front_back_introduction_messages.json").read_text())
+    assert "输出语言要求：English" in messages[0]["content"]
+
+
 @pytest.mark.parametrize("mode", ["embedded", "distributed"])
 def test_unsupported_placement_preserved_without_generation(tmp_path, mode):
     body = tmp_path / "body.md"

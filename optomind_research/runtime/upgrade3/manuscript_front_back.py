@@ -153,9 +153,15 @@ def build_stage_messages(
         user += '{"title": "...", "abstract": "...", "keywords": ["...", "..."]}。'
     else:
         user += f'{{"{stage}": "..."}}。'
+    requested_language = str(language or "zh").strip()
+    language_label = {"zh": "中文", "en": "English"}.get(
+        requested_language.lower(), requested_language)
     return [
         {"role": "system",
-         "content": "你是这篇完整综述的定稿编辑，只负责首尾部件，不改正文章节正文。"},
+         "content": (
+             "你是这篇完整综述的定稿编辑，只负责首尾部件，不改正文章节正文。"
+             f"输出语言要求：{language_label}。"
+         )},
         {"role": "user", "content": user},
     ]
 
