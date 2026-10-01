@@ -59,8 +59,8 @@ def _parser() -> argparse.ArgumentParser:
                         help="0 disables the per-source ceiling (nothing is dropped silently)")
     parser.add_argument("--keep-deep-read-references", action="store_true",
                         help="Also send the source paper's own bibliography from the deep read")
-    parser.add_argument("--output-tokens", type=int, default=4000)
-    parser.add_argument("--thinking-budget", type=int, default=0)
+    parser.add_argument("--output-tokens", type=int, default=12000)
+    parser.add_argument("--thinking-budget", type=int, default=4000)
     parser.add_argument("--timeout-seconds", type=float, default=900.0)
     parser.add_argument("--key-file", default=str(DEFAULT_KEY_FILE))
     parser.add_argument("--budget-ledger", default=str(DEFAULT_LEDGER),

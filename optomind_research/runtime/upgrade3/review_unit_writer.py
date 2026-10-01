@@ -48,7 +48,7 @@ PLANNING_REVISION_INSTRUCTIONS = (
     "具体问题写入 issues，包含 unit_id、problem、source_handles 和 action（local_backfill、directed_read、supplement、chapter_owner 或 omit）。"
 )
 
-DEFAULT_MODEL = "qwen3.7-flash"
+DEFAULT_MODEL = "qwen3.5-plus"
 DEFAULT_MAX_MATERIAL_CHARS_PER_SOURCE = 20000
 # Above this the unit should be split rather than silently trimmed.  Nothing is
 # dropped when the warning fires: the caller decides.
@@ -1075,6 +1075,16 @@ def _decode_json_content(value: str) -> Mapping[str, Any] | None:
     try:
         parsed = json.loads(text)
     except (TypeError, ValueError):
+        # Some otherwise valid envelopes contain literal Markdown line breaks
+        # inside a quoted body.  The stdlib decoder can tolerate those control
+        # characters without changing any other content; try that before the
+        # historical backslash repair below.
+        try:
+            parsed = json.loads(text, strict=False)
+        except (TypeError, ValueError):
+            parsed = None
+        if isinstance(parsed, Mapping):
+            return parsed
         # Models sometimes emit LaTeX such as \sim with a single JSON
         # backslash. Preserve that text literally without rewriting prose.
         if '"body_markdown"' not in text:
@@ -1087,14 +1097,33 @@ def _decode_json_content(value: str) -> Mapping[str, Any] | None:
         try:
             parsed = json.loads(repaired)
         except (TypeError, ValueError):
-            return None
+            try:
+                parsed = json.loads(repaired, strict=False)
+            except (TypeError, ValueError):
+                return None
     return parsed if isinstance(parsed, Mapping) else None
+
+
+def _envelope_body(envelope: Mapping[str, Any]) -> str | None:
+    """Return body text and retain a separate table from a JSON envelope."""
+
+    body = envelope.get("body_markdown")
+    if not isinstance(body, str) or not body.strip():
+        return None
+    body = _strip_fences(body)
+    table = envelope.get("table_markdown")
+    if isinstance(table, str) and table.strip() and table.strip() not in body:
+        return body.rstrip() + "\n\n" + table
+    return body
 
 
 def parse_unit_body(response: Any) -> str:
     """Accept plain Markdown, ``{"body_markdown": ...}`` or a wrapped response."""
 
     if isinstance(response, Mapping):
+        envelope_body = _envelope_body(response)
+        if envelope_body is not None:
+            return envelope_body
         for key in ("body_markdown", "content", "markdown", "text"):
             value = response.get(key)
             if isinstance(value, str) and value.strip():
