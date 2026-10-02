@@ -1,0 +1,40 @@
+{
+  "status": "ready_for_root_paid_gate",
+  "driver": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\case_chain_restore_20261002\\run_case_chain_restore.py",
+  "command_after_root_gate": [
+    "C:\\Anaconda\\python.exe",
+    "-X",
+    "utf8",
+    "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\case_chain_restore_20261002\\run_case_chain_restore.py",
+    "--run"
+  ],
+  "run_root": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\case_chain_restore_20261002",
+  "shared_ledger": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+  "budget_before_paid": {
+    "limit_cny": 50.0,
+    "settled_cny": 23.1512026,
+    "reserved_cny": 0.0,
+    "uncertain_cny": 0.0,
+    "available_after_holds_cny": 26.8487974
+  },
+  "models": {
+    "main_planner": "qwen3.5-plus",
+    "chapter_details_and_cases": "qwen3.7-flash"
+  },
+  "allowed_paid_stages": [
+    "whole_plan_improvement",
+    "affected_chapter_revision",
+    "case_groups"
+  ],
+  "early_reuse_proof": "EARLY_REUSE_PREFLIGHT.json",
+  "normalization_record": "observations/CACHE_NORMALIZATION.json",
+  "network_calls_before_gate": 0,
+  "excluded_from_new_root": [
+    "stages/case_groups",
+    "stages/whole_plan_improvement.json",
+    "stages/affected_chapter_revision",
+    "DETAILED_REVIEW_PLAN.json",
+    "writer_packets"
+  ],
+  "post_plan_gate": "inspect case enrichment and DETAILED_REVIEW_PLAN before arrangement/writing"
+}

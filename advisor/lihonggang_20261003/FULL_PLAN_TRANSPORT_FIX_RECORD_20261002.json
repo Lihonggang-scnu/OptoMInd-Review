@@ -1,0 +1,63 @@
+{
+  "schema_version": "lihonggang.full_acceptance.transport_fix_record.v1",
+  "recorded_at_epoch": 1790882121.7477143,
+  "status": "offline_fix_ready_for_root_review",
+  "scope": {
+    "production_files": [
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree\\optomind_research\\runtime\\upgrade3\\module4\\runtime.py",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree\\optomind_research\\runtime\\upgrade3\\progressive_review_plan.py"
+    ],
+    "test_file": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree\\tests\\upgrade3\\test_progressive_review_plan_transport_retry.py",
+    "no_prompt_or_science_changes": true
+  },
+  "changes": [
+    "QwenTransportError now exposes bounded reason_code; uncertain ledger telemetry stores exception class/reason and numeric errno/winerror/verify_code only.",
+    "Transient URLError/TimeoutError/OSError and HTTP server/rate errors retry on the current key only; explicit account/auth rejection retains bounded key rotation.",
+    "Source-routing propagates typed QwenTransportError without route content repair, sets a stop event, cancels queued futures, and shuts down without waiting for already-running work.",
+    "Valid partial route content still uses the existing repair-001 path; completed batch caches remain reusable."
+  ],
+  "verification": {
+    "pytest_command": "pytest -q tests/upgrade3/test_progressive_review_plan_transport_retry.py tests/upgrade3/test_progressive_review_plan_material_reuse.py tests/upgrade3/test_planning_feedback_scope.py tests/upgrade3/test_progressive_review_plan_body_boundary.py",
+    "pytest_result": "44 passed",
+    "compileall": "passed",
+    "git_diff_check": "passed"
+  },
+  "ledger_after_offline_tests": {
+    "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+    "limit_cny": 50.0,
+    "summary_rows": [
+      [
+        "settled",
+        44,
+        3.3931641999999997,
+        18.4864788
+      ],
+      [
+        "uncertain",
+        24,
+        0,
+        26.722952
+      ]
+    ],
+    "paid_calls_launched_after_incident": false
+  },
+  "resume_proposal": {
+    "mode": "small_serial_resume_canary",
+    "preserve_cached_batches": [
+      "batch_001.json",
+      "batch_002.json",
+      "batch_003.json",
+      "batch_004.json",
+      "batch_005.json"
+    ],
+    "chapter_workers": 1,
+    "same_output_dir": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1",
+    "same_ledger": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+    "gate": "root approval required before any paid resume; do not start arrangement/writing automatically"
+  },
+  "blockers": [
+    "24 uncertain reservations remain held and must not be released without verifiable provider billing.",
+    "No paid resume launched; root review remains the next gate."
+  ],
+  "git_commit_or_push": false
+}

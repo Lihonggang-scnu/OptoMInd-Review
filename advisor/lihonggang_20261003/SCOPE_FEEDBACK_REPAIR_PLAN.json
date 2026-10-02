@@ -1,0 +1,225 @@
+{
+  "schema_version": "lihonggang.full_acceptance.scope_feedback_repair_plan.v1",
+  "recorded_at_utc": "2026-10-01T16:20:15.657385+00:00",
+  "status": "outline_invalidated_ready_to_launch",
+  "reason": "clinical_evidence must normalize to application_outcome; direct_use with answers_requested_question=false keeps useful context but opens the original unmet question for bounded external research",
+  "worktree": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree",
+  "stage": "level1_outline",
+  "planned_resume": {
+    "command_mode": "same-root --run --stop-after level1 --resume",
+    "invalidate_only": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\stages\\level1_outline.json",
+    "action_before_resume": "move level1_outline.json to a repair archive, then remove only the stage cache so _stage recomputes this stage",
+    "preserve_and_reuse": [
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\stages\\provisional_scope.json",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\stages\\level1_tools.json",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\retrieval_loop.jsonl",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\raw_responses",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\planning_material_index.sqlite",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite"
+    ],
+    "recompute_signature_scope": "only the normalized unmet need whose intended_use changes from clinical_evidence to application_outcome",
+    "raw_qwen_responses": "leave untouched; no overwrite",
+    "actual_journal": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\retrieval_loop.jsonl",
+    "journal_policy": "preserve nested level1 journal; resume may reuse unchanged signatures and append only affected work",
+    "raw_response_policy": "deterministic call_id-key-attempt raw files copied before resume; original tree remains untouched until launch",
+    "cache_policy": "level1 local_triage and _llm_response_cache copied; keep originals for unchanged journal/cache reuse",
+    "invalidation_completed_at_utc": "2026-10-01T16:20:15.657385+00:00",
+    "invalidated_cache": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\stages\\level1_outline.json",
+    "moved_pre_repair_outline": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\pre_resume\\level1_outline.pre_repair.json",
+    "stage_cache_check": {
+      "level1_outline_exists": false,
+      "level1_tools_exists": true,
+      "provisional_scope_exists": true
+    }
+  },
+  "pre_repair_snapshots": {
+    "level1_outline": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\stages\\level1_outline.json",
+      "exists": true,
+      "bytes": 22433,
+      "sha256": "6990be4a8cfc1a12010d13bca7ff57a295a66f7c5954bdcf2071093dba67e6fb",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\level1_outline.json"
+    },
+    "level1_tools": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\stages\\level1_tools.json",
+      "exists": true,
+      "bytes": 6185953,
+      "sha256": "e9fd14efcb295ae665a2532351e14c7fd6c4c22f97543b84deefc9372bc54a61",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\level1_tools.json"
+    },
+    "provisional_scope": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\stages\\provisional_scope.json",
+      "exists": true,
+      "bytes": 18384,
+      "sha256": "3b02acf671c43bd064def83eeecd90ab3009e1b3e605d4a22aab060f0fe2fe15",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\provisional_scope.json"
+    },
+    "retrieval_loop": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\retrieval_loop.jsonl",
+      "exists": false
+    },
+    "partial_plan_json": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\PROGRESSIVE_REVIEW_PLAN.partial.json",
+      "exists": true,
+      "bytes": 6328059,
+      "sha256": "28893ecec75b9c6584e05e6d4ae8b9cf40c3fd58b83fe76675fb148a9ab8165e",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\PROGRESSIVE_REVIEW_PLAN.partial.json"
+    },
+    "partial_plan_md": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\PROGRESSIVE_REVIEW_PLAN.partial.md",
+      "exists": true,
+      "bytes": 23998,
+      "sha256": "afa00f885313442c5229e8bfea054988627f61e6b5dee3baf6809980e8d71e54",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\PROGRESSIVE_REVIEW_PLAN.partial.md"
+    },
+    "root_run_state": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\RUN_STATE.json",
+      "exists": true,
+      "bytes": 4264,
+      "sha256": "785b921d5b8004878a07e54c39f5e440fb9d7502ed4d9a3d87285051b8d68cd1",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\root_RUN_STATE.json"
+    },
+    "level1_run_state": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\RUN_STATE.json",
+      "exists": true,
+      "bytes": 12163,
+      "sha256": "b4ddb2a4fea374103d39cb1641d601bbe530fee42921df1f6e28b9c62bdfb16f",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\planner_RUN_STATE.json"
+    },
+    "stdout_log": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\PLAN_LEVEL1_RETRY.stdout.log",
+      "exists": true,
+      "bytes": 566,
+      "sha256": "c843b13e0ab5656528939c1edba962ea2df714de12064cc22473304f05c8ace2",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\PLAN_LEVEL1_RETRY.stdout.log"
+    },
+    "stderr_log": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\PLAN_LEVEL1_RETRY.stderr.log",
+      "exists": true,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\PLAN_LEVEL1_RETRY.stderr.log"
+    },
+    "previous_stdout_log": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\PLAN_LEVEL1.stdout.log",
+      "exists": true,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\PLAN_LEVEL1.stdout.log"
+    },
+    "previous_stderr_log": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\PLAN_LEVEL1.stderr.log",
+      "exists": true,
+      "bytes": 107,
+      "sha256": "b133d47b11080a30c09f9d1e8562d13c97d83df40c13be5959989ece6ba5f526",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\PLAN_LEVEL1.stderr.log"
+    },
+    "cost_record": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\CALL_COST_level1.json",
+      "exists": true,
+      "bytes": 313,
+      "sha256": "401e22d3a1865c2192a6f52e26ed782b13d7c5a479e4c7fa4f2c71c43bfa1343",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\CALL_COST_level1.json"
+    },
+    "level1_retrieval_loop": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\retrieval_loop.jsonl",
+      "exists": true,
+      "bytes": 1910568,
+      "sha256": "afea71fcc1f1cbfebfac70ad6967c4873152dc0058b5a275b1bf786d0ead7082",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\level1_retrieval_loop.jsonl"
+    },
+    "raw_responses": {
+      "source": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\raw_responses",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\raw_responses",
+      "files": [
+        {
+          "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\raw_responses\\progressive-review_level1_outline_microbiome_ici_review\\progressive-review_level1_outline_microbiome_ici_review-key0-attempt0.raw",
+          "bytes": 26786,
+          "sha256": "6b6c72b11d2964a459ae08dc6e8e345d12fd0e58e5f6dccd242acff0de18e5b1"
+        },
+        {
+          "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\raw_responses\\progressive-review_provisional_scope_microbiome_ici_review\\progressive-review_provisional_scope_microbiome_ici_review-key0-attempt0.raw",
+          "bytes": 27670,
+          "sha256": "c03705a82e9c389a75f44086d0e6fab5df04ba5537a8d7ae11f621c6a36315aa"
+        }
+      ]
+    },
+    "level1_local_triage": {
+      "source": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\local_triage",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\level1\\local_triage",
+      "files": [
+        {
+          "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\local_triage\\N79dccd9d2305\\LOCAL_TRIAGE.json",
+          "bytes": 80372,
+          "sha256": "118905243a5ae94daca71f3df8d774cbca157052b1c556ad51d119444b037192"
+        },
+        {
+          "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\local_triage\\N96939865654c\\LOCAL_TRIAGE.json",
+          "bytes": 75421,
+          "sha256": "615aa174c0cd7e9f245c8e9f28e2d6587d76793bee8567bbd7c6b5af332079c6"
+        }
+      ]
+    },
+    "level1_llm_response_cache": {
+      "source": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\_llm_response_cache",
+      "preserved_copy": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\level1\\_llm_response_cache",
+      "files": [
+        {
+          "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\_llm_response_cache\\1790866402448960100\\planning-material-triage_N96939865654c-key0-attempt0.raw",
+          "bytes": 19560,
+          "sha256": "988e53501c27e8a7306593ece3939f14eb649486745ef5438a2e8ad617dbffb0"
+        },
+        {
+          "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\_llm_response_cache\\1790866450160438100\\planning-material-triage_N79dccd9d2305-key0-attempt0.raw",
+          "bytes": 16637,
+          "sha256": "fb9df13b1338a1fde755be7d8d8aea3654bb5956b6c509ff38b6a3cdc4072f76"
+        },
+        {
+          "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\_llm_response_cache\\1790867140152251200\\planning-material-triage_N79dccd9d2305-key0-attempt0.raw",
+          "bytes": 21027,
+          "sha256": "a6271bbc111bc35fbe3cd5fe5727b304b9e96ef8f6051743c7b4271009dc4dd1"
+        },
+        {
+          "path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\_llm_response_cache\\1790867697560581600\\planning-material-triage_N79dccd9d2305-key0-attempt0.raw",
+          "bytes": 16264,
+          "sha256": "29f6d4f7373a137a5161bb4922b416ff0834385809ce197f1ec46c76556a0e48"
+        }
+      ]
+    },
+    "snapshot_name_correction": {
+      "old_ambiguous_name": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\RUN_STATE.json",
+      "resolved_names": [
+        "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\root_RUN_STATE.json",
+        "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\planner_RUN_STATE.json"
+      ]
+    }
+  },
+  "ledger_before_resume": {
+    "grouped": [
+      [
+        "settled",
+        31,
+        2.7123947999999998
+      ]
+    ],
+    "settled_count": 31,
+    "settled_actual_cny": 2.7123948,
+    "held_count": 0,
+    "held_reserved_cny": 0.0,
+    "limit_cny": 50
+  },
+  "paid_calls": {
+    "started": false,
+    "resume_pid": null,
+    "note": "This record and archive are offline preparation only; root content review is required before any paid resume."
+  },
+  "no_invalidation": [
+    "provisional_scope",
+    "level1_tools",
+    "full585B processing",
+    "retrieval journals",
+    "TME/deep material snapshots and cards",
+    "raw Qwen response files"
+  ]
+}

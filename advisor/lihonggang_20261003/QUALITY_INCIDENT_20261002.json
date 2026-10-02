@@ -1,0 +1,116 @@
+{
+  "schema_version": "lihonggang.full_acceptance.quality_incident.v1",
+  "incident_id": "QUALITY_INCIDENT_20261002_CH03_SOURCE_ATTRIBUTION",
+  "recorded_at_utc": "2026-10-02T02:17:13.908210Z",
+  "severity": "hard_content_quality_stop",
+  "process_id": 19192,
+  "process_observed": "stopped_before_harmonized_scope_completion",
+  "stage_at_stop": "harmonized_scope",
+  "completed_stages": [
+    "provisional_scope",
+    "level1_tools",
+    "level1_outline",
+    "source_routing",
+    "chapter_proposals"
+  ],
+  "trigger": "Root review found serious source attribution errors in the newly paid CH03 chapter proposal; further paid calls are paused pending root/user approval.",
+  "output_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\stages\\chapter_proposals\\CH03.json",
+  "source_audit_path": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_astra_repair\\source_identity_map.json",
+  "confirmed_findings": [
+    {
+      "kind": "wrong_source_attribution",
+      "json_path": "response.chapter_proposals[0].directed_reads[2]",
+      "source_handle_in_output": "P0585",
+      "generated_reason": "提供 III 期 RCT（JCOG2007）附属研究中抗生素暴露与生存期的关联数据，作为抗生素管理的高级别证据。",
+      "local_identity_map_entry": "P0585",
+      "local_card_path": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_E_phase3_rct\\source_units\\SU03_search_candidate_3636101ad7\\card\\PAPER_READING_CARD.json",
+      "local_source_title": "Gut Microbiota in Advanced Non-small-cell Lung Cancer Receiving Chemo-immunotherapy: An Ancillary Biomarker Study from the Phase III trial JCOG2007 (NIPPON).",
+      "local_source_scope": "Abstract-only ancillary microbiome biomarker study; baseline fecal 16S data from 270 patients with OS and serious-AE associations.",
+      "confirmed_problem": "Root personally read the supplied original abstract: 270 baseline fecal microbiome samples, 16S sequencing, OS and serious-AE associations. It reports no antibiotic-exposure result; the requested use is unsupported by the available original material.",
+      "raw_abstract_path": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_E_phase3_rct\\source_units\\SU03_search_candidate_3636101ad7\\materials\\8016df1aa5a8160b7ccd412fa6851a6a508e2731\\snapshot-120d4fa616c3bdd7ba02f0ec\\DOCUMENT_BLOCKS.jsonl"
+    },
+    {
+      "kind": "cross_paper_attribution",
+      "json_path": "response.chapter_proposals[0].substantive_threads[0]",
+      "generated_claim": "大样本真实世界数据（如 n=21,108 队列，P0402, P0585）... ICI 后 HR=1.27 vs ICI 前 HR=1.04。",
+      "incorrectly_referenced_handles": [
+        "P0585"
+      ],
+      "local_identity_map_entries": {
+        "P0575": {
+          "title": "Antibiotic Timing and Survival After Immune Checkpoint Inhibitor Initiation in Patients With Cancer",
+          "card_path": "F:\\OptoMind-Review-2\\outputs\\planning_support\\20260923\\practical_refresh\\supplement_live\\source_units\\SU01_search_candidate_2ec5a3c2b3\\card\\PAPER_READING_CARD.json"
+        },
+        "P0402": {
+          "title": "THE IMPACT OF ANTIBIOTIC THERAPY ON THE EFFECTIVENESS OF IMMUNOTHERAPY: A REVIEW OF CURRENT EVIDENCE",
+          "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\affb01ce6dd2c0ea0909edc814fd8af01596e021\\7dd94cc7542d04164a27a4b9e6ca8b88\\attempt-01\\PAPER_READING_CARD.json"
+        },
+        "P0585": {
+          "title": "Gut Microbiota in Advanced Non-small-cell Lung Cancer Receiving Chemo-immunotherapy: An Ancillary Biomarker Study from the Phase III trial JCOG2007 (NIPPON).",
+          "card_path": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_E_phase3_rct\\source_units\\SU03_search_candidate_3636101ad7\\card\\PAPER_READING_CARD.json"
+        }
+      },
+      "confirmed_problem": "The actual 21,108-patient study is P0575 and is omitted from this proposed thread; P0585 is incorrectly included as an antibiotic-exposure source. P0402 review-mediated support remains unadjudicated.",
+      "other_referenced_handle_not_fully_adjudicated": {
+        "handle": "P0402",
+        "note": "This is a review. Its complete text has not been checked here for a retelling of the 21,108-patient study; this record does not reject review-mediated citation or assert that such a retelling is absent."
+      }
+    }
+  ],
+  "separate_unresolved_observation": {
+    "text": "The broad statement that there is no confirmed phase-III microbiome intervention RCT was not adjudicated by this incident.",
+    "action": "Preserve the model output and do not infer a correction from this record."
+  },
+  "action_taken": {
+    "paid_process_stopped": true,
+    "downstream_arrangement_started": false,
+    "downstream_writing_started": false,
+    "production_output_hand_edited": false,
+    "new_paid_calls_started_after_stop": false,
+    "reserved_call_marked_uncertain": {
+      "call_id": "progressive-review:harmonize_scope:microbiome_ici_review:key0:attempt0",
+      "amount_cny": 1.910704,
+      "provider_error_code": "local_process_interrupted_quality_gate"
+    }
+  },
+  "ledger_snapshot": {
+    "ledger_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+    "limit_cny": 50.0,
+    "settled_rows": 54,
+    "actual_settled_cny": 4.6558742,
+    "uncertain_rows": 25,
+    "uncertain_held_cny": 28.633656,
+    "reserved_rows": 0,
+    "note": "All uncertain reservations remain held; no uncertain amount was released.",
+    "settled_paid_calls_since_serial_resume": 10,
+    "uncertain_reserved_calls_since_serial_resume": 1
+  },
+  "preserved_artifacts": {
+    "stdout_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\FULL_PLAN_SERIAL_CANARY.stdout.log",
+    "stderr_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\FULL_PLAN_SERIAL_CANARY.stderr.log",
+    "run_state": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\RUN_STATE.json",
+    "planning_state": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\RUN_STATE.json",
+    "raw_responses": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\raw_responses",
+    "chapter_proposal": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\stages\\chapter_proposals\\CH03.json",
+    "retrieval_loop": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\retrieval_loop.jsonl"
+  },
+  "next_gate": "Continue from harmonize_scope; stop after final detailed plan at root coverage/writability review before arrangement or writing.",
+  "root_interpretation": {
+    "observed": "Five substantive chapter proposals were produced; manuscript entry/conclusion duties have not become BODY chapters in this limited run.",
+    "not_proven": "These attribution errors do not establish that the two common-prompt edits caused BODY degradation. No new BODY has been written yet.",
+    "potential_information_flow_cause": "The chapter-proposal call receives compact source routes and a shared outline, while full A/B consumption is scheduled later. This may contribute to mixing shared-outline facts with the wrong routed source, but causation has not been isolated."
+  },
+  "latest_decision": {
+    "recorded_at_utc": "2026-10-02T05:41:24.855306Z",
+    "decision": "accepted_non_blocking_quality_observation",
+    "decision_text_zh": "用户接受该局部研究归属误差为非阻塞工程误差，放行本轮继续；不修复算法、提示词、卡片或模型输出。",
+    "repair_authorized": false,
+    "paid_resume_authorized": true,
+    "conditions": [
+      "preserve original observation",
+      "do not release uncertain reservations",
+      "stop before arrangement/writing for root final-plan review"
+    ],
+    "source": "latest user ruling relayed by root"
+  }
+}

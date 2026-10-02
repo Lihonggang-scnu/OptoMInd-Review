@@ -1,0 +1,44 @@
+{
+  "schema_version": "lihonggang.material_reuse_repair.v1",
+  "recorded_at_utc": "2026-10-01T15:59:39.542057Z",
+  "status": "implemented_zero_paid_pending_root_review",
+  "scope": "Contained DOI alias reuse in progressive planning supplement adapter; no prompt, body, planning, or assembly algorithm changes.",
+  "observed_duplicate": {
+    "pool_paper_id": "CorpusId:252309032",
+    "external_candidate_canonical_id": "OpenAlex:W4296038319",
+    "doi": "10.1038/s41467-022-33116-z",
+    "title": "Inhibition of UBA6 by inosine augments tumour immunogenicity and responses",
+    "pool_card_path": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_C2_inosine_tme\\source_units\\SU02_search_candidate_73af8e5de3\\card\\PAPER_READING_CARD.json",
+    "pool_snapshot_path": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_C2_inosine_tme\\source_units\\SU02_search_candidate_73af8e5de3\\materials\\CorpusId_252309032\\snapshot-977ff8b5739acba1a864c0b8",
+    "active_source_unit_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\external\\N79dccd9d2305\\round_3\\supplements\\GAP_02_Human_TME_Metabolites\\source_units\\SU01_search_candidate_aa606cc112\\SOURCE_UNIT.json",
+    "active_acquisition_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\external\\N79dccd9d2305\\round_3\\supplements\\GAP_02_Human_TME_Metabolites\\source_units\\SU01_search_candidate_aa606cc112\\ACQUISITION.json",
+    "identity_audit": "matched_existing by DOI to CorpusId:252309032",
+    "prior_behavior": "material_reused absent; fresh OpenAlex snapshot acquired from EuropePMC JATS"
+  },
+  "change": {
+    "worktree": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree",
+    "file": "optomind_research/runtime/upgrade3/progressive_review_plan.py",
+    "function": "make_planning_supplement_runner.<locals>.reuse_material",
+    "behavior": [
+      "exact canonical/provider ID match remains first",
+      "unique normalized DOI fallback reads existing pool identity DOI",
+      "fallback requires exactly one DOI match",
+      "existing snapshot/card is still required; missing assets return None and acquisition proceeds",
+      "no title-only or fuzzy matching"
+    ]
+  },
+  "tests": {
+    "test_file": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree\\tests\\upgrade3\\test_progressive_review_plan_material_reuse.py",
+    "command": "C:\\Anaconda\\python.exe -m pytest -q tests/upgrade3/test_progressive_review_plan_material_reuse.py tests/upgrade3/test_progressive_review_plan_body_boundary.py",
+    "result": "33 passed",
+    "compile_and_diff_check": "compileall passed; git diff --check passed"
+  },
+  "paid_state": {
+    "ledger": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+    "actual_settled_cny": 2.7123948,
+    "budget_limit_cny": 50.0,
+    "new_paid_calls_for_repair": 0,
+    "completed_level1_outputs_unchanged": true
+  },
+  "next_gate": "Root reviews this fix and separate feedback-scope issue before any level1/full-planning paid resume."
+}

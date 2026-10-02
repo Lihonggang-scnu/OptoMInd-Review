@@ -1,0 +1,298 @@
+{
+  "status": "ok",
+  "first_hit": true,
+  "revision_rounds": 0,
+  "revision_reason": "",
+  "errors": [],
+  "error_details": [],
+  "plan": {
+    "schema_version": "research_harness.query_plan.v2",
+    "question_en": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?",
+    "research_object": "gut microbiome",
+    "ambiguity": {
+      "is_ambiguous": false,
+      "default_reading": "",
+      "needs_user_input": []
+    },
+    "facets": [
+      {
+        "id": "F1",
+        "ask": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours",
+        "keyword_queries": [
+          "gut microbiome immune checkpoint inhibitors efficacy solid tumours",
+          "gut microbiome immune checkpoint inhibitors response rates solid tumours",
+          "gut microbiome immune checkpoint inhibitors survival outcomes solid tumours"
+        ],
+        "question_queries": [
+          "How does the composition of the gut microbiome influence clinical response to immune checkpoint inhibitors in patients with solid tumours?",
+          "Studies report correlations between specific gut microbiome signatures and progression-free survival in solid tumour patients treated with immune checkpoint inhibitors."
+        ],
+        "must_exclude": [],
+        "filters": {
+          "publication_type": [],
+          "fields_of_study": [],
+          "text_availability": []
+        }
+      },
+      {
+        "id": "F2",
+        "ask": "what mechanisms mediate that effect",
+        "keyword_queries": [
+          "gut microbiome immune checkpoint inhibitors immunomodulation mechanisms",
+          "gut microbiome immune checkpoint inhibitors T cell priming mechanisms",
+          "gut microbiome immune checkpoint inhibitors metabolic pathways mechanisms"
+        ],
+        "question_queries": [
+          "What molecular mechanisms allow the gut microbiome to enhance T cell activation during immune checkpoint inhibitor therapy in solid tumours?",
+          "Research describes how gut microbiome-derived metabolites regulate the tumor microenvironment to support immune checkpoint inhibitor efficacy."
+        ],
+        "must_exclude": [],
+        "filters": {
+          "publication_type": [],
+          "fields_of_study": [],
+          "text_availability": []
+        }
+      }
+    ],
+    "seeds": [],
+    "criteria": {
+      "must_include_topic": [
+        "gut microbiome",
+        "immune checkpoint inhibitors",
+        "solid tumours"
+      ],
+      "must_exclude_domain": [],
+      "synonyms": {
+        "immune checkpoint inhibitors": [
+          "ICIs",
+          "checkpoint blockade"
+        ],
+        "solid tumours": [
+          "solid tumors",
+          "solid cancers"
+        ]
+      }
+    },
+    "additional_constraints": []
+  },
+  "round_usages": [
+    {
+      "module": "QueryPlannerAgent",
+      "agent_name": "QueryPlannerAgent",
+      "model_tier": "QueryPlannerAgent",
+      "model_name": "qwen3.5-plus",
+      "task_type": "research_chat",
+      "mock_llm": false,
+      "estimated_input_tokens": 3298,
+      "estimated_output_tokens": 649,
+      "input_tokens": 2843,
+      "output_tokens": 9249,
+      "token_usage_source": "provider_response",
+      "provider_usage": {
+        "prompt_tokens": 2843,
+        "completion_tokens": 9249,
+        "total_tokens": 12092,
+        "completion_tokens_details": {
+          "reasoning_tokens": 8642,
+          "text_tokens": 9249
+        },
+        "prompt_tokens_details": {
+          "text_tokens": 2843
+        }
+      },
+      "success": true,
+      "failure": false,
+      "error_type": "HTTPError_400_Arrearage",
+      "fallback_used": false,
+      "api_key_source": "F:\\OptoMind-Review-2\\api_keys\\qwen-api-key.txt#2",
+      "api_key_masked": "****",
+      "api_key_candidate_count": 4,
+      "api_key_rotation_count": 1,
+      "key_failures": [
+        "****:HTTPError_400_Arrearage"
+      ],
+      "transport_error": "HTTPError_400_Arrearage",
+      "json_contract_violation": "",
+      "json_contract_repaired": false,
+      "model_fallback_used": false,
+      "fallback_chain": [
+        "qwen3.7-flash",
+        "qwen-flash"
+      ],
+      "attempted_models": [
+        "qwen3.5-plus"
+      ],
+      "selected_model_index": 0,
+      "partial_stream": false,
+      "stream_interrupted_error": "",
+      "request_attempt_count": 2,
+      "retry_count": 1
+    }
+  ],
+  "transport": {
+    "fallback_used": false,
+    "transport_error": "HTTPError_400_Arrearage",
+    "json_contract_repaired": false
+  },
+  "degradation": {
+    "plan_state": "complete",
+    "degraded": false,
+    "missing_channels": [],
+    "channels": {
+      "facets": 2,
+      "keyword_queries": 6,
+      "question_queries": 4,
+      "missing_channels": []
+    },
+    "reasons": [],
+    "transport_failures": [
+      {
+        "fallback_used": false,
+        "transport_error": "HTTPError_400_Arrearage",
+        "json_contract_repaired": false
+      }
+    ]
+  },
+  "repairs": [],
+  "prompt_hash": "150ddae49e467e2b53989f4aff0b2fddfb24d8510d5260b1ef6a05ef80e4dc72",
+  "validator_fingerprint": "5ce2c113308fd41de3d3898731a20cee312a8f6e31d79d9e19b23599146838a6",
+  "refused_queries": [],
+  "rounds": [
+    {
+      "round": 1,
+      "raw_plan": {
+        "schema_version": "research_harness.query_plan.v2",
+        "question_en": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?",
+        "research_object": "gut microbiome",
+        "ambiguity": {
+          "is_ambiguous": false,
+          "default_reading": "",
+          "needs_user_input": []
+        },
+        "facets": [
+          {
+            "id": "F1",
+            "ask": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours",
+            "keyword_queries": [
+              "gut microbiome immune checkpoint inhibitors efficacy solid tumours",
+              "gut microbiome immune checkpoint inhibitors response rates solid tumours",
+              "gut microbiome immune checkpoint inhibitors survival outcomes solid tumours"
+            ],
+            "question_queries": [
+              "How does the composition of the gut microbiome influence clinical response to immune checkpoint inhibitors in patients with solid tumours?",
+              "Studies report correlations between specific gut microbiome signatures and progression-free survival in solid tumour patients treated with immune checkpoint inhibitors."
+            ],
+            "filters": {
+              "publication_type": [],
+              "fields_of_study": [],
+              "text_availability": []
+            },
+            "must_exclude": []
+          },
+          {
+            "id": "F2",
+            "ask": "what mechanisms mediate that effect",
+            "keyword_queries": [
+              "gut microbiome immune checkpoint inhibitors immunomodulation mechanisms",
+              "gut microbiome immune checkpoint inhibitors T cell priming mechanisms",
+              "gut microbiome immune checkpoint inhibitors metabolic pathways mechanisms"
+            ],
+            "question_queries": [
+              "What molecular mechanisms allow the gut microbiome to enhance T cell activation during immune checkpoint inhibitor therapy in solid tumours?",
+              "Research describes how gut microbiome-derived metabolites regulate the tumor microenvironment to support immune checkpoint inhibitor efficacy."
+            ],
+            "filters": {
+              "publication_type": [],
+              "fields_of_study": [],
+              "text_availability": []
+            },
+            "must_exclude": []
+          }
+        ],
+        "seeds": [],
+        "criteria": {
+          "must_include_topic": [
+            "gut microbiome",
+            "immune checkpoint inhibitors",
+            "solid tumours"
+          ],
+          "must_exclude_domain": [],
+          "synonyms": {
+            "immune checkpoint inhibitors": [
+              "ICIs",
+              "checkpoint blockade"
+            ],
+            "solid tumours": [
+              "solid tumors",
+              "solid cancers"
+            ]
+          }
+        },
+        "additional_constraints": []
+      },
+      "ok": true,
+      "errors": [],
+      "refused_queries": [],
+      "repairs": [],
+      "validator_fingerprint": "5ce2c113308fd41de3d3898731a20cee312a8f6e31d79d9e19b23599146838a6",
+      "raw_response": "{\n  \"schema_version\": \"research_harness.query_plan.v2\",\n  \"question_en\": \"How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?\",\n  \"research_object\": \"gut microbiome\",\n  \"ambiguity\": {\n    \"is_ambiguous\": false,\n    \"default_reading\": \"\",\n    \"needs_user_input\": []\n  },\n  \"facets\": [\n    {\n      \"id\": \"F1\",\n      \"ask\": \"How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours\",\n      \"keyword_queries\": [\n        \"gut microbiome immune checkpoint inhibitors efficacy solid tumours\",\n        \"gut microbiome immune checkpoint inhibitors response rates solid tumours\",\n        \"gut microbiome immune checkpoint inhibitors survival outcomes solid tumours\"\n      ],\n      \"question_queries\": [\n        \"How does the composition of the gut microbiome influence clinical response to immune checkpoint inhibitors in patients with solid tumours?\",\n        \"Studies report correlations between specific gut microbiome signatures and progression-free survival in solid tumour patients treated with immune checkpoint inhibitors.\"\n      ],\n      \"filters\": {\n        \"publication_type\": [],\n        \"fields_of_study\": [],\n        \"text_availability\": []\n      },\n      \"must_exclude\": []\n    },\n    {\n      \"id\": \"F2\",\n      \"ask\": \"what mechanisms mediate that effect\",\n      \"keyword_queries\": [\n        \"gut microbiome immune checkpoint inhibitors immunomodulation mechanisms\",\n        \"gut microbiome immune checkpoint inhibitors T cell priming mechanisms\",\n        \"gut microbiome immune checkpoint inhibitors metabolic pathways mechanisms\"\n      ],\n      \"question_queries\": [\n        \"What molecular mechanisms allow the gut microbiome to enhance T cell activation during immune checkpoint inhibitor therapy in solid tumours?\",\n        \"Research describes how gut microbiome-derived metabolites regulate the tumor microenvironment to support immune checkpoint inhibitor efficacy.\"\n      ],\n      \"filters\": {\n        \"publication_type\": [],\n        \"fields_of_study\": [],\n        \"text_availability\": []\n      },\n      \"must_exclude\": []\n    }\n  ],\n  \"seeds\": [],\n  \"criteria\": {\n    \"must_include_topic\": [\n      \"gut microbiome\",\n      \"immune checkpoint inhibitors\",\n      \"solid tumours\"\n    ],\n    \"must_exclude_domain\": [],\n    \"synonyms\": {\n      \"immune checkpoint inhibitors\": [\n        \"ICIs\",\n        \"checkpoint blockade\"\n      ],\n      \"solid tumours\": [\n        \"solid tumors\",\n        \"solid cancers\"\n      ]\n    }\n  },\n  \"additional_constraints\": []\n}",
+      "usage": {
+        "module": "QueryPlannerAgent",
+        "agent_name": "QueryPlannerAgent",
+        "model_tier": "QueryPlannerAgent",
+        "model_name": "qwen3.5-plus",
+        "task_type": "research_chat",
+        "mock_llm": false,
+        "estimated_input_tokens": 3298,
+        "estimated_output_tokens": 649,
+        "input_tokens": 2843,
+        "output_tokens": 9249,
+        "token_usage_source": "provider_response",
+        "provider_usage": {
+          "prompt_tokens": 2843,
+          "completion_tokens": 9249,
+          "total_tokens": 12092,
+          "completion_tokens_details": {
+            "reasoning_tokens": 8642,
+            "text_tokens": 9249
+          },
+          "prompt_tokens_details": {
+            "text_tokens": 2843
+          }
+        },
+        "success": true,
+        "failure": false,
+        "error_type": "HTTPError_400_Arrearage",
+        "fallback_used": false,
+        "api_key_source": "F:\\OptoMind-Review-2\\api_keys\\qwen-api-key.txt#2",
+        "api_key_masked": "****",
+        "api_key_candidate_count": 4,
+        "api_key_rotation_count": 1,
+        "key_failures": [
+          "****:HTTPError_400_Arrearage"
+        ],
+        "transport_error": "HTTPError_400_Arrearage",
+        "json_contract_violation": "",
+        "json_contract_repaired": false,
+        "model_fallback_used": false,
+        "fallback_chain": [
+          "qwen3.7-flash",
+          "qwen-flash"
+        ],
+        "attempted_models": [
+          "qwen3.5-plus"
+        ],
+        "selected_model_index": 0,
+        "partial_stream": false,
+        "stream_interrupted_error": "",
+        "request_attempt_count": 2,
+        "retry_count": 1
+      },
+      "transport": {
+        "fallback_used": false,
+        "transport_error": "HTTPError_400_Arrearage",
+        "json_contract_repaired": false
+      }
+    }
+  ]
+}
