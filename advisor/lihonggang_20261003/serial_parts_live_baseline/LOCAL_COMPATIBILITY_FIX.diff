@@ -1,0 +1,23 @@
+diff --git a/optomind_research/runtime/upgrade3/serial_manuscript_parts.py b/optomind_research/runtime/upgrade3/serial_manuscript_parts.py
+index fea046e..2ff991d 100644
+--- a/optomind_research/runtime/upgrade3/serial_manuscript_parts.py
++++ b/optomind_research/runtime/upgrade3/serial_manuscript_parts.py
+@@ -214,6 +214,18 @@ def normalize_context(context: Mapping[str, Any] | None, *, research_question: s
+ 
+ def validate_manuscript_parts_plan(plan: Any) -> dict[str, Any]:
+     """Full replacement, strict v1 role card; no deep planner payloads."""
++    # Some providers serialize the single boundary sentence as a scalar even
++    # though the contract declares boundary:string[]. Preserve that sentence
++    # verbatim and normalize only this unambiguous legacy shape.
++    if isinstance(plan, Mapping):
++        normalized_plan = dict(plan)
++        for name in ("abstract", "introduction", "conclusion"):
++            part = normalized_plan.get(name)
++            if isinstance(part, Mapping) and isinstance(part.get("boundary"), str) and part["boundary"].strip():
++                normalized_part = dict(part)
++                normalized_part["boundary"] = [part["boundary"]]
++                normalized_plan[name] = normalized_part
++        plan = normalized_plan
+     if not isinstance(plan, Mapping) or set(plan) != {"context", "abstract", "introduction", "conclusion"}:
+         raise SerialPartsError("invalid_manuscript_parts_plan_shape")
+     if _walk_keys(plan) & _BANNED_PLAN_KEYS:
