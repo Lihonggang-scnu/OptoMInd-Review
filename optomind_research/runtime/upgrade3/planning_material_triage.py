@@ -53,7 +53,10 @@ USES = ("background", "mechanism", "comparison", "quantification", "application_
 # ``clinical_effect`` appeared in earlier planner requests.  Accept it at the
 # boundary, but keep the exposed category broad enough for non-clinical
 # applications and outcomes.
-INTENDED_USE_ALIASES = {"clinical_effect": "application_outcome"}
+INTENDED_USE_ALIASES = {
+    "clinical_effect": "application_outcome",
+    "clinical_evidence": "application_outcome",
+}
 
 
 def normalize_intended_use(value: Any) -> str:
@@ -77,9 +80,10 @@ TRIAGE_SYSTEM_PROMPT = """你是综述作者的材料阅读助手，围绕一个
 涉及数字时，先逐项输出 quantitative_comparisons，每项写 research_object、result_or_measure、setting_or_time、groups；groups 是 [{group:原文组名或缩写,value:紧邻该组的结果含单位}]，保留原文分组顺序与缩写，不重新命名或调序；缩写定义另写 group_definitions。逐字读取每个组名紧随的数值，不从常识、总体结论或组名列表反推配对。reported_statistics 记录原文给出的统计量（没报告才留空）。一组一数成对，不用多组名字对应一串数字；总体与分层比较、不同指标或结果分别记录。usable_content 解释含义，不重复重排数字。原文没有的值不编。问题限定某设置、时间或子组时，必须分别读总体和指定部分，不能拿总体结果代替，也不能把分析时点当成条件发生时点。
 decision 判断当前具体问题是否解决，而不是材料有没有用：direct_use=足以回答当前问题，或有明确材料纠正其错误前提；local_deep_read=本地有材料但需要读另一部分或完整比较（read_focus 说明具体要读什么）；external_research=缺新的研究对象、方法、比较或验证材料（external_ask 提出保留对象和关系的窄需求）。external_research 也可以有丰富 usable_content：已有背景可用但核心问题没回答，就先保留内容并提出剩余检索需求。不要因为找到相关材料就宣布 direct_use。问题里的预设（例如研究阶段、设计、测量或效果）不是事实，先以材料校正。
 对于“是否已经有某类研究/结果”的问题，找到一个符合条件的实例可以回答；几篇论文未提到，或一篇较早综述说当时没有，不能回答当前是否存在。已有内容可以说明截至该来源时间的研究格局；若仍需确认后来是否出现目标研究，就选择 external_research 并提出该项具体检索，不要一边宣布问题已解决一边仍要求确认其核心答案。只有问题明确限定在这些来源的时间或材料范围内，才可据此直接给出否定答案。
+answers_requested_question 只表示当前材料是否真正回答了原问题和 success_criteria；有用但只覆盖背景或部分条件的内容填 false，明确的实验性阴性结果或明确限于这些来源/时间范围的否定答案可填 true。
 reading_mode=focused_local_read 时已经执行补读，尽力完成具体认识；仍缺新材料则指出缺口，不循环要求读同一材料。摘要能回答背景或明确比较就可用，不强制全文。
 先完成 quantitative_comparisons，再写 usable_content。必须先逐组读原句，不根据总体方向猜测分组方向；结果可以与提问隐含的方向相反。某部分出现反向或无差异时，综合开头就写清不同设置或对象结果不一致，不能先说“一致”再在后面补相反数据。同一指标的总体比较和按条件分层不是同一组数据，不得互换。
-返回 JSON，按此顺序写字段：quantitative_comparisons（无数字则 []）, usable_content, decision, still_missing, read_focus, external_ask, reason。
+返回 JSON，按此顺序写字段：quantitative_comparisons（无数字则 []）, usable_content, decision, answers_requested_question（必须是 JSON boolean；不能确定或 success_criteria 未满足时填 false）, still_missing, read_focus, external_ask, reason。
 """
 
 
@@ -223,13 +227,16 @@ class TriageJudgment:
     cost_cny: float = 0.0
     model_calls: int = 0
     quantitative_comparisons: list[dict[str, Any]] = field(default_factory=list)
+    # Optional so old injected judges and saved fixtures retain their legacy
+    # routing when they do not provide the new semantic answer signal.
+    answers_requested_question: bool | None = None
 
     @property
     def material_ready(self) -> bool:
         return self.decision == "direct_use" and bool(self.usable_content.strip())
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        result = {
             "schema_version": SCHEMA_VERSION,
             "gap": self.gap.to_dict(),
             "decision": self.decision,
@@ -246,11 +253,14 @@ class TriageJudgment:
             "model_calls": int(self.model_calls),
             "quantitative_comparisons": self.quantitative_comparisons,
         }
+        if self.answers_requested_question is not None:
+            result["answers_requested_question"] = bool(self.answers_requested_question)
+        return result
 
     def external_request(self) -> dict[str, Any]:
         """The concrete request work order 03 consumes when local material fails."""
 
-        return {
+        request = {
             "schema_version": REQUEST_SCHEMA,
             "gap_id": self.gap.gap_id,
             "gap_question": self.gap.question,
@@ -266,6 +276,9 @@ class TriageJudgment:
             ],
             "local_reading_cost": {"downloads": 0, "whole_paper_rereads": 0},
         }
+        if self.answers_requested_question is not None:
+            request["answers_requested_question"] = bool(self.answers_requested_question)
+        return request
 
 
 # --------------------------------------------------------------------------
@@ -552,7 +565,9 @@ def _normalize_judgment(raw: Mapping[str, Any], gap: LocalGap) -> dict[str, Any]
     def text(key: str) -> str:
         return readable(raw.get(key))
 
-    return {
+    answer_signal = raw.get("answers_requested_question")
+    answers_requested_question = answer_signal if isinstance(answer_signal, bool) else None
+    normalized = {
         "decision": decision,
         "usable_content": text("usable_content"),
         "still_missing": text("still_missing"),
@@ -561,6 +576,9 @@ def _normalize_judgment(raw: Mapping[str, Any], gap: LocalGap) -> dict[str, Any]
         "reason": text("reason"),
         "quantitative_comparisons": [dict(row) for row in (raw.get("quantitative_comparisons") or []) if isinstance(row, Mapping)],
     }
+    if answers_requested_question is not None:
+        normalized["answers_requested_question"] = answers_requested_question
+    return normalized
 
 
 class QwenLocalTriageJudge:
@@ -700,6 +718,7 @@ def triage_gap(
                 local_reading=bundle,
                 model_calls=int(getattr(judge, "last_call_count", 1)),
                 quantitative_comparisons=normalized.get("quantitative_comparisons", []),
+                answers_requested_question=normalized.get("answers_requested_question"),
             )
             judgment.usable_content = _with_comparisons(judgment.usable_content, judgment.quantitative_comparisons)
             judgment = _apply_guardrails(judgment, bundle)
@@ -754,11 +773,20 @@ def _apply_guardrails(judgment: TriageJudgment, bundle: LocalReadingBundle) -> T
     if not bundle.passages:
         judgment.decision = "external_research"
         judgment.reason = "no_local_passage;" + judgment.reason
+        if judgment.answers_requested_question is False and not judgment.still_missing.strip():
+            judgment.still_missing = gap.question
         return judgment
     if judgment.decision == "direct_use":
         if not judgment.usable_content.strip():
             judgment.decision = "external_research"
             judgment.reason = "direct_use_without_stated_content;" + judgment.reason
+        elif judgment.answers_requested_question is False:
+            # Preserve useful partial context, but do not let it satisfy a
+            # broader question whose requested object or success criteria are
+            # still unmet.  The original question is the bounded external ask.
+            judgment.decision = "external_research"
+            judgment.still_missing = judgment.still_missing or gap.question
+            judgment.reason = "useful_context_does_not_answer_question;" + judgment.reason
         elif gap.intended_use in SHALLOW_OK_USES and bundle.planning_summary:
             # Background use may rely on a clear summary statement.
             judgment.reason = judgment.reason or "background_use_allowed_from_summary"
@@ -770,6 +798,8 @@ def _apply_guardrails(judgment: TriageJudgment, bundle: LocalReadingBundle) -> T
         judgment.external_ask = (
             f"Local material does not cover: {gap.question} (intended use: {gap.intended_use})."
         )
+    if judgment.answers_requested_question is False and not judgment.still_missing.strip():
+        judgment.still_missing = gap.question
     return judgment
 
 
@@ -889,7 +919,7 @@ def build_writer_material(
         }
         for passage in judgment.passages
     ]
-    return {
+    result = {
         "schema_version": WRITER_MATERIAL_SCHEMA,
         "chapter_id": chapter_id,
         "unit_key": unit_key,
@@ -912,6 +942,9 @@ def build_writer_material(
             "source": judgment.source,
         },
     }
+    if judgment.answers_requested_question is not None:
+        result["answers_requested_question"] = bool(judgment.answers_requested_question)
+    return result
 
 
 # --------------------------------------------------------------------------

@@ -1,0 +1,126 @@
+{
+  "mode": "run",
+  "model": "qwen3.5-plus",
+  "language": "zh",
+  "arrangement": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_case_restore_20261002\\CH02\\CHAPTER_ARRANGEMENT.json",
+  "output_root": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_case_restore_20261002\\CH02_U02",
+  "model_calls": 1,
+  "units": [
+    {
+      "chapter_id": "CH02",
+      "unit_id": "CH02_U02",
+      "focus": "胆汁酸代谢 - 肠道屏障-Treg 迁移轴及器官特异性毒性",
+      "paragraph_tasks": 3,
+      "table_tasks": 0,
+      "source_count": 13,
+      "with_study_summary_A": 13,
+      "with_review_planning_B": 13,
+      "with_deep_read_material": [
+        "P0574"
+      ],
+      "material_read_from_disk": [
+        "P0180",
+        "P0201",
+        "P0293",
+        "P0370",
+        "P0391",
+        "P0424",
+        "P0481",
+        "P0527",
+        "P0574",
+        "P0576",
+        "P0579",
+        "P0580",
+        "P0581"
+      ],
+      "material_truncated": [],
+      "input_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_case_restore_20261002\\CH02_U02\\CH02_CH02_U02\\UNIT_INPUT.json",
+      "messages_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_case_restore_20261002\\CH02_U02\\CH02_CH02_U02\\UNIT_MESSAGES.json",
+      "estimate": {
+        "prompt_tokens_estimate": 283958,
+        "reserved_input_tokens": 326224,
+        "output_tokens": 12000,
+        "thinking_budget": 4000,
+        "total_context_tokens": 342224,
+        "estimated_cost_cny": 1.688896,
+        "model": "qwen3.5-plus",
+        "tokenizer": "utf8_conservative_upper_bound"
+      },
+      "input_chars": 182148,
+      "warnings": [
+        {
+          "code": "input_too_large_consider_splitting_unit",
+          "prompt_tokens_estimate": 283958,
+          "threshold_tokens": 65536,
+          "input_chars": 182148,
+          "note": "没有静默截断后续来源；建议把该单元拆成更小的写作任务"
+        }
+      ],
+      "planning_revision": true,
+      "status": "written",
+      "body_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_case_restore_20261002\\CH02_U02\\CH02_CH02_U02\\UNIT_BODY.md",
+      "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_case_restore_20261002\\CH02_U02\\CH02_CH02_U02\\UNIT_RESULT.json",
+      "used_source_handles": [
+        "P0574",
+        "P0424",
+        "P0527",
+        "P0576",
+        "P0201",
+        "P0180",
+        "P0481",
+        "P0579",
+        "P0580"
+      ],
+      "unused_source_handles": [
+        "P0581",
+        "P0370",
+        "P0391",
+        "P0293"
+      ],
+      "unknown_citations": [],
+      "finish_reason": "stop",
+      "complete": true,
+      "completion_status": "complete",
+      "partial_error": "",
+      "usage": {
+        "prompt_tokens": 65321,
+        "completion_tokens": 4810,
+        "total_tokens": 70131,
+        "completion_tokens_details": {
+          "reasoning_tokens": 3347,
+          "text_tokens": 4810
+        },
+        "prompt_tokens_details": {
+          "text_tokens": 65321
+        }
+      },
+      "issues": [
+        {
+          "unit_id": "CH02_U02",
+          "problem": "任务 P03 指定 P0581 作为'肝细胞癌模型中高浓度结合型与次级胆汁酸诱导氧化应激耗竭 CD8+ T 细胞'的主论据，但 P0581 实际内容为'转移性结直肠癌中 Artemin 与 ICI 疗效的相关性'，不涉及胆汁酸或 HCC 机制。",
+          "source_handles": [
+            "P0581"
+          ],
+          "action": "chapter_owner"
+        },
+        {
+          "unit_id": "CH02_U02",
+          "problem": "任务 P03 中关于 HCC 胆汁酸毒性的证据实际引自 P0574 深读材料中引用的 Varanasi et al. (2025) 研究，以及 P0391 综述内容；正文已据此修正，但需更新任务来源映射。",
+          "source_handles": [
+            "P0574",
+            "P0391"
+          ],
+          "action": "chapter_owner"
+        },
+        {
+          "unit_id": "CH02_U02",
+          "problem": "任务 P02 指定 P0576 为'共生菌定植'主论据，但 P0576 主题为'抗生素治疗对免疫疗法有效性的影响'。正文已调整为从'抗生素破坏定植'的反面角度使用该来源，建议任务描述微调以匹配来源实际内容。",
+          "source_handles": [
+            "P0576"
+          ],
+          "action": "chapter_owner"
+        }
+      ]
+    }
+  ]
+}

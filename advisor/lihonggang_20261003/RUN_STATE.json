@@ -1,0 +1,974 @@
+{
+  "schema_version": "lihonggang.full_acceptance.run_state.v1",
+  "status": "body_assembly_complete",
+  "paid_stage": "body_assembly_20261002",
+  "process_id": null,
+  "started_at_utc": "2026-10-02T01:43:58.3236689Z",
+  "launched_at_utc": "2026-10-02T05:43:12.563774Z",
+  "finished_at_utc": "2026-10-02T07:18:16.9770522Z",
+  "stable_output_dir": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1",
+  "shared_budget_ledger": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+  "budget_limit_cny": 50,
+  "external_supplement_enabled": true,
+  "stdout_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_04_CH04\\BODY_WRITING_CH04_20261002_193718.stdout.log",
+  "stderr_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_04_CH04\\BODY_WRITING_CH04_20261002_193718.stderr.log",
+  "previous_attempts": [
+    {
+      "stdout_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\PLAN_LEVEL1.stdout.log",
+      "status": "failed_before_paid_call",
+      "process_id": 27044,
+      "error": "output_directory_exists_use_resume",
+      "stderr_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\PLAN_LEVEL1.stderr.log"
+    }
+  ],
+  "command": {
+    "executable": "C:\\Anaconda\\python.exe",
+    "args": [
+      "-X",
+      "utf8",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree\\scripts\\upgrade3\\chapter_arrangement.py",
+      "--all-chapters",
+      "--packet-root",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1",
+      "--output-root",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002",
+      "--run",
+      "--model",
+      "qwen3.5-plus",
+      "--key-file",
+      "F:\\OptoMind-Review-2\\api_keys\\qwen-api-key.txt",
+      "--budget-ledger",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+      "--round-cap-cny",
+      "10",
+      "--output-tokens",
+      "20000",
+      "--thinking-budget",
+      "12000",
+      "--timeout-seconds",
+      "900",
+      "--max-source-chars",
+      "240",
+      "--planning-revision"
+    ],
+    "working_directory": "F:\\OptoMind-Review-2",
+    "stdout_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\BODY_ARRANGEMENT_20261002_191906.stdout.log",
+    "stderr_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\BODY_ARRANGEMENT_20261002_191906.stderr.log"
+  },
+  "paid_stage_status": "full_planning_serial_resume_after_quality_acceptance",
+  "exit_code": null,
+  "ledger_summary": {
+    "limit_cny": 50.0,
+    "settled_rows": 54,
+    "actual_settled_cny": 4.6558742,
+    "uncertain_rows": 25,
+    "uncertain_held_cny": 28.633656,
+    "reserved_rows": 0,
+    "available_after_settled_and_uncertain_cny": 16.7104698
+  },
+  "artifact_paths": {
+    "provisional_scope": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\stages\\provisional_scope.json",
+    "level1_tools": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\stages\\level1_tools.json",
+    "level1_outline": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\stages\\level1_outline.json",
+    "retrieval_loop": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\retrieval_loop.jsonl",
+    "ledger": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+    "stderr_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\FULL_PLAN_RESUME_AFTER_QUALITY_ACCEPTANCE.stderr.log",
+    "stdout_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\FULL_PLAN_RESUME_AFTER_QUALITY_ACCEPTANCE.stdout.log",
+    "quality_incident": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\QUALITY_INCIDENT_20261002.json",
+    "chapter_proposals": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\stages\\chapter_proposals",
+    "resume_backup": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\resume_after_quality_acceptance_20261002_1018"
+  },
+  "repair": {
+    "kind": "clinical_evidence_feedback_scope",
+    "invalidated_stage": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\stages\\level1_outline.json",
+    "pre_repair_outline": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\pre_resume\\level1_outline.pre_repair.json",
+    "actual_journal": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\retrieval_loop.jsonl",
+    "raw_snapshot": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\repair_pre_scope_feedback_20261002\\observations\\raw_responses"
+  },
+  "stop_after_level1": false,
+  "previous_repair": {
+    "pid": 33144,
+    "status": "completed",
+    "exit_code": 0,
+    "stdout_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\PLAN_LEVEL1_SCOPE_REPAIR.stdout.log",
+    "stderr_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\PLAN_LEVEL1_SCOPE_REPAIR.stderr.log",
+    "result": {
+      "status": "partial",
+      "completed_through": "level1",
+      "increment_cny": 0.1394254,
+      "total_settled_cny_before_full_plan": 2.8518202
+    },
+    "review": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\ROOT_REPAIRED_LEVEL1_REVIEW.md"
+  },
+  "updated_at_utc": "2026-10-02T05:56:33.013452Z",
+  "full_plan_command": [
+    "C:\\Anaconda\\python.exe",
+    "-X",
+    "utf8",
+    "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree\\scripts\\upgrade3\\progressive_review_plan.py",
+    "--run",
+    "--pool",
+    "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_astra_repair\\INPUT_POOL.jsonl",
+    "--plan",
+    "F:\\OptoMind-Review-2\\outputs\\upgrade3\\CROSSDOMAIN_REWORK\\X1_microbiome_ICI\\PLAN.json",
+    "--output-dir",
+    "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1",
+    "--topic-id",
+    "microbiome_ici_review",
+    "--key-file",
+    "F:\\OptoMind-Review-2\\api_keys\\qwen-api-key.txt",
+    "--budget-ledger",
+    "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+    "--budget-limit-cny",
+    "50",
+    "--chapter-model",
+    "qwen3.7-flash",
+    "--timeout-seconds",
+    "900",
+    "--thinking-budget",
+    "8192",
+    "--output-tokens",
+    "32000",
+    "--deep-read-limit",
+    "40",
+    "--chapter-workers",
+    "3",
+    "--reader-workers",
+    "3",
+    "--tokenizer",
+    "F:\\OptoMind-Review-2\\data\\tokenizers\\qwen3_5_9b\\tokenizer.json",
+    "--local-material-index",
+    "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\planning_material_index.sqlite",
+    "--planning-revision",
+    "--resume"
+  ],
+  "full_plan_stdout_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\FULL_PLAN_AFTER_REPAIR.stdout.log",
+  "full_plan_stderr_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\FULL_PLAN_AFTER_REPAIR.stderr.log",
+  "no_stop_after_level1": true,
+  "stage_gate_after_full_plan": "root substantive final-plan review required before arrangement or writing",
+  "stop_reason": "user_accepted_nonblocking_quality_observation_resume_from_harmonize_scope",
+  "incident_record": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\QUALITY_INCIDENT_20261002.json",
+  "next_action_gate": "root_content_review_before_any_front_back_or_post_body_work",
+  "serial_canary": {
+    "chapter_workers": 1,
+    "preserved_cache_batches": [
+      "batch_001.json",
+      "batch_002.json",
+      "batch_003.json",
+      "batch_004.json",
+      "batch_005.json"
+    ],
+    "first_new_batch": "batch_006",
+    "command": [
+      "C:\\Anaconda\\python.exe",
+      "-X",
+      "utf8",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree\\scripts\\upgrade3\\progressive_review_plan.py",
+      "--run",
+      "--pool",
+      "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_astra_repair\\INPUT_POOL.jsonl",
+      "--plan",
+      "F:\\OptoMind-Review-2\\outputs\\upgrade3\\CROSSDOMAIN_REWORK\\X1_microbiome_ICI\\PLAN.json",
+      "--output-dir",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1",
+      "--topic-id",
+      "microbiome_ici_review",
+      "--key-file",
+      "F:\\OptoMind-Review-2\\api_keys\\qwen-api-key.txt",
+      "--budget-ledger",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+      "--budget-limit-cny",
+      "50",
+      "--chapter-model",
+      "qwen3.7-flash",
+      "--timeout-seconds",
+      "900",
+      "--thinking-budget",
+      "8192",
+      "--output-tokens",
+      "32000",
+      "--deep-read-limit",
+      "40",
+      "--chapter-workers",
+      "1",
+      "--reader-workers",
+      "3",
+      "--tokenizer",
+      "F:\\OptoMind-Review-2\\data\\tokenizers\\qwen3_5_9b\\tokenizer.json",
+      "--local-material-index",
+      "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\planning_material_index.sqlite",
+      "--planning-revision",
+      "--resume"
+    ],
+    "prior_transport_fix_record": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\FULL_PLAN_TRANSPORT_FIX_RECORD_20261002.json"
+  },
+  "quality_gate": {
+    "status": "accepted_nonblocking_observation",
+    "incident": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\QUALITY_INCIDENT_20261002.json",
+    "repair_applied": false,
+    "paid_resume_authorized": true,
+    "resume_stage": "harmonize_scope",
+    "current_stage": "chapters_tools"
+  },
+  "resumed_at_utc": "2026-10-02T05:42:35.543532Z",
+  "resume_after_quality_acceptance": {
+    "authorized": true,
+    "decision_record": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\QUALITY_INCIDENT_20261002.json",
+    "resume_stage": "harmonize_scope",
+    "chapter_workers": 1,
+    "reader_workers": 3,
+    "backup_dir": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\resume_after_quality_acceptance_20261002_1018",
+    "stdout_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\FULL_PLAN_RESUME_AFTER_QUALITY_ACCEPTANCE.stdout.log",
+    "stderr_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\FULL_PLAN_RESUME_AFTER_QUALITY_ACCEPTANCE.stderr.log",
+    "do_not_release_uncertain": true,
+    "downstream_gate": "stop before arrangement or writing for root final-plan review",
+    "process_id": 36116,
+    "launched_at_utc": "2026-10-02T05:43:12.563774Z"
+  },
+  "current_stage": "body_assembly_complete",
+  "completed_stages": [
+    "provisional_scope",
+    "level1_tools",
+    "level1_outline",
+    "source_routing",
+    "chapter_proposals",
+    "harmonized_scope",
+    "level2_tools",
+    "finalize_chapter_scope",
+    "chapter_need_analysis"
+  ],
+  "current_stage_observed_at": "2026-10-02T07:16:31.3160822Z",
+  "last_log": "planning_level1\\FULL_PLAN_RESUME_AFTER_QUALITY_ACCEPTANCE.stdout.log",
+  "ledger_snapshot": {
+    "settled_count": 129,
+    "settled_actual_cny": 9.6389326,
+    "uncertain_count": 25,
+    "uncertain_amount_cny": 28.633656,
+    "reserved_count": 0,
+    "reserved_amount_cny": 0,
+    "source": "budget.sqlite",
+    "observed_at": "2026-10-02T07:18:16.9770522Z"
+  },
+  "process_exit_code": 0,
+  "failure_type": "ProgressivePlanError",
+  "failure_code": "planner_context_preflight_exceeded",
+  "failure_detail": "chapter_details:input=1118136:output=16000:thinking=2048",
+  "failure_artifact": "planning_level1\\RUN_FAILURE.json",
+  "continuation_20261002": {
+    "pid": 32536,
+    "started_at": "2026-10-02T18:21:40.0376595+08:00",
+    "status": "running",
+    "stdout_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\FULL_BODY_CONTINUATION_20261002_182137.stdout.log",
+    "stderr_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\FULL_BODY_CONTINUATION_20261002_182137.stderr.log",
+    "ledger": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+    "resume": true,
+    "chapter_workers": 1,
+    "output_tokens": 32000,
+    "thinking_budget": 8192
+  },
+  "budget_authorized_release": {
+    "recorded_at": "2026-10-02T18:26:32.827227+08:00",
+    "artifact": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\AUTHORIZED_UNCERTAIN_RELEASE_20261002.json",
+    "released_uncertain_count": 25,
+    "released_uncertain_original_amount_cny": 28.633656,
+    "provider_spend_confirmed": false,
+    "settled_unchanged_by_release": true,
+    "ledger_summary": {
+      "released_authorized": {
+        "count": 25,
+        "reserved_amount_cny": 0.0,
+        "actual_cny": 0.0
+      },
+      "reserved": {
+        "count": 1,
+        "reserved_amount_cny": 0.796524,
+        "actual_cny": 0.0
+      },
+      "settled": {
+        "count": 130,
+        "reserved_amount_cny": 55.3160088,
+        "actual_cny": 10.3029586
+      }
+    }
+  },
+  "failure": null,
+  "continuation_retry_20261002": {
+    "pid": 5200,
+    "started_at": "2026-10-02T18:45:33.3572477+08:00",
+    "status": "running",
+    "stdout_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\FULL_BODY_CONTINUATION_AFTER_CASEGROUP_FIX_20261002_184531.stdout.log",
+    "stderr_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\FULL_BODY_CONTINUATION_AFTER_CASEGROUP_FIX_20261002_184531.stderr.log",
+    "previous_failure": "TypeError: build_local_material_payload() got an unexpected keyword argument deep_material_by_paper",
+    "fix": "deep_material keyword",
+    "tests": "py_compile; body_boundary 30 passed; candidate material smoke ok"
+  },
+  "planning_completion_20261002": {
+    "status": "completed_no_stderr",
+    "output": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\DETAILED_REVIEW_PLAN.json",
+    "markdown": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\DETAILED_REVIEW_PLAN.md",
+    "writer_packets": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\writer_packets",
+    "process_id": 5200,
+    "error": "prior case_groups TypeError fixed as deep_material; focused tests passed"
+  },
+  "body_arrangement_20261002": {
+    "pid": 18904,
+    "started_at": "2026-10-02T19:19:08.6868891+08:00",
+    "status": "running",
+    "stdout_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\BODY_ARRANGEMENT_20261002_191906.stdout.log",
+    "stderr_log": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\BODY_ARRANGEMENT_20261002_191906.stderr.log",
+    "packet_root": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1",
+    "output_root": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002",
+    "model": "qwen3.5-plus",
+    "round_cap_cny": 10,
+    "output_tokens": 20000,
+    "thinking_budget": 12000
+  },
+  "body_writing_20261002": {
+    "started_at": "2026-10-02T19:33:26.1693128+08:00",
+    "concurrency": 3,
+    "workers": [
+      {
+        "chapter": "CH01",
+        "worker": "worker_01_CH01",
+        "pid": 18896,
+        "stdout": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_01_CH01\\BODY_WRITING_CH01_20261002_193323.stdout.log",
+        "stderr": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_01_CH01\\BODY_WRITING_CH01_20261002_193323.stderr.log",
+        "output_root": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_01_CH01",
+        "arrangement": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH01\\CHAPTER_ARRANGEMENT.json",
+        "units": [
+          "CH01_U01",
+          "CH01_U02",
+          "CH01_U03"
+        ],
+        "args": [
+          "-X",
+          "utf8",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree\\scripts\\upgrade3\\review_unit_writer.py",
+          "--arrangement",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH01\\CHAPTER_ARRANGEMENT.json",
+          "--view",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH01\\ARRANGEMENT_INPUT.json",
+          "--output-root",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_01_CH01",
+          "--model",
+          "qwen3.5-plus",
+          "--max-material-chars-per-source",
+          "0",
+          "--output-tokens",
+          "12000",
+          "--thinking-budget",
+          "4000",
+          "--timeout-seconds",
+          "900",
+          "--key-file",
+          "F:\\OptoMind-Review-2\\api_keys\\qwen-api-key.txt",
+          "--budget-ledger",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+          "--planning-revision",
+          "--run",
+          "--unit",
+          "CH01_U01",
+          "--unit",
+          "CH01_U02",
+          "--unit",
+          "CH01_U03"
+        ]
+      },
+      {
+        "chapter": "CH02",
+        "worker": "worker_02_CH02",
+        "pid": 13840,
+        "stdout": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_02_CH02\\BODY_WRITING_CH02_20261002_193323.stdout.log",
+        "stderr": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_02_CH02\\BODY_WRITING_CH02_20261002_193323.stderr.log",
+        "output_root": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_02_CH02",
+        "arrangement": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH02\\CHAPTER_ARRANGEMENT.json",
+        "units": [
+          "CH02_U01",
+          "CH02_U02",
+          "CH02_U03",
+          "CH02_U04"
+        ],
+        "args": [
+          "-X",
+          "utf8",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree\\scripts\\upgrade3\\review_unit_writer.py",
+          "--arrangement",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH02\\CHAPTER_ARRANGEMENT.json",
+          "--view",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH02\\ARRANGEMENT_INPUT.json",
+          "--output-root",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_02_CH02",
+          "--model",
+          "qwen3.5-plus",
+          "--max-material-chars-per-source",
+          "0",
+          "--output-tokens",
+          "12000",
+          "--thinking-budget",
+          "4000",
+          "--timeout-seconds",
+          "900",
+          "--key-file",
+          "F:\\OptoMind-Review-2\\api_keys\\qwen-api-key.txt",
+          "--budget-ledger",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+          "--planning-revision",
+          "--run",
+          "--unit",
+          "CH02_U01",
+          "--unit",
+          "CH02_U02",
+          "--unit",
+          "CH02_U03",
+          "--unit",
+          "CH02_U04"
+        ]
+      },
+      {
+        "chapter": "CH03",
+        "worker": "worker_03_CH03",
+        "pid": 21064,
+        "stdout": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_03_CH03\\BODY_WRITING_CH03_20261002_193323.stdout.log",
+        "stderr": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_03_CH03\\BODY_WRITING_CH03_20261002_193323.stderr.log",
+        "output_root": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_03_CH03",
+        "arrangement": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH03\\CHAPTER_ARRANGEMENT.json",
+        "units": [
+          "CH03_U01",
+          "CH03_U02",
+          "CH03_U03",
+          "CH03_U04"
+        ],
+        "args": [
+          "-X",
+          "utf8",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree\\scripts\\upgrade3\\review_unit_writer.py",
+          "--arrangement",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH03\\CHAPTER_ARRANGEMENT.json",
+          "--view",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH03\\ARRANGEMENT_INPUT.json",
+          "--output-root",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_03_CH03",
+          "--model",
+          "qwen3.5-plus",
+          "--max-material-chars-per-source",
+          "0",
+          "--output-tokens",
+          "12000",
+          "--thinking-budget",
+          "4000",
+          "--timeout-seconds",
+          "900",
+          "--key-file",
+          "F:\\OptoMind-Review-2\\api_keys\\qwen-api-key.txt",
+          "--budget-ledger",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+          "--planning-revision",
+          "--run",
+          "--unit",
+          "CH03_U01",
+          "--unit",
+          "CH03_U02",
+          "--unit",
+          "CH03_U03",
+          "--unit",
+          "CH03_U04"
+        ]
+      }
+    ],
+    "alive": [
+      true,
+      true,
+      true
+    ],
+    "ledger": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+    "model": "qwen3.5-plus",
+    "output_tokens": 12000,
+    "thinking_budget": 4000,
+    "max_material_chars_per_source": 0
+  },
+  "body_writing_workers_04_05": {
+    "started_at": "2026-10-02T19:37:21.7190199+08:00",
+    "concurrency": 2,
+    "workers": [
+      {
+        "chapter": "CH04",
+        "worker": "worker_04_CH04",
+        "pid": 34544,
+        "stdout": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_04_CH04\\BODY_WRITING_CH04_20261002_193718.stdout.log",
+        "stderr": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_04_CH04\\BODY_WRITING_CH04_20261002_193718.stderr.log",
+        "output_root": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_04_CH04",
+        "arrangement": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH04\\CHAPTER_ARRANGEMENT.json",
+        "units": [
+          "CH04_U01",
+          "CH04_U02",
+          "CH04_U03",
+          "CH04_U04"
+        ],
+        "args": [
+          "-X",
+          "utf8",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree\\scripts\\upgrade3\\review_unit_writer.py",
+          "--arrangement",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH04\\CHAPTER_ARRANGEMENT.json",
+          "--view",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH04\\ARRANGEMENT_INPUT.json",
+          "--output-root",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_04_CH04",
+          "--model",
+          "qwen3.5-plus",
+          "--max-material-chars-per-source",
+          "0",
+          "--output-tokens",
+          "12000",
+          "--thinking-budget",
+          "4000",
+          "--timeout-seconds",
+          "900",
+          "--key-file",
+          "F:\\OptoMind-Review-2\\api_keys\\qwen-api-key.txt",
+          "--budget-ledger",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+          "--planning-revision",
+          "--run",
+          "--unit",
+          "CH04_U01",
+          "--unit",
+          "CH04_U02",
+          "--unit",
+          "CH04_U03",
+          "--unit",
+          "CH04_U04"
+        ]
+      },
+      {
+        "chapter": "CH05",
+        "worker": "worker_05_CH05",
+        "pid": 33340,
+        "stdout": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_05_CH05\\BODY_WRITING_CH05_20261002_193718.stdout.log",
+        "stderr": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_05_CH05\\BODY_WRITING_CH05_20261002_193718.stderr.log",
+        "output_root": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_05_CH05",
+        "arrangement": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH05\\CHAPTER_ARRANGEMENT.json",
+        "units": [
+          "CH05_U01",
+          "CH05_U02",
+          "CH05_U03",
+          "CH05_U04",
+          "CH05_U05"
+        ],
+        "args": [
+          "-X",
+          "utf8",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree\\scripts\\upgrade3\\review_unit_writer.py",
+          "--arrangement",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH05\\CHAPTER_ARRANGEMENT.json",
+          "--view",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_20261002\\CH05\\ARRANGEMENT_INPUT.json",
+          "--output-root",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_05_CH05",
+          "--model",
+          "qwen3.5-plus",
+          "--max-material-chars-per-source",
+          "0",
+          "--output-tokens",
+          "12000",
+          "--thinking-budget",
+          "4000",
+          "--timeout-seconds",
+          "900",
+          "--key-file",
+          "F:\\OptoMind-Review-2\\api_keys\\qwen-api-key.txt",
+          "--budget-ledger",
+          "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+          "--planning-revision",
+          "--run",
+          "--unit",
+          "CH05_U01",
+          "--unit",
+          "CH05_U02",
+          "--unit",
+          "CH05_U03",
+          "--unit",
+          "CH05_U04",
+          "--unit",
+          "CH05_U05"
+        ]
+      }
+    ],
+    "alive": [
+      true,
+      true
+    ],
+    "ledger": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+    "model": "qwen3.5-plus",
+    "output_tokens": 12000,
+    "thinking_budget": 4000,
+    "max_material_chars_per_source": 0
+  },
+  "ledger_summary_final": {
+    "recorded_at": "2026-10-02T11:45:24.591895+00:00",
+    "ledger": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\budget.sqlite",
+    "limit_cny": 50.0,
+    "statuses": {
+      "released_authorized": {
+        "count": 25,
+        "amount_cny": 0.0,
+        "actual_cny": 0.0
+      },
+      "settled": {
+        "count": 198,
+        "amount_cny": 107.42220879999999,
+        "actual_cny": 23.1512026
+      }
+    },
+    "released_authorized_artifact": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\AUTHORIZED_UNCERTAIN_RELEASE_20261002.json",
+    "released_uncertain_provider_spend_confirmed": false
+  },
+  "body_assembly_20261002": {
+    "status": "complete",
+    "finished_at": "2026-10-02T11:45:24.591895+00:00",
+    "manifest": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_assembly_20261002\\batch\\MANIFEST.json",
+    "batch_jobs": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_assembly_20261002\\batch\\BATCH_JOBS.json",
+    "assembly_root": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_assembly_20261002\\assembled",
+    "review_draft": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_assembly_20261002\\assembled\\REVIEW_DRAFT.md",
+    "review_draft_handles": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_assembly_20261002\\assembled\\REVIEW_DRAFT_HANDLES.md",
+    "references": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_assembly_20261002\\assembled\\REFERENCES.json",
+    "report": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_assembly_20261002\\assembled\\RUN_REPORT.md",
+    "summary": {
+      "schema_version": "optomind.full_review_draft.run_report.v1",
+      "status": "complete",
+      "problems_resolved": false,
+      "pending_problems": [
+        {
+          "unit_id": "CH01_U02",
+          "code": "writer_issues:1",
+          "issues": [
+            {
+              "unit_id": "CH01_U02",
+              "problem": "原任务指定的来源 P0523 因无法解析（unresolvable_handle）已移至未使用来源，本单元仅能使用 P0520（2025 年综述）。P0520 主要总结了特定菌属与 ICI 疗效的基线关联及分子机制，未提供具体的纵向β多样性变化幅度数据或直接比较'清除有害菌 vs. 供体定植'策略的原始实验数据。",
+              "source_handles": [
+                "P0520"
+              ],
+              "action": "chapter_owner"
+            }
+          ]
+        },
+        {
+          "unit_id": "CH04_U03",
+          "code": "writer_issues:3",
+          "issues": [
+            {
+              "unit_id": "CH04_U03",
+              "problem": "sMAdCAM-1 在不同癌症类型中的阈值一致性及跨癌种验证数据在现有材料中未提供，仅确认在 mRCC 队列（n=612）中完成回顾性验证",
+              "source_handles": [
+                "P0574"
+              ],
+              "action": "supplement"
+            },
+            {
+              "unit_id": "CH04_U03",
+              "problem": "TOPOSCORE 在独立前瞻性队列中的具体验证准确率及临床效用数据未完全提供，现有材料主要基于回顾性分析（预测准确率 69.8%）",
+              "source_handles": [
+                "P0574"
+              ],
+              "action": "supplement"
+            },
+            {
+              "unit_id": "CH04_U03",
+              "problem": "P0097 的功能预测基于 16S 数据推断（PICRUSt2），非直接宏基因组测序，分辨率和准确性受限，需在综述中明确这一方法学局限",
+              "source_handles": [
+                "P0097"
+              ],
+              "action": "omit"
+            }
+          ]
+        },
+        {
+          "unit_id": "",
+          "code": "planning_status:partial"
+        }
+      ],
+      "review_title": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?",
+      "expected_units": 20,
+      "manifest_units": 20,
+      "loaded_units": 20,
+      "missing_units": [],
+      "errors": [],
+      "used_papers": 59,
+      "unused_papers": 1,
+      "catalog_papers": 60,
+      "table_count": 3,
+      "table_handle_replacements": 0,
+      "unknown_table_handles": [],
+      "unknown_citations": [
+        "P584"
+      ],
+      "planning_status": "partial",
+      "arrangement_status": "arranged",
+      "arrangement_issues": [],
+      "unit_rows": [
+        {
+          "chapter_id": "CH01",
+          "unit_id": "CH01_U01",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_01_CH01\\CH01_CH01_U01\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1332,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH01",
+          "unit_id": "CH01_U02",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_01_CH01\\CH01_CH01_U02\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1211,
+          "tables": 0,
+          "pending_problem": "writer_issues:1",
+          "completion_status": "complete",
+          "issues": [
+            {
+              "unit_id": "CH01_U02",
+              "problem": "原任务指定的来源 P0523 因无法解析（unresolvable_handle）已移至未使用来源，本单元仅能使用 P0520（2025 年综述）。P0520 主要总结了特定菌属与 ICI 疗效的基线关联及分子机制，未提供具体的纵向β多样性变化幅度数据或直接比较'清除有害菌 vs. 供体定植'策略的原始实验数据。",
+              "source_handles": [
+                "P0520"
+              ],
+              "action": "chapter_owner"
+            }
+          ]
+        },
+        {
+          "chapter_id": "CH01",
+          "unit_id": "CH01_U03",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_01_CH01\\CH01_CH01_U03\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1536,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH02",
+          "unit_id": "CH02_U01",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_02_CH02\\CH02_CH02_U01\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1518,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH02",
+          "unit_id": "CH02_U02",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_02_CH02\\CH02_CH02_U02\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1355,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH02",
+          "unit_id": "CH02_U03",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_02_CH02\\CH02_CH02_U03\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1405,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH02",
+          "unit_id": "CH02_U04",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_02_CH02\\CH02_CH02_U04\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1482,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH03",
+          "unit_id": "CH03_U01",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_03_CH03\\CH03_CH03_U01\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 2361,
+          "tables": 1,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH03",
+          "unit_id": "CH03_U02",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_03_CH03\\CH03_CH03_U02\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1363,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH03",
+          "unit_id": "CH03_U03",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_03_CH03\\CH03_CH03_U03\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1420,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH03",
+          "unit_id": "CH03_U04",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_03_CH03\\CH03_CH03_U04\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1879,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH04",
+          "unit_id": "CH04_U01",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_04_CH04\\CH04_CH04_U01\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 2590,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH04",
+          "unit_id": "CH04_U02",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_04_CH04\\CH04_CH04_U02\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1400,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH04",
+          "unit_id": "CH04_U03",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_04_CH04\\CH04_CH04_U03\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 2929,
+          "tables": 0,
+          "pending_problem": "writer_issues:3",
+          "completion_status": "complete",
+          "issues": [
+            {
+              "unit_id": "CH04_U03",
+              "problem": "sMAdCAM-1 在不同癌症类型中的阈值一致性及跨癌种验证数据在现有材料中未提供，仅确认在 mRCC 队列（n=612）中完成回顾性验证",
+              "source_handles": [
+                "P0574"
+              ],
+              "action": "supplement"
+            },
+            {
+              "unit_id": "CH04_U03",
+              "problem": "TOPOSCORE 在独立前瞻性队列中的具体验证准确率及临床效用数据未完全提供，现有材料主要基于回顾性分析（预测准确率 69.8%）",
+              "source_handles": [
+                "P0574"
+              ],
+              "action": "supplement"
+            },
+            {
+              "unit_id": "CH04_U03",
+              "problem": "P0097 的功能预测基于 16S 数据推断（PICRUSt2），非直接宏基因组测序，分辨率和准确性受限，需在综述中明确这一方法学局限",
+              "source_handles": [
+                "P0097"
+              ],
+              "action": "omit"
+            }
+          ]
+        },
+        {
+          "chapter_id": "CH04",
+          "unit_id": "CH04_U04",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_04_CH04\\CH04_CH04_U04\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1919,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH05",
+          "unit_id": "CH05_U01",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_05_CH05\\CH05_CH05_U01\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1374,
+          "tables": 1,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH05",
+          "unit_id": "CH05_U02",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_05_CH05\\CH05_CH05_U02\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 826,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH05",
+          "unit_id": "CH05_U03",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_05_CH05\\CH05_CH05_U03\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1061,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH05",
+          "unit_id": "CH05_U04",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_05_CH05\\CH05_CH05_U04\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1690,
+          "tables": 1,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        },
+        {
+          "chapter_id": "CH05",
+          "unit_id": "CH05_U05",
+          "result_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_20261002\\worker_05_CH05\\CH05_CH05_U05\\UNIT_RESULT.json",
+          "status": "written",
+          "body_chars": 1154,
+          "tables": 0,
+          "pending_problem": "",
+          "completion_status": "complete",
+          "issues": []
+        }
+      ],
+      "editorial_repairs": {},
+      "references_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_assembly_20261002\\assembled\\REFERENCES.json",
+      "batch_root": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_assembly_20261002\\batch",
+      "front_matter": "",
+      "back_matter": "",
+      "title_overrides": 0,
+      "table_titles": 0
+    },
+    "front_back_generated": false
+  }
+}

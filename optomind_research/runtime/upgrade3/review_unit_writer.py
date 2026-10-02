@@ -957,19 +957,90 @@ def _decode_json_content(value: str) -> Mapping[str, Any] | None:
     try:
         parsed = json.loads(text)
     except (TypeError, ValueError):
-        # Models sometimes emit LaTeX such as \sim with a single JSON
-        # backslash. Preserve that text literally without rewriting prose.
-        if '"body_markdown"' not in text:
-            return None
-        repaired = re.sub(
-            r'\\(?:["\\/bfnrt]|u[0-9a-fA-F]{4})|\\',
-            lambda match: "\\\\" if match.group(0) == "\\" else match.group(0),
-            text,
-        )
         try:
-            parsed = json.loads(repaired)
+            # Some providers preserve literal newlines in the JSON string.
+            # strict=False accepts those control characters without changing
+            # the Markdown payload.
+            parsed = json.loads(text, strict=False)
         except (TypeError, ValueError):
-            return None
+            # Models sometimes emit LaTeX such as \sim with a single JSON
+            # backslash. Preserve that text literally without rewriting prose.
+            if '"body_markdown"' not in text:
+                return None
+            repaired = re.sub(
+                r'\\(?:["\\/bfnrt]|u[0-9a-fA-F]{4})|\\',
+                lambda match: "\\\\" if match.group(0) == "\\" else match.group(0),
+                text,
+            )
+            try:
+                parsed = json.loads(repaired, strict=False)
+            except (TypeError, ValueError):
+                # Some provider responses quote the body as JSON but leave a
+                # literal quote in prose (for example ``"irAE"``). Recover
+                # only that body string and preserve any readable issues.
+                marker = '"body_markdown"'
+                marker_at = text.find(marker)
+                if marker_at < 0:
+                    return None
+                value_at = text.find('"', text.find(":", marker_at) + 1)
+                if value_at < 0:
+                    return None
+                suffixes = list(re.finditer(r'"\s*,\s*"issues"\s*:', text[value_at + 1:]))
+                if not suffixes:
+                    return None
+                end_at = value_at + 1 + suffixes[-1].start()
+                fragment = text[value_at + 1:end_at]
+                encoded: list[str] = []
+                index = 0
+                while index < len(fragment):
+                    char = fragment[index]
+                    if char == "\\":
+                        if index + 1 < len(fragment):
+                            nxt = fragment[index + 1]
+                            if nxt == "u" and index + 5 < len(fragment) and re.match(r"^[0-9a-fA-F]{4}$", fragment[index + 2:index + 6]):
+                                encoded.append(fragment[index:index + 6])
+                                index += 6
+                                continue
+                            if nxt in '"\\/bfnrt':
+                                encoded.append(fragment[index:index + 2])
+                                index += 2
+                                continue
+                        encoded.append("\\\\")
+                        index += 1
+                        continue
+                    if char == '"':
+                        encoded.append('\\"')
+                    elif char == "\n":
+                        encoded.append("\\n")
+                    elif char == "\r":
+                        encoded.append("\\r")
+                    elif char == "\t":
+                        encoded.append("\\t")
+                    else:
+                        encoded.append(char)
+                    index += 1
+                try:
+                    body = json.loads('"' + ''.join(encoded) + '"')
+                except (TypeError, ValueError):
+                    return None
+
+                issues: Any = [{
+                    "issue_id": "malformed_json_envelope",
+                    "problem": "issues_field_unreadable",
+                }]
+                issues_at = text.find('"issues"', end_at)
+                if issues_at >= 0:
+                    colon_at = text.find(":", issues_at)
+                    closing_at = text.rfind("}")
+                    if colon_at >= 0 and closing_at > colon_at:
+                        raw_issues = text[colon_at + 1:closing_at].strip()
+                        try:
+                            parsed_issues = json.loads(raw_issues, strict=False)
+                        except (TypeError, ValueError):
+                            pass
+                        else:
+                            issues = parsed_issues if isinstance(parsed_issues, list) else [parsed_issues]
+                return {"body_markdown": body, "issues": issues}
     return parsed if isinstance(parsed, Mapping) else None
 
 

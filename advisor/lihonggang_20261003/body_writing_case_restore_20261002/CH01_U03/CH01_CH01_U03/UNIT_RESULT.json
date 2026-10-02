@@ -1,0 +1,500 @@
+{
+  "schema_version": "optomind.review_unit_writer.result.v1",
+  "generated_at": "2026-10-02T23:19:59",
+  "mode": "run",
+  "simulated": false,
+  "chapter_id": "CH01",
+  "unit_id": "CH01_U03",
+  "model": "qwen3.5-plus",
+  "language": "zh",
+  "body_markdown": "### 抗生素与伴随用药暴露的时序依赖性与肿瘤异质性\n\n大规模真实世界证据表明，抗生素暴露对免疫检查点抑制剂（ICI）疗效的负面影响并非恒定，而是高度依赖于给药时机与肿瘤生物学背景。一项纳入 21,108 名实体瘤患者的泛癌种回顾性队列研究量化了这一时序效应：在调整基线健康状况、肿瘤类型及治疗线数后，ICI 启动后早期（+1 至 +60 天）的抗生素暴露与全因死亡率显著增加相关（HR=1.27; 95% CI, 1.20–1.35），且双窗口暴露者风险最高（HR=1.31）；相比之下，仅 ICI 启动前（-60 至 -1 天）的暴露未显示显著的长期生存劣势（HR=1.04; 95% CI, 0.99–1.10）[P0575]。这一发现挑战了仅关注基线微生物状态的傳統观点，提示 ICI 治疗初期的微生物群完整性对于肿瘤反应性 T 细胞的扩增与致敏至关重要。亚组分析进一步揭示了肿瘤类型的敏感性异质性：头颈部癌（HR=1.46）、肾细胞癌（HR=1.26）和乳腺癌（HR=1.24）对 ICI 后早期暴露表现出显著的生存劣势，而肺癌（HR=1.09）和黑色素瘤（HR=1.07）在该大样本队列中未达统计学显著性，提示不同癌种的免疫微环境对微生物扰动的韧性存在差异 [P0575]。其他近期荟萃分析（2018–2025）也支持抗生素暴露与总生存期恶化（HR=1.16）及无进展生存期缩短的趋势性关联，特别是在非小细胞肺癌亚组中表现一致 [P0345]。\n\n除抗生素外，质子泵抑制剂（PPIs）作为另一类常见的微生物群调节剂，其负面影响同样表现出显著的时窗依赖性。一项涵盖 33 项研究的荟萃分析显示，PPI 使用总体与较短的总生存期（OS, HR=1.31）和无进展生存期（PFS, HR=1.30）相关，但这种关联主要驱动于基线或 ICI 启动前长期使用的患者；在 ICI 治疗期间或之后才开始使用 PPI 的患者中，未观察到显著的生存负面影响 [P0339]。这种“长期扰动有害、短期伴随无害”的模式与抗生素的早期窗口效应形成互补，共同指向微生物群在免疫治疗启动前的预置状态及治疗初期的动态稳定性是关键调节节点。值得注意的是，PPI 的负面效应还受既往化疗时序的调节：在近期（<1 年）接受过化疗的患者中，PPI 对生存的负面影响消失（HR=1.09），这可能是因为化疗引起的剧烈微生物群重塑掩盖了 PPI 的独立效应，或改变了宿主对菌群失调的免疫应答阈值 [P0537]。此外，小样本真实世界研究还量化了皮质类固醇（RR=1.73）与 PPI（RR=1.61）在 ICI 早期联合使用时的叠加死亡风险，提示多重药物诱导的微生态失调可能产生协同负面作用 [P0007]。\n\n### 微生物生物标志物临床转化的现实局限\n\n尽管观察性关联证据稳健，但将微生物特征转化为临床可用的生物标志物仍面临肿瘤生物学背景、宿主变量缺失及方法学异质性的多重制约。首先，肿瘤微环境的免疫表型（如“热”与“冷”肿瘤）显著调节微生物信号的预测效力。例如，在 JCOG2007 III 期临床试验的附属生物标志物研究中，特定产丁酸菌属（*Fusicatenibacter*, *Butyricicoccus*）的高丰度仅在纳武利尤单抗联合伊匹木单抗（双免疫）方案中与更长的总生存期显著相关（HR 分别为 0.56 和 0.52），而在帕博利珠单抗联合化疗组中效应较弱，且这些菌属同时与较低的严重不良事件风险相关 [P0585]。这表明微生物标志物的预测价值高度依赖于具体的免疫治疗方案及肿瘤类型，难以建立跨癌种、跨方案的通用标志物。\n\n其次，现有临床数据中关键宿主预后变量的缺失限制了微生物模型的独立预测能力。多项大型回顾性研究明确承认，由于电子健康记录的粒度限制，无法获取 ECOG 体能状态评分和 PD-L1 表达水平等关键协变量，导致模型可能存在残留混杂 [P0575][P0585]。若无法区分微生物信号是独立预后因子还是宿主虚弱状态（如频繁住院、营养不良）的代理指标，其临床转化价值将大打折扣。此外，方法学异质性（采样时间、测序深度、生物信息学流程）导致不同研究间分类学标志物难以复现。针对这一困境，学界正提出从“分类学标志物”向“功能趋同”范式的转变：尽管不同队列中响应相关的细菌物种差异巨大，但其功能通路（如短链脂肪酸产生、树突状细胞激活、CD8+ T 细胞致敏）呈现高度一致性 [P0364]。宏基因组结构变异（SV）分析进一步证实，特定菌种（如*Akkermansia muciniphila*）内部的基因组结构差异（而非单纯丰度变化）独立预测 ICI 疗效，提示亚基因组水平的功能异质性可能是解释分类学不一致的关键 [P0179]。\n\n最后，临床界面对微生物组干预的认知与证据等级之间存在显著落差。调查显示，虽然 61% 的肿瘤科医生认为调节肠道菌群可增加 ICI 疗效，但现有证据最高等级仍限于 I/II 期试验及病例系列，缺乏已完成的大型 III 期随机对照试验（RCT）证实微生物组干预（如 FMT、益生菌）的确切疗效 [P0524]。早期干预试验（如 SER-401）因万古霉素预处理导致目标菌定植失败及系统性炎症增加的案例，也揭示了从机制发现向临床转化过程中，宿主微生态环境制约及干预策略复杂性的现实挑战 [P0150]。因此，当前对微生物生物标志物的临床预期应保持理性，需结合功能机制验证与高标准循证医学证据逐步推进。\n\n| 药物类别 | 暴露时间窗 | 肿瘤类型敏感性 | 效应量/结论 | 证据来源 |\n| :--- | :--- | :--- | :--- | :--- |\n| **抗生素** | ICI 后早期（+1 至 +60 天）vs. ICI 前（-60 至 -1 天） | 头颈癌、RCC、乳腺癌敏感；肺癌、黑色素瘤在该队列中不显著 | ICI 后暴露显著增加死亡风险（HR=1.27），ICI 前暴露无显著长期影响（HR=1.04）；口服给药及治疗后即刻暴露特异性负面影响更强 | [P0575][P0418][P0547] |\n| **PPI** | 基线/ICI 前长期使用 vs. ICI 期间/后使用 | NSCLC、尿路上皮癌显著；RCC、黑色素瘤不显著；受既往化疗时序调节 | 基线/ICI 前使用显著缩短 OS（HR=1.31）与 PFS（HR=1.30）；ICI 期间/后使用无显著影响；近期化疗可抵消 PPI 负面效应 | [P0339][P0537][P0081] |\n| **转化局限** | 宿主微生态制约、方法学异质性与机制模型 | 方案依赖性（如双免疫 vs. 单药）；缺乏 ECOG/PD-L1 数据；分类学不一致 | 标志物预测效力受治疗方案调节；功能趋同（SCFA/DC 激活）优于分类学标志物；结构变异（SV）提供独立预测信息；缺乏 III 期 RCT 证据 | [P0585][P0364][P0179][P0150][P0524] |\n\n*注：HR 为风险比（Hazard Ratio），RR 为相对风险（Relative Risk）；效应量均经多变量调整（若原研究提供）。*",
+  "body_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_case_restore_20261002\\CH01_U03\\CH01_CH01_U03\\UNIT_BODY.md",
+  "used_source_handles": [
+    "P0575",
+    "P0345",
+    "P0339",
+    "P0537",
+    "P0007",
+    "P0585",
+    "P0364",
+    "P0179",
+    "P0524",
+    "P0150",
+    "P0418",
+    "P0547",
+    "P0081"
+  ],
+  "unused_source_handles": [
+    "P0543",
+    "P0520",
+    "P0146",
+    "P0100",
+    "P0564",
+    "P0163",
+    "P0268",
+    "P0286"
+  ],
+  "unknown_citations": [],
+  "source_count": 21,
+  "material_summary": {
+    "sources": 21,
+    "with_study_summary_A": 21,
+    "with_review_planning_B": 21,
+    "with_deep_read_material": [
+      "P0575"
+    ],
+    "with_supplement_material": 2,
+    "with_supplement_materials": [
+      "P0575",
+      "P0585"
+    ],
+    "with_local_passages": [],
+    "with_tool_supplement_materials": [
+      "P0575"
+    ],
+    "chapter_tool_materials": 0,
+    "read_from_disk": [
+      "P0007",
+      "P0081",
+      "P0100",
+      "P0146",
+      "P0150",
+      "P0163",
+      "P0179",
+      "P0268",
+      "P0286",
+      "P0339",
+      "P0345",
+      "P0364",
+      "P0418",
+      "P0520",
+      "P0524",
+      "P0537",
+      "P0543",
+      "P0547",
+      "P0564",
+      "P0575",
+      "P0585"
+    ],
+    "truncated": []
+  },
+  "material_notes": [
+    {
+      "source_handle": "P0575",
+      "issues": [],
+      "paid_deep_read_material": true,
+      "deep_read_trimmed": {
+        "material_ready": 4,
+        "paper_id": 42,
+        "references": 2,
+        "review_id": 23,
+        "schema_version": 46,
+        "status": 16,
+        "task_id": 34,
+        "workflow": 21,
+        "content(duplicate_of_question_material)": 3463
+      },
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\planning_support\\20260923\\practical_refresh\\supplement_live\\source_units\\SU01_search_candidate_2ec5a3c2b3\\card\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0339",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\9225e04c4f9620a87d4eb74932067cab87644bf2\\b00930fc889c0b10c13559898cc68e06\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0543",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\f21589feb11a40d82accfc90cd7dcda9dd90172c\\3cd9a11950bc485b4599c5565b3f3ab0\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0007",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\0112ad552f7a3b31cc41ba42b421af92ccb64cd1\\19b0236f27a4cb5dc48e6c0ae36e0199\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0345",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\965c8c2618c7f965a4632582a7323daa5f35e19c\\0c2ff3c2c92b415ca9b5d087a734df8e\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0585",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_E_phase3_rct\\source_units\\SU03_search_candidate_3636101ad7\\card\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0520",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\ea1493ed7f9214e5d8b1b7913358c70b53e577d0\\e525be003765f60588a483421db23bb8\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0146",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\4171288ecca93c6bca3eee61295418d704bb00fd\\92125422c10f28cdb7938d2658870c58\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0364",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\9dd62eb058feb9dbd44c28e9c8d004181dd8d19d\\087ed47cfe6952f4d934d87e8dd43399\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0524",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\eb8389aa4db9c7fa1d42d82f39f1ba4436f3b701\\ab9bdd86859e43251dec5ee5bc9901e9\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0100",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\2796ef910ba21a714db531f45be544f27f75bf1f\\e657519b7a2e44002c187c5e7c9c9150\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0418",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\b6fbc38d91d9e82bf947c036e215212cf29374d1\\019fa780f4e2c76f014c40e07a085910\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0547",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\f35b573335f00cb26d5316eda7d52df639464dbd\\e300bba9c64dd12a0022aafa0b0c4617\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0081",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\1d2792ae1850f48accaf1c111b2d92b6b2ebc6c0\\6306ccac684d884f60ffc329cc05a0e0\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0537",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\ef3aa04c443ab46a0b126661b9aab2a6d8239655\\8316908d55c9ebbcb045d2db11ef7477\\attempt-02\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0564",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\f9528bbe80ec13365f81258cf4939027d14a43a9\\590c40c6f85ba522c69b557540f69ac5\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0150",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\434185f8fc2d4c3dab624bcf2b7882d51a213e05\\c263df4bba3c9ce0215f6bf2556d4339\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0163",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\487e91c7e1620d8dcd87c884be958d2ecfa543d3\\343857210215849aaae719b1c4b2cb76\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0179",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\4e8229a614d8664a4b4bf9f52960c176010c2f16\\4e3c97b8d3e5c6377b4b953bba8d94d0\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0268",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\72763b4b828f711b5ef3c5e8e83ab69d0920cd17\\0a5cc8c06f74c16c9c881e7020433d99\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0286",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\7e82740a20ee584360b9fa976bf4b172c099caa4\\9c65da7e4c360db03eafb25e675a01ce\\attempt-01\\PAPER_READING_CARD.json"
+    }
+  ],
+  "warnings": [],
+  "estimate": {
+    "prompt_tokens_estimate": 316497,
+    "reserved_input_tokens": 362668,
+    "output_tokens": 12000,
+    "thinking_budget": 4000,
+    "total_context_tokens": 378668,
+    "estimated_cost_cny": 1.834672,
+    "model": "qwen3.5-plus",
+    "tokenizer": "utf8_conservative_upper_bound"
+  },
+  "usage": {
+    "prompt_tokens": 73054,
+    "completion_tokens": 5882,
+    "total_tokens": 78936,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4000,
+      "text_tokens": 5882
+    },
+    "prompt_tokens_details": {
+      "text_tokens": 73054
+    }
+  },
+  "finish_reason": "stop",
+  "complete": true,
+  "completion_status": "complete",
+  "partial_error": "",
+  "issues": [],
+  "arrangement_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_case_restore_20261002\\CH01\\CHAPTER_ARRANGEMENT.json",
+  "view_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_case_restore_20261002\\CH01\\ARRANGEMENT_INPUT.json",
+  "input_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_case_restore_20261002\\CH01_U03\\CH01_CH01_U03\\UNIT_INPUT.json",
+  "messages_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_case_restore_20261002\\CH01_U03\\CH01_CH01_U03\\UNIT_MESSAGES.json",
+  "raw_response": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_case_restore_20261002\\CH01_U03\\CH01_CH01_U03\\raw_responses\\CH01_CH01_U03_20261002T231959.raw",
+  "simulated_from": "",
+  "note": "真实模型输出；未做全章合稿、未做审稿循环、未做事实核查。"
+}

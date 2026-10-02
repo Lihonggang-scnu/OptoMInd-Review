@@ -1,0 +1,339 @@
+{
+  "schema_version": "optomind.review_unit_writer.result.v1",
+  "generated_at": "2026-10-02T23:24:28",
+  "mode": "run",
+  "simulated": false,
+  "chapter_id": "CH04",
+  "unit_id": "CH04_U04",
+  "model": "qwen3.5-plus",
+  "language": "zh",
+  "body_markdown": "观察性研究虽能提供大规模真实世界证据，但其因果推断能力受限于残余混杂与反向因果风险。基于 21,108 名实体瘤患者电子健康记录的大规模队列分析显示，ICI 启动后 60 天内的抗生素暴露与死亡风险增加 27% 显著相关（HR 1.27），而启动前暴露无显著长期影响 [P0575]。然而，该研究明确承认 EHR 数据粒度不足，缺乏 ECOG 体能评分与 PD-L1 表达等关键预后协变量，导致模型存在残余混杂；且部分协变量（如年龄、白蛋白）呈现非比例风险，提示简单的 Cox 模型可能无法完全捕捉动态影响 [P0575]。类似地，质子泵抑制剂（PPI）与生存期缩短的关联（HR 1.39）在调整抗生素使用后显著性丧失，且其效应受既往化疗时序调节（化疗结束至 ICI 间隔<1 年时 PPI 效应消失，HR 1.09）[P0537]。这表明“疾病严重程度驱动用药”的反向因果及药物间交互作用可能掩盖或扭曲单一因素的独立效应。文献计量分析进一步证实，该领域目前仍以回顾性关联研究为主，缺乏随机对照试验，且存在阴性结果发表偏倚及地域代表性不足的方法学局限 [P0501]。因此，现有证据多提示相关性而非因果性，需通过时变系数模型、倾向评分匹配及前瞻性功能导向队列来缓解偏倚 [P0534]。\n\n除临床混杂外，技术异质性是导致跨研究结论不一致的另一核心瓶颈。测序平台（16S rRNA 扩增子 vs. 宏基因组鸟枪法）、生信分析管道及样本处理流程的差异，使得不同队列间的微生物数据难以直接比较 [P0468][P0584]。一项针对 5 个独立队列（n=303）原始测序数据的统一重分析研究证明，采用标准化生信管道（Resphera Insight/MetaPhlAn2）可消除技术噪音，识别出稳健的非响应者（NR）整合指数（平均 AUC 70.3%），其预测性能优于基于文献的单一标志物指数 [P0354]。该研究发现非响应者相关的微生物信号（如*Veillonella parvula*、*Bacteroides* spp. 富集）比响应者信号更具一致性，提示标准化分析有助于揭示被技术异质性掩盖的生物学规律 [P0354]。为推动方法学标准化，ONCOBIOME 国际倡议正致力于定义肠道肿瘤微生物组特征（GOMs），并通过 Seerave 全球平台整合多组学数据与临床用药记录，以支持 TOPOSCORE 等工具的前瞻性验证 [P0574]。尽管 TOPOSCORE 在回顾性分析中显示出 69.8% 的预测准确率，但其在独立前瞻性队列中的临床效用仍需通过标准化协议确立 [P0574]。综上，建立统一的宏基因组协议、多组学整合框架及前瞻性验证基础设施，是突破当前因果推断困境与实现临床转化的必要路径。",
+  "body_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_case_restore_20261002\\CH04_U04\\CH04_CH04_U04\\UNIT_BODY.md",
+  "used_source_handles": [
+    "P0575",
+    "P0537",
+    "P0501",
+    "P0534",
+    "P0468",
+    "P0584",
+    "P0354",
+    "P0574"
+  ],
+  "unused_source_handles": [
+    "P0384",
+    "P0559",
+    "P0561",
+    "P0587"
+  ],
+  "unknown_citations": [],
+  "source_count": 12,
+  "material_summary": {
+    "sources": 12,
+    "with_study_summary_A": 12,
+    "with_review_planning_B": 12,
+    "with_deep_read_material": [
+      "P0574",
+      "P0575"
+    ],
+    "with_supplement_material": 3,
+    "with_supplement_materials": [
+      "P0575",
+      "P0584",
+      "P0587"
+    ],
+    "with_local_passages": [],
+    "with_tool_supplement_materials": [
+      "P0574",
+      "P0575"
+    ],
+    "chapter_tool_materials": 2,
+    "read_from_disk": [
+      "P0354",
+      "P0384",
+      "P0468",
+      "P0501",
+      "P0534",
+      "P0537",
+      "P0559",
+      "P0561",
+      "P0574",
+      "P0575",
+      "P0584",
+      "P0587"
+    ],
+    "truncated": []
+  },
+  "material_notes": [
+    {
+      "source_handle": "P0575",
+      "issues": [],
+      "paid_deep_read_material": true,
+      "deep_read_trimmed": {
+        "material_ready": 4,
+        "paper_id": 42,
+        "references": 2,
+        "review_id": 23,
+        "schema_version": 46,
+        "status": 16,
+        "task_id": 34,
+        "workflow": 21,
+        "content(duplicate_of_question_material)": 3463
+      },
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\planning_support\\20260923\\practical_refresh\\supplement_live\\source_units\\SU01_search_candidate_2ec5a3c2b3\\card\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0537",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\ef3aa04c443ab46a0b126661b9aab2a6d8239655\\8316908d55c9ebbcb045d2db11ef7477\\attempt-02\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0534",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\ee8eab6a2dc467e53087607197bbc6701429b8ae\\272c8a05274c22d99a9e0cd573f8396f\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0501",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\e145edb862970298294c1300bdf6cf909db2dc89\\50d683f686fce456a5a83bfd5dedea9e\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0574",
+      "issues": [],
+      "paid_deep_read_material": true,
+      "deep_read_trimmed": {
+        "material_ready": 4,
+        "paper_id": 42,
+        "references": 106214,
+        "review_id": 23,
+        "schema_version": 46,
+        "status": 16,
+        "task_id": 34,
+        "workflow": 21,
+        "content(duplicate_of_question_material)": 6686
+      },
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\ff5504ec23a09bb1d577854219dadfe3c7772ece\\1475698daa03432dd9f0f24681ab62d0\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0354",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\9ab8366e1190d9c05b04e4dcee48581a8e9c0db5\\360549880cd03f5167292bed0358935a\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0468",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\ceec7d46369c07ec2ee5f0439ffde63202c758db\\aab69a66ad66717175a1179128a87239\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0584",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_E_phase3_rct\\source_units\\SU02_search_candidate_93c14070cc\\card\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0384",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\format_recovered_reading_retry2\\a6f72f7aa31e1375a26b6c2327b81f7bdbe96d96\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0559",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\f740fe4e28eed64b9c255e57d2e93b64c6cbdd27\\0718369cf5061b7e64c6f77985ebecd5\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0561",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\f845fe79c73bf04f15c7ab75115b887691b09e53\\589ce3c5b57ea0fefed1750430763a4c\\attempt-01\\PAPER_READING_CARD.json"
+    },
+    {
+      "source_handle": "P0587",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\level1\\external\\N79dccd9d2305\\round_2\\supplements\\GAP_02_Human_TME_Metabolites\\source_units\\SU01_search_candidate_51842d8984\\card\\PAPER_READING_CARD.json"
+    }
+  ],
+  "warnings": [],
+  "estimate": {
+    "prompt_tokens_estimate": 291600,
+    "reserved_input_tokens": 334784,
+    "output_tokens": 12000,
+    "thinking_budget": 4000,
+    "total_context_tokens": 350784,
+    "estimated_cost_cny": 1.723136,
+    "model": "qwen3.5-plus",
+    "tokenizer": "utf8_conservative_upper_bound"
+  },
+  "usage": {
+    "prompt_tokens": 65834,
+    "completion_tokens": 2664,
+    "total_tokens": 68498,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1944,
+      "text_tokens": 2664
+    },
+    "prompt_tokens_details": {
+      "text_tokens": 65834
+    }
+  },
+  "finish_reason": "stop",
+  "complete": true,
+  "completion_status": "complete",
+  "partial_error": "",
+  "issues": [],
+  "arrangement_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_case_restore_20261002\\CH04\\CHAPTER_ARRANGEMENT.json",
+  "view_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_arrangement_case_restore_20261002\\CH04\\ARRANGEMENT_INPUT.json",
+  "input_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_case_restore_20261002\\CH04_U04\\CH04_CH04_U04\\UNIT_INPUT.json",
+  "messages_path": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_case_restore_20261002\\CH04_U04\\CH04_CH04_U04\\UNIT_MESSAGES.json",
+  "raw_response": "F:\\OptoMind-Review-2\\outputs\\lihonggang_full_acceptance_20261001_50cny\\body_writing_case_restore_20261002\\CH04_U04\\CH04_CH04_U04\\raw_responses\\CH04_CH04_U04_20261002T232428.raw",
+  "simulated_from": "",
+  "note": "真实模型输出；未做全章合稿、未做审稿循环、未做事实核查。"
+}
