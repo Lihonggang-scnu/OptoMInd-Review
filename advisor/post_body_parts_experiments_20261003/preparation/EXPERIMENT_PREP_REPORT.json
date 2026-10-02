@@ -1,0 +1,147 @@
+{
+  "status": "prompt_refinement_zero_paid",
+  "production_files_modified": [
+    "F:\\OptoMind-Review-2\\outputs\\serial_parts_preflight_20261002\\worktree\\optomind_research\\runtime\\upgrade3\\serial_manuscript_parts.py",
+    "F:\\OptoMind-Review-2\\outputs\\serial_parts_preflight_20261002\\worktree\\tests\\upgrade3\\test_serial_manuscript_parts.py"
+  ],
+  "experiment_runner": "F:\\OptoMind-Review-2\\outputs\\serial_parts_preflight_20261002\\worktree\\scripts\\upgrade3\\post_body_runner.py",
+  "behavior": {
+    "default_prior_parts_mode": "full",
+    "optional_prior_parts_mode": "none",
+    "none_effect": "conception and conclusion do not include prior outputs; introduction and abstract do not include prior generated parts",
+    "manual_quality_status": "pending_review",
+    "live_requires_explicit_mode": true,
+    "quality_record_resume": "attempt directories and RUN_EVENTS/RUN_STATE keep manual review pending; no QUALITY/<stage>.json is auto-created by the canonical runner",
+    "call_id_binding": "serial_parts:<run_root_name>:<attempt>:<stage>; run name prevents same-attempt stage ambiguity across experiments sharing a ledger"
+  },
+  "baseline_replay": {
+    "status": "generated",
+    "generated": [
+      "conception",
+      "conclusion",
+      "introduction",
+      "abstract"
+    ],
+    "replay_modes": {
+      "serial_parts:conception": "exact",
+      "serial_parts:conclusion": "exact",
+      "serial_parts:introduction": "exact",
+      "serial_parts:abstract": "exact"
+    },
+    "provider_calls": 0,
+    "external_requests": 0,
+    "body_preserved": true,
+    "body_sha256": "7741466cfa31df1c19b7fbd3eabb007375b4fda713b2aa15f4e763bcfab7c71f",
+    "final_body_sha256": "7741466cfa31df1c19b7fbd3eabb007375b4fda713b2aa15f4e763bcfab7c71f",
+    "final_manuscript": "F:\\OptoMind-Review-2\\outputs\\serial_parts_experiment_prep_20261003\\baseline_replay\\MANUSCRIPT_FINAL.md",
+    "source_recordings": "F:\\OptoMind-Review-2\\outputs\\serial_parts_live_20261002_30cny\\REPLAY_RECORDINGS.json",
+    "prompt_state": "pre-experiment-change baseline"
+  },
+  "preview_full": {
+    "status": "preview",
+    "stage": "introduction",
+    "messages_sha256": "a3597c909d912888d40bb18bfaaf35eb992f7ae56fd2fd43dc9ff12fa70570a0",
+    "body_sha256": "7741466cfa31df1c19b7fbd3eabb007375b4fda713b2aa15f4e763bcfab7c71f",
+    "prior_parts_mode": "full",
+    "provider_calls": 0
+  },
+  "preview_none": {
+    "status": "preview",
+    "stage": "introduction",
+    "messages_sha256": "d4c26470f6bb14202cfb5bec5da79a75be33ad30fbfd69023ae78e9bb9508d12",
+    "body_sha256": "7741466cfa31df1c19b7fbd3eabb007375b4fda713b2aa15f4e763bcfab7c71f",
+    "prior_parts_mode": "none",
+    "provider_calls": 0
+  },
+  "preview_body_hash_equal": true,
+  "preview_message_hash_changed": true,
+  "changed_prompt_old_cache_replay": {
+    "status": "pending",
+    "failure": {
+      "stage": "conception",
+      "error": "SerialPartsError:recording_binding_mismatch:serial_parts:conception"
+    },
+    "provider_calls": 0,
+    "body_sha256": "7741466cfa31df1c19b7fbd3eabb007375b4fda713b2aa15f4e763bcfab7c71f"
+  },
+  "tests": {
+    "command": "python -X utf8 -m pytest -q tests/upgrade3/test_post_body_runner.py tests/upgrade3/test_serial_manuscript_parts.py -k \"runner or prior_parts_mode or exact_replay_binding or conception_boundary_scalar or card_full_strict_replacement or condition_preserving or conception_assigns_distinct or stage_duties\"",
+    "result": "14 passed, 56 deselected",
+    "runner_py_compile": "passed",
+    "canonical_body_preview": "full and none completed with provider_calls=0 and identical BODY hash",
+    "parse_recovery": "old scalar-boundary parser rejects first attempt; current parser reuses unchanged cached response with 0 new calls",
+    "normal_path": "existing core tests pass through the selected set; no live provider calls",
+    "prompt_refinement": "offline prompt assertions passed; no model output generated"
+  },
+  "paid_calls": 0,
+  "network_calls": 0,
+  "ledger_reset": false,
+  "notes": [
+    "The prior baseline replay remains valid only for the pre-experiment prompt; after the scope-method prompt change it must stop at conception with recording_binding_mismatch and zero calls.",
+    "The canonical runner is under the worktree and derives PROJECT_ROOT from its own location; the old temporary runner is retained as historical material only.",
+    "A parse failure recovery test uses the original scalar-boundary response and an old-parser simulation; it does not edit cached response content.",
+    "No existing manual quality record is overwritten; each attempt and cache are isolated under the selected run root.",
+    "Prompt refinement is offline only and remains unvalidated by new model output until the separately authorized focused trial."
+  ],
+  "canonical_runner": "F:\\OptoMind-Review-2\\outputs\\serial_parts_preflight_20261002\\worktree\\scripts\\upgrade3\\post_body_runner.py",
+  "runner_test_file": "F:\\OptoMind-Review-2\\outputs\\serial_parts_preflight_20261002\\worktree\\tests\\upgrade3\\test_post_body_runner.py",
+  "runner_behavior": {
+    "default_mode": "preview",
+    "live_requires_explicit_mode": true,
+    "default_cache_reuse": true,
+    "cache_binding": "messages_sha256 plus model/output parameters",
+    "raw_and_request_persist_before_parse": true,
+    "changed_messages": "new cache key and only affected downstream stages are called",
+    "stop_status": "awaiting_review",
+    "manual_quality_status": "pending_review",
+    "language_and_chapter_roles": "CLI language is passed through; context.chapter_roles is passed as the runtime role argument and removed from normalized prompt context"
+  },
+  "canonical_body_previews": {
+    "full": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\serial_parts_experiment_prep_20261003\\preview_full_canonical",
+      "status": "preview",
+      "stage": "introduction",
+      "prior_parts_mode": "full",
+      "messages_sha256": "a3597c909d912888d40bb18bfaaf35eb992f7ae56fd2fd43dc9ff12fa70570a0",
+      "body_sha256": "7741466cfa31df1c19b7fbd3eabb007375b4fda713b2aa15f4e763bcfab7c71f",
+      "provider_calls": 0
+    },
+    "none": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\serial_parts_experiment_prep_20261003\\preview_none_canonical",
+      "status": "preview",
+      "stage": "introduction",
+      "prior_parts_mode": "none",
+      "messages_sha256": "d4c26470f6bb14202cfb5bec5da79a75be33ad30fbfd69023ae78e9bb9508d12",
+      "body_sha256": "7741466cfa31df1c19b7fbd3eabb007375b4fda713b2aa15f4e763bcfab7c71f",
+      "provider_calls": 0
+    },
+    "body_hash_equal": true,
+    "message_hash_changed": true,
+    "provider_calls": 0
+  },
+  "legacy_experiment_runner": "F:\\OptoMind-Review-2\\outputs\\serial_parts_experiment_prep_20261003\\serial_parts_live_runner.py",
+  "prompt_refinement": {
+    "file": "F:\\OptoMind-Review-2\\outputs\\serial_parts_preflight_20261002\\worktree\\optomind_research\\runtime\\upgrade3\\serial_manuscript_parts.py",
+    "scope": [
+      "_COMMON",
+      "_CONCEPTION",
+      "_DUTIES"
+    ],
+    "paid_calls": 0,
+    "changes": [
+      "Scope wording distinguishes discussion scope, completed methods, and pending judgments while preserving meaningful exceptions.",
+      "Introduction connects existing knowledge, reader difficulty, and the usefulness of the organizing view; navigation explains transitions and does not stand in for the reading reason.",
+      "Conclusion explains relationships, limits, tradeoffs, and conditional uses; it may restate framework/tutorial/practice value without inventing findings or a future-work list.",
+      "Abstract selects information needed for independent understanding and need not carry every finding, limitation, or conclusion agenda.",
+      "Useful repetition remains allowed when it serves the current part; identical lists cannot merely be relabeled as compression, navigation, and synthesis.",
+      "Stage-specific duty prompts now carry the selected introduction, conclusion, and abstract actions at generation time, not only in the conception card."
+    ],
+    "prompt_excerpt": {
+      "introduction": "若需要章节导航，让它说明讨论之间为什么这样衔接，不让章节清单代替阅读理由。",
+      "conclusion": "说明它们如何互相支持、限制，或在条件变化时导向不同的判断与用途。",
+      "abstract": "从实际正文选择足以理解本文对象、组织价值和核心认识的信息，保留决定判断含义的条件。"
+    },
+    "tests_result": "14 passed, 56 deselected",
+    "call_id_change": "ResponseCacheProvider now emits serial_parts:<run_root_name>:<attempt>:<stage>; historical 30 CNY rows retain their original call IDs and were not modified."
+  }
+}

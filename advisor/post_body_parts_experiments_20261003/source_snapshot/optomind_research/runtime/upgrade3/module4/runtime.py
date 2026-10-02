@@ -1,0 +1,630 @@
+"""Auditable Module 4 runtime helpers and a strict direct Qwen transport.
+
+The legacy chat wrapper intentionally is not used here: it may downgrade the
+model and can turn partial/fallback responses into ordinary content.  The
+reader needs the raw response and terminal finish reason before accepting a
+page as complete.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import sqlite3
+import time
+import urllib.error
+import urllib.request
+import uuid
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Callable, Mapping, Sequence
+
+
+TRANSIENT_HTTP = {408, 409, 425, 429, 500, 502, 503, 504}
+
+# Official Model Studio North China 2 (Beijing) real-time prices, CNY per
+# million tokens.  These are deliberately explicit: the M4 paid evaluation
+# is restricted to these two model IDs and must never silently fall back to a
+# different tier or model.
+MODEL_PRICING_CNY: dict[str, dict[str, Any]] = {
+    "qwen3.7-flash": {
+        "tiers": ((32_000, 0.2, 0.8), (256_000, 0.6, 2.4), (991_808, 1.2, 4.8)),
+        "max_input_tokens": 991_808,
+        "max_output_tokens": 131_072,
+        "thinking_json": True,
+    },
+    "qwen3.5-plus": {
+        "tiers": ((128_000, 0.8, 4.8), (256_000, 2.0, 12.0), (1_000_000, 4.0, 24.0)),
+        "max_input_tokens": 991_808,
+        "max_output_tokens": 65_536,
+        # Alibaba's structured-output guide does not support JSON-object mode
+        # together with thinking for this model.  The direct client can still
+        # run that combination when callers explicitly disable json_mode; the
+        # reader then owns JSON parsing and schema validation.
+        "thinking_json": False,
+    },
+}
+
+
+def model_pricing(model: str) -> dict[str, Any]:
+    key = _text(model).strip()
+    try:
+        return MODEL_PRICING_CNY[key]
+    except KeyError as exc:
+        raise QwenTransportError("unsupported_m4_model", transient=False, record={"model": key, "allowed_models": sorted(MODEL_PRICING_CNY)}) from exc
+
+
+def _tier_rates(model: str, input_tokens: int) -> tuple[float, float]:
+    pricing = model_pricing(model)
+    tokens = max(1, int(input_tokens))
+    if tokens > int(pricing["max_input_tokens"]):
+        raise QwenTransportError("model_input_context_exceeded", transient=False, record={"model": model, "input_tokens": tokens, "max_input_tokens": pricing["max_input_tokens"]})
+    for upper, input_rate, output_rate in pricing["tiers"]:
+        if tokens <= upper:
+            return float(input_rate), float(output_rate)
+    raise QwenTransportError("model_pricing_tier_missing", transient=False, record={"model": model, "input_tokens": tokens})
+
+
+def _conservative_prompt_token_upper_bound(request_bytes: bytes, messages: Sequence[Mapping[str, Any]]) -> int:
+    """Return a hard-budget upper bound for prompt tokens before dispatch.
+
+    A byte is the smallest possible UTF-8/BPE unit, so dividing UTF-8 bytes by
+    four is only an estimate and can under-reserve Chinese and other
+    non-ASCII prompts.  The serialized request already includes messages,
+    role labels, JSON syntax, and escaped fields; add a fixed protocol margin
+    for tokenizer framing and provider message wrappers.
+    """
+
+    protocol_margin = 8_192 + (256 * max(1, len(messages)))
+    return max(1, len(request_bytes) + protocol_margin)
+
+
+def _safe_error_code(raw: bytes) -> str:
+    """Extract only a bounded provider error code; never retain its message."""
+
+    try:
+        value = json.loads(raw.decode("utf-8", errors="replace"))
+    except (TypeError, ValueError, UnicodeError):
+        return ""
+    if not isinstance(value, Mapping):
+        return ""
+    error = value.get("error") if isinstance(value.get("error"), Mapping) else value
+    code = error.get("code") or error.get("error_code") or value.get("code")
+    code = _text(code).strip()
+    if not code:
+        return ""
+    return "".join(char for char in code[:80] if char.isalnum() or char in "-_ .").strip().replace(" ", "_")
+
+
+def _account_rejection(status_code: int, error_code: str) -> bool:
+    normalized = _text(error_code).casefold().replace("-", "").replace("_", "").replace(" ", "")
+    # A bare 401 is the one safe status-only signal: it is the provider's
+    # authentication challenge and retrying it with another configured key is
+    # bounded by max_keys.  A bare 403 is deliberately *not* rotated because
+    # it can mean a policy/scope denial that applies to every credential.
+    markers = ("invalidapikey", "invalidkey", "unauthorized", "authentication", "arrearage", "insufficientbalance", "accountbalance", "paymentrequired", "accountdisabled")
+    return (status_code == 401 and not normalized) or (
+        status_code in {400, 401, 402, 403} and any(marker in normalized for marker in markers)
+    )
+
+
+def _provider_request_id(raw: bytes, headers: Any) -> str:
+    """Return a bounded request id from headers or a JSON error envelope."""
+
+    header_id = ""
+    if hasattr(headers, "get"):
+        header_id = _text(headers.get("x-request-id") or headers.get("X-Request-ID") or headers.get("request-id"))
+    if header_id:
+        return header_id[:200]
+    try:
+        value = json.loads(raw.decode("utf-8", errors="replace"))
+    except (TypeError, ValueError, UnicodeError):
+        return ""
+    if not isinstance(value, Mapping):
+        return ""
+    error = value.get("error") if isinstance(value.get("error"), Mapping) else {}
+    for key in ("request_id", "requestId", "requestid", "request-id"):
+        candidate = value.get(key) or error.get(key)
+        if candidate:
+            return _text(candidate)[:200]
+    return ""
+
+
+def _text(value: Any) -> str:
+    return "" if value is None else str(value)
+
+
+def _json_bytes(value: Any) -> bytes:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
+
+
+def _hash(value: Any) -> str:
+    return hashlib.sha256(_json_bytes(value)).hexdigest()
+
+
+def _economy_enabled() -> bool:
+    return _text(os.environ.get("OPTOMIND_ECONOMY_TEXT_CEILING")).strip().casefold() in {"1", "true", "yes", "on"}
+
+
+class QwenTransportError(RuntimeError):
+    def __init__(self, message: str, *, transient: bool = False, status_code: int | None = None, record: Mapping[str, Any] | None = None):
+        super().__init__(message)
+        self.transient = transient
+        self.status_code = status_code
+        self.record = dict(record or {})
+
+
+class MissingCredentialError(QwenTransportError):
+    pass
+
+
+@dataclass
+class GlobalBudgetLedger:
+    """One explicit experiment-wide CNY ledger shared across paper runs."""
+
+    limit_cny: float | None = None
+    reserved_cny: float = 0.0
+    actual_cny: float = 0.0
+    reservations: list[dict[str, Any]] = field(default_factory=list)
+    path: Path | None = None
+
+    def __post_init__(self) -> None:
+        if self.path:
+            self.path = Path(self.path)
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            with sqlite3.connect(self.path) as db:
+                db.execute("CREATE TABLE IF NOT EXISTS budget_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+                db.execute("CREATE TABLE IF NOT EXISTS reservations (reservation_id TEXT PRIMARY KEY, call_id TEXT NOT NULL, amount_cny REAL NOT NULL, actual_cny REAL, status TEXT NOT NULL, created_at REAL NOT NULL, usage_json TEXT, returned_model TEXT, finish_reason TEXT, request_id TEXT, raw_response_sha256 TEXT, status_code INTEGER)")
+                columns = {row[1] for row in db.execute("PRAGMA table_info(reservations)").fetchall()}
+                for name, sql_type in (("usage_json", "TEXT"), ("returned_model", "TEXT"), ("finish_reason", "TEXT"), ("request_id", "TEXT"), ("raw_response_sha256", "TEXT"), ("status_code", "INTEGER"), ("provider_error_code", "TEXT"), ("key_index", "INTEGER"), ("attempt", "INTEGER")):
+                    if name not in columns:
+                        db.execute(f"ALTER TABLE reservations ADD COLUMN {name} {sql_type}")
+                if self.limit_cny is not None:
+                    row = db.execute("SELECT value FROM budget_meta WHERE key='limit_cny'").fetchone()
+                    if row is not None and abs(float(row[0]) - float(self.limit_cny)) > 1e-9:
+                        raise QwenTransportError("global_budget_limit_conflict", transient=False, record={"existing_limit_cny": float(row[0]), "requested_limit_cny": float(self.limit_cny)})
+                    db.execute("INSERT OR IGNORE INTO budget_meta(key,value) VALUES ('limit_cny',?)", (str(float(self.limit_cny)),))
+                db.commit()
+
+    def _refresh_from_db(self) -> None:
+        if not self.path:
+            return
+        with sqlite3.connect(self.path) as db:
+            row = db.execute("SELECT value FROM budget_meta WHERE key='limit_cny'").fetchone()
+            if self.limit_cny is None and row:
+                self.limit_cny = float(row[0])
+            row = db.execute("SELECT COALESCE(SUM(amount_cny),0) FROM reservations WHERE status IN ('reserved','uncertain')").fetchone()
+            self.reserved_cny = float(row[0] or 0.0)
+            row = db.execute("SELECT COALESCE(SUM(actual_cny),0) FROM reservations").fetchone()
+            self.actual_cny = float(row[0] or 0.0)
+
+    def reserve(self, amount_cny: float, call_id: str) -> dict[str, Any]:
+        amount = max(0.0, float(amount_cny))
+        if self.path:
+            reservation_id = "res-" + uuid.uuid4().hex[:16]
+            with sqlite3.connect(self.path, timeout=30.0) as db:
+                db.execute("BEGIN IMMEDIATE")
+                row = db.execute("SELECT value FROM budget_meta WHERE key='limit_cny'").fetchone()
+                limit = self.limit_cny if self.limit_cny is not None else (float(row[0]) if row else None)
+                used = db.execute("SELECT COALESCE(SUM(CASE WHEN status='settled' THEN COALESCE(actual_cny,amount_cny) ELSE amount_cny END),0) FROM reservations").fetchone()[0]
+                if limit is not None and float(used or 0.0) + amount > float(limit) + 1e-9:
+                    raise QwenTransportError("global_budget_exceeded", transient=False, record={"call_id": call_id, "amount_cny": amount})
+                db.execute("INSERT INTO reservations(reservation_id,call_id,amount_cny,actual_cny,status,created_at) VALUES (?,?,?,?,?,?)", (reservation_id, call_id, amount, None, "reserved", time.time()))
+                db.commit()
+            self._refresh_from_db()
+            row = {"reservation_id": reservation_id, "call_id": call_id, "amount_cny": amount, "status": "reserved"}
+            self.reservations.append(row)
+            return row
+        # The in-memory mode is used by offline callers, but it must have the
+        # same cap semantics as the durable ledger: settled spend remains
+        # spent and open reservations remain held.
+        if self.limit_cny is not None and self.actual_cny + self.reserved_cny + amount > float(self.limit_cny) + 1e-9:
+            raise QwenTransportError("global_budget_exceeded", transient=False, record={"call_id": call_id, "amount_cny": amount})
+        row = {"reservation_id": "res-" + uuid.uuid4().hex[:16], "call_id": call_id, "amount_cny": amount, "status": "reserved"}
+        self.reserved_cny += amount
+        self.reservations.append(row)
+        return row
+
+    def settle(self, reservation_id: str, actual_cny: float | None, *, uncertain: bool = False, telemetry: Mapping[str, Any] | None = None) -> None:
+        amount = max(0.0, float(actual_cny or 0.0))
+        telemetry = dict(telemetry or {})
+        if self.path:
+            status = "uncertain" if uncertain else "settled"
+            with sqlite3.connect(self.path, timeout=30.0) as db:
+                row = db.execute("SELECT status FROM reservations WHERE reservation_id=?", (reservation_id,)).fetchone()
+                if row is None:
+                    raise QwenTransportError("unknown_budget_reservation", transient=False, record={"reservation_id": reservation_id})
+                if row[0] in {"settled", "uncertain"}:
+                    raise QwenTransportError("budget_reservation_already_settled", transient=False, record={"reservation_id": reservation_id})
+                db.execute("UPDATE reservations SET actual_cny=?, status=?, usage_json=?, returned_model=?, finish_reason=?, request_id=?, raw_response_sha256=?, status_code=?, provider_error_code=?, key_index=?, attempt=? WHERE reservation_id=?", (
+                    amount if actual_cny is not None else None, status,
+                    json.dumps(telemetry.get("usage"), ensure_ascii=False, sort_keys=True) if telemetry.get("usage") is not None else None,
+                    _text(telemetry.get("returned_model")) or None, _text(telemetry.get("finish_reason")) or None,
+                    _text(telemetry.get("request_id")) or None, _text(telemetry.get("raw_response_sha256")) or None,
+                    int(telemetry["status_code"]) if telemetry.get("status_code") is not None else None,
+                    _text(telemetry.get("provider_error_code")) or None,
+                    int(telemetry["key_index"]) if telemetry.get("key_index") is not None else None,
+                    int(telemetry["attempt"]) if telemetry.get("attempt") is not None else None, reservation_id,
+                ))
+                db.commit()
+            self._refresh_from_db()
+            for row in self.reservations:
+                if row.get("reservation_id") == reservation_id:
+                    row["status"] = status
+                    if actual_cny is not None:
+                        row["actual_cny"] = amount
+                    row["telemetry"] = telemetry
+            return
+        for row in self.reservations:
+            if row.get("reservation_id") == reservation_id:
+                if row.get("status") in {"settled", "uncertain"}:
+                    raise QwenTransportError("budget_reservation_already_settled", transient=False, record={"reservation_id": reservation_id})
+                if row.get("status") not in {"reserved", "uncertain"}:
+                    raise QwenTransportError("budget_reservation_invalid_status", transient=False, record={"reservation_id": reservation_id, "status": row.get("status")})
+                if uncertain:
+                    row["status"] = "uncertain"
+                    row["actual_cny"] = None
+                else:
+                    row["status"] = "settled"
+                    row["actual_cny"] = amount
+                    self.reserved_cny = max(0.0, self.reserved_cny - float(row.get("amount_cny") or 0.0))
+                    self.actual_cny += amount
+                row["telemetry"] = telemetry
+                return
+        raise QwenTransportError("unknown_budget_reservation", transient=False, record={"reservation_id": reservation_id})
+
+    def as_dict(self) -> dict[str, Any]:
+        self._refresh_from_db()
+        if self.path:
+            with sqlite3.connect(self.path) as db:
+                rows = db.execute("SELECT reservation_id,call_id,amount_cny,actual_cny,status,usage_json,returned_model,finish_reason,request_id,raw_response_sha256,status_code,provider_error_code,key_index,attempt FROM reservations ORDER BY created_at,reservation_id").fetchall()
+            reservations = []
+            for row in rows:
+                item = {"reservation_id": row[0], "call_id": row[1], "amount_cny": row[2], "actual_cny": row[3], "status": row[4]}
+                telemetry = {"usage": json.loads(row[5]) if row[5] else None, "returned_model": row[6], "finish_reason": row[7], "request_id": row[8], "raw_response_sha256": row[9], "status_code": row[10], "provider_error_code": row[11], "key_index": row[12], "attempt": row[13]}
+                if any(value is not None for value in telemetry.values()):
+                    item["telemetry"] = telemetry
+                reservations.append(item)
+        else:
+            reservations = list(self.reservations)
+        return {"limit_cny": self.limit_cny, "reserved_cny": self.reserved_cny, "actual_cny": self.actual_cny, "ledger_path": str(self.path) if self.path else "", "reservations": reservations}
+
+
+class QwenDirectClient:
+    """Direct non-streaming JSON-object Qwen client with explicit model."""
+
+    def __init__(
+        self,
+        *,
+        model: str = "qwen3.7-flash",
+        key_file: str | Path | None = None,
+        base_url: str | None = None,
+        max_retries: int = 2,
+        timeout_seconds: float = 300.0,
+        max_output_tokens: int = 32768,
+        thinking: bool = True,
+        thinking_budget: int = 8192,
+        json_mode: bool = True,
+        max_keys: int = 3,
+        raw_response_dir: str | Path | None = None,
+        budget_ledger: GlobalBudgetLedger | None = None,
+        reserved_attempt_cny: float | None = None,
+        prompt_token_counter: Callable[[bytes, Sequence[Mapping[str, Any]]], int] | None = None,
+        prompt_token_multiplier: float = 1.0,
+        prompt_token_framing_margin: int = 0,
+    ):
+        self.model = str(model)
+        pricing = model_pricing(self.model)
+        if _economy_enabled() and self.model != "qwen3.7-flash":
+            raise QwenTransportError("economy_text_ceiling_would_downgrade_explicit_model", transient=False)
+        self.key_file = Path(key_file) if key_file else None
+        self.base_url = str(base_url or "https://dashscope.aliyuncs.com/compatible-mode/v1")
+        self.max_retries = max(0, int(max_retries))
+        self.timeout_seconds = max(5.0, float(timeout_seconds))
+        self.max_output_tokens = max(64, int(max_output_tokens))
+        if self.max_output_tokens > int(pricing["max_output_tokens"]):
+            raise QwenTransportError("model_max_output_exceeded", transient=False, record={"model": self.model, "requested": self.max_output_tokens, "max_output_tokens": pricing["max_output_tokens"]})
+        self.thinking = bool(thinking)
+        self.json_mode = bool(json_mode)
+        if self.thinking and self.json_mode and not bool(pricing["thinking_json"]):
+            raise QwenTransportError("thinking_json_unsupported_for_model", transient=False, record={"model": self.model, "thinking": True, "response_format": {"type": "json_object"}})
+        try:
+            configured_thinking_budget = int(thinking_budget)
+        except (TypeError, ValueError) as exc:
+            raise QwenTransportError("invalid_thinking_budget", transient=False, record={"model": self.model}) from exc
+        if configured_thinking_budget < 0:
+            raise QwenTransportError("invalid_thinking_budget", transient=False, record={"model": self.model})
+        # `max_tokens` is the visible answer budget for thinking requests.
+        # Reserve and bound the thinking allowance separately so the combined
+        # completion cannot exceed this model's published output capacity.
+        self.thinking_budget = configured_thinking_budget if self.thinking else 0
+        if self.max_output_tokens + self.thinking_budget > int(pricing["max_output_tokens"]):
+            raise QwenTransportError(
+                "model_total_output_exceeded",
+                transient=False,
+                record={
+                    "model": self.model,
+                    "requested_output_tokens": self.max_output_tokens,
+                    "thinking_budget": self.thinking_budget,
+                    "max_output_tokens": pricing["max_output_tokens"],
+                },
+            )
+        self.max_keys = max(1, int(max_keys))
+        self.raw_response_dir = Path(raw_response_dir) if raw_response_dir else None
+        self.budget_ledger = budget_ledger
+        self.reserved_attempt_cny = reserved_attempt_cny
+        self.prompt_token_counter = prompt_token_counter
+        try:
+            self.prompt_token_multiplier = float(prompt_token_multiplier)
+            self.prompt_token_framing_margin = int(prompt_token_framing_margin)
+        except (TypeError, ValueError) as exc:
+            raise QwenTransportError("invalid_prompt_token_estimator", transient=False) from exc
+        if self.prompt_token_multiplier < 1.0 or self.prompt_token_framing_margin < 0:
+            raise QwenTransportError("invalid_prompt_token_estimator", transient=False)
+
+    def _prompt_token_estimate(self, request_bytes: bytes, messages: Sequence[Mapping[str, Any]]) -> int:
+        if self.prompt_token_counter is None:
+            return _conservative_prompt_token_upper_bound(request_bytes, messages)
+        try:
+            measured = int(self.prompt_token_counter(request_bytes, messages))
+        except Exception as exc:
+            raise QwenTransportError(
+                "prompt_token_estimator_failed",
+                transient=False,
+                record={"error": type(exc).__name__},
+            ) from exc
+        if measured < 0:
+            raise QwenTransportError("prompt_token_estimator_returned_negative", transient=False)
+        return max(1, int(measured * self.prompt_token_multiplier + 0.999999) + self.prompt_token_framing_margin)
+
+    def _keys(self) -> list[str]:
+        try:
+            from config.qwen_config import get_qwen_api_key_candidates_ordered
+            rows = get_qwen_api_key_candidates_ordered(self.key_file)
+            keys = [_text(row.get("api_key")) for row in rows if isinstance(row, Mapping) and _text(row.get("api_key"))]
+        except Exception as exc:
+            raise MissingCredentialError("qwen_key_resolution_failed", record={"error": type(exc).__name__}) from exc
+        if not keys:
+            raise MissingCredentialError("qwen_credentials_missing")
+        return keys
+
+    @staticmethod
+    def _message_content(payload: Mapping[str, Any]) -> str:
+        choices = payload.get("choices")
+        if not isinstance(choices, Sequence) or not choices:
+            return ""
+        choice = choices[0] if isinstance(choices[0], Mapping) else {}
+        message = choice.get("message") if isinstance(choice.get("message"), Mapping) else {}
+        content = message.get("content")
+        if isinstance(content, list):
+            return "".join(_text(item.get("text")) if isinstance(item, Mapping) else _text(item) for item in content)
+        return _text(content)
+
+    def __call__(self, messages: Sequence[Mapping[str, Any]], **kwargs: Any) -> dict[str, Any]:
+        call_id = _text(kwargs.get("call_id")) or "call-" + uuid.uuid4().hex[:16]
+        safe_call_id = "".join(char if char.isalnum() or char in "-_" else "_" for char in call_id)[:100] or "call"
+        model = _text(kwargs.get("model")) or self.model
+        if model != self.model:
+            raise QwenTransportError("runtime_model_mismatch", transient=False, record={"requested": model, "configured": self.model})
+        pricing = model_pricing(model)
+        if self.json_mode and not any("json" in _text(item.get("content")).casefold() for item in messages if isinstance(item, Mapping)):
+            raise QwenTransportError("json_keyword_required_for_json_object", transient=False, record={"model": model})
+        requested_output_tokens = int(kwargs.get("max_output_tokens") or self.max_output_tokens)
+        if requested_output_tokens > int(pricing["max_output_tokens"]):
+            raise QwenTransportError("model_max_output_exceeded", transient=False, record={"model": model, "requested": requested_output_tokens, "max_output_tokens": pricing["max_output_tokens"]})
+        if requested_output_tokens < 64:
+            requested_output_tokens = 64
+        try:
+            thinking_budget = int(kwargs.get("thinking_budget", self.thinking_budget)) if self.thinking else 0
+        except (TypeError, ValueError) as exc:
+            raise QwenTransportError("invalid_thinking_budget", transient=False, record={"model": model}) from exc
+        if thinking_budget < 0:
+            raise QwenTransportError("invalid_thinking_budget", transient=False, record={"model": model})
+        total_output_tokens = requested_output_tokens + thinking_budget
+        if total_output_tokens > int(pricing["max_output_tokens"]):
+            raise QwenTransportError(
+                "model_total_output_exceeded",
+                transient=False,
+                record={
+                    "model": model,
+                    "requested_output_tokens": requested_output_tokens,
+                    "thinking_budget": thinking_budget,
+                    "max_output_tokens": pricing["max_output_tokens"],
+                },
+            )
+        body = {
+            "model": model,
+            "messages": [dict(item) for item in messages],
+            "max_tokens": requested_output_tokens,
+            "temperature": float(kwargs.get("temperature", 0.1)),
+            "enable_thinking": self.thinking,
+            "stream": False,
+        }
+        if self.json_mode:
+            body["response_format"] = {"type": "json_object"}
+        if self.thinking:
+            body["thinking_budget"] = thinking_budget
+        request_bytes = _json_bytes(body)
+        last_error: QwenTransportError | None = None
+        for key_index, key in enumerate(self._keys()[: self.max_keys]):
+            for attempt in range(self.max_retries + 1):
+                reservation = None
+                if self.budget_ledger is not None:
+                    prompt_estimate = self._prompt_token_estimate(request_bytes, messages)
+                    required_reservation = estimated_cost_cny({"prompt_tokens": prompt_estimate, "completion_tokens": total_output_tokens}, model=model, conservative=True)
+                    conservative = float(self.reserved_attempt_cny or 0.0)
+                    if conservative > 0 and conservative + 1e-12 < required_reservation:
+                        raise QwenTransportError("reserved_attempt_cny_too_low", transient=False, record={"provided_cny": conservative, "required_cny": required_reservation, "model": model})
+                    if conservative <= 0:
+                        conservative = required_reservation
+                    reservation = self.budget_ledger.reserve(conservative, f"{call_id}:key{key_index}:attempt{attempt}")
+                reservation_settled = False
+                started = time.monotonic()
+                request = urllib.request.Request(
+                    self.base_url.rstrip("/") + "/chat/completions",
+                    data=request_bytes,
+                    headers={"Authorization": "Bearer " + key, "Content-Type": "application/json", "Connection": "close"},
+                    method="POST",
+                )
+                try:
+                    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                    with opener.open(request, timeout=self.timeout_seconds) as response:
+                        raw = response.read()
+                        if self.raw_response_dir:
+                            self.raw_response_dir.mkdir(parents=True, exist_ok=True)
+                            temp = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.tmp")
+                            target = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.raw")
+                            temp.write_bytes(raw)
+                            os.replace(temp, target)
+                        status_code = int(getattr(response, "status", 200))
+                        headers = dict(response.headers.items()) if getattr(response, "headers", None) else {}
+                    try:
+                        payload = json.loads(raw.decode("utf-8"))
+                    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                        raise QwenTransportError("qwen_response_not_json", transient=False, status_code=status_code, record={"raw_sha256": hashlib.sha256(raw).hexdigest()}) from exc
+                    if not isinstance(payload, Mapping):
+                        raise QwenTransportError("qwen_response_not_object", transient=False, status_code=status_code)
+                    choices = payload.get("choices") if isinstance(payload.get("choices"), Sequence) else []
+                    choice = choices[0] if choices and isinstance(choices[0], Mapping) else {}
+                    finish_reason = _text(choice.get("finish_reason"))
+                    content = self._message_content(payload)
+                    complete = finish_reason == "stop" and bool(content)
+                    result = {
+                        "content": content,
+                        "raw_response": raw.decode("utf-8", errors="replace"),
+                        "raw_response_sha256": hashlib.sha256(raw).hexdigest(),
+                        "requested_model": model,
+                        "returned_model": _text(payload.get("model")) or None,
+                        "finish_reason": finish_reason,
+                        "complete": complete,
+                        "request_id": _text(payload.get("id") or headers.get("x-request-id") or headers.get("X-Request-ID")),
+                        "usage": dict(payload.get("usage") or {}) if isinstance(payload.get("usage"), Mapping) else {},
+                        "status_code": status_code,
+                        "call_id": call_id,
+                        "attempt": attempt + 1,
+                        "key_index": key_index,
+                        "elapsed_seconds": time.monotonic() - started,
+                    }
+                    if self.budget_ledger is not None and reservation:
+                        usage = result.get("usage") or {}
+                        telemetry = {"usage": usage, "returned_model": result.get("returned_model"), "finish_reason": result.get("finish_reason"), "request_id": result.get("request_id"), "raw_response_sha256": result.get("raw_response_sha256"), "status_code": status_code}
+                        has_usage = usage and (usage.get("prompt_tokens") is not None or usage.get("input_tokens") is not None) and (usage.get("completion_tokens") is not None or usage.get("output_tokens") is not None)
+                        if has_usage:
+                            self.budget_ledger.settle(reservation["reservation_id"], estimated_cost_cny(usage, model=model), uncertain=False, telemetry=telemetry)
+                            reservation_settled = True
+                        else:
+                            self.budget_ledger.settle(reservation["reservation_id"], None, uncertain=True, telemetry=telemetry)
+                            reservation_settled = True
+                    actual_model = _text(result.get("returned_model"))
+                    if actual_model and actual_model != model:
+                        raise QwenTransportError("qwen_returned_model_mismatch", transient=False, status_code=status_code, record=result)
+                    if not complete:
+                        raise QwenTransportError("qwen_incomplete_response", transient=False, status_code=status_code, record=result)
+                    return result
+                except QwenTransportError:
+                    if self.budget_ledger is not None and reservation and not reservation_settled:
+                        self.budget_ledger.settle(reservation["reservation_id"], None, uncertain=True)
+                        reservation_settled = True
+                    raise
+                except urllib.error.HTTPError as exc:
+                    raw = exc.read() if hasattr(exc, "read") else b""
+                    status = int(exc.code)
+                    if self.raw_response_dir:
+                        self.raw_response_dir.mkdir(parents=True, exist_ok=True)
+                        temp = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.tmp")
+                        target = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.raw")
+                        temp.write_bytes(raw)
+                        os.replace(temp, target)
+                    headers = getattr(exc, "headers", None) or {}
+                    request_id = _provider_request_id(raw, headers)
+                    error_code = _safe_error_code(raw)
+                    rotate_key = _account_rejection(status, error_code)
+                    provider_error_code = error_code or (f"http_{status}")
+                    record = {
+                        "status_code": status, "raw_response_sha256": hashlib.sha256(raw).hexdigest(),
+                        "call_id": call_id, "request_id": request_id or None, "provider_error_code": provider_error_code,
+                        "key_index": key_index, "attempt": attempt + 1, "rotate_key": rotate_key,
+                    }
+                    transient = status in TRANSIENT_HTTP
+                    last_error = QwenTransportError("qwen_account_rejection" if rotate_key else "qwen_http_error", transient=transient, status_code=status, record=record)
+                    if self.budget_ledger is not None and reservation and not reservation_settled:
+                        telemetry = {"usage": None, "request_id": request_id or None, "raw_response_sha256": record["raw_response_sha256"], "status_code": status, "provider_error_code": provider_error_code, "key_index": key_index, "attempt": attempt + 1}
+                        # A definitive 4xx, including an account rejection,
+                        # consumed no model tokens.  Server errors and rate
+                        # limits remain uncertain because the provider may
+                        # have accepted the request before returning the
+                        # error.
+                        self.budget_ledger.settle(reservation["reservation_id"], 0.0, uncertain=False, telemetry=telemetry) if not last_error.transient else self.budget_ledger.settle(reservation["reservation_id"], None, uncertain=True, telemetry=telemetry)
+                        reservation_settled = True
+                    if not last_error.transient:
+                        if rotate_key:
+                            break
+                        raise last_error
+                except (urllib.error.URLError, TimeoutError, OSError) as exc:
+                    last_error = QwenTransportError("qwen_transport_error", transient=True, record={"call_id": call_id, "error": type(exc).__name__})
+                if last_error and last_error.record.get("rotate_key"):
+                    # Account/auth rejection is definitive for this key.  Do
+                    # not spend retry attempts on the same credential; move
+                    # to the next bounded key in the pool.
+                    break
+                if last_error and not last_error.transient:
+                    if self.budget_ledger is not None and reservation and not reservation_settled:
+                        self.budget_ledger.settle(reservation["reservation_id"], None, uncertain=True)
+                        reservation_settled = True
+                    raise last_error
+                if self.budget_ledger is not None and reservation and not reservation_settled:
+                    self.budget_ledger.settle(reservation["reservation_id"], None, uncertain=True)
+                    reservation_settled = True
+                if attempt < self.max_retries:
+                    time.sleep(min(8.0, 0.5 * (2 ** attempt)))
+        raise last_error or QwenTransportError("qwen_call_failed", transient=False)
+
+
+def invoke_client(client: Any, messages: Sequence[Mapping[str, Any]], **kwargs: Any) -> dict[str, Any]:
+    """Call an injected test/live client without hiding its telemetry."""
+
+    if client is None:
+        raise QwenTransportError("reader_client_required", transient=False)
+    if hasattr(client, "complete") and callable(client.complete):
+        result = client.complete(messages, **kwargs)
+    elif callable(client):
+        result = client(messages, **kwargs)
+    else:
+        raise QwenTransportError("reader_client_not_callable", transient=False)
+    if isinstance(result, Mapping):
+        return dict(result)
+    return {"content": result, "complete": True, "finish_reason": "stop"}
+
+
+def estimated_cost_cny(
+    usage: Mapping[str, Any],
+    *,
+    model: str = "qwen3.7-flash",
+    input_rate: float | None = None,
+    output_rate: float | None = None,
+    conservative: bool = False,
+) -> float:
+    """Estimate CNY from provider usage using the model's Beijing tiers.
+
+    Missing token counters are an accounting error, never free usage.  The
+    conservative mode uses the highest applicable tier for both counters for
+    a pre-dispatch reservation; settled usage uses the exact input tier.
+    """
+
+    inp_value = usage.get("prompt_tokens") if usage.get("prompt_tokens") is not None else usage.get("input_tokens")
+    out_value = usage.get("completion_tokens") if usage.get("completion_tokens") is not None else usage.get("output_tokens")
+    if inp_value is None or out_value is None:
+        raise QwenTransportError("usage_token_counts_missing", transient=False, record={"model": model, "usage_keys": sorted(str(key) for key in usage)})
+    inp = max(0, int(float(inp_value)))
+    out = max(0, int(float(out_value)))
+    if input_rate is None or output_rate is None:
+        pricing = model_pricing(model)
+        if conservative:
+            _, input_rate, output_rate = pricing["tiers"][-1]
+        else:
+            input_rate, output_rate = _tier_rates(model, max(1, inp))
+    return (inp * float(input_rate) + out * float(output_rate)) / 1_000_000.0
+
+
+__all__ = ["QwenDirectClient", "QwenTransportError", "MissingCredentialError", "GlobalBudgetLedger", "invoke_client", "estimated_cost_cny", "model_pricing", "MODEL_PRICING_CNY"]
