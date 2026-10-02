@@ -33,3 +33,15 @@ v1只自动装配standalone；现有owned结语原位替换，新结语放在第
 - tests/upgrade3/test_review_delivery_figures_citations.py::test_stage_cross_refs_captions_and_map_all_agree
 - tests/upgrade3/test_review_delivery_integration.py::test_history_full_chain_via_cli_subprocess
 - tests/upgrade3/test_review_delivery_integration.py::test_plan_restricted_chain_via_entry
+
+## 2026-10-02 协议接缝小修
+
+基线为 `fdc9a0d94d394c1bfbc0b9241893540454b9dc63`。本轮只修改首尾生产消息及部件外层标题兼容处理，新增质量指南；不调整 BODY、schema、材料选择或模型调用顺序。
+
+- 构思实际消息明确当前只执行 standalone；保留 embedded/distributed 卡片验证与保存后停止的兼容行为，不静默转换。
+- 文本生成消息明确外层部件标题由程序添加。应用层仅去除第一个非空行上明确同名的 H1/H2 标题（中文／英文既有别名），保留内部、非同名、复合、编号和代码中的标题；不移除 H3+、Setext 或无 Markdown 标记的疑似标题。标题删除后没有内容则失败，不发布。
+- 最终专项测试 **207 passed**；完整 `tests/upgrade3` **286 passed, 12 failed**。同一环境重新测试未改基线为 **241 passed, 12 failed**，失败测试身份集合逐项完全相同，即上列 12 项；新增参数化用例净增 45 项。
+- 测试检查实际落盘的生产消息、中文／英文／无外层标题的最终稿、合法内部标题、CRLF、缩进、只有标题时拒绝发布、owned span 重复应用幂等；输入文件不变，BODY 投影字节相等。
+- `git diff --check` 和 `compileall` 通过。受保护正文文件与基线无差异。
+- 新增 `POST_BODY_PARTS_QUALITY_GUIDE.md` 复用原 35 篇研究，以 5 篇确实阅读的例子区分原文观察和评审推论。本轮没有发现需要新增的通用质量任务，不叠加生产质量要求。
+- 没有真实／付费模型调用，没有重跑正文。这些结果只证明协议与装配行为；生成质量、输入组合和调用方案优劣仍须本地固定 BODY 后验证。

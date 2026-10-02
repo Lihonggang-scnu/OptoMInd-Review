@@ -351,11 +351,28 @@ def _part_text(parts: Mapping[str, Any], part: str) -> str:
         return ""
     if not isinstance(value, str):
         raise SerialPartsApplicationError(f"part_must_be_text:{part}")
+    original_value = value
     value = value.strip()
     if _MARKER_LIKE.search(value):
         raise SerialPartsApplicationError(f"part_contains_ownership_marker:{part}")
     if part == "title" and ("\n" in value or "\r" in value):
         raise SerialPartsApplicationError("title_must_be_single_line")
+    if part in _PART_NAMES:
+        lines = original_value.splitlines(keepends=True)
+        first = next((i for i, line in enumerate(lines) if line.strip()), None)
+        heading = _HEADING.fullmatch(lines[first]) if first is not None else None
+        # Tolerate one redundant outer heading, not arbitrary subsection titles.
+        # H3+ remains part content even when its title matches the part name.
+        # Inspect original indentation so code is not mistaken for a heading.
+        if heading and len(heading[1]) <= 2:
+            title = re.sub(r"[ \t]+#+[ \t]*$", "", heading[2]).strip().casefold()
+            if title in _PART_NAMES[part]:
+                start = first + 1
+                while start < len(lines) and not lines[start].strip():
+                    start += 1
+                value = "".join(lines[start:]).rstrip()
+                if not value:
+                    raise SerialPartsApplicationError(f"part_body_required:{part}")
     return value
 
 

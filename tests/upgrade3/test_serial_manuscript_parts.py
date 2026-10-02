@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from optomind_research.runtime.upgrade3 import serial_manuscript_parts as serial
-from optomind_research.runtime.upgrade3.serial_parts_application import extract_body
+from optomind_research.runtime.upgrade3.serial_parts_application import extract_body, extract_owned_parts
 
 BODY = "# 原题\n\n## 理论与证据\n\n概念 A 与条件 B 共同限定关系 C [P0001]。\n\n## 参考文献\n\n[P0001] 来源一\n"
 
@@ -52,6 +52,66 @@ def test_four_stages_offline_preserve_body_and_provenance(tmp_path, monkeypatch)
     assert "实际 BODY" in intro[0]["content"]
 
 
+@pytest.mark.parametrize("language", ["zh", "en"])
+def test_actual_production_messages_describe_runtime_and_part_content_contract(tmp_path, language):
+    report = run(tmp_path, language=language)
+    assert report["status"] == "generated", report
+    for stage in serial.STAGE_ORDER:
+        messages = json.loads((tmp_path / f"output/messages/{stage}.json").read_text())
+        prompt = "\n".join(message["content"] for message in messages)
+        assert "生成部件文本时，abstract、introduction、conclusion 字段只返回部件正文" in prompt
+        assert "可保留必要的内部小标题" in prompt
+        assert "这些标题由应用层统一添加" in prompt
+        if stage == "conception":
+            assert "当前运行时只支持 standalone 装配" in prompt
+            assert "本轮三个部件的 placement.mode 都应为 standalone" in prompt
+            assert "不是综述写作的普遍要求" in prompt
+            assert "schema 为兼容保留 embedded/distributed" in prompt
+            assert "unsupported_placement 后停止" in prompt
+            assert "mode:standalone|embedded|distributed" in prompt
+
+
+@pytest.mark.parametrize("language", ["zh", "en"])
+@pytest.mark.parametrize("heading_language", [None, "zh", "en"])
+def test_final_assembly_has_one_outer_heading_and_preserves_part_content_and_body(
+    tmp_path, language, heading_language,
+):
+    headings = {"zh": {"abstract": "摘要", "introduction": "引言", "conclusion": "结语"},
+                "en": {"abstract": "Abstract", "introduction": "Introduction", "conclusion": "Conclusion"}}
+    source = BODY.replace("\n", "\r\n").rstrip("\r\n")
+    draft = tmp_path / "BODY.md"
+    draft.write_bytes(source.encode("utf-8"))
+    data = fixture()
+    content = {}
+    for part in ("abstract", "introduction", "conclusion"):
+        content[part] = (f"Actual {part} content.\r\n\r\n### Conditions\r\n"
+                         f"Preserve scientific detail.\r\n\r\n### {headings[language][part]}\r\n"
+                         "A legitimate internal heading.\r\n\r\n## Conclusion of a proof\r\n"
+                         "Keep this compound heading too.")
+        outer = ""
+        if heading_language:
+            # Both outer heading levels, including optional closing hashes.
+            prefix = "#" if part == "abstract" else "##"
+            outer = f"{prefix} {headings[heading_language][part]} ##\r\n\r\n"
+        data[part][part] = outer + content[part]
+    fixture_path = tmp_path / "fixture.json"
+    fixture_path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    report = serial.run_serial_parts(draft_path=draft, research_question="q", chapter_roles=[],
+        out_dir=tmp_path / "output", parts_fixture_path=fixture_path, language=language)
+    assert report["status"] == "generated", report
+    final = Path(report["final_manuscript"]).read_bytes().decode("utf-8")
+    assert draft.read_bytes() == source.encode("utf-8")
+    assert extract_body(final).encode("utf-8") == extract_body(source).encode("utf-8")
+    assert report["body_sha256"] == report["final_body_sha256"]
+    owned_parts = extract_owned_parts(final)
+    for part in content:
+        expected = f"## {headings[language][part]}\r\n\r\n{content[part]}"
+        if part == "abstract":
+            label, separator = ("**关键词：** ", "；") if language == "zh" else ("**Keywords:** ", "; ")
+            expected += "\r\n\r\n" + label + separator.join(data["abstract"]["keywords"])
+        assert owned_parts[part] == expected
+
+
 def test_conception_generated_from_body_and_not_early_cards(tmp_path):
     report = run(tmp_path, context={"manuscript_parts_plan": card()})
     assert report["status"] == "failed"
@@ -87,14 +147,31 @@ def test_abstract_output_strict(tmp_path, field, bad):
     assert run(tmp_path, data)["status"] == "failed"
 
 
-def test_unsupported_placement_preserves_card_and_stops(tmp_path):
+@pytest.mark.parametrize("mode", ["embedded", "distributed"])
+@pytest.mark.parametrize("part", ["abstract", "introduction", "conclusion"])
+def test_unsupported_placement_preserves_card_and_stops(tmp_path, mode, part):
     data = fixture()
-    data["conception"]["manuscript_parts_plan"]["conclusion"]["placement"]["mode"] = "embedded"
+    data["conception"]["manuscript_parts_plan"][part]["placement"]["mode"] = mode
     report = run(tmp_path, data)
     assert report["status"] == "unsupported_placement"
     assert "unsupported_placement" in str(report["failures"])
-    assert (tmp_path / "output/MANUSCRIPT_PARTS_PLAN.json").exists()
+    saved = json.loads((tmp_path / "output/MANUSCRIPT_PARTS_PLAN.json").read_text())
+    assert saved[part]["placement"]["mode"] == mode
+    assert report["unsupported_placements"] == [part]
+    assert report["final_manuscript"] is None
     assert not (tmp_path / "output/messages/conclusion.json").exists()
+
+
+@pytest.mark.parametrize("part,heading", [("abstract", "Abstract"), ("introduction", "引言"),
+                                         ("conclusion", "Conclusion")])
+def test_heading_only_part_cannot_publish_final(tmp_path, part, heading):
+    data = fixture()
+    data[part][part] = f"## {heading}\r\n\r\n"
+    report = run(tmp_path, data)
+    assert report["status"] == "failed"
+    assert f"part_body_required:{part}" in str(report["failures"])
+    assert report["final_manuscript"] is None
+    assert not (tmp_path / "output/MANUSCRIPT_FINAL.md").exists()
 
 
 @pytest.mark.parametrize("mutate", [lambda c:c.update(extra=1), lambda c:c["abstract"].update(units=[]),

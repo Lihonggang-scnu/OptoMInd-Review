@@ -213,6 +213,55 @@ def test_english_headings_and_keywords(language):
     assert parts["conclusion"].startswith("## Conclusion\n")
 
 
+@pytest.mark.parametrize("part,heading", [
+    ("abstract", "摘要"), ("abstract", "ABSTRACT"),
+    ("introduction", "引言"), ("introduction", "绪论"), ("introduction", "Introduction"),
+    ("conclusion", "结语"), ("conclusion", "结论"), ("conclusion", "Conclusions"),
+])
+@pytest.mark.parametrize("prefix", ["#", "##"])
+def test_one_exact_leading_matching_outer_heading_is_removed(part, heading, prefix):
+    source = "## Methods\r\nExact BODY without a final newline"
+    content = "Actual content.\r\n\r\n### Conditions\r\nKeep these conditions."
+    parts = {part: f"{prefix} {heading}\r\n\r\n{content}"}
+    result, _ = app.apply_serial_parts(source, parts, language="en")
+    assert app.extract_owned_parts(result)[part] == f"## {part.title()}\r\n\r\n{content}"
+    assert app.extract_body(result) == source
+    repeated, _ = app.apply_serial_parts(result, parts, language="en")
+    assert repeated == result
+
+
+@pytest.mark.parametrize("indent", ["    ", "\t"])
+def test_removing_outer_heading_preserves_indented_part_content(indent):
+    source = "## Methods\nExact BODY."
+    content = f"{indent}## Internal literal\n{indent}Code content."
+    parts = {"conclusion": "\n\n## Conclusion\n \n" + content}
+    result, _ = app.apply_serial_parts(source, parts, language="en")
+    assert app.extract_owned_parts(result)["conclusion"] == "## Conclusion\n\n" + content
+    assert app.extract_body(result) == source
+    repeated, _ = app.apply_serial_parts(result, parts, language="en")
+    assert repeated == result
+
+
+@pytest.mark.parametrize("value", [
+    "Body content without a heading.",
+    "## Abstract\nA nonmatching part heading.",
+    "## Introduction to Bayesian methods\nA compound heading.",
+    "## 引言：符号系统\nA compound Chinese heading.",
+    "## 1. Introduction\nA numbered heading is not an exact match.",
+    "### Introduction\nA legitimate internal heading.",
+    "### 引言\nA legitimate internal Chinese heading.",
+    "Prose first.\n\n## Introduction\nA later heading must remain.",
+    "```markdown\n## Introduction\n```\nA literal example.",
+    "    ## Introduction\n    An indented code heading.",
+    "\n\n\t## Introduction\n\tA tab-indented code heading.",
+])
+def test_nonmatching_compound_and_internal_part_headings_are_preserved(value):
+    source = "## Methods\nExact BODY."
+    result, _ = app.apply_serial_parts(source, {"introduction": value}, language="en")
+    assert app.extract_owned_parts(result)["introduction"] == "## Introduction\n\n" + value.strip()
+    assert app.extract_body(result) == source
+
+
 @pytest.mark.parametrize("parts,reason", [
     ({"title": "First\nSecond"}, "single_line"),
     ({"abstract": 123}, "must_be_text"),

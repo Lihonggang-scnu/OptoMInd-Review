@@ -245,7 +245,8 @@ _COMMON = """你是独立的正文完成后首尾编辑。只构思并生成首�
 保留决定科学含义的完整概念、关系、研究对象、设置、比较和适用条件；不要把具体机制压成空泛标签，不扩大因果、验证强度或适用范围。条件应与对应主张一起出现。
 已生成首尾仅供表达协调，不是科学证据，不约束你接受其判断。发现它与 BODY 冲突时以 BODY 为准；BODY 内部矛盾不靠猜测修复，应保留边界并报告。
 只使用当前正文已有引用句柄或明确选定材料的许可句柄；身份目录不是证据。没有背景材料时不得虚构来源、研究缺失、首创或系统综述方法。全文池和历史职责卡不作为输入。
-同一概念可因定义、解释与综合而合法复现；避免把同一段结论在三部分改写复读。字数、段落顺序与案例数量不是统一模板。Return JSON only."""
+同一概念可因定义、解释与综合而合法复现；避免把同一段结论在三部分改写复读。字数、段落顺序与案例数量不是统一模板。
+生成部件文本时，abstract、introduction、conclusion 字段只返回部件正文，可保留必要的内部小标题；不要包含部件自己的外层标题（摘要/Abstract、引言/Introduction、结语/Conclusion），这些标题由应用层统一添加。Return JSON only."""
 
 _CONCEPTION = """阅读实际 BODY 后，重新构思摘要、引言与结语的知识职责。先把握整篇已经建立的认识及其组织理由，再决定各部件的重点；不能由一个局部缺口或未来工作清单接管全篇。
 引言：为目标读者建立阅读理由与理解条件，说明有关问题、已有认识、为何需要本篇视角、实际范围及组织方式。按需要解释关键概念或代表性现象，允许有依据的概括判断；不要提前完成正文的详细比较，也不要写成缩小版结论。
@@ -253,6 +254,7 @@ _CONCEPTION = """阅读实际 BODY 后，重新构思摘要、引言与结语的
 摘要：让未阅读全文者独立理解对象、范围、组织价值及最重要的有条件认识；导航或分类本身可以是文章价值，不强求单一最终答案。不能机械列章节，也不照抄结语。题名与摘要共同定稿，匹配实际覆盖与文体，不无据使用“系统”“首次”“全面”等承诺。
 使用一个共享 context 表达读者、用途、知识负担和已确认格式；未知格式不要猜测。三个部件各给 purpose、focus、boundary、placement、finalize_from：purpose 是读者认识任务；focus 是本篇实质重点而非段落清单；boundary 说明展开尺度、与现有正文的交接及必要重现，不笼统禁机制、数字、案例或引用；placement 指现有结构中的承载方式；finalize_from 明确当前 BODY 的相关章节、判断及条件，必要时指出所给背景材料，不只列早期计划字段。
 职责卡保持轻量，不生成 units、cases、paragraphs、paragraph_briefs 或第二套文献规划。三部分可共享中心问题，但各自信息作用必须不同。缺少必要背景时在相关 focus 中简短指出待补事项，不编造已知事实或另起检索计划。
+当前运行时只支持 standalone 装配，本轮三个部件的 placement.mode 都应为 standalone。这只是当前实现的执行边界，不是综述写作的普遍要求。schema 为兼容保留 embedded/distributed；若返回这些模式，运行会保存职责卡并报告 unsupported_placement 后停止，不会自动转换或修改 BODY。
 只返回 {\"manuscript_parts_plan\": {\"context\": \"...\", \"abstract\": PartPlan, \"introduction\": PartPlan, \"conclusion\": PartPlan}}。PartPlan 必须且仅含 purpose:string、focus:string[]、boundary:string[]、placement:{mode:standalone|embedded|distributed,anchor:string}、finalize_from:string[]。所有字符串与数组非空，输出完整新卡，不返回补丁。"""
 
 _DUTIES = {
