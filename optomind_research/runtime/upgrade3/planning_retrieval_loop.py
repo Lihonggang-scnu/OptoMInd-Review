@@ -90,6 +90,12 @@ class InformationNeed:
             raise RetrievalLoopError("need_id_required")
         if self.kind not in {"supplement", "directed"}:
             raise RetrievalLoopError("need_kind_invalid")
+        # Keep queue entries on the same intended-use vocabulary as local
+        # triage.  In particular, clinical_evidence is an application outcome
+        # request and must reach the Plus judge route instead of falling back
+        # to the mechanism default.
+        from .planning_material_triage import normalize_intended_use
+        self.intended_use = normalize_intended_use(self.intended_use)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -363,7 +369,7 @@ class NeedState:
     def content_for_owner(self, owner: str) -> dict[str, Any]:
         """What one section gets: the same material, interpreted for its use."""
 
-        return {
+        result = {
             "need_id": self.need.need_id,
             "owner": owner,
             "question": self.need.question,
@@ -378,6 +384,9 @@ class NeedState:
             "is_owner_request": owner in self.need.owners,
             "local_triage": dict(self.local_triage),
         }
+        if "answers_requested_question" in self.local_triage:
+            result["answers_requested_question"] = self.local_triage["answers_requested_question"]
+        return result
 
 
 @dataclass
@@ -883,6 +892,8 @@ def needs_from_planner_gap_rows(
 ) -> list[InformationNeed]:
     """Build queue entries from the planner's gap rows (thin wrapper)."""
 
+    from .planning_material_triage import normalize_intended_use
+
     out: list[InformationNeed] = []
     for index, raw in enumerate(rows, start=1):
         question = str(raw.get("gap_question") or raw.get("question") or "").strip()
@@ -903,7 +914,7 @@ def needs_from_planner_gap_rows(
             need_id=str(raw.get("need_id") or need_id_for(question, comparison_object=comparison)),
             question=question,
             owners=owners,
-            intended_use=str(raw.get("intended_use") or intended_use),
+            intended_use=normalize_intended_use(str(raw.get("intended_use") or intended_use)),
             user_scope=str(raw.get("user_scope") or user_scope),
             success_criteria=tuple(str(item) for item in (raw.get("success_criteria") or ()) if str(item).strip()),
             concepts=tuple(concepts[:MAX_QUERIES_PER_ROUND_DEFAULT]),

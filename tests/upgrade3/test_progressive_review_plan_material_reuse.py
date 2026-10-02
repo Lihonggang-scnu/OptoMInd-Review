@@ -1,0 +1,531 @@
+"""Offline regression tests for provider-alias material reuse."""
+
+import json
+from pathlib import Path
+
+from optomind_research.runtime.upgrade3 import directed_reading, planning_retrieval_loop, planning_supplement
+from optomind_research.runtime.upgrade3.progressive_review_plan import (
+    ProgressivePlannerConfig,
+    ProgressiveReviewPlanner,
+    _decorate_directed_material,
+    _directed_task_signature,
+    make_directed_reading_runner,
+    make_planning_supplement_runner,
+    make_retrieval_loop_runner,
+)
+
+
+DOI = "10.1038/s41467-022-33116-z"
+
+
+def _pool_row(tmp_path: Path, *, with_assets: bool = True) -> dict:
+    row = {
+        "paper_id": "CorpusId:252309032",
+        "planning_view": {
+            "paper_identity": {
+                "canonical_paper_id": "CorpusId:252309032",
+                "doi": DOI,
+                "title": "Inhibition of UBA6 by inosine augments tumour immunogenicity and responses",
+            }
+        },
+        "_b_summary": {"declared_content_depth": "fulltext"},
+    }
+    if not with_assets:
+        row["card_path"] = str(tmp_path / "missing" / "PAPER_READING_CARD.json")
+        return row
+
+    source_unit = tmp_path / "existing" 
+    card_path = source_unit / "card" / "PAPER_READING_CARD.json"
+    snapshot = source_unit / "materials" / "CorpusId_252309032" / "snapshot-existing"
+    card_path.parent.mkdir(parents=True)
+    snapshot.mkdir(parents=True)
+    (snapshot / "manifest.json").write_text(json.dumps({"snapshot_id": "snapshot-existing"}), encoding="utf-8")
+    (source_unit / "SOURCE_UNIT.json").write_text(
+        json.dumps({"snapshot_path": str(snapshot)}), encoding="utf-8"
+    )
+    card_path.write_text(
+        json.dumps({"material": {"snapshot_id": "snapshot-existing"}}), encoding="utf-8"
+    )
+    row["card_path"] = str(card_path)
+    return row
+
+
+def _reuse_callback(tmp_path: Path, monkeypatch, pool_row: dict):
+    captured = {}
+    acquire_calls = []
+
+    def fake_judge(**kwargs):
+        return object()
+
+    def fake_supplement(
+        request_path, *, output_dir, acquirer_factory, reuse_material, **kwargs
+    ):
+        record = {
+            "canonical_paper_id": "OpenAlex:W4296038319",
+            "doi": "https://doi.org/" + DOI,
+            "title": "Inhibition of UBA6 by inosine augments tumour immunogenicity and responses",
+        }
+        reused = reuse_material(record=record, pool_rows=[pool_row])
+        captured["reused"] = reused
+        if reused is None:
+            acquire_calls.append(record)
+        return {"status": "fulfilled", "output_dir": str(output_dir)}
+
+    monkeypatch.setattr(planning_supplement, "run_qwen_fulfillment_judge", fake_judge)
+    monkeypatch.setattr(planning_supplement, "run_planning_supplement", fake_supplement)
+    config = ProgressivePlannerConfig(
+        topic_id="reuse-test",
+        pool_path=tmp_path / "pool.jsonl",
+        plan_path=tmp_path / "plan.json",
+        output_dir=tmp_path / "run",
+    )
+    runner = make_planning_supplement_runner(
+        config,
+        key_file=tmp_path / "missing-key.txt",
+        budget_ledger_path=tmp_path / "budget.sqlite",
+        budget_limit_cny=50,
+    )
+    runner(
+        [{"gap_id": "G1", "gap_question": "test"}],
+        phase="level1",
+        output_dir=tmp_path / "phase",
+        pool_rows=[pool_row],
+        plan={"research_question": "test"},
+        skip_local_triage=True,
+    )
+    return captured["reused"], acquire_calls
+
+
+def test_unique_doi_alias_reuses_existing_material_without_acquisition(tmp_path, monkeypatch):
+    reused, acquire_calls = _reuse_callback(tmp_path, monkeypatch, _pool_row(tmp_path))
+
+    assert reused is not None
+    assert reused["snapshot"].name == "snapshot-existing"
+    assert reused["card_path"].endswith("PAPER_READING_CARD.json")
+    assert acquire_calls == []
+
+
+def test_unrelated_doi_does_not_false_match(tmp_path, monkeypatch):
+    row = _pool_row(tmp_path)
+    row["planning_view"]["paper_identity"]["doi"] = "10.9999/unrelated"
+    reused, acquire_calls = _reuse_callback(tmp_path, monkeypatch, row)
+
+    assert reused is None
+    assert len(acquire_calls) == 1
+
+
+def test_doi_match_without_assets_falls_back_to_acquisition(tmp_path, monkeypatch):
+    reused, acquire_calls = _reuse_callback(
+        tmp_path, monkeypatch, _pool_row(tmp_path, with_assets=False)
+    )
+
+    assert reused is None
+    assert len(acquire_calls) == 1
+
+
+def _directed_task(*, question="What finding?", output="Reported finding"):
+    return {
+        "paper_id": "paper-1",
+        "questions": [{"question_id": "Q1", "question": question, "purpose": "Use the finding with its conditions."}],
+        "required_outputs": [{"output_id": "O1", "output_type": "practical_material", "description": output}],
+        "knowledge_gaps": ["Need the paper-specific finding."],
+    }
+
+
+def _tool_cycle_fixture(tmp_path, *, prior_directed=None, reader=None, budget=1):
+    calls = []
+
+    def fake_reader(tasks, **_kwargs):
+        calls.extend(dict(item) for item in tasks)
+        if reader is not None:
+            return reader(tasks)
+        return {
+            "status": "complete",
+            "materials": [{
+                "paper_id": "paper-1",
+                "question_material": [{"finding": "new answer", "conditions": "new conditions"}],
+            }],
+            "consumed_paper_ids": ["paper-1"],
+        }
+
+    planner = ProgressiveReviewPlanner(
+        ProgressivePlannerConfig(
+            topic_id="directed-reuse",
+            pool_path=tmp_path / "POOL.jsonl",
+            plan_path=tmp_path / "PLAN.json",
+            output_dir=tmp_path / "run",
+            shared_deep_read_budget=budget,
+        ),
+        planner=lambda _stage, _payload: {},
+        directed_reader=fake_reader,
+        prior_readings=(),
+    )
+    result = planner._tool_cycle(
+        phase="level1",
+        supplement_requests=[],
+        directed_requests=[_directed_task()],
+        pool_rows=[{"_paper_id": "paper-1"}],
+        plan={"research_question": "test"},
+        prior_directed=prior_directed,
+        prior_tool_results={},
+        source_handle_map={},
+        resume=False,
+        state={},
+    )
+    return result, calls
+
+
+def test_exact_directed_task_reuses_without_provider_and_enters_materials(tmp_path):
+    task = _directed_task()
+    prior = {
+        "paper_id": "paper-1",
+        "_progressive_task_signature": _directed_task_signature(task),
+        "question_material": [{"finding": "old answer", "conditions": "old conditions"}],
+    }
+    result, calls = _tool_cycle_fixture(
+        tmp_path,
+        prior_directed={"consumed_paper_ids": ["paper-1"], "directed_results": [{"materials": [prior]}]},
+    )
+
+    assert calls == []
+    directed = result["directed_results"][0]
+    assert directed["reused_prior_tasks"][0]["status"] == "reused_prior_deep_read"
+    assert directed["materials"][0]["question_material"][0]["finding"] == "old answer"
+
+
+def test_changed_question_runs_same_paper_at_existing_unique_slot_and_keeps_old_answer(tmp_path):
+    task = _directed_task()
+    prior = {
+        "paper_id": "paper-1",
+        "_progressive_task_signature": _directed_task_signature(task),
+        "question_material": [{"finding": "old answer"}],
+    }
+    changed = _directed_task(question="What limitation was reported?")
+    calls = []
+
+    def reader(tasks, **_kwargs):
+        calls.extend(tasks)
+        return {"status": "complete", "materials": [{"paper_id": "paper-1", "question_material": [{"finding": "new limitation"}]}], "consumed_paper_ids": ["paper-1"]}
+
+    planner = ProgressiveReviewPlanner(
+        ProgressivePlannerConfig(
+            topic_id="changed-question",
+            pool_path=tmp_path / "POOL.jsonl",
+            plan_path=tmp_path / "PLAN.json",
+            output_dir=tmp_path / "run",
+            shared_deep_read_budget=1,
+        ),
+        planner=lambda _stage, _payload: {},
+        directed_reader=reader,
+    )
+    result = planner._tool_cycle(
+        phase="level1", supplement_requests=[], directed_requests=[changed],
+        pool_rows=[{"_paper_id": "paper-1"}], plan={"research_question": "test"},
+        prior_directed={"consumed_paper_ids": ["paper-1"], "directed_results": [{"materials": [prior]}]},
+        prior_tool_results={}, source_handle_map={}, resume=False, state={},
+    )
+
+    assert len(calls) == 1
+    material = result["directed_results"][0]["materials"][0]
+    assert [row["finding"] for row in material["question_material"]] == ["old answer", "new limitation"]
+    assert material["current_question_material"] == [{"finding": "new limitation"}]
+    assert material["prior_question_material"] == [{"finding": "old answer"}]
+
+
+def test_unknown_legacy_reading_is_context_only_and_new_output_preserves_it(tmp_path):
+    legacy = {"paper_id": "paper-1", "question_material": [{"finding": "legacy context"}]}
+    result, calls = _tool_cycle_fixture(
+        tmp_path,
+        prior_directed={"consumed_paper_ids": ["paper-1"], "directed_results": [{"materials": [legacy]}]},
+        budget=1,
+    )
+
+    assert len(calls) == 1
+    material = result["directed_results"][0]["materials"][0]
+    assert [row["finding"] for row in material["question_material"]] == ["legacy context", "new answer"]
+    assert material["current_question_material"] == [{"finding": "new answer", "conditions": "new conditions"}]
+    assert material["prior_question_material"] == [{"finding": "legacy context"}]
+
+
+def test_changed_required_output_runs_same_paper_and_keeps_history(tmp_path):
+    original = _directed_task()
+    prior = {
+        "paper_id": "paper-1",
+        "_progressive_task_signature": _directed_task_signature(original),
+        "question_material": [{"finding": "old answer"}],
+    }
+    changed = _directed_task(output="A limitation with conditions")
+    calls = []
+
+    def reader(tasks, **_kwargs):
+        calls.extend(tasks)
+        return {
+            "status": "complete",
+            "materials": [{"paper_id": "paper-1", "question_material": [{"finding": "new limitation"}]}],
+            "consumed_paper_ids": ["paper-1"],
+        }
+
+    planner = ProgressiveReviewPlanner(
+        ProgressivePlannerConfig(
+            topic_id="changed-output",
+            pool_path=tmp_path / "POOL.jsonl",
+            plan_path=tmp_path / "PLAN.json",
+            output_dir=tmp_path / "run",
+            shared_deep_read_budget=1,
+        ),
+        planner=lambda _stage, _payload: {},
+        directed_reader=reader,
+    )
+    result = planner._tool_cycle(
+        phase="level1", supplement_requests=[], directed_requests=[changed],
+        pool_rows=[{"_paper_id": "paper-1"}], plan={"research_question": "test"},
+        prior_directed={"consumed_paper_ids": ["paper-1"], "directed_results": [{"materials": [prior]}]},
+        prior_tool_results={}, source_handle_map={}, resume=False, state={},
+    )
+
+    assert len(calls) == 1
+    material = result["directed_results"][0]["materials"][0]
+    assert [row["finding"] for row in material["question_material"]] == ["old answer", "new limitation"]
+
+
+def test_three_changed_tasks_retain_all_history_but_current_rows_are_separate(tmp_path):
+    first = _directed_task(question="What finding?")
+    second = _directed_task(question="What limitation?")
+    third = _directed_task(question="What condition?")
+    calls = []
+
+    def reader(tasks, **_kwargs):
+        calls.extend(tasks)
+        question = tasks[0]["questions"][0]["question"]
+        return {
+            "status": "complete",
+            "materials": [{"paper_id": "paper-1", "question_material": [{"finding": question}]}],
+            "consumed_paper_ids": ["paper-1"],
+        }
+
+    planner = ProgressiveReviewPlanner(
+        ProgressivePlannerConfig(
+            topic_id="three-reads",
+            pool_path=tmp_path / "POOL.jsonl",
+            plan_path=tmp_path / "PLAN.json",
+            output_dir=tmp_path / "run",
+            shared_deep_read_budget=1,
+        ),
+        planner=lambda _stage, _payload: {},
+        directed_reader=reader,
+    )
+
+    def run(task, prior):
+        return planner._tool_cycle(
+            phase="level1", supplement_requests=[], directed_requests=[task],
+            pool_rows=[{"_paper_id": "paper-1"}], plan={"research_question": "test"},
+            prior_directed=prior, prior_tool_results={}, source_handle_map={}, resume=False, state={},
+        )
+
+    first_result = run(first, None)
+    first_material = first_result["directed_results"][0]["materials"][0]
+    second_result = run(second, first_result["directed_results"][0])
+    second_material = second_result["directed_results"][0]["materials"][0]
+    third_result = run(third, second_result["directed_results"][0])
+    third_material = third_result["directed_results"][0]["materials"][0]
+
+    assert len(calls) == 3
+    assert [row["finding"] for row in first_material["question_material"]] == ["What finding?"]
+    assert [row["finding"] for row in second_material["question_material"]] == ["What finding?", "What limitation?"]
+    assert [row["finding"] for row in third_material["question_material"]] == ["What finding?", "What limitation?", "What condition?"]
+    assert third_material["current_question_material"] == [{"finding": "What condition?"}]
+    assert third_material["prior_question_material"] == [
+        {"finding": "What finding?"}, {"finding": "What limitation?"},
+    ]
+
+
+def test_nested_decorators_do_not_duplicate_history_or_reclassify_old_rows():
+    original = _directed_task()
+    changed = _directed_task(question="What limitation?")
+    prior = {
+        "paper_id": "paper-1",
+        "_progressive_task_signature": _directed_task_signature(original),
+        "question_material": [{"finding": "old answer"}],
+    }
+    inner = _decorate_directed_material(
+        {"paper_id": "paper-1", "question_material": [{"finding": "new answer"}]},
+        task=changed,
+        prior_material=prior,
+    )
+    outer = _decorate_directed_material(inner, task=changed, prior_material=prior)
+
+    assert [row["finding"] for row in outer["question_material"]] == ["old answer", "new answer"]
+    assert outer["prior_question_material"] == [{"finding": "old answer"}]
+    assert outer["current_question_material"] == [{"finding": "new answer"}]
+
+    blank = _decorate_directed_material(
+        {"paper_id": "paper-1", "question_material": []},
+        task=changed,
+        prior_material=prior,
+    )
+    assert blank["question_material"] == [{"finding": "old answer"}]
+    assert blank["current_question_material"] == []
+
+
+def _direct_runner(tmp_path, monkeypatch, *, task, prior, provider_result, calls):
+    class FakeStore:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def admit_candidates(self, *args, **kwargs):
+            return [{"paper_id": "paper-1", "admission_status": "approved_core"}]
+
+    def fake_run_directed_reading(**kwargs):
+        calls.append(kwargs)
+        return provider_result
+
+    monkeypatch.setattr(directed_reading, "DirectedReadingStore", FakeStore)
+    monkeypatch.setattr(directed_reading, "run_directed_reading", fake_run_directed_reading)
+    config = ProgressivePlannerConfig(
+        topic_id="direct-runner-reuse",
+        pool_path=tmp_path / "POOL.jsonl",
+        plan_path=tmp_path / "PLAN.json",
+        output_dir=tmp_path / "run",
+        shared_deep_read_budget=1,
+    )
+    runner = make_directed_reading_runner(
+        config,
+        key_file=tmp_path / "missing-key.txt",
+        budget_ledger_path=tmp_path / "budget.sqlite",
+        budget_limit_cny=30,
+        prior_readings=[prior] if prior is not None else [],
+    )
+    return runner(
+        [task],
+        phase="level1",
+        output_dir=tmp_path / "phase",
+        plan={"research_question": "test"},
+        pool_by_id={"paper-1": _pool_row(tmp_path)},
+    )
+
+
+def test_directed_runner_reuses_exact_useful_material_without_provider(tmp_path, monkeypatch):
+    task = _directed_task()
+    prior = {
+        "paper_id": "paper-1",
+        "_progressive_task_signature": _directed_task_signature(task),
+        "question_material": [{"finding": "old answer"}],
+    }
+    calls = []
+    result = _direct_runner(
+        tmp_path, monkeypatch, task=task, prior=prior,
+        provider_result={"ready": True, "output": {"question_material": [{"finding": "unused"}]}},
+        calls=calls,
+    )
+
+    assert calls == []
+    assert result["results"][0]["status"] == "reused_prior_deep_read"
+    assert result["materials"][0]["current_question_material"] == [{"finding": "old answer"}]
+
+
+def test_directed_runner_passes_changed_explicit_output_to_provider(tmp_path, monkeypatch):
+    original = _directed_task(output="Original requested output")
+    changed = _directed_task(output="Changed requested output")
+    prior = {
+        "paper_id": "paper-1",
+        "_progressive_task_signature": _directed_task_signature(original),
+        "question_material": [{"finding": "old answer"}],
+    }
+    calls = []
+    result = _direct_runner(
+        tmp_path, monkeypatch, task=changed, prior=prior,
+        provider_result={"ready": True, "output": {"question_material": [{"finding": "new answer"}]}},
+        calls=calls,
+    )
+
+    assert len(calls) == 1
+    provider_task = calls[0]["task"]
+    assert provider_task["required_outputs"] == [{
+        "output_id": "O1", "output_type": "practical_material",
+        "description": "Changed requested output",
+    }]
+    assert provider_task["questions"][0]["required_output_ids"] == ["O1"]
+    assert result["results"][0]["status"] == "complete"
+    assert [row["finding"] for row in result["materials"][0]["question_material"]] == ["old answer", "new answer"]
+
+
+def test_directed_runner_retries_exact_empty_material(tmp_path, monkeypatch):
+    task = _directed_task()
+    prior = {
+        "paper_id": "paper-1",
+        "_progressive_task_signature": _directed_task_signature(task),
+        "question_material": [{"finding": "old history"}],
+        "current_question_material": [],
+    }
+    calls = []
+    result = _direct_runner(
+        tmp_path, monkeypatch, task=task, prior=prior,
+        provider_result={"ready": True, "output": {"question_material": [], "current_question_material": []}},
+        calls=calls,
+    )
+
+    assert len(calls) == 1
+    assert result["results"][0]["status"] == "complete"
+    material = result["materials"][0]
+    assert material["question_material"] == [{"finding": "old history"}]
+    assert material["current_question_material"] == []
+
+
+def test_adaptive_external_closure_does_not_fulfill_from_empty_current_history(tmp_path, monkeypatch):
+    task = _directed_task()
+    signature = _directed_task_signature(task)
+    output_dir = tmp_path / "run"
+    output_dir.mkdir(parents=True)
+    (output_dir / "DIRECTED_MATERIAL_CACHE.json").write_text(json.dumps({
+        "materials": {
+            "paper-1": {
+                "paper_id": "paper-1",
+                "_progressive_task_signature": signature,
+                "question_material": [{"finding": "old history"}],
+                "current_question_material": [],
+            }
+        },
+        "task_signatures": {"paper-1": signature},
+        "consumed_paper_ids": ["paper-1"],
+    }), encoding="utf-8")
+    reader_calls = []
+    captured = {}
+
+    def fake_reader(tasks, **_kwargs):
+        reader_calls.extend(tasks)
+        return {
+            "status": "complete",
+            "materials": [{"paper_id": "paper-1", "question_material": [], "current_question_material": []}],
+            "consumed_paper_ids": ["paper-1"],
+        }
+
+    def fake_loop(needs, _config, *, external_closure, **_kwargs):
+        captured["result"] = external_closure(need=needs[0], round_index=1, queries=[], spec={})
+        return {"needs": []}
+
+    monkeypatch.setattr(planning_retrieval_loop, "run_retrieval_loop", fake_loop)
+    config = ProgressivePlannerConfig(
+        topic_id="adaptive-empty-retry",
+        pool_path=tmp_path / "POOL.jsonl",
+        plan_path=tmp_path / "PLAN.json",
+        output_dir=output_dir,
+        shared_deep_read_budget=1,
+    )
+    runner = make_retrieval_loop_runner(
+        config,
+        key_file=tmp_path / "missing-key.txt",
+        budget_ledger_path=tmp_path / "budget.sqlite",
+        budget_limit_cny=30,
+        allow_external=True,
+        directed_reader=fake_reader,
+    )
+    runner(
+        phase="level1", directed_requests=[task], pool_rows=[], plan={"research_question": "test"},
+        prior_tool_results={}, prior_directed={}, source_handle_map={}, resume=True,
+        output_dir=output_dir / "level1",
+    )
+
+    assert len(reader_calls) == 1
+    assert captured["result"]["status"] == "unmet"
+    assert captured["result"]["usable_content"] == ""
+

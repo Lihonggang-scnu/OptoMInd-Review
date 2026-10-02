@@ -27,10 +27,13 @@ from optomind_research.runtime.upgrade3.review_unit_writer import (
     build_unit_view,
     estimate_unit_cost,
     load_writer_prompt,
+    completion_messages,
     run_unit_writing,
+    run_unit_completion,
     unit_messages,
     unit_payload,
     write_unit_input,
+    write_unit_completion,
     write_unit_output,
 )
 
@@ -47,6 +50,10 @@ def _parser() -> argparse.ArgumentParser:
                         help="Path to CHxx/CHAPTER_ARRANGEMENT.json from the arrangement step")
     parser.add_argument("--unit", action="append", default=[],
                         help="unit_id to write, e.g. CH05_U01; may be repeated")
+    parser.add_argument("--existing-body", default="",
+                        help="Existing body file for explicit omitted-task completion")
+    parser.add_argument("--complete-task", action="append", default=[],
+                        help="Task id to complete explicitly; repeatable, requires --existing-body")
     parser.add_argument("--view", default="",
                         help="ARRANGEMENT_INPUT.json (defaults to the arrangement's sibling file)")
     parser.add_argument("--packet-root", default="",
@@ -116,6 +123,20 @@ def main(argv: list[str] | None = None) -> int:
             raise UnitWritingError("choose_either_run_or_fake_client")
         prompt = load_writer_prompt(planning_revision=args.planning_revision)
         unit_ids = _unit_ids(args)
+        completion_mode = bool(args.complete_task)
+        if args.existing_body and not completion_mode:
+            raise UnitWritingError("existing_body_requires_complete_task")
+        if completion_mode:
+            if len(unit_ids) != 1:
+                raise UnitWritingError("completion_requires_one_unit")
+            if not args.existing_body:
+                raise UnitWritingError("completion_requires_existing_body")
+            existing_path = Path(args.existing_body).resolve()
+            if not existing_path.is_file():
+                raise UnitWritingError("existing_body_missing:" + str(existing_path))
+            if args.run and args.fake_client:
+                raise UnitWritingError("choose_either_run_or_fake_client")
+
         arrangement_path = Path(args.arrangement).resolve()
         output_root = Path(args.output_root).resolve()
         mode = "run" if args.run else ("fake" if args.fake_client else "preview")
@@ -129,6 +150,89 @@ def main(argv: list[str] | None = None) -> int:
             "units": [],
         }
         token_counter = _default_qwen_token_counter()
+        if completion_mode:
+            unit_id = unit_ids[0]
+            view = build_unit_view(
+                arrangement_path,
+                unit_id,
+                view_path=args.view or None,
+                packet_root=args.packet_root or None,
+                max_material_chars_per_source=args.max_material_chars_per_source,
+                keep_deep_read_references=args.keep_deep_read_references,
+            )
+            existing_body = existing_path.read_bytes().decode("utf-8")
+            messages = completion_messages(
+                view, existing_body, args.complete_task, prompt=prompt,
+                language=args.language, planning_revision=args.planning_revision,
+            )
+            estimate = estimate_unit_cost(
+                messages, model=args.model, output_tokens=args.output_tokens,
+                thinking_budget=args.thinking_budget,
+            )
+            unit_dir = output_root / f"{view.chapter_id}_{view.unit_id}_completion"
+            # Never write the completion artifacts over the existing BODY file.
+            if output_root.resolve() == existing_path.parent.resolve() or unit_dir.resolve() == existing_path.parent.resolve():
+                raise UnitWritingError("completion_output_overlaps_existing_body")
+            unit_dir.mkdir(parents=True, exist_ok=True)
+            (unit_dir / "COMPLETION_MESSAGES.json").write_text(
+                json.dumps(messages, ensure_ascii=False, indent=2), encoding="utf-8")
+            (unit_dir / "COMPLETION_INPUT.json").write_text(json.dumps({
+                "chapter_id": view.chapter_id,
+                "unit_id": view.unit_id,
+                "existing_body_path": str(existing_path),
+                "task_ids": list(args.complete_task),
+                "payload": json.loads(messages[-1]["content"]),
+                "estimate": estimate,
+                "mode": mode,
+            }, ensure_ascii=False, indent=2), encoding="utf-8")
+            entry = {
+                "chapter_id": view.chapter_id,
+                "unit_id": view.unit_id,
+                "task_ids": list(args.complete_task),
+                "existing_body_path": str(existing_path),
+                "output_dir": str(unit_dir),
+                "estimate": estimate,
+                "source_handles": json.loads(messages[-1]["content"]).get("requested_source_handles", []),
+                "material_summary": view.material_summary(),
+                "mode": mode,
+            }
+            if mode == "preview":
+                (unit_dir / "ORIGINAL_BODY.md").write_bytes(existing_body.encode("utf-8"))
+                (unit_dir / "COMPLETION_FRAGMENT.md").write_text("", encoding="utf-8")
+                (unit_dir / "COMPLETED_BODY.md").write_bytes(existing_body.encode("utf-8"))
+                (unit_dir / "COMPLETION_RESULT.json").write_text(json.dumps({
+                    "schema_version": "optomind.review_unit_writer.result.v1.completion",
+                    "mode": "preview", "pending": True,
+                    "task_ids": list(args.complete_task),
+                    "note": "预览未调用模型；仅保存完整 messages 和原正文。",
+                }, ensure_ascii=False, indent=2), encoding="utf-8")
+                entry["status"] = "preview_only"
+                report["units"].append(entry)
+            else:
+                client = _fake_client(args.fake_client) if mode == "fake" else _real_client(
+                    args, token_counter=token_counter)
+                result = run_unit_completion(
+                    view, existing_body=existing_body, task_ids=args.complete_task,
+                    client=client, model=args.model, prompt=prompt,
+                    language=args.language, output_tokens=args.output_tokens,
+                    thinking_budget=args.thinking_budget,
+                    raw_response_dir=unit_dir / "raw_responses" if mode == "run" else unit_dir / "fake_response",
+                    planning_revision=args.planning_revision, simulated=mode == "fake",
+                )
+                written = write_unit_completion(
+                    view, result, unit_dir, estimate=estimate, language=args.language)
+                entry.update(written)
+                entry["status"] = "pending" if written["pending"] else ("simulated" if mode == "fake" else "written")
+                report["model_calls"] = 1 if mode == "run" else 0
+                report["units"].append(entry)
+            report["completion_mode"] = True
+            report["existing_body"] = str(existing_path)
+            report["task_ids"] = list(args.complete_task)
+            report_path = output_root / "COMPLETION_RUN.json"
+            output_root.mkdir(parents=True, exist_ok=True)
+            report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+            print(json.dumps(report, ensure_ascii=False, indent=2, default=str))
+            return 0
         for unit_id in unit_ids:
             view = build_unit_view(
                 arrangement_path,

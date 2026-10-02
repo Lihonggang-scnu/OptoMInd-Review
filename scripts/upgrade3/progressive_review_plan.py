@@ -48,6 +48,17 @@ def parser():
         action="store_true",
         help="启用默认关闭的 M1 材料导航与本地按需回填路径",
     )
+    p.add_argument(
+        "--recover-chapters-from",
+        type=Path,
+        help="从明确指定的历史输出根恢复兼容的成功章节 owner plan；不扫描历史",
+    )
+    p.add_argument(
+        "--recover-chapter",
+        action="append",
+        default=[],
+        help="限制恢复的章节 ID，可重复传入；省略则按兼容性逐章判断",
+    )
     return p
 
 
@@ -102,6 +113,8 @@ def main(argv=None):
         planner_output_tokens=args.output_tokens, tokenizer_path=args.tokenizer.resolve(),
         planning_revision_enabled=bool(args.planning_revision),
         local_material_index_path=(args.local_material_index.resolve() if args.local_material_index else None),
+        recovery_from=(args.recover_chapters_from.resolve() if args.recover_chapters_from else None),
+        recovery_chapters=tuple(args.recover_chapter or ()),
     )
     try:
         if not args.run:

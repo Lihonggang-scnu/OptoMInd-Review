@@ -148,11 +148,41 @@ def _economy_enabled() -> bool:
 
 
 class QwenTransportError(RuntimeError):
-    def __init__(self, message: str, *, transient: bool = False, status_code: int | None = None, record: Mapping[str, Any] | None = None):
+    def __init__(self, message: str, *, transient: bool = False, status_code: int | None = None, record: Mapping[str, Any] | None = None, reason_code: str | None = None):
         super().__init__(message)
         self.transient = transient
         self.status_code = status_code
         self.record = dict(record or {})
+        raw_reason = _text(reason_code or self.record.get("error") or message)
+        self.reason_code = "".join(char for char in raw_reason[:80] if char.isalnum() or char in "-_ .").strip().replace(" ", "_")
+
+
+def _transport_exception_record(error: BaseException) -> dict[str, Any]:
+    """Return exception classes and numeric OS/SSL codes without messages."""
+    names = [type(error).__name__]
+    nested = getattr(error, "reason", None)
+    if isinstance(nested, BaseException):
+        names.append(type(nested).__name__)
+    codes: dict[str, int] = {}
+    for source in (error, nested if isinstance(nested, BaseException) else None):
+        for field_name in ("errno", "winerror", "verify_code"):
+            value = getattr(source, field_name, None) if source is not None else None
+            if isinstance(value, int) and not isinstance(value, bool):
+                codes.setdefault(field_name, value)
+    reason_code = "__".join(names + [f"{key}_{value}" for key, value in sorted(codes.items())])
+    return {"error": names[0], "reason_code": reason_code, **codes}
+
+
+def _uncertain_telemetry(error: QwenTransportError, *, key_index: int, attempt: int) -> dict[str, Any]:
+    """Persist only bounded error identity when a request has unknown billing."""
+    error_class = "".join(char for char in type(error).__name__[:40] if char.isalnum() or char in "-_")
+    reason = "".join(char for char in (error.reason_code or "unknown")[:80] if char.isalnum() or char in "-_")
+    return {
+        "provider_error_code": f"{error_class}:{reason}"[:128],
+        "status_code": error.status_code,
+        "key_index": key_index,
+        "attempt": attempt + 1,
+    }
 
 
 class MissingCredentialError(QwenTransportError):
@@ -522,9 +552,12 @@ class QwenDirectClient:
                     if not complete:
                         raise QwenTransportError("qwen_incomplete_response", transient=False, status_code=status_code, record=result)
                     return result
-                except QwenTransportError:
+                except QwenTransportError as exc:
                     if self.budget_ledger is not None and reservation and not reservation_settled:
-                        self.budget_ledger.settle(reservation["reservation_id"], None, uncertain=True)
+                        self.budget_ledger.settle(
+                            reservation["reservation_id"], None, uncertain=True,
+                            telemetry=_uncertain_telemetry(exc, key_index=key_index, attempt=attempt),
+                        )
                         reservation_settled = True
                     raise
                 except urllib.error.HTTPError as exc:
@@ -562,7 +595,13 @@ class QwenDirectClient:
                             break
                         raise last_error
                 except (urllib.error.URLError, TimeoutError, OSError) as exc:
-                    last_error = QwenTransportError("qwen_transport_error", transient=True, record={"call_id": call_id, "error": type(exc).__name__})
+                    transport_record = _transport_exception_record(exc)
+                    last_error = QwenTransportError(
+                        "qwen_transport_error",
+                        transient=True,
+                        record={"call_id": call_id, **transport_record},
+                        reason_code=transport_record["reason_code"],
+                    )
                 if last_error and last_error.record.get("rotate_key"):
                     # Account/auth rejection is definitive for this key.  Do
                     # not spend retry attempts on the same credential; move
@@ -570,14 +609,22 @@ class QwenDirectClient:
                     break
                 if last_error and not last_error.transient:
                     if self.budget_ledger is not None and reservation and not reservation_settled:
-                        self.budget_ledger.settle(reservation["reservation_id"], None, uncertain=True)
+                        self.budget_ledger.settle(
+                            reservation["reservation_id"], None, uncertain=True,
+                            telemetry=_uncertain_telemetry(last_error, key_index=key_index, attempt=attempt),
+                        )
                         reservation_settled = True
                     raise last_error
                 if self.budget_ledger is not None and reservation and not reservation_settled:
-                    self.budget_ledger.settle(reservation["reservation_id"], None, uncertain=True)
+                    self.budget_ledger.settle(
+                        reservation["reservation_id"], None, uncertain=True,
+                        telemetry=_uncertain_telemetry(last_error, key_index=key_index, attempt=attempt),
+                    )
                     reservation_settled = True
                 if attempt < self.max_retries:
                     time.sleep(min(8.0, 0.5 * (2 ** attempt)))
+            if last_error is not None and not last_error.record.get("rotate_key"):
+                raise last_error
         raise last_error or QwenTransportError("qwen_call_failed", transient=False)
 
 
