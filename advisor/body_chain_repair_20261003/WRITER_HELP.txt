@@ -1,0 +1,60 @@
+usage: review_unit_writer.py [-h] --arrangement ARRANGEMENT [--unit UNIT]
+                             [--existing-body EXISTING_BODY]
+                             [--complete-task COMPLETE_TASK] [--view VIEW]
+                             [--packet-root PACKET_ROOT]
+                             [--output-root OUTPUT_ROOT] [--language LANGUAGE]
+                             [--model MODEL]
+                             [--max-material-chars-per-source MAX_MATERIAL_CHARS_PER_SOURCE]
+                             [--keep-deep-read-references]
+                             [--output-tokens OUTPUT_TOKENS]
+                             [--thinking-budget THINKING_BUDGET]
+                             [--timeout-seconds TIMEOUT_SECONDS]
+                             [--key-file KEY_FILE]
+                             [--budget-ledger BUDGET_LEDGER]
+                             [--global-budget-cny GLOBAL_BUDGET_CNY] [--run]
+                             [--fake-client FAKE_CLIENT] [--print-preview]
+                             [--planning-revision]
+
+Write one arranged unit from its real material (offline preview by default).
+
+options:
+  -h, --help            show this help message and exit
+  --arrangement ARRANGEMENT
+                        Path to CHxx/CHAPTER_ARRANGEMENT.json from the
+                        arrangement step
+  --unit UNIT           unit_id to write, e.g. CH05_U01; may be repeated
+  --existing-body EXISTING_BODY
+                        Existing body file for explicit omitted-task
+                        completion
+  --complete-task COMPLETE_TASK
+                        Task id to complete explicitly; repeatable, requires
+                        --existing-body
+  --view VIEW           ARRANGEMENT_INPUT.json (defaults to the arrangement's
+                        sibling file)
+  --packet-root PACKET_ROOT
+                        run585 root, only needed if ARRANGEMENT_INPUT.json is
+                        absent
+  --output-root OUTPUT_ROOT
+  --language LANGUAGE
+  --model MODEL
+  --max-material-chars-per-source MAX_MATERIAL_CHARS_PER_SOURCE
+                        0 disables the per-source ceiling (nothing is dropped
+                        silently)
+  --keep-deep-read-references
+                        Also send the source paper's own bibliography from the
+                        deep read
+  --output-tokens OUTPUT_TOKENS
+  --thinking-budget THINKING_BUDGET
+  --timeout-seconds TIMEOUT_SECONDS
+  --key-file KEY_FILE
+  --budget-ledger BUDGET_LEDGER
+                        The shared ledger is reused when --run is used; no new
+                        wallet
+  --global-budget-cny GLOBAL_BUDGET_CNY
+                        Explicitly initialize/complete a ledger cap for --run
+  --run                 Perform the real writing call
+  --fake-client FAKE_CLIENT
+                        Offline simulation: a Markdown or JSON file used as
+                        the model reply
+  --print-preview       Also print the messages and material summary to stdout
+  --planning-revision   启用 opt-in 章节论证模式：写作者只执行更新后的具体任务
