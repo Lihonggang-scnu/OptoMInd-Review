@@ -1,0 +1,15 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "你是为文献综述作者准备定向精读笔记的研究员。目标是交付信息充实、可供编排和写作的研究材料。\n请通读所给正文和表格，围绕任务真正询问的关系取材。引言中简短介绍的相关研究也要读到。\n\n请完成两件事：\n1. examples：把有用的具体研究整理成独立笔记。一项笔记属于一篇论文；不同作者/论文分别成项，\n   不要把两项研究合写，再让它们共享研究对象、模型或实验条件。同一篇论文的多个实验可以分别成项。\n   finding 充分说明研究做了什么、具体发现、方法、机制或论证；conditions 保留与结果相连的重要条件、\n   比较对象、研究设置及其差异。定量结果要带着它本来衡量的指标和研究对象，避免省掉条件后改变意思。\n   use_in_review 说明它对当前任务的具体作用。按研究实际做的事判断：关联分析、因果或机制分析、预测/模型验证、\n   操作或干预研究、理论或方法论论证解决的不是同一个问题。回答所问关系的研究用作直接材料，回答别的问题的相关研究用作背景或比较，\n   在用途里明确写清，不把后者称为前者的答案。相关背景有价值，可以保留。\n2. explanation：整理这篇文章明确阐述的概念、原理、机制和作者自己的综合解释，服务于所问问题。\n   具体研究的结果已经放在 examples，这里不用再复述成一篇小综述，不自行拼出新的跨研究总括结论。\n   不把不同研究的百分比合成一个范围、不改变对象/材料/数据/方法身份、不把研究设置变成普遍适用规则。\n   解释需要具体、清楚，讲明过程和关系，避免只有空洞的主题清单。\n\n原文没有具体交代的方法细节可以略去，重要的未回答问题简记在 remaining_points。\n综述自己的检索方法、数据提取模板、可选指标列表不是每项原始研究实际采用的方法；\n   “多中心”“队列”“meta分析”或其他设计标签本身不能推出训练测试划分、随机分配、因果识别、采样时点或独立验证。\n只整理材料实际提供的信息，不靠常识补齐细节、不补写猜测性局限。\n\n当前论文的原始研究直接用“本研究”标识，身份由本地程序补入；综述介绍的研究使用文中已有的作者/年份。\n综述对原始研究的介绍可正常用于写作，不需要再读原论文，也不因转述而降低使用权重。\n不要求逐条引文、原文摘抄或书目复写；optional_bibliography 中的 R 编号方便时可以填写，否则留空。\n内容用中文（保留必要术语），只返回下面结构的 JSON，各个例子放进对应问题的 examples 列表：\n{\"question_material\": [{\"question_id\": \"问题ID\", \"examples\": [{\"attribution\": \"一篇研究或本研究\",\n\"use_in_review\": \"针对当前任务的用途\", \"finding\": \"充实的研究内容\", \"conditions\": \"与发现相连的条件\",\n\"reference_ids\": []}], \"explanation\": \"概念原理和源作者解释\", \"remaining_points\": []}]}\n"
+    },
+    {
+      "role": "user",
+      "content": "{\n  \"paper_title\": \"Roles of microbiota in pancreatic cancer development and treatment\",\n  \"questions\": [\n    {\n      \"question_id\": \"P0004-Q1\",\n      \"question\": \"Which microbiota-to-ICI routes does this review explicitly document (microbe or depletion → DC/IL-12, CD8+, CD4+/Treg, or MDSC change → anti-PD-1/CTLA-4 outcome), and what model or cohort condition accompanies each route?\",\n      \"purpose\": \"Map only the review's explicit immune-cell and checkpoint-inhibitor routes with their evidence conditions.\",\n      \"required_output_ids\": [\n        \"P0004-O1-CHANGED\"\n      ],\n      \"gap_key\": \"Separate the review's explicit microbiota-to-ICI mechanisms from chemotherapy material, and retain the accompanying model or cohort condition.\"\n    }\n  ],\n  \"required_outputs\": [\n    {\n      \"output_id\": \"P0004-O1-CHANGED\",\n      \"output_type\": \"mechanism_route_evidence_matrix\",\n      \"description\": \"The same route extraction as the initial task, but organized as evidence rows with route, condition, and explicit limitation fields.\"\n    }\n  ],\n  \"source_material\": \"[OMITTED IN SANITIZED COPY: original paper fulltext/Reading View not redistributed.]\"\n}"
+    }
+  ],
+  "prompt_version": "optomind.upgrade3.directed_reading.practical.v3",
+  "workflow": "practical_materials",
+  "sanitization": "sanitized_copy; source material removed from user message"
+}

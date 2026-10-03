@@ -1,0 +1,39 @@
+{
+  "paper": {
+    "canonical_paper_id": "00d3d83d6571a7d9c15adbb84e0c371ce46d15a4",
+    "paper_kind": "review",
+    "title": "Roles of microbiota in pancreatic cancer development and treatment",
+    "material_scope": "fulltext"
+  },
+  "paper_id": "00d3d83d6571a7d9c15adbb84e0c371ce46d15a4",
+  "review_id": "body02_real_qwen_20261003",
+  "task": {
+    "gap_keys": [
+      "Separate the review's explicit microbiota-to-ICI mechanisms from chemotherapy material, and retain the accompanying model or cohort condition."
+    ],
+    "questions": [
+      {
+        "gap_key": "Separate the review's explicit microbiota-to-ICI mechanisms from chemotherapy material, and retain the accompanying model or cohort condition.",
+        "purpose": "Map only the review's explicit immune-cell and checkpoint-inhibitor routes with their evidence conditions.",
+        "question": "Which microbiota-to-ICI routes does this review explicitly document (microbe or depletion → DC/IL-12, CD8+, CD4+/Treg, or MDSC change → anti-PD-1/CTLA-4 outcome), and what model or cohort condition accompanies each route?",
+        "question_id": "P0004-Q1",
+        "required_output_ids": [
+          "P0004-O1-CHANGED"
+        ]
+      }
+    ],
+    "required_outputs": [
+      {
+        "description": "The same route extraction as the initial task, but organized as evidence rows with route, condition, and explicit limitation fields.",
+        "output_id": "P0004-O1-CHANGED",
+        "output_type": "mechanism_route_evidence_matrix"
+      }
+    ]
+  },
+  "task_id": "dr-task-7a86c38d7162d2f1f5f4bffb",
+  "workflow": "practical_materials",
+  "sanitization": {
+    "kind": "sanitized_copy",
+    "omitted": "source paper Reading View/fulltext and publisher body; see source DOI/local index in task/config records"
+  }
+}

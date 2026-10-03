@@ -7081,10 +7081,16 @@ def make_retrieval_loop_runner(
                 if isinstance(item, Mapping) and _directed_material_status(request, item) != "unmet"
             )
             status = "fulfilled" if "fulfilled" in material_statuses else "partial" if useful else "unmet"
+            raw_status = _text(raw.get("status")).casefold()
+            provider_failed = bool(raw.get("provider_failed")) or raw_status in {"failed", "provider_failed", "provider_error"}
+            if provider_failed and not useful:
+                status = "failed"
             added = [_text(item.get("paper_id")) for item in materials if isinstance(item, Mapping) and _text(item.get("paper_id"))]
             return {"status": status, "still_missing": "" if status == "fulfilled" else need.question,
                     "usable_content": useful, "new_handles": added, "raw_result": raw,
-                    "consumed_paper_ids": list(raw.get("consumed_paper_ids") or [])}
+                     "consumed_paper_ids": list(raw.get("consumed_paper_ids") or []),
+                     "provider_failed": provider_failed and not useful,
+                     "error": _text(raw.get("error") or raw.get("reason")) if provider_failed and not useful else ""}
 
         loop_config = LoopConfig(
             index_path=index_path, journal_path=root / "retrieval_loop.jsonl",
@@ -7294,7 +7300,16 @@ def make_directed_reading_runner(
         consumed = sorted({_text(row.get("paper_id")) for row in results if row.get("status") in {"fulfilled", "partial", "unmet", "failed", "reused_prior_deep_read"} and _text(row.get("paper_id"))})
         blocked = [_text(row.get("blocked_paper_id")) for row in results if _text(row.get("blocked_paper_id"))]
         materials = [dict(row.get("material") or {}) for row in results if isinstance(row.get("material"), Mapping) and row.get("material")]
-        return {"status": "fulfilled" if all(row.get("status") in {"fulfilled", "reused_prior_deep_read"} for row in results) else "partial" if any(row.get("status") in {"fulfilled", "partial", "reused_prior_deep_read"} for row in results) else "unmet", "results": results, "materials": materials, "consumed_paper_ids": consumed, "attempted_paper_ids": attempted, "blocked_paper_ids": blocked}
+        failed_rows = [row for row in results if _text(row.get("status")).casefold() in {"failed", "provider_failed", "provider_error"}]
+        has_useful = any(row.get("status") in {"fulfilled", "partial", "reused_prior_deep_read"} for row in results)
+        aggregate_status = "fulfilled" if all(row.get("status") in {"fulfilled", "reused_prior_deep_read"} for row in results) else "partial" if has_useful else "unmet"
+        provider_failed = bool(failed_rows and not has_useful)
+        if provider_failed:
+            aggregate_status = "failed"
+        return {"status": aggregate_status, "provider_failed": provider_failed,
+                "failed_paper_ids": sorted({_text(row.get("paper_id")) for row in failed_rows if _text(row.get("paper_id"))}),
+                "results": results, "materials": materials, "consumed_paper_ids": consumed,
+                "attempted_paper_ids": attempted, "blocked_paper_ids": blocked}
     return run
 
 

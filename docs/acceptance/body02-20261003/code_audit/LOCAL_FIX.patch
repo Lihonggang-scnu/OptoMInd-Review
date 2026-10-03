@@ -1,0 +1,150 @@
+diff --git a/optomind_research/runtime/upgrade3/progressive_review_plan.py b/optomind_research/runtime/upgrade3/progressive_review_plan.py
+index d48965c..9eb462c 100644
+--- a/optomind_research/runtime/upgrade3/progressive_review_plan.py
++++ b/optomind_research/runtime/upgrade3/progressive_review_plan.py
+@@ -7081,10 +7081,16 @@ def make_retrieval_loop_runner(
+                 if isinstance(item, Mapping) and _directed_material_status(request, item) != "unmet"
+             )
+             status = "fulfilled" if "fulfilled" in material_statuses else "partial" if useful else "unmet"
++            raw_status = _text(raw.get("status")).casefold()
++            provider_failed = bool(raw.get("provider_failed")) or raw_status in {"failed", "provider_failed", "provider_error"}
++            if provider_failed and not useful:
++                status = "failed"
+             added = [_text(item.get("paper_id")) for item in materials if isinstance(item, Mapping) and _text(item.get("paper_id"))]
+             return {"status": status, "still_missing": "" if status == "fulfilled" else need.question,
+                     "usable_content": useful, "new_handles": added, "raw_result": raw,
+-                    "consumed_paper_ids": list(raw.get("consumed_paper_ids") or [])}
++                     "consumed_paper_ids": list(raw.get("consumed_paper_ids") or []),
++                     "provider_failed": provider_failed and not useful,
++                     "error": _text(raw.get("error") or raw.get("reason")) if provider_failed and not useful else ""}
+ 
+         loop_config = LoopConfig(
+             index_path=index_path, journal_path=root / "retrieval_loop.jsonl",
+@@ -7294,7 +7300,16 @@ def make_directed_reading_runner(
+         consumed = sorted({_text(row.get("paper_id")) for row in results if row.get("status") in {"fulfilled", "partial", "unmet", "failed", "reused_prior_deep_read"} and _text(row.get("paper_id"))})
+         blocked = [_text(row.get("blocked_paper_id")) for row in results if _text(row.get("blocked_paper_id"))]
+         materials = [dict(row.get("material") or {}) for row in results if isinstance(row.get("material"), Mapping) and row.get("material")]
+-        return {"status": "fulfilled" if all(row.get("status") in {"fulfilled", "reused_prior_deep_read"} for row in results) else "partial" if any(row.get("status") in {"fulfilled", "partial", "reused_prior_deep_read"} for row in results) else "unmet", "results": results, "materials": materials, "consumed_paper_ids": consumed, "attempted_paper_ids": attempted, "blocked_paper_ids": blocked}
++        failed_rows = [row for row in results if _text(row.get("status")).casefold() in {"failed", "provider_failed", "provider_error"}]
++        has_useful = any(row.get("status") in {"fulfilled", "partial", "reused_prior_deep_read"} for row in results)
++        aggregate_status = "fulfilled" if all(row.get("status") in {"fulfilled", "reused_prior_deep_read"} for row in results) else "partial" if has_useful else "unmet"
++        provider_failed = bool(failed_rows and not has_useful)
++        if provider_failed:
++            aggregate_status = "failed"
++        return {"status": aggregate_status, "provider_failed": provider_failed,
++                "failed_paper_ids": sorted({_text(row.get("paper_id")) for row in failed_rows if _text(row.get("paper_id"))}),
++                "results": results, "materials": materials, "consumed_paper_ids": consumed,
++                "attempted_paper_ids": attempted, "blocked_paper_ids": blocked}
+     return run
+ 
+ 
+diff --git a/tests/upgrade3/test_directed_reading_adapter_contract.py b/tests/upgrade3/test_directed_reading_adapter_contract.py
+index 55f8e6e..c73ea43 100644
+--- a/tests/upgrade3/test_directed_reading_adapter_contract.py
++++ b/tests/upgrade3/test_directed_reading_adapter_contract.py
+@@ -97,6 +97,46 @@ def test_useful_partial_is_retained_but_not_fulfilled(tmp_path, monkeypatch):
+     assert not _directed_material_compatible(task(), material)
+ 
+ 
++def test_reader_aggregate_marks_provider_failure_without_changing_attempted_quota(tmp_path, monkeypatch):
++    runner, context, _, _ = fixture(tmp_path, monkeypatch, [answer()])
++
++    def fail_reader(**kwargs):
++        raise RuntimeError("injected provider failure")
++
++    monkeypatch.setattr(dr, "run_directed_reading", fail_reader)
++    result = runner([task()], **context)
++
++    assert result["status"] == "failed"
++    assert result["provider_failed"] is True
++    assert result["failed_paper_ids"] == ["paper-1"]
++    assert result["consumed_paper_ids"] == result["attempted_paper_ids"] == ["paper-1"]
++    assert result["results"][0]["status"] == "failed"
++
++
++def test_reader_aggregate_keeps_useful_partial_and_exposes_failed_rows(tmp_path, monkeypatch):
++    runner, context, _, _ = fixture(tmp_path, monkeypatch, [answer()])
++    calls = []
++
++    def mixed_reader(**kwargs):
++        calls.append(kwargs["output_dir"])
++        if len(calls) == 1:
++            return {
++                "output": answer("Useful partial", remaining="Need another condition"),
++                "output_dir": str(kwargs["output_dir"]),
++                "network_call": True,
++            }
++        raise RuntimeError("injected provider failure")
++
++    monkeypatch.setattr(dr, "run_directed_reading", mixed_reader)
++    result = runner([task(), task(question="Which conditions?")], **context)
++
++    assert result["status"] == "partial"
++    assert result["provider_failed"] is False
++    assert result["failed_paper_ids"] == ["paper-1"]
++    assert sorted(row["status"] for row in result["results"]) == ["failed", "partial"]
++    assert result["materials"][0]["question_material"][0]["explanation"] == "Useful partial"
++
++
+ def test_question_rows_without_answer_do_not_authorize_reuse():
+     material = _decorate_directed_material({"question_material": [{"question_id": "Q01", "question": "What changed?", "explanation": "", "remaining_points": ""}]}, task=task())
+     assert not _directed_material_compatible(task(), material)
+@@ -154,6 +194,58 @@ def test_real_retrieval_closure_keeps_partial_status_and_content(tmp_path, monke
+     assert result["tool_materials_by_chapter"]["C1"][0]["usable_content"]
+ 
+ 
++def test_real_retrieval_closure_routes_provider_failure_to_same_round_retry(tmp_path):
++    from optomind_research.runtime.upgrade3.progressive_review_plan import (
++        ProgressivePlannerConfig, make_retrieval_loop_runner,
++    )
++
++    config = ProgressivePlannerConfig(
++        topic_id="provider-failure-review",
++        pool_path=tmp_path / "POOL.jsonl",
++        plan_path=tmp_path / "PLAN.json",
++        output_dir=tmp_path / "run",
++        shared_deep_read_budget=1,
++        reader_workers=1,
++    )
++    calls = []
++
++    def failed_reader(tasks, **context):
++        calls.append(context["output_dir"])
++        return {
++            "status": "failed",
++            "results": [{"paper_id": "paper-1", "status": "failed", "error": "RuntimeError"}],
++            "materials": [],
++            "consumed_paper_ids": ["paper-1"],
++            "attempted_paper_ids": ["paper-1"],
++        }
++
++    retrieval = make_retrieval_loop_runner(config, allow_external=True, directed_reader=failed_reader)
++    request = {
++        "paper_id": "paper-1",
++        "chapter_ids": ["C1"],
++        "questions": [{"question_id": "Q01", "question": "What answer is available?", "purpose": "Probe"}],
++        "required_outputs": [{"output_id": "O01", "output_type": "practical_material", "description": "Answer"}],
++        "knowledge_gap": "provider failure probe",
++        "reason": "provider failure probe",
++        "round_specs": [
++            {"round": index, "targeted_queries": [{"query_type": "keyword", "query_text": f"direction-{index}"}]}
++            for index in (1, 2, 3)
++        ],
++    }
++    result = retrieval(
++        phase="provider-failure", directed_requests=[request], pool_rows=[],
++        plan={"research_question": "Synthetic provider failure"}, resume=False,
++    )
++
++    state = result["retrieval_loop"]["needs"][0]
++    assert len(calls) == 2
++    assert all("round_1" in str(path) for path in calls)
++    assert state["status"] == "pending"
++    assert state["action"] == "provider_retry"
++    assert result["directed_results"]
++    assert all(row["status"] == "failed" for row in result["directed_results"])
++
++
+ def test_retrieval_explicit_empty_retry_is_one_attempt_across_rounds(tmp_path, monkeypatch):
+     from optomind_research.runtime.upgrade3.progressive_review_plan import make_retrieval_loop_runner
+     runner, context, calls, config = fixture(tmp_path, monkeypatch, [answer(""), answer("")])

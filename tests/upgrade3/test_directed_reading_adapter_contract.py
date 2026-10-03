@@ -97,6 +97,46 @@ def test_useful_partial_is_retained_but_not_fulfilled(tmp_path, monkeypatch):
     assert not _directed_material_compatible(task(), material)
 
 
+def test_reader_aggregate_marks_provider_failure_without_changing_attempted_quota(tmp_path, monkeypatch):
+    runner, context, _, _ = fixture(tmp_path, monkeypatch, [answer()])
+
+    def fail_reader(**kwargs):
+        raise RuntimeError("injected provider failure")
+
+    monkeypatch.setattr(dr, "run_directed_reading", fail_reader)
+    result = runner([task()], **context)
+
+    assert result["status"] == "failed"
+    assert result["provider_failed"] is True
+    assert result["failed_paper_ids"] == ["paper-1"]
+    assert result["consumed_paper_ids"] == result["attempted_paper_ids"] == ["paper-1"]
+    assert result["results"][0]["status"] == "failed"
+
+
+def test_reader_aggregate_keeps_useful_partial_and_exposes_failed_rows(tmp_path, monkeypatch):
+    runner, context, _, _ = fixture(tmp_path, monkeypatch, [answer()])
+    calls = []
+
+    def mixed_reader(**kwargs):
+        calls.append(kwargs["output_dir"])
+        if len(calls) == 1:
+            return {
+                "output": answer("Useful partial", remaining="Need another condition"),
+                "output_dir": str(kwargs["output_dir"]),
+                "network_call": True,
+            }
+        raise RuntimeError("injected provider failure")
+
+    monkeypatch.setattr(dr, "run_directed_reading", mixed_reader)
+    result = runner([task(), task(question="Which conditions?")], **context)
+
+    assert result["status"] == "partial"
+    assert result["provider_failed"] is False
+    assert result["failed_paper_ids"] == ["paper-1"]
+    assert sorted(row["status"] for row in result["results"]) == ["failed", "partial"]
+    assert result["materials"][0]["question_material"][0]["explanation"] == "Useful partial"
+
+
 def test_question_rows_without_answer_do_not_authorize_reuse():
     material = _decorate_directed_material({"question_material": [{"question_id": "Q01", "question": "What changed?", "explanation": "", "remaining_points": ""}]}, task=task())
     assert not _directed_material_compatible(task(), material)
@@ -152,6 +192,58 @@ def test_real_retrieval_closure_keeps_partial_status_and_content(tmp_path, monke
     assert "Sample increased" in state["usable_content"]
     assert state["still_missing"]
     assert result["tool_materials_by_chapter"]["C1"][0]["usable_content"]
+
+
+def test_real_retrieval_closure_routes_provider_failure_to_same_round_retry(tmp_path):
+    from optomind_research.runtime.upgrade3.progressive_review_plan import (
+        ProgressivePlannerConfig, make_retrieval_loop_runner,
+    )
+
+    config = ProgressivePlannerConfig(
+        topic_id="provider-failure-review",
+        pool_path=tmp_path / "POOL.jsonl",
+        plan_path=tmp_path / "PLAN.json",
+        output_dir=tmp_path / "run",
+        shared_deep_read_budget=1,
+        reader_workers=1,
+    )
+    calls = []
+
+    def failed_reader(tasks, **context):
+        calls.append(context["output_dir"])
+        return {
+            "status": "failed",
+            "results": [{"paper_id": "paper-1", "status": "failed", "error": "RuntimeError"}],
+            "materials": [],
+            "consumed_paper_ids": ["paper-1"],
+            "attempted_paper_ids": ["paper-1"],
+        }
+
+    retrieval = make_retrieval_loop_runner(config, allow_external=True, directed_reader=failed_reader)
+    request = {
+        "paper_id": "paper-1",
+        "chapter_ids": ["C1"],
+        "questions": [{"question_id": "Q01", "question": "What answer is available?", "purpose": "Probe"}],
+        "required_outputs": [{"output_id": "O01", "output_type": "practical_material", "description": "Answer"}],
+        "knowledge_gap": "provider failure probe",
+        "reason": "provider failure probe",
+        "round_specs": [
+            {"round": index, "targeted_queries": [{"query_type": "keyword", "query_text": f"direction-{index}"}]}
+            for index in (1, 2, 3)
+        ],
+    }
+    result = retrieval(
+        phase="provider-failure", directed_requests=[request], pool_rows=[],
+        plan={"research_question": "Synthetic provider failure"}, resume=False,
+    )
+
+    state = result["retrieval_loop"]["needs"][0]
+    assert len(calls) == 2
+    assert all("round_1" in str(path) for path in calls)
+    assert state["status"] == "pending"
+    assert state["action"] == "provider_retry"
+    assert result["directed_results"]
+    assert all(row["status"] == "failed" for row in result["directed_results"])
 
 
 def test_retrieval_explicit_empty_retry_is_one_attempt_across_rounds(tmp_path, monkeypatch):
