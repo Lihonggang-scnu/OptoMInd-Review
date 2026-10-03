@@ -307,6 +307,24 @@ def _read_card_material(
     if not isinstance(payload, Mapping):
         return text, {"format": "text", "extra_chars": len(text)}
 
+    # Locators are not identity authority. Reject a demonstrably foreign card
+    # before filling any missing science; metadata-free legacy cards still work.
+    from .chapter_arrangement import normalize_doi
+
+    identities = [payload]
+    for container in (payload, payload.get("planning_view"),
+                      payload.get("general_understanding"), payload.get("review_planning")):
+        if isinstance(container, Mapping):
+            for key in ("paper_identity", "record_identity", "identity"):
+                if isinstance(container.get(key), Mapping):
+                    identities.append(container[key])
+    for identity in identities:
+        paper = str(identity.get("canonical_paper_id") or identity.get("paper_id") or "")
+        doi = normalize_doi(identity.get("doi"))
+        if ((paper and entry.get("paper_id") and paper != str(entry["paper_id"]))
+                or (doi and entry.get("doi") and doi != normalize_doi(entry["doi"]))):
+            raise UnitWritingError("locator_identity_conflict:" + str(target))
+
     card_note: dict[str, Any] = {"format": "paper_reading_card", "omitted_keys": [], "added_fields": []}
     general = payload.get("general_understanding")
     if isinstance(general, Mapping):
@@ -534,6 +552,8 @@ def _material_entry(
             card_material, card_note = _read_card_material(card_path, entry)
         except UnitWritingError as exc:
             note["issues"].append(str(exc))
+            if str(exc).startswith("locator_identity_conflict:"):
+                entry["material_identity_conflict"] = "foreign_locator_card_ignored"
         else:
             if card_material is not None:
                 entry["card_material"] = card_material
@@ -656,8 +676,26 @@ def build_unit_view(
         packet_materials = {
             str(row.get("source_handle")): row for row in packet.get("source_materials") or ()
         }
+        from .chapter_arrangement import resolve_tool_materials
+
+        for tool in resolve_tool_materials(packet):
+            if not str(tool.get("usable_content") or "").strip():
+                continue
+            for source in tool.get("sources") or ():
+                handle = str(source.get("source_handle") or "")
+                if handle:
+                    packet_materials.setdefault(handle, source)
 
     handles = unit_handles(unit)
+    relevant_tools = _unit_relevant_chapter_tool_materials(
+        arrangement.get("chapter_tool_materials") or (), unit_id)
+    for tool in relevant_tools:
+        if not str(tool.get("usable_content") or "").strip():
+            continue
+        for source in tool.get("sources") or ():
+            handle = str(source.get("source_handle") or "") if isinstance(source, Mapping) else ""
+            if handle in source_catalog and handle not in handles:
+                handles.append(handle)
     if not handles:
         raise UnitWritingError(f"unit_uses_no_sources:{unit_id}")
     materials: list[dict[str, Any]] = []
@@ -704,8 +742,7 @@ def build_unit_view(
         arrangement_path=str(arrangement_file),
         view_path=str(resolved_view_path),
         unit_notes=str(unit.get("unit_notes") or ""),
-        chapter_tool_materials=_unit_relevant_chapter_tool_materials(
-            arrangement.get("chapter_tool_materials") or (), unit_id),
+        chapter_tool_materials=relevant_tools,
         owner_unit_context=(
             dict(unit["owner_unit_context"]) if isinstance(unit.get("owner_unit_context"), Mapping)
             else {}),
@@ -999,6 +1036,14 @@ def build_completion_payload(
         for item in view.materials
         if isinstance(item, Mapping)
     }
+    tools = _completion_tool_materials(
+        view.chapter_tool_materials, unit_id=view.unit_id, handles=handles)
+    for item in tools:
+        if not str(item.get("usable_content") or "").strip():
+            continue
+        for handle in _source_handles_from_value(item):
+            if handle in by_handle and handle not in handles:
+                handles.append(handle)
     missing = [
         handle for handle in handles
         if handle not in by_handle or by_handle[handle].get("missing_material")
@@ -1025,8 +1070,7 @@ def build_completion_payload(
         "paragraph_tasks": paragraph_tasks,
         "table_tasks": table_tasks,
         "sources": sources,
-        "chapter_tool_materials": _completion_tool_materials(
-            view.chapter_tool_materials, unit_id=view.unit_id, handles=handles),
+        "chapter_tool_materials": tools,
         "existing_body_markdown": existing_body,
         "requested_task_ids": [str(item) for item in task_ids],
         "requested_source_handles": handles,

@@ -518,6 +518,10 @@ def tool_supplement_entry(item: Mapping[str, Any]) -> dict[str, Any]:
         "limits": [str(row) for row in (item.get("limits") or []) if str(row).strip()],
         "still_missing": str(item.get("still_missing") or ""),
         "allowed_use": [str(row) for row in (item.get("allowed_use") or []) if str(row).strip()],
+        **({"sources": [dict(row) for row in item["sources"] if isinstance(row, Mapping)]}
+           if item.get("sources") else {}),
+        **({"provenance": dict(item["provenance"])}
+           if isinstance(item.get("provenance"), Mapping) else {}),
     }
 
 
@@ -537,7 +541,8 @@ def compact_chapter_tool_material(item: Mapping[str, Any]) -> dict[str, Any]:
     entry["sources"] = [
         {
             key: str(source.get(key) or "")
-            for key in ("source_handle", "paper_id", "canonical_paper_id", "title", "year", "doi")
+            for key in ("source_handle", "paper_id", "canonical_paper_id", "title", "year", "doi",
+                        "original_source_handle", "identity_status")
             if str(source.get(key) or "").strip()
         }
         for source in (item.get("sources") or ())
@@ -575,14 +580,14 @@ def _source_identity_key(source: Any) -> str:
     if not isinstance(source, Mapping):
         return ""
     handle = str(source.get("source_handle") or "").strip()
-    if handle:
-        return "h:" + handle
-    paper = str(source.get("paper_id") or source.get("canonical_paper_id") or "").strip()
+    paper = str(source.get("canonical_paper_id") or source.get("paper_id") or "").strip()
     if paper:
         return "p:" + paper
     doi = str(source.get("doi") or "").strip()
     if doi:
-        return "d:" + doi
+        return "d:" + normalize_doi(doi)
+    if handle:
+        return "h:" + handle
     title = str(source.get("title") or "").strip()
     return ("t:" + title.casefold()) if title else ""
 
@@ -690,8 +695,13 @@ def _source_catalog(packet: Mapping[str, Any], chapter_id: str) -> dict[str, Sou
         if not isinstance(row, Mapping):
             continue
         entry = catalog.setdefault(str(handle), SourceMaterial(source_handle=str(handle)))
+        current_paper = str(row.get("canonical_paper_id") or row.get("paper_id") or "")
+        current_doi = normalize_doi(row.get("doi"))
+        if ((entry.paper_id and current_paper and entry.paper_id != current_paper)
+                or (entry.doi and current_doi and normalize_doi(entry.doi) != current_doi)):
+            raise ChapterArrangementError("source_identity_conflict:" + str(handle))
         if not entry.paper_id:
-            entry.paper_id = str(row.get("paper_id") or "")
+            entry.paper_id = current_paper
         if not entry.title:
             entry.title = str(row.get("title") or "")
         if not entry.year:
@@ -701,6 +711,91 @@ def _source_catalog(packet: Mapping[str, Any], chapter_id: str) -> dict[str, Sou
         if not entry.card_path:
             entry.card_path = str(row.get("card_path") or "")
     return catalog
+
+
+def _resolved_tool_materials(
+    packet: Mapping[str, Any], catalog: dict[str, SourceMaterial],
+) -> list[dict[str, Any]]:
+    """Resolve tool references against current identities without trusting old labels.
+
+    Already assigned, unclaimed tool handles with a stable identity are usable;
+    stable-ID-only sources without a current handle remain visible and unresolved.
+    Multi-source content is never copied into a single source's study summary.
+    """
+
+    def compatible(row: Mapping[str, Any], target: SourceMaterial) -> bool:
+        paper = str(row.get("canonical_paper_id") or row.get("paper_id") or "").strip()
+        doi = normalize_doi(row.get("doi"))
+        title = normalize_title(row.get("title"))
+        title_conflict = (not paper and not doi and title and target.title
+                          and title != normalize_title(target.title))
+        return not ((paper and target.paper_id and paper != target.paper_id)
+                    or (doi and target.doi and doi != normalize_doi(target.doi))
+                    or title_conflict)
+
+    output: list[dict[str, Any]] = []
+    raw_materials = [*(packet.get("tool_materials") or ()),
+                     *(packet.get("chapter_tool_materials") or ())]
+    for material in packet.get("source_materials") or ():
+        if isinstance(material, Mapping):
+            raw_materials.extend(material.get("tool_materials") or ())
+    seen: set[str] = set()
+    for raw in raw_materials:
+        if not isinstance(raw, Mapping):
+            continue
+        signature = json.dumps(dict(raw), ensure_ascii=False, sort_keys=True, default=str)
+        if signature in seen:
+            continue
+        seen.add(signature)
+        item = dict(raw)
+        sources: list[dict[str, Any]] = []
+        for source in raw.get("sources") or ():
+            if not isinstance(source, Mapping):
+                continue
+            row = dict(source)
+            old = str(row.get("source_handle") or "").strip()
+            paper = str(row.get("canonical_paper_id") or row.get("paper_id") or "").strip()
+            doi = normalize_doi(row.get("doi"))
+            identity_matches = [handle for handle, target in catalog.items()
+                                if (paper and paper == target.paper_id)
+                                or (doi and doi == normalize_doi(target.doi))]
+            matches = [handle for handle in identity_matches if compatible(row, catalog[handle])]
+            conflicting_identity = any(not compatible(row, catalog[handle]) for handle in identity_matches)
+            resolved = matches[0] if len(matches) == 1 and not conflicting_identity else ""
+            if not resolved and not identity_matches and old in catalog and compatible(row, catalog[old]):
+                resolved = old
+            if not resolved and not identity_matches and old not in catalog and re.fullmatch(r"P\d{4}", old) and (paper or doi):
+                # Preserve an existing tool assignment; never allocate a new handle.
+                catalog[old] = SourceMaterial(source_handle=old, paper_id=paper,
+                    title=str(row.get("title") or ""), year=str(row.get("year") or ""),
+                    doi=str(row.get("doi") or ""))
+                resolved = old
+            if resolved:
+                row["source_handle"] = resolved
+                if old and old != resolved:
+                    row["original_source_handle"] = old
+                    row["identity_status"] = "remapped"
+                target = catalog[resolved]
+                for key in ("paper_id", "title", "year", "doi"):
+                    if not row.get(key) and getattr(target, key):
+                        row[key] = getattr(target, key)
+            else:
+                row.pop("source_handle", None)
+                if old:
+                    row["original_source_handle"] = old
+                row["identity_status"] = row.get("identity_status") or (
+                    "conflicting_identity" if conflicting_identity else
+                    "conflicting_handle" if old in catalog else "unresolved_identity")
+            sources.append(row)
+        item["sources"] = sources
+        output.append(item)
+    return output
+
+
+def resolve_tool_materials(packet: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Identity-safe tool rows for packet merging and downstream handoff."""
+
+    return _resolved_tool_materials(packet, _source_catalog(packet, ""))
 
 
 def chapter_tool_materials_from_packet(packet: Mapping[str, Any]) -> tuple[dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
@@ -715,19 +810,19 @@ def chapter_tool_materials_from_packet(packet: Mapping[str, Any]) -> tuple[dict[
     their source set intact; ownership is never guessed.
     """
 
+    catalog = _source_catalog(packet, "")
+    materials = _resolved_tool_materials(packet, catalog)
     catalog_handles = {
-        str(item.get("source_handle") or "").strip()
-        for item in packet.get("source_materials") or ()
-        if isinstance(item, Mapping) and str(item.get("source_handle") or "").strip()
+        str(row.get("source_handle") or "")
+        for row in packet.get("source_materials") or () if isinstance(row, Mapping)
     }
     per_source: dict[str, list[dict[str, Any]]] = {}
     chapter_level: list[dict[str, Any]] = []
-    for raw in packet.get("tool_materials") or ():
-        if not isinstance(raw, Mapping):
-            continue
+    for raw in materials:
         identities = distinct_tool_material_sources(raw)
         handles = _ordered_source_handles(raw)
-        if len(identities) == 1 and len(handles) == 1 and handles[0] in catalog_handles:
+        if (len(identities) == 1 and len(handles) == 1 and handles[0] in catalog_handles
+                and not str(raw.get("unit_key") or "").strip()):
             per_source[handles[0]] = merge_tool_supplement_entry(
                 per_source.get(handles[0]) or [], tool_supplement_entry(raw))
             continue
@@ -852,6 +947,7 @@ def build_chapter_view(
     plan = packet.get("chapter_plan") if isinstance(packet.get("chapter_plan"), Mapping) else {}
     chapter = packet.get("chapter") if isinstance(packet.get("chapter"), Mapping) else {}
     catalog = _source_catalog(packet, chapter_id)
+    packet["tool_materials"] = _resolved_tool_materials(packet, catalog)
 
     resolved_id_map = Path(id_map_path) if id_map_path else (
         Path(packet_path).parent.parent / "chapter_arrangement" / "ID_MAP.json"
@@ -935,13 +1031,25 @@ def build_chapter_view(
             # setdefault: a source that already has paragraph uses keeps them.
             uses.setdefault(handle, [])
 
+    # Usable tool material gives its cited studies a selection opportunity even
+    # when the earlier owner tasks did not yet name them.
+    tool_handles = {
+        str(source.get("source_handle") or "")
+        for item in packet.get("tool_materials") or ()
+        if str(item.get("usable_content") or "").strip()
+        for source in item.get("sources") or ()
+        if source.get("source_handle") in catalog
+    }
     sources: list[SourceMaterial] = []
-    for handle in sorted(uses, key=lambda item: (len(item), item)):
+    for handle in sorted(set(uses) | tool_handles, key=lambda item: (len(item), item)):
         material = catalog.get(handle)
         if material is None:
             material = SourceMaterial(source_handle=handle, material_status="unresolvable_handle")
         elif not (material.planning_view or material.study_summary_a
-                  or material.deep_read_material or material.deep_read_materials):
+                  or material.deep_read_material or material.deep_read_materials
+                  or material.supplement_material or material.supplement_materials
+                  or material.local_passages or material.local_passages_variants
+                  or material.tool_supplement_materials or handle in tool_handles):
             material.material_status = "no_material"
         sources.append(material)
 
@@ -962,6 +1070,14 @@ def build_chapter_view(
                 target.tool_supplement_materials, entry)
 
     sources, uses, merges = merge_doi_duplicates(sources, uses)
+    aliases = {alias: source.source_handle for source in sources for alias in source.aliases}
+    for item in chapter_level:
+        for reference in item.get("sources") or ():
+            old = str(reference.get("source_handle") or "")
+            if old in aliases:
+                reference.setdefault("original_source_handle", old)
+                reference["source_handle"] = aliases[old]
+                reference["identity_status"] = "remapped"
     for source in sources:
         for use in uses.get(source.source_handle, []):
             use["resolved_handle"] = source.source_handle
@@ -1990,6 +2106,7 @@ __all__ = [
     "normalize_title",
     "parse_arrangement_response",
     "render_arrangement_markdown",
+    "resolve_tool_materials",
     "run_arrangement",
     "source_usage_summary",
     "tool_supplement_entry",

@@ -236,6 +236,7 @@ def _owner_test_planner(tmp_path: Path):
 def _owner_case(tmp_path: Path, *, card: bool = True, handle: str = "P0574") -> dict:
     row = _candidate(tmp_path, handle)
     row["_paper_id"] = "paper-0574"
+    row["planning_view"]["paper_identity"]["canonical_paper_id"] = "paper-0574"
     if not card:
         row["card_path"] = str(tmp_path / "missing-card" / "PAPER_READING_CARD.json")
     return row
@@ -273,7 +274,7 @@ def test_owner_missing_current_card_remains_validation_error(tmp_path):
     assert result["status"] == "unresolved"
     assert "updated_unit_sources_unavailable:P0574" in result["structural_errors"]
     assert owner.payload["owner_material_resolution"]["unresolved"] == [{
-        "source_handle": "P0574", "reason": "current_card_material_missing",
+        "source_handle": "P0574", "reason": "study_material_missing",
     }]
     assert owner.payload["source_materials"] == []
 
@@ -282,6 +283,7 @@ def test_owner_closure_does_not_inject_unreferenced_pool_rows(tmp_path):
     planner, owner = _owner_test_planner(tmp_path)
     extra = _candidate(tmp_path, "P0999")
     extra["_paper_id"] = "paper-0999"
+    extra["planning_view"]["paper_identity"]["canonical_paper_id"] = "paper-0999"
     result = planner.revise_from_arrangement_issues(
         chapter={"chapter_id": "CH05"},
         chapter_plan={"units": [{"unit_id": "CH05_U01", "source_handles": ["P0574"]}]},
