@@ -28,3 +28,7 @@
 ## 交接必须包含
 
 root 审阅需要工单记录、生产差异摘要、fixture/短链输入和输出、正常路径对照、未解决项及实际命令或 harness 入口。不得附凭据、原始秘密或本地绝对路径。
+
+## 2026-10-03 WO-03 explicit continuation
+
+User message `Sentinel_7c82dc03c35481919a5bcc4c06830ff7` authorizes only WO-03 from acceptance commit `4bb82be54d8d812c2d11b1e3a45e8ff863af0ee4`. The earlier table is historical. WO-00–02 have bounded local acceptance; WO-03 is READY_FOR_ASTRA_03 after 212 bounded offline tests passed (2 full-fake-chain controls deselected), on independent branch `body-chain-repair-cloud03-20261003`. WO-04–07 remain WAITING_APPROVAL. Stop after WO-03 at `READY_FOR_ASTRA_03`.

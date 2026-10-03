@@ -19,6 +19,7 @@ import hashlib
 import json
 import math
 import re
+import tempfile
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -56,6 +57,20 @@ class PlanningSupplementError(ValueError):
 
 class OutputDirectoryError(PlanningSupplementError):
     """The output directory is not new and empty."""
+
+
+def allocate_supplement_attempt(output_root: str | Path) -> Path:
+    """Reserve a fresh directory without replacing an earlier attempt.
+
+    Allocation does not authorize or initiate a retry. The caller retains its
+    existing retry and budget policy, and passes this empty directory to
+    ``run_planning_supplement``. Atomic creation also isolates concurrent calls.
+    Legacy artifacts at the logical root are left untouched.
+    """
+
+    root = Path(output_root).resolve()
+    root.mkdir(parents=True, exist_ok=True)
+    return Path(tempfile.mkdtemp(prefix="attempt-", dir=root))
 
 
 @dataclass
@@ -186,6 +201,9 @@ class PlanningSupplementRequest:
     reuse_plan_facet_ids: tuple[str, ...] = ()
     known_papers: tuple[dict[str, Any], ...] = ()
     reviewed_references: tuple[dict[str, Any], ...] = ()
+    required_outputs: tuple[str | dict[str, Any], ...] = ()
+    reusable_material: str = ""
+    still_missing: str = ""
     max_candidates: int = DEFAULT_MAX_CANDIDATES
     max_acquisitions: int = DEFAULT_MAX_ACQUISITIONS
     per_query_limit: int = DEFAULT_PER_QUERY_LIMIT
@@ -203,7 +221,7 @@ class PlanningSupplementRequest:
             "schema_version", "request_id", "topic_id", "gap_id",
             "gap_question", "success_criteria", "base_pool_path", "plan_path",
             "targeted_queries", "reuse_plan_facet_ids", "known_papers",
-            "reviewed_references", "limits",
+            "reviewed_references", "required_outputs", "reusable_material", "still_missing", "limits",
         }
         unknown = sorted(str(key) for key in raw if key not in allowed)
         if unknown:
@@ -235,6 +253,24 @@ class PlanningSupplementRequest:
             criteria = ()
         if not criteria:
             raise PlanningSupplementError("success_criteria_required")
+
+        required_outputs_raw = raw.get("required_outputs") or ()
+        if not isinstance(required_outputs_raw, Sequence) or isinstance(required_outputs_raw, (str, bytes)):
+            raise PlanningSupplementError("required_outputs_must_be_array")
+        required_outputs: list[str | dict[str, Any]] = []
+        for item in required_outputs_raw:
+            if isinstance(item, Mapping):
+                required_outputs.append(dict(item))
+            elif isinstance(item, str) and item.strip():
+                required_outputs.append(item.strip())
+            else:
+                raise PlanningSupplementError("required_output_must_be_text_or_object")
+        reusable_material = raw.get("reusable_material") or ""
+        if not isinstance(reusable_material, str):
+            raise PlanningSupplementError("reusable_material_must_be_text")
+        still_missing = raw.get("still_missing") or ""
+        if not isinstance(still_missing, str):
+            raise PlanningSupplementError("still_missing_must_be_text")
 
         targeted: list[dict[str, str]] = []
         for index, item in enumerate(raw.get("targeted_queries") or (), start=1):
@@ -323,6 +359,9 @@ class PlanningSupplementRequest:
             reuse_plan_facet_ids=reused,
             known_papers=records("known_papers"),
             reviewed_references=records("reviewed_references"),
+            required_outputs=tuple(required_outputs),
+            reusable_material=reusable_material,
+            still_missing=still_missing,
             max_candidates=bounded_int("max_candidates", DEFAULT_MAX_CANDIDATES, 1, MAX_CANDIDATES_HARD),
             max_acquisitions=bounded_int("max_acquisitions", DEFAULT_MAX_ACQUISITIONS, 0, MAX_ACQUISITIONS_HARD),
             per_query_limit=bounded_int("per_query_limit", DEFAULT_PER_QUERY_LIMIT, 1, MAX_PER_QUERY_HARD),
@@ -342,6 +381,9 @@ class PlanningSupplementRequest:
             "reuse_plan_facet_ids": list(self.reuse_plan_facet_ids),
             "known_papers": [dict(item) for item in self.known_papers],
             "reviewed_references": [dict(item) for item in self.reviewed_references],
+            "required_outputs": list(self.required_outputs),
+            "reusable_material": self.reusable_material,
+            "still_missing": self.still_missing,
             "limits": {
                 "max_candidates": self.max_candidates,
                 "max_acquisitions": self.max_acquisitions,
@@ -1190,13 +1232,16 @@ def normalize_practical_fulfillment_judgment(
     content, plain_text = decode_practical_json(raw)
     if not isinstance(content, Mapping):
         content = {}
-    raw_status = str(content.get("primary_gap_status") or content.get("status") or "").strip().casefold()
-    aliases = {"complete": "fulfilled", "partly_fulfilled": "partial", "not_fulfilled": "unmet"}
+    raw_status = str(content.get("primary_gap_status") or content.get("substantive_gap_status") or content.get("status") or "").strip().casefold()
+    # A completed invocation is not itself an answer to the research question.
+    aliases = {"partly_fulfilled": "partial", "not_fulfilled": "unmet"}
     status = aliases.get(raw_status, raw_status)
     if status not in {"fulfilled", "partial", "unmet", "unjudgeable"}:
-        status = "unjudgeable"
+        status = "fulfilled" if content.get("fulfilled") is True else "unjudgeable"
 
-    useful = content.get("useful_material", content.get("direct_contribution", content.get("contribution", content.get("explanation", content.get("answer", content.get("response", ""))))))
+    useful = next((content[key] for key in (
+        "useful_material", "usable_content", "direct_contribution", "contribution", "explanation", "answer", "response"
+    ) if content.get(key)), "")
     if not useful:
         useful = {
             key: content[key]
@@ -1226,7 +1271,22 @@ def normalize_practical_fulfillment_judgment(
         limitations_value = [limitations_value] if limitations_value.strip() else []
     elif not isinstance(limitations_value, Sequence) or isinstance(limitations_value, (bytes, bytearray)):
         limitations_value = [str(limitations_value)] if limitations_value else []
-    remaining_gap = str(content.get("remaining_gap") or content.get("unresolved_gap") or "").strip()
+    remaining_gap = str(content.get("remaining_gap") or content.get("unresolved_gap") or content.get("still_missing") or "").strip()
+    assessments = content.get("criterion_assessments") or []
+    if isinstance(assessments, Mapping):
+        assessments = [assessments]
+    unresolved_criteria = any(
+        isinstance(row, Mapping) and (
+            str(row.get("status") or "").strip().casefold() in {"partial", "unmet", "unjudgeable", "failed", "not_fulfilled"}
+            or row.get("fulfilled") is False
+        )
+        for row in assessments
+    ) if isinstance(assessments, Sequence) and not isinstance(assessments, (str, bytes)) else False
+    if status == "fulfilled":
+        if not material_ready:
+            status = "unjudgeable"
+        elif remaining_gap or unresolved_criteria or content.get("fulfilled") is False or content.get("answers_requested_question") is False:
+            status = "partial"
     if not remaining_gap and status in {"unmet", "partial", "unjudgeable"}:
         remaining_gap = str(gap_question or "").strip()
     outline_action = str(content.get("outline_action") or content.get("writing_action") or "").strip()
@@ -1267,6 +1327,14 @@ def normalize_practical_fulfillment_judgment(
         normalized["evidence"] = rows(content.get("evidence"))
     if content.get("title"):
         normalized["title"] = content.get("title")
+    # Transport/run diagnostics remain visible even when optional gap metadata
+    # is absent. Useful material and research fulfillment stay independent.
+    execution_status = str(content.get("execution_status") or content.get("status") or "").strip().casefold()
+    if execution_status in {"complete", "completed", "failed", "provider_failed", "provider_error", "error"}:
+        normalized["execution_status"] = execution_status
+    for key in ("error", "reason", "failure_stage", "retryable", "provider_failed"):
+        if key in content:
+            normalized[key] = content[key]
     return normalized
 
 
@@ -1730,6 +1798,14 @@ def _apply_source_unit_to_pool(
     if existing_index is not None:
         previous = dict(pool_rows[existing_index])
         previous_path = str(previous.get("card_path") or "")
+        prior_gap_materials: list[dict[str, Any]] = []
+        for material in [
+            *(previous.get("prior_supplement_gap_materials") or []),
+            *(previous.get("supplement_gap_materials") or []),
+            previous.get("supplement_gap_material"),
+        ]:
+            if isinstance(material, Mapping) and material and material not in prior_gap_materials:
+                prior_gap_materials.append(dict(material))
         if status == "fulfilled":
             new_row = _pool_row_from_card(
                 candidate,
@@ -1752,9 +1828,6 @@ def _apply_source_unit_to_pool(
             if previous.get("supplement_source_unit_id"):
                 previous_units.append(previous["supplement_source_unit_id"])
             new_row["prior_source_unit_ids"] = list(dict.fromkeys(previous_units))
-            prior_gap_materials = list(previous.get("prior_supplement_gap_materials") or [])
-            if isinstance(previous.get("supplement_gap_material"), Mapping):
-                prior_gap_materials.append(dict(previous["supplement_gap_material"]))
             if prior_gap_materials:
                 new_row["prior_supplement_gap_materials"] = prior_gap_materials
             pool_rows[existing_index] = new_row
@@ -1769,6 +1842,14 @@ def _apply_source_unit_to_pool(
             "gap_id": gap_id,
             "judgment_path": judgment_path,
         }]
+        # The authoritative A/B card stays in place, but useful partial/unmet
+        # prose must travel with the pool, not only a diagnostic file path.
+        material = _pool_row_from_card(
+            candidate, card, paper_id=matched_paper_id, card_path=card_path,
+            source_unit_id=candidate.source_unit_id, judgment=judgment,
+            material_depth=material_depth, gap_id=gap_id, judgment_path=judgment_path,
+        )["supplement_gap_material"]
+        previous["supplement_gap_materials"] = [*prior_gap_materials, material]
         pool_rows[existing_index] = previous
         return {"pool_action": "active_card_retained_material_candidate_linked" if status == "unmet" else "active_card_retained_partial_candidate_linked", "prior_card_path": previous_path}
     if not card:
@@ -2078,6 +2159,9 @@ def run_planning_supplement(
         "gap_id": request.gap_id,
         "gap_question": request.gap_question,
         "success_criteria": list(request.success_criteria),
+        "required_outputs": list(request.required_outputs),
+        "reusable_material": request.reusable_material,
+        "still_missing": request.still_missing,
     }
     options = dict(card_options or {})
 
@@ -2270,6 +2354,11 @@ def run_planning_supplement(
                     reading_text=reading_text,
                     gap_question=request.gap_question,
                 )
+                if judgment.get("execution_status") in {"failed", "provider_failed", "provider_error", "error"}:
+                    acquisition_or_judgment_error_seen = True
+                    provider_issue_seen = True
+                    retryable_provider_seen = retryable_provider_seen or judgment.get("retryable") is True
+                    source_unit["failure_stage"] = judgment.get("failure_stage") or "fulfillment_judge"
                 if judgment.get("reason") in {
                     "judge_quote_not_found_in_snapshot",
                     "judge_quote_anchor_below_threshold",
@@ -2372,6 +2461,12 @@ def run_planning_supplement(
         "auxiliary_material": [judgment.get("auxiliary_material") for judgment in judgments if judgment.get("material_ready") and judgment.get("auxiliary_material")],
         "evidence": [evidence for judgment in judgments for evidence in judgment.get("evidence", []) if isinstance(evidence, Mapping)],
         "limitations": [limit for judgment in judgments for limit in judgment.get("limitations", []) if str(limit or "").strip()],
+        "failed_feedback": [
+            {"source_unit_id": unit["source_unit_id"], **dict(unit["fulfillment_judgment"])}
+            for unit in source_units
+            if isinstance(unit.get("fulfillment_judgment"), Mapping)
+            and (unit.get("failure_stage") or unit["fulfillment_judgment"].get("execution_status") in {"failed", "provider_failed", "provider_error", "error"})
+        ],
         "remaining_gap": next((str(judgment.get("remaining_gap")) for judgment in judgments if judgment.get("status") == overall_status and "remaining_gap" in judgment), request.gap_question),
         "outline_action": next((str(judgment.get("outline_action")) for judgment in judgments if judgment.get("status") == overall_status and judgment.get("outline_action")), default_outline_action),
         "outline_action_recovered_by_policy": any(bool(judgment.get("outline_action_recovered_by_policy")) for judgment in judgments),
@@ -2857,6 +2952,7 @@ __all__ = [
     "PlanningSupplementError",
     "OutputDirectoryError",
     "PlanningSupplementRequest",
+    "allocate_supplement_attempt",
     "load_planning_supplement_request",
     "preflight_planning_supplement",
     "run_planning_supplement",

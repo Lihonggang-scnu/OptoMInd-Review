@@ -132,8 +132,64 @@ def need_id_for(question: str, *, comparison_object: str = "") -> str:
 
 
 def _need_signature(need: InformationNeed) -> str:
-    """Stable request shape used to invalidate a changed resumed stage."""
-    return json.dumps(need.to_dict(), ensure_ascii=False, sort_keys=True, default=str)
+    """Research/acceptance shape; chapter ownership is a separate binding."""
+    payload = need.to_dict()
+    payload.pop("owners", None)
+    return json.dumps(payload, ensure_ascii=False, sort_keys=True, default=str)
+
+
+def _signature_matches(saved: Any, current: str) -> bool:
+    if str(saved or "") == current:
+        return True
+    # Preserve pre-WO03 journals rather than charging for compatible work again.
+    try:
+        payload = json.loads(str(saved or ""))
+    except (TypeError, ValueError):
+        return False
+    if not isinstance(payload, dict):
+        return False
+    payload.pop("owners", None)
+    return json.dumps(payload, ensure_ascii=False, sort_keys=True, default=str) == current
+
+
+def _merge_usable_content(previous: str, current: str) -> str:
+    previous, current = previous.strip(), current.strip()
+    if not current or current in previous:
+        return previous
+    if not previous or previous in current:
+        return current
+    return previous + "\n\n" + current
+
+
+def _requirement_content(value: Any) -> Any:
+    """Separate output/question routing labels from acceptance content."""
+    if isinstance(value, Mapping):
+        return {key: _requirement_content(item) for key, item in value.items()
+                if key not in {"output_id", "question_id", "required_output_ids"}}
+    if isinstance(value, (list, tuple)):
+        return [_requirement_content(item) for item in value]
+    return value
+
+
+def _normalized_contract_text(value: Any) -> str:
+    return re.sub(r"\s+", " ", str(value or "")).strip().casefold()
+
+
+def _external_raw_result(outcome: Mapping[str, Any]) -> dict[str, Any]:
+    raw = outcome.get("raw_result")
+    if isinstance(raw, Mapping):
+        return dict(raw)
+    return dict(outcome) if raw is None else {"value": raw}
+
+
+def _is_scientific_attempt(entry: Mapping[str, Any]) -> bool:
+    # A legacy first-round query failure did not cross the retrieval boundary.
+    # Let the repaired initializer run instead of restoring that terminal state.
+    return (
+        entry.get("counts_as_round", True) is not False
+        and str(entry.get("status") or "") != "provider_retry"
+        and not (int(entry.get("round") or 0) == 1 and entry.get("status") == "stopped_no_query")
+    )
 
 
 def _need_terms(need: InformationNeed) -> set[str]:
@@ -149,25 +205,36 @@ def _need_terms(need: InformationNeed) -> set[str]:
 def merge_similar_needs(needs: Sequence[InformationNeed]) -> list[InformationNeed]:
     """Serve the same information need once, without merging different questions.
 
-    Two needs merge only when they ask the same thing: either the same
-    ``need_id``, or an identical question text.  Needs that merely share a topic
-    but compare different objects keep separate sessions.
+    Owners may differ, but research content and acceptance must agree. Merely
+    sharing a question (or a caller-supplied id) does not satisfy new outputs.
     """
 
     merged: dict[str, InformationNeed] = {}
+    def contract(need: InformationNeed) -> str:
+        return json.dumps({
+            "question": _normalized_contract_text(need.question),
+            "kind": need.kind,
+            "intended_use": need.intended_use,
+            "user_scope": _normalized_contract_text(need.user_scope),
+            "comparison_object": _normalized_contract_text(need.comparison_object),
+            "success_criteria": sorted({_normalized_contract_text(item) for item in need.success_criteria}),
+            "required_concepts": sorted({_normalized_contract_text(item) for item in need.required_concepts}),
+        }, ensure_ascii=False, sort_keys=True)
+
     for need in needs:
         key = need.need_id
         existing = merged.get(key)
+        if existing is not None and contract(existing) != contract(need):
+            key = need.need_id + "-" + hashlib.sha1(contract(need).encode("utf-8")).hexdigest()[:8]
+            existing = merged.get(key)
         if existing is None:
             for candidate in merged.values():
-                if candidate.kind == need.kind == "supplement" and candidate.comparison_object == need.comparison_object and (
-                    candidate.question.strip().casefold() == need.question.strip().casefold()
-                ):
+                if candidate.kind == need.kind == "supplement" and contract(candidate) == contract(need):
                     existing = candidate
                     break
         if existing is None:
             merged[key] = InformationNeed(
-                need_id=need.need_id,
+                need_id=key,
                 question=need.question,
                 owners=tuple(dict.fromkeys(need.owners)),
                 intended_use=need.intended_use,
@@ -181,8 +248,7 @@ def merge_similar_needs(needs: Sequence[InformationNeed]) -> list[InformationNee
                 kind=need.kind,
             )
             continue
-        # Same need from several sections: keep every owner and the stricter
-        # (union) of the stated criteria and concepts.
+        # Compatible needs bind every owner without repeating the research.
         existing.owners = tuple(dict.fromkeys([*existing.owners, *need.owners]))
         existing.success_criteria = tuple(dict.fromkeys([*existing.success_criteria, *need.success_criteria]))
         existing.concepts = tuple(dict.fromkeys([*existing.concepts, *need.concepts]))
@@ -222,17 +288,12 @@ class RetrievalJournal:
         return list(self._entries)
 
     def has(self, need_id: str, round_index: int, *, signature: str | None = None) -> bool:
-        def is_scientific_attempt(entry: Mapping[str, Any]) -> bool:
-            # Provider failures are journaled for diagnostics, but must not
-            # make a round look complete on a later resume.
-            return entry.get("counts_as_round", True) is not False and str(entry.get("status") or "") != "provider_retry"
-
         matches = [
             entry for entry in self._entries
             if str(entry.get("need_id")) == str(need_id)
             and int(entry.get("round") or 0) == int(round_index)
-            and is_scientific_attempt(entry)
-            and (signature is None or str(entry.get("need_signature") or "") == str(signature))
+            and _is_scientific_attempt(entry)
+            and (signature is None or _signature_matches(entry.get("need_signature"), signature))
         ]
         return bool(matches)
 
@@ -251,8 +312,7 @@ class RetrievalJournal:
             (
                 int(entry.get("round") or 0)
                 for entry in self.entries_for(need_id)
-                if entry.get("counts_as_round", True) is not False
-                and str(entry.get("status") or "") != "provider_retry"
+                if _is_scientific_attempt(entry)
             ),
             default=0,
         )
@@ -342,6 +402,9 @@ class NeedState:
     external_results: list[dict[str, Any]] = field(default_factory=list)
     consumed_paper_ids: tuple[str, ...] = ()
     last_error: str = ""
+    queries: list[dict[str, str]] = field(default_factory=list)
+    query_status: str = ""
+    query_source: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -364,6 +427,9 @@ class NeedState:
             "external_results": list(self.external_results),
             "consumed_paper_ids": list(self.consumed_paper_ids),
             "last_error": self.last_error,
+            "queries": list(self.queries),
+            "query_status": self.query_status,
+            "query_source": self.query_source,
         }
 
     def content_for_owner(self, owner: str) -> dict[str, Any]:
@@ -383,6 +449,8 @@ class NeedState:
             "status": self.status,
             "is_owner_request": owner in self.need.owners,
             "local_triage": dict(self.local_triage),
+            "query_status": self.query_status,
+            "query_error": self.last_error if self.query_status == "query_not_formed" else "",
         }
         if "answers_requested_question" in self.local_triage:
             result["answers_requested_question"] = self.local_triage["answers_requested_question"]
@@ -518,18 +586,38 @@ def run_retrieval_loop(
                 continue
             need = state.need
             signature = _need_signature(need)
+            # Infrastructure failures are not completed research rounds, but
+            # their material, actual attempt paths and consumed paper slots
+            # still belong to the need after an interrupted or completed retry.
+            for diagnostic in journal.entries_for(need_id):
+                if (int(diagnostic.get("round") or 0) != round_index
+                        or diagnostic.get("status") != "provider_retry"
+                        or not _signature_matches(diagnostic.get("need_signature"), signature)):
+                    continue
+                raw_rows = diagnostic.get("external_results") or [diagnostic.get("external_result")]
+                for raw in raw_rows:
+                    if isinstance(raw, Mapping) and raw not in state.external_results:
+                        state.external_results.append(dict(raw))
+                state.usable_content = _merge_usable_content(state.usable_content, str(diagnostic.get("usable_content") or ""))
+                if diagnostic.get("still_missing"):
+                    state.still_missing = str(diagnostic["still_missing"])
+                consumed = {str(item) for item in diagnostic.get("consumed_paper_ids") or () if str(item).strip()}
+                consumed_paper_ids.update(consumed)
+                state.consumed_paper_ids = tuple(sorted(set(state.consumed_paper_ids).union(consumed)))
             if journal.has(need_id, round_index, signature=signature):
                 saved = next(
                     entry for entry in reversed(journal.entries_for(need_id))
                     if int(entry.get("round") or 0) == round_index
-                    and str(entry.get("need_signature") or "") == signature
-                    and entry.get("counts_as_round", True) is not False
-                    and str(entry.get("status") or "") != "provider_retry"
+                    and _signature_matches(entry.get("need_signature"), signature)
+                    and _is_scientific_attempt(entry)
                 )
                 state.round_index = max(state.round_index, round_index)
                 state.local_decision = str(saved.get("local_decision") or state.local_decision)
-                state.usable_content = str(saved.get("usable_content") or state.usable_content)
-                state.still_missing = str(saved.get("still_missing") or state.still_missing)
+                state.usable_content = _merge_usable_content(state.usable_content, str(saved.get("usable_content") or ""))
+                state.still_missing = str(saved.get("still_missing", state.still_missing) or "")
+                state.queries = list(saved.get("queries") or [])
+                state.query_status = str(saved.get("query_status") or ("ready" if state.queries else ""))
+                state.query_source = str(saved.get("query_source") or "")
                 state.read_focus = str(saved.get("read_focus") or state.read_focus)
                 state.external_ask = str(saved.get("external_ask") or state.external_ask)
                 if isinstance(saved.get("local_triage"), Mapping):
@@ -562,7 +650,7 @@ def run_retrieval_loop(
             state.local_triage = dict(local)
             usable = str(local.get("usable_content") or "").strip()
             if usable:
-                state.usable_content = usable
+                state.usable_content = _merge_usable_content(state.usable_content, usable)
             local_missing = str(local.get("still_missing") or "").strip()
             if local_missing and (not state.still_missing or state.still_missing == need.question):
                 state.still_missing = local_missing
@@ -589,7 +677,7 @@ def run_retrieval_loop(
                 "round": round_index,
                 "owners": list(need.owners),
                 "local_decision": decision,
-                "usable_content": usable,
+                "usable_content": state.usable_content,
                 "still_missing": state.still_missing,
                 "new_handles": list(new_handles),
                 "new_passages": len(passages),
@@ -623,17 +711,63 @@ def run_retrieval_loop(
                 ]
                 state.action = "external_research"
 
+            if budget_available_cny is not None and float(budget_available_cny) <= float(budget_floor_cny):
+                entry.update({"status": "stopped_budget", "action": "stop",
+                              "note": "known budget is at or below the configured floor; acquired content is kept"})
+                state.status = "partial" if state.usable_content else "stopped"
+                state.action = "stop"
+                journal.record(entry)
+                state.attempts.append(entry)
+                continue
+
             explicit_spec = _spec_for_round(need, round_index)
             spec = explicit_spec
             queries = _queries_from_spec(spec, limit=config.max_queries_per_round)
+            query_source = "need" if queries else ""
+            # The checkpoint precedes the external boundary, so a provider
+            # failure or interrupted run resumes the same initialized query.
+            prepared = next((item for item in reversed(journal.entries_for(need_id))
+                             if int(item.get("round") or 0) == round_index
+                             and _signature_matches(item.get("need_signature"), signature)
+                             and item.get("status") == "query_ready"), None)
+            if prepared is not None:
+                spec = dict(prepared.get("query_spec") or {})
+                queries = _queries_from_spec({"targeted_queries": prepared.get("queries") or []},
+                                             limit=config.max_queries_per_round)
+                query_source = str(prepared.get("query_source") or "journal")
+            if round_index == 1 and not queries and need.kind != "directed":
+                reason = "query_refiner_unavailable"
+                if refine_queries is not None:
+                    try:
+                        refined = refine_queries(need, round_index, [], state.usable_content,
+                                                 state.still_missing or need.question)
+                        spec = {**explicit_spec, **_spec_from_refined_queries(refined)}
+                        queries = _queries_from_spec(spec, limit=config.max_queries_per_round)
+                        query_source = "refiner"
+                        reason = "query_refiner_returned_no_usable_query"
+                    except Exception as exc:
+                        reason = "query_refiner_failed:" + type(exc).__name__
+                if not queries:
+                    state.query_status = "query_not_formed"
+                    state.last_error = reason
+                    state.still_missing = state.still_missing or need.question
+                    state.status = "partial" if state.usable_content else "stopped"
+                    state.action = "stop"
+                    entry.update({"status": "query_not_formed", "action": "stop", "counts_as_round": False,
+                                  "query_status": state.query_status, "error": reason,
+                                  "error_stage": "query_initialization", "question": need.question,
+                                  "still_missing": state.still_missing,
+                                  "note": "query not formed; external retrieval was not attempted"})
+                    journal.record(entry)
+                    state.attempts.append(entry)
+                    continue
             previous_queries: list[dict[str, str]] = []
             if round_index > 1:
                 prior_entries = [
                     item for item in journal.entries_for(need_id)
                     if int(item.get("round") or 0) < round_index
-                    and str(item.get("need_signature") or "") == signature
-                    and item.get("counts_as_round", True) is not False
-                    and str(item.get("status") or "") != "provider_retry"
+                    and _signature_matches(item.get("need_signature"), signature)
+                    and _is_scientific_attempt(item)
                 ]
                 if prior_entries:
                     previous_queries = _queries_from_spec(
@@ -645,7 +779,7 @@ def run_retrieval_loop(
                         _spec_for_round(need, round_index - 1),
                         limit=config.max_queries_per_round,
                     )
-                if not explicit_spec and refine_queries is not None:
+                if prepared is None and not explicit_spec and refine_queries is not None:
                     try:
                         refined = refine_queries(
                             need,
@@ -670,6 +804,7 @@ def run_retrieval_loop(
                         continue
                     spec = _spec_from_refined_queries(refined)
                     queries = _queries_from_spec(spec, limit=config.max_queries_per_round)
+                    query_source = "refiner"
                     # Facets are local routing metadata, not something the
                     # query rewriter has to regenerate on every search.
                     default_facet = next((row.get("facet_id") for row in previous_queries if row.get("facet_id")), "")
@@ -678,6 +813,10 @@ def run_retrieval_loop(
                             if not query.get("facet_id"):
                                 query["facet_id"] = default_facet
             entry["queries"] = list(queries)
+            state.queries = list(queries)
+            state.query_status = "ready" if queries else "not_required" if need.kind == "directed" and round_index == 1 else "exhausted"
+            state.query_source = query_source
+            entry.update({"query_status": state.query_status, "query_source": query_source})
             if round_index > 1 and queries and not queries_changed(previous_queries, queries):
                 entry["status"] = "stopped_same_query"
                 entry["action"] = "stop"
@@ -702,15 +841,9 @@ def run_retrieval_loop(
                 state.attempts.append(entry)
                 continue
 
-            if budget_available_cny is not None and float(budget_available_cny) <= float(budget_floor_cny):
-                entry["status"] = "stopped_budget"
-                entry["action"] = "stop"
-                entry["note"] = "known budget is at or below the configured floor; acquired content is kept"
-                state.status = "stopped"
-                state.action = "stop"
-                journal.record(entry)
-                state.attempts.append(entry)
-                continue
+            if queries and prepared is None:
+                journal.record({**entry, "status": "query_ready", "counts_as_round": False,
+                                "query_spec": {**spec, "targeted_queries": list(queries)}})
 
             if external_closure is None:
                 entry["status"] = "pending_external"
@@ -747,12 +880,24 @@ def run_retrieval_loop(
                 status = str(outcome.get("status") or "")
                 if provider_failed or status in {"failed", "provider_error"}:
                     error = str(outcome.get("error") or "provider_failed")
+                    raw_result = _external_raw_result(outcome)
+                    state.external_results.append(raw_result)
+                    state.usable_content = _merge_usable_content(state.usable_content, str(outcome.get("usable_content") or ""))
+                    state.still_missing = str(outcome.get("still_missing") or state.still_missing or need.question)
+                    consumed = {str(item) for item in outcome.get("consumed_paper_ids") or () if str(item).strip()}
+                    consumed_paper_ids.update(consumed)
+                    state.consumed_paper_ids = tuple(sorted(set(state.consumed_paper_ids).union(consumed)))
                     retry_entry = dict(entry)
                     retry_entry.update({
                         "status": "provider_retry",
                         "action": "provider_retry",
                         "counts_as_round": False,
                         "error": error,
+                        "external_result": raw_result,
+                        "external_results": [raw_result],
+                        "usable_content": state.usable_content,
+                        "still_missing": state.still_missing,
+                        "consumed_paper_ids": sorted(consumed),
                     })
                     journal.record(retry_entry)
                     state.attempts.append(retry_entry)
@@ -775,7 +920,7 @@ def run_retrieval_loop(
             added_handles = tuple(str(item) for item in (outcome.get("new_handles") or ()) if str(item))
             useful = str(outcome.get("usable_content") or "").strip()
             if useful:
-                state.usable_content = useful
+                state.usable_content = _merge_usable_content(state.usable_content, useful)
             state.new_handles = tuple(dict.fromkeys([*state.new_handles, *added_handles]))
             for handle in added_handles:
                 shared_reads.setdefault(handle, round_index)
@@ -787,13 +932,7 @@ def run_retrieval_loop(
             )
             consumed_paper_ids.update(consumed)
             state.consumed_paper_ids = tuple(sorted(set(state.consumed_paper_ids).union(consumed)))
-            raw_result = outcome.get("raw_result")
-            if isinstance(raw_result, Mapping):
-                raw_result = dict(raw_result)
-            elif raw_result is None:
-                raw_result = dict(outcome)
-            else:
-                raw_result = {"value": raw_result}
+            raw_result = _external_raw_result(outcome)
             state.external_results.append(raw_result)
             entry["new_handles"] = list(dict.fromkeys([*entry.get("new_handles", []), *added_handles]))
             entry["usable_content"] = state.usable_content
@@ -806,7 +945,7 @@ def run_retrieval_loop(
             entry["external_usable_content"] = bool(useful)
             if str(outcome.get("still_missing") or "").strip():
                 state.still_missing = str(outcome["still_missing"])
-            elif status == "fulfilled":
+            elif status == "fulfilled" and useful:
                 state.still_missing = ""
             if str(outcome.get("external_ask") or "").strip():
                 state.external_ask = str(outcome["external_ask"])
@@ -821,7 +960,7 @@ def run_retrieval_loop(
             entry["gained"] = gained
             entry["empty_rounds"] = state.empty_rounds
 
-            if status == "fulfilled" and (useful or added_handles):
+            if status == "fulfilled" and useful and not state.still_missing.strip():
                 entry["status"] = "answered"
                 state.status = "answered"
                 state.action = "external_research"
@@ -909,14 +1048,29 @@ def needs_from_planner_gap_rows(
                 text = str(query or "").strip()
             if text:
                 concepts.append(text)
-        round_specs = raw.get("round_specs") or ()
+        round_specs = [dict(spec) for spec in raw.get("round_specs") or () if isinstance(spec, Mapping)]
+        inherited_queries = _queries_from_spec(raw)
+        first_spec = next((spec for spec in round_specs if int(spec.get("round") or 0) == 1), None)
+        if inherited_queries and (first_spec is None or not _queries_from_spec(first_spec)):
+            if first_spec is None:
+                round_specs.insert(0, {"round": 1, "targeted_queries": inherited_queries})
+            else:
+                first_spec["targeted_queries"] = inherited_queries
+        criteria = [str(item) for item in raw.get("success_criteria") or () if str(item).strip()]
+        # Acceptance changes invalidate the round state even when the question
+        # text stays the same. Keep structured outputs canonical and distinct.
+        criteria.extend(
+            json.dumps(_requirement_content(item), ensure_ascii=False, sort_keys=True, default=str)
+            if isinstance(item, Mapping) else str(item).strip()
+            for item in raw.get("required_outputs") or () if item
+        )
         out.append(InformationNeed(
             need_id=str(raw.get("need_id") or need_id_for(question, comparison_object=comparison)),
             question=question,
             owners=owners,
             intended_use=normalize_intended_use(str(raw.get("intended_use") or intended_use)),
             user_scope=str(raw.get("user_scope") or user_scope),
-            success_criteria=tuple(str(item) for item in (raw.get("success_criteria") or ()) if str(item).strip()),
+            success_criteria=tuple(dict.fromkeys(criteria)),
             concepts=tuple(concepts[:MAX_QUERIES_PER_ROUND_DEFAULT]),
             required_concepts=tuple(str(item) for item in (raw.get("required_concepts") or ()) if str(item).strip()),
             comparison_object=comparison,

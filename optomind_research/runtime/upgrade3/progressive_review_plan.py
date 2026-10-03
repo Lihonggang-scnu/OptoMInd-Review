@@ -776,7 +776,7 @@ def _normalize_proposal_response(response: Mapping[str, Any]) -> dict[str, Any]:
     return output
 
 
-def _merge_supplement_pool_updates(pool_rows: list[dict[str, Any]], tool_result: Mapping[str, Any]) -> list[dict[str, Any]]:
+def _merge_supplement_pool_updates(pool_rows: list[dict[str, Any]], tool_result: Mapping[str, Any], *, preserve_current_material: bool = False) -> list[dict[str, Any]]:
     """Add supplement discoveries and merge their upgraded planning material into B."""
 
     by_id = {str(row.get("_paper_id")): row for row in pool_rows}
@@ -820,21 +820,25 @@ def _merge_supplement_pool_updates(pool_rows: list[dict[str, Any]], tool_result:
             )
             if incoming_is_upgrade:
                 for key in ("card_path", "planning_view", "material_depth_label", "supplement_version", "prior_card_path", "prior_source_unit_ids", "prior_supplement_gap_materials"):
-                    if key in row:
+                    if key in row and (not preserve_current_material or key not in {"card_path", "planning_view", "material_depth_label"}):
                         current[key] = row[key]
                 if incoming_unit:
                     current["supplement_source_unit_id"] = incoming_unit
             material = row.get("supplement_gap_material")
-            if isinstance(material, Mapping) and material:
-                prior = current.get("supplement_gap_material")
-                materials = list(current.get("supplement_gap_materials") or [])
-                if isinstance(prior, Mapping) and prior and prior.get("gap_id") != material.get("gap_id"):
-                    if not any(isinstance(item, Mapping) and item.get("gap_id") == prior.get("gap_id") for item in materials):
-                        materials.append(dict(prior))
-                if not any(isinstance(item, Mapping) and item.get("gap_id") == material.get("gap_id") for item in materials):
-                    materials.append(dict(material))
+            prior = current.get("supplement_gap_material")
+            # A gap label is an owner/routing label, not a material identity.
+            # Complementary changed-output and retry material must coexist;
+            # stale derived base rows may add history but cannot reset active B.
+            material_rows = [*(current.get("supplement_gap_materials") or []),
+                             *(current.get("prior_supplement_gap_materials") or []), prior,
+                             *(row.get("supplement_gap_materials") or []),
+                             *(row.get("prior_supplement_gap_materials") or []), material]
+            distinct = {_material_content_signature(item): dict(item) for item in material_rows
+                        if isinstance(item, Mapping) and item}
+            if distinct:
+                current["supplement_gap_materials"] = list(distinct.values())
+            if isinstance(material, Mapping) and material and ((incoming_is_upgrade and not preserve_current_material) or not prior):
                 current["supplement_gap_material"] = dict(material)
-                current["supplement_gap_materials"] = materials
                 current["supplement_material_status"] = row.get("supplement_material_status") or row.get("supplement_status") or "ready"
             if not current_unit and incoming_unit:
                 current["supplement_source_unit_id"] = incoming_unit
@@ -842,6 +846,11 @@ def _merge_supplement_pool_updates(pool_rows: list[dict[str, Any]], tool_result:
             row["_paper_id"] = paper_id
             row["_source_handle"] = ""
             row["_b_summary"] = {}
+            history = [*(row.get("supplement_gap_materials") or []),
+                       *(row.get("prior_supplement_gap_materials") or []), row.get("supplement_gap_material")]
+            distinct = {_material_content_signature(item): dict(item) for item in history if isinstance(item, Mapping) and item}
+            if distinct:
+                row["supplement_gap_materials"] = list(distinct.values())
             pool_rows.append(row)
             by_id[paper_id] = row
         changed = True
@@ -2920,6 +2929,7 @@ def _normalize_gaps(gaps: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
             "gap_id": gap_id,
             "gap_question": question,
             "success_criteria": criteria,
+            "required_outputs": _supplement_requirement_rows(raw.get("required_outputs")),
             "targeted_queries": queries[:3],
             "round_specs": round_specs or ([{"round": 1, "targeted_queries": queries[:3]}] if queries else []),
             "reuse_plan_facet_ids": list(dict.fromkeys(_text(x) for x in reuse_facets if _text(x)))[:3],
@@ -4609,6 +4619,8 @@ class ProgressiveReviewPlanner:
                  "consumed_paper_ids", "reused_prior_tasks", "deferred_tasks", "requested_unique_papers",
                  "selected_unique_papers", "shared_budget_remaining", "results", "output_dir", "outcome",
                  "local_triage", "retrieval_loop", "owner_content", "tool_materials_by_chapter",
+                 "chapter_ids", "question", "usable_content", "useful_material", "auxiliary_material",
+                 "remaining_gap", "still_missing", "limitations", "outline_action", "derived_pool_path",
             )
             out = {key: result[key] for key in keys if key in result}
             if isinstance(result.get("materials"), list):
@@ -4631,6 +4643,9 @@ class ProgressiveReviewPlanner:
             output["phase"] = value["phase"]
         if "consumed_paper_ids" in value:
             output["consumed_paper_ids"] = list(value.get("consumed_paper_ids") or [])
+        for key in ("level1", "level2", "chapters", "chapter_tools"):
+            if isinstance(value.get(key), Mapping):
+                output[key] = ProgressiveReviewPlanner._compact_tool_feedback(value[key])
         return output
 
     def _post_case_review(
@@ -5233,7 +5248,10 @@ class ProgressiveReviewPlanner:
                 if not isinstance(group, Mapping):
                     continue
                 pending.extend(group.get("results") or [])
-                if group.get("gap_id") or group.get("fulfillment_judgment"):
+                if group.get("gap_id") or group.get("fulfillment_judgment") or any(
+                    group.get(key) for key in ("error", "reason", "usable_content", "useful_material",
+                                              "remaining_gap", "still_missing")
+                ) or _text(group.get("status")) in {"partial", "failed", "unmet", "unjudgeable"}:
                     yield group
 
         def chapter_payload(chapter: Mapping[str, Any], index: int) -> tuple[str, dict[str, Any]]:
@@ -5296,6 +5314,10 @@ class ProgressiveReviewPlanner:
                         "substantive_gap_status": _text(group.get("substantive_gap_status")),
                         "outcome": _text(group.get("outcome")),
                         "fulfillment_judgment": judgment if isinstance(judgment, Mapping) else {},
+                        **{key: group[key] for key in ("gap_question", "question", "error", "reason",
+                            "usable_content", "useful_material", "auxiliary_material", "remaining_gap",
+                            "still_missing", "limitations", "outline_action", "output_dir", "derived_pool_path")
+                           if key in group},
                     })
                 for group in result.get("directed_results") or []:
                     if not isinstance(group, Mapping):
@@ -5554,7 +5576,7 @@ class ProgressiveReviewPlanner:
     def _improvement_entries(improvement: Mapping[str, Any]) -> list[dict[str, Any]]:
         """Normalize the several model response shapes used for chapter edits."""
         entries: list[dict[str, Any]] = []
-        for key in ("updated_chapter_plans", "chapter_updates", "affected_chapters", "cross_chapter_adjustments"):
+        for key in ("updated_chapter_plans", "chapter_updates", "affected_chapters", "cross_chapter_adjustments", "chapter_feedback"):
             raw = improvement.get(key)
             if isinstance(raw, Mapping):
                 raw = [
@@ -6572,7 +6594,7 @@ def make_planning_supplement_runner(
         from .paper_reading_card import run_paper_reading_card
         from .planning_supplement import (
             CompositeS2OpenAlexGateway, QwenCandidateSelector, run_gap_local_triage,
-            run_planning_supplement, run_qwen_fulfillment_judge,
+            run_planning_supplement, run_qwen_fulfillment_judge, allocate_supplement_attempt,
         )
         from .planning_material_triage import QwenLocalTriageJudge
         from ...s2_intelligence_gateway import S2IntelligenceGateway
@@ -6694,7 +6716,13 @@ def make_planning_supplement_runner(
                 "topic_id": config.topic_id,
                 "gap_id": gap_id,
                 "gap_question": _text(gap.get("gap_question") or gap.get("question")) or "Resolve a scope-relevant literature gap.",
-                "success_criteria": list(gap.get("success_criteria") or ["Return directly relevant material or clearly state what remains unresolved."]),
+                "success_criteria": list(gap.get("success_criteria") or []) + [
+                    _supplement_requirement_text(item) for item in _supplement_requirement_rows(gap.get("required_outputs"))
+                    if _supplement_requirement_text(item) not in (gap.get("success_criteria") or [])
+                ] or ["Return directly relevant material or clearly state what remains unresolved."],
+                "required_outputs": _supplement_requirement_rows(gap.get("required_outputs")),
+                "reusable_material": _text(gap.get("reusable_material")),
+                "still_missing": _text(gap.get("still_missing")),
                 "base_pool_path": str(base_path.resolve()),
                 "plan_path": str(config.plan_path.resolve()),
                 "targeted_queries": [dict(item) for item in gap.get("targeted_queries") or [] if isinstance(item, Mapping)],
@@ -6704,7 +6732,7 @@ def make_planning_supplement_runner(
                 "limits": {"max_candidates": 12, "max_acquisitions": 3, "per_query_limit": 12},
             }
             _atomic_json(request_path, request)
-            output_dir = phase_root / "supplements" / gap_id
+            output_dir = allocate_supplement_attempt(phase_root / "supplements" / gap_id)
             try:
                 result = run_planning_supplement(
                     request_path,
@@ -6721,20 +6749,27 @@ def make_planning_supplement_runner(
                     candidate_selector=selector,
                     reuse_material=reuse_material,
                 )
-                index_path = output_dir / "SUPPLEMENT_INDEX.json"
+                returned_dir = Path(str(result.get("output_dir") or output_dir))
+                index_path = returned_dir / "SUPPLEMENT_INDEX.json"
                 index = _read_json(index_path) if index_path.is_file() else {}
                 results.append({
                     **dict(result),
                     "gap_id": gap_id,
                     "chapter_ids": list(gap.get("chapter_ids") or []),
-                    "fulfillment_judgment": index.get("fulfillment_judgment") if isinstance(index, Mapping) else result.get("fulfillment_judgment"),
-                    "source_units": index.get("source_units") if isinstance(index, Mapping) else [],
+                    "gap_question": request["gap_question"],
+                    "required_outputs": request["required_outputs"],
+                    "output_dir": str(returned_dir),
+                    "fulfillment_judgment": index.get("fulfillment_judgment") or result.get("fulfillment_judgment") or {},
+                    "source_units": index.get("source_units") or (result.get("source_units") if isinstance(result.get("source_units"), list) else []),
                     "citation_anchors": index.get("citation_anchors") if isinstance(index, Mapping) else [],
-                    "substantive_gap_status": index.get("substantive_gap_status") if isinstance(index, Mapping) else result.get("substantive_gap_status"),
+                    "substantive_gap_status": index.get("substantive_gap_status") or result.get("substantive_gap_status"),
                     "status": result.get("status") or "completed",
                 })
             except Exception as exc:
-                results.append({"gap_id": gap_id, "chapter_ids": list(gap.get("chapter_ids") or []), "status": "failed", "error": type(exc).__name__})
+                results.append({"gap_id": gap_id, "chapter_ids": list(gap.get("chapter_ids") or []),
+                                "gap_question": request["gap_question"], "required_outputs": request["required_outputs"],
+                                "status": "failed", "error": type(exc).__name__, "reason": str(exc),
+                                "output_dir": str(output_dir), "still_missing": request["gap_question"]})
         return {
             "status": "completed" if any(row.get("status") not in {"failed", "error"} for row in results) else "failed",
             "results": results,
@@ -6792,6 +6827,105 @@ def _extend_planning_material_index(index_path: Path, rows: Sequence[Mapping[str
         index.record_term_document_frequency()
 
 
+def _supplement_requirement_rows(value: Any) -> list[Any]:
+    if isinstance(value, (str, Mapping)):
+        return [value] if value else []
+    return list(value or [])
+
+
+def _supplement_requirement_text(value: Any) -> str:
+    if isinstance(value, Mapping):
+        return _text(value.get("description") or value.get("requirement") or value.get("output_type")) or json.dumps(
+            {key: item for key, item in value.items() if key not in {"output_id", "question_id"}},
+            ensure_ascii=False, sort_keys=True,
+        )
+    return _text(value)
+
+
+def _supplement_contract_value(value: Any) -> Any:
+    """Normalize semantic contract fields, excluding output routing labels."""
+    if isinstance(value, Mapping):
+        return {key: _supplement_contract_value(item) for key, item in sorted(value.items())
+                if key not in {"output_id", "question_id", "required_output_ids"}}
+    if isinstance(value, (list, tuple)):
+        return sorted({_supplement_contract_token(item) for item in value if item not in (None, "")})
+    return re.sub(r"\s+", " ", str(value or "")).strip().casefold()
+
+
+def _supplement_contract_token(value: Any) -> str:
+    return json.dumps(_supplement_contract_value(value), ensure_ascii=False, sort_keys=True)
+
+
+def _supplement_need_contract(request: Mapping[str, Any], need: Any) -> dict[str, Any]:
+    research = _supplement_contract_value({
+        "question": need.question, "user_scope": need.user_scope, "intended_use": need.intended_use,
+        "comparison_object": need.comparison_object, "required_concepts": need.required_concepts,
+    })
+    acceptance = {key: _supplement_contract_value(request.get(key) or [])
+                  for key in ("success_criteria", "required_outputs")}
+    encoded = json.dumps({"research": research, "acceptance": acceptance}, ensure_ascii=False, sort_keys=True)
+    return {"research": research, "acceptance": acceptance,
+            "research_key": hashlib.sha256(json.dumps(research, sort_keys=True).encode()).hexdigest(),
+            "reuse_key": hashlib.sha256(encoded.encode()).hexdigest()}
+
+
+def _supplement_source_fingerprint(row: Mapping[str, Any]) -> str:
+    card = _card_for_candidate(row)
+    planning = row.get("planning_view") if isinstance(row.get("planning_view"), Mapping) else {}
+    # Identity and paths are not scientific changes, and our own supplement
+    # notes are additive. Compare the current source A/B actually available.
+    material = {
+        "A": card.get("general_understanding") or {},
+        "B": card.get("review_planning") or {},
+        "planning": {key: value for key, value in planning.items() if key != "paper_identity"},
+    }
+    return _material_content_signature(_owner_cache_projection(material))
+
+
+def _supplement_material_fingerprints(row: Mapping[str, Any]) -> dict[str, Any]:
+    active = row.get("supplement_gap_material")
+    materials = [active, *(row.get("supplement_gap_materials") or []), *(row.get("prior_supplement_gap_materials") or [])]
+    return {
+        "source_unit_id": _text(row.get("supplement_source_unit_id")),
+        "active": _material_content_signature(_owner_cache_projection(active)) if isinstance(active, Mapping) and active else "",
+        "materials": sorted({_material_content_signature(_owner_cache_projection(item)) for item in materials
+                             if isinstance(item, Mapping) and item}),
+    }
+
+
+def _supplement_used_papers(state: Mapping[str, Any]) -> set[str]:
+    papers: set[str] = set()
+    pending = [state.get("local_triage") or {}, *(state.get("external_results") or [])]
+    while pending:
+        item = pending.pop()
+        if isinstance(item, Mapping):
+            identity = item.get("record_identity") if isinstance(item.get("record_identity"), Mapping) else item
+            paper_id = _text(identity.get("canonical_paper_id") or identity.get("paper_id"))
+            if paper_id:
+                papers.add(paper_id)
+            for key in ("results", "source_units", "sources", "passages"):
+                if isinstance(item.get(key), list):
+                    pending.extend(item[key])
+            if isinstance(item.get("writer_material"), Mapping):
+                pending.append(item["writer_material"])
+    return papers
+
+
+def _supplement_answered(state: Mapping[str, Any]) -> bool:
+    return isinstance(state, Mapping) and state.get("status") == "answered" and bool(_text(state.get("usable_content"))) and not _text(state.get("still_missing"))
+
+
+def _supplement_bind_results(results: Sequence[Mapping[str, Any]], owners: Sequence[str]) -> list[dict[str, Any]]:
+    output = []
+    for raw in results:
+        row = dict(raw)
+        row["chapter_ids"] = list(owners)
+        if isinstance(row.get("results"), list):
+            row["results"] = _supplement_bind_results(row["results"], owners)
+        output.append(row)
+    return output
+
+
 def make_retrieval_loop_runner(
     config: ProgressivePlannerConfig,
     *,
@@ -6843,12 +6977,104 @@ def make_retrieval_loop_runner(
             {**dict(task), "_progressive_task_signature": _directed_task_signature(task)}
             for task in _merge_directed_tasks(directed_requests)
         ]
+        # A query plan may supply an explicitly linked facet when the gap itself
+        # has no query. Do not borrow unrelated facets or invent domain terms.
+        for request in gaps:
+            if not request.get("targeted_queries") and request.get("reuse_plan_facet_ids"):
+                ids = set(request["reuse_plan_facet_ids"])
+                linked = []
+                for facet in (plan or {}).get("facets") or ():
+                    if isinstance(facet, Mapping) and facet.get("id") in ids:
+                        for key, kind in (("keyword_queries", "keyword"), ("question_queries", "question")):
+                            linked.extend({"query_text": text, "query_type": kind, "facet_id": facet["id"]}
+                                          for text in facet.get(key) or [] if _text(text))
+                request["targeted_queries"] = linked[:3]
         needs = needs_from_planner_gap_rows(gaps, intended_use="mechanism", user_scope=topic)
         kind_by_id: dict[str, str] = {}
         request_by_id: dict[str, Mapping[str, Any]] = {}
-        for need in needs:
+        cache_path = config.output_dir / "RETRIEVAL_NEED_CACHE.json"
+        saved_cache = _read_json(cache_path) if cache_path.is_file() else {}
+        cache_records = dict(saved_cache.get("records") or {}) if saved_cache.get("schema_version") == "optomind.retrieval_need_cache.v1" else {}
+        cache_records = {key: row for key, row in cache_records.items() if isinstance(row, Mapping)
+                         and isinstance(row.get("state"), Mapping) and isinstance(row.get("contract"), Mapping)
+                         and isinstance(row.get("source_fingerprints"), Mapping)}
+        contract_by_id: dict[str, dict[str, Any]] = {}
+        inherited_by_id: dict[str, list[Mapping[str, Any]]] = {}
+        cached_answer_by_id: dict[str, Mapping[str, Any]] = {}
+        current_sources = {_text(row.get("_paper_id") or _canonical_paper_id(row)): row
+                           for row in pool_rows if isinstance(row, Mapping)}
+
+        def source_compatible(cached: Mapping[str, Any]) -> bool:
+            fingerprints = cached.get("source_fingerprints")
+            if not isinstance(fingerprints, Mapping) or not all(
+                paper_id not in current_sources or _supplement_source_fingerprint(current_sources[paper_id]) == signature
+                for paper_id, signature in fingerprints.items()
+            ):
+                return False
+            for paper_id, old in (cached.get("supplement_fingerprints") or {}).items():
+                current = current_sources.get(paper_id)
+                if not current or not any(key in current for key in ("supplement_gap_material", "supplement_gap_materials", "supplement_source_unit_id")):
+                    # A caller may still supply its unchanged original pool;
+                    # absence of our additive output is not a source correction.
+                    continue
+                fresh = _supplement_material_fingerprints(current)
+                if old.get("source_unit_id") == fresh["source_unit_id"] and old.get("active") != fresh["active"]:
+                    return False
+                if not set(old.get("materials") or []) <= set(fresh["materials"]):
+                    return False
+            return True
+
+        for need, request in zip(needs, gaps):
+            contract = _supplement_need_contract(request, need)
+            need.success_criteria = tuple(sorted(set(
+                _supplement_contract_token(item) for item in
+                [*(request.get("success_criteria") or []), *(request.get("required_outputs") or [])]
+            )))
+            related = [row for row in cache_records.values() if isinstance(row, Mapping)
+                       and isinstance(row.get("contract"), Mapping)
+                       and row["contract"].get("research") == contract["research"]
+                       and row["contract"].get("research_key") == contract["research_key"]]
+            used_ids = {paper_id for row in related for paper_id in (row.get("source_fingerprints") or {})}
+            used_ids.update(_text(row.get("canonical_paper_id") or row.get("paper_id"))
+                            for row in request.get("known_papers") or [] if isinstance(row, Mapping))
+            source_context = {paper_id: {
+                "source": _supplement_source_fingerprint(current_sources[paper_id]),
+                "supplement": _supplement_material_fingerprints(current_sources[paper_id]),
+            } for paper_id in sorted(used_ids) if paper_id in current_sources}
+            need.need_id = "N" + contract["reuse_key"][:20] + (
+                "-" + _material_content_signature(source_context) if source_context else "")
+            contract_by_id[need.need_id] = contract
             kind_by_id[need.need_id] = "supplement"
-            request_by_id[need.need_id] = next((row for row in gaps if _text(row.get("gap_question") or row.get("question")) == need.question), {})
+            inherited = [row for row in related if source_compatible(row)]
+            inherited_by_id[need.need_id] = inherited
+            exact = cache_records.get(contract["reuse_key"]) or {}
+            if exact.get("contract") == contract and source_compatible(exact) and _supplement_answered(exact.get("state") or {}):
+                cached_answer_by_id[need.need_id] = exact["state"]
+            covered = {key: set() for key in ("success_criteria", "required_outputs")}
+            for row in inherited:
+                if _supplement_answered(row.get("state") or {}):
+                    for key in covered:
+                        covered[key].update((row.get("contract") or {}).get("acceptance", {}).get(key) or [])
+            delta = dict(request)
+            for key in covered:
+                delta[key] = [item for item in request.get(key) or []
+                              if _supplement_contract_token(item) not in covered[key]]
+            # Only prior answered requirements may be removed. Partial prose
+            # stays available but never supplies completion by its shape.
+            delta["reusable_material"] = "\n\n".join(dict.fromkeys(
+                _text(row.get("state", {}).get("usable_content")) for row in inherited
+                if _text(row.get("state", {}).get("usable_content"))))
+            if inherited and not any(delta[key] for key in covered):
+                answered_states = [row["state"] for row in inherited if _supplement_answered(row.get("state") or {})]
+                if answered_states:
+                    cached_answer_by_id[need.need_id] = {
+                        **dict(answered_states[0]), "status": "answered", "still_missing": "",
+                        "usable_content": "\n\n".join(dict.fromkeys(row["usable_content"] for row in answered_states)),
+                    }
+            delta["still_missing"] = "; ".join(dict.fromkeys(
+                _text(row.get("state", {}).get("still_missing")) for row in inherited
+                if not _supplement_answered(row.get("state") or {}) and _text(row.get("state", {}).get("still_missing"))))
+            request_by_id[need.need_id] = delta
         for task in tasks:
             paper_id = _text(task.get("paper_id"))
             questions = [
@@ -6891,16 +7117,21 @@ def make_retrieval_loop_runner(
                 raw_response_dir=root / "_llm_response_cache",
             )
         working_pool = [dict(row) for row in pool_rows]
+        for inherited in inherited_by_id.values():
+            for cached in inherited:
+                _merge_supplement_pool_updates(working_pool, {"supplement_results": cached.get("state", {}).get("external_results") or []}, preserve_current_material=True)
         journal_path = root / "retrieval_loop.jsonl"
         if resume and journal_path.is_file():
             for line in journal_path.read_text(encoding="utf-8").splitlines():
                 if not line.strip():
                     continue
                 entry = json.loads(line)
+                if _text(entry.get("need_id")) not in request_by_id:
+                    continue
                 recovered = entry.get("external_results") or [entry.get("external_result")]
                 for result in recovered:
                     if isinstance(result, Mapping):
-                        _merge_supplement_pool_updates(working_pool, {"supplement_results": [result]})
+                        _merge_supplement_pool_updates(working_pool, {"supplement_results": [result]}, preserve_current_material=True)
         local_results: dict[str, Mapping[str, Any]] = {}
         external_results: dict[str, list[Mapping[str, Any]]] = {}
         explicit_retry_consumed: set[str] = set()
@@ -6909,6 +7140,13 @@ def make_retrieval_loop_runner(
 
         def local_triage(*, gap: Any, round_index: int) -> Mapping[str, Any]:
             from .planning_supplement import run_gap_local_triage
+            cached = cached_answer_by_id.get(gap.gap_id)
+            if cached:
+                result = {**dict(cached.get("local_triage") or {}), "decision": "direct_use",
+                          "usable_content": cached["usable_content"], "still_missing": "",
+                          "answers_requested_question": True, "reused_answer": True}
+                local_results[gap.gap_id] = result
+                return result
             if kind_by_id.get(gap.gap_id) == "directed":
                 return {"decision": "external_research", "usable_content": "", "still_missing": gap.question,
                         "external_ask": "Read the nominated paper for this task."}
@@ -6931,6 +7169,10 @@ def make_retrieval_loop_runner(
             if not index_path.is_file():
                 result = {"gap_id": gap.gap_id, "decision": "external_research", "usable_content": "",
                           "still_missing": gap.question, "external_ask": gap.question}
+                prior = request_by_id.get(gap.gap_id) or {}
+                result["usable_content"] = _text(prior.get("reusable_material"))
+                result["still_missing"] = _text(prior.get("still_missing")) or "; ".join(_supplement_requirement_text(item) for item in
+                    [*(prior.get("success_criteria") or []), *(prior.get("required_outputs") or [])]) or gap.question
                 local_results[gap.gap_id] = result
                 return result
             kwargs = {
@@ -6946,6 +7188,13 @@ def make_retrieval_loop_runner(
                     raise
                 kwargs.pop("read_local", None)
                 result = run_gap_local_triage(gap_row, **kwargs)
+            prior = request_by_id.get(gap.gap_id) or {}
+            retained = _text(prior.get("reusable_material"))
+            if retained:
+                result = dict(result)
+                result["usable_content"] = "\n\n".join(dict.fromkeys(text for text in (retained, _text(result.get("usable_content"))) if text))
+                # A local judgement is authoritative for the full current need;
+                # inherited partial text alone never changes its decision.
             local_results[gap.gap_id] = dict(result)
             return dict(result)
 
@@ -6988,6 +7237,15 @@ def make_retrieval_loop_runner(
                 if supplement_runner is None or not allow_external:
                     return {"status": "unmet", "usable_content": "", "still_missing": need.question}
                 request["targeted_queries"] = [dict(item) for item in queries if isinstance(item, Mapping)]
+                plan_facets = [_text(item.get("id")) for item in (plan or {}).get("facets") or ()
+                               if isinstance(item, Mapping) and _text(item.get("id"))]
+                requested_facets = [item for item in request.get("reuse_plan_facet_ids") or [] if item in plan_facets]
+                original_facets = [_text(item.get("facet_id")) for item in request_by_id.get(need.need_id, {}).get("targeted_queries") or []
+                                   if isinstance(item, Mapping) and _text(item.get("facet_id"))]
+                routing_facet = next(iter(requested_facets or original_facets or plan_facets), "F1")
+                for query in request["targeted_queries"]:
+                    if not _text(query.get("facet_id")):
+                        query["facet_id"] = routing_facet
                 raw = dict(supplement_runner([request], **context))
                 before = {str(row.get("_paper_id")): json.dumps(row, ensure_ascii=False, sort_keys=True, default=_json_default) for row in working_pool}
                 _merge_supplement_pool_updates(working_pool, {"supplement_results": [raw]})
@@ -6995,45 +7253,54 @@ def make_retrieval_loop_runner(
                 changed = [row for row in working_pool if before.get(str(row.get("_paper_id"))) != json.dumps(row, ensure_ascii=False, sort_keys=True, default=_json_default)]
                 _extend_planning_material_index(index_path, changed, root / "index_updates" / _safe_id(need.need_id) / str(round_index), config.topic_id)
                 external_results.setdefault(need.need_id, []).append(raw)
-                judgment = raw.get("fulfillment_judgment") if isinstance(raw.get("fulfillment_judgment"), Mapping) else {}
-                judgments: list[Mapping[str, Any]] = [judgment] if judgment else []
-                pending = list(raw.get("results") or [])
+                from .practical_materials import has_practical_content
+                groups: list[Mapping[str, Any]] = []
+                pending = [raw]
                 while pending:
                     group = pending.pop(0)
                     if not isinstance(group, Mapping):
                         continue
+                    groups.append(group)
                     pending.extend(group.get("results") or [])
-                    candidate = group.get("fulfillment_judgment")
-                    if isinstance(candidate, Mapping):
-                        judgments.append(candidate)
-                useful_values: list[Any] = []
-                for item in judgments:
-                    values = item.get("useful_material") or item.get("auxiliary_material") or []
-                    if isinstance(values, str):
-                        values = [values]
-                    useful_values.extend(value for value in values if str(value).strip())
-                useful = raw.get("usable_content") or " ".join(str(item) for item in useful_values)
-                statuses = {
-                    _text(item.get("status") or item.get("substantive_gap_status"))
-                    for item in judgments
-                    if _text(item.get("status") or item.get("substantive_gap_status"))
-                }
-                if "fulfilled" in statuses:
-                    status = "fulfilled"
-                elif "partial" in statuses or useful:
-                    status = "partial"
-                else:
-                    status = _text(raw.get("status"))
-                remaining = "; ".join(dict.fromkeys(
-                    _text(item.get("remaining_gap")) for item in judgments if _text(item.get("remaining_gap"))
-                ))
-                if status == "fulfilled":
-                    remaining = ""
-                elif not remaining and statuses - {"fulfilled"}:
-                    remaining = need.question
-                return {"status": status if status in {"fulfilled", "partial"} else "unmet",
-                        "usable_content": str(useful), "still_missing": remaining,
-                        "new_handles": [], "raw_result": raw}
+                def content_aliases(value: Any) -> Any:
+                    if isinstance(value, Mapping):
+                        return {({"summary": "explanation", "mechanisms": "details"}.get(key, key)): content_aliases(item)
+                                for key, item in value.items()}
+                    if isinstance(value, (list, tuple)):
+                        return [content_aliases(item) for item in value]
+                    return value
+
+                useful_values: list[str] = []
+                statuses: set[str] = set()
+                remaining_values: list[str] = []
+                failure_errors: list[str] = []
+                for group in groups:
+                    judgment = group.get("fulfillment_judgment")
+                    observations = [group, judgment] if isinstance(judgment, Mapping) else [group]
+                    for item in observations:
+                        item_status = _text(item.get("substantive_gap_status") or item.get("status")).casefold()
+                        if item_status in {"fulfilled", "partial", "unmet", "failed", "provider_error", "provider_failed", "unjudgeable", "unassessed"}:
+                            statuses.add(item_status)
+                        for key in ("usable_content", "useful_material", "auxiliary_material"):
+                            value = item.get(key)
+                            if value and has_practical_content({"useful_material": content_aliases(value)}):
+                                useful_values.append(value if isinstance(value, str) else json.dumps(value, ensure_ascii=False))
+                        remaining_values.extend(_text(item.get(key)) for key in ("remaining_gap", "still_missing") if _text(item.get(key)))
+                        if item_status in {"failed", "provider_error", "provider_failed"} or item.get("provider_failed") or item.get("outcome") in {
+                            "retryable_provider_outage", "provider_access_error", "acquisition_or_judgment_failed"
+                        }:
+                            failure_errors.append(_text(item.get("error") or item.get("reason") or "provider_failed"))
+                useful = "\n\n".join(dict.fromkeys(useful_values))
+                remaining = "; ".join(dict.fromkeys(remaining_values))
+                # A fulfilled child cannot close another unresolved child, nor
+                # can a nonempty artifact/identifier substitute for an answer.
+                answered = bool(useful) and statuses == {"fulfilled"} and not remaining
+                status = "fulfilled" if answered else "partial" if useful else "failed" if failure_errors else "unmet"
+                if status != "fulfilled" and not remaining:
+                    remaining = _text(request.get("still_missing")) or need.question
+                return {"status": status, "usable_content": useful, "still_missing": remaining,
+                        "new_handles": [], "raw_result": raw, "provider_failed": bool(failure_errors and not useful),
+                        "error": "; ".join(dict.fromkeys(failure_errors))}
             # External retrieval can be disabled while reading an already
             # downloaded paper remains available under the shared read budget.
             if directed_reader is None:
@@ -7110,7 +7377,39 @@ def make_retrieval_loop_runner(
             owners = [_text(item) for item in need_info.get("owners") or need_state.get("owners") or () if _text(item)]
             local = need_state.get("local_triage") if isinstance(need_state.get("local_triage"), Mapping) else local_results.get(need_id, {})
             restored = [entry for entry in need_state.get("external_results") or [] if isinstance(entry, Mapping)]
-            raw_results = [dict(item) for item in (restored or external_results.get(need_id, [])) if isinstance(item, Mapping)]
+            delivered = ([*restored, *external_results.get(need_id, [])] if kind_by_id.get(need_id) == "supplement"
+                         else restored or external_results.get(need_id, []))
+            raw_results = [dict(item) for item in delivered if isinstance(item, Mapping)]
+            if kind_by_id.get(need_id) == "supplement":
+                prior_raw = [result for cached in inherited_by_id.get(need_id, [])
+                             for result in cached.get("state", {}).get("external_results") or [] if isinstance(result, Mapping)]
+                unique = {}
+                for result in _supplement_bind_results([*prior_raw, *raw_results], owners):
+                    unique[json.dumps(result, ensure_ascii=False, sort_keys=True, default=_json_default)] = result
+                raw_results = list(unique.values())
+                need_state["external_results"] = raw_results
+                contract = contract_by_id[need_id]
+                key = contract["reuse_key"]
+                previous = cache_records.get(key) or {}
+                bindings = list(previous.get("owner_bindings") or [])
+                binding = {"phase": phase, "owners": owners}
+                if binding not in bindings:
+                    bindings.append(binding)
+                fingerprints = {
+                    paper_id: _supplement_source_fingerprint(current_sources.get(paper_id) or pool_by_id[paper_id])
+                    for paper_id in _supplement_used_papers(need_state)
+                    if paper_id in current_sources or paper_id in pool_by_id
+                }
+                if previous and previous.get("source_fingerprints") != fingerprints:
+                    history_key = key + ":prior:" + _material_content_signature(previous)
+                    cache_records.setdefault(history_key, previous)
+                supplement_fingerprints = {paper_id: _supplement_material_fingerprints(pool_by_id[paper_id])
+                                           for paper_id in fingerprints if paper_id in pool_by_id}
+                cache_records[key] = {"contract": contract, "state": dict(need_state),
+                                      "source_fingerprints": fingerprints, "supplement_fingerprints": supplement_fingerprints,
+                                      "owner_bindings": bindings}
+                need_state["reuse_key"] = key
+                need_state["reused_answer"] = need_id in cached_answer_by_id
             raw = raw_results[-1] if raw_results else {}
             if raw_results:
                 if kind_by_id.get(need_id) == "supplement":
@@ -7158,6 +7457,8 @@ def make_retrieval_loop_runner(
                                  "sources": [dict(item) for item in sources if isinstance(item, Mapping)]})
                 for owner in owners:
                     materials_by_chapter.setdefault(owner, []).append(dict(material))
+        if contract_by_id:
+            _atomic_json(cache_path, {"schema_version": "optomind.retrieval_need_cache.v1", "records": cache_records})
         return {
             "phase": phase, "status": "complete", "retrieval_loop": loop_result,
             "supplement_results": supplement_results, "directed_results": directed_results,
