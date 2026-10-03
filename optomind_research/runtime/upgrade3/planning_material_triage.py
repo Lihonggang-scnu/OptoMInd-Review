@@ -38,6 +38,7 @@ from .planning_material_search import (
     _adjacent_terms,
     paper_context,
     nominated_paper_passage,
+    nominated_paper_material,
     search,
 )
 
@@ -473,11 +474,10 @@ def prepare_local_reading(
         if index.paper(paper_id) is None:
             bundle.explicit_reading_status[paper_id] = "not_indexed"
             continue
-        selected = search(
-            index, gap.question, concepts=gap.concepts,
-            required_concepts=gap.required_concepts, paper_ids=[paper_id],
-            top_papers=1, passages_per_paper=1,
-        ).hits
+        selected = nominated_paper_material(
+            index, gap.question, paper_id, concepts=gap.concepts,
+            required_concepts=gap.required_concepts,
+        )
         if not selected:
             fallback = nominated_paper_passage(index, paper_id)
             if fallback is not None:
@@ -486,7 +486,15 @@ def prepare_local_reading(
                 bundle.explicit_reading_status[paper_id] = "no_substantive_indexed_passage"
         pinned_hits.extend(selected)
     bundle.bounded_read_omissions = gap.existing_paper_ids[LOCAL_EXPANSION_PAPERS:]
-    _append_bounded_hits(index, bundle, pinned_hits)
+    # Reserve actual additional opening/section text in the same 24K allowance.
+    # Initial contexts remain byte-for-byte unchanged for ordinary callers.
+    additional_contexts = paper_context(index, [pid for pid in gap.existing_paper_ids[:LOCAL_EXPANSION_PAPERS]
+        if pid not in initial_paper_ids[:4] and any(hit.paper_id == pid for hit in pinned_hits)],
+        opening_chars=400, max_sections=6, substantive_only=True)
+    for context in additional_contexts:
+        context.sections = tuple(section[:100] for section in context.sections)
+    context_chars = sum(len(c.opening) + sum(map(len, c.sections)) for c in additional_contexts)
+    _append_bounded_hits(index, bundle, pinned_hits, budget=LOCAL_INCREMENT_CHARS-context_chars)
     for paper_id in gap.existing_paper_ids:
         if any(p.paper_id == paper_id for p in bundle.passages):
             bundle.explicit_reading_status[paper_id] = ("included_nomination_fallback"
@@ -517,7 +525,8 @@ def prepare_local_reading(
     # still visible without re-reading the whole paper.
     matched_paper_ids = list(dict.fromkeys(item.paper_id for item in bundle.passages if item.paper_id))
     if matched_paper_ids:
-        bundle.paper_contexts = paper_context(index, initial_paper_ids[:4])
+        bundle.paper_contexts = [*paper_context(index, initial_paper_ids[:4]),
+            *(context for context in additional_contexts if context.paper_id in matched_paper_ids)]
         handles = dict(gap.current_source_handles)
         for context in bundle.paper_contexts:
             context.source_handle = handles.get(context.paper_id, context.paper_id if context.source_handle in handles.values() else context.source_handle)
@@ -858,18 +867,36 @@ def _with_comparisons(content: str, comparisons: Sequence[Mapping[str, Any]]) ->
 def read_local_capture(index: PlanningMaterialIndex, judgment: TriageJudgment, *, judge: Judge) -> TriageJudgment:
     """One diverse, bounded incremental read after an insufficient first read."""
     gap = judgment.gap
-    question = gap.question
-    if judgment.read_focus:
-        question += "\nRead specifically: " + judgment.read_focus
-    result = search(index, question, concepts=gap.concepts,
+    # The original question owns the candidate slots. A judge's narrower or
+    # broader focus can supplement them, never replace its top-12 anchors.
+    result = search(index, gap.question, concepts=gap.concepts,
                     required_concepts=gap.required_concepts,
-                    top_papers=LOCAL_EXPANSION_PAPERS, passages_per_paper=2)
+                    top_papers=LOCAL_EXPANSION_PAPERS, passages_per_paper=2,
+                    bounded_channels=True, context_chars=0)
+    candidate_ids = list(dict.fromkeys(hit.paper_id for hit in result.hits))
+    hits = list(result.hits)
+    if judgment.read_focus:
+        focused = search(index, judgment.read_focus, concepts=gap.concepts,
+                         required_concepts=gap.required_concepts,
+                         top_papers=LOCAL_EXPANSION_PAPERS, passages_per_paper=2,
+                         bounded_channels=True, context_chars=0)
+        for hit in focused.hits:
+            if hit.paper_id not in candidate_ids and len(candidate_ids) < LOCAL_EXPANSION_PAPERS:
+                candidate_ids.append(hit.paper_id)
+        # Also inspect the focus within the anchors even when the focus's own
+        # global ranking would omit them. Bounded per-paper, no query rewrite.
+        if candidate_ids:
+            focused = search(index, judgment.read_focus, concepts=gap.concepts,
+                             required_concepts=gap.required_concepts, paper_ids=candidate_ids,
+                             top_papers=LOCAL_EXPANSION_PAPERS, passages_per_paper=2,
+                             bounded_channels=True, context_chars=0)
+            hits.extend(focused.hits)
     previous = judgment.local_reading or LocalReadingBundle(gap=gap)
     bundle = replace(previous, passages=list(previous.passages),
                      paper_contexts=list(previous.paper_contexts),
                      explicit_reading_status=dict(previous.explicit_reading_status),
-                     new_task_fields=("focused_local_read",), searched_papers=result.matched_papers)
-    if not _append_bounded_hits(index, bundle, result.hits):
+                     new_task_fields=("focused_local_read",), searched_papers=len(candidate_ids))
+    if not _append_bounded_hits(index, bundle, hits):
         return judgment
     bundle.required_concepts_all_missing = tuple(
         concept for concept in gap.required_concepts

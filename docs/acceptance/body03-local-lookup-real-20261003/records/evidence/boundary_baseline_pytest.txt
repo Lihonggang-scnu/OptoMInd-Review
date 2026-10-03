@@ -1,0 +1,127 @@
+.FFFFF.                                                                  [100%]
+=================================== FAILURES ===================================
+_______ test_nominated_card_change_invalidates_only_changed_actual_input _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-153/test_nominated_card_change_inv0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fccc79261e0>
+
+    def test_nominated_card_change_invalidates_only_changed_actual_input(tmp_path, monkeypatch):
+        path = make_index(tmp_path)
+        judge, calls = boundary(tmp_path, monkeypatch)
+        kwargs = {'cache_dir': tmp_path / 'checkpoint'}
+        first = run(path, judge, request(), **kwargs)
+        replay = run(path, judge, request(), **kwargs)
+        assert len(calls) == 1 and replay['model_calls'] == 0
+        assert first['usable_content'] == replay['usable_content']
+        with PlanningMaterialIndex(path) as index:
+            rows = [dict(row) for kind in ('document_block', 'card_key_finding', 'card_facet_contribution')
+                    for row in index.segments_for('nominated-0', kind)]
+            for row in rows:
+                row['section_path'] = row['section_path'].split(' / ')
+                row['text'] = row['text'].replace('CARD_A_0_OLD', 'CARD_A_0_NEW')
+            index.bulk_replace_paper('nominated-0', rows)
+            index.record_term_document_frequency()
+            index.commit()
+        changed = run(path, judge, request(), **kwargs)
+>       assert len(calls) == 2 and changed['model_calls'] == 1
+E       AssertionError: assert (1 == 2)
+E        +  where 1 = len([{'gap_id': 'R2-independent', 'intended_use': 'mechanism', 'local_search': {'found': True, 'not_matched_reason': '', '...coating. thermal fatigue coating. BODY_0: coated coupons were cycled; field durability was not measured.', ...}], ...}])
+
+/workspace/scratch/695e15fe638d/OptoMInd-Review-body03-local-lookup-r2/tests/upgrade3/test_body03_local_lookup_r2_boundaries.py:104: AssertionError
+_________ test_nominated_cards_and_context_are_actual_payload_channels _________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-153/test_nominated_cards_and_conte0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fccc7946060>
+
+    def test_nominated_cards_and_context_are_actual_payload_channels(tmp_path, monkeypatch):
+        path = make_index(tmp_path)
+        judge, calls = boundary(tmp_path, monkeypatch)
+        result = run(path, judge, request())
+        text = '\n'.join(row['text'] for row in calls[0]['material_found'] if row['source_handle'] == 'N0')
+>       assert 'BODY_0' in text and 'CARD_A_0_OLD' in text and 'CARD_B_0' in text
+E       AssertionError: assert ('BODY_0' in 'thermal fatigue coating. thermal fatigue coating. thermal fatigue coating. thermal fatigue coating. thermal fatigue c...ermal fatigue coating. thermal fatigue coating. BODY_0: coated coupons were cycled; field durability was not measured.' and 'CARD_A_0_OLD' in 'thermal fatigue coating. thermal fatigue coating. thermal fatigue coating. thermal fatigue coating. thermal fatigue c...ermal fatigue coating. thermal fatigue coating. BODY_0: coated coupons were cycled; field durability was not measured.')
+
+/workspace/scratch/695e15fe638d/OptoMInd-Review-body03-local-lookup-r2/tests/upgrade3/test_body03_local_lookup_r2_boundaries.py:116: AssertionError
+_________ test_explicit_cards_and_context_share_existing_increment[6] __________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-153/test_explicit_cards_and_contex0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fccc7946390>
+nominations = 6
+
+    @pytest.mark.parametrize('nominations', [6, 12])
+    def test_explicit_cards_and_context_share_existing_increment(tmp_path, monkeypatch, nominations):
+        path = make_index(tmp_path, nominations=nominations, large=True)
+        judge, calls = boundary(tmp_path, monkeypatch)
+        run(path, judge, request(0))
+        result = run(path, judge, request(nominations))
+        ordinary, explicit = calls
+        assert explicit['material_found'][0] == ordinary['material_found'][0]
+        assert source_text_chars(explicit) - source_text_chars(ordinary) <= triage.LOCAL_INCREMENT_CHARS
+        # At the twelve-source maximum, intact long bodies can consume the
+        # allowance before all card complements fit. Check real new content and
+        # its source context, while the smaller case also guarantees A knowledge.
+        delivered = {row['source_handle'] for row in explicit['material_found']
+                     if any(f'BODY_{n}: coated coupons were cycled; field durability was not measured.' in row['text']
+                            for n in range(nominations))}
+        assert delivered
+        if nominations == 6:
+>           assert any('CARD_A_' in row['text'] for row in explicit['material_found'])
+E           assert False
+E            +  where False = any(<generator object test_explicit_cards_and_context_share_existing_increment.<locals>.<genexpr> at 0x7fccc76eb920>)
+
+/workspace/scratch/695e15fe638d/OptoMInd-Review-body03-local-lookup-r2/tests/upgrade3/test_body03_local_lookup_r2_boundaries.py:139: AssertionError
+_________ test_explicit_cards_and_context_share_existing_increment[12] _________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-153/test_explicit_cards_and_contex1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fccc7945d90>
+nominations = 12
+
+    @pytest.mark.parametrize('nominations', [6, 12])
+    def test_explicit_cards_and_context_share_existing_increment(tmp_path, monkeypatch, nominations):
+        path = make_index(tmp_path, nominations=nominations, large=True)
+        judge, calls = boundary(tmp_path, monkeypatch)
+        run(path, judge, request(0))
+        result = run(path, judge, request(nominations))
+        ordinary, explicit = calls
+        assert explicit['material_found'][0] == ordinary['material_found'][0]
+        assert source_text_chars(explicit) - source_text_chars(ordinary) <= triage.LOCAL_INCREMENT_CHARS
+        # At the twelve-source maximum, intact long bodies can consume the
+        # allowance before all card complements fit. Check real new content and
+        # its source context, while the smaller case also guarantees A knowledge.
+        delivered = {row['source_handle'] for row in explicit['material_found']
+                     if any(f'BODY_{n}: coated coupons were cycled; field durability was not measured.' in row['text']
+                            for n in range(nominations))}
+        assert delivered
+        if nominations == 6:
+            assert any('CARD_A_' in row['text'] for row in explicit['material_found'])
+>       assert any(row['source_handle'] in delivered and 'BODY_' in row['opening']
+                   for row in explicit['paper_context'])
+E       assert False
+E        +  where False = any(<generator object test_explicit_cards_and_context_share_existing_increment.<locals>.<genexpr> at 0x7fccc65b8ba0>)
+
+/workspace/scratch/695e15fe638d/OptoMInd-Review-body03-local-lookup-r2/tests/upgrade3/test_body03_local_lookup_r2_boundaries.py:140: AssertionError
+___________ test_nominations_beyond_old_context_quota_are_considered ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-153/test_nominations_beyond_old_co0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fccc65cd610>
+
+    def test_nominations_beyond_old_context_quota_are_considered(tmp_path, monkeypatch):
+        path = make_index(tmp_path, nominations=6)
+        judge, calls = boundary(tmp_path, monkeypatch)
+        result = run(path, judge, request(6))
+        # Small packages fit comfortably; all six nominations get actual context,
+        # rather than silently disappearing behind the old initial-ID-only [:4].
+        contexts = {row['source_handle'] for row in calls[0]['paper_context']}
+>       assert {'N0', 'N1', 'N2', 'N3', 'N4', 'N5'}.issubset(contexts)
+E       AssertionError: assert False
+E        +  where False = <built-in method issubset of set object at 0x7fccc65b9700>({'BASE'})
+E        +    where <built-in method issubset of set object at 0x7fccc65b9700> = {'N0', 'N1', 'N2', 'N3', 'N4', 'N5'}.issubset
+
+/workspace/scratch/695e15fe638d/OptoMInd-Review-body03-local-lookup-r2/tests/upgrade3/test_body03_local_lookup_r2_boundaries.py:153: AssertionError
+=========================== short test summary info ============================
+FAILED ../workspace/scratch/695e15fe638d/OptoMInd-Review-body03-local-lookup-r2/tests/upgrade3/test_body03_local_lookup_r2_boundaries.py::test_nominated_card_change_invalidates_only_changed_actual_input
+FAILED ../workspace/scratch/695e15fe638d/OptoMInd-Review-body03-local-lookup-r2/tests/upgrade3/test_body03_local_lookup_r2_boundaries.py::test_nominated_cards_and_context_are_actual_payload_channels
+FAILED ../workspace/scratch/695e15fe638d/OptoMInd-Review-body03-local-lookup-r2/tests/upgrade3/test_body03_local_lookup_r2_boundaries.py::test_explicit_cards_and_context_share_existing_increment[6]
+FAILED ../workspace/scratch/695e15fe638d/OptoMInd-Review-body03-local-lookup-r2/tests/upgrade3/test_body03_local_lookup_r2_boundaries.py::test_explicit_cards_and_context_share_existing_increment[12]
+FAILED ../workspace/scratch/695e15fe638d/OptoMInd-Review-body03-local-lookup-r2/tests/upgrade3/test_body03_local_lookup_r2_boundaries.py::test_nominations_beyond_old_context_quota_are_considered
+5 failed, 2 passed in 0.74s

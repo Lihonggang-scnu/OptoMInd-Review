@@ -1,0 +1,28 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_nominated_context_filters_legacy_reference_opening ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-159/test_nominated_context_filters0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3d10f6d670>
+
+    def test_nominated_context_filters_legacy_reference_opening(tmp_path, monkeypatch):
+        path = write_index(tmp_path, [
+            ('neighbor', [('document_block', 'Neighbor', 'thermal coating '*100)]),
+            ('target', [('document_block', 'References', 'REFERENCE_ONLY: thermal coating bibliography. '*30),
+                        ('document_block', 'Study conditions', 'SUBSTANTIVE_OPENING: thermal coating was tested only on cycled coupons.')])])
+        # Existing indexes may predate filtering; ensure this exercises retained
+        # legacy publication metadata rather than assuming the build rejected it.
+        with ms.PlanningMaterialIndex(path, readonly=True) as index:
+            assert any('REFERENCE_ONLY' in row['text'] for row in index.segments_for('target', 'document_block'))
+        judge, calls = capture_model(tmp_path, monkeypatch, PARTIAL)
+        supplement.run_gap_local_triage({'gap_id': 'G', 'question': 'thermal coating',
+            'known_papers': [{'paper_id': 'target'}]}, index_path=path, judge=judge,
+            top_papers=1, max_passages=1, read_local=False)
+        contexts = [row for row in calls[0]['paper_context'] if row['source_handle'] == 'TARGET']
+>       assert contexts and 'SUBSTANTIVE_OPENING' in contexts[0]['opening']
+E       AssertionError: assert ([{'opening': 'REFERENCE_ONLY: thermal coating bibliography. REFERENCE_ONLY: thermal coating bibliography. REFERENCE_ON...ography. REFERENCE_ONLY: thermal coating ', 'sections': ['References', 'Study conditions'], 'source_handle': 'TARGET'}] and 'SUBSTANTIVE_OPENING' in 'REFERENCE_ONLY: thermal coating bibliography. REFERENCE_ONLY: thermal coating bibliography. REFERENCE_ONLY: thermal c...NCE_ONLY: thermal coating bibliography. REFERENCE_ONLY: thermal coating bibliography. REFERENCE_ONLY: thermal coating ')
+
+/workspace/scratch/695e15fe638d/OptoMInd-Review-body03-local-lookup-r2/tests/upgrade3/test_body03_local_lookup_r2.py:175: AssertionError
+=========================== short test summary info ============================
+FAILED ../workspace/scratch/695e15fe638d/OptoMInd-Review-body03-local-lookup-r2/tests/upgrade3/test_body03_local_lookup_r2.py::test_nominated_context_filters_legacy_reference_opening
+1 failed, 5 deselected in 0.95s

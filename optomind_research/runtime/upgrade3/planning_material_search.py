@@ -1349,6 +1349,7 @@ def search(
     kinds: Sequence[str] | None = None,
     required_concepts: Sequence[str] = (),
     paper_ids: Sequence[str] = (),
+    bounded_channels: bool = False,
 ) -> SearchResult:
     """Answer one concrete question from local material only.
 
@@ -1357,6 +1358,11 @@ def search(
     present (a metabolite, a receptor, a compartment, a study design).  Prose
     alone drifts, because expansion turns a long sentence into dozens of weak OR
     terms.
+
+    ``bounded_channels`` opts local reading into one eligible lexical/BM25
+    anchor followed by reranked, distinct-section complements within each
+    paper's passage quota. It does not change paper ranking. By default the
+    existing one-passage-per-kind selection remains unchanged.
 
     ``required_concepts`` turns the question's own hard requirements into a
     filter: a passage that only overlaps on generic wording is not allowed to
@@ -1481,6 +1487,8 @@ def search(
         ),
     )
 
+    lexical_order = ({str(row["segment_id"]): i for i, row in enumerate(rows)}
+                     if bounded_channels else {})
     for paper_id, entry in ordered[: max(0, int(top_papers))]:
         paper = index.paper(paper_id)
         if paper is None:
@@ -1488,10 +1496,25 @@ def search(
         passages = sorted(entry["passages"], key=lambda item: (-item[0], -item[1]))
         chosen: list[Any] = []
         used_kinds: set[str] = set()
+        if bounded_channels:
+            # Preserve the first eligible BM25 hit before frequency-based
+            # reranking. Then read complementary sections, including multiple
+            # document blocks. Ordinary search retains its kind-diverse default.
+            lexical = min(passages, key=lambda item: lexical_order[str(item[3]["segment_id"])])
+            passages = [lexical, *passages]
+        used_sections: set[tuple[str, str]] = set()
+        used_segments: set[str] = set()
         for passage in passages:
             kind = str(passage[3]["segment_kind"])
-            if kind in used_kinds and len(chosen) >= 1:
+            section = str(passage[3]["section_path"])
+            segment_id = str(passage[3]["segment_id"])
+            if bounded_channels:
+                if segment_id in used_segments or (section and (kind, section) in used_sections):
+                    continue
+            elif kind in used_kinds and len(chosen) >= 1:
                 continue
+            used_segments.add(segment_id)
+            used_sections.add((kind, section))
             chosen.append(passage)
             used_kinds.add(kind)
             if len(chosen) >= max(1, int(passages_per_paper)):
@@ -1521,6 +1544,52 @@ def search(
     if not result.hits:
         result.not_matched_reason = "no_paper_passed_ranking"
     return result
+
+
+def nominated_paper_material(
+    index: PlanningMaterialIndex, question: str, paper_id: str, *,
+    concepts: Sequence[str] = (), required_concepts: Sequence[str] = (),
+) -> list[SearchHit]:
+    """Small identity-directed package, never a sufficiency verdict.
+
+    Keep a lexical body anchor and two complementary reranked sections, plus
+    one substantive finding from A and one contribution from B. The caller
+    owns the shared character budget. No files, model or network are consulted.
+    """
+    hits = search(index, question, concepts=concepts, required_concepts=required_concepts,
+                  paper_ids=[paper_id], top_papers=1, passages_per_paper=3,
+                  kinds=("document_block", "directed_content", "directed_question"),
+                  context_chars=0, bounded_channels=True).hits
+    paper = index.paper(paper_id)
+    if paper is None:
+        return []
+    for kinds in (("card_key_finding", "card_work_summary", "card_approach"),
+                  ("card_facet_contribution", "card_contribution_limit", "card_planning_summary", "card_review_use")):
+        selected = search(index, question, concepts=concepts, paper_ids=[paper_id],
+                          top_papers=1, passages_per_paper=1, kinds=kinds, context_chars=0).hits
+        if selected:
+            hits.append(selected[0])
+            continue
+        # Existing card knowledge can complement the query vocabulary. Keep
+        # its real content even when lexical matching finds only a scope row.
+        for kind in kinds:
+            candidate = next((row for row in index.segments_for(paper_id, kind)
+                              if str(row["text"]).strip() and not _is_non_evidence_material(
+                                  str(row["text"]), str(row["section_path"]).split(" / "))), None)
+            if candidate is not None:
+                hits.append(SearchHit(
+                    paper_id=paper_id, source_handle=str(paper["source_handle"]),
+                    title=str(paper["title"]), year=str(paper["year"]), doi=str(paper["doi"]),
+                    segment_kind=kind, section_path=tuple(str(candidate["section_path"]).split(" / ")),
+                    text=str(candidate["text"]), score=0.0, match_terms=(),
+                    material_depth=str(paper["material_depth"]), reading_path=str(paper["snapshot_path"]),
+                    card_path=str(paper["card_path"]), pool_action=str(paper["pool_action"]), best_sentence=""))
+                break
+    if not hits:
+        fallback = nominated_paper_passage(index, paper_id)
+        if fallback is not None:
+            hits.append(fallback)
+    return hits
 
 
 def nominated_paper_passage(index: PlanningMaterialIndex, paper_id: str) -> SearchHit | None:
@@ -1692,6 +1761,7 @@ def paper_context(
     *,
     opening_chars: int = 1400,
     max_sections: int = 18,
+    substantive_only: bool = False,
 ) -> list[PaperContext]:
     """Opening text and section map for the papers a read is focused on."""
 
@@ -1710,6 +1780,8 @@ def paper_context(
         matched_sections: list[str] = []
         for row in segments:
             section = str(row["section_path"] or "")
+            if substantive_only and _is_non_evidence_material(str(row["text"]), section.split(" / ")):
+                continue
             if section and section not in sections:
                 sections.append(section)
             if str(row["segment_kind"]) == "document_block" and section:
