@@ -4,6 +4,8 @@ Tested production: `1b4f7b6a7c0dafb6f7dfe59f46980480f44d993f`; implementation: `
 
 Read `ASTRA_ACCEPTANCE.md` first, then the three unchanged model outputs in `RESULTS/`, derived `REQUEST_METADATA.json`, and cost summary. This archive is documentation only; do not reuse these records as production PLAN or caches.
 
+`ADVISOR_HANDOFF.md` separates observed facts, the local interpretation, and suggestions for the next bounded stage. The cloud advisor should independently evaluate these suggestions after reading the evidence; they are not a prescribed algorithm.
+
 Root accepts the two bounded material-handoff repairs. The unspecified-paper expansion now finds the relevant PDAC experiment; nominated-paper reading supplies the relevant body passages, A/B knowledge and bounded context, and one real call extracts a usable core mechanism. Root personally checked the content, not only the direct_use field. Primary classification remains overstrict and the outputs retain condition/extra-claim errors. Their originals are preserved, not manually corrected.
 
 Three direct qwen3.7-flash calls, zero retries: 0.0098414 CNY. The unchanged 30 CNY ledger totals 0.6102896 CNY; reserved/uncertain zero. Offline controls: 251 passed, 2 deselected. No production edit, full planning, owner, BODY writing, external scholarly query or download occurred locally. No scientific full-BODY or multi-domain real acceptance is claimed. WO04–07 were not started.
