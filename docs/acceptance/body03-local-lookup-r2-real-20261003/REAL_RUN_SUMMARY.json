@@ -1,0 +1,62 @@
+{
+  "schema_version": "optomind.body03.local_lookup_acceptance.r2.summary.v1",
+  "worktree_head": "1b4f7b6a7c0dafb6f7dfe59f46980480f44d993f",
+  "ledger_path": "LOCAL_ONLY: same authorized 30 CNY ledger; no database uploaded",
+  "model": "qwen3.7-flash",
+  "max_retries": 0,
+  "scenarios": {
+    "primary_no_known_paper": {
+      "real_calls": 2,
+      "actual_cny_delta": 0.0067042,
+      "ledger_after_cny": 0.6071524,
+      "decision": "external_research",
+      "answers_requested_question": false,
+      "target_presence": {
+        "first_input_present": false,
+        "expanded_input_present": true,
+        "final_writer_source_present": true
+      },
+      "initial_request": "LOCAL_RUN/runs\\live\\primary_no_known_paper\\judge_inputs\\66f0b9b1774384cc75632da4d8ab28f60d45e25f3f8746e5c4553bfe315851eb\\attempt-c05r16oe\\REQUEST.json",
+      "initial_result": "LOCAL_RUN/runs\\live\\primary_no_known_paper\\judge_inputs\\66f0b9b1774384cc75632da4d8ab28f60d45e25f3f8746e5c4553bfe315851eb\\attempt-c05r16oe\\RESULT.json",
+      "expanded_request": "LOCAL_RUN/runs\\live\\primary_no_known_paper\\judge_inputs\\90bb64fffc780f9a5c717e431e183b2bcd12fd79fc23ff02e9df1b802f9b357e\\attempt-698hkp9t\\REQUEST.json",
+      "expanded_result": "LOCAL_RUN/runs\\live\\primary_no_known_paper\\judge_inputs\\90bb64fffc780f9a5c717e431e183b2bcd12fd79fc23ff02e9df1b802f9b357e\\attempt-698hkp9t\\RESULT.json",
+      "raw_dir": "LOCAL_RUN/runs\\live\\primary_no_known_paper\\raw_responses",
+      "scenario_report": "LOCAL_RUN/runs\\live\\primary_no_known_paper\\SCENARIO_REPORT.json",
+      "result_path": "LOCAL_RUN/runs\\live\\primary_no_known_paper\\LOCAL_TRIAGE.json",
+      "content_note": "Expanded request contains P0004 and the orthotopic PDAC microbiota depletion to anti-PD-1 sensitivity passage; judge still requests patient-level clinical evidence."
+    },
+    "explicit_stable_p0004": {
+      "real_calls": 1,
+      "actual_cny_delta": 0.0031372,
+      "ledger_after_cny": 0.6102896,
+      "decision": "direct_use",
+      "answers_requested_question": true,
+      "target_presence": {
+        "first_input_present": true,
+        "expanded_input_present": false,
+        "final_writer_source_present": true
+      },
+      "request": "LOCAL_RUN/runs\\live\\explicit_stable_p0004\\judge_inputs\\f7c0cf523f9bce54b441b4793748eebd5281bed3c8be444b984039a69b83f86d\\attempt-_s0_9uiu\\REQUEST.json",
+      "result": "LOCAL_RUN/runs\\live\\explicit_stable_p0004\\judge_inputs\\f7c0cf523f9bce54b441b4793748eebd5281bed3c8be444b984039a69b83f86d\\attempt-_s0_9uiu\\RESULT.json",
+      "raw_dir": "LOCAL_RUN/runs\\live\\explicit_stable_p0004\\raw_responses",
+      "scenario_report": "LOCAL_RUN/runs\\live\\explicit_stable_p0004\\SCENARIO_REPORT.json",
+      "result_path": "LOCAL_RUN/runs\\live\\explicit_stable_p0004\\LOCAL_TRIAGE.json"
+    }
+  },
+  "offline_reuse": {
+    "status": "completed_offline_checkpoint_reuse",
+    "report": "LOCAL_RUN/reports\\EXPLICIT_REUSE_REPORT.json",
+    "result_path": "LOCAL_RUN/runs\\live\\explicit_stable_p0004_reuse\\LOCAL_TRIAGE.json",
+    "network_boundary_call_count": 0,
+    "model_call_count": 0,
+    "actual_cny_delta": 0.0
+  },
+  "cumulative": {
+    "real_calls": 3,
+    "actual_cny_delta": 0.0098414,
+    "ledger_after_cny": 0.6102896,
+    "reserved_cny": 0.0,
+    "uncertain_count": 0
+  },
+  "root_decision": "Accept the two bounded material-handoff repairs; explicit core mechanism is usable. Primary judgment remains overstrict and model outputs contain additional errors; no full BODY quality pass is claimed."
+}
