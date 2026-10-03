@@ -1,0 +1,182 @@
+{
+  "r5": {
+    "identity_only": {
+      "closed_rows": [
+        {
+          "source_handle": "P0001",
+          "paper_id": "paper-1",
+          "title": "Identity only"
+        }
+      ],
+      "resolution_report": {
+        "requested_handles": [
+          "P0001"
+        ],
+        "resolved_from_current_pool": [],
+        "already_present": [
+          "P0001"
+        ],
+        "unresolved": []
+      },
+      "validator_errors": [],
+      "owner_updated_accepted": true
+    },
+    "identity_only_missing_card_candidate": {
+      "closed_rows": [
+        {
+          "source_handle": "P0001",
+          "paper_id": "paper-1",
+          "title": "Identity only"
+        }
+      ],
+      "resolution_report": {
+        "requested_handles": [
+          "P0001"
+        ],
+        "resolved_from_current_pool": [],
+        "already_present": [
+          "P0001"
+        ],
+        "unresolved": []
+      }
+    },
+    "nested_missing": {
+      "closed_rows": [
+        {
+          "source_handle": "P0001",
+          "paper_id": "paper-1",
+          "title": "Identity only"
+        }
+      ],
+      "resolution_report": {
+        "requested_handles": [
+          "P0001",
+          "P0999"
+        ],
+        "resolved_from_current_pool": [],
+        "already_present": [
+          "P0001"
+        ],
+        "unresolved": [
+          {
+            "source_handle": "P0999",
+            "reason": "not_in_current_pool"
+          }
+        ]
+      },
+      "validator_errors": [],
+      "owner_updated_accepted": true
+    }
+  },
+  "n2": {
+    "rows": [
+      {
+        "source_handle": "P0001",
+        "paper_id": "paper-old",
+        "title": "Old title",
+        "doi": "10.old",
+        "year": "",
+        "material_depth": "",
+        "study_summary_A": {
+          "key_findings": "NEW A"
+        },
+        "review_planning_B": {
+          "planning_summary": "NEW B"
+        },
+        "external_calls": 0
+      }
+    ],
+    "resolution_report": {
+      "requested_handles": [
+        "P0001"
+      ],
+      "resolved_from_current_pool": [],
+      "already_present": [
+        "P0001"
+      ],
+      "unresolved": []
+    }
+  },
+  "n3": {
+    "supporting_studies": [
+      {
+        "source_handle": "P0999",
+        "proposed_use": "case use",
+        "contribution": "case use"
+      }
+    ],
+    "source_materials": [
+      {
+        "source_handle": "P0999",
+        "paper_id": "paper-999",
+        "title": "Identity only candidate",
+        "doi": "10.9999",
+        "year": "",
+        "material_depth": "",
+        "study_summary_A": {},
+        "review_planning_B": {},
+        "external_calls": 0
+      }
+    ],
+    "chapter_source_ids": [
+      "paper-999"
+    ],
+    "material_fields": {
+      "study_summary_A": {},
+      "review_planning_B": {},
+      "deep_read_material": null,
+      "paper_id": "paper-999",
+      "title": "Identity only candidate"
+    }
+  },
+  "n4": {
+    "fenced_table": {
+      "pending": false,
+      "body_markdown": "ORIGINAL\n\n```markdown\n| a | b |\n|---|---|\n| x | y |\n```",
+      "completion_fragment": "```markdown\n| a | b |\n|---|---|\n| x | y |\n```",
+      "table_check": {
+        "valid": true,
+        "header_cells": 2,
+        "data_cells": 2,
+        "line": 2
+      },
+      "issues": [],
+      "source_handles": []
+    },
+    "two_tasks_one_table": {
+      "pending": false,
+      "body_markdown": "ORIGINAL\n\n| a | b |\n|---|---|\n| x | y |",
+      "completion_fragment": "| a | b |\n|---|---|\n| x | y |",
+      "table_check": {
+        "valid": true,
+        "header_cells": 2,
+        "data_cells": 2,
+        "line": 1
+      },
+      "issues": [],
+      "source_handles": []
+    },
+    "unknown_citation": {
+      "pending": false,
+      "body_markdown": "ORIGINAL\n\nA new paragraph cites [P9999].",
+      "completion_fragment": "A new paragraph cites [P9999].",
+      "table_check": {
+        "valid": null
+      },
+      "issues": [],
+      "source_handles": []
+    },
+    "ordinary_writer_unknown_reference": {
+      "unknown_citations": [
+        "P9999"
+      ],
+      "citation_problems": [
+        {
+          "code": "citation_not_in_unit_sources",
+          "handle": "P9999",
+          "note": "����ģ��ԭ�ģ������滻�ɱ����Դ"
+        }
+      ]
+    }
+  }
+}

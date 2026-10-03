@@ -1,0 +1,103 @@
+commit 4e266f4370164a90a0362b85da71a4936782b8c9
+Author:     OptoMind Local Upgrade <local-upgrade@invalid>
+AuthorDate: Wed Sep 30 21:58:27 2026 +0800
+Commit:     OptoMind Local Upgrade <local-upgrade@invalid>
+CommitDate: Wed Sep 30 21:58:27 2026 +0800
+
+    fix(planning): keep global outline grounded beyond local tool gaps
+
+diff --git a/optomind_research/runtime/upgrade3/progressive_review_plan.py b/optomind_research/runtime/upgrade3/progressive_review_plan.py
+index ba9e654..631f9d8 100644
+--- a/optomind_research/runtime/upgrade3/progressive_review_plan.py
++++ b/optomind_research/runtime/upgrade3/progressive_review_plan.py
+@@ -34,6 +34,9 @@ from .manuscript_parts import (
+ 
+ SCHEMA_VERSION = "optomind.progressive_review_plan.v1"
+ PARTS_PLAN_SCHEMA_VERSION = "optomind.progressive_review_plan.v2"
++# This version is scoped to the level-1 global-outline prompt. Changing it
++# must invalidate only that stage on resume, not provisional scope or tools.
++LEVEL1_OUTLINE_PROMPT_CONTRACT = "level1_outline.review_v2_04"
+ DEFAULT_PLANNER_MODEL = "qwen3.5-plus"
+ DEFAULT_READER_MODEL = "qwen3.7-flash"
+ DEFAULT_POOL_PATH = Path("outputs/planning_support/20260923/practical_refresh/supplement_live/PLANNING_POOL.jsonl")
+@@ -771,6 +774,15 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
+                 "Develop deep teaching, analysis, methods, mechanisms and evidence fully regardless of publication heading. "
+                 "Do not return or modify manuscript_parts_plan."
+             )
++        if stage == "level1_outline":
++            stage_text += (
++                "\n【level1 全局材料权限】原始研究计划及其 facets、上游 material_theme_inventory 和已供上游阶段筛选的完整材料池共同构成全局材料依据；"
++                "当前 actual_tool_results 只是受影响章节的局部证据与缺口反馈，可修正相关章节的问题、范围和未决限制，不能因反馈字段更长就取代全局组织视角。"
++                "上游主题库存是材料摘要，应回到已提供的材料内容和研究设计核验，不盲从推荐语。组织论点必须由实际材料和研究设计驱动；"
++                "来源顺序、近期性或 payload 体量本身不能决定全篇中心，但材料确实支持时可以依据研究问题和实质内容判断近期性或取舍。"
++                "除非用户或 supplied standard 明确提供评价标准，不得凭空添加证据等级、A/B/C 分级或证据层级；若存在标准，按原标准并保留研究对象、设置、条件和限制。"
++                "本阶段所有说明性文本使用中文，科学名称、论文原题和 source_handle 可保留原文。"
++            )
+     return common + "\n\n" + stage_text
+ 
+ 
+@@ -1177,6 +1189,12 @@ def _parts_contract_delivery(stage: str) -> str:
+         return (
+             "只返回本阶段 JSON。顶层必须包含 shared_scope、shared_outline、review_argument、"
+             "source_selection_principles、unresolved_limits，以及 manuscript_parts_plan。"
++            "原始研究计划、上游主题库存和已供上游阶段筛选的完整材料池是全局材料依据；工具结果只是受影响章节的局部反馈，"
++            "只能细化相关章节范围和限制，不能按反馈体量取代全局组织论点。上游主题库存是材料摘要，"
++            "应回到已提供的材料内容和研究设计核验，不盲从推荐语。来源顺序、近期性或 payload 体量本身不能决定全篇中心，"
++            "但材料确实支持时可以依据研究问题和实质内容判断近期性或取舍。组织论点必须由实际材料和研究设计驱动；除非用户或 supplied standard 明确提供评价标准，"
++            "不得凭空添加证据等级、A/B/C 分级或证据层级。保留研究对象、设置、条件和限制。"
++            "本阶段所有说明性文本使用中文，科学名称、论文原题和 source_handle 可保留原文。"
+             + required_card_shape + card_skeleton + capability
+         )
+     if stage == "whole_plan_improvement":
+@@ -2890,19 +2908,33 @@ class ProgressiveReviewPlanner:
+         paper_to_handle = {paper_id: handle for handle, paper_id in source_handle_map.items()}
+         b_pool = [dict(row["_b_summary"]) for row in pool_rows]
+         candidate_by_id = {str(row["_paper_id"]): row for row in pool_rows}
++        level1_tool_feedback = self._compact_tool_feedback(level1_tool_result)
++        level1_payload = {
++            "topic_id": self.config.topic_id,
++            "research_question": topic,
++            "provisional_scope": provisional,
++            "actual_tool_results": level1_tool_feedback,
++            "full_b_pool_was_semantically_screened": len(b_pool),
++            "unavailable_and_failed_tools_are_scope_feedback": True,
++        }
++        if self.config.planning_revision_enabled:
++            level1_payload.update({
++                "original_plan": plan,
++                "upstream_material_theme_inventory": provisional.get("material_theme_inventory") or [],
++                "global_material_authority": {
++                    "upstream_complete_pool_row_count": len(b_pool),
++                    "upstream_material_summary_is_material_base": True,
++                    "tool_results_are_bounded_local_feedback": True,
++                    "organizing_claims_must_be_material_driven": True,
++                },
++            })
+         level1_outline_record = self._stage(
+             "level1_outline",
+-            lambda: self._call("level1_outline", {
+-                "topic_id": self.config.topic_id,
+-                "research_question": topic,
+-                "provisional_scope": provisional,
+-                "actual_tool_results": self._compact_tool_feedback(level1_tool_result),
+-                "full_b_pool_was_semantically_screened": len(b_pool),
+-                "unavailable_and_failed_tools_are_scope_feedback": True,
+-            }),
++            lambda: self._call("level1_outline", level1_payload),
+             resume=resume,
+             state=state,
+-            cache_inputs=({"provisional": provisional, "tools": self._compact_tool_feedback(level1_tool_result), "pool": b_pool}) if self.config.planning_revision_enabled else None,
++            cache_inputs=({"prompt_contract": LEVEL1_OUTLINE_PROMPT_CONTRACT,
++                           "provisional": provisional, "tools": level1_tool_feedback, "pool": b_pool}) if self.config.planning_revision_enabled else None,
+         )
+         level1_outline = _stage_response(level1_outline_record)
+         self._accept_parts("level1_outline", level1_outline)
+@@ -6567,7 +6599,7 @@ def render_plan_markdown(plan: Mapping[str, Any]) -> str:
+ 
+ 
+ __all__ = [
+-    "SCHEMA_VERSION", "ProgressivePlanError", "ProgressivePlannerConfig", "ProgressiveReviewPlanner",
++    "SCHEMA_VERSION", "LEVEL1_OUTLINE_PROMPT_CONTRACT", "ProgressivePlanError", "ProgressivePlannerConfig", "ProgressiveReviewPlanner",
+     "QwenProgressivePlanner", "load_original_plan", "load_planning_pool", "load_prior_readings", "qwen_local_token_counter",
+     "make_planning_supplement_runner", "make_retrieval_loop_runner", "make_directed_reading_runner",
+     "render_plan_markdown", "render_writer_packet_markdown",

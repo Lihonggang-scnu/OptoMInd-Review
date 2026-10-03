@@ -1,0 +1,228 @@
+commit e2bcb2a2c1f82d51060f0e2927f59df0f4ca3216
+Author:     OptoMind Local Upgrade <local-upgrade@invalid>
+AuthorDate: Thu Oct 1 07:11:30 2026 +0800
+Commit:     OptoMind Local Upgrade <local-upgrade@invalid>
+CommitDate: Thu Oct 1 07:11:30 2026 +0800
+
+    fix(review): admit supplied candidates and reuse valid owner responses
+
+diff --git a/optomind_research/runtime/upgrade3/progressive_review_plan.py b/optomind_research/runtime/upgrade3/progressive_review_plan.py
+index 7c490c3..5e1245c 100644
+--- a/optomind_research/runtime/upgrade3/progressive_review_plan.py
++++ b/optomind_research/runtime/upgrade3/progressive_review_plan.py
+@@ -1713,6 +1713,7 @@ def _validate_owner_plan_update(
+     source_materials: Sequence[Mapping[str, Any]],
+     *,
+     owner_response: Mapping[str, Any] | None = None,
++    candidate_materials: Sequence[Mapping[str, Any]] = (),
+ ) -> tuple[dict[str, list[str]], list[str]]:
+     """Validate structural changes without guessing identity by list position."""
+ 
+@@ -1740,6 +1741,22 @@ def _validate_owner_plan_update(
+         for item in source_materials
+         if isinstance(item, Mapping) and _text(item.get("source_handle"))
+     }
++    # Revision owners may promote an unassigned candidate after inspecting its
++    # supplied A/B, local, deep or supplement material.  Navigation metadata
++    # alone is deliberately excluded: only rows carrying substantive material
++    # can satisfy the source-availability contract.
++    material_keys = (
++        "study_summary_A", "review_planning_B", "deep_read_material",
++        "local_passages", "supplement_gap_material", "supplement_gap_materials",
++        "supplement_material", "supplement_materials", "tool_supplement_materials",
++    )
++    available.update(
++        _text(item.get("source_handle"))
++        for item in candidate_materials
++        if isinstance(item, Mapping)
++        and _text(item.get("source_handle"))
++        and any(item.get(key) not in (None, "", [], {}) for key in material_keys)
++    )
+     for unit in new_units:
+         handles: set[str] = set()
+         for key in ("source_handle", "source_handles"):
+@@ -1776,6 +1793,8 @@ def _classify_owner_response(
+     old_plan: Mapping[str, Any],
+     response: Mapping[str, Any],
+     source_materials: Sequence[Mapping[str, Any]],
++    *,
++    candidate_materials: Sequence[Mapping[str, Any]] = (),
+ ) -> tuple[str, dict[str, Any] | None, dict[str, list[str]], list[str]]:
+     """Validate owner output before a caller treats a provider call as complete."""
+ 
+@@ -1788,6 +1807,7 @@ def _classify_owner_response(
+     if updated_plan is not None:
+         remap, errors = _validate_owner_plan_update(
+             old_plan, updated_plan, source_materials, owner_response=response,
++            candidate_materials=candidate_materials,
+         )
+         if errors:
+             return "unresolved", None, remap, errors
+@@ -1799,6 +1819,38 @@ def _classify_owner_response(
+     return "unresolved", None, remap, ["owner_response_missing_complete_plan"]
+ 
+ 
++def _reuse_cached_owner_revision(
++    cached: Mapping[str, Any],
++    revision_payload: Mapping[str, Any],
++) -> dict[str, Any] | None:
++    """Reclassify a same-input owner cache before deciding to call again."""
++
++    if cached.get("cache_inputs") != revision_payload:
++        return None
++    response = cached.get("response")
++    if isinstance(response, Mapping):
++        owner_status, updated_plan, unit_id_remap, structural_errors = _classify_owner_response(
++            revision_payload.get("chapter_plan") or {},
++            response,
++            revision_payload.get("source_materials") or [],
++            candidate_materials=revision_payload.get("candidate_materials") or [],
++        )
++        if owner_status in {"updated", "no_change"}:
++            repaired = dict(cached)
++            repaired.update({
++                "status": "complete",
++                "owner_status": owner_status,
++                "updated_plan": updated_plan,
++                "unit_id_remap": unit_id_remap,
++                "structural_errors": structural_errors,
++            })
++            return repaired
++        return None
++    if cached.get("status") == "complete" and cached.get("owner_status") in {"updated", "no_change"}:
++        return dict(cached)
++    return None
++
++
+ def _canonicalize_feedback_materials(
+     packet: Mapping[str, Any],
+     incoming: Sequence[Mapping[str, Any]],
+@@ -2589,6 +2641,7 @@ class ProgressiveReviewPlanner:
+         owner_input_plan = payload.get("chapter_plan") if isinstance(payload.get("chapter_plan"), Mapping) else chapter_plan
+         status, updated_plan, unit_id_remap, structural_errors = _classify_owner_response(
+             owner_input_plan, response, source_materials,
++            candidate_materials=candidate_materials,
+         )
+         return {
+             "status": status,
+@@ -4241,12 +4294,11 @@ class ProgressiveReviewPlanner:
+                 if resume and cache_path.is_file():
+                     try:
+                         cached = _read_json(cache_path)
+-                        if (
+-                            cached.get("status") == "complete"
+-                            and cached.get("owner_status") in {"updated", "no_change"}
+-                            and cached.get("cache_inputs") == revision_payload
+-                        ):
+-                            return index, dict(cached)
++                        reused = _reuse_cached_owner_revision(cached, revision_payload)
++                        if reused is not None:
++                            if reused != cached:
++                                _atomic_json(cache_path, reused)
++                            return index, reused
+                     except (ProgressivePlanError, AttributeError):
+                         pass
+                 try:
+@@ -4256,6 +4308,7 @@ class ProgressiveReviewPlanner:
+                         revision_payload.get("chapter_plan") or {},
+                         response,
+                         revision_payload.get("source_materials") or [],
++                        candidate_materials=revision_payload.get("candidate_materials") or [],
+                     )
+                     saved = {
+                         "chapter_id": chapter_id,
+@@ -4326,6 +4379,8 @@ class ProgressiveReviewPlanner:
+         else:
+             apply_improvement = improvement
+         final_records = self._apply_improvements(detail_records, apply_improvement)
++        if self.config.planning_revision_enabled:
++            final_records = self._promote_owner_candidate_materials(final_records, apply_improvement)
+         # A completed owner review has judged every pending case suggestion:
+         # adopted ones live in the owner's plan, rejected ones are simply not
+         # there.  The proposals move to a packet-level audit trail so they do
+@@ -4954,6 +5009,85 @@ class ProgressiveReviewPlanner:
+                 concrete.add(chapter_id)
+         return concrete - requires_revision
+ 
++    @classmethod
++    def _promote_owner_candidate_materials(
++        cls,
++        chapters: Sequence[Mapping[str, Any]],
++        improvement: Mapping[str, Any],
++    ) -> list[dict[str, Any]]:
++        """Carry adopted candidate material into the writer-facing packet."""
++
++        accepted: dict[str, Mapping[str, Any]] = {}
++        for item in improvement.get("chapter_updates") or ():
++            if not isinstance(item, Mapping) or item.get("_complete_chapter_revision") is not True:
++                continue
++            chapter_id = _text(item.get("chapter_id"))
++            plan = cls._improvement_plan(item)
++            if chapter_id and isinstance(plan, Mapping):
++                accepted[chapter_id] = plan
++        if not accepted:
++            return [dict(row) for row in chapters]
++
++        material_keys = (
++            "study_summary_A", "review_planning_B", "deep_read_material",
++            "local_passages", "supplement_gap_material", "supplement_gap_materials",
++            "supplement_material", "supplement_materials", "tool_supplement_materials",
++        )
++        output: list[dict[str, Any]] = []
++        for raw in chapters:
++            packet = dict(raw)
++            chapter = _copy_json_value(packet.get("chapter")) if isinstance(packet.get("chapter"), Mapping) else {}
++            chapter_id = _text(chapter.get("chapter_id"))
++            plan = accepted.get(chapter_id)
++            if plan is None:
++                output.append(packet)
++                continue
++            handles, paper_ids = _source_keys_in_value(plan)
++            candidates = [
++                item for item in (packet.get("candidate_materials") or ())
++                if isinstance(item, Mapping)
++                and _text(item.get("source_handle"))
++                and any(item.get(key) not in (None, "", [], {}) for key in material_keys)
++            ]
++            additions = []
++            for item in candidates:
++                handle = _text(item.get("source_handle"))
++                paper_id = _text(item.get("paper_id"))
++                if handle in handles or paper_id in paper_ids:
++                    additions.append(dict(item))
++            if additions:
++                existing = [
++                    dict(item) for item in (packet.get("source_materials") or ())
++                    if isinstance(item, Mapping)
++                ]
++                existing_handles = {
++                    _text(item.get("source_handle")) for item in existing if _text(item.get("source_handle"))
++                }
++                for item in additions:
++                    handle = _text(item.get("source_handle"))
++                    if handle not in existing_handles:
++                        existing.append(item)
++                        existing_handles.add(handle)
++                    chapter.setdefault("source_handles", []).append(handle)
++                    paper_id = _text(item.get("paper_id"))
++                    if paper_id:
++                        chapter.setdefault("source_ids", []).append(paper_id)
++                    identity_map = dict(packet.get("source_identity_map") or {})
++                    identity_map[handle] = {
++                        key: item.get(key) for key in ("source_handle", "paper_id", "title", "doi", "year")
++                    }
++                    packet["source_identity_map"] = identity_map
++                packet["source_materials"] = existing
++                chapter["source_handles"] = list(dict.fromkeys(
++                    _text(value) for value in (chapter.get("source_handles") or ()) if _text(value)
++                ))
++                chapter["source_ids"] = list(dict.fromkeys(
++                    _text(value) for value in (chapter.get("source_ids") or ()) if _text(value)
++                ))
++                packet["chapter"] = chapter
++            output.append(packet)
++        return output
++
+     @classmethod
+     def _apply_improvements(cls, chapters: Sequence[Mapping[str, Any]], improvement: Mapping[str, Any]) -> list[dict[str, Any]]:
+         """Apply only concrete whole-plan edits targeted to a known chapter."""

@@ -1,0 +1,422 @@
+commit 6b8e1ad0dc0a79bd6a59bbbd4a263f21d5a8a226
+Author:     OptoMind Local Upgrade <local-upgrade@invalid>
+AuthorDate: Thu Oct 1 00:52:08 2026 +0800
+Commit:     OptoMind Local Upgrade <local-upgrade@invalid>
+CommitDate: Thu Oct 1 00:52:08 2026 +0800
+
+    fix(planning): rebind cached materials to active source identities
+
+diff --git a/optomind_research/runtime/upgrade3/planning_material_triage.py b/optomind_research/runtime/upgrade3/planning_material_triage.py
+index c98e7b6..c1697b1 100644
+--- a/optomind_research/runtime/upgrade3/planning_material_triage.py
++++ b/optomind_research/runtime/upgrade3/planning_material_triage.py
+@@ -351,6 +351,7 @@ def prepare_local_reading(
+     max_passages: int = MAX_PASSAGES,
+     passages_per_paper: int = 2,
+     top_papers: int = 6,
++    source_identity_map: Mapping[str, Mapping[str, Any]] | None = None,
+ ) -> tuple[LocalReadingBundle, SearchResult]:
+     """Read the stored material for one question without downloading anything."""
+ 
+@@ -373,8 +374,11 @@ def prepare_local_reading(
+     existing = {str(handle) for handle in gap.existing_handles}
+     for hit in result.hits[: max(1, int(max_passages))]:
+         reading_text = _expanded_hit_text(index, hit)
++        source_handle = _local_source_handle(
++            hit.paper_id, hit.doi, hit.source_handle, source_identity_map,
++        )
+         bundle.passages.append(LocalReadingPassage(
+-            source_handle=hit.source_handle,
++            source_handle=source_handle,
+             paper_id=hit.paper_id,
+             title=hit.title,
+             year=hit.year,
+@@ -386,7 +390,7 @@ def prepare_local_reading(
+             material_depth=hit.material_depth,
+             reading_path=hit.reading_path,
+             card_path=hit.card_path,
+-            from_existing_field=hit.source_handle in existing,
++            from_existing_field=source_handle in existing,
+             key_sentences=_key_sentences(reading_text, gap.question),
+         ))
+     bundle.new_task_fields = (
+@@ -407,9 +411,58 @@ def prepare_local_reading(
+     matched_paper_ids = list(dict.fromkeys(item.paper_id for item in bundle.passages if item.paper_id))
+     if matched_paper_ids:
+         bundle.paper_contexts = paper_context(index, matched_paper_ids[:4])
++        for context in bundle.paper_contexts:
++            context.source_handle = _local_source_handle(
++                context.paper_id, context.doi, context.source_handle, source_identity_map,
++            )
+     return bundle, result
+ 
+ 
++def _normalized_doi(value: Any) -> str:
++    text = str(value or "").strip().casefold()
++    text = re.sub(r"^https?://(?:dx\.)?doi\.org/", "", text)
++    return text.rstrip(" .;,)")
++
++
++def _local_source_handle(
++    paper_id: Any,
++    doi: Any,
++    fallback: Any,
++    source_identity_map: Mapping[str, Mapping[str, Any]] | None,
++) -> str:
++    """Bind a local hit to this run's handle without discarding pool-outside material.
++
++    ``None`` means the caller has no current-pool identity map and preserves the
++    historical index handle.  An explicit map is a run boundary: exact paper ID
++    wins, then an unambiguous exact DOI match; an unmatched hit keeps its stable
++    identity but loses the stale run-local handle so the inclusion path can assign
++    a current one later.
++    """
++
++    raw_handle = str(fallback or "").strip()
++    if source_identity_map is None:
++        return raw_handle
++    by_paper: dict[str, Mapping[str, Any]] = {}
++    by_doi: dict[str, list[Mapping[str, Any]]] = {}
++    for key, raw in source_identity_map.items():
++        if not isinstance(raw, Mapping):
++            continue
++        identity = raw
++        identity_paper_id = str(raw.get("paper_id") or key or "").strip()
++        if identity_paper_id:
++            by_paper[identity_paper_id] = identity
++        identity_doi = _normalized_doi(raw.get("doi"))
++        if identity_doi:
++            by_doi.setdefault(identity_doi, []).append(identity)
++    matched = by_paper.get(str(paper_id or "").strip())
++    if matched is None:
++        candidates = by_doi.get(_normalized_doi(doi), [])
++        handles = {str(item.get("source_handle") or "").strip() for item in candidates}
++        if len(candidates) == 1 or (len(handles) == 1 and "" not in handles):
++            matched = candidates[0]
++    return str(matched.get("source_handle") or "").strip() if matched else ""
++
++
+ def _concept_present(concept: str, text: str) -> bool:
+     """True when the concept's own words sit together in this passage."""
+ 
+@@ -448,6 +501,10 @@ def _triage_payload(gap: LocalGap, bundle: LocalReadingBundle) -> dict[str, Any]
+         "material_found": [
+             {
+                 "source_handle": item.source_handle,
++                "paper_id": item.paper_id,
++                "title": item.title,
++                "year": item.year,
++                "doi": item.doi,
+                 "type": item.reading_role,
+                 "material_depth": item.material_depth,
+                 "section": list(item.section_path),
+@@ -458,8 +515,13 @@ def _triage_payload(gap: LocalGap, bundle: LocalReadingBundle) -> dict[str, Any]
+         "paper_context": [
+             {
+                 "source_handle": item.source_handle,
++                "paper_id": item.paper_id,
++                "title": item.title,
++                "year": item.year,
++                "doi": item.doi,
+                 "opening": item.opening,
+                 "sections": list(item.sections),
++                "matched_sections": list(item.matched_sections),
+             }
+             for item in bundle.paper_contexts
+         ],
+@@ -665,6 +727,7 @@ def triage_gap(
+     top_papers: int = 6,
+     passages_per_paper: int = 2,
+     policy_override: Mapping[str, str] | None = None,
++    source_identity_map: Mapping[str, Mapping[str, Any]] | None = None,
+ ) -> TriageJudgment:
+     """Decide direct use / local deep read / external research for one gap.
+ 
+@@ -677,6 +740,7 @@ def triage_gap(
+         max_passages=max_passages,
+         top_papers=top_papers,
+         passages_per_paper=passages_per_paper,
++        source_identity_map=source_identity_map,
+     )
+     if judge is None or not bundle.passages:
+         judgment = _policy_decision(gap, bundle)
+@@ -731,15 +795,33 @@ def _with_comparisons(content: str, comparisons: Sequence[Mapping[str, Any]]) ->
+     return "\n".join(lines)
+ 
+ 
+-def read_local_capture(index: PlanningMaterialIndex, judgment: TriageJudgment, *, judge: Judge) -> TriageJudgment:
++def read_local_capture(
++    index: PlanningMaterialIndex,
++    judgment: TriageJudgment,
++    *,
++    judge: Judge,
++    source_identity_map: Mapping[str, Mapping[str, Any]] | None = None,
++) -> TriageJudgment:
+     """Actually read additional stored sections for the requested detail."""
+     from dataclasses import replace
+     focused = replace(judgment.gap, question=judgment.gap.question + "\nRead specifically: " + (judgment.read_focus or judgment.gap.question))
+-    bundle, _ = prepare_local_reading(index, focused, max_passages=10, passages_per_paper=3, top_papers=6)
++    bundle, _ = prepare_local_reading(
++        index, focused, max_passages=10, passages_per_paper=3, top_papers=6,
++        source_identity_map=source_identity_map,
++    )
+     bundle.gap = judgment.gap
+     bundle.new_task_fields = ("focused_local_read",)
+     existing = {(p.paper_id, p.text) for p in bundle.passages}
+-    bundle.passages.extend(p for p in judgment.passages if (p.paper_id, p.text) not in existing)
++    rebound_prior = [
++        replace(
++            passage,
++            source_handle=_local_source_handle(
++                passage.paper_id, passage.doi, passage.source_handle, source_identity_map,
++            ),
++        )
++        for passage in judgment.passages
++    ]
++    bundle.passages.extend(p for p in rebound_prior if (p.paper_id, p.text) not in existing)
+     normalized = _normalize_judgment(judge(judgment.gap, bundle), judgment.gap)
+     result = TriageJudgment(gap=judgment.gap, source="judge+focused_local_read", passages=bundle.passages,
+                            local_reading=bundle, model_calls=judgment.model_calls+int(getattr(judge, "last_call_count", 1)), **normalized)
+@@ -783,6 +865,7 @@ def triage_gaps(
+     passages_per_paper: int = 2,
+     max_passages: int = MAX_PASSAGES,
+     policy_override: Mapping[str, str] | None = None,
++    source_identity_map: Mapping[str, Mapping[str, Any]] | None = None,
+ ) -> dict[str, Any]:
+     """Triage several gaps and write the stage artifacts."""
+ 
+@@ -795,6 +878,7 @@ def triage_gaps(
+             passages_per_paper=passages_per_paper,
+             max_passages=max_passages,
+             policy_override=policy_override,
++            source_identity_map=source_identity_map,
+         ))
+     summary = {
+         "schema_version": SCHEMA_VERSION,
+diff --git a/optomind_research/runtime/upgrade3/planning_supplement.py b/optomind_research/runtime/upgrade3/planning_supplement.py
+index 980b319..b4fe60f 100644
+--- a/optomind_research/runtime/upgrade3/planning_supplement.py
++++ b/optomind_research/runtime/upgrade3/planning_supplement.py
+@@ -1919,6 +1919,7 @@ def run_gap_local_triage(
+     passages_per_paper: int = 2,
+     max_passages: int = 5,
+     read_local: bool = True,
++    source_identity_map: Mapping[str, Mapping[str, Any]] | None = None,
+ ) -> dict[str, Any]:
+     """Answer one gap from already-registered local material before any retrieval.
+ 
+@@ -1963,9 +1964,12 @@ def run_gap_local_triage(
+             top_papers=top_papers,
+             passages_per_paper=passages_per_paper,
+             max_passages=max_passages,
++            source_identity_map=source_identity_map,
+         )
+         if read_local and judge is not None and judgment.decision == "local_deep_read":
+-            judgment = read_local_capture(index, judgment, judge=judge)
++            judgment = read_local_capture(
++                index, judgment, judge=judge, source_identity_map=source_identity_map,
++            )
+     payload = judgment.to_dict()
+     payload["writer_material"] = build_writer_material(judgment)
+     payload["gap_id"] = local_gap.gap_id
+diff --git a/optomind_research/runtime/upgrade3/progressive_review_plan.py b/optomind_research/runtime/upgrade3/progressive_review_plan.py
+index a4520df..5d6a617 100644
+--- a/optomind_research/runtime/upgrade3/progressive_review_plan.py
++++ b/optomind_research/runtime/upgrade3/progressive_review_plan.py
+@@ -38,6 +38,7 @@ PARTS_PLAN_SCHEMA_VERSION = "optomind.progressive_review_plan.v2"
+ # must invalidate only that stage on resume, not provisional scope or tools.
+ LEVEL1_OUTLINE_PROMPT_CONTRACT = "level1_outline.review_v2_04"
+ RETRIEVAL_STAGE_CONTRACT = "first_round_query_recovery.v2"
++LOCAL_SOURCE_IDENTITY_CONTRACT = "active_pool_identity.v1"
+ DEFAULT_PLANNER_MODEL = "qwen3.5-plus"
+ DEFAULT_READER_MODEL = "qwen3.7-flash"
+ DEFAULT_POOL_PATH = Path("outputs/planning_support/20260923/practical_refresh/supplement_live/PLANNING_POOL.jsonl")
+@@ -423,6 +424,10 @@ def _merge_supplement_pool_updates(pool_rows: list[dict[str, Any]], tool_result:
+         groups.append(group)
+         pending.extend(group.get("results") or [])
+     candidate_rows: list[Mapping[str, Any]] = []
++    candidate_rows.extend(
++        row for row in (tool_result.get("local_pool_updates") or [])
++        if isinstance(row, Mapping)
++    )
+     for group in groups:
+         candidate_rows.extend(row for row in (group.get("candidate_rows") or []) if isinstance(row, Mapping))
+         derived_path = Path(str(group.get("derived_pool_path") or ""))
+@@ -482,6 +487,75 @@ def _merge_supplement_pool_updates(pool_rows: list[dict[str, Any]], tool_result:
+     return pool_rows
+ 
+ 
++def _local_triage_pool_candidates(result: Mapping[str, Any], pool_rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
++    """Promote useful pool-outside local passages to the current run's pool."""
++
++    known = {_text(row.get("_paper_id")) for row in pool_rows if isinstance(row, Mapping)}
++    known_handles = {_text(row.get("_source_handle")) for row in pool_rows if isinstance(row, Mapping)}
++    passages = result.get("passages") if isinstance(result.get("passages"), list) else []
++    grouped: dict[str, list[Mapping[str, Any]]] = {}
++    for passage in passages:
++        if not isinstance(passage, Mapping):
++            continue
++        paper_id = _text(passage.get("paper_id") or passage.get("canonical_paper_id"))
++        # An exact DOI match may retain an older stable paper ID while already
++        # carrying the current pool handle. It is usable material, not a new
++        # paper to number a second time.
++        if paper_id and paper_id not in known and _text(passage.get("source_handle")) not in known_handles:
++            grouped.setdefault(paper_id, []).append(passage)
++    output: list[dict[str, Any]] = []
++    for paper_id, rows in grouped.items():
++        first = rows[0]
++        title = _text(first.get("title"))
++        doi = _text(first.get("doi"))
++        year = _text(first.get("year"))
++        identity = {
++            "canonical_paper_id": paper_id,
++            "title": title,
++            "doi": doi,
++            "year": year,
++        }
++        output.append({
++            "paper_id": paper_id,
++            "title": title,
++            "doi": doi,
++            "year": year,
++            "identity_status": "local_index_outside_current_pool",
++            "pool_action": "admit_local_material",
++            "planning_view": {
++                "paper_identity": identity,
++                "planning_summary": " ".join(_text(row.get("text")) for row in rows if _text(row.get("text"))),
++                "material_scope": "bounded local triage passage",
++            },
++            "local_passages": [dict(row) for row in rows],
++        })
++    return output
++
++
++def _bind_local_triage_result_handles(result: Mapping[str, Any], pool_rows: Sequence[Mapping[str, Any]]) -> None:
++    """Bind every local result source to the handles assigned by pool inclusion."""
++
++    by_paper = {
++        _text(row.get("_paper_id")): _text(row.get("_source_handle"))
++        for row in pool_rows
++        if isinstance(row, Mapping) and _text(row.get("_paper_id")) and _text(row.get("_source_handle"))
++    }
++
++    def walk(value: Any) -> None:
++        if isinstance(value, dict):
++            paper_id = _text(value.get("paper_id") or value.get("canonical_paper_id"))
++            if paper_id and "source_handle" in value and paper_id in by_paper:
++                value["source_handle"] = by_paper[paper_id]
++            for child in value.values():
++                if isinstance(child, (dict, list, tuple)):
++                    walk(child)
++        elif isinstance(value, (list, tuple)):
++            for child in value:
++                walk(child)
++
++    walk(result)
++
++
+ def qwen_local_token_counter(tokenizer_path: str | Path = DEFAULT_TOKENIZER_PATH) -> Callable[[bytes, Sequence[Mapping[str, Any]]], int]:
+     """Return a local Qwen-family tokenizer counter without downloading assets."""
+ 
+@@ -2731,7 +2805,10 @@ class ProgressiveReviewPlanner:
+             # Only the downstream adaptive tool stages need to re-enter after
+             # the query-recovery contract changed.  Upstream pool/routing and
+             # proposal caches remain reusable on a revision-only resume.
+-            tool_cache_inputs = {"retrieval_loop_contract": RETRIEVAL_STAGE_CONTRACT}
++            tool_cache_inputs = {
++                "retrieval_loop_contract": RETRIEVAL_STAGE_CONTRACT,
++                "local_source_identity_contract": LOCAL_SOURCE_IDENTITY_CONTRACT,
++            }
+ 
+         if self.retrieval_loop_runner is not None:
+             def run_adaptive_cycle() -> dict[str, Any]:
+@@ -5955,12 +6032,19 @@ def make_retrieval_loop_runner(
+                 raw_response_dir=root / "_llm_response_cache",
+             )
+         working_pool = [dict(row) for row in pool_rows]
++        local_pool_updates: list[dict[str, Any]] = []
+         journal_path = root / "retrieval_loop.jsonl"
+         if resume and journal_path.is_file():
+             for line in journal_path.read_text(encoding="utf-8").splitlines():
+                 if not line.strip():
+                     continue
+                 entry = json.loads(line)
++                if config.planning_revision_enabled:
++                    saved_local = entry.get("local_triage") or {}
++                    saved_candidates = saved_local.get("local_pool_updates") or []
++                    if saved_candidates:
++                        _merge_supplement_pool_updates(working_pool, {"local_pool_updates": saved_candidates})
++                        local_pool_updates.extend(dict(row) for row in saved_candidates if isinstance(row, Mapping))
+                 recovered = entry.get("external_results") or [entry.get("external_result")]
+                 for result in recovered:
+                     if isinstance(result, Mapping):
+@@ -6000,16 +6084,44 @@ def make_retrieval_loop_runner(
+                 "index_path": index_path, "user_scope": topic, "judge": judge,
+                 "output_dir": root / "local_triage" / _safe_id(gap.gap_id), "read_local": True,
+             }
++            if config.planning_revision_enabled:
++                # The shared index can contain run-local handles from an older
++                # pool.  Rebind current IDs (or exact DOIs) at the triage
++                # boundary, while leaving unmatched stable identities usable
++                # with an empty handle for the normal pool-inclusion path.
++                kwargs["source_identity_map"] = ProgressiveReviewPlanner._source_identity_map(working_pool)
+             try:
+                 result = run_gap_local_triage(gap_row, **kwargs)
+             except TypeError as exc:
+                 # Keep offline compatibility with an older injected helper;
+-                # production always uses the read_local-capable API.
+-                if "read_local" not in str(exc):
++                # production always uses the identity-aware API.
++                message = str(exc)
++                if "source_identity_map" in message:
++                    kwargs.pop("source_identity_map", None)
++                    try:
++                        result = run_gap_local_triage(gap_row, **kwargs)
++                    except TypeError as retry_exc:
++                        if "read_local" not in str(retry_exc):
++                            raise
++                        kwargs.pop("read_local", None)
++                        result = run_gap_local_triage(gap_row, **kwargs)
++                elif "read_local" not in message:
+                     raise
+-                kwargs.pop("read_local", None)
+-                result = run_gap_local_triage(gap_row, **kwargs)
+-            local_results[gap.gap_id] = dict(result)
++                else:
++                    kwargs.pop("read_local", None)
++                    result = run_gap_local_triage(gap_row, **kwargs)
++            result = dict(result)
++            candidates = (
++                _local_triage_pool_candidates(result, working_pool)
++                if config.planning_revision_enabled else []
++            )
++            if candidates:
++                _merge_supplement_pool_updates(working_pool, {"local_pool_updates": candidates})
++                pool_by_id.update({str(row.get("_paper_id")): row for row in working_pool})
++                local_pool_updates.extend(candidates)
++                _bind_local_triage_result_handles(result, working_pool)
++                result["local_pool_updates"] = candidates
++            local_results[gap.gap_id] = result
+             return dict(result)
+ 
+         def refine_queries(need: Any, round_index: int, previous_queries: Sequence[Mapping[str, Any]],
+@@ -6190,12 +6302,18 @@ def make_retrieval_loop_runner(
+                                  "sources": [dict(item) for item in sources if isinstance(item, Mapping)]})
+                 for owner in owners:
+                     materials_by_chapter.setdefault(owner, []).append(dict(material))
+-        return {
++        output = {
+             "phase": phase, "status": "complete", "retrieval_loop": loop_result,
+             "supplement_results": supplement_results, "directed_results": directed_results,
+             "tool_materials_by_chapter": materials_by_chapter,
+             "consumed_paper_ids": sorted(consumed_ids),
+         }
++        if config.planning_revision_enabled:
++            output.update({
++                "local_pool_updates": local_pool_updates,
++                "pool_rows": [dict(row) for row in working_pool],
++            })
++        return output
+     return run
+ 
+ 
