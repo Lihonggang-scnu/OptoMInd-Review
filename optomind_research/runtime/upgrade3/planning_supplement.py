@@ -1988,6 +1988,71 @@ def _render_supplement_materials(
     return "\n".join(lines).rstrip() + "\n"
 
 
+class _LocalJudgeCheckpointError(RuntimeError):
+    """A failed local read is infrastructure failure, not absent evidence."""
+
+
+class _LocalJudgeCheckpoint:
+    """Reuse exact judge inputs, keeping every failed/successful attempt intact."""
+
+    def __init__(self, judge: Any, root: Path | None, *, retry_failed: bool = False):
+        self.judge, self.root, self.retry_failed = judge, root, retry_failed
+        self.last_call_count = 0
+        self.model_calls = 0
+        self.attempt_paths: list[str] = []
+        self.retried: set[str] = set()
+
+    def __call__(self, gap: Any, bundle: Any) -> Mapping[str, Any]:
+        from .planning_material_triage import _triage_payload, _normalize_judgment, TRIAGE_SYSTEM_PROMPT
+        payload = _triage_payload(gap, bundle)
+        payload.pop("gap_id", None)  # chapter/gap routing does not change a read
+        effective = {
+            "payload": payload, "system_prompt": TRIAGE_SYSTEM_PROMPT,
+            "sources": [{"paper_id": p.paper_id, "source_handle": p.source_handle,
+                         "reading_path": p.reading_path, "card_path": p.card_path}
+                        for p in bundle.passages],
+            "explicit_papers": sorted(gap.existing_paper_ids),
+            "judge": type(self.judge).__qualname__,
+            "settings": {key: getattr(self.judge, key, None) for key in
+                         ("model", "quantitative_model", "max_output_tokens", "thinking_budget")},
+        }
+        signature = hashlib.sha256(json.dumps(effective, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
+        bucket = self.root / signature if self.root else None
+        self.last_call_count = 0
+        if bucket:
+            attempts = sorted(bucket.glob("attempt-*"), key=lambda p: p.stat().st_mtime_ns, reverse=True)
+            self.attempt_paths.extend(str(path) for path in reversed(attempts))
+            for previous in attempts:
+                if (previous / "RESULT.json").is_file():
+                    self.attempt_paths.append(str(previous))
+                    return json.loads((previous / "RESULT.json").read_text(encoding="utf-8"))
+            if attempts and not (self.retry_failed and signature not in self.retried):
+                self.attempt_paths.append(str(attempts[0]))
+                diagnostic = attempts[0] / "FAILED.json"
+                message = json.loads(diagnostic.read_text(encoding="utf-8")).get("error") if diagnostic.is_file() else "interrupted_local_judge_attempt"
+                raise _LocalJudgeCheckpointError(str(message))
+            if attempts:
+                self.retried.add(signature)
+        attempt = allocate_supplement_attempt(bucket) if bucket else None
+        if attempt:
+            self.attempt_paths.append(str(attempt))
+            _write_json(attempt / "REQUEST.json", effective)
+        try:
+            raw = dict(self.judge(gap, bundle))
+            _normalize_judgment(raw, gap)
+        except Exception as exc:
+            self.last_call_count = int(getattr(self.judge, "last_call_count", 1))
+            self.model_calls += self.last_call_count
+            if attempt:
+                _write_json(attempt / "FAILED.json", {"status": "failed", "error": f"{type(exc).__name__}: {exc}"})
+            raise _LocalJudgeCheckpointError(f"{type(exc).__name__}: {exc}") from exc
+        self.last_call_count = int(getattr(self.judge, "last_call_count", 1))
+        self.model_calls += self.last_call_count
+        if attempt:
+            _write_json(attempt / "RESULT.json", raw)
+        return raw
+
+
 def run_gap_local_triage(
     gap: Mapping[str, Any],
     *,
@@ -2000,6 +2065,9 @@ def run_gap_local_triage(
     passages_per_paper: int = 2,
     max_passages: int = 5,
     read_local: bool = True,
+    source_handle_map: Mapping[str, str] | None = None,
+    cache_dir: str | Path | None = None,
+    retry_failed: bool = False,
 ) -> dict[str, Any]:
     """Answer one gap from already-registered local material before any retrieval.
 
@@ -2010,7 +2078,8 @@ def run_gap_local_triage(
     """
 
     from .planning_material_search import PlanningMaterialIndex
-    from .planning_material_triage import LocalGap, triage_gap, read_local_capture, build_writer_material
+    from .planning_material_triage import (LocalGap, TriageJudgment, triage_gap,
+        read_local_capture, build_writer_material)
 
     question = str(gap.get("gap_question") or gap.get("question") or "").strip()
     if not question:
@@ -2026,31 +2095,95 @@ def run_gap_local_triage(
     raw_criteria = gap.get("success_criteria") or []
     if isinstance(raw_criteria, str):
         raw_criteria = [raw_criteria]
+    # Direct adapter callers can supply output requirements without going
+    # through the retrieval-loop projection. Keep absent-output input unchanged.
+    criteria = [str(item) for item in raw_criteria if str(item).strip()]
+    required_outputs = gap.get("required_outputs") or ()
+    if isinstance(required_outputs, (str, Mapping)):
+        required_outputs = [required_outputs]
+    for output in required_outputs:
+        if isinstance(output, Mapping):
+            text = json.dumps({key: value for key, value in output.items()
+                               if key not in {"output_id", "question_id", "required_output_ids"}},
+                              ensure_ascii=False, sort_keys=True)
+        else:
+            text = str(output or "").strip()
+        if text and text not in criteria:
+            criteria.append(text)
+    # A P label is run-local. Only the current caller's mapping can resolve a
+    # handle-only nomination; stable IDs always take precedence over old labels.
+    handle_map = {str(k): str(v) for k, v in (source_handle_map or {}).items() if k and v}
+    paper_ids: list[str] = []
+    unresolved_handles: list[str] = []
+    for known in gap.get("known_papers") or ():
+        row = known if isinstance(known, Mapping) else {"paper_id": known}
+        paper_id = str(row.get("canonical_paper_id") or row.get("paper_id") or "").strip()
+        if not paper_id:
+            handle = str(row.get("source_handle") or "")
+            paper_id = handle_map.get(handle, "")
+            if handle and not paper_id:
+                unresolved_handles.append(handle)
+        if paper_id and paper_id not in paper_ids:
+            paper_ids.append(paper_id)
+    for handle in gap.get("known_paper_handles") or ():
+        if str(handle) not in handle_map:
+            unresolved_handles.append(str(handle))
+        if str(handle) in handle_map and handle_map[str(handle)] not in paper_ids:
+            paper_ids.append(handle_map[str(handle)])
     local_gap = LocalGap(
         gap_id=str(gap.get("gap_id") or "gap"),
         question=question,
         intended_use=str(gap.get("intended_use") or intended_use),
         user_scope=str(gap.get("user_scope") or user_scope),
-        success_criteria=tuple(str(item) for item in raw_criteria if str(item).strip()),
+        success_criteria=tuple(criteria),
         chapter_ids=tuple(str(item) for item in (gap.get("chapter_ids") or ()) if str(item).strip()),
         concepts=tuple(concepts[:6]),
         required_concepts=tuple(str(item) for item in (gap.get("required_concepts") or ()) if str(item).strip()),
-        existing_handles=tuple(str(item) for item in (gap.get("known_paper_handles") or ()) if str(item).strip()),
+        existing_handles=tuple(handle for handle, paper_id in handle_map.items() if paper_id in paper_ids),
+        existing_paper_ids=tuple(paper_ids),
+        current_source_handles=tuple((paper_id, handle) for handle, paper_id in handle_map.items()),
+        reusable_material=str(gap.get("reusable_material") or ""),
     )
+    checkpoint = _LocalJudgeCheckpoint(judge, Path(cache_dir) if cache_dir else (Path(output_dir) / "judge_inputs" if output_dir else None),
+        retry_failed=retry_failed or gap.get("retry_empty_result") is True) if judge is not None else None
+    failure = ""
+    judgment = TriageJudgment(gap=local_gap, decision="external_research", still_missing=question)
     with PlanningMaterialIndex(Path(index_path), readonly=True) as index:
-        judgment = triage_gap(
-            index, local_gap,
-            judge=judge,
-            top_papers=top_papers,
-            passages_per_paper=passages_per_paper,
-            max_passages=max_passages,
-        )
-        if read_local and judge is not None and judgment.decision == "local_deep_read":
-            judgment = read_local_capture(index, judgment, judge=judge)
+        try:
+            judgment = triage_gap(
+                index, local_gap, judge=checkpoint,
+                top_papers=top_papers, passages_per_paper=passages_per_paper,
+                max_passages=max_passages,
+            )
+            if output_dir is not None:
+                # Preserve the successful first read before the incremental call.
+                _write_json(Path(output_dir) / "INITIAL_LOCAL_TRIAGE.json", judgment.to_dict())
+            if read_local and checkpoint is not None and judgment.decision != "direct_use":
+                judgment = read_local_capture(index, judgment, judge=checkpoint)
+        except _LocalJudgeCheckpointError as exc:
+            failure = str(exc)
+            judgment.decision = "external_research"
+            judgment.answers_requested_question = False
+            judgment.still_missing = judgment.still_missing or question
+            judgment.reason = "local_judge_failed;" + failure
+    if checkpoint is not None:
+        judgment.model_calls = checkpoint.model_calls
+    retained = local_gap.reusable_material.strip()
+    if retained and retained not in judgment.usable_content:
+        judgment.usable_content = retained + ("\n\n" + judgment.usable_content if judgment.usable_content else "")
     payload = judgment.to_dict()
     payload["writer_material"] = build_writer_material(judgment)
     payload["gap_id"] = local_gap.gap_id
+    if unresolved_handles:
+        payload["unresolved_known_paper_handles"] = list(dict.fromkeys(unresolved_handles))
     payload["external_request"] = judgment.external_request()
+    if checkpoint is not None:
+        payload["local_judge_attempts"] = list(dict.fromkeys(checkpoint.attempt_paths))
+    if failure:
+        payload.update({"status": "failed", "provider_failed": True, "error": failure,
+                        "failure_stage": "local_triage"})
+        payload["writer_material"].update({key: payload[key] for key in
+            ("status", "provider_failed", "error", "failure_stage", "local_judge_attempts") if key in payload})
     if output_dir is not None:
         root = Path(output_dir)
         root.mkdir(parents=True, exist_ok=True)

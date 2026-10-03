@@ -27,7 +27,7 @@ from __future__ import annotations
 import json
 import re
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
@@ -37,6 +37,7 @@ from .planning_material_search import (
     SearchResult,
     _adjacent_terms,
     paper_context,
+    nominated_paper_passage,
     search,
 )
 
@@ -72,6 +73,8 @@ QUANTITATIVE_USES = {"quantification", "application_outcome"}
 
 MAX_PASSAGES = 5
 PASSAGE_CHARS = 1100
+LOCAL_EXPANSION_PAPERS = 12
+LOCAL_INCREMENT_CHARS = 24000
 
 TRIAGE_SYSTEM_PROMPT = """你是综述作者的材料阅读助手，围绕一个写作问题提炼具体研究认识。
 一起阅读 material_found 和 paper_context，保留研究对象或材料、研究设置、比较对象、方法、操作或条件（如有）、结果或论证、验证方式与适用边界。卡片、专家综述转述和原文都按内容是否能回答问题使用，不因形式自动降权。
@@ -104,6 +107,9 @@ class LocalGap:
     concepts: tuple[str, ...] = ()
     required_concepts: tuple[str, ...] = ()
     existing_handles: tuple[str, ...] = ()
+    existing_paper_ids: tuple[str, ...] = ()
+    current_source_handles: tuple[tuple[str, str], ...] = ()
+    reusable_material: str = ""
 
     def __post_init__(self) -> None:
         if not str(self.gap_id or "").strip():
@@ -127,6 +133,8 @@ class LocalGap:
             "concepts": list(self.concepts),
             "required_concepts": list(self.required_concepts),
             "existing_handles": list(self.existing_handles),
+            "existing_paper_ids": list(self.existing_paper_ids),
+            "current_source_handles": dict(self.current_source_handles),
         }
 
 
@@ -152,6 +160,7 @@ class LocalReadingPassage:
     #: passage lets a judge attach a number to the wrong group; the labelled
     #: statements are what the judge is asked to quote from.
     key_sentences: tuple[str, ...] = ()
+    selection_reason: str = "query_match"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -169,6 +178,7 @@ class LocalReadingPassage:
             "reading_path": self.reading_path,
             "card_path": self.card_path,
             "from_existing_field": self.from_existing_field,
+            "selection_reason": self.selection_reason,
         }
 
 
@@ -184,6 +194,8 @@ class LocalReadingBundle:
     new_task_fields: tuple[str, ...] = ()
     required_concepts_all_missing: tuple[str, ...] = ()
     paper_contexts: list[Any] = field(default_factory=list)
+    bounded_read_omissions: tuple[str, ...] = ()
+    explicit_reading_status: dict[str, str] = field(default_factory=dict)
 
     @property
     def direct_evidence(self) -> list[LocalReadingPassage]:
@@ -205,6 +217,8 @@ class LocalReadingBundle:
             "not_matched_reason": self.not_matched_reason,
             "new_task_fields": list(self.new_task_fields),
             "required_concepts_all_missing": list(self.required_concepts_all_missing),
+            "bounded_read_omissions": list(self.bounded_read_omissions),
+            "explicit_reading_status": dict(self.explicit_reading_status),
             "paper_contexts": [
                 item.to_dict() if hasattr(item, "to_dict") else dict(item)
                 for item in self.paper_contexts
@@ -357,6 +371,72 @@ def _expanded_hit_text(index: PlanningMaterialIndex, hit: SearchHit) -> str:
     return body
 
 
+def _reading_passage(index: PlanningMaterialIndex, gap: LocalGap, hit: SearchHit,
+                     *, text: str | None = None) -> LocalReadingPassage:
+    body = _expanded_hit_text(index, hit) if text is None else text
+    handles = dict(gap.current_source_handles)
+    handle = handles.get(hit.paper_id, hit.paper_id if hit.source_handle in handles.values() else hit.source_handle)
+    return LocalReadingPassage(
+        source_handle=handle, paper_id=hit.paper_id, title=hit.title,
+        year=hit.year, doi=hit.doi, reading_role=_reading_role(hit), text=body,
+        best_sentence=_clip(hit.best_sentence, 500), section_path=hit.section_path,
+        material_depth=hit.material_depth, reading_path=hit.reading_path,
+        card_path=hit.card_path,
+        from_existing_field=(hit.paper_id in gap.existing_paper_ids or handle in gap.existing_handles),
+        key_sentences=_key_sentences(body, gap.question),
+        selection_reason="query_match" if hit.match_terms else "explicit_nomination_fallback",
+    )
+
+
+def _append_bounded_hits(index: PlanningMaterialIndex, bundle: LocalReadingBundle,
+                         hits: Sequence[SearchHit], *, budget: int = LOCAL_INCREMENT_CHARS) -> int:
+    """Add intact relevant passages, first giving unread papers a fair share.
+
+    The budget counts exactly the added material text sent to the judge. No
+    additional opening/context is added here; the initial contexts are retained.
+    Oversized sections fall back to the intact search segment, never a prefix
+    that could drop a condition or reverse the reported result.
+    """
+    represented = {p.paper_id for p in bundle.passages}
+    first, rest, seen = [], [], set(represented)
+    for hit in hits:
+        if hit.paper_id not in seen:
+            first.append(hit)
+            seen.add(hit.paper_id)
+        else:
+            rest.append(hit)
+    remaining = max(0, int(budget))
+    count = 0
+    deferred: list[SearchHit] = []
+    omitted: list[str] = []
+
+    def append(hit: SearchHit, limit: int) -> bool:
+        nonlocal remaining, count
+        expanded = _expanded_hit_text(index, hit) if hit.match_terms else hit.text
+        if any(p.paper_id == hit.paper_id and (expanded == p.text or hit.text in p.text)
+               for p in bundle.passages):
+            return True
+        body = expanded if len(expanded) <= min(6000, limit) else hit.text
+        if not body.strip() or len(body) > limit:
+            return False
+        bundle.passages.append(_reading_passage(index, bundle.gap, hit, text=body))
+        remaining -= len(body)
+        count += 1
+        return True
+
+    for position, hit in enumerate(first):
+        if not append(hit, remaining // max(1, len(first) - position)):
+            deferred.append(hit)
+    # A long first passage must get a second opportunity with the spare budget;
+    # per-paper fair shares are not a second permanent candidate cutoff.
+    for hit in [*deferred, *rest]:
+        if not append(hit, remaining):
+            omitted.append(hit.paper_id)
+    bundle.bounded_read_omissions = tuple(dict.fromkeys([*bundle.bounded_read_omissions, *omitted]))
+
+    return count
+
+
 def prepare_local_reading(
     index: PlanningMaterialIndex,
     gap: LocalGap,
@@ -383,25 +463,43 @@ def prepare_local_reading(
         search_found=result.found,
         not_matched_reason=result.not_matched_reason,
     )
-    existing = {str(handle) for handle in gap.existing_handles}
     for hit in result.hits[: max(1, int(max_passages))]:
-        reading_text = _expanded_hit_text(index, hit)
-        bundle.passages.append(LocalReadingPassage(
-            source_handle=hit.source_handle,
-            paper_id=hit.paper_id,
-            title=hit.title,
-            year=hit.year,
-            doi=hit.doi,
-            reading_role=_reading_role(hit),
-            text=reading_text,
-            best_sentence=_clip(hit.best_sentence, 500),
-            section_path=hit.section_path,
-            material_depth=hit.material_depth,
-            reading_path=hit.reading_path,
-            card_path=hit.card_path,
-            from_existing_field=hit.source_handle in existing,
-            key_sentences=_key_sentences(reading_text, gap.question),
-        ))
+        bundle.passages.append(_reading_passage(index, gap, hit))
+    initial_paper_ids = list(dict.fromkeys(p.paper_id for p in bundle.passages))
+    # Explicit identities add reading opportunities, never a relevance verdict.
+    # Keep the ordinary selection intact; the extra input has its own hard cap.
+    pinned_hits = []
+    for paper_id in gap.existing_paper_ids[:LOCAL_EXPANSION_PAPERS]:
+        if index.paper(paper_id) is None:
+            bundle.explicit_reading_status[paper_id] = "not_indexed"
+            continue
+        selected = search(
+            index, gap.question, concepts=gap.concepts,
+            required_concepts=gap.required_concepts, paper_ids=[paper_id],
+            top_papers=1, passages_per_paper=1,
+        ).hits
+        if not selected:
+            fallback = nominated_paper_passage(index, paper_id)
+            if fallback is not None:
+                selected = [fallback]
+            else:
+                bundle.explicit_reading_status[paper_id] = "no_substantive_indexed_passage"
+        pinned_hits.extend(selected)
+    bundle.bounded_read_omissions = gap.existing_paper_ids[LOCAL_EXPANSION_PAPERS:]
+    _append_bounded_hits(index, bundle, pinned_hits)
+    for paper_id in gap.existing_paper_ids:
+        if any(p.paper_id == paper_id for p in bundle.passages):
+            bundle.explicit_reading_status[paper_id] = ("included_nomination_fallback"
+                if any(p.paper_id == paper_id and p.selection_reason == "explicit_nomination_fallback" for p in bundle.passages)
+                else "included")
+        elif paper_id in gap.existing_paper_ids[LOCAL_EXPANSION_PAPERS:]:
+            bundle.explicit_reading_status[paper_id] = "candidate_cap"
+        elif paper_id not in bundle.explicit_reading_status:
+            bundle.explicit_reading_status[paper_id] = "passage_budget"
+    bundle.search_found = bool(bundle.passages)
+    if bundle.search_found:
+        bundle.not_matched_reason = ""
+    bundle.searched_papers = len({hit.paper_id for hit in [*result.hits, *pinned_hits]})
     bundle.new_task_fields = (
         ("question", "intended_use", "read_focus") if bundle.direct_evidence else ()
     )
@@ -419,7 +517,10 @@ def prepare_local_reading(
     # still visible without re-reading the whole paper.
     matched_paper_ids = list(dict.fromkeys(item.paper_id for item in bundle.passages if item.paper_id))
     if matched_paper_ids:
-        bundle.paper_contexts = paper_context(index, matched_paper_ids[:4])
+        bundle.paper_contexts = paper_context(index, initial_paper_ids[:4])
+        handles = dict(gap.current_source_handles)
+        for context in bundle.paper_contexts:
+            context.source_handle = handles.get(context.paper_id, context.paper_id if context.source_handle in handles.values() else context.source_handle)
     return bundle, result
 
 
@@ -451,7 +552,7 @@ def _concept_present(concept: str, text: str) -> bool:
 
 
 def _triage_payload(gap: LocalGap, bundle: LocalReadingBundle) -> dict[str, Any]:
-    return {
+    payload = {
         "gap_id": gap.gap_id,
         "question": gap.question,
         "intended_use": gap.intended_use,
@@ -482,6 +583,10 @@ def _triage_payload(gap: LocalGap, bundle: LocalReadingBundle) -> dict[str, Any]
             "papers_seen": bundle.searched_papers,
         },
     }
+
+    if gap.reusable_material:
+        payload["reusable_material"] = gap.reusable_material
+    return payload
 
 
 def _policy_decision(gap: LocalGap, bundle: LocalReadingBundle) -> TriageJudgment:
@@ -751,18 +856,33 @@ def _with_comparisons(content: str, comparisons: Sequence[Mapping[str, Any]]) ->
 
 
 def read_local_capture(index: PlanningMaterialIndex, judgment: TriageJudgment, *, judge: Judge) -> TriageJudgment:
-    """Actually read additional stored sections for the requested detail."""
-    from dataclasses import replace
-    focused = replace(judgment.gap, question=judgment.gap.question + "\nRead specifically: " + (judgment.read_focus or judgment.gap.question))
-    bundle, _ = prepare_local_reading(index, focused, max_passages=10, passages_per_paper=3, top_papers=6)
-    bundle.gap = judgment.gap
-    bundle.new_task_fields = ("focused_local_read",)
-    existing = {(p.paper_id, p.text) for p in bundle.passages}
-    bundle.passages.extend(p for p in judgment.passages if (p.paper_id, p.text) not in existing)
-    normalized = _normalize_judgment(judge(judgment.gap, bundle), judgment.gap)
-    result = TriageJudgment(gap=judgment.gap, source="judge+focused_local_read", passages=bundle.passages,
+    """One diverse, bounded incremental read after an insufficient first read."""
+    gap = judgment.gap
+    question = gap.question
+    if judgment.read_focus:
+        question += "\nRead specifically: " + judgment.read_focus
+    result = search(index, question, concepts=gap.concepts,
+                    required_concepts=gap.required_concepts,
+                    top_papers=LOCAL_EXPANSION_PAPERS, passages_per_paper=2)
+    previous = judgment.local_reading or LocalReadingBundle(gap=gap)
+    bundle = replace(previous, passages=list(previous.passages),
+                     paper_contexts=list(previous.paper_contexts),
+                     explicit_reading_status=dict(previous.explicit_reading_status),
+                     new_task_fields=("focused_local_read",), searched_papers=result.matched_papers)
+    if not _append_bounded_hits(index, bundle, result.hits):
+        return judgment
+    bundle.required_concepts_all_missing = tuple(
+        concept for concept in gap.required_concepts
+        if not any(_concept_present(concept, p.text) for p in bundle.passages)
+    )
+    normalized = _normalize_judgment(judge(gap, bundle), gap)
+    result = TriageJudgment(gap=gap, source="judge+focused_local_read", passages=bundle.passages,
                            local_reading=bundle, model_calls=judgment.model_calls+int(getattr(judge, "last_call_count", 1)), **normalized)
     result.usable_content = _with_comparisons(result.usable_content, result.quantitative_comparisons)
+    # A later partial read must not erase useful content already obtained.
+    old, new = judgment.usable_content.strip(), result.usable_content.strip()
+    if old and old not in new:
+        result.usable_content = old + ("\n\n" + new if new else "")
     return _apply_guardrails(result, bundle)
 
 
@@ -912,6 +1032,7 @@ def build_writer_material(
             "year": passage.year,
             "doi": passage.doi,
             "reading_role": passage.reading_role,
+            "selection_reason": passage.selection_reason,
             "section_path": list(passage.section_path),
             "material_depth": passage.material_depth,
             "reading_path": passage.reading_path,

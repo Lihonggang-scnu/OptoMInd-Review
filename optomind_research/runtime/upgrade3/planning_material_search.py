@@ -1348,6 +1348,7 @@ def search(
     max_candidates: int = BM25_CANDIDATES,
     kinds: Sequence[str] | None = None,
     required_concepts: Sequence[str] = (),
+    paper_ids: Sequence[str] = (),
 ) -> SearchResult:
     """Answer one concrete question from local material only.
 
@@ -1373,18 +1374,22 @@ def search(
     # concept list still drives the local ranking.
     match = fts_query(_dedupe_terms([*terms[:MAX_FTS_CONCEPTS], *extras]))
     index_counts = index.counts()
+    # Restrict before the global BM25 cap so explicitly named local papers
+    # get the same scoring path even when absent from the ordinary window.
+    nominated = tuple(dict.fromkeys(str(item) for item in paper_ids if str(item)))
+    restriction = " AND segment_fts.paper_id IN (" + ",".join("?" for _ in nominated) + ")" if nominated else ""
     rows = list(index._conn.execute(
-        """
+        f"""
         SELECT segment_fts.segment_id AS segment_id,
                segment_fts.paper_id AS paper_id,
                segment_fts.segment_kind AS segment_kind,
                bm25(segment_fts) AS rank
         FROM segment_fts
-        WHERE segment_fts MATCH ?
+        WHERE segment_fts MATCH ? {restriction}
         ORDER BY rank
         LIMIT ?
         """,
-        (match, max(1, int(max_candidates))),
+        (match, *nominated, max(1, int(max_candidates))),
     ))
     result = SearchResult(
         question=question,
@@ -1516,6 +1521,33 @@ def search(
     if not result.hits:
         result.not_matched_reason = "no_paper_passed_ranking"
     return result
+
+
+def nominated_paper_passage(index: PlanningMaterialIndex, paper_id: str) -> SearchHit | None:
+    """One substantive existing summary/opening for an explicit nomination.
+
+    This is an identity-directed reading opportunity when query vocabulary does
+    not match, not a search relevance score. It does not inspect external files
+    or substitute references/declarations for readable material.
+    """
+    paper = index.paper(paper_id)
+    if paper is None:
+        return None
+    for kind in ("card_work_summary", "card_planning_summary", "card_key_finding", "document_block"):
+        for segment in index.segments_for(paper_id, kind):
+            body = str(segment["text"]).strip()
+            section = tuple(part for part in str(segment["section_path"]).split(" / ") if part)
+            if not body or _is_non_evidence_material(body, section):
+                continue
+            return SearchHit(
+                paper_id=paper_id, source_handle=str(paper["source_handle"]),
+                title=str(paper["title"]), year=str(paper["year"]), doi=str(paper["doi"]),
+                segment_kind=kind, section_path=section, text=body, score=0.0,
+                match_terms=(), material_depth=str(paper["material_depth"]),
+                reading_path=str(paper["snapshot_path"]), card_path=str(paper["card_path"]),
+                pool_action=str(paper["pool_action"]), best_sentence="",
+            )
+    return None
 
 
 def _query_pairs(terms: Sequence[QueryTerm]) -> set[tuple[str, str]]:

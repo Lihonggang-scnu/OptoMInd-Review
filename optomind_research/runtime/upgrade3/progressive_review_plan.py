@@ -683,7 +683,7 @@ def _resolve_planner_handles(value: Mapping[str, Any], handle_to_id: Mapping[str
                                for item in row.get("known_papers") or []]
         for candidate in row.get("known_papers") or []:
             if isinstance(candidate, Mapping):
-                raw_id = candidate.get("source_handle") or candidate.get("paper_id") or candidate.get("canonical_paper_id")
+                raw_id = candidate.get("canonical_paper_id") or candidate.get("paper_id") or candidate.get("source_handle")
                 candidate["paper_id"] = _resolve_source_handle(raw_id, handle_to_id)
     return result
 
@@ -2937,7 +2937,7 @@ def _normalize_gaps(gaps: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
             "reviewed_references": [dict(x) for x in (raw.get("reviewed_references") or []) if isinstance(x, Mapping)],
             "chapter_ids": list(dict.fromkeys(_text(x) for x in (raw.get("chapter_ids") or []) if _text(x))),
             "priority": raw.get("priority", 0),
-            **{key: raw[key] for key in ("intended_use", "user_scope", "required_concepts", "known_paper_handles", "comparison_object", "need_id") if key in raw},
+            **{key: raw[key] for key in ("intended_use", "user_scope", "required_concepts", "known_paper_handles", "comparison_object", "need_id", "retry_empty_result") if key in raw},
         })
         if not normalized[-1]["success_criteria"]:
             normalized[-1]["success_criteria"] = ["Return directly relevant evidence or state why the gap remains unresolved."]
@@ -6636,16 +6636,20 @@ def make_planning_supplement_runner(
                         judge=local_judge,
                         output_dir=phase_root / "local_triage" / gap_id,
                         read_local=True,
+                        source_handle_map=context.get("source_handle_map") or {},
+                        cache_dir=config.output_dir / "local_lookup",
+                        retry_failed=gap.get("retry_empty_result") is True,
                     )
                 except Exception as exc:  # local triage failure must not hide the gap
                     local_triage.append({"gap_id": gap_id, "decision": "triage_failed", "error": type(exc).__name__})
                     remaining.append(gap)
                     continue
                 local_triage.append(triage)
-                if triage.get("decision") == "external_research":
+                if triage.get("decision") == "external_research" and not triage.get("provider_failed"):
                     remaining.append(gap)
         if not remaining:
-            return {"status": "local_material_ready", "results": [], "local_triage": local_triage}
+            return {"status": "local_triage_failed" if any(row.get("provider_failed") for row in local_triage) else "local_material_ready",
+                    "results": [], "local_triage": local_triage}
         if not allow_external:
             return {
                 "status": "external_research_required",
@@ -6989,6 +6993,30 @@ def make_retrieval_loop_runner(
                             linked.extend({"query_text": text, "query_type": kind, "facet_id": facet["id"]}
                                           for text in facet.get(key) or [] if _text(text))
                 request["targeted_queries"] = linked[:3]
+        for request in gaps:
+            for row in request.get("known_papers") or []:
+                if isinstance(row, dict) and not (row.get("canonical_paper_id") or row.get("paper_id")):
+                    paper_id = _text((source_handle_map or {}).get(_text(row.get("source_handle"))))
+                    if paper_id:
+                        row["paper_id"] = paper_id
+            nominated = {_text(row.get("canonical_paper_id") or row.get("paper_id"))
+                         for row in request.get("known_papers") or [] if isinstance(row, Mapping)}
+            for handle in request.get("known_paper_handles") or []:
+                paper_id = _text((source_handle_map or {}).get(_text(handle)))
+                if paper_id and paper_id not in nominated:
+                    request["known_papers"].append({"paper_id": paper_id})
+                    nominated.add(paper_id)
+        index_path = Path(local_index_path) if local_index_path else config.output_dir / "planning_material_index.sqlite"
+        # Conservative generation guard for journal replay. The durable judge
+        # cache below fingerprints actual material, so WAL checkpoint/stat-only
+        # changes may re-inspect but cannot repay identical model inputs.
+        local_index_generation = []
+        for path in (index_path, Path(str(index_path) + "-wal")):
+            if path.is_file():
+                stat = path.stat()
+                if path != index_path and stat.st_size == 0:
+                    continue  # read-only SQLite can create an empty WAL
+                local_index_generation.append([str(path.resolve()), stat.st_ino, stat.st_size, stat.st_mtime_ns])
         needs = needs_from_planner_gap_rows(gaps, intended_use="mechanism", user_scope=topic)
         kind_by_id: dict[str, str] = {}
         request_by_id: dict[str, Mapping[str, Any]] = {}
@@ -7004,7 +7032,13 @@ def make_retrieval_loop_runner(
         current_sources = {_text(row.get("_paper_id") or _canonical_paper_id(row)): row
                            for row in pool_rows if isinstance(row, Mapping)}
 
+        def lookup_compatible(cached: Mapping[str, Any], nominations: list[str]) -> bool:
+            return (cached.get("local_index_generation", local_index_generation) == local_index_generation
+                    and cached.get("local_nominations", nominations) == nominations)
+
         def source_compatible(cached: Mapping[str, Any]) -> bool:
+            # A conservative index-generation change requires a fresh look but
+            # cannot discard earlier useful material from compatible sources.
             fingerprints = cached.get("source_fingerprints")
             if not isinstance(fingerprints, Mapping) or not all(
                 paper_id not in current_sources or _supplement_source_fingerprint(current_sources[paper_id]) == signature
@@ -7034,6 +7068,9 @@ def make_retrieval_loop_runner(
                        and isinstance(row.get("contract"), Mapping)
                        and row["contract"].get("research") == contract["research"]
                        and row["contract"].get("research_key") == contract["research_key"]]
+            nominations = sorted({_text(row.get("canonical_paper_id") or row.get("paper_id"))
+                                  for row in request.get("known_papers") or [] if isinstance(row, Mapping)
+                                  and _text(row.get("canonical_paper_id") or row.get("paper_id"))})
             used_ids = {paper_id for row in related for paper_id in (row.get("source_fingerprints") or {})}
             used_ids.update(_text(row.get("canonical_paper_id") or row.get("paper_id"))
                             for row in request.get("known_papers") or [] if isinstance(row, Mapping))
@@ -7041,31 +7078,35 @@ def make_retrieval_loop_runner(
                 "source": _supplement_source_fingerprint(current_sources[paper_id]),
                 "supplement": _supplement_material_fingerprints(current_sources[paper_id]),
             } for paper_id in sorted(used_ids) if paper_id in current_sources}
+            effective_sources = dict(source_context)
+            if local_index_generation or nominations:
+                effective_sources["local_lookup"] = {"index_generation": local_index_generation, "nominations": nominations}
             need.need_id = "N" + contract["reuse_key"][:20] + (
-                "-" + _material_content_signature(source_context) if source_context else "")
+                "-" + _material_content_signature(effective_sources) if effective_sources else "")
             contract_by_id[need.need_id] = contract
             kind_by_id[need.need_id] = "supplement"
             inherited = [row for row in related if source_compatible(row)]
             inherited_by_id[need.need_id] = inherited
             exact = cache_records.get(contract["reuse_key"]) or {}
-            if exact.get("contract") == contract and source_compatible(exact) and _supplement_answered(exact.get("state") or {}):
+            if exact.get("contract") == contract and source_compatible(exact) and lookup_compatible(exact, nominations) and _supplement_answered(exact.get("state") or {}):
                 cached_answer_by_id[need.need_id] = exact["state"]
             covered = {key: set() for key in ("success_criteria", "required_outputs")}
             for row in inherited:
-                if _supplement_answered(row.get("state") or {}):
+                if lookup_compatible(row, nominations) and _supplement_answered(row.get("state") or {}):
                     for key in covered:
                         covered[key].update((row.get("contract") or {}).get("acceptance", {}).get(key) or [])
             delta = dict(request)
             for key in covered:
                 delta[key] = [item for item in request.get(key) or []
                               if _supplement_contract_token(item) not in covered[key]]
+            delta["local_acceptance_delta"] = any(len(delta[key]) != len(request.get(key) or []) for key in covered)
             # Only prior answered requirements may be removed. Partial prose
             # stays available but never supplies completion by its shape.
             delta["reusable_material"] = "\n\n".join(dict.fromkeys(
                 _text(row.get("state", {}).get("usable_content")) for row in inherited
                 if _text(row.get("state", {}).get("usable_content"))))
             if inherited and not any(delta[key] for key in covered):
-                answered_states = [row["state"] for row in inherited if _supplement_answered(row.get("state") or {})]
+                answered_states = [row["state"] for row in inherited if lookup_compatible(row, nominations) and _supplement_answered(row.get("state") or {})]
                 if answered_states:
                     cached_answer_by_id[need.need_id] = {
                         **dict(answered_states[0]), "status": "answered", "still_missing": "",
@@ -7135,6 +7176,7 @@ def make_retrieval_loop_runner(
         local_results: dict[str, Mapping[str, Any]] = {}
         external_results: dict[str, list[Mapping[str, Any]]] = {}
         explicit_retry_consumed: set[str] = set()
+        local_retry_consumed: set[str] = set()
         pool_by_id = {str(row.get("_paper_id")): dict(row) for row in working_pool if isinstance(row, Mapping)}
         paper_to_handle = {str(value): str(key) for key, value in (source_handle_map or {}).items()}
 
@@ -7150,12 +7192,19 @@ def make_retrieval_loop_runner(
             if kind_by_id.get(gap.gap_id) == "directed":
                 return {"decision": "external_research", "usable_content": "", "still_missing": gap.question,
                         "external_ask": "Read the nominated paper for this task."}
+            prior = request_by_id.get(gap.gap_id) or {}
+            pending_criteria = [*(prior.get("success_criteria") or []), *(prior.get("required_outputs") or [])]
             gap_row = {
                 "gap_id": gap.gap_id, "gap_question": gap.question, "question": gap.question,
                 "intended_use": gap.intended_use, "user_scope": gap.user_scope,
-                "success_criteria": list(gap.success_criteria), "chapter_ids": list(gap.chapter_ids),
+                "success_criteria": ([_supplement_requirement_text(item) for item in pending_criteria]
+                    if prior.get("local_acceptance_delta") else list(gap.success_criteria)),
+                "chapter_ids": list(gap.chapter_ids),
                 "targeted_queries": [{"query_text": item, "query_type": "keyword"} for item in gap.concepts],
-                "required_concepts": list(gap.required_concepts), "known_paper_handles": list(gap.existing_handles),
+                "required_concepts": list(gap.required_concepts),
+                "known_paper_handles": list(prior.get("known_paper_handles") or gap.existing_handles),
+                "known_papers": list(prior.get("known_papers") or []),
+                "reusable_material": _text(prior.get("reusable_material")) if prior.get("local_acceptance_delta") else "",
             }
             # A planner may supply a Chinese question without English query
             # terms. Keep that question for the reader, but use the existing
@@ -7178,16 +7227,17 @@ def make_retrieval_loop_runner(
             kwargs = {
                 "index_path": index_path, "user_scope": topic, "judge": judge,
                 "output_dir": root / "local_triage" / _safe_id(gap.gap_id), "read_local": True,
+                "source_handle_map": dict(source_handle_map or {}),
+                "cache_dir": config.output_dir / "local_lookup",
+                "retry_failed": prior.get("retry_empty_result") is True and gap.gap_id not in local_retry_consumed,
             }
-            try:
-                result = run_gap_local_triage(gap_row, **kwargs)
-            except TypeError as exc:
-                # Keep offline compatibility with an older injected helper;
-                # production always uses the read_local-capable API.
-                if "read_local" not in str(exc):
-                    raise
-                kwargs.pop("read_local", None)
-                result = run_gap_local_triage(gap_row, **kwargs)
+            if kwargs["retry_failed"]:
+                local_retry_consumed.add(gap.gap_id)
+            import inspect
+            parameters = inspect.signature(run_gap_local_triage).parameters
+            if not any(p.kind == inspect.Parameter.VAR_KEYWORD for p in parameters.values()):
+                kwargs = {key: value for key, value in kwargs.items() if key in parameters}
+            result = run_gap_local_triage(gap_row, **kwargs)
             prior = request_by_id.get(gap.gap_id) or {}
             retained = _text(prior.get("reusable_material"))
             if retained:
@@ -7407,7 +7457,11 @@ def make_retrieval_loop_runner(
                                            for paper_id in fingerprints if paper_id in pool_by_id}
                 cache_records[key] = {"contract": contract, "state": dict(need_state),
                                       "source_fingerprints": fingerprints, "supplement_fingerprints": supplement_fingerprints,
-                                      "owner_bindings": bindings}
+                                      "owner_bindings": bindings,
+                                      "local_index_generation": local_index_generation,
+                                      "local_nominations": sorted({_text(row.get("canonical_paper_id") or row.get("paper_id"))
+                                          for row in request_by_id.get(need_id, {}).get("known_papers") or [] if isinstance(row, Mapping)
+                                          and _text(row.get("canonical_paper_id") or row.get("paper_id"))})}
                 need_state["reuse_key"] = key
                 need_state["reused_answer"] = need_id in cached_answer_by_id
             raw = raw_results[-1] if raw_results else {}
@@ -7644,7 +7698,7 @@ def _tool_material_for_prompt(item: Mapping[str, Any]) -> dict[str, Any]:
             "material_depth": _text(source.get("material_depth")),
             "section_path": list(source.get("section_path") or []),
         })
-    return {
+    result = {
         "need_id": _text(item.get("need_id")),
         "question": _text(item.get("question")),
         "intended_use": _text(item.get("intended_use")),
@@ -7656,6 +7710,10 @@ def _tool_material_for_prompt(item: Mapping[str, Any]) -> dict[str, Any]:
         "sources": sources,
         "allowed_use": list(item.get("allowed_use") or []),
     }
+
+    if item.get("provider_failed"):
+        result.update({key: item[key] for key in ("status", "provider_failed", "error", "failure_stage") if key in item})
+    return result
 
 
 def _source_keys_in_value(value: Any) -> tuple[set[str], set[str]]:

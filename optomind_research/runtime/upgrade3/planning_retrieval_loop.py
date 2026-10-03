@@ -689,6 +689,17 @@ def run_retrieval_loop(
                 "local_triage": dict(local),
             }
 
+            if local.get("provider_failed"):
+                # An unread local attempt is not evidence that the library is
+                # insufficient. Retain its partial material and await an explicit
+                # retry; do not spend an external-search round on this failure.
+                entry.update({"status": "provider_retry", "action": "provider_retry",
+                              "counts_as_round": False, "error": str(local.get("error") or "local_judge_failed")})
+                state.status, state.action = "pending", "provider_retry"
+                journal.record(entry)
+                state.attempts.append(entry)
+                continue
+
             if decision == "direct_use" and usable:
                 entry["status"] = "answered"
                 state.status = "answered"

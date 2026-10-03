@@ -1,0 +1,601 @@
+{
+  "evidence_kind": "synthetic fixture, actual baseline production messages; no live/scientific acceptance",
+  "baseline_sha": "91543f7c7e43515eb8e3c8cc86ee09ed54e486c5",
+  "loaded_production_module": "/tmp/wo03-baseline/optomind_research/runtime/upgrade3/planning_supplement.py",
+  "ranking": [
+    {
+      "paper_id": "neighbor-01",
+      "source_handle": "N0001"
+    },
+    {
+      "paper_id": "neighbor-01",
+      "source_handle": "N0001"
+    },
+    {
+      "paper_id": "neighbor-02",
+      "source_handle": "N0002"
+    },
+    {
+      "paper_id": "neighbor-02",
+      "source_handle": "N0002"
+    },
+    {
+      "paper_id": "neighbor-03",
+      "source_handle": "N0003"
+    },
+    {
+      "paper_id": "neighbor-03",
+      "source_handle": "N0003"
+    },
+    {
+      "paper_id": "neighbor-04",
+      "source_handle": "N0004"
+    },
+    {
+      "paper_id": "neighbor-04",
+      "source_handle": "N0004"
+    },
+    {
+      "paper_id": "neighbor-05",
+      "source_handle": "N0005"
+    },
+    {
+      "paper_id": "neighbor-05",
+      "source_handle": "N0005"
+    },
+    {
+      "paper_id": "neighbor-06",
+      "source_handle": "N0006"
+    },
+    {
+      "paper_id": "neighbor-06",
+      "source_handle": "N0006"
+    },
+    {
+      "paper_id": "stable-target",
+      "source_handle": "TGT07"
+    }
+  ],
+  "boundary_calls": [
+    {
+      "messages": [
+        {
+          "role": "system",
+          "content": "你是综述作者的材料阅读助手，围绕一个写作问题提炼具体研究认识。\n一起阅读 material_found 和 paper_context，保留研究对象或材料、研究设置、比较对象、方法、操作或条件（如有）、结果或论证、验证方式与适用边界。卡片、专家综述转述和原文都按内容是否能回答问题使用，不因形式自动降权。\n先理解 user_scope 与问题对象，不能用其他对象、方法、设置或比较冒充本问题的答案。特定模型、材料或场景的结果不得无依据外推到别的对象或设置；观察关联不改写为因果关系；统计或分析方法也不自动证明因果、排除混杂或完成独立验证，方法意义只说材料明确说明的部分。\n输出 usable_content 为一段可直接阅读的字符串：适合本节的具体认识、研究异同、解释和条件。先呈现能区别不同研究的发现或论证，不先套领域常见结论；结尾也要保留这些区别。别把多个不同对象、材料、产品、场景或实验设置的结果合成一个普适机制或结论。\n涉及数字时，先逐项输出 quantitative_comparisons，每项写 research_object、result_or_measure、setting_or_time、groups；groups 是 [{group:原文组名或缩写,value:紧邻该组的结果含单位}]，保留原文分组顺序与缩写，不重新命名或调序；缩写定义另写 group_definitions。逐字读取每个组名紧随的数值，不从常识、总体结论或组名列表反推配对。reported_statistics 记录原文给出的统计量（没报告才留空）。一组一数成对，不用多组名字对应一串数字；总体与分层比较、不同指标或结果分别记录。usable_content 解释含义，不重复重排数字。原文没有的值不编。问题限定某设置、时间或子组时，必须分别读总体和指定部分，不能拿总体结果代替，也不能把分析时点当成条件发生时点。\ndecision 判断当前具体问题是否解决，而不是材料有没有用：direct_use=足以回答当前问题，或有明确材料纠正其错误前提；local_deep_read=本地有材料但需要读另一部分或完整比较（read_focus 说明具体要读什么）；external_research=缺新的研究对象、方法、比较或验证材料（external_ask 提出保留对象和关系的窄需求）。external_research 也可以有丰富 usable_content：已有背景可用但核心问题没回答，就先保留内容并提出剩余检索需求。不要因为找到相关材料就宣布 direct_use。问题里的预设（例如研究阶段、设计、测量或效果）不是事实，先以材料校正。\n对于“是否已经有某类研究/结果”的问题，找到一个符合条件的实例可以回答；几篇论文未提到，或一篇较早综述说当时没有，不能回答当前是否存在。已有内容可以说明截至该来源时间的研究格局；若仍需确认后来是否出现目标研究，就选择 external_research 并提出该项具体检索，不要一边宣布问题已解决一边仍要求确认其核心答案。只有问题明确限定在这些来源的时间或材料范围内，才可据此直接给出否定答案。\nanswers_requested_question 只表示当前材料是否真正回答了原问题和 success_criteria；有用但只覆盖背景或部分条件的内容填 false，明确的实验性阴性结果或明确限于这些来源/时间范围的否定答案可填 true。\nreading_mode=focused_local_read 时已经执行补读，尽力完成具体认识；仍缺新材料则指出缺口，不循环要求读同一材料。摘要能回答背景或明确比较就可用，不强制全文。\n先完成 quantitative_comparisons，再写 usable_content。必须先逐组读原句，不根据总体方向猜测分组方向；结果可以与提问隐含的方向相反。某部分出现反向或无差异时，综合开头就写清不同设置或对象结果不一致，不能先说“一致”再在后面补相反数据。同一指标的总体比较和按条件分层不是同一组数据，不得互换。\n返回 JSON，按此顺序写字段：quantitative_comparisons（无数字则 []）, usable_content, decision, answers_requested_question（必须是 JSON boolean；不能确定或 success_criteria 未满足时填 false）, still_missing, read_focus, external_ask, reason。\n"
+        },
+        {
+          "role": "user",
+          "content": "{\"gap_id\": \"G-synthetic\", \"intended_use\": \"mechanism\", \"local_search\": {\"found\": true, \"not_matched_reason\": \"\", \"papers_seen\": 6}, \"material_found\": [{\"material_depth\": \"fulltext\", \"section\": [\"Results\"], \"source_handle\": \"N0001\", \"text\": \"thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.\", \"type\": \"direct_evidence\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Summary\"], \"source_handle\": \"N0001\", \"text\": \"thermal fatigue coating. N01_CARD: Necessary original qualifier remains untested.\", \"type\": \"planning_summary\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Results\"], \"source_handle\": \"N0002\", \"text\": \"thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.\", \"type\": \"direct_evidence\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Summary\"], \"source_handle\": \"N0002\", \"text\": \"thermal fatigue coating. N02_CARD: Necessary original qualifier remains untested.\", \"type\": \"planning_summary\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Results\"], \"source_handle\": \"N0003\", \"text\": \"thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.\", \"type\": \"direct_evidence\"}], \"paper_context\": [{\"opening\": \"thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.\", \"sections\": [\"Summary\", \"Results\"], \"source_handle\": \"N0001\"}, {\"opening\": \"thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.\", \"sections\": [\"Summary\", \"Results\"], \"source_handle\": \"N0002\"}, {\"opening\": \"thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.\", \"sections\": [\"Summary\", \"Results\"], \"source_handle\": \"N0003\"}], \"question\": \"thermal fatigue coating\", \"reading_mode\": \"initial_read\", \"success_criteria\": [\"measured relation\"], \"user_scope\": \"\"}"
+        }
+      ],
+      "payload": {
+        "gap_id": "G-synthetic",
+        "intended_use": "mechanism",
+        "local_search": {
+          "found": true,
+          "not_matched_reason": "",
+          "papers_seen": 6
+        },
+        "material_found": [
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Results"
+            ],
+            "source_handle": "N0001",
+            "text": "thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.",
+            "type": "direct_evidence"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Summary"
+            ],
+            "source_handle": "N0001",
+            "text": "thermal fatigue coating. N01_CARD: Necessary original qualifier remains untested.",
+            "type": "planning_summary"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Results"
+            ],
+            "source_handle": "N0002",
+            "text": "thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.",
+            "type": "direct_evidence"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Summary"
+            ],
+            "source_handle": "N0002",
+            "text": "thermal fatigue coating. N02_CARD: Necessary original qualifier remains untested.",
+            "type": "planning_summary"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Results"
+            ],
+            "source_handle": "N0003",
+            "text": "thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.",
+            "type": "direct_evidence"
+          }
+        ],
+        "paper_context": [
+          {
+            "opening": "thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.",
+            "sections": [
+              "Summary",
+              "Results"
+            ],
+            "source_handle": "N0001"
+          },
+          {
+            "opening": "thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.",
+            "sections": [
+              "Summary",
+              "Results"
+            ],
+            "source_handle": "N0002"
+          },
+          {
+            "opening": "thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.",
+            "sections": [
+              "Summary",
+              "Results"
+            ],
+            "source_handle": "N0003"
+          }
+        ],
+        "question": "thermal fatigue coating",
+        "reading_mode": "initial_read",
+        "success_criteria": [
+          "measured relation"
+        ],
+        "user_scope": ""
+      },
+      "call_id": "planning-material-triage:G-synthetic"
+    },
+    {
+      "messages": [
+        {
+          "role": "system",
+          "content": "你是综述作者的材料阅读助手，围绕一个写作问题提炼具体研究认识。\n一起阅读 material_found 和 paper_context，保留研究对象或材料、研究设置、比较对象、方法、操作或条件（如有）、结果或论证、验证方式与适用边界。卡片、专家综述转述和原文都按内容是否能回答问题使用，不因形式自动降权。\n先理解 user_scope 与问题对象，不能用其他对象、方法、设置或比较冒充本问题的答案。特定模型、材料或场景的结果不得无依据外推到别的对象或设置；观察关联不改写为因果关系；统计或分析方法也不自动证明因果、排除混杂或完成独立验证，方法意义只说材料明确说明的部分。\n输出 usable_content 为一段可直接阅读的字符串：适合本节的具体认识、研究异同、解释和条件。先呈现能区别不同研究的发现或论证，不先套领域常见结论；结尾也要保留这些区别。别把多个不同对象、材料、产品、场景或实验设置的结果合成一个普适机制或结论。\n涉及数字时，先逐项输出 quantitative_comparisons，每项写 research_object、result_or_measure、setting_or_time、groups；groups 是 [{group:原文组名或缩写,value:紧邻该组的结果含单位}]，保留原文分组顺序与缩写，不重新命名或调序；缩写定义另写 group_definitions。逐字读取每个组名紧随的数值，不从常识、总体结论或组名列表反推配对。reported_statistics 记录原文给出的统计量（没报告才留空）。一组一数成对，不用多组名字对应一串数字；总体与分层比较、不同指标或结果分别记录。usable_content 解释含义，不重复重排数字。原文没有的值不编。问题限定某设置、时间或子组时，必须分别读总体和指定部分，不能拿总体结果代替，也不能把分析时点当成条件发生时点。\ndecision 判断当前具体问题是否解决，而不是材料有没有用：direct_use=足以回答当前问题，或有明确材料纠正其错误前提；local_deep_read=本地有材料但需要读另一部分或完整比较（read_focus 说明具体要读什么）；external_research=缺新的研究对象、方法、比较或验证材料（external_ask 提出保留对象和关系的窄需求）。external_research 也可以有丰富 usable_content：已有背景可用但核心问题没回答，就先保留内容并提出剩余检索需求。不要因为找到相关材料就宣布 direct_use。问题里的预设（例如研究阶段、设计、测量或效果）不是事实，先以材料校正。\n对于“是否已经有某类研究/结果”的问题，找到一个符合条件的实例可以回答；几篇论文未提到，或一篇较早综述说当时没有，不能回答当前是否存在。已有内容可以说明截至该来源时间的研究格局；若仍需确认后来是否出现目标研究，就选择 external_research 并提出该项具体检索，不要一边宣布问题已解决一边仍要求确认其核心答案。只有问题明确限定在这些来源的时间或材料范围内，才可据此直接给出否定答案。\nanswers_requested_question 只表示当前材料是否真正回答了原问题和 success_criteria；有用但只覆盖背景或部分条件的内容填 false，明确的实验性阴性结果或明确限于这些来源/时间范围的否定答案可填 true。\nreading_mode=focused_local_read 时已经执行补读，尽力完成具体认识；仍缺新材料则指出缺口，不循环要求读同一材料。摘要能回答背景或明确比较就可用，不强制全文。\n先完成 quantitative_comparisons，再写 usable_content。必须先逐组读原句，不根据总体方向猜测分组方向；结果可以与提问隐含的方向相反。某部分出现反向或无差异时，综合开头就写清不同设置或对象结果不一致，不能先说“一致”再在后面补相反数据。同一指标的总体比较和按条件分层不是同一组数据，不得互换。\n返回 JSON，按此顺序写字段：quantitative_comparisons（无数字则 []）, usable_content, decision, answers_requested_question（必须是 JSON boolean；不能确定或 success_criteria 未满足时填 false）, still_missing, read_focus, external_ask, reason。\n"
+        },
+        {
+          "role": "user",
+          "content": "{\"gap_id\": \"G-synthetic\", \"intended_use\": \"mechanism\", \"local_search\": {\"found\": true, \"not_matched_reason\": \"\", \"papers_seen\": 7}, \"material_found\": [{\"material_depth\": \"fulltext\", \"section\": [\"Results\"], \"source_handle\": \"N0001\", \"text\": \"thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.\", \"type\": \"direct_evidence\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Summary\"], \"source_handle\": \"N0001\", \"text\": \"thermal fatigue coating. N01_CARD: Necessary original qualifier remains untested.\", \"type\": \"planning_summary\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Results\"], \"source_handle\": \"N0002\", \"text\": \"thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.\", \"type\": \"direct_evidence\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Summary\"], \"source_handle\": \"N0002\", \"text\": \"thermal fatigue coating. N02_CARD: Necessary original qualifier remains untested.\", \"type\": \"planning_summary\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Results\"], \"source_handle\": \"N0003\", \"text\": \"thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.\", \"type\": \"direct_evidence\"}], \"paper_context\": [{\"opening\": \"thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.\", \"sections\": [\"Summary\", \"Results\"], \"source_handle\": \"N0001\"}, {\"opening\": \"thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.\", \"sections\": [\"Summary\", \"Results\"], \"source_handle\": \"N0002\"}, {\"opening\": \"thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.\", \"sections\": [\"Summary\", \"Results\"], \"source_handle\": \"N0003\"}], \"question\": \"thermal fatigue coating\", \"reading_mode\": \"initial_read\", \"success_criteria\": [\"measured relation\"], \"user_scope\": \"\"}"
+        }
+      ],
+      "payload": {
+        "gap_id": "G-synthetic",
+        "intended_use": "mechanism",
+        "local_search": {
+          "found": true,
+          "not_matched_reason": "",
+          "papers_seen": 7
+        },
+        "material_found": [
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Results"
+            ],
+            "source_handle": "N0001",
+            "text": "thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.",
+            "type": "direct_evidence"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Summary"
+            ],
+            "source_handle": "N0001",
+            "text": "thermal fatigue coating. N01_CARD: Necessary original qualifier remains untested.",
+            "type": "planning_summary"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Results"
+            ],
+            "source_handle": "N0002",
+            "text": "thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.",
+            "type": "direct_evidence"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Summary"
+            ],
+            "source_handle": "N0002",
+            "text": "thermal fatigue coating. N02_CARD: Necessary original qualifier remains untested.",
+            "type": "planning_summary"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Results"
+            ],
+            "source_handle": "N0003",
+            "text": "thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.",
+            "type": "direct_evidence"
+          }
+        ],
+        "paper_context": [
+          {
+            "opening": "thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.",
+            "sections": [
+              "Summary",
+              "Results"
+            ],
+            "source_handle": "N0001"
+          },
+          {
+            "opening": "thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.",
+            "sections": [
+              "Summary",
+              "Results"
+            ],
+            "source_handle": "N0002"
+          },
+          {
+            "opening": "thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.",
+            "sections": [
+              "Summary",
+              "Results"
+            ],
+            "source_handle": "N0003"
+          }
+        ],
+        "question": "thermal fatigue coating",
+        "reading_mode": "initial_read",
+        "success_criteria": [
+          "measured relation"
+        ],
+        "user_scope": ""
+      },
+      "call_id": "planning-material-triage:G-synthetic"
+    }
+  ],
+  "loop_boundary_calls": [
+    {
+      "messages": [
+        {
+          "role": "system",
+          "content": "你是综述作者的材料阅读助手，围绕一个写作问题提炼具体研究认识。\n一起阅读 material_found 和 paper_context，保留研究对象或材料、研究设置、比较对象、方法、操作或条件（如有）、结果或论证、验证方式与适用边界。卡片、专家综述转述和原文都按内容是否能回答问题使用，不因形式自动降权。\n先理解 user_scope 与问题对象，不能用其他对象、方法、设置或比较冒充本问题的答案。特定模型、材料或场景的结果不得无依据外推到别的对象或设置；观察关联不改写为因果关系；统计或分析方法也不自动证明因果、排除混杂或完成独立验证，方法意义只说材料明确说明的部分。\n输出 usable_content 为一段可直接阅读的字符串：适合本节的具体认识、研究异同、解释和条件。先呈现能区别不同研究的发现或论证，不先套领域常见结论；结尾也要保留这些区别。别把多个不同对象、材料、产品、场景或实验设置的结果合成一个普适机制或结论。\n涉及数字时，先逐项输出 quantitative_comparisons，每项写 research_object、result_or_measure、setting_or_time、groups；groups 是 [{group:原文组名或缩写,value:紧邻该组的结果含单位}]，保留原文分组顺序与缩写，不重新命名或调序；缩写定义另写 group_definitions。逐字读取每个组名紧随的数值，不从常识、总体结论或组名列表反推配对。reported_statistics 记录原文给出的统计量（没报告才留空）。一组一数成对，不用多组名字对应一串数字；总体与分层比较、不同指标或结果分别记录。usable_content 解释含义，不重复重排数字。原文没有的值不编。问题限定某设置、时间或子组时，必须分别读总体和指定部分，不能拿总体结果代替，也不能把分析时点当成条件发生时点。\ndecision 判断当前具体问题是否解决，而不是材料有没有用：direct_use=足以回答当前问题，或有明确材料纠正其错误前提；local_deep_read=本地有材料但需要读另一部分或完整比较（read_focus 说明具体要读什么）；external_research=缺新的研究对象、方法、比较或验证材料（external_ask 提出保留对象和关系的窄需求）。external_research 也可以有丰富 usable_content：已有背景可用但核心问题没回答，就先保留内容并提出剩余检索需求。不要因为找到相关材料就宣布 direct_use。问题里的预设（例如研究阶段、设计、测量或效果）不是事实，先以材料校正。\n对于“是否已经有某类研究/结果”的问题，找到一个符合条件的实例可以回答；几篇论文未提到，或一篇较早综述说当时没有，不能回答当前是否存在。已有内容可以说明截至该来源时间的研究格局；若仍需确认后来是否出现目标研究，就选择 external_research 并提出该项具体检索，不要一边宣布问题已解决一边仍要求确认其核心答案。只有问题明确限定在这些来源的时间或材料范围内，才可据此直接给出否定答案。\nanswers_requested_question 只表示当前材料是否真正回答了原问题和 success_criteria；有用但只覆盖背景或部分条件的内容填 false，明确的实验性阴性结果或明确限于这些来源/时间范围的否定答案可填 true。\nreading_mode=focused_local_read 时已经执行补读，尽力完成具体认识；仍缺新材料则指出缺口，不循环要求读同一材料。摘要能回答背景或明确比较就可用，不强制全文。\n先完成 quantitative_comparisons，再写 usable_content。必须先逐组读原句，不根据总体方向猜测分组方向；结果可以与提问隐含的方向相反。某部分出现反向或无差异时，综合开头就写清不同设置或对象结果不一致，不能先说“一致”再在后面补相反数据。同一指标的总体比较和按条件分层不是同一组数据，不得互换。\n返回 JSON，按此顺序写字段：quantitative_comparisons（无数字则 []）, usable_content, decision, answers_requested_question（必须是 JSON boolean；不能确定或 success_criteria 未满足时填 false）, still_missing, read_focus, external_ask, reason。\n"
+        },
+        {
+          "role": "user",
+          "content": "{\"gap_id\": \"N5a120b5fecb5557cfe58\", \"intended_use\": \"mechanism\", \"local_search\": {\"found\": true, \"not_matched_reason\": \"\", \"papers_seen\": 6}, \"material_found\": [{\"material_depth\": \"fulltext\", \"section\": [\"Results\"], \"source_handle\": \"N0001\", \"text\": \"thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.\", \"type\": \"direct_evidence\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Summary\"], \"source_handle\": \"N0001\", \"text\": \"thermal fatigue coating. N01_CARD: Necessary original qualifier remains untested.\", \"type\": \"planning_summary\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Results\"], \"source_handle\": \"N0002\", \"text\": \"thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.\", \"type\": \"direct_evidence\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Summary\"], \"source_handle\": \"N0002\", \"text\": \"thermal fatigue coating. N02_CARD: Necessary original qualifier remains untested.\", \"type\": \"planning_summary\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Results\"], \"source_handle\": \"N0003\", \"text\": \"thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.\", \"type\": \"direct_evidence\"}], \"paper_context\": [{\"opening\": \"thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.\", \"sections\": [\"Summary\", \"Results\"], \"source_handle\": \"N0001\"}, {\"opening\": \"thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.\", \"sections\": [\"Summary\", \"Results\"], \"source_handle\": \"N0002\"}, {\"opening\": \"thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.\", \"sections\": [\"Summary\", \"Results\"], \"source_handle\": \"N0003\"}], \"question\": \"thermal fatigue coating\", \"reading_mode\": \"initial_read\", \"success_criteria\": [\"\\\"measured boundary\\\"\", \"\\\"measured relation\\\"\"], \"user_scope\": \"thermal fatigue coating\"}"
+        }
+      ],
+      "payload": {
+        "gap_id": "N5a120b5fecb5557cfe58",
+        "intended_use": "mechanism",
+        "local_search": {
+          "found": true,
+          "not_matched_reason": "",
+          "papers_seen": 6
+        },
+        "material_found": [
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Results"
+            ],
+            "source_handle": "N0001",
+            "text": "thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.",
+            "type": "direct_evidence"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Summary"
+            ],
+            "source_handle": "N0001",
+            "text": "thermal fatigue coating. N01_CARD: Necessary original qualifier remains untested.",
+            "type": "planning_summary"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Results"
+            ],
+            "source_handle": "N0002",
+            "text": "thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.",
+            "type": "direct_evidence"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Summary"
+            ],
+            "source_handle": "N0002",
+            "text": "thermal fatigue coating. N02_CARD: Necessary original qualifier remains untested.",
+            "type": "planning_summary"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Results"
+            ],
+            "source_handle": "N0003",
+            "text": "thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.",
+            "type": "direct_evidence"
+          }
+        ],
+        "paper_context": [
+          {
+            "opening": "thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.",
+            "sections": [
+              "Summary",
+              "Results"
+            ],
+            "source_handle": "N0001"
+          },
+          {
+            "opening": "thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.",
+            "sections": [
+              "Summary",
+              "Results"
+            ],
+            "source_handle": "N0002"
+          },
+          {
+            "opening": "thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.",
+            "sections": [
+              "Summary",
+              "Results"
+            ],
+            "source_handle": "N0003"
+          }
+        ],
+        "question": "thermal fatigue coating",
+        "reading_mode": "initial_read",
+        "success_criteria": [
+          "\"measured boundary\"",
+          "\"measured relation\""
+        ],
+        "user_scope": "thermal fatigue coating"
+      },
+      "call_id": "planning-material-triage:N5a120b5fecb5557cfe58"
+    },
+    {
+      "messages": [
+        {
+          "role": "system",
+          "content": "你是综述作者的材料阅读助手，围绕一个写作问题提炼具体研究认识。\n一起阅读 material_found 和 paper_context，保留研究对象或材料、研究设置、比较对象、方法、操作或条件（如有）、结果或论证、验证方式与适用边界。卡片、专家综述转述和原文都按内容是否能回答问题使用，不因形式自动降权。\n先理解 user_scope 与问题对象，不能用其他对象、方法、设置或比较冒充本问题的答案。特定模型、材料或场景的结果不得无依据外推到别的对象或设置；观察关联不改写为因果关系；统计或分析方法也不自动证明因果、排除混杂或完成独立验证，方法意义只说材料明确说明的部分。\n输出 usable_content 为一段可直接阅读的字符串：适合本节的具体认识、研究异同、解释和条件。先呈现能区别不同研究的发现或论证，不先套领域常见结论；结尾也要保留这些区别。别把多个不同对象、材料、产品、场景或实验设置的结果合成一个普适机制或结论。\n涉及数字时，先逐项输出 quantitative_comparisons，每项写 research_object、result_or_measure、setting_or_time、groups；groups 是 [{group:原文组名或缩写,value:紧邻该组的结果含单位}]，保留原文分组顺序与缩写，不重新命名或调序；缩写定义另写 group_definitions。逐字读取每个组名紧随的数值，不从常识、总体结论或组名列表反推配对。reported_statistics 记录原文给出的统计量（没报告才留空）。一组一数成对，不用多组名字对应一串数字；总体与分层比较、不同指标或结果分别记录。usable_content 解释含义，不重复重排数字。原文没有的值不编。问题限定某设置、时间或子组时，必须分别读总体和指定部分，不能拿总体结果代替，也不能把分析时点当成条件发生时点。\ndecision 判断当前具体问题是否解决，而不是材料有没有用：direct_use=足以回答当前问题，或有明确材料纠正其错误前提；local_deep_read=本地有材料但需要读另一部分或完整比较（read_focus 说明具体要读什么）；external_research=缺新的研究对象、方法、比较或验证材料（external_ask 提出保留对象和关系的窄需求）。external_research 也可以有丰富 usable_content：已有背景可用但核心问题没回答，就先保留内容并提出剩余检索需求。不要因为找到相关材料就宣布 direct_use。问题里的预设（例如研究阶段、设计、测量或效果）不是事实，先以材料校正。\n对于“是否已经有某类研究/结果”的问题，找到一个符合条件的实例可以回答；几篇论文未提到，或一篇较早综述说当时没有，不能回答当前是否存在。已有内容可以说明截至该来源时间的研究格局；若仍需确认后来是否出现目标研究，就选择 external_research 并提出该项具体检索，不要一边宣布问题已解决一边仍要求确认其核心答案。只有问题明确限定在这些来源的时间或材料范围内，才可据此直接给出否定答案。\nanswers_requested_question 只表示当前材料是否真正回答了原问题和 success_criteria；有用但只覆盖背景或部分条件的内容填 false，明确的实验性阴性结果或明确限于这些来源/时间范围的否定答案可填 true。\nreading_mode=focused_local_read 时已经执行补读，尽力完成具体认识；仍缺新材料则指出缺口，不循环要求读同一材料。摘要能回答背景或明确比较就可用，不强制全文。\n先完成 quantitative_comparisons，再写 usable_content。必须先逐组读原句，不根据总体方向猜测分组方向；结果可以与提问隐含的方向相反。某部分出现反向或无差异时，综合开头就写清不同设置或对象结果不一致，不能先说“一致”再在后面补相反数据。同一指标的总体比较和按条件分层不是同一组数据，不得互换。\n返回 JSON，按此顺序写字段：quantitative_comparisons（无数字则 []）, usable_content, decision, answers_requested_question（必须是 JSON boolean；不能确定或 success_criteria 未满足时填 false）, still_missing, read_focus, external_ask, reason。\n"
+        },
+        {
+          "role": "user",
+          "content": "{\"gap_id\": \"N5a120b5fecb5557cfe58\", \"intended_use\": \"mechanism\", \"local_search\": {\"found\": true, \"not_matched_reason\": \"\", \"papers_seen\": 6}, \"material_found\": [{\"material_depth\": \"fulltext\", \"section\": [\"Results\"], \"source_handle\": \"N0001\", \"text\": \"thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.\", \"type\": \"direct_evidence\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Summary\"], \"source_handle\": \"N0001\", \"text\": \"thermal fatigue coating. N01_CARD: Necessary original qualifier remains untested.\", \"type\": \"planning_summary\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Results\"], \"source_handle\": \"N0002\", \"text\": \"thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.\", \"type\": \"direct_evidence\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Summary\"], \"source_handle\": \"N0002\", \"text\": \"thermal fatigue coating. N02_CARD: Necessary original qualifier remains untested.\", \"type\": \"planning_summary\"}, {\"material_depth\": \"fulltext\", \"section\": [\"Results\"], \"source_handle\": \"N0003\", \"text\": \"thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.\", \"type\": \"direct_evidence\"}], \"paper_context\": [{\"opening\": \"thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.\", \"sections\": [\"Summary\", \"Results\"], \"source_handle\": \"N0001\"}, {\"opening\": \"thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.\", \"sections\": [\"Summary\", \"Results\"], \"source_handle\": \"N0002\"}, {\"opening\": \"thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.\", \"sections\": [\"Summary\", \"Results\"], \"source_handle\": \"N0003\"}], \"question\": \"thermal fatigue coating\", \"reading_mode\": \"initial_read\", \"success_criteria\": [\"\\\"measured boundary\\\"\", \"\\\"measured relation\\\"\"], \"user_scope\": \"thermal fatigue coating\"}"
+        }
+      ],
+      "payload": {
+        "gap_id": "N5a120b5fecb5557cfe58",
+        "intended_use": "mechanism",
+        "local_search": {
+          "found": true,
+          "not_matched_reason": "",
+          "papers_seen": 6
+        },
+        "material_found": [
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Results"
+            ],
+            "source_handle": "N0001",
+            "text": "thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.",
+            "type": "direct_evidence"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Summary"
+            ],
+            "source_handle": "N0001",
+            "text": "thermal fatigue coating. N01_CARD: Necessary original qualifier remains untested.",
+            "type": "planning_summary"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Results"
+            ],
+            "source_handle": "N0002",
+            "text": "thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.",
+            "type": "direct_evidence"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Summary"
+            ],
+            "source_handle": "N0002",
+            "text": "thermal fatigue coating. N02_CARD: Necessary original qualifier remains untested.",
+            "type": "planning_summary"
+          },
+          {
+            "material_depth": "fulltext",
+            "section": [
+              "Results"
+            ],
+            "source_handle": "N0003",
+            "text": "thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.",
+            "type": "direct_evidence"
+          }
+        ],
+        "paper_context": [
+          {
+            "opening": "thermal fatigue coating. thermal fatigue coating. N01_BODY: Only the neighboring topic was described.",
+            "sections": [
+              "Summary",
+              "Results"
+            ],
+            "source_handle": "N0001"
+          },
+          {
+            "opening": "thermal fatigue coating. thermal fatigue coating. N02_BODY: Only the neighboring topic was described.",
+            "sections": [
+              "Summary",
+              "Results"
+            ],
+            "source_handle": "N0002"
+          },
+          {
+            "opening": "thermal fatigue coating. thermal fatigue coating. N03_BODY: Only the neighboring topic was described.",
+            "sections": [
+              "Summary",
+              "Results"
+            ],
+            "source_handle": "N0003"
+          }
+        ],
+        "question": "thermal fatigue coating",
+        "reading_mode": "initial_read",
+        "success_criteria": [
+          "\"measured boundary\"",
+          "\"measured relation\""
+        ],
+        "user_scope": "thermal fatigue coating"
+      },
+      "call_id": "planning-material-triage:N5a120b5fecb5557cfe58"
+    }
+  ],
+  "loop_model_calls": 2,
+  "loop_status": "partial",
+  "first_owner": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是学术综述规划编辑。目标是形成有论证主线的长篇综述，规划内容用中文撰写，论文原题和专名可保留原文；不要写成问答清单。\n\n本规划链只规划综述正文中需要实质展开的知识与分析。全篇开场、向读者宣告综述范围与文章组织、摘要，以及收束全文的最终总结，由正文完成后的独立模块负责，不作为本链路的章节或单元任务；也不要将这些职责换名为“背景”“概述”等章节继续规划。理解后续分析所必需的背景、概念、理论教学、机制、方法比较，以及具有具体问题与分析的未来研究方向，仍属于正文，应按解释需要充分展开。每章应有明确的知识问题或分析任务，不能仅以引入全文或总结全文为目的。本链路仍须确定研究范围、组织视角和章节分工，但这些规划信息不等于需要写成一个入口章节。上述职责归属适用于本链路所有阶段。\n\n章节组织和比较尺度由研究问题、学科语境与现有材料决定，不预设任何单一研究范式为所有主题的共同模板；理论、概念、方法论和设计研究也应按其实际论证结构组织。以用户研究问题为中心，提出贯穿全文的组织视角和综合判断，再让不同来源承担解释、比较、例证、背景或发展等职责；不要按论文逐篇复述，也不要让某个局部缺口取代全篇主线。综合判断必须由材料中的联系、差异或演进支撑。根据研究问题和材料本身判断相关性；材料中的推荐语可能夸大用途，应以来源实际的研究对象或材料、研究设置、方法、比较、结果或论证、验证方式和边界为准。保留每个来源真实的研究类型、对象、设置、条件、方法、结果和限制。综述的综合、假设或方案不是已观察到的结果。相关时，综述中报告的原始研究与直接来源享有同等实质使用权。保留报告综述的来源元数据；原始研究身份已解析时，写作者可以直接引用原始研究，不因材料来自专家综述就要求逐句降格或反复标注‘综述转述’，也不要声称读过原始全文或重新获取它。保留每个报告综述自己的 R# 命名空间；有 source_handle 就使用它，否则原样保留 supplied paper_id 或 reference。短 handle 到规范身份的映射由本地程序完成。证据足够时使用广泛材料，但不要为了凑数量硬塞来源。区分关联与因果证据、机制或解释、迁移或应用、验证和不确定性；不要把相关关系、作者提出的解释或同一组材料内的支持误写成因果机制、跨设置迁移或独立验证。有限补充检索没有找到匹配研究，不等于该研究不存在，也不等于整个领域缺乏相关研究或不存在更优路线；未被满足的需求只约束本次可写的结论范围，不得升级为领域层面的缺失判断，也不应让同一缺口反复主导多个章节。只描述现有材料支持的范围，并纠正前面规划中的过度表述。路由摘要与原始 interpretation_limits 冲突时，以原始限制为准。综述题名中的对象或应用也不自动成为其中每项研究的对象和设置。研究条件必须进入 substantive_point、thesis、synthesis 和 transition 本身；决定含义的研究对象与研究设置随主张、案例和展开关系一起陈述，而不是全部堆进独立的 limitation 字段；不能靠单独的 limitation 字段修补前文过度断言，也不要求每句都填条件表或给所有判断统一加“可能”。对不同对象、设置或比较尺度的材料，保留其不可直接等同之处，不把它们排成脱离条件的效果排名。章节标题也用中文。Return JSON only.\n\nPrepare this chapter's writer-ready plan from the coordinated shared scope and supplied A/B/deep materials. The chapter object is your only writing assignment. The shared_outline is a map of OTHER chapters as well, not a list to reproduce as this chapter's units. Keep this chapter within its purpose and scope; briefly signpost topics owned by other chapters instead of developing them again. Treat the outline as an editorial assignment, not a factual source: correct factual or terminology mistakes using the supplied A/B and reading material. Develop the chapter across the supplied collection, not only a few deeply read examples. Organize useful studies into concrete case and comparison groups attached to the actual content units; identify what each group contributes. The writer should receive enough selected cases, contrasts and background sources for a substantial review chapter. Do not do new research. Return a chapter_plan with a clear thesis, reader objective, ordered substantive units, specific cases and paper references, cross-paper synthesis, conditions and limitations, and transitions. Every unit must state (1) its substantive point, (2) the ordered development, (3) concrete studies or cases with source_handle only (the local program supplies bibliographic identity) together with the research object and setting that determine what the finding means, (4) what findings agree or conflict and why, (5) evidence conditions and limits kept with the claims they qualify rather than parked in a separate list, and (6) its transition. Within each substantial unit, provide paragraph_briefs: an ordered list of paragraph tasks, each with its specific point, development (the actual comparison or reasoning), and source_handles. A unit may span several distinct paragraphs; do not reduce a rich theme to 'introduce, discuss, summarize'. Let useful distinctions in the material determine the number of paragraphs, not a fixed quota. Keep direct-source references distinct from review-reported references."
+      },
+      {
+        "role": "user",
+        "content": "当前任务：chapter_details\n{\"topic_id\":\"wo03-synthetic-coatings\",\"research_question\":\"thermal fatigue coating\",\"shared_outline\":{},\"chapter\":{\"chapter_id\":\"CH01\",\"title\":\"Measured boundary\"},\"position\":{\"index\":1,\"count\":1},\"next_chapter_title\":\"\",\"previous_chapter_title\":\"\",\"source_materials\":[],\"relevant_tool_feedback\":[{\"gap_id\":\"\",\"chapter_ids\":[\"CH01\"],\"status\":\"unmet\",\"substantive_gap_status\":\"\",\"outcome\":\"\",\"fulfillment_judgment\":{},\"usable_content\":\"\",\"still_missing\":\"thermal fatigue coating\"}],\"citation_rules\":{\"direct_source\":\"cite the supplied source_handle and bibliographic identity; the local packet maps it to paper_id\",\"review_reported_original\":\"keep the reporting review in source metadata; cite the resolved original study normally, with equal substantive use and no mandatory weaker wording or repeated review label\",\"scope\":\"preserve the actual reported findings and conditions; full-text access is not a prerequisite for using a sufficient abstract or expert review account\"},\"new_tool_materials\":[{\"need_id\":\"N5a120b5fecb5557cfe58\",\"question\":\"thermal fatigue coating\",\"intended_use\":\"mechanism\",\"decision\":\"stop\",\"usable_content\":\"Synthetic coating observation: the uncycled coupon provides a baseline, not the cyclic boundary.\",\"conditions\":[],\"limits\":[\"Need the measured boundary.\"],\"still_missing\":\"Need the measured boundary.\",\"sources\":[{\"source_handle\":\"N0001\",\"title\":\"Synthetic adjacent study 1\",\"year\":\"2025\",\"reading_role\":\"direct_evidence\",\"material_depth\":\"fulltext\",\"section_path\":[\"Results\"]},{\"source_handle\":\"N0001\",\"title\":\"Synthetic adjacent study 1\",\"year\":\"2025\",\"reading_role\":\"planning_summary\",\"material_depth\":\"fulltext\",\"section_path\":[\"Summary\"]},{\"source_handle\":\"N0002\",\"title\":\"Synthetic adjacent study 2\",\"year\":\"2025\",\"reading_role\":\"direct_evidence\",\"material_depth\":\"fulltext\",\"section_path\":[\"Results\"]},{\"source_handle\":\"N0002\",\"title\":\"Synthetic adjacent study 2\",\"year\":\"2025\",\"reading_role\":\"planning_summary\",\"material_depth\":\"fulltext\",\"section_path\":[\"Summary\"]},{\"source_handle\":\"N0003\",\"title\":\"Synthetic adjacent study 3\",\"year\":\"2025\",\"reading_role\":\"direct_evidence\",\"material_depth\":\"fulltext\",\"section_path\":[\"Results\"]}],\"allowed_use\":[\"background_context\",\"explicit_objectives\",\"explicit_method_summaries\",\"explicit_reported_findings\",\"explicit_leads\"]}],\"required_behavior\":{\"use_new_tool_materials\":true,\"state_what_changed\":true,\"keep_conditions_and_limits\":true,\"do_not_only_append_citations\":true}}\n\n【本轮交付】本轮只返回 {\"chapter_plan\": {...}}：thesis、reader_objective、units。每个实质单元包含 paragraph_briefs（逐段的point、development、source_handles）、案例对象（source_handle、finding、conditions，含决定含义的研究对象与设置；条件随所属判断陈述，不整体堆入 limitations）、跨研究比较和衔接。不能只列论文编号，也不能用一个宽泛展开句代替逐段任务。不要返回输入的 source_materials 或论文库存清单。"
+      }
+    ],
+    "payload": {
+      "topic_id": "wo03-synthetic-coatings",
+      "research_question": "thermal fatigue coating",
+      "shared_outline": {},
+      "chapter": {
+        "chapter_id": "CH01",
+        "title": "Measured boundary"
+      },
+      "position": {
+        "index": 1,
+        "count": 1
+      },
+      "next_chapter_title": "",
+      "previous_chapter_title": "",
+      "source_materials": [],
+      "relevant_tool_feedback": [
+        {
+          "gap_id": "",
+          "chapter_ids": [
+            "CH01"
+          ],
+          "status": "unmet",
+          "substantive_gap_status": "",
+          "outcome": "",
+          "fulfillment_judgment": {},
+          "usable_content": "",
+          "still_missing": "thermal fatigue coating"
+        }
+      ],
+      "citation_rules": {
+        "direct_source": "cite the supplied source_handle and bibliographic identity; the local packet maps it to paper_id",
+        "review_reported_original": "keep the reporting review in source metadata; cite the resolved original study normally, with equal substantive use and no mandatory weaker wording or repeated review label",
+        "scope": "preserve the actual reported findings and conditions; full-text access is not a prerequisite for using a sufficient abstract or expert review account"
+      },
+      "new_tool_materials": [
+        {
+          "need_id": "N5a120b5fecb5557cfe58",
+          "question": "thermal fatigue coating",
+          "intended_use": "mechanism",
+          "decision": "stop",
+          "usable_content": "Synthetic coating observation: the uncycled coupon provides a baseline, not the cyclic boundary.",
+          "conditions": [],
+          "limits": [
+            "Need the measured boundary."
+          ],
+          "still_missing": "Need the measured boundary.",
+          "sources": [
+            {
+              "source_handle": "N0001",
+              "title": "Synthetic adjacent study 1",
+              "year": "2025",
+              "reading_role": "direct_evidence",
+              "material_depth": "fulltext",
+              "section_path": [
+                "Results"
+              ]
+            },
+            {
+              "source_handle": "N0001",
+              "title": "Synthetic adjacent study 1",
+              "year": "2025",
+              "reading_role": "planning_summary",
+              "material_depth": "fulltext",
+              "section_path": [
+                "Summary"
+              ]
+            },
+            {
+              "source_handle": "N0002",
+              "title": "Synthetic adjacent study 2",
+              "year": "2025",
+              "reading_role": "direct_evidence",
+              "material_depth": "fulltext",
+              "section_path": [
+                "Results"
+              ]
+            },
+            {
+              "source_handle": "N0002",
+              "title": "Synthetic adjacent study 2",
+              "year": "2025",
+              "reading_role": "planning_summary",
+              "material_depth": "fulltext",
+              "section_path": [
+                "Summary"
+              ]
+            },
+            {
+              "source_handle": "N0003",
+              "title": "Synthetic adjacent study 3",
+              "year": "2025",
+              "reading_role": "direct_evidence",
+              "material_depth": "fulltext",
+              "section_path": [
+                "Results"
+              ]
+            }
+          ],
+          "allowed_use": [
+            "background_context",
+            "explicit_objectives",
+            "explicit_method_summaries",
+            "explicit_reported_findings",
+            "explicit_leads"
+          ]
+        }
+      ],
+      "required_behavior": {
+        "use_new_tool_materials": true,
+        "state_what_changed": true,
+        "keep_conditions_and_limits": true,
+        "do_not_only_append_citations": true
+      }
+    }
+  },
+  "normal_decision": "external_research",
+  "wider_only_decision": "external_research",
+  "target_text": "SYNTHETIC_COUPON_RESULT: In the cycled coupon, a porous interlayer delayed crack initiation at 600 C.",
+  "model_calls": 4
+}
