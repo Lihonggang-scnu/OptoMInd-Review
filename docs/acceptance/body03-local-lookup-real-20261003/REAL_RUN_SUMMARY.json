@@ -1,0 +1,187 @@
+{
+  "schema_version": "public_body03_local_lookup_acceptance_summary.v1",
+  "acceptance_date": "2026-10-03",
+  "status": "completed_real_runs_quality_not_passed",
+  "tested_code_sha": "2df2a2719b17b05a9ccdfc1574b0649c7bacf586",
+  "question_criteria_unchanged": true,
+  "production_or_tests_modified": false,
+  "real_calls": {
+    "count": 4,
+    "model": "qwen3.7-flash",
+    "actual_cny_delta": 0.01428,
+    "external_live_search_calls": 0,
+    "owner_scenario_calls": 0,
+    "qwen35_plus_calls": 0,
+    "reserved_cny": 0.0,
+    "uncertain_cny": 0.0
+  },
+  "shared_ledger": {
+    "before_actual_cny": 0.5861682,
+    "after_actual_cny": 0.6004482,
+    "limit_cny": 30.0
+  },
+  "scenarios": {
+    "primary_no_known_paper": {
+      "model_calls": 2,
+      "actual_cny_delta": 0.0068188,
+      "decision": "local_deep_read",
+      "answers_requested_question": false,
+      "initial": {
+        "material_count": 5,
+        "material_text_chars": 19950,
+        "target_paper_present": false,
+        "target_handle_present": false
+      },
+      "focused": {
+        "material_count": 23,
+        "material_text_chars": 43089,
+        "target_paper_present": false,
+        "target_handle_present": false
+      },
+      "source_handles_initial": [
+        "P0597",
+        "P0087",
+        "P0479"
+      ],
+      "source_handles_focused": [
+        "P0597",
+        "P0087",
+        "P0479",
+        "P0162",
+        "P0258",
+        "P0184",
+        "P0168",
+        "P0151",
+        "P0520",
+        "P0461",
+        "P0581",
+        "P0555",
+        "P0256",
+        "P0598"
+      ]
+    },
+    "explicit_stable_p0004": {
+      "model_calls": 2,
+      "actual_cny_delta": 0.0074612,
+      "decision": "external_research",
+      "answers_requested_question": false,
+      "initial": {
+        "material_count": 6,
+        "material_text_chars": 22613,
+        "target_paper_present": true,
+        "target_handle_present": true
+      },
+      "focused": {
+        "material_count": 21,
+        "material_text_chars": 46137,
+        "target_paper_present": true,
+        "target_handle_present": true
+      },
+      "source_handles_initial": [
+        "P0597",
+        "P0087",
+        "P0479",
+        "P0004"
+      ],
+      "source_handles_focused": [
+        "P0597",
+        "P0087",
+        "P0479",
+        "P0004",
+        "P0151",
+        "P0583",
+        "P0081",
+        "P0084",
+        "P0079",
+        "P0601",
+        "P0168",
+        "P0076"
+      ]
+    }
+  },
+  "cache_summary": {
+    "status": "completed_offline_checkpoint_reuse",
+    "network_boundary_calls": 0,
+    "model_calls_observed": 0,
+    "ledger_actual_cny_delta": 0.0,
+    "interpretation": "Checkpoint reuse reproduced an unsatisfied result; it is not evidence of cross-stage scientific passage."
+  },
+  "ranking_evidence": {
+    "raw_fts_relevant_p0004_section": "ord93-94",
+    "raw_fts_relevant_p0004_rank": 1,
+    "original_question_rank": 9,
+    "focused_question_rank": 64,
+    "selected_explicit_p0004_section": "ord115-116",
+    "needed_preclinical_section": "ord55-56",
+    "interpretation": "The focused query changed candidate ordering; explicit paper identity selected the wrong section within the paper."
+  },
+  "source_provenance": {
+    "authoritative_acceptance": "ASTRA_ACCEPTANCE.md",
+    "authoritative_report": "reports/REAL_RUN_REPORT.json",
+    "source_sha256": {
+      "ASTRA_ACCEPTANCE.md": "94b546e638887160d63b09a67f2370fbfdc76dcb8e3eaee2496f82df829f43d5",
+      "reports/REAL_RUN_REPORT.json": "db765899e071866d93532a06f2e4398962dfd7c8e63429227c70a6ace91db01c"
+    }
+  },
+  "omissions": [
+    "Raw REQUEST.json files: paper excerpts omitted; see REQUEST_METADATA.json.",
+    "Raw response files, fulltext, PDFs, SQLite ledgers, caches, scripts, credentials, signed links, and long diagnostic prose omitted; see LOCAL_ARTIFACT_INDEX.json."
+  ],
+  "call_receipts": [
+    {
+      "scenario": "primary_no_known_paper",
+      "sequence_in_scenario": 1,
+      "model": "qwen3.7-flash",
+      "receipt_created_asia_shanghai": "2026-10-03T21:41:56+08:00",
+      "prompt_tokens": 6580,
+      "completion_tokens": 1999,
+      "finish_reason": "stop",
+      "actual_cny": 0.0029151999999999997,
+      "duration_seconds": null,
+      "duration_status": "unavailable_from_raw_receipt"
+    },
+    {
+      "scenario": "primary_no_known_paper",
+      "sequence_in_scenario": 2,
+      "model": "qwen3.7-flash",
+      "receipt_created_asia_shanghai": "2026-10-03T21:42:17+08:00",
+      "prompt_tokens": 12414,
+      "completion_tokens": 1776,
+      "finish_reason": "stop",
+      "actual_cny": 0.0039036000000000006,
+      "duration_seconds": null,
+      "duration_status": "unavailable_from_raw_receipt"
+    },
+    {
+      "scenario": "explicit_stable_p0004",
+      "sequence_in_scenario": 1,
+      "model": "qwen3.7-flash",
+      "receipt_created_asia_shanghai": "2026-10-03T21:52:11+08:00",
+      "prompt_tokens": 7228,
+      "completion_tokens": 1751,
+      "finish_reason": "stop",
+      "actual_cny": 0.0028464000000000007,
+      "duration_seconds": null,
+      "duration_status": "unavailable_from_raw_receipt"
+    },
+    {
+      "scenario": "explicit_stable_p0004",
+      "sequence_in_scenario": 2,
+      "model": "qwen3.7-flash",
+      "receipt_created_asia_shanghai": "2026-10-03T21:52:31+08:00",
+      "prompt_tokens": 13510,
+      "completion_tokens": 2391,
+      "finish_reason": "stop",
+      "actual_cny": 0.0046148000000000005,
+      "duration_seconds": null,
+      "duration_status": "unavailable_from_raw_receipt"
+    }
+  ],
+  "provider_parameters": {
+    "max_output_tokens": 5000,
+    "thinking_budget": 1024,
+    "timeout_seconds": 300,
+    "max_retries": 0,
+    "transport": "QwenDirectClient urllib ProxyHandler({}) direct"
+  }
+}
