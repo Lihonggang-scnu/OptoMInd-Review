@@ -194,17 +194,17 @@ def test_completed_source_batch_cache_is_reused_without_planner_call(monkeypatch
     output = tmp_path / "output" / "stages" / "source_routing"
     output.mkdir(parents=True)
     rows = _pool_rows(2)
-    cached = {
-        "batch_id": "batch_001",
-        "batch_index": 1,
-        "batch_count": 1,
-        "source_handles": [row["_source_handle"] for row in rows],
-        "source_routes": [
-            {"source_handle": row["_source_handle"], "chapter_ids": ["C1"], "route_status": "assigned"}
-            for row in rows
-        ],
-    }
-    (output / "batch_001.json").write_text(json.dumps(cached), encoding="utf-8")
+    def initial_planner(stage, payload):
+        return {"source_routes": [
+            {"source_handle": row["source_handle"], "chapter_ids": ["C1"],
+             "specific_usable_material": "compatible material"}
+            for row in payload["candidate_batch"]
+        ]}
+
+    initial = planning.ProgressiveReviewPlanner(_config(tmp_path, workers=1), planner=initial_planner)
+    initial._route_sources(rows, shared_outline=_outline(), resume=False, state={"topic": "topic"})
+    cached = json.loads((output / "batch_001.json").read_text(encoding="utf-8"))
+    assert cached["cache_contract"]
 
     def fail_planner(*_args, **_kwargs):
         raise AssertionError("completed source batch was not reused")

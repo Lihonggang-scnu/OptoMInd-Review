@@ -181,6 +181,70 @@ _RECOVERY_COMPATIBILITY_FIELDS = (
 )
 
 
+def _owner_cache_projection(value: Any, *, _scientific: bool = False) -> Any:
+    """Compare owner-consumed values, excluding only known storage metadata.
+
+    Scientific A/B content, conditions, task text and study dates remain exact.
+    This is deliberately scoped to owner/recovery inputs, not every stage.
+    """
+
+    operational = {
+        "card_path", "reading_path", "snapshot_path", "raw_response_path", "result_path",
+        "output_path", "output_dir", "cache_path", "fetched_at", "retrieved_at",
+        "saved_at", "generated_at", "created_at", "updated_at",
+        "owner_material_resolution",
+    }
+    scientific = {
+        "study_summary_A", "review_planning_B", "conditions", "finding", "findings",
+        "content", "question_material", "paragraph_briefs", "required_outputs",
+    }
+    if isinstance(value, Mapping):
+        return {
+            key: _owner_cache_projection(child, _scientific=_scientific or key in scientific)
+            for key, child in value.items()
+            if _scientific or key not in operational
+        }
+    if isinstance(value, (list, tuple)):
+        return [_owner_cache_projection(child, _scientific=_scientific) for child in value]
+    return value
+
+
+def _owner_success_record(path: Path) -> dict[str, Any] | None:
+    """Read only validated, provenance-bearing successful owner records."""
+
+    if not path.is_file():
+        return None
+    try:
+        value = _read_json(path)
+    except ProgressivePlanError:
+        return None
+    if (isinstance(value, Mapping) and value.get("status") == "complete"
+            and value.get("owner_status") in {"updated", "no_change"}
+            and isinstance(value.get("cache_inputs"), Mapping)
+            and isinstance(value.get("updated_plan"), Mapping)):
+        return dict(value)
+    return None
+
+
+def _recovery_outline_projection(outline: Any) -> Any:
+    """Normalize accepted outline shapes without dropping global constraints."""
+
+    if isinstance(outline, list):
+        return {"chapters": _outline_chapter_rows(outline)}
+    if isinstance(outline, Mapping):
+        result = dict(outline)
+        if "chapters" in result or "sections" in result:
+            result.pop("sections", None)
+            result["chapters"] = _outline_chapter_rows(outline)
+        elif "shared_outline" in result:
+            nested = _recovery_outline_projection(result.pop("shared_outline"))
+            if not result:
+                return nested
+            result["shared_outline"] = nested
+        return result
+    return None
+
+
 def _recovery_pool_material(handle: str, row: Mapping[str, Any]) -> dict[str, Any]:
     """Build the current pool's authoritative A/B view for one handle."""
 
@@ -201,23 +265,63 @@ def _recovery_pool_material(handle: str, row: Mapping[str, Any]) -> dict[str, An
         "review_planning_B": dict(b),
         "supplement_gap_material": row.get("supplement_gap_material") or {},
         "supplement_gap_materials": row.get("supplement_gap_materials") or [],
-        "deep_read_material": {},
+        "deep_read_material": row.get("deep_read_material") or {},
+        "local_passages": row.get("local_passages") or {},
         "planning_view": dict(planning),
     }
 
 
+def _refresh_owner_packet_materials(
+    packet: dict[str, Any],
+    *,
+    pool_rows: Sequence[Mapping[str, Any]],
+    deep_material_by_paper: Mapping[str, Mapping[str, Any]] | None = None,
+) -> None:
+    """Refresh only existing material rows, including duplicated candidate views."""
+
+    for key in ("source_materials", "candidate_materials"):
+        if key not in packet:
+            continue
+        packet[key], _ = _resolve_owner_source_materials(
+            source_materials=packet.get(key) or [], chapter_plan={}, pool_rows=pool_rows,
+            deep_material_by_paper=deep_material_by_paper,
+        )
+    navigation = packet.get("candidate_navigation")
+    if isinstance(navigation, Mapping) and "candidate_materials" in navigation:
+        navigation = dict(navigation)
+        navigation["candidate_materials"], _ = _resolve_owner_source_materials(
+            source_materials=navigation.get("candidate_materials") or [], chapter_plan={}, pool_rows=pool_rows,
+            deep_material_by_paper=deep_material_by_paper,
+        )
+        packet["candidate_navigation"] = navigation
+
+
+def _owner_consumed_material(value: Mapping[str, Any]) -> dict[str, Any]:
+    """Normalize supplement aliases while retaining conflicting consumed text."""
+
+    content = _material_content(value)
+    if "deep_read_material" in content:
+        content["deep_read_material"] = _compact_reading_material(content["deep_read_material"])
+    for canonical, alias in (("supplement_gap_material", "supplement_material"),
+                              ("supplement_gap_materials", "supplement_materials")):
+        if value.get(alias) in (None, "", [], {}):
+            continue
+        if canonical not in content:
+            content[canonical] = value[alias]
+        elif _owner_cache_projection(content[canonical]) != _owner_cache_projection(value[alias]):
+            content[alias] = value[alias]
+    return content
+
+
 def _recovery_material_matches(source: Mapping[str, Any], current: Mapping[str, Any]) -> bool:
-    """Require the same identity and A/B material before importing a row."""
+    """Require the same identity and consumed content before importing a row."""
 
     for key in ("source_handle", "paper_id", "doi", "title", "year"):
         source_value = _text(source.get(key))
         current_value = _text(current.get(key))
         if source_value and current_value and source_value != current_value:
             return False
-    for key in ("study_summary_A", "review_planning_B"):
-        if source.get(key) not in (None, {}) and source.get(key) != current.get(key):
-            return False
-    return True
+    return _owner_cache_projection(_owner_consumed_material(source)) == _owner_cache_projection(_owner_consumed_material(current))
 
 
 def _strip_recovery_case_suggestions(value: Any) -> Any:
@@ -243,7 +347,7 @@ def _recovery_compare_value(key: str, value: Any) -> Any:
             name: child for name, child in normalized.items()
             if name not in {"source_ids", "source_handles", "excluded_source_ids", "excluded_source_handles", "source_exclusion_notes"}
         }
-    return normalized
+    return _owner_cache_projection(normalized)
 
 
 def recover_compatible_chapter_details(
@@ -260,8 +364,9 @@ def recover_compatible_chapter_details(
     The source revision's original ``cache_inputs`` are compared with the
     current chapter packet.  Only the source handles used by its updated plan
     are considered.  A missing current row may be restored from the source
-    cache only after the current pool proves the same identity and A/B card;
-    the full historical pool and pending case suggestions are never copied.
+    cache only after the current pool proves the same identity and consumed
+    material; the restored row comes from current inputs, never stale content.
+    The full historical pool and pending case suggestions are never copied.
     """
 
     source_root = Path(recovery_root).resolve()
@@ -285,43 +390,33 @@ def recover_compatible_chapter_details(
         if selected and chapter_id not in selected:
             result.append(packet)
             continue
+        # Existing packet snapshots cannot overrule explicitly corrected pool
+        # material even when every historical required handle is already there.
+        _refresh_owner_packet_materials(packet, pool_rows=current_pool)
         entry: dict[str, Any] = {"status": "skipped", "chapter_id": chapter_id}
-        revision_path = source_root / "stages" / "affected_chapter_revision" / f"{_safe_id(chapter_id)}.json"
-        if not chapter_id or not revision_path.is_file():
-            entry["reason"] = "source_successful_revision_missing"
+        revision_root = source_root / "stages" / "affected_chapter_revision"
+        revision_path = revision_root / f"{_safe_id(chapter_id)}.json"
+        success_path = revision_root / "successful" / revision_path.name
+        revision = _owner_success_record(revision_path) if chapter_id else None
+        if revision is None and chapter_id:
+            revision = _owner_success_record(success_path)
+            if revision is not None:
+                revision_path = success_path
+        if revision is None:
+            entry["reason"] = ("source_revision_not_successful" if revision_path.is_file() or success_path.is_file()
+                               else "source_successful_revision_missing")
             report["chapters"][chapter_id or "unknown"] = entry
             result.append(packet)
             continue
-        try:
-            revision = _read_json(revision_path)
-        except ProgressivePlanError:
-            revision = {}
-        cache = revision.get("cache_inputs") if isinstance(revision, Mapping) else None
-        updated = revision.get("updated_plan") if isinstance(revision, Mapping) else None
-        if not (
-            isinstance(revision, Mapping)
-            and revision.get("status") == "complete"
-            and revision.get("owner_status") in {"updated", "no_change"}
-            and isinstance(cache, Mapping)
-            and isinstance(updated, Mapping)
-        ):
-            entry["reason"] = "source_revision_not_successful"
-            report["chapters"][chapter_id] = entry
-            result.append(packet)
-            continue
-        if current_root is not None:
-            current_revision = current_root / "stages" / "affected_chapter_revision" / f"{_safe_id(chapter_id)}.json"
-            if current_revision.is_file():
-                try:
-                    current_saved = _read_json(current_revision)
-                except ProgressivePlanError:
-                    current_saved = {}
-                if isinstance(current_saved, Mapping) and current_saved.get("status") == "complete" and current_saved.get("owner_status") in {"updated", "no_change"}:
-                    entry["reason"] = "current_successful_owner_has_priority"
-                    report["chapters"][chapter_id] = entry
-                    result.append(packet)
-                    continue
+        cache = revision["cache_inputs"]
+        updated = revision["updated_plan"]
+        # First reconstruct the same compatible seed. A current owner success
+        # is replayed by its own input-aware cache below, never by merely
+        # skipping recovery and leaving the coarse chapter plan in its place.
         mismatch = []
+        if any(_text(value) and _text(value) != chapter_id for value in
+               (revision.get("chapter_id"), updated.get("chapter_id"))):
+            mismatch.append("chapter_ownership")
         for key in _RECOVERY_COMPATIBILITY_FIELDS:
             if _recovery_compare_value(key, cache.get(key)) != _recovery_compare_value(key, packet.get(key)):
                 mismatch.append(key)
@@ -335,11 +430,17 @@ def recover_compatible_chapter_details(
                 source_packet = loaded_source_packet if isinstance(loaded_source_packet, Mapping) else {}
             except ProgressivePlanError:
                 source_packet = {}
-            current_outline = packet.get("shared_outline")
-            if not isinstance(source_packet.get("shared_outline"), Mapping) or not isinstance(current_outline, Mapping):
+            source_outline = _recovery_outline_projection(source_packet.get("shared_outline"))
+            current_outline = _recovery_outline_projection(packet.get("shared_outline"))
+            expected_outline = _recovery_outline_projection(shared_outline)
+            if source_outline is None or current_outline is None or expected_outline is None:
                 mismatch.append("shared_outline_unavailable")
-            elif source_packet.get("shared_outline") != current_outline or current_outline != shared_outline:
+            elif source_outline != current_outline or current_outline != expected_outline:
                 mismatch.append("shared_outline")
+            outline_ids = {_text(row.get("chapter_id") or row.get("id"))
+                           for row in _outline_chapter_rows(shared_outline)}
+            if outline_ids and chapter_id not in outline_ids:
+                mismatch.append("chapter_ownership")
         if mismatch:
             entry["reason"] = "compatibility_mismatch"
             entry["fields"] = mismatch
@@ -395,7 +496,7 @@ def recover_compatible_chapter_details(
                 material_mismatch = ("required_material_unavailable", handle)
                 break
             if current_row is not None and not _recovery_material_matches(source_row, current_row):
-                material_mismatch = ("required_material_identity_or_ab_mismatch", handle)
+                material_mismatch = ("required_material_identity_or_content_mismatch", handle)
                 break
         if material_mismatch:
             entry["reason"], entry["handle"] = material_mismatch
@@ -415,12 +516,12 @@ def recover_compatible_chapter_details(
                 break
             current_row = _recovery_pool_material(handle, pool_row)
             if not _recovery_material_matches(source_row, current_row):
-                entry["reason"] = "required_material_identity_or_ab_mismatch"
+                entry["reason"] = "required_material_identity_or_content_mismatch"
                 entry["handle"] = handle
                 report["chapters"][chapter_id] = entry
                 result.append(packet)
                 break
-            current_materials[handle] = source_row
+            current_materials[handle] = current_row
             restored.append(handle)
         else:
             packet["source_materials"] = [
@@ -428,7 +529,7 @@ def recover_compatible_chapter_details(
                 for row in packet.get("source_materials") or []
                 if isinstance(row, Mapping)
             ]
-            packet["source_materials"].extend(source_materials[handle] for handle in restored)
+            packet["source_materials"].extend(current_materials[handle] for handle in restored)
             packet["chapter_plan"] = recovered_plan
             packet["chapter_recovery"] = {
                 "source_root": str(source_root),
@@ -1544,6 +1645,80 @@ def _chapter_details_cache_signature(payload: Mapping[str, Any], *, planner: Any
     })
 
 
+def _chapter_details_record_error(record: Any) -> str:
+    """Check the adaptive output envelope, not its scientific completeness.
+
+    A successful provider response is not necessarily a successful chapter.
+    Keep this check off the ordinary unsplit path, and apply it to saved
+    records as well as new responses so an old empty merge cannot resume.
+    """
+
+    if not isinstance(record, Mapping) or not isinstance(record.get("response"), Mapping):
+        return "missing_chapter_plan"
+    response = record["response"]
+    plan = response.get("chapter_plan", response)
+    if not isinstance(plan, Mapping) or not plan:
+        return "missing_chapter_plan"
+    telemetry = record.get("telemetry") if isinstance(record.get("telemetry"), Mapping) else {}
+    for value in (record, response, plan, telemetry):
+        status = _text(value.get("status")).casefold()
+        if status in {"failed", "error", "partial", "unresolved", "incomplete", "blocked", "cancelled", "canceled"}:
+            return "response_status:" + status
+        if value.get("complete") is False:
+            return "incomplete_response"
+        if _text(value.get("finish_reason")).casefold() in {"length", "max_tokens", "max_output_tokens", "content_filter", "error"}:
+            return "incomplete_response"
+    units = _chapter_units(plan)
+    if not units or any(not isinstance(unit, Mapping) for unit in units):
+        return "missing_substantive_units"
+
+    def has_content(value: Any) -> bool:
+        if isinstance(value, str):
+            return bool(value.strip())
+        if isinstance(value, Mapping):
+            return any(has_content(child) for key, child in value.items() if key not in {
+                "unit_id", "id", "title", "source_handle", "source_handles", "source_ids", "paper_id", "paper_ids",
+            })
+        if isinstance(value, list):
+            return any(has_content(child) for child in value)
+        return False
+
+    # Identifiers, headings and source inventories alone do not constitute a
+    # substantive chapter.  This is a minimum content gate, not a quota or a
+    # new semantic judge of whether the supplied findings are sufficient.
+    if not any(has_content(unit.get(key)) for unit in units for key in (
+        "substantive_point", "point", "claim", "development", "ordered_development", "paragraph_briefs",
+    )):
+        return "missing_substantive_units"
+    return ""
+
+
+def _chapter_details_failed_seam(
+    cache_root: Path,
+    *,
+    seam: str,
+    signature: str,
+    chapter_id: str,
+    error: Exception,
+    successful_batches: Sequence[Mapping[str, Any]],
+    record: Mapping[str, Any] | None = None,
+    **details: Any,
+) -> None:
+    """Save the last failed attempt separately from every successful cache."""
+
+    _atomic_json(cache_root / "failed_seams" / f"{seam}_{signature}.json", {
+        "status": "failed",
+        "seam": seam,
+        "chapter_id": chapter_id,
+        "cache_inputs": signature,
+        "error": str(error),
+        "error_type": type(error).__name__,
+        "successful_batches": [dict(batch) for batch in successful_batches],
+        **({"record": dict(record)} if record is not None else {}),
+        **details,
+    })
+
+
 def _chapter_details_adaptive_record(
     planner: Any,
     payload: Mapping[str, Any],
@@ -1576,12 +1751,26 @@ def _chapter_details_adaptive_record(
                     and list(candidate.get("source_handles") or []) == [
                         _text(row.get("source_handle")) for row in package.get("source_materials") or []
                     ]
+                    and not _chapter_details_record_error(candidate.get("record"))
                 ):
                     cached = candidate
             except ProgressivePlanError:
                 cached = None
         if cached is None:
-            record = _call_record(planner, "chapter_details", package)
+            record = None
+            try:
+                record = _call_record(planner, "chapter_details", package)
+                error = _chapter_details_record_error(record)
+                if error:
+                    raise ProgressivePlanError("chapter_details_batch_" + error)
+            except Exception as exc:
+                _chapter_details_failed_seam(
+                    cache_root, seam="batch", signature=signature, chapter_id=chapter_id,
+                    error=exc, record=record, successful_batches=batch_meta,
+                    batch_index=index, batch_count=len(packages), estimate=estimate,
+                    source_handles=[_text(row.get("source_handle")) for row in package.get("source_materials") or []],
+                )
+                raise
             _atomic_json(cache_path, {
                 "status": "complete",
                 "cache_inputs": signature,
@@ -1627,18 +1816,39 @@ def _chapter_details_adaptive_record(
     merge_payload["call_id"] = f"chapter-details-merge:{_safe_id(chapter_id)}:{merge_signature[:12]}"
     merge_capacity = _chapter_details_capacity(planner, merge_payload)
     if merge_capacity is None or not merge_capacity["fits"]:
-        raise ProgressivePlanError("chapter_details_merge_context_preflight_exceeded")
+        error = ProgressivePlanError("chapter_details_merge_context_preflight_exceeded")
+        _chapter_details_failed_seam(
+            cache_root, seam="merge", signature=merge_signature, chapter_id=chapter_id,
+            error=error, successful_batches=batch_meta, estimate=merge_capacity,
+        )
+        raise error
     merge_cache = cache_root / f"merge_{merge_signature}.json"
     cached_merge: Mapping[str, Any] | None = None
     if resume and merge_cache.is_file():
         try:
             candidate = _read_json(merge_cache)
-            if isinstance(candidate, Mapping) and candidate.get("status") == "complete" and candidate.get("cache_inputs") == merge_signature:
+            if (
+                isinstance(candidate, Mapping)
+                and candidate.get("status") == "complete"
+                and candidate.get("cache_inputs") == merge_signature
+                and not _chapter_details_record_error(candidate.get("record"))
+            ):
                 cached_merge = candidate
         except ProgressivePlanError:
             cached_merge = None
     if cached_merge is None:
-        merged_record = _call_record(planner, "chapter_details", merge_payload)
+        merged_record = None
+        try:
+            merged_record = _call_record(planner, "chapter_details", merge_payload)
+            error = _chapter_details_record_error(merged_record)
+            if error:
+                raise ProgressivePlanError("chapter_details_merge_" + error)
+        except Exception as exc:
+            _chapter_details_failed_seam(
+                cache_root, seam="merge", signature=merge_signature, chapter_id=chapter_id,
+                error=exc, record=merged_record, successful_batches=batch_meta, estimate=merge_capacity,
+            )
+            raise
         _atomic_json(merge_cache, {
             "status": "complete",
             "cache_inputs": merge_signature,
@@ -2090,7 +2300,8 @@ def _resolve_owner_source_materials(
         "unresolved": [],
     }
     deep_by_paper = deep_material_by_paper or {}
-    for handle in sorted(referenced):
+    # Refresh already assigned material too; this adds no candidate admission.
+    for handle in sorted(referenced | set(rows)):
         candidate = candidate_by_handle.get(handle)
         if candidate is None:
             if handle not in rows:
@@ -2100,9 +2311,8 @@ def _resolve_owner_source_materials(
         card = _card_for_candidate(candidate)
         card_a = card.get("general_understanding") if isinstance(card.get("general_understanding"), Mapping) else {}
         card_b = card.get("review_planning") if isinstance(card.get("review_planning"), Mapping) else {}
-        if not card_a and not card_b:
-            if handle not in rows:
-                report["unresolved"].append({"source_handle": handle, "reason": "current_card_material_missing"})
+        if not card_a and not card_b and handle not in rows:
+            report["unresolved"].append({"source_handle": handle, "reason": "current_card_material_missing"})
             continue
         local = build_local_material_payload(
             candidate,
@@ -2115,10 +2325,21 @@ def _resolve_owner_source_materials(
                 merged[key] = value
         # The current card is authoritative for A/B and may contain a repaired
         # snapshot even when the earlier chapter slice was stale.
-        if card_a:
+        if isinstance(card.get("general_understanding"), Mapping):
             merged["study_summary_A"] = dict(card_a)
-        if card_b:
+        if isinstance(card.get("review_planning"), Mapping):
             merged["review_planning_B"] = dict(card_b)
+        # Explicit current tool/local inputs supersede older nonempty packet
+        # snapshots. Absence is not permission to manufacture replacement text.
+        for key in ("supplement_gap_material", "supplement_gap_materials", "local_passages", "deep_read_material"):
+            if key in candidate:
+                merged[key] = candidate[key]
+        for key, alias in (("supplement_gap_material", "supplement_material"),
+                           ("supplement_gap_materials", "supplement_materials")):
+            if key in candidate:
+                merged[alias] = candidate[key]
+        if paper_id in deep_by_paper:
+            merged["deep_read_material"] = _compact_reading_material(deep_by_paper[paper_id])
         rows[handle] = merged
         if handle not in report["already_present"]:
             report["resolved_from_current_pool"].append({
@@ -2144,6 +2365,8 @@ def _classify_owner_response(
     old_plan: Mapping[str, Any],
     response: Mapping[str, Any],
     source_materials: Sequence[Mapping[str, Any]],
+    *,
+    expected_chapter_id: str = "",
 ) -> tuple[str, dict[str, Any] | None, dict[str, list[str]], list[str]]:
     """Validate owner output before a caller treats a provider call as complete."""
 
@@ -2151,6 +2374,14 @@ def _classify_owner_response(
     remap: dict[str, list[str]] = {}
     errors: list[str] = []
     updated_plan = _owner_response_plan(response)
+    if expected_chapter_id:
+        owned_entries = [entry for entry in ProgressiveReviewPlanner._improvement_entries(response)
+                         if isinstance(ProgressiveReviewPlanner._improvement_plan(entry), Mapping)]
+        returned_ids = {_text(entry.get("chapter_id") or entry.get("id")) for entry in owned_entries}
+        returned_ids.update(_text(value) for value in
+                            (response.get("chapter_id"), (updated_plan or {}).get("chapter_id")))
+        if any(value and value != expected_chapter_id for value in returned_ids):
+            return "unresolved", None, remap, ["owner_response_chapter_mismatch"]
     if response_status in {"failed", "error", "partial", "unresolved", "incomplete"}:
         return "unresolved", None, remap, ["owner_response_status:" + response_status]
     if updated_plan is not None:
@@ -2920,11 +3151,65 @@ class ProgressiveReviewPlanner:
         self.retrieval_loop_runner = retrieval_loop_runner
         self._read_materials: dict[str, dict[str, Any]] = {}
 
+    def _cache_contract(self, stage: str, payload: Any) -> str:
+        """Fingerprint effective input and live prompt/settings, not storage locations.
+
+        The explicit metadata allowlist deliberately retains scientific dates,
+        years, durations and conditions. Unknown fields remain conservative.
+        """
+        metadata = {"card_path", "output_dir", "output_path", "pool_path", "plan_path",
+                    "created_at", "updated_at", "generated_at", "retrieved_at",
+                    "cache_path", "raw_response_path", "result_path", "reading_path", "snapshot_path",
+                    "fetched_at", "saved_at", "telemetry"}
+        # Material envelopes retain operational paths/timestamps. Protect their
+        # substantive children, rather than treating an entire envelope as science.
+        scientific_fields = {"study_summary_A", "review_planning_B", "B_review_planning",
+                             "conditions", "finding", "findings", "content", "question_material",
+                             "paragraph_briefs", "required_outputs"}
+
+        def project(value: Any, scientific: bool = False) -> Any:
+            if isinstance(value, Mapping):
+                return {str(key): project(item, scientific or key in scientific_fields)
+                        for key, item in sorted(value.items(), key=lambda row: str(row[0]))
+                        if scientific or key not in metadata}
+            if isinstance(value, (list, tuple)):
+                return [project(item, scientific) for item in value]
+            return value
+
+        stage = {"harmonized_scope": "harmonize_scope"}.get(stage, stage)
+        payload = project(payload)
+        model = getattr(self.planner, "chapter_model", self.config.chapter_model) if stage in {"chapter_details", "case_groups"} else getattr(self.planner, "model", self.config.planner_model)
+        output_tokens = getattr(self.planner, "output_tokens", self.config.planner_output_tokens)
+        thinking_budget = getattr(self.planner, "thinking_budget", self.config.thinking_budget)
+        if stage in {"source_routing", "chapter_details", "case_groups"}:
+            thinking_budget = 2048
+        if stage in {"chapter_details", "affected_chapter_revision"}:
+            output_tokens = min(output_tokens, 16000)
+        if stage == "whole_plan_improvement":
+            output_tokens = min(output_tokens, 5000)
+        if stage in {"whole_plan_improvement", "affected_chapter_revision"}:
+            thinking_budget = min(thinking_budget, 1024)
+        contract = {"version": 1, "stage": stage,
+                    # Tool orchestration has no planner prompt of its own; its
+                    # complete outer arguments are the compatibility boundary.
+                    "messages": payload if stage.endswith("_tools") else _messages_for(stage, payload if isinstance(payload, Mapping) else {"inputs": payload}),
+                    "model": model, "output_tokens": output_tokens, "thinking_budget": thinking_budget}
+        return hashlib.sha256(json.dumps(contract, ensure_ascii=False, sort_keys=True, default=_json_default).encode("utf-8")).hexdigest()
+
+    def _model_stage(self, name: str, payload: Mapping[str, Any], *, resume: bool, state: dict[str, Any]) -> Any:
+        # Use one frozen payload for the actual call and its persisted provenance.
+        payload = json.loads(json.dumps(payload, default=_json_default))
+        stage = {"harmonized_scope": "harmonize_scope"}.get(name, name)
+        return self._stage(name, lambda: _call_record(self.planner, stage, payload),
+                           resume=resume, state=state, cache_inputs=payload)
+
     def _stage(self, name: str, fn: Callable[[], Any], *, resume: bool, state: dict[str, Any], cache_inputs: Any = None) -> Any:
         path = self.config.output_dir / "stages" / (name + ".json")
-        if resume and path.is_file():
-            previous = (state.get("stage_inputs") or {}).get(name)
-            if cache_inputs is None or previous == cache_inputs:
+        # Snapshot before invoking a callable which may mutate its inputs.
+        frozen_inputs = json.loads(json.dumps(cache_inputs, default=_json_default)) if cache_inputs is not None else None
+        contract = self._cache_contract(name, frozen_inputs) if frozen_inputs is not None else None
+        if resume and path.is_file() and contract is not None:
+            if (state.get("stage_cache_contracts") or {}).get(name) == contract:
                 return _read_json(path)
         state.update({"status": "in_progress", "current_stage": name})
         _atomic_json(self.config.output_dir / "RUN_STATE.json", state)
@@ -2932,8 +3217,14 @@ class ProgressiveReviewPlanner:
         _atomic_json(path, result)
         if cache_inputs is not None:
             stage_inputs = dict(state.get("stage_inputs") or {})
-            stage_inputs[name] = cache_inputs
+            stage_inputs[name] = frozen_inputs
             state["stage_inputs"] = stage_inputs
+        contracts = dict(state.get("stage_cache_contracts") or {})
+        if contract is None:
+            contracts.pop(name, None)
+        else:
+            contracts[name] = contract
+        state["stage_cache_contracts"] = contracts
         completed = list(state.get("completed_stages") or [])
         if name not in completed:
             completed.append(name)
@@ -3026,25 +3317,30 @@ class ProgressiveReviewPlanner:
         def propose(chapter: Mapping[str, Any]) -> dict[str, Any]:
             chapter_id = _text(chapter.get("chapter_id") or chapter.get("id"))
             path = root / (_safe_id(chapter_id) + ".json")
-            if resume and path.is_file():
-                return _read_json(path)
             routes = [row for row in routing["source_routes"] if chapter_id in (row.get("chapter_ids") or [])]
             material = [{key: row[key] for key in (
                 "question", "usable_content", "still_missing", "conditions", "limits", "source_handles"
             ) if key in row} for row in self.tool_materials_by_chapter.get(chapter_id, [])]
-            record = _call_record(self.planner, "chapter_proposals", {
+            payload = {
                 "call_id": "chapter-proposal-" + chapter_id,
                 "topic_id": self.config.topic_id, "research_question": topic,
                 "chapter": dict(chapter), "shared_level1_outline": outline,
                 "source_routing": routes, "chapter_tool_materials": material,
                 "candidate_pool_row_count": routing.get("pool_sources"),
-            })
+            }
+            contract = self._cache_contract("chapter_proposals", payload)
+            if resume and path.is_file():
+                cached = _read_json(path)
+                if isinstance(cached, Mapping) and cached.get("cache_contract") == contract:
+                    return cached
+            record = _call_record(self.planner, "chapter_proposals", payload)
             response = _normalize_proposal_response(_stage_response(record))
             rows = [row for row in response.get("chapter_proposals", [])
                     if isinstance(row, Mapping) and _text(row.get("chapter_id") or row.get("id")) == chapter_id]
             if not rows:
                 raise ProgressivePlanError("chapter_proposal_missing:" + chapter_id)
             result = {"response": {"chapter_proposals": rows}, "telemetry": record.get("telemetry") or {}}
+            result["cache_contract"] = contract
             _atomic_json(path, result)
             return result
 
@@ -3146,9 +3442,7 @@ class ProgressiveReviewPlanner:
                     "reason": reason,
                 } for row in candidates]
 
-            def invoke(candidates: Sequence[Mapping[str, Any]], *, repair_attempt: int = 0) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-                if stop_event.is_set():
-                    raise ProgressivePlanError("source_routing_cancelled")
+            def route_payload(candidates: Sequence[Mapping[str, Any]], *, repair_attempt: int = 0) -> dict[str, Any]:
                 suffix = f"-repair-{repair_attempt:03d}" if repair_attempt else ""
                 payload = {
                     "call_id": f"source-routing-{batch_id}-of-{len(batches):03d}{suffix}",
@@ -3172,6 +3466,14 @@ class ProgressiveReviewPlanner:
                     payload["repair_for_batch"] = batch_id
                     payload["repair_attempt"] = repair_attempt
                     payload["route_only_supplied_handles"] = True
+                return payload
+
+            contract = self._cache_contract("source_routing", route_payload(candidate_batch))
+
+            def invoke(candidates: Sequence[Mapping[str, Any]], *, repair_attempt: int = 0) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+                if stop_event.is_set():
+                    raise ProgressivePlanError("source_routing_cancelled")
+                payload = route_payload(candidates, repair_attempt=repair_attempt)
                 try:
                     record = _call_record(self.planner, "source_routing", payload)
                     response = _stage_response(record)
@@ -3224,7 +3526,7 @@ class ProgressiveReviewPlanner:
             if resume and cache_path.is_file():
                 try:
                     cached = _read_json(cache_path)
-                    if isinstance(cached, Mapping):
+                    if isinstance(cached, Mapping) and cached.get("cache_contract") == contract:
                         pending, attempted = pending_from_cache(cached)
                         if not pending:
                             return index, dict(cached)
@@ -3234,6 +3536,7 @@ class ProgressiveReviewPlanner:
 
             output_routes, telemetry = invoke(candidate_batch)
             saved = {
+                "cache_contract": contract,
                 "batch_id": batch_id,
                 "batch_index": index + 1,
                 "batch_count": len(batches),
@@ -3298,6 +3601,20 @@ class ProgressiveReviewPlanner:
         state: dict[str, Any],
     ) -> dict[str, Any]:
         name = phase.lower() + "_tools"
+        cycle_inputs = {
+            "phase": phase, "topic_id": self.config.topic_id,
+            "supplement_requests": _normalize_gaps(supplement_requests),
+            "directed_requests": _merge_directed_tasks(directed_requests),
+            "pool_rows": list(pool_rows), "plan": dict(plan),
+            "prior_directed": dict(prior_directed or {}),
+            "prior_tool_results": dict(prior_tool_results or {}),
+            "source_handle_map": dict(source_handle_map),
+            "prior_readings": self.prior_readings,
+            "shared_deep_read_budget": self.config.shared_deep_read_budget,
+            "reader_model": self.config.reader_model,
+            "thinking_budget": self.config.thinking_budget,
+            "adaptive_queue": self.retrieval_loop_runner is not None,
+        }
 
         if self.retrieval_loop_runner is not None:
             def run_adaptive_cycle() -> dict[str, Any]:
@@ -3319,9 +3636,7 @@ class ProgressiveReviewPlanner:
 
             result = self._stage(
                 name, run_adaptive_cycle, resume=resume, state=state,
-                cache_inputs={"supplement_requests": _normalize_gaps(supplement_requests),
-                              "directed_requests": _merge_directed_tasks(directed_requests),
-                              "prior_tool_results": dict(prior_tool_results or {})},
+                cache_inputs=cycle_inputs,
             )
             for chapter_id, rows in (result.get("tool_materials_by_chapter") or {}).items():
                 existing = self.tool_materials_by_chapter.setdefault(str(chapter_id), [])
@@ -3451,7 +3766,7 @@ class ProgressiveReviewPlanner:
                 "budget_deferred_tasks": deferred,
             }
 
-        return self._stage(name, run_cycle, resume=resume, state=state)
+        return self._stage(name, run_cycle, resume=resume, state=state, cache_inputs=cycle_inputs)
 
     @staticmethod
     def _collect_tool_result(future: Any, absent_reason: str, requested: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
@@ -3510,19 +3825,14 @@ class ProgressiveReviewPlanner:
             }
             _atomic_json(state_path, state)
 
-        provisional_record = self._stage(
-            "provisional_scope",
-            lambda: _call_record(self.planner, "provisional_scope", {
+        provisional_record = self._model_stage("provisional_scope", {
                 "topic_id": self.config.topic_id,
                 "research_question": topic,
                 "original_plan": plan,
                 "pool_row_count": len(b_pool),
                 "candidate_pool": b_pool,
                 "required_behavior": {"read_all_candidates": True, "candidate_pool_is_complete": True, "do_not_force_use": True},
-            }),
-            resume=resume,
-            state=state,
-        )
+            }, resume=resume, state=state)
         provisional = _stage_response(provisional_record)
         provisional = _resolve_planner_handles(provisional, source_handle_map)
 
@@ -3544,19 +3854,14 @@ class ProgressiveReviewPlanner:
         paper_to_handle = {paper_id: handle for handle, paper_id in source_handle_map.items()}
         b_pool = [dict(row["_b_summary"]) for row in pool_rows]
         candidate_by_id = {str(row["_paper_id"]): row for row in pool_rows}
-        level1_outline_record = self._stage(
-            "level1_outline",
-            lambda: _call_record(self.planner, "level1_outline", {
+        level1_outline_record = self._model_stage("level1_outline", {
                 "topic_id": self.config.topic_id,
                 "research_question": topic,
                 "provisional_scope": provisional,
                 "actual_tool_results": self._compact_tool_feedback(level1_tool_result),
                 "full_b_pool_was_semantically_screened": len(b_pool),
                 "unavailable_and_failed_tools_are_scope_feedback": True,
-            }),
-            resume=resume,
-            state=state,
-        )
+            }, resume=resume, state=state)
         level1_outline = _stage_response(level1_outline_record)
         if stop_after == "level1":
             partial = self._partial_result(topic, plan, provisional, level1_outline, level1_tool_result, "level1")
@@ -3566,6 +3871,7 @@ class ProgressiveReviewPlanner:
             _atomic_json(state_path, state)
             return partial
 
+        state["topic"] = topic
         routing = self._route_sources(pool_rows, shared_outline=level1_outline.get("shared_outline"), resume=resume, state=state)
         limits_by_handle = {row["_source_handle"]: row["_b_summary"].get("scope_interpretation_cautions") or [] for row in pool_rows}
         for route in routing["source_routes"]:
@@ -3576,12 +3882,13 @@ class ProgressiveReviewPlanner:
             lambda: self._propose_chapters(topic=topic, outline=level1_outline, routing=routing, resume=resume),
             resume=resume,
             state=state,
+            cache_inputs={"topic_id": self.config.topic_id, "research_question": topic,
+                          "outline": level1_outline, "routing": routing,
+                          "chapter_tool_materials": self.tool_materials_by_chapter},
         )
         proposals = self._attach_routed_sources(_normalize_proposal_response(_stage_response(proposals_record)), routing["source_routes"], level1_outline.get("shared_outline"))
         proposals = _resolve_planner_handles(proposals, source_handle_map)
-        harmonize_record = self._stage(
-            "harmonized_scope",
-            lambda: _call_record(self.planner, "harmonize_scope", {
+        harmonize_record = self._model_stage("harmonized_scope", {
                 "topic_id": self.config.topic_id,
                 "research_question": topic,
                 "shared_level1_outline": level1_outline,
@@ -3589,10 +3896,7 @@ class ProgressiveReviewPlanner:
                 "source_routing": routing["source_routes"],
                 "level1_tool_results": self._compact_tool_feedback(level1_tool_result),
                 "global_unique_deep_read_budget": self.config.shared_deep_read_budget,
-            }),
-            resume=resume,
-            state=state,
-        )
+            }, resume=resume, state=state)
         harmonized = _resolve_planner_handles(_stage_response(harmonize_record), source_handle_map)
         harmonized["chapters"] = self._harmonized_chapters(harmonized, proposals)
         level2_tool_result = self._tool_cycle(
@@ -3612,9 +3916,7 @@ class ProgressiveReviewPlanner:
         self._bind_tool_material_source_handles(pool_rows)
         paper_to_handle = {paper_id: handle for handle, paper_id in source_handle_map.items()}
         candidate_by_id = {str(row["_paper_id"]): row for row in pool_rows}
-        final_scope_record = self._stage(
-            "finalize_chapter_scope",
-            lambda: _call_record(self.planner, "finalize_chapter_scope", {
+        final_scope_record = self._model_stage("finalize_chapter_scope", {
                 "topic_id": self.config.topic_id,
                 "research_question": topic,
                 "harmonized_shared_outline": harmonized.get("shared_outline") or level1_outline.get("shared_outline") or {},
@@ -3627,10 +3929,7 @@ class ProgressiveReviewPlanner:
                 "level2_tool_results": self._compact_tool_feedback(level2_tool_result),
                 "new_and_upgraded_sources": [dict(row["_b_summary"]) for row in pool_rows if row.get("supplement_gap_material")],
                 "do_not_issue_more_tool_requests": True,
-            }),
-            resume=resume,
-            state=state,
-        )
+            }, resume=resume, state=state)
         final_scope = _resolve_planner_handles(_stage_response(final_scope_record), source_handle_map)
         harmonized = {
             **harmonized,
@@ -3648,9 +3947,7 @@ class ProgressiveReviewPlanner:
 
         chapter_gaps, chapter_directed = _chapter_retrieval_requests(chapters)
         if self.retrieval_loop_runner is not None:
-            chapter_needs_record = self._stage(
-                "chapter_need_analysis",
-                lambda: _call_record(self.planner, "chapter_need_analysis", {
+            chapter_needs_record = self._model_stage("chapter_need_analysis", {
                     "topic_id": self.config.topic_id,
                     "research_question": topic,
                     "shared_outline": harmonized.get("shared_outline") or level1_outline.get("shared_outline") or {},
@@ -3661,15 +3958,7 @@ class ProgressiveReviewPlanner:
                     "level1_tool_results": self._compact_tool_feedback(level1_tool_result),
                     "level2_tool_results": self._compact_tool_feedback(level2_tool_result),
                     "required_behavior": {"bounded_questions": True, "preserve_chapter_ids": True},
-                }),
-                resume=resume,
-                state=state,
-                cache_inputs={
-                    "chapters": [{key: row.get(key) for key in ("chapter_id", "title", "purpose", "scope", "substantive_threads")}
-                                 for row in chapters],
-                    "level2_tool_results": self._compact_tool_feedback(level2_tool_result),
-                },
-            )
+                }, resume=resume, state=state)
             chapter_needs = _resolve_planner_handles(_stage_response(chapter_needs_record), source_handle_map)
             raw_chapter_gaps = chapter_needs.get("supplement_requests") or chapter_needs.get("retrieval_gaps") or []
             raw_chapter_directed = chapter_needs.get("directed_reads") or chapter_needs.get("directed_read_requests") or []
@@ -4347,6 +4636,10 @@ class ProgressiveReviewPlanner:
         # Refresh authoritative local cards before case work.  The case model
         # contributes pointers and uses; it cannot author or overwrite A/B.
         detail_records = _refresh_local_material_snapshots(detail_records)
+        for record in detail_records:
+            _refresh_owner_packet_materials(
+                record, pool_rows=pool_rows, deep_material_by_paper=self._read_materials,
+            )
         by_chapter_material: dict[str, list[dict[str, Any]]] = {}
         source_materials_by_chapter: dict[str, dict[str, dict[str, Any]]] = {}
         for record in detail_records:
@@ -4385,9 +4678,9 @@ class ProgressiveReviewPlanner:
         for chapter_id, current_sources in source_materials_by_chapter.items():
             prior_sources = baseline_materials_by_chapter.get(chapter_id, {})
             for handle, current_source in current_sources.items():
-                current_content = _material_content(current_source)
-                prior_content = _material_content(prior_sources.get(handle))
-                if current_content == prior_content:
+                current_content = _owner_consumed_material(current_source)
+                prior_content = _owner_consumed_material(prior_sources.get(handle) or {})
+                if _owner_cache_projection(current_content) == _owner_cache_projection(prior_content):
                     continue
                 by_chapter_material.setdefault(chapter_id, []).append({
                     "source_handle": handle,
@@ -4607,17 +4900,42 @@ class ProgressiveReviewPlanner:
             def revise_one(item: tuple[int, tuple[str, Mapping[str, Any]]]) -> tuple[int, dict[str, Any]]:
                 index, (chapter_id, revision_payload) = item
                 cache_path = revision_root / f"{_safe_id(chapter_id)}.json"
-                if resume and cache_path.is_file():
-                    try:
-                        cached = _read_json(cache_path)
-                        if (
-                            cached.get("status") == "complete"
-                            and cached.get("owner_status") in {"updated", "no_change"}
-                            and cached.get("cache_inputs") == revision_payload
-                        ):
-                            return index, dict(cached)
-                    except (ProgressivePlanError, AttributeError):
-                        pass
+                success_path = revision_root / "successful" / cache_path.name
+                projection = _owner_cache_projection(revision_payload)
+                owner_contract = self._cache_contract("affected_chapter_revision", projection)
+                compatible_success = None
+                for path in (cache_path, success_path):
+                    cached = _owner_success_record(path)
+                    if (cached is None or _text(cached.get("chapter_id")) != chapter_id
+                            or cached.get("owner_cache_contract") != owner_contract
+                            or _owner_cache_projection(cached["cache_inputs"]) != projection):
+                        continue
+                    status, _, _, errors = _classify_owner_response(
+                        revision_payload.get("chapter_plan") or {},
+                        {"status": cached["owner_status"], "updated_plan": cached["updated_plan"],
+                         "unit_id_remap": cached.get("unit_id_remap") or {}},
+                        revision_payload.get("source_materials") or [], expected_chapter_id=chapter_id,
+                    )
+                    if status in {"updated", "no_change"} and not errors:
+                        compatible_success = cached
+                        # Preserve this validated success separately before a
+                        # later attempt can replace the latest-attempt record.
+                        if path == cache_path:
+                            _atomic_json(success_path, cached)
+                        elif cache_path.is_file():
+                            try:
+                                latest_attempt = _read_json(cache_path)
+                            except ProgressivePlanError:
+                                latest_attempt = {}
+                            if (isinstance(latest_attempt, Mapping)
+                                    and latest_attempt.get("status") in {"failed", "partial"}
+                                    and _owner_cache_projection(latest_attempt.get("cache_inputs")) == projection):
+                                compatible_success["retained_compatible_success"] = True
+                                compatible_success["latest_attempt_status"] = latest_attempt["status"]
+                                compatible_success["latest_attempt_error"] = latest_attempt.get("error") or latest_attempt.get("structural_errors")
+                        break
+                if resume and compatible_success is not None:
+                    return index, compatible_success
                 try:
                     record = _call_record(self.planner, "affected_chapter_revision", revision_payload)
                     response = _stage_response(record)
@@ -4625,6 +4943,7 @@ class ProgressiveReviewPlanner:
                         revision_payload.get("chapter_plan") or {},
                         response,
                         revision_payload.get("source_materials") or [],
+                        expected_chapter_id=chapter_id,
                     )
                     saved = {
                         "chapter_id": chapter_id,
@@ -4646,7 +4965,31 @@ class ProgressiveReviewPlanner:
                         "error_detail": str(exc)[:1000],
                         "cache_inputs": dict(revision_payload),
                     }
+                saved["cache_projection"] = projection
+                saved["cache_signature"] = _material_content_signature(projection)
+                saved["owner_cache_contract"] = owner_contract
+                if cache_path.is_file():
+                    try:
+                        previous_attempt = _read_json(cache_path)
+                    except ProgressivePlanError:
+                        previous_attempt = None
+                    if isinstance(previous_attempt, Mapping):
+                        # Keep prior attempts, including legacy successes whose
+                        # prompt/model provenance cannot justify implicit reuse.
+                        history_path = revision_root / "history" / _safe_id(chapter_id) / (
+                            _material_content_signature(previous_attempt) + ".json")
+                        _atomic_json(history_path, previous_attempt)
+                        if _owner_success_record(cache_path) is not None and not success_path.is_file():
+                            _atomic_json(success_path, previous_attempt)
                 _atomic_json(cache_path, saved)
+                if saved.get("status") == "complete":
+                    _atomic_json(success_path, saved)
+                elif compatible_success is not None:
+                    retained = dict(compatible_success)
+                    retained["retained_compatible_success"] = True
+                    retained["latest_attempt_status"] = saved.get("status")
+                    retained["latest_attempt_error"] = saved.get("error") or saved.get("structural_errors")
+                    return index, retained
                 return index, saved
 
             revision_items = list(revision_inputs.items())
@@ -4674,6 +5017,11 @@ class ProgressiveReviewPlanner:
             })
             improvement["chapter_updates"] = [dict(item) for item in revision_entries]
             improvement["chapter_revision_results"] = [dict(item) for item in revision_records]
+            improvement["owner_revision_attempt_failures"] = [
+                str(item.get("chapter_id")) for item in revision_records
+                if item.get("latest_attempt_status") in {"failed", "partial"}
+                or item.get("status") in {"failed", "partial"}
+            ]
             improvement["owner_revision_unresolved"] = [
                 str(item.get("chapter_id"))
                 for item in revision_records
@@ -4958,18 +5306,6 @@ class ProgressiveReviewPlanner:
             index, chapter = item
             chapter_id, payload = chapter_payload(chapter, index)
             cached = root / (_safe_id(chapter_id) + ".json")
-            if resume and cached.is_file():
-                cached_packet = dict(_read_json(cached))
-                expected_materials = [_tool_material_for_prompt(item) for item in (tool_materials_by_chapter or {}).get(chapter_id, [])]
-                if (
-                    cached_packet.get("_adaptive_input_materials") == expected_materials
-                    and cached_packet.get("source_materials") == payload["source_materials"]
-                    and (not self.config.planning_revision_enabled or (
-                        cached_packet.get("candidate_navigation") == payload.get("candidate_navigation")
-                        and cached_packet.get("candidate_materials") == payload.get("candidate_materials")
-                    ))
-                ):
-                    return index, cached_packet
             def projected_source(item: Mapping[str, Any]) -> dict[str, Any]:
                 route = route_by_handle.get(item.get("source_handle"))
                 if self.config.planning_revision_enabled:
@@ -5044,18 +5380,30 @@ class ProgressiveReviewPlanner:
                     "keep_conditions_and_limits": True,
                     "do_not_only_append_citations": True,
                 }
-            batch_cache_root = root / f"{_safe_id(chapter_id)}_details_batches"
-            record, adaptive_meta = _chapter_details_adaptive_record(
-                self.planner,
-                model_payload,
-                chapter_id=chapter_id,
-                cache_root=batch_cache_root,
-                resume=resume,
-            )
-            response = _stage_response(record)
-            chapter_plan = response.get("chapter_plan") if isinstance(response.get("chapter_plan"), Mapping) else response
-            if adaptive_meta and isinstance(chapter_plan, Mapping):
-                chapter_plan = _chapter_plan_with_arrangement_units(chapter_plan)
+            # Cache the model's assigned/candidate projections separately, not
+            # the expanded handoff list (which appends candidate rows below).
+            # The contract also covers task/scope, prompt and model settings.
+            input_contract = self._cache_contract("chapter_details", model_payload)
+            cached_packet = dict(_read_json(cached)) if resume and cached.is_file() else {}
+            cached_plan = cached_packet.get("chapter_plan")
+            if (cached_packet.get("_chapter_details_input_contract") == input_contract
+                    and isinstance(cached_plan, Mapping) and cached_plan.get("units")):
+                chapter_plan = dict(cached_plan)
+                adaptive_meta = cached_packet.get("chapter_details_adaptive")
+                record = {"telemetry": cached_packet.get("planner_telemetry") or {}}
+            else:
+                batch_cache_root = root / f"{_safe_id(chapter_id)}_details_batches"
+                record, adaptive_meta = _chapter_details_adaptive_record(
+                    self.planner,
+                    model_payload,
+                    chapter_id=chapter_id,
+                    cache_root=batch_cache_root,
+                    resume=resume,
+                )
+                response = _stage_response(record)
+                chapter_plan = response.get("chapter_plan") if isinstance(response.get("chapter_plan"), Mapping) else response
+                if adaptive_meta and isinstance(chapter_plan, Mapping):
+                    chapter_plan = _chapter_plan_with_arrangement_units(chapter_plan)
             packet_source_materials = [dict(item) for item in payload["source_materials"]]
             existing_handles = {_text(item.get("source_handle")) for item in packet_source_materials}
             for item in payload.get("candidate_materials") or []:
@@ -5100,6 +5448,7 @@ class ProgressiveReviewPlanner:
                 },
                 "planner_telemetry": record.get("telemetry") or {},
                 "_adaptive_input_materials": chapter_tool_materials,
+                "_chapter_details_input_contract": input_contract,
                 **({"chapter_details_adaptive": adaptive_meta} if adaptive_meta else {}),
             }
             _atomic_json(cached, packet)

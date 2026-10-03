@@ -63,7 +63,7 @@ def test_recovery_seeds_plan_and_removes_pending_case_suggestions(tmp_path):
     assert saved["chapter_plan"] == recovered[0]["chapter_plan"]
 
 
-def test_recovery_checks_existing_material_and_current_success_priority(tmp_path):
+def test_recovery_checks_existing_material_despite_unproven_current_success(tmp_path):
     source = tmp_path / "source"
     plan = {"reader_objective": "read", "thesis": "thesis", "units": [{"unit_id": "CH03_U01", "paragraph_briefs": [{"point": "brief", "source_handles": ["P0001"]}]}]}
     chapter = {"chapter_id": "CH03", "scope": "scope", "title": "Title"}
@@ -74,7 +74,7 @@ def test_recovery_checks_existing_material_and_current_success_priority(tmp_path
                 "chapter_plan": plan, "candidate_materials": [], "candidate_navigation": {},
                 "shared_outline": {"scope": "shared"}, "source_materials": [changed]}]
     recovered, report = recover_compatible_chapter_details(current, recovery_root=source, shared_outline={"scope": "shared"}, chapter_ids=["CH03"])
-    assert report["chapters"]["CH03"]["reason"] == "required_material_identity_or_ab_mismatch"
+    assert report["chapters"]["CH03"]["reason"] == "required_material_identity_or_content_mismatch"
     assert recovered[0]["chapter_plan"] == plan
 
     output = tmp_path / "output"
@@ -82,7 +82,7 @@ def test_recovery_checks_existing_material_and_current_success_priority(tmp_path
     saved.parent.mkdir(parents=True)
     saved.write_text(json.dumps({"status": "complete", "owner_status": "updated"}), encoding="utf-8")
     recovered, report = recover_compatible_chapter_details(current, recovery_root=source, shared_outline={"scope": "shared"}, output_root=output, chapter_ids=["CH03"])
-    assert report["chapters"]["CH03"]["reason"] == "current_successful_owner_has_priority"
+    assert report["chapters"]["CH03"]["reason"] == "required_material_identity_or_content_mismatch"
     assert recovered[0]["chapter_plan"] == plan
 
 
