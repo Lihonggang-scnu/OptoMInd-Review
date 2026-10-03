@@ -242,10 +242,12 @@ def _evidence_contract(raw: Any, question_id: str) -> dict[str, Any] | None:
     }
 
 
-def _question_row(raw: Mapping[str, Any], index: int) -> dict[str, Any]:
+def _question_row(raw: Mapping[str, Any] | str, index: int) -> dict[str, Any]:
+    if isinstance(raw, str):
+        raw = {"question": raw, "purpose": raw}
     question_id = _norm(raw.get("question_id") or raw.get("id")) or f"Q{index + 1:02d}"
     question = _norm(raw.get("question") or raw.get("ask") or raw.get("what_to_extract"))
-    purpose = _norm(raw.get("purpose") or raw.get("use"))
+    purpose = _norm(raw.get("purpose") or raw.get("use")) or question
     if not question:
         raise RequestValidationError(f"question_text_missing:{question_id}")
     if not purpose:
@@ -338,8 +340,13 @@ def build_directed_request(
         raise RequestValidationError("directed_questions_required")
     if not required_outputs:
         raise RequestValidationError("required_outputs_required")
+    if isinstance(questions, str):
+        questions = [questions]
     q_rows = [_question_row(row, index) for index, row in enumerate(questions)]
     o_rows = [_output_row(row, index) for index, row in enumerate(required_outputs)]
+    for row in q_rows:
+        if not row["required_output_ids"]:
+            row["required_output_ids"] = [output["output_id"] for output in o_rows]
     candidate_rows = [_candidate_row(row, index) for index, row in enumerate(candidates)]
     if len({row["question_id"] for row in q_rows}) != len(q_rows):
         raise RequestValidationError("duplicate_question_id")
@@ -716,8 +723,13 @@ class DirectedReadingStore:
         paper = self.paper(rid, pid)
         if paper is None:
             raise AdmissionError("paper_not_nominated")
-        normalized_questions = [dict(row) for row in questions]
-        normalized_outputs = [dict(row) for row in required_outputs]
+        if isinstance(questions, str):
+            questions = [questions]
+        normalized_questions = [_question_row(row, index) for index, row in enumerate(questions)]
+        normalized_outputs = [_output_row(row, index) for index, row in enumerate(required_outputs)]
+        for row in normalized_questions:
+            if not row["required_output_ids"]:
+                row["required_output_ids"] = [output["output_id"] for output in normalized_outputs]
         gaps = sorted({_norm(value) for value in gap_keys if _norm(value)})
         now = time.time()
         with self._connect() as db:
@@ -730,23 +742,19 @@ class DirectedReadingStore:
             task_id = "dr-task-" + task_hash[:24]
             existing = db.execute("SELECT * FROM directed_tasks WHERE task_id=?", (task_id,)).fetchone()
             if existing is not None:
+                if existing["status"] == "needs_explicit_new_gap":
+                    db.execute("UPDATE directed_tasks SET status='pending',updated_at=? WHERE task_id=?", (now, task_id))
+                    db.commit()
+                    return {"task_id": task_id, "status": "pending", "task_hash": task_hash, "reused": False, "route": "run"}
                 db.commit()
                 route = "reuse" if existing["status"] in {"reuse_available", "committed"} else existing["status"]
                 return {"task_id": task_id, "status": existing["status"], "task_hash": task_hash, "reused": route == "reuse", "route": route}
-            prior_gaps: set[str] = set()
-            for row in db.execute("SELECT gap_keys_json FROM directed_readings WHERE review_id=? AND canonical_paper_id=? AND source_hash=? AND status='committed'", (rid, pid, _text(source_hash))).fetchall():
-                try:
-                    prior_gaps.update(json.loads(row[0]) or [])
-                except (TypeError, ValueError):
-                    pass
-            if prior_gaps and (not gaps or set(gaps).issubset(prior_gaps)):
-                route = "needs_explicit_new_gap"
-                status = "needs_explicit_new_gap"
-            else:
-                route = "run"
-                status = "pending"
+            # A changed question/output contract is a new task even when it
+            # addresses the same gap. Paper admission alone owns the core slot.
+            route = "run"
+            status = "pending"
             db.execute("INSERT INTO directed_tasks(task_id,review_id,canonical_paper_id,task_hash,questions_json,required_outputs_json,gap_keys_json,source_hash,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)", (task_id, rid, pid, task_hash, json.dumps(normalized_questions, ensure_ascii=False, sort_keys=True), json.dumps(normalized_outputs, ensure_ascii=False, sort_keys=True), json.dumps(gaps, ensure_ascii=False), source_hash, status, now, now))
-            current_ids = paper.get("task_ids") or []
+            current_ids = json.loads(db.execute("SELECT task_ids_json FROM directed_papers WHERE review_id=? AND canonical_paper_id=?", (rid, pid)).fetchone()[0])
             current_ids = [*current_ids, task_id]
             db.execute("UPDATE directed_papers SET task_ids_json=?,updated_at=? WHERE review_id=? AND canonical_paper_id=?", (json.dumps(current_ids, ensure_ascii=False), now, rid, pid))
             self._event(db, rid, "task_added", {"task_id": task_id, "paper_id": pid, "route": route, "gap_keys": gaps})
@@ -831,7 +839,15 @@ class DirectedReadingStore:
         reading_key = sha256_value({"task_id": task_id, "source_hash": source_hash})[:32]
         with self._connect() as db:
             db.execute("BEGIN IMMEDIATE")
+            committed = db.execute("SELECT reading_key,output_dir FROM directed_readings WHERE task_id=? AND source_hash=? AND status='committed'", (task_id, source_hash)).fetchone()
+            if committed is not None:
+                if _text(committed["output_dir"]) != _text(output_dir):
+                    raise AdmissionError("reading_commit_is_immutable")
+                reading_key = committed["reading_key"]
             previous = db.execute("SELECT output_dir,status FROM directed_readings WHERE reading_key=?", (reading_key,)).fetchone()
+            if previous is not None and previous["status"] in {"partial", "unmet"}:
+                reading_key = sha256_value({"task_id": task_id, "source_hash": source_hash, "output_dir": str(output_dir)})[:32]
+                previous = db.execute("SELECT output_dir,status FROM directed_readings WHERE reading_key=?", (reading_key,)).fetchone()
             if previous is not None and (_text(previous["output_dir"]) != _text(output_dir) or _text(previous["status"]) != "committed"):
                 raise AdmissionError("reading_commit_is_immutable")
             if previous is None:
@@ -840,6 +856,26 @@ class DirectedReadingStore:
             self._event(db, _norm(review_id), "reading_committed", {"task_id": task_id, "reading_key": reading_key, "output_dir": output_dir})
             db.commit()
         return {"reading_key": reading_key, "status": "committed", "reused": previous is not None}
+
+    def retain_incomplete(self, task_id: str, *, status: str, output_dir: str) -> bool:
+        """Correct a historical false commit without removing its evidence."""
+        if status not in {"partial", "unmet"}:
+            raise AdmissionError("incomplete_status_invalid")
+        with self._connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT status FROM directed_tasks WHERE task_id=?", (task_id,)).fetchone()
+            if row is None:
+                raise AdmissionError("task_not_found")
+            if row["status"] == "running":
+                raise AdmissionError("running_elsewhere")
+            # Invalidate only the evaluated artifact. A concurrent retry may
+            # already have committed a different, fulfilled attempt.
+            db.execute("UPDATE directed_readings SET status=? WHERE task_id=? AND output_dir=? AND status='committed'", (status, task_id, output_dir))
+            active = db.execute("SELECT 1 FROM directed_readings WHERE task_id=? AND status='committed' LIMIT 1", (task_id,)).fetchone()
+            if active is None:
+                db.execute("UPDATE directed_tasks SET status='pending',updated_at=? WHERE task_id=?", (time.time(), task_id))
+            db.commit()
+            return active is None
 
     def committed_reading(self, review_id: str, task_id: str) -> dict[str, Any] | None:
         with self._connect() as db:
@@ -4212,8 +4248,14 @@ def run_directed_reading_legacy(
 
 def _practical_task_rows(request: Mapping[str, Any], task: Mapping[str, Any] | None) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[str]]:
     source = task if isinstance(task, Mapping) else request
-    questions = [dict(row) for row in source.get("questions") or request.get("questions") or () if isinstance(row, Mapping)]
+    raw_questions = source.get("questions") or request.get("questions") or ()
+    if isinstance(raw_questions, str):
+        raw_questions = [raw_questions]
+    questions = [_question_row(row, index) for index, row in enumerate(raw_questions)]
     outputs = [dict(row) for row in source.get("required_outputs") or request.get("required_outputs") or () if isinstance(row, Mapping)]
+    for row in questions:
+        if not row["required_output_ids"]:
+            row["required_output_ids"] = [_norm(output.get("output_id")) for output in outputs]
     gaps = source.get("gap_keys") or [row.get("gap_key") for row in questions if row.get("gap_key")]
     return questions, outputs, sorted({_norm(item) for item in gaps if _norm(item)})
 
@@ -4289,6 +4331,72 @@ def _load_practical_raw(path: Path) -> dict[str, Any] | None:
     return dict(value) if isinstance(value, Mapping) else {"content": value}
 
 
+def practical_result_status(artifact: Mapping[str, Any], questions: Sequence[Mapping[str, Any]]) -> str:
+    """Distinguish useful material from coverage, without a scientific gate."""
+    content = artifact.get("content")
+    if not isinstance(content, Mapping):
+        content = artifact
+    plain_text = _norm(artifact.get("plain_text"))
+    rows = artifact.get("current_question_material") if "current_question_material" in artifact else content.get("question_material") or artifact.get("question_material") or []
+    # The question collection itself is never evidence of an answer. Retain
+    # useful historical rows, but require answer-bearing fields within them.
+    history = content.get("question_material") or artifact.get("question_material") or []
+    other_content = {key: value for key, value in content.items() if key not in {"question_material", "current_question_material"}}
+    useful = bool(plain_text) or has_practical_content(other_content) or any(
+        has_practical_content(row)
+        for collection in (rows, history) if isinstance(collection, list)
+        for row in collection if isinstance(row, Mapping)
+    )
+    if not useful:
+        return "unmet"
+    expected = {_norm(row.get("question_id")) for row in questions if isinstance(row, Mapping)} - {""}
+    covered = set()
+    incomplete = set()
+    for row in rows if isinstance(rows, list) else []:
+        if not isinstance(row, Mapping):
+            continue
+        qid = _norm(row.get("question_id"))
+        unresolved = {"partial", "unavailable", "unmet", "no_material", "no_writing_material_returned", "pending", "unknown"}
+        if row.get("remaining_points") or row.get("remaining_gap") or any(_norm(row.get(key)).casefold() in unresolved for key in ("status", "availability", "primary_gap_status")) or not has_practical_content(row):
+            incomplete.add(qid)
+        else:
+            covered.add(qid)
+    explicitly_incomplete = any(
+        value.get("material_ready") is False or value.get("fulfilled") is False
+        or _norm(value.get("status")).casefold() in {"partial", "unavailable", "unmet", "no_material", "no_writing_material_returned"}
+        or bool(value.get("remaining_points") or value.get("remaining_gap") or value.get("open_questions"))
+        for value in (artifact, content)
+    )
+    return "fulfilled" if expected and expected <= covered and not expected.intersection(incomplete) and not explicitly_incomplete else "partial"
+
+
+def _practical_cached_result(artifact: Mapping[str, Any], output: Path, questions: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    status = practical_result_status(artifact, questions)
+    result = dict(artifact)
+    result.update(material_ready=status != "unmet", fulfilled=status == "fulfilled")
+    result["status"] = "material_ready" if status == "fulfilled" else "partial" if status == "partial" else "no_writing_material_returned"
+    return {"output": result, "output_dir": str(output), "reused": status == "fulfilled", "retained": status != "fulfilled", "ready": status != "unmet", "fulfilled": status == "fulfilled", "network_call": False}
+
+
+def _practical_output_directory(root: Path, task_id: str) -> Path:
+    """Allocate by task before writing, including concurrent same-paper tasks."""
+    # Read pre-existing legacy paths in place; new allocations are deterministic.
+    identities = []
+    for name in ("DIRECTED_READING.json", "INPUT.json"):
+        path = root / name
+        if path.is_file():
+            payload = _read_json(path)
+            identities.append(payload.get("task_id") if isinstance(payload, Mapping) else None)
+    if identities and any(value != task_id for value in identities):
+        if root.name == task_id or task_id in identities:
+            raise DirectedReadingError("output_directory_task_identity_conflict")
+        child = root / task_id
+        return _practical_output_directory(child, task_id)
+    if identities:
+        return root
+    return root if root.name == task_id else _practical_output_directory(root / task_id, task_id)
+
+
 def run_directed_reading(
     *,
     request: Mapping[str, Any],
@@ -4305,6 +4413,7 @@ def run_directed_reading(
     thinking_budget: int = DEFAULT_THINKING_BUDGET,
     max_input_tokens: int = DEFAULT_MAX_INPUT_TOKENS,
     attempt: int = 1,
+    retry_empty_result: bool = False,
     selected_source_packet_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Produce practical writing material with one Qwen read and no verifier gate."""
@@ -4335,44 +4444,76 @@ def run_directed_reading(
     task_id = _norm(added.get("task_id"))
     effective_task = store.task(task_id) or {"task_id": task_id, "questions": questions, "required_outputs": outputs, "gap_keys": gaps}
     receipt["task_id"] = task_id
-    output = Path(output_dir)
-    existing_result = output / "DIRECTED_READING.json"
-    if existing_result.is_file():
-        existing = _read_json(existing_result)
-        if isinstance(existing, Mapping) and existing.get("task_id") == task_id and existing.get("workflow") == "practical_materials":
-            return {"output": existing, "output_dir": str(output), "reused": True, "ready": bool(existing.get("material_ready"))}
-        raise DirectedReadingError("output_directory_already_contains_a_reading")
+    output = _practical_output_directory(Path(output_dir), task_id)
     saved = store.committed_reading(review_id, task_id)
-    if saved is not None:
-        committed_path = Path(str(saved.get("output_dir") or "")) / "DIRECTED_READING.json"
-        if committed_path.is_file():
-            existing = _read_json(committed_path)
-            return {"output": existing, "output_dir": str(committed_path.parent), "reused": True, "ready": bool((existing or {}).get("material_ready"))}
-
+    attempts = store.attempts(task_id)
+    candidates = ([Path(saved["output_dir"])] if saved else []) + [Path(row["output_dir"]) for row in reversed(attempts)] + [output]
+    retained = None
+    for candidate in candidates:
+        path = candidate / "DIRECTED_READING.json"
+        if not path.is_file():
+            raw_candidate = candidate / "RAW_RESPONSE.json"
+            input_candidate = candidate / "INPUT.json"
+            if raw_candidate.is_file() and input_candidate.is_file():
+                saved_input = _read_json(input_candidate)
+                if isinstance(saved_input, Mapping) and saved_input.get("task_id") == task_id:
+                    # Resume the newest interrupted response before considering
+                    # an older empty artifact from the same task.
+                    break
+            continue
+        existing = _read_json(path)
+        if not isinstance(existing, Mapping) or existing.get("task_id") != task_id or existing.get("workflow") != "practical_materials":
+            continue
+        retained = _practical_cached_result(existing, candidate, questions)
+        if retained["fulfilled"]:
+            return retained
+        invalidated = store.retain_incomplete(task_id, status="partial" if retained["ready"] else "unmet", output_dir=str(candidate))
+        if not invalidated:
+            latest = store.committed_reading(review_id, task_id)
+            latest_path = Path(latest["output_dir"]) / "DIRECTED_READING.json" if latest else None
+            if latest_path is not None and latest_path.is_file():
+                latest_artifact = _read_json(latest_path)
+                if isinstance(latest_artifact, Mapping) and latest_artifact.get("task_id") == task_id:
+                    return _practical_cached_result(latest_artifact, latest_path.parent, questions)
+            raise AdmissionError("committed_reading_changed")
+        if not retry_empty_result:
+            return retained
+        if retained["ready"]:
+            raise DirectedReadingError("retry_empty_result_requires_empty_answer")
+        output = candidate / f"retry-{len(attempts) + 1:02d}"
+        if output.exists():
+            raise DirectedReadingError("retry_output_directory_already_exists")
+        break
+    if retained is None:
+        for candidate in candidates:
+            raw_candidate = candidate / "RAW_RESPONSE.json"
+            input_candidate = candidate / "INPUT.json"
+            if not raw_candidate.is_file() or not input_candidate.is_file():
+                continue
+            saved_input = _read_json(input_candidate)
+            if not isinstance(saved_input, Mapping) or saved_input.get("task_id") != task_id:
+                continue
+            output = candidate
+            if retry_empty_result:
+                raw_content, raw_text = decode_practical_json(_load_practical_raw(raw_candidate))
+                if practical_result_status({"content": raw_content, "plain_text": raw_text}, questions) != "unmet":
+                    raise DirectedReadingError("retry_empty_result_requires_empty_answer")
+                output = candidate / f"retry-{len(attempts) + 1:02d}"
+                retained = {"ready": False}
+            break
+    if retry_empty_result and retained is None:
+        raise DirectedReadingError("retry_empty_result_requires_previous_empty_result")
+    attempt = max(int(attempt), max((int(row["attempt"]) for row in attempts), default=0) + 1)
     raw_path = output / "RAW_RESPONSE.json"
-    raw = _load_practical_raw(raw_path)
+    if raw_path.is_file():
+        input_path = output / "INPUT.json"
+        raw_input = _read_json(input_path) if input_path.is_file() else {}
+        if not isinstance(raw_input, Mapping) or raw_input.get("task_id") != task_id:
+            raise DirectedReadingError("raw_response_task_identity_unverified")
+    raw = None if retry_empty_result else _load_practical_raw(raw_path)
     live = raw is None
-    if live and client is None:
-        if not key_file or not Path(key_file).is_file():
-            raise DirectedReadingError("live_run_key_file_required")
-        if not budget_ledger_path or budget_limit_cny is None or not math.isfinite(float(budget_limit_cny)) or float(budget_limit_cny) <= 0:
-            raise DirectedReadingError("live_run_finite_positive_budget_required")
-        ledger = GlobalBudgetLedger(limit_cny=float(budget_limit_cny), path=budget_ledger_path)
-        _budget_preflight(ledger, required_cny=_message_cost_cny(messages, output_tokens=max_output_tokens, thinking_budget=thinking_budget))
-        client = QwenDirectClient(
-            model=MODEL,
-            key_file=key_file,
-            max_output_tokens=int(max_output_tokens),
-            thinking=True,
-            thinking_budget=int(thinking_budget),
-            json_mode=True,
-            raw_response_dir=output / "raw_responses",
-            budget_ledger=ledger,
-        )
     prompt_payload = {"workflow": "practical_materials", "prompt_version": PRACTICAL_PROMPT_VERSION, "messages": messages}
     input_payload = {"workflow": "practical_materials", "review_id": review_id, "paper_id": paper_id, "task_id": task_id, "paper": {key: admitted_paper.get(key) for key in ("canonical_paper_id", "title", "paper_kind", "material_scope")}, "task": {"questions": questions, "required_outputs": outputs, "gap_keys": gaps}}
-    _atomic_json(output / "INPUT.json", input_payload)
-    _atomic_json(output / "PROMPT.json", prompt_payload)
     claim = store.claim_task(task_id)
     if not claim.get("claimed"):
         if claim.get("route") == "reuse":
@@ -4381,11 +4522,30 @@ def run_directed_reading(
                 committed_path = Path(str(saved.get("output_dir") or "")) / "DIRECTED_READING.json"
                 if committed_path.is_file():
                     existing = _read_json(committed_path)
-                    return {"output": existing, "output_dir": str(committed_path.parent), "reused": True, "ready": bool((existing or {}).get("material_ready"))}
+                    return _practical_cached_result(existing, committed_path.parent, questions)
         raise AdmissionError(str(claim.get("route") or "task_not_claimed"))
-    output.mkdir(parents=True, exist_ok=True)
     reader_called = False
     try:
+        output.mkdir(parents=True, exist_ok=True)
+        if live and client is None:
+            if not key_file or not Path(key_file).is_file():
+                raise DirectedReadingError("live_run_key_file_required")
+            if not budget_ledger_path or budget_limit_cny is None or not math.isfinite(float(budget_limit_cny)) or float(budget_limit_cny) <= 0:
+                raise DirectedReadingError("live_run_finite_positive_budget_required")
+            ledger = GlobalBudgetLedger(limit_cny=float(budget_limit_cny), path=budget_ledger_path)
+            _budget_preflight(ledger, required_cny=_message_cost_cny(messages, output_tokens=max_output_tokens, thinking_budget=thinking_budget))
+            client = QwenDirectClient(
+                model=MODEL,
+                key_file=key_file,
+                max_output_tokens=int(max_output_tokens),
+                thinking=True,
+                thinking_budget=int(thinking_budget),
+                json_mode=True,
+                raw_response_dir=output / "raw_responses",
+                budget_ledger=ledger,
+            )
+        _atomic_json(output / "INPUT.json", input_payload)
+        _atomic_json(output / "PROMPT.json", prompt_payload)
         if raw is None:
             reader_called = True
             raw = invoke_client(
@@ -4399,11 +4559,17 @@ def run_directed_reading(
             )
             _atomic_json(raw_path, raw)
         content, plain_text = decode_practical_json(raw)
-        ready = bool(plain_text.strip()) or has_practical_content(content)
+        fulfillment = practical_result_status({"content": content, "plain_text": plain_text}, questions)
+        ready = fulfillment != "unmet"
+        fulfilled = fulfillment == "fulfilled"
         artifact = {
             "schema_version": OUTPUT_SCHEMA_VERSION,
             "workflow": "practical_materials",
-            "status": "material_ready" if ready else "no_writing_material_returned",
+            "status": "material_ready" if fulfilled else "partial" if ready else "no_writing_material_returned",
+            "fulfilled": fulfilled,
+            "questions": questions,
+            "required_outputs": outputs,
+            "task_hash": added["task_hash"],
             "material_ready": ready,
             "review_id": review_id,
             "paper_id": paper_id,
@@ -4428,16 +4594,16 @@ def run_directed_reading(
             )
         _atomic_json(output / "DIRECTED_READING.json", artifact)
         _atomic_text(output / "DIRECTED_READING.md", markdown)
-        status = "material_ready" if ready else "no_material"
+        status = "material_ready" if fulfilled else "partial" if ready else "no_material"
         raw_usage = raw.get("usage") if isinstance(raw, Mapping) and isinstance(raw.get("usage"), Mapping) else {}
         store.record_attempt(review_id=review_id, task_id=task_id, attempt=attempt, status=status, output_dir=str(output), usage=raw_usage)
         commit = {"status": status, "ready": ready, "review_id": review_id, "task_id": task_id, "output_dir": str(output)}
         _atomic_json(output / "COMMIT.json", commit)
-        if ready:
+        if fulfilled:
             store.commit_reading(review_id=review_id, task_id=task_id, output_dir=str(output), source_hash="", gap_keys=gaps)
         else:
             store.release_task(task_id, status="pending")
-        return {"output": artifact, "output_dir": str(output), "reused": False, "ready": ready, "commit": commit, "network_call": reader_called}
+        return {"output": artifact, "output_dir": str(output), "reused": False, "ready": ready, "fulfilled": fulfilled, "commit": commit, "network_call": reader_called}
     except Exception as exc:
         store.record_attempt(review_id=review_id, task_id=task_id, attempt=attempt, status="failed", output_dir=str(output), error=str(exc)[:500])
         store.release_task(task_id, status="pending")
@@ -4495,6 +4661,7 @@ def _cli_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("inspect", help="inspect durable review state")
     p.add_argument("--store", required=True); p.add_argument("--review-id", required=True)
     p = sub.add_parser("run", help="read an admitted task into practical writing material")
+    p.add_argument("--retry-empty-result", action="store_true", help="explicitly retry a saved empty answer once in a new directory, preserving its result and raw response")
     p.add_argument("--request", required=True); p.add_argument("--paper", required=True); p.add_argument("--snapshot", required=True); p.add_argument("--store", required=True); p.add_argument("--task"); p.add_argument("--output-dir", required=True); p.add_argument("--key-file"); p.add_argument("--budget-ledger"); p.add_argument("--budget-limit-cny", type=float); p.add_argument("--max-output-tokens", type=int, default=DEFAULT_MAX_OUTPUT_TOKENS); p.add_argument("--thinking-budget", type=int, default=DEFAULT_THINKING_BUDGET); p.add_argument("--max-input-tokens", type=int, default=DEFAULT_MAX_INPUT_TOKENS)
     return parser
 
@@ -4582,7 +4749,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(json.dumps(receipt, ensure_ascii=False, indent=2))
             return 0
         store = DirectedReadingStore(args.store) if args.store else None
-        result = run_directed_reading(request=request, paper=paper, snapshot_dir=args.snapshot, output_dir=args.output_dir, store=store, task=task, key_file=args.key_file, budget_ledger_path=args.budget_ledger, budget_limit_cny=args.budget_limit_cny, max_output_tokens=args.max_output_tokens, thinking_budget=args.thinking_budget, max_input_tokens=args.max_input_tokens)
+        result = run_directed_reading(request=request, paper=paper, snapshot_dir=args.snapshot, output_dir=args.output_dir, store=store, task=task, retry_empty_result=args.retry_empty_result, key_file=args.key_file, budget_ledger_path=args.budget_ledger, budget_limit_cny=args.budget_limit_cny, max_output_tokens=args.max_output_tokens, thinking_budget=args.thinking_budget, max_input_tokens=args.max_input_tokens)
         print(json.dumps({"output_dir": result.get("output_dir"), "reused": result.get("reused", False)}, ensure_ascii=False, indent=2))
         return 0
     except (DirectedReadingError, OSError, ValueError) as exc:
@@ -4596,7 +4763,7 @@ __all__ = [
     "DirectedReadingStore", "build_directed_request", "validate_request", "build_source_index", "snapshot_hash",
     "build_source_selection_catalog", "build_source_selection_messages", "parse_source_selection", "build_selected_source_packet", "selection_preflight_directed_reading", "run_source_selection",
     "build_reader_messages", "build_verifier_messages", "normalize_directed_output", "apply_verifier_result",
-    "preflight_directed_reading", "run_directed_reading", "preflight_directed_reading_legacy", "run_directed_reading_legacy", "render_directed_markdown", "main",
+    "preflight_directed_reading", "run_directed_reading", "practical_result_status", "preflight_directed_reading_legacy", "run_directed_reading_legacy", "render_directed_markdown", "main",
 ]
 
 

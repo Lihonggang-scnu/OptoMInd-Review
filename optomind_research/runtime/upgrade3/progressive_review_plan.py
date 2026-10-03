@@ -2828,7 +2828,10 @@ def _merge_directed_tasks(tasks: Sequence[Mapping[str, Any]]) -> list[dict[str, 
         paper_id = _text(raw.get("paper_id") or raw.get("canonical_paper_id"))
         if not paper_id:
             continue
-        row = merged.setdefault(paper_id, {
+        requirements = _directed_task_requirements(raw)
+        task_key = paper_id + ":" + _directed_task_signature(raw)
+        raw = {**dict(raw), **requirements}
+        row = merged.setdefault(task_key, {
             "paper_id": paper_id,
             "chapter_ids": [],
             "questions": [],
@@ -2837,6 +2840,10 @@ def _merge_directed_tasks(tasks: Sequence[Mapping[str, Any]]) -> list[dict[str, 
             "reasons": [],
             "priority": raw.get("priority", 0),
         })
+        if raw.get("retry_empty_result") is True:
+            row["retry_empty_result"] = True
+        if raw.get("round_specs") and not row.get("round_specs"):
+            row["round_specs"] = [dict(spec) for spec in raw["round_specs"] if isinstance(spec, Mapping)]
         owners = raw.get("chapter_ids") or []
         if isinstance(owners, str):
             owners = [owners]
@@ -2950,6 +2957,10 @@ def _directed_task_requirements(task: Mapping[str, Any] | None) -> dict[str, Any
     """Normalize the scientific request fields used to decide read reuse."""
 
     task = task if isinstance(task, Mapping) else {}
+    gaps = task.get("knowledge_gaps") or task.get("knowledge_gap") or task.get("reasons") or task.get("reason") or []
+    if isinstance(gaps, str):
+        gaps = [gaps]
+    gaps = sorted({_text(value) for value in gaps if _text(value)})
     raw_outputs = task.get("required_outputs") or []
     if isinstance(raw_outputs, (str, Mapping)):
         raw_outputs = [raw_outputs]
@@ -2972,7 +2983,7 @@ def _directed_task_requirements(task: Mapping[str, Any] | None) -> dict[str, Any
     for index, raw in enumerate(raw_questions, start=1):
         item = dict(raw) if isinstance(raw, Mapping) else {"question": _text(raw)}
         question = _text(item.get("question") or item.get("ask") or item.get("what_to_extract"))
-        purpose = _text(item.get("purpose") or item.get("use") or item.get("required_output"))
+        purpose = _text(item.get("purpose") or item.get("use") or item.get("required_output") or question)
         output_ids = item.get("required_output_ids") or item.get("output_ids") or []
         if isinstance(output_ids, str):
             output_ids = [output_ids]
@@ -2992,6 +3003,7 @@ def _directed_task_requirements(task: Mapping[str, Any] | None) -> dict[str, Any
             "question_id": _text(item.get("question_id") or item.get("id")) or f"Q{index:02d}",
             "question": question,
             "purpose": purpose,
+            "gap_key": _text(item.get("gap_key") or item.get("knowledge_gap")) or "; ".join(gaps),
             "required_output_ids": sorted(set(output_ids)),
         })
     if not questions:
@@ -3001,17 +3013,9 @@ def _directed_task_requirements(task: Mapping[str, Any] | None) -> dict[str, Any
         questions = [{
             "question_id": "Q01", "question": question,
             "purpose": "Supply a concrete, attributed case for the coordinated review.",
+            "gap_key": "; ".join(gaps),
             "required_output_ids": sorted(row["output_id"] for row in outputs),
         }]
-    gaps = (
-        task.get("knowledge_gaps")
-        or task.get("knowledge_gap")
-        or task.get("reasons")
-        or task.get("reason")
-        or []
-    )
-    if isinstance(gaps, str):
-        gaps = [gaps]
     return {
         "questions": questions,
         "required_outputs": outputs,
@@ -3045,7 +3049,24 @@ def _directed_material_compatible(task: Mapping[str, Any], material: Mapping[str
     actual = _material_task_signature(material)
     # A cached task-bound response with no current answer is incomplete.  It
     # remains useful history, but must not suppress a later explicit retry.
-    return bool(expected and actual and expected == actual and _material_current_question_rows(material))
+    return bool(expected and actual and expected == actual and _directed_material_status(task, material) == "fulfilled")
+
+
+def _directed_material_status(task: Mapping[str, Any], material: Mapping[str, Any] | None) -> str:
+    """Classify only the current answer, never a question row or retained history."""
+    from .directed_reading import practical_result_status
+
+    if not isinstance(material, Mapping):
+        return "unmet"
+    current = dict(material)
+    if "current_question_material" in material:
+        rows = _material_current_question_rows(material)
+        current["question_material"] = rows
+        current["content"] = {
+            **(dict(material["content"]) if isinstance(material.get("content"), Mapping) else {}),
+            "question_material": rows,
+        }
+    return practical_result_status(current, _directed_task_requirements(task)["questions"])
 
 
 def _material_question_rows(material: Mapping[str, Any] | None) -> list[Any]:
@@ -3090,6 +3111,7 @@ def _decorate_directed_material(
 
     output = dict(material)
     output["_progressive_task_signature"] = _directed_task_signature(task)
+    output["_progressive_task_requirements"] = _directed_task_requirements(task)
     if prior_material and not _directed_material_compatible(task, prior_material):
         prior_questions = _material_question_rows(prior_material)
         current_questions = _material_current_question_rows(material)
@@ -3701,8 +3723,9 @@ class ProgressiveReviewPlanner:
                     new_candidates.append(task)
             existing_candidates.sort(key=lambda row: (-float(row.get("priority") or 0), row["paper_id"]))
             new_candidates.sort(key=lambda row: (-float(row.get("priority") or 0), row["paper_id"]))
-            selected = [*existing_candidates, *new_candidates[:available]]
-            deferred = [{**row, "status": "deferred_global_deep_read_budget"} for row in new_candidates[available:]]
+            selected_new_ids = set(list(dict.fromkeys(row["paper_id"] for row in new_candidates))[:available])
+            selected = [*existing_candidates, *[row for row in new_candidates if row["paper_id"] in selected_new_ids]]
+            deferred = [{**row, "status": "deferred_global_deep_read_budget"} for row in new_candidates if row["paper_id"] not in selected_new_ids]
 
             context = {
                 "phase": phase,
@@ -3727,12 +3750,18 @@ class ProgressiveReviewPlanner:
                 supplement_result = self._collect_tool_result(supplement_future, "supplement_runner_unavailable", gaps)
                 directed_result = self._collect_tool_result(directed_future, "directed_reader_unavailable", selected)
             consumed = {_text(item) for item in directed_result.get("consumed_paper_ids") or [] if _text(item)}
-            selected_by_id = {_text(task.get("paper_id")): task for task in selected}
+            selected_by_signature = {(_text(task.get("paper_id")), _directed_task_signature(task)): task for task in selected}
+            selected_by_id: dict[str, list[Mapping[str, Any]]] = {}
+            for task in selected:
+                selected_by_id.setdefault(_text(task.get("paper_id")), []).append(task)
             decorated_materials: list[dict[str, Any]] = []
             for result in directed_result.get("materials") or []:
                 if isinstance(result, Mapping) and _text(result.get("paper_id")):
                     paper_id = _text(result.get("paper_id"))
-                    task = selected_by_id.get(paper_id)
+                    task = selected_by_signature.get((paper_id, _material_task_signature(result)))
+                    candidates = selected_by_id.get(paper_id, [])
+                    if task is None and len(candidates) == 1:
+                        task = candidates[0]
                     if task is not None:
                         result = _decorate_directed_material(
                             result, task=task, prior_material=task.get("_prior_material"),
@@ -3749,8 +3778,8 @@ class ProgressiveReviewPlanner:
                 "blocked_paper_ids": sorted(_text(item) for item in directed_result.get("blocked_paper_ids") or [] if _text(item)),
                 "reused_prior_tasks": reused,
                 "deferred_tasks": deferred,
-                "requested_unique_papers": len(merged),
-                "selected_unique_papers": len(selected),
+                "requested_unique_papers": len({row["paper_id"] for row in merged}),
+                "selected_unique_papers": len({row["paper_id"] for row in selected}),
                 "shared_budget_remaining": max(
                     0,
                     available - len({paper_id for paper_id in consumed if paper_id not in already_read}),
@@ -6829,7 +6858,7 @@ def make_retrieval_loop_runner(
             question = "; ".join(item for item in questions if item) or "; ".join(task.get("knowledge_gaps") or task.get("reasons") or [])
             if not question:
                 continue
-            need_id = _text(task.get("need_id")) or need_id_for(question + (" || " + paper_id if paper_id else ""))
+            need_id = _text(task.get("need_id")) or need_id_for(question + (" || " + paper_id if paper_id else "") + " || " + _directed_task_signature(task))
             round_specs = tuple(task.get("round_specs") or ())
             need = InformationNeed(
                 need_id=need_id,
@@ -6874,6 +6903,7 @@ def make_retrieval_loop_runner(
                         _merge_supplement_pool_updates(working_pool, {"supplement_results": [result]})
         local_results: dict[str, Mapping[str, Any]] = {}
         external_results: dict[str, list[Mapping[str, Any]]] = {}
+        explicit_retry_consumed: set[str] = set()
         pool_by_id = {str(row.get("_paper_id")): dict(row) for row in working_pool if isinstance(row, Mapping)}
         paper_to_handle = {str(value): str(key) for key, value in (source_handle_map or {}).items()}
 
@@ -6942,6 +6972,10 @@ def make_retrieval_loop_runner(
 
         def external_closure(*, need: Any, round_index: int, queries: Sequence[Mapping[str, Any]], spec: Mapping[str, Any], **budget_context: Any) -> Mapping[str, Any]:
             request = dict(request_by_id.get(need.need_id) or {})
+            # An explicit retry authorizes one new attempt, not a retry per round.
+            request["retry_empty_result"] = request.get("retry_empty_result") is True and need.need_id not in explicit_retry_consumed
+            if request["retry_empty_result"]:
+                explicit_retry_consumed.add(need.need_id)
             context = {
                 "phase": phase, "output_dir": root / "external" / _safe_id(need.need_id) / f"round_{round_index}",
                 "topic_id": config.topic_id, "plan": dict(plan or {}), "pool_rows": working_pool,
@@ -7009,7 +7043,7 @@ def make_retrieval_loop_runner(
             prior_material = read_materials.get(paper_id)
             prior_signature = read_task_signatures.get(paper_id) or _material_task_signature(prior_material)
             if prior_material is not None and prior_signature and prior_signature == task_signature \
-                    and _material_current_question_rows(prior_material):
+                    and _directed_material_compatible(request, prior_material):
                 raw = {"status": "reused_prior_deep_read", "materials": [dict(prior_material)],
                        "consumed_paper_ids": [paper_id], "task_reused": True}
             elif paper_id not in consumed_ids and len(consumed_ids) >= config.shared_deep_read_budget:
@@ -7036,13 +7070,19 @@ def make_retrieval_loop_runner(
                 })
             external_results.setdefault(need.need_id, []).append(raw)
             materials = raw.get("materials") or []
+            material_statuses = [_directed_material_status(request, item) for item in materials if isinstance(item, Mapping)]
             useful = " ".join(
-                json.dumps(_material_current_question_rows(item), ensure_ascii=False)
+                json.dumps({
+                    **(dict(item["content"]) if isinstance(item.get("content"), Mapping) else {}),
+                    "question_material": _material_current_question_rows(item),
+                    "plain_text": _text(item.get("plain_text")),
+                }, ensure_ascii=False)
                 for item in materials
-                if isinstance(item, Mapping) and _material_current_question_rows(item)
+                if isinstance(item, Mapping) and _directed_material_status(request, item) != "unmet"
             )
+            status = "fulfilled" if "fulfilled" in material_statuses else "partial" if useful else "unmet"
             added = [_text(item.get("paper_id")) for item in materials if isinstance(item, Mapping) and _text(item.get("paper_id"))]
-            return {"status": "fulfilled" if useful else "unmet",
+            return {"status": status, "still_missing": "" if status == "fulfilled" else need.question,
                     "usable_content": useful, "new_handles": added, "raw_result": raw,
                     "consumed_paper_ids": list(raw.get("consumed_paper_ids") or [])}
 
@@ -7154,7 +7194,7 @@ def make_directed_reading_runner(
                     if isinstance(raw, Mapping) and _text(raw.get("question")) == row["question"]:
                         gap_key = _text(raw.get("gap_key") or raw.get("knowledge_gap"))
                         break
-                question["gap_key"] = gap_key or _text(task.get("knowledge_gap") or task.get("reason"))
+                question["gap_key"] = gap_key or "; ".join(normalized["knowledge_gaps"])
                 questions.append(question)
             outputs = [dict(row) for row in normalized["required_outputs"]]
             return questions, outputs
@@ -7222,7 +7262,7 @@ def make_directed_reading_runner(
             admission = store.admit_candidates(config.topic_id, topic_binding, [nomination], topic_hash=config.topic_id)
             if not admission or admission[0].get("admission_status") != "approved_core":
                 return {"paper_id": paper_id, "status": "unavailable", "reason": "directed_read_not_admitted", "admission": admission}
-            task_payload = {"questions": questions, "required_outputs": outputs, "gap_keys": list(dict.fromkeys(_text(row.get("gap_key")) for row in questions if _text(row.get("gap_key"))))}
+            task_payload = {"questions": questions, "required_outputs": outputs, "gap_keys": sorted(set(_directed_task_requirements(task)["knowledge_gaps"]) | {_text(row.get("gap_key")) for row in questions if _text(row.get("gap_key"))})}
             output_dir = phase_root / "directed" / _safe_id(paper_id)
             try:
                 result = run_directed_reading(
@@ -7237,10 +7277,11 @@ def make_directed_reading_runner(
                     budget_limit_cny=budget_limit_cny,
                     max_output_tokens=config.chapter_output_tokens,
                     thinking_budget=config.thinking_budget,
+                    retry_empty_result=task.get("retry_empty_result") is True or context.get("retry_empty_result") is True,
                 )
                 artifact = result.get("output") if isinstance(result.get("output"), Mapping) else {}
                 material = _decorate_directed_material(artifact, task=signature_task, prior_material=reused)
-                return {**dict(artifact), "paper_id": paper_id, "status": "complete" if result.get("ready") else "partial", "output_dir": str(output_dir), "material": material, "task_signature": task_signature}
+                return {**dict(artifact), "paper_id": paper_id, "status": _directed_material_status(signature_task, artifact), "output_dir": str(result.get("output_dir") or output_dir), "material": material, "task_signature": task_signature, "reused": bool(result.get("reused")), "network_call": bool(result.get("network_call"))}
             except Exception as exc:
                 return {"paper_id": paper_id, "status": "failed", "error": type(exc).__name__}
 
@@ -7249,11 +7290,11 @@ def make_directed_reading_runner(
             for future in as_completed(futures):
                 results.append(future.result())
         results.sort(key=lambda row: _text(row.get("paper_id")))
-        attempted = [_text(row.get("paper_id")) for row in results if _text(row.get("paper_id"))]
-        consumed = [_text(row.get("paper_id")) for row in results if row.get("status") in {"complete", "partial", "failed"} and _text(row.get("paper_id"))]
+        attempted = sorted({_text(row.get("paper_id")) for row in results if _text(row.get("paper_id"))})
+        consumed = sorted({_text(row.get("paper_id")) for row in results if row.get("status") in {"fulfilled", "partial", "unmet", "failed", "reused_prior_deep_read"} and _text(row.get("paper_id"))})
         blocked = [_text(row.get("blocked_paper_id")) for row in results if _text(row.get("blocked_paper_id"))]
         materials = [dict(row.get("material") or {}) for row in results if isinstance(row.get("material"), Mapping) and row.get("material")]
-        return {"status": "complete" if all(row.get("status") in {"complete", "partial", "reused_prior_deep_read", "review_reported_no_reacquire"} for row in results) else "partial", "results": results, "materials": materials, "consumed_paper_ids": consumed, "attempted_paper_ids": attempted, "blocked_paper_ids": blocked}
+        return {"status": "fulfilled" if all(row.get("status") in {"fulfilled", "reused_prior_deep_read"} for row in results) else "partial" if any(row.get("status") in {"fulfilled", "partial", "reused_prior_deep_read"} for row in results) else "unmet", "results": results, "materials": materials, "consumed_paper_ids": consumed, "attempted_paper_ids": attempted, "blocked_paper_ids": blocked}
     return run
 
 

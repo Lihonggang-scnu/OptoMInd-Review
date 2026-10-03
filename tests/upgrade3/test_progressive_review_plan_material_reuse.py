@@ -180,7 +180,7 @@ def test_exact_directed_task_reuses_without_provider_and_enters_materials(tmp_pa
     prior = {
         "paper_id": "paper-1",
         "_progressive_task_signature": _directed_task_signature(task),
-        "question_material": [{"finding": "old answer", "conditions": "old conditions"}],
+        "question_material": [{"question_id": "Q1", "finding": "old answer", "conditions": "old conditions"}],
     }
     result, calls = _tool_cycle_fixture(
         tmp_path,
@@ -409,7 +409,7 @@ def test_directed_runner_reuses_exact_useful_material_without_provider(tmp_path,
     prior = {
         "paper_id": "paper-1",
         "_progressive_task_signature": _directed_task_signature(task),
-        "question_material": [{"finding": "old answer"}],
+        "question_material": [{"question_id": "Q1", "finding": "old answer"}],
     }
     calls = []
     result = _direct_runner(
@@ -420,7 +420,7 @@ def test_directed_runner_reuses_exact_useful_material_without_provider(tmp_path,
 
     assert calls == []
     assert result["results"][0]["status"] == "reused_prior_deep_read"
-    assert result["materials"][0]["current_question_material"] == [{"finding": "old answer"}]
+    assert result["materials"][0]["current_question_material"] == [{"question_id": "Q1", "finding": "old answer"}]
 
 
 def test_directed_runner_passes_changed_explicit_output_to_provider(tmp_path, monkeypatch):
@@ -429,12 +429,12 @@ def test_directed_runner_passes_changed_explicit_output_to_provider(tmp_path, mo
     prior = {
         "paper_id": "paper-1",
         "_progressive_task_signature": _directed_task_signature(original),
-        "question_material": [{"finding": "old answer"}],
+        "question_material": [{"question_id": "Q1", "finding": "old answer"}],
     }
     calls = []
     result = _direct_runner(
         tmp_path, monkeypatch, task=changed, prior=prior,
-        provider_result={"ready": True, "output": {"question_material": [{"finding": "new answer"}]}},
+        provider_result={"ready": True, "output": {"question_material": [{"question_id": "Q1", "finding": "new answer"}]}},
         calls=calls,
     )
 
@@ -445,7 +445,7 @@ def test_directed_runner_passes_changed_explicit_output_to_provider(tmp_path, mo
         "description": "Changed requested output",
     }]
     assert provider_task["questions"][0]["required_output_ids"] == ["O1"]
-    assert result["results"][0]["status"] == "complete"
+    assert result["results"][0]["status"] == "fulfilled"
     assert [row["finding"] for row in result["materials"][0]["question_material"]] == ["old answer", "new answer"]
 
 
@@ -465,7 +465,7 @@ def test_directed_runner_retries_exact_empty_material(tmp_path, monkeypatch):
     )
 
     assert len(calls) == 1
-    assert result["results"][0]["status"] == "complete"
+    assert result["results"][0]["status"] == "unmet"
     material = result["materials"][0]
     assert material["question_material"] == [{"finding": "old history"}]
     assert material["current_question_material"] == []
