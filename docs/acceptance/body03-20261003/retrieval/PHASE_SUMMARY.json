@@ -1,0 +1,438 @@
+{
+  "schema_version": "optomind.body03.sanitized.retrieval_summary.v1",
+  "status": "completed_bounded_retrieval_adapter",
+  "first_query_empty": true,
+  "external_live_search": false,
+  "loop_query_refiner_enabled": true,
+  "supplement_external_acquisition_enabled": false,
+  "model": "qwen3.7-flash",
+  "expected_boundary": {
+    "call_bound": "the existing three phase loop permits up to nine model attempts across local triage and two query refinements per phase; the report uses actual ledger deltas",
+    "changed_outputs": "retain WO03-O-MECHANISM and add WO03-O-BOUNDARY; only the new uncovered requirement may remain outstanding",
+    "empty_initializer": "one real qwen3.7-flash query-refiner call only if local triage leaves the empty-query need unresolved; if the first refinement returns no usable query, the bounded loop may make one second refinement on the next empty round; if local direct_use answers it, zero initializer calls and the report must retain that bypass",
+    "external_acquisition": "zero provider search/card/extraction calls because the supplement adapter has allow_external=False",
+    "local_triage": "one qwen3.7-flash local judgement per non-reused phase as needed",
+    "rebind": "reuse the same answered need with zero new paid retrieval when its contract is answered; a partial/unmet first result may legitimately invoke the adapter again"
+  },
+  "content_comparison": {
+    "changed_old_plus_new_requirements": {
+      "action": "stop",
+      "queries": [
+        {
+          "facet_id": "",
+          "query_text": "pancreatic cancer microbiome FMT antibiotic immune checkpoint inhibitor response mechanism",
+          "query_type": "keyword"
+        },
+        {
+          "facet_id": "",
+          "query_text": "How do fecal microbiota transplantation or antibiotic depletion of specific gut microbes in pancreatic ductal adenocarcinoma models or cohorts modulate the efficacy and immune infiltration patterns of anti-PD-1/PD-L1 therapy?",
+          "query_type": "question"
+        }
+      ],
+      "query_source": "refiner",
+      "query_status": "ready",
+      "required_outputs": [
+        "\"name at least one source-bound pdac microbiota-to-ici route.\"",
+        "\"retain the model or cohort condition and the patient-level evidence boundary.\"",
+        "{\"description\": \"pdac-specific boundary and explicit patient-level limit.\", \"output_type\": \"boundary_comparison\"}",
+        "{\"description\": \"retain the already answered route, immune change, checkpoint outcome, and evidence condition.\", \"output_type\": \"mechanism_route\"}"
+      ],
+      "status": "stopped",
+      "still_missing": "Which PDAC microbiota to immune-checkpoint routes in the existing local materials are source-bound enough to support a bounded mechanism paragraph, including model or cohort conditions and the patient-level limit?",
+      "usable_content": "现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（\n\n现有材料未能提供胰腺导管腺癌（PDAC）中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597指出FMT在黑色素瘤和UC中的研究涉及供体筛选，但未建立PDAC特有的微生物-ICI机制；材料P0479聚焦于短链脂肪酸（如丁酸盐）对乳腺癌的体外抗癌作用及其分子机制（如组蛋白去乙酰化酶抑制、凋亡诱导），未涉及PDAC或ICI；材料P0087详细描述了PDAC中口腔-肠道微生物轴通过代谢重编程、免疫调节等促进肿瘤发生及化疗耐药，并提及肿瘤内微生物多样性与长期生存者（LTS）的相关性，但明确指出这些发现主要关联于传统治疗预后或诊断标志物，未具体阐述针对免疫检查点阻断疗法（ICB）的特异性微生物介导机制。因此，缺乏支持撰写关于PDAC微生物群如何特异性调节ICI疗效的机制段落所需的模型/队列条件及患者层面证据边界。\n\n现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（\n\n现有材料未能提供胰腺导管腺癌（PDAC）中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源数据支持的机制路径。虽然P0087指出肿瘤内微生物群通过代谢重编程和免疫调节驱动治疗耐药，并提及口腔-肠道微生物轴在PDAC发病中的作用，但该综述未明确界定任何特定的PDAC微生物物种或菌株如何通过特定分子途径直接调控ICI的疗效或免疫检查点表达。材料中关于微生物多样性与预后的关联（如Geller et al.的研究显示长期生存者α-多样性更高，且特定菌属丰度差异显著）主要基于病理活检样本的回顾性分析，用于预测总生存期，而非针对ICI治疗的机制解释。此外，P0597关于粪菌移植（FMT）的材料主要涉及黑色素瘤和溃疡性结肠炎，虽提及FMT可能改善ICI反应，但未提供PDAC的具体微生物-免疫检查点作用机制细节。P0479关于丁酸盐对乳腺癌的作用机制亦不适用于PDAC-ICI场景。因此，缺乏符合“源绑定”要求的PDAC特异性微生物至ICI通路的定量或定性证据，无法构建包含模型/队列条件和患者层面限制的机制段落。\n\n现有材料中关于胰腺导管腺癌（PDAC）微生物群与免疫检查点抑制剂（ICI）疗效关联的机制描述，主要停留在概念性假设和预后相关性层面，缺乏针对特定微生物-免疫通路的源绑定（source-bound）实验证据或明确的队列分层数据。具体而言：1. P0597 (Porcari et al.) 综述了粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的供体筛选标准及疗效差异，指出微生物定植与临床成功相关，但并未提供PDAC患者中特定微生物调节ICI疗效的具体通路、模型条件或患者级限制数据；2. P0087 (Pancreatic cancer review) 详细阐述了口腔-肠道微生物轴通过代谢重编程、免疫调节等驱动PDAC发生发展及化疗耐药，并发现肿瘤内α多样性与长期生存者（LTS）正相关（如Clostridium, Mycobacterium丰度增加），但该研究聚焦于预后标志物而非ICI治疗响应机制，未提及具体的免疫检查点分子或ICI疗效数据；3. P0479 (Butyrate in BC) 仅讨论丁酸盐对乳腺癌的体外抗癌作用，与PDAC无关。因此，当前材料无法支持撰写包含明确模型/队列条件和患者级限制的PDAC特异性微生物-ICI机制段落。\n\n现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（\n\n现有材料未能提供胰腺导管腺癌（PDAC）中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597指出FMT在黑色素瘤和UC中的研究涉及供体筛选，但未建立PDAC特有的微生物-ICI机制；材料P0479聚焦于短链脂肪酸（如丁酸盐）对乳腺癌的体外抗癌作用及其分子机制（如组蛋白去乙酰化酶抑制、凋亡诱导），未涉及PDAC或ICI；材料P0087详细描述了PDAC中口腔-肠道微生物轴通过代谢重编程、免疫调节等促进肿瘤发生及化疗耐药，并提及肿瘤内微生物多样性与长期生存者（LTS）的相关性，但明确指出这些发现主要关联于传统治疗预后或诊断标志物，未具体阐述针对免疫检查点阻断疗法（ICB）的特异性微生物介导机制。因此，缺乏支持撰写关于PDAC微生物群如何特异性调节ICI疗效的机制段落所需的模型/队列条件及患者层面证据边界。\n\n现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（\n\n现有材料未能提供胰腺导管腺癌（PDAC）中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源数据支持的机制路径。虽然P0087指出肿瘤内微生物群通过代谢重编程和免疫调节驱动治疗耐药，并提及口腔-肠道微生物轴在PDAC发病中的作用，但该综述未明确界定任何特定的PDAC微生物物种或菌株如何通过特定分子途径直接调控ICI的疗效或免疫检查点表达。材料中关于微生物多样性与预后的关联（如Geller et al.的研究显示长期生存者α-多样性更高，且特定菌属丰度差异显著）主要基于病理活检样本的回顾性分析，用于预测总生存期，而非针对ICI治疗的机制解释。此外，P0597关于粪菌移植（FMT）的材料主要涉及黑色素瘤和溃疡性结肠炎，虽提及FMT可能改善ICI反应，但未提供PDAC的具体微生物-免疫检查点作用机制细节。P0479关于丁酸盐对乳腺癌的作用机制亦不适用于PDAC-ICI场景。因此，缺乏符合“源绑定”要求的PDAC特异性微生物至ICI通路的定量或定性证据，无法构建包含模型/队列条件和患者层面限制的机制段落。\n\n现有材料未能提供PDAC微生物群调节免疫检查点抑制剂（ICI）疗效的具体机制路径，因此无法支持撰写包含模型/队列条件和患者级限制的有界机制段落。材料P0597虽然指出FMT供体特征与ICI难治性黑色素瘤的临床成功相关，并提及UC研究，但明确说明供体α多样性与临床成功的关联在不同疾病和试验中不一致，且未提供PDAC相关的微生物-ICI交互数据。材料P0087聚焦于胰腺导管腺癌（PDAC），详细阐述了口腔-肠道微生物轴通过代谢重编程、免疫调节、抑制凋亡等机制促进PDAC发生发展及化疗耐药，并发现肿瘤内微生物α多样性与长期生存者（>5年）正相关，短期生存者富集具核梭杆菌和拟杆菌属；然而，该部分仅涉及PDAC的自然病程预后和诊断标志物潜力，未涉及ICI治疗或免疫检查点通路的具体调节机制。材料P0479讨论的是丁酸盐等肠道微生物代谢产物对乳腺癌的抗癌作用及其分子机制，与PDAC无关。综上，本地材料缺乏将PDAC特定微生物群与ICI疗效直接联系的实验性或观察性证据，无法满足关于PDAC特异性边界和患者级限制的成功标准。"
+    },
+    "initial_old_requirement": {
+      "action": "stop",
+      "queries": [
+        {
+          "facet_id": "",
+          "query_text": "Pancreatic ductal adenocarcinoma Fusobacterium nucleatum PD-1 resistance mechanism",
+          "query_type": "keyword"
+        },
+        {
+          "facet_id": "",
+          "query_text": "How does Fusobacterium nucleatum abundance in pancreatic ductal adenocarcinoma tumors correlate with PD-L1 expression and T-cell exhaustion in patients receiving immune checkpoint inhibitors?",
+          "query_type": "question"
+        }
+      ],
+      "query_source": "refiner",
+      "query_status": "ready",
+      "required_outputs": [
+        "\"name at least one source-bound pdac microbiota-to-ici route.\"",
+        "\"retain the model or cohort condition and the patient-level evidence boundary.\"",
+        "{\"description\": \"route, immune change, checkpoint outcome, and evidence condition.\", \"output_type\": \"mechanism_route\"}"
+      ],
+      "status": "stopped",
+      "still_missing": "Which PDAC microbiota to immune-checkpoint routes in the existing local materials are source-bound enough to support a bounded mechanism paragraph, including model or cohort conditions and the patient-level limit?",
+      "usable_content": "现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（"
+    },
+    "rebind_same_need": {
+      "action": "stop",
+      "queries": [
+        {
+          "facet_id": "",
+          "query_text": "PDAC microbiome metabolites immune checkpoint inhibitor response mechanism",
+          "query_type": "keyword"
+        },
+        {
+          "facet_id": "",
+          "query_text": "How do specific gut or intratumoral microbial metabolites in pancreatic ductal adenocarcinoma modulate T-cell infiltration and efficacy of anti-PD-1/PD-L1 therapy?",
+          "query_type": "question"
+        }
+      ],
+      "query_source": "refiner",
+      "query_status": "ready",
+      "required_outputs": [
+        "\"name at least one source-bound pdac microbiota-to-ici route.\"",
+        "\"retain the model or cohort condition and the patient-level evidence boundary.\"",
+        "{\"description\": \"route, immune change, checkpoint outcome, and evidence condition.\", \"output_type\": \"mechanism_route\"}"
+      ],
+      "status": "stopped",
+      "still_missing": "Which PDAC microbiota to immune-checkpoint routes in the existing local materials are source-bound enough to support a bounded mechanism paragraph, including model or cohort conditions and the patient-level limit?",
+      "usable_content": "现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（\n\n现有材料未能提供胰腺导管腺癌（PDAC）中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597指出FMT在黑色素瘤和UC中的研究涉及供体筛选，但未建立PDAC特有的微生物-ICI机制；材料P0479聚焦于短链脂肪酸（如丁酸盐）对乳腺癌的体外抗癌作用及其分子机制（如组蛋白去乙酰化酶抑制、凋亡诱导），未涉及PDAC或ICI；材料P0087详细描述了PDAC中口腔-肠道微生物轴通过代谢重编程、免疫调节等促进肿瘤发生及化疗耐药，并提及肿瘤内微生物多样性与长期生存者（LTS）的相关性，但明确指出这些发现主要关联于传统治疗预后或诊断标志物，未具体阐述针对免疫检查点阻断疗法（ICB）的特异性微生物介导机制。因此，缺乏支持撰写关于PDAC微生物群如何特异性调节ICI疗效的机制段落所需的模型/队列条件及患者层面证据边界。\n\n现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（\n\n现有材料未能提供胰腺导管腺癌（PDAC）中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源数据支持的机制路径。虽然P0087指出肿瘤内微生物群通过代谢重编程和免疫调节驱动治疗耐药，并提及口腔-肠道微生物轴在PDAC发病中的作用，但该综述未明确界定任何特定的PDAC微生物物种或菌株如何通过特定分子途径直接调控ICI的疗效或免疫检查点表达。材料中关于微生物多样性与预后的关联（如Geller et al.的研究显示长期生存者α-多样性更高，且特定菌属丰度差异显著）主要基于病理活检样本的回顾性分析，用于预测总生存期，而非针对ICI治疗的机制解释。此外，P0597关于粪菌移植（FMT）的材料主要涉及黑色素瘤和溃疡性结肠炎，虽提及FMT可能改善ICI反应，但未提供PDAC的具体微生物-免疫检查点作用机制细节。P0479关于丁酸盐对乳腺癌的作用机制亦不适用于PDAC-ICI场景。因此，缺乏符合“源绑定”要求的PDAC特异性微生物至ICI通路的定量或定性证据，无法构建包含模型/队列条件和患者层面限制的机制段落。"
+    }
+  },
+  "scientific_content_preview": "现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（",
+  "scientific_content_review": {
+    "changed_outputs": "The old mechanism requirement and new boundary requirement were both present in the changed contract. Existing partial text was retained, but neither requirement was forced to fulfilled; the phase stopped with the same unresolved source-bound need.",
+    "initial_empty_query": "Local triage read P0597/P0479/P0087 and returned no source-bound PDAC-to-ICI route: P0087 supplied general PDAC microbiome context, P0479 was breast-cancer butyrate material, and P0597 concerned FMT in melanoma/ulcerative colitis. The need remained missing.",
+    "p0004_visibility": "P0004 was preserved in the owner packet/deep-read input, but this retrieval pool triage selected other local material and did not use P0004 to answer the retrieval need.",
+    "rebind_same_answered_need": "The first phase was partial/stopped rather than answered, so the adapter legitimately triaged again; reuse was false. It again did not surface the existing P0004 route and remained unmet/stopped."
+  },
+  "run_timing": {
+    "duration_seconds": 373.86,
+    "measurement": "owned retrieval root creation to final retrieval report write",
+    "observed_finish_local": "2026-10-03T19:35:12.785",
+    "observed_start_local": "2026-10-03T19:28:58.925"
+  },
+  "budget": {
+    "actual_cny": 0.5861682,
+    "reserved_cny": 0.0,
+    "limit_cny": 30.0,
+    "ledger_path": "<LOCAL_ONLY_SHARED_LEDGER>"
+  },
+  "budget_delta_from_scenario_a": {
+    "actual_cny_delta": 0.0352366,
+    "after_actual_cny": 0.5861682,
+    "before_actual_cny": 0.5509316,
+    "model_attempt_count": 12,
+    "reserved_cny": 0.0,
+    "uncertain_cny": 0.0
+  },
+  "model_boundary_observation": [
+    {
+      "phase": "initial_empty_query",
+      "model_attempt_count_observed": 4,
+      "local_triage_call_count_observed": 2,
+      "query_initializer_call_count_observed": 2,
+      "supplement_adapter_invocation_count_observed": 2,
+      "external_provider_call_count_observed": 0,
+      "actual_cny_delta": 0.0120556,
+      "reserved_cny_delta": 0.0,
+      "settled_count": 4,
+      "uncertain_count": 0,
+      "call_ids": [
+        "planning-material-triage:Ne675fc8ee99c6a9a6b37:key0:attempt0",
+        "query-refinement:Ne675fc8ee99c6a9a6b37:1:key0:attempt0",
+        "planning-material-triage:Ne675fc8ee99c6a9a6b37:key0:attempt0",
+        "query-refinement:Ne675fc8ee99c6a9a6b37:2:key0:attempt0"
+      ]
+    },
+    {
+      "phase": "rebind_same_answered_need",
+      "model_attempt_count_observed": 4,
+      "local_triage_call_count_observed": 2,
+      "query_initializer_call_count_observed": 2,
+      "supplement_adapter_invocation_count_observed": 2,
+      "external_provider_call_count_observed": 0,
+      "actual_cny_delta": 0.0116532,
+      "reserved_cny_delta": 0.0,
+      "settled_count": 4,
+      "uncertain_count": 0,
+      "call_ids": [
+        "planning-material-triage:Ne675fc8ee99c6a9a6b37:key0:attempt0",
+        "query-refinement:Ne675fc8ee99c6a9a6b37:1:key0:attempt0",
+        "planning-material-triage:Ne675fc8ee99c6a9a6b37:key0:attempt0",
+        "query-refinement:Ne675fc8ee99c6a9a6b37:2:key0:attempt0"
+      ]
+    },
+    {
+      "phase": "changed_required_outputs",
+      "model_attempt_count_observed": 4,
+      "local_triage_call_count_observed": 2,
+      "query_initializer_call_count_observed": 2,
+      "supplement_adapter_invocation_count_observed": 2,
+      "external_provider_call_count_observed": 0,
+      "actual_cny_delta": 0.0115278,
+      "reserved_cny_delta": 0.0,
+      "settled_count": 4,
+      "uncertain_count": 0,
+      "call_ids": [
+        "planning-material-triage:Ndc869bbfa1a0bdeab75a:key0:attempt0",
+        "query-refinement:Ndc869bbfa1a0bdeab75a:1:key0:attempt0",
+        "planning-material-triage:Ndc869bbfa1a0bdeab75a:key0:attempt0",
+        "query-refinement:Ndc869bbfa1a0bdeab75a:2:key0:attempt0"
+      ]
+    }
+  ],
+  "phases": [
+    {
+      "phase": "initial_empty_query",
+      "result": {
+        "phase": "initial_empty_query",
+        "status": "complete",
+        "model_calls": null,
+        "external_calls": 2,
+        "journal_entries": 4,
+        "config": {
+          "local_top_papers": 6,
+          "local_passages_per_paper": 2,
+          "max_rounds": 3,
+          "max_empty_rounds": 2,
+          "max_queries_per_round": 3,
+          "max_provider_retries": 1,
+          "shared_deep_read_budget": 40
+        },
+        "needs": [
+          {
+            "need_id": "Ne675fc8ee99c6a9a6b37",
+            "status": "stopped",
+            "action": "stop",
+            "local_decision": "external_research",
+            "query_source": "refiner",
+            "query_status": "ready",
+            "queries": [
+              {
+                "facet_id": "",
+                "query_text": "Pancreatic ductal adenocarcinoma Fusobacterium nucleatum PD-1 resistance mechanism",
+                "query_type": "keyword"
+              },
+              {
+                "facet_id": "",
+                "query_text": "How does Fusobacterium nucleatum abundance in pancreatic ductal adenocarcinoma tumors correlate with PD-L1 expression and T-cell exhaustion in patients receiving immune checkpoint inhibitors?",
+                "query_type": "question"
+              }
+            ],
+            "new_handles": [
+              "P0597",
+              "P0087",
+              "P0479"
+            ],
+            "new_passages": 0,
+            "consumed_paper_ids": [],
+            "owners": [
+              "CH02"
+            ],
+            "rounds": 2,
+            "empty_rounds": 2,
+            "reused_answer": false,
+            "reuse_key": "e675fc8ee99c6a9a6b378c696e869ae409b7a9007b36878d9f5201655d6287dd",
+            "still_missing": "Which PDAC microbiota to immune-checkpoint routes in the existing local materials are source-bound enough to support a bounded mechanism paragraph, including model or cohort conditions and the patient-level limit?",
+            "usable_content": "现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（",
+            "external_ask": "寻找具体研究：1. PDAC中特定细菌/真菌物种如何通过抗原模拟、代谢物产生或模式识别受体激活来调节PD-1/PD-L1通路或T细胞功能；2. 临床队列研究中，基线微生物组成与抗PD-1/PD-L1治疗反应的相关性及潜在机制验证；3. 动物模型中证实微生物介导的ICI疗效增强的实验证据。",
+            "attempt_count": 2
+          }
+        ],
+        "paper_owners": {
+          "P0087": [
+            "CH02"
+          ],
+          "P0479": [
+            "CH02"
+          ],
+          "P0597": [
+            "CH02"
+          ]
+        },
+        "shared_reads": {
+          "P0087": 1,
+          "P0479": 1,
+          "P0597": 1
+        },
+        "shared_deep_reads_used": 0,
+        "shared_deep_reads_remaining": 40,
+        "external_provider_payloads_omitted": true
+      },
+      "triage_decision_file": "retrieval/ACTUAL_TRIAGE_DECISIONS.json#initial_empty_query",
+      "actual_query_output_files": [
+        "retrieval/ACTUAL_QUERY_OUTPUTS.json#initial_empty_query-attempt-1",
+        "retrieval/ACTUAL_QUERY_OUTPUTS.json#initial_empty_query-attempt-2"
+      ]
+    },
+    {
+      "phase": "rebind_same_answered_need",
+      "result": {
+        "phase": "rebind_same_answered_need",
+        "status": "complete",
+        "model_calls": null,
+        "external_calls": 2,
+        "journal_entries": 4,
+        "config": {
+          "local_top_papers": 6,
+          "local_passages_per_paper": 2,
+          "max_rounds": 3,
+          "max_empty_rounds": 2,
+          "max_queries_per_round": 3,
+          "max_provider_retries": 1,
+          "shared_deep_read_budget": 40
+        },
+        "needs": [
+          {
+            "need_id": "Ne675fc8ee99c6a9a6b37",
+            "status": "stopped",
+            "action": "stop",
+            "local_decision": "external_research",
+            "query_source": "refiner",
+            "query_status": "ready",
+            "queries": [
+              {
+                "facet_id": "",
+                "query_text": "PDAC microbiome metabolites immune checkpoint inhibitor response mechanism",
+                "query_type": "keyword"
+              },
+              {
+                "facet_id": "",
+                "query_text": "How do specific gut or intratumoral microbial metabolites in pancreatic ductal adenocarcinoma modulate T-cell infiltration and efficacy of anti-PD-1/PD-L1 therapy?",
+                "query_type": "question"
+              }
+            ],
+            "new_handles": [
+              "P0597",
+              "P0087",
+              "P0479"
+            ],
+            "new_passages": 0,
+            "consumed_paper_ids": [],
+            "owners": [
+              "CH02",
+              "CH03"
+            ],
+            "rounds": 2,
+            "empty_rounds": 2,
+            "reused_answer": false,
+            "reuse_key": "e675fc8ee99c6a9a6b378c696e869ae409b7a9007b36878d9f5201655d6287dd",
+            "still_missing": "Which PDAC microbiota to immune-checkpoint routes in the existing local materials are source-bound enough to support a bounded mechanism paragraph, including model or cohort conditions and the patient-level limit?",
+            "usable_content": "现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（\n\n现有材料未能提供胰腺导管腺癌（PDAC）中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597指出FMT在黑色素瘤和UC中的研究涉及供体筛选，但未建立PDAC特有的微生物-ICI机制；材料P0479聚焦于短链脂肪酸（如丁酸盐）对乳腺癌的体外抗癌作用及其分子机制（如组蛋白去乙酰化酶抑制、凋亡诱导），未涉及PDAC或ICI；材料P0087详细描述了PDAC中口腔-肠道微生物轴通过代谢重编程、免疫调节等促进肿瘤发生及化疗耐药，并提及肿瘤内微生物多样性与长期生存者（LTS）的相关性，但明确指出这些发现主要关联于传统治疗预后或诊断标志物，未具体阐述针对免疫检查点阻断疗法（ICB）的特异性微生物介导机制。因此，缺乏支持撰写关于PDAC微生物群如何特异性调节ICI疗效的机制段落所需的模型/队列条件及患者层面证据边界。\n\n现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（\n\n现有材料未能提供胰腺导管腺癌（PDAC）中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源数据支持的机制路径。虽然P0087指出肿瘤内微生物群通过代谢重编程和免疫调节驱动治疗耐药，并提及口腔-肠道微生物轴在PDAC发病中的作用，但该综述未明确界定任何特定的PDAC微生物物种或菌株如何通过特定分子途径直接调控ICI的疗效或免疫检查点表达。材料中关于微生物多样性与预后的关联（如Geller et al.的研究显示长期生存者α-多样性更高，且特定菌属丰度差异显著）主要基于病理活检样本的回顾性分析，用于预测总生存期，而非针对ICI治疗的机制解释。此外，P0597关于粪菌移植（FMT）的材料主要涉及黑色素瘤和溃疡性结肠炎，虽提及FMT可能改善ICI反应，但未提供PDAC的具体微生物-免疫检查点作用机制细节。P0479关于丁酸盐对乳腺癌的作用机制亦不适用于PDAC-ICI场景。因此，缺乏符合“源绑定”要求的PDAC特异性微生物至ICI通路的定量或定性证据，无法构建包含模型/队列条件和患者层面限制的机制段落。",
+            "external_ask": "检索PDAC中微生物群调节免疫检查点抑制剂疗效的具体机制研究，特别是那些提供了从微生物到免疫表型再到临床结局（ICI响应率、生存期）完整链条证据的文献。重点关注是否有研究鉴定了特定的PDAC相关微生物或其代谢产物作为ICI疗效的生物标志物或效应介质。",
+            "attempt_count": 2
+          }
+        ],
+        "paper_owners": {
+          "P0087": [
+            "CH02",
+            "CH03"
+          ],
+          "P0479": [
+            "CH02",
+            "CH03"
+          ],
+          "P0597": [
+            "CH02",
+            "CH03"
+          ]
+        },
+        "shared_reads": {
+          "P0087": 1,
+          "P0479": 1,
+          "P0597": 1
+        },
+        "shared_deep_reads_used": 0,
+        "shared_deep_reads_remaining": 40,
+        "external_provider_payloads_omitted": true
+      },
+      "triage_decision_file": "retrieval/ACTUAL_TRIAGE_DECISIONS.json#rebind_same_answered_need",
+      "actual_query_output_files": [
+        "retrieval/ACTUAL_QUERY_OUTPUTS.json#rebind_same_answered_need-attempt-1",
+        "retrieval/ACTUAL_QUERY_OUTPUTS.json#rebind_same_answered_need-attempt-2"
+      ]
+    },
+    {
+      "phase": "changed_required_outputs",
+      "result": {
+        "phase": "changed_required_outputs",
+        "status": "complete",
+        "model_calls": null,
+        "external_calls": 2,
+        "journal_entries": 4,
+        "config": {
+          "local_top_papers": 6,
+          "local_passages_per_paper": 2,
+          "max_rounds": 3,
+          "max_empty_rounds": 2,
+          "max_queries_per_round": 3,
+          "max_provider_retries": 1,
+          "shared_deep_read_budget": 40
+        },
+        "needs": [
+          {
+            "need_id": "Ndc869bbfa1a0bdeab75a",
+            "status": "stopped",
+            "action": "stop",
+            "local_decision": "external_research",
+            "query_source": "refiner",
+            "query_status": "ready",
+            "queries": [
+              {
+                "facet_id": "",
+                "query_text": "pancreatic cancer microbiome FMT antibiotic immune checkpoint inhibitor response mechanism",
+                "query_type": "keyword"
+              },
+              {
+                "facet_id": "",
+                "query_text": "How do fecal microbiota transplantation or antibiotic depletion of specific gut microbes in pancreatic ductal adenocarcinoma models or cohorts modulate the efficacy and immune infiltration patterns of anti-PD-1/PD-L1 therapy?",
+                "query_type": "question"
+              }
+            ],
+            "new_handles": [
+              "P0597",
+              "P0087",
+              "P0479"
+            ],
+            "new_passages": 0,
+            "consumed_paper_ids": [],
+            "owners": [
+              "CH02",
+              "CH03"
+            ],
+            "rounds": 2,
+            "empty_rounds": 2,
+            "reused_answer": false,
+            "reuse_key": "dc869bbfa1a0bdeab75a0f62a2478807f0dd21dbf989b9b0bf3431209888232c",
+            "still_missing": "Which PDAC microbiota to immune-checkpoint routes in the existing local materials are source-bound enough to support a bounded mechanism paragraph, including model or cohort conditions and the patient-level limit?",
+            "usable_content": "现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（\n\n现有材料未能提供胰腺导管腺癌（PDAC）中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597指出FMT在黑色素瘤和UC中的研究涉及供体筛选，但未建立PDAC特有的微生物-ICI机制；材料P0479聚焦于短链脂肪酸（如丁酸盐）对乳腺癌的体外抗癌作用及其分子机制（如组蛋白去乙酰化酶抑制、凋亡诱导），未涉及PDAC或ICI；材料P0087详细描述了PDAC中口腔-肠道微生物轴通过代谢重编程、免疫调节等促进肿瘤发生及化疗耐药，并提及肿瘤内微生物多样性与长期生存者（LTS）的相关性，但明确指出这些发现主要关联于传统治疗预后或诊断标志物，未具体阐述针对免疫检查点阻断疗法（ICB）的特异性微生物介导机制。因此，缺乏支持撰写关于PDAC微生物群如何特异性调节ICI疗效的机制段落所需的模型/队列条件及患者层面证据边界。\n\n现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（\n\n现有材料未能提供胰腺导管腺癌（PDAC）中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源数据支持的机制路径。虽然P0087指出肿瘤内微生物群通过代谢重编程和免疫调节驱动治疗耐药，并提及口腔-肠道微生物轴在PDAC发病中的作用，但该综述未明确界定任何特定的PDAC微生物物种或菌株如何通过特定分子途径直接调控ICI的疗效或免疫检查点表达。材料中关于微生物多样性与预后的关联（如Geller et al.的研究显示长期生存者α-多样性更高，且特定菌属丰度差异显著）主要基于病理活检样本的回顾性分析，用于预测总生存期，而非针对ICI治疗的机制解释。此外，P0597关于粪菌移植（FMT）的材料主要涉及黑色素瘤和溃疡性结肠炎，虽提及FMT可能改善ICI反应，但未提供PDAC的具体微生物-免疫检查点作用机制细节。P0479关于丁酸盐对乳腺癌的作用机制亦不适用于PDAC-ICI场景。因此，缺乏符合“源绑定”要求的PDAC特异性微生物至ICI通路的定量或定性证据，无法构建包含模型/队列条件和患者层面限制的机制段落。\n\n现有材料中关于胰腺导管腺癌（PDAC）微生物群与免疫检查点抑制剂（ICI）疗效关联的机制描述，主要停留在概念性假设和预后相关性层面，缺乏针对特定微生物-免疫通路的源绑定（source-bound）实验证据或明确的队列分层数据。具体而言：1. P0597 (Porcari et al.) 综述了粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的供体筛选标准及疗效差异，指出微生物定植与临床成功相关，但并未提供PDAC患者中特定微生物调节ICI疗效的具体通路、模型条件或患者级限制数据；2. P0087 (Pancreatic cancer review) 详细阐述了口腔-肠道微生物轴通过代谢重编程、免疫调节等驱动PDAC发生发展及化疗耐药，并发现肿瘤内α多样性与长期生存者（LTS）正相关（如Clostridium, Mycobacterium丰度增加），但该研究聚焦于预后标志物而非ICI治疗响应机制，未提及具体的免疫检查点分子或ICI疗效数据；3. P0479 (Butyrate in BC) 仅讨论丁酸盐对乳腺癌的体外抗癌作用，与PDAC无关。因此，当前材料无法支持撰写包含明确模型/队列条件和患者级限制的PDAC特异性微生物-ICI机制段落。\n\n现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（\n\n现有材料未能提供胰腺导管腺癌（PDAC）中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597指出FMT在黑色素瘤和UC中的研究涉及供体筛选，但未建立PDAC特有的微生物-ICI机制；材料P0479聚焦于短链脂肪酸（如丁酸盐）对乳腺癌的体外抗癌作用及其分子机制（如组蛋白去乙酰化酶抑制、凋亡诱导），未涉及PDAC或ICI；材料P0087详细描述了PDAC中口腔-肠道微生物轴通过代谢重编程、免疫调节等促进肿瘤发生及化疗耐药，并提及肿瘤内微生物多样性与长期生存者（LTS）的相关性，但明确指出这些发现主要关联于传统治疗预后或诊断标志物，未具体阐述针对免疫检查点阻断疗法（ICB）的特异性微生物介导机制。因此，缺乏支持撰写关于PDAC微生物群如何特异性调节ICI疗效的机制段落所需的模型/队列条件及患者层面证据边界。\n\n现有本地材料未能提供PDAC中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源可溯的作用机制路径。材料P0597和P0087主要聚焦于胰腺导管腺癌（PDAC）的发病机制、诊断标志物及预后，虽然P0087指出肿瘤内微生物群通过代谢重编程、免疫调节等途径促进化疗耐药和免疫逃逸，但并未具体阐述针对ICI的特异性分子或细胞通路。材料P0479详细描述了丁酸盐等肠道代谢物在乳腺癌中的抗肿瘤机制（如诱导凋亡、细胞周期阻滞），但其研究对象为乳腺癌，且多为体外细胞实验，无法直接外推至PDAC的ICI治疗场景。因此，当前材料缺乏支持撰写关于“PDAC微生物群-ICI作用机制”段落所需的特定模型/队列条件及患者层面的证据边界。\n\n现有本地材料未能提供PDAC微生物群通过特定免疫检查点（如PD-1/PD-L1）调节免疫检查点抑制剂（ICI）疗效的有源绑定机制路径。材料P0597主要综述粪菌移植（FMT）在黑色素瘤和溃疡性结肠炎中的应用，指出供体微生物特征（如高α多样性、Ruminococcaceae丰度）与临床成功相关，并强调供体筛选标准的异质性，但未涉及PDAC或具体的ICI免疫通路机制。材料P0479聚焦于短链脂肪酸丁酸盐对乳腺癌的抗肿瘤作用及其分子机制（如HDAC抑制、凋亡诱导），与PDAC及ICI无关。材料P0087详细阐述了胰腺导管腺癌（PDAC）中“口腔-肠道微生物轴”的作用，包括肿瘤内微生物群（如Proteobacteria富集、Malassezia真菌定位）通过代谢重编程、慢性炎症和细胞周期失调促进致癌作用，以及唾液/粪便微生物标志物用于诊断和预后（如LTS患者Clostridium丰度高）。尽管该材料提到肿瘤内微生物群可能影响化疗和免疫治疗结果（\n\n现有材料未能提供胰腺导管腺癌（PDAC）中微生物群与免疫检查点抑制剂（ICI）疗效之间具体的、有源数据支持的机制路径。虽然P0087指出肿瘤内微生物群通过代谢重编程和免疫调节驱动治疗耐药，并提及口腔-肠道微生物轴在PDAC发病中的作用，但该综述未明确界定任何特定的PDAC微生物物种或菌株如何通过特定分子途径直接调控ICI的疗效或免疫检查点表达。材料中关于微生物多样性与预后的关联（如Geller et al.的研究显示长期生存者α-多样性更高，且特定菌属丰度差异显著）主要基于病理活检样本的回顾性分析，用于预测总生存期，而非针对ICI治疗的机制解释。此外，P0597关于粪菌移植（FMT）的材料主要涉及黑色素瘤和溃疡性结肠炎，虽提及FMT可能改善ICI反应，但未提供PDAC的具体微生物-免疫检查点作用机制细节。P0479关于丁酸盐对乳腺癌的作用机制亦不适用于PDAC-ICI场景。因此，缺乏符合“源绑定”要求的PDAC特异性微生物至ICI通路的定量或定性证据，无法构建包含模型/队列条件和患者层面限制的机制段落。\n\n现有材料未能提供PDAC微生物群调节免疫检查点抑制剂（ICI）疗效的具体机制路径，因此无法支持撰写包含模型/队列条件和患者级限制的有界机制段落。材料P0597虽然指出FMT供体特征与ICI难治性黑色素瘤的临床成功相关，并提及UC研究，但明确说明供体α多样性与临床成功的关联在不同疾病和试验中不一致，且未提供PDAC相关的微生物-ICI交互数据。材料P0087聚焦于胰腺导管腺癌（PDAC），详细阐述了口腔-肠道微生物轴通过代谢重编程、免疫调节、抑制凋亡等机制促进PDAC发生发展及化疗耐药，并发现肿瘤内微生物α多样性与长期生存者（>5年）正相关，短期生存者富集具核梭杆菌和拟杆菌属；然而，该部分仅涉及PDAC的自然病程预后和诊断标志物潜力，未涉及ICI治疗或免疫检查点通路的具体调节机制。材料P0479讨论的是丁酸盐等肠道微生物代谢产物对乳腺癌的抗癌作用及其分子机制，与PDAC无关。综上，本地材料缺乏将PDAC特定微生物群与ICI疗效直接联系的实验性或观察性证据，无法满足关于PDAC特异性边界和患者级限制的成功标准。",
+            "external_ask": "请检索以下窄需求材料：1. PDAC患者接受免疫检查点抑制剂治疗时，基线肠道或肿瘤内微生物组成（特别是门/属水平或特定菌种）与客观缓解率（ORR）或总生存期（OS）的相关性研究；2. 在PDAC动物模型中，通过抗生素处理或粪菌移植改变微生物群后，对PD-1/PD-L1阻断疗法疗效影响的机制研究；3. 任何阐明PDAC微生物介导ICI耐药或敏感性的具体分子机制（如抗原呈递、T细胞功能调节）的实验证据。",
+            "attempt_count": 2
+          }
+        ],
+        "paper_owners": {
+          "P0087": [
+            "CH02",
+            "CH03"
+          ],
+          "P0479": [
+            "CH02",
+            "CH03"
+          ],
+          "P0597": [
+            "CH02",
+            "CH03"
+          ]
+        },
+        "shared_reads": {
+          "P0087": 1,
+          "P0479": 1,
+          "P0597": 1
+        },
+        "shared_deep_reads_used": 0,
+        "shared_deep_reads_remaining": 40,
+        "external_provider_payloads_omitted": true
+      },
+      "triage_decision_file": "retrieval/ACTUAL_TRIAGE_DECISIONS.json#changed_required_outputs",
+      "actual_query_output_files": [
+        "retrieval/ACTUAL_QUERY_OUTPUTS.json#changed_required_outputs-attempt-1",
+        "retrieval/ACTUAL_QUERY_OUTPUTS.json#changed_required_outputs-attempt-2"
+      ]
+    }
+  ],
+  "phase_status_note": "All three phases stopped without treating an unanswered need as fulfilled. The rebind phase retained the same answered-need identity where the actual run reported reuse; changed output requirements remained visible."
+}

@@ -1,0 +1,98 @@
+{
+  "schema_version": "optomind.body03.sanitized.parameters.v1",
+  "tested_head": "8810c7bf38227f2987d7510937bdf9001ffd47ad",
+  "config": {
+    "schema_version": "optomind.body03.real_acceptance.config.v1",
+    "worktree": "<WORKTREE_ROOT>",
+    "required_head": "8810c7b",
+    "topic_id": "body03_real_qwen_20261003",
+    "topic": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?",
+    "budget": {
+      "ledger_path": "<WO02_SOURCE_ROOT>\\budget.sqlite",
+      "limit_cny": 30.0,
+      "local_provisional_ceiling_cny": 5.0
+    },
+    "provider": {
+      "model": "qwen3.7-flash",
+      "key_file": "<LOCAL_ONLY_CREDENTIAL_PATH>",
+      "max_output_tokens": 5000,
+      "thinking_budget": 1024,
+      "timeout_seconds": 300,
+      "max_retries": 1
+    },
+    "owner": {
+      "model": "qwen3.5-plus",
+      "output_tokens": 16384,
+      "thinking_budget": 2048,
+      "tokenizer": "<LOCAL_REVIEW_ROOT>\\data\\tokenizers\\qwen3_5_9b\\tokenizer.json",
+      "packet_path": "<LOCAL_REVIEW_ROOT>\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\writer_packets\\CH02.json",
+      "chapter_id": "CH02",
+      "subset_units": [
+        "CH02:U1",
+        "CH02:U3"
+      ],
+      "source_handle": "P0004",
+      "chapter_title": "Microbiome-mediated mechanisms of immune checkpoint inhibitor efficacy"
+    },
+    "prior": {
+      "whole_stage": "<WO02_SOURCE_ROOT>\\runs\\live\\owner_delta\\stages\\whole_plan_improvement.json",
+      "whole_raw": "<WO02_SOURCE_ROOT>\\runs\\live\\owner_delta\\raw_responses\\progressive-review_whole_plan_improvement_body02_real_qwen_20261003\\progressive-review_whole_plan_improvement_body02_real_qwen_20261003-key0-attempt0.raw",
+      "reader_artifact": "<WO02_SOURCE_ROOT>\\runs\\live\\reader\\paper1_initial\\directed\\00d3d83d6571a7d9c15adbb84e0c371ce46d15a4\\dr-task-0a3c29a5c78a27910afc4081\\DIRECTED_READING.json"
+    },
+    "retrieval": {
+      "local_index": "<LOCAL_REVIEW_ROOT>\\outputs\\lihonggang_full_acceptance_20261001_50cny\\planning_level1\\planning_material_index.sqlite",
+      "first_gap_id": "WO03-G-P0004",
+      "question": "Which PDAC microbiota to immune-checkpoint routes in the existing local materials are source-bound enough to support a bounded mechanism paragraph, including model or cohort conditions and the patient-level limit?",
+      "success_criteria": [
+        "Name at least one source-bound PDAC microbiota-to-ICI route.",
+        "Retain the model or cohort condition and the patient-level evidence boundary."
+      ],
+      "required_outputs_initial": [
+        {
+          "output_id": "WO03-O-MECHANISM",
+          "output_type": "mechanism_route",
+          "description": "Route, immune change, checkpoint outcome, and evidence condition."
+        }
+      ],
+      "required_outputs_changed": [
+        {
+          "output_id": "WO03-O-MECHANISM",
+          "output_type": "mechanism_route",
+          "description": "Retain the already answered route, immune change, checkpoint outcome, and evidence condition."
+        },
+        {
+          "output_id": "WO03-O-BOUNDARY",
+          "output_type": "boundary_comparison",
+          "description": "PDAC-specific boundary and explicit patient-level limit."
+        }
+      ],
+      "chapter_ids_first": [
+        "CH02"
+      ],
+      "chapter_ids_second": [
+        "CH02",
+        "CH03"
+      ]
+    }
+  },
+  "offline_selection": {
+    "socket_guards": [
+      "socket.create_connection",
+      "socket.socket.connect"
+    ],
+    "tests_passed": 212,
+    "tests_deselected": 2,
+    "wo03_new_tests_passed": 64,
+    "compileall_exit": 0,
+    "git_diff_check_exit": 0
+  },
+  "budget_summary": {
+    "new_actual_cny": 0.1085646,
+    "shared_actual_cny_after": 0.5861682,
+    "shared_limit_cny": 30.0,
+    "reserved_cny": 0.0,
+    "uncertain_cny": 0.0,
+    "remaining_cny": 29.4138318,
+    "new_network_calls": 13
+  }
+}
