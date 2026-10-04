@@ -70,7 +70,7 @@ class OwnerBoundary:
         return {"chapter_updates": [{"chapter_id": "CH01", "updated_plan": revised}]}
 
 
-def setup(tmp_path, monkeypatch, *, expect_update=True):
+def make_chain_fixture(tmp_path, monkeypatch, *, expect_update=True):
     source = tmp_path / "source"
     snapshot = source / "snapshot"
     snapshot.mkdir(parents=True)
@@ -166,7 +166,7 @@ def store_evidence(tmp_path, name, summary):
 
 @pytest.mark.parametrize("change", ["question", "required_outputs"])
 def test_same_paper_new_task_partial_owner_resume(tmp_path, monkeypatch, change):
-    config, pool, packet, calls, owner, new_planner = setup(tmp_path, monkeypatch)
+    config, pool, packet, calls, owner, new_planner = make_chain_fixture(tmp_path, monkeypatch)
     planner = new_planner()
     baseline = task()
     changed = task(question="How was the result replicated?") if change == "question" else task(output="Report replication and the temperature comparison")
@@ -247,7 +247,7 @@ def test_same_paper_new_task_partial_owner_resume(tmp_path, monkeypatch, change)
 
 
 def test_normal_pre_case_owner_path_without_new_material(tmp_path, monkeypatch):
-    config, pool, packet, calls, owner, new_planner = setup(tmp_path, monkeypatch, expect_update=False)
+    config, pool, packet, calls, owner, new_planner = make_chain_fixture(tmp_path, monkeypatch, expect_update=False)
     planner = new_planner()
     result = owner_review(planner, pool, packet, {})
     assert result["chapters"][0]["chapter_plan"] == packet["chapter_plan"]
@@ -264,7 +264,7 @@ def test_normal_pre_case_owner_path_without_new_material(tmp_path, monkeypatch):
 
 
 def test_fulfilled_read_clears_stale_local_gap_before_owner(tmp_path, monkeypatch):
-    config, pool, packet, calls, owner, new_planner = setup(tmp_path, monkeypatch)
+    config, pool, packet, calls, owner, new_planner = make_chain_fixture(tmp_path, monkeypatch)
     owner.expect_partial = False
     planner = new_planner()
     complete = cycle(planner, pool, "normal_fulfilled", task())
