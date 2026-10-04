@@ -1,0 +1,70 @@
+{
+  "schema_version": "body_preflight_material_acceptance.live_writer_once.v1",
+  "provider": "qwen3.7-flash",
+  "call_count_requested": 1,
+  "cli_return_code": 0,
+  "error": "",
+  "elapsed_seconds": 15.273006916046143,
+  "arrangement": "<redacted-local-path>",
+  "view": "<redacted-local-path>",
+  "output_root": "<redacted-local-path>",
+  "ledger": {
+    "path": "<redacted-local-path>",
+    "before": {
+      "by_status": [
+        {
+          "status": "settled",
+          "count": 42,
+          "actual_cny": 2.3133652000000002,
+          "amount_cny": 11.7868124
+        }
+      ],
+      "settled_actual_cny": 2.3133652000000002,
+      "reserved_cny": 0,
+      "uncertain": []
+    },
+    "after": {
+      "by_status": [
+        {
+          "status": "settled",
+          "count": 43,
+          "actual_cny": 2.3385136,
+          "amount_cny": 11.983496
+        }
+      ],
+      "settled_actual_cny": 2.3385136,
+      "reserved_cny": 0,
+      "uncertain": []
+    },
+    "changed": true
+  },
+  "files": [
+    "CH02_U3\\RAW_RESPONSE.json",
+    "CH02_U3\\UNIT_BODY.md",
+    "CH02_U3\\UNIT_INPUT.json",
+    "CH02_U3\\UNIT_MESSAGES.json",
+    "CH02_U3\\UNIT_RESULT.json",
+    "CH02_U3\\raw_responses\\CH02_CH02"
+  ],
+  "note": "One production CLI writer call; no retry and no full BODY run.",
+  "raw_response_copy": "<redacted-local-path>",
+  "postprocess_note": "The runtime raw path contains a Windows unit-id colon and was copied from its ADS path to RAW_RESPONSE.json for ordinary file review; no provider call was repeated.",
+  "estimate": {
+    "prompt_tokens_estimate": 147761,
+    "reserved_input_tokens": 173684,
+    "output_tokens": 4000,
+    "thinking_budget": 0,
+    "total_context_tokens": 177684,
+    "estimated_cost_cny": 0.2276208,
+    "model": "qwen3.7-flash",
+    "tokenizer": "utf8_conservative_upper_bound"
+  },
+  "single_call_estimate_guard": true,
+  "first_attempt_before_provider": {
+    "return_code": -1,
+    "error": "NotADirectoryError: Windows output path contained unit key colon (CH02_CH02:U3)",
+    "provider_calls": 0,
+    "ledger_changed": false,
+    "fee_cny": 0
+  }
+}

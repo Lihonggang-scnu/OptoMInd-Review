@@ -1,0 +1,40 @@
+{
+  "package": "preflight-materials-local-20261004",
+  "package_date": "2026-10-04",
+  "recorded_current_code_sha": "6d1c8525fe0c2bcad53fcaec7699c88e04e63503",
+  "historical_body_baseline_code_sha": "unknown",
+  "historical_sha_note": "The prior BODY artifacts did not record a verifiable code SHA. The current acceptance SHA is not substituted.",
+  "source_roots": {
+    "second_stop_acceptance": "outputs/body_preflight_material_acceptance_20261004",
+    "historical_body_baseline": "outputs/body_full_preflight_20261004/live_chain"
+  },
+  "historical_comparison_files": [
+    "historical_body_baseline/WRITTEN_BODY.md",
+    "historical_body_baseline/UNIT_MESSAGES.json",
+    "historical_body_baseline/LIVE_CHAIN_REPORT.json",
+    "historical_body_baseline/FORMAL_PACKET_AFTER_OWNER.json"
+  ],
+  "historical_prior_reading": [
+    "historical_prior_reading/DIRECTED_READING.json",
+    "historical_prior_reading/PAPER_READING_CARD.json"
+  ],
+  "fixture_note": "Moved and edited real_directed fixture copies were excluded. The interrupted edited copy placed its marker after the reader-consumed body, so it is not a valid compatibility proof. ROOT_REAL_COMPATIBILITY.json and SECOND_STOP_RESULT.json retain the actual isolated source-state result summary.",
+  "redaction": {
+    "absolute_local_paths": "replaced with <redacted-local-path>",
+    "provider_keys_ledger_wallets_and_key_files": "omitted or replaced with placeholders",
+    "signed_links_headers_tokens_passwords": "omitted or replaced with redacted markers",
+    "scientific_material": "processed A/B/deep summaries and writer messages retained; reading-view fulltext and snapshots excluded",
+    "line_endings": "Public text copies normalized to LF; scientific content retained."
+  },
+  "exclusions": [
+    "real_checks/results/source_states/**",
+    "root_replay/**",
+    "**/snapshot/**",
+    "PDF and reading-view fulltext",
+    "SQLite budget wallets and key files",
+    "alternate raw response ADS entries"
+  ],
+  "interpretation": "The copied historical BODY files are comparison evidence only. The new result is the local second-stop acceptance described by ASTRA_ACCEPTANCE.md and SECOND_STOP_RESULT.json.",
+  "live_invocation_note": "Successful new call used the production writer runtime and CLI budget client through a local driver with a safe output directory. It did not prove the unmodified CLI main path works for a unit ID containing a colon. Some saved source descriptions say CLI call as shorthand; ASTRA_ACCEPTANCE.md provides the precise scope.",
+  "public_copy_note": "Absolute local paths are redacted in public input/message copies; scientific fields and saved model output remain for analysis. These are not byte-exact request replays or new production PLAN/cache. Reproducing historical fulltext compatibility locally requires the excluded source snapshots."
+}
