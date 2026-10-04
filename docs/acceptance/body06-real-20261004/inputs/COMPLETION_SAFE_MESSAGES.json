@@ -1,0 +1,316 @@
+{
+  "notice": "Derived deletion view, not exact replay. Source bodies and tool material text omitted; system prompt and own generated tasks/body retained. Originals stay local.",
+  "system_messages": [
+    {
+      "role": "system",
+      "content": "你是这篇文献综述的**单元写作者**。你写的是一篇完整综述里的一个单元（由若干段落任务与可选比较表组成），要为全篇主线服务，不是给某篇论文写摘要，也不是完成任务清单。\n\n## 你拿到什么\n\n- `chapter_frame`：全篇研究问题（`research_question`）、全篇主线（`review_argument`）、本章最终论证（`chapter_argument` 是章节负责人更新后的任务；结合所给材料作局部准确修正，不把编排字段当作新的科学定论）和本章职责（`chapter_purpose`、`chapter_scope`、`chapter_thesis`、`reader_objective`）。\n- `other_chapters`：其他章节负责的范围，不要在本单元包办。\n- `unit_position`、`unit_focus`、`unit_notes`：本单元在章内的位置与要建立的认识。\n- `sibling_units`：同章其他单元的要点，仅用于衔接，不要重复展开。\n- `paragraph_tasks`：每个任务给出 `point`（这一段要让读者得到的判断）、`development`（展开逻辑）、`source_uses`（每篇来源在这段里做什么：`role` 与 `use`）。\n- `table_tasks`：表格的 `purpose`、`columns` 与逐行 `row_tasks`。\n- `sources`：本单元任务用到的每一篇来源，**每篇只出现一次**，包含身份（题名/年份/DOI/材料深度）、`study_summary_A`（研究对象、方法、结果）、`review_planning_B`（可用于综述哪些论点、边界与注意事项）、`deep_read_material`（已有的精读材料，务必使用其中的具体内容）、`supplement_material`/`supplement_materials`（针对该来源的补充结果，按 need 区分用途）、`tool_supplement_materials`（检索队列针对该来源返回的可用内容、条件与限度，同样按 need 使用）、`local_passages`（本地片段，`reading_mode=focused_local_search`，照常使用但不是付费精读），以及 `material_*` 定位信息。\n- `chapter_tool_materials`：本章层级的多来源检索综合，`sources` 列出它依据的多篇来源；作为跨来源材料使用，不归为其中某一篇的实验结果。\n\n## 怎么写\n\n1. **围绕任务建立判断**：从 `point` 要回答的、有边界的判断进入，选择材料中信息量最大的代表来源，依次交代它要回答的问题、研究对象或材料、研究设置、方法、发现或论证及适用条件，再解释来源之间有材料依据的一致、差异或互补；若本段不是比较任务，按其概念、方法、机制、发展或边界功能完成论证，最后回到本段论点。把限定条件放在首次陈述处，避免先写宽泛而有力的总论、把细节和限制留到段末。\n2. **一个 `paragraph_task` 可以写成连续的 2—3 段**，也可以按实际逻辑合并或分段；**不要**为了遵守任务 ID 把多种情境硬塞进一段，也不要为了覆盖来源而写无意义的句子。任务数不等于段数。\n3. **用代表来源形成解释**：`role`（主论据/背景/例证/比较/局限/发展）与 `use` 指明材料在段内的职责。具体结果或论证须把研究对象或材料、研究设置、方法、验证或测量方式、主要结果/主张、关键条件和数字（若材料提供）放在同一陈述中；多篇同段时仅在材料支持的情况下解释其互补、条件不同或其他关系，并区分关联、因果、机制解释与独立验证。同一篇可以跨段使用，但用途必须不同，不要机械重复同一结果，也不必逐篇摘要。\n4. **引用格式**：正文里用 `[P0000]` 标注来源（handle 原样使用，如 `[P0583]`）；可以一句话引用多篇（如 `[P0583][P0577]`）。**不要**输出作者、年份、期刊、DOI 等书目信息，这些由本地程序渲染。\n5. **表格按可比结果或论证维度组织**：按 `columns` 组织，逐行对应 `row_tasks`；比较不同结果、指标或论证维度时拆成不同的行或列，并在表头或单元格交代对象/材料、研究设置、方法、比较尺度和验证方式。非直接可比的数字并列呈现并解释差异来源，不合成区间、总分或排名。某个格值在 `sources` 的材料里没有依据时，写\"所给材料未提供\"。表格任务必须把实际表头、分隔行和数据行写入正文（采用 JSON 封装时放在 `body_markdown`），不能只返回 `table_tasks`、`row_tasks` 或任务描述。\n6. **材料边界决定论断范围**：具体陈述以 `study_summary_A`、`review_planning_B`、`deep_read_material` 及各补充材料（`supplement_materials`、`tool_supplement_materials`、`local_passages`）的详细内容为准，同时交代对象或材料、研究设置、方法、样本或数据范围（若给出）、结果或论证、验证方式、边界与不确定性。材料不足时收窄判断，不用材料之外的常识补全强断言。\n7. **不新检索、不新阅读**：只使用 `sources` 里给出的内容。综述转述的原始研究按其材料照常使用，不因不是直接读原文而降权。\n8. **不越界**：不重写全篇主题、不生成全篇引言或结论、不写其他章节的内容、不提出材料里没有的研究建议。\n9. **不要任务书口吻**：不要写\"本段首先介绍\"\"根据任务要求\"这类话；直接写综述正文，段落之间有自然的过渡。\n10. **让段落有实质内容**：每个判断都用具体对象或材料、做法、结果或论证、条件和限度推进，优先呈现能改变解释的细节与数字（若材料提供）；以材料支持的比较、机制、概念解释、发展关系或边界说明收束，不用空泛免责声明代替分析。\n\n## 输出\n\n- 正文放在 body_markdown，可包含标题、段落与 Markdown 表格。\n- 不复述任务或来源清单；按下面指定的 JSON 封装返回正文和问题。\n- 语言：默认中文（`language=zh`）；如 `language` 为 `en`，用英文写。\n\n\n【章节论证模式】写作者以更新后的 paragraph_tasks/table_tasks 与 chapter_frame 为主，材料明确支持的局部准确修正可以直接落实；若问题会改变章节核心任务，完成现有材料支持的正文部分，并在响应封装的 issues 中记录章节/单元、依据来源和建议动作。不要把编排当作新的科学论证入口，不要把每个单元改写成性能比较；按任务实际要求解释概念、方法前提、机制、发展、背景、例证或边界。只有任务和材料确有可比依据时才比较，不补造差异原因。相互独立的维度可以并存；除非材料明确支持，不把它们写成互斥且穷尽的二分路径。\n\n【原任务消费】paragraph_task 的 `source_brief_details` 是章节负责人已写好的各条原任务，每条都是独立主张，各自带 point、development 和 source_handles：逐条讲清各自的研究对象、设置、结果与来源关系，再按编排意图综合。顶层 point 只是第一条主张，顶层 development 只是多条的兼容拼接，source_uses 是编排用途的并集——三者都不能替代逐条原任务。`portion` 说明本段只展开原任务的哪一部分，按它取舍；同一原任务为多个段落提供上下文时，各段讲各自的部分，不重复叙述整体。`owner_unit_context` 是负责人单元级的条件、综合与衔接，与段落任务共同生效。\n\n【写作保真】保留决定判断含义的研究对象与设置（温度/压力/时间/循环等工况）、指标名称与其基准（含百分比的分母）、比较关系和限制条件，让它们随所依附的判断出现；不同研究或实验先分开描述再比较，不把不同实验的数字拼成同一结果，不把上限或最佳值说成典型值，不悄悄替换比例的基准。不是逐句填条件表，也不要求所有数值都进入正文。材料之间冲突且当前无法消解时，分别描述或省略该无法确认的精确数字并继续完成论述，不整段拒写。原材料明确支持时可以修正负责人文本的错误；允许依据 A/B/精读做有依据的综合。单元内 `sources` 每篇只提供一次，供各段共用，不要因多段使用而重复罗列。返回 JSON 对象 {\"body_markdown\": \"单元正文 Markdown\", \"issues\": []}。正常写作时 issues 为空；具体问题写入 issues，包含 unit_id、problem、source_handles 和 action（local_backfill、directed_read、supplement、chapter_owner 或 omit）。\n\n【定点补写模式】这不是重写单元。只处理 requested_task_ids 指定的任务，把\nexisting_body_markdown 当作只读上下文，不重复或改写其中已有正文；返回的\nbody_markdown 只能是需要追加的片段。返回 JSON 对象，且只使用以下字段：\nbody_markdown、status（appended、already_covered 或 pending）、covered_task_ids\n（仅诊断信息）和 issues。covered_task_ids 不能代替对正文的实际检查，也不能单独\n证明任务已经完成。若任务已在现有正文中充分完成，返回空 body_markdown 和\nalready_covered，不要杜撰内容；若材料不足或无法完成，返回 pending 并说明问题。\n只使用本次给出的任务和来源材料，不新检索、不调用未给出的资料。\n\n若指定任务是表格任务，必须在 body_markdown 中写出真正的 Markdown 表格：有表头、\n分隔行和至少一行数据；不能返回 table_tasks、row_tasks 或任务描述来冒充已完成\n表格。表格单元格只写材料支持的内容，材料没有提供的值写“所给材料未提供”。"
+    }
+  ],
+  "safe_user_payload": {
+    "completion_mode": true,
+    "chapter_id": "CH03",
+    "unit_id": "CH03_U01",
+    "language": "zh",
+    "chapter_frame": {
+      "chapter_title": "微生物组干预策略的临床证据与转化现状",
+      "chapter_purpose": "使读者掌握不同微生物干预手段（FMT、LBPs、益生菌/饮食）在实体瘤ICI治疗中的真实临床证据等级与安全性边界，理解为何当前证据多停留在I/II期，并明确未来精准化、机制导向的转化路径。",
+      "chapter_scope": "肠道微生物组通过代谢物与免疫细胞互作显著调制实体瘤对ICI的响应，但当前基于菌群调控的临床转化仍受限于缺乏III期确证性RCT、供体/制剂标准化缺失及情境依赖性毒性信号；未来需从“经验性广谱干预”转向“机制驱动的精准微生态工程”。",
+      "chapter_thesis": "肠道微生物组通过代谢物与免疫细胞互作显著调制实体瘤对ICI的响应，但当前基于菌群调控的临床转化仍受限于缺乏III期确证性RCT、供体/制剂标准化缺失及情境依赖性毒性信号；未来需从“经验性广谱干预”转向“机制驱动的精准微生态工程”。",
+      "chapter_argument": "肠道微生物组通过代谢物与免疫细胞互作显著调制实体瘤对ICI的响应，但当前基于菌群调控的临床转化仍受限于缺乏III期确证性RCT、供体/制剂标准化缺失及情境依赖性毒性信号；未来需从“经验性广谱干预”转向“机制驱动的精准微生态工程”。",
+      "reader_objective": "使读者掌握不同微生物干预手段（FMT、LBPs、益生菌/饮食）在实体瘤ICI治疗中的真实临床证据等级与安全性边界，理解为何当前证据多停留在I/II期，并明确未来精准化、机制导向的转化路径。",
+      "research_question": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?",
+      "review_argument": "本综述聚焦于实体瘤（黑色素瘤、非小细胞肺癌、肾细胞癌、肝细胞癌、结直肠癌等）患者接受免疫检查点抑制剂（PD-1/PD-L1/CTLA-4 抑制剂）治疗期间，肠道微生物组组成及其代谢产物对治疗疗效（ORR、PFS、OS）及毒性（irAEs）的调节作用。涵盖观察性临床关联、分子与细胞介导机制、微生物组干预策略（抗生素管理、FMT、益生菌、饮食）的临床证据及方法学挑战。排除血液系统恶性肿瘤、非 ICI 免疫疗法（如 CAR-T，除非作为对比）、纯方法学论文（无生物学洞察）及非肠道微生物组研究（如瘤内微生物组，除非作为对比背景）。本综述严格区分观察性关联与因果证据，引用动物模型机制时注明其在人体中的验证状态，并根据现有材料证据强度调整各章节结论范围。",
+      "shared_scope": {},
+      "review_argument_status": "provided_unspecified",
+      "review_argument_source": "provided_unspecified"
+    },
+    "other_chapters": [
+      {
+        "chapter_id": "CH01",
+        "purpose": "为临床研究者提供经证据分级的跨癌种微生物-ICI 关联图谱，重点阐明肿瘤类型、治疗背景与药物暴露时间窗对关联强度的调节作用，并基于大样本真实世界数据建立对微生物生物标志物临床转化现实局限的理性预期。"
+      },
+      {
+        "chapter_id": "CH02",
+        "purpose": "使读者清晰掌握微生物代谢物与组分调控ICI疗效的核心分子路径，理解不同证据层级（人类队列关联 vs. 动物模型因果 vs. 体外生化验证）的适用边界，并识别当前从机制发现向精准生物标志物转化的关键瓶颈。"
+      },
+      {
+        "chapter_id": "CH04",
+        "purpose": "帮助读者理解为何现有文献中微生物组-ICI关联高度不一致，掌握关键混杂因素（肿瘤亚型、用药时间窗）的作用机制，并了解新型多维失调定义框架如何推动方法学标准化与因果推断。"
+      },
+      {
+        "chapter_id": "CH05",
+        "purpose": "帮助读者厘清当前微生物组-Ici联合疗法的证据层级与核心瓶颈，掌握关键分子机制（如UBA6-肌苷轴、有害菌清除模型）向人体验证转化的方法学路径，并理解供体筛选、多组学建模及安全性监管在未来临床试验设计中的整合逻辑。"
+      }
+    ],
+    "unit_position": {
+      "index": 1,
+      "of": 4
+    },
+    "unit_focus": "比较不同微生物干预策略（FMT、LBPs、益生菌/饮食）在实体瘤 ICI 治疗中的客观缓解率（ORR）与生存获益，揭示证据等级的不均衡性与癌种/方案依赖性。",
+    "unit_notes": "",
+    "sibling_units": [
+      {
+        "unit_id": "CH03_U02",
+        "point": "解析 FMT 及特定菌株干预起效的核心机制，论证当前证据正从“供体菌株替代定植”向“基线有害病原体清除与代谢重编程”转变。"
+      },
+      {
+        "unit_id": "CH03_U03",
+        "point": "评估微生物干预的安全性信号，阐明严重 irAEs（如心肌炎）与供体菌群特征及 ICI 骨架（单药 vs 双免）的情境依赖性关联。"
+      },
+      {
+        "unit_id": "CH03_U04",
+        "point": "综合当前转化医学面临的标准化缺失、III 期空白及监管挑战，提出基于机制驱动与宿主 - 菌群匹配的未来研究议程。"
+      }
+    ],
+    "owner_unit_context": {
+      "evidence_conditions": "所有疗效数据均来源于单臂设计或小样本试验，缺乏平行对照组与随机分配，无法排除自然病程或历史对照偏差；目前尚无已完成的大型Phase III RCT证实微生物组干预在实体瘤ICI治疗中的确证性疗效，现有结论属假设生成性质。",
+      "synthesis": "",
+      "transition": "上述临床表型的差异提示，干预起效并非单纯依赖外源菌株的被动定植，其背后存在更深层的宿主-微生物互作逻辑。"
+    },
+    "paragraph_tasks": [],
+    "table_tasks": [
+      {
+        "table_id": "CH03_U01_T01",
+        "purpose": "帮助读者直观比较不同微生物干预策略在实体瘤 ICI 治疗中的证据等级、关键疗效指标与主要局限。",
+        "columns": [
+          "干预类型",
+          "代表研究/试验",
+          "主要疗效指标 (ORR/PFS/OS)",
+          "证据等级",
+          "主要局限/风险"
+        ],
+        "row_tasks": [
+          {
+            "content": "FMT（初治队列）：LUMINate/MIMIC 试验，高 ORR 但伴随特定毒性风险",
+            "source_uses": [
+              {
+                "source_handle": "P0583",
+                "role": "比较",
+                "use": "提供 NSCLC 与黑色素瘤队列的 ORR 与安全性数据"
+              },
+              {
+                "source_handle": "P0577",
+                "role": "比较",
+                "use": "提供黑色素瘤队列的生存获益数据"
+              }
+            ]
+          },
+          {
+            "content": "FMT（难治队列）：MITRIC 试验，未显示显著疗效逆转",
+            "source_uses": [
+              {
+                "source_handle": "P0578",
+                "role": "比较",
+                "use": "提供耐药实体瘤队列的阴性 ORR 与 PFS 数据"
+              }
+            ]
+          },
+          {
+            "content": "益生菌/菌群组合：CBM588 等特定菌株，显示菌群失调纠正但临床获益待确证",
+            "source_uses": [
+              {
+                "source_handle": "P0143",
+                "role": "比较",
+                "use": "提供 mRCC 中菌群组成变化数据"
+              },
+              {
+                "source_handle": "P0387",
+                "role": "比较",
+                "use": "提供临床结局数据对比"
+              }
+            ]
+          },
+          {
+            "content": "饮食/生活方式：高纤维有益，人工甜味剂/抗生素有害",
+            "source_uses": [
+              {
+                "source_handle": "P0156",
+                "role": "比较",
+                "use": "提供高纤维饮食的荟萃分析数据"
+              },
+              {
+                "source_handle": "P0452",
+                "role": "比较",
+                "use": "提供三氯蔗糖的负面证据"
+              },
+              {
+                "source_handle": "P0576",
+                "role": "比较",
+                "use": "提供抗生素的负面证据"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "existing_body_markdown": "当前微生物组干预策略在实体瘤免疫检查点抑制剂（ICI）治疗中的临床证据呈现显著的不均衡性，主要体现在干预手段的复杂度、适用人群及证据等级上。粪便微生物群移植（FMT）作为最直接的菌群重塑手段，在 ICI 初治队列中展现出较高的客观缓解率（ORR）信号，但在难治性队列中疗效受限。FMT-LUMINate 二期试验显示，在非小细胞肺癌（NSCLC）初治队列中，单次口服 FMT 联合抗 PD-1 治疗的 ORR 达到 80%，且 1 年总生存期（OS）为 100%；在黑色素瘤初治队列中，FMT 联合双免疫治疗的 ORR 为 75%[P0583]。类似的，MIMic 一期试验报告晚期黑色素瘤患者接受健康供体 FMT 联合抗 PD-1 治疗后，中位 OS 达到 52.8 个月，显著优于历史对照 [P0577]。然而，这种疗效信号并未在难治性人群中普遍复现。MITRIC 二期 a 试验针对 ICI 耐药的多种实体瘤患者（包括黑色素瘤、肾细胞癌等），使用 ICI 长期响应者作为供体进行 FMT，结果显示 ORR 为 0%，中位无进展生存期（PFS）仅 1.5 个月 [P0578]。荟萃分析进一步汇总了早期试验数据，显示 FMT 联合 ICI 的总体 ORR 约为 43%，且在抗 PD-1 联合抗 CTLA-4 双药背景下疗效信号更强（ORR 60% vs 单药 37%），但各研究间存在中度异质性 [P0212]。值得注意的是，尽管 FMT 在多种肿瘤类型中显示出潜力，但截至当前证据截止点，尚无已完成的大型随机对照 III 期临床试验（Phase III RCT）证实微生物组干预在 ICI 治疗中的确证性疗效，现有结论多源于单臂设计或小样本试验，属于假设生成性质 [P0590]。\n\n非 FMT 干预策略（包括特定益生菌、饮食管理及抗生素暴露控制）则显示出更强的情境依赖性与风险异质性。特定菌株制剂如 CBM588 在转移性肾细胞癌（mRCC）的 I 期试验中显示出纠正菌群失调的潜力，表现为防止有益菌（如 *Eubacterium siraeum*）耗竭并改善厚壁菌门/拟杆菌门比率，但其临床获益尚需确证 [P0143]。饮食干预方面，系统综述与荟萃分析表明，高纤维摄入与 ICI 治疗反应改善显著相关（合并优势比 5.79），且特定产丁酸菌属（如 *Fusicatenibacter*）的富集与 NSCLC 患者更长的 OS 及较低的严重不良事件风险相关 [P0156][P0585]。相反，非营养性甜味剂（如三氯蔗糖）的摄入在临床前模型中被证实可通过干扰精氨酸/瓜氨酸代谢削弱 CD8+ T 细胞功能，从而降低 ICI 疗效 [P0452]。抗生素暴露作为非预期的微生物组干扰因素，其负面影响具有时间窗特异性：ICI 启动前（尤其是前 30-60 天）的抗生素暴露与显著的生存劣势相关（HR=1.56），而治疗期间的同步暴露影响较小或不显著 [P0576][P0039]。宏观定量对比显示，抗生素使用与疗效降低及不良生存结果一致相关，而益生菌与 FMT 则显示出支持性的积极信号，但后者的证据等级仍低于抗生素负面影响的证据强度 [P0039]。综上，当前微生物干预策略的临床证据等级呈现“负面干扰证据强于正面干预证据”、“观察性关联强于干预性确证”的特点，且高度依赖于肿瘤类型、ICI 方案及基线菌群状态。\n",
+    "requested_task_ids": [
+      "CH03_U01_T01"
+    ],
+    "requested_source_handles": [
+      "P0583",
+      "P0577",
+      "P0578",
+      "P0143",
+      "P0387",
+      "P0156",
+      "P0452",
+      "P0576"
+    ],
+    "source_index": [
+      {
+        "source_handle": "P0583",
+        "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a",
+        "doi": "10.1038/s41591-025-04186-5",
+        "title": "Fecal microbiota transplantation plus immunotherapy in non-small cell lung cancer and melanoma: the phase 2 FMT-LUMINate trial",
+        "year": "2026",
+        "material_depth": "fulltext",
+        "channels": {
+          "material_status": 10,
+          "aliases": 2,
+          "study_summary_A": 1824,
+          "review_planning_B": 1978,
+          "deep_read_material": 4225,
+          "deep_read_material_trimmed": 307,
+          "supplement_material": 2489,
+          "supplement_materials": 2491,
+          "tool_supplement_materials": 9156,
+          "locator": 402,
+          "card_material": 2066,
+          "material_read_from_disk": 211
+        }
+      },
+      {
+        "source_handle": "P0577",
+        "paper_id": "20c143d5373eab0bfea2067cf66b0e260dfeb1ef",
+        "doi": "10.1136/jitc-2025-012659",
+        "title": "Improved survival in advanced melanoma patients treated with fecal microbiota transplantation using healthy donor stool in combination with anti-PD1: final results of the MIMic phase 1 trial",
+        "year": "2025",
+        "material_depth": "fulltext",
+        "channels": {
+          "material_status": 10,
+          "aliases": 2,
+          "study_summary_A": 4556,
+          "review_planning_B": 4217,
+          "deep_read_material": 1502,
+          "deep_read_material_trimmed": 305,
+          "supplement_material": 2542,
+          "supplement_materials": 2544,
+          "locator": 401,
+          "card_material": 30,
+          "material_read_from_disk": 210
+        }
+      },
+      {
+        "source_handle": "P0578",
+        "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+        "doi": "10.1136/jitc-2026-015122",
+        "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+        "year": "2026",
+        "material_depth": "fulltext",
+        "channels": {
+          "material_status": 10,
+          "aliases": 2,
+          "study_summary_A": 1786,
+          "review_planning_B": 1943,
+          "deep_read_material": 3263,
+          "deep_read_material_trimmed": 307,
+          "supplement_material": 3299,
+          "supplement_materials": 3301,
+          "tool_supplement_materials": 6394,
+          "locator": 401,
+          "card_material": 30,
+          "material_read_from_disk": 210
+        }
+      },
+      {
+        "source_handle": "P0143",
+        "paper_id": "40bb0c781682f60135b3050a5dd92d2659017944",
+        "doi": "10.1200/jco.2024.42.16_suppl.4550",
+        "title": "Impact of CBM588 on gut microbiome composition and dysbiosis in patients receiving frontline immune checkpoint inhibitor (ICI) combinations for metastatic renal cell carcinoma (mRCC).",
+        "year": "2024",
+        "material_depth": "abstract",
+        "channels": {
+          "material_status": 10,
+          "aliases": 2,
+          "study_summary_A": 1421,
+          "review_planning_B": 1676,
+          "locator": 392,
+          "card_material": 364,
+          "material_read_from_disk": 201
+        }
+      },
+      {
+        "source_handle": "P0387",
+        "paper_id": "a7aa74ce68cc3094e2a185d973f39ba70ae017d9",
+        "doi": "10.1093/oncolo/oyag131",
+        "title": "Immunotherapy with guts: a review of microbial therapeutic adjuncts for immunotherapy in solid tumors",
+        "year": "2026",
+        "material_depth": "fulltext",
+        "channels": {
+          "material_status": 10,
+          "aliases": 2,
+          "study_summary_A": 1643,
+          "review_planning_B": 2189,
+          "locator": 392,
+          "card_material": 30,
+          "material_read_from_disk": 201
+        }
+      },
+      {
+        "source_handle": "P0156",
+        "paper_id": "44afc8fde2acebdf322a85dc7115dc008907961a",
+        "doi": "10.1186/s12967-025-06586-0",
+        "title": "Gut microbiome changes and cancer immunotherapy outcomes associated with dietary interventions: a systematic review of preclinical and clinical evidence",
+        "year": "2025",
+        "material_depth": "fulltext",
+        "channels": {
+          "material_status": 10,
+          "aliases": 2,
+          "study_summary_A": 1555,
+          "review_planning_B": 2025,
+          "locator": 392,
+          "card_material": 30,
+          "material_read_from_disk": 201
+        }
+      },
+      {
+        "source_handle": "P0452",
+        "paper_id": "c74166359bde03d0df0ea566b1bcf05eb9ccce79",
+        "doi": "10.3390/biomedicines14040917",
+        "title": "Sucralose and the Gut–Immune Axis: Emerging Evidence Linking Dysbiosis, Barrier Alterations, and Implications for Colitis and Colorectal Cancer Immunotherapy",
+        "year": "2026",
+        "material_depth": "fulltext",
+        "channels": {
+          "material_status": 10,
+          "aliases": 2,
+          "study_summary_A": 1864,
+          "review_planning_B": 2217,
+          "locator": 392,
+          "card_material": 30,
+          "material_read_from_disk": 201
+        }
+      },
+      {
+        "source_handle": "P0576",
+        "paper_id": "CorpusId:286786239",
+        "doi": "10.31435/ijitss.1(49).2026.4882",
+        "title": "THE IMPACT OF ANTIBIOTIC THERAPY ON THE EFFECTIVENESS OF IMMUNOTHERAPY: A REVIEW OF CURRENT EVIDENCE",
+        "year": "2026",
+        "material_depth": "fulltext",
+        "channels": {
+          "material_status": 10,
+          "aliases": 2,
+          "study_summary_A": 1497,
+          "review_planning_B": 1868,
+          "supplement_material": 7445,
+          "supplement_materials": 7447,
+          "locator": 366,
+          "card_material": 325,
+          "material_read_from_disk": 175
+        }
+      }
+    ],
+    "chapter_tool_materials_omitted_count": 4
+  }
+}

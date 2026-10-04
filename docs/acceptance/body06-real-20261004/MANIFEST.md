@@ -1,0 +1,30 @@
+# 文件索引
+
+| 路径 | 内容类型 |
+| --- | --- |
+| `CONFIG.json` | 说明与实际配置 |
+| `inputs/COMPLETION_SAFE_MESSAGES.json` | 删去论文材料正文的派生消息视图 |
+| `inputs/ORDINARY_SAFE_MESSAGES.json` | 删去论文材料正文的派生消息视图 |
+| `README.md` | 说明与实际配置 |
+| `round1/ASTRA_ACCEPTANCE_ORIGINAL.md` | 首轮原始验收记录或实际生成内容 |
+| `round1/COMPLETED_BODY.md` | 首轮原始验收记录或实际生成内容 |
+| `round1/COMPLETION_FRAGMENT.md` | 首轮原始验收记录或实际生成内容 |
+| `round1/COMPLETION_ORIGINAL_BODY.md` | 首轮原始验收记录或实际生成内容 |
+| `round1/COMPLETION_REPORT.json` | 首轮原始验收记录或实际生成内容 |
+| `round1/COMPLETION_RESPONSE_CONTENT.json` | 首轮原始验收记录或实际生成内容 |
+| `round1/HISTORY_REPLAY.json` | 首轮原始验收记录或实际生成内容 |
+| `round1/LIVE_ACCOUNT.json` | 首轮原始验收记录或实际生成内容 |
+| `round1/NORMAL_BODY.md` | 首轮原始验收记录或实际生成内容 |
+| `round1/OFFLINE_CONTROLS.log` | 首轮原始验收记录或实际生成内容 |
+| `round1/ORDINARY_REPORT.json` | 首轮原始验收记录或实际生成内容 |
+| `round1/ORDINARY_RESPONSE_CONTENT.json` | 首轮原始验收记录或实际生成内容 |
+| `round1/ROOT_REPLAY_FINDINGS.json` | 首轮原始验收记录或实际生成内容 |
+| `round2/COMPLETION_REPORT.json` | 第二轮复测/修复记录 |
+| `round2/FAIL_FIRST.log` | 第二轮复测/修复记录 |
+| `round2/HISTORY_BODY.md` | 第二轮复测/修复记录 |
+| `round2/HISTORY_REPORT.json` | 第二轮复测/修复记录 |
+| `round2/ORDINARY_REPORT.json` | 第二轮复测/修复记录 |
+| `round2/REGRESSION.log` | 第二轮复测/修复记录 |
+| `round2/REPLAY_COMPARISON.json` | 第二轮复测/修复记录 |
+| `round2/TARGETED.log` | 第二轮复测/修复记录 |
+| `ROUND2_ACCEPTANCE.md` | 说明与实际配置 |
