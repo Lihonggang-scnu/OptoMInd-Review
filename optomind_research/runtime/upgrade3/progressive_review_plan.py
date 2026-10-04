@@ -8100,7 +8100,11 @@ def make_retrieval_loop_runner(
                 material = dict(writer)
                 material.update({"need_id": need_id, "chapter_ids": owners, "question": _text(need_info.get("question")),
                                  "decision": _text(need_state.get("action") or local.get("decision")),
-                                 "usable_content": usable, "still_missing": _text(need_state.get("still_missing") or local.get("still_missing")),
+                                 "usable_content": usable,
+                                 # A completed closure explicitly clears this field. Do not
+                                 # revive the earlier local lookup's unresolved question.
+                                 "still_missing": _text(need_state["still_missing"] if "still_missing" in need_state
+                                                        else local.get("still_missing")),
                                  "sources": [dict(item) for item in sources if isinstance(item, Mapping)]})
                 for owner in owners:
                     materials_by_chapter.setdefault(owner, []).append(dict(material))

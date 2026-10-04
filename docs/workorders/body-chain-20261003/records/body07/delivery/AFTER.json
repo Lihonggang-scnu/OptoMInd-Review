@@ -1,0 +1,314 @@
+{
+  "fixture": "synthetic one-unit batch; production history assembly and downstream entry",
+  "model_calls": 0,
+  "network_calls": 0,
+  "cases": {
+    "missing_table": {
+      "actual_report": {
+        "start": "history",
+        "manifest": "$TEMP/AFTER/missing_table/manifest.json",
+        "batch_root": "$TEMP/AFTER/missing_table",
+        "output_root": "$TEMP/AFTER/missing_table/delivery/assembled",
+        "restricted_import": false,
+        "original_units": 1,
+        "assembled_units": 1,
+        "missing_units": [],
+        "assembly": {
+          "schema_version": "optomind.full_review_draft.run_report.v1",
+          "status": "complete",
+          "problems_resolved": false,
+          "pending_problems": [
+            {
+              "unit_id": "U1",
+              "code": "writer_issues:1",
+              "issues": [
+                {
+                  "code": "markdown_table_missing_or_invalid"
+                }
+              ]
+            }
+          ],
+          "review_title": "文献综述",
+          "expected_units": 1,
+          "manifest_units": 1,
+          "loaded_units": 1,
+          "missing_units": [],
+          "errors": [],
+          "used_papers": 1,
+          "unused_papers": 0,
+          "catalog_papers": 1,
+          "table_count": 0,
+          "table_handle_replacements": 0,
+          "unknown_table_handles": [],
+          "unknown_citations": [],
+          "planning_status": "not_checked",
+          "arrangement_status": "not_checked",
+          "arrangement_issues": [],
+          "unit_rows": [
+            {
+              "chapter_id": "CH01",
+              "unit_id": "U1",
+              "result_path": "$TEMP/AFTER/missing_table/unit/UNIT_RESULT.json",
+              "status": "written",
+              "body_chars": 62,
+              "tables": 0,
+              "pending_problem": "writer_issues:1",
+              "completion_status": "",
+              "issues": [
+                {
+                  "code": "markdown_table_missing_or_invalid"
+                }
+              ]
+            }
+          ],
+          "editorial_repairs": {},
+          "references_path": "$TEMP/AFTER/missing_table/delivery/assembled/REFERENCES.json",
+          "batch_root": "$TEMP/AFTER/missing_table",
+          "front_matter": "",
+          "back_matter": "",
+          "title_overrides": 0,
+          "table_titles": 0
+        },
+        "model_calls": 0,
+        "external_requests": 0,
+        "pending": [],
+        "delivery_mode": "full_downstream",
+        "config": "$TEMP/AFTER/missing_table/config.json",
+        "stages": {},
+        "halt_reasons": [
+          "assembly_pending"
+        ],
+        "downstream_status": "pending",
+        "assembly_gate": {
+          "status": "pending",
+          "assembly_status": "complete",
+          "problems_resolved": false,
+          "reason": "assembly_incomplete_or_unresolved"
+        }
+      },
+      "original_bytes_unchanged": true,
+      "body_retained": true,
+      "files": {
+        "config.json": "{\n  \"schema\": \"review_v2_delivery.config.v1\",\n  \"text_edit\": {\n    \"fixture\": \"$TEMP/AFTER/missing_table/edit.json\"\n  }\n}",
+        "edit.json": "{\n  \"fixture\": true,\n  \"changes\": [],\n  \"unresolved_questions\": []\n}",
+        "BATCH_JOBS.json": "[\n  {\n    \"chapter_id\": \"CH01\",\n    \"unit_id\": \"U1\",\n    \"arrangement\": \"$TEMP/AFTER/missing_table/arrangement.json\",\n    \"output\": \"$TEMP/AFTER/missing_table/unit\"\n  }\n]",
+        "manifest.json": "{\n  \"chapters\": [\n    {\n      \"chapter_id\": \"CH01\",\n      \"arrangement_path\": \"$TEMP/AFTER/missing_table/arrangement.json\"\n    }\n  ]\n}",
+        "arrangement.json": "{\n  \"chapter_id\": \"CH01\",\n  \"title\": \"Physical response\",\n  \"units\": [\n    {\n      \"unit_id\": \"U1\",\n      \"focus\": \"Response\",\n      \"paragraph_tasks\": []\n    }\n  ],\n  \"source_catalog\": {\n    \"P0001\": {\n      \"paper_id\": \"synthetic-one\",\n      \"title\": \"Synthetic response\",\n      \"year\": \"2024\"\n    }\n  }\n}",
+        "delivery/DELIVERY_REPORT.json": "{\n  \"start\": \"history\",\n  \"manifest\": \"$TEMP/AFTER/missing_table/manifest.json\",\n  \"batch_root\": \"$TEMP/AFTER/missing_table\",\n  \"output_root\": \"$TEMP/AFTER/missing_table/delivery/assembled\",\n  \"restricted_import\": false,\n  \"original_units\": 1,\n  \"assembled_units\": 1,\n  \"missing_units\": [],\n  \"assembly\": {\n    \"schema_version\": \"optomind.full_review_draft.run_report.v1\",\n    \"status\": \"complete\",\n    \"problems_resolved\": false,\n    \"pending_problems\": [\n      {\n        \"unit_id\": \"U1\",\n        \"code\": \"writer_issues:1\",\n        \"issues\": [\n          {\n            \"code\": \"markdown_table_missing_or_invalid\"\n          }\n        ]\n      }\n    ],\n    \"review_title\": \"文献综述\",\n    \"expected_units\": 1,\n    \"manifest_units\": 1,\n    \"loaded_units\": 1,\n    \"missing_units\": [],\n    \"errors\": [],\n    \"used_papers\": 1,\n    \"unused_papers\": 0,\n    \"catalog_papers\": 1,\n    \"table_count\": 0,\n    \"table_handle_replacements\": 0,\n    \"unknown_table_handles\": [],\n    \"unknown_citations\": [],\n    \"planning_status\": \"not_checked\",\n    \"arrangement_status\": \"not_checked\",\n    \"arrangement_issues\": [],\n    \"unit_rows\": [\n      {\n        \"chapter_id\": \"CH01\",\n        \"unit_id\": \"U1\",\n        \"result_path\": \"$TEMP/AFTER/missing_table/unit/UNIT_RESULT.json\",\n        \"status\": \"written\",\n        \"body_chars\": 62,\n        \"tables\": 0,\n        \"pending_problem\": \"writer_issues:1\",\n        \"completion_status\": \"\",\n        \"issues\": [\n          {\n            \"code\": \"markdown_table_missing_or_invalid\"\n          }\n        ]\n      }\n    ],\n    \"editorial_repairs\": {},\n    \"references_path\": \"$TEMP/AFTER/missing_table/delivery/assembled/REFERENCES.json\",\n    \"batch_root\": \"$TEMP/AFTER/missing_table\",\n    \"front_matter\": \"\",\n    \"back_matter\": \"\",\n    \"title_overrides\": 0,\n    \"table_titles\": 0\n  },\n  \"model_calls\": 0,\n  \"external_requests\": 0,\n  \"pending\": [],\n  \"delivery_mode\": \"full_downstream\",\n  \"config\": \"$TEMP/AFTER/missing_table/config.json\",\n  \"stages\": {},\n  \"halt_reasons\": [\n    \"assembly_pending\"\n  ],\n  \"downstream_status\": \"pending\",\n  \"assembly_gate\": {\n    \"status\": \"pending\",\n    \"assembly_status\": \"complete\",\n    \"problems_resolved\": false,\n    \"reason\": \"assembly_incomplete_or_unresolved\"\n  }\n}",
+        "unit/UNIT_RESULT.json": "{\n  \"chapter_id\": \"CH01\",\n  \"unit_id\": \"U1\",\n  \"complete\": true,\n  \"finish_reason\": \"stop\",\n  \"body_markdown\": \"Synthetic measured response at 20 K; no extrapolation [P0001].\",\n  \"issues\": [\n    {\n      \"code\": \"markdown_table_missing_or_invalid\"\n    }\n  ],\n  \"output_consumption_status\": \"pending_table\"\n}",
+        "delivery/assembled/RUN_REPORT.md": "# 全稿汇编运行报告\n\n- 状态：`complete`\n- 装配齐全：是；已接入结果中的问题已解决：否（不代表科学内容审校通过）\n- 规划状态：`not_checked`；编排状态：`not_checked`\n- 预计单元数：1；已载入：1；缺少：0\n- 实际使用论文数：1；未使用论文数：0\n- 全文统一表号：0 张\n- 未能映射的原始引用 handle：无\n- 表格来源栏已换正式编号：0 处；未能映射表格句柄：无\n\n## 单元状态\n\n| 章节 | 单元 | 状态 | 正文字符数 | 待处理问题 | 结果路径 |\n| --- | --- | --- | ---: | --- | --- |\n| CH01 | U1 | written | 62 | writer_issues:1 | `$TEMP/AFTER/missing_table/unit/UNIT_RESULT.json` |\n\n## 待处理问题（不因装配齐全而视为解决）\n\n- `U1`：writer_issues:1；详情：[{\"code\":\"markdown_table_missing_or_invalid\"}]\n\n摘要与结语由主代理在全稿亲审后补写。\n",
+        "delivery/assembled/ASSEMBLY_SUMMARY.json": "{\n  \"schema_version\": \"optomind.full_review_draft.run_report.v1\",\n  \"status\": \"complete\",\n  \"problems_resolved\": false,\n  \"pending_problems\": [\n    {\n      \"unit_id\": \"U1\",\n      \"code\": \"writer_issues:1\",\n      \"issues\": [\n        {\n          \"code\": \"markdown_table_missing_or_invalid\"\n        }\n      ]\n    }\n  ],\n  \"review_title\": \"文献综述\",\n  \"expected_units\": 1,\n  \"manifest_units\": 1,\n  \"loaded_units\": 1,\n  \"missing_units\": [],\n  \"errors\": [],\n  \"used_papers\": 1,\n  \"unused_papers\": 0,\n  \"catalog_papers\": 1,\n  \"table_count\": 0,\n  \"table_handle_replacements\": 0,\n  \"unknown_table_handles\": [],\n  \"unknown_citations\": [],\n  \"planning_status\": \"not_checked\",\n  \"arrangement_status\": \"not_checked\",\n  \"arrangement_issues\": [],\n  \"unit_rows\": [\n    {\n      \"chapter_id\": \"CH01\",\n      \"unit_id\": \"U1\",\n      \"result_path\": \"$TEMP/AFTER/missing_table/unit/UNIT_RESULT.json\",\n      \"status\": \"written\",\n      \"body_chars\": 62,\n      \"tables\": 0,\n      \"pending_problem\": \"writer_issues:1\",\n      \"completion_status\": \"\",\n      \"issues\": [\n        {\n          \"code\": \"markdown_table_missing_or_invalid\"\n        }\n      ]\n    }\n  ],\n  \"editorial_repairs\": {},\n  \"references_path\": \"$TEMP/AFTER/missing_table/delivery/assembled/REFERENCES.json\",\n  \"batch_root\": \"$TEMP/AFTER/missing_table\",\n  \"front_matter\": \"\",\n  \"back_matter\": \"\",\n  \"title_overrides\": 0,\n  \"table_titles\": 0\n}",
+        "delivery/assembled/REFERENCES.json": "{\n  \"schema_version\": \"optomind.full_review_draft.references.v1\",\n  \"citation_style\": \"numeric_order_of_first_appearance\",\n  \"references\": [\n    {\n      \"reference_number\": 1,\n      \"canonical_handle\": \"P0001\",\n      \"handles\": [\n        \"P0001\"\n      ],\n      \"title\": \"Synthetic response\",\n      \"year\": \"2024\",\n      \"doi\": null,\n      \"paper_id\": \"synthetic-one\",\n      \"identity_source\": \"source_catalog\",\n      \"used_handles_in_text\": [\n        \"P0001\"\n      ]\n    }\n  ],\n  \"handle_to_reference\": {\n    \"P0001\": 1\n  },\n  \"catalog_papers\": 1,\n  \"used_papers\": 1,\n  \"unused_papers\": 0\n}",
+        "delivery/assembled/REVIEW_DRAFT_HANDLES.md": "# 文献综述\n\n## 第1章 Physical response\n\n### 1.1 Response\n\nSynthetic measured response at 20 K; no extrapolation [P0001].\n\n## 参考文献（原始 handle）\n\nP0001. Synthetic response（2024）\n",
+        "delivery/assembled/REVIEW_DRAFT.md": "# 文献综述\n\n## 第1章 Physical response\n\n### 1.1 Response\n\nSynthetic measured response at 20 K; no extrapolation [1].\n\n## 参考文献\n\n1. Synthetic response（2024）\n",
+        "delivery/assembled/chapters_handles/CH01.md": "# 第1章 Physical response\n\n### 1.1 Response\n\nSynthetic measured response at 20 K; no extrapolation [P0001].\n",
+        "delivery/assembled/chapters/CH01.md": "# 第1章 Physical response\n\n### 1.1 Response\n\nSynthetic measured response at 20 K; no extrapolation [1].\n"
+      }
+    },
+    "truncated": {
+      "actual_report": {
+        "start": "history",
+        "manifest": "$TEMP/AFTER/truncated/manifest.json",
+        "batch_root": "$TEMP/AFTER/truncated",
+        "output_root": "$TEMP/AFTER/truncated/delivery/assembled",
+        "restricted_import": false,
+        "original_units": 1,
+        "assembled_units": 1,
+        "missing_units": [],
+        "assembly": {
+          "schema_version": "optomind.full_review_draft.run_report.v1",
+          "status": "complete",
+          "problems_resolved": false,
+          "pending_problems": [
+            {
+              "unit_id": "U1",
+              "code": "partial_length",
+              "issues": []
+            }
+          ],
+          "review_title": "文献综述",
+          "expected_units": 1,
+          "manifest_units": 1,
+          "loaded_units": 1,
+          "missing_units": [],
+          "errors": [],
+          "used_papers": 1,
+          "unused_papers": 0,
+          "catalog_papers": 1,
+          "table_count": 0,
+          "table_handle_replacements": 0,
+          "unknown_table_handles": [],
+          "unknown_citations": [],
+          "planning_status": "not_checked",
+          "arrangement_status": "not_checked",
+          "arrangement_issues": [],
+          "unit_rows": [
+            {
+              "chapter_id": "CH01",
+              "unit_id": "U1",
+              "result_path": "$TEMP/AFTER/truncated/unit/UNIT_RESULT.json",
+              "status": "written",
+              "body_chars": 62,
+              "tables": 0,
+              "pending_problem": "partial_length",
+              "completion_status": "",
+              "issues": []
+            }
+          ],
+          "editorial_repairs": {},
+          "references_path": "$TEMP/AFTER/truncated/delivery/assembled/REFERENCES.json",
+          "batch_root": "$TEMP/AFTER/truncated",
+          "front_matter": "",
+          "back_matter": "",
+          "title_overrides": 0,
+          "table_titles": 0
+        },
+        "model_calls": 0,
+        "external_requests": 0,
+        "pending": [],
+        "delivery_mode": "full_downstream",
+        "config": "$TEMP/AFTER/truncated/config.json",
+        "stages": {},
+        "halt_reasons": [
+          "assembly_pending"
+        ],
+        "downstream_status": "pending",
+        "assembly_gate": {
+          "status": "pending",
+          "assembly_status": "complete",
+          "problems_resolved": false,
+          "reason": "assembly_incomplete_or_unresolved"
+        }
+      },
+      "original_bytes_unchanged": true,
+      "body_retained": true,
+      "files": {
+        "config.json": "{\n  \"schema\": \"review_v2_delivery.config.v1\",\n  \"text_edit\": {\n    \"fixture\": \"$TEMP/AFTER/truncated/edit.json\"\n  }\n}",
+        "edit.json": "{\n  \"fixture\": true,\n  \"changes\": [],\n  \"unresolved_questions\": []\n}",
+        "BATCH_JOBS.json": "[\n  {\n    \"chapter_id\": \"CH01\",\n    \"unit_id\": \"U1\",\n    \"arrangement\": \"$TEMP/AFTER/truncated/arrangement.json\",\n    \"output\": \"$TEMP/AFTER/truncated/unit\"\n  }\n]",
+        "manifest.json": "{\n  \"chapters\": [\n    {\n      \"chapter_id\": \"CH01\",\n      \"arrangement_path\": \"$TEMP/AFTER/truncated/arrangement.json\"\n    }\n  ]\n}",
+        "arrangement.json": "{\n  \"chapter_id\": \"CH01\",\n  \"title\": \"Physical response\",\n  \"units\": [\n    {\n      \"unit_id\": \"U1\",\n      \"focus\": \"Response\",\n      \"paragraph_tasks\": []\n    }\n  ],\n  \"source_catalog\": {\n    \"P0001\": {\n      \"paper_id\": \"synthetic-one\",\n      \"title\": \"Synthetic response\",\n      \"year\": \"2024\"\n    }\n  }\n}",
+        "delivery/DELIVERY_REPORT.json": "{\n  \"start\": \"history\",\n  \"manifest\": \"$TEMP/AFTER/truncated/manifest.json\",\n  \"batch_root\": \"$TEMP/AFTER/truncated\",\n  \"output_root\": \"$TEMP/AFTER/truncated/delivery/assembled\",\n  \"restricted_import\": false,\n  \"original_units\": 1,\n  \"assembled_units\": 1,\n  \"missing_units\": [],\n  \"assembly\": {\n    \"schema_version\": \"optomind.full_review_draft.run_report.v1\",\n    \"status\": \"complete\",\n    \"problems_resolved\": false,\n    \"pending_problems\": [\n      {\n        \"unit_id\": \"U1\",\n        \"code\": \"partial_length\",\n        \"issues\": []\n      }\n    ],\n    \"review_title\": \"文献综述\",\n    \"expected_units\": 1,\n    \"manifest_units\": 1,\n    \"loaded_units\": 1,\n    \"missing_units\": [],\n    \"errors\": [],\n    \"used_papers\": 1,\n    \"unused_papers\": 0,\n    \"catalog_papers\": 1,\n    \"table_count\": 0,\n    \"table_handle_replacements\": 0,\n    \"unknown_table_handles\": [],\n    \"unknown_citations\": [],\n    \"planning_status\": \"not_checked\",\n    \"arrangement_status\": \"not_checked\",\n    \"arrangement_issues\": [],\n    \"unit_rows\": [\n      {\n        \"chapter_id\": \"CH01\",\n        \"unit_id\": \"U1\",\n        \"result_path\": \"$TEMP/AFTER/truncated/unit/UNIT_RESULT.json\",\n        \"status\": \"written\",\n        \"body_chars\": 62,\n        \"tables\": 0,\n        \"pending_problem\": \"partial_length\",\n        \"completion_status\": \"\",\n        \"issues\": []\n      }\n    ],\n    \"editorial_repairs\": {},\n    \"references_path\": \"$TEMP/AFTER/truncated/delivery/assembled/REFERENCES.json\",\n    \"batch_root\": \"$TEMP/AFTER/truncated\",\n    \"front_matter\": \"\",\n    \"back_matter\": \"\",\n    \"title_overrides\": 0,\n    \"table_titles\": 0\n  },\n  \"model_calls\": 0,\n  \"external_requests\": 0,\n  \"pending\": [],\n  \"delivery_mode\": \"full_downstream\",\n  \"config\": \"$TEMP/AFTER/truncated/config.json\",\n  \"stages\": {},\n  \"halt_reasons\": [\n    \"assembly_pending\"\n  ],\n  \"downstream_status\": \"pending\",\n  \"assembly_gate\": {\n    \"status\": \"pending\",\n    \"assembly_status\": \"complete\",\n    \"problems_resolved\": false,\n    \"reason\": \"assembly_incomplete_or_unresolved\"\n  }\n}",
+        "unit/UNIT_RESULT.json": "{\n  \"chapter_id\": \"CH01\",\n  \"unit_id\": \"U1\",\n  \"complete\": false,\n  \"finish_reason\": \"length\",\n  \"body_markdown\": \"Synthetic measured response at 20 K; no extrapolation [P0001].\",\n  \"issues\": []\n}",
+        "delivery/assembled/RUN_REPORT.md": "# 全稿汇编运行报告\n\n- 状态：`complete`\n- 装配齐全：是；已接入结果中的问题已解决：否（不代表科学内容审校通过）\n- 规划状态：`not_checked`；编排状态：`not_checked`\n- 预计单元数：1；已载入：1；缺少：0\n- 实际使用论文数：1；未使用论文数：0\n- 全文统一表号：0 张\n- 未能映射的原始引用 handle：无\n- 表格来源栏已换正式编号：0 处；未能映射表格句柄：无\n\n## 单元状态\n\n| 章节 | 单元 | 状态 | 正文字符数 | 待处理问题 | 结果路径 |\n| --- | --- | --- | ---: | --- | --- |\n| CH01 | U1 | written | 62 | partial_length | `$TEMP/AFTER/truncated/unit/UNIT_RESULT.json` |\n\n## 待处理问题（不因装配齐全而视为解决）\n\n- `U1`：partial_length\n\n摘要与结语由主代理在全稿亲审后补写。\n",
+        "delivery/assembled/ASSEMBLY_SUMMARY.json": "{\n  \"schema_version\": \"optomind.full_review_draft.run_report.v1\",\n  \"status\": \"complete\",\n  \"problems_resolved\": false,\n  \"pending_problems\": [\n    {\n      \"unit_id\": \"U1\",\n      \"code\": \"partial_length\",\n      \"issues\": []\n    }\n  ],\n  \"review_title\": \"文献综述\",\n  \"expected_units\": 1,\n  \"manifest_units\": 1,\n  \"loaded_units\": 1,\n  \"missing_units\": [],\n  \"errors\": [],\n  \"used_papers\": 1,\n  \"unused_papers\": 0,\n  \"catalog_papers\": 1,\n  \"table_count\": 0,\n  \"table_handle_replacements\": 0,\n  \"unknown_table_handles\": [],\n  \"unknown_citations\": [],\n  \"planning_status\": \"not_checked\",\n  \"arrangement_status\": \"not_checked\",\n  \"arrangement_issues\": [],\n  \"unit_rows\": [\n    {\n      \"chapter_id\": \"CH01\",\n      \"unit_id\": \"U1\",\n      \"result_path\": \"$TEMP/AFTER/truncated/unit/UNIT_RESULT.json\",\n      \"status\": \"written\",\n      \"body_chars\": 62,\n      \"tables\": 0,\n      \"pending_problem\": \"partial_length\",\n      \"completion_status\": \"\",\n      \"issues\": []\n    }\n  ],\n  \"editorial_repairs\": {},\n  \"references_path\": \"$TEMP/AFTER/truncated/delivery/assembled/REFERENCES.json\",\n  \"batch_root\": \"$TEMP/AFTER/truncated\",\n  \"front_matter\": \"\",\n  \"back_matter\": \"\",\n  \"title_overrides\": 0,\n  \"table_titles\": 0\n}",
+        "delivery/assembled/REFERENCES.json": "{\n  \"schema_version\": \"optomind.full_review_draft.references.v1\",\n  \"citation_style\": \"numeric_order_of_first_appearance\",\n  \"references\": [\n    {\n      \"reference_number\": 1,\n      \"canonical_handle\": \"P0001\",\n      \"handles\": [\n        \"P0001\"\n      ],\n      \"title\": \"Synthetic response\",\n      \"year\": \"2024\",\n      \"doi\": null,\n      \"paper_id\": \"synthetic-one\",\n      \"identity_source\": \"source_catalog\",\n      \"used_handles_in_text\": [\n        \"P0001\"\n      ]\n    }\n  ],\n  \"handle_to_reference\": {\n    \"P0001\": 1\n  },\n  \"catalog_papers\": 1,\n  \"used_papers\": 1,\n  \"unused_papers\": 0\n}",
+        "delivery/assembled/REVIEW_DRAFT_HANDLES.md": "# 文献综述\n\n## 第1章 Physical response\n\n### 1.1 Response\n\nSynthetic measured response at 20 K; no extrapolation [P0001].\n\n## 参考文献（原始 handle）\n\nP0001. Synthetic response（2024）\n",
+        "delivery/assembled/REVIEW_DRAFT.md": "# 文献综述\n\n## 第1章 Physical response\n\n### 1.1 Response\n\nSynthetic measured response at 20 K; no extrapolation [1].\n\n## 参考文献\n\n1. Synthetic response（2024）\n",
+        "delivery/assembled/chapters_handles/CH01.md": "# 第1章 Physical response\n\n### 1.1 Response\n\nSynthetic measured response at 20 K; no extrapolation [P0001].\n",
+        "delivery/assembled/chapters/CH01.md": "# 第1章 Physical response\n\n### 1.1 Response\n\nSynthetic measured response at 20 K; no extrapolation [1].\n"
+      }
+    },
+    "normal": {
+      "actual_report": {
+        "start": "history",
+        "manifest": "$TEMP/AFTER/normal/manifest.json",
+        "batch_root": "$TEMP/AFTER/normal",
+        "output_root": "$TEMP/AFTER/normal/delivery/assembled",
+        "restricted_import": false,
+        "original_units": 1,
+        "assembled_units": 1,
+        "missing_units": [],
+        "assembly": {
+          "schema_version": "optomind.full_review_draft.run_report.v1",
+          "status": "complete",
+          "problems_resolved": true,
+          "pending_problems": [],
+          "review_title": "文献综述",
+          "expected_units": 1,
+          "manifest_units": 1,
+          "loaded_units": 1,
+          "missing_units": [],
+          "errors": [],
+          "used_papers": 1,
+          "unused_papers": 0,
+          "catalog_papers": 1,
+          "table_count": 0,
+          "table_handle_replacements": 0,
+          "unknown_table_handles": [],
+          "unknown_citations": [],
+          "planning_status": "not_checked",
+          "arrangement_status": "not_checked",
+          "arrangement_issues": [],
+          "unit_rows": [
+            {
+              "chapter_id": "CH01",
+              "unit_id": "U1",
+              "result_path": "$TEMP/AFTER/normal/unit/UNIT_RESULT.json",
+              "status": "written",
+              "body_chars": 62,
+              "tables": 0,
+              "pending_problem": "",
+              "completion_status": "",
+              "issues": []
+            }
+          ],
+          "editorial_repairs": {},
+          "references_path": "$TEMP/AFTER/normal/delivery/assembled/REFERENCES.json",
+          "batch_root": "$TEMP/AFTER/normal",
+          "front_matter": "",
+          "back_matter": "",
+          "title_overrides": 0,
+          "table_titles": 0
+        },
+        "model_calls": 0,
+        "external_requests": 0,
+        "pending": [],
+        "delivery_mode": "full_downstream",
+        "config": "$TEMP/AFTER/normal/config.json",
+        "stages": {
+          "02_text_edit": {
+            "stage": "text_edit",
+            "status": "no_change",
+            "proposals_source": "labeled_manual_fixture:$TEMP/AFTER/normal/edit.json",
+            "changes_proposed": 0,
+            "applied": [],
+            "skipped": [],
+            "unresolved_questions": [],
+            "source_draft": "$TEMP/AFTER/normal/delivery/assembled/REVIEW_DRAFT_HANDLES.md",
+            "edited_draft": "$TEMP/AFTER/normal/delivery/02_text_edit/REVIEW_DRAFT_HANDLES_EDITED.md",
+            "passes": [
+              "full"
+            ],
+            "draft_chars_before": 168,
+            "draft_chars_after": 168,
+            "model_calls": 0,
+            "external_requests": 0
+          },
+          "03_front_back": {
+            "stage": "front_back",
+            "status": "pending",
+            "reason": "no_fixture_or_recordings_in_config",
+            "model_calls": 0,
+            "external_requests": 0
+          }
+        },
+        "halt_reasons": [
+          "03_front_back"
+        ],
+        "downstream_status": "pending"
+      },
+      "original_bytes_unchanged": true,
+      "body_retained": true,
+      "files": {
+        "config.json": "{\n  \"schema\": \"review_v2_delivery.config.v1\",\n  \"text_edit\": {\n    \"fixture\": \"$TEMP/AFTER/normal/edit.json\"\n  }\n}",
+        "edit.json": "{\n  \"fixture\": true,\n  \"changes\": [],\n  \"unresolved_questions\": []\n}",
+        "BATCH_JOBS.json": "[\n  {\n    \"chapter_id\": \"CH01\",\n    \"unit_id\": \"U1\",\n    \"arrangement\": \"$TEMP/AFTER/normal/arrangement.json\",\n    \"output\": \"$TEMP/AFTER/normal/unit\"\n  }\n]",
+        "manifest.json": "{\n  \"chapters\": [\n    {\n      \"chapter_id\": \"CH01\",\n      \"arrangement_path\": \"$TEMP/AFTER/normal/arrangement.json\"\n    }\n  ]\n}",
+        "arrangement.json": "{\n  \"chapter_id\": \"CH01\",\n  \"title\": \"Physical response\",\n  \"units\": [\n    {\n      \"unit_id\": \"U1\",\n      \"focus\": \"Response\",\n      \"paragraph_tasks\": []\n    }\n  ],\n  \"source_catalog\": {\n    \"P0001\": {\n      \"paper_id\": \"synthetic-one\",\n      \"title\": \"Synthetic response\",\n      \"year\": \"2024\"\n    }\n  }\n}",
+        "delivery/DELIVERY_REPORT.json": "{\n  \"start\": \"history\",\n  \"manifest\": \"$TEMP/AFTER/normal/manifest.json\",\n  \"batch_root\": \"$TEMP/AFTER/normal\",\n  \"output_root\": \"$TEMP/AFTER/normal/delivery/assembled\",\n  \"restricted_import\": false,\n  \"original_units\": 1,\n  \"assembled_units\": 1,\n  \"missing_units\": [],\n  \"assembly\": {\n    \"schema_version\": \"optomind.full_review_draft.run_report.v1\",\n    \"status\": \"complete\",\n    \"problems_resolved\": true,\n    \"pending_problems\": [],\n    \"review_title\": \"文献综述\",\n    \"expected_units\": 1,\n    \"manifest_units\": 1,\n    \"loaded_units\": 1,\n    \"missing_units\": [],\n    \"errors\": [],\n    \"used_papers\": 1,\n    \"unused_papers\": 0,\n    \"catalog_papers\": 1,\n    \"table_count\": 0,\n    \"table_handle_replacements\": 0,\n    \"unknown_table_handles\": [],\n    \"unknown_citations\": [],\n    \"planning_status\": \"not_checked\",\n    \"arrangement_status\": \"not_checked\",\n    \"arrangement_issues\": [],\n    \"unit_rows\": [\n      {\n        \"chapter_id\": \"CH01\",\n        \"unit_id\": \"U1\",\n        \"result_path\": \"$TEMP/AFTER/normal/unit/UNIT_RESULT.json\",\n        \"status\": \"written\",\n        \"body_chars\": 62,\n        \"tables\": 0,\n        \"pending_problem\": \"\",\n        \"completion_status\": \"\",\n        \"issues\": []\n      }\n    ],\n    \"editorial_repairs\": {},\n    \"references_path\": \"$TEMP/AFTER/normal/delivery/assembled/REFERENCES.json\",\n    \"batch_root\": \"$TEMP/AFTER/normal\",\n    \"front_matter\": \"\",\n    \"back_matter\": \"\",\n    \"title_overrides\": 0,\n    \"table_titles\": 0\n  },\n  \"model_calls\": 0,\n  \"external_requests\": 0,\n  \"pending\": [],\n  \"delivery_mode\": \"full_downstream\",\n  \"config\": \"$TEMP/AFTER/normal/config.json\",\n  \"stages\": {\n    \"02_text_edit\": {\n      \"stage\": \"text_edit\",\n      \"status\": \"no_change\",\n      \"proposals_source\": \"labeled_manual_fixture:$TEMP/AFTER/normal/edit.json\",\n      \"changes_proposed\": 0,\n      \"applied\": [],\n      \"skipped\": [],\n      \"unresolved_questions\": [],\n      \"source_draft\": \"$TEMP/AFTER/normal/delivery/assembled/REVIEW_DRAFT_HANDLES.md\",\n      \"edited_draft\": \"$TEMP/AFTER/normal/delivery/02_text_edit/REVIEW_DRAFT_HANDLES_EDITED.md\",\n      \"passes\": [\n        \"full\"\n      ],\n      \"draft_chars_before\": 168,\n      \"draft_chars_after\": 168,\n      \"model_calls\": 0,\n      \"external_requests\": 0\n    },\n    \"03_front_back\": {\n      \"stage\": \"front_back\",\n      \"status\": \"pending\",\n      \"reason\": \"no_fixture_or_recordings_in_config\",\n      \"model_calls\": 0,\n      \"external_requests\": 0\n    }\n  },\n  \"halt_reasons\": [\n    \"03_front_back\"\n  ],\n  \"downstream_status\": \"pending\"\n}",
+        "unit/UNIT_RESULT.json": "{\n  \"chapter_id\": \"CH01\",\n  \"unit_id\": \"U1\",\n  \"complete\": true,\n  \"finish_reason\": \"stop\",\n  \"body_markdown\": \"Synthetic measured response at 20 K; no extrapolation [P0001].\",\n  \"issues\": []\n}",
+        "delivery/02_text_edit/TEXT_EDIT_REPORT.json": "{\n  \"stage\": \"text_edit\",\n  \"status\": \"no_change\",\n  \"proposals_source\": \"labeled_manual_fixture:$TEMP/AFTER/normal/edit.json\",\n  \"changes_proposed\": 0,\n  \"applied\": [],\n  \"skipped\": [],\n  \"unresolved_questions\": [],\n  \"source_draft\": \"$TEMP/AFTER/normal/delivery/assembled/REVIEW_DRAFT_HANDLES.md\",\n  \"edited_draft\": \"$TEMP/AFTER/normal/delivery/02_text_edit/REVIEW_DRAFT_HANDLES_EDITED.md\",\n  \"passes\": [\n    \"full\"\n  ],\n  \"draft_chars_before\": 168,\n  \"draft_chars_after\": 168,\n  \"model_calls\": 0,\n  \"external_requests\": 0\n}",
+        "delivery/02_text_edit/REVIEW_DRAFT_HANDLES_EDITED.md": "# 文献综述\n\n## 第1章 Physical response\n\n### 1.1 Response\n\nSynthetic measured response at 20 K; no extrapolation [P0001].\n\n## 参考文献（原始 handle）\n\nP0001. Synthetic response（2024）\n",
+        "delivery/assembled/RUN_REPORT.md": "# 全稿汇编运行报告\n\n- 状态：`complete`\n- 装配齐全：是；已接入结果中的问题已解决：是（不代表科学内容审校通过）\n- 规划状态：`not_checked`；编排状态：`not_checked`\n- 预计单元数：1；已载入：1；缺少：0\n- 实际使用论文数：1；未使用论文数：0\n- 全文统一表号：0 张\n- 未能映射的原始引用 handle：无\n- 表格来源栏已换正式编号：0 处；未能映射表格句柄：无\n\n## 单元状态\n\n| 章节 | 单元 | 状态 | 正文字符数 | 待处理问题 | 结果路径 |\n| --- | --- | --- | ---: | --- | --- |\n| CH01 | U1 | written | 62 | 无 | `$TEMP/AFTER/normal/unit/UNIT_RESULT.json` |\n\n摘要与结语由主代理在全稿亲审后补写。\n",
+        "delivery/assembled/ASSEMBLY_SUMMARY.json": "{\n  \"schema_version\": \"optomind.full_review_draft.run_report.v1\",\n  \"status\": \"complete\",\n  \"problems_resolved\": true,\n  \"pending_problems\": [],\n  \"review_title\": \"文献综述\",\n  \"expected_units\": 1,\n  \"manifest_units\": 1,\n  \"loaded_units\": 1,\n  \"missing_units\": [],\n  \"errors\": [],\n  \"used_papers\": 1,\n  \"unused_papers\": 0,\n  \"catalog_papers\": 1,\n  \"table_count\": 0,\n  \"table_handle_replacements\": 0,\n  \"unknown_table_handles\": [],\n  \"unknown_citations\": [],\n  \"planning_status\": \"not_checked\",\n  \"arrangement_status\": \"not_checked\",\n  \"arrangement_issues\": [],\n  \"unit_rows\": [\n    {\n      \"chapter_id\": \"CH01\",\n      \"unit_id\": \"U1\",\n      \"result_path\": \"$TEMP/AFTER/normal/unit/UNIT_RESULT.json\",\n      \"status\": \"written\",\n      \"body_chars\": 62,\n      \"tables\": 0,\n      \"pending_problem\": \"\",\n      \"completion_status\": \"\",\n      \"issues\": []\n    }\n  ],\n  \"editorial_repairs\": {},\n  \"references_path\": \"$TEMP/AFTER/normal/delivery/assembled/REFERENCES.json\",\n  \"batch_root\": \"$TEMP/AFTER/normal\",\n  \"front_matter\": \"\",\n  \"back_matter\": \"\",\n  \"title_overrides\": 0,\n  \"table_titles\": 0\n}",
+        "delivery/assembled/REFERENCES.json": "{\n  \"schema_version\": \"optomind.full_review_draft.references.v1\",\n  \"citation_style\": \"numeric_order_of_first_appearance\",\n  \"references\": [\n    {\n      \"reference_number\": 1,\n      \"canonical_handle\": \"P0001\",\n      \"handles\": [\n        \"P0001\"\n      ],\n      \"title\": \"Synthetic response\",\n      \"year\": \"2024\",\n      \"doi\": null,\n      \"paper_id\": \"synthetic-one\",\n      \"identity_source\": \"source_catalog\",\n      \"used_handles_in_text\": [\n        \"P0001\"\n      ]\n    }\n  ],\n  \"handle_to_reference\": {\n    \"P0001\": 1\n  },\n  \"catalog_papers\": 1,\n  \"used_papers\": 1,\n  \"unused_papers\": 0\n}",
+        "delivery/assembled/REVIEW_DRAFT_HANDLES.md": "# 文献综述\n\n## 第1章 Physical response\n\n### 1.1 Response\n\nSynthetic measured response at 20 K; no extrapolation [P0001].\n\n## 参考文献（原始 handle）\n\nP0001. Synthetic response（2024）\n",
+        "delivery/assembled/REVIEW_DRAFT.md": "# 文献综述\n\n## 第1章 Physical response\n\n### 1.1 Response\n\nSynthetic measured response at 20 K; no extrapolation [1].\n\n## 参考文献\n\n1. Synthetic response（2024）\n",
+        "delivery/02_text_edit/messages/text_edit_full_messages.json": "[\n  {\n    \"role\": \"system\",\n    \"content\": \"你是这篇完整综述的**全文编辑**。你拿到的是已经写好的整篇句柄稿全文（含章节与来源句柄）、各章节的职责说明与段落数量。你的任务是以读者理解为目标，找出并输出**少量、可执行的局部编辑**：处理真正重复、统一同义术语书写、并把相邻章节的衔接写具体。你不重写整篇，不做逐单元审稿，不做新的检索或阅读。\\n\\n## 判断标准\\n\\n- **重复**：同案例相同作用下的重复才压缩——同一研究、同一结果、在同一类用途下被完整重复讲述时，保留讲述最完整或最主定位的一处，另一处压缩为一句带具体指向的回指（说明被指章节/段落讲什么）。同案例不同作用（主讲、毒性边界、方法对比、表格式汇总）不是重复，必须保留。\\n- **术语**：只归一同义概念的书写差异（如全半角、空格、同一概念的两种写法）。研究对象本身的专有名称与区别（不同材料、不同菌株、不同试验名）不得改动。\\n- **衔接**：章节交界处把“综上所述”这类通用收束改为具体的承接——说明本章建立了什么、下一章要处理什么问题。不要把所有衔接统一成同一句式。\\n- **反面结果与限制**：阴性结果、必要背景、条件差异不是语言噪声；不得为省字删除，也不得把相反结论合并成单结论。\\n- 举例必须来自当次输入全文；不引入全文之外的事实、数字或来源。\\n\\n## 输出合同（只返回一个 JSON 对象）\\n\\n```json\\n{\\n  \\\"changes\\\": [\\n    {\\n      \\\"target_block_id\\\": \\\"章节或单元的稳定标识，输入给出什么就用什么\\\",\\n      \\\"operation\\\": \\\"replace|remove\\\",\\n      \\\"original_text\\\": \\\"全文中逐字出现、且全文只出现一次的目标原文片段\\\",\\n      \\\"replacement_text\\\": \\\"replace 时的替换文本；remove 时为空字符串\\\",\\n      \\\"reason\\\": \\\"为什么这样改（重复依据/术语依据/衔接依据）\\\"\\n    }\\n  ],\\n  \\\"unresolved_questions\\\": [\\n    {\\\"where\\\": \\\"位置描述\\\", \\\"question\\\": \\\"需要负责人或更多材料才能决定的问题\\\"}\\n  ]\\n}\\n```\\n\\n要求：\\n- 只输出局部编辑；没有值得修改之处就返回空 `changes`（no_change），不要为输出而改。\\n- `original_text` 必须逐字复制全文原文，且在全文中**恰好出现一次**；出现多次或不存在的目标不要输出。\\n- `replacement_text` 不得引入新的事实、数字或来源句柄；可以引用全文已有的章节号与句柄。\\n- 一次统筹控制在少量高价值编辑（通常不超过 10 处）；拿不准的写进 `unresolved_questions`，不要勉强改。\\n\"\n  },\n  {\n    \"role\": \"user\",\n    \"content\": \"【章节职责】\\n[]\\n\\n【全文句柄稿】\\n# 文献综述\\n\\n## 第1章 Physical response\\n\\n### 1.1 Response\\n\\nSynthetic measured response at 20 K; no extrapolation [P0001].\\n\\n## 参考文献（原始 handle）\\n\\nP0001. Synthetic response（2024）\\n\\n\\n【本轮交付】只返回 {\\\"changes\\\": [...], \\\"unresolved_questions\\\": [...]}；没有值得修改之处返回空 changes。\"\n  }\n]",
+        "delivery/assembled/chapters_handles/CH01.md": "# 第1章 Physical response\n\n### 1.1 Response\n\nSynthetic measured response at 20 K; no extrapolation [P0001].\n",
+        "delivery/assembled/chapters/CH01.md": "# 第1章 Physical response\n\n### 1.1 Response\n\nSynthetic measured response at 20 K; no extrapolation [1].\n"
+      }
+    }
+  }
+}

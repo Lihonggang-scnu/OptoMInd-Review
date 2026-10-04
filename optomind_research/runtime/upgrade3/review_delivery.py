@@ -621,6 +621,39 @@ def run_downstream_delivery(
     stages: dict[str, Any] = {}
     halt: list[str] = []
 
+    # A readable draft can be a deliberately restricted/pending export.  The
+    # assembler's "complete" only means all selected units were loaded; its
+    # separate unresolved/problem fields must also permit downstream work.
+    # Check before looking for a file, so a stale prior draft cannot bypass a
+    # failed arrangement or missing recording in the current invocation.
+    assembly = assembly_report.get("assembly")
+    # Identity-only gaps have an existing downstream resolver using the
+    # explicitly supplied catalogs.  Do not turn that normal path into a
+    # task-completion failure; its later citation status remains authoritative.
+    identity_only = (
+        isinstance(assembly, Mapping)
+        and bool(assembly.get("unknown_citations"))
+        and not assembly.get("pending_problems")
+        and not assembly.get("unknown_table_handles")
+    )
+    if (not isinstance(assembly, Mapping)
+            or assembly.get("status") != "complete"
+            or (assembly.get("problems_resolved") is not True and not identity_only)
+            or assembly.get("pending_problems")
+            or assembly.get("missing_units")
+            or assembly.get("errors")
+            or assembly_report.get("pending")
+            or assembly_report.get("missing_units")
+            or assembly_report.get("restricted_import")):
+        report = _downstream_report(config, {}, ["assembly_pending"])
+        report["assembly_gate"] = {
+            "status": "pending",
+            "assembly_status": assembly.get("status") if isinstance(assembly, Mapping) else None,
+            "problems_resolved": assembly.get("problems_resolved") if isinstance(assembly, Mapping) else None,
+            "reason": "assembly_incomplete_or_unresolved",
+        }
+        return report
+
     # The assembler writes BOTH drafts; downstream starts from the HANDLE
     # one.  history reports output_root=<assembled dir>, plan reports the
     # delivery root with the assembly one level below — resolve from the
