@@ -1,0 +1,97 @@
+{
+  "live_calls": 0,
+  "needs": [
+    {
+      "need_id": "Ndd851f2ba0a29638fe39-b61a7a309644eda0",
+      "status": "answered",
+      "action": "answer_from_local",
+      "usable_content": "P1_ANSWER condition at 25 C.\n\nP2_ANSWER boundary at 60 C.",
+      "still_missing": ""
+    }
+  ],
+  "tool_materials_by_chapter": {
+    "CH01": [
+      {
+        "schema_version": "optomind.planning_writer_material.v1",
+        "chapter_id": "",
+        "unit_key": "",
+        "need_id": "Ndd851f2ba0a29638fe39-b61a7a309644eda0",
+        "question": "Which temperature changes the mechanism?",
+        "intended_use": "mechanism",
+        "decision": "answer_from_local",
+        "usable_content": "P1_ANSWER condition at 25 C.\n\nP2_ANSWER boundary at 60 C.",
+        "conditions": [
+          "P1_CONDITION",
+          "P2_CONDITION"
+        ],
+        "limits": [
+          "P1_LIMIT",
+          "P2_LIMIT"
+        ],
+        "still_missing": "",
+        "read_focus": "",
+        "external_ask": "",
+        "allowed_use": [
+          "background_context",
+          "explicit_objectives",
+          "explicit_method_summaries",
+          "explicit_reported_findings",
+          "explicit_leads"
+        ],
+        "sources": [
+          {
+            "card_path": "",
+            "doi": "",
+            "material_depth": "review_derived",
+            "paper_id": "paper-1",
+            "reading_path": "",
+            "reading_role": "direct_evidence",
+            "section_path": [
+              "Reported findings"
+            ],
+            "selection_reason": "query_match",
+            "source_handle": "P0001",
+            "title": "Review-derived source 1",
+            "year": ""
+          },
+          {
+            "paper_id": "paper-2",
+            "source_handle": "P0002",
+            "title": "Review-derived source 2",
+            "year": "",
+            "doi": "",
+            "reading_role": "direct_evidence",
+            "selection_reason": "query_match",
+            "section_path": [
+              "Reported findings"
+            ],
+            "material_depth": "review_derived",
+            "reading_path": "",
+            "card_path": ""
+          }
+        ],
+        "provenance": {
+          "downloads": 0,
+          "whole_paper_rereads": 0,
+          "model_calls": 0,
+          "source": ""
+        },
+        "answers_requested_question": true,
+        "chapter_ids": [
+          "CH01"
+        ]
+      }
+    ]
+  },
+  "actual_messages": [
+    {
+      "role": "system",
+      "content": "你是学术综述规划编辑。目标是形成有论证主线的长篇综述，规划内容用中文撰写，论文原题和专名可保留原文；不要写成问答清单。\n\n本规划链只规划综述正文中需要实质展开的知识与分析。全篇开场、向读者宣告综述范围与文章组织、摘要，以及收束全文的最终总结，由正文完成后的独立模块负责，不作为本链路的章节或单元任务；也不要将这些职责换名为“背景”“概述”等章节继续规划。理解后续分析所必需的背景、概念、理论教学、机制、方法比较，以及具有具体问题与分析的未来研究方向，仍属于正文，应按解释需要充分展开。每章应有明确的知识问题或分析任务，不能仅以引入全文或总结全文为目的。本链路仍须确定研究范围、组织视角和章节分工，但这些规划信息不等于需要写成一个入口章节。上述职责归属适用于本链路所有阶段。\n\n章节组织和比较尺度由研究问题、学科语境与现有材料决定，不预设任何单一研究范式为所有主题的共同模板；理论、概念、方法论和设计研究也应按其实际论证结构组织。以用户研究问题为中心，提出贯穿全文的组织视角和综合判断，再让不同来源承担解释、比较、例证、背景或发展等职责；不要按论文逐篇复述，也不要让某个局部缺口取代全篇主线。综合判断必须由材料中的联系、差异或演进支撑。根据研究问题和材料本身判断相关性；材料中的推荐语可能夸大用途，应以来源实际的研究对象或材料、研究设置、方法、比较、结果或论证、验证方式和边界为准。保留每个来源真实的研究类型、对象、设置、条件、方法、结果和限制。综述的综合、假设或方案不是已观察到的结果。相关时，综述中报告的原始研究与直接来源享有同等实质使用权。保留报告综述的来源元数据；原始研究身份已解析时，写作者可以直接引用原始研究，不因材料来自专家综述就要求逐句降格或反复标注‘综述转述’，也不要声称读过原始全文或重新获取它。保留每个报告综述自己的 R# 命名空间；有 source_handle 就使用它，否则原样保留 supplied paper_id 或 reference。短 handle 到规范身份的映射由本地程序完成。证据足够时使用广泛材料，但不要为了凑数量硬塞来源。区分关联与因果证据、机制或解释、迁移或应用、验证和不确定性；不要把相关关系、作者提出的解释或同一组材料内的支持误写成因果机制、跨设置迁移或独立验证。有限补充检索没有找到匹配研究，不等于该研究不存在，也不等于整个领域缺乏相关研究或不存在更优路线；未被满足的需求只约束本次可写的结论范围，不得升级为领域层面的缺失判断，也不应让同一缺口反复主导多个章节。只描述现有材料支持的范围，并纠正前面规划中的过度表述。路由摘要与原始 interpretation_limits 冲突时，以原始限制为准。综述题名中的对象或应用也不自动成为其中每项研究的对象和设置。研究条件必须进入 substantive_point、thesis、synthesis 和 transition 本身；决定含义的研究对象与研究设置随主张、案例和展开关系一起陈述，而不是全部堆进独立的 limitation 字段；不能靠单独的 limitation 字段修补前文过度断言，也不要求每句都填条件表或给所有判断统一加“可能”。对不同对象、设置或比较尺度的材料，保留其不可直接等同之处，不把它们排成脱离条件的效果排名。章节标题也用中文。Return JSON only.\n\nFinalize the first shared outline using the provisional scope and the actual level-1 supplement and directed reading results. Explain how successful, partial, failed, or unavailable tool outputs changed chapter scope. Adapt where evidence is missing; do not request the same missing item repeatedly. Return shared_scope, shared_outline (ordered chapters), review_argument, source_selection_principles, and unresolved_limits."
+    },
+    {
+      "role": "user",
+      "content": "当前任务：level1_outline\n{\"topic_id\":\"independent-context-review\",\"research_question\":\"Temperature mechanism\",\"actual_tool_results\":{\"supplement_results\":[],\"directed_results\":[],\"phase\":\"level2\",\"consumed_paper_ids\":[],\"status\":\"complete\",\"tool_materials_by_chapter\":{\"CH01\":[{\"need_id\":\"Ndd851f2ba0a29638fe39-b61a7a309644eda0\",\"question\":\"Which temperature changes the mechanism?\",\"intended_use\":\"mechanism\",\"decision\":\"answer_from_local\",\"usable_content\":\"P1_ANSWER condition at 25 C.\\n\\nP2_ANSWER boundary at 60 C.\",\"conditions\":[\"P1_CONDITION\",\"P2_CONDITION\"],\"limits\":[\"P1_LIMIT\",\"P2_LIMIT\"],\"still_missing\":\"\",\"sources\":[{\"source_handle\":\"P0001\",\"paper_id\":\"paper-1\",\"title\":\"Review-derived source 1\",\"year\":\"\",\"reading_role\":\"direct_evidence\",\"material_depth\":\"review_derived\",\"section_path\":[\"Reported findings\"]},{\"source_handle\":\"P0002\",\"paper_id\":\"paper-2\",\"title\":\"Review-derived source 2\",\"year\":\"\",\"reading_role\":\"direct_evidence\",\"material_depth\":\"review_derived\",\"section_path\":[\"Reported findings\"]}],\"allowed_use\":[\"background_context\",\"explicit_objectives\",\"explicit_method_summaries\",\"explicit_reported_findings\",\"explicit_leads\"]}]},\"retrieval_loop\":{\"needs\":[{\"need_id\":\"Ndd851f2ba0a29638fe39-b61a7a309644eda0\",\"status\":\"answered\",\"action\":\"answer_from_local\",\"still_missing\":\"\"}]}}}\n\n【本轮交付】请用中文撰写本阶段要求的内容，只返回本阶段的JSON结果，不照抄输入字段。"
+    }
+  ],
+  "local_calls": 2
+}

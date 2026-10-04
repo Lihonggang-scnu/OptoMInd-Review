@@ -129,6 +129,24 @@ def load_arrangement(path: str | Path) -> dict[str, Any]:
     arrangement = _load_json(path, what="arrangement")
     if not arrangement.get("units"):
         raise UnitWritingError("arrangement_has_no_units:" + str(path))
+    # Honor the producer's verdict at the common file-consumption boundary,
+    # before material reads, client construction or replacement output. Match
+    # the feedback gate: genuinely old exports without a verdict still work,
+    # but a supplied verdict must affirm success without contrary signals.
+    if "validation" in arrangement:
+        validation = arrangement["validation"]
+        status = str(validation.get("status") or "").strip().casefold() \
+            if isinstance(validation, Mapping) else ""
+        if not isinstance(validation, Mapping) or (
+            validation.get("ok") is False
+            or validation.get("contract_ok") is False
+            or validation.get("needs_arrangement") is True
+            or bool(validation.get("errors"))
+            or bool(validation.get("sources_never_mentioned") or validation.get("missing_sources"))
+            or (bool(status) and status != "arranged")
+            or not (validation.get("ok") is True or status == "arranged")
+        ):
+            raise UnitWritingError("arrangement_not_ready:" + (status or "partial") + ":" + str(path))
     return arrangement
 
 

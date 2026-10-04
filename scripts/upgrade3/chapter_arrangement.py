@@ -161,7 +161,7 @@ def _payload_from_saved(saved: dict) -> tuple[dict, dict]:
         }
     payload = {
         key: saved[key]
-        for key in ("chapter_id", "chapter_argument", "units", "unused_sources")
+        for key in ("chapter_id", "chapter_argument", "units", "unused_sources", "issues")
         if key in saved
     }
     return payload, {
@@ -469,6 +469,12 @@ def saved_payload_from(arrangement: Mapping) -> dict:
                 "paragraph_tasks": [
                     {
                         "paragraph_id": task.get("paragraph_id"),
+                        # These relationships are validator inputs, not derived
+                        # annotations. Merged/split tasks cannot recover them
+                        # from the output id or condensed point on restore.
+                        **({"source_briefs": list(task["source_briefs"])}
+                           if "source_briefs" in task else {}),
+                        **({"portion": task["portion"]} if "portion" in task else {}),
                         "point": task.get("point"),
                         "development": task.get("development"),
                         "source_uses": [
@@ -505,6 +511,7 @@ def saved_payload_from(arrangement: Mapping) -> dict:
             {"source_handle": item.get("source_handle"), "reason": item.get("reason")}
             for item in arrangement.get("unused_sources") or ()
         ],
+        "issues": [dict(issue) for issue in arrangement.get("issues") or ()],
     }
 
 

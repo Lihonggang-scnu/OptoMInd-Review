@@ -1,0 +1,19 @@
+Environment for every command: PYTHONUTF8=1 PYTHONPATH=/tmp/optomind-wo01-deps:.
+
+Unchanged locked production archive (6aee581), new dedicated tests:
+python -m pytest -q tests/upgrade3/test_progressive_review_plan_tool_consumer_recovery.py
+11 failed in 1.09s
+
+Repaired dedicated + independent context tests:
+python -m pytest -q tests/upgrade3/test_progressive_review_plan_tool_consumer_recovery.py tests/upgrade3/test_preflight_material_recovery_context.py
+14 passed in 0.88s
+
+Final focused controls:
+python -m pytest -q tests/upgrade3/test_progressive_review_plan_tool_consumer_recovery.py tests/upgrade3/test_preflight_material_recovery_context.py tests/upgrade3/test_progressive_review_plan_stage_cache_contract.py tests/upgrade3/test_progressive_review_plan_material_reuse.py tests/upgrade3/test_body03_local_lookup_contract.py tests/upgrade3/test_body03_local_lookup_reading.py tests/upgrade3/test_body03_local_lookup_r2.py tests/upgrade3/test_body03_local_lookup_r2_boundaries.py tests/upgrade3/test_planning_retrieval_query_initialization.py tests/upgrade3/test_planning_feedback_scope.py tests/upgrade3/test_body05_global_argument_handoff.py
+111 passed in 1.86s
+
+python -m py_compile optomind_research/runtime/upgrade3/progressive_review_plan.py optomind_research/runtime/upgrade3/planning_retrieval_loop.py
+PASS
+
+git diff --check
+PASS

@@ -1,0 +1,26 @@
+{
+  "provenance": "Synthetic offline production-path checks; no provider/network calls, credentials, full BODY run, or scientific-quality claim.",
+  "baseline_commit": "6aee581023ebd23921db45e1270f1f35213030a5",
+  "test_file": "tests/upgrade3/test_body_preflight_f1_arrangement_cache_consumer.py",
+  "test_file_sha256": "7ee32bd892f178aea0db5dcb991e8cad248d2d3137ba1440c9be1dd579b334e9",
+  "initial_failure_first": "32 failed, 3 passed (original 35 checks before production edits)",
+  "final_tests_on_unmodified_baseline": "33 failed, 3 passed (expanded 36 checks, actual production BODY filenames)",
+  "final_tests_on_fixed_tree": "36 passed",
+  "changes": [
+    "Preserve validator input source_briefs/portion and normalized issues in payload cache; include issues in legacy unwrap.",
+    "Reject explicit invalid, incomplete, malformed or contradictory validation in common load_arrangement before writer/material/output dispatch."
+  ],
+  "boundaries": [
+    "Status-less legacy exports remain readable; supplied ok:true or status:arranged remains accepted unless contradicted.",
+    "Old lossy merged/split cache cannot reconstruct absent references or portions. Actual cache restore returns reused_contract_failed with no new provider call; writer refuses.",
+    "Issues stay in exported arrangement/cache; the patch does not add them to writer prompts or change scientific text.",
+    "Arrangement CLI run mode uses controlled provider and ledger replacements in tests; its model_calls:1 is one local stub invocation, not a live provider call."
+  ],
+  "regression": {
+    "selected_broad_current": "252 passed, 12 failed",
+    "selected_broad_baseline": "252 passed, 12 failed",
+    "same_failed_node_ids": true,
+    "failure_causes": "Missing local outputs/ real-draft fixtures and a hard-coded Windows subprocess cwd.",
+    "later_portable_check": "202 passed, 1 failed while concurrent F2 edits changed injected-runner resume dispatch. Root/F2 owner notified; see main record for final combined rerun."
+  }
+}

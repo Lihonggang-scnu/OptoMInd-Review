@@ -1,0 +1,594 @@
+{
+  "evidence_kind": "Synthetic offline formal-consumer regression; not historical live material, provider replay, scientific acceptance, or a full BODY run.",
+  "projection": "Exact actual next user-message strings; unchanged prompts omitted; synthetic absolute paths normalized.",
+  "before": [
+    {
+      "fixture": "test_local_feedback_enters_act0",
+      "actual_next_stage": "level1_outline",
+      "actual_user_message": {
+        "content": "当前任务：level1_outline\n{\"topic_id\":\"wo03-synthetic-coatings\",\"research_question\":\"thermal fatigue coating\",\"provisional_scope\":{\"supplement_requests\":[{\"gap_id\":\"G-synthetic\",\"gap_question\":\"thermal fatigue coating\",\"intended_use\":\"mechanism\",\"chapter_ids\":[\"CH01\"],\"success_criteria\":[\"measured relation\"],\"required_outputs\":[\"measured boundary\"],\"targeted_queries\":[{\"query_text\":\"thermal fatigue coating\",\"query_type\":\"keyword\"}],\"known_papers\":[]}],\"provisional_outline\":[{\"chapter_id\":\"CH01\",\"title\":\"Measured boundary\"}],\"material_theme_inventory\":[]},\"original_plan\":{\"question_en\":\"thermal fatigue coating\",\"facets\":[{\"id\":\"F1\"}]},\"material_theme_inventory\":[],\"actual_tool_results\":{\"supplement_results\":[],\"directed_results\":[],\"phase\":\"level1\",\"consumed_paper_ids\":[]},\"full_b_pool_was_semantically_screened\":1,\"unavailable_and_failed_tools_are_scope_feedback\":true}\n\n【本轮交付】请用中文撰写本阶段要求的内容，只返回本阶段的JSON结果，不照抄输入字段。",
+        "role": "user"
+      },
+      "source_bound_material_on_disk": {
+        "CH01": [
+          {
+            "allowed_use": [
+              "background_context",
+              "explicit_objectives",
+              "explicit_method_summaries",
+              "explicit_reported_findings",
+              "explicit_leads"
+            ],
+            "answers_requested_question": true,
+            "chapter_id": "",
+            "chapter_ids": [
+              "CH01"
+            ],
+            "conditions": [
+              "Synthetic coupon",
+              "600 C"
+            ],
+            "decision": "answer_from_local",
+            "external_ask": "",
+            "intended_use": "mechanism",
+            "limits": [],
+            "need_id": "N5a120b5fecb5557cfe58-3e8bf012e78a9de9",
+            "provenance": {
+              "downloads": 0,
+              "model_calls": 1,
+              "source": "judge",
+              "whole_paper_rereads": 0
+            },
+            "question": "thermal fatigue coating",
+            "read_focus": "",
+            "schema_version": "optomind.planning_writer_material.v1",
+            "sources": [
+              {
+                "card_path": "<BASELINE_FIXTURE>/test_local_feedback_enters_act0/cards/stable-target/PAPER_READING_CARD.json",
+                "doi": "",
+                "material_depth": "fulltext",
+                "paper_id": "stable-target",
+                "reading_path": "<BASELINE_FIXTURE>/test_local_feedback_enters_act0/snapshots/stable-target",
+                "reading_role": "direct_evidence",
+                "section_path": [
+                  "Results"
+                ],
+                "selection_reason": "query_match",
+                "source_handle": "P0001",
+                "title": "Synthetic focused experiment",
+                "year": "2025"
+              }
+            ],
+            "still_missing": "",
+            "unit_key": "",
+            "usable_content": "LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon."
+          }
+        ]
+      },
+      "need": {
+        "need_id": "N5a120b5fecb5557cfe58-3e8bf012e78a9de9",
+        "status": "answered",
+        "action": "answer_from_local",
+        "rounds": 1,
+        "usable_content": "LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon.",
+        "still_missing": "",
+        "reused_answer": false,
+        "reuse_key": "5a120b5fecb5557cfe58795cfdffd2986712b6a1c1824c0e1900b559d122a9aa"
+      }
+    },
+    {
+      "fixture": "test_local_feedback_enters_act1",
+      "actual_next_stage": "level1_outline",
+      "actual_user_message": {
+        "content": "当前任务：level1_outline\n{\"topic_id\":\"wo03-synthetic-coatings\",\"research_question\":\"thermal fatigue coating\",\"provisional_scope\":{\"supplement_requests\":[{\"gap_id\":\"G-synthetic\",\"gap_question\":\"thermal fatigue coating\",\"intended_use\":\"mechanism\",\"chapter_ids\":[\"CH01\"],\"success_criteria\":[\"measured relation\"],\"required_outputs\":[\"measured boundary\"],\"targeted_queries\":[{\"query_text\":\"thermal fatigue coating\",\"query_type\":\"keyword\"}],\"known_papers\":[]}],\"provisional_outline\":[{\"chapter_id\":\"CH01\",\"title\":\"Measured boundary\"}],\"material_theme_inventory\":[]},\"original_plan\":{\"question_en\":\"thermal fatigue coating\",\"facets\":[{\"id\":\"F1\"}]},\"material_theme_inventory\":[],\"actual_tool_results\":{\"supplement_results\":[],\"directed_results\":[],\"phase\":\"level1\",\"consumed_paper_ids\":[]},\"full_b_pool_was_semantically_screened\":7,\"unavailable_and_failed_tools_are_scope_feedback\":true}\n\n【本轮交付】请用中文撰写本阶段要求的内容，只返回本阶段的JSON结果，不照抄输入字段。",
+        "role": "user"
+      },
+      "source_bound_material_on_disk": {
+        "CH01": [
+          {
+            "allowed_use": [
+              "background_context",
+              "explicit_objectives",
+              "explicit_method_summaries",
+              "explicit_reported_findings",
+              "explicit_leads"
+            ],
+            "answers_requested_question": false,
+            "chapter_id": "",
+            "chapter_ids": [
+              "CH01"
+            ],
+            "conditions": [
+              "Synthetic coupon",
+              "600 C"
+            ],
+            "decision": "provider_retry",
+            "error": "TimeoutError: bounded lookup outage",
+            "external_ask": "Local material does not cover: thermal fatigue coating (intended use: mechanism).",
+            "failure_stage": "local_triage",
+            "intended_use": "mechanism",
+            "limits": [
+              "Unmeasured cyclic boundary remains unresolved."
+            ],
+            "local_judge_attempts": [
+              "<BASELINE_FIXTURE>/test_local_feedback_enters_act1/run/local_lookup/3a730b50e2f6e9f97314a2d302f97513d7edd0ffb1e840a9e85560c169101a21/attempt-2gy7qn96",
+              "<BASELINE_FIXTURE>/test_local_feedback_enters_act1/run/local_lookup/276120bf4943c814e010dc2ac0a7cbcdfda30ffe98cc617da6bc60abf1594c1e/attempt-1_rro2oo"
+            ],
+            "need_id": "N5a120b5fecb5557cfe58-a879c197f054d457",
+            "provenance": {
+              "downloads": 0,
+              "model_calls": 2,
+              "source": "judge",
+              "whole_paper_rereads": 0
+            },
+            "provider_failed": true,
+            "question": "thermal fatigue coating",
+            "read_focus": "",
+            "schema_version": "optomind.planning_writer_material.v1",
+            "sources": [
+              {
+                "card_path": "<BASELINE_FIXTURE>/test_local_feedback_enters_act1/cards/neighbor-01/PAPER_READING_CARD.json",
+                "doi": "",
+                "material_depth": "fulltext",
+                "paper_id": "neighbor-01",
+                "reading_path": "<BASELINE_FIXTURE>/test_local_feedback_enters_act1/snapshots/neighbor-01",
+                "reading_role": "direct_evidence",
+                "section_path": [
+                  "Results"
+                ],
+                "selection_reason": "query_match",
+                "source_handle": "P0001",
+                "title": "Synthetic adjacent study 1",
+                "year": "2025"
+              },
+              {
+                "card_path": "<BASELINE_FIXTURE>/test_local_feedback_enters_act1/cards/neighbor-01/PAPER_READING_CARD.json",
+                "doi": "",
+                "material_depth": "fulltext",
+                "paper_id": "neighbor-01",
+                "reading_path": "<BASELINE_FIXTURE>/test_local_feedback_enters_act1/snapshots/neighbor-01",
+                "reading_role": "planning_summary",
+                "section_path": [
+                  "Summary"
+                ],
+                "selection_reason": "query_match",
+                "source_handle": "P0001",
+                "title": "Synthetic adjacent study 1",
+                "year": "2025"
+              },
+              {
+                "card_path": "<BASELINE_FIXTURE>/test_local_feedback_enters_act1/cards/neighbor-02/PAPER_READING_CARD.json",
+                "doi": "",
+                "material_depth": "fulltext",
+                "paper_id": "neighbor-02",
+                "reading_path": "<BASELINE_FIXTURE>/test_local_feedback_enters_act1/snapshots/neighbor-02",
+                "reading_role": "direct_evidence",
+                "section_path": [
+                  "Results"
+                ],
+                "selection_reason": "query_match",
+                "source_handle": "P0002",
+                "title": "Synthetic adjacent study 2",
+                "year": "2025"
+              },
+              {
+                "card_path": "<BASELINE_FIXTURE>/test_local_feedback_enters_act1/cards/neighbor-02/PAPER_READING_CARD.json",
+                "doi": "",
+                "material_depth": "fulltext",
+                "paper_id": "neighbor-02",
+                "reading_path": "<BASELINE_FIXTURE>/test_local_feedback_enters_act1/snapshots/neighbor-02",
+                "reading_role": "planning_summary",
+                "section_path": [
+                  "Summary"
+                ],
+                "selection_reason": "query_match",
+                "source_handle": "P0002",
+                "title": "Synthetic adjacent study 2",
+                "year": "2025"
+              },
+              {
+                "card_path": "<BASELINE_FIXTURE>/test_local_feedback_enters_act1/cards/neighbor-03/PAPER_READING_CARD.json",
+                "doi": "",
+                "material_depth": "fulltext",
+                "paper_id": "neighbor-03",
+                "reading_path": "<BASELINE_FIXTURE>/test_local_feedback_enters_act1/snapshots/neighbor-03",
+                "reading_role": "direct_evidence",
+                "section_path": [
+                  "Results"
+                ],
+                "selection_reason": "query_match",
+                "source_handle": "P0003",
+                "title": "Synthetic adjacent study 3",
+                "year": "2025"
+              }
+            ],
+            "status": "failed",
+            "still_missing": "Unmeasured cyclic boundary remains unresolved.",
+            "unit_key": "",
+            "usable_content": "LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon."
+          }
+        ]
+      },
+      "need": {
+        "need_id": "N5a120b5fecb5557cfe58-a879c197f054d457",
+        "status": "pending",
+        "action": "provider_retry",
+        "rounds": 1,
+        "usable_content": "LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon.",
+        "still_missing": "Unmeasured cyclic boundary remains unresolved.",
+        "reused_answer": false,
+        "reuse_key": "5a120b5fecb5557cfe58795cfdffd2986712b6a1c1824c0e1900b559d122a9aa"
+      }
+    },
+    {
+      "fixture": "test_local_feedback_enters_act2",
+      "actual_next_stage": "level1_outline",
+      "actual_user_message": {
+        "content": "当前任务：level1_outline\n{\"topic_id\":\"wo03-synthetic-coatings\",\"research_question\":\"thermal fatigue coating\",\"provisional_scope\":{\"supplement_requests\":[{\"gap_id\":\"G-synthetic\",\"gap_question\":\"thermal fatigue coating\",\"intended_use\":\"mechanism\",\"chapter_ids\":[\"CH01\"],\"success_criteria\":[\"measured relation\"],\"required_outputs\":[\"measured boundary\"],\"targeted_queries\":[{\"query_text\":\"thermal fatigue coating\",\"query_type\":\"keyword\"}],\"known_papers\":[]}],\"provisional_outline\":[{\"chapter_id\":\"CH01\",\"title\":\"Measured boundary\"}],\"material_theme_inventory\":[]},\"original_plan\":{\"question_en\":\"thermal fatigue coating\",\"facets\":[{\"id\":\"F1\"}]},\"material_theme_inventory\":[],\"actual_tool_results\":{\"supplement_results\":[{\"status\":\"fulfilled\",\"chapter_ids\":[\"CH01\"],\"usable_content\":\"NEW measured cyclic boundary.\"}],\"directed_results\":[],\"phase\":\"level1\",\"consumed_paper_ids\":[]},\"full_b_pool_was_semantically_screened\":1,\"unavailable_and_failed_tools_are_scope_feedback\":true}\n\n【本轮交付】请用中文撰写本阶段要求的内容，只返回本阶段的JSON结果，不照抄输入字段。",
+        "role": "user"
+      },
+      "source_bound_material_on_disk": {
+        "CH01": [
+          {
+            "allowed_use": [
+              "background_context",
+              "explicit_objectives",
+              "explicit_method_summaries",
+              "explicit_reported_findings",
+              "explicit_leads"
+            ],
+            "answers_requested_question": false,
+            "chapter_id": "",
+            "chapter_ids": [
+              "CH01"
+            ],
+            "conditions": [
+              "Synthetic coupon",
+              "600 C"
+            ],
+            "decision": "external_research",
+            "external_ask": "Local material does not cover: thermal fatigue coating (intended use: mechanism).",
+            "intended_use": "mechanism",
+            "limits": [
+              "Unmeasured cyclic boundary remains unresolved."
+            ],
+            "need_id": "N5a120b5fecb5557cfe58-52163c52a05a6d72",
+            "provenance": {
+              "downloads": 0,
+              "model_calls": 1,
+              "source": "judge",
+              "whole_paper_rereads": 0
+            },
+            "question": "thermal fatigue coating",
+            "read_focus": "",
+            "schema_version": "optomind.planning_writer_material.v1",
+            "sources": [
+              {
+                "card_path": "<BASELINE_FIXTURE>/test_local_feedback_enters_act2/cards/stable-target/PAPER_READING_CARD.json",
+                "doi": "",
+                "material_depth": "fulltext",
+                "paper_id": "stable-target",
+                "reading_path": "<BASELINE_FIXTURE>/test_local_feedback_enters_act2/snapshots/stable-target",
+                "reading_role": "direct_evidence",
+                "section_path": [
+                  "Results"
+                ],
+                "selection_reason": "query_match",
+                "source_handle": "P0001",
+                "title": "Synthetic focused experiment",
+                "year": "2025"
+              }
+            ],
+            "still_missing": "",
+            "unit_key": "",
+            "usable_content": "LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon.\n\nNEW measured cyclic boundary."
+          }
+        ]
+      },
+      "need": {
+        "need_id": "N5a120b5fecb5557cfe58-52163c52a05a6d72",
+        "status": "answered",
+        "action": "external_research",
+        "rounds": 1,
+        "usable_content": "LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon.\n\nNEW measured cyclic boundary.",
+        "still_missing": "",
+        "reused_answer": false,
+        "reuse_key": "5a120b5fecb5557cfe58795cfdffd2986712b6a1c1824c0e1900b559d122a9aa"
+      }
+    }
+  ],
+  "after": [
+    {
+      "fixture": "test_local_feedback_enters_act0",
+      "actual_next_stage": "level1_outline",
+      "actual_user_message": {
+        "content": "当前任务：level1_outline\n{\"topic_id\":\"wo03-synthetic-coatings\",\"research_question\":\"thermal fatigue coating\",\"provisional_scope\":{\"supplement_requests\":[{\"gap_id\":\"G-synthetic\",\"gap_question\":\"thermal fatigue coating\",\"intended_use\":\"mechanism\",\"chapter_ids\":[\"CH01\"],\"success_criteria\":[\"measured relation\"],\"required_outputs\":[\"measured boundary\"],\"targeted_queries\":[{\"query_text\":\"thermal fatigue coating\",\"query_type\":\"keyword\"}],\"known_papers\":[]}],\"provisional_outline\":[{\"chapter_id\":\"CH01\",\"title\":\"Measured boundary\"}],\"material_theme_inventory\":[]},\"original_plan\":{\"question_en\":\"thermal fatigue coating\",\"facets\":[{\"id\":\"F1\"}]},\"material_theme_inventory\":[],\"actual_tool_results\":{\"supplement_results\":[],\"directed_results\":[],\"phase\":\"level1\",\"consumed_paper_ids\":[],\"status\":\"complete\",\"tool_materials_by_chapter\":{\"CH01\":[{\"need_id\":\"N5a120b5fecb5557cfe58-e13ad4ee3658fb84\",\"question\":\"thermal fatigue coating\",\"intended_use\":\"mechanism\",\"decision\":\"answer_from_local\",\"usable_content\":\"LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon.\",\"conditions\":[\"Synthetic coupon\",\"600 C\"],\"limits\":[],\"still_missing\":\"\",\"sources\":[{\"source_handle\":\"P0001\",\"paper_id\":\"stable-target\",\"title\":\"Synthetic focused experiment\",\"year\":\"2025\",\"reading_role\":\"direct_evidence\",\"material_depth\":\"fulltext\",\"section_path\":[\"Results\"]}],\"allowed_use\":[\"background_context\",\"explicit_objectives\",\"explicit_method_summaries\",\"explicit_reported_findings\",\"explicit_leads\"]}]},\"retrieval_loop\":{\"needs\":[{\"need_id\":\"N5a120b5fecb5557cfe58-e13ad4ee3658fb84\",\"status\":\"answered\",\"action\":\"answer_from_local\",\"still_missing\":\"\"}]}},\"full_b_pool_was_semantically_screened\":1,\"unavailable_and_failed_tools_are_scope_feedback\":true}\n\n【本轮交付】请用中文撰写本阶段要求的内容，只返回本阶段的JSON结果，不照抄输入字段。",
+        "role": "user"
+      },
+      "source_bound_material_on_disk": {
+        "CH01": [
+          {
+            "allowed_use": [
+              "background_context",
+              "explicit_objectives",
+              "explicit_method_summaries",
+              "explicit_reported_findings",
+              "explicit_leads"
+            ],
+            "answers_requested_question": true,
+            "chapter_id": "",
+            "chapter_ids": [
+              "CH01"
+            ],
+            "conditions": [
+              "Synthetic coupon",
+              "600 C"
+            ],
+            "decision": "answer_from_local",
+            "external_ask": "",
+            "intended_use": "mechanism",
+            "limits": [],
+            "need_id": "N5a120b5fecb5557cfe58-e13ad4ee3658fb84",
+            "provenance": {
+              "downloads": 0,
+              "model_calls": 1,
+              "source": "judge",
+              "whole_paper_rereads": 0
+            },
+            "question": "thermal fatigue coating",
+            "read_focus": "",
+            "schema_version": "optomind.planning_writer_material.v1",
+            "sources": [
+              {
+                "card_path": "<REPAIRED_FIXTURE>/test_local_feedback_enters_act0/cards/stable-target/PAPER_READING_CARD.json",
+                "doi": "",
+                "material_depth": "fulltext",
+                "paper_id": "stable-target",
+                "reading_path": "<REPAIRED_FIXTURE>/test_local_feedback_enters_act0/snapshots/stable-target",
+                "reading_role": "direct_evidence",
+                "section_path": [
+                  "Results"
+                ],
+                "selection_reason": "query_match",
+                "source_handle": "P0001",
+                "title": "Synthetic focused experiment",
+                "year": "2025"
+              }
+            ],
+            "still_missing": "",
+            "unit_key": "",
+            "usable_content": "LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon."
+          }
+        ]
+      },
+      "need": {
+        "need_id": "N5a120b5fecb5557cfe58-e13ad4ee3658fb84",
+        "status": "answered",
+        "action": "answer_from_local",
+        "rounds": 1,
+        "usable_content": "LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon.",
+        "still_missing": "",
+        "reused_answer": false,
+        "reuse_key": "5a120b5fecb5557cfe58795cfdffd2986712b6a1c1824c0e1900b559d122a9aa"
+      }
+    },
+    {
+      "fixture": "test_local_feedback_enters_act1",
+      "actual_next_stage": "level1_outline",
+      "actual_user_message": {
+        "content": "当前任务：level1_outline\n{\"topic_id\":\"wo03-synthetic-coatings\",\"research_question\":\"thermal fatigue coating\",\"provisional_scope\":{\"supplement_requests\":[{\"gap_id\":\"G-synthetic\",\"gap_question\":\"thermal fatigue coating\",\"intended_use\":\"mechanism\",\"chapter_ids\":[\"CH01\"],\"success_criteria\":[\"measured relation\"],\"required_outputs\":[\"measured boundary\"],\"targeted_queries\":[{\"query_text\":\"thermal fatigue coating\",\"query_type\":\"keyword\"}],\"known_papers\":[]}],\"provisional_outline\":[{\"chapter_id\":\"CH01\",\"title\":\"Measured boundary\"}],\"material_theme_inventory\":[]},\"original_plan\":{\"question_en\":\"thermal fatigue coating\",\"facets\":[{\"id\":\"F1\"}]},\"material_theme_inventory\":[],\"actual_tool_results\":{\"supplement_results\":[],\"directed_results\":[],\"phase\":\"level1\",\"consumed_paper_ids\":[],\"status\":\"complete\",\"tool_materials_by_chapter\":{\"CH01\":[{\"need_id\":\"N5a120b5fecb5557cfe58-555d0603879c1b0d\",\"question\":\"thermal fatigue coating\",\"intended_use\":\"mechanism\",\"decision\":\"provider_retry\",\"usable_content\":\"LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon.\",\"conditions\":[\"Synthetic coupon\",\"600 C\"],\"limits\":[\"Unmeasured cyclic boundary remains unresolved.\"],\"still_missing\":\"Unmeasured cyclic boundary remains unresolved.\",\"sources\":[{\"source_handle\":\"P0001\",\"paper_id\":\"neighbor-01\",\"title\":\"Synthetic adjacent study 1\",\"year\":\"2025\",\"reading_role\":\"direct_evidence\",\"material_depth\":\"fulltext\",\"section_path\":[\"Results\"]},{\"source_handle\":\"P0001\",\"paper_id\":\"neighbor-01\",\"title\":\"Synthetic adjacent study 1\",\"year\":\"2025\",\"reading_role\":\"planning_summary\",\"material_depth\":\"fulltext\",\"section_path\":[\"Summary\"]},{\"source_handle\":\"P0002\",\"paper_id\":\"neighbor-02\",\"title\":\"Synthetic adjacent study 2\",\"year\":\"2025\",\"reading_role\":\"direct_evidence\",\"material_depth\":\"fulltext\",\"section_path\":[\"Results\"]},{\"source_handle\":\"P0002\",\"paper_id\":\"neighbor-02\",\"title\":\"Synthetic adjacent study 2\",\"year\":\"2025\",\"reading_role\":\"planning_summary\",\"material_depth\":\"fulltext\",\"section_path\":[\"Summary\"]},{\"source_handle\":\"P0003\",\"paper_id\":\"neighbor-03\",\"title\":\"Synthetic adjacent study 3\",\"year\":\"2025\",\"reading_role\":\"direct_evidence\",\"material_depth\":\"fulltext\",\"section_path\":[\"Results\"]}],\"allowed_use\":[\"background_context\",\"explicit_objectives\",\"explicit_method_summaries\",\"explicit_reported_findings\",\"explicit_leads\"],\"status\":\"failed\",\"provider_failed\":true,\"error\":\"TimeoutError: bounded lookup outage\",\"failure_stage\":\"local_triage\"}]},\"retrieval_loop\":{\"needs\":[{\"need_id\":\"N5a120b5fecb5557cfe58-555d0603879c1b0d\",\"status\":\"pending\",\"action\":\"provider_retry\",\"still_missing\":\"Unmeasured cyclic boundary remains unresolved.\"}]}},\"full_b_pool_was_semantically_screened\":7,\"unavailable_and_failed_tools_are_scope_feedback\":true}\n\n【本轮交付】请用中文撰写本阶段要求的内容，只返回本阶段的JSON结果，不照抄输入字段。",
+        "role": "user"
+      },
+      "source_bound_material_on_disk": {
+        "CH01": [
+          {
+            "allowed_use": [
+              "background_context",
+              "explicit_objectives",
+              "explicit_method_summaries",
+              "explicit_reported_findings",
+              "explicit_leads"
+            ],
+            "answers_requested_question": false,
+            "chapter_id": "",
+            "chapter_ids": [
+              "CH01"
+            ],
+            "conditions": [
+              "Synthetic coupon",
+              "600 C"
+            ],
+            "decision": "provider_retry",
+            "error": "TimeoutError: bounded lookup outage",
+            "external_ask": "Local material does not cover: thermal fatigue coating (intended use: mechanism).",
+            "failure_stage": "local_triage",
+            "intended_use": "mechanism",
+            "limits": [
+              "Unmeasured cyclic boundary remains unresolved."
+            ],
+            "local_judge_attempts": [
+              "<REPAIRED_FIXTURE>/test_local_feedback_enters_act1/run/local_lookup/c903352e0cb431a0075c5657a282c3674b2bb4da78182264fd7c41383b52d5bb/attempt-qdhat2lr",
+              "<REPAIRED_FIXTURE>/test_local_feedback_enters_act1/run/local_lookup/4da5d03d62ffb4472815001df5b4105a369e3f611c3caadc8c79be18ea79b47e/attempt-6x1vxa48"
+            ],
+            "need_id": "N5a120b5fecb5557cfe58-555d0603879c1b0d",
+            "provenance": {
+              "downloads": 0,
+              "model_calls": 2,
+              "source": "judge",
+              "whole_paper_rereads": 0
+            },
+            "provider_failed": true,
+            "question": "thermal fatigue coating",
+            "read_focus": "",
+            "schema_version": "optomind.planning_writer_material.v1",
+            "sources": [
+              {
+                "card_path": "<REPAIRED_FIXTURE>/test_local_feedback_enters_act1/cards/neighbor-01/PAPER_READING_CARD.json",
+                "doi": "",
+                "material_depth": "fulltext",
+                "paper_id": "neighbor-01",
+                "reading_path": "<REPAIRED_FIXTURE>/test_local_feedback_enters_act1/snapshots/neighbor-01",
+                "reading_role": "direct_evidence",
+                "section_path": [
+                  "Results"
+                ],
+                "selection_reason": "query_match",
+                "source_handle": "P0001",
+                "title": "Synthetic adjacent study 1",
+                "year": "2025"
+              },
+              {
+                "card_path": "<REPAIRED_FIXTURE>/test_local_feedback_enters_act1/cards/neighbor-01/PAPER_READING_CARD.json",
+                "doi": "",
+                "material_depth": "fulltext",
+                "paper_id": "neighbor-01",
+                "reading_path": "<REPAIRED_FIXTURE>/test_local_feedback_enters_act1/snapshots/neighbor-01",
+                "reading_role": "planning_summary",
+                "section_path": [
+                  "Summary"
+                ],
+                "selection_reason": "query_match",
+                "source_handle": "P0001",
+                "title": "Synthetic adjacent study 1",
+                "year": "2025"
+              },
+              {
+                "card_path": "<REPAIRED_FIXTURE>/test_local_feedback_enters_act1/cards/neighbor-02/PAPER_READING_CARD.json",
+                "doi": "",
+                "material_depth": "fulltext",
+                "paper_id": "neighbor-02",
+                "reading_path": "<REPAIRED_FIXTURE>/test_local_feedback_enters_act1/snapshots/neighbor-02",
+                "reading_role": "direct_evidence",
+                "section_path": [
+                  "Results"
+                ],
+                "selection_reason": "query_match",
+                "source_handle": "P0002",
+                "title": "Synthetic adjacent study 2",
+                "year": "2025"
+              },
+              {
+                "card_path": "<REPAIRED_FIXTURE>/test_local_feedback_enters_act1/cards/neighbor-02/PAPER_READING_CARD.json",
+                "doi": "",
+                "material_depth": "fulltext",
+                "paper_id": "neighbor-02",
+                "reading_path": "<REPAIRED_FIXTURE>/test_local_feedback_enters_act1/snapshots/neighbor-02",
+                "reading_role": "planning_summary",
+                "section_path": [
+                  "Summary"
+                ],
+                "selection_reason": "query_match",
+                "source_handle": "P0002",
+                "title": "Synthetic adjacent study 2",
+                "year": "2025"
+              },
+              {
+                "card_path": "<REPAIRED_FIXTURE>/test_local_feedback_enters_act1/cards/neighbor-03/PAPER_READING_CARD.json",
+                "doi": "",
+                "material_depth": "fulltext",
+                "paper_id": "neighbor-03",
+                "reading_path": "<REPAIRED_FIXTURE>/test_local_feedback_enters_act1/snapshots/neighbor-03",
+                "reading_role": "direct_evidence",
+                "section_path": [
+                  "Results"
+                ],
+                "selection_reason": "query_match",
+                "source_handle": "P0003",
+                "title": "Synthetic adjacent study 3",
+                "year": "2025"
+              }
+            ],
+            "status": "failed",
+            "still_missing": "Unmeasured cyclic boundary remains unresolved.",
+            "unit_key": "",
+            "usable_content": "LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon."
+          }
+        ]
+      },
+      "need": {
+        "need_id": "N5a120b5fecb5557cfe58-555d0603879c1b0d",
+        "status": "pending",
+        "action": "provider_retry",
+        "rounds": 1,
+        "usable_content": "LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon.",
+        "still_missing": "Unmeasured cyclic boundary remains unresolved.",
+        "reused_answer": false,
+        "reuse_key": "5a120b5fecb5557cfe58795cfdffd2986712b6a1c1824c0e1900b559d122a9aa"
+      }
+    },
+    {
+      "fixture": "test_local_feedback_enters_act2",
+      "actual_next_stage": "level1_outline",
+      "actual_user_message": {
+        "content": "当前任务：level1_outline\n{\"topic_id\":\"wo03-synthetic-coatings\",\"research_question\":\"thermal fatigue coating\",\"provisional_scope\":{\"supplement_requests\":[{\"gap_id\":\"G-synthetic\",\"gap_question\":\"thermal fatigue coating\",\"intended_use\":\"mechanism\",\"chapter_ids\":[\"CH01\"],\"success_criteria\":[\"measured relation\"],\"required_outputs\":[\"measured boundary\"],\"targeted_queries\":[{\"query_text\":\"thermal fatigue coating\",\"query_type\":\"keyword\"}],\"known_papers\":[]}],\"provisional_outline\":[{\"chapter_id\":\"CH01\",\"title\":\"Measured boundary\"}],\"material_theme_inventory\":[]},\"original_plan\":{\"question_en\":\"thermal fatigue coating\",\"facets\":[{\"id\":\"F1\"}]},\"material_theme_inventory\":[],\"actual_tool_results\":{\"supplement_results\":[{\"status\":\"fulfilled\",\"chapter_ids\":[\"CH01\"],\"usable_content\":\"NEW measured cyclic boundary.\"}],\"directed_results\":[],\"phase\":\"level1\",\"consumed_paper_ids\":[],\"status\":\"complete\",\"tool_materials_by_chapter\":{\"CH01\":[{\"need_id\":\"N5a120b5fecb5557cfe58-dcfdf7e6f4ab9e1e\",\"question\":\"thermal fatigue coating\",\"intended_use\":\"mechanism\",\"decision\":\"external_research\",\"usable_content\":\"LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon.\\n\\nNEW measured cyclic boundary.\",\"conditions\":[\"Synthetic coupon\",\"600 C\"],\"limits\":[],\"still_missing\":\"\",\"sources\":[{\"source_handle\":\"P0001\",\"paper_id\":\"stable-target\",\"title\":\"Synthetic focused experiment\",\"year\":\"2025\",\"reading_role\":\"direct_evidence\",\"material_depth\":\"fulltext\",\"section_path\":[\"Results\"]}],\"allowed_use\":[\"background_context\",\"explicit_objectives\",\"explicit_method_summaries\",\"explicit_reported_findings\",\"explicit_leads\"]}]},\"retrieval_loop\":{\"needs\":[{\"need_id\":\"N5a120b5fecb5557cfe58-dcfdf7e6f4ab9e1e\",\"status\":\"answered\",\"action\":\"external_research\",\"still_missing\":\"\"}]}},\"full_b_pool_was_semantically_screened\":1,\"unavailable_and_failed_tools_are_scope_feedback\":true}\n\n【本轮交付】请用中文撰写本阶段要求的内容，只返回本阶段的JSON结果，不照抄输入字段。",
+        "role": "user"
+      },
+      "source_bound_material_on_disk": {
+        "CH01": [
+          {
+            "allowed_use": [
+              "background_context",
+              "explicit_objectives",
+              "explicit_method_summaries",
+              "explicit_reported_findings",
+              "explicit_leads"
+            ],
+            "answers_requested_question": false,
+            "chapter_id": "",
+            "chapter_ids": [
+              "CH01"
+            ],
+            "conditions": [
+              "Synthetic coupon",
+              "600 C"
+            ],
+            "decision": "external_research",
+            "external_ask": "Local material does not cover: thermal fatigue coating (intended use: mechanism).",
+            "intended_use": "mechanism",
+            "limits": [],
+            "need_id": "N5a120b5fecb5557cfe58-dcfdf7e6f4ab9e1e",
+            "provenance": {
+              "downloads": 0,
+              "model_calls": 1,
+              "source": "judge",
+              "whole_paper_rereads": 0
+            },
+            "question": "thermal fatigue coating",
+            "read_focus": "",
+            "schema_version": "optomind.planning_writer_material.v1",
+            "sources": [
+              {
+                "card_path": "<REPAIRED_FIXTURE>/test_local_feedback_enters_act2/cards/stable-target/PAPER_READING_CARD.json",
+                "doi": "",
+                "material_depth": "fulltext",
+                "paper_id": "stable-target",
+                "reading_path": "<REPAIRED_FIXTURE>/test_local_feedback_enters_act2/snapshots/stable-target",
+                "reading_role": "direct_evidence",
+                "section_path": [
+                  "Results"
+                ],
+                "selection_reason": "query_match",
+                "source_handle": "P0001",
+                "title": "Synthetic focused experiment",
+                "year": "2025"
+              }
+            ],
+            "still_missing": "",
+            "unit_key": "",
+            "usable_content": "LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon.\n\nNEW measured cyclic boundary."
+          }
+        ]
+      },
+      "need": {
+        "need_id": "N5a120b5fecb5557cfe58-dcfdf7e6f4ab9e1e",
+        "status": "answered",
+        "action": "external_research",
+        "rounds": 1,
+        "usable_content": "LOCAL_PARTIAL_ANSWER: A porous interlayer delayed crack initiation in the measured coupon.\n\nNEW measured cyclic boundary.",
+        "still_missing": "",
+        "reused_answer": false,
+        "reuse_key": "5a120b5fecb5557cfe58795cfdffd2986712b6a1c1824c0e1900b559d122a9aa"
+      }
+    }
+  ]
+}

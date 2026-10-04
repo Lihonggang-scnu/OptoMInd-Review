@@ -4219,14 +4219,24 @@ class ProgressiveReviewPlanner:
                 return dict(result)
 
             result = self._stage(
-                name, run_adaptive_cycle, resume=resume, state=state,
+                # The collector owns per-need/material compatibility and
+                # explicit failure retries. Re-enter it even when the outer
+                # arguments match; its durable caches reuse fulfilled work.
+                name, run_adaptive_cycle, resume=False, state=state,
                 cache_inputs=cycle_inputs,
             )
             for chapter_id, rows in (result.get("tool_materials_by_chapter") or {}).items():
                 existing = self.tool_materials_by_chapter.setdefault(str(chapter_id), [])
-                seen = {json.dumps(item, ensure_ascii=False, sort_keys=True, default=_json_default) for item in existing}
                 for row in rows:
                     if isinstance(row, Mapping):
+                        # Each collector row is the cumulative current view
+                        # of this exact need. Its prior attempts remain in the
+                        # journal; do not keep an obsolete gap/failure active
+                        # beside the recovered answer in chapter messages.
+                        need_id = _text(row.get("need_id"))
+                        if need_id:
+                            existing[:] = [item for item in existing if _text(item.get("need_id")) != need_id]
+                        seen = {json.dumps(item, ensure_ascii=False, sort_keys=True, default=_json_default) for item in existing}
                         encoded = json.dumps(row, ensure_ascii=False, sort_keys=True, default=_json_default)
                         if encoded not in seen:
                             existing.append(dict(row))
@@ -5256,6 +5266,23 @@ class ProgressiveReviewPlanner:
             output["phase"] = value["phase"]
         if "consumed_paper_ids" in value:
             output["consumed_paper_ids"] = list(value.get("consumed_paper_ids") or [])
+        if "status" in value:
+            output["status"] = value["status"]
+        # Local-only answers do not occur in either provider-result array.
+        # Reuse the source-bound writer projection, not the lookup passages,
+        # complete pool, or attempt journal, for the next outline consumer.
+        materials = value.get("tool_materials_by_chapter")
+        if isinstance(materials, Mapping):
+            output["tool_materials_by_chapter"] = {
+                str(chapter_id): [_tool_material_for_prompt(row) for row in rows if isinstance(row, Mapping)]
+                for chapter_id, rows in materials.items() if isinstance(rows, (list, tuple))
+            }
+        loop = value.get("retrieval_loop")
+        if isinstance(loop, Mapping):
+            output["retrieval_loop"] = {"needs": [
+                {key: row[key] for key in ("need_id", "status", "action", "still_missing") if key in row}
+                for row in loop.get("needs") or [] if isinstance(row, Mapping)
+            ]}
         for key in ("level1", "level2", "chapters", "chapter_tools"):
             if isinstance(value.get(key), Mapping):
                 output[key] = ProgressiveReviewPlanner._compact_tool_feedback(value[key])
@@ -7512,6 +7539,19 @@ def _supplement_answered(state: Mapping[str, Any]) -> bool:
     return isinstance(state, Mapping) and state.get("status") == "answered" and bool(_text(state.get("usable_content"))) and not _text(state.get("still_missing"))
 
 
+def _local_writer_context(local: Mapping[str, Any], *, omit_gap_limit: bool = False) -> dict[str, Any]:
+    raw = local.get("writer_material") if isinstance(local, Mapping) else None
+    writer = dict(raw) if isinstance(raw, Mapping) else {}
+    if omit_gap_limit:
+        from .planning_material_triage import WRITER_MATERIAL_SCHEMA
+        missing = _text(local.get("still_missing"))
+        if missing and writer.get("schema_version") == WRITER_MATERIAL_SCHEMA:
+            # build_writer_material mirrors its task gap in limits. That is
+            # not a source limitation; preserve every other limitation.
+            writer["limits"] = [item for item in writer.get("limits") or [] if item != missing]
+    return writer
+
+
 def _supplement_bind_results(results: Sequence[Mapping[str, Any]], owners: Sequence[str]) -> list[dict[str, Any]]:
     output = []
     for raw in results:
@@ -7773,15 +7813,37 @@ def make_retrieval_loop_runner(
         pool_by_id = {str(row.get("_paper_id")): dict(row) for row in working_pool if isinstance(row, Mapping)}
         paper_to_handle = {str(value): str(key) for key, value in (source_handle_map or {}).items()}
 
+        def retain_local_context(need_id: str, result: Mapping[str, Any]) -> dict[str, Any]:
+            result = dict(result)
+            retained = _text((request_by_id.get(need_id) or {}).get("reusable_material"))
+            if retained:
+                result["usable_content"] = "\n\n".join(dict.fromkeys(
+                    text for text in (retained, _text(result.get("usable_content"))) if text))
+                contexts = [_local_writer_context(cached["state"].get("local_triage") or {}, omit_gap_limit=True)
+                            for cached in inherited_by_id.get(need_id, [])
+                            if _text(cached["state"].get("usable_content"))]
+                writer = _local_writer_context(result)
+                for key in ("sources", "conditions", "limits", "allowed_use"):
+                    combined = {}
+                    for context in [*contexts, writer]:
+                        for item in context.get(key) or []:
+                            combined[json.dumps(item, ensure_ascii=False, sort_keys=True, default=_json_default)] = item
+                    if combined:
+                        writer[key] = list(combined.values())
+                if writer:
+                    result["writer_material"] = writer
+            local_results[need_id] = result
+            return result
+
         def local_triage(*, gap: Any, round_index: int) -> Mapping[str, Any]:
             from .planning_supplement import run_gap_local_triage
             cached = cached_answer_by_id.get(gap.gap_id)
             if cached:
                 result = {**dict(cached.get("local_triage") or {}), "decision": "direct_use",
                           "usable_content": cached["usable_content"], "still_missing": "",
-                          "answers_requested_question": True, "reused_answer": True}
-                local_results[gap.gap_id] = result
-                return result
+                          "answers_requested_question": True, "reused_answer": True,
+                          "writer_material": _local_writer_context(cached.get("local_triage") or {}, omit_gap_limit=True)}
+                return retain_local_context(gap.gap_id, result)
             if kind_by_id.get(gap.gap_id) == "directed":
                 return {"decision": "external_research", "usable_content": "", "still_missing": gap.question,
                         "external_ask": "Read the nominated paper for this task."}
@@ -7815,8 +7877,7 @@ def make_retrieval_loop_runner(
                 result["usable_content"] = _text(prior.get("reusable_material"))
                 result["still_missing"] = _text(prior.get("still_missing")) or "; ".join(_supplement_requirement_text(item) for item in
                     [*(prior.get("success_criteria") or []), *(prior.get("required_outputs") or [])]) or gap.question
-                local_results[gap.gap_id] = result
-                return result
+                return retain_local_context(gap.gap_id, result)
             kwargs = {
                 "index_path": index_path, "user_scope": topic, "judge": judge,
                 "output_dir": root / "local_triage" / _safe_id(gap.gap_id), "read_local": True,
@@ -7831,15 +7892,9 @@ def make_retrieval_loop_runner(
             if not any(p.kind == inspect.Parameter.VAR_KEYWORD for p in parameters.values()):
                 kwargs = {key: value for key, value in kwargs.items() if key in parameters}
             result = run_gap_local_triage(gap_row, **kwargs)
-            prior = request_by_id.get(gap.gap_id) or {}
-            retained = _text(prior.get("reusable_material"))
-            if retained:
-                result = dict(result)
-                result["usable_content"] = "\n\n".join(dict.fromkeys(text for text in (retained, _text(result.get("usable_content"))) if text))
-                # A local judgement is authoritative for the full current need;
-                # inherited partial text alone never changes its decision.
-            local_results[gap.gap_id] = dict(result)
-            return dict(result)
+            # Keep the current judgment authoritative for completion while
+            # inherited prose retains its own source and scientific context.
+            return retain_local_context(gap.gap_id, result)
 
         def refine_queries(need: Any, round_index: int, previous_queries: Sequence[Mapping[str, Any]],
                            usable_content: str, still_missing: str) -> list[dict[str, Any]]:
@@ -8010,6 +8065,8 @@ def make_retrieval_loop_runner(
         loop_result = run_retrieval_loop(
             needs, loop_config, local_triage=local_triage, external_closure=external_closure,
             resume=resume, refine_queries=refine_queries, prior_consumed_paper_ids=sorted(consumed_ids),
+            retry_need_ids=[need_id for need_id, request in request_by_id.items()
+                            if request.get("retry_empty_result") is True and need_id not in cached_answer_by_id],
         )
         materials_by_chapter: dict[str, list[dict[str, Any]]] = {}
         supplement_results: list[dict[str, Any]] = []
@@ -8064,7 +8121,7 @@ def make_retrieval_loop_runner(
                 else:
                     directed_results.extend(raw_results)
             usable = _text(need_state.get("usable_content") or local.get("usable_content"))
-            writer = local.get("writer_material") if isinstance(local.get("writer_material"), Mapping) else {}
+            writer = _local_writer_context(local, omit_gap_limit=_supplement_answered(need_state))
             sources = writer.get("sources") if isinstance(writer.get("sources"), list) else local.get("passages") or []
             if raw_results and kind_by_id.get(need_id) == "directed":
                 directed_materials = [
@@ -8095,7 +8152,7 @@ def make_retrieval_loop_runner(
                     collected_sources.extend(item for item in group.get("source_units") or () if isinstance(item, Mapping))
                 if not usable:
                     usable = " ".join(dict.fromkeys(collected_values))
-                sources = [{**dict(item.get("record_identity") or {}), **dict(item)} for item in collected_sources] or sources
+                sources = [*sources, *[{**dict(item.get("record_identity") or {}), **dict(item)} for item in collected_sources]]
             if usable or writer:
                 material = dict(writer)
                 material.update({"need_id": need_id, "chapter_ids": owners, "question": _text(need_info.get("question")),

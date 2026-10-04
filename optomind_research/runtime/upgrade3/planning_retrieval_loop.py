@@ -500,6 +500,7 @@ def run_retrieval_loop(
     budget_floor_cny: float = 0.0,
     refine_queries: Callable[..., Any] | None = None,
     prior_consumed_paper_ids: Sequence[str] = (),
+    retry_need_ids: Sequence[str] = (),
     verbose: bool = False,
 ) -> dict[str, Any]:
     """Run the shared queue, one bounded round per need at a time."""
@@ -515,6 +516,28 @@ def run_retrieval_loop(
     consumed_paper_ids: set[str] = {
         str(item) for item in prior_consumed_paper_ids if str(item).strip()
     }
+    # An explicit retry reopens only the last attempted direction of a
+    # compatible, terminal nonanswer. Keep the append-only journal and earlier
+    # useful work; answered needs and ordinary resumes remain unchanged.
+    retry_rounds: dict[str, int] = {}
+    for need in merged:
+        if need.need_id not in retry_need_ids:
+            continue
+        previous = [entry for entry in journal.entries_for(need.need_id)
+                    if _signature_matches(entry.get("need_signature"), _need_signature(need))
+                    and _is_scientific_attempt(entry)]
+        if not previous:
+            continue
+        last = previous[-1]
+        if last.get("status") == "answered" or not (
+            last.get("action") == "stop" or str(last.get("status") or "").startswith("stopped")
+            or (last.get("status") == "partial" and int(last.get("round") or 0) >= config.max_rounds)
+        ):
+            continue
+        # A later no-query stop is not a paid attempt. Retry the prior actual
+        # external checkpoint instead of rerunning query refinement.
+        attempted = next((entry for entry in reversed(previous) if entry.get("external_status") is not None), last)
+        retry_rounds[need.need_id] = int(attempted.get("round") or 1)
 
     def acquire_index():
         return PlanningMaterialIndex(Path(config.index_path), readonly=True)
@@ -586,6 +609,7 @@ def run_retrieval_loop(
                 continue
             need = state.need
             signature = _need_signature(need)
+            retrying_terminal = retry_rounds.get(need_id) == round_index
             # Infrastructure failures are not completed research rounds, but
             # their material, actual attempt paths and consumed paper slots
             # still belong to the need after an interrupted or completed retry.
@@ -641,7 +665,9 @@ def run_retrieval_loop(
                 state.status = str(saved.get("status") or state.status)
                 state.action = str(saved.get("action") or state.action)
                 progressed = True
-                continue
+                if not retrying_terminal:
+                    continue
+                state.status, state.action = "pending", "external_research"
             progressed = True
             state.round_index = round_index
             local = local_pass(need, round_index)
@@ -704,6 +730,10 @@ def run_retrieval_loop(
                 entry["status"] = "answered"
                 state.status = "answered"
                 state.action = "answer_from_local"
+                # The current answer supersedes an unresolved question restored
+                # from an earlier failed/partial attempt.
+                state.still_missing = local_missing
+                entry["still_missing"] = local_missing
                 journal.record(entry)
                 state.attempts.append(entry)
                 continue
@@ -828,7 +858,7 @@ def run_retrieval_loop(
             state.query_status = "ready" if queries else "not_required" if need.kind == "directed" and round_index == 1 else "exhausted"
             state.query_source = query_source
             entry.update({"query_status": state.query_status, "query_source": query_source})
-            if round_index > 1 and queries and not queries_changed(previous_queries, queries):
+            if round_index > 1 and queries and not retrying_terminal and not queries_changed(previous_queries, queries):
                 entry["status"] = "stopped_same_query"
                 entry["action"] = "stop"
                 # Preserve a substantive partial result so a fulfilled source
@@ -984,6 +1014,12 @@ def run_retrieval_loop(
                 entry["status"] = "partial"
                 state.status = "partial"
                 state.action = "external_research"
+            if retrying_terminal and state.status != "answered":
+                # One explicit retry is one bounded attempt, not permission to
+                # start another sequence of research rounds.
+                state.status = "partial" if state.usable_content else "stopped"
+                state.action = "stop"
+                entry.update({"status": state.status, "action": "stop"})
             entry["still_missing"] = state.still_missing
             journal.record(entry)
             state.attempts.append(entry)

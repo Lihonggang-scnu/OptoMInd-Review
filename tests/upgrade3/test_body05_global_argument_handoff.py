@@ -221,8 +221,9 @@ def test_real_tool_cycle_theme_inventory_stable_same_and_fresh_instance_resume(t
     boundary.calls.clear()
     second = planner.run(resume=True, stop_after="level1")
     assert second["material_theme_inventory"] == first["material_theme_inventory"]
-    assert boundary.calls == [] and tool_calls == ["level1"]
+    # Collector orchestration re-enters; unchanged effective model input still reuses.
+    assert boundary.calls == [] and tool_calls == ["level1", "level1"]
     fresh = p.ProgressiveReviewPlanner(planner.config, planner=boundary, retrieval_loop_runner=runner)
     third = fresh.run(resume=True, stop_after="level1")
     assert third["material_theme_inventory"] == first["material_theme_inventory"]
-    assert boundary.calls == [] and tool_calls == ["level1"]
+    assert boundary.calls == [] and tool_calls == ["level1", "level1", "level1"]
