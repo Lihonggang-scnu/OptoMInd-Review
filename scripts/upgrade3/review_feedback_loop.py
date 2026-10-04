@@ -320,11 +320,9 @@ class FeedbackLoop:
     ) -> Mapping[str, Any]:
         packet_path = output_dir / "UPDATED_WRITER_PACKET.json"
         outline = _chapter_outline(updated_packet)
-        chapter = updated_packet.get("chapter") if isinstance(updated_packet.get("chapter"), Mapping) else {}
         view = arranging.build_chapter_view(
             packet_path,
             shared_outline=outline,
-            review_argument=str(chapter.get("purpose") or updated_packet.get("review_argument") or ""),
             id_map_path=output_dir / "ID_MAP.json",
         )
         payload = view.arrangement_payload(max_source_chars=self.args.max_source_chars)
@@ -477,7 +475,6 @@ def _preflight(args: argparse.Namespace, packet: Mapping[str, Any], arrangement:
     view = arranging.build_chapter_view(
         packet_path,
         shared_outline=_chapter_outline(packet),
-        review_argument=str(chapter.get("purpose") or ""),
         id_map_path=args.output_root.resolve() / "ID_MAP.json",
     )
     arrangement_payload = view.arrangement_payload(max_source_chars=args.max_source_chars)

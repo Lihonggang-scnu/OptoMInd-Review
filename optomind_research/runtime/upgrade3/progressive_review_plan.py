@@ -617,6 +617,178 @@ def _compact_b_record(row: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+
+def _compact_original_plan(plan: Mapping[str, Any]) -> dict[str, Any]:
+    """Carry the user's intent, without the search execution/corpus payload."""
+    result = {key: plan[key] for key in (
+        "question", "question_en", "research_object", "scope", "shared_scope",
+        "criteria", "additional_constraints", "ambiguity",
+    ) if key in plan}
+    result["facets"] = [
+        {key: facet[key] for key in ("id", "facet_id", "ask", "question", "scope", "filters", "must_exclude")
+         if key in facet}
+        for facet in plan.get("facets") or [] if isinstance(facet, Mapping)
+    ]
+    return result
+
+
+def _review_guidance(
+    level1_outline: Mapping[str, Any], harmonized: Mapping[str, Any],
+    improvement: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Keep scope and argument distinct, including legacy missing arguments."""
+    improvement = improvement or {}
+    scope = next((value for value in (
+        improvement.get("finalized_shared_scope"), improvement.get("final_shared_scope"),
+        harmonized.get("shared_scope"), level1_outline.get("shared_scope"),
+    ) if isinstance(value, Mapping) and value or isinstance(value, str) and value.strip()), {})
+    result = {"shared_scope": dict(scope) if isinstance(scope, Mapping) else {"statement": scope.strip()},
+              "review_argument": "", "review_argument_status": "missing", "review_argument_source": "missing"}
+    for source, value, status in (
+        ("whole_plan_improvement", improvement.get("finalized_review_argument"), "calibrated"),
+        ("whole_plan_improvement", improvement.get("review_argument"), "calibrated"),
+        ("harmonized_scope", harmonized.get("review_argument"), "carried_forward_uncalibrated"),
+        ("level1_outline", level1_outline.get("review_argument"), "carried_forward_uncalibrated"),
+    ):
+        if isinstance(value, Mapping) and value or isinstance(value, str) and value.strip():
+            argument = json.dumps(value, ensure_ascii=False, sort_keys=True, default=_json_default) if isinstance(value, Mapping) else value.strip()
+            result.update(review_argument=argument, review_argument_status=status, review_argument_source=source)
+            break
+    return result
+
+
+def _material_theme_snapshot(
+    pool_rows: Sequence[Mapping[str, Any]], deep_materials: Mapping[str, Any] | None = None,
+) -> dict[str, dict[str, Any]]:
+    """Snapshot actual planning content, excluding paths and routing metadata."""
+    output = {}
+    for row in pool_rows:
+        paper_id = _text(row.get("_paper_id") or _canonical_paper_id(row))
+        b = row.get("_b_summary") or _compact_b_record(row)
+        content = {"review_planning_B": {key: b[key] for key in (
+            "planning_summary", "facet_contributions", "scope_interpretation_cautions", "broader_review_uses",
+        ) if b.get(key)}, **_material_content(row)}
+        deep = (deep_materials or {}).get(paper_id)
+        if deep:
+            content["deep_read_material"] = _compact_reading_material(deep)
+        output[paper_id] = _owner_cache_projection(content)
+    return output
+
+
+def _refresh_material_theme_inventory(
+    inventory: Sequence[Any], baseline: Mapping[str, Any], pool_rows: Sequence[Mapping[str, Any]],
+    deep_materials: Mapping[str, Any] | None = None,
+) -> list[Any]:
+    """Append compact, attributed deltas to the existing semantic inventory.
+
+    This is a navigation update, not another planner or a replacement for the
+    complete evidence delivered to the affected chapter owner.
+    """
+    updated = [dict(item) if isinstance(item, Mapping) else item for item in inventory
+               if not (isinstance(item, Mapping) and item.get("inventory_origin") == "material_update")]
+    current = _material_theme_snapshot(pool_rows, deep_materials)
+    for row in pool_rows:
+        paper_id = _text(row.get("_paper_id") or _canonical_paper_id(row))
+        material = current.get(paper_id) or {}
+        if material == baseline.get(paper_id) or not _owner_material_has_content(material):
+            continue
+        excerpt = json.dumps(material, ensure_ascii=False, sort_keys=True, default=_json_default)
+        updated.append({
+            "inventory_origin": "material_update", "source_handle": _text(row.get("_source_handle")),
+            "paper_id": paper_id, "change": "updated" if paper_id in baseline else "new",
+            "material_excerpt": excerpt[:1800], "excerpt_truncated": len(excerpt) > 1800,
+            "content_signature": _material_content_signature(material),
+        })
+    return updated
+
+
+def _attach_late_route_materials(
+    records: Sequence[Mapping[str, Any]], routing: Mapping[str, Any], pool_rows: Sequence[Mapping[str, Any]],
+    deep_materials: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    """Give newly routed material to its owner before final coordination."""
+    routes = [row for row in routing.get("late_source_routes") or []
+              if isinstance(row, Mapping) and row.get("route_status") == "assigned"]
+    materials = {row["source_handle"]: row for row in _case_selection_material_rows(
+        [_text(row.get("source_handle")) for row in routes], records, pool_rows, deep_materials)}
+    output = json.loads(json.dumps(records, ensure_ascii=False, default=_json_default))
+    for packet in output:
+        chapter = packet.get("chapter") or {}
+        chapter_id = _text(chapter.get("chapter_id"))
+        sources = list(packet.get("source_materials") or [])
+        existing = {_text(row.get("source_handle")) for row in sources if isinstance(row, Mapping)}
+        for route in routes:
+            handle = _text(route.get("source_handle"))
+            material = materials.get(handle) or {}
+            if chapter_id not in (route.get("chapter_ids") or []) or handle in existing or not _owner_material_has_content(material):
+                continue
+            sources.append(dict(material))
+            existing.add(handle)
+            for key, value in (("source_handles", handle), ("source_ids", _text(material.get("paper_id")))):
+                if value:
+                    chapter[key] = list(dict.fromkeys([*_source_values(chapter.get(key)), value]))
+        packet["source_materials"] = sources
+    return output
+
+def _chapter_material_changes(
+    detail_records: Sequence[Mapping[str, Any]], baseline_detail_records: Sequence[Mapping[str, Any]] | None,
+    case_response: Mapping[str, Any] | None = None,
+) -> dict[str, list[dict[str, Any]]]:
+    """Compare actual consumed content, preserving the existing late detector."""
+    case_response = case_response or {}
+    by_chapter_material: dict[str, list[dict[str, Any]]] = {}
+    source_materials_by_chapter: dict[str, dict[str, dict[str, Any]]] = {}
+    for record in detail_records:
+        chapter = record.get("chapter") if isinstance(record.get("chapter"), Mapping) else {}
+        chapter_id = _text(chapter.get("chapter_id"))
+        if not chapter_id:
+            continue
+        source_materials_by_chapter[chapter_id] = {
+            _text(item.get("source_handle")): dict(item)
+            for item in (record.get("source_materials") or [])
+            if isinstance(item, Mapping) and _text(item.get("source_handle"))
+        }
+    baseline_materials_by_chapter: dict[str, dict[str, dict[str, Any]]] = {}
+    for record in (baseline_detail_records or detail_records):
+        chapter = record.get("chapter") if isinstance(record.get("chapter"), Mapping) else {}
+        chapter_id = _text(chapter.get("chapter_id"))
+        if not chapter_id:
+            continue
+        baseline_materials_by_chapter[chapter_id] = {
+            _text(item.get("source_handle")): dict(item)
+            for item in (record.get("source_materials") or [])
+            if isinstance(item, Mapping) and _text(item.get("source_handle"))
+        }
+    # Compare actual material regardless of whether the case editor chose
+    # to mention it. Its labels and repeated contribution text are not a
+    # gate on a chapter owner's access to changed content.
+    case_notes: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for addition in case_response.get("additions") or []:
+        if not isinstance(addition, Mapping):
+            continue
+        unit_key = _text(addition.get("unit_key"))
+        chapter_id = unit_key.split(":", 1)[0] if ":" in unit_key else _text(addition.get("chapter_id"))
+        for study in addition.get("studies") or []:
+            if isinstance(study, Mapping):
+                case_notes.setdefault((chapter_id, _text(study.get("source_handle"))), []).append(dict(study))
+    for chapter_id, current_sources in source_materials_by_chapter.items():
+        prior_sources = baseline_materials_by_chapter.get(chapter_id, {})
+        for handle, current_source in current_sources.items():
+            current_content = _owner_consumed_material(current_source)
+            prior_content = _owner_consumed_material(prior_sources.get(handle) or {})
+            if _owner_cache_projection(current_content) == _owner_cache_projection(prior_content):
+                continue
+            by_chapter_material.setdefault(chapter_id, []).append({
+                "source_handle": handle,
+                "studies": case_notes.get((chapter_id, handle), []),
+                "source_materials": [dict(current_source)],
+                "previous_material": prior_content,
+                "content_signature": _material_content_signature(current_content),
+            })
+
+    return by_chapter_material
+
+
 def load_planning_pool(path: str | Path) -> list[dict[str, Any]]:
     source = Path(path)
     rows: list[dict[str, Any]] = []
@@ -1027,7 +1199,10 @@ def _planner_instructions(stage: str, *, planning_revision: bool = False) -> str
             "Do not repeat a settled level-1 or level-2 request, and return empty arrays when the supplied material is sufficient."
         ),
         "whole_plan_improvement": (
-            "Make one light whole-plan improvement pass. Identify only high-value changes to flow, duplication, scope "
+            "Make one light whole-plan improvement pass. Calibrate the supplied review_argument against the actual "
+            "material and chapter plans, keeping it distinct from shared_scope (coverage and exclusions). Return a "
+            "complete finalized_review_argument, preserving the argument when supported and qualifying or correcting "
+            "it when necessary. Do not substitute a scope statement for an argument. Identify only high-value changes to flow, duplication, scope "
             "consistency, terminology, and transitions. Coordinate by actual content: for each important concept, "
             "mechanism or method, say which chapter is its primary place of explanation and what a re-appearance in "
             "another chapter adds for the reader. Judge duplication by explanatory role, not by sentence similarity or "
@@ -2072,20 +2247,45 @@ def _seed_owner_unit_ids(
     units = seeded.get("units")
     if not isinstance(units, list):
         return seeded, []
-    arranged_ids = [
-        _text(item.get("unit_id") or item.get("id"))
-        for item in (arrangement.get("units") or ())
-        if isinstance(item, Mapping) and _text(item.get("unit_id") or item.get("id"))
-    ]
+    arranged_units = [item for item in arrangement.get("units") or () if isinstance(item, Mapping)]
+    arranged_ids = [_text(item.get("unit_id") or item.get("id")) for item in arranged_units]
+    has_explicit_relations = bool(_owner_unit_id_remap(arrangement)) or any(
+        "source_briefs" in task for item in arranged_units
+        for task in item.get("paragraph_tasks") or () if isinstance(task, Mapping)
+    )
+    def paragraph_ids(unit: Mapping[str, Any], key: str) -> set[str]:
+        return {_text(item.get("paragraph_id")) for item in unit.get(key) or ()
+                if isinstance(item, Mapping) and _text(item.get("paragraph_id"))}
+
+    arranged_refs = []
+    for item in arranged_units:
+        refs: set[str] = set()
+        for task in item.get("paragraph_tasks") or ():
+            if not isinstance(task, Mapping):
+                continue
+            references = task.get("source_briefs") or [task.get("paragraph_id")]
+            if isinstance(references, (str, Mapping)):
+                references = [references]
+            for ref in references:
+                refs.add(_text(ref.get("paragraph_id") or ref.get("id")) if isinstance(ref, Mapping) else _text(ref))
+        arranged_refs.append(refs)
     existing_ids: list[str] = []
     for index, unit in enumerate(units):
         if not isinstance(unit, Mapping):
             continue
         row = dict(unit)
         unit_id = _text(row.get("unit_id") or row.get("id"))
-        if not unit_id and index < len(arranged_ids):
-            unit_id = arranged_ids[index]
-            row["unit_id"] = unit_id
+        if not unit_id:
+            original_refs = paragraph_ids(row, "paragraph_briefs")
+            matches = [arranged_id for arranged_id, refs in zip(arranged_ids, arranged_refs)
+                       if arranged_id and original_refs and original_refs == refs]
+            if len(matches) == 1:
+                unit_id = matches[0]
+            elif not original_refs and not has_explicit_relations and index < len(arranged_ids):
+                # Compatibility only when neither side supplied a relationship.
+                unit_id = arranged_ids[index]
+            if unit_id:
+                row["unit_id"] = unit_id
         if unit_id:
             existing_ids.append(unit_id)
         units[index] = row
@@ -2247,7 +2447,9 @@ def _validate_owner_plan_update(
     old_ids = [item for item in old_ids if item]
     new_ids = [item for item in new_ids if item]
     remap = _owner_unit_id_remap(owner_response) or _owner_unit_id_remap(updated_plan)
-    structural_change = len(old_units) != len(new_units) or (old_ids and new_ids and old_ids != new_ids)
+    if len(new_ids) != len(set(new_ids)):
+        errors.append("updated_plan_duplicate_unit_ids")
+    structural_change = len(old_units) != len(new_units) or (old_ids and set(old_ids) != set(new_ids))
     if structural_change:
         if len(new_ids) != len(new_units) or not remap:
             errors.append("structural_unit_change_requires_explicit_unit_ids_and_remap")
@@ -2258,6 +2460,11 @@ def _validate_owner_plan_update(
             for new_id, old_refs in remap.items():
                 if new_id not in set(new_ids) or any(old_id not in allowed_old for old_id in old_refs):
                     errors.append("unit_id_remap_references_unknown_unit")
+            if any(new_id not in remap for new_id in set(new_ids) - allowed_old):
+                errors.append("unit_id_remap_missing_new_unit")
+            mapped_old = {old_id for old_refs in remap.values() for old_id in old_refs}
+            if allowed_old - set(new_ids) - mapped_old:
+                errors.append("unit_id_remap_missing_previous_unit")
     available = {
         _text(item.get("source_handle")) for item in source_materials
         if isinstance(item, Mapping) and _owner_material_has_content(item)
@@ -4103,6 +4310,7 @@ class ProgressiveReviewPlanner:
         paper_to_handle = {paper_id: handle for handle, paper_id in source_handle_map.items()}
         b_pool = [dict(row["_b_summary"]) for row in pool_rows]
         candidate_by_id = {str(row["_paper_id"]): row for row in pool_rows}
+        initial_material_snapshot = _material_theme_snapshot(pool_rows)
         state_path = root / "RUN_STATE.json"
         if resume and state_path.is_file():
             state = dict(_read_json(state_path))
@@ -4135,6 +4343,26 @@ class ProgressiveReviewPlanner:
             }, resume=resume, state=state)
         provisional = _stage_response(provisional_record)
         provisional = _resolve_planner_handles(provisional, source_handle_map)
+        initial_theme_inventory = provisional.get("material_theme_inventory") or provisional.get("theme_inventory") or []
+
+        def refresh_themes(*tool_results: Mapping[str, Any], routes: Mapping[str, Any] | None = None) -> list[Any]:
+            inventory = _refresh_material_theme_inventory(initial_theme_inventory, initial_material_snapshot, pool_rows, self._read_materials)
+            known_chapters = _outline_chapter_rows(provisional.get("provisional_outline") or [])
+            for result in tool_results:
+                known_chapters = _attach_chapter_candidate_sources(known_chapters, pool_rows, result)
+            owners: dict[str, set[str]] = {}
+            for chapter in known_chapters:
+                for handle in chapter.get("source_handles") or []:
+                    owners.setdefault(handle, set()).add(_text(chapter.get("chapter_id")))
+            for route in (routes or {}).get("source_routes") or []:
+                for chapter_id in route.get("chapter_ids") or []:
+                    owners.setdefault(_text(route.get("source_handle")), set()).add(_text(chapter_id))
+            for item in inventory:
+                if isinstance(item, dict) and item.get("inventory_origin") == "material_update":
+                    item["chapter_ids"] = sorted(owners.get(item["source_handle"]) or [])
+            provisional["material_theme_inventory"] = inventory
+            _atomic_json(root / "stages" / "material_theme_inventory.json", {"material_theme_inventory": inventory})
+            return inventory
 
         level1_tool_result = self._tool_cycle(
             phase="level1",
@@ -4154,10 +4382,13 @@ class ProgressiveReviewPlanner:
         paper_to_handle = {paper_id: handle for handle, paper_id in source_handle_map.items()}
         b_pool = [dict(row["_b_summary"]) for row in pool_rows]
         candidate_by_id = {str(row["_paper_id"]): row for row in pool_rows}
+        refresh_themes(level1_tool_result)
         level1_outline_record = self._model_stage("level1_outline", {
                 "topic_id": self.config.topic_id,
                 "research_question": topic,
                 "provisional_scope": provisional,
+                "original_plan": _compact_original_plan(plan),
+                "material_theme_inventory": provisional["material_theme_inventory"],
                 "actual_tool_results": self._compact_tool_feedback(level1_tool_result),
                 "full_b_pool_was_semantically_screened": len(b_pool),
                 "unavailable_and_failed_tools_are_scope_feedback": True,
@@ -4216,9 +4447,12 @@ class ProgressiveReviewPlanner:
         self._bind_tool_material_source_handles(pool_rows)
         paper_to_handle = {paper_id: handle for handle, paper_id in source_handle_map.items()}
         candidate_by_id = {str(row["_paper_id"]): row for row in pool_rows}
+        refresh_themes(level1_tool_result, level2_tool_result, routes=routing)
         final_scope_record = self._model_stage("finalize_chapter_scope", {
                 "topic_id": self.config.topic_id,
                 "research_question": topic,
+                **_review_guidance(level1_outline, harmonized),
+                "material_theme_inventory": provisional["material_theme_inventory"],
                 "harmonized_shared_outline": harmonized.get("shared_outline") or level1_outline.get("shared_outline") or {},
                 "harmonized_chapters": (
                     _planner_scope_copy(harmonized, paper_to_handle).get("chapters")
@@ -4235,6 +4469,7 @@ class ProgressiveReviewPlanner:
             **harmonized,
             "shared_outline": final_scope.get("shared_outline") or harmonized.get("shared_outline"),
             "final_scope_notes": final_scope.get("final_scope_notes") or [],
+            **{key: final_scope[key] for key in ("shared_scope", "review_argument") if final_scope.get(key)},
         }
         chapters = self._harmonized_chapters(final_scope, {"chapter_proposals": harmonized.get("chapters") or proposals.get("chapter_proposals") or []})
         if stop_after == "level2":
@@ -4302,6 +4537,7 @@ class ProgressiveReviewPlanner:
             self._bind_tool_material_source_handles(pool_rows)
             chapters = _attach_chapter_candidate_sources(chapters, pool_rows, chapter_tool_result)
 
+        refresh_themes(level1_tool_result, level2_tool_result, chapter_tool_result, routes=routing)
         detail_records = self._chapter_details(
             chapters=chapters,
             shared_outline=harmonized.get("shared_outline") or level1_outline.get("shared_outline") or {},
@@ -4325,6 +4561,18 @@ class ProgressiveReviewPlanner:
                 chapter_ids=self.config.recovery_chapters,
             )
             _atomic_json(root / "stages" / "chapter_recovery.json", recovery_report)
+        # Late sources must reach the existing coordinator and their owner
+        # before formal case attachment in either planning mode.
+        baseline_detail_records = json.loads(json.dumps(detail_records, ensure_ascii=False, default=_json_default))
+        routing = self._route_late_sources(
+            routing, pool_rows, detail_records=detail_records,
+            tool_results=[level2_tool_result, chapter_tool_result],
+            shared_outline=harmonized.get("shared_outline") or level1_outline.get("shared_outline") or {},
+            resume=resume, state=state,
+        )
+        detail_records = _attach_late_route_materials(detail_records, routing, pool_rows, self._read_materials)
+        refresh_themes(level1_tool_result, level2_tool_result, chapter_tool_result, routes=routing)
+        late_material_changes = _chapter_material_changes(detail_records, baseline_detail_records)
         whole_review_chapters = []
         for row in detail_records:
             chapter = row.get("chapter") if isinstance(row.get("chapter"), Mapping) else {}
@@ -4343,6 +4591,7 @@ class ProgressiveReviewPlanner:
                 # cited by this chapter, rather than the full routed pool.
                 "source_materials": _chapter_review_source_materials(row),
                 "tool_materials": chapter_tool_materials,
+                "late_material_changes": late_material_changes.get(chapter_id, []),
             })
         whole_record = ({"response": {}}
                         if self.config.planning_revision_enabled else self._stage(
@@ -4352,7 +4601,11 @@ class ProgressiveReviewPlanner:
                 "research_question": topic,
                 "shared_outline": harmonized.get("shared_outline") or level1_outline.get("shared_outline") or {},
                 "chapters": whole_review_chapters,
-                "tool_results_summary": self._compact_tool_feedback({"level1": level1_tool_result, "level2": level2_tool_result}),
+                "late_material_changes": late_material_changes,
+                **_review_guidance(level1_outline, harmonized),
+                "original_plan": _compact_original_plan(plan),
+                "material_theme_inventory": provisional["material_theme_inventory"],
+                "tool_results_summary": self._compact_tool_feedback({"level1": level1_tool_result, "level2": level2_tool_result, "chapters": chapter_tool_result}),
                 "editorial_feedback": editorial_feedback,
                 "citation_rules": dict(CURRENT_CITATION_RULES),
                 "do_not_invent_evidence": True,
@@ -4361,12 +4614,17 @@ class ProgressiveReviewPlanner:
             state=state,
             cache_inputs={
                 "chapters": whole_review_chapters,
-                "tool_results_summary": self._compact_tool_feedback({"level1": level1_tool_result, "level2": level2_tool_result}),
+                "late_material_changes": late_material_changes,
+                **_review_guidance(level1_outline, harmonized),
+                "original_plan": _compact_original_plan(plan),
+                "material_theme_inventory": provisional["material_theme_inventory"],
+                "tool_results_summary": self._compact_tool_feedback({"level1": level1_tool_result, "level2": level2_tool_result, "chapters": chapter_tool_result}),
                 "editorial_feedback": editorial_feedback,
                 "citation_rules": dict(CURRENT_CITATION_RULES),
             },
         ))
-        improvement = _stage_response(whole_record)
+        improvement = dict(_stage_response(whole_record))
+        improvement["late_material_changes"] = late_material_changes
         # The light whole-plan pass often returns useful prose adjustments but
         # leaves the chapter rewrite implicit.  Give named affected chapters a
         # bounded second call so those adjustments reach the writer packet as
@@ -4374,11 +4632,13 @@ class ProgressiveReviewPlanner:
         editorial_feedback_entries = self._editorial_feedback_entries(editorial_feedback)
         affected_ids = list(dict.fromkeys([
             *self._affected_chapter_ids(improvement),
+            *late_material_changes,
             *[_text(item.get("chapter_id")) for item in editorial_feedback_entries if _text(item.get("chapter_id"))],
         ]))
         concrete_ids = self._concrete_improvement_ids(improvement)
         editorial_ids = {_text(item.get("chapter_id")) for item in editorial_feedback_entries if _text(item.get("chapter_id"))}
-        revision_ids = [chapter_id for chapter_id in affected_ids if chapter_id not in concrete_ids or chapter_id in editorial_ids]
+        revision_ids = [chapter_id for chapter_id in affected_ids
+                        if chapter_id not in concrete_ids or chapter_id in editorial_ids or chapter_id in late_material_changes]
         if revision_ids and not self.config.planning_revision_enabled:
             detail_by_id = {
                 _text((row.get("chapter") or {}).get("chapter_id")): row
@@ -4392,6 +4652,7 @@ class ProgressiveReviewPlanner:
             common_revision_payload = {
                 "topic_id": self.config.topic_id,
                 "research_question": topic,
+                **_review_guidance(level1_outline, harmonized, improvement),
                 "improvement_notes": improvement.get("improvement_notes") or [],
                 "cross_chapter_adjustments": improvement.get("cross_chapter_adjustments") or [],
                 "editorial_feedback": editorial_feedback,
@@ -4426,6 +4687,7 @@ class ProgressiveReviewPlanner:
                     "chapter": (detail_by_id.get(chapter_id) or {}).get("chapter") or {},
                     "chapter_plan": (detail_by_id.get(chapter_id) or {}).get("chapter_plan") or {},
                     "chapter_feedback": feedback_by_chapter.get(chapter_id) or [],
+                    "late_material_changes": late_material_changes.get(chapter_id, []),
                     "editorial_feedback_for_chapter": [
                         dict(item) for item in editorial_feedback_entries
                         if _text(item.get("chapter_id")) == chapter_id
@@ -4538,7 +4800,7 @@ class ProgressiveReviewPlanner:
                 harmonized=harmonized,
                 level1_outline=level1_outline,
                 detail_records=detail_records,
-                baseline_detail_records=detail_records,
+                baseline_detail_records=baseline_detail_records,
                 case_record={"response": {}},
                 level1_tool_result=level1_tool_result,
                 level2_tool_result=level2_tool_result,
@@ -4951,55 +5213,7 @@ class ProgressiveReviewPlanner:
             _refresh_owner_packet_materials(
                 record, pool_rows=pool_rows, deep_material_by_paper=self._read_materials,
             )
-        by_chapter_material: dict[str, list[dict[str, Any]]] = {}
-        source_materials_by_chapter: dict[str, dict[str, dict[str, Any]]] = {}
-        for record in detail_records:
-            chapter = record.get("chapter") if isinstance(record.get("chapter"), Mapping) else {}
-            chapter_id = _text(chapter.get("chapter_id"))
-            if not chapter_id:
-                continue
-            source_materials_by_chapter[chapter_id] = {
-                _text(item.get("source_handle")): dict(item)
-                for item in (record.get("source_materials") or [])
-                if isinstance(item, Mapping) and _text(item.get("source_handle"))
-            }
-        baseline_materials_by_chapter: dict[str, dict[str, dict[str, Any]]] = {}
-        for record in (baseline_detail_records or detail_records):
-            chapter = record.get("chapter") if isinstance(record.get("chapter"), Mapping) else {}
-            chapter_id = _text(chapter.get("chapter_id"))
-            if not chapter_id:
-                continue
-            baseline_materials_by_chapter[chapter_id] = {
-                _text(item.get("source_handle")): dict(item)
-                for item in (record.get("source_materials") or [])
-                if isinstance(item, Mapping) and _text(item.get("source_handle"))
-            }
-        # Compare actual material regardless of whether the case editor chose
-        # to mention it. Its labels and repeated contribution text are not a
-        # gate on a chapter owner's access to changed content.
-        case_notes: dict[tuple[str, str], list[dict[str, Any]]] = {}
-        for addition in case_response.get("additions") or []:
-            if not isinstance(addition, Mapping):
-                continue
-            unit_key = _text(addition.get("unit_key"))
-            chapter_id = unit_key.split(":", 1)[0] if ":" in unit_key else _text(addition.get("chapter_id"))
-            for study in addition.get("studies") or []:
-                if isinstance(study, Mapping):
-                    case_notes.setdefault((chapter_id, _text(study.get("source_handle"))), []).append(dict(study))
-        for chapter_id, current_sources in source_materials_by_chapter.items():
-            prior_sources = baseline_materials_by_chapter.get(chapter_id, {})
-            for handle, current_source in current_sources.items():
-                current_content = _owner_consumed_material(current_source)
-                prior_content = _owner_consumed_material(prior_sources.get(handle) or {})
-                if _owner_cache_projection(current_content) == _owner_cache_projection(prior_content):
-                    continue
-                by_chapter_material.setdefault(chapter_id, []).append({
-                    "source_handle": handle,
-                    "studies": case_notes.get((chapter_id, handle), []),
-                    "source_materials": [dict(current_source)],
-                    "previous_material": prior_content,
-                    "content_signature": _material_content_signature(current_content),
-                })
+        by_chapter_material = _chapter_material_changes(detail_records, baseline_detail_records, case_response)
 
         whole_review_chapters: list[dict[str, Any]] = []
         for row in detail_records:
@@ -5020,7 +5234,8 @@ class ProgressiveReviewPlanner:
             })
         whole_inputs = {
             "chapters": whole_review_chapters,
-            "original_plan": dict(original_plan or {}),
+            "original_plan": _compact_original_plan(original_plan or {}),
+            **_review_guidance(level1_outline, harmonized),
             "material_theme_inventory": [
                 dict(item) if isinstance(item, Mapping) else _text(item)
                 for item in (material_theme_inventory or ())
@@ -5039,7 +5254,7 @@ class ProgressiveReviewPlanner:
             # differ; the coordinator sees the actual overlap and judges by
             # role instead of mechanically de-duplicating citations.
             "cross_chapter_source_uses": _cross_chapter_source_uses(detail_records),
-            "tool_results_summary": self._compact_tool_feedback({"level1": level1_tool_result, "level2": level2_tool_result}),
+            "tool_results_summary": self._compact_tool_feedback({"level1": level1_tool_result, "level2": level2_tool_result, "chapters": chapter_tool_result}),
             "tool_feedback_scope": {
                 "unanswered_need_means": "当前池未取得该内容，仅约束受影响章节本次可写结论；不构成领域缺失或不存在更优路线的证据",
             },
@@ -5069,6 +5284,7 @@ class ProgressiveReviewPlanner:
         improvement = _stage_response(whole_record)
         improvement = dict(improvement)
         improvement["late_material_changes"] = by_chapter_material
+        improvement["material_theme_inventory"] = whole_inputs["material_theme_inventory"]
         # In the opt-in path the whole-plan response is feedback for the
         # chapter owner.  Keeping its scalar suggestions in ``improvement``
         # is useful for the audit packet, but applying them before the owner
@@ -5161,6 +5377,7 @@ class ProgressiveReviewPlanner:
                     "topic_id": self.config.topic_id,
                     "research_question": topic,
                     "planning_revision_mode": True,
+                    **_review_guidance(level1_outline, harmonized, improvement),
                     "call_id": f"affected-chapter-revision-{_safe_id(chapter_id)}",
                     "chapter_id": chapter_id,
                     "chapter": (detail_by_id.get(chapter_id) or {}).get("chapter") or {},
@@ -5815,6 +6032,8 @@ class ProgressiveReviewPlanner:
             "review_title": _text(provisional.get("review_title") or topic),
             "original_plan": dict(plan),
             "provisional_scope": dict(provisional),
+            **_review_guidance(level1_outline, harmonized or {}),
+            "material_theme_inventory": provisional.get("material_theme_inventory") or [],
             "shared_outline": (harmonized or {}).get("shared_outline") or level1_outline.get("shared_outline") or {},
             "level1_tool_results": level1_tools,
             "level2_tool_results": dict(level2_tools or {}),
@@ -6093,13 +6312,8 @@ class ProgressiveReviewPlanner:
         source_index = self._source_index(chapters, pool_rows)
         unique_selected = {paper_id for row in source_index.values() if row.get("selected") for paper_id in [row.get("paper_id")]}
         all_deep_ids = list(dict.fromkeys([*_all_directed_ids(level1_tools), *_all_directed_ids(level2_tools), *_all_directed_ids(chapter_tools or {})]))
-        finalized_shared_scope = improvement.get("finalized_shared_scope")
-        if not isinstance(finalized_shared_scope, Mapping):
-            finalized_shared_scope = improvement.get("final_shared_scope")
-        if not isinstance(finalized_shared_scope, Mapping):
-            finalized_shared_scope = harmonized.get("shared_scope") or level1_outline.get("shared_scope") or {}
-        if not isinstance(finalized_shared_scope, Mapping):
-            finalized_shared_scope = {"statement": _text(finalized_shared_scope)} if _text(finalized_shared_scope) else {}
+        guidance = _review_guidance(level1_outline, harmonized, improvement)
+        material_themes = improvement.get("material_theme_inventory") or provisional.get("material_theme_inventory") or []
         finalized_notes = improvement.get("finalized_harmonization_notes")
         if finalized_notes is None:
             finalized_notes = improvement.get("harmonization_notes")
@@ -6113,6 +6327,7 @@ class ProgressiveReviewPlanner:
             # The current program contract is authoritative even when an old
             # cached packet carries stale editorial instructions.
             packet["citation_namespace_rule"] = dict(CURRENT_CITATION_RULES)
+            packet.update(guidance)
         final = {
             "schema_version": SCHEMA_VERSION,
             "status": "complete",
@@ -6121,7 +6336,8 @@ class ProgressiveReviewPlanner:
             "review_title": _text(provisional.get("review_title") or harmonized.get("review_title") or plan.get("review_title") or topic),
             "original_plan": dict(plan),
             "provisional_scope": dict(provisional),
-            "shared_scope": dict(finalized_shared_scope),
+            **guidance,
+            "material_theme_inventory": material_themes,
             "shared_outline": shared_outline,
             "harmonization_notes": finalized_notes,
             "citation_rules": dict(CURRENT_CITATION_RULES),

@@ -10,6 +10,7 @@ retrieve, read, or re-plan anything, and it never rewrites the upstream plan.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from dataclasses import dataclass, field
@@ -221,6 +222,10 @@ class ChapterView:
     # Multi-source or unattributed tool returns for this chapter.  They keep
     # their whole source set and are exported next to the per-handle catalog.
     chapter_tool_materials: list[dict[str, Any]] = field(default_factory=list)
+    unit_id_remap: dict[str, list[str]] = field(default_factory=dict)
+    shared_scope: dict[str, Any] = field(default_factory=dict)
+    review_argument_status: str = ""
+    review_argument_source: str = ""
 
     def to_dict(self, *, include_material: bool = True) -> dict[str, Any]:
         return {
@@ -232,7 +237,11 @@ class ChapterView:
             "thesis": self.thesis,
             "reader_objective": self.reader_objective,
             "research_question": self.research_question,
+            "unit_id_remap": self.unit_id_remap,
             "review_argument": self.review_argument,
+            "shared_scope": self.shared_scope,
+            "review_argument_status": self.review_argument_status,
+            "review_argument_source": self.review_argument_source,
             "other_chapters": self.other_chapters,
             "units": [unit.to_dict() for unit in self.units],
             "sources": [source.to_dict(include_material=include_material) for source in self.sources],
@@ -299,7 +308,18 @@ class ChapterView:
             "thesis": clip(self.thesis),
             "reader_objective": clip(self.reader_objective),
             "research_question": self.research_question,
-            "review_argument": clip(self.review_argument),
+            "review_argument": self.review_argument,
+            "task_identity_contract": {
+                "unchanged_task_may_retain_original_id": True,
+                "split_or_merge_requires_new_paragraph_id": True,
+                "new_ids_must_not_collide_with_original_ids": True,
+                "omit_new_id_for_deterministic_derivation": True,
+                "derived_id_inputs": ["source_briefs", "portion"],
+                "split_portions_must_be_distinct_unless_explicit_new_ids": True,
+            },
+            "shared_scope": self.shared_scope,
+            "review_argument_status": self.review_argument_status,
+            "review_argument_source": self.review_argument_source,
             "other_chapters": [
                 {"chapter_id": row.get("chapter_id"), "title": row.get("title"), "purpose": clip(row.get("purpose"))}
                 for row in self.other_chapters
@@ -340,8 +360,8 @@ class ChapterView:
 class IdMap:
     """Stable local ids for units and paragraphs.
 
-    Ids are assigned once and persisted; a later run with a reordered plan reads
-    the saved map instead of inventing new identities.
+    Explicit owner IDs are authoritative. The persisted positional map is only
+    a compatibility path for older packets without IDs, not semantic identity.
     """
 
     def __init__(self, path: Path) -> None:
@@ -366,17 +386,26 @@ class IdMap:
     def paragraph_signature(unit_id: str, ordinal: int, point: str) -> str:
         return f"{unit_id}#p{ordinal}"
 
-    def unit_id(self, signature: str, fallback: str) -> str:
-        if signature not in self.units:
-            self.units[signature] = fallback
-            self._dirty = True
-        return self.units[signature]
+    def _legacy_id(self, values: dict[str, str], signature: str, fallback: str,
+                   reserved: set[str]) -> str:
+        existing = values.get(signature)
+        if existing and existing not in reserved:
+            return existing
+        candidate = fallback
+        occupied = reserved | set(values.values())
+        suffix = 2
+        while candidate in occupied:
+            candidate = f"{fallback}_LEGACY_{suffix:02d}"
+            suffix += 1
+        values[signature] = candidate
+        self._dirty = True
+        return candidate
 
-    def paragraph_id(self, signature: str, fallback: str) -> str:
-        if signature not in self.paragraphs:
-            self.paragraphs[signature] = fallback
-            self._dirty = True
-        return self.paragraphs[signature]
+    def unit_id(self, signature: str, fallback: str, *, reserved: set[str] | None = None) -> str:
+        return self._legacy_id(self.units, signature, fallback, reserved or set())
+
+    def paragraph_id(self, signature: str, fallback: str, *, reserved: set[str] | None = None) -> str:
+        return self._legacy_id(self.paragraphs, signature, fallback, reserved or set())
 
     def save(self) -> None:
         if not self._dirty:
@@ -938,6 +967,9 @@ def build_chapter_view(
     *,
     shared_outline: Sequence[Mapping[str, Any]] | None = None,
     review_argument: str = "",
+    shared_scope: Mapping[str, Any] | None = None,
+    review_argument_status: str = "",
+    review_argument_source: str = "",
     id_map_path: str | Path | None = None,
 ) -> ChapterView:
     """Build the arrangement view for one chapter from its writer packet."""
@@ -954,6 +986,19 @@ def build_chapter_view(
     )
     ids = IdMap(resolved_id_map)
 
+    owner_units = [unit for unit in plan.get("units") or () if isinstance(unit, Mapping)]
+    explicit_unit_ids = [str(unit.get("unit_id") or unit.get("id") or "").strip()
+                         for unit in owner_units]
+    explicit_paragraph_ids = [str(row.get("paragraph_id") or row.get("id") or "").strip()
+                              for unit in owner_units for row in _paragraph_rows(unit)]
+    for kind, values in (("unit", explicit_unit_ids), ("paragraph", explicit_paragraph_ids)):
+        seen: set[str] = set()
+        for value in values:
+            if value and value in seen:
+                raise ChapterArrangementError(f"{kind}_id_duplicated:{value}")
+            seen.add(value)
+    reserved_units = set(explicit_unit_ids) - {""}
+    reserved_paragraphs = set(explicit_paragraph_ids) - {""}
     units: list[UnitView] = []
     uses: dict[str, list[dict[str, Any]]] = {}
     paragraph_handles: set[str] = set()
@@ -962,13 +1007,20 @@ def build_chapter_view(
             continue
         substantive = str(unit.get("substantive_point") or "").strip()
         signature = IdMap.unit_signature(chapter_id, index, substantive)
-        unit_id = ids.unit_id(signature, f"{chapter_id}_U{index:02d}")
+        unit_id = str(unit.get("unit_id") or unit.get("id") or "").strip()
+        if not unit_id:
+            unit_id = ids.unit_id(signature, f"{chapter_id}_U{index:02d}", reserved=reserved_units)
+        reserved_units.add(unit_id)
         briefs: list[ParagraphBrief] = []
         for ordinal, row in enumerate(_paragraph_rows(unit), start=1):
             point = str(row.get("point") or "").strip()
             handles = tuple(_dedupe(_handles_in(row.get("source_handles")) or _handles_in(row)))
             paragraph_signature = IdMap.paragraph_signature(unit_id, ordinal, point)
-            paragraph_id = ids.paragraph_id(paragraph_signature, f"{unit_id}_P{ordinal:02d}")
+            paragraph_id = str(row.get("paragraph_id") or row.get("id") or "").strip()
+            if not paragraph_id:
+                paragraph_id = ids.paragraph_id(
+                    paragraph_signature, f"{unit_id}_P{ordinal:02d}", reserved=reserved_paragraphs)
+            reserved_paragraphs.add(paragraph_id)
             briefs.append(ParagraphBrief(
                 paragraph_id=paragraph_id,
                 unit_id=unit_id,
@@ -1099,6 +1151,28 @@ def build_chapter_view(
         if isinstance(row, Mapping) and str(row.get("chapter_id") or "") != chapter_id
     ]
 
+    argument = review_argument or str(packet.get("review_argument") or "")
+    packet_argument_applies = not review_argument or review_argument == packet.get("review_argument")
+    argument_status = review_argument_status or (
+        str(packet.get("review_argument_status") or "") if packet_argument_applies else "")
+    argument_source = review_argument_source or (
+        str(packet.get("review_argument_source") or "") if packet_argument_applies else "")
+    scope = shared_scope if shared_scope is not None else packet.get("shared_scope")
+    raw_remap = packet.get("unit_id_remap") or plan.get("unit_id_remap") or {}
+    unit_remap: dict[str, list[str]] = {}
+    if not isinstance(raw_remap, Mapping):
+        raise ChapterArrangementError("unit_id_remap_not_object")
+    current_ids = {unit.unit_id for unit in units}
+    for new_id, old_ids in raw_remap.items():
+        if str(new_id) not in current_ids:
+            raise ChapterArrangementError(f"unit_id_remap_unknown_target:{new_id}")
+        if isinstance(old_ids, str):
+            old_ids = [old_ids]
+        if not isinstance(old_ids, list) or not old_ids:
+            raise ChapterArrangementError(f"unit_id_remap_invalid_sources:{new_id}")
+        unit_remap[str(new_id)] = list(dict.fromkeys(str(old).strip() for old in old_ids if str(old).strip()))
+        if not unit_remap[str(new_id)]:
+            raise ChapterArrangementError(f"unit_id_remap_invalid_sources:{new_id}")
     return ChapterView(
         chapter_id=chapter_id,
         title=title,
@@ -1107,7 +1181,11 @@ def build_chapter_view(
         thesis=str(plan.get("thesis") or ""),
         reader_objective=str(plan.get("reader_objective") or ""),
         research_question=str(packet.get("research_question") or ""),
-        review_argument=review_argument or str(packet.get("review_argument") or ""),
+        review_argument=argument,
+        shared_scope=dict(scope) if isinstance(scope, Mapping) else {},
+        unit_id_remap=unit_remap,
+        review_argument_status=(argument_status or "provided_unspecified") if argument else "missing",
+        review_argument_source=(argument_source or "provided_unspecified") if argument else "missing",
         other_chapters=other_chapters,
         units=units,
         sources=sources,
@@ -1714,6 +1792,8 @@ def _restore_owner_paragraph_briefs(
     unit: UnitView,
     known_handles: set[str],
     errors: list[str],
+    *,
+    restore_text: bool = True,
 ) -> list[str]:
     """Restore the owner's original paragraph tasks in the opt-in mode.
 
@@ -1733,27 +1813,28 @@ def _restore_owner_paragraph_briefs(
     """
 
     briefs_by_id = {brief.paragraph_id: brief for brief in unit.paragraph_briefs}
-    if not briefs_by_id:
-        return []
     claimed: set[str] = set()
     unmapped: list[str] = []
     for entry, raw, explicit_id in zip(paragraphs, raw_rows, explicit_ids):
         refs_raw = raw.get("source_briefs")
+        if refs_raw is not None and not isinstance(refs_raw, list):
+            errors.append(f"brief_reference_not_list:{unit_id}:{entry['paragraph_id']}")
         refs = [str(item).strip() for item in refs_raw if str(item).strip()] \
             if isinstance(refs_raw, list) else []
         bad = [ref for ref in refs if ref not in briefs_by_id]
         if bad:
             errors.append(f"brief_reference_unknown:{unit_id}:{','.join(bad)}")
             refs = [ref for ref in refs if ref in briefs_by_id]
-        if not refs and explicit_id and entry["paragraph_id"] in briefs_by_id:
+        if not refs and restore_text and explicit_id and entry["paragraph_id"] in briefs_by_id:
             refs = [entry["paragraph_id"]]
         if refs:
             claimed.update(refs)
             briefs = [briefs_by_id[ref] for ref in refs]
             primary = briefs[0]
-            entry["point"] = primary.point
-            entry["development"] = "\n\n".join(
-                brief.development for brief in briefs if brief.development).strip()
+            if restore_text:
+                entry["point"] = primary.point
+                entry["development"] = "\n\n".join(
+                    brief.development for brief in briefs if brief.development).strip()
             entry["source_briefs"] = refs
             # Keep the complete local owner tasks beside the compact
             # references. source_uses is an arrangement-level view and
@@ -1761,7 +1842,8 @@ def _restore_owner_paragraph_briefs(
             # brief after a merge.
             entry["source_brief_details"] = [brief.to_dict() for brief in briefs]
             entry["carried_over"] = True
-            entry["point_changed_from_brief"] = False
+            if restore_text:
+                entry["point_changed_from_brief"] = False
             # A missing output id already received a unit-local fallback in
             # validate_arrangement. Keep that unique task id: the owner brief
             # id is a reference, not the identity of a split output task.
@@ -1778,7 +1860,7 @@ def _restore_owner_paragraph_briefs(
         if portion:
             entry["portion"] = portion
     unclaimed = sorted(ref for ref in briefs_by_id if ref not in claimed)
-    if unclaimed:
+    if unclaimed and restore_text:
         errors.append(f"briefs_unclaimed:{unit_id}:{','.join(unclaimed)}")
     return unmapped
 
@@ -1819,9 +1901,11 @@ def validate_arrangement(
         """Resolve an existing catalogue alias without inventing identities."""
 
         return alias_to_canonical.get(handle, handle)
-    known_paragraphs = {
-        brief.paragraph_id for unit in view.units for brief in unit.paragraph_briefs
+    paragraph_owners = {
+        brief.paragraph_id: unit.unit_id for unit in view.units for brief in unit.paragraph_briefs
     }
+    known_paragraphs = set(paragraph_owners)
+    seen_paragraphs: set[str] = set()
     brief_points = {
         brief.paragraph_id: _normalize_point(brief.point)
         for unit in view.units for brief in unit.paragraph_briefs
@@ -1868,7 +1952,20 @@ def validate_arrangement(
             paragraph_id = str(raw_paragraph.get("paragraph_id") or "").strip()
             explicit_id = bool(paragraph_id)
             explicit_paragraph_ids.append(explicit_id)
-            if not paragraph_id:
+            refs = raw_paragraph.get("source_briefs")
+            if paragraph_id in known_paragraphs and (
+                (isinstance(refs, list) and refs and set(str(ref).strip() for ref in refs) != {paragraph_id})
+                or str(raw_paragraph.get("portion") or "").strip()
+            ):
+                errors.append(f"paragraph_id_brief_conflict:{paragraph_id}")
+            if not paragraph_id and isinstance(refs, list) and refs:
+                # This identity follows the explicit relationship and split
+                # portion, never the output position or similar prose.
+                identity = {"source_briefs": sorted(set(str(ref).strip() for ref in refs)),
+                            "portion": str(raw_paragraph.get("portion") or "").strip()}
+                digest = hashlib.sha256(json.dumps(identity, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:16]
+                paragraph_id = f"{unit_id}__TASK_{digest}"
+            elif not paragraph_id:
                 paragraph_id = f"{unit_id}_P{ordinal:02d}"
                 if planning_revision and (
                     paragraph_id in known_paragraphs
@@ -1881,8 +1978,11 @@ def validate_arrangement(
                         paragraph_id = f"{unit_id}__TASK_{ordinal:02d}_{suffix:02d}"
                         suffix += 1
                 generated_ids.add(paragraph_id)
-            elif paragraph_id in known_paragraphs and not paragraph_id.startswith(unit_id):
+            elif paragraph_id in known_paragraphs and paragraph_owners[paragraph_id] != unit_id:
                 errors.append(f"paragraph_id_unit_mismatch:{paragraph_id}")
+            if paragraph_id in seen_paragraphs:
+                errors.append(f"paragraph_id_duplicated:{paragraph_id}")
+            seen_paragraphs.add(paragraph_id)
             uses = _normalize_uses(raw_paragraph.get("source_uses"))
             for use in uses:
                 if use["source_handle"] not in known_handles:
@@ -1892,7 +1992,7 @@ def validate_arrangement(
             # later merge by id), but the judgement may have been rewritten.  Both
             # facts are reported so nothing is inferred from the id alone.
             previous_point = brief_points.get(paragraph_id)
-            reused = previous_point is not None
+            reused = explicit_id and previous_point is not None
             kept_point = reused and previous_point == _normalize_point(point)
             paragraphs.append({
                 "paragraph_id": paragraph_id,
@@ -1903,11 +2003,10 @@ def validate_arrangement(
                 "point_changed_from_brief": reused and not kept_point,
             })
             raw_paragraph_rows.append(raw_paragraph)
-        if planning_revision:
-            unmapped_tasks = _restore_owner_paragraph_briefs(
-                unit_id, paragraphs, raw_paragraph_rows, explicit_paragraph_ids,
-                known_units[unit_id], known_handles, errors,
-            )
+        unmapped_tasks = _restore_owner_paragraph_briefs(
+            unit_id, paragraphs, raw_paragraph_rows, explicit_paragraph_ids,
+            known_units[unit_id], known_handles, errors, restore_text=planning_revision,
+        )
         tables: list[dict[str, Any]] = []
         for ordinal, raw_table in enumerate(raw_unit.get("table_tasks") or (), start=1):
             if not isinstance(raw_table, Mapping):
@@ -2005,6 +2104,7 @@ def validate_arrangement(
         "schema_version": OUTPUT_SCHEMA,
         "chapter_id": view.chapter_id,
         "chapter_argument": view.thesis if planning_revision else str(payload.get("chapter_argument") or "").strip(),
+        "unit_id_remap": view.unit_id_remap,
         "units": units_out,
         "unused_sources": unused,
         "issues": _normalize_issues(payload.get("issues")),

@@ -1,0 +1,61 @@
+......................FFF                                                [100%]
+=================================== FAILURES ===================================
+______ test_split_portion_cannot_keep_old_id_without_explicit_refs[None] _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-15/test_split_portion_cannot_keep0')
+refs = None
+
+    @pytest.mark.parametrize("refs", [None, []])
+    def test_split_portion_cannot_keep_old_id_without_explicit_refs(tmp_path, refs):
+        view = _view(tmp_path)
+        response = _payload(view)
+        task = response["units"][0]["paragraph_tasks"][0]
+        task["portion"] = "settings only"
+        if refs is None:
+            task.pop("source_briefs")
+        else:
+            task["source_briefs"] = refs
+        result = arranging.validate_arrangement(response, view, planning_revision=True)
+>       assert any("paragraph_id_brief_conflict:" in e for e in result["validation"]["errors"])
+E       assert False
+E        +  where False = any(<generator object test_split_portion_cannot_keep_old_id_without_explicit_refs.<locals>.<genexpr> at 0x7ff248c5f370>)
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:265: AssertionError
+______ test_split_portion_cannot_keep_old_id_without_explicit_refs[refs1] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-15/test_split_portion_cannot_keep1')
+refs = []
+
+    @pytest.mark.parametrize("refs", [None, []])
+    def test_split_portion_cannot_keep_old_id_without_explicit_refs(tmp_path, refs):
+        view = _view(tmp_path)
+        response = _payload(view)
+        task = response["units"][0]["paragraph_tasks"][0]
+        task["portion"] = "settings only"
+        if refs is None:
+            task.pop("source_briefs")
+        else:
+            task["source_briefs"] = refs
+        result = arranging.validate_arrangement(response, view, planning_revision=True)
+>       assert any("paragraph_id_brief_conflict:" in e for e in result["validation"]["errors"])
+E       assert False
+E        +  where False = any(<generator object test_split_portion_cannot_keep_old_id_without_explicit_refs.<locals>.<genexpr> at 0x7ff248c5fe00>)
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:265: AssertionError
+__________ test_actual_arrangement_message_exposes_identity_contract ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-15/test_actual_arrangement_messag0')
+
+    def test_actual_arrangement_message_exposes_identity_contract(tmp_path):
+        view = _view(tmp_path)
+        message = json.loads(arranging.arrangement_messages(view.arrangement_payload())[-1]["content"])
+>       contract = message["task_identity_contract"]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'task_identity_contract'
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:271: KeyError
+=========================== short test summary info ============================
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_split_portion_cannot_keep_old_id_without_explicit_refs[None]
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_split_portion_cannot_keep_old_id_without_explicit_refs[refs1]
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_actual_arrangement_message_exposes_identity_contract
+3 failed, 22 passed in 0.80s

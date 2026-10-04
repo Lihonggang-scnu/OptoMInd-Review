@@ -1,0 +1,412 @@
+{
+  "finding": "F12",
+  "baseline_commit": "3d244f23166c9ba2e948fd8efd8257d00dbebc51",
+  "test_file": "tests/upgrade3/test_body05_argument_cli_handoff.py",
+  "fixture_type": "synthetic offline inputs; controlled provider response, not a recording",
+  "boundaries": {
+    "arrangement_preview": "actual CLI subprocess, default offline preview",
+    "feedback_preflight": "actual CLI main; local tokenizer replaced by deterministic counter; provider construction forbidden",
+    "feedback_adapter": "real arrangement_runner, message construction, run_arrangement, parsing and validation; ControlledClient.complete returns synthetic placement only"
+  },
+  "observed_checks": [
+    {
+      "stage": "before CLI changes",
+      "result": "13 failed in 6.61s"
+    },
+    {
+      "stage": "after CLI changes, before argument clipping fix",
+      "result": "1 failed, 13 passed in 8.55s"
+    },
+    {
+      "stage": "after argument repair, before final identity-protocol payload",
+      "result": "14 passed in 8.26s"
+    },
+    {
+      "stage": "after final identity/runtime freeze",
+      "result": "14 passed in 9.01s"
+    }
+  ],
+  "preview_cases": [
+    {
+      "fixture": "final_plan_precedes_stale_packet",
+      "before": {
+        "input": {
+          "plan_review_argument": "FINAL_CALIBRATED_ARGUMENT",
+          "packet_review_argument": "STALE_PACKET_ARGUMENT",
+          "plan_shared_scope": {
+            "statement": "SCOPE_ONLY",
+            "exclusions": [
+              "outside this review"
+            ]
+          }
+        },
+        "persisted_view_fields": {
+          "review_argument": "SCOPE_ONLY",
+          "shared_scope": null,
+          "purpose": "CHAPTER_PURPOSE_ONLY",
+          "review_argument_status": null,
+          "review_argument_source": null
+        },
+        "mode": "preview",
+        "model_calls": 0,
+        "cache_signature": "511458fa1d74165a"
+      },
+      "after": {
+        "input": {
+          "plan_review_argument": "FINAL_CALIBRATED_ARGUMENT",
+          "packet_review_argument": "STALE_PACKET_ARGUMENT",
+          "plan_shared_scope": {
+            "statement": "SCOPE_ONLY",
+            "exclusions": [
+              "outside this review"
+            ]
+          }
+        },
+        "persisted_view_fields": {
+          "review_argument": "FINAL_CALIBRATED_ARGUMENT",
+          "shared_scope": {
+            "statement": "SCOPE_ONLY",
+            "exclusions": [
+              "outside this review"
+            ]
+          },
+          "purpose": "CHAPTER_PURPOSE_ONLY",
+          "review_argument_status": "calibrated",
+          "review_argument_source": "whole_plan_improvement"
+        },
+        "mode": "preview",
+        "model_calls": 0,
+        "cache_signature": "aa11cf48d160a121"
+      }
+    },
+    {
+      "fixture": "missing_plan_argument_falls_back_to_packet",
+      "before": {
+        "input": {
+          "plan_review_argument": null,
+          "packet_review_argument": "PACKET_CALIBRATED_ARGUMENT",
+          "plan_shared_scope": {
+            "statement": "SCOPE_ONLY",
+            "exclusions": [
+              "outside this review"
+            ]
+          }
+        },
+        "persisted_view_fields": {
+          "review_argument": "SCOPE_ONLY",
+          "shared_scope": null,
+          "purpose": "CHAPTER_PURPOSE_ONLY",
+          "review_argument_status": null,
+          "review_argument_source": null
+        },
+        "mode": "preview",
+        "model_calls": 0,
+        "cache_signature": "511458fa1d74165a"
+      },
+      "after": {
+        "input": {
+          "plan_review_argument": null,
+          "packet_review_argument": "PACKET_CALIBRATED_ARGUMENT",
+          "plan_shared_scope": {
+            "statement": "SCOPE_ONLY",
+            "exclusions": [
+              "outside this review"
+            ]
+          }
+        },
+        "persisted_view_fields": {
+          "review_argument": "PACKET_CALIBRATED_ARGUMENT",
+          "shared_scope": {
+            "statement": "SCOPE_ONLY",
+            "exclusions": [
+              "outside this review"
+            ]
+          },
+          "purpose": "CHAPTER_PURPOSE_ONLY",
+          "review_argument_status": "calibrated",
+          "review_argument_source": "whole_plan_improvement"
+        },
+        "mode": "preview",
+        "model_calls": 0,
+        "cache_signature": "6b61142ce121b1f8"
+      }
+    },
+    {
+      "fixture": "absent_argument_stays_missing",
+      "before": {
+        "input": {
+          "plan_review_argument": null,
+          "packet_review_argument": null,
+          "plan_shared_scope": {
+            "statement": "SCOPE_ONLY",
+            "exclusions": [
+              "outside this review"
+            ]
+          }
+        },
+        "persisted_view_fields": {
+          "review_argument": "SCOPE_ONLY",
+          "shared_scope": null,
+          "purpose": "CHAPTER_PURPOSE_ONLY",
+          "review_argument_status": null,
+          "review_argument_source": null
+        },
+        "mode": "preview",
+        "model_calls": 0,
+        "cache_signature": "511458fa1d74165a"
+      },
+      "after": {
+        "input": {
+          "plan_review_argument": null,
+          "packet_review_argument": null,
+          "plan_shared_scope": {
+            "statement": "SCOPE_ONLY",
+            "exclusions": [
+              "outside this review"
+            ]
+          }
+        },
+        "persisted_view_fields": {
+          "review_argument": "",
+          "shared_scope": {
+            "statement": "SCOPE_ONLY",
+            "exclusions": [
+              "outside this review"
+            ]
+          },
+          "purpose": "CHAPTER_PURPOSE_ONLY",
+          "review_argument_status": "missing",
+          "review_argument_source": "missing"
+        },
+        "mode": "preview",
+        "model_calls": 0,
+        "cache_signature": "1bf38eea96bcc7de"
+      }
+    }
+  ],
+  "feedback_cases": [
+    {
+      "fixture": "packet_calibrated_argument",
+      "before_preflight": {
+        "role": "user",
+        "user_message_fields": {
+          "review_argument": "CHAPTER_PURPOSE_ONLY",
+          "shared_scope": null,
+          "purpose": "CHAPTER_PURPOSE_ONLY",
+          "review_argument_status": null,
+          "review_argument_source": null
+        }
+      },
+      "after_preflight": {
+        "role": "user",
+        "user_message_fields": {
+          "review_argument": "CALIBRATED_A",
+          "shared_scope": {
+            "statement": "SCOPE_ONLY",
+            "exclusions": [
+              "outside this review"
+            ]
+          },
+          "purpose": "CHAPTER_PURPOSE_ONLY",
+          "review_argument_status": "calibrated",
+          "review_argument_source": "whole_plan_improvement"
+        },
+        "task_identity_contract": {
+          "unchanged_task_may_retain_original_id": true,
+          "split_or_merge_requires_new_paragraph_id": true,
+          "new_ids_must_not_collide_with_original_ids": true,
+          "omit_new_id_for_deterministic_derivation": true,
+          "derived_id_inputs": [
+            "source_briefs",
+            "portion"
+          ],
+          "split_portions_must_be_distinct_unless_explicit_new_ids": true
+        }
+      },
+      "before_adapter": {
+        "role": "user",
+        "user_message_fields": {
+          "review_argument": "CHAPTER_PURPOSE_ONLY",
+          "shared_scope": null,
+          "purpose": "CHAPTER_PURPOSE_ONLY",
+          "review_argument_status": null,
+          "review_argument_source": null
+        }
+      },
+      "after_adapter": {
+        "role": "user",
+        "user_message_fields": {
+          "review_argument": "CALIBRATED_A",
+          "shared_scope": {
+            "statement": "SCOPE_ONLY",
+            "exclusions": [
+              "outside this review"
+            ]
+          },
+          "purpose": "CHAPTER_PURPOSE_ONLY",
+          "review_argument_status": "calibrated",
+          "review_argument_source": "whole_plan_improvement"
+        },
+        "task_identity_contract": {
+          "unchanged_task_may_retain_original_id": true,
+          "split_or_merge_requires_new_paragraph_id": true,
+          "new_ids_must_not_collide_with_original_ids": true,
+          "omit_new_id_for_deterministic_derivation": true,
+          "derived_id_inputs": [
+            "source_briefs",
+            "portion"
+          ],
+          "split_portions_must_be_distinct_unless_explicit_new_ids": true
+        }
+      },
+      "after_persisted_view_fields": {
+        "review_argument": "CALIBRATED_A",
+        "shared_scope": {
+          "statement": "SCOPE_ONLY",
+          "exclusions": [
+            "outside this review"
+          ]
+        },
+        "purpose": "CHAPTER_PURPOSE_ONLY",
+        "review_argument_status": "calibrated",
+        "review_argument_source": "whole_plan_improvement"
+      },
+      "after_preflight_run": {
+        "status": "preflight_only",
+        "network_calls": 0
+      }
+    },
+    {
+      "fixture": "packet_missing_argument",
+      "before_preflight": {
+        "role": "user",
+        "user_message_fields": {
+          "review_argument": "CHAPTER_PURPOSE_ONLY",
+          "shared_scope": null,
+          "purpose": "CHAPTER_PURPOSE_ONLY",
+          "review_argument_status": null,
+          "review_argument_source": null
+        }
+      },
+      "after_preflight": {
+        "role": "user",
+        "user_message_fields": {
+          "review_argument": "",
+          "shared_scope": {
+            "statement": "SCOPE_ONLY",
+            "exclusions": [
+              "outside this review"
+            ]
+          },
+          "purpose": "CHAPTER_PURPOSE_ONLY",
+          "review_argument_status": "missing",
+          "review_argument_source": "missing"
+        },
+        "task_identity_contract": {
+          "unchanged_task_may_retain_original_id": true,
+          "split_or_merge_requires_new_paragraph_id": true,
+          "new_ids_must_not_collide_with_original_ids": true,
+          "omit_new_id_for_deterministic_derivation": true,
+          "derived_id_inputs": [
+            "source_briefs",
+            "portion"
+          ],
+          "split_portions_must_be_distinct_unless_explicit_new_ids": true
+        }
+      },
+      "before_adapter": {
+        "role": "user",
+        "user_message_fields": {
+          "review_argument": "CHAPTER_PURPOSE_ONLY",
+          "shared_scope": null,
+          "purpose": "CHAPTER_PURPOSE_ONLY",
+          "review_argument_status": null,
+          "review_argument_source": null
+        }
+      },
+      "after_adapter": {
+        "role": "user",
+        "user_message_fields": {
+          "review_argument": "",
+          "shared_scope": {
+            "statement": "SCOPE_ONLY",
+            "exclusions": [
+              "outside this review"
+            ]
+          },
+          "purpose": "CHAPTER_PURPOSE_ONLY",
+          "review_argument_status": "missing",
+          "review_argument_source": "missing"
+        },
+        "task_identity_contract": {
+          "unchanged_task_may_retain_original_id": true,
+          "split_or_merge_requires_new_paragraph_id": true,
+          "new_ids_must_not_collide_with_original_ids": true,
+          "omit_new_id_for_deterministic_derivation": true,
+          "derived_id_inputs": [
+            "source_briefs",
+            "portion"
+          ],
+          "split_portions_must_be_distinct_unless_explicit_new_ids": true
+        }
+      },
+      "after_persisted_view_fields": {
+        "review_argument": "",
+        "shared_scope": {
+          "statement": "SCOPE_ONLY",
+          "exclusions": [
+            "outside this review"
+          ]
+        },
+        "purpose": "CHAPTER_PURPOSE_ONLY",
+        "review_argument_status": "missing",
+        "review_argument_source": "missing"
+      },
+      "after_preflight_run": {
+        "status": "preflight_only",
+        "network_calls": 0
+      }
+    }
+  ],
+  "long_argument_cache_case": {
+    "fixture": "common prefix = \"shared context \" repeated 40 times; suffixes ARGUMENT_A / ARGUMENT_B",
+    "before_clipping_fix": {
+      "first": {
+        "review_argument_characters": 610,
+        "review_argument_sha256": "5f9e06120b062ecae087989aff90b01a694987ad392cbf13713f57779374f6df",
+        "review_argument_suffix": "ARGUMENT_A",
+        "cache_signature": "793c9ef953bdccd7",
+        "model_calls": 0
+      },
+      "second": {
+        "review_argument_characters": 610,
+        "review_argument_sha256": "be62ca1ec4d881451171cd88be9b9ddf3746110391ac20b9af3dc77b7a8f1479",
+        "review_argument_suffix": "ARGUMENT_B",
+        "cache_signature": "793c9ef953bdccd7",
+        "model_calls": 0
+      }
+    },
+    "after_clipping_fix": {
+      "first": {
+        "review_argument_characters": 610,
+        "review_argument_sha256": "5f9e06120b062ecae087989aff90b01a694987ad392cbf13713f57779374f6df",
+        "review_argument_suffix": "ARGUMENT_A",
+        "cache_signature": "cf1a30a9a69e1ac2",
+        "model_calls": 0
+      },
+      "second": {
+        "review_argument_characters": 610,
+        "review_argument_sha256": "be62ca1ec4d881451171cd88be9b9ddf3746110391ac20b9af3dc77b7a8f1479",
+        "review_argument_suffix": "ARGUMENT_B",
+        "cache_signature": "fc6691e1d3254179",
+        "model_calls": 0
+      }
+    }
+  },
+  "limits": [
+    "No paid model calls, credentials, live retrieval, full planning/body chain or full suite",
+    "Calibration labels are synthetic inputs; these tests validate transmission, not scientific quality",
+    "Historical original F12 real-run inputs remain LOCAL_ONLY"
+  ],
+  "final_evidence_note": "All after fields and signatures refreshed after addition of task_identity_contract to actual arrangement message payload; baseline snapshots unchanged."
+}

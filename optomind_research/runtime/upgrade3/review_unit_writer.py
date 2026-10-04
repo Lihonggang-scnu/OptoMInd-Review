@@ -123,11 +123,72 @@ def load_arrangement(path: str | Path) -> dict[str, Any]:
 
 
 def select_unit(arrangement: Mapping[str, Any], unit_id: str) -> dict[str, Any]:
-    for unit in arrangement.get("units") or ():
-        if str(unit.get("unit_id") or "") == unit_id:
-            return dict(unit)
+    matches = [unit for unit in arrangement.get("units") or ()
+               if isinstance(unit, Mapping) and str(unit.get("unit_id") or "") == unit_id]
+    if len(matches) > 1:
+        raise UnitWritingError(f"unit_id_duplicated:{unit_id}")
+    if matches:
+        return dict(matches[0])
     known = ", ".join(str(unit.get("unit_id")) for unit in arrangement.get("units") or ())
     raise UnitWritingError(f"unit_not_in_arrangement:{unit_id}|known:{known}")
+
+
+def _checked_unit_tasks(unit: Mapping[str, Any], chapter_view: Mapping[str, Any]) -> dict[str, Any]:
+    """Resolve explicit brief links against the saved input, never task position.
+
+    Persisted/reexported arrangements may predate current validation. Refuse
+    ambiguous identities at this final read boundary as well; rebuild complete
+    brief details from the authoritative input when references are present.
+    """
+    unit = deepcopy(dict(unit))
+    unit_id = str(unit.get("unit_id") or "")
+    all_briefs: dict[str, dict[str, Any]] = {}
+    owners: dict[str, str] = {}
+    for owner in chapter_view.get("units") or ():
+        if not isinstance(owner, Mapping):
+            continue
+        for brief in owner.get("paragraph_briefs") or ():
+            if not isinstance(brief, Mapping):
+                continue
+            brief_id = str(brief.get("paragraph_id") or "")
+            if brief_id in all_briefs:
+                raise UnitWritingError(f"paragraph_id_duplicated:{brief_id}")
+            if brief_id:
+                all_briefs[brief_id] = dict(brief)
+                owners[brief_id] = str(owner.get("unit_id") or "")
+    seen: set[str] = set()
+    for task in unit.get("paragraph_tasks") or ():
+        paragraph_id = str(task.get("paragraph_id") or "")
+        if paragraph_id and paragraph_id in seen:
+            raise UnitWritingError(f"paragraph_id_duplicated:{paragraph_id}")
+        seen.add(paragraph_id)
+        if paragraph_id in owners and owners[paragraph_id] != unit_id:
+            raise UnitWritingError(f"paragraph_id_unit_mismatch:{paragraph_id}")
+        refs = task.get("source_briefs")
+        if paragraph_id in owners and task.get("portion"):
+            raise UnitWritingError(f"paragraph_id_brief_conflict:{paragraph_id}")
+        if refs is None:
+            continue
+        if not isinstance(refs, list):
+            raise UnitWritingError(f"brief_reference_not_list:{paragraph_id}")
+        if paragraph_id in owners and refs and (
+            set(str(ref) for ref in refs) != {paragraph_id} or task.get("portion")
+        ):
+            raise UnitWritingError(f"paragraph_id_brief_conflict:{paragraph_id}")
+        if not refs:
+            continue
+        bad = [str(ref) for ref in refs if str(ref) not in all_briefs or owners[str(ref)] != unit_id]
+        if bad:
+            raise UnitWritingError(f"brief_reference_unknown:{unit_id}:{','.join(bad)}")
+        task["source_brief_details"] = [deepcopy(all_briefs[str(ref)]) for ref in refs]
+        uses = task.setdefault("source_uses", [])
+        handles = {str(use.get("source_handle") or "") for use in uses}
+        for brief in task["source_brief_details"]:
+            for handle in brief.get("source_handles") or ():
+                if handle not in handles:
+                    uses.append({"source_handle": handle, "role": "负责人指定", "use": ""})
+                    handles.add(handle)
+    return unit
 
 
 def unit_handles(unit: Mapping[str, Any]) -> list[str]:
@@ -161,7 +222,7 @@ class UnitWritingView:
     unit_index: int
     sibling_units: list[dict[str, str]]
     unit_count: int
-    chapter_frame: dict[str, str]
+    chapter_frame: dict[str, Any]
     other_chapters: list[dict[str, str]]
     paragraph_tasks: list[dict[str, Any]]
     table_tasks: list[dict[str, Any]]
@@ -658,7 +719,7 @@ def build_unit_view(
     else:
         raise UnitWritingError("arrangement_input_missing:" + str(resolved_view_path))
 
-    unit = select_unit(arrangement, unit_id)
+    unit = _checked_unit_tasks(select_unit(arrangement, unit_id), chapter_view)
     units = list(arrangement.get("units") or ())
     index = [str(item.get("unit_id")) for item in units].index(unit_id)
     siblings = [
@@ -730,6 +791,11 @@ def build_unit_view(
             "reader_objective": str(chapter_view.get("reader_objective") or ""),
             "research_question": str(chapter_view.get("research_question") or ""),
             "review_argument": review_argument,
+            "shared_scope": dict(chapter_view.get("shared_scope") or {}),
+            "review_argument_status": chapter_view.get("review_argument_status") or (
+                "provided_unspecified" if review_argument else "missing"),
+            "review_argument_source": chapter_view.get("review_argument_source") or (
+                "provided_unspecified" if review_argument else "missing"),
         },
         other_chapters=[
             {"chapter_id": str(row.get("chapter_id") or ""), "purpose": str(row.get("purpose") or "")}
@@ -770,7 +836,10 @@ def _view_from_packet(packet_root: str | Path, chapter_id: str) -> dict[str, Any
     view = build_chapter_view(
         root / "writer_packets" / (chapter_id + ".json"),
         shared_outline=plan.get("shared_outline") or [],
-        review_argument=str((plan.get("shared_scope") or {}).get("statement") or ""),
+        review_argument=str(plan.get("review_argument") or ""),
+        shared_scope=plan.get("shared_scope"),
+        review_argument_status=str(plan.get("review_argument_status") or ""),
+        review_argument_source=str(plan.get("review_argument_source") or ""),
     )
     return view.to_dict(include_material=False)
 

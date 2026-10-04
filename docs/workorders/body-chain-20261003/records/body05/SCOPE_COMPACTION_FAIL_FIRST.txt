@@ -1,0 +1,22 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______ test_global_scope_exclusions_are_not_cut_by_source_material_budget ______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-20/test_global_scope_exclusions_a0')
+
+    def test_global_scope_exclusions_are_not_cut_by_source_material_budget(tmp_path):
+        packet = _packet()
+        packet["shared_scope"] = {"statement": "Context " * 80, "exclusions": ["Only adult settings " * 20 + "EXCLUDE_CHILDREN"]}
+        payload = _view(tmp_path, packet).arrangement_payload(max_source_chars=20)
+>       assert payload["shared_scope"] == packet["shared_scope"]
+E       AssertionError: assert {'statement':...settings  …']} == {'statement':...DE_CHILDREN']}
+E
+E         Differing items:
+E         {'exclusions': ['Only adult settings  …']} != {'exclusions': ['Only adult settings Only adult settings Only adult settings Only adult settings Only adult settings O...Only adult settings Only adult settings Only adult settings Only adult settings Only adult settings EXCLUDE_CHILDREN']}
+E         {'statement': 'Context Context Cont …'} != {'statement': 'Context Context Context Context Context Context Context Context Context Context Context Context Context...text Context Context Context Context Context Context Context Context Context Context Context Context Context Context '}
+E         Use -v to get more diff
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:281: AssertionError
+=========================== short test summary info ============================
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_global_scope_exclusions_are_not_cut_by_source_material_budget
+1 failed, 25 deselected in 0.68s

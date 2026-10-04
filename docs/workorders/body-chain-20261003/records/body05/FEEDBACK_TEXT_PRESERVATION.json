@@ -1,0 +1,46 @@
+{
+  "evidence_type": "synthetic bounded real feedback persistence with deterministic owner/arrangement/writer callbacks",
+  "test": "tests/upgrade3/test_body05_feedback_text_reuse.py",
+  "checks": {
+    "identical_inputs_reuse_same_result_path": true,
+    "callbacks_after_identical_retry": {
+      "owner": 1,
+      "arrangement": 1,
+      "writer": 1
+    },
+    "argument_change_generates_separate_artifact": true,
+    "prior_body_bytes_unchanged": true
+  },
+  "persisted_results": [
+    {
+      "review_argument": "The observed tradeoff depends on operating conditions.",
+      "shared_scope": {
+        "statement": "Compare two device methods."
+      },
+      "unit_ids": [
+        "U-mechanism"
+      ],
+      "body": "Synthetic preserved body: conditions matter. [P0001]\n\nSecond paragraph.\n",
+      "body_sha256": "9527bd9502ea82650c2330d14ee0fe0d529070ce072d12ed1ce3668dae2cbb7b",
+      "writer_result": {
+        "body_markdown": "Synthetic preserved body: conditions matter. [P0001]\n\nSecond paragraph.",
+        "complete": true
+      }
+    },
+    {
+      "review_argument": "The comparison supports equivalence only within the measured range.",
+      "shared_scope": {
+        "statement": "Compare two device methods."
+      },
+      "unit_ids": [
+        "U-mechanism"
+      ],
+      "body": "Synthetic preserved body: conditions matter. [P0001]\n\nSecond paragraph.\n",
+      "body_sha256": "9527bd9502ea82650c2330d14ee0fe0d529070ce072d12ed1ce3668dae2cbb7b",
+      "writer_result": {
+        "body_markdown": "Synthetic preserved body: conditions matter. [P0001]\n\nSecond paragraph.",
+        "complete": true
+      }
+    }
+  ]
+}

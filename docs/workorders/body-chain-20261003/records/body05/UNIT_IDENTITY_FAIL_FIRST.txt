@@ -1,0 +1,230 @@
+FFFFFFF.FFFFF                                                            [100%]
+=================================== FAILURES ===================================
+_____ test_explicit_owner_identity_survives_reorder_and_old_positional_map _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-4/test_explicit_owner_identity_s0')
+
+    def test_explicit_owner_identity_survives_reorder_and_old_positional_map(tmp_path):
+        (tmp_path / "ID_MAP.json").write_text(json.dumps({"units": {"CH01#u1": "CH01_U01"},
+                                                        "paragraphs": {"CH01_U01#p1": "CH01_U01_P01"}}))
+        packet = _packet()
+        before = _view(tmp_path, packet)
+        packet["chapter_plan"]["units"].reverse()
+        packet["chapter_plan"]["units"][1]["paragraph_briefs"].reverse()
+        after = _view(tmp_path, packet)
+>       assert [u.unit_id for u in before.units] == ["UNIT_A", "UNIT_B"]
+E       AssertionError: assert ['CH01_U01', 'CH01_U02'] == ['UNIT_A', 'UNIT_B']
+E
+E         At index 0 diff: 'CH01_U01' != 'UNIT_A'
+E         Use -v to get more diff
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:70: AssertionError
+_____ test_split_merge_reference_ids_are_stable_under_task_reorder[False] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-4/test_split_merge_reference_ids0')
+mode = False
+
+    @pytest.mark.parametrize("mode", [False, True])
+    def test_split_merge_reference_ids_are_stable_under_task_reorder(tmp_path, mode):
+        view = _view(tmp_path)
+        payload = _payload(view)
+        refs = [p.paragraph_id for p in view.units[0].paragraph_briefs]
+        payload["units"][0]["paragraph_tasks"] = [
+            {"source_briefs": refs, "portion": "settings", "point": "Editor settings", "development": "Editor prose"},
+            {"source_briefs": refs, "portion": "limits", "point": "Editor limits", "development": "Editor limits prose"}]
+        before = arranging.validate_arrangement(payload, view, planning_revision=mode)
+        payload["units"][0]["paragraph_tasks"].reverse()
+        after = arranging.validate_arrangement(payload, view, planning_revision=mode)
+>       assert before["validation"]["ok"], before["validation"]
+E       AssertionError: {'ok': False, 'contract_ok': True, 'needs_arrangement': True, 'status': 'needs_arrangement', ...}
+E       assert False
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:91: AssertionError
+______ test_split_merge_reference_ids_are_stable_under_task_reorder[True] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-4/test_split_merge_reference_ids1')
+mode = True
+
+    @pytest.mark.parametrize("mode", [False, True])
+    def test_split_merge_reference_ids_are_stable_under_task_reorder(tmp_path, mode):
+        view = _view(tmp_path)
+        payload = _payload(view)
+        refs = [p.paragraph_id for p in view.units[0].paragraph_briefs]
+        payload["units"][0]["paragraph_tasks"] = [
+            {"source_briefs": refs, "portion": "settings", "point": "Editor settings", "development": "Editor prose"},
+            {"source_briefs": refs, "portion": "limits", "point": "Editor limits", "development": "Editor limits prose"}]
+        before = arranging.validate_arrangement(payload, view, planning_revision=mode)
+        payload["units"][0]["paragraph_tasks"].reverse()
+        after = arranging.validate_arrangement(payload, view, planning_revision=mode)
+        assert before["validation"]["ok"], before["validation"]
+        assert after["validation"]["ok"], after["validation"]
+        first = {t["portion"]: t["paragraph_id"] for t in before["units"][0]["paragraph_tasks"]}
+        last = {t["portion"]: t["paragraph_id"] for t in after["units"][0]["paragraph_tasks"]}
+>       assert first == last
+E       AssertionError: assert {'settings': ...U01__TASK_02'} == {'limits': 'C...U01__TASK_02'}
+E
+E         Differing items:
+E         {'limits': 'CH01_U01__TASK_02'} != {'limits': 'CH01_U01__TASK_01'}
+E         {'settings': 'CH01_U01__TASK_01'} != {'settings': 'CH01_U01__TASK_02'}
+E         Use -v to get more diff
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:95: AssertionError
+_____ test_duplicate_owner_ids_rejected_instead_of_silent_overwrite[unit] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-4/test_duplicate_owner_ids_rejec0')
+kind = 'unit'
+
+    @pytest.mark.parametrize("kind", ["unit", "paragraph"])
+    def test_duplicate_owner_ids_rejected_instead_of_silent_overwrite(tmp_path, kind):
+        packet = _packet()
+        if kind == "unit":
+            packet["chapter_plan"]["units"][1]["unit_id"] = "UNIT_A"
+        else:
+            packet["chapter_plan"]["units"][1]["paragraph_briefs"][0]["paragraph_id"] = "BRIEF_A1"
+>       with pytest.raises(arranging.ChapterArrangementError, match="duplicated"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ChapterArrangementError
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:114: Failed
+___ test_duplicate_owner_ids_rejected_instead_of_silent_overwrite[paragraph] ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-4/test_duplicate_owner_ids_rejec1')
+kind = 'paragraph'
+
+    @pytest.mark.parametrize("kind", ["unit", "paragraph"])
+    def test_duplicate_owner_ids_rejected_instead_of_silent_overwrite(tmp_path, kind):
+        packet = _packet()
+        if kind == "unit":
+            packet["chapter_plan"]["units"][1]["unit_id"] = "UNIT_A"
+        else:
+            packet["chapter_plan"]["units"][1]["paragraph_briefs"][0]["paragraph_id"] = "BRIEF_A1"
+>       with pytest.raises(arranging.ChapterArrangementError, match="duplicated"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ChapterArrangementError
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:114: Failed
+_ test_duplicate_derived_tasks_are_ambiguous_without_portion_or_explicit_ids[False] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-4/test_duplicate_derived_tasks_a0')
+mode = False
+
+    @pytest.mark.parametrize("mode", [False, True])
+    def test_duplicate_derived_tasks_are_ambiguous_without_portion_or_explicit_ids(tmp_path, mode):
+        view = _view(tmp_path)
+        payload = _payload(view)
+        row = {"source_briefs": [p.paragraph_id for p in view.units[0].paragraph_briefs]}
+        payload["units"][0]["paragraph_tasks"] = [row, copy.deepcopy(row)]
+        result = arranging.validate_arrangement(payload, view, planning_revision=mode)
+>       assert any("paragraph_id_duplicated:" in e for e in result["validation"]["errors"])
+E       assert False
+E        +  where False = any(<generator object test_duplicate_derived_tasks_are_ambiguous_without_portion_or_explicit_ids.<locals>.<genexpr> at 0x7f5b15e71700>)
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:125: AssertionError
+_ test_duplicate_derived_tasks_are_ambiguous_without_portion_or_explicit_ids[True] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-4/test_duplicate_derived_tasks_a1')
+mode = True
+
+    @pytest.mark.parametrize("mode", [False, True])
+    def test_duplicate_derived_tasks_are_ambiguous_without_portion_or_explicit_ids(tmp_path, mode):
+        view = _view(tmp_path)
+        payload = _payload(view)
+        row = {"source_briefs": [p.paragraph_id for p in view.units[0].paragraph_briefs]}
+        payload["units"][0]["paragraph_tasks"] = [row, copy.deepcopy(row)]
+        result = arranging.validate_arrangement(payload, view, planning_revision=mode)
+>       assert any("paragraph_id_duplicated:" in e for e in result["validation"]["errors"])
+E       assert False
+E        +  where False = any(<generator object test_duplicate_derived_tasks_are_ambiguous_without_portion_or_explicit_ids.<locals>.<genexpr> at 0x7f5b15f00ee0>)
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:125: AssertionError
+__ test_legacy_missing_ids_remain_compatible_and_do_not_collide_with_explicit __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-4/test_legacy_missing_ids_remain0')
+
+    def test_legacy_missing_ids_remain_compatible_and_do_not_collide_with_explicit(tmp_path):
+        packet = _packet()
+        for unit in packet["chapter_plan"]["units"]:
+            unit.pop("unit_id")
+            for row in unit["paragraph_briefs"]:
+                row.pop("paragraph_id")
+        legacy = _view(tmp_path, packet)
+        assert [u.unit_id for u in legacy.units] == ["CH01_U01", "CH01_U02"]
+        packet["chapter_plan"]["units"][1]["unit_id"] = "CH01_U01"
+        mixed = _view(tmp_path, packet)
+>       assert mixed.units[1].unit_id == "CH01_U01"
+E       AssertionError: assert 'CH01_U02' == 'CH01_U01'
+E
+E         - CH01_U01
+E         ?        ^
+E         + CH01_U02
+E         ?        ^
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:148: AssertionError
+____________ test_writer_refuses_ambiguous_duplicate_unit_selection ____________
+
+    def test_writer_refuses_ambiguous_duplicate_unit_selection():
+>       with pytest.raises(writing.UnitWritingError, match="duplicated"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitWritingError
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:153: Failed
+____ test_calibrated_argument_and_scope_reach_persisted_production_messages ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-4/test_calibrated_argument_and_s0')
+
+    def test_calibrated_argument_and_scope_reach_persisted_production_messages(tmp_path):
+        view = _view(tmp_path)
+        arranging_message = json.loads(arranging.arrangement_messages(view.arrangement_payload())[-1]["content"])
+>       assert arranging_message["shared_scope"] == {"statement": "SCOPE_ONLY"}
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'shared_scope'
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:160: KeyError
+___________ test_writer_packet_fallback_uses_plan_argument_not_scope ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-4/test_writer_packet_fallback_us0')
+
+    def test_writer_packet_fallback_uses_plan_argument_not_scope(tmp_path):
+        (tmp_path / "writer_packets").mkdir()
+        packet = _packet()
+        (tmp_path / "writer_packets" / "CH01.json").write_text(json.dumps(packet))
+        (tmp_path / "DETAILED_REVIEW_PLAN.json").write_text(json.dumps({
+            "shared_scope": {"statement": "SCOPE_ONLY"}, "review_argument": "NEW_CALIBRATED_ARGUMENT",
+            "review_argument_status": "calibrated", "review_argument_source": "whole_plan_improvement"}))
+        view = writing._view_from_packet(tmp_path, "CH01")
+>       assert view["review_argument"] == "NEW_CALIBRATED_ARGUMENT"
+E       AssertionError: assert 'SCOPE_ONLY' == 'NEW_CALIBRATED_ARGUMENT'
+E
+E         - NEW_CALIBRATED_ARGUMENT
+E         + SCOPE_ONLY
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:178: AssertionError
+____________ test_missing_argument_is_explicitly_missing_not_scope _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-4/test_missing_argument_is_expli0')
+
+    def test_missing_argument_is_explicitly_missing_not_scope(tmp_path):
+        packet = _packet()
+        for key in ("review_argument", "review_argument_status", "review_argument_source"):
+            packet.pop(key)
+        view = _view(tmp_path, packet)
+        assert view.to_dict()["review_argument"] == ""
+>       assert view.to_dict()["review_argument_status"] == "missing"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'review_argument_status'
+
+tests/upgrade3/test_body05_unit_identity_continuity.py:188: KeyError
+=========================== short test summary info ============================
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_explicit_owner_identity_survives_reorder_and_old_positional_map
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_split_merge_reference_ids_are_stable_under_task_reorder[False]
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_split_merge_reference_ids_are_stable_under_task_reorder[True]
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_duplicate_owner_ids_rejected_instead_of_silent_overwrite[unit]
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_duplicate_owner_ids_rejected_instead_of_silent_overwrite[paragraph]
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_duplicate_derived_tasks_are_ambiguous_without_portion_or_explicit_ids[False]
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_duplicate_derived_tasks_are_ambiguous_without_portion_or_explicit_ids[True]
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_legacy_missing_ids_remain_compatible_and_do_not_collide_with_explicit
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_writer_refuses_ambiguous_duplicate_unit_selection
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_calibrated_argument_and_scope_reach_persisted_production_messages
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_writer_packet_fallback_uses_plan_argument_not_scope
+FAILED tests/upgrade3/test_body05_unit_identity_continuity.py::test_missing_argument_is_explicitly_missing_not_scope
+12 failed, 1 passed in 0.66s

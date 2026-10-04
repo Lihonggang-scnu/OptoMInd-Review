@@ -267,7 +267,10 @@ def main(argv: list[str] | None = None) -> int:
             raise ChapterArrangementError("choose_either_run_or_reexport_from")
         plan = _load_plan(packet_root)
         shared_outline = plan.get("shared_outline") or []
-        review_argument = str((plan.get("shared_scope") or {}).get("statement") or "")
+        # The final coordinator's argument and the review's coverage are
+        # different inputs. Older plans may have only the packet argument;
+        # build_chapter_view retains that fallback and marks a true absence.
+        review_argument = str(plan.get("review_argument") or "").strip()
         prompt = load_editor_prompt(planning_revision=args.planning_revision)
         reexport_mode = bool(args.reexport_from)
         chapter_ids = _chapter_ids(args, plan)
@@ -293,6 +296,9 @@ def main(argv: list[str] | None = None) -> int:
                 packet_path,
                 shared_outline=shared_outline,
                 review_argument=review_argument,
+                review_argument_status=str(plan.get("review_argument_status") or "") if review_argument else "",
+                review_argument_source=str(plan.get("review_argument_source") or "") if review_argument else "",
+                shared_scope=plan.get("shared_scope") if isinstance(plan.get("shared_scope"), Mapping) else None,
                 id_map_path=output_root / "ID_MAP.json",
             )
             payload = view.arrangement_payload(max_source_chars=args.max_source_chars)
