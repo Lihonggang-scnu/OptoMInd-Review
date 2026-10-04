@@ -2779,6 +2779,35 @@ def run_feedback_loop(
         raise ProgressivePlanError("feedback_packet_must_be_object")
     arrangement_value = dict(arrangement)
     issues = [dict(item) for item in (arrangement_value.get("issues") or ()) if isinstance(item, Mapping)]
+
+    def pending_arrangement(value: Mapping[str, Any]) -> dict[str, Any]:
+        # Consume the existing validator's verdict, not unit count as proof of
+        # completion. Legacy callbacks that omit validation remain compatible;
+        # a supplied verdict must affirm success and contain no contrary signal.
+        validation = value.get("validation")
+        status = _text(validation.get("status")).casefold() if isinstance(validation, Mapping) else ""
+        incomplete = not value.get("units")
+        if "validation" in value:
+            incomplete = incomplete or not isinstance(validation, Mapping) or (
+                validation.get("ok") is False
+                or validation.get("contract_ok") is False
+                or validation.get("needs_arrangement") is True
+                or bool(validation.get("errors"))
+                or bool(validation.get("sources_never_mentioned") or validation.get("missing_sources"))
+                or (bool(status) and status != "arranged")
+                or not (validation.get("ok") is True or status == "arranged")
+            )
+        if not incomplete:
+            return {}
+        return {
+            "status": "partial",
+            "pending_arrangement": True,
+            "arrangement_status": status or "partial",
+            "arrangement_validation": validation,
+            "writer": "",
+        }
+
+    original_pending = pending_arrangement(arrangement_value) if "validation" in arrangement_value else {}
     if not issues:
         return {
             "status": "reused",
@@ -2786,6 +2815,7 @@ def run_feedback_loop(
             "arrangement": str(arrangement_file),
             "writer": "",
             "issues": [],
+            **original_pending,
         }
     target_dir = Path(output_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
@@ -2839,13 +2869,39 @@ def run_feedback_loop(
     resume_probe_signature = resume_signature
     previous_status = _text(previous_pointer.get("status")).casefold()
     reusable_statuses = {"complete", "completed", "updated", "updated_material", "reused", "no_change"}
-    if resume and previous_pointer.get("resume_signature") == resume_signature and previous_status in reusable_statuses:
+    if resume and previous_pointer.get("resume_signature") == resume_signature and (
+        previous_status in reusable_statuses or previous_pointer.get("pending_arrangement") is True
+    ):
         previous_dir = Path(str(previous_pointer.get("artifact_dir") or ""))
         cached_outputs = (
             previous_dir / "UPDATED_WRITER_PACKET.json",
             previous_dir / "CHAPTER_ARRANGEMENT.json",
             previous_dir / "WRITTEN_RESULT.json",
         )
+        if cached_outputs[0].is_file() and cached_outputs[1].is_file():
+            cached_arrangement = _read_json(cached_outputs[1])
+            pending = pending_arrangement(cached_arrangement) if isinstance(cached_arrangement, Mapping) else {
+                "status": "partial", "pending_arrangement": True,
+                "arrangement_status": "invalid_arrangement", "arrangement_validation": None, "writer": "",
+            }
+            if pending:
+                # Older completed pointers may have been written after an
+                # invalid arrangement. Keep their artifacts, but never reuse
+                # that pointer as completed or restart paid callbacks just to
+                # report its existing pending work.
+                if _read_json(active_path) != previous_pointer:
+                    raise ProgressivePlanError("feedback_result_stale_active_artifact")
+                _atomic_json(active_path, {**dict(previous_pointer), **pending})
+                return {
+                    **pending,
+                    "updated_packet": str(cached_outputs[0]),
+                    "arrangement": str(cached_outputs[1]),
+                    "issues": issues,
+                    "owner_status": previous_pointer.get("owner_status") or "",
+                    "input_signature": previous_pointer.get("input_signature") or resume_signature,
+                    "resume_signature": resume_signature,
+                    "reuse_reason": "identical_feedback_pending_arrangement",
+                }
         if all(path.is_file() for path in cached_outputs):
             return {
                 "status": "reused",
@@ -2857,7 +2913,13 @@ def run_feedback_loop(
                 "resume_signature": resume_signature,
                 "reuse_reason": "identical_feedback_and_material_inputs",
             }
-        if previous_status in {"reused", "no_change"}:
+        if previous_status in {"reused", "no_change"} or (
+            previous_pointer.get("pending_arrangement") is True and original_pending
+        ):
+            if original_pending:
+                if _read_json(active_path) != previous_pointer:
+                    raise ProgressivePlanError("feedback_result_stale_active_artifact")
+                _atomic_json(active_path, {**dict(previous_pointer), **original_pending})
             return {
                 "status": "reused",
                 "updated_packet": str(packet_file),
@@ -2866,6 +2928,7 @@ def run_feedback_loop(
                 "issues": issues,
                 "resume_signature": resume_signature,
                 "reuse_reason": "owner_no_change_and_material_inputs_unchanged",
+                **original_pending,
             }
     _atomic_json(active_path, {
         "resume_signature": resume_signature,
@@ -2951,6 +3014,7 @@ def run_feedback_loop(
             "resume_signature": resume_probe_signature,
             "status": "partial" if unresolved_actions else "reused",
             "artifact_dir": str(staging_dir),
+            **(original_pending if not unresolved_actions else {}),
         })
         return {
             "status": "partial" if unresolved_actions else "reused",
@@ -2959,6 +3023,7 @@ def run_feedback_loop(
             "writer": "",
             "issues": issues,
             "action_result": action_result,
+            **original_pending,
         }
     chapter = working_packet.get("chapter") if isinstance(working_packet.get("chapter"), Mapping) else {}
     chapter_plan = working_packet.get("chapter_plan") if isinstance(working_packet.get("chapter_plan"), Mapping) else {}
@@ -3043,7 +3108,9 @@ def run_feedback_loop(
     if owner_status == "no_change" and not material_changed:
         assert_active()
         status = "partial" if unresolved_actions else "reused"
-        _atomic_json(active_path, {"input_signature": input_signature, "resume_signature": resume_probe_signature, "artifact_dir": str(artifact_dir), "status": status, "owner_status": "no_change"})
+        _atomic_json(active_path, {"input_signature": input_signature, "resume_signature": resume_probe_signature,
+                                  "artifact_dir": str(artifact_dir), "status": status, "owner_status": "no_change",
+                                  **(original_pending if not unresolved_actions else {})})
         return {
             "status": status,
             "updated_packet": str(packet_file),
@@ -3052,6 +3119,7 @@ def run_feedback_loop(
             "issues": issues,
             "owner_status": "no_change",
             "action_result": action_result,
+            **original_pending,
         }
     assert_active()
     updated_packet = dict(working_packet)
@@ -3075,17 +3143,33 @@ def run_feedback_loop(
     rebuilt_arrangement = dict(arrangement_runner(updated_packet, {**arrangement_value, "issues": owner_issues}, artifact_dir))
     rebuilt_arrangement_path = artifact_dir / "CHAPTER_ARRANGEMENT.json"
     _atomic_json(rebuilt_arrangement_path, rebuilt_arrangement)
-    if not rebuilt_arrangement.get("units"):
+    pending = pending_arrangement(rebuilt_arrangement)
+    if pending:
         assert_active()
-        _atomic_json(active_path, {"input_signature": input_signature, "resume_signature": resume_probe_signature, "artifact_dir": str(artifact_dir), "status": "partial", "owner_status": owner_status, "arrangement_status": "partial"})
+        # Adopted material is already persisted in the updated packet. Match
+        # the next local probe so unchanged pending work does not repeat paid
+        # callbacks, including when the owner adopted a supplied candidate.
+        pending_probe = dict(probe_packet)
+        pending_sources, _ = _merge_feedback_source_materials(pending_probe, updated_packet.get("source_materials") or [])
+        if pending_sources:
+            pending_probe["source_materials"] = _refresh_local_material_snapshots(
+                [{"source_materials": pending_sources}])[0].get("source_materials") or pending_sources
+        for key in ("tool_materials", "feedback_materials"):
+            if updated_packet.get(key): pending_probe[key] = updated_packet[key]
+            else: pending_probe.pop(key, None)
+        resume_probe_signature = _feedback_signature({"packet": pending_probe, "issues": issues,
+                                                    "execution_context": dict(execution_context or {})})
+        _atomic_json(active_path, {"input_signature": input_signature, "resume_signature": resume_probe_signature,
+                                  "artifact_dir": str(artifact_dir), "owner_status": owner_status, **pending})
         return {
-            "status": "partial",
+            **pending,
             "updated_packet": str(updated_packet_path),
             "arrangement": str(rebuilt_arrangement_path),
-            "writer": "",
             "issues": issues,
             "owner_status": owner_status,
             "action_result": action_result,
+            "input_signature": input_signature,
+            "resume_signature": resume_probe_signature,
         }
     assert_active()
     written = dict(writer_runner(updated_packet, rebuilt_arrangement, artifact_dir))

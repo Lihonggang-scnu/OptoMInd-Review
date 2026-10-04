@@ -1170,7 +1170,7 @@ def _completion_envelope(response: Any) -> Mapping[str, Any]:
     """Extract completion JSON without accepting table metadata as prose."""
 
     if isinstance(response, Mapping):
-        if any(key in response for key in ("body_markdown", "status", "covered_task_ids", "issues")):
+        if any(key in response for key in ("body_markdown", "table_markdown", "status", "covered_task_ids", "issues")):
             return response
         content = response.get("content")
         if isinstance(content, str):
@@ -1206,21 +1206,62 @@ def _completion_envelope(response: Any) -> Mapping[str, Any]:
     raise UnitWritingError("completion_response_unreadable")
 
 
-def _markdown_table_check(text: str) -> dict[str, Any]:
-    rows = [line.strip() for line in str(text or "").splitlines() if line.strip()]
-    for index in range(max(0, len(rows) - 2)):
-        header = [cell.strip() for cell in rows[index].strip("|").split("|")]
-        separator = [cell.strip() for cell in rows[index + 1].strip("|").split("|")]
-        data = [cell.strip() for cell in rows[index + 2].strip("|").split("|")]
-        if len(header) < 2 or len(separator) != len(header) or len(data) != len(header):
+def _fenced_line_indices(text: str) -> set[int]:
+    """Identify fenced code (including an unfinished fence), without unwrapping it."""
+    hidden: set[int] = set()
+    fence = ""
+    for index, line in enumerate(text.splitlines()):
+        if fence:
+            hidden.add(index)
+            if re.fullmatch(r" {0,3}" + re.escape(fence[0]) + "{" + str(len(fence)) + r",}\s*", line):
+                fence = ""
+        else:
+            match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+            if match:
+                fence = match.group(1)
+                hidden.add(index)
+    return hidden
+
+
+def _table_cells(line: str) -> list[str]:
+    # Escaped pipes are cell text, not additional columns.
+    return [cell.strip() for cell in re.split(r"(?<!\\)\|", line.strip().strip("|"))]
+
+
+def _markdown_tables(text: str) -> list[dict[str, Any]]:
+    """Syntactic finished tables only; never a semantic task-coverage judgment."""
+    lines = text.splitlines()
+    hidden = _fenced_line_indices(text) | {index for index, line in enumerate(lines)
+                                         if line.startswith(("    ", "\t"))}
+    found: list[dict[str, Any]] = []
+    index = 0
+    while index + 2 < len(lines):
+        if index in hidden or index + 1 in hidden or index + 2 in hidden:
+            index += 1
             continue
-        if all(cell and re.fullmatch(r":?-{3,}:?", cell) for cell in separator) and all(data):
-            return {
-                "valid": True,
-                "header_cells": len(header),
-                "data_cells": len(data),
-                "line": index + 1,
-            }
+        header, separator = _table_cells(lines[index]), _table_cells(lines[index + 1])
+        if len(header) < 2 or not all(header) or len(separator) != len(header) or not all(
+            re.fullmatch(r":?-{3,}:?", cell) for cell in separator
+        ):
+            index += 1
+            continue
+        end = index + 2
+        data: list[list[str]] = []
+        while end < len(lines) and end not in hidden and "|" in lines[end] and lines[end].strip():
+            data.append(_table_cells(lines[end]))
+            end += 1
+        if data and all(len(row) == len(header) and all(row) for row in data):
+            found.append({"start": index, "end": end, "header_cells": len(header),
+                          "data_cells": len(data[0]), "line": index + 1,
+                          "fingerprint": (tuple(header), tuple(tuple(row) for row in data))})
+        index = max(index + 1, end)
+    return found
+
+
+def _markdown_table_check(text: str) -> dict[str, Any]:
+    tables = _markdown_tables(str(text or ""))
+    if tables:
+        return {"valid": True, **{key: tables[0][key] for key in ("header_cells", "data_cells", "line")}}
     return {"valid": False, "header_cells": 0, "data_cells": 0, "line": None}
 
 
@@ -1238,6 +1279,7 @@ def run_unit_completion(
     raw_response_dir: str | Path | None = None,
     planning_revision: bool = False,
     simulated: bool = False,
+    citation_number_map: Mapping[Any, Any] | None = None,
 ) -> dict[str, Any]:
     """Make at most one explicit completion call and preserve a pending result."""
 
@@ -1281,6 +1323,8 @@ def run_unit_completion(
         "pending": True,
         "model_status": "pending",
         "covered_task_ids": [],
+        "content_review_status": "not_reviewed",
+        "citation_scope": "completion_fragment",
         "issues": [],
         "raw_response": raw_path,
         "usage": dict(response.get("usage") or {}) if isinstance(response, Mapping) else {},
@@ -1295,8 +1339,18 @@ def run_unit_completion(
     }
     try:
         envelope = _completion_envelope(response)
-        fragment = envelope.get("body_markdown")
-        fragment = fragment if isinstance(fragment, str) else ""
+        if any(isinstance(envelope.get(key), str) and envelope[key].strip()
+               for key in ("body_markdown", "table_markdown")):
+            fragment, normalization = _consume_unit_output(envelope)
+        else:
+            fragment, normalization = "", []
+        fragment, repairs = _repair_numeric_citations(
+            fragment, citation_number_map, payload.get("requested_source_handles", []))
+        result.update(_output_diagnostics(fragment, payload.get("requested_source_handles", [])))
+        result["citation_scope"] = "completion_fragment"
+        result["numeric_citation_repairs"] = repairs
+        result["output_normalization"] = normalization
+        result["completion_fragment"] = fragment
         status = str(envelope.get("status") or "").strip() or "pending"
         covered = envelope.get("covered_task_ids")
         result["covered_task_ids"] = [
@@ -1304,6 +1358,7 @@ def run_unit_completion(
         ] if isinstance(covered, Sequence) and not isinstance(covered, (str, bytes, bytearray)) else []
         raw_issues = envelope.get("issues")
         result["issues"] = list(raw_issues) if isinstance(raw_issues, list) else ([raw_issues] if raw_issues else [])
+        result["issues"].extend(item for item in normalization if item.get("code") == "table_markdown_missing_or_invalid")
         result["model_status"] = status
         result["response_envelope"] = dict(envelope)
         table_requested = bool(payload.get("table_tasks"))
@@ -1395,6 +1450,15 @@ def write_unit_completion(
         "model_status": result.get("model_status") or "pending",
         "covered_task_ids": list(result.get("covered_task_ids") or []),
         "table_check": result.get("table_check") or {},
+        "content_review_status": "not_reviewed",
+        "citation_scope": "completion_fragment",
+        "used_source_handles": list(result.get("used_source_handles") or []),
+        "unknown_citations": list(result.get("unknown_citations") or []),
+        "unresolved_numeric_citations": list(result.get("unresolved_numeric_citations") or []),
+        "citation_problems": list(result.get("citation_problems") or []),
+        "fence_report": result.get("fence_report") or {},
+        "output_normalization": list(result.get("output_normalization") or []),
+        "numeric_citation_repairs": list(result.get("numeric_citation_repairs") or []),
         "issues": list(result.get("issues") or []),
         "call_error": result.get("call_error") or "",
         "estimate": dict(estimate),
@@ -1491,18 +1555,234 @@ def estimate_unit_cost(
 # --------------------------------------------------------------------------
 
 
-def _strip_fences(text: str) -> str:
-    value = text.strip()
-    if value.startswith("```"):
-        value = re.sub(r"^```[a-zA-Z]*\s*", "", value)
-        value = re.sub(r"\s*```$", "", value)
-    return value.strip()
+def _strip_fences(text: str, *, json_envelope: bool = False) -> str:
+    """Unwrap one complete Markdown transport wrapper, not an actual code example."""
+    value = text.strip("\r\n").rstrip()
+    lines = value.splitlines()
+    if len(lines) < 3:
+        return value
+    opening = re.fullmatch(r" {0,3}(`{3,}|~{3,})([A-Za-z]*)\s*", lines[0])
+    if not opening:
+        return value
+    fence, language = opening.group(1), opening.group(2).lower()
+    allowed = {"", "markdown", "md"} | ({"json"} if json_envelope else set())
+    if language not in allowed:
+        return value
+    closer = re.compile(r" {0,3}" + re.escape(fence[0]) + "{" + str(len(fence)) + r",}\s*")
+    closes = [index for index, line in enumerate(lines[1:], 1) if closer.fullmatch(line)]
+    if not closes or closes[0] != len(lines) - 1:
+        return value
+    inner = "\n".join(lines[1:-1]).strip("\r\n").rstrip()
+    if not language and not (json_envelope and inner.startswith("{")):
+        # With no language label, only structural Markdown makes this an
+        # unambiguous output wrapper rather than a standalone code example.
+        if not re.search(r"(?m)^#{1,6}\s+\S", inner) and not _markdown_table_check(inner)["valid"]:
+            return value
+    return inner
 
+
+def _inline_link_spans(text: str) -> Iterable[tuple[int, int]]:
+    """Bound link protection at its own closing parenthesis, including titles."""
+    for match in re.finditer(r"!?\[[^\]\n]*\]\(", text):
+        depth, quote, index = 1, "", match.end()
+        while index < len(text) and text[index] not in "\r\n":
+            char = text[index]
+            if char == "\\":
+                index += 2
+                continue
+            if quote:
+                if char == quote:
+                    quote = ""
+            elif char in "\"'" and text[index - 1].isspace():
+                quote = char
+            elif char == "(":
+                depth += 1
+            elif char == ")":
+                depth -= 1
+                if depth == 0:
+                    yield match.start(), index + 1
+                    break
+            index += 1
+
+
+def _prose_segments(text: str) -> Iterable[tuple[str, bool]]:
+    """Keep code and Markdown link constructs byte-for-byte during repairs."""
+    protected: list[tuple[int, int]] = []
+    hidden = _fenced_line_indices(text)
+    position = 0
+    for index, line in enumerate(text.splitlines(keepends=True)):
+        if index in hidden or line.startswith(("    ", "\t")):
+            protected.append((position, position + len(line)))
+        position += len(line)
+    for pattern in (
+        r"(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)",
+        r"(?m)^ {0,3}\[[^\]\n]+\]:[^\n]*(?:\n[ \t]+[^\n]*)*",
+        r"https?://[^\s<>()]+",
+    ):
+        protected.extend((match.start(), match.end()) for match in re.finditer(pattern, text))
+    protected.extend(_inline_link_spans(text))
+    # Numeric-looking reference labels are links when defined in this body.
+    # Preserve full, collapsed and shortcut references rather than guessing.
+    definitions = {" ".join(match.group(1).split()).casefold() for match in re.finditer(
+        r"(?m)^ {0,3}\[([^\]\n]+)\]:", text)}
+    for match in re.finditer(r"!?\[([^\]\n]+)\](?:\[([^\]\n]*)\])?", text):
+        label = match.group(2) if match.group(2) else match.group(1)
+        if " ".join(label.split()).casefold() in definitions:
+            protected.append((match.start(), match.end()))
+    position = 0
+    for start, end in sorted(protected):
+        if end <= position:
+            continue
+        if start > position:
+            yield text[position:start], True
+        yield text[max(start, position):end], False
+        position = end
+    yield text[position:], True
+
+
+def _citation_matches(text: str) -> Iterable[re.Match[str]]:
+    matches = list(CITATION_RE.finditer(text))
+
+    def citation_like(value: str) -> bool:
+        return bool(re.fullmatch(r"(?:P\d{3,}|\d+)(?:[ ,;\-–]*(?:P\d{3,}|\d+))*", value.strip()))
+
+    for index, match in enumerate(matches):
+        if match.start() and text[match.start() - 1] in "\\!":
+            continue
+        suffix = text[match.end():].lstrip()
+        # Reference links have two bracket groups. Preserve both, while still
+        # recognizing the writer's canonical adjacent [P0001][P0002] citations.
+        if suffix.startswith("[") and index + 1 < len(matches):
+            following = matches[index + 1]
+            if not (citation_like(match.group(1)) and citation_like(following.group(1))):
+                continue
+        if index and matches[index - 1].end() == match.start():
+            if not citation_like(matches[index - 1].group(1)):
+                continue
+        yield match
+
+
+def _repair_numeric_citations(
+    text: str, mapping: Mapping[Any, Any] | None, known_handles: Iterable[str],
+) -> tuple[str, list[dict[str, str]]]:
+    """Only a caller's explicit number -> currently provided handle can repair."""
+    known = set(known_handles)
+    explicit = {str(key): value for key, value in (mapping or {}).items()
+                if str(key).isdigit() and isinstance(value, str) and value in known}
+    repairs: list[dict[str, str]] = []
+    output: list[str] = []
+    for segment, prose in _prose_segments(text):
+        if not prose:
+            output.append(segment)
+            continue
+        position = 0
+        for match in _citation_matches(segment):
+            bracket = match.group(1).strip()
+            if not re.fullmatch(r"\d+(?:\s*[,;]\s*\d+)*", bracket):
+                continue
+            numbers = re.split(r"\s*[,;]\s*", bracket)
+            if not all(number in explicit for number in numbers):
+                continue
+            replacement = "".join("[" + explicit[number] + "]" for number in numbers)
+            output.extend((segment[position:match.start()], replacement))
+            repairs.append({"original": match.group(0), "replacement": replacement})
+            position = match.end()
+        output.append(segment[position:])
+    return "".join(output), repairs
+
+
+def _output_diagnostics(body: str, known_handles: Iterable[str]) -> dict[str, Any]:
+    used = citations_in(body)
+    known = set(known_handles)
+    unknown = [handle for handle in used if handle not in known]
+    numeric: list[str] = []
+    for segment, prose in _prose_segments(body):
+        if prose:
+            for match in _citation_matches(segment):
+                if re.fullmatch(r"\d+(?:\s*[,;\-–]\s*\d+)*", match.group(1).strip()):
+                    if match.group(0) not in numeric:
+                        numeric.append(match.group(0))
+    problems = [{"code": "citation_not_in_unit_sources", "handle": handle,
+                 "note": "保留模型原文，不猜替换成别的来源"} for handle in unknown]
+    problems.extend({"code": "numeric_citation_unresolved", "citation": value,
+                     "note": "没有可用的显式编号到当前来源映射，保留原文"} for value in numeric)
+    fenced = sorted(index + 1 for index in _fenced_line_indices(body))
+    return {"used_source_handles": used, "unknown_citations": unknown,
+            "unresolved_numeric_citations": numeric, "citation_problems": problems,
+            "fence_report": {"remaining_fenced_lines": fenced},
+            "content_review_status": "not_reviewed"}
+
+
+def _merge_table_markdown(body: str, table: str) -> str:
+    known = {item["fingerprint"] for item in _markdown_tables(body)}
+    duplicates = [item for item in _markdown_tables(table) if item["fingerprint"] in known]
+    lines = table.splitlines()
+    for item in reversed(duplicates):
+        del lines[item["start"]:item["end"]]
+    remaining = "\n".join(lines).strip()
+    return body + ("\n\n" if body and remaining else "") + remaining
+
+
+def _consume_unit_output(response: Any) -> tuple[str, list[dict[str, Any]]]:
+    """Consume generated prose and independent finished tables, never tasks."""
+    if isinstance(response, str):
+        envelope = _decode_json_content(response)
+        if envelope is not None:
+            return _consume_unit_output(envelope)
+        text = _strip_fences(response)
+        if text:
+            issue = [{"code": "outer_markdown_fence_unwrapped"}] if text != response.strip("\r\n").rstrip() else []
+            return text, issue
+    if isinstance(response, Mapping):
+        body = ""
+        issues: list[dict[str, Any]] = []
+        for key in ("body_markdown", "content", "markdown", "text"):
+            value = response.get(key)
+            if isinstance(value, str) and value.strip():
+                if key == "body_markdown":
+                    body = _strip_fences(value)
+                    issues = ([{"code": "outer_markdown_fence_unwrapped", "field": key}]
+                              if body != value.strip("\r\n").rstrip() else [])
+                else:
+                    body, issues = _consume_unit_output(value)
+                break
+        if not body:
+            for key in ("response", "message"):
+                if isinstance(response.get(key), (Mapping, str)):
+                    body, issues = _consume_unit_output(response[key])
+                    break
+            choices = response.get("choices")
+            if not body and isinstance(choices, Sequence) and not isinstance(choices, (str, bytes)) and choices:
+                body, issues = _consume_unit_output(choices[0])
+        table = response.get("table_markdown")
+        if isinstance(table, str) and table.strip():
+            normalized = _strip_fences(table)
+            if normalized != table.strip("\r\n").rstrip():
+                issues.append({"code": "outer_markdown_fence_unwrapped", "field": "table_markdown"})
+            if _markdown_table_check(normalized)["valid"]:
+                body = _merge_table_markdown(body, normalized)
+            else:
+                issues.append({"code": "table_markdown_missing_or_invalid"})
+        if body:
+            return body, issues
+    raise UnitWritingError("unit_body_empty_or_unreadable")
+
+
+def _known_unit_handles(view: UnitWritingView) -> list[str]:
+    return list(view.sources) or [str(item.get("source_handle") or "") for item in view.materials]
+
+
+def _table_consumption_report(body: str, table_requested: bool) -> dict[str, Any]:
+    check = _markdown_table_check(body) if table_requested else {"valid": None}
+    missing = table_requested and not check["valid"]
+    return {"table_check": check, "output_consumption_status": "pending_table" if missing else "consumed",
+            "content_review_status": "not_reviewed",
+            "issues": [{"code": "markdown_table_missing_or_invalid"}] if missing else []}
 
 def _decode_json_content(value: str) -> Mapping[str, Any] | None:
     """Decode a provider content string when it contains our JSON envelope."""
 
-    text = _strip_fences(value)
+    text = _strip_fences(value, json_envelope=True).strip()
     if not text or text[0] != "{" or text[-1] != "}":
         return None
     try:
@@ -1596,37 +1876,8 @@ def _decode_json_content(value: str) -> Mapping[str, Any] | None:
 
 
 def parse_unit_body(response: Any) -> str:
-    """Accept plain Markdown, ``{"body_markdown": ...}`` or a wrapped response."""
-
-    if isinstance(response, Mapping):
-        for key in ("body_markdown", "content", "markdown", "text"):
-            value = response.get(key)
-            if isinstance(value, str) and value.strip():
-                if key == "content":
-                    envelope = _decode_json_content(value)
-                    if envelope is not None:
-                        return parse_unit_body(envelope)
-                stripped = _strip_fences(value)
-                if stripped:
-                    return stripped
-        choices = response.get("choices")
-        if isinstance(choices, Sequence) and choices:
-            return parse_unit_body(choices[0])
-        message = response.get("message")
-        if isinstance(message, Mapping):
-            return parse_unit_body(message)
-        response = response.get("response") if isinstance(response.get("response"), Mapping) else response
-        if isinstance(response, Mapping) and response.get("body_markdown"):
-            return _strip_fences(str(response["body_markdown"]))
-    if isinstance(response, str):
-        text = _strip_fences(response)
-        if text:
-            envelope = _decode_json_content(text)
-            if envelope is not None:
-                return parse_unit_body(envelope)
-            return text
-    raise UnitWritingError("unit_body_empty_or_unreadable")
-
+    """Return all generated prose and finished tables from a provider envelope."""
+    return _consume_unit_output(response)[0]
 
 def _response_issues(response: Any) -> list[dict[str, Any]]:
     """Read optional caller-facing issues without making them part of prose."""
@@ -1675,10 +1926,12 @@ def citations_in(body: str) -> list[str]:
     """Handles actually cited in the body (including inside Markdown tables)."""
 
     found: list[str] = []
-    for bracket in CITATION_RE.findall(body or ""):
-        for handle in HANDLE_RE.findall(bracket):
-            if handle not in found:
-                found.append(handle)
+    for segment, prose in _prose_segments(body or ""):
+        if prose:
+            for bracket in _citation_matches(segment):
+                for handle in HANDLE_RE.findall(bracket.group(1)):
+                    if handle not in found:
+                        found.append(handle)
     return found
 
 
@@ -1713,9 +1966,10 @@ def write_unit_output(
 
     target = Path(output_dir)
     target.mkdir(parents=True, exist_ok=True)
-    known = set(view.sources)
-    used = citations_in(body)
-    unknown = [handle for handle in used if handle not in known]
+    diagnostics = _output_diagnostics(body, _known_unit_handles(view))
+    consumption = _table_consumption_report(body, bool(view.table_tasks))
+    used = diagnostics["used_source_handles"]
+    unknown = diagnostics["unknown_citations"]
     unused = [handle for handle in view.sources if handle not in used]
     banner = simulated_banner(view, simulated_from) if mode == "fake" else ""
     markdown_path = target / ("UNIT_BODY.simulated.md" if mode == "fake" else "UNIT_BODY.md")
@@ -1749,6 +2003,8 @@ def write_unit_output(
         ),
         "partial_error": partial_error,
         "issues": [dict(item) for item in issues if isinstance(item, Mapping)],
+        **diagnostics,
+        **{key: value for key, value in consumption.items() if key != "issues"},
         "arrangement_path": view.arrangement_path,
         "view_path": view.view_path,
         "input_path": str(target / "UNIT_INPUT.json"),
@@ -1763,12 +2019,9 @@ def write_unit_output(
             "真实模型输出；未做全章合稿、未做审稿循环、未做事实核查。"
         ),
     }
-    if unknown:
-        result["citation_problems"] = [
-            {"code": "citation_not_in_unit_sources", "handle": handle,
-             "note": "保留模型原文，不猜替换成别的来源"}
-            for handle in unknown
-        ]
+    for issue in consumption["issues"]:
+        if issue not in result["issues"]:
+            result["issues"].append(issue)
     (target / "UNIT_RESULT.json").write_text(
         json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     return result
@@ -1821,6 +2074,7 @@ def run_unit_writing(
     payload: Mapping[str, Any] | None = None,
     raw_response_dir: str | Path | None = None,
     planning_revision: bool = False,
+    citation_number_map: Mapping[Any, Any] | None = None,
 ) -> dict[str, Any]:
     """One writing call, with the raw response kept on disk."""
 
@@ -1844,8 +2098,6 @@ def run_unit_writing(
             raise
         response = dict(record)
         partial_error = type(exc).__name__ + ":" + str(exc)
-    body = parse_unit_body(response)
-    issues = _response_issues(response)
     raw_path = ""
     if raw_response_dir is not None:
         directory = Path(raw_response_dir)
@@ -1854,8 +2106,25 @@ def run_unit_writing(
         raw_path = str(directory / f"{view.chapter_id}_{view.unit_id}_{stamp}.raw")
         Path(raw_path).write_text(json.dumps(response, ensure_ascii=False, indent=2, default=str),
                                   encoding="utf-8")
+    body, normalization = _consume_unit_output(response)
+    # The caller's payload is trusted task context; never read a mapping out of
+    # the model response. No implicit positional/P-number-suffix conversion.
+    explicit_map = citation_number_map
+    if explicit_map is None and payload is not None:
+        candidate = payload.get("citation_number_map")
+        explicit_map = candidate if isinstance(candidate, Mapping) else None
+    body, repairs = _repair_numeric_citations(body, explicit_map, _known_unit_handles(view))
+    diagnostics = _output_diagnostics(body, _known_unit_handles(view))
+    consumption = _table_consumption_report(body, bool(view.table_tasks))
+    issues = _response_issues(response)
+    issues.extend(item for item in normalization if item.get("code") == "table_markdown_missing_or_invalid")
+    issues.extend(item for item in consumption["issues"] if item not in issues)
     return {
         "body_markdown": body,
+        **diagnostics,
+        **{key: value for key, value in consumption.items() if key != "issues"},
+        "output_normalization": normalization,
+        "numeric_citation_repairs": repairs,
         "messages": messages,
         "usage": dict(response.get("usage") or {}),
         "finish_reason": response.get("finish_reason") or "",

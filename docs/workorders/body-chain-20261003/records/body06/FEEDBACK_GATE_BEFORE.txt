@@ -1,0 +1,44 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_real_validation_blocks_writer_and_persists_owner_material[needs_arrangement] _
+
+tmp_path = PosixPath('/tmp/body06-feedback-gate-before/test_real_validation_blocks_wr0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fae7e3c7f80>
+mode = 'needs_arrangement'
+
+    @pytest.mark.parametrize("mode", ["needs_arrangement", "contract_failed"])
+    def test_real_validation_blocks_writer_and_persists_owner_material(tmp_path, monkeypatch, mode):
+        state = _scenario(tmp_path, monkeypatch, mode=mode)
+        result = state["run"]()
+        rebuilt = _read(result["arrangement"])
+        assert rebuilt["units"]
+        assert rebuilt["validation"]["status"] == mode
+        assert rebuilt["validation"]["ok"] is False
+>       assert state["calls"]["writer"] == 0, state["calls"]
+E       AssertionError: {'owner': 1, 'arrangement': 1, 'writer': 1}
+E       assert 1 == 0
+
+tests/upgrade3/test_body06_feedback_arrangement_gate.py:122: AssertionError
+_ test_real_validation_blocks_writer_and_persists_owner_material[contract_failed] _
+
+tmp_path = PosixPath('/tmp/body06-feedback-gate-before/test_real_validation_blocks_wr1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fae7e40e180>
+mode = 'contract_failed'
+
+    @pytest.mark.parametrize("mode", ["needs_arrangement", "contract_failed"])
+    def test_real_validation_blocks_writer_and_persists_owner_material(tmp_path, monkeypatch, mode):
+        state = _scenario(tmp_path, monkeypatch, mode=mode)
+        result = state["run"]()
+        rebuilt = _read(result["arrangement"])
+        assert rebuilt["units"]
+        assert rebuilt["validation"]["status"] == mode
+        assert rebuilt["validation"]["ok"] is False
+>       assert state["calls"]["writer"] == 0, state["calls"]
+E       AssertionError: {'owner': 1, 'arrangement': 1, 'writer': 1}
+E       assert 1 == 0
+
+tests/upgrade3/test_body06_feedback_arrangement_gate.py:122: AssertionError
+=========================== short test summary info ============================
+FAILED tests/upgrade3/test_body06_feedback_arrangement_gate.py::test_real_validation_blocks_writer_and_persists_owner_material[needs_arrangement]
+FAILED tests/upgrade3/test_body06_feedback_arrangement_gate.py::test_real_validation_blocks_writer_and_persists_owner_material[contract_failed]
+2 failed in 0.69s

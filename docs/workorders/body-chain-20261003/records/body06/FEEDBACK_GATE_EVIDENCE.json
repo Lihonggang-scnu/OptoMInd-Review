@@ -1,0 +1,288 @@
+{
+  "scope": "WO06 item 8, feedback arrangement validation consumption only",
+  "fixture_kind": "Synthetic deterministic offline integration; real run_feedback_loop persistence, owner-result classification, FeedbackLoop.arrangement_runner, arrangement parser and validator; controlled owner/provider responses and writer sentinel callback.",
+  "production_baseline": "6efc7a44615f0414109678c8c2ac7a040ee0ffc7",
+  "docs_baseline": "8582bb698700937b0b89db65b26c8cfa958b210b",
+  "provider_configuration": {
+    "adapter_model": "qwen3.5-plus",
+    "adapter_max_output_tokens": 5000,
+    "adapter_thinking": true,
+    "adapter_thinking_budget": 1024,
+    "real_provider_calls": 0,
+    "paid_calls": 0,
+    "credential_reads": 0,
+    "writer_model": "none; controlled sentinel callback"
+  },
+  "cases": [
+    {
+      "mode": "needs_arrangement",
+      "before": {
+        "raw_provider_response": {
+          "chapter_id": "CH01",
+          "units": [
+            {
+              "unit_id": "UNIT_A",
+              "paragraph_tasks": [
+                {
+                  "paragraph_id": "BRIEF_A",
+                  "source_briefs": [
+                    "BRIEF_A"
+                  ],
+                  "source_uses": [
+                    {
+                      "source_handle": "P0001"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "validation": {
+          "contract_ok": true,
+          "errors": [],
+          "missing_sources": [
+            "P0002"
+          ],
+          "needs_arrangement": true,
+          "ok": false,
+          "paragraph_ids_reused_with_new_point": [],
+          "paragraph_tasks": 1,
+          "paragraph_tasks_carried_over": 1,
+          "paragraph_tasks_with_changed_point": 0,
+          "sources_arranged": 1,
+          "sources_marked_unused": 0,
+          "sources_never_mentioned": [
+            "P0002"
+          ],
+          "status": "needs_arrangement",
+          "table_tasks": 0,
+          "units_expected": 1,
+          "units_returned": 1
+        },
+        "units_retained": [
+          "UNIT_A"
+        ],
+        "dispatch_calls": {
+          "owner": 1,
+          "arrangement": 1,
+          "writer": 1
+        },
+        "loop_status": "updated",
+        "pending_arrangement": false,
+        "writer_file_exists": true,
+        "writer_output": {
+          "body_markdown": "Existing usable body under condition A. [P0001]",
+          "complete": true
+        },
+        "owner_plan_thesis": "Compare results with their different conditions.",
+        "adopted_source_content": {
+          "usable_content": "Comparison result under condition B."
+        },
+        "adopted_source_identity": {
+          "paper_id": "synthetic-two"
+        }
+      },
+      "after": {
+        "raw_provider_response": {
+          "chapter_id": "CH01",
+          "units": [
+            {
+              "unit_id": "UNIT_A",
+              "paragraph_tasks": [
+                {
+                  "paragraph_id": "BRIEF_A",
+                  "source_briefs": [
+                    "BRIEF_A"
+                  ],
+                  "source_uses": [
+                    {
+                      "source_handle": "P0001"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "validation": {
+          "contract_ok": true,
+          "errors": [],
+          "missing_sources": [
+            "P0002"
+          ],
+          "needs_arrangement": true,
+          "ok": false,
+          "paragraph_ids_reused_with_new_point": [],
+          "paragraph_tasks": 1,
+          "paragraph_tasks_carried_over": 1,
+          "paragraph_tasks_with_changed_point": 0,
+          "sources_arranged": 1,
+          "sources_marked_unused": 0,
+          "sources_never_mentioned": [
+            "P0002"
+          ],
+          "status": "needs_arrangement",
+          "table_tasks": 0,
+          "units_expected": 1,
+          "units_returned": 1
+        },
+        "units_retained": [
+          "UNIT_A"
+        ],
+        "dispatch_calls": {
+          "owner": 1,
+          "arrangement": 1,
+          "writer": 0
+        },
+        "loop_status": "partial",
+        "pending_arrangement": true,
+        "writer_file_exists": false,
+        "writer_output": null,
+        "owner_plan_thesis": "Compare results with their different conditions.",
+        "adopted_source_content": {
+          "usable_content": "Comparison result under condition B."
+        },
+        "adopted_source_identity": {
+          "paper_id": "synthetic-two"
+        }
+      }
+    },
+    {
+      "mode": "contract_failed",
+      "before": {
+        "raw_provider_response": {
+          "chapter_id": "WRONG_CHAPTER",
+          "units": [
+            {
+              "unit_id": "UNIT_A",
+              "paragraph_tasks": [
+                {
+                  "paragraph_id": "BRIEF_A",
+                  "source_briefs": [
+                    "BRIEF_A"
+                  ],
+                  "source_uses": [
+                    {
+                      "source_handle": "P0001"
+                    },
+                    {
+                      "source_handle": "P0002"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "validation": {
+          "contract_ok": false,
+          "errors": [
+            "chapter_id_mismatch:WRONG_CHAPTER!=CH01"
+          ],
+          "missing_sources": [],
+          "needs_arrangement": false,
+          "ok": false,
+          "paragraph_ids_reused_with_new_point": [],
+          "paragraph_tasks": 1,
+          "paragraph_tasks_carried_over": 1,
+          "paragraph_tasks_with_changed_point": 0,
+          "sources_arranged": 2,
+          "sources_marked_unused": 0,
+          "sources_never_mentioned": [],
+          "status": "contract_failed",
+          "table_tasks": 0,
+          "units_expected": 1,
+          "units_returned": 1
+        },
+        "units_retained": [
+          "UNIT_A"
+        ],
+        "dispatch_calls": {
+          "owner": 1,
+          "arrangement": 1,
+          "writer": 1
+        },
+        "loop_status": "updated",
+        "pending_arrangement": false,
+        "writer_file_exists": true,
+        "writer_output": {
+          "body_markdown": "Existing usable body under condition A. [P0001]",
+          "complete": true
+        },
+        "owner_plan_thesis": "Compare results with their different conditions.",
+        "adopted_source_content": {
+          "usable_content": "Comparison result under condition B."
+        },
+        "adopted_source_identity": {
+          "paper_id": "synthetic-two"
+        }
+      },
+      "after": {
+        "raw_provider_response": {
+          "chapter_id": "WRONG_CHAPTER",
+          "units": [
+            {
+              "unit_id": "UNIT_A",
+              "paragraph_tasks": [
+                {
+                  "paragraph_id": "BRIEF_A",
+                  "source_briefs": [
+                    "BRIEF_A"
+                  ],
+                  "source_uses": [
+                    {
+                      "source_handle": "P0001"
+                    },
+                    {
+                      "source_handle": "P0002"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "validation": {
+          "contract_ok": false,
+          "errors": [
+            "chapter_id_mismatch:WRONG_CHAPTER!=CH01"
+          ],
+          "missing_sources": [],
+          "needs_arrangement": false,
+          "ok": false,
+          "paragraph_ids_reused_with_new_point": [],
+          "paragraph_tasks": 1,
+          "paragraph_tasks_carried_over": 1,
+          "paragraph_tasks_with_changed_point": 0,
+          "sources_arranged": 2,
+          "sources_marked_unused": 0,
+          "sources_never_mentioned": [],
+          "status": "contract_failed",
+          "table_tasks": 0,
+          "units_expected": 1,
+          "units_returned": 1
+        },
+        "units_retained": [
+          "UNIT_A"
+        ],
+        "dispatch_calls": {
+          "owner": 1,
+          "arrangement": 1,
+          "writer": 0
+        },
+        "loop_status": "partial",
+        "pending_arrangement": true,
+        "writer_file_exists": false,
+        "writer_output": null,
+        "owner_plan_thesis": "Compare results with their different conditions.",
+        "adopted_source_content": {
+          "usable_content": "Comparison result under condition B."
+        },
+        "adopted_source_identity": {
+          "paper_id": "synthetic-two"
+        }
+      }
+    }
+  ]
+}
