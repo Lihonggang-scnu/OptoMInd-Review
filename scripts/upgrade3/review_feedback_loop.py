@@ -357,6 +357,7 @@ class FeedbackLoop:
         # material catalogue so the following writer can use the same packet.
         exported = dict(result)
         exported["source_catalog"] = arranging.build_source_catalog(view, result)
+        exported["chapter_tool_materials"] = arranging.compact_chapter_tool_materials(view)
         exported["unit_id_remap"] = dict(updated_packet.get("unit_id_remap") or {})
         return exported
 

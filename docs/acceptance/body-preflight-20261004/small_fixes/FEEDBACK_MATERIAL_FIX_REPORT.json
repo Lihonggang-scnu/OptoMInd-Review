@@ -1,0 +1,44 @@
+{
+  "status": "complete_offline_feedback_material_export_fix",
+  "paid_calls": 0,
+  "model_calls": 0,
+  "production_file_changed": "<PROJECT_ROOT>\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree\\scripts\\upgrade3\\review_feedback_loop.py",
+  "production_change": "FeedbackLoop.arrangement_runner now exports chapter_tool_materials using arranging.compact_chapter_tool_materials(view), alongside source_catalog and unit_id_remap.",
+  "targeted_test": "<PROJECT_ROOT>\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree\\tests\\upgrade3\\test_feedback_loop_chapter_tool_materials.py",
+  "before_failure": {
+    "artifact": "<PROJECT_ROOT>\\outputs\\body_full_preflight_20261004\\feedback_material_fix\\BEFORE_FIX_FAILURE.json",
+    "exported_chapter_tool_materials": null,
+    "writer_unit_tool_materials": {
+      "CH01_U01": [],
+      "CH01_U02": []
+    },
+    "message": "Actual FeedbackLoop.arrangement_runner completed with a stub client, but its saved arrangement omitted chapter_tool_materials; real build_unit_view then gave both units no chapter tool material."
+  },
+  "after_success": {
+    "artifact": "<PROJECT_ROOT>\\outputs\\body_full_preflight_20261004\\feedback_material_fix\\AFTER_FIX_RESULT.json",
+    "exported_tool_materials": [
+      {"unit_key": "CH01:CH01_U01", "usable_content": "TOOL_ANSWER_A", "source_handles": ["P0001", "P0002"]},
+      {"unit_key": "CH01:CH01_U02", "usable_content": "TOOL_ANSWER_B", "source_handles": ["P0002"]}
+    ],
+    "writer_unit_tool_materials": {
+      "CH01_U01": ["TOOL_ANSWER_A"],
+      "CH01_U02": ["TOOL_ANSWER_B"]
+    },
+    "writer_payload_source_handles": {
+      "CH01_U01": ["P0001", "P0002"],
+      "CH01_U02": ["P0002"]
+    },
+    "cross_unit_isolation": true,
+    "arrangement_messages": "<PROJECT_ROOT>\\outputs\\body_full_preflight_20261004\\feedback_material_fix\\after_fix\\ARRANGEMENT_MESSAGES.json",
+    "writer_messages": [
+      "<PROJECT_ROOT>\\outputs\\body_full_preflight_20261004\\feedback_material_fix\\after_fix\\UNIT_MESSAGES_CH01_U01.json",
+      "<PROJECT_ROOT>\\outputs\\body_full_preflight_20261004\\feedback_material_fix\\after_fix\\UNIT_MESSAGES_CH01_U02.json"
+    ]
+  },
+  "tests": {
+    "command": "python -m pytest -q tests/upgrade3/test_feedback_loop_chapter_tool_materials.py tests/upgrade3/test_body05_argument_cli_handoff.py",
+    "result": "15 passed",
+    "output": "<PROJECT_ROOT>\\outputs\\body_full_preflight_20261004\\feedback_material_fix\\pytest_output.txt"
+  },
+  "scope": "No other production files changed; no prompts, model outputs, live_chain files, commits, pushes, ledger, keys, or paid calls were touched."
+}

@@ -63,7 +63,17 @@ DEEP_READ_DROP_ALWAYS = ("schema_version", "task_id", "review_id", "workflow", "
 DEEP_READ_DROP_BULKY = ("references",)
 
 CITATION_RE = re.compile(r"\[([^\[\]]{1,120})\]")
-HANDLE_RE = re.compile(r"\bP\d{3,}\b")
+# Handles may sit directly next to CJK text (for example ``[参考P0602]``),
+# while still refusing identifier substrings such as ``AP0602`` or
+# ``P0602suffix``.
+HANDLE_RE = re.compile(r"(?<![A-Za-z0-9_])P\d{3,}(?![A-Za-z0-9_])")
+CITATION_PREFIX_RE = re.compile(
+    r"^(?:(?:参考)|(?:ref(?:erence)?|citation|source))\s*[:：]?\s*",
+    re.IGNORECASE,
+)
+CITATION_SEQUENCE_RE = re.compile(
+    r"(?:P\d{3,}|\d+)(?:[ ,;\-–]*(?:P\d{3,}|\d+))*"
+)
 
 A_FIELDS = (
     "work_summary",
@@ -1653,7 +1663,11 @@ def _citation_matches(text: str) -> Iterable[re.Match[str]]:
     matches = list(CITATION_RE.finditer(text))
 
     def citation_like(value: str) -> bool:
-        return bool(re.fullmatch(r"(?:P\d{3,}|\d+)(?:[ ,;\-–]*(?:P\d{3,}|\d+))*", value.strip()))
+        stripped = value.strip()
+        if CITATION_SEQUENCE_RE.fullmatch(stripped):
+            return True
+        prefix = CITATION_PREFIX_RE.match(stripped)
+        return bool(prefix and CITATION_SEQUENCE_RE.fullmatch(stripped[prefix.end():].strip()))
 
     for index, match in enumerate(matches):
         if match.start() and text[match.start() - 1] in "\\!":

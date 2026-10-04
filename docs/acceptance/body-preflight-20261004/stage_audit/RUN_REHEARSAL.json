@@ -1,0 +1,298 @@
+{
+  "schema": "body-full-preflight-run-rehearsal-v1",
+  "inspection": {
+    "repository": "<PROJECT_ROOT>\\outputs\\lihonggang_full_acceptance_20261001_50cny\\worktree",
+    "commit": "1f171c4731f27f2f4d20107d37a05b805582529c",
+    "branch": "body07-local-acceptance-20261004",
+    "inspected_on": "2026-10-04",
+    "execution_policy": "read-only preflight; no model, provider, network, key read, paid run, production edit, commit, or push",
+    "status_vocabulary": {
+      "CODE-CONFIRMED": "Order and callable are confirmed from current HEAD source.",
+      "OFFLINE-EXERCISED": "A bounded controlled fixture exercised the boundary; this is not full-run acceptance.",
+      "FULL-EXPERIMENT-REQUIRED": "Current HEAD full/live behavior remains unverified."
+    }
+  },
+  "current_body_order": [
+    "pool/plan load, handle refresh, run-state validation",
+    "provisional_scope",
+    "level1 tool cycle and material merge",
+    "level1_outline",
+    "source routing and chapter proposals",
+    "harmonized_scope",
+    "level2 tool cycle and material merge",
+    "finalize_chapter_scope",
+    "optional chapter_need_analysis and chapters tool cycle",
+    "chapter_details with oversized handling and optional explicit recovery",
+    "late source routing and late material attachment",
+    "pre-case whole_plan_improvement coordinator",
+    "affected chapter owner revisions",
+    "case_groups collection",
+    "direct formal supporting_studies attachment in planning_revision mode",
+    "final planner assembly and writer_packets",
+    "separate chapter arrangement",
+    "separate unit writing",
+    "deterministic batch assembly"
+  ],
+  "stages": [
+    {
+      "id": "preflight",
+      "order": 0,
+      "status": "CODE-CONFIRMED",
+      "callable": "scripts/upgrade3/progressive_review_plan.py:main -> preflight",
+      "entry": "progressive_review_plan.py without --run",
+      "inputs": ["<POOL_JSON>", "<PLAN_JSON>", "<BODY_RUN>", "<TOPIC_ID>"],
+      "artifacts": ["<BODY_RUN>.PREFLIGHT.json"],
+      "checks": ["pool and plan load", "local token/context estimate", "missing card paths reported", "no provider call"],
+      "expected_state": "preflight report exists; no RUN_STATE completion and no generated plan",
+      "observation": "upstream input scope and local sizing only",
+      "full_run": false
+    },
+    {
+      "id": "provisional_scope",
+      "order": 1,
+      "status": "FULL-EXPERIMENT-REQUIRED",
+      "callable": "ProgressiveReviewPlanner.run -> _model_stage(\"provisional_scope\")",
+      "artifacts": ["<BODY_RUN>/stages/provisional_scope.json", "<BODY_RUN>/RUN_STATE.json.stage_inputs.provisional_scope", "<BODY_RUN>/RUN_STATE.json.stage_cache_contracts.provisional_scope"],
+      "checks": ["response complete", "topic and planning_revision match", "stage contract persisted"],
+      "expected_state": "completed stage and advanced RUN_STATE",
+      "observation": "first model understanding of topic/pool",
+      "full_run": true
+    },
+    {
+      "id": "level1_tools",
+      "order": 2,
+      "status": "OFFLINE-EXERCISED",
+      "callable": "ProgressiveReviewPlanner.run -> _tool_cycle(phase=level1)",
+      "artifacts": ["<BODY_RUN>/stages/level1_tools*.json", "source snapshots", "need journal", "material index"],
+      "checks": ["query/refinement and acquisition/card/judge edges persist", "directed reading status and handles persist", "partial status remains partial"],
+      "expected_state": "material rows merged into pool/handles and visible to next outline stage",
+      "observation": "retrieval fidelity from need to planner-visible material",
+      "full_run": true
+    },
+    {
+      "id": "level1_outline",
+      "order": 3,
+      "status": "FULL-EXPERIMENT-REQUIRED",
+      "callable": "ProgressiveReviewPlanner.run -> _model_stage(\"level1_outline\")",
+      "artifacts": ["<BODY_RUN>/stages/level1_outline.json"],
+      "checks": ["known material identities", "outline response persisted", "stop_after=level1 leaves explicit partial state if used"],
+      "expected_state": "completed outline or stopped_after_level1 with partial outputs",
+      "observation": "model understanding after first tool pass",
+      "full_run": true
+    },
+    {
+      "id": "routing_and_proposals",
+      "order": 4,
+      "status": "OFFLINE-EXERCISED",
+      "callable": "_route_sources -> _propose_chapters",
+      "artifacts": ["<BODY_RUN>/stages/source_routing/", "source_routing_summary.json", "stages/chapter_proposals/*.json", "chapter_proposals.json"],
+      "checks": ["stable source identity", "chapter assignment", "proposal cache contract", "full pool batch coverage"],
+      "expected_state": "routed source map and chapter proposal set available",
+      "observation": "global scope to chapter material/need handoff",
+      "full_run": true
+    },
+    {
+      "id": "harmonized_scope",
+      "order": 5,
+      "status": "FULL-EXPERIMENT-REQUIRED",
+      "callable": "_model_stage(\"harmonized_scope\")",
+      "artifacts": ["<BODY_RUN>/stages/harmonized_scope.json"],
+      "checks": ["shared thesis/scope/argument", "chapter list and identity continuity"],
+      "expected_state": "harmonized global/chapter scope",
+      "observation": "global-to-chapter interpretation",
+      "full_run": true
+    },
+    {
+      "id": "level2_and_finalize",
+      "order": 6,
+      "status": "OFFLINE-EXERCISED",
+      "callable": "_tool_cycle(phase=level2) -> _model_stage(\"finalize_chapter_scope\")",
+      "artifacts": ["level2 tool records", "<BODY_RUN>/stages/finalize_chapter_scope.json", "final shared outline/scope/argument"],
+      "checks": ["material deltas merged", "final chapter IDs stable", "unit identity contract persisted"],
+      "expected_state": "final scope ready for chapter needs/details",
+      "observation": "final owner-input preparation",
+      "full_run": true
+    },
+    {
+      "id": "chapter_needs_and_tools",
+      "order": 7,
+      "status": "OFFLINE-EXERCISED",
+      "callable": "_model_stage(\"chapter_need_analysis\") -> _tool_cycle(phase=chapters), conditional",
+      "artifacts": ["chapter need records", "chapter material snapshots/index rows", "tool stage records"],
+      "checks": ["only gaps trigger reads", "answered/partial/unresolved preserved", "handles resolve"],
+      "expected_state": "chapter detail inputs include current tool material and explicit unresolved qualifiers",
+      "observation": "retrieval-to-chapter-detail handoff",
+      "full_run": true
+    },
+    {
+      "id": "chapter_details",
+      "order": 8,
+      "status": "FULL-EXPERIMENT-REQUIRED",
+      "callable": "_chapter_details per chapter",
+      "artifacts": ["<BODY_RUN>/stages/chapters/<CH>.json", "chapter markdown if enabled"],
+      "checks": ["_chapter_details_capacity estimates rendered input with ceil(message_tokens * TOKEN_MARGIN_MULTIPLIER) + TOKEN_FRAMING_MARGIN", "output is min(planner.output_tokens,16000) and chapter thinking is fixed 2048", "fit requires estimated input <= MAX_INPUT_TOKENS and total input+output+thinking < 1000000", "oversized source rows are weighted and repartitioned into complete records", "each batch and the merge are capacity checked and persisted", "single-record/fixed-envelope/merge overflow raises an explicit error", "caveats/conditions survive", "oversized/error state visible"],
+      "expected_state": "complete chapter detail records or explicit partial/error records",
+      "observation": "chapter model understanding and source-to-detail handoff",
+      "full_run": true
+    },
+    {
+      "id": "explicit_recovery",
+      "order": 9,
+      "status": "CODE-CONFIRMED",
+      "callable": "recover_compatible_chapter_details when --recover-chapters-from/--recover-chapter is supplied",
+      "artifacts": ["<BODY_RUN>/stages/chapter_recovery.json", "recovered chapter records"],
+      "checks": ["explicit source only", "compatibility and material identity", "no implicit historical recovery"],
+      "expected_state": "only compatible requested chapters recovered",
+      "observation": "recovery handoff",
+      "full_run": false
+    },
+    {
+      "id": "late_routes",
+      "order": 10,
+      "status": "OFFLINE-EXERCISED",
+      "callable": "_route_late_sources -> _attach_late_route_materials",
+      "artifacts": ["late routing records", "late attachment records", "late material change summary"],
+      "checks": ["chapter match", "material delta recorded", "late material reaches owner input"],
+      "expected_state": "detail records reflect late material before owner/case stages",
+      "observation": "last upstream material handoff",
+      "full_run": true
+    },
+    {
+      "id": "pre_case_whole_plan",
+      "order": 11,
+      "status": "OFFLINE-EXERCISED",
+      "callable": "_post_case_review(case_record={response:{}}, ...) -> _stage(\"whole_plan_improvement\")",
+      "artifacts": ["<BODY_RUN>/stages/whole_plan_improvement.json", "global owner feedback"],
+      "checks": ["pre-case material snapshot", "late changes and chapter records included", "whole-plan cache contract"],
+      "expected_state": "coordinator feedback available before any formal case attachment",
+      "observation": "global understanding before cases",
+      "full_run": true
+    },
+    {
+      "id": "owner_revision",
+      "order": 12,
+      "status": "OFFLINE-EXERCISED",
+      "callable": "_post_case_review -> revise_one -> _apply_improvements",
+      "artifacts": ["stages/affected_chapter_revision/<CH>.json", "stages/affected_chapter_revision/successful/<CH>.json", "history", "affected_chapter_revision.json"],
+      "checks": ["complete successful owner output only replaces authoritative detail", "material and identity map retained", "failed/unresolved work visible", "resume reuses matching owner success"],
+      "expected_state": "owner-revised chapter details are authoritative before case collection",
+      "observation": "coordinator-to-owner handoff",
+      "full_run": true
+    },
+    {
+      "id": "case_groups",
+      "order": 13,
+      "status": "OFFLINE-EXERCISED",
+      "callable": "run_case_groups; _stage(\"case_groups\", ..., resume=False)",
+      "artifacts": ["case stage file", "per-chapter/per-batch records", "case response/errors", "inner cache contracts"],
+      "checks": ["collector runs on resume", "inner cache signatures match route/material/task inputs", "failed batches retry", "actual source material is present"],
+      "expected_state": "case results or explicit partial/error batch records",
+      "observation": "case generation boundary; separate missing material from model output",
+      "full_run": true
+    },
+    {
+      "id": "case_attachment",
+      "order": 14,
+      "status": "FULL-EXPERIMENT-REQUIRED",
+      "callable": "_attach_case_groups(planning_revision=True, body_case_additions=True)",
+      "artifacts": ["chapter supporting_studies", "contribution fields", "source materials/identity maps", "case enrichment summary"],
+      "checks": ["_owner_material_has_content", "stable identity and aliases", "proposed_use mapped to contribution when needed", "no case_suggestions adoption loop", "no post-case owner rewrite"],
+      "expected_state": "case additions are formal supporting_studies before final planner assembly",
+      "observation": "owner-revised plan to case output direct formal append; no second owner approval or post-case rewrite; inspect case input/output and later writer use",
+      "full_run": true
+    },
+    {
+      "id": "planner_assembly",
+      "order": 15,
+      "status": "FULL-EXPERIMENT-REQUIRED",
+      "callable": "_assemble_final -> _write_final_outputs",
+      "artifacts": ["writer_packets/<CH>.json/.md", "DETAILED_REVIEW_PLAN.json/.md", "RUN_STATE.json"],
+      "checks": ["all chapter records assembled", "status distinguishes complete/partial/initial_draft", "case enrichment retained", "packet source catalog is inspectable"],
+      "expected_state": "final planner packet set ready for arrangement",
+      "observation": "planner-to-arrangement handoff",
+      "full_run": true
+    },
+    {
+      "id": "arrangement",
+      "order": 16,
+      "status": "OFFLINE-EXERCISED",
+      "callable": "chapter_arrangement.build_chapter_view -> arrangement_payload -> run_arrangement -> validate_arrangement",
+      "entry": "scripts/upgrade3/chapter_arrangement.py --all-chapters",
+      "artifacts": ["ARRANGEMENT_INPUT.json", "INPUT_SOURCE_USAGE.json", "CHAPTER_ARRANGEMENT.json/.md", "SOURCE_USAGE.json", "raw response", "ARRANGEMENT_RUN.json"],
+      "checks": ["every existing task referenced or explicitly unused", "known unit IDs", "known source handles", "source briefs/details/conditions preserved", "invalid/needs_arrangement/contract_failed stops"],
+      "expected_state": "validated arranged chapter or explicit pending validation state",
+      "observation": "packet to arrangement-model input and handoff",
+      "full_run": true
+    },
+    {
+      "id": "unit_writer",
+      "order": 17,
+      "status": "OFFLINE-EXERCISED",
+      "callable": "review_unit_writer.build_unit_view -> unit_payload -> run_unit_writing -> write_unit_output",
+      "entry": "scripts/upgrade3/review_unit_writer.py (repeatable --unit)",
+      "artifacts": ["UNIT_INPUT.json", "UNIT_MESSAGES.json", "UNIT_RESULT.json", "UNIT_BODY.md", "raw response"],
+      "checks": ["unit identity/task IDs match arrangement", "source materials and caveats present", "citations/unknowns captured", "table pending stays pending"],
+      "expected_state": "usable unit output or explicit partial/issues record",
+      "observation": "arrangement input to generated prose/table boundary",
+      "full_run": true
+    },
+    {
+      "id": "assembly",
+      "order": 18,
+      "status": "OFFLINE-EXERCISED",
+      "callable": "full_review_draft.load_manifest -> collect_documents -> assemble_documents",
+      "entry": "scripts/upgrade3/full_review_draft.py",
+      "artifacts": ["MANIFEST.json", "BATCH_JOBS.json", "ASSEMBLY_SUMMARY.json", "RUN_REPORT.md", "REVIEW_DRAFT_HANDLES.md", "numeric draft/references"],
+      "checks": ["all units present", "fake/simulated rejected", "identity/citations resolve", "missing units fail without --allow-partial"],
+      "expected_state": "deterministic complete assembly or explicit diagnostic partial_check",
+      "observation": "writer output to final document; no new model call",
+      "full_run": true
+    }
+  ],
+  "proposed_cli": {
+    "offline_preflight": "python scripts/upgrade3/progressive_review_plan.py --preflight --pool <POOL_JSON> --plan <PLAN_JSON> --output-dir <BODY_RUN> --topic-id <TOPIC_ID> --planning-revision [--local-material-index <LOCAL_INDEX>] [--deep-read-limit <N>] [--prior-reading <READING_ROOT>]",
+    "planner_run": "python scripts/upgrade3/progressive_review_plan.py --pool <POOL_JSON> --plan <PLAN_JSON> --output-dir <BODY_RUN> --topic-id <TOPIC_ID> --planning-revision --run --key-file <KEY_FILE> --budget-ledger <LEDGER> --budget-limit-cny <LIMIT> --chapter-workers <N> --reader-workers <N> --deep-read-limit <N> [--local-material-index <LOCAL_INDEX>] [--no-external-supplement] [--resume]",
+    "arrangement_run": "python scripts/upgrade3/chapter_arrangement.py --all-chapters --packet-root <BODY_RUN> --output-root <ARRANGE_ROOT> --planning-revision --run --model <ARRANGEMENT_MODEL> --key-file <KEY_FILE> --budget-ledger <LEDGER> --round-cap-cny <CAP> [--force]",
+    "writer_run_per_unit": "python scripts/upgrade3/review_unit_writer.py --arrangement <ARRANGE_ROOT>/<CHAPTER>/CHAPTER_ARRANGEMENT.json --unit <UNIT_ID> --packet-root <BODY_RUN> --output-root <WRITER_ROOT> --planning-revision --run --model <WRITER_MODEL> --key-file <KEY_FILE> --budget-ledger <LEDGER> --global-budget-cny <LIMIT>",
+    "assembly_check": "python scripts/upgrade3/full_review_draft.py --manifest <BATCH_ROOT>/MANIFEST.json --batch-root <BATCH_ROOT> --output-root <ASSEMBLY_ROOT> --check-only",
+    "assembly_run": "python scripts/upgrade3/full_review_draft.py --manifest <BATCH_ROOT>/MANIFEST.json --batch-root <BATCH_ROOT> --output-root <ASSEMBLY_ROOT>"
+  },
+  "cache_audit": {
+    "planner_stage": "_stage uses a completed result only when resume is requested, output exists, and cache_inputs contract matches; without cache_inputs, it does not reuse an old output through a contract.",
+    "case_groups": "outer stage deliberately uses resume=False on planner resume; inner per-batch cache requires chapter/batch/route/unit-material/task signatures, preserving retry of failed batches.",
+    "owner": "only successful complete owner outputs matching owner/material/identity contract replace authoritative details; failed or unresolved work remains visible.",
+    "arrangement": "completed validated result may be reused by input/config signature; --force bypasses it; reexport revalidates current code without a model call.",
+    "writer": "standalone writer CLI has no full BODY cache contract; a batch driver must use explicit unit manifest/output roots.",
+    "assembly": "missing units fail by default and fake/simulated outputs are rejected; --allow-partial is diagnostic only.",
+    "operator_check": "Use a fresh run root or record exact --resume root, then inspect RUN_STATE.json, stage contracts, source/material signatures, and commit before accepting any cache hit. Historical case_chain_restore/body07 artifacts must not satisfy a missing current stage.",
+    "known_risk": "Planner cache contracts hash effective inputs, current prompt text, model, output limit, and thinking limit, but not repository commit SHA. An old result can match if those fields happen to match while implementation code changed elsewhere; fresh output roots are required for a clean rehearsal."
+  },
+  "oversized_chapter_behavior": {
+    "callables": ["_chapter_details_capacity", "_chapter_details_adaptive_batches", "_chapter_details_adaptive_record"],
+    "normal_path": "If capacity is unavailable to an injected test planner or the complete request fits, call chapter_details once.",
+    "capacity": {
+      "constants": "MAX_INPUT_TOKENS=991808, TOKEN_MARGIN_MULTIPLIER=1.12, TOKEN_FRAMING_MARGIN=8192",
+      "estimated_input": "ceil(rendered_message_tokens * 1.12) + 8192",
+      "output_tokens": "min(planner.output_tokens, 16000)",
+      "thinking_tokens": 2048,
+      "fit": "estimated_input <= 991808 and estimated_input + output_tokens + thinking_tokens < 1000000"
+    },
+    "adaptive_path": ["check fixed envelope with no source rows", "weight complete source rows with planner counter", "estimate initial batch count from available input budget", "partition ordered rows toward equal weight and increase count until every batch fits", "call and cache each batch", "build merge payload from batch chapter plans/handles", "capacity-check and call/cache merge"],
+    "failure_seams": ["chapter_details_fixed_context_exceeds_capacity", "chapter_details_source_record_exceeds_capacity", "chapter_details_merge_context_preflight_exceeded", "failed_seams artifacts"],
+    "historical_label": "No current-HEAD evidence supports calling this an older tournament implementation or assigning a prior SHA; that historical identification remains unverified."
+  },
+  "evidence": {
+    "offline_records": [
+      "docs/workorders/body-chain-20261003/records/body07/reading/RECORD.md",
+      "docs/workorders/body-chain-20261003/records/body07/retrieval/RECORD.md",
+      "docs/workorders/body-chain-20261003/records/body07/writer/RECORD.md"
+    ],
+    "historical_restoration": "docs/BODY_CASE_CHAIN_RESTORATION_20261002.md",
+    "classification": "These records are bounded synthetic/offline evidence, mostly baseline 841e914, and do not establish a current HEAD full BODY run or scientific quality.",
+    "cli_help_checks": {
+      "commands": ["scripts/upgrade3/progressive_review_plan.py --help", "scripts/upgrade3/chapter_arrangement.py --help", "scripts/upgrade3/review_unit_writer.py --help", "scripts/upgrade3/full_review_draft.py --help"],
+      "result": "all exited 0 on current HEAD; parser/entry continuity only, no model/network call"
+    },
+    "still_required": ["current HEAD planner stages through case attachment", "current HEAD finalized packets through arrangement", "current HEAD unit writer outputs", "complete deterministic assembly"]
+  }
+}

@@ -28,8 +28,17 @@ DEFAULT_MANIFEST = PROJECT_ROOT / "outputs/unit_writing/20260927_astra_repair/DE
 DEFAULT_BATCH_ROOT = PROJECT_ROOT / "outputs/full_review_draft/20260927_run01"
 DEFAULT_OUTPUT_ROOT = DEFAULT_BATCH_ROOT
 
-HANDLE_RE = re.compile(r"\bP\d{3,}\b")
+# Keep the handle boundary ASCII-only so a handle adjacent to CJK text such
+# as ``[参考P0602]`` is consumed, while identifier substrings remain excluded.
+HANDLE_RE = re.compile(r"(?<![A-Za-z0-9_])P\d{3,}(?![A-Za-z0-9_])")
 CITATION_BRACKET_RE = re.compile(r"\[([^\[\]]{1,240})\]")
+CITATION_PREFIX_RE = re.compile(
+    r"^(?:(?:参考)|(?:ref(?:erence)?|citation|source))\s*[:：]?\s*",
+    re.IGNORECASE,
+)
+CITATION_SEQUENCE_RE = re.compile(
+    r"(?:P\d{3,}|\d+)(?:[ ,;\-–]*(?:P\d{3,}|\d+))*"
+)
 TABLE_SEPARATOR_RE = re.compile(r"^\s*:?-{3,}:?\s*$")
 TABLE_CAPTION_RE = re.compile(r"(表|Table)\s*\d+(?:\s*[-–—]\s*\d+)?")
 
@@ -437,6 +446,16 @@ def replace_citations_numbered(
             if canonical is None:
                 return handle
             return str(number_by_canonical[canonical])
+
+        stripped = bracket.strip()
+        prefix = CITATION_PREFIX_RE.match(stripped)
+        if prefix:
+            citation_text = stripped[prefix.end():].strip()
+            handles = HANDLE_RE.findall(citation_text)
+            if handles and CITATION_SEQUENCE_RE.fullmatch(citation_text) and all(
+                identity.reference_key(handle) in number_by_canonical for handle in handles
+            ):
+                return "[" + HANDLE_RE.sub(one, citation_text) + "]"
 
         return "[" + HANDLE_RE.sub(one, bracket) + "]"
 
