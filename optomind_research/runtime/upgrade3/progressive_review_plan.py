@@ -3630,7 +3630,7 @@ class ProgressiveReviewPlanner:
         metadata = {"card_path", "output_dir", "output_path", "pool_path", "plan_path",
                     "created_at", "updated_at", "generated_at", "retrieved_at",
                     "cache_path", "raw_response_path", "result_path", "reading_path", "snapshot_path",
-                    "fetched_at", "saved_at", "telemetry"}
+                    "fetched_at", "saved_at", "telemetry", "reused_from"}
         # Material envelopes retain operational paths/timestamps. Protect their
         # substantive children, rather than treating an entire envelope as science.
         scientific_fields = {"study_summary_A", "review_planning_B", "B_review_planning",

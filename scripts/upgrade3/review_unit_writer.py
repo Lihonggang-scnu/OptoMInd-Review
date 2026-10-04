@@ -36,6 +36,7 @@ from optomind_research.runtime.upgrade3.review_unit_writer import (
     write_unit_completion,
     write_unit_output,
 )
+from optomind_research.runtime.upgrade3.portable_paths import portable_component
 
 DEFAULT_OUTPUT_ROOT = PROJECT_ROOT / "outputs/unit_writing/20260927_deepseek"
 DEFAULT_LEDGER = PROJECT_ROOT / "outputs/review_blueprint/20260922_phase1/budget.sqlite"
@@ -169,7 +170,7 @@ def main(argv: list[str] | None = None) -> int:
                 messages, model=args.model, output_tokens=args.output_tokens,
                 thinking_budget=args.thinking_budget,
             )
-            unit_dir = output_root / f"{view.chapter_id}_{view.unit_id}_completion"
+            unit_dir = output_root / portable_component(f"{view.chapter_id}_{view.unit_id}_completion")
             # Never write the completion artifacts over the existing BODY file.
             if output_root.resolve() == existing_path.parent.resolve() or unit_dir.resolve() == existing_path.parent.resolve():
                 raise UnitWritingError("completion_output_overlaps_existing_body")
@@ -253,7 +254,7 @@ def main(argv: list[str] | None = None) -> int:
                 messages, model=args.model, output_tokens=args.output_tokens,
                 thinking_budget=args.thinking_budget)
             unit_dir = output_root / ("_simulated" if mode == "fake" else "") / \
-                f"{view.chapter_id}_{view.unit_id}"
+                portable_component(f"{view.chapter_id}_{view.unit_id}")
             write_unit_input(view, messages, unit_dir, estimate=estimate, language=args.language)
             summary = view.material_summary()
             entry = {

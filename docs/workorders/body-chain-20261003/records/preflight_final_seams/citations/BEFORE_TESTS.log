@@ -1,0 +1,161 @@
+FF.FF.......F......FF                                                    [100%]
+=================================== FAILURES ===================================
+_ test_explanatory_brackets_do_not_hide_canonical_citations[x[\u53c2\u8003\u5355\u5143\u8bba\u8bc1][P0602]-expected0] _
+
+body = 'x[参考单元论证][P0602]', expected = ['P0602']
+
+    @pytest.mark.parametrize('body,expected', [
+        ('x[参考单元论证][P0602]', ['P0602']),
+        ('x[explanation][P0602][P0564][P0602]', ['P0602', 'P0564']),
+        ('x[P0564][P0576]', ['P0564', 'P0576']),
+        ('x[参考单元论证][P9999]', ['P9999']),
+        ('[explanation][P0602, P0564]', ['P0602', 'P0564']),
+    ])
+    def test_explanatory_brackets_do_not_hide_canonical_citations(body, expected):
+>       assert writer.citations_in(body) == expected
+E       AssertionError: assert [] == ['P0602']
+E
+E         Right contains one more item: 'P0602'
+E         Use -v to get more diff
+
+tests/upgrade3/test_preflight_final_citations.py:38: AssertionError
+_ test_explanatory_brackets_do_not_hide_canonical_citations[x[explanation][P0602][P0564][P0602]-expected1] _
+
+body = 'x[explanation][P0602][P0564][P0602]', expected = ['P0602', 'P0564']
+
+    @pytest.mark.parametrize('body,expected', [
+        ('x[参考单元论证][P0602]', ['P0602']),
+        ('x[explanation][P0602][P0564][P0602]', ['P0602', 'P0564']),
+        ('x[P0564][P0576]', ['P0564', 'P0576']),
+        ('x[参考单元论证][P9999]', ['P9999']),
+        ('[explanation][P0602, P0564]', ['P0602', 'P0564']),
+    ])
+    def test_explanatory_brackets_do_not_hide_canonical_citations(body, expected):
+>       assert writer.citations_in(body) == expected
+E       AssertionError: assert ['P0564', 'P0602'] == ['P0602', 'P0564']
+E
+E         At index 0 diff: 'P0564' != 'P0602'
+E         Use -v to get more diff
+
+tests/upgrade3/test_preflight_final_citations.py:38: AssertionError
+_ test_explanatory_brackets_do_not_hide_canonical_citations[x[\u53c2\u8003\u5355\u5143\u8bba\u8bc1][P9999]-expected3] _
+
+body = 'x[参考单元论证][P9999]', expected = ['P9999']
+
+    @pytest.mark.parametrize('body,expected', [
+        ('x[参考单元论证][P0602]', ['P0602']),
+        ('x[explanation][P0602][P0564][P0602]', ['P0602', 'P0564']),
+        ('x[P0564][P0576]', ['P0564', 'P0576']),
+        ('x[参考单元论证][P9999]', ['P9999']),
+        ('[explanation][P0602, P0564]', ['P0602', 'P0564']),
+    ])
+    def test_explanatory_brackets_do_not_hide_canonical_citations(body, expected):
+>       assert writer.citations_in(body) == expected
+E       AssertionError: assert [] == ['P9999']
+E
+E         Right contains one more item: 'P9999'
+E         Use -v to get more diff
+
+tests/upgrade3/test_preflight_final_citations.py:38: AssertionError
+_ test_explanatory_brackets_do_not_hide_canonical_citations[[explanation][P0602, P0564]-expected4] _
+
+body = '[explanation][P0602, P0564]', expected = ['P0602', 'P0564']
+
+    @pytest.mark.parametrize('body,expected', [
+        ('x[参考单元论证][P0602]', ['P0602']),
+        ('x[explanation][P0602][P0564][P0602]', ['P0602', 'P0564']),
+        ('x[P0564][P0576]', ['P0564', 'P0576']),
+        ('x[参考单元论证][P9999]', ['P9999']),
+        ('[explanation][P0602, P0564]', ['P0602', 'P0564']),
+    ])
+    def test_explanatory_brackets_do_not_hide_canonical_citations(body, expected):
+>       assert writer.citations_in(body) == expected
+E       AssertionError: assert [] == ['P0602', 'P0564']
+E
+E         Right contains 2 more items, first extra item: 'P0602'
+E         Use -v to get more diff
+
+tests/upgrade3/test_preflight_final_citations.py:38: AssertionError
+_______ test_real_links_images_and_code_stay_protected[![P0602][P0564]] ________
+
+body = '![P0602][P0564]'
+
+    @pytest.mark.parametrize('body', [
+        '[label][P0602]\n\n[P0602]: https://example.invalid',
+        '[P0602][link]\n\n[link]: https://example.invalid',
+        '[P0602][]\n\n[P0602]: https://example.invalid',
+        '[P0602]\n\n[P0602]: https://example.invalid',
+        '![figure][P0602]\n\n[P0602]: image.png',
+        '![P0602](image.png)',
+        '![figure][P0602]',
+        '![P0602][P0564]',
+        '[P0602](https://example.invalid)',
+        '`lookup("[label][P0602]")`',
+        '```text\n[label][P0602]\n```',
+        '    [label][P0602]',
+        r'\[P0602]',
+    ])
+    def test_real_links_images_and_code_stay_protected(body):
+>       assert writer.citations_in(body) == []
+E       AssertionError: assert ['P0564'] == []
+E
+E         Left contains one more item: 'P0564'
+E         Use -v to get more diff
+
+tests/upgrade3/test_preflight_final_citations.py:57: AssertionError
+______________ test_archived_body_report_and_downstream_numbering ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-54/test_archived_body_report_and_0')
+
+    def test_archived_body_report_and_downstream_numbering(tmp_path):
+        saved = json.loads((ARCHIVE / 'UNIT_RESULT.json').read_text(encoding='utf-8'))
+        body = saved['body_markdown']
+        view, messages = archived_view()
+        assert saved['used_source_handles'] == ['P0576']
+        assert (body.rstrip() + '\n').encode() == (ARCHIVE / 'UNIT_BODY.md').read_bytes()
+        report = writer.write_unit_output(
+            view, body, tmp_path, model=saved['model'], language='zh',
+            mode='archive-replay', used_messages=messages, estimate={},
+        )
+>       assert report['used_source_handles'] == EXPECTED
+E       AssertionError: assert ['P0576'] == ['P0564', 'P0... 'P0190', ...]
+E
+E         At index 0 diff: 'P0576' != 'P0564'
+E         Right contains 6 more items, first extra item: 'P0576'
+E         Use -v to get more diff
+
+tests/upgrade3/test_preflight_final_citations.py:76: AssertionError
+_________________ test_unknown_canonical_handle_stays_reported _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-54/test_unknown_canonical_handle_0')
+
+    def test_unknown_canonical_handle_stays_reported(tmp_path):
+        view, messages = archived_view()
+        body = 'Claim[参考单元论证][P9999]'
+        report = writer.write_unit_output(
+            view, body, tmp_path, model='offline', language='zh',
+            mode='archive-replay', used_messages=messages, estimate={},
+        )
+>       assert report['used_source_handles'] == ['P9999']
+E       AssertionError: assert [] == ['P9999']
+E
+E         Right contains one more item: 'P9999'
+E         Use -v to get more diff
+
+tests/upgrade3/test_preflight_final_citations.py:99: AssertionError
+=============================== warnings summary ===============================
+../../../../tmp/optomind-stage2-deps/_pytest/config/__init__.py:1345
+../../../../tmp/optomind-stage2-deps/_pytest/config/__init__.py:1345
+  /tmp/optomind-stage2-deps/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; anyio
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/upgrade3/test_preflight_final_citations.py::test_explanatory_brackets_do_not_hide_canonical_citations[x[\u53c2\u8003\u5355\u5143\u8bba\u8bc1][P0602]-expected0]
+FAILED tests/upgrade3/test_preflight_final_citations.py::test_explanatory_brackets_do_not_hide_canonical_citations[x[explanation][P0602][P0564][P0602]-expected1]
+FAILED tests/upgrade3/test_preflight_final_citations.py::test_explanatory_brackets_do_not_hide_canonical_citations[x[\u53c2\u8003\u5355\u5143\u8bba\u8bc1][P9999]-expected3]
+FAILED tests/upgrade3/test_preflight_final_citations.py::test_explanatory_brackets_do_not_hide_canonical_citations[[explanation][P0602, P0564]-expected4]
+FAILED tests/upgrade3/test_preflight_final_citations.py::test_real_links_images_and_code_stay_protected[![P0602][P0564]]
+FAILED tests/upgrade3/test_preflight_final_citations.py::test_archived_body_report_and_downstream_numbering
+FAILED tests/upgrade3/test_preflight_final_citations.py::test_unknown_canonical_handle_stays_reported
+7 failed, 14 passed, 2 warnings in 0.09s

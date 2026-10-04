@@ -22,6 +22,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
+from .portable_paths import portable_component
+
 SCHEMA_VERSION = "optomind.review_unit_writer.v1"
 INPUT_SCHEMA = "optomind.review_unit_writer.input.v1"
 RESULT_SCHEMA = "optomind.review_unit_writer.result.v1"
@@ -1336,7 +1338,7 @@ def run_unit_completion(
         target = Path(raw_response_dir)
         target.mkdir(parents=True, exist_ok=True)
         stamp = time.strftime("%Y%m%dT%H%M%S")
-        raw_target = target / f"{call_id}_{stamp}.raw"
+        raw_target = target / (portable_component(f"{call_id}_{stamp}") + ".raw")
         raw_target.write_text(json.dumps(response, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
         raw_path = str(raw_target)
 
@@ -1677,7 +1679,9 @@ def _prose_segments(
     yield text[position:], True
 
 
-def _citation_matches(text: str) -> Iterable[re.Match[str]]:
+def _citation_matches(
+    text: str, *, canonical_handles: bool = False,
+) -> Iterable[re.Match[str]]:
     matches = list(CITATION_RE.finditer(text))
 
     def citation_like(value: str) -> bool:
@@ -1689,6 +1693,19 @@ def _citation_matches(text: str) -> Iterable[re.Match[str]]:
 
     for index, match in enumerate(matches):
         if match.start() and text[match.start() - 1] in "\\!":
+            continue
+        if index and matches[index - 1].end() == match.start():
+            previous_start = matches[index - 1].start()
+            if previous_start and text[previous_start - 1] == "!":
+                continue
+        # Actual defined reference links are already masked by _prose_segments.
+        # An undefined explanatory [label] next to [Pxxxx] is prose, not a
+        # reason to lose a canonical handle (including an unknown handle).
+        # Keep the conservative adjacency rule for numeric citation repairs.
+        if canonical_handles and re.fullmatch(
+            r"\s*P\d{3,}(?:\s*[,;]\s*P\d{3,})*\s*", match.group(1)
+        ):
+            yield match
             continue
         suffix = text[match.end():].lstrip()
         # Reference links have two bracket groups. Preserve both, while still
@@ -1969,7 +1986,7 @@ def citations_in(body: str) -> list[str]:
     found: list[str] = []
     for segment, prose in _prose_segments(body or "", formatted_paper_citations=True):
         if prose:
-            for bracket in _citation_matches(segment):
+            for bracket in _citation_matches(segment, canonical_handles=True):
                 for handle in HANDLE_RE.findall(bracket.group(1)):
                     if handle not in found:
                         found.append(handle)
@@ -2144,7 +2161,7 @@ def run_unit_writing(
         directory = Path(raw_response_dir)
         directory.mkdir(parents=True, exist_ok=True)
         stamp = time.strftime("%Y%m%dT%H%M%S")
-        raw_path = str(directory / f"{view.chapter_id}_{view.unit_id}_{stamp}.raw")
+        raw_path = str(directory / (portable_component(f"{view.chapter_id}_{view.unit_id}_{stamp}") + ".raw"))
         Path(raw_path).write_text(json.dumps(response, ensure_ascii=False, indent=2, default=str),
                                   encoding="utf-8")
     body, normalization = _consume_unit_output(response)
