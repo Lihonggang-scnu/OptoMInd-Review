@@ -1605,7 +1605,9 @@ def _inline_link_spans(text: str) -> Iterable[tuple[int, int]]:
             index += 1
 
 
-def _prose_segments(text: str) -> Iterable[tuple[str, bool]]:
+def _prose_segments(
+    text: str, *, formatted_paper_citations: bool = False,
+) -> Iterable[tuple[str, bool]]:
     """Keep code and Markdown link constructs byte-for-byte during repairs."""
     protected: list[tuple[int, int]] = []
     hidden = _fenced_line_indices(text)
@@ -1614,8 +1616,15 @@ def _prose_segments(text: str) -> Iterable[tuple[str, bool]]:
         if index in hidden or line.startswith(("    ", "\t")):
             protected.append((position, position + len(line)))
         position += len(line)
+    for match in re.finditer(r"(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)", text):
+        inner = match.group(0)[len(match.group(1)):-len(match.group(1))].strip()
+        reference_only = re.fullmatch(
+            r"(?:\[\s*P\d{3,}(?:\s*[,;]\s*P\d{3,})*\s*\]\s*)+", inner)
+        # Some real writer responses format references as inline code. Count
+        # only pure paper-reference spans, without relaxing numeric repairs.
+        if not (formatted_paper_citations and reference_only):
+            protected.append((match.start(), match.end()))
     for pattern in (
-        r"(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)",
         r"(?m)^ {0,3}\[[^\]\n]+\]:[^\n]*(?:\n[ \t]+[^\n]*)*",
         r"https?://[^\s<>()]+",
     ):
@@ -1926,7 +1935,7 @@ def citations_in(body: str) -> list[str]:
     """Handles actually cited in the body (including inside Markdown tables)."""
 
     found: list[str] = []
-    for segment, prose in _prose_segments(body or ""):
+    for segment, prose in _prose_segments(body or "", formatted_paper_citations=True):
         if prose:
             for bracket in _citation_matches(segment):
                 for handle in HANDLE_RE.findall(bracket.group(1)):
