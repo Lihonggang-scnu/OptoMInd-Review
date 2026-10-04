@@ -186,12 +186,28 @@ def _refresh_local_material_snapshots(records: Sequence[Mapping[str, Any]]) -> l
                 continue
             conflict = _saved_card_identity_conflict(source, card)
             if conflict is not None:
+                # Quarantine only the incompatible card channel. Independently
+                # sourced deep/supplement material remains available.
+                source["study_summary_A"] = {}
+                source["review_planning_B"] = {}
                 source["material_identity_conflict"] = True
                 source["material_identity_conflicts"] = [{
                     "channel": "saved_card", "reason": "source_identity_conflict",
                     "card_identity": {k: conflict.get(k) for k in ("paper_id", "canonical_paper_id", "doi", "title") if conflict.get(k)},
                 }]
+                for key in ("deep_read_material", "supplement_gap_material", "supplement_material", "material"):
+                    independent = source.get(key)
+                    if isinstance(independent, Mapping) and _saved_card_identity_conflict(source, independent) is not None:
+                        source.pop(key, None)
+                if _owner_material_has_content({**source, "material_identity_conflict": False}):
+                    source.pop("material_identity_conflict", None)
                 continue
+            previously_conflicted = bool(source.get("material_identity_conflict") or source.get("material_identity_conflicts"))
+            source.pop("material_identity_conflict", None)
+            source.pop("material_identity_conflicts", None)
+            if previously_conflicted:
+                source["study_summary_A"] = {}
+                source["review_planning_B"] = {}
             a = card.get("general_understanding")
             b = card.get("review_planning")
             if isinstance(a, Mapping) and a:
@@ -1409,7 +1425,7 @@ def build_local_material_payload(
     if candidate.get("supplement_gap_materials"):
         material["supplement_gap_materials"] = candidate.get("supplement_gap_materials")
         material["supplement_materials"] = candidate.get("supplement_gap_materials")
-    if deep_material:
+    if deep_material and _saved_card_identity_conflict(_candidate_identity(candidate), deep_material) is None:
         material["deep_read_material"] = _compact_reading_material(deep_material)
 
     bounded_hits: list[dict[str, Any]] = []
@@ -1441,6 +1457,10 @@ def build_local_material_payload(
             **dict(material["deep_read_material"]),
             "reading_mode": "focused_local_search",
         }
+    if material.get("material_identity_conflict") and _owner_material_has_content({**material, "material_identity_conflict": False}):
+        # The card channel was removed above; its diagnostic cannot disqualify
+        # independently supplied, compatible reading/supplement content.
+        material.pop("material_identity_conflict", None)
     return material
 
 
@@ -3529,6 +3549,15 @@ def _decorate_directed_material(
     """Bind a returned reading to its request and retain legacy question output."""
 
     output = dict(material)
+    current_identity = {**(dict(material["paper_identity"]) if isinstance(material.get("paper_identity"), Mapping) else {}),
+                        **{key: material[key] for key in ("paper_id", "canonical_paper_id", "doi") if material.get(key)}}
+    if prior_material and _saved_card_identity_conflict(current_identity, prior_material) is not None:
+        prior_material = None  # Do not splice another paper's answer into history.
+    if prior_material and _prior_read_source_hash(material) and _prior_read_source_hash(material) != _prior_read_source_hash(prior_material):
+        # Earlier artifacts stay intact on disk. Do not rebind superseded
+        # findings or reference numbers to corrected current source content.
+        output["prior_reading_compatibility"] = "source_changed_or_unverified"
+        prior_material = None
     output["_progressive_task_signature"] = _directed_task_signature(task)
     output["_progressive_task_requirements"] = _directed_task_requirements(task)
     if prior_material and not _directed_material_compatible(task, prior_material):
@@ -4194,6 +4223,10 @@ class ProgressiveReviewPlanner:
             "prior_tool_results": dict(prior_tool_results or {}),
             "source_handle_map": dict(source_handle_map),
             "prior_readings": self.prior_readings,
+            "directed_source_materials": {str(row.get("_paper_id") or _canonical_paper_id(row)): _directed_source_state(row)
+                                          for row in pool_rows if isinstance(row, Mapping)
+                                          and _text(row.get("_paper_id") or _canonical_paper_id(row)) in
+                                          {_text(task.get("paper_id")) for task in directed_requests}},
             "shared_deep_read_budget": self.config.shared_deep_read_budget,
             "reader_model": self.config.reader_model,
             "thinking_budget": self.config.thinking_budget,
@@ -4282,7 +4315,7 @@ class ProgressiveReviewPlanner:
                 prior_material = prior_material_by_id.get(paper_id) or self._read_materials.get(paper_id)
                 if paper_id in blocked_no_reacquire:
                     reused.append({**task, "status": "review_reported_source_no_reacquire", "material": {}})
-                elif prior_material is not None and _directed_material_compatible(task, prior_material):
+                elif prior_material is not None and _directed_material_compatible(task, prior_material) and _prior_read_source_compatible(pool_by_id.get(paper_id, {}), prior_material):
                     reused.append({**task, "status": "reused_prior_deep_read", "material": dict(prior_material)})
                     reused_materials.append(dict(prior_material))
                 elif paper_id in already_read:
@@ -4917,6 +4950,21 @@ class ProgressiveReviewPlanner:
             shared_outline=harmonized.get("shared_outline") or level1_outline.get("shared_outline") or {},
             resume=resume, state=state,
         )
+        # A fresh process can reuse legacy tool-stage records without
+        # executing the reader callback that populated _read_materials. Keep
+        # those already-returned readings available to the case consumer too;
+        # current in-memory readings take precedence over restored history.
+        case_read_materials = {
+            _text(row.get("paper_id")): dict(row)
+            for row in [
+                *self.prior_readings,
+                *self._result_paper_materials(level1_tool_result),
+                *self._result_paper_materials(level2_tool_result),
+                *self._result_paper_materials(chapter_tool_result),
+                *self._read_materials.values(),
+            ]
+            if isinstance(row, Mapping) and _text(row.get("paper_id"))
+        }
         case_catalog = _case_unit_catalog(detail_records)
         chapter_ids = list(dict.fromkeys(
             _text((record.get("chapter") or {}).get("chapter_id"))
@@ -5044,7 +5092,7 @@ class ProgressiveReviewPlanner:
                         for row in batch_unit_rows
                     ]
                     batch_material_rows = _case_selection_material_rows(
-                        batch_handles, detail_records, pool_rows, self._read_materials)
+                        batch_handles, detail_records, pool_rows, case_read_materials)
                     material_signature = hashlib.sha256(json.dumps(
                         batch_material_rows, ensure_ascii=False, sort_keys=True, default=_json_default
                     ).encode("utf-8")).hexdigest()[:16]
@@ -5062,35 +5110,6 @@ class ProgressiveReviewPlanner:
                         "review_sources_in_unit_catalog": len(set(re.findall(r"\bP\d{4,}\b", json.dumps(case_catalog, ensure_ascii=False)))),
                         "planning_revision_mode": self.config.planning_revision_enabled,
                     })
-                    cached: Mapping[str, Any] | None = None
-                    if resume and cache_path.is_file():
-                        try:
-                            candidate = _read_json(cache_path)
-                            if (
-                                isinstance(candidate, Mapping)
-                                and candidate.get("status") == "complete"
-                                and _text(candidate.get("chapter_id")) == chapter_id
-                                and int(candidate.get("batch_index") or 0) == batch_index
-                                and list(candidate.get("route_handles") or []) == batch_handles
-                                and list(candidate.get("unit_source_signature") or []) == unit_source_signature
-                                and _text(candidate.get("material_signature")) == material_signature
-                                and _text(candidate.get("task_signature")) == task_signature
-                                and _text(candidate.get("prompt_contract")) == CASE_GROUPS_PROMPT_CONTRACT
-                            ):
-                                cached = candidate
-                        except (ProgressivePlanError, TypeError, ValueError):
-                            cached = None
-                    if cached is not None:
-                        additions = [
-                            dict(item) for item in cached.get("additions") or []
-                            if isinstance(item, Mapping) and _text(item.get("unit_key")).startswith(chapter_id + ":")
-                        ]
-                        chapter_additions.extend(additions)
-                        chapter_telemetry.append(dict(cached.get("telemetry") or {}))
-                        update_unit_catalog(additions)
-                        merge_additions(additions)
-                        continue
-
                     payload = {
                         "call_id": f"case-groups-{_safe_id(chapter_id)}-batch-{batch_index:03d}-of-{len(route_batches):03d}",
                         "topic_id": self.config.topic_id,
@@ -5125,6 +5144,35 @@ class ProgressiveReviewPlanner:
                         payload["source_materials"] = batch_material_rows
                     if self.config.planning_revision_enabled:
                         payload["planning_revision_mode"] = True
+                    input_contract = self._cache_contract("case_groups", payload)
+                    cached: Mapping[str, Any] | None = None
+                    if resume and cache_path.is_file():
+                        try:
+                            candidate = _read_json(cache_path)
+                            if (
+                                isinstance(candidate, Mapping)
+                                and candidate.get("status") == "complete"
+                                and _text(candidate.get("chapter_id")) == chapter_id
+                                and int(candidate.get("batch_index") or 0) == batch_index
+                                and list(candidate.get("route_handles") or []) == batch_handles
+                                and list(candidate.get("unit_source_signature") or []) == unit_source_signature
+                                and _text(candidate.get("input_contract")) == input_contract
+                                and _text(candidate.get("prompt_contract")) == CASE_GROUPS_PROMPT_CONTRACT
+                            ):
+                                cached = candidate
+                        except (ProgressivePlanError, TypeError, ValueError):
+                            cached = None
+                    if cached is not None:
+                        additions = [
+                            dict(item) for item in cached.get("additions") or []
+                            if isinstance(item, Mapping) and _text(item.get("unit_key")).startswith(chapter_id + ":")
+                        ]
+                        chapter_additions.extend(additions)
+                        chapter_telemetry.append(dict(cached.get("telemetry") or {}))
+                        update_unit_catalog(additions)
+                        merge_additions(additions)
+                        continue
+
                     try:
                         response_record = _call_record(self.planner, "case_groups", payload)
                         response = _stage_response(response_record)
@@ -5142,6 +5190,7 @@ class ProgressiveReviewPlanner:
                             "material_signature": material_signature,
                             "task_signature": task_signature,
                             "prompt_contract": CASE_GROUPS_PROMPT_CONTRACT,
+                            "input_contract": input_contract,
                             "additions": additions,
                             "telemetry": response_record.get("telemetry") or {},
                         })
@@ -5162,6 +5211,7 @@ class ProgressiveReviewPlanner:
                             "material_signature": material_signature,
                             "task_signature": task_signature,
                             "prompt_contract": CASE_GROUPS_PROMPT_CONTRACT,
+                            "input_contract": input_contract,
                             "error": error,
                         })
                 result = {
@@ -5208,6 +5258,7 @@ class ProgressiveReviewPlanner:
             planning_revision=self.config.planning_revision_enabled,
             body_case_additions=self.config.planning_revision_enabled,
             candidate_rows=pool_rows,
+            read_materials=case_read_materials,
         )
         plan_output = self._assemble_final(
             topic=topic,
@@ -5882,29 +5933,20 @@ class ProgressiveReviewPlanner:
                     if material:
                         source_materials.append({"paper_id": str(source_id), "source_role": "supplement_or_deep_read", "material": material})
                     continue
-                card = _card_for_candidate(candidate)
-                a = card.get("general_understanding") if isinstance(card.get("general_understanding"), Mapping) else {}
-                review_planning = card.get("review_planning") if isinstance(card.get("review_planning"), Mapping) else {}
-                planning = candidate.get("planning_view") if isinstance(candidate.get("planning_view"), Mapping) else {}
-                b_record = candidate.get("_b_summary") if isinstance(candidate.get("_b_summary"), Mapping) else {}
-                source_materials.append({
-                    "source_handle": _text(candidate.get("_source_handle")),
-                    "paper_id": str(source_id),
-                    "card_path": _text(candidate.get("card_path")),
-                    "title": _text((planning.get("paper_identity") or {}).get("title") if isinstance(planning.get("paper_identity"), Mapping) else candidate.get("title")),
-                    "doi": _text((planning.get("paper_identity") or {}).get("doi") if isinstance(planning.get("paper_identity"), Mapping) else candidate.get("doi")),
-                    "year": _text((planning.get("paper_identity") or {}).get("year") if isinstance(planning.get("paper_identity"), Mapping) else candidate.get("year")),
-                    "material_depth": _text(b_record.get("declared_content_depth")),
-                    "study_summary_A": dict(a),
-                    "review_planning_B": dict(review_planning or {
+                material = build_local_material_payload(
+                    candidate, deep_material=all_materials.get(str(source_id)),
+                )
+                material["card_path"] = _text(candidate.get("card_path"))
+                # Keep the legacy pool summary fallback for identity-compatible
+                # cards only; a mismatched card must not regain its old text.
+                if not material.get("review_planning_B") and not material.get("material_identity_conflicts"):
+                    planning = candidate.get("planning_view") if isinstance(candidate.get("planning_view"), Mapping) else {}
+                    material["review_planning_B"] = {
                         "planning_summary": planning.get("planning_summary"),
                         "facet_contributions": planning.get("facet_contributions"),
                         "scope_interpretation_cautions": planning.get("scope_interpretation_cautions"),
-                    }),
-                    "supplement_gap_material": candidate.get("supplement_gap_material") or {},
-                    "supplement_gap_materials": candidate.get("supplement_gap_materials") or [],
-                    "deep_read_material": all_materials.get(str(source_id), {}),
-                })
+                    }
+                source_materials.append(material)
             related_ids = set(str(item) for item in source_ids)
             related_tools = []
             for result in (level1_tools, level2_tools, chapter_tools or {}):
@@ -6618,13 +6660,13 @@ def _case_selection_material_row(row: Mapping[str, Any]) -> dict[str, Any]:
     return compact
 
 
-def _case_selection_material_rows(
+def _case_material_rows(
     handles: Sequence[str],
     records: Sequence[Mapping[str, Any]],
     pool_rows: Sequence[Mapping[str, Any]],
     read_materials: Mapping[str, Mapping[str, Any]],
 ) -> list[dict[str, Any]]:
-    """Real material for exactly the routed candidates of one case batch.
+    """Resolve existing, unclipped case material for selection and attachment.
 
     The case layer used to see only handles and thin routing notes, which let
     it invent experiments for papers it had never read.  Selection support now
@@ -6675,8 +6717,20 @@ def _case_selection_material_rows(
         if row is None:
             output.append({"source_handle": handle, "material_available": False})
             continue
-        output.append(_case_selection_material_row(row))
+        output.append(dict(row))
     return output
+
+
+def _case_selection_material_rows(
+    handles: Sequence[str],
+    records: Sequence[Mapping[str, Any]],
+    pool_rows: Sequence[Mapping[str, Any]],
+    read_materials: Mapping[str, Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Bound selection inputs without truncating the formal writer handoff."""
+
+    return [_case_selection_material_row(row) for row in _case_material_rows(
+        handles, records, pool_rows, read_materials)]
 
 
 def _proposed_use_text(study: Mapping[str, Any]) -> str:
@@ -6946,6 +7000,7 @@ def _attach_case_groups(
     planning_revision: bool = False,
     body_case_additions: bool = False,
     candidate_rows: Sequence[Mapping[str, Any]] = (),
+    read_materials: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """Consume the case layer's response into the chapter records.
 
@@ -6959,11 +7014,19 @@ def _attach_case_groups(
     """
 
     result = json.loads(json.dumps(records, ensure_ascii=False, default=_json_default))
-    all_sources = {source["source_handle"]: source for record in result for source in record.get("source_materials") or [] if source.get("source_handle")}
-    candidate_by_handle = {
-        _text(row.get("_source_handle")): row
-        for row in candidate_rows or ()
-        if isinstance(row, Mapping) and _text(row.get("_source_handle"))
+    selected_handles = list(dict.fromkeys(
+        _text(study.get("source_handle"))
+        for addition in response.get("additions") or [] if isinstance(addition, Mapping)
+        for study in addition.get("studies") or [] if isinstance(study, Mapping)
+        if _text(study.get("source_handle"))
+    ))
+    # Reuse the same identity-aware material resolution as case selection.
+    # The selection projection is clipped; the writer gets the full existing
+    # reading, including useful partial or review-reported original material.
+    all_sources = {
+        _text(source.get("source_handle")): source
+        for source in _case_material_rows(selected_handles, result, candidate_rows, read_materials or {})
+        if source.get("paper_id") or _owner_material_has_content(source)
     }
     destinations = {f"{record['chapter']['chapter_id']}:{i + 1}": (record, unit)
                     for record in result for i, unit in enumerate(_chapter_units(record.get("chapter_plan") or {})) if isinstance(unit, dict)}
@@ -6993,10 +7056,6 @@ def _attach_case_groups(
                     # proposal for the same paper still reaches the owner.
                     continue
                 source = all_sources.get(handle)
-                if source is None and handle in candidate_by_handle:
-                    candidate = candidate_by_handle[handle]
-                    paper_id = _text(candidate.get("_paper_id") or _canonical_paper_id(candidate))
-                    source = build_local_material_payload(candidate)
                 suggestion = {
                     "source_handle": handle,
                     "proposed_use": proposed_use,
@@ -7031,12 +7090,20 @@ def _attach_case_groups(
                 continue
             handle = study.get("source_handle")
             source = all_sources.get(handle)
-            # A BODY case can be selected from the routed candidate pool even
-            # when its card was not preloaded into this chapter packet.  Keep
-            # the direct-append contract, but attach that candidate's real
-            # material before accepting the study.
-            if source is None and handle in candidate_by_handle:
-                source = build_local_material_payload(candidate_by_handle[handle])
+            current = next((item for item in record.get("source_materials") or []
+                            if item.get("source_handle") == handle), None)
+            if current is not None:
+                if _owner_material_has_content(current):
+                    # The same study may carry chapter-specific questions,
+                    # conditions or limits. Never replace that context with
+                    # another chapter's first source row.
+                    source = current
+                elif source is not None:
+                    resolved, _ = _resolve_owner_source_materials(
+                        source_materials=[current], chapter_plan={"source_handles": [handle]},
+                        candidate_materials=[source],
+                    )
+                    source = resolved[0] if resolved else None
             if not source or not _owner_material_has_content(source) or handle in existing:
                 continue
             stored_study = dict(study)
@@ -7046,10 +7113,19 @@ def _attach_case_groups(
             if not _text(stored_study.get("contribution")) and _text(stored_study.get("proposed_use")):
                 stored_study["contribution"] = _text(stored_study.get("proposed_use"))
             studies.append(stored_study); existing.add(handle)
-            if handle not in packet_handles:
-                record["source_materials"].append(source); packet_handles.add(handle)
-                record.setdefault("source_identity_map", {})[handle] = {key: source.get(key) for key in ("paper_id", "title", "doi", "year")}
-                record["chapter"].setdefault("source_ids", []).append(source["paper_id"])
+            if handle in packet_handles:
+                record["source_materials"] = [
+                    source if item.get("source_handle") == handle else item
+                    for item in record["source_materials"]
+                ]
+            else:
+                record.setdefault("source_materials", []).append(source); packet_handles.add(handle)
+            record.setdefault("source_identity_map", {})[handle] = {
+                key: source.get(key) for key in ("paper_id", "title", "doi", "year")
+            }
+            source_ids = record["chapter"].setdefault("source_ids", [])
+            if source.get("paper_id") and source["paper_id"] not in source_ids:
+                source_ids.append(source["paper_id"])
     return result
 
 
@@ -7153,6 +7229,81 @@ def _snapshot_id(snapshot_dir: Path) -> str:
     return ""
 
 
+def _candidate_identity(candidate: Mapping[str, Any]) -> dict[str, Any]:
+    planning = candidate.get("planning_view") if isinstance(candidate.get("planning_view"), Mapping) else {}
+    identity = planning.get("paper_identity") if isinstance(planning.get("paper_identity"), Mapping) else {}
+    return {**dict(identity), **{key: candidate[key] for key in ("paper_id", "canonical_paper_id", "doi", "title") if candidate.get(key)},
+            "paper_id": _text(candidate.get("_paper_id") or _canonical_paper_id(candidate))}
+
+
+def _directed_source_state(candidate: Mapping[str, Any]) -> dict[str, Any]:
+    """Current readable content, independent of directories and snapshot names."""
+    from .directed_reading import sha256_value
+    from .practical_materials import load_practical_material
+
+    identity = _candidate_identity(candidate)
+    result = {"paper_identity": identity, "source_hash": ""}
+    card = _card_for_candidate(candidate)
+    if _saved_card_identity_conflict(identity, card) is not None:
+        return {**result, "material_identity_conflict": True}
+    snapshot = _snapshot_for_candidate(candidate)
+    if snapshot is None:
+        return result
+    for name in ("manifest.json", "SNAPSHOT_MANIFEST.json", "snapshot.json"):
+        path = snapshot / name
+        if path.is_file():
+            try:
+                manifest = _read_json(path)
+            except ProgressivePlanError:
+                continue
+            if isinstance(manifest, Mapping) and _saved_card_identity_conflict(identity, manifest) is not None:
+                return {**result, "material_identity_conflict": True}
+    try:
+        result["source_hash"] = sha256_value(load_practical_material(snapshot))
+    except (OSError, UnicodeError, ValueError):
+        pass
+    return result
+
+
+def _prior_read_source_hash(material: Mapping[str, Any]) -> str:
+    """Recover legacy practical content proof from its already-saved prompt."""
+    from .directed_reading import sha256_value
+
+    digest = _text(material.get("source_hash"))
+    if digest:
+        return digest
+    origin = _text(material.get("reused_from"))
+    if not origin:
+        return ""
+    prompt_path = Path(origin).parent / "PROMPT.json"
+    if not prompt_path.is_file():
+        return ""
+    try:
+        prompt = _read_json(prompt_path)
+        for row in prompt.get("messages") or []:
+            if row.get("role") != "user":
+                continue
+            payload = json.loads(row.get("content") or "{}")
+            if isinstance(payload, Mapping) and "source_material" in payload and "optional_bibliography" in payload:
+                return sha256_value({"body": payload["source_material"], "references": payload["optional_bibliography"]})
+    except (ProgressivePlanError, TypeError, ValueError, AttributeError):
+        pass
+    return ""
+
+
+def _prior_read_source_compatible(candidate: Mapping[str, Any], material: Mapping[str, Any]) -> bool:
+    identity = _candidate_identity(candidate)
+    if _saved_card_identity_conflict(identity, material) is not None:
+        return False
+    # A review-derived account remains usable without its own snapshot, but
+    # its presence alone is not proof that an earlier task answer is unchanged.
+    current = _directed_source_state(candidate)
+    if current.get("material_identity_conflict"):
+        return False
+    previous = _prior_read_source_hash(material)
+    return bool(previous and current["source_hash"] and previous == current["source_hash"])
+
+
 def load_prior_readings(paths: Sequence[str | Path], pool_rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     """Load explicitly supplied practical reading outputs that match this pool."""
     pool_by_id = {str(row.get("_paper_id") or _canonical_paper_id(row)): row for row in pool_rows}
@@ -7177,6 +7328,8 @@ def load_prior_readings(paths: Sequence[str | Path], pool_rows: Sequence[Mapping
         if paper_id not in pool_by_id:
             continue
         pool = pool_by_id[paper_id]
+        if _saved_card_identity_conflict(_candidate_identity(pool), artifact) is not None:
+            continue
         planning = pool.get("planning_view") if isinstance(pool.get("planning_view"), Mapping) else {}
         pool_identity = planning.get("paper_identity") if isinstance(planning.get("paper_identity"), Mapping) else {}
         expected_title = _text(pool_identity.get("title") or pool.get("title"))
@@ -7187,6 +7340,22 @@ def load_prior_readings(paths: Sequence[str | Path], pool_rows: Sequence[Mapping
         value["paper_id"] = paper_id
         value.setdefault("paper_title", expected_title)
         value["reused_from"] = str(path.resolve())
+        source_hash = _prior_read_source_hash(value)
+        if source_hash:
+            value["source_hash"] = source_hash
+        input_path = path.parent / "INPUT.json"
+        if not _material_task_signature(value) and input_path.is_file():
+            try:
+                saved_input = _read_json(input_path)
+            except ProgressivePlanError:
+                saved_input = {}
+            saved_task = saved_input.get("task") if isinstance(saved_input, Mapping) else None
+            if (isinstance(saved_task, Mapping) and saved_task.get("questions") and saved_task.get("required_outputs")
+                    and _text(saved_input.get("paper_id")) == paper_id
+                    and saved_input.get("task_id") == value.get("task_id")):
+                value["_progressive_task_signature"] = _directed_task_signature({
+                    **dict(saved_task), "knowledge_gaps": saved_task.get("gap_keys") or [],
+                })
         output[paper_id] = value
     return list(output.values())
 
@@ -7759,6 +7928,9 @@ def make_retrieval_loop_runner(
             if not question:
                 continue
             need_id = _text(task.get("need_id")) or need_id_for(question + (" || " + paper_id if paper_id else "") + " || " + _directed_task_signature(task))
+            current_source = current_sources.get(paper_id)
+            if current_source is not None:
+                need_id += "-" + _material_content_signature(_directed_source_state(current_source))
             round_specs = tuple(task.get("round_specs") or ())
             need = InformationNeed(
                 need_id=need_id,
@@ -8008,7 +8180,8 @@ def make_retrieval_loop_runner(
             prior_material = read_materials.get(paper_id)
             prior_signature = read_task_signatures.get(paper_id) or _material_task_signature(prior_material)
             if prior_material is not None and prior_signature and prior_signature == task_signature \
-                    and _directed_material_compatible(request, prior_material):
+                    and _directed_material_compatible(request, prior_material) \
+                    and _prior_read_source_compatible(pool_by_id.get(paper_id, {}), prior_material):
                 raw = {"status": "reused_prior_deep_read", "materials": [dict(prior_material)],
                        "consumed_paper_ids": [paper_id], "task_reused": True}
             elif paper_id not in consumed_ids and len(consumed_ids) >= config.shared_deep_read_budget:
@@ -8227,15 +8400,30 @@ def make_directed_reading_runner(
             }
             task_signature = _directed_task_signature(signature_task)
             reused = prior_by_id.get(paper_id)
-            if reused and _directed_material_compatible(signature_task, reused):
+            source_identity = _candidate_identity(candidate)
+            if reused and _saved_card_identity_conflict(source_identity, reused) is not None:
+                reused = None  # Different-paper text is not history for this source.
+            current_source = _directed_source_state(candidate)
+            if current_source.get("material_identity_conflict"):
+                return {"paper_id": paper_id, "status": "unavailable", "reason": "source_identity_conflict"}
+            if reused and _directed_material_compatible(signature_task, reused) and _prior_read_source_compatible(candidate, reused):
                 return {
                     "paper_id": paper_id,
                     "status": "reused_prior_deep_read",
                     "material": _decorate_directed_material(reused, task=signature_task),
                 }
+            if candidate.get("root_review_note"):
+                retained = {**dict(reused), "current_question_material": [],
+                            "prior_reading_compatibility": "review_account_unverified"} if reused else {}
+                return {"paper_id": paper_id, "status": "review_reported_no_reacquire",
+                        "reason": "Use the attributed account already supplied by its source review.",
+                        "blocked_paper_id": paper_id, **({"material": retained} if retained else {})}
             snapshot = _snapshot_for_candidate(candidate)
             if snapshot is None:
-                return {"paper_id": paper_id, "status": "unavailable", "reason": "existing_snapshot_not_found"}
+                retained = {**dict(reused), "prior_question_material": _material_question_rows(reused),
+                            "current_question_material": [], "prior_reading_compatibility": "current_snapshot_unavailable"} if reused else {}
+                return {"paper_id": paper_id, "status": "partial" if retained else "unavailable",
+                        "reason": "existing_snapshot_not_found", **({"material": retained} if retained else {})}
             card = _card_for_candidate(candidate)
             identity = card.get("paper_identity") if isinstance(card.get("paper_identity"), Mapping) else {}
             a_summary = card.get("general_understanding") if isinstance(card.get("general_understanding"), Mapping) else {}
@@ -8245,12 +8433,11 @@ def make_directed_reading_runner(
             chapter_ids = list(task.get("chapter_ids") or [])
             chapter_title = " / ".join(_text(item) for item in chapter_ids) or "Coordinated review"
             kind = _text(identity.get("paper_kind") or a_summary.get("paper_kind") or a_summary.get("study_type") or candidate.get("paper_kind") or "study")
-            if isinstance(candidate.get("root_review_note"), Mapping) and candidate.get("root_review_note"):
-                return {"paper_id": paper_id, "status": "review_reported_no_reacquire", "reason": "Use the attributed account already supplied by its source review.", "blocked_paper_id": paper_id}
             scope = _text((card.get("material") or {}).get("material_scope") if isinstance(card.get("material"), Mapping) else "") or planning.get("material_scope")
             nomination = {
                 "canonical_paper_id": paper_id,
                 "title": title,
+                "doi": _text(source_identity.get("doi")),
                 "paper_kind": kind,
                 "material_scope": scope,
                 "snapshot_dir": str(snapshot),

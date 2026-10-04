@@ -1,0 +1,182 @@
+FFF.FFF.F.F                                                              [100%]
+=================================== FAILURES ===================================
+____ test_assigned_conflicting_card_excluded_before_initial_messages[False] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-1/test_assigned_conflicting_card0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5a6f7007d0>
+revision = False
+
+    @pytest.mark.parametrize("revision", [False, True])
+    def test_assigned_conflicting_card_excluded_before_initial_messages(tmp_path, monkeypatch, revision):
+        _, row, _, _, _, _ = fixture(tmp_path, monkeypatch)
+        dump(Path(row["card_path"]), {"paper_identity": {"paper_id": "paper-B", "doi": "10.synthetic/b"}, "general_understanding": {"finding": "CONTRADICTORY_B"}, "review_planning": {"planning_summary": "CONTRADICTORY_B"}})
+        planner, calls, args = chapters(tmp_path, row, revision=revision)
+        result = planner._chapter_details(**args, resume=False)[0]
+>       assert "CONTRADICTORY_B" not in json.dumps(calls[0]["messages"])
+E       assert 'CONTRADICTORY_B' not in '[{"role": "...55\\u3002"}]'
+E
+E         'CONTRADICTORY_B' is contained here:
+E           mmary\":\"CONTRADICTORY_B\"},\"supplement_material\":{},\"deep_read_material\":{}}],\"relevant_tool_feedback\":[],\"citation_rules\":{\"direct_source\":\"cite the supplied source_handle and bibliographic identity; the local packet maps it to paper_id\",\"review_reported_original\":\"keep the reporting review in source metadata; cite the resolved original study normally, with equal substantive use and no mandatory weaker wording or repeated review label\",\"scope\":\"preserve the actual reported findings and conditions; full-text access is not ...
+E
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests/upgrade3/test_preflight_material_identity_compatibility.py:77: AssertionError
+____ test_assigned_conflicting_card_excluded_before_initial_messages[True] _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-1/test_assigned_conflicting_card1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5a6f6bf4a0>
+revision = True
+
+    @pytest.mark.parametrize("revision", [False, True])
+    def test_assigned_conflicting_card_excluded_before_initial_messages(tmp_path, monkeypatch, revision):
+        _, row, _, _, _, _ = fixture(tmp_path, monkeypatch)
+        dump(Path(row["card_path"]), {"paper_identity": {"paper_id": "paper-B", "doi": "10.synthetic/b"}, "general_understanding": {"finding": "CONTRADICTORY_B"}, "review_planning": {"planning_summary": "CONTRADICTORY_B"}})
+        planner, calls, args = chapters(tmp_path, row, revision=revision)
+        result = planner._chapter_details(**args, resume=False)[0]
+>       assert "CONTRADICTORY_B" not in json.dumps(calls[0]["messages"])
+E       assert 'CONTRADICTORY_B' not in '[{"role": "...55\\u3002"}]'
+E
+E         'CONTRADICTORY_B' is contained here:
+E         ?      --------------------------------------------------
+E           nding\":\"CONTRADICTORY_B\"},\"planning_material\":{\"planning_summary\":\"CONTRADICTORY_B\"},\"supplement_material\":{},\"supplement_materials\":[],\"deep_read_material\":{}}],\"relevant_tool_feedback\":[],\"citation_rules\":{\"direct_source\":\"cite the supplied source_handle and bibliographic identity; the local packet maps it to paper_id\",\"review_reported_original\":\"keep the reporting review in source metadata; cite the resolved original study normally, with equal substantive use...
+E
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests/upgrade3/test_preflight_material_identity_compatibility.py:77: AssertionError
+________ test_refresh_removes_stale_conflicting_card_only_and_recovers _________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-1/test_refresh_removes_stale_con0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5a6f703650>
+
+    def test_refresh_removes_stale_conflicting_card_only_and_recovers(tmp_path, monkeypatch):
+        _, row, _, _, _, _ = fixture(tmp_path, monkeypatch)
+        source = {**p.build_local_material_payload(row), "card_path": row["card_path"], "deep_read_material": {"question_material": [{"explanation": "VALID_DEEP"}]}, "supplement_gap_material": {"usable_content": "VALID_SUPPLEMENT"}}
+        dump(Path(row["card_path"]), {"paper_identity": {"paper_id": "paper-B"}, "general_understanding": {"finding": "WRONG"}, "review_planning": {"planning_summary": "WRONG"}})
+        result = p._refresh_local_material_snapshots([{"source_materials": [source]}])[0]["source_materials"][0]
+>       assert not result.get("study_summary_A") and not result.get("review_planning_B")
+E       AssertionError: assert (not {'finding': 'A_FINDING'})
+E        +  where {'finding': 'A_FINDING'} = <built-in method get of dict object at 0x7f5a6f126840>('study_summary_A')
+E        +    where <built-in method get of dict object at 0x7f5a6f126840> = {'source_handle': 'P0001', 'paper_id': 'paper-A', 'title': 'Synthetic paper A', 'doi': '10.synthetic/a', ...}.get
+
+tests/upgrade3/test_preflight_material_identity_compatibility.py:88: AssertionError
+_______________ test_prior_loader_rejects_explicit_doi_conflict ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-1/test_prior_loader_rejects_expl0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5a6f704e30>
+
+    def test_prior_loader_rejects_explicit_doi_conflict(tmp_path, monkeypatch):
+        _, row, _, _, _, _ = fixture(tmp_path, monkeypatch)
+        prior = {"paper_id": "paper-A", "paper_identity": {"title": row["title"], "doi": "10.synthetic/b"}, "_progressive_task_signature": p._directed_task_signature(task()), "question_material": [{"question_id": "Q01", "explanation": "WRONG_IDENTITY"}]}
+        path = tmp_path / "prior.json"
+        dump(path, prior)
+>       assert p.load_prior_readings([path], [row]) == []
+E       AssertionError: assert [{'paper_id':...TITY'}], ...}] == []
+E
+E         Left contains one more item: {'paper_id': 'paper-A', 'paper_identity': {'title': 'Synthetic paper A', 'doi': '10.synthetic/b'}, '_progressive_task_signature': '88ec22e9f97fdbb2', 'question_material': [{'question_id': 'Q01', 'explanation': 'WRONG_IDENTITY'}], ...}
+E         Use -v to get more diff
+
+tests/upgrade3/test_preflight_material_identity_compatibility.py:112: AssertionError
+_________ test_actual_reader_cache_reopens_only_changed_content[body] __________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-1/test_actual_reader_cache_reope0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5a6f705460>
+change = 'body'
+
+    @pytest.mark.parametrize("change", ["body", "references"])
+    def test_actual_reader_cache_reopens_only_changed_content(tmp_path, monkeypatch, change):
+        config, row, snapshot, context, calls, runner = fixture(tmp_path, monkeypatch)
+        read = runner()
+        first = read([task()], **context)
+        old = Path(first["results"][0]["output_dir"])
+        old_bytes = (old / "DIRECTED_READING.json").read_bytes()
+        if change == "body":
+            (snapshot / "READING_VIEW.md").write_text("## Abstract\nREVISED: sample decreased from 4 to 2 at 10 K.\n")
+        else:
+            dump(snapshot / "REFERENCES.json", {"references": [{"marker": "[1]", "text": "Changed citation identity"}]})
+        second = runner(first["materials"])([task()], **context)
+        third = runner(second["materials"])([task()], **context)
+>       assert len(calls) == 2, (first, second, third)
+E       AssertionError: ({'status': 'fulfilled', 'provider_failed': False, 'failed_paper_ids': [], 'results': [{'schema_version': 'optomind.up...ted_reading.output.v4', 'workflow': 'practical_materials', 'status': 'material_ready', 'fulfilled': True, ...}}], ...})
+E       assert 1 == 2
+E        +  where 1 = len([[{'role': 'system', 'content': '你是为文献综述作者准备定向精读笔记的研究员。目标是交付信息充实、可供编排和写作的研究材料。\n请通读所给正文和表格，围绕任务真正询问的关系取材。引言中简短介绍的相关研究也...ource_material": "## Abstract\\nORIGINAL: sample increased from 2 to 4 at 10 K.",\n  "optional_bibliography": []\n}'}]])
+
+tests/upgrade3/test_preflight_material_identity_compatibility.py:128: AssertionError
+______ test_actual_reader_cache_reopens_only_changed_content[references] _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-1/test_actual_reader_cache_reope1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5a6f707860>
+change = 'references'
+
+    @pytest.mark.parametrize("change", ["body", "references"])
+    def test_actual_reader_cache_reopens_only_changed_content(tmp_path, monkeypatch, change):
+        config, row, snapshot, context, calls, runner = fixture(tmp_path, monkeypatch)
+        read = runner()
+        first = read([task()], **context)
+        old = Path(first["results"][0]["output_dir"])
+        old_bytes = (old / "DIRECTED_READING.json").read_bytes()
+        if change == "body":
+            (snapshot / "READING_VIEW.md").write_text("## Abstract\nREVISED: sample decreased from 4 to 2 at 10 K.\n")
+        else:
+            dump(snapshot / "REFERENCES.json", {"references": [{"marker": "[1]", "text": "Changed citation identity"}]})
+        second = runner(first["materials"])([task()], **context)
+        third = runner(second["materials"])([task()], **context)
+>       assert len(calls) == 2, (first, second, third)
+E       AssertionError: ({'status': 'fulfilled', 'provider_failed': False, 'failed_paper_ids': [], 'results': [{'schema_version': 'optomind.up...ted_reading.output.v4', 'workflow': 'practical_materials', 'status': 'material_ready', 'fulfilled': True, ...}}], ...})
+E       assert 1 == 2
+E        +  where 1 = len([[{'role': 'system', 'content': '你是为文献综述作者准备定向精读笔记的研究员。目标是交付信息充实、可供编排和写作的研究材料。\n请通读所给正文和表格，围绕任务真正询问的关系取材。引言中简短介绍的相关研究也...ource_material": "## Abstract\\nORIGINAL: sample increased from 2 to 4 at 10 K.",\n  "optional_bibliography": []\n}'}]])
+
+tests/upgrade3/test_preflight_material_identity_compatibility.py:128: AssertionError
+________ test_legacy_prompt_proves_reuse_but_cannot_hide_current_change ________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-1/test_legacy_prompt_proves_reus0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5a6f70ff80>
+
+    def test_legacy_prompt_proves_reuse_but_cannot_hide_current_change(tmp_path, monkeypatch):
+        _, row, snapshot, context, calls, runner = fixture(tmp_path, monkeypatch)
+        first = runner()([task()], **context)
+        old = Path(first["results"][0]["output_dir"])
+        legacy = {k: v for k, v in first["materials"][0].items() if k not in {"source_hash", "source_provenance", "paper_identity"}}
+        dump(old / "EXPORTED_PRIOR.json", legacy)
+        prior = p.load_prior_readings([old / "EXPORTED_PRIOR.json"], [row])
+        second = runner(prior)([task()], **context)
+        assert second["results"][0]["status"] == "reused_prior_deep_read" and len(calls) == 1
+        (snapshot / "READING_VIEW.md").write_text("## Abstract\nREVISED: actual content changed.\n")
+        third = runner(prior)([task()], **context)
+>       assert third["results"][0]["status"] == "fulfilled" and len(calls) == 2
+E       AssertionError: assert ('reused_prior_deep_read' == 'fulfilled'
+E
+E         - fulfilled
+E         + reused_prior_deep_read)
+
+tests/upgrade3/test_preflight_material_identity_compatibility.py:170: AssertionError
+_____________ test_actual_adaptive_journal_reopens_changed_source ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-1/test_actual_adaptive_journal_r0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5a6f707c20>
+
+    def test_actual_adaptive_journal_reopens_changed_source(tmp_path, monkeypatch):
+        config, row, snapshot, _, calls, runner = fixture(tmp_path, monkeypatch)
+        read = runner()
+        collect = p.make_retrieval_loop_runner(config, allow_external=False, directed_reader=read)
+        args = dict(phase="level1", directed_requests=[task()], pool_rows=[row], plan={"research_question": "What changed?"}, prior_tool_results={}, prior_directed={}, source_handle_map={"P0001": "paper-A"}, resume=True, output_dir=tmp_path / "adaptive")
+        first = collect(**args)
+        cached = collect(**args)
+        assert len(calls) == 1
+        (snapshot / "READING_VIEW.md").write_text("## Abstract\nREVISED: measured outcome decreased.\n")
+        changed = collect(**args)
+>       assert len(calls) == 2, (first, cached, changed)
+E       AssertionError: ({'phase': 'level1', 'status': 'complete', 'retrieval_loop': {'schema_version': 'optomind.planning_retrieval_loop.v1',...Nac340ab84c21', 'owners': [], 'rounds': 1, ...}], 'shared_reads': {'paper-A': 1}, ...}, 'supplement_results': [], ...})
+E       assert 1 == 2
+E        +  where 1 = len([[{'role': 'system', 'content': '你是为文献综述作者准备定向精读笔记的研究员。目标是交付信息充实、可供编排和写作的研究材料。\n请通读所给正文和表格，围绕任务真正询问的关系取材。引言中简短介绍的相关研究也...ource_material": "## Abstract\\nORIGINAL: sample increased from 2 to 4 at 10 K.",\n  "optional_bibliography": []\n}'}]])
+
+tests/upgrade3/test_preflight_material_identity_compatibility.py:194: AssertionError
+=========================== short test summary info ============================
+FAILED tests/upgrade3/test_preflight_material_identity_compatibility.py::test_assigned_conflicting_card_excluded_before_initial_messages[False]
+FAILED tests/upgrade3/test_preflight_material_identity_compatibility.py::test_assigned_conflicting_card_excluded_before_initial_messages[True]
+FAILED tests/upgrade3/test_preflight_material_identity_compatibility.py::test_refresh_removes_stale_conflicting_card_only_and_recovers
+FAILED tests/upgrade3/test_preflight_material_identity_compatibility.py::test_prior_loader_rejects_explicit_doi_conflict
+FAILED tests/upgrade3/test_preflight_material_identity_compatibility.py::test_actual_reader_cache_reopens_only_changed_content[body]
+FAILED tests/upgrade3/test_preflight_material_identity_compatibility.py::test_actual_reader_cache_reopens_only_changed_content[references]
+FAILED tests/upgrade3/test_preflight_material_identity_compatibility.py::test_legacy_prompt_proves_reuse_but_cannot_hide_current_change
+FAILED tests/upgrade3/test_preflight_material_identity_compatibility.py::test_actual_adaptive_journal_reopens_changed_source
+8 failed, 3 passed in 1.63s

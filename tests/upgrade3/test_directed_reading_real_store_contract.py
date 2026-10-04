@@ -215,7 +215,7 @@ def test_model_top_level_incomplete_preserves_partial(reading, flag):
 def test_committed_store_location_is_still_immutable(reading):
     result = dr.run_directed_reading(**reading, client=ModelBoundary(answer()))
     with pytest.raises(dr.AdmissionError, match="reading_commit_is_immutable"):
-        reading["store"].commit_reading(review_id="synthetic-review", task_id=result["output"]["task_id"], output_dir="different-location", source_hash="", gap_keys=["mechanism"])
+        reading["store"].commit_reading(review_id="synthetic-review", task_id=result["output"]["task_id"], output_dir="different-location", source_hash=reading["store"].task(result["output"]["task_id"])["source_hash"], gap_keys=["mechanism"])
     assert reading["store"].summary("synthetic-review")["reading_count"] == 1
 
 
@@ -247,7 +247,9 @@ def test_scalar_question_is_one_executable_question(reading):
 
 def test_conflicting_task_owned_output_never_overwritten(reading):
     questions, outputs, gaps = dr._practical_task_rows(reading["request"], None)
-    added = reading["store"].add_task(review_id="synthetic-review", paper_id="synthetic-paper", questions=questions, required_outputs=outputs, gap_keys=gaps)
+    added = reading["store"].add_task(review_id="synthetic-review", paper_id="synthetic-paper", questions=questions, required_outputs=outputs, gap_keys=gaps,
+        source_hash=dr.sha256_value({"source_hash": dr.sha256_value(dr.load_practical_material(reading["snapshot_dir"])),
+                                     "paper_identity": {"canonical_paper_id": "synthetic-paper", "title": "Synthetic fixture"}}))
     output = Path(reading["output_dir"]) / added["task_id"]
     output.mkdir(parents=True)
     old = json.dumps({"task_id": "foreign-task", "workflow": "practical_materials", "content": answer()})
@@ -264,10 +266,9 @@ def test_output_creation_failure_releases_claim_without_model_call(reading):
     client = ModelBoundary(answer())
     with pytest.raises(OSError):
         dr.run_directed_reading(**reading, client=client)
-    questions, outputs, gaps = dr._practical_task_rows(reading["request"], None)
-    added = reading["store"].add_task(review_id="synthetic-review", paper_id="synthetic-paper", questions=questions, required_outputs=outputs, gap_keys=gaps)
-    assert reading["store"].task(added["task_id"])["status"] == "pending"
-    assert reading["store"].attempts(added["task_id"])[-1]["status"] == "failed"
+    task_id = reading["store"].paper("synthetic-review", "synthetic-paper")["task_ids"][0]
+    assert reading["store"].task(task_id)["status"] == "pending"
+    assert reading["store"].attempts(task_id)[-1]["status"] == "failed"
     assert not client.calls
 
 

@@ -150,12 +150,13 @@ def test_unit_scoped_tool_is_not_folded_into_shared_source():
     assert merged['tool_materials'][0]['unit_key']=='CH01:U2'
 
 
-def test_refresh_conflicting_card_keeps_old_content_and_marks_conflict(tmp_path):
+def test_refresh_conflicting_card_quarantines_old_content_and_marks_conflict(tmp_path):
     card=tmp_path/'card.json';card.write_text(json.dumps({'paper_identity':{'canonical_paper_id':'different-paper','doi':'10.1234/different'},
         'general_understanding':{'finding':'WRONG_NEW_PAPER_FINDING'}}))
     original={**source(),'card_path':str(card)}
     refreshed=p._refresh_local_material_snapshots([{'source_materials':[original]}])[0]['source_materials'][0]
-    assert refreshed['study_summary_A']==source()['study_summary_A']
+    assert refreshed['study_summary_A']=={}
+    assert original['study_summary_A']==source()['study_summary_A']
     assert refreshed['material_identity_conflict'] is True
     assert 'WRONG_NEW_PAPER_FINDING' not in json.dumps(refreshed)
     assert not p._owner_material_has_content(refreshed)

@@ -134,6 +134,16 @@ def _directed_task(*, question="What finding?", output="Reported finding"):
 
 def _tool_cycle_fixture(tmp_path, *, prior_directed=None, reader=None, budget=1):
     calls = []
+    snapshot = tmp_path / "source" / "snapshot"
+    snapshot.mkdir(parents=True)
+    (snapshot / "READING_VIEW.md").write_text("Synthetic unchanged source material")
+    card = snapshot.parent / "PAPER_READING_CARD.json"
+    card.write_text(json.dumps({"paper_identity": {"paper_id": "paper-1"}}))
+    (snapshot.parent / "SOURCE_UNIT.json").write_text(json.dumps({"snapshot_path": str(snapshot)}))
+    if prior_directed:
+        for group in prior_directed.get("directed_results") or []:
+            for material in group.get("materials") or []:
+                material.setdefault("source_hash", directed_reading.sha256_value(directed_reading.load_practical_material(snapshot)))
 
     def fake_reader(tasks, **_kwargs):
         calls.extend(dict(item) for item in tasks)
@@ -164,7 +174,7 @@ def _tool_cycle_fixture(tmp_path, *, prior_directed=None, reader=None, budget=1)
         phase="level1",
         supplement_requests=[],
         directed_requests=[_directed_task()],
-        pool_rows=[{"_paper_id": "paper-1"}],
+        pool_rows=[{"_paper_id": "paper-1", "card_path": str(card)}],
         plan={"research_question": "test"},
         prior_directed=prior_directed,
         prior_tool_results={},
@@ -388,6 +398,16 @@ def _direct_runner(tmp_path, monkeypatch, *, task, prior, provider_result, calls
         output_dir=tmp_path / "run",
         shared_deep_read_budget=1,
     )
+    pool_row = _pool_row(tmp_path)
+    # The adapter fixture must represent the requested paper, rather than
+    # disguising a contradictory CorpusId under the dictionary key paper-1.
+    pool_row["paper_id"] = "paper-1"
+    pool_row["_paper_id"] = "paper-1"
+    pool_row["planning_view"]["paper_identity"]["canonical_paper_id"] = "paper-1"
+    snapshot = tmp_path / "existing" / "materials" / "CorpusId_252309032" / "snapshot-existing"
+    (snapshot / "READING_VIEW.md").write_text("Synthetic unchanged source material")
+    if prior is not None:
+        prior = {**prior, "source_hash": directed_reading.sha256_value(directed_reading.load_practical_material(snapshot))}
     runner = make_directed_reading_runner(
         config,
         key_file=tmp_path / "missing-key.txt",
@@ -400,7 +420,7 @@ def _direct_runner(tmp_path, monkeypatch, *, task, prior, provider_result, calls
         phase="level1",
         output_dir=tmp_path / "phase",
         plan={"research_question": "test"},
-        pool_by_id={"paper-1": _pool_row(tmp_path)},
+        pool_by_id={"paper-1": pool_row},
     )
 
 

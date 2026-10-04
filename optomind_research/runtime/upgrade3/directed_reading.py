@@ -4430,16 +4430,47 @@ def run_directed_reading(
     if admitted_paper is None:
         raise AdmissionError("paper_not_nominated")
 
+    # Admission owns quota, while the caller owns the current source identity.
+    # Do not pair newly supplied content with an old stored title.
+    effective_paper = {**admitted_paper, **{key: value for key, value in paper.items() if value not in (None, "")}}
     receipt, messages, material, questions, outputs, gaps = _practical_reading_plan(
-        request=request, paper=admitted_paper, snapshot_dir=snapshot_dir, task=task, max_input_tokens=max_input_tokens
+        request=request, paper=effective_paper, snapshot_dir=snapshot_dir, task=task, max_input_tokens=max_input_tokens
     )
+    # The practical reader consumes this cleaned body and bibliography, not
+    # snapshot paths/names. Reuse the store's existing content-bound task key.
+    source_digest = sha256_value(material)
+    source_identity = {"canonical_paper_id": paper_id, "title": _norm(effective_paper.get("title")),
+                       **({"doi": _norm(effective_paper.get("doi"))} if effective_paper.get("doi") else {})}
+    task_source_hash = sha256_value({"source_hash": source_digest, "paper_identity": source_identity})
+    # Legacy practical tasks used an empty source hash. Their saved prompt is
+    # explicit content/task proof; keep a matching committed reading in place.
+    # Missing proof never exempts a new read, and old artifacts are not edited.
+    for saved_reading in reversed(store.readings(review_id, paper_id)):
+        legacy_task = store.task(_text(saved_reading.get("task_id"))) or {}
+        if legacy_task.get("source_hash") or legacy_task.get("gap_keys") != gaps:
+            continue
+        old_root = Path(saved_reading["output_dir"])
+        try:
+            old_prompt = _read_json(old_root / "PROMPT.json")
+            old_artifact = _read_json(old_root / "DIRECTED_READING.json")
+        except (OSError, ValueError):
+            continue
+        if not isinstance(old_prompt, Mapping) or old_prompt.get("messages") != messages or not isinstance(old_artifact, Mapping):
+            continue
+        from .progressive_review_plan import _saved_card_identity_conflict
+        if old_artifact.get("workflow") != "practical_materials" or _saved_card_identity_conflict(source_identity, old_artifact) is not None:
+            continue
+        retained_legacy = _practical_cached_result(old_artifact, old_root, questions)
+        if retained_legacy["fulfilled"]:
+            retained_legacy["output"] = {**retained_legacy["output"], "source_hash": source_digest, "paper_identity": source_identity}
+            return retained_legacy
     added = store.add_task(
         review_id=review_id,
         paper_id=paper_id,
         questions=questions,
         required_outputs=outputs,
         gap_keys=gaps,
-        source_hash="",
+        source_hash=task_source_hash,
     )
     task_id = _norm(added.get("task_id"))
     effective_task = store.task(task_id) or {"task_id": task_id, "questions": questions, "required_outputs": outputs, "gap_keys": gaps}
@@ -4513,7 +4544,7 @@ def run_directed_reading(
     raw = None if retry_empty_result else _load_practical_raw(raw_path)
     live = raw is None
     prompt_payload = {"workflow": "practical_materials", "prompt_version": PRACTICAL_PROMPT_VERSION, "messages": messages}
-    input_payload = {"workflow": "practical_materials", "review_id": review_id, "paper_id": paper_id, "task_id": task_id, "paper": {key: admitted_paper.get(key) for key in ("canonical_paper_id", "title", "paper_kind", "material_scope")}, "task": {"questions": questions, "required_outputs": outputs, "gap_keys": gaps}}
+    input_payload = {"workflow": "practical_materials", "review_id": review_id, "paper_id": paper_id, "task_id": task_id, "source_hash": source_digest, "paper_identity": source_identity, "paper": {key: effective_paper.get(key) for key in ("canonical_paper_id", "title", "paper_kind", "material_scope")}, "task": {"questions": questions, "required_outputs": outputs, "gap_keys": gaps}}
     claim = store.claim_task(task_id)
     if not claim.get("claimed"):
         if claim.get("route") == "reuse":
@@ -4573,8 +4604,10 @@ def run_directed_reading(
             "material_ready": ready,
             "review_id": review_id,
             "paper_id": paper_id,
+            "paper_identity": source_identity,
+            "source_hash": source_digest,
             "task_id": task_id,
-            "paper_title": _norm(admitted_paper.get("title") or paper.get("title")),
+            "paper_title": _norm(effective_paper.get("title")),
             "question_material": content.get("question_material") if isinstance(content.get("question_material"), list) else content,
             "content": content,
             "plain_text": plain_text,
@@ -4600,7 +4633,7 @@ def run_directed_reading(
         commit = {"status": status, "ready": ready, "review_id": review_id, "task_id": task_id, "output_dir": str(output)}
         _atomic_json(output / "COMMIT.json", commit)
         if fulfilled:
-            store.commit_reading(review_id=review_id, task_id=task_id, output_dir=str(output), source_hash="", gap_keys=gaps)
+            store.commit_reading(review_id=review_id, task_id=task_id, output_dir=str(output), source_hash=task_source_hash, gap_keys=gaps)
         else:
             store.release_task(task_id, status="pending")
         return {"output": artifact, "output_dir": str(output), "reused": False, "ready": ready, "fulfilled": fulfilled, "commit": commit, "network_call": reader_called}
