@@ -1,0 +1,168 @@
+{
+  "status": "recorded_real_A_first_failure_and_single_retry",
+  "variant": "A",
+  "case_sha256": "7211e022ac4bc2684c1a7d5b5be905bb9fd059f1e3a0f1529a88bd867c6b6378",
+  "first_attempt": {
+    "path": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\A\\live",
+    "status": "failed",
+    "run_completed": false,
+    "errors": [
+      "RevisionContractError: combined_fixed_issue_identity_mismatch"
+    ],
+    "calls": [
+      {
+        "stage_id": "combined",
+        "status": "ok",
+        "model": "qwen3.7-flash",
+        "cost_cny": 0.07593479999999998,
+        "usage": {
+          "completion_tokens": 1753,
+          "prompt_tokens": 119546,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 119546
+          },
+          "total_tokens": 121299
+        },
+        "raw_response_sha256": "d825b8dbe841ab17d0d5390640065d2b844a1ee3216f1f68aa7fe3e045642179"
+      }
+    ],
+    "candidate_sha256": "dd7cf5f8cda3a55c187b54b367a9790d3a9bc985c1f84e21ee39703f638a9bac",
+    "applied_patch_issue_ids": [],
+    "issue_statuses": [],
+    "counts": {
+      "applied": 0,
+      "dismissed": 0,
+      "pending": 0,
+      "proposed": 0,
+      "reviewed": 0,
+      "verified": 0
+    },
+    "verification_status": "unresolved_or_incomplete",
+    "cost_cny": 0.07593479999999998,
+    "usage": {
+      "completion_tokens": 1753,
+      "prompt_tokens": 119546,
+      "total_tokens": 121299
+    }
+  },
+  "retry_attempt": {
+    "path": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live_attempt2\\A\\live",
+    "status": "completed",
+    "run_completed": true,
+    "errors": [],
+    "calls": [
+      {
+        "stage_id": "combined",
+        "status": "ok",
+        "model": "qwen3.7-flash",
+        "cost_cny": 0.076632,
+        "usage": {
+          "completion_tokens": 2018,
+          "prompt_tokens": 119648,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 119648
+          },
+          "total_tokens": 121666
+        },
+        "raw_response_sha256": "e1a6bb61bcb2b6920770f53f2d2a9a16f4b8cabbf897826eda54d4feba6a5306"
+      },
+      {
+        "stage_id": "issue_001_verifier",
+        "status": "ok",
+        "model": "qwen3.7-flash",
+        "cost_cny": 0.005425000000000001,
+        "usage": {
+          "completion_tokens": 187,
+          "prompt_tokens": 26377,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 26377
+          },
+          "total_tokens": 26564
+        },
+        "raw_response_sha256": "ae05c652c1c494fbe550c17ffba502544b743e4d20795d6a0507658a633e27da"
+      },
+      {
+        "stage_id": "issue_002_verifier",
+        "status": "ok",
+        "model": "qwen3.7-flash",
+        "cost_cny": 0.0239118,
+        "usage": {
+          "completion_tokens": 181,
+          "prompt_tokens": 39129,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 39129
+          },
+          "total_tokens": 39310
+        },
+        "raw_response_sha256": "7ea53ec34a35b77f282ad79c370138a8178a8a90a91eb94b21da821ffcf99eee"
+      }
+    ],
+    "candidate_sha256": "fc639a0d0d06fec12f69a097f01860353887082bc1a168933fa96c60d1b6fdfc",
+    "applied_patch_issue_ids": [
+      "R1"
+    ],
+    "issue_statuses": [
+      {
+        "issue_id": "R1",
+        "status": "applied",
+        "verified": true,
+        "pending": false,
+        "reason": "The original text claimed a direct causal link ('directly led to') between PPI-induced ecological reshaping and PFS shortening. The evidence from source P0289 indicates this is an observational finding with limited statistical power in the specific subgroup (P=0.08, close to significance threshold) and lacks mechanistic validation. The candidate text correctly revises the claim to state that there is a 'significant association' ('存在显著关联') rather than direct causation, which aligns with the study's limitations and nature as an observational cohort analysis. This addresses the reviewer's concern about unsupported causal language while preserving the core scientific observation."
+      },
+      {
+        "issue_id": "R2",
+        "status": "pending",
+        "verified": true,
+        "pending": true,
+        "reason": "The candidate text is substantially identical to the original text (original), differing only in minor phrasing (e.g., '纳武利尤单抗' vs '尼莫鲁单抗', '仅含...对照组' vs '对照组'). The reviewer's concern regarding potential duplication with block B0012 is valid; both blocks describe the same JCOG2007 findings. Since the candidate does not resolve this redundancy by removing or significantly distinguishing the content from B0012, and merely repeats the same trial data with negligible editorial changes, it fails to improve the manuscript structure or address the identified issue."
+      },
+      {
+        "issue_id": "R3",
+        "status": "pending",
+        "verified": false,
+        "pending": true,
+        "reason": "RevisionContractError: no_op_patch"
+      }
+    ],
+    "counts": {
+      "applied": 1,
+      "dismissed": 0,
+      "pending": 2,
+      "proposed": 3,
+      "reviewed": 3,
+      "verified": 2
+    },
+    "verification_status": "unresolved_or_incomplete",
+    "cost_cny": 0.1059688,
+    "usage": {
+      "completion_tokens": 2386,
+      "prompt_tokens": 185154,
+      "total_tokens": 187540
+    }
+  },
+  "prompt_change": {
+    "path": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\worktree\\prompts\\post_body_revision\\combined.md",
+    "before_sha256": "bfa51c8a50bf54578e4d29215ac7da000400b161ba48eeda2d8b041f2a02fb6f",
+    "after_sha256": "ad988b0253e9ba53a39e5996907700d5ac0446eabc474bff78a8b03cdc0d75d0",
+    "scope": "conditional known_fixed_issues identity protocol only"
+  },
+  "budget": {
+    "ledger": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\budget.sqlite",
+    "limit_cny": 10.0,
+    "settled_cny": 0.1819036,
+    "reserved_cny": 0,
+    "uncertain_cny": 0,
+    "remaining_cny": 9.8180964,
+    "reservation_count": 4
+  },
+  "b_or_c_started": false,
+  "interpretation": "The retry validated the generic fixed-issue identity protocol. It is a completed A run with one applied R1 patch and unresolved/pending R2/R3; this metadata is not a scientific quality verdict.",
+  "raw_artifacts": [
+    "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\A\\live\\calls",
+    "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live_attempt2\\A\\live\\calls"
+  ]
+}

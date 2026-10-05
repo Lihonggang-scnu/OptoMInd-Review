@@ -25,8 +25,8 @@ class BlindedEvaluationTests(unittest.TestCase):
         for variant in "ABC":
             folder = self.root / variant
             folder.mkdir()
-            (folder / "baseline.md").write_text(self.case["draft_text"])
-            (folder / "candidate.md").write_text(self.case["draft_text"])
+            (folder / "baseline.md").write_bytes(self.case["draft_text"].encode("utf-8"))
+            (folder / "candidate.md").write_bytes(self.case["draft_text"].encode("utf-8"))
             value = {"variant": variant, "case_id": "SYNTHETIC", "base_sha256": self.case["base_sha256"],
                      "case_fingerprint": fingerprint(self.case), "evidence_fingerprint": evidence_fingerprint(self.case),
                      "baseline_path": "baseline.md", "candidate_path": "candidate.md", "run_completed": True,

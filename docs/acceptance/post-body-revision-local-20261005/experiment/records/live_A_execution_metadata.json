@@ -1,0 +1,74 @@
+{
+  "status": "real_provider_call_completed_but_scheme_failed_contract_guard",
+  "variant": "A",
+  "case_sha256": "7211e022ac4bc2684c1a7d5b5be905bb9fd059f1e3a0f1529a88bd867c6b6378",
+  "output_dir": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\A\\live",
+  "report": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\A\\live\\report.json",
+  "command_policy": {
+    "max_retries": 0,
+    "max_keys": 1,
+    "b_or_c_started": false
+  },
+  "call": {
+    "stage_id": "combined",
+    "status": "ok",
+    "dispatched": true,
+    "model": "qwen3.7-flash",
+    "request_message_count": 2,
+    "system_chars": 3420,
+    "user_chars": 305144,
+    "usage": {
+      "completion_tokens": 1753,
+      "prompt_tokens": 119546,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "text_tokens": 119546
+      },
+      "total_tokens": 121299
+    },
+    "cost_cny": 0.07593479999999998,
+    "cost_provenance": "module4_configured_pricing_from_provider_usage",
+    "raw_response_sha256": "d825b8dbe841ab17d0d5390640065d2b844a1ee3216f1f68aa7fe3e045642179",
+    "returned_model": "qwen3.7-flash",
+    "finish_reason": "stop",
+    "response_content_chars": 3961,
+    "response_top_level_keys": [
+      "issues",
+      "proposals"
+    ],
+    "response_issue_ids": [
+      "R4",
+      "R5",
+      "R6"
+    ],
+    "response_issue_target_ids": [
+      "B0017",
+      "B0098",
+      "B0024"
+    ],
+    "response_proposal_count": 3
+  },
+  "run": {
+    "status": "failed",
+    "run_completed": false,
+    "error": [
+      "RevisionContractError: combined_fixed_issue_identity_mismatch"
+    ],
+    "calls": 1,
+    "applied_patches": [],
+    "baseline_sha256": "dd7cf5f8cda3a55c187b54b367a9790d3a9bc985c1f84e21ee39703f638a9bac",
+    "candidate_sha256": "dd7cf5f8cda3a55c187b54b367a9790d3a9bc985c1f84e21ee39703f638a9bac",
+    "candidate_equals_baseline": true
+  },
+  "budget": {
+    "ledger": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\budget.sqlite",
+    "limit_cny": 10.0,
+    "settled_cny": 0.07593479999999998,
+    "reserved_cny": 0,
+    "uncertain_cny": 0,
+    "remaining_cny": 9.9240652,
+    "reservation_rows": 1
+  },
+  "raw_artifact": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\A\\live\\calls\\combined.json",
+  "interpretation": "The real provider response was retained for root review. The strict fixed-issue identity guard rejected it because returned issue IDs were R4/R5/R6 rather than the required R1/R2/R3; this is a failed scheme-A run, not a quality judgment."
+}

@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "case_id": {
+      "type": "string"
+    },
+    "pair_id": {
+      "type": "string"
+    },
+    "pair_input_sha256": {
+      "type": "string"
+    },
+    "assessment_state": {
+      "enum": [
+        "complete",
+        "insufficient_evidence",
+        "uncertain"
+      ]
+    },
+    "winner": {
+      "enum": [
+        "left",
+        "right",
+        "tie",
+        "uncertain"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "knowledge_preservation": {
+      "enum": [
+        "preserved",
+        "loss",
+        "uncertain"
+      ]
+    },
+    "resolved_issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "editorial",
+              "scientific",
+              "missing"
+            ]
+          },
+          "affected_side": {
+            "enum": [
+              "left",
+              "right",
+              "both"
+            ]
+          },
+          "target_quote": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "enum": [
+              "minor",
+              "major",
+              "critical"
+            ]
+          },
+          "knowledge_loss": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "kind",
+          "affected_side",
+          "target_quote",
+          "evidence_ids",
+          "reason",
+          "severity",
+          "knowledge_loss"
+        ]
+      }
+    },
+    "regressions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "editorial",
+              "scientific",
+              "missing"
+            ]
+          },
+          "affected_side": {
+            "enum": [
+              "left",
+              "right",
+              "both"
+            ]
+          },
+          "target_quote": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "enum": [
+              "minor",
+              "major",
+              "critical"
+            ]
+          },
+          "knowledge_loss": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "kind",
+          "affected_side",
+          "target_quote",
+          "evidence_ids",
+          "reason",
+          "severity",
+          "knowledge_loss"
+        ]
+      }
+    },
+    "remaining_issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "editorial",
+              "scientific",
+              "missing"
+            ]
+          },
+          "affected_side": {
+            "enum": [
+              "left",
+              "right",
+              "both"
+            ]
+          },
+          "target_quote": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "enum": [
+              "minor",
+              "major",
+              "critical"
+            ]
+          },
+          "knowledge_loss": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "kind",
+          "affected_side",
+          "target_quote",
+          "evidence_ids",
+          "reason",
+          "severity",
+          "knowledge_loss"
+        ]
+      }
+    }
+  },
+  "required": [
+    "case_id",
+    "pair_id",
+    "pair_input_sha256",
+    "assessment_state",
+    "winner",
+    "reason",
+    "knowledge_preservation",
+    "resolved_issues",
+    "regressions",
+    "remaining_issues"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "base_sha256": "dd7cf5f8cda3a55c187b54b367a9790d3a9bc985c1f84e21ee39703f638a9bac",
+  "case_sha256": "7211e022ac4bc2684c1a7d5b5be905bb9fd059f1e3a0f1529a88bd867c6b6378",
+  "source_case_sha256": "e93aef771091ef3f30141d1ffd57f60a1a25ec632d5eceef58580d7db7d0068c",
+  "issues": [
+    {
+      "issue_id": "R1",
+      "kind": "scientific",
+      "target_block_id": "B0019",
+      "original_text": "例如，PPIs通过改变胃内pH值促进口腔细菌易位至肠道，这种由药物诱导的生态重塑直接导致了PFS的缩短[ P0289 ]。",
+      "related_block_ids": [],
+      "evidence_ids": [
+        "P0289"
+      ],
+      "problem": "Check whether the stated direct causal connection is supported by the supplied study design and results. Preserve the useful explanation connecting medication exposure, microbial ecology and outcome; determine whether any wording or boundary needs revision. Do not supply a new mechanism or treat the issue statement as an answer key.",
+      "preserve": [],
+      "operation": "replace",
+      "priority": "high"
+    },
+    {
+      "issue_id": "R2",
+      "kind": "editorial",
+      "target_block_id": "B0017",
+      "original_text": "除了常规合并用药，具体的抗肿瘤治疗方案（如化疗-免疫联合 vs. 单药免疫）构成了关键的宿主背景，能够修饰甚至反转肠道微生物组对临床结局的预测方向。在JCOG2007（NIPPON）III期临床试验的辅助生物标志物研究中，针对晚期非小细胞肺癌（NSCLC）患者的分析显示，微生物组的预后价值高度依赖于治疗臂[ P0585 ]。在纳武利尤单抗联合伊匹木单抗加铂类双药化疗（NIC）组中，基线粪便中产丁酸菌属 *Fusicatenibacter* 和 *Butyricicoccus* 的高丰度与更好的OS获益显著相关（HR分别为0.56和0.52），且这些菌属的低丰度与发生≥4级严重不良事件的风险增加相关；相反，*Prevotellaceae NK3B31* 的高丰度在NIC组中与更高的死亡风险相关（HR=2.33）。然而，在仅含帕博利珠单抗加化疗（PC）的对照组中，上述关联并未表现出同等强度的显著性或方向一致性。这表明，双重免疫检查点阻断联合化疗不仅改变了免疫微环境的选择压力，还放大了特定细菌群落（如产丁酸菌）对生存期的正向调节作用，同时也揭示了某些菌群（如普雷沃氏科）在强免疫激活背景下可能转化为负面预后因子。\r\n",
+      "related_block_ids": [
+        "B0012"
+      ],
+      "evidence_ids": [
+        "P0585"
+      ],
+      "problem": "Compare this passage with B0012 and the section tasks. Determine whether the repeated trial findings add a distinct treatment-context explanation or repeat the same function. A shared paper is not itself duplication. Preserve any actual comparator, regimen, population and safety interpretation that supplies an increment; no_change is valid when the reuse is justified.",
+      "preserve": [],
+      "operation": "replace",
+      "priority": "medium"
+    },
+    {
+      "issue_id": "R3",
+      "kind": "scientific",
+      "target_block_id": "B0038",
+      "original_text": "肠道微生物组通过分子模拟机制为适应性免疫启动提供了直接的抗原交叉识别基础。传统新抗原预测算法多依赖HLA结合亲和力，但宿主既往的微生物暴露史可通过诱导异源记忆T细胞库，显著重塑新抗原的实际免疫原性[ P0085 ]。T细胞受体（TCR）具有广泛的交叉反应能力，当微生物肽段与肿瘤新抗原在关键残基或三维空间构象上呈现同源性时，预存的异源记忆T细胞即可发生交叉识别，从而将局部肠道信号转化为远端抗肿瘤应答[ P0085 ]。在小鼠模型中，这一假说已通过功能回补实验获得严格的因果验证。工程化表达分段丝状菌（SFB）特异性CD4+ T细胞表位（SFB-3340）的肿瘤模型显示，仅在SFB定植背景下，抗PD-1治疗方能有效抑制肿瘤生长[ P0388 ]。单细胞转录组与谱系追踪证实，SFB诱导的肠道固有层TH17细胞可迁移至远端肿瘤，在ICI干预下发生表型可塑性，转化为分泌IFN-γ和TNF的ex-TH1样效应细胞，进而直接辅助CD8+ CTL的招募与活化[ P0388 ]。与之形成对照的是，诱导Foxp3+调节性T细胞的幽门螺杆菌近缘种（H. hepaticus）虽同样能引发抗原特异性T细胞浸润，但因维持抑制性表型而无法增强疗效，凸显了初始免疫程序类型对最终治疗结局的决定性作用[ P0388 ]。\r\n",
+      "related_block_ids": [],
+      "evidence_ids": [
+        "P0388",
+        "P0085"
+      ],
+      "problem": "Check this mechanism account against the selected material and the chapter task: are the engineered antigen setting, colonization/treatment conditions, cellular pathway and non-effective comparator properly explained? Decide whether an actual defect requires revision or the current account should remain. Detail and an animal model do not by themselves justify deletion; any supported correction must keep the useful mechanism and negative comparison.",
+      "preserve": [],
+      "operation": "replace",
+      "priority": "low"
+    }
+  ],
+  "input_changes": "case_id and known_fixed_issues only; BODY, scope, outline, all materials and identities unchanged",
+  "selection_note": "Root chose a clearly supported design/wording concern plus an undecided reuse question and a comparatively substantial mechanism account. No replacement text or forced no-change answer was prepared.",
+  "scout_adjustment": "The scouting skeleton protected the entire target and used an unsupported control priority; those skeletons are not used. This experiment uses legal priorities and empty literal preserve lists; semantic preservation is assessed by existing prompts and verifier.",
+  "model_calls": 0
+}

@@ -1,0 +1,35 @@
+{
+  "fixture_case": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\native\\windows_newline_reproduction\\case.json",
+  "fixture_case_draft_sha256": "8c0b2e598a2843d5fa8a147a22390b98c2717a23bc451ad963581375fca0d43e",
+  "bad_baseline_sha256": "2b92ca10a754eb0ebf88cd5f9529a2f91dfda20fa2de557592c47b884dbc12bd",
+  "draft_lf_count": 1,
+  "draft_crlf_count": 0,
+  "bad_baseline_lf_count": 1,
+  "bad_baseline_crlf_count": 1,
+  "bad_baseline_bytes": 19,
+  "expected_lf_bytes": 18,
+  "first_difference_offset": 17,
+  "engine_write_bytes_equivalent_sha256": "8c0b2e598a2843d5fa8a147a22390b98c2717a23bc451ad963581375fca0d43e",
+  "test_fixture_write_site": "tests/upgrade3/test_post_body_revision_evaluation.py:28",
+  "production_write_site": "optomind_research/runtime/upgrade3/post_body_revision.py:416",
+  "evaluation_read_site": "optomind_research/runtime/upgrade3/post_body_revision_evaluation.py:137-139",
+  "fixture_reproduction": {
+    "status": "expected_failure",
+    "exception_type": "ValueError",
+    "reason": "run_baseline_bytes_mismatch",
+    "traceback_tail": [
+      "  File \"F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\native\\record_windows_newline_reproduction.py\", line 69, in main",
+      "    prepare(case_path, [bad_runs / v / \"recording\" for v in \"ABC\"], OUT / \"bad_evaluation\")",
+      "  File \"F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\worktree\\optomind_research\\runtime\\upgrade3\\post_body_revision_evaluation.py\", line 139, in prepare",
+      "    raise ValueError(\"run_baseline_bytes_mismatch\")",
+      "ValueError: run_baseline_bytes_mismatch"
+    ]
+  },
+  "formal_recording_evaluation": {
+    "status": "success",
+    "experiment_sha256": "8e61ad461be68dea1253afdc1c1ff9cee711ab5cb19f86f0eea2c3df47280554",
+    "files": 6
+  },
+  "repair_suggestion": "Keep production read_bytes/write_bytes byte guard unchanged; change only test fixture baseline/candidate setup to write_bytes(draft.encode('utf-8')) or explicit newline=''.",
+  "scope": "No production or test file was modified; this is a new reproduction copy under acceptance native/."
+}

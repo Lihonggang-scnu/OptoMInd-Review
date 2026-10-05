@@ -1,0 +1,168 @@
+{
+  "mode": "offline_reservation_preview_not_paid_spend",
+  "preflight": {
+    "A": {
+      "variant": "A",
+      "base_sha256": "dd7cf5f8cda3a55c187b54b367a9790d3a9bc985c1f84e21ee39703f638a9bac",
+      "review_input_chars": 308564,
+      "material_index_chars": 153835,
+      "max_input_chars": 600000,
+      "max_material_index_chars": 200000,
+      "max_target_chars": 12000,
+      "review_call_required": true,
+      "fixed_issue_author_input_chars": [
+        {
+          "issue_id": "R1",
+          "chars": 53703
+        },
+        {
+          "issue_id": "R2",
+          "chars": 92684
+        },
+        {
+          "issue_id": "R3",
+          "chars": 62662
+        }
+      ],
+      "dynamic_inputs_checked_before_dispatch": true
+    },
+    "B": {
+      "variant": "B",
+      "base_sha256": "dd7cf5f8cda3a55c187b54b367a9790d3a9bc985c1f84e21ee39703f638a9bac",
+      "review_input_chars": 308557,
+      "material_index_chars": 153835,
+      "max_input_chars": 600000,
+      "max_material_index_chars": 200000,
+      "max_target_chars": 12000,
+      "review_call_required": false,
+      "fixed_issue_author_input_chars": [
+        {
+          "issue_id": "R1",
+          "chars": 53703
+        },
+        {
+          "issue_id": "R2",
+          "chars": 92684
+        },
+        {
+          "issue_id": "R3",
+          "chars": 62662
+        }
+      ],
+      "dynamic_inputs_checked_before_dispatch": true
+    },
+    "C": {
+      "variant": "C",
+      "base_sha256": "dd7cf5f8cda3a55c187b54b367a9790d3a9bc985c1f84e21ee39703f638a9bac",
+      "review_input_chars": 308557,
+      "material_index_chars": 153835,
+      "max_input_chars": 600000,
+      "max_material_index_chars": 200000,
+      "max_target_chars": 12000,
+      "review_call_required": false,
+      "fixed_issue_author_input_chars": [
+        {
+          "issue_id": "R1",
+          "chars": 53703
+        },
+        {
+          "issue_id": "R2",
+          "chars": 92684
+        },
+        {
+          "issue_id": "R3",
+          "chars": 62662
+        }
+      ],
+      "dynamic_inputs_checked_before_dispatch": true
+    }
+  },
+  "combined_A": {
+    "model": "qwen3.7-flash",
+    "request_bytes": 462498,
+    "reservation_prompt_token_upper_bound": 471202,
+    "actual_prompt_tokens": null,
+    "maximum_output_tokens": 8192,
+    "reservation_cny": 0.604764
+  },
+  "local_payloads": [
+    {
+      "issue_id": "R1",
+      "kind": "scientific",
+      "author_flash": {
+        "model": "qwen3.7-flash",
+        "request_bytes": 113144,
+        "reservation_prompt_token_upper_bound": 121848,
+        "actual_prompt_tokens": null,
+        "maximum_output_tokens": 8192,
+        "reservation_cny": 0.18553920000000002
+      },
+      "author_plus": {
+        "model": "qwen3.5-plus",
+        "request_bytes": 113143,
+        "reservation_prompt_token_upper_bound": 121847,
+        "actual_prompt_tokens": null,
+        "maximum_output_tokens": 8192,
+        "reservation_cny": 0.683996
+      }
+    },
+    {
+      "issue_id": "R2",
+      "kind": "editorial",
+      "author_flash": {
+        "model": "qwen3.7-flash",
+        "request_bytes": 157586,
+        "reservation_prompt_token_upper_bound": 166290,
+        "actual_prompt_tokens": null,
+        "maximum_output_tokens": 8192,
+        "reservation_cny": 0.23886960000000002
+      },
+      "author_plus": {
+        "model": "qwen3.5-plus",
+        "request_bytes": 157585,
+        "reservation_prompt_token_upper_bound": 166289,
+        "actual_prompt_tokens": null,
+        "maximum_output_tokens": 8192,
+        "reservation_cny": 0.861764
+      }
+    },
+    {
+      "issue_id": "R3",
+      "kind": "scientific",
+      "author_flash": {
+        "model": "qwen3.7-flash",
+        "request_bytes": 133036,
+        "reservation_prompt_token_upper_bound": 141740,
+        "actual_prompt_tokens": null,
+        "maximum_output_tokens": 8192,
+        "reservation_cny": 0.2094096
+      },
+      "author_plus": {
+        "model": "qwen3.5-plus",
+        "request_bytes": 133035,
+        "reservation_prompt_token_upper_bound": 141739,
+        "actual_prompt_tokens": null,
+        "maximum_output_tokens": 8192,
+        "reservation_cny": 0.763564
+      }
+    }
+  ],
+  "scheme_reservation_estimates_cny": {
+    "A": 1.3565471999999998,
+    "B": 1.3856016,
+    "C": 5.067153600000001
+  },
+  "total_reservation_estimate_cny": 7.809302400000001,
+  "assumptions": [
+    "A/B/C independently run the same fixed case.",
+    "All three issues reach a verifier; both eligible scientific issues in C escalate once.",
+    "Byte-based prompt upper bound and highest applicable model price tier.",
+    "8192 maximum output at every generation/verifier; generated content/history is not yet available.",
+    "Verifier/history padding approximates a conservative request bound, not exact tokenizer measurement.",
+    "No discovery calls in fixed-issue B/C; autonomous review and API judging are not included."
+  ],
+  "paid_calls": 0,
+  "settled_cny": 0,
+  "budget_authorized_this_round": null,
+  "local_agent_account_cost_cny": null
+}

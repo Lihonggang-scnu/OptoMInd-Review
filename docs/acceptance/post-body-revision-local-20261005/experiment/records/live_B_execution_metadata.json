@@ -1,0 +1,145 @@
+{
+  "status": "real_B_completed_with_uncertain_R3_verifier",
+  "variant": "B",
+  "case_sha256": "7211e022ac4bc2684c1a7d5b5be905bb9fd059f1e3a0f1529a88bd867c6b6378",
+  "output_dir": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\B\\live",
+  "report": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\B\\live\\report.json",
+  "calls": [
+    {
+      "stage_id": "issue_001_author",
+      "status": "ok",
+      "model": "qwen3.7-flash",
+      "cost_cny": 0.0054232,
+      "usage": {
+        "completion_tokens": 211,
+        "prompt_tokens": 26272,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 26272
+        },
+        "total_tokens": 26483
+      },
+      "error": null,
+      "raw_response_sha256": "97724eca95a9400691819d774ef85c5fef1cc79b2d5e7d3cd8cbfcc395c45374"
+    },
+    {
+      "stage_id": "issue_001_verifier",
+      "status": "ok",
+      "model": "qwen3.7-flash",
+      "cost_cny": 0.005440400000000001,
+      "usage": {
+        "completion_tokens": 175,
+        "prompt_tokens": 26502,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 26502
+        },
+        "total_tokens": 26677
+      },
+      "error": null,
+      "raw_response_sha256": "991e8e2ce9d6a79322a692fd4ce85e23bf26ebe8d3fc217fbcf89be09fc5e0ab"
+    },
+    {
+      "stage_id": "issue_002_author",
+      "status": "ok",
+      "model": "qwen3.7-flash",
+      "cost_cny": 0.0244722,
+      "usage": {
+        "completion_tokens": 578,
+        "prompt_tokens": 38475,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 38475
+        },
+        "total_tokens": 39053
+      },
+      "error": null,
+      "raw_response_sha256": "a9b88e61eb48546b5a7ef05cce710a55ed86c281d8d15beb7f2889ec4eb7e344"
+    },
+    {
+      "stage_id": "issue_003_author",
+      "status": "ok",
+      "model": "qwen3.7-flash",
+      "cost_cny": 0.0065896,
+      "usage": {
+        "completion_tokens": 529,
+        "prompt_tokens": 30832,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 30832
+        },
+        "total_tokens": 31361
+      },
+      "error": null,
+      "raw_response_sha256": "cea68486cd6e4392f2f612d22b7258f2247f65021c1f1cdbca897786f7ee2820"
+    },
+    {
+      "stage_id": "issue_003_verifier",
+      "status": "error",
+      "model": "qwen3.7-flash",
+      "cost_cny": null,
+      "usage": {},
+      "error": "QwenTransportError: qwen_transport_error",
+      "raw_response_sha256": null
+    }
+  ],
+  "issue_statuses": [
+    {
+      "issue_id": "R1",
+      "status": "applied",
+      "proposed": true,
+      "verified": true,
+      "pending": false,
+      "reason": "The candidate text correctly revises the causal claim ('directly led to') found in the original text to an associative claim ('significant association'), which aligns with the observational nature of study P0289. The evidence explicitly states that the study 'proposes a potential mechanism hypothesis' and 'cannot confirm causality', while reporting a significant association (HR=1.38) between oral bacteria and shorter PFS. The replacement text accurately reflects this statistical finding and preserves the mechanistic context (PPIs altering pH promoting translocation) as a hypothesis rather than a proven fact."
+    },
+    {
+      "issue_id": "R2",
+      "status": "pending",
+      "proposed": true,
+      "verified": false,
+      "pending": true,
+      "reason": "RevisionContractError: no_op_patch"
+    },
+    {
+      "issue_id": "R3",
+      "status": "pending",
+      "proposed": true,
+      "verified": false,
+      "pending": true,
+      "reason": "RevisionContractError: call_failed:issue_003_verifier:QwenTransportError: qwen_transport_error"
+    }
+  ],
+  "applied_patch_issue_ids": [
+    "R1"
+  ],
+  "run": {
+    "run_completed": true,
+    "status": "completed",
+    "cost_cny": null,
+    "known_cost_cny": 0.0419254,
+    "candidate_sha256": "f86a41bb2d1413dccb9ed57426616dcf7ab4f789bbb7d4a4869c7731abab6427",
+    "baseline_sha256": "dd7cf5f8cda3a55c187b54b367a9790d3a9bc985c1f84e21ee39703f638a9bac",
+    "candidate_equals_baseline": false,
+    "verification_status": "unresolved_or_incomplete",
+    "counts": {
+      "applied": 1,
+      "dismissed": 0,
+      "pending": 2,
+      "proposed": 3,
+      "reviewed": 3,
+      "verified": 1
+    }
+  },
+  "budget": {
+    "ledger": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\budget.sqlite",
+    "limit_cny": 10.0,
+    "settled_cny": 0.223829,
+    "uncertain_cny": 0.2137224,
+    "reserved_cny": 0,
+    "remaining_after_uncertain_cny": 9.5624486,
+    "reservation_count": 9
+  },
+  "b_or_c_followup": "C not started; no B retry after uncertain R3 verifier.",
+  "interpretation": "Operational run metadata only; R1/R2/R3 outcomes require root quality review and the uncertain provider call is not treated as a quality result.",
+  "raw_artifact_dir": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\B\\live\\calls"
+}

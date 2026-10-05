@@ -1,0 +1,168 @@
+[
+  {
+    "case_id": "body40-fixed3-20261005",
+    "pair_id": "pair-001-0",
+    "pair_input_sha256": "06242f15ba9cee30ca6e614cb62e79ddce70a816ab70e10bcaa6a90fc23bde76",
+    "assessment_state": "complete",
+    "winner": "right",
+    "reason": "The only substantive text change replaces an unsupported causal claim about PPI-related microbiome remodeling with an association claim. P0289 directly supports an observational PFS association but explicitly limits causal interpretation. The right side therefore improves scientific calibration and keeps the P0289 citation and mechanism context; the line remains slightly under-qualified about the proposed mechanism, so the gain is real but bounded.",
+    "knowledge_preservation": "preserved",
+    "resolved_issues": [
+      {
+        "kind": "scientific",
+        "affected_side": "right",
+        "target_quote": "此外，其他宿主因素的作用机制亦提示了校正的复杂性：例如，PPIs通过改变胃内pH值促进口腔细菌易位至肠道，这种由药物诱导的生态重塑与PFS的缩短存在显著关联[ P0289 ]。",
+        "evidence_ids": [
+          "P0289"
+        ],
+        "reason": "P0289 is an observational SCRUM-Japan MONSTAR-SCREEN cohort (817 pre-treatment patients; 333 ICI-treated patients, 16S rRNA profiling and adjusted association analyses). Its supplied findings report an association between oral-bacteria abundance and shorter PFS, while the PPI interaction is only suggestive (P=0.08); its stated limits say the design cannot establish causality. Therefore “存在显著关联” preserves the supported direction and claim boundary, whereas “直接导致” overstates the material.",
+        "severity": "major",
+        "knowledge_loss": false
+      }
+    ],
+    "regressions": [
+      {
+        "kind": "scientific",
+        "affected_side": "left",
+        "target_quote": "此外，其他宿主因素的作用机制亦提示了校正的复杂性：例如，PPIs通过改变胃内pH值促进口腔细菌易位至肠道，这种由药物诱导的生态重塑直接导致了PFS的缩短[ P0289 ]。",
+        "evidence_ids": [
+          "P0289"
+        ],
+        "reason": "The left sentence turns P0289’s observational association into direct PFS causation, contrary to the supplied study design and limits.",
+        "severity": "major",
+        "knowledge_loss": false
+      }
+    ],
+    "remaining_issues": [
+      {
+        "kind": "scientific",
+        "affected_side": "right",
+        "target_quote": "此外，其他宿主因素的作用机制亦提示了校正的复杂性：例如，PPIs通过改变胃内pH值促进口腔细菌易位至肠道，这种由药物诱导的生态重塑与PFS的缩短存在显著关联[ P0289 ]。",
+        "evidence_ids": [
+          "P0289"
+        ],
+        "reason": "The association wording is the substantive improvement, but the surrounding mechanism phrase “由药物诱导” still reads more definite than this observational card supports. P0289 presents the PPI-to-oral-bacteria pathway as a potential mechanism and warns that causal inference is not available; a later edit should qualify it as a proposed mechanism if the sentence remains.",
+        "severity": "minor",
+        "knowledge_loss": false
+      }
+    ]
+  },
+  {
+    "case_id": "body40-fixed3-20261005",
+    "pair_id": "pair-002-0",
+    "pair_input_sha256": "8337b38e9f43ee44b9e89b01a305c8701f6c734662138456a419ec3a43dbd468",
+    "assessment_state": "complete",
+    "winner": "left",
+    "reason": "The left side preserves the observational wording supported by P0289 and accurately describes the P0388 result as a synthetic-antigen mimicry experiment in an engineered mouse model. The right side reverses the P0289 correction into direct causation and changes the P0388 method to a functional-rescue experiment that is not present in the supplied material. The left is therefore materially safer and more evidence-aligned, with the usual model-to-human boundary retained.",
+    "knowledge_preservation": "loss",
+    "resolved_issues": [
+      {
+        "kind": "scientific",
+        "affected_side": "left",
+        "target_quote": "此外，其他宿主因素的作用机制亦提示了校正的复杂性：例如，PPIs通过改变胃内pH值促进口腔细菌易位至肠道，这种由药物诱导的生态重塑与PFS缩短存在显著关联[ P0289 ]。",
+        "evidence_ids": [
+          "P0289"
+        ],
+        "reason": "P0289 is an observational SCRUM-Japan MONSTAR-SCREEN cohort (817 pre-treatment patients; 333 ICI-treated patients, 16S rRNA profiling and adjusted association analyses). Its supplied findings report an association between oral-bacteria abundance and shorter PFS, while the PPI interaction is only suggestive (P=0.08); its stated limits say the design cannot establish causality. Therefore “存在显著关联” preserves the supported direction and claim boundary, whereas “直接导致” overstates the material.",
+        "severity": "major",
+        "knowledge_loss": false
+      },
+      {
+        "kind": "scientific",
+        "affected_side": "left",
+        "target_quote": "在小鼠模型中，这一假说已通过合成抗原模拟实验获得因果验证。",
+        "evidence_ids": [
+          "P0388"
+        ],
+        "reason": "P0388’s actual approach constructs tumor cells expressing the SFB-3340 antigen, compares SFB-colonized and uncolonized mice under anti-PD-1, and uses conditional IL-17A+ T-cell depletion plus TCR tracing. Its supplied summary and outline call this an engineered/synthetic antigen mimicry model with causal evidence within the mouse system; the quoted “合成抗原模拟实验” matches that method.",
+        "severity": "major",
+        "knowledge_loss": false
+      }
+    ],
+    "regressions": [
+      {
+        "kind": "scientific",
+        "affected_side": "right",
+        "target_quote": "此外，其他宿主因素的作用机制亦提示了校正的复杂性：例如，PPIs通过改变胃内pH值促进口腔细菌易位至肠道，这种由药物诱导的生态重塑直接导致了PFS的缩短[ P0289 ]。",
+        "evidence_ids": [
+          "P0289"
+        ],
+        "reason": "The right sentence reintroduces direct causation for the P0289 observational cohort, exceeding the supplied evidence.",
+        "severity": "major",
+        "knowledge_loss": false
+      },
+      {
+        "kind": "scientific",
+        "affected_side": "right",
+        "target_quote": "在小鼠模型中，这一假说已通过功能回补实验获得严格的因果验证。",
+        "evidence_ids": [
+          "P0388"
+        ],
+        "reason": "P0388 reports engineered SFB antigen mimicry and conditional loss-of-function depletion of IL-17A+ cells. The supplied material does not report a “功能回补实验” (functional rescue experiment), so the right wording substitutes an unsupported method and loses the actual experimental identity.",
+        "severity": "major",
+        "knowledge_loss": true
+      }
+    ],
+    "remaining_issues": [
+      {
+        "kind": "scientific",
+        "affected_side": "left",
+        "target_quote": "此外，其他宿主因素的作用机制亦提示了校正的复杂性：例如，PPIs通过改变胃内pH值促进口腔细菌易位至肠道，这种由药物诱导的生态重塑与PFS缩短存在显著关联[ P0289 ]。",
+        "evidence_ids": [
+          "P0289"
+        ],
+        "reason": "The association wording is the substantive improvement, but the surrounding mechanism phrase “由药物诱导” still reads more definite than this observational card supports. P0289 presents the PPI-to-oral-bacteria pathway as a potential mechanism and warns that causal inference is not available; a later edit should qualify it as a proposed mechanism if the sentence remains.",
+        "severity": "minor",
+        "knowledge_loss": false
+      }
+    ]
+  },
+  {
+    "case_id": "body40-fixed3-20261005",
+    "pair_id": "pair-003-0",
+    "pair_input_sha256": "d8787d783ef76a65c4898d2f1299070db8538bf48b217582fb7e8dfc89a5f534",
+    "assessment_state": "complete",
+    "winner": "right",
+    "reason": "The substantive change again replaces direct causation with the association supported by P0289’s observational cohort. The only other diff is a line-ending/blank-line change around the following paragraph, with no scientific or informational effect. The right therefore improves claim calibration while preserving the cited content.",
+    "knowledge_preservation": "preserved",
+    "resolved_issues": [
+      {
+        "kind": "scientific",
+        "affected_side": "right",
+        "target_quote": "此外，其他宿主因素的作用机制亦提示了校正的复杂性：例如，PPIs通过改变胃内pH值促进口腔细菌易位至肠道，这种由药物诱导的生态重塑与PFS缩短存在显著关联[ P0289 ]。",
+        "evidence_ids": [
+          "P0289"
+        ],
+        "reason": "P0289 is an observational SCRUM-Japan MONSTAR-SCREEN cohort (817 pre-treatment patients; 333 ICI-treated patients, 16S rRNA profiling and adjusted association analyses). Its supplied findings report an association between oral-bacteria abundance and shorter PFS, while the PPI interaction is only suggestive (P=0.08); its stated limits say the design cannot establish causality. Therefore “存在显著关联” preserves the supported direction and claim boundary, whereas “直接导致” overstates the material.",
+        "severity": "major",
+        "knowledge_loss": false
+      }
+    ],
+    "regressions": [
+      {
+        "kind": "scientific",
+        "affected_side": "left",
+        "target_quote": "此外，其他宿主因素的作用机制亦提示了校正的复杂性：例如，PPIs通过改变胃内pH值促进口腔细菌易位至肠道，这种由药物诱导的生态重塑直接导致了PFS的缩短[ P0289 ]。",
+        "evidence_ids": [
+          "P0289"
+        ],
+        "reason": "The left sentence treats an observational association as direct causation, which the supplied P0289 methods and limits do not support.",
+        "severity": "major",
+        "knowledge_loss": false
+      }
+    ],
+    "remaining_issues": [
+      {
+        "kind": "scientific",
+        "affected_side": "right",
+        "target_quote": "此外，其他宿主因素的作用机制亦提示了校正的复杂性：例如，PPIs通过改变胃内pH值促进口腔细菌易位至肠道，这种由药物诱导的生态重塑与PFS缩短存在显著关联[ P0289 ]。",
+        "evidence_ids": [
+          "P0289"
+        ],
+        "reason": "The association wording is the substantive improvement, but the surrounding mechanism phrase “由药物诱导” still reads more definite than this observational card supports. P0289 presents the PPI-to-oral-bacteria pathway as a potential mechanism and warns that causal inference is not available; a later edit should qualify it as a proposed mechanism if the sentence remains.",
+        "severity": "minor",
+        "knowledge_loss": false
+      }
+    ]
+  }
+]

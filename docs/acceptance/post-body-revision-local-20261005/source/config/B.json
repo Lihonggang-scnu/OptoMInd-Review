@@ -1,0 +1,29 @@
+{
+  "variant": "B",
+  "max_issues": 6,
+  "max_input_chars": 600000,
+  "max_material_index_chars": 200000,
+  "models": {
+    "review": "qwen3.7-flash",
+    "author": "qwen3.7-flash",
+    "verifier": "qwen3.7-flash",
+    "escalation": "qwen3.5-plus"
+  },
+  "model_settings": {
+    "qwen3.7-flash": {
+      "max_output_tokens": 8192,
+      "thinking": false,
+      "thinking_budget": 0,
+      "json_mode": true,
+      "timeout_seconds": 300
+    },
+    "qwen3.5-plus": {
+      "max_output_tokens": 8192,
+      "thinking": false,
+      "thinking_budget": 0,
+      "json_mode": true,
+      "timeout_seconds": 300
+    }
+  },
+  "max_target_chars": 12000
+}

@@ -1,0 +1,28 @@
+diff --git a/prompts/post_body_revision/combined.md b/prompts/post_body_revision/combined.md
+index 3c54f54..af663e4 100644
+--- a/prompts/post_body_revision/combined.md
++++ b/prompts/post_body_revision/combined.md
+@@ -6,6 +6,8 @@ Return {"issues": [{"issue_id": "unique string", "kind": "editorial|scientific|m
+ 
+ Propose only bounded edits anchored to the actual block. For insert_after, original_text is an existing insertion anchor. An issue may have no proposal when the available material cannot support a responsible patch. A title/summary is not complete evidentiary proof. Every proposal goes to an independent verifier using available full evidence; do not claim your own proposal is verified. No search, citations outside material_index, whole-article rewrite, or forced edit for an unsupported review concern. Any known_fixed_issues constrain this controlled experiment but must still be judged against the actual snapshot.
+ 
++When known_fixed_issues is supplied, it is the authoritative issue set for this controlled run: do not rediscover, add, drop, or reorder issues. Return the issues array with exactly the supplied issue_id values in their supplied order, retaining the supplied issue metadata rather than inventing alternative metadata. Proposals must use those issue IDs and their supplied target anchors and operations; an unsupported issue may have no proposal or a no_change proposal. When known_fixed_issues is absent, use the normal discovery behavior above.
++
+ The preserve list contains exact literal substrings from original_text that must remain byte-for-byte unchanged. Use [] when semantic preservation is required but no literal span must be fixed; the independent verifier always checks full semantic preservation.
+ 
+ A historical source handle alone is not proof of paper identity or claim support. Compare the material title and actual content with stable paper IDs, DOI and title in selected_source_identities when provided. Treat conflicting title, DOI, stable identity or content as an unresolved identity/evidence gap: do not invent a mapping, silently replace handles globally, or accept an edit that depends on that conflict. Authors should return no_change with the conflict reason; verifiers should return insufficient_evidence. Reviewers should identify the specific gap without guessing a repaired identity.
+diff --git a/tests/upgrade3/test_post_body_revision_evaluation.py b/tests/upgrade3/test_post_body_revision_evaluation.py
+index 6ffdba0..defa0a4 100644
+--- a/tests/upgrade3/test_post_body_revision_evaluation.py
++++ b/tests/upgrade3/test_post_body_revision_evaluation.py
+@@ -25,8 +25,8 @@ class BlindedEvaluationTests(unittest.TestCase):
+         for variant in "ABC":
+             folder = self.root / variant
+             folder.mkdir()
+-            (folder / "baseline.md").write_text(self.case["draft_text"])
+-            (folder / "candidate.md").write_text(self.case["draft_text"])
++            (folder / "baseline.md").write_bytes(self.case["draft_text"].encode("utf-8"))
++            (folder / "candidate.md").write_bytes(self.case["draft_text"].encode("utf-8"))
+             value = {"variant": variant, "case_id": "SYNTHETIC", "base_sha256": self.case["base_sha256"],
+                      "case_fingerprint": fingerprint(self.case), "evidence_fingerprint": evidence_fingerprint(self.case),
+                      "baseline_path": "baseline.md", "candidate_path": "candidate.md", "run_completed": True,

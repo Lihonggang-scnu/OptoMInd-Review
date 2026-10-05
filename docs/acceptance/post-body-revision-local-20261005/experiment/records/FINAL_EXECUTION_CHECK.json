@@ -1,0 +1,105 @@
+{
+  "status": "offline_closeout_complete",
+  "scope": {
+    "worktree": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\worktree",
+    "head": "abc97d5713904d8acc000f1f576c4785b4fa2ef7",
+    "source_snapshot": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\records\\ROOT_SOURCE_SNAPSHOT.json",
+    "paid_calls_during_closeout": 0,
+    "network_calls_during_closeout": 0,
+    "git_mutations_during_closeout": 0
+  },
+  "real_attempts": {
+    "total": 15,
+    "settled": 14,
+    "uncertain": 1,
+    "latest_settled_cny": 0.2785574,
+    "latest_uncertain_cny_held": 0.2137224
+  },
+  "runs": {
+    "A_first": {
+      "output": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\A\\live",
+      "status": "failed_fixed_issue_identity_guard",
+      "settled_cny": 0.0759348
+    },
+    "A_retry": {
+      "output": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live_attempt2\\A\\live",
+      "status": "completed_unresolved",
+      "settled_cny": 0.1059688
+    },
+    "B_original": {
+      "output": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\B\\live",
+      "status": "completed_with_uncertain_verifier",
+      "known_settled_cny": 0.0419254,
+      "uncertain_cny_held": 0.2137224
+    },
+    "B_recovery": {
+      "output": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live_B_retry\\B\\recovery",
+      "status": "completed_boundary_retry",
+      "saved_replay_calls": 4,
+      "new_provider_calls": 1,
+      "incremental_settled_cny": 0.006509,
+      "full_B_known_settled_cny": 0.0484344,
+      "original_uncertain_cny_held": 0.2137224
+    },
+    "C": {
+      "output": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\C\\live",
+      "status": "completed_unresolved",
+      "calls": 5,
+      "settled_cny": 0.0482194
+    }
+  },
+  "evaluation": {
+    "directory": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\evaluation",
+    "manifest": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\evaluation\\manifest.json",
+    "offline_report": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\evaluation\\report_offline\\primary_report.json",
+    "judgments_input": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\evaluation\\judgments_primary.json",
+    "assessment_basis": "agent_assessed_not_ground_truth",
+    "A_assessment_accepted": true,
+    "B_assessment_accepted": true,
+    "C_assessment_accepted": false,
+    "C_reason": "one invalid judgment and one missing judgment; no complete C assessment accepted",
+    "qualified_pareto_variants": [],
+    "quality_verdict_made": false,
+    "B_report_cost_is_incremental_recovery_only_cny": 0.006509,
+    "consistent_judgments": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\evaluation\\judgments_primary_consistent.json",
+    "consistent_report": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\evaluation\\report_offline\\consistent_report.json",
+    "primary_judgments_preserved": true,
+    "consistent_change": "pair-002-0 top-level knowledge_preservation preserved->loss only; winner remains left; loss record is on the right-side original passage",
+    "forward_packets_accepted": [
+      "pair-001-0",
+      "pair-002-0",
+      "pair-003-0"
+    ],
+    "reverse_packets_missing": [
+      "pair-001-1",
+      "pair-002-1"
+    ],
+    "no_reverse_judgments_fabricated": true,
+    "consistent_report_caveat": "C top-level loss is inherited from the comparison record identifying loss on the original side; it is not a claim that the C candidate lost knowledge."
+  },
+  "focused_tests": {
+    "modules": [
+      "tests/upgrade3/test_post_body_revision_contracts.py",
+      "tests/upgrade3/test_post_body_revision_cli.py",
+      "tests/upgrade3/test_post_body_revision_engine.py",
+      "tests/upgrade3/test_post_body_revision_evaluation.py"
+    ],
+    "command": "C:\\Anaconda\\python.exe -m pytest tests/upgrade3/test_post_body_revision_contracts.py tests/upgrade3/test_post_body_revision_cli.py tests/upgrade3/test_post_body_revision_engine.py tests/upgrade3/test_post_body_revision_evaluation.py -q",
+    "collected": 92,
+    "passed": 92,
+    "result": "92 passed in 28.76s",
+    "paid_calls": 0,
+    "network_calls": 0
+  },
+  "owned_new_files": [
+    "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\records\\LIVE_COMMANDS_AND_RECOVERY.md",
+    "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\records\\FINAL_EXECUTION_CHECK.json",
+    "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\evaluation\\report_offline\\primary_report.json",
+    "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\evaluation\\judgments_primary_consistent.json",
+    "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\evaluation\\report_offline\\consistent_report.json"
+  ],
+  "blockers": [
+    "No three-method quality conclusion or Pareto result: reverse packets remain missing and the report is agent-assessed, not ground truth.",
+    "B original uncertain provider reservation remains held and is not treated as a quality result."
+  ]
+}
