@@ -376,7 +376,10 @@ def _reading_passage(index: PlanningMaterialIndex, gap: LocalGap, hit: SearchHit
                      *, text: str | None = None) -> LocalReadingPassage:
     body = _expanded_hit_text(index, hit) if text is None else text
     handles = dict(gap.current_source_handles)
-    handle = handles.get(hit.paper_id, hit.paper_id if hit.source_handle in handles.values() else hit.source_handle)
+    # Historical labels are foreign even when currently unoccupied: a later
+    # pool addition can claim that number. Only this run's identity map may
+    # provide a handle; otherwise keep the useful material under its stable ID.
+    handle = handles.get(hit.paper_id) or hit.paper_id
     return LocalReadingPassage(
         source_handle=handle, paper_id=hit.paper_id, title=hit.title,
         year=hit.year, doi=hit.doi, reading_role=_reading_role(hit), text=body,
@@ -529,7 +532,7 @@ def prepare_local_reading(
             *(context for context in additional_contexts if context.paper_id in matched_paper_ids)]
         handles = dict(gap.current_source_handles)
         for context in bundle.paper_contexts:
-            context.source_handle = handles.get(context.paper_id, context.paper_id if context.source_handle in handles.values() else context.source_handle)
+            context.source_handle = handles.get(context.paper_id) or context.paper_id
     return bundle, result
 
 

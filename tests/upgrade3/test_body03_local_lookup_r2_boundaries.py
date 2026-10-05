@@ -72,7 +72,7 @@ def source_text_chars(payload):
 def test_ordinary_first_payload_remains_exact(tmp_path, monkeypatch):
     path = make_index(tmp_path)
     judge, calls = boundary(tmp_path, monkeypatch)
-    run(path, judge, request(0))
+    run(path, judge, request(0), source_handle_map={'BASE': 'base'})
     assert calls == [{
         'gap_id': 'R2-independent', 'question': QUESTION, 'intended_use': 'mechanism',
         'user_scope': '', 'success_criteria': [], 'reading_mode': 'initial_read',
@@ -111,9 +111,9 @@ def test_nominated_cards_and_context_are_actual_payload_channels(tmp_path, monke
     path = make_index(tmp_path)
     judge, calls = boundary(tmp_path, monkeypatch)
     result = run(path, judge, request())
-    text = '\n'.join(row['text'] for row in calls[0]['material_found'] if row['source_handle'] == 'N0')
+    text = '\n'.join(row['text'] for row in calls[0]['material_found'] if row['source_handle'] == 'nominated-0')
     assert 'BODY_0' in text and 'CARD_A_0_OLD' in text and 'CARD_B_0' in text
-    context = next(row for row in calls[0]['paper_context'] if row['source_handle'] == 'N0')
+    context = next(row for row in calls[0]['paper_context'] if row['source_handle'] == 'nominated-0')
     assert 'BODY_0' in context['opening'] and 'Experiment 0' in context['sections']
     assert any(row['paper_id'] == 'nominated-0' and row['reading_role'] == 'planning_summary'
                for row in result['writer_material']['sources'])
@@ -149,7 +149,7 @@ def test_nominations_beyond_old_context_quota_are_considered(tmp_path, monkeypat
     # Small packages fit comfortably; all six nominations get actual context,
     # rather than silently disappearing behind the old initial-ID-only [:4].
     contexts = {row['source_handle'] for row in calls[0]['paper_context']}
-    assert {'N0', 'N1', 'N2', 'N3', 'N4', 'N5'}.issubset(contexts)
+    assert {f'nominated-{n}' for n in range(6)}.issubset(contexts)
     assert all(result['local_reading']['explicit_reading_status'][f'nominated-{n}'].startswith('included')
                for n in range(6))
     assert len(contexts) <= 1 + triage.LOCAL_EXPANSION_PAPERS

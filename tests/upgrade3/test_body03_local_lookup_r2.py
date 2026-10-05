@@ -134,7 +134,7 @@ def test_nominated_package_delivers_complementary_content(tmp_path, monkeypatch,
     for fact in (observation, boundary):
         assert fact in text(calls[0])
         assert fact in result['writer_material']['usable_content']
-    assert any(row['source_handle']=='TARGET' and 'OPENING_BOUNDARY' in row['opening'] for row in calls[0]['paper_context'])
+    assert any(row['source_handle']=='target' and 'OPENING_BOUNDARY' in row['opening'] for row in calls[0]['paper_context'])
     assert result['answers_requested_question'] is False
 
 
@@ -171,7 +171,7 @@ def test_nominated_context_filters_legacy_reference_opening(tmp_path, monkeypatc
     supplement.run_gap_local_triage({'gap_id': 'G', 'question': 'thermal coating',
         'known_papers': [{'paper_id': 'target'}]}, index_path=path, judge=judge,
         top_papers=1, max_passages=1, read_local=False)
-    contexts = [row for row in calls[0]['paper_context'] if row['source_handle'] == 'TARGET']
+    contexts = [row for row in calls[0]['paper_context'] if row['source_handle'] == 'target']
     assert contexts and 'SUBSTANTIVE_OPENING' in contexts[0]['opening']
     assert 'REFERENCE_ONLY' not in json.dumps(contexts)
     assert 'References' not in contexts[0]['sections']

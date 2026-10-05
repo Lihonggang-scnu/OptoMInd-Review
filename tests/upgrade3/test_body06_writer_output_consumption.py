@@ -116,14 +116,16 @@ def test_planning_revision_local_aliases_are_explicit_and_ambiguous_aliases_stay
     assert result['body_markdown'].startswith('Finding [P0001].')
 
 
-def test_planning_revision_run_declares_and_consumes_same_local_map():
+def test_planning_revision_declared_aliases_do_not_confirm_output_numbering():
     response = {'body_markdown':'Finding [1].\n\n'+TABLE, 'complete':True, 'finish_reason':'stop'}
     client = fixture.Fake(response)
     result = w.run_unit_writing(fixture.view(), client=client, model='offline-synthetic',
                                 planning_revision=True)
     sent = json.loads(result['messages'][-1]['content'])
     assert sent['citation_number_map']['1'] == 'P0001'
-    assert result['body_markdown'].startswith('Finding [P0001].')
+    assert result['body_markdown'].startswith('Finding [1].')
+    assert result['numeric_citation_repairs'] == []
+    assert result['citation_mapping_diagnostics'][0]['code'] == 'numeric_citation_generated_aliases_unconfirmed'
 
     explicit_empty = w.unit_payload(fixture.view(), planning_revision=True,
                                      citation_number_map={})

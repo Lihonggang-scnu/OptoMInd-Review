@@ -65,7 +65,7 @@ def test_long_intact_pinned_segment_gets_spare_budget(tmp_path, monkeypatch):
         top_papers=1, max_passages=1, read_local=False)
     actual = calls[0]['material_found']
     assert all(any(text['source_handle'] == handle and 'ONLY_WITHIN_THE_RECORDED_SETTING' in text['text']
-                   for text in actual) for handle in ('P2', 'P3'))
+                   for text in actual) for handle in ('long0', 'long1'))
     assert sum(len(text['text']) for text in actual[1:]) <= triage.LOCAL_INCREMENT_CHARS
     assert result['answers_requested_question'] is False
 
@@ -78,7 +78,7 @@ def test_over_budget_nomination_has_explicit_omission(tmp_path, monkeypatch):
         'known_papers': [{'paper_id': 'z'}]}, index_path=path, judge=judge,
         top_papers=1, max_passages=1, read_local=False)
     assert result['local_reading']['bounded_read_omissions'] == ['z']
-    assert [row['source_handle'] for row in calls[0]['material_found']] == ['P1']
+    assert [row['source_handle'] for row in calls[0]['material_found']] == ['a']
 
 
 def test_current_identity_beats_stale_handle_before_adapter(tmp_path, monkeypatch):

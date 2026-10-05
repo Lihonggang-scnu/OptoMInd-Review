@@ -310,7 +310,7 @@ def main(argv: list[str] | None = None) -> int:
                 simulated_from=str(Path(args.fake_client).resolve()) if mode == "fake" else "",
                 response_path=result["raw_response"], finish_reason=result["finish_reason"],
                 complete=result.get("complete", True), partial_error=result.get("partial_error", ""),
-                issues=result.get("issues") or [])
+                issues=result.get("issues") or [], citation_diagnostics=result)
             entry.update({
                 "status": (
                     "written" if mode == "run" and result.get("complete", True)
@@ -328,6 +328,12 @@ def main(argv: list[str] | None = None) -> int:
                 "partial_error": result.get("partial_error", ""),
                 "usage": result["usage"],
                 "issues": result.get("issues") or [],
+                **{key: written[key] for key in (
+                    "citation_problems", "unresolved_numeric_citations",
+                    "numeric_citation_repairs", "bibliography_title_citation_map",
+                    "citation_number_map_origin", "citation_mapping_diagnostics",
+                    "known_tool_identifiers", "non_source_identifier_citations",
+                ) if key in written},
             })
             report["units"].append(entry)
 

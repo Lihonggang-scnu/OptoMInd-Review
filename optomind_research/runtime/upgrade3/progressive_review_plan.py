@@ -6400,7 +6400,7 @@ class ProgressiveReviewPlanner:
         """Resolve supplement identities to program-managed pool handles."""
         by_paper = {_text(row.get("_paper_id")): _text(row.get("_source_handle"))
                     for row in pool_rows if _text(row.get("_paper_id")) and _text(row.get("_source_handle"))}
-        by_unit = {_text(row.get("supplement_source_unit_id")): _text(row.get("_source_handle"))
+        by_unit = {_text(row.get("supplement_source_unit_id")): row
                    for row in pool_rows if _text(row.get("supplement_source_unit_id")) and _text(row.get("_source_handle"))}
         for rows in self.tool_materials_by_chapter.values():
             for material in rows:
@@ -6419,7 +6419,20 @@ class ProgressiveReviewPlanner:
                     current = _text(source.get("source_handle"))
                     paper_id = _text(source.get("paper_id") or source.get("canonical_paper_id"))
                     unit_id = _text(source.get("source_unit_id") or source.get("supplement_source_unit_id"))
-                    source["source_handle"] = by_paper.get(paper_id) or by_unit.get(unit_id) or current
+                    unit = by_unit.get(unit_id) or {}
+                    # Unit provenance cannot override a contradictory stable ID.
+                    unit_handle = (_text(unit.get("_source_handle"))
+                                   if not paper_id or paper_id == _text(unit.get("_paper_id")) else "")
+                    # Unknown historical P labels remain unsafe even before the
+                    # current pool has allocated that label. Preserve the source
+                    # under its stable identity until normal registration.
+                    source["source_handle"] = by_paper.get(paper_id) or unit_handle or paper_id
+                    if unit_handle and not paper_id:
+                        source["paper_id"] = _text(unit.get("_paper_id"))
+                    if not source["source_handle"] and current:
+                        # Membership alone cannot establish which run minted a
+                        # handle-only source. Keep the unresolved label visible.
+                        source["unresolved_source_handle"] = current
 
     def _assemble_final(self, *, topic: str, plan: Mapping[str, Any], pool_rows: Sequence[Mapping[str, Any]], provisional: Mapping[str, Any], level1_outline: Mapping[str, Any], harmonized: Mapping[str, Any], chapters: Sequence[Mapping[str, Any]], chapter_records: Sequence[Mapping[str, Any]], level1_tools: Mapping[str, Any], level2_tools: Mapping[str, Any], improvement: Mapping[str, Any], chapter_tools: Mapping[str, Any] | None = None) -> dict[str, Any]:
         # Writer handoff follows the final chapter plans, not superseded proposal text.
@@ -8534,7 +8547,8 @@ def _tool_material_for_prompt(item: Mapping[str, Any]) -> dict[str, Any]:
             continue
         sources.append({
             "source_handle": _text(source.get("source_handle")),
-            **({key: source[key] for key in ("paper_id", "canonical_paper_id", "doi", "record_identity") if source.get(key)}),
+            **({key: source[key] for key in ("paper_id", "canonical_paper_id", "doi", "record_identity",
+                                            "unresolved_source_handle", "identity_status") if source.get(key)}),
             "title": _text(source.get("title")),
             "year": _text(source.get("year")),
             "reading_role": _text(source.get("reading_role")),

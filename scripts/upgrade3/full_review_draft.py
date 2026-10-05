@@ -85,18 +85,61 @@ def _valid_unit_title(value: Any) -> str:
 def _unit_pending_problem(result: Mapping[str, Any]) -> str:
     """Why this unit's result is not a resolved, complete answer ("" = none)."""
 
+    reasons = []
     if result.get("complete") is False or str(result.get("finish_reason") or "") == "length":
-        return str(result.get("completion_status") or "partial_length")
+        reasons.append(str(result.get("completion_status") or "partial_length"))
     issues = result.get("issues") or []
     if issues:
-        return f"writer_issues:{len(issues)}"
-    return ""
+        reasons.append(f"writer_issues:{len(issues)}")
+    citation_problems = _unresolved_citation_problems(result)
+    if citation_problems:
+        reasons.append(f"citation_problems:{len(citation_problems)}")
+    return ";".join(reasons)
 
 
 def _issue_details(value: Any) -> list[dict[str, Any]]:
     """Keep writer issue objects available to downstream reports."""
 
     return [dict(item) for item in value or () if isinstance(item, Mapping)]
+
+
+# Keep provenance and successful repairs visible without treating them as defects.
+_CITATION_DIAGNOSTIC_FIELDS = (
+    "citation_problems", "unresolved_numeric_citations", "unknown_citations",
+    "numeric_citation_repairs", "bibliography_title_citation_map",
+    "citation_number_map_origin", "citation_mapping_diagnostics",
+    "known_tool_identifiers", "non_source_identifier_citations",
+)
+
+
+def _unresolved_citation_problems(result: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Carry identity uncertainty, including older results missing problem rows."""
+
+    problems: list[dict[str, Any]] = []
+    for item in [*_issue_details(result.get("citation_problems")),
+                 *_issue_details(result.get("citation_mapping_diagnostics"))]:
+        if item.get("resolved") is True or str(item.get("severity") or "").lower() in {
+            "info", "informational", "debug",
+        }:
+            continue
+        if item not in problems:
+            problems.append(item)
+    for field, code, identity_key in (
+        ("unresolved_numeric_citations", "numeric_citation_unresolved", "citation"),
+        ("unknown_citations", "citation_not_in_unit_sources", "handle"),
+        ("non_source_identifier_citations", "non_source_identifier_citation", "citation"),
+    ):
+        for value in result.get(field) or []:
+            item = dict(value) if isinstance(value, Mapping) else {identity_key: str(value)}
+            item.setdefault("code", code)
+            if not any(existing.get("code") == item["code"] and
+                       existing.get(identity_key) == item.get(identity_key) for existing in problems):
+                problems.append(item)
+    return problems
+
+
+def _citation_diagnostics(result: Mapping[str, Any]) -> dict[str, Any]:
+    return {key: result[key] for key in _CITATION_DIAGNOSTIC_FIELDS if key in result}
 
 
 def _read_json(path: Path) -> Any:
@@ -240,8 +283,6 @@ def load_unit_document(job: Job, result_path: Path, arrangement: Mapping[str, An
         raise AssemblyError(f"result_unit_mismatch:{result_path}")
     if result.get("simulated") is True or str(result.get("mode") or "").lower() == "fake":
         raise AssemblyError(f"simulated_result:{job.unit_id}:{result_path}")
-    complete = result.get("complete", True)
-    finish_reason = str(result.get("finish_reason") or "")
     body = ""
     body_path_value = str(result.get("body_path") or "").strip()
     if body_path_value:
@@ -259,11 +300,7 @@ def load_unit_document(job: Job, result_path: Path, arrangement: Mapping[str, An
     # A length-cutoff or incomplete flag with usable text assembles into a
     # restricted draft: the body is kept, and the unresolved state travels in
     # unit_rows/pending_problems instead of blocking the whole manuscript.
-    pending_problem = ""
-    if complete is False or finish_reason == "length":
-        pending_problem = str(result.get("completion_status") or "partial_length")
-    elif result.get("issues"):
-        pending_problem = f"writer_issues:{len(result.get('issues') or [])}"
+    pending_problem = _unit_pending_problem(result)
     units = {str(item.get("unit_id")): item for item in arrangement.get("units") or []}
     unit = units.get(job.unit_id) or {}
     focus = str(unit.get("focus") or job.unit_id).strip()
@@ -727,6 +764,7 @@ def assemble_documents(
                 "pending_problem": document.pending_problem,
                 "completion_status": str(document.result.get("completion_status") or ""),
                 "issues": _issue_details(document.result.get("issues")),
+                **_citation_diagnostics(document.result),
             })
         handle_chapters[chapter_id] = "\n".join(handle_parts).strip() + "\n"
     ordered_texts = [front_matter] if front_matter.strip() else []
@@ -1005,6 +1043,8 @@ def _report_markdown(summary: Mapping[str, Any]) -> str:
             line = f"- `{item.get('unit_id') or '（全局）'}`：{item.get('code')}"
             if item.get("issues"):
                 line += "；详情：" + json.dumps(item["issues"], ensure_ascii=False, separators=(",", ":"))
+            if item.get("citation_problems"):
+                line += "；引用详情：" + json.dumps(item["citation_problems"], ensure_ascii=False, separators=(",", ":"))
             lines.append(line)
     lines.extend(["", "摘要与结语由主代理在全稿亲审后补写。", ""])
     return "\n".join(lines)
@@ -1076,7 +1116,10 @@ def run(args: argparse.Namespace) -> int:
     # partial writer results, writer issues, or unmapped handles) are separate
     # statements; a restricted draft is allowed to carry both honestly.
     pending_problems = [
-        {"unit_id": row["unit_id"], "code": row["pending_problem"], "issues": row.get("issues") or []}
+        {"unit_id": row["unit_id"], "code": row["pending_problem"],
+         "issues": row.get("issues") or [],
+         **({"citation_problems": _unresolved_citation_problems(row)}
+            if _unresolved_citation_problems(row) else {})}
         for row in assembled["unit_rows"] if row.get("pending_problem")
     ]
     unknown_table_handles = list(assembled.get("unknown_table_handles") or [])

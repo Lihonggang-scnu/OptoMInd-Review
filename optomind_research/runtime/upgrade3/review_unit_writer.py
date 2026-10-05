@@ -16,13 +16,13 @@ from __future__ import annotations
 import json
 import re
 import time
+import unicodedata
 from copy import deepcopy
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
-from .chapter_arrangement import normalize_title as _normalize_title
 from .portable_paths import portable_component
 
 SCHEMA_VERSION = "optomind.review_unit_writer.v1"
@@ -1403,13 +1403,22 @@ def run_unit_completion(
         if explicit_map is None:
             candidate = payload.get("citation_number_map")
             explicit_map = candidate if isinstance(candidate, Mapping) else None
+        if explicit_map is not None and not map_origin:
+            map_origin = "caller_explicit"
+        mapping_diagnostics: list[dict[str, Any]] = []
         effective_map, title_map = _effective_numeric_citation_map(
             fragment, view.materials, explicit_map,
-            origin=map_origin, planning_revision=planning_revision,
+            origin=map_origin, planning_revision=planning_revision, diagnostics=mapping_diagnostics,
         )
         fragment, repairs = _repair_numeric_citations(
             fragment, effective_map, payload.get("requested_source_handles", []))
-        result.update(_output_diagnostics(fragment, payload.get("requested_source_handles", [])))
+        for repair in repairs:
+            repair["mapping_origin"] = ("bibliography_exact_title" if map_origin == "generated_local_aliases"
+                                        or explicit_map is None else "caller_explicit")
+        result.update(_output_diagnostics(fragment, payload.get("requested_source_handles", []),
+                                          _known_tool_identifiers(payload)))
+        result["citation_mapping_diagnostics"] = mapping_diagnostics
+        result["citation_problems"].extend(mapping_diagnostics)
         result["citation_scope"] = "completion_fragment"
         result["numeric_citation_repairs"] = repairs
         result["bibliography_title_citation_map"] = title_map
@@ -1524,6 +1533,11 @@ def write_unit_completion(
         "fence_report": result.get("fence_report") or {},
         "output_normalization": list(result.get("output_normalization") or []),
         "numeric_citation_repairs": list(result.get("numeric_citation_repairs") or []),
+        "bibliography_title_citation_map": dict(result.get("bibliography_title_citation_map") or {}),
+        "citation_number_map_origin": result.get("citation_number_map_origin") or "none",
+        "citation_mapping_diagnostics": list(result.get("citation_mapping_diagnostics") or []),
+        "known_tool_identifiers": list(result.get("known_tool_identifiers") or []),
+        "non_source_identifier_citations": list(result.get("non_source_identifier_citations") or []),
         "issues": list(result.get("issues") or []),
         "call_error": result.get("call_error") or "",
         "estimate": dict(estimate),
@@ -1727,13 +1741,13 @@ def _prose_segments(
 
 
 def _citation_matches(
-    text: str, *, canonical_handles: bool = False,
+    text: str, *, canonical_handles: bool = False, known_identifiers: Iterable[str] = (),
 ) -> Iterable[re.Match[str]]:
     matches = list(CITATION_RE.finditer(text))
 
     def citation_like(value: str) -> bool:
         stripped = value.strip()
-        if CITATION_SEQUENCE_RE.fullmatch(stripped):
+        if stripped in known_identifiers or CITATION_SEQUENCE_RE.fullmatch(stripped):
             return True
         prefix = CITATION_PREFIX_RE.match(stripped)
         return bool(prefix and CITATION_SEQUENCE_RE.fullmatch(stripped[prefix.end():].strip()))
@@ -1840,6 +1854,11 @@ def _trailing_numbered_bibliography(text: str) -> list[tuple[str, str]]:
     return list(reversed(found))
 
 
+def _citation_title_key(value: Any) -> str:
+    """Keep scientific symbols; normalize only Unicode, case and whitespace."""
+    return " ".join(unicodedata.normalize("NFC", str(value or "")).casefold().split())
+
+
 def _bibliography_title_citation_map(
     text: str, materials: Iterable[Mapping[str, Any]],
 ) -> dict[str, str]:
@@ -1850,18 +1869,28 @@ def _bibliography_title_citation_map(
         if not isinstance(item, Mapping):
             continue
         handle = str(item.get("source_handle") or "").strip()
-        title = _normalize_title(item.get("title"))
+        title = _citation_title_key(item.get("title"))
         if handle and title:
             titles.setdefault(title, set()).add(handle)
     candidates: dict[str, set[str]] = {}
+    invalid: set[str] = set()
     for number, title in _trailing_numbered_bibliography(text):
-        handles = titles.get(_normalize_title(title), set())
+        handles = titles.get(_citation_title_key(title), set())
+        if len(handles) != 1:
+            invalid.add(number)
         candidates.setdefault(number, set()).update(handles)
     return {
         number: next(iter(handles))
         for number, handles in candidates.items()
-        if len(handles) == 1
+        if len(handles) == 1 and number not in invalid
     }
+
+
+def _numeric_citation_numbers(text: str) -> set[str]:
+    return {number for segment, prose in _prose_segments(text) if prose
+            for match in _citation_matches(segment)
+            if re.fullmatch(r"\d+(?:\s*[,;\-–]\s*\d+)*", match.group(1).strip())
+            for number in re.split(r"\s*[,;\-–]\s*", match.group(1).strip())}
 
 
 def _effective_numeric_citation_map(
@@ -1871,23 +1900,73 @@ def _effective_numeric_citation_map(
     *,
     origin: str = "",
     planning_revision: bool = False,
+    diagnostics: list[dict[str, Any]] | None = None,
 ) -> tuple[dict[str, Any], dict[str, str]]:
-    """Merge exact title matches without overriding caller-owned mappings."""
+    """Use confirmed caller identities or complete, unique local title evidence.
 
-    title_map = (
-        _bibliography_title_citation_map(text, materials)
-        if planning_revision else {}
-    )
+    An advertised P-number suffix alias does not establish the dialect chosen
+    by a model. Never partially apply those aliases to sequential references.
+    Title matching is lexical evidence, not independent DOI verification.
+    """
+    title_map = (_bibliography_title_citation_map(text, materials)
+                 if planning_revision else {})
     supplied = {str(key): value for key, value in (mapping or {}).items()}
-    if origin == "generated_local_aliases":
-        supplied.update(title_map)
+    if origin != "generated_local_aliases" and (mapping is not None or origin == "caller_explicit"):
         return supplied, title_map
-    if mapping is not None or origin == "caller_explicit":
-        return supplied, title_map
+    numbers = _numeric_citation_numbers(text)
+    problems = diagnostics if diagnostics is not None else []
+    if numbers and origin == "generated_local_aliases" and not numbers.issubset(title_map):
+        problems.append({"code": "numeric_citation_generated_aliases_unconfirmed",
+                         "numbers": sorted(numbers),
+                         "note": "Generated handle suffixes do not confirm the model's numeric reference identities; preserved verbatim."})
+    definitions = {number for number, _ in _trailing_numbered_bibliography(text)}
+    ambiguous = definitions - title_map.keys() if planning_revision else set()
+    if ambiguous or (title_map and not numbers.issubset(title_map)):
+        problems.append({"code": "numeric_citation_mapping_ambiguous",
+                         "numbers": sorted(ambiguous | (numbers - title_map.keys())),
+                         "note": "Incomplete or conflicting full-title evidence; no partial numeric conversion."})
+        return {}, title_map
     return dict(title_map), title_map
 
 
-def _output_diagnostics(body: str, known_handles: Iterable[str]) -> dict[str, Any]:
+def _known_tool_identifiers(payload: Any) -> list[str]:
+    """Read explicitly typed tool IDs, including JSON-encoded reading answers.
+
+    Free prose and model output cannot establish an identifier. IDs are only
+    collected below material/tool containers, never inferred from Q/R prefixes.
+    """
+    found: set[str] = set()
+    id_keys = {"question_id", "question_ids", "tool_call_id", "tool_id", "request_id"}
+
+    def visit(value: Any) -> None:
+        if isinstance(value, Mapping):
+            for key, item in value.items():
+                if key in id_keys:
+                    values = item if isinstance(item, list) else [item]
+                    found.update(v for v in values if isinstance(v, str)
+                                 and re.fullmatch(r"[A-Za-z][A-Za-z0-9_.:-]*", v)
+                                 and not re.fullmatch(r"P\d{3,}", v))
+                visit(item)
+        elif isinstance(value, list):
+            for item in value:
+                visit(item)
+        elif isinstance(value, str) and value.lstrip().startswith(("{", "[")):
+            try:
+                decoded = json.loads(value)
+            except (ValueError, TypeError):
+                return
+            if isinstance(decoded, (dict, list)):
+                visit(decoded)
+
+    if isinstance(payload, Mapping):
+        for key in ("chapter_tool_materials", "sources", "materials"):
+            visit(payload.get(key))
+    return sorted(found)
+
+
+def _output_diagnostics(
+    body: str, known_handles: Iterable[str], known_tool_identifiers: Iterable[str] = (),
+) -> dict[str, Any]:
     used = citations_in(body)
     known = set(known_handles)
     unknown = [handle for handle in used if handle not in known]
@@ -1898,12 +1977,28 @@ def _output_diagnostics(body: str, known_handles: Iterable[str]) -> dict[str, An
                 if re.fullmatch(r"\d+(?:\s*[,;\-–]\s*\d+)*", match.group(1).strip()):
                     if match.group(0) not in numeric:
                         numeric.append(match.group(0))
+    tool_ids = set(known_tool_identifiers)
+    tool_citations: list[str] = []
+    tool_problems: list[dict[str, str]] = []
+    for segment, prose in _prose_segments(body):
+        if not prose:
+            continue
+        for match in _citation_matches(segment, known_identifiers=tool_ids):
+            identifier = match.group(1).strip()
+            if identifier in tool_ids and match.group(0) not in tool_citations:
+                tool_citations.append(match.group(0))
+                tool_problems.append({"code": "non_source_identifier_citation",
+                                      "identifier": identifier, "citation": match.group(0),
+                                      "note": "Known input tool identifier used in citation form; preserved without guessing a paper."})
     problems = [{"code": "citation_not_in_unit_sources", "handle": handle,
                  "note": "保留模型原文，不猜替换成别的来源"} for handle in unknown]
     problems.extend({"code": "numeric_citation_unresolved", "citation": value,
                      "note": "没有可用的显式编号到当前来源映射，保留原文"} for value in numeric)
+    problems.extend(tool_problems)
     fenced = sorted(index + 1 for index in _fenced_line_indices(body))
     return {"used_source_handles": used, "unknown_citations": unknown,
+            "known_tool_identifiers": sorted(tool_ids),
+            "non_source_identifier_citations": tool_citations,
             "unresolved_numeric_citations": numeric, "citation_problems": problems,
             "fence_report": {"remaining_fenced_lines": fenced},
             "content_review_status": "not_reviewed"}
@@ -2157,12 +2252,28 @@ def write_unit_output(
     complete: bool = True,
     partial_error: str = "",
     issues: Sequence[Mapping[str, Any]] = (),
+    citation_diagnostics: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Store the model's Markdown and the program's honest bookkeeping."""
 
     target = Path(output_dir)
     target.mkdir(parents=True, exist_ok=True)
-    diagnostics = _output_diagnostics(body, _known_unit_handles(view))
+    context = {"materials": view.materials, "chapter_tool_materials": view.chapter_tool_materials}
+    known_ids = set(_known_tool_identifiers(context))
+    prior = citation_diagnostics or {}
+    known_ids.update(prior.get("known_tool_identifiers") or [])
+    for message in used_messages:
+        try:
+            message_payload = json.loads(message.get("content") or "")
+        except (ValueError, TypeError):
+            continue
+        known_ids.update(_known_tool_identifiers(message_payload))
+    diagnostics = _output_diagnostics(body, _known_unit_handles(view), known_ids)
+    for key in ("numeric_citation_repairs", "bibliography_title_citation_map",
+                "citation_number_map_origin", "citation_mapping_diagnostics"):
+        if key in prior:
+            diagnostics[key] = deepcopy(prior[key])
+    diagnostics["citation_problems"].extend(prior.get("citation_mapping_diagnostics") or [])
     consumption = _table_consumption_report(body, bool(view.table_tasks))
     used = diagnostics["used_source_handles"]
     unknown = diagnostics["unknown_citations"]
@@ -2318,13 +2429,21 @@ def run_unit_writing(
     if explicit_map is None and effective_payload is not None:
         candidate = effective_payload.get("citation_number_map")
         explicit_map = candidate if isinstance(candidate, Mapping) else None
+    if explicit_map is not None and not map_origin:
+        map_origin = "caller_explicit"
+    mapping_diagnostics: list[dict[str, Any]] = []
     effective_map, title_map = _effective_numeric_citation_map(
         body, view.materials, explicit_map,
-        origin=map_origin, planning_revision=planning_revision,
+        origin=map_origin, planning_revision=planning_revision, diagnostics=mapping_diagnostics,
     )
     known_handles = _known_unit_handles(view)
     body, repairs = _repair_numeric_citations(body, effective_map, known_handles)
-    diagnostics = _output_diagnostics(body, known_handles)
+    for repair in repairs:
+        repair["mapping_origin"] = ("bibliography_exact_title" if map_origin == "generated_local_aliases"
+                                    or explicit_map is None else "caller_explicit")
+    diagnostics = _output_diagnostics(body, known_handles, _known_tool_identifiers(effective_payload))
+    diagnostics["citation_mapping_diagnostics"] = mapping_diagnostics
+    diagnostics["citation_problems"].extend(mapping_diagnostics)
     consumption = _table_consumption_report(body, bool(view.table_tasks))
     issues = _response_issues(response)
     issues.extend(item for item in normalization if item.get("code") == "table_markdown_missing_or_invalid")
