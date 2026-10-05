@@ -1,0 +1,409 @@
+{
+  "base_pool_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\level1\\external\\N76e5cbf6bca57e729afb-44ef4668ae030687\\round_3\\tool_inputs\\MERGED_PLANNING_POOL.jsonl",
+  "base_pool_rows": 585,
+  "base_pool_sha256": "8fb78c6fbec0f0b59d73904ef064bb2e8c9da2226798d5b4ebaaa5cf7024e8b8",
+  "citation_anchor_status": "not_applicable",
+  "citation_anchors": [],
+  "citation_anchors_path": "CITATION_ANCHORS.jsonl",
+  "created_at_unix": 1791133402.7712283,
+  "derived_pool_path": "PLANNING_POOL.jsonl",
+  "fulfillment_judgment": {
+    "acquisition_count": 0,
+    "auxiliary_material": [
+      "小鼠模型数据表明外源性肌苷补充（400 mg/kg）可克服 ICI 耐药（B16-GMCSF, 4T1 模型），并改变肿瘤免疫微环境（增加 CD8+ T 细胞浸润，M1/M2 比值升高）。MC38 结肠癌模型显示肌苷疗效依赖于肿瘤细胞 UBA6 的基础表达水平。研究讨论了肌苷在血浆中半衰期较长（约 15 小时）而腺苷半衰期极短，可能影响血浆肌苷测量的稳定性。",
+      "综述提供了 HCC 背景下微生物代谢物（SCFAs、胆汁酸、色氨酸代谢物、TMAO）调节 ICI 疗效的整体框架，包括测量方法（粪便、血浆非侵入性检测）和机器学习预测模型的应用。文中指出当前领域存在方法学异质性（样本采集、测序平台、生信流程不标准化），导致不同队列间微生物标志物结果不一致。这些信息有助于理解肌苷作为微生物代谢物生物标志物的研究背景和潜在挑战。"
+    ],
+    "candidate_count": 2,
+    "citation_anchor_count": 0,
+    "citation_anchor_status": "not_applicable",
+    "evidence": [],
+    "failed_feedback": [],
+    "limitations": [],
+    "material_ready": true,
+    "model_call": true,
+    "network_call": true,
+    "note": "The gap judgment and ready writing material are reported separately.",
+    "outcome": "gap_partially_fulfilled",
+    "outline_action": "在综述中引用该研究作为人体血浆肌苷水平与 ICI 疗效相关性的关键证据，并说明其机制（UBA6 抑制）。同时需明确指出该研究未提供肿瘤微环境内的肌苷绝对浓度数据，且作者自述未在组织样本中验证肌苷水平，以此界定当前文献在 TME 局部浓度数据上的空白，建议后续检索该研究的补充数据（Supplementary Data）或其他代谢组学文献以寻找可能的绝对浓度数值。",
+    "outline_action_recovered_by_policy": false,
+    "planning_use_contract": {
+      "status": "equal_use"
+    },
+    "query_audits": [
+      {
+        "facet_id": "F1",
+        "provider_attempts": [
+          {
+            "provider": "semantic_scholar",
+            "retryable": true,
+            "returned": 0,
+            "status_code": 429
+          },
+          {
+            "error": "",
+            "provider": "openalex",
+            "retryable": false,
+            "returned": 12,
+            "status_code": 200
+          }
+        ],
+        "provider_issue": true,
+        "query_id": "SUP_case_C2_inosine_tme_KQ_01",
+        "query_text": "human solid tumor microenvironment inosine concentration metabolomics immune checkpoint inhibitor response",
+        "query_type": "keyword",
+        "requested_limit": 12,
+        "retrieval_source": "paper_search",
+        "retryable": true,
+        "returned": 12,
+        "status": 200
+      },
+      {
+        "discovery_target": 0,
+        "facet_id": "F1",
+        "max_snippets_per_paper": 0,
+        "provider_attempts": [
+          {
+            "provider": "semantic_scholar_snippets",
+            "retryable": true,
+            "returned": 0,
+            "status_code": 429
+          }
+        ],
+        "provider_issue": true,
+        "query_id": "SUP_case_C2_inosine_tme_QQ_02",
+        "query_text": "What are the absolute physiological concentrations of inosine measured directly in human solid tumor tissues or interstitial fluid, and is there a statistical association between these local levels and clinical response to immune checkpoint inhibitors?",
+        "query_type": "question",
+        "raw_snippet_hits": 0,
+        "requested_limit": 12,
+        "requested_limits": [
+          12
+        ],
+        "requests": 1,
+        "retrieval_source": "snippet_search",
+        "retryable": true,
+        "returned": 0,
+        "status": 429,
+        "unique_papers": 0
+      }
+    ],
+    "query_source": "planner_supplied_targeted_queries",
+    "remaining_gap": "成功标准要求的‘人体肿瘤组织或微透析液内肌苷绝对浓度（μM 或 ng/mL）’在本材料中未提供。材料仅报告了人体血浆肌苷水平的相对分层（中位数高低）与 OS 的关联，未给出具体浓度数值。材料明确说明未在人体肿瘤组织中直接测量肌苷浓度，因此肿瘤微环境内的具体生理浓度数据仍缺失。",
+    "remaining_gap_recovered_by_policy": false,
+    "status": "partial",
+    "substantive_gap_status": "partial",
+    "useful_material": [
+      "该研究在人体层面分析了 CheckMate 025 临床试验中肾细胞癌（RCC）患者的血浆代谢谱（n=394 接受 nivolumab 治疗）。研究发现血浆肌苷水平与 nivolumab 治疗的总生存期（OS）显著相关（高肌苷组中位 OS 33 个月 vs 低肌苷组 22 个月，P < 0.01），但在 everolimus 组无此关联。研究提出了肌苷通过直接抑制肿瘤细胞内 UBA6 酶活性、增强肿瘤免疫原性（MHC-I 上调、炎症信号增强）从而增敏 ICI 的分子机制。此外，研究明确指出由于样本缺失，未能在其收集的人体肿瘤组织队列（n=22）中直接检测肌苷浓度，仅检测了 UBA6 蛋白表达与 ICI 疗效的相关性。",
+      "该综述在 4.3 节详细描述了肌苷的生物学机制：肌苷由腺苷脱氨酶（ADA）作用于腺苷产生，肠道细菌（主要是 Bifidobacterium pseudolongum）是主要生产者；肌苷通过腺苷 A2A 受体依赖的方式指导 Th1 细胞分化，支持 CD8+ T 细胞在葡萄糖受限的肿瘤微环境中增殖，并直接抑制 UBA6 酶。文中引用了一项随机对照 II 期研究（172 例晚期实体瘤患者，包括 HCC），显示 ICI 联合肌苷补充组相比单用 ICI 组 PFS 延长 2.6 个月、疾病进展风险降低 37%。此外，还提及小鼠模型中肌苷水平与 ICI 疗效的关联（如 Mager 等发现 B. pseudolongum 定植的无菌小鼠肌苷丰度最高且 ICI 反应最佳）。"
+    ]
+  },
+  "gap_id": "case_C2_inosine_tme",
+  "limits": {
+    "max_acquisitions": 3,
+    "max_candidates": 12,
+    "per_query_limit": 12
+  },
+  "material_ready": true,
+  "materials_markdown_path": "SUPPLEMENT_MATERIALS.md",
+  "model_call": true,
+  "network_call": true,
+  "plan_source_audit": {
+    "degradation": {
+      "channels": {
+        "facets": 2,
+        "keyword_queries": 6,
+        "missing_channels": [],
+        "question_queries": 4
+      },
+      "degraded": false,
+      "missing_channels": [],
+      "plan_state": "complete",
+      "reasons": [],
+      "transport_failures": [
+        {
+          "fallback_used": false,
+          "json_contract_repaired": false,
+          "transport_error": "HTTPError_400_Arrearage"
+        }
+      ]
+    },
+    "error_details": [],
+    "errors": [],
+    "first_hit": true,
+    "prompt_hash": "150ddae49e467e2b53989f4aff0b2fddfb24d8510d5260b1ef6a05ef80e4dc72",
+    "refused_queries": [],
+    "repairs": [],
+    "revision_reason": "",
+    "revision_rounds": 0,
+    "source_format": "planning_run_wrapper",
+    "source_sha256": "31a83ebb90f3abb2dc9787f91b2280d18b603ea81cbc8cad7524dad5a4288314",
+    "status": "ok",
+    "transport": {
+      "fallback_used": false,
+      "json_contract_repaired": false,
+      "transport_error": "HTTPError_400_Arrearage"
+    },
+    "validator_fingerprint": "5ce2c113308fd41de3d3898731a20cee312a8f6e31d79d9e19b23599146838a6"
+  },
+  "plan_source_audit_path": "PLAN_SOURCE_AUDIT.json",
+  "planning_use_contract": {
+    "status": "equal_use"
+  },
+  "query_audits": [
+    {
+      "facet_id": "F1",
+      "provider_attempts": [
+        {
+          "provider": "semantic_scholar",
+          "retryable": true,
+          "returned": 0,
+          "status_code": 429
+        },
+        {
+          "error": "",
+          "provider": "openalex",
+          "retryable": false,
+          "returned": 12,
+          "status_code": 200
+        }
+      ],
+      "provider_issue": true,
+      "query_id": "SUP_case_C2_inosine_tme_KQ_01",
+      "query_text": "human solid tumor microenvironment inosine concentration metabolomics immune checkpoint inhibitor response",
+      "query_type": "keyword",
+      "requested_limit": 12,
+      "retrieval_source": "paper_search",
+      "retryable": true,
+      "returned": 12,
+      "status": 200
+    },
+    {
+      "discovery_target": 0,
+      "facet_id": "F1",
+      "max_snippets_per_paper": 0,
+      "provider_attempts": [
+        {
+          "provider": "semantic_scholar_snippets",
+          "retryable": true,
+          "returned": 0,
+          "status_code": 429
+        }
+      ],
+      "provider_issue": true,
+      "query_id": "SUP_case_C2_inosine_tme_QQ_02",
+      "query_text": "What are the absolute physiological concentrations of inosine measured directly in human solid tumor tissues or interstitial fluid, and is there a statistical association between these local levels and clinical response to immune checkpoint inhibitors?",
+      "query_type": "question",
+      "raw_snippet_hits": 0,
+      "requested_limit": 12,
+      "requested_limits": [
+        12
+      ],
+      "requests": 1,
+      "retrieval_source": "snippet_search",
+      "retryable": true,
+      "returned": 0,
+      "status": 429,
+      "unique_papers": 0
+    }
+  ],
+  "request_id": "progressive-microbiome_ici_review-level1-case_C2_inosine_tme",
+  "schema_version": "optomind.planning_supplement.result.v1",
+  "search_hits_path": "SEARCH_HITS.jsonl",
+  "source_units": [
+    {
+      "acquisition_path": "ACQUISITION.json",
+      "candidate_record_path": "CANDIDATE_RECORD.json",
+      "card_id": "paper-card-103a817905f24cc30439974b",
+      "card_output_dir": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_C2_inosine_tme\\source_units\\SU02_search_candidate_73af8e5de3\\card",
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_C2_inosine_tme\\source_units\\SU02_search_candidate_73af8e5de3\\card\\PAPER_READING_CARD.json",
+      "fulfillment_judgment": {
+        "auxiliary_material": "小鼠模型数据表明外源性肌苷补充（400 mg/kg）可克服 ICI 耐药（B16-GMCSF, 4T1 模型），并改变肿瘤免疫微环境（增加 CD8+ T 细胞浸润，M1/M2 比值升高）。MC38 结肠癌模型显示肌苷疗效依赖于肿瘤细胞 UBA6 的基础表达水平。研究讨论了肌苷在血浆中半衰期较长（约 15 小时）而腺苷半衰期极短，可能影响血浆肌苷测量的稳定性。",
+        "material_ready": true,
+        "material_usefulness": "direct",
+        "outline_action": "在综述中引用该研究作为人体血浆肌苷水平与 ICI 疗效相关性的关键证据，并说明其机制（UBA6 抑制）。同时需明确指出该研究未提供肿瘤微环境内的肌苷绝对浓度数据，且作者自述未在组织样本中验证肌苷水平，以此界定当前文献在 TME 局部浓度数据上的空白，建议后续检索该研究的补充数据（Supplementary Data）或其他代谢组学文献以寻找可能的绝对浓度数值。",
+        "remaining_gap": "成功标准要求的‘人体肿瘤组织或微透析液内肌苷绝对浓度（μM 或 ng/mL）’在本材料中未提供。材料仅报告了人体血浆肌苷水平的相对分层（中位数高低）与 OS 的关联，未给出具体浓度数值。材料明确说明未在人体肿瘤组织中直接测量肌苷浓度，因此肿瘤微环境内的具体生理浓度数据仍缺失。",
+        "status": "partial",
+        "substantive_gap_status": "partial",
+        "useful_material": "该研究在人体层面分析了 CheckMate 025 临床试验中肾细胞癌（RCC）患者的血浆代谢谱（n=394 接受 nivolumab 治疗）。研究发现血浆肌苷水平与 nivolumab 治疗的总生存期（OS）显著相关（高肌苷组中位 OS 33 个月 vs 低肌苷组 22 个月，P < 0.01），但在 everolimus 组无此关联。研究提出了肌苷通过直接抑制肿瘤细胞内 UBA6 酶活性、增强肿瘤免疫原性（MHC-I 上调、炎症信号增强）从而增敏 ICI 的分子机制。此外，研究明确指出由于样本缺失，未能在其收集的人体肿瘤组织队列（n=22）中直接检测肌苷浓度，仅检测了 UBA6 蛋白表达与 ICI 疗效的相关性。"
+      },
+      "identity_audit": {
+        "conflicts": [],
+        "decision": "matched_existing",
+        "match": {
+          "basis": "doi",
+          "comparison": {
+            "author_overlap": 0.0,
+            "basis": "doi",
+            "conflicts": [],
+            "state": "verified",
+            "title_similarity": 1.0,
+            "verified": true
+          },
+          "paper_id": "CorpusId:252309032"
+        }
+      },
+      "judgment_path": "FULFILLMENT_JUDGMENT.json",
+      "lineage": {
+        "facet_ids": [
+          "F1"
+        ],
+        "kind": "retrieval_query",
+        "providers": [
+          "openalex"
+        ],
+        "query_ids": [
+          "SUP_case_C2_inosine_tme_KQ_01"
+        ],
+        "query_types": [
+          "keyword"
+        ]
+      },
+      "material_depth": "fulltext",
+      "material_reused": true,
+      "output_dir": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\level1\\external\\N76e5cbf6bca57e729afb-44ef4668ae030687\\round_3\\supplements\\case_C2_inosine_tme\\attempt-zsolasch\\source_units\\SU01_search_candidate_216ff7fc1c",
+      "pool_action": {
+        "pool_action": "active_card_retained_partial_candidate_linked",
+        "prior_card_path": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_C2_inosine_tme\\source_units\\SU02_search_candidate_73af8e5de3\\card\\PAPER_READING_CARD.json"
+      },
+      "reading_text_chars": 73208,
+      "record_identity": {
+        "arxiv_id": null,
+        "authors": [
+          "Lei Zhang",
+          "Li Jiang",
+          "Liang Yu",
+          "Qin Li",
+          "Xiangjun Tian",
+          "Jingquan He",
+          "Ling Zeng",
+          "Yuqin Yang",
+          "Chaoran Wang",
+          "Yuhan Wei",
+          "Xiaoyue Jiang",
+          "Jing Li",
+          "Xiaolu Ge",
+          "Qisheng Gu",
+          "Jikun Li",
+          "Di Wu",
+          "Anthony John Sadler",
+          "Di Yu",
+          "Dakang Xu",
+          "Yue Gao",
+          "Xiangliang Yuan",
+          "Baokun He"
+        ],
+        "canonical_paper_id": "OpenAlex:W4296038319",
+        "corpus_id": null,
+        "doi": "10.1038/s41467-022-33116-z",
+        "openalex_id": "W4296038319",
+        "paper_id": null,
+        "semantic_scholar_paper_id": null,
+        "title": "Inhibition of UBA6 by inosine augments tumour immunogenicity and responses",
+        "year": 2022
+      },
+      "search_hit_ids": [
+        "SUP-H000004"
+      ],
+      "search_hits_path": "SEARCH_HITS.jsonl",
+      "snapshot_id": "snapshot-977ff8b5739acba1a864c0b8",
+      "snapshot_path": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_C2_inosine_tme\\source_units\\SU02_search_candidate_73af8e5de3\\materials\\CorpusId_252309032\\snapshot-977ff8b5739acba1a864c0b8",
+      "source_kind": "search_candidate",
+      "source_unit_id": "SU01_search_candidate_216ff7fc1c",
+      "status": "partial",
+      "success_criteria_audit": {
+        "checked": false
+      }
+    },
+    {
+      "acquisition_path": "ACQUISITION.json",
+      "candidate_record_path": "CANDIDATE_RECORD.json",
+      "card_id": "paper-card-faad2ef64431e9d3e3144fd4",
+      "card_output_dir": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\48c14b6cc3c62472eee38defcef380761b819d68\\10b57e761a2d0290d745ffb96e1b4bee\\attempt-01",
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\48c14b6cc3c62472eee38defcef380761b819d68\\10b57e761a2d0290d745ffb96e1b4bee\\attempt-01\\PAPER_READING_CARD.json",
+      "fulfillment_judgment": {
+        "auxiliary_material": "综述提供了 HCC 背景下微生物代谢物（SCFAs、胆汁酸、色氨酸代谢物、TMAO）调节 ICI 疗效的整体框架，包括测量方法（粪便、血浆非侵入性检测）和机器学习预测模型的应用。文中指出当前领域存在方法学异质性（样本采集、测序平台、生信流程不标准化），导致不同队列间微生物标志物结果不一致。这些信息有助于理解肌苷作为微生物代谢物生物标志物的研究背景和潜在挑战。",
+        "material_ready": true,
+        "material_usefulness": "supporting",
+        "outline_action": "需检索原始代谢组学研究，特别是针对接受 ICI 治疗的人类肿瘤患者队列，测量肿瘤组织、血浆或微透析液中肌苷浓度的研究。可关注引用了 Mager 等或 Tanoue 等机制研究的后续临床转化论文，或搜索包含'inosine metabolomics ICI human tumor concentration'等关键词的文献。同时可追踪该综述引用的 II 期试验（参考文献 95）的完整发表版本，查看是否包含基线肌苷浓度与疗效的相关性亚组分析。",
+        "remaining_gap": "该综述未报告人体肿瘤组织或微透析液中肌苷的绝对浓度数据（如 μM 或 ng/mL），也未提供内源性肌苷水平与 ICI 响应指标（ORR/PFS/OS）之间的统计关联分析。文中引用的 II 期临床试验测试的是外源性肌苷补充的效果，而非测量患者基线或治疗期间的内源性肌苷浓度并与疗效进行相关性分析。小鼠模型中的肌苷水平数据（如盲肠和血清水平）无法直接外推至人体肿瘤微环境。因此，成功标准中要求的'人体肿瘤组织绝对浓度 + ICI 响应统计关联'两项核心要素均未在此材料中得到满足。",
+        "status": "unmet",
+        "substantive_gap_status": "unmet",
+        "useful_material": "该综述在 4.3 节详细描述了肌苷的生物学机制：肌苷由腺苷脱氨酶（ADA）作用于腺苷产生，肠道细菌（主要是 Bifidobacterium pseudolongum）是主要生产者；肌苷通过腺苷 A2A 受体依赖的方式指导 Th1 细胞分化，支持 CD8+ T 细胞在葡萄糖受限的肿瘤微环境中增殖，并直接抑制 UBA6 酶。文中引用了一项随机对照 II 期研究（172 例晚期实体瘤患者，包括 HCC），显示 ICI 联合肌苷补充组相比单用 ICI 组 PFS 延长 2.6 个月、疾病进展风险降低 37%。此外，还提及小鼠模型中肌苷水平与 ICI 疗效的关联（如 Mager 等发现 B. pseudolongum 定植的无菌小鼠肌苷丰度最高且 ICI 反应最佳）。"
+      },
+      "identity_audit": {
+        "conflicts": [],
+        "decision": "matched_existing",
+        "match": {
+          "basis": "doi",
+          "comparison": {
+            "author_overlap": 0.0,
+            "basis": "doi",
+            "conflicts": [],
+            "state": "verified",
+            "title_similarity": 1.0,
+            "verified": true
+          },
+          "paper_id": "48c14b6cc3c62472eee38defcef380761b819d68"
+        }
+      },
+      "judgment_path": "FULFILLMENT_JUDGMENT.json",
+      "lineage": {
+        "facet_ids": [
+          "F1"
+        ],
+        "kind": "retrieval_query",
+        "providers": [
+          "openalex"
+        ],
+        "query_ids": [
+          "SUP_case_C2_inosine_tme_KQ_01"
+        ],
+        "query_types": [
+          "keyword"
+        ]
+      },
+      "material_depth": "fulltext",
+      "material_reused": true,
+      "output_dir": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\level1\\external\\N76e5cbf6bca57e729afb-44ef4668ae030687\\round_3\\supplements\\case_C2_inosine_tme\\attempt-zsolasch\\source_units\\SU02_search_candidate_70cfebbd12",
+      "pool_action": {
+        "pool_action": "active_card_retained_material_candidate_linked",
+        "prior_card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\48c14b6cc3c62472eee38defcef380761b819d68\\10b57e761a2d0290d745ffb96e1b4bee\\attempt-01\\PAPER_READING_CARD.json"
+      },
+      "reading_text_chars": 63875,
+      "record_identity": {
+        "arxiv_id": null,
+        "authors": [
+          "Maria Cerreto",
+          "Marta Maestri",
+          "Maria Pallozzi",
+          "Lucia Cerrito",
+          "Leonardo Stella",
+          "Gianluca Ianiro",
+          "Antonio Gasbarrini",
+          "Francesca Romana Ponziani"
+        ],
+        "canonical_paper_id": "OpenAlex:W7152993358",
+        "corpus_id": null,
+        "doi": "10.3390/life16040641",
+        "openalex_id": "W7152993358",
+        "paper_id": null,
+        "semantic_scholar_paper_id": null,
+        "title": "Gut Microbiota Biomarkers in Patients with Hepatocellular Carcinoma in the Era of Immune Checkpoint Inhibitors",
+        "year": 2026
+      },
+      "search_hit_ids": [
+        "SUP-H000010"
+      ],
+      "search_hits_path": "SEARCH_HITS.jsonl",
+      "snapshot_id": "snapshot-dff9314acfbe2d32da2a9e41",
+      "snapshot_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\48c14b6cc3c62472eee38defcef380761b819d68\\snapshot-dff9314acfbe2d32da2a9e41",
+      "source_kind": "search_candidate",
+      "source_unit_id": "SU02_search_candidate_70cfebbd12",
+      "status": "unmet",
+      "success_criteria_audit": {
+        "checked": false
+      }
+    }
+  ],
+  "substantive_gap_status": "partial",
+  "topic_id": "microbiome_ici_review"
+}

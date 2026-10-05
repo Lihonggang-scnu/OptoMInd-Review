@@ -1,0 +1,261 @@
+{
+  "base_pool_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\level1\\external\\N76e5cbf6bca57e729afb-df9b777a93e759ce\\round_1\\tool_inputs\\MERGED_PLANNING_POOL.jsonl",
+  "base_pool_rows": 585,
+  "base_pool_sha256": "001b73513d64d0bb6731147c43e4fcfc332c32f2f34d921d065730a558ce6649",
+  "citation_anchor_status": "not_applicable",
+  "citation_anchors": [],
+  "citation_anchors_path": "CITATION_ANCHORS.jsonl",
+  "created_at_unix": 1791134085.2345016,
+  "derived_pool_path": "PLANNING_POOL.jsonl",
+  "fulfillment_judgment": {
+    "acquisition_count": 0,
+    "auxiliary_material": [
+      "研究在小鼠模型（B16-F0, 4T1 等）中证实了外源性肌苷补充可增强 ICI 疗效，并揭示了分子机制：肌苷直接进入肿瘤细胞，抑制泛素激活酶 UBA6，从而解除 UBA6 对炎症信号和抗原呈递通路的抑制，提高肿瘤免疫原性。研究还指出肌苷在血浆中的半衰期较长（约 15 小时），而腺苷极短，这影响了体内测量的稳定性。此外，研究提到肌苷来源具有多源性（肠道微生物、饮食、癌细胞分泌），且在不同肿瘤类型中效果可能依赖基础 UBA6 表达水平（如在低 UBA6 的 MC38 模型中无效）。"
+    ],
+    "candidate_count": 1,
+    "citation_anchor_count": 0,
+    "citation_anchor_status": "not_applicable",
+    "evidence": [],
+    "failed_feedback": [],
+    "limitations": [],
+    "material_ready": true,
+    "model_call": true,
+    "network_call": true,
+    "note": "The gap judgment and ready writing material are reported separately.",
+    "outcome": "retryable_provider_outage",
+    "outline_action": "Retry after the provider or judgment issue is resolved; do not treat this attempt as scientific absence.",
+    "outline_action_recovered_by_policy": false,
+    "planning_use_contract": {
+      "status": "equal_use"
+    },
+    "query_audits": [
+      {
+        "facet_id": "F1",
+        "provider_attempts": [
+          {
+            "provider": "semantic_scholar",
+            "retryable": true,
+            "returned": 0,
+            "status_code": 429
+          },
+          {
+            "error": "",
+            "provider": "openalex",
+            "retryable": false,
+            "returned": 12,
+            "status_code": 200
+          }
+        ],
+        "provider_issue": true,
+        "query_id": "SUP_case_C2_inosine_tme_KQ_01",
+        "query_text": "inosine concentration human tumor microenvironment immune checkpoint inhibitor response",
+        "query_type": "keyword",
+        "requested_limit": 12,
+        "retrieval_source": "paper_search",
+        "retryable": true,
+        "returned": 12,
+        "status": 200
+      }
+    ],
+    "query_source": "planner_supplied_targeted_queries",
+    "remaining_gap": "人体肿瘤微环境内肌苷（inosine）的生理浓度及其与 ICI 疗效的具体相关性数据是什么？",
+    "remaining_gap_recovered_by_policy": false,
+    "status": "unjudgeable",
+    "substantive_gap_status": "unjudgeable",
+    "useful_material": [
+      "这项研究在人体数据方面提供了两方面的关键证据：首先，通过分析 CheckMate 025 临床试验中肾细胞癌（RCC）患者的血浆代谢组数据（n=394 接受 nivolumab 治疗），发现血浆肌苷水平高低与总生存期（OS）显著相关（高肌苷组中位 OS 33 个月 vs 低肌苷组 22 个月），证实了循环肌苷水平与 ICI 疗效的临床关联。其次，在一个包含 22 名接受抗 PD-1 治疗的多癌种患者的小型队列中，作者检测了肿瘤组织内的 UBA6 蛋白表达（作为肌苷作用的下游靶点），发现低 UBA6 表达与更高的客观缓解率（ORR 50% vs 17%）及 CD8+ T 细胞浸润相关。然而，作者明确指出由于样本缺失，未能在该人体肿瘤队列中直接检测肌苷浓度。"
+    ]
+  },
+  "gap_id": "case_C2_inosine_tme",
+  "limits": {
+    "max_acquisitions": 3,
+    "max_candidates": 12,
+    "per_query_limit": 12
+  },
+  "material_ready": true,
+  "materials_markdown_path": "SUPPLEMENT_MATERIALS.md",
+  "model_call": true,
+  "network_call": true,
+  "plan_source_audit": {
+    "degradation": {
+      "channels": {
+        "facets": 2,
+        "keyword_queries": 6,
+        "missing_channels": [],
+        "question_queries": 4
+      },
+      "degraded": false,
+      "missing_channels": [],
+      "plan_state": "complete",
+      "reasons": [],
+      "transport_failures": [
+        {
+          "fallback_used": false,
+          "json_contract_repaired": false,
+          "transport_error": "HTTPError_400_Arrearage"
+        }
+      ]
+    },
+    "error_details": [],
+    "errors": [],
+    "first_hit": true,
+    "prompt_hash": "150ddae49e467e2b53989f4aff0b2fddfb24d8510d5260b1ef6a05ef80e4dc72",
+    "refused_queries": [],
+    "repairs": [],
+    "revision_reason": "",
+    "revision_rounds": 0,
+    "source_format": "planning_run_wrapper",
+    "source_sha256": "31a83ebb90f3abb2dc9787f91b2280d18b603ea81cbc8cad7524dad5a4288314",
+    "status": "ok",
+    "transport": {
+      "fallback_used": false,
+      "json_contract_repaired": false,
+      "transport_error": "HTTPError_400_Arrearage"
+    },
+    "validator_fingerprint": "5ce2c113308fd41de3d3898731a20cee312a8f6e31d79d9e19b23599146838a6"
+  },
+  "plan_source_audit_path": "PLAN_SOURCE_AUDIT.json",
+  "planning_use_contract": {
+    "status": "equal_use"
+  },
+  "query_audits": [
+    {
+      "facet_id": "F1",
+      "provider_attempts": [
+        {
+          "provider": "semantic_scholar",
+          "retryable": true,
+          "returned": 0,
+          "status_code": 429
+        },
+        {
+          "error": "",
+          "provider": "openalex",
+          "retryable": false,
+          "returned": 12,
+          "status_code": 200
+        }
+      ],
+      "provider_issue": true,
+      "query_id": "SUP_case_C2_inosine_tme_KQ_01",
+      "query_text": "inosine concentration human tumor microenvironment immune checkpoint inhibitor response",
+      "query_type": "keyword",
+      "requested_limit": 12,
+      "retrieval_source": "paper_search",
+      "retryable": true,
+      "returned": 12,
+      "status": 200
+    }
+  ],
+  "request_id": "progressive-microbiome_ici_review-level1-case_C2_inosine_tme",
+  "schema_version": "optomind.planning_supplement.result.v1",
+  "search_hits_path": "SEARCH_HITS.jsonl",
+  "source_units": [
+    {
+      "acquisition_path": "ACQUISITION.json",
+      "candidate_record_path": "CANDIDATE_RECORD.json",
+      "card_id": "paper-card-103a817905f24cc30439974b",
+      "card_output_dir": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_C2_inosine_tme\\source_units\\SU02_search_candidate_73af8e5de3\\card",
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_C2_inosine_tme\\source_units\\SU02_search_candidate_73af8e5de3\\card\\PAPER_READING_CARD.json",
+      "fulfillment_judgment": {
+        "auxiliary_material": "研究在小鼠模型（B16-F0, 4T1 等）中证实了外源性肌苷补充可增强 ICI 疗效，并揭示了分子机制：肌苷直接进入肿瘤细胞，抑制泛素激活酶 UBA6，从而解除 UBA6 对炎症信号和抗原呈递通路的抑制，提高肿瘤免疫原性。研究还指出肌苷在血浆中的半衰期较长（约 15 小时），而腺苷极短，这影响了体内测量的稳定性。此外，研究提到肌苷来源具有多源性（肠道微生物、饮食、癌细胞分泌），且在不同肿瘤类型中效果可能依赖基础 UBA6 表达水平（如在低 UBA6 的 MC38 模型中无效）。",
+        "material_ready": true,
+        "material_usefulness": "supporting",
+        "outline_action": "1. 检索专门针对人体肿瘤组织活检样本进行代谢组学分析（如质谱成像、组织提取 LC-MS）的研究，重点关注是否报告了肌苷的绝对定量数据。2. 查找是否有微透析（microdialysis）技术应用于肿瘤患者监测代谢物的临床研究。3. 关注本研究的后续工作或引用该研究的文献，看是否补充了人体肿瘤组织肌苷浓度的验证数据。4. 在综述中可利用本研究血浆数据作为系统性暴露的代理，利用 UBA6 数据作为 TME 内肌苷活性的代理，但需明确标注这是间接证据而非直接的浓度测量。",
+        "remaining_gap": "成功标准要求的‘人体肿瘤组织或微透析液中肌苷绝对浓度（如 μM 或 ng/mL）’数据在此研究中缺失。作者明确说明在人体肿瘤组织队列中因样本问题未进行肌苷测量，仅检测了下游蛋白 UBA6。此外，CheckMate 025 的数据基于血浆（plasma）而非肿瘤微环境（TME）组织液，且文中未报告肌苷的具体绝对浓度数值，仅按中位数分组报告了生存关联。因此，关于 TME 内肌苷生理浓度及其与 ICI 响应的直接定量统计关联仍未解决。",
+        "status": "unmet",
+        "substantive_gap_status": "unmet",
+        "useful_material": "这项研究在人体数据方面提供了两方面的关键证据：首先，通过分析 CheckMate 025 临床试验中肾细胞癌（RCC）患者的血浆代谢组数据（n=394 接受 nivolumab 治疗），发现血浆肌苷水平高低与总生存期（OS）显著相关（高肌苷组中位 OS 33 个月 vs 低肌苷组 22 个月），证实了循环肌苷水平与 ICI 疗效的临床关联。其次，在一个包含 22 名接受抗 PD-1 治疗的多癌种患者的小型队列中，作者检测了肿瘤组织内的 UBA6 蛋白表达（作为肌苷作用的下游靶点），发现低 UBA6 表达与更高的客观缓解率（ORR 50% vs 17%）及 CD8+ T 细胞浸润相关。然而，作者明确指出由于样本缺失，未能在该人体肿瘤队列中直接检测肌苷浓度。"
+      },
+      "identity_audit": {
+        "conflicts": [],
+        "decision": "matched_existing",
+        "match": {
+          "basis": "doi",
+          "comparison": {
+            "author_overlap": 0.0,
+            "basis": "doi",
+            "conflicts": [],
+            "state": "verified",
+            "title_similarity": 1.0,
+            "verified": true
+          },
+          "paper_id": "CorpusId:252309032"
+        }
+      },
+      "judgment_path": "FULFILLMENT_JUDGMENT.json",
+      "lineage": {
+        "facet_ids": [
+          "F1"
+        ],
+        "kind": "retrieval_query",
+        "providers": [
+          "openalex"
+        ],
+        "query_ids": [
+          "SUP_case_C2_inosine_tme_KQ_01"
+        ],
+        "query_types": [
+          "keyword"
+        ]
+      },
+      "material_depth": "fulltext",
+      "material_reused": true,
+      "output_dir": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\level1\\external\\N76e5cbf6bca57e729afb-df9b777a93e759ce\\round_1\\supplements\\case_C2_inosine_tme\\attempt-cbtjrz3v\\source_units\\SU01_search_candidate_216ff7fc1c",
+      "pool_action": {
+        "pool_action": "active_card_retained_material_candidate_linked",
+        "prior_card_path": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_C2_inosine_tme\\source_units\\SU02_search_candidate_73af8e5de3\\card\\PAPER_READING_CARD.json"
+      },
+      "reading_text_chars": 73208,
+      "record_identity": {
+        "arxiv_id": null,
+        "authors": [
+          "Lei Zhang",
+          "Li Jiang",
+          "Liang Yu",
+          "Qin Li",
+          "Xiangjun Tian",
+          "Jingquan He",
+          "Ling Zeng",
+          "Yuqin Yang",
+          "Chaoran Wang",
+          "Yuhan Wei",
+          "Xiaoyue Jiang",
+          "Jing Li",
+          "Xiaolu Ge",
+          "Qisheng Gu",
+          "Jikun Li",
+          "Di Wu",
+          "Anthony John Sadler",
+          "Di Yu",
+          "Dakang Xu",
+          "Yue Gao",
+          "Xiangliang Yuan",
+          "Baokun He"
+        ],
+        "canonical_paper_id": "OpenAlex:W4296038319",
+        "corpus_id": null,
+        "doi": "10.1038/s41467-022-33116-z",
+        "openalex_id": "W4296038319",
+        "paper_id": null,
+        "semantic_scholar_paper_id": null,
+        "title": "Inhibition of UBA6 by inosine augments tumour immunogenicity and responses",
+        "year": 2022
+      },
+      "search_hit_ids": [
+        "SUP-H000007"
+      ],
+      "search_hits_path": "SEARCH_HITS.jsonl",
+      "snapshot_id": "snapshot-977ff8b5739acba1a864c0b8",
+      "snapshot_path": "F:\\OptoMind-Review-2\\outputs\\progressive_review_plan\\20260926_adaptive_retrieval\\03_external_closure\\runs\\case_C2_inosine_tme\\source_units\\SU02_search_candidate_73af8e5de3\\materials\\CorpusId_252309032\\snapshot-977ff8b5739acba1a864c0b8",
+      "source_kind": "search_candidate",
+      "source_unit_id": "SU01_search_candidate_216ff7fc1c",
+      "status": "unmet",
+      "success_criteria_audit": {
+        "checked": false
+      }
+    }
+  ],
+  "substantive_gap_status": "unjudgeable",
+  "topic_id": "microbiome_ici_review"
+}

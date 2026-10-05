@@ -1,0 +1,308 @@
+{
+  "base_pool_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\level1\\external\\N76e5cbf6bca57e729afb-df9b777a93e759ce\\round_3\\tool_inputs\\MERGED_PLANNING_POOL.jsonl",
+  "base_pool_rows": 586,
+  "base_pool_sha256": "f15bc92b9a38111506c649a42da6bd2d473224d7937d328c6864e639b8113606",
+  "citation_anchor_status": "not_applicable",
+  "citation_anchors": [],
+  "citation_anchors_path": "CITATION_ANCHORS.jsonl",
+  "created_at_unix": 1791134673.017754,
+  "derived_pool_path": "PLANNING_POOL.jsonl",
+  "fulfillment_judgment": {
+    "acquisition_count": 1,
+    "auxiliary_material": [
+      [
+        "Description of the CD39/CD73 axis responsible for adenosine generation in the tumor microenvironment.",
+        "Details on T cell metabolic states (naïve, effector, memory, exhausted) and their vulnerability to adenosine.",
+        "Engineering strategies for localizing ADA1 on T cell surfaces (e.g., via CD26 or scFv).",
+        "Safety considerations regarding metabolic engineering, including risks of fueling tumor cells with inosine.",
+        "Statement that no clinical trials of ADA1/CAR T cells in humans have been conducted to date."
+      ]
+    ],
+    "candidate_count": 1,
+    "citation_anchor_count": 0,
+    "citation_anchor_status": "not_applicable",
+    "evidence": [],
+    "failed_feedback": [],
+    "limitations": [],
+    "material_ready": true,
+    "model_call": true,
+    "network_call": true,
+    "note": "The gap judgment and ready writing material are reported separately.",
+    "outcome": "retryable_provider_outage",
+    "outline_action": "Retry after the provider or judgment issue is resolved; do not treat this attempt as scientific absence.",
+    "outline_action_recovered_by_policy": false,
+    "planning_use_contract": {
+      "status": "equal_use"
+    },
+    "query_audits": [
+      {
+        "facet_id": "F1",
+        "provider_attempts": [
+          {
+            "provider": "semantic_scholar",
+            "retryable": true,
+            "returned": 0,
+            "status_code": 429
+          },
+          {
+            "error": "",
+            "provider": "openalex",
+            "retryable": false,
+            "returned": 12,
+            "status_code": 200
+          }
+        ],
+        "provider_issue": true,
+        "query_id": "SUP_case_C2_inosine_tme_KQ_01",
+        "query_text": "human solid tumor tissue biopsy inosine concentration metabolomics immune checkpoint inhibitor response",
+        "query_type": "keyword",
+        "requested_limit": 12,
+        "retrieval_source": "paper_search",
+        "retryable": true,
+        "returned": 12,
+        "status": 200
+      },
+      {
+        "discovery_target": 0,
+        "facet_id": "F1",
+        "max_snippets_per_paper": 0,
+        "provider_attempts": [
+          {
+            "provider": "semantic_scholar_snippets",
+            "retryable": true,
+            "returned": 0,
+            "status_code": 429
+          }
+        ],
+        "provider_issue": true,
+        "query_id": "SUP_case_C2_inosine_tme_QQ_02",
+        "query_text": "What are the absolute concentrations of inosine measured directly in human solid tumor tissue biopsies or interstitial fluid, and how do these local levels correlate with objective response rate (ORR) or survival outcomes in patients treated with immune checkpoint inhibitors?",
+        "query_type": "question",
+        "raw_snippet_hits": 0,
+        "requested_limit": 12,
+        "requested_limits": [
+          12
+        ],
+        "requests": 1,
+        "retrieval_source": "snippet_search",
+        "retryable": true,
+        "returned": 0,
+        "status": 429,
+        "unique_papers": 0
+      }
+    ],
+    "query_source": "planner_supplied_targeted_queries",
+    "remaining_gap": "人体肿瘤微环境内肌苷（inosine）的生理浓度及其与 ICI 疗效的具体相关性数据是什么？",
+    "remaining_gap_recovered_by_policy": false,
+    "status": "unjudgeable",
+    "substantive_gap_status": "unjudgeable",
+    "useful_material": [
+      [
+        "Mechanism description: ADA1 enzyme converts immunosuppressive adenosine to inosine, which can serve as an alternative carbon source for T cells.",
+        "General TME metabolite context: Extracellular adenosine concentrations in tumors can reach 100–200 μM, significantly higher than in healthy tissue.",
+        "Metabolic rationale: Inosine supplementation or generation supports T cell metabolism (glycolytic and pentose phosphate pathways) under glucose restriction.",
+        "Preclinical evidence: ADA1-expressing CAR T cells show reduced exhaustion and improved persistence in mouse models, linked to inosine availability.",
+        "Combination concept: The authors discuss potential integration of metabolic reprogramming (like ADA1) with immune checkpoint inhibitors (ICIs) as a future strategy."
+      ]
+    ]
+  },
+  "gap_id": "case_C2_inosine_tme",
+  "limits": {
+    "max_acquisitions": 3,
+    "max_candidates": 12,
+    "per_query_limit": 12
+  },
+  "material_ready": true,
+  "materials_markdown_path": "SUPPLEMENT_MATERIALS.md",
+  "model_call": true,
+  "network_call": true,
+  "plan_source_audit": {
+    "degradation": {
+      "channels": {
+        "facets": 2,
+        "keyword_queries": 6,
+        "missing_channels": [],
+        "question_queries": 4
+      },
+      "degraded": false,
+      "missing_channels": [],
+      "plan_state": "complete",
+      "reasons": [],
+      "transport_failures": [
+        {
+          "fallback_used": false,
+          "json_contract_repaired": false,
+          "transport_error": "HTTPError_400_Arrearage"
+        }
+      ]
+    },
+    "error_details": [],
+    "errors": [],
+    "first_hit": true,
+    "prompt_hash": "150ddae49e467e2b53989f4aff0b2fddfb24d8510d5260b1ef6a05ef80e4dc72",
+    "refused_queries": [],
+    "repairs": [],
+    "revision_reason": "",
+    "revision_rounds": 0,
+    "source_format": "planning_run_wrapper",
+    "source_sha256": "31a83ebb90f3abb2dc9787f91b2280d18b603ea81cbc8cad7524dad5a4288314",
+    "status": "ok",
+    "transport": {
+      "fallback_used": false,
+      "json_contract_repaired": false,
+      "transport_error": "HTTPError_400_Arrearage"
+    },
+    "validator_fingerprint": "5ce2c113308fd41de3d3898731a20cee312a8f6e31d79d9e19b23599146838a6"
+  },
+  "plan_source_audit_path": "PLAN_SOURCE_AUDIT.json",
+  "planning_use_contract": {
+    "status": "equal_use"
+  },
+  "query_audits": [
+    {
+      "facet_id": "F1",
+      "provider_attempts": [
+        {
+          "provider": "semantic_scholar",
+          "retryable": true,
+          "returned": 0,
+          "status_code": 429
+        },
+        {
+          "error": "",
+          "provider": "openalex",
+          "retryable": false,
+          "returned": 12,
+          "status_code": 200
+        }
+      ],
+      "provider_issue": true,
+      "query_id": "SUP_case_C2_inosine_tme_KQ_01",
+      "query_text": "human solid tumor tissue biopsy inosine concentration metabolomics immune checkpoint inhibitor response",
+      "query_type": "keyword",
+      "requested_limit": 12,
+      "retrieval_source": "paper_search",
+      "retryable": true,
+      "returned": 12,
+      "status": 200
+    },
+    {
+      "discovery_target": 0,
+      "facet_id": "F1",
+      "max_snippets_per_paper": 0,
+      "provider_attempts": [
+        {
+          "provider": "semantic_scholar_snippets",
+          "retryable": true,
+          "returned": 0,
+          "status_code": 429
+        }
+      ],
+      "provider_issue": true,
+      "query_id": "SUP_case_C2_inosine_tme_QQ_02",
+      "query_text": "What are the absolute concentrations of inosine measured directly in human solid tumor tissue biopsies or interstitial fluid, and how do these local levels correlate with objective response rate (ORR) or survival outcomes in patients treated with immune checkpoint inhibitors?",
+      "query_type": "question",
+      "raw_snippet_hits": 0,
+      "requested_limit": 12,
+      "requested_limits": [
+        12
+      ],
+      "requests": 1,
+      "retrieval_source": "snippet_search",
+      "retryable": true,
+      "returned": 0,
+      "status": 429,
+      "unique_papers": 0
+    }
+  ],
+  "request_id": "progressive-microbiome_ici_review-level1-case_C2_inosine_tme",
+  "schema_version": "optomind.planning_supplement.result.v1",
+  "search_hits_path": "SEARCH_HITS.jsonl",
+  "source_units": [
+    {
+      "acquisition_path": "ACQUISITION.json",
+      "candidate_record_path": "CANDIDATE_RECORD.json",
+      "card_id": "paper-card-2aa067eb44fb86117875d97c",
+      "card_output_dir": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\level1\\external\\N76e5cbf6bca57e729afb-df9b777a93e759ce\\round_3\\supplements\\case_C2_inosine_tme\\attempt-qeheq06s\\source_units\\SU01_search_candidate_77e152397a\\card",
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\level1\\external\\N76e5cbf6bca57e729afb-df9b777a93e759ce\\round_3\\supplements\\case_C2_inosine_tme\\attempt-qeheq06s\\source_units\\SU01_search_candidate_77e152397a\\card\\PAPER_READING_CARD.json",
+      "fulfillment_judgment": {
+        "auxiliary_material": [
+          "Description of the CD39/CD73 axis responsible for adenosine generation in the tumor microenvironment.",
+          "Details on T cell metabolic states (naïve, effector, memory, exhausted) and their vulnerability to adenosine.",
+          "Engineering strategies for localizing ADA1 on T cell surfaces (e.g., via CD26 or scFv).",
+          "Safety considerations regarding metabolic engineering, including risks of fueling tumor cells with inosine.",
+          "Statement that no clinical trials of ADA1/CAR T cells in humans have been conducted to date."
+        ],
+        "material_ready": true,
+        "material_usefulness": "supporting",
+        "outline_action": "['Search for clinical metabolomics studies that profile purine metabolites (including inosine) in baseline tumor biopsies or blood from ICI-treated patients.', 'Look for microdialysis or mass spectrometry imaging studies quantifying inosine specifically in human tumor microenvironments.', 'Investigate literature linking gut microbiome-derived inosine to ICI efficacy, as the topic context involves microbiome-ICI interactions.', 'Prioritize studies that explicitly report statistical associations (e.g., hazard ratios, p-values) between metabolite levels and clinical endpoints.']",
+        "remaining_gap": "['No absolute concentration data for inosine (μM or ng/mL) in human tumor tissue or microdialysis fluid is provided.', 'No statistical correlation between endogenous inosine levels and ICI response (ORR/PFS/OS) in human patients is reported.', 'The efficacy data presented is primarily from preclinical CAR T cell models, not ICI monotherapy or combination trials in humans.', 'The review explicitly states that clinical validation for ADA1-based strategies is pending, implying a lack of human inosine-ICI outcome data in this source.']",
+        "status": "unmet",
+        "substantive_gap_status": "unmet",
+        "useful_material": [
+          "Mechanism description: ADA1 enzyme converts immunosuppressive adenosine to inosine, which can serve as an alternative carbon source for T cells.",
+          "General TME metabolite context: Extracellular adenosine concentrations in tumors can reach 100–200 μM, significantly higher than in healthy tissue.",
+          "Metabolic rationale: Inosine supplementation or generation supports T cell metabolism (glycolytic and pentose phosphate pathways) under glucose restriction.",
+          "Preclinical evidence: ADA1-expressing CAR T cells show reduced exhaustion and improved persistence in mouse models, linked to inosine availability.",
+          "Combination concept: The authors discuss potential integration of metabolic reprogramming (like ADA1) with immune checkpoint inhibitors (ICIs) as a future strategy."
+        ]
+      },
+      "identity_audit": {
+        "conflicts": [],
+        "decision": "new_identity",
+        "matches": []
+      },
+      "judgment_path": "FULFILLMENT_JUDGMENT.json",
+      "lineage": {
+        "facet_ids": [
+          "F1"
+        ],
+        "kind": "retrieval_query",
+        "providers": [
+          "openalex"
+        ],
+        "query_ids": [
+          "SUP_case_C2_inosine_tme_KQ_01"
+        ],
+        "query_types": [
+          "keyword"
+        ]
+      },
+      "material_depth": "fulltext",
+      "output_dir": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\level1\\external\\N76e5cbf6bca57e729afb-df9b777a93e759ce\\round_3\\supplements\\case_C2_inosine_tme\\attempt-qeheq06s\\source_units\\SU01_search_candidate_77e152397a",
+      "pool_action": {
+        "pool_action": "new_material_ready_candidate_added"
+      },
+      "reading_text_chars": 39949,
+      "record_identity": {
+        "arxiv_id": null,
+        "authors": [
+          "Alex Wade Song",
+          "Xiao‐Tong Song"
+        ],
+        "canonical_paper_id": "OpenAlex:W7116840248",
+        "corpus_id": null,
+        "doi": "10.3390/cancers18010034",
+        "openalex_id": "W7116840248",
+        "paper_id": null,
+        "semantic_scholar_paper_id": null,
+        "title": "ADA1-Driven Metabolic Refueling Enhances CAR T Cell Therapy for Solid Tumors",
+        "year": 2025
+      },
+      "search_hit_ids": [
+        "SUP-H000009"
+      ],
+      "search_hits_path": "SEARCH_HITS.jsonl",
+      "snapshot_id": "snapshot-c7c3f37eb99fc17db583ab4c",
+      "snapshot_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\level1\\external\\N76e5cbf6bca57e729afb-df9b777a93e759ce\\round_3\\supplements\\case_C2_inosine_tme\\attempt-qeheq06s\\source_units\\SU01_search_candidate_77e152397a\\materials\\OpenAlex_W7116840248\\snapshot-c7c3f37eb99fc17db583ab4c",
+      "source_kind": "search_candidate",
+      "source_unit_id": "SU01_search_candidate_77e152397a",
+      "status": "unmet",
+      "success_criteria_audit": {
+        "checked": false
+      }
+    }
+  ],
+  "substantive_gap_status": "unjudgeable",
+  "topic_id": "microbiome_ici_review"
+}

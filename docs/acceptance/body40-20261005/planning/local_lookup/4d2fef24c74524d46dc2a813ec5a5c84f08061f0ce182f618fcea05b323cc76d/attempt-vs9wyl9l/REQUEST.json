@@ -1,0 +1,430 @@
+{
+  "explicit_papers": [],
+  "judge": "QwenLocalTriageJudge",
+  "payload": {
+    "intended_use": "mechanism",
+    "local_search": {
+      "found": true,
+      "not_matched_reason": "",
+      "papers_seen": 12
+    },
+    "material_found": [
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0601",
+        "text": "{\"auxiliary_material\": \"The authors performed complete genome sequencing using PacBio SMRT technology, phylogenetic analysis of 16S rRNA and ITS regions, and phenotypic microarray analysis to classify the bacterium as Bacillus infantis. They identified 623 potential virulence factors, including adhesins, invasins, and transporters. The study also notes the presence of unique methyltransferases and insertion sequence elements. These details support the characterization of the bacterium but are less directly relevant to the specific signaling pathway question regarding Prevotella.\", \"evidence\": [], \"gap_id\": \"Ch6_gap_4\", \"judgment_path\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\body_full_staged_acceptance_20261004_40cny\\\\planning\\\\chapters\\\\external\\\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\\\round_2\\\\supplements\\\\Ch6_gap_4\\\\attempt-x8duln8o\\\\source_units\\\\SU02_search_candidate_d1274441e4\\\\FULFILLMENT_JUDGMENT.json\", \"limitations\": [], \"material_ready\": true, \"material_usefulness\": \"supporting\", \"outline_action\": \"Search for literature specifically linking Prevotella spp. to myocarditis mechanisms, focusing on antigens or metabolites identified after the FMT-LUMINate study. Use this Bacillus study as a comparative example in the review to illustrate the principle of molecular mimicry in bacterial myocarditis, clearly distinguishing it from the Prevotella context. Verify if any follow-up publications from the FMT-LUMINate investigators address the mechanistic gap.\", \"outline_action_recovered_by_policy\": false, \"remaining_gap\": \"The supplied material does not mention Prevotella spp., the FMT-LUMINate study, or any downstream signaling pathways specific to Prevotella-induced myocarditis. The mechanism described is specific to Bacillus infantis and cardiac myosin mimicry. There is no information on whether Prevotella uses a similar mimicry strategy or distinct metabolites to activate T cells in the context of the FMT-LUMINate research.\", \"remaining_gap_recovered_by_policy\": false, \"status\": \"unmet\", \"useful_material\": \"This study identifies a specific molecular mimicry mechanism where Bacillus infantis (strain NRRL B-14911) induces autoimmune myocarditis. The authors found that an epitope (BAC 25-40) from the bacterial allantoate amidohydrolase (AAH) protein shares sequence homology with cardiac myosin heavy chain alpha (Myhc-α 334-352). Active immunization with this epitope induced myocarditis in A/J mice by generating cardiac-reactive T cells. The study provides genomic evidence of virulence factors and confirms the conservation of this mimicry epitope. This serves as a concrete example of a bacterium inducing myocarditis via antigen-specific T cell cross-reactivity, which parallels the type of mechanism (antigen/metabolite -> T cell subset) sought in the gap question, albeit for a different bacterial species.\"}",
+        "type": "planning_summary"
+      },
+      {
+        "material_depth": "abstract",
+        "section": [
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0595",
+        "text": "{\"auxiliary_material\": \"The analysis relied on bioinformatics methods using the GSE180045 and GSE4172 datasets without explicit wet-lab validation of causal function reported in the abstract. The study design is retrospective and computational, focusing on transcriptomic differences between ICI patients with and without myocarditis. The authors noted drug predictions (e.g., acetohydroxamic-acid) via cMAP database but did not incorporate microbiome data or stratify patients by microbial composition such as Prevotella spp. abundance.\", \"evidence\": [], \"gap_id\": \"Ch6_gap_4\", \"judgment_path\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\body_full_staged_acceptance_20261004_40cny\\\\planning\\\\chapters\\\\external\\\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\\\round_1\\\\supplements\\\\Ch6_gap_4\\\\attempt-adnnjw8w\\\\source_units\\\\SU01_search_candidate_9277696331\\\\FULFILLMENT_JUDGMENT.json\", \"limitations\": [], \"material_ready\": true, \"material_usefulness\": \"supporting\", \"outline_action\": \"Use this study to characterize the general host immune signaling environment (CD8+ T cell/NK cell activation, RAGE pathway) in ICI-associated myocarditis as a potential convergence point for microbial triggers. Explicitly state that this work does not address the microbiome component. In the review, separate the evidence for host effector mechanisms (supported by this study) from the evidence for microbial initiators (still missing for Prevotella spp.). Future search strategies should focus on studies linking specific microbial metabolites or antigens to the identified hub genes (NKG7, GZMH) or RAGE signaling in the context of myocarditis.\", \"outline_action_recovered_by_policy\": false, \"remaining_gap\": \"The specific molecular mechanism linking Prevotella spp. to myocarditis, such as the identity of antigens or metabolites activating specific T cell subgroups, remains unresolved by this material. While this study details downstream host immune pathways (e.g., RAGE, CD8+ TCR) in ICI-associated myocarditis, it does not establish whether these pathways are triggered by Prevotella spp. or confirm any follow-up to the FMT-LUMINate study correlations. The absence of microbiome data in this study prevents it from validating the microbial trigger hypothesis.\", \"remaining_gap_recovered_by_policy\": false, \"status\": \"unmet\", \"useful_material\": \"This study identified pivotal immune-related genes (NKG7, GZMH, KLRB1) and signaling pathways (CD8+ T cell receptor, natural killer cell-mediated cytotoxicity, RAGE signaling) enriched in ICI-associated myocarditis samples compared to controls. The authors constructed a ceRNA network and highlighted cell lysis and proinflammatory pathways as characteristic biological enrichments. These findings provide a detailed map of the host immune response landscape in ICI-associated myocarditis, specifically emphasizing cytotoxic lymphocyte activation and inflammatory signaling cascades that could theoretically serve as downstream effectors if triggered by microbial antigens.\"}",
+        "type": "planning_summary"
+      },
+      {
+        "material_depth": "abstract",
+        "section": [
+          "Abstract"
+        ],
+        "source_handle": "P0595",
+        "text": "Background: Immune checkpoint inhibitors (ICIs) are extensively employed in cancer treatment; however, the development of ICI-associated myocarditis (ICI-MC) introduces a severe and potentially fatal complication with elusive pathophysiological mechanisms. This study aimed to pinpoint pivotal immune-related genes in ICI-MC and unveil potential therapeutic targets using bioinformatics. Methods: Utilizing the GSE180045 dataset (comprising three groups: Group A - ICI patients without immune adverse events, Group B - ICI patients with non-myocarditis immune adverse events, Group C - ICI patients with myocarditis), we scrutinized differentially expressed genes (DEGs) between ICI-MC samples (Group C) and non-myocarditis controls (Group A&B). These DEGs were cross-referenced with 1796 immune-related genes (IRGs) from the immPort database to derive IR-DEGs. We conducted functional enrichment analyses (GO, KEGG, GSEA), constructed a PPI network, and identified hub genes. Validation was performed using the GSE4172 dataset, and optimal feature genes (OFGs) were identified from the overlap of hub genes and validation DEGs. Predictions of target miRNAs were made, and a ceRNA network was constructed. Target drugs for hub genes were forecasted using the cMAP database. Results: We pinpointed 58 DEGs between ICI-MC and controls, leading to the identification of 32 IR-DEGs after intersecting with 1796 IRGs. Functional analyses revealed enrichment in cell lysis, CD8+ T cell receptor, natural killer cell-mediated cytotoxicity, and RAGE signaling. Up-regulated hub genes (IL7R, PRF1, GNLY, CD3G, NKG7, GZMH, GZMB, KLRB1, KLRK1, CD247) were highlighted. In the validation dataset, 407 DEGs were uncovered, resulting in the identification of 3 OFGs (KLRB1, NKG7, GZMH). Predicted target miRNAs, lincRNAs, and circRNAs formed a comprehensive ceRNA network. The top 10 drugs with elevated connectivity scores included acetohydroxamic-acid, suggesting caution in ICI treatment. Conclusion: NKG7, GZMH, and KLRB1 emerged as pivotal immune-related genes in ICI-MC. Biological enrichments encompassed cell lysis, CD8+ T cell receptor pathway, natural killer cell-mediated cytotoxicity, RAGE signaling, and proinflammatory pathways. The ceRNA network shed light on critical molecules, emphasizing the need to avoid drugs like acetohydroxamic-acid in ICI treatment.",
+        "type": "direct_evidence"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0597",
+        "text": "{\"auxiliary_material\": \"文中总结了 HLA 类 I 和类 II 分子在心肌炎中的不同功能（类 I 呈递病毒肽给 CD8+ T 细胞，类 II 呈递外源肽给 CD4+ T 细胞），并列出了与心肌炎或扩张型心肌病（DCM）相关的具体 HLA 等位基因（如 HLA-DR4, HLA-B27, HLA-DR15 等）。此外，文章提出了心肌炎的三相模型（触发、免疫反应、慢性炎症），并指出 HLA 多态性影响胸腺阴性选择和 T 细胞克隆扩增，这些背景信息有助于构建宿主遗传与环境互作的整体病理生理图景。\", \"evidence\": [], \"gap_id\": \"Ch6_gap_4\", \"judgment_path\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\body_full_staged_acceptance_20261004_40cny\\\\planning\\\\chapters\\\\external\\\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\\\round_1\\\\supplements\\\\Ch6_gap_4\\\\attempt-adnnjw8w\\\\source_units\\\\SU03_search_candidate_caa7d3faf8\\\\FULFILLMENT_JUDGMENT.json\", \"limitations\": [], \"material_ready\": true, \"material_usefulness\": \"supporting\", \"outline_action\": \"利用本材料中关于“微生物组 - 分子模拟 -HLA 限制性 T 细胞激活”的机制框架，作为假设 Prevotella 作用机制的理论基础。在撰写时，需明确区分文中已证实的 Bacteroides 案例与 Gap 关注的 Prevotella 案例，避免混淆。后续行动应侧重于检索专门针对 Prevotella 与心肌炎关联的原始研究，特别是查找 FMT-LUMINate 研究的后续出版物或引用该研究的文献，以寻找关于具体抗原、代谢物及信号通路的实验数据。\", \"outline_action_recovered_by_policy\": false, \"remaining_gap\": \"本材料未提及 Prevotella spp. 具体诱导心肌炎的分子机制，也未涉及 FMT-LUMINate 研究或其后续跟进研究。文中关于微生物组诱导心肌炎的实证例子主要集中在拟杆菌属（Bacteroides）而非 Prevotella 属。关于具体的下游信号通路、特定的 Prevotella 抗原或代谢物、以及其激活的特定 T 细胞亚群（除了一般性的 CD4+ T 细胞外）的细节，在本综述中均未解析。因此，针对 Gap 中询问的 Prevotella 特异性机制及 FMT-LUMINate 后续研究证据，本材料无法直接提供。\", \"remaining_gap_recovered_by_policy\": false, \"status\": \"unmet\", \"useful_material\": \"本综述提供了微生物组诱导自身免疫性心肌炎的通用机制框架，特别是“分子模拟”（molecular mimicry）概念。作者引用了 Gil-Cruz 等人的研究，指出共生细菌（如拟杆菌属 Bacteroides）可产生与心脏肌球蛋白表位结构相似的肽段模拟物，在肠道内激活自体反应性 CD4+ T 细胞，进而导致心肌炎。该材料详细描述了 HLA 限制性抗原呈递（HLA 类分子向 CD4+ T 细胞呈递外源性肽段）在打破免疫耐受中的核心作用，以及微生物抗原如何通过交叉反应激活针对心脏自身抗原的免疫应答。这为理解肠道菌群（包括潜在的 Prevotella spp.）如何通过抗原模拟激活特定 T 细胞亚群提供了理论模型和机制参考。\"} {\"auxiliary_material\": \"文中提供了 HLA I 类和 II 类分子在心肌炎中的功能对比，包括抗原呈递对象（CD8+ vs CD4+ T 细胞）、表达细胞类型及在自身免疫中的具体角色。还涉及病毒持续感染与自身免疫的复杂关系，以及抗肌球蛋白自身抗体与β1-肾上腺素能受体的交叉反应机制。这些内容虽不直",
+        "type": "planning_summary"
+      },
+      {
+        "material_depth": "abstract",
+        "section": [
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0596",
+        "text": "{\"auxiliary_material\": \"The study design is a bioinformatics-based screening and validation approach rather than experimental validation of microbial causality. The authors constructed a ceRNA network and predicted potential target drugs, noting acetohydroxamic acid as a compound requiring caution during ICI treatment. The analysis distinguishes ICI-MC from other immune adverse events based on gene expression profiles. The results are derived from public transcriptomic datasets, and the authors note the findings are predictive or hypothesis-generating rather than causal proof.\", \"evidence\": [], \"gap_id\": \"Ch6_gap_4\", \"judgment_path\": \"F:\\\\OptoMind-Review-2\\\\outputs\\\\body_full_staged_acceptance_20261004_40cny\\\\planning\\\\chapters\\\\external\\\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\\\round_1\\\\supplements\\\\Ch6_gap_4\\\\attempt-adnnjw8w\\\\source_units\\\\SU02_search_candidate_1ade57df76\\\\FULFILLMENT_JUDGMENT.json\", \"limitations\": [], \"material_ready\": true, \"material_usefulness\": \"supporting\", \"outline_action\": \"Use this study to describe the established downstream effector phase of ICI-associated myocarditis (cytotoxic lymphocyte activation and specific hub genes) in the review. Explicitly clarify that while these pathways represent the final common mechanism of tissue damage, the upstream microbial triggers (such as Prevotella-derived antigens) are not defined here. Cite this as context for the severity and molecular signature of ICI-MC, but maintain the distinction that the microbiome-initiation mechanism remains an open question requiring further specific investigation.\", \"outline_action_recovered_by_policy\": false, \"remaining_gap\": \"The supplied material does not mention Prevotella spp., fecal microbiota transplantation (FMT), or the FMT-LUMINate study. Consequently, it does not provide evidence linking specific microbial antigens or metabolites to the identified downstream pathways (e.g., CD8+ T cell receptor signaling). The specific molecular mechanism by which Prevotella might initiate this cytotoxic cascade remains unidentified in this text. The gap regarding whether follow-up studies have resolved the microbial-specific signaling pathway is not answered by this source.\", \"remaining_gap_recovered_by_policy\": false, \"status\": \"unmet\", \"useful_material\": \"This study utilized bioinformatics analysis on datasets GSE180045 and GSE4172 to characterize the molecular landscape of ICI-associated myocarditis (ICI-MC). The authors identified 32 immune-related differentially expressed genes (IR-DEGs) and highlighted hub genes including KLRB1, NKG7, and GZMH. Functional enrichment analyses indicated that the pathophysiology involves CD8+ T cell receptor signaling, natural killer cell-mediated cytotoxicity, cell lysis, and RAGE signaling. These findings delineate the downstream immune effector mechanisms (specifically cytotoxic T cell and NK cell activation) that characterize ICI-MC, providing a potential target profile for any upstream trigger, including microbial factors.\"}",
+        "type": "planning_summary"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "The Gut Microbiome in Cancer Immunotherapy",
+          "Human data implicating gut microbiome composition in cancer immunotherapy"
+        ],
+        "source_handle": "P0261",
+        "text": "Best radiographic response per RECIST v1.1 (including SD ≥3 months); PFS All radiographic responders: Ruminococcaceae OTU185 spp., CAG-352 OTU217 spp., Prevotella OTU264 spp., Dialister OTU18 spp., Lachnospiraceae OTU77 spp., Ruminiclostridium OTU216 spp., Lachnospira OTU159 spp., Ruminococcus OTU222 spp., Ruminiclostridium OTU196 spp., Parabacteroides OTU295 spp. Esophageal carcinoma (N = 14): Prevotella _9 OTU261 spp., Dialister OTU18 spp., Lachnospiraceae OTU97 spp., Ruminococcus_2 OTU222 spp., Bacteroides OTU266 spp., Parasutterella OTU207 spp., Phascolarctobacterium OTU1 spp., Bacteroides OTU277 spp., Lachnospiraceae OTU105 spp., Lachnospiraceae OTU128 spp. Gastric cancer (N = 23): Prevotella_9 OTU263 spp., Bifidobacterium OTU202 spp., Prevotella _2 OTU264 spp., Lachnospira OTU156 spp., Bacteroides OTU274 spp., Ruminococcaceae OTU190 spp., Agathobacter OTU79 spp., Bacteroides OTU275 spp. Colorectal carcinoma (N = 19): Lachnoclostridium OTU104 spp., Parabacteroides OTU294 spp., Parabacteroides OTU293 spp., Lachnospira OTU155 spp., Ruminococcaceae OTU187 spp., Flavonifractor OTU197 spp., Dialister OTU18 spp., Ruminococcaceae OTU187 spp., Lachnospiraceae OTU77 spp., Lachnospiraceae OTU103 spp. Diversity metrics were not associated with outcome. Abbreviation: MSS, microsatellite stable. ^{a}In Hakozaki and colleagues, while stable disease (SD) was observed in 17 patients and patients with SD ≥ 6 months were counted as R, this number was not reported.",
+        "type": "direct_evidence"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "PDF text"
+        ],
+        "source_handle": "P0319",
+        "text": "e produced by B. pseudolongum binds A2AR on CD4+ T cells and, together with IFN-γ and CpG, promotes Th1 differentiation. ILA generated by L. plantarum enhances H3K27ac at the IL-12 enhancer in DCs and increases IL-12 secretion, thereby activating CD8+ T-cell antitumor responses. Clostridiales-derived TMA is converted into TMAO by FMO3. TMAO induces GSDME-mediated pyroptosis in tumor cells through the PERK–eIF2α pathway and promotes the release of IL-1β and IL-18, thereby enhancing CD8+ T-cell antitumor immunity. The LCA derivatives 3-oxoLCA and isoLCA regulate CD4+ T-cell differentiation by promoting Treg cells and inhibiting Th17 cells. Table 1. Gut microbiota-derived metabolites, immune targets, mechanisms, and cancer relevance. Immune Cell Types Metabolites Related Species Mechanism Therapeutic Significance Disease/Cancer Type Reference DCs ILA L. plantarum L168 Promotes IL-12 transcription, activates CD8+ T cells Enhance tumor immunity and inhibit tumor growth CRC, Melanoma [29] SCFAs Dietary fiber fermenting bacteria (e.g., Bacteroides spp.) Activation of FFAR2/HDAC enhances antigen presentation Modulates antigen presentation CRC, IBD [30,31] Macrophages Propionate Prevotella spp. Inhibits M1 polarization Alleviates inflammation but suppresses antitumor IBD, CRC [32] Health Metab. 2026, 3(2), 3 https://doi.org/10.53941/hm.2026.100010 4 of 20 Table 1. Cont. Immune Cell Types Metabolites Related Species Mechanism Therapeutic Significance Disease/Cancer Type Reference Succinate F. nucleatum Promotes M2 polarization via HIF-1α Promotes tumor angiogenesis CRC [28,33] Serine Host-microbiota co- metabolism Promotes M1, inhibits M2 Enhances antitumor immunity Pancreatic cancer, CRC [34] NK cells c-di-AMP E. coli Nissle1917 Activates STING pathway Enhances immunotherapy efficacy Melanoma, solid tumors [35,36] Serine E. recta + le Enhances NK activity Improves immune response Melanoma [37] isoLCA Bacteroides ovatus Suppresses NK function Tumor immune evasion CRC [38] Butyrate R. intestinalis et al Activates GPR109A, enhances LrNK function Prevents liver cancer Hepatocellular carcinoma [39] CD8+ T cells Butyrate C. butyricum HDAC inhibition, boosts effector function Reverses T cell exhaustion Melanoma [40,41] TMAO Choline metabolizing bacteria (e.g., Proteobacteria) Promotes pyroptosis, IL-1β release Enhances antitumor immunity CRC [42] DCA Bacteroides spp. Suppresses Ca2+- NFAT2 Weakens antitumor immunity CRC, Liver cancer [43] IPA, I3A, IAA L. johnsonii, C. sporogenes, L. reuteri Activates AhR, boosts Tpex/Teff Improves PD-1 response Melanoma, CRC [15,44,45] CD4+ T cells DCA, LCA Clostridium spp.",
+        "type": "direct_evidence"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "Regulation of microbial metabolites on tumor immunity and immunotherapy",
+          "Tryptophan metabolites"
+        ],
+        "source_handle": "P0447",
+        "text": "Mechanisms of microbiota-derived tryptophan metabolites in disease pathogenesis. Microbiota-derived tryptophan metabolites (e.g., IAA, IPA, 3-IAld, indole-3-lactic acid) contribute to disease processes through multiple pathways: IAA ameliorates precancerous intestinal inflammation and modulates the microbiota via IL-35; metabolites derived from Bifidobacterium enhance the synthesis of immune molecules, synergizing with anti-tumor therapies; supplementation with Akkermansia spp. and IPA influences CAR-T cell efficacy; 3-IAld and Bacteroides spp.",
+        "type": "direct_evidence"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "review planning",
+          "facet contribution"
+        ],
+        "source_handle": "P0297",
+        "text": "Mechanisms are often derived from mouse models or inferred from human correlative data. The review acknowledges complexity and multiple interacting pathways rather than a single linear mechanism. Elaborates on mechanisms including: 1) Metabolite-mediated regulation (SCFAs, acetate, butyrate influencing immune cell function); 2) Immune cell priming and trafficking (dendritic cells, T-cell activation, CD8+ T cell infiltration); 3) Direct translocation of bacteria to tumor sites; 4) Modulation of bile acid metabolism affecting Treg migration.",
+        "type": "planning_summary"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "The intratumoral microbiome: a critical regulator of TME and immunotherapy responses"
+        ],
+        "source_handle": "P0146",
+        "text": "upport TLS maturation through activation of the STING signaling pathway and enhancement of T and NK cell activity^{200}. Furthermore, other microbial-derived metabolites—including indole derivatives, hydrogen sulfide, and bile acids—modulate tumor cell metabolism and immune homeostasis^{201}. The dynamic evolution of the gut microbiome is intimately associated with mechanisms of immune escape in tumors. Specific Clostridium spp. produce metabolites that induce the differentiation of Tregs while inhibiting the establishment of immunosuppression in the TME^{202}.",
+        "type": "direct_evidence"
+      },
+      {
+        "material_depth": "abstract",
+        "section": [
+          "Abstract"
+        ],
+        "source_handle": "P0609",
+        "text": "Background: Spatial integration of metabolic pathways with single cell-level transcriptomic data in human tumor and normal tissue may elucidate mechanisms supporting tumorigenesis for therapeutic targeting. The suppressive adenosine signaling pathway is an emerging potential target for combination with radiotherapy. This study aims to create an in situ map of the pathway in non-small cell lung cancer (NSCLC) tumor and adjacent normal tissue. We seek to define how distinct cellular compartments cooperate and contribute to adenosine signaling within the tumor microenvironment (TME). Methods: Using Matrix-Assisted Laser Desorption/Ionization mass spectrometry imaging, we examined the spatial distribution of metabolites in paired human NSCLC compared to normal tissue from the same patient (n=15). In situ metabolite quantification and pathway enrichment analysis were performed. Second, we performed single nuclear RNA-sequencing (snRNA-seq) on NSCLC patient samples (n=4) to characterize the transcriptomic landscape of the tumors, including quantification of key members of the adenosine signaling pathway: ADORA2A (A2AR), ADORA2B (A2BR), ENTPD1 (CD39), NT5E (CD73), and ENPP1. Leveraging the average gene expression per cell subtype and pathologist-annotated H&E-stained tissue sections, we are integrating transcriptomic data with the spatial metabolomics to generate an in situ pathway map. Results: In NSCLC tissue, UMP, AMP, and ADP levels were significantly higher in tumor compared to normal tissue (p<0.0001), with mean percentage increases of 79%, 89%, and 73%, respectively. Metabolites downstream of adenosine, adenine and inosine, showed no significant differences (p>0.05). Single nuclear RNA-seq analyses revealed expression of the adenosine 2B receptor, ADORA2B, was highest in fibroblasts, lower in tumor, and absent in the immune compartment. ENTPD1 was expressed by all immune cells and tumor. NT5E was absent in T cells and ENPP1 was absent in macrophages, but expressed in all other immune compartments and tumor. Integration of snRNA-seq data with spatial metabolomics is underway to correlate metabolite abundance and gene expression within distinct cellular compartments to define cell type-specific contribution to adenosine signaling. Conclusion: Our study offers a multimodal approach to spatially resolve metabolic and transcriptomic data in situ relying on frozen NSCLC and normal lung tissue. This has significant translational implications, enabling analysis of biospecimens from multi-institutional clinical trials that precludes processing fresh tissue for single-cell analyses. Herein, we are able to localize key metabolites in untreated tumor and normal tissue and quantify the expression of pathway members at the cellular level. Through spatial integration of these data, we aim to decipher the relationship between distinct cell types within the TME and their contribution to adenosine-driven suppressive changes, then extend to radiotherapy-treated tumors. Citation Format: Chelsea L. Rahiman, Roberto Ribas, Manan Vij, Julia An, Patrick J. McCann, Jason Cham, Chang Liu, Parin Shah, Rosa Martin, Ariel Chen, Simon Cheng, Aleksandar Z. Obradovic, Ramon C. Sun, Catherine S. Spina. {Abstract title} [abstract]. In: Proceedings of the AACR Special Conference in Cancer Research: Translating Targeted Therapies in Combination with Radiotherapy; 2025 Jan 26-29; San Diego, CA. Philadelphia (PA): AACR; Clin Cancer Res 2025;31(2_Suppl):Abstract nr B028.",
+        "type": "direct_evidence"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "Mechanisms of communication between microbiota and the immune system",
+          "Short-chain fatty acids"
+        ],
+        "source_handle": "P0460",
+        "text": "PRRs recognize both pathogen-associated molecular patterns (PAMPs) and damage-associated molecular patterns (DAMPs) to differentiate between infection and tissue damage (46). DAMPs, such as high-mobility group box 1 (HMGB1), are released during cellular injury and can trigger inflammation via receptors like TLR4 (47). This dual recognition system balances pathogen clearance with tissue repair (48). The gut microbiota’s production of SCFAs, including acetate, propionate, and butyrate, plays a fundamental role in maintaining immune tolerance, gut health, and host metabolism (49, 50). Figure 2 illustrates how gut microbiota ferments dietary fibers to produce SCFAs, including acetate, butyrate, and propionate. These SCFAs play a crucial role in epithelial cell growth, immune response, and metabolic regulation. These microbial metabolites are primarily produced in the colon through distinct bacterial pathways. Acetate is synthesized via the pyruvate pathway by Akkermansia muciniphila, Bacteroides spp., Bifidobacterium spp., and Ruminococcus spp. (51, 52). Propionate is generated through the succinate, acrylate, and propanediol pathways by species such as Bacteroides spp., Veillonella spp., and Roseburia inulinivorans (53). Butyrate a key immunomodulatory SCFA, is predominantly via the phosphotransbutyrylase/butyrate kinase and butyryl-CoA:acetate CoA-transferase pathwaysinvolving Coprococcus catus, Faecalibacterium prausnitzii, and Eubacterium rectale (54, 55). Gut microbial fermentation of dietary fibers and short-chain fatty acid production. Among butyrate-producing bacteria, Faecalibacterium prausnitzii plays a crucial role due to its ability to modulate gut immune responses and reinforce epithelial integrity (55). This bacterium exerts anti-inflammatory effects by inhibiting NF-κB activation and stimulating IL-10 production, thereby reducing gut inflammation and maintaining homeostasis (56). Additionally, butyrate enhances the expression of tight junction proteins such as ZO-1 and occludin, essential for maintaining gut barrier function (57). Disruptions in F. prausnitzii abundance have been linked to inflammatory bowel disease (IBD) and colorectal cancer, emphasizing its potential as a probiotic candidate for microbiota-targeted therapies (58). SCFAs exert systemic effects by modulating immune function and metabolism. Acetate, the most abundant SCFA in circulation, can cross the blood-brain barrier to regulate appetite via central homeostatic mechanisms (59). Propionate, predominantly metabolized in the liver, contributes to lipid and glucose metabolism but remains at low peripheral concentrations (50). Butyrate plays a key role in reinforcing gut barrier integrity, reducing inflammation, and promoting regulatory T cell (Treg) differentiation, which is crucial for immune tolerance and the suppression of excessive inflammation (60–62). It also directly modulates dendritic cells and macrophages, enhancing their ability to recognize pathogen-associated molecular patterns (PAMPs) and regulating pro-inflammatory cytokine secretion (63). A significant mechanism underlying butyrate’s immunomodulatory effects is its inhibition of histone deacetylases (HDACs), leading to epigenetic modifications that regulate gene expression associated with immune homeostasis (64–66). This process fosters anti-inflammatory signaling, supports tissue repair, and balances immune responses in conditions such as infections and cancer. Mammals rely on gut bacteria to break down indigestible dietary components, such as fiber, generating SCFAs as metabolic byproducts that contribute to host health and disease prevention (11). The dynamic interplay between diet, microbial metabolism, and immune regulation highlights the potential of SCFAs as therapeutic targets for inflammatory and metabolic disorders. Cytokine signaling pathways are fundamental to immune regulation, with the microbiome playing a key role in modulating both pro-inflammatory and anti-inflammatory responses. Pro-inflammatory cytokines, such as TNF-α, IL-1β, IL-6, and IFN-γ, are critical in initiating inflammatory reactions and serve as primary mediators of immune responses during infection or injury (67). Microbial components, including lipopolysaccharides (LPS), activate signaling pathways such as the nuclear factor NF-κB pathway through Toll-like receptors, particularly TLR4, TLR3 and TLR5. The recognition of LPS by TLR4 triggers NF-κB activation, activator protein-1 (AP-1), and mitogen-activated protein kinase (MAPK) (68). These pathways stimulate the release of proinflammatory cytokines and chemokines, including interleukin (IL)-1, tumor necrosis factor (TNF)-α, and IL-6 (44, 69, 70). Cytokines are versatile proteins that play a key role in regulating osteoclast development and bone resorption, altering vascular endothelial permeability, and attracting immune cells to sites of inflammation (44, 71). The recognition of viral components by TLR3 triggers the TRIF-mediated signaling pathway, leading to the activation of Interferon Regulatory Factor 3 (IRF3) and the subsequent production of Interferon Beta (IFN-β), which plays a crucial role in inhibiting viral replication (72).",
+        "type": "direct_evidence"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "Abstract"
+        ],
+        "source_handle": "P0486",
+        "text": "The pathogenesis of colorectal cancer (CRC) is closely associated with gut microbial metabolites, which exert crucial regulatory effects within the tumor immune microenvironment.These metabolites play a dual role in CRC immunity: certain metabolites promote tumor progression by inducing chronic inflammation, recruiting myeloid-derived suppressor cells, and suppressing CD8 + T cell function; while others, such as short-chain fatty acids and tryptophan metabolites, enhance anti-tumor immunity and improve the efficacy of immune checkpoint inhibitors (ICBs).This paper systematically explores intervention strategies targeting this mechanism, including probiotics, prebiotics, metabolite adjuvants, and their combination with immunotherapy to overcome ICB resistance.Furthermore, the analysis of specific metabolites (e.g., cholic acid derivatives) and microbial signatures (e.g., enrichment of F. nucleatum) has been identified as a potential avenue for the development of novel non-invasive biomarkers, which could facilitate early screening and differential diagnosis.Notwithstanding the challenges encountered in the clinical translation of these technologies, the integration of multi-omics and artificial intelligence with the immunoregulatory mechanisms and diagnostic potential of metabolites holds great promise for advancing precision medicine in the comprehensive management of CRC. Colorectal cancer (CRC) is the third most common and third deadliest form of cancer.While the number of new cases has remained stable or even decreased in some regions worldwide among individuals over 50, there has been an alarming increase in younger adults (aged 25-49) [1].Even though surgery and chemotherapy are still the main ways to treat the disease, patients with unresectable or metastatic disease usually have a poor prognosis and a much lower chance of surviving for 5 years.Lately, there has been a great deal of optimism surrounding novel anticancer medications that focus on the immune system.The pharmaceutical agents classified as immune checkpoint inhibitory compounds have demonstrated considerable potential as a therapeutic modality for the management of the aforementioned ailment [2].Nevertheless, concerns pertaining to drug resistance and toxicity persist in impeding the extensive clinical implementation of these treatments, underscoring the pressing necessity for novel therapeutic methodologies [3].A mixture of hereditary, epigenomic and ecological elements usually leads to the etiology of CRC.Mounting proof suggests the performance of a vital regulatory function in this process by the intestinal microbiota.The human gastrointestinal tract is home to a multitude of minuscule organisms known as microbes.This includes bacteria, fungi, and viruses.Together, they form a complex ecosystem [4].The diversity of these microorganisms within the gut far exceeds both the genetic diversity of the host and that of the human genome, suggesting a rich and intricate ecological relationship [5,6]",
+        "type": "direct_evidence"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "review planning",
+          "facet contribution"
+        ],
+        "source_handle": "P0261",
+        "text": "Many mechanisms are derived from preclinical mouse models; human validation is ongoing. The relative contribution of each mechanism in humans is not fully quantified. Outlines three mechanistic categories: (1) Direct T-cell stimulation (e.g., via DC activation or TLR signaling); (2) Molecular mimicry (cross-reactive T-cells); (3) Metabolite production (SCFAs, bile acids, inosine) influencing the tumor microenvironment and systemic immunity. F2\nUse to answer 'what mechanisms mediate that effect'.",
+        "type": "planning_summary"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "review planning",
+          "topic handles"
+        ],
+        "source_handle": "P0319",
+        "text": "Mechanisms of adaptive immunity regulation (CD8+ T cell exhaustion, CD4+ T cell differentiation)",
+        "type": "planning_summary"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "Metabolic reprogramming of tumor-associated immune cells by microbiota-derived metabolites: mechanisms and therapeutic implications",
+          "Tryptophan metabolites: context-dependent immunometabolic regulation centered on the AhR signaling axis"
+        ],
+        "source_handle": "P0447",
+        "text": "ndole derivative pathway (104). Among these, the kynurenine pathway is the most extensively studied in tumor immunology. Its key rate-limiting enzymes, indoleamine 2,3-dioxygenase (IDO) and tryptophan 2,3-dioxygenase (TDO), are highly expressed in various tumors, leading to tryptophan depletion and the accumulation of metabolites such as kynurenine in the tumor microenvironment (133). This “dual-hit” mechanism—comprising amino acid deprivation and toxic metabolite accumulation—collectively induces T cell cycle arrest and functional exhaustion, thereby fostering an immunosuppressive microenvironment.",
+        "type": "direct_evidence"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "Microbiome-mediated modulation of drug efficacy"
+        ],
+        "source_handle": "P0297",
+        "text": "t al., 2024).These findings provide a robust framework for personalized treatment selection based on microbial profiling.A multi-omics analysis of fecal microbiota and metabolites was conducted in 303 cancer patients receiving anti-PD-1/PD-L1 immunotherapy, integrated with data from four public metagenomic datasets (568 patients).The study identified five gut microbial enterotypes closely associated with treatment response.Each enterotype demonstrated distinct bacterial compositions and unique metabolic profiles.These enterotypes and their associated metabolites may serve as predictive biomarkers for immunotherapy response (Zhu et al., 2025). The gut microbiome exerts profound influence on anti-tumor drug responses through multifaceted immunomodulatory mechanisms.Beneficial commensals including Lachnospiraceae, Ruminococcaceae, Faecalibacterium spp., Akkermansia spp., and Bifidobacterium spp.species enhance treatment efficacy through several synergistic pathways: production of immunostimulatory metabolites (SCFAs, L-arginine, inosine, tryptophan); expression of molecular patterns that activate dendritic cells; and induction of TH1-polarized immune responses via IL-12 and type I interferon signaling (Liu et al., 2024).Several studies have demonstrated that probiotic use is associated with improved overall survival and progression-free survival in NSCLC patients (Zhang and Xu, 2023).Antibiotic use may negatively impact prognosis and treatment efficacy in lung cancer patients by altering gut microbiota composition and reducing beneficial bacteria.Multiple retrospective studies have shown that antibiotic exposure correlates with reduced immunotherapy efficacy and poorer prognosis (Zhang et al., 2021).Research indicates that gut microbiota diversity is closely linked to NSCLC patient outcomes, with higher diversity associated with better prognosis.Specific bacterial species, such as Akkermansia muciniphila and Ruminococcaceae, have been associated with favorable outcomes in NSCLC patients (Del Giudice et al., 2024).Clinical observations reveal that antibiotic administration prior to ICI therapy dramatically reduces median overall survival from 15.3 to 8.3 months (Routy et al., 2018), while specific microbial taxa demonstrate remarkable therapeutic associations.Bifidobacterium species potentiate PD-1 blockade efficacy by activating antigen-presenting cells (Sivan et al., 2015), and butyrate-producing microbes (Faecalibacterium spp., Roseburia spp., Anaerobutyricum spp.) significantly improve outcomes through acetyl-CoA-mediated metabolic programming (Liu et al., 2024).These findings are further supported by compelling preclinical evidence showing that fecal microbiota transplantation (FMT) from responding patients can transfer therapeutic responsiveness to germfree mice (Routy et al., 2018). Innovative microbiome-modulating strategies are emerging as promising adjuncts to conventional lung cancer therapies.Current approaches for gut microbiome modulation primarily include interventions such as probiotics, prebiotics, FMT, and lifestyle modifications.In recent years, clinical trials have evaluated the efficacy of these microbiome-targeted interventions, particularly in combination with ICIs, providing both biological rationale and clinical feasibility for gut microbiome modulation as a strategy to enhance cancer treatment response (Elkrief et al., 2025).Emerging evidence suggests that specific probiotic supplementation may serve as an \"adjuvant\" for immunotherapy.For instance, probiotic formulations containing Bifidobacterium and Clostridium butyricum have demonstrated the ability to enhance ICI efficacy across multiple studies, improving treatment response rates by 10-15%.These probiotics exert their beneficial effects through multiple mechanisms, including immune balance regulation, intestinal barrier enhancement, and production of beneficial metabolites (Jin et al., 2025).Clinical data demonstrate that probiotic supplementation with Clostridium butyricum MIYAIRI 588 significantly extends both progression-free and overall survival in advanced NSCLC patients receiving immunotherapy (Tomita et al., 2020).Preclinical models reveal that probiotic co-administration enhances gefitinib's anti-tumor activity while antibiotic use abrogates its therapeutic effects (Jiang et al., 2024).Cutting-edge research on postbiotic formulations (e.g., MS-20) demonstrates synergistic effects with PD-1",
+        "type": "direct_evidence"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "general understanding",
+          "key finding"
+        ],
+        "source_handle": "P0146",
+        "text": "Mechanisms of Immune Modulation\nMicrobiota modulate immunity via direct interaction with dendritic cells and macrophages (PRR activation), metabolite signaling (SCFAs, bile acids, tryptophan metabolites influencing T cell differentiation), and molecular mimicry (cross-reactive T cells). Intratumoral microbiota can remodel the TME, promoting TLS formation or inducing immunosuppression.",
+        "type": "planning_summary"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "Technological advances in understanding the immunological axis"
+        ],
+        "source_handle": "P0460",
+        "text": "Analyzing microbial metabolites and linking them to host immune pathways.",
+        "type": "direct_evidence"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "review planning",
+          "topic handles"
+        ],
+        "source_handle": "P0319",
+        "text": "Mechanisms of innate immunity regulation (DCs, macrophages, NK cells)",
+        "type": "planning_summary"
+      },
+      {
+        "material_depth": "fulltext",
+        "section": [
+          "review planning",
+          "facet contribution"
+        ],
+        "source_handle": "P0261",
+        "text": "e) influencing the tumor microenvironment and systemic immunity. F2\nUse to answer 'what mechanisms mediate that effect'. Provides specific biological pathways and molecules (e.g., STING pathway, NOD2, adenosine receptors, GPRs) that link microbial presence to immune function.",
+        "type": "planning_summary"
+      }
+    ],
+    "paper_context": [
+      {
+        "opening": "",
+        "sections": [
+          "general understanding / approach",
+          "general understanding / contribution and limits",
+          "review planning / facet contribution",
+          "general understanding / key finding",
+          "planning summary",
+          "general understanding / problem",
+          "general understanding / scope",
+          "review planning / broader review uses",
+          "review planning / scope cautions",
+          "review planning / topic handles",
+          "general understanding / work summary",
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0601"
+      },
+      {
+        "opening": "Background: Immune checkpoint inhibitors (ICIs) are extensively employed in cancer treatment; however, the development of ICI-associated myocarditis (ICI-MC) introduces a severe and potentially fatal complication with elusive pathophysiological mechanisms. This study aimed to pinpoint pivotal immune-related genes in ICI-MC and unveil potential therapeutic targets using bioinformatics. aimed to pinpoint pivotal immune-related genes in ICI-MC and unveil potential therapeutic targets using bioinformatics. Methods: Utilizing the GSE180045 dataset (comprising three groups: Group A - ICI patients without immune adverse events, Group B - ICI patients with non-myocarditis immune adverse events, Group C - ICI patients with myocarditis), we scrutinized differentially expressed genes (DEGs) between ICI-MC samples (Group C) and non-myocarditis controls (Group A&B). These DEGs were cross-referenced with 1796 immune-related genes (IRGs) from the immPort database to derive IR-DEGs. &B). These DEGs were cross-referenced with 1796 immune-related genes (IRGs) from the immPort database to derive IR-DEGs. We conducted functional enrichment analyses (GO, KEGG, GSEA), constructed a PPI network, and identified hub genes. Validation was performed using the GSE4172 dataset, and optimal feature genes (OFGs) were identified from the overlap of hub genes and validation DEGs. Predictions of target miRNAs w",
+        "sections": [
+          "general understanding / approach",
+          "general understanding / contribution and limits",
+          "review planning / facet contribution",
+          "general understanding / key finding",
+          "planning summary",
+          "general understanding / problem",
+          "general understanding / scope",
+          "review planning / broader review uses",
+          "review planning / scope cautions",
+          "review planning / topic handles",
+          "general understanding / work summary",
+          "Supplementary question reading",
+          "Abstract"
+        ],
+        "source_handle": "P0595"
+      },
+      {
+        "opening": "",
+        "sections": [
+          "general understanding / approach",
+          "general understanding / contribution and limits",
+          "review planning / facet contribution",
+          "general understanding / key finding",
+          "planning summary",
+          "general understanding / problem",
+          "general understanding / scope",
+          "review planning / broader review uses",
+          "review planning / scope cautions",
+          "review planning / topic handles",
+          "general understanding / work summary",
+          "Supplementary question reading"
+        ],
+        "source_handle": "P0597"
+      },
+      {
+        "opening": "Immune checkpoint inhibitors (ICIs) are widely used in cancer treatment; however, the emergenceof ICI-associated myocarditis (ICI-MC) presents a severe and potentially fatal complication with poorly understood pathophysiological mechanisms. This study aimed to identify crucial immune-related genes in ICI-MC and uncover potential therapeutic targets using bioinformatics. aimed to identify crucial immune-related genes in ICI-MC and uncover potential therapeutic targets using bioinformatics. Using the GSE180045 dataset, which includes three groups—Group A: ICI patients without immune adverse events, Group B: ICI patients with non-myocarditis immune adverse events, and Group C: ICI patients with myocarditis—we analyzed differentially expressed genes (DEGs) between ICI-MC samples (Group C) and non-myocarditis controls (Groups A and B). These DEGs were then cross-referenced with 1,796 immune-related genes (IRGs) from the immPort database to identify IR-DEGs. se DEGs were then cross-referenced with 1,796 immune-related genes (IRGs) from the immPort database to identify IR-DEGs. We conducted functional enrichment analyses (GO, KEGG, GSEA), constructed a PPI network, and identified hub genes. Validation using the GSE4172 dataset led to the identification of optimal feature genes (OFGs) from the overlap between hub genes and DEGs. Predictions of target miRNAs were made, and a ceRNA netwo",
+        "sections": [
+          "general understanding / approach",
+          "general understanding / contribution and limits",
+          "review planning / facet contribution",
+          "general understanding / key finding",
+          "planning summary",
+          "general understanding / problem",
+          "general understanding / scope",
+          "review planning / broader review uses",
+          "review planning / scope cautions",
+          "review planning / topic handles",
+          "general understanding / work summary",
+          "Supplementary question reading",
+          "Abstract"
+        ],
+        "source_handle": "P0596"
+      }
+    ],
+    "question": "Prevotella spp. 诱导心肌炎的具体分子机制（如通过何种抗原或代谢物激活特定 T 细胞亚群）在 FMT-LUMINate 研究中仅表现为相关性，是否有后续研究解析其下游信号通路？",
+    "reading_mode": "focused_local_read",
+    "success_criteria": [
+      "\"return directly relevant evidence or state why the gap remains unresolved.\""
+    ],
+    "user_scope": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect?"
+  },
+  "settings": {
+    "max_output_tokens": 6000,
+    "model": "qwen3.7-flash",
+    "quantitative_model": "qwen3.5-plus",
+    "thinking_budget": 4096
+  },
+  "sources": [
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_2\\supplements\\Ch6_gap_4\\attempt-x8duln8o\\source_units\\SU02_search_candidate_d1274441e4\\card\\PAPER_READING_CARD.json",
+      "paper_id": "CorpusId:9951952",
+      "reading_path": "",
+      "source_handle": "P0601"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU01_search_candidate_9277696331\\card\\PAPER_READING_CARD.json",
+      "paper_id": "167d738780c05d96b68041fb0211da97bb53b857",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU01_search_candidate_9277696331\\materials\\167d738780c05d96b68041fb0211da97bb53b857\\snapshot-dae772f6ab6cc882c1b0d822",
+      "source_handle": "P0595"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU01_search_candidate_9277696331\\card\\PAPER_READING_CARD.json",
+      "paper_id": "167d738780c05d96b68041fb0211da97bb53b857",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU01_search_candidate_9277696331\\materials\\167d738780c05d96b68041fb0211da97bb53b857\\snapshot-dae772f6ab6cc882c1b0d822",
+      "source_handle": "P0595"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU03_search_candidate_caa7d3faf8\\card\\PAPER_READING_CARD.json",
+      "paper_id": "CorpusId:287796055",
+      "reading_path": "",
+      "source_handle": "P0597"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU02_search_candidate_1ade57df76\\card\\PAPER_READING_CARD.json",
+      "paper_id": "38f13e3a33ed5233b0a792fdb8143168a4264099",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU02_search_candidate_1ade57df76\\materials\\38f13e3a33ed5233b0a792fdb8143168a4264099\\snapshot-2d61e929efb96caa925ff33c",
+      "source_handle": "P0596"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\6f9060daa22a7c9efcd4a92919035c5e5c24367a\\cc59b1602065d8843b6a0ee6c2797d9c\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "6f9060daa22a7c9efcd4a92919035c5e5c24367a",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\6f9060daa22a7c9efcd4a92919035c5e5c24367a\\snapshot-0f60a870cc234cd16bde738b",
+      "source_handle": "P0261"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\896aa96e6dbaae9b8dbaa7d183f459500ad70834\\0a3462ca68e00befd1fc57bcd3fddfc4\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "896aa96e6dbaae9b8dbaa7d183f459500ad70834",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\896aa96e6dbaae9b8dbaa7d183f459500ad70834\\snapshot-97008f5eee2dc294fb3cfd1f",
+      "source_handle": "P0319"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\c59738fb3db453360d9f86e97ad338176abe8eb6\\42993142a6b2e557adda307d103ec858\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "c59738fb3db453360d9f86e97ad338176abe8eb6",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\c59738fb3db453360d9f86e97ad338176abe8eb6\\snapshot-03c6080fcfb27d08dba67d01",
+      "source_handle": "P0447"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\8211fc48bb00f738157c8859ad0748cc7d220f09\\5faefb771e9af4b8f1b5bd10a8bf9492\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "8211fc48bb00f738157c8859ad0748cc7d220f09",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\8211fc48bb00f738157c8859ad0748cc7d220f09\\snapshot-bd53babb83613dea7287afe9",
+      "source_handle": "P0297"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\4171288ecca93c6bca3eee61295418d704bb00fd\\92125422c10f28cdb7938d2658870c58\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "4171288ecca93c6bca3eee61295418d704bb00fd",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\4171288ecca93c6bca3eee61295418d704bb00fd\\snapshot-82744d20e02956a846810b15",
+      "source_handle": "P0146"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\new_plan\\chapters\\external\\N149eaa553bda\\round_2\\supplements\\tme_metabolite_quant_methods\\source_units\\SU01_search_candidate_d0e251127d\\card\\PAPER_READING_CARD.json",
+      "paper_id": "d69f29862a6e18da7c70e3c9d22cd4b7cabc18a3",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\manuscript_parts_acceptance_20260930\\new_plan\\chapters\\external\\N149eaa553bda\\round_2\\supplements\\tme_metabolite_quant_methods\\source_units\\SU01_search_candidate_d0e251127d\\materials\\d69f29862a6e18da7c70e3c9d22cd4b7cabc18a3\\snapshot-a5da5ae26f9b05e1f813fcd1",
+      "source_handle": "P0609"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\cbbd16613d73a6baa4dff169701c792f0d38e1e2\\148d0bec6459003d47e990fa0dd471c5\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "cbbd16613d73a6baa4dff169701c792f0d38e1e2",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\cbbd16613d73a6baa4dff169701c792f0d38e1e2\\snapshot-b5d8e50a0ad84f58aedc223d",
+      "source_handle": "P0460"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\daf9a1dede2bf1241ba0b187914be958d46b79fd\\0b465d9d1ce55910ec376a98185f4f08\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "daf9a1dede2bf1241ba0b187914be958d46b79fd",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\daf9a1dede2bf1241ba0b187914be958d46b79fd\\snapshot-fd4d157212785d11a0ea5c97",
+      "source_handle": "P0486"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\6f9060daa22a7c9efcd4a92919035c5e5c24367a\\cc59b1602065d8843b6a0ee6c2797d9c\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "6f9060daa22a7c9efcd4a92919035c5e5c24367a",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\6f9060daa22a7c9efcd4a92919035c5e5c24367a\\snapshot-0f60a870cc234cd16bde738b",
+      "source_handle": "P0261"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\896aa96e6dbaae9b8dbaa7d183f459500ad70834\\0a3462ca68e00befd1fc57bcd3fddfc4\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "896aa96e6dbaae9b8dbaa7d183f459500ad70834",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\896aa96e6dbaae9b8dbaa7d183f459500ad70834\\snapshot-97008f5eee2dc294fb3cfd1f",
+      "source_handle": "P0319"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\c59738fb3db453360d9f86e97ad338176abe8eb6\\42993142a6b2e557adda307d103ec858\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "c59738fb3db453360d9f86e97ad338176abe8eb6",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\c59738fb3db453360d9f86e97ad338176abe8eb6\\snapshot-03c6080fcfb27d08dba67d01",
+      "source_handle": "P0447"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\8211fc48bb00f738157c8859ad0748cc7d220f09\\5faefb771e9af4b8f1b5bd10a8bf9492\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "8211fc48bb00f738157c8859ad0748cc7d220f09",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\8211fc48bb00f738157c8859ad0748cc7d220f09\\snapshot-bd53babb83613dea7287afe9",
+      "source_handle": "P0297"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\4171288ecca93c6bca3eee61295418d704bb00fd\\92125422c10f28cdb7938d2658870c58\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "4171288ecca93c6bca3eee61295418d704bb00fd",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\4171288ecca93c6bca3eee61295418d704bb00fd\\snapshot-82744d20e02956a846810b15",
+      "source_handle": "P0146"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\cbbd16613d73a6baa4dff169701c792f0d38e1e2\\148d0bec6459003d47e990fa0dd471c5\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "cbbd16613d73a6baa4dff169701c792f0d38e1e2",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\cbbd16613d73a6baa4dff169701c792f0d38e1e2\\snapshot-b5d8e50a0ad84f58aedc223d",
+      "source_handle": "P0460"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\896aa96e6dbaae9b8dbaa7d183f459500ad70834\\0a3462ca68e00befd1fc57bcd3fddfc4\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "896aa96e6dbaae9b8dbaa7d183f459500ad70834",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\896aa96e6dbaae9b8dbaa7d183f459500ad70834\\snapshot-97008f5eee2dc294fb3cfd1f",
+      "source_handle": "P0319"
+    },
+    {
+      "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\6f9060daa22a7c9efcd4a92919035c5e5c24367a\\cc59b1602065d8843b6a0ee6c2797d9c\\attempt-01\\PAPER_READING_CARD.json",
+      "paper_id": "6f9060daa22a7c9efcd4a92919035c5e5c24367a",
+      "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\6f9060daa22a7c9efcd4a92919035c5e5c24367a\\snapshot-0f60a870cc234cd16bde738b",
+      "source_handle": "P0261"
+    }
+  ],
+  "system_prompt": "你是综述作者的材料阅读助手，围绕一个写作问题提炼具体研究认识。\n一起阅读 material_found 和 paper_context，保留研究对象或材料、研究设置、比较对象、方法、操作或条件（如有）、结果或论证、验证方式与适用边界。卡片、专家综述转述和原文都按内容是否能回答问题使用，不因形式自动降权。\n先理解 user_scope 与问题对象，不能用其他对象、方法、设置或比较冒充本问题的答案。特定模型、材料或场景的结果不得无依据外推到别的对象或设置；观察关联不改写为因果关系；统计或分析方法也不自动证明因果、排除混杂或完成独立验证，方法意义只说材料明确说明的部分。\n输出 usable_content 为一段可直接阅读的字符串：适合本节的具体认识、研究异同、解释和条件。先呈现能区别不同研究的发现或论证，不先套领域常见结论；结尾也要保留这些区别。别把多个不同对象、材料、产品、场景或实验设置的结果合成一个普适机制或结论。\n涉及数字时，先逐项输出 quantitative_comparisons，每项写 research_object、result_or_measure、setting_or_time、groups；groups 是 [{group:原文组名或缩写,value:紧邻该组的结果含单位}]，保留原文分组顺序与缩写，不重新命名或调序；缩写定义另写 group_definitions。逐字读取每个组名紧随的数值，不从常识、总体结论或组名列表反推配对。reported_statistics 记录原文给出的统计量（没报告才留空）。一组一数成对，不用多组名字对应一串数字；总体与分层比较、不同指标或结果分别记录。usable_content 解释含义，不重复重排数字。原文没有的值不编。问题限定某设置、时间或子组时，必须分别读总体和指定部分，不能拿总体结果代替，也不能把分析时点当成条件发生时点。\ndecision 判断当前具体问题是否解决，而不是材料有没有用：direct_use=足以回答当前问题，或有明确材料纠正其错误前提；local_deep_read=本地有材料但需要读另一部分或完整比较（read_focus 说明具体要读什么）；external_research=缺新的研究对象、方法、比较或验证材料（external_ask 提出保留对象和关系的窄需求）。external_research 也可以有丰富 usable_content：已有背景可用但核心问题没回答，就先保留内容并提出剩余检索需求。不要因为找到相关材料就宣布 direct_use。问题里的预设（例如研究阶段、设计、测量或效果）不是事实，先以材料校正。\n对于“是否已经有某类研究/结果”的问题，找到一个符合条件的实例可以回答；几篇论文未提到，或一篇较早综述说当时没有，不能回答当前是否存在。已有内容可以说明截至该来源时间的研究格局；若仍需确认后来是否出现目标研究，就选择 external_research 并提出该项具体检索，不要一边宣布问题已解决一边仍要求确认其核心答案。只有问题明确限定在这些来源的时间或材料范围内，才可据此直接给出否定答案。\nanswers_requested_question 只表示当前材料是否真正回答了原问题和 success_criteria；有用但只覆盖背景或部分条件的内容填 false，明确的实验性阴性结果或明确限于这些来源/时间范围的否定答案可填 true。\nreading_mode=focused_local_read 时已经执行补读，尽力完成具体认识；仍缺新材料则指出缺口，不循环要求读同一材料。摘要能回答背景或明确比较就可用，不强制全文。\n先完成 quantitative_comparisons，再写 usable_content。必须先逐组读原句，不根据总体方向猜测分组方向；结果可以与提问隐含的方向相反。某部分出现反向或无差异时，综合开头就写清不同设置或对象结果不一致，不能先说“一致”再在后面补相反数据。同一指标的总体比较和按条件分层不是同一组数据，不得互换。\n返回 JSON，按此顺序写字段：quantitative_comparisons（无数字则 []）, usable_content, decision, answers_requested_question（必须是 JSON boolean；不能确定或 success_criteria 未满足时填 false）, still_missing, read_focus, external_ask, reason。\n"
+}
