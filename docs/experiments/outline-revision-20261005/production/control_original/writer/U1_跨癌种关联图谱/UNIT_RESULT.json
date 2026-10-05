@@ -1,0 +1,469 @@
+{
+  "schema_version": "optomind.review_unit_writer.result.v1",
+  "generated_at": "2026-10-05T22:30:33",
+  "mode": "run",
+  "simulated": false,
+  "chapter_id": "Ch1",
+  "unit_id": "U1_跨癌种关联图谱",
+  "model": "qwen3.7-flash",
+  "language": "zh",
+  "body_markdown": "## 跨癌种微生物特征与ICI疗效的关联图谱\n\n在实体瘤免疫检查点抑制剂（ICI）治疗中，肠道微生物组特征与临床结局之间存在显著的观察性关联，但这种关联呈现出高度的癌种特异性与情境依赖性。尽管黑色素瘤、非小细胞肺癌（NSCLC）和肾细胞癌（RCC）等队列中反复出现某些阳性信号，但结直肠癌、肝细胞癌（HCC）及前列腺癌中却存在信号反转或失效的现象，证实了不存在普适性的单一生物标志物。\n\n### 共性信号与癌种特异性分布\n\n在黑色素瘤、NSCLC和RCC患者中，基线高肠道微生物α多样性以及特定有益菌属（如*Akkermansia muciniphila*、*Faecalibacterium prausnitzii*、*Bifidobacterium longum*）的富集通常与改善的总生存期（OS）、无进展生存期（PFS）及客观缓解率（ORR）相关[298]。例如，一项涵盖1,542名患者的系统综述与荟萃分析显示，高α多样性显著改善了NSCLC和黑色素瘤患者的OS（合并HR 0.52）和PFS（合并HR 0.58），且这种关联不受测序方法（16S vs. 宏基因组）的影响[298]。此外，多界微生物组整合分析进一步支持了这一生态稳定性观点：在跨越多种实体瘤的大规模队列中，具有高多样性和稳定共现网络结构的患者亚型（富含*Bacteroides*和*Kluyveromyces*）表现出显著优于低多样性亚型的ICI疗效和生存期[393]。\n\n然而，这些在部分癌种中稳健的信号在其他肿瘤类型中可能完全失效甚至呈现负向关联。在晚期肝细胞癌（HCC）患者中，虽然持久临床获益（DCB）组的细菌和代谢物多样性高于非持久获益组，但真菌群落的差异并不显著，提示不同微生物类群对疗效的贡献度具有癌种特异性[204]。更具挑战性的是转移性去势抵抗性前列腺癌（mCRPC）的证据：在该人群中，此前在其他癌症中被认为促进ICI疗效的*A. muciniphila*在反应者中反而显著减少，而口腔共生菌*Streptococcus salivarius*则在粪便中与疗效呈正相关[270]。这种跨癌种的信号反转挑战了“通用增效菌”的假设，表明既往内分泌治疗史（如恩杂鲁胺使用）可能重塑了微生物组对ICI的反应模式[270]。\n\n### “无通用标志物”的统计依据与异质性来源\n\n跨队列研究的巨大异质性是阻碍单一微生物标志物泛化的核心原因。在一项整合了5个新测序队列和4个公开数据集的大型黑色素瘤研究中，PERMANOVA分析证实，“队列”本身是解释微生物群落组成变异的最大因素，其解释方差远超任何临床参数（如年龄、性别或用药史）[478]。机器学习模型的验证结果进一步量化了这种不可重复性：基于物种丰度训练的预测模型在内部队列中表现尚可（AUC-ROC最高达0.78），但在跨队列测试中泛化能力极差，留一法交叉验证的平均AUC-ROC仅为0.59-0.60，几乎等同于随机猜测[478]。这表明，基于特定人群训练的微生物特征无法可靠地预测其他独立队列的治疗反应。\n\n这种异质性不仅源于人群背景，还与宿主自身的肠型（Enterotype）密切相关。研究揭示，微生物标志物的效应高度依赖于特定的群落背景：例如，*Collinsella*属的丰度增加仅在E2肠型（富含肠杆菌科）中与ICI响应相关，而在E1肠型中则表现为阴性或无关[170]。同样，在日本全国范围的晚期实体瘤筛查项目中，整体α多样性与ICI疗效并无普遍关联；相反，粪便中高比例的口腔细菌比例升高显著预测了较差的PFS，这在上消化道肿瘤及质子泵抑制剂（PPI）使用者中尤为明显[289]。这些证据共同确认了微生物关联的复杂性和强烈的队列/肠型依赖性，使得单一物种难以成为普适性生物标志物。\n\n### 治疗方案与给药时序的严格修饰\n\n除了癌种和人群背景外，具体的免疫治疗方案也是决定微生物效应方向的关键修饰变量。在JCOG2007（NIPPON）III期临床试验的辅助生物标志物研究中，研究者对比了含帕博利珠单抗的化疗联合方案（PC）与含纳武利尤单抗+伊匹木单抗的双免疫联合方案（NIC）。结果显示，*Fusicatenibacter*和*Butyricicoccus*的高丰度仅在NIC组中与更好的OS显著相关（HR分别为0.56和0.52），而在PC组中这一关联消失[585]。更值得注意的是，在NIC组中，*Prevotellaceae NK3B31*的高丰度反而与更高的死亡风险相关（HR=2.33），揭示了同一菌属在不同给药方案下可能产生截然相反的预后意义[585]。\n\n进一步的菌株水平分辨率研究也强调了治疗方案特异性的普遍存在。针对罕见实体瘤联合免疫检查点阻断（CICB）构建的菌株级微生物签名，虽然在三种不同的罕见癌症组织学亚型间表现出稳健的泛癌种预测力（平均AUC=0.75），但当该模型被应用于抗PD-1单药治疗的队列时，其预测能力完全丧失（平均AUC=0.51）[0015]。基因水平的功能趋同分析也指出，尽管分类学特征因治疗方案而异，但响应相关的菌群均指向短链脂肪酸产生和CD8+ T细胞致敏等共享通路[364]。这些发现表明，微生物-宿主互作并非静态不变，而是受到具体药物组合（如CTLA-4与PD-1联用与否）的严格调控，未来的生物标志物开发必须将治疗方案作为核心分层变量。",
+  "body_path": "<LOCAL_REVIEW2_PATH>",
+  "used_source_handles": [],
+  "unused_source_handles": [
+    "P0096",
+    "P0146",
+    "P0585",
+    "P0298",
+    "P0204",
+    "P0270",
+    "P0393",
+    "P0565",
+    "P0478",
+    "P0170",
+    "P0289",
+    "P0015",
+    "P0437",
+    "P0364",
+    "P0511",
+    "P0545"
+  ],
+  "unknown_citations": [],
+  "source_count": 16,
+  "material_summary": {
+    "sources": 16,
+    "with_study_summary_A": 16,
+    "with_review_planning_B": 16,
+    "with_deep_read_material": [
+      "P0478"
+    ],
+    "with_supplement_material": 1,
+    "with_supplement_materials": [
+      "P0585"
+    ],
+    "with_local_passages": [
+      "P0364"
+    ],
+    "with_tool_supplement_materials": [],
+    "chapter_tool_materials": 0,
+    "read_from_disk": [
+      "P0015",
+      "P0096",
+      "P0146",
+      "P0170",
+      "P0204",
+      "P0270",
+      "P0289",
+      "P0298",
+      "P0364",
+      "P0393",
+      "P0437",
+      "P0478",
+      "P0511",
+      "P0545",
+      "P0565",
+      "P0585"
+    ],
+    "truncated": []
+  },
+  "material_notes": [
+    {
+      "source_handle": "P0096",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0146",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0585",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0298",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0204",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0270",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0393",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0565",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0478",
+      "issues": [],
+      "paid_deep_read_material": true,
+      "deep_read_trimmed": {
+        "material_ready": 4,
+        "paper_id": 42,
+        "references": 992,
+        "review_id": 23,
+        "schema_version": 46,
+        "status": 9,
+        "task_id": 34,
+        "workflow": 21
+      },
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0170",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0289",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0015",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0437",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0364",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0511",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0545",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    }
+  ],
+  "warnings": [],
+  "estimate": {
+    "prompt_tokens_estimate": 57009,
+    "reserved_input_tokens": 72042,
+    "output_tokens": 4000,
+    "thinking_budget": 0,
+    "total_context_tokens": 76042,
+    "estimated_cost_cny": 0.10565039999999999,
+    "model": "qwen3.7-flash",
+    "tokenizer": "provided_token_counter"
+  },
+  "usage": {
+    "completion_tokens": 1344,
+    "prompt_tokens": 57021,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 57021
+    },
+    "total_tokens": 58365
+  },
+  "finish_reason": "stop",
+  "complete": true,
+  "completion_status": "complete",
+  "partial_error": "",
+  "issues": [],
+  "known_tool_identifiers": [
+    "Q01"
+  ],
+  "non_source_identifier_citations": [],
+  "unresolved_numeric_citations": [
+    "[298]",
+    "[393]",
+    "[204]",
+    "[270]",
+    "[478]",
+    "[170]",
+    "[289]",
+    "[585]",
+    "[0015]",
+    "[364]"
+  ],
+  "citation_problems": [
+    {
+      "code": "numeric_citation_unresolved",
+      "citation": "[298]",
+      "note": "没有可用的显式编号到当前来源映射，保留原文"
+    },
+    {
+      "code": "numeric_citation_unresolved",
+      "citation": "[393]",
+      "note": "没有可用的显式编号到当前来源映射，保留原文"
+    },
+    {
+      "code": "numeric_citation_unresolved",
+      "citation": "[204]",
+      "note": "没有可用的显式编号到当前来源映射，保留原文"
+    },
+    {
+      "code": "numeric_citation_unresolved",
+      "citation": "[270]",
+      "note": "没有可用的显式编号到当前来源映射，保留原文"
+    },
+    {
+      "code": "numeric_citation_unresolved",
+      "citation": "[478]",
+      "note": "没有可用的显式编号到当前来源映射，保留原文"
+    },
+    {
+      "code": "numeric_citation_unresolved",
+      "citation": "[170]",
+      "note": "没有可用的显式编号到当前来源映射，保留原文"
+    },
+    {
+      "code": "numeric_citation_unresolved",
+      "citation": "[289]",
+      "note": "没有可用的显式编号到当前来源映射，保留原文"
+    },
+    {
+      "code": "numeric_citation_unresolved",
+      "citation": "[585]",
+      "note": "没有可用的显式编号到当前来源映射，保留原文"
+    },
+    {
+      "code": "numeric_citation_unresolved",
+      "citation": "[0015]",
+      "note": "没有可用的显式编号到当前来源映射，保留原文"
+    },
+    {
+      "code": "numeric_citation_unresolved",
+      "citation": "[364]",
+      "note": "没有可用的显式编号到当前来源映射，保留原文"
+    }
+  ],
+  "fence_report": {
+    "remaining_fenced_lines": []
+  },
+  "content_review_status": "not_reviewed",
+  "table_check": {
+    "valid": null
+  },
+  "output_consumption_status": "consumed",
+  "arrangement_path": "<LOCAL_REVIEW2_PATH>",
+  "view_path": "<LOCAL_REVIEW2_PATH>",
+  "input_path": "<LOCAL_REVIEW2_PATH>",
+  "messages_path": "<LOCAL_REVIEW2_PATH>",
+  "raw_response": "<LOCAL_REVIEW2_PATH>",
+  "simulated_from": "",
+  "note": "真实模型输出；未做全章合稿、未做审稿循环、未做事实核查。"
+}

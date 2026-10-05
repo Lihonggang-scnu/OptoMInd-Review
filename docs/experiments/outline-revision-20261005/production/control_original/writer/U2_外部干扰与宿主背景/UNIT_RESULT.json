@@ -1,0 +1,382 @@
+{
+  "schema_version": "optomind.review_unit_writer.result.v1",
+  "generated_at": "2026-10-05T22:30:50",
+  "mode": "run",
+  "simulated": false,
+  "chapter_id": "Ch1",
+  "unit_id": "U2_外部干扰与宿主背景",
+  "model": "qwen3.7-flash",
+  "language": "zh",
+  "body_markdown": "## 外部药物暴露与联合方案的干扰效应\n\n### 抗生素与质子泵抑制剂：效应量与时间窗特异性\n\n在实体瘤免疫检查点抑制剂（ICI）治疗中，伴随用药是修饰肠道微生物组-免疫轴的关键外部因素。大规模荟萃分析证实，全身性抗生素暴露与患者总生存期（OS）、无进展生存期（PFS）及客观缓解率（ORR）的显著恶化相关。跨癌种汇总数据显示，抗生素使用者较未使用者的OS风险增加61%（HR=1.61, 95% CI 1.44–1.81），PFS风险增加43%（HR=1.43, 95% CI 1.27–1.60），且ORR降低近半（RR=0.58, 95% CI 0.51–0.66）[P0081]。这种负面效应在非小细胞肺癌（NSCLC）亚组中尤为稳健，一项涵盖超5万名患者的系统综述显示，NSCLC患者使用抗生素后PFS风险显著增加16%（HR=1.16, 95% CI 1.02–1.30），且该结果在不同研究中无异质性（I²=0%）[P0236]。\n\n抗生素对疗效的损害具有明确的时间窗口特异性。亚组分析与Meta回归表明，在ICI治疗前后[-45, 45]天窗口内使用抗生素，对OS恶化的负面影响最强（β=0.2192, p=0.008）[P0081]。这一发现与多项回顾性研究一致，提示ICI启动前的短期暴露（如30天内）对维持抗肿瘤免疫微环境的破坏最为致命[P0402]。同样，质子泵抑制剂（PPIs）的使用也与生存结局恶化显著相关。荟萃分析显示，PPI使用者OS风险增加约31%（HR≈1.31, 95% CI 1.19–1.44），且这种关联主要依赖于使用时窗：仅在ICI基线或前60天内开始使用的患者表现出显著的生存缩短，而在ICI治疗期间或之后才开始使用的患者则未观察到显著的负面影响[P0339]。\n\n不同肿瘤类型对药物干扰的敏感性存在异质性。在拉丁美洲NSCLC人群中，抗生素暴露导致OS显著缩短（中位OS从40.6个月降至20.3-24.7个月），但未显著影响PFS或反应率，提示地域特征或特定人群可能扰动微生物-疗效轴的表型表现[P0266]。相反，在肝细胞癌（HCC）人群中，由于肝硬化导致的基线免疫抑制状态和特定的菌群组成，抗生素暴露并未显著恶化ICI疗效（OS: HR=1.41, P=0.088; PFS: HR=1.21, P=0.459），这为“宿主背景缓冲抗生素扰动”提供了实证支持[P0275]。此外，抗生素的负面效应还受宿主生物标志物状态的严格修饰；在PD-L1高表达（≥50%）的NSCLC患者中，抗生素使用导致PFS和OS显著缩短，而在低表达患者中未见此效应，说明微生物干预的效应方向高度依赖宿主的免疫原性背景[P0517]。\n\n| 肿瘤类型 | 干扰因素 | 暴露时间窗 | 效应指标 (HR/RR) | 效应方向与显著性 | 关键来源 |\n| :--- | :--- | :--- | :--- | :--- | :--- |\n| 跨癌种汇总 | 抗生素暴露 | [-45, 45]天窗口内最强 | OS: HR=1.61 (1.44-1.81)<br>PFS: HR=1.43 (1.27-1.60)<br>ORR: RR=0.58 (0.51-0.66) | 显著恶化 [P0081] | P0081 |\n| 跨癌种汇总 | PPIs暴露 | 基线/前60天使用效应最强 | OS: HR≈1.31 (1.19-1.44)<br>PFS: HR=1.30 (1.17-1.46) | 显著恶化 [P0339] | P0339 |\n| NSCLC特异性 | 抗生素暴露 | 治疗前后 | PFS: HR=1.16 (1.02-1.30) | 显著缩短 (无异质性) [P0236] | P0236 |\n| NSCLC特异性 | 抗生素暴露 | ICI前30天/同期 | OS: 中位20.3-24.7月 vs 40.6月 | 显著缩短 (PFS无差异) [P0266] | P0266 |\n| HCC特异性 | 抗生素暴露 | 治疗前后 | OS: HR=1.41 (P=0.088)<br>PFS: HR=1.21 (P=0.459) | 无显著影响 [P0275] | P0275 |\n| 妇科肿瘤 | 长程抗生素(≥14天) | ICI前60天内 | OS: HR=2.286 (1.210–4.318) | 独立预测因子 [P0360] | P0360 |\n\n### 联合方案对微生物效应的修饰与反转\n\n除了单一药物暴露，复杂的联合治疗方案（如化疗-免疫联合或双免疫检查点阻断）能够进一步放大或反转微生物对临床结局的影响方向。在晚期NSCLC的大型III期临床试验（JCOG2007/NIPPON）附属生物标志物研究中，肠道微生物群对预后的预测价值表现出强烈的方案依赖性。在纳武利尤单抗+伊匹木单抗联合铂类化疗（NIC）组中，*Fusicatenibacter*和*Butyricicoccus*的高丰度与更好的OS显著相关（HR分别为0.56和0.52），但在培美曲塞+铂类联合帕博利珠单抗（PC）组中，这种关联消失或减弱。更值得注意的是，*Prevotellaceae NK3B31*的高丰度在NIC组中与更高的死亡风险相关（HR=2.33），揭示了同一菌属在不同免疫微环境下的双重角色[P0585]。\n\n合并用药不仅通过改变菌群丰度产生干扰，还能重塑菌群的演化路径。纵向队列研究表明，质子泵抑制剂（PPI）的使用会导致粪便中口腔细菌比例显著升高，且这一特征在PPI亚组中与更差的PFS趋势强相关[P0289]。在黑色素瘤患者的纵向宏基因组分析中，PPI使用者与非使用者在微生物动态轨迹上呈现显著差异：例如，*Streptococcus thermophilus*在非使用者（长期无进展生存者）中丰度增加，而在使用者中反而减少，说明合并用药可以彻底改变特定有益菌在治疗期间的响应模式[P0033]。这些证据共同表明，联合方案和常规药物不仅是混杂变量，更是主动修饰微生物-免疫互作方向的调节器。\n\n### 校正必要性与残余偏倚风险\n\n尽管抗生素和PPIs的负面效应已被广泛量化，但观察性研究中的指示偏倚（Indication Bias）可能导致这些效应被高估。病情更重、感染风险更高或体能状态更差的患者往往更频繁地使用抗生素，而这些患者本身的预后本就较差。因此，单纯检测微生物组而不考虑详细的用药史（种类、剂量、持续时间及指征）会导致结果的不一致和不可重复。未来研究必须标准化暴露定义并进行多变量校正，以分离出微生物介导的真实因果效应[P0081][P0402]。\n\n此外，除微生物组外，其他宿主因素（如肌肉量）对ICI疗效的影响也呈现出异质性。在一项针对实体瘤患者的研究中，低肌肉量并未像预期那样降低PFS或增加毒性，甚至在肺癌亚组中与较长的PFS相关，这提示在评估外部干扰时，需结合肿瘤免疫原性与疾病背景综合评估，避免简单归因于单一的“菌群破坏”或“身体衰弱”机制[P0548][P0421]。只有将微生物组数据置于精确的药物暴露时间窗和宿主背景中进行多维校正，才能准确解析肠道微生物组在ICI疗效中的真实贡献。",
+  "body_path": "<LOCAL_REVIEW2_PATH>",
+  "used_source_handles": [
+    "P0081",
+    "P0236",
+    "P0402",
+    "P0339",
+    "P0266",
+    "P0275",
+    "P0517",
+    "P0360",
+    "P0585",
+    "P0289",
+    "P0033",
+    "P0548",
+    "P0421"
+  ],
+  "unused_source_handles": [
+    "P0157",
+    "P0123"
+  ],
+  "unknown_citations": [],
+  "source_count": 15,
+  "material_summary": {
+    "sources": 15,
+    "with_study_summary_A": 15,
+    "with_review_planning_B": 15,
+    "with_deep_read_material": [],
+    "with_supplement_material": 1,
+    "with_supplement_materials": [
+      "P0585"
+    ],
+    "with_local_passages": [
+      "P0081",
+      "P0402"
+    ],
+    "with_tool_supplement_materials": [],
+    "chapter_tool_materials": 0,
+    "read_from_disk": [
+      "P0033",
+      "P0081",
+      "P0123",
+      "P0157",
+      "P0236",
+      "P0266",
+      "P0275",
+      "P0289",
+      "P0339",
+      "P0360",
+      "P0402",
+      "P0421",
+      "P0517",
+      "P0548",
+      "P0585"
+    ],
+    "truncated": []
+  },
+  "material_notes": [
+    {
+      "source_handle": "P0081",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0402",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0236",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0157",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0339",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0123",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0266",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0275",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0360",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0517",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0585",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0289",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0033",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0548",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    },
+    {
+      "source_handle": "P0421",
+      "issues": [],
+      "card_dedup": {
+        "format": "paper_reading_card",
+        "omitted_keys": [
+          "general_understanding",
+          "material",
+          "planning_view",
+          "review_planning"
+        ],
+        "extra_fields": [
+          "known_gaps",
+          "material_scope"
+        ]
+      },
+      "read_from_disk": "<LOCAL_REVIEW2_PATH>"
+    }
+  ],
+  "warnings": [],
+  "estimate": {
+    "prompt_tokens_estimate": 53403,
+    "reserved_input_tokens": 68003,
+    "output_tokens": 4000,
+    "thinking_budget": 0,
+    "total_context_tokens": 72003,
+    "estimated_cost_cny": 0.1008036,
+    "model": "qwen3.7-flash",
+    "tokenizer": "provided_token_counter"
+  },
+  "usage": {
+    "completion_tokens": 1923,
+    "prompt_tokens": 53415,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 53415
+    },
+    "total_tokens": 55338
+  },
+  "finish_reason": "stop",
+  "complete": true,
+  "completion_status": "complete",
+  "partial_error": "",
+  "issues": [],
+  "known_tool_identifiers": [],
+  "non_source_identifier_citations": [],
+  "unresolved_numeric_citations": [],
+  "citation_problems": [],
+  "fence_report": {
+    "remaining_fenced_lines": []
+  },
+  "content_review_status": "not_reviewed",
+  "table_check": {
+    "valid": true,
+    "header_cells": 6,
+    "data_cells": 6,
+    "line": 11
+  },
+  "output_consumption_status": "consumed",
+  "arrangement_path": "<LOCAL_REVIEW2_PATH>",
+  "view_path": "<LOCAL_REVIEW2_PATH>",
+  "input_path": "<LOCAL_REVIEW2_PATH>",
+  "messages_path": "<LOCAL_REVIEW2_PATH>",
+  "raw_response": "<LOCAL_REVIEW2_PATH>",
+  "simulated_from": "",
+  "note": "真实模型输出；未做全章合稿、未做审稿循环、未做事实核查。"
+}

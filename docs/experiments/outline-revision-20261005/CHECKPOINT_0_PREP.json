@@ -1,0 +1,84 @@
+{
+  "schema_version": "optomind.outline_revision_real_tournament.checkpoint.v1",
+  "status": "offline_preparation_only",
+  "paid_calls_made": 0,
+  "cluster": {
+    "chapter_id": "Ch1",
+    "unit_ids": [
+      "U1_跨癌种信号",
+      "U2_外部药物暴露"
+    ],
+    "paragraph_brief_count": 6,
+    "reason": "U1 and U2 share P0585 while assigning different duties: regimen-specific effect modification versus exposure confounding/adjustment; preserves a valid shared-study case."
+  },
+  "arms": [
+    {
+      "id": "control_original",
+      "planning_calls": 0,
+      "writer_calls": 1
+    },
+    {
+      "id": "R1_strong_once",
+      "planning_calls": 1,
+      "planner_model": "qwen3.8-max",
+      "writer_calls": 1
+    },
+    {
+      "id": "R2_review_then_owner",
+      "planning_calls": 2,
+      "reviewer_model": "qwen3.8-max",
+      "owner_model": "qwen3.8-max",
+      "writer_calls": 1
+    }
+  ],
+  "direct_paragraph_handles": [
+    "P0096",
+    "P0146",
+    "P0585",
+    "P0478",
+    "P0081",
+    "P0402"
+  ],
+  "supporting_handle_count": 25,
+  "supporting_handle_source": "original_final_plan Ch1 U1/U2 supporting_studies",
+  "material_projection_chars": 151313,
+  "inputs": {
+    "original_final_plan": "<LOCAL_REVIEW2_PATH>",
+    "body": "<LOCAL_REVIEW2_PATH>",
+    "writer_packet": "<LOCAL_REVIEW2_PATH>",
+    "arrangement": "<LOCAL_REVIEW2_PATH>",
+    "old_material_packet": "<LOCAL_REVIEW2_PATH>"
+  },
+  "client_and_owner": {
+    "direct_client": "old_experiment worktree scripts/upgrade3/post_body_revision.py::make_live_client plus existing optomind_research.runtime.upgrade3 QwenDirectClient",
+    "owner_contract": "optomind_research.runtime.upgrade3.progressive_review_plan affected_chapter_revision and review_feedback_loop.py",
+    "writer_contract": "scripts/upgrade3/review_unit_writer.py",
+    "qwen_route": "direct Qwen; no proxy; key remains local and is not copied"
+  },
+  "ledger": {
+    "public_note": "Repeated ledger history omitted; see cost_evidence.json."
+  },
+  "estimate_cny": {
+    "planning_qwen3.8_max": [
+      2.4,
+      2.9
+    ],
+    "three_writers_qwen3.7_flash": [
+      0.15,
+      0.3
+    ],
+    "optional_oldswap_qwen3.5_plus": [
+      0.05,
+      0.15
+    ],
+    "total_reservation_ceiling": 3.6
+  },
+  "offline_seam_checks": [
+    "real Ch1 U1/U2 and six paragraph briefs only",
+    "25 supporting handles and six direct handles covered",
+    "same R1/R2 material projection and same writer parameters across arms",
+    "owner receives reviewer issues but not an answer key",
+    "source identities, unit IDs, citation handles preserved",
+    "no key read/copy; no old source/artifact mutation"
+  ]
+}

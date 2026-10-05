@@ -1,0 +1,35 @@
+{
+  "case_id": "body40-fixed3-20261005",
+  "pair_id": "pair-002-0",
+  "pair_input_sha256": "8337b38e9f43ee44b9e89b01a305c8701f6c734662138456a419ec3a43dbd468",
+  "assessment_state": "complete",
+  "winner": "left",
+  "reason": "左侧文本在两个关键差异点上更准确地反映了证据材料的科学确定性。第一处差异（1.2 节 PPI 机制描述）：左侧表述为'与 PFS 缩短存在显著关联'，右侧表述为'直接导致了 PFS 的缩短'。根据 P0289 材料，该研究为观察性队列设计，关键发现为'粪便中高比例口腔细菌与较短的 PFS 显著相关（HR=1.38）'，且 PPI 与口腔细菌的交互作用 P 值为 0.08（提示性而非确证性），材料明确指出'观察性研究设计无法确证因果关系'。右侧的'直接导致'表述过度推断因果，左侧的'存在显著关联'更符合证据等级。第二处差异（2.2 节小鼠实验描述）：左侧表述为'合成抗原模拟实验'，右侧表述为'功能回补实验'。根据 P0388 材料，研究方法为'工程化 B16-F10、LLC1 和 MC-38 细胞系稳定表达 SFB 抗原片段（SFB-3340），建立合成新抗原模拟肿瘤模型'，左侧描述更准确。右侧两处均为科学准确性回归。",
+  "knowledge_preservation": "preserved",
+  "resolved_issues": [],
+  "regressions": [
+    {
+      "kind": "scientific",
+      "affected_side": "right",
+      "target_quote": "这种由药物诱导的生态重塑直接导致了 PFS 的缩短[ P0289 ]",
+      "evidence_ids": [
+        "P0289"
+      ],
+      "reason": "P0289 为观察性队列研究，材料明确指出'观察性研究设计无法确证因果关系'，关键发现为口腔细菌比例与 PFS'显著相关（HR=1.38, 95% CI 1.07–1.78）'，PPI 与口腔细菌交互作用 P=0.08 仅为提示性发现。右侧文本将观察性关联表述为'直接导致'的因果关系，过度推断证据支持的科学确定性，违反观察性研究不能推断因果的方法学原则。左侧'存在显著关联'表述准确反映证据等级。",
+      "severity": "major",
+      "knowledge_loss": false
+    },
+    {
+      "kind": "scientific",
+      "affected_side": "right",
+      "target_quote": "在小鼠模型中，这一假说已通过功能回补实验获得严格的因果验证",
+      "evidence_ids": [
+        "P0388"
+      ],
+      "reason": "P0388 材料描述的研究方法为'工程化 B16-F10、LLC1 和 MC-38 细胞系稳定表达 SFB 抗原片段（SFB-3340），建立合成新抗原模拟肿瘤模型'，通过比较 SFB 定植与无菌小鼠在植入表达该抗原的肿瘤后的生长情况来验证假说。这属于合成抗原模拟模型（synthetic antigen mimicry model），而非传统意义上的功能回补实验（functional complementation，通常指在缺失模型中回补特定基因/通路）。右侧'功能回补实验'术语使用不准确，左侧'合成抗原模拟实验'更精确反映实际方法学。",
+      "severity": "minor",
+      "knowledge_loss": false
+    }
+  ],
+  "remaining_issues": []
+}

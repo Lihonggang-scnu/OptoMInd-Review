@@ -1,0 +1,58 @@
+{
+  "case_id": "body40-fixed3-20261005",
+  "pair_id": "pair-002-0",
+  "pair_input_sha256": "8337b38e9f43ee44b9e89b01a305c8701f6c734662138456a419ec3a43dbd468",
+  "assessment_state": "complete",
+  "winner": "left",
+  "reason": "两侧全文仅在两处发生实质改动，均位于相关章节的科学表述。第1章“校正必要性与残余偏倚风险”中，左侧写“与PFS缩短存在显著关联”，与 P0289 的观察性队列证据相符：高比例粪便口腔细菌与较短 PFS 有关联，而 PPI 交互仅是提示性趋势（P=0.08），材料明确指出不能据此确立因果。右侧改为“直接导致了PFS的缩短”，把观察性关联和机制假说升级为直接因果，越过了证据边界。第2章2.2中，左侧的“合成抗原模拟实验”准确对应 P0388 的工程化 SFB 抗原肿瘤模型；右侧改成“功能回补实验”并加上“严格的”，但材料列明的是条件性清除、过继转移、单细胞测序及谱系追踪等功能验证，没有把该实验命名为功能回补。P0388 确实支持小鼠模型中的因果机制，但右侧的方法标签不准确。左侧因此更能保留证据等级、模型边界和有效知识；未发现其他差异或阴性结果被删除。",
+  "knowledge_preservation": "loss",
+  "resolved_issues": [
+    {
+      "kind": "scientific",
+      "affected_side": "left",
+      "target_quote": "这种由药物诱导的生态重塑与PFS缩短存在显著关联[ P0289 ]。",
+      "evidence_ids": [
+        "P0289"
+      ],
+      "reason": "位于第1章“校正必要性与残余偏倚风险”。左侧保留了关联性措辞，与 P0289 的观察性队列设计和结果一致；该材料报告口腔细菌比例与较短 PFS 的关联，并将 PPI 路径表述为潜在机制，且 PPI 亚组交互仅为提示性趋势，不能支持直接因果。",
+      "severity": "major",
+      "knowledge_loss": false
+    },
+    {
+      "kind": "scientific",
+      "affected_side": "left",
+      "target_quote": "在小鼠模型中，这一假说已通过合成抗原模拟实验获得因果验证。",
+      "evidence_ids": [
+        "P0388"
+      ],
+      "reason": "位于第2章2.2“适应性免疫启动”。左侧保留了 P0388 所述工程化肿瘤细胞表达 SFB-3340 表位的合成新抗原模拟模型；该材料同时提供条件性清除和过继转移等功能验证，支持小鼠模型中的因果机制，但不要求把实验称为“功能回补”。",
+      "severity": "minor",
+      "knowledge_loss": false
+    }
+  ],
+  "regressions": [
+    {
+      "kind": "scientific",
+      "affected_side": "right",
+      "target_quote": "这种由药物诱导的生态重塑直接导致了PFS的缩短[ P0289 ]。",
+      "evidence_ids": [
+        "P0289"
+      ],
+      "reason": "位于第1章“校正必要性与残余偏倚风险”。P0289 是观察性队列，支持的是口腔细菌比例与较短 PFS 的关联；PPI 交互为 P=0.08 的提示性趋势，材料还明确说观察性设计不能确证因果。右侧把关联改写为“直接导致”，形成科学上的因果过度推断。",
+      "severity": "major",
+      "knowledge_loss": true
+    },
+    {
+      "kind": "scientific",
+      "affected_side": "right",
+      "target_quote": "在小鼠模型中，这一假说已通过功能回补实验获得严格的因果验证。",
+      "evidence_ids": [
+        "P0388"
+      ],
+      "reason": "位于第2章2.2“适应性免疫启动”。P0388 的实际材料描述了合成新抗原肿瘤模型、条件性清除 IL-17A+ T 细胞、过继转移、scRNA/scTCR 和谱系追踪；没有给出“功能回补实验”这一实验名称或“严格的”这一额外强度限定。核心小鼠因果机制有证据支持，但右侧对具体实验类型的替换降低了来源对齐的准确性。",
+      "severity": "minor",
+      "knowledge_loss": false
+    }
+  ],
+  "remaining_issues": []
+}

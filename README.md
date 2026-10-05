@@ -4,6 +4,10 @@
 
 当前开发只看 [lihonggang-dev](https://github.com/Lihonggang-scnu/OptoMInd-Review/tree/lihonggang-dev)；原比赛及技术报告代码保留在 [main](https://github.com/Lihonggang-scnu/OptoMInd-Review/tree/main)。
 
+## 后续实验资料
+
+- [2026-10-05 细纲修订真实对照](docs/experiments/outline-revision-20261005/README.md)：原细纲、强模型一次修订、独立审稿后负责人修订，以及相同负责人合同的补充对照；包含实际候选细纲、八份局部正文、请求/响应公开副本、费用与评价限制。受测生产代码为 `43c1c940f85d92fe414590db1820d73d25a96084`，不是本归档工作树。这些是研究资料，不是已启用的生产 PLAN 或默认优化模块。
+
 ## 保存方式
 
 本分支使用一个专门的归档提交，将全部旧分支末端纳入其父提交的可达历史。工作树仅放索引和恢复说明；没有把各版算法合并成一套代码。以下 SHA 链接保留对应完整文件树。旧分支名称清理后请使用固定 SHA 链接，不使用已删除的分支名。

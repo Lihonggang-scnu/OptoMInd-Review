@@ -1,0 +1,35 @@
+{
+  "case_id": "body40-fixed3-20261005",
+  "pair_id": "pair-002-1",
+  "pair_input_sha256": "a1bcad2b7a8ae059355be7edb8336ebb1219f85428adafa6365cdb264e039cfb",
+  "assessment_state": "complete",
+  "winner": "right",
+  "reason": "右侧文本在两处关键科学表述上更为准确。第一处（1.2 节）：左侧称 PPI 诱导的生态重塑'直接导致了 PFS 的缩短'，但 P0289 材料为观察性队列研究（SCRUM-Japan MONSTAR-SCREEN），仅能确立关联而非因果，右侧改为'与 PFS 缩短存在显著关联'更符合证据等级。第二处（2.2 节）：左侧称小鼠模型通过'功能回补实验'验证，但 P0388 材料实际使用的是工程化表达 SFB 抗原片段的合成抗原模拟肿瘤模型，右侧'合成抗原模拟实验'更准确描述实验方法。两处修改均提升了科学严谨性，无知识损失。",
+  "knowledge_preservation": "preserved",
+  "resolved_issues": [
+    {
+      "kind": "scientific",
+      "affected_side": "right",
+      "target_quote": "这种由药物诱导的生态重塑与 PFS 缩短存在显著关联 [P0289]",
+      "evidence_ids": [
+        "P0289"
+      ],
+      "reason": "左侧文本称 PPI 诱导的生态重塑'直接导致了 PFS 的缩短'，但 P0289 为观察性队列研究（n=333 ICI 治疗患者），仅报告高比例口腔细菌与较短 PFS 的显著关联（HR=1.38），无法确立直接因果关系。右侧改为'存在显著关联'准确反映了观察性研究的证据等级，避免过度推断因果。",
+      "severity": "minor",
+      "knowledge_loss": false
+    },
+    {
+      "kind": "scientific",
+      "affected_side": "right",
+      "target_quote": "在小鼠模型中，这一假说已通过合成抗原模拟实验获得因果验证",
+      "evidence_ids": [
+        "P0388"
+      ],
+      "reason": "左侧称'功能回补实验'，但 P0388 材料实际采用工程化 B16-F10/LLC1/MC-38 细胞系稳定表达 SFB 抗原片段（SFB-3340）的合成新抗原模拟模型，并非传统意义上的功能回补（如无菌鼠定植特定菌株）。右侧'合成抗原模拟实验'更精确描述了该研究的实验设计，避免方法学术语混淆。",
+      "severity": "minor",
+      "knowledge_loss": false
+    }
+  ],
+  "regressions": [],
+  "remaining_issues": []
+}
