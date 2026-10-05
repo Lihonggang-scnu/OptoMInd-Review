@@ -1,0 +1,69 @@
+........................................................................ [ 13%]
+........................................................................ [ 26%]
+........................................................................ [ 40%]
+........................................................................ [ 53%]
+......................F.F............................................... [ 66%]
+........................................................................ [ 80%]
+........................................................................ [ 93%]
+...................................                                      [100%]
+================================== FAILURES ===================================
+_____________ test_archived_body_report_and_downstream_numbering ______________
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-1274/test_archived_body_report_and_0')
+
+    def test_archived_body_report_and_downstream_numbering(tmp_path):
+        saved = json.loads((ARCHIVE / 'UNIT_RESULT.json').read_text(encoding='utf-8'))
+        body = saved['body_markdown']
+        view, messages = archived_view()
+        assert saved['used_source_handles'] == ['P0576']
+        assert (body.rstrip() + '\n').encode() == (ARCHIVE / 'UNIT_BODY.md').read_bytes()
+        report = writer.write_unit_output(
+            view, body, tmp_path, model=saved['model'], language='zh',
+            mode='archive-replay', used_messages=messages, estimate={},
+        )
+        assert report['used_source_handles'] == EXPECTED
+        assert report['unused_source_handles'] == []
+        assert report['unknown_citations'] == []
+        assert report['body_markdown'] == body
+>       assert (tmp_path / 'UNIT_BODY.md').read_bytes() == (ARCHIVE / 'UNIT_BODY.md').read_bytes()
+E       AssertionError: assert b'## \xe5\xbe...3\x80\x82\r\n' == b'## \xe5\xbe...xe3\x80\x82\n'
+E         At index 75 diff: b'\r' != b'\n'
+E         Use -v to get more diff
+
+tests\upgrade3\test_preflight_final_citations.py:80: AssertionError
+_ test_actual_case_batch_reuses_moved_reading_but_invalidates_science_and_settings _
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-1274/test_actual_case_batch_reuses_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000017465877830>
+
+    def test_actual_case_batch_reuses_moved_reading_but_invalidates_science_and_settings(tmp_path, monkeypatch):
+        root = Path(os.environ.get("PREFLIGHT_FINAL_CASE_EVIDENCE_ROOT", tmp_path / "cases")).resolve()
+        root.mkdir(parents=True, exist_ok=True)
+        driver = CaseRun(root, monkeypatch)
+        original = root / "original/DIRECTED_READING.json"
+        moved = root / "moved/DIRECTED_READING.json"
+        dump(original, driver.deep)
+        moved.parent.mkdir(parents=True)
+        shutil.copyfile(original, moved)
+        pool = [{**row, "_paper_id": row["paper_id"]} for row in driver.pool]
+        a = planning.load_prior_readings([original], pool)
+        b = planning.load_prior_readings([moved], pool)
+        assert len(a) == len(b) == 1
+        assert a[0]["reused_from"] != b[0]["reused_from"]
+        assert {k: v for k, v in a[0].items() if k != "reused_from"} == {k: v for k, v in b[0].items() if k != "reused_from"}
+        driver.planner.prior_readings = a
+        _, first_calls = driver.run()
+        first = [call for call in first_calls if call["stage"] == "case_groups"]
+        assert len(first) == 1
+        first_payload = first[0]["payload"]
+>       assert str(original) in json.dumps(first_payload)
+E       assert 'C:\\Users\\Administrator\\AppData\\Local\\Temp\\pytest-of-Administrator\\pytest-1274\\test_actual_case_batch_reuses_0\\cases\\original\\DIRECTED_READING.json' in '{"call_id": "case-groups-CH01-batch-001-of-001", "topic_id": "case-material-consumer", "research_question": "How does...euses_0\\\\cases\\\\original\\\\DIRECTED_READING.json"}, "material_available": true}], "planning_revision_mode": true}'
+E        +  where 'C:\\Users\\Administrator\\AppData\\Local\\Temp\\pytest-of-Administrator\\pytest-1274\\test_actual_case_batch_reuses_0\\cases\\original\\DIRECTED_READING.json' = str(WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-1274/test_actual_case_batch_reuses_0/cases/original/DIRECTED_READING.json'))
+E        +  and   '{"call_id": "case-groups-CH01-batch-001-of-001", "topic_id": "case-material-consumer", "research_question": "How does...euses_0\\\\cases\\\\original\\\\DIRECTED_READING.json"}, "material_available": true}], "planning_revision_mode": true}' = <function dumps at 0x000001745CF79940>({'breadth_rule': {'basis': '当前材料池规模与各单元实际材料', 'goal': '整篇综述对主题、背景、发展与代表案例的充分覆盖', 'not_a_quota': '不为数量塞入无关文献，也不把只用少数核心论..., 'output_contract': {'batch_count': 1, 'batch_index': 1, 'bounded_route_count': 2, 'bounded_unit_count': 1, ...}, ...})
+E        +    where <function dumps at 0x000001745CF79940> = json.dumps
+
+tests\upgrade3\test_preflight_final_case_path_cache.py:46: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/upgrade3/test_preflight_final_citations.py::test_archived_body_report_and_downstream_numbering
+FAILED tests/upgrade3/test_preflight_final_case_path_cache.py::test_actual_case_batch_reuses_moved_reading_but_invalidates_science_and_settings
+2 failed, 537 passed in 42.27s
