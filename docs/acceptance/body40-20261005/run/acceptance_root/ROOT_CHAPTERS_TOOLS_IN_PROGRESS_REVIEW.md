@@ -1,5 +1,0 @@
-# 章级工具运行中抽读（不是最终质量放行）
-
-根于2026-10-05 04:43本地核实PID33200运行，chapter_tools尚未最终落盘。chapter_need_analysis没有新请求，但章节提案原有需求仍进入工具循环。当前两项较耗时补充是Prevotella相关心肌炎机制及非结肠炎irAEs大队列。此前FMT-LUMINate/MITRIC/III期现有证据需求已有本地答案。
-
-亲读最新FULFILLMENT_JUDGMENT内容：Bacteroides/心肌肌球蛋白模拟与Bacillus infantis AAH表位的A/J小鼠机制可作相关机制案例，均明确不是Prevotella的直接证明；32名irAE患者材料有38次事件/3例心肌炎、一般irAE模型AUC、FMT小鼠结肠炎因果验证，仍不提供罕见器官类型的大规模独立验证。该内容能补具体背景与比较，不能填造未满足的特定问题。有一项reading_card_provider_or_validation_error，标unjudgeable、材料为空，不将它当研究不存在。未见生产进程崩溃；待最终工具结果再做整体亲审，不提前放行。
