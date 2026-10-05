@@ -9,6 +9,7 @@ from optomind_research.runtime.upgrade3.progressive_review_plan import (
     ProgressiveReviewPlanner,
     _decorate_directed_material,
     _directed_task_signature,
+    _resolve_planner_handles,
     make_directed_reading_runner,
     make_planning_supplement_runner,
     make_retrieval_loop_runner,
@@ -255,6 +256,81 @@ def test_unknown_legacy_reading_is_context_only_and_new_output_preserves_it(tmp_
     assert [row["finding"] for row in material["question_material"]] == ["legacy context", "new answer"]
     assert material["current_question_material"] == [{"finding": "new answer", "conditions": "new conditions"}]
     assert material["prior_question_material"] == [{"finding": "legacy context"}]
+
+
+def test_harmonized_handle_aliases_reach_adaptive_queue_with_context(tmp_path):
+    handle_to_id = {
+        "P0583": "paper-583",
+        "P0578": "paper-578",
+        "P0582": "paper-582",
+        "P0585": "paper-585",
+        "P0478": "paper-478",
+        "P0327": "paper-327",
+    }
+    directed_reads = [
+        # An explicit source_handle remains authoritative over the short alias.
+        {"source_handle": "P0583", "handle": "P0578", "chapter_ids": ["Ch5", "Ch6"], "reason": "FMT mechanism"},
+        {"handle": "P0578", "chapter_ids": ["Ch5"], "reason": "MITRIC context"},
+        {"handle": "P0582", "chapter_ids": ["Ch3"], "reason": "UBA6 evidence"},
+        {"handle": "P0585", "chapter_ids": ["Ch1", "Ch4"], "reason": "JCOG context"},
+        {"handle": "P0478", "chapter_ids": ["Ch1", "Ch7"], "reason": "cross-domain comparison"},
+        {"handle": "P0327", "chapter_ids": ["Ch1"], "reason": "negative evidence"},
+        {"handle": "P9999", "chapter_ids": ["Ch7"], "reason": "unknown handle"},
+    ]
+    resolved = _resolve_planner_handles({"directed_reads": directed_reads}, handle_to_id)
+
+    assert [row["paper_id"] for row in resolved["directed_reads"][:6]] == [
+        "paper-583", "paper-578", "paper-582", "paper-585", "paper-478", "paper-327",
+    ]
+    assert resolved["directed_reads"][0]["chapter_ids"] == ["Ch5", "Ch6"]
+    assert resolved["directed_reads"][0]["reason"] == "FMT mechanism"
+    assert resolved["directed_reads"][-1]["paper_id"] == "P9999"
+    assert resolved["directed_reads"][-1]["paper_id"] not in set(handle_to_id.values())
+
+    captured = {}
+
+    def fake_adaptive(**kwargs):
+        captured.update(kwargs)
+        return {
+            "phase": "level2",
+            "status": "complete",
+            "directed_results": [],
+            "supplement_results": [],
+            "tool_materials_by_chapter": {},
+            "consumed_paper_ids": [],
+        }
+
+    planner = ProgressiveReviewPlanner(
+        ProgressivePlannerConfig(
+            topic_id="harmonized-aliases",
+            pool_path=tmp_path / "POOL.jsonl",
+            plan_path=tmp_path / "PLAN.json",
+            output_dir=tmp_path / "run",
+        ),
+        planner=lambda _stage, _payload: {},
+        retrieval_loop_runner=fake_adaptive,
+    )
+    planner._tool_cycle(
+        phase="level2",
+        supplement_requests=[],
+        directed_requests=resolved["directed_reads"][:6],
+        pool_rows=[{"_paper_id": paper_id, "_source_handle": handle} for handle, paper_id in handle_to_id.items()],
+        plan={"research_question": "test"},
+        prior_directed=None,
+        prior_tool_results={},
+        source_handle_map=handle_to_id,
+        resume=False,
+        state={},
+    )
+
+    queued = captured["directed_requests"]
+    assert [row["paper_id"] for row in queued] == [
+        "paper-583", "paper-578", "paper-582", "paper-585", "paper-478", "paper-327",
+    ]
+    assert queued[0]["chapter_ids"] == ["Ch5", "Ch6"]
+    assert queued[0]["reasons"] == ["FMT mechanism"]
+    assert queued[4]["chapter_ids"] == ["Ch1", "Ch7"]
+    assert all(row["paper_id"] != "P9999" for row in queued)
 
 
 def test_changed_required_output_runs_same_paper_and_keeps_history(tmp_path):

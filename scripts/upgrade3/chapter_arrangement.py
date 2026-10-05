@@ -299,6 +299,7 @@ def main(argv: list[str] | None = None) -> int:
                 review_argument_status=str(plan.get("review_argument_status") or "") if review_argument else "",
                 review_argument_source=str(plan.get("review_argument_source") or "") if review_argument else "",
                 shared_scope=plan.get("shared_scope") if isinstance(plan.get("shared_scope"), Mapping) else None,
+                fallback_source_identity_map=plan.get("source_identity_map"),
                 id_map_path=output_root / "ID_MAP.json",
             )
             payload = view.arrangement_payload(max_source_chars=args.max_source_chars)

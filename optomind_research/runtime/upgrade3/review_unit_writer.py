@@ -22,6 +22,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
+from .chapter_arrangement import normalize_title as _normalize_title
 from .portable_paths import portable_component
 
 SCHEMA_VERSION = "optomind.review_unit_writer.v1"
@@ -941,10 +942,14 @@ def _unit_relevant_chapter_tool_materials(
     return relevant
 
 
-def unit_payload(view: UnitWritingView, *, language: str = "zh") -> dict[str, Any]:
+def unit_payload(
+    view: UnitWritingView, *, language: str = "zh",
+    citation_number_map: Mapping[Any, Any] | None = None,
+    planning_revision: bool = False,
+) -> dict[str, Any]:
     """The compact payload the writing model receives (each source only once)."""
 
-    return {
+    payload = {
         "chapter_id": view.chapter_id,
         "unit_id": view.unit_id,
         "language": language,
@@ -995,6 +1000,16 @@ def unit_payload(view: UnitWritingView, *, language: str = "zh") -> dict[str, An
         ],
         "sources": view.materials,
     }
+    if planning_revision:
+        payload["planning_revision_mode"] = True
+        if citation_number_map is None:
+            citation_number_map = _local_numeric_citation_map(_known_unit_handles(view))
+            payload["citation_number_map_origin"] = "generated_local_aliases"
+        else:
+            payload["citation_number_map_origin"] = "caller_explicit"
+    if citation_number_map is not None:
+        payload["citation_number_map"] = dict(citation_number_map)
+    return payload
 
 
 
@@ -1184,8 +1199,16 @@ def completion_messages(
     prompt: str | None = None,
     language: str = "zh",
     planning_revision: bool = False,
+    citation_number_map: Mapping[Any, Any] | None = None,
 ) -> list[dict[str, str]]:
     payload = build_completion_payload(view, existing_body, task_ids, language=language)
+    if citation_number_map is not None:
+        payload["citation_number_map"] = dict(citation_number_map)
+        payload["citation_number_map_origin"] = "caller_explicit"
+    elif planning_revision:
+        payload["citation_number_map"] = _local_numeric_citation_map(
+            payload.get("requested_source_handles") or ())
+        payload["citation_number_map_origin"] = "generated_local_aliases"
     system = prompt if prompt is not None else load_writer_prompt(planning_revision=planning_revision)
     if planning_revision:
         system = _with_revision_output(system)
@@ -1317,7 +1340,7 @@ def run_unit_completion(
 
     messages = completion_messages(
         view, existing_body, task_ids, prompt=prompt, language=language,
-        planning_revision=planning_revision)
+        planning_revision=planning_revision, citation_number_map=citation_number_map)
     call_id = f"unit_completion_{view.chapter_id}_{view.unit_id}_{int(time.time())}"
     response: Any = None
     call_error = ""
@@ -1374,11 +1397,23 @@ def run_unit_completion(
             fragment, normalization = _consume_unit_output(envelope)
         else:
             fragment, normalization = "", []
+        explicit_map = citation_number_map
+        map_origin = "caller_explicit" if citation_number_map is not None else str(
+            payload.get("citation_number_map_origin") or "")
+        if explicit_map is None:
+            candidate = payload.get("citation_number_map")
+            explicit_map = candidate if isinstance(candidate, Mapping) else None
+        effective_map, title_map = _effective_numeric_citation_map(
+            fragment, view.materials, explicit_map,
+            origin=map_origin, planning_revision=planning_revision,
+        )
         fragment, repairs = _repair_numeric_citations(
-            fragment, citation_number_map, payload.get("requested_source_handles", []))
+            fragment, effective_map, payload.get("requested_source_handles", []))
         result.update(_output_diagnostics(fragment, payload.get("requested_source_handles", [])))
         result["citation_scope"] = "completion_fragment"
         result["numeric_citation_repairs"] = repairs
+        result["bibliography_title_citation_map"] = title_map
+        result["citation_number_map_origin"] = map_origin or "none"
         result["output_normalization"] = normalization
         result["completion_fragment"] = fragment
         status = str(envelope.get("status") or "").strip() or "pending"
@@ -1513,9 +1548,21 @@ def unit_messages(
     language: str = "zh",
     payload: Mapping[str, Any] | None = None,
     planning_revision: bool = False,
+    citation_number_map: Mapping[Any, Any] | None = None,
 ) -> list[dict[str, str]]:
-    body = dict(payload) if payload is not None else unit_payload(view, language=language)
+    body = (dict(payload) if payload is not None else
+            unit_payload(view, language=language, planning_revision=planning_revision,
+                         citation_number_map=citation_number_map))
     planning_revision = bool(planning_revision or body.get("planning_revision_mode"))
+    if citation_number_map is not None:
+        if planning_revision:
+            body["planning_revision_mode"] = True
+        body["citation_number_map"] = dict(citation_number_map)
+        body["citation_number_map_origin"] = "caller_explicit"
+    elif planning_revision and "citation_number_map" not in body:
+        body["planning_revision_mode"] = True
+        body["citation_number_map"] = _local_numeric_citation_map(_known_unit_handles(view))
+        body["citation_number_map_origin"] = "generated_local_aliases"
     system = prompt if prompt is not None else load_writer_prompt(planning_revision=planning_revision)
     if planning_revision:
         system = _with_revision_output(system)
@@ -1747,6 +1794,97 @@ def _repair_numeric_citations(
             position = match.end()
         output.append(segment[position:])
     return "".join(output), repairs
+
+
+def _local_numeric_citation_map(known_handles: Iterable[str]) -> dict[str, str]:
+    """Map unique numeric aliases from the current unit's local handles.
+
+    This is deliberately narrower than a publication-reference mapping: only
+    the unit's own ``P####`` handles participate, and aliases shared by more
+    than one handle remain unresolved.
+    """
+
+    aliases: dict[str, set[str]] = {}
+    for raw_handle in known_handles:
+        handle = str(raw_handle or "").strip()
+        match = re.fullmatch(r"P(\d{3,})", handle)
+        if not match:
+            continue
+        digits = match.group(1)
+        keys = {digits, str(int(digits))}
+        for key in keys:
+            aliases.setdefault(key, set()).add(handle)
+    return {
+        key: next(iter(handles))
+        for key, handles in aliases.items()
+        if len(handles) == 1
+    }
+
+
+def _trailing_numbered_bibliography(text: str) -> list[tuple[str, str]]:
+    """Read only complete numbered title lines at the end of a model body."""
+
+    lines = str(text or "").splitlines()
+    found: list[tuple[str, str]] = []
+    index = len(lines) - 1
+    while index >= 0:
+        line = lines[index].strip()
+        if not line:
+            index -= 1
+            continue
+        match = re.fullmatch(r"\[(\d+)\]\s+(.+?)\s*", line)
+        if not match:
+            break
+        found.append((match.group(1), match.group(2)))
+        index -= 1
+    return list(reversed(found))
+
+
+def _bibliography_title_citation_map(
+    text: str, materials: Iterable[Mapping[str, Any]],
+) -> dict[str, str]:
+    """Resolve trailing bibliography numbers by exact local source title only."""
+
+    titles: dict[str, set[str]] = {}
+    for item in materials or ():
+        if not isinstance(item, Mapping):
+            continue
+        handle = str(item.get("source_handle") or "").strip()
+        title = _normalize_title(item.get("title"))
+        if handle and title:
+            titles.setdefault(title, set()).add(handle)
+    candidates: dict[str, set[str]] = {}
+    for number, title in _trailing_numbered_bibliography(text):
+        handles = titles.get(_normalize_title(title), set())
+        candidates.setdefault(number, set()).update(handles)
+    return {
+        number: next(iter(handles))
+        for number, handles in candidates.items()
+        if len(handles) == 1
+    }
+
+
+def _effective_numeric_citation_map(
+    text: str,
+    materials: Iterable[Mapping[str, Any]],
+    mapping: Mapping[Any, Any] | None,
+    *,
+    origin: str = "",
+    planning_revision: bool = False,
+) -> tuple[dict[str, Any], dict[str, str]]:
+    """Merge exact title matches without overriding caller-owned mappings."""
+
+    title_map = (
+        _bibliography_title_citation_map(text, materials)
+        if planning_revision else {}
+    )
+    supplied = {str(key): value for key, value in (mapping or {}).items()}
+    if origin == "generated_local_aliases":
+        supplied.update(title_map)
+        return supplied, title_map
+    if mapping is not None or origin == "caller_explicit":
+        return supplied, title_map
+    return dict(title_map), title_map
 
 
 def _output_diagnostics(body: str, known_handles: Iterable[str]) -> dict[str, Any]:
@@ -2140,8 +2278,15 @@ def run_unit_writing(
 
     messages = unit_messages(
         view, prompt=prompt, language=language, payload=payload,
-        planning_revision=planning_revision,
+        planning_revision=planning_revision, citation_number_map=citation_number_map,
     )
+    effective_payload: Mapping[str, Any] | None = payload
+    try:
+        decoded_payload = json.loads(messages[-1]["content"])
+    except (TypeError, ValueError, KeyError, IndexError):
+        decoded_payload = None
+    if isinstance(decoded_payload, Mapping):
+        effective_payload = decoded_payload
     partial_error = ""
     try:
         response = invoke_client(client, messages)
@@ -2167,12 +2312,19 @@ def run_unit_writing(
     body, normalization = _consume_unit_output(response)
     # The caller's payload is trusted task context; never read a mapping out of
     # the model response. No implicit positional/P-number-suffix conversion.
+    map_origin = "caller_explicit" if citation_number_map is not None else str(
+        effective_payload.get("citation_number_map_origin") or "") if effective_payload else ""
     explicit_map = citation_number_map
-    if explicit_map is None and payload is not None:
-        candidate = payload.get("citation_number_map")
+    if explicit_map is None and effective_payload is not None:
+        candidate = effective_payload.get("citation_number_map")
         explicit_map = candidate if isinstance(candidate, Mapping) else None
-    body, repairs = _repair_numeric_citations(body, explicit_map, _known_unit_handles(view))
-    diagnostics = _output_diagnostics(body, _known_unit_handles(view))
+    effective_map, title_map = _effective_numeric_citation_map(
+        body, view.materials, explicit_map,
+        origin=map_origin, planning_revision=planning_revision,
+    )
+    known_handles = _known_unit_handles(view)
+    body, repairs = _repair_numeric_citations(body, effective_map, known_handles)
+    diagnostics = _output_diagnostics(body, known_handles)
     consumption = _table_consumption_report(body, bool(view.table_tasks))
     issues = _response_issues(response)
     issues.extend(item for item in normalization if item.get("code") == "table_markdown_missing_or_invalid")
@@ -2183,6 +2335,8 @@ def run_unit_writing(
         **{key: value for key, value in consumption.items() if key != "issues"},
         "output_normalization": normalization,
         "numeric_citation_repairs": repairs,
+        "bibliography_title_citation_map": title_map,
+        "citation_number_map_origin": map_origin or "none",
         "messages": messages,
         "usage": dict(response.get("usage") or {}),
         "finish_reason": response.get("finish_reason") or "",

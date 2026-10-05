@@ -243,9 +243,8 @@ def main(argv: list[str] | None = None) -> int:
                 max_material_chars_per_source=args.max_material_chars_per_source,
                 keep_deep_read_references=args.keep_deep_read_references,
             )
-            payload = unit_payload(view, language=args.language)
-            if args.planning_revision:
-                payload["planning_revision_mode"] = True
+            payload = unit_payload(
+                view, language=args.language, planning_revision=args.planning_revision)
             messages = unit_messages(
                 view, prompt=prompt, language=args.language, payload=payload,
                 planning_revision=args.planning_revision,

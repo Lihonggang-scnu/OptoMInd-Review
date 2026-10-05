@@ -888,7 +888,8 @@ def _resolve_planner_handles(value: Mapping[str, Any], handle_to_id: Mapping[str
     for key in ("directed_reads",):
         for row in result.get(key) or []:
             if isinstance(row, Mapping):
-                raw_id = row.get("source_handle") or row.get("paper_id") or row.get("canonical_paper_id")
+                raw_id = (row.get("source_handle") or row.get("paper_id")
+                          or row.get("canonical_paper_id") or row.get("handle"))
                 row["paper_id"] = _resolve_source_handle(raw_id, handle_to_id)
     for row in result.get("supplement_requests") or []:
         if not isinstance(row, Mapping):

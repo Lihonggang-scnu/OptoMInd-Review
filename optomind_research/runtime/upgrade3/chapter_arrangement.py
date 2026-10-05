@@ -742,6 +742,62 @@ def _source_catalog(packet: Mapping[str, Any], chapter_id: str) -> dict[str, Sou
     return catalog
 
 
+def _apply_identity_fallback(
+    catalog: dict[str, SourceMaterial],
+    used_handles: Iterable[str],
+    fallback_source_identity_map: Mapping[str, Any] | None,
+) -> None:
+    """Fill missing identity/locator fields from the shared plan map.
+
+    Writer packets carry a chapter-local material subset.  A chapter can still
+    retain a source handle in a task after that subset was assembled, so the
+    downstream arrangement view needs a narrow bridge to the plan-level
+    identity map.  Only handles already used by this chapter are considered;
+    local identity and material always win, and no A/B content is imported.
+    """
+
+    if not isinstance(fallback_source_identity_map, Mapping):
+        return
+    fields = {
+        "paper_id": ("paper_id", "canonical_paper_id"),
+        "title": ("title",),
+        "year": ("year",),
+        "doi": ("doi",),
+        "card_path": ("card_path",),
+    }
+
+    def compatible(entry: SourceMaterial, row: Mapping[str, Any]) -> bool:
+        fallback_paper = str(row.get("canonical_paper_id") or row.get("paper_id") or "").strip()
+        fallback_doi = normalize_doi(row.get("doi"))
+        if (entry.paper_id and fallback_paper and entry.paper_id != fallback_paper):
+            return False
+        if (entry.doi and fallback_doi and normalize_doi(entry.doi) != fallback_doi):
+            return False
+        if (not entry.paper_id and not entry.doi and entry.title and row.get("title")
+                and normalize_title(entry.title) != normalize_title(row.get("title"))):
+            return False
+        return True
+
+    for raw_handle in used_handles:
+        handle = str(raw_handle or "").strip()
+        row = fallback_source_identity_map.get(handle)
+        if not handle or not isinstance(row, Mapping):
+            continue
+        if not any(str(row.get(key) or "").strip() for keys in fields.values() for key in keys):
+            continue
+        entry = catalog.setdefault(handle, SourceMaterial(source_handle=handle))
+        if not compatible(entry, row):
+            continue
+        for field, keys in fields.items():
+            if getattr(entry, field):
+                continue
+            for key in keys:
+                value = str(row.get(key) or "").strip()
+                if value:
+                    setattr(entry, field, value)
+                    break
+
+
 def _resolved_tool_materials(
     packet: Mapping[str, Any], catalog: dict[str, SourceMaterial],
 ) -> list[dict[str, Any]]:
@@ -970,6 +1026,7 @@ def build_chapter_view(
     shared_scope: Mapping[str, Any] | None = None,
     review_argument_status: str = "",
     review_argument_source: str = "",
+    fallback_source_identity_map: Mapping[str, Any] | None = None,
     id_map_path: str | Path | None = None,
 ) -> ChapterView:
     """Build the arrangement view for one chapter from its writer packet."""
@@ -1014,7 +1071,32 @@ def build_chapter_view(
         briefs: list[ParagraphBrief] = []
         for ordinal, row in enumerate(_paragraph_rows(unit), start=1):
             point = str(row.get("point") or "").strip()
-            handles = tuple(_dedupe(_handles_in(row.get("source_handles")) or _handles_in(row)))
+            explicit_handles = _handles_in(row.get("source_handles"))
+            base_handles = explicit_handles or _handles_in(row)
+            if fallback_source_identity_map:
+                # Owner prose occasionally names a selected source while the
+                # explicit list omits it.  Carry only those prose handles that
+                # are already present in the shared identity map; model-only
+                # handles remain validation errors downstream.
+                owner_text = [
+                    re.sub(
+                        r"(?<=P\d{4})(?![A-Za-z0-9])",
+                        " ",
+                        re.sub(
+                            r"(?<![A-Za-z0-9])(?=P\d{4}(?![A-Za-z0-9]))",
+                            " ",
+                            str(value or ""),
+                        ),
+                    )
+                    for value in (row.get("point"), row.get("development"))
+                ]
+                owner_text_handles = [
+                    handle for handle in _handles_in(owner_text)
+                    if handle in fallback_source_identity_map
+                ]
+                handles = tuple(_dedupe([*base_handles, *owner_text_handles]))
+            else:
+                handles = tuple(_dedupe(base_handles))
             paragraph_signature = IdMap.paragraph_signature(unit_id, ordinal, point)
             paragraph_id = str(row.get("paragraph_id") or row.get("id") or "").strip()
             if not paragraph_id:
@@ -1082,6 +1164,8 @@ def build_chapter_view(
         for handle in _dedupe(row["source_handle"] for row in unit.case_uses):
             # setdefault: a source that already has paragraph uses keeps them.
             uses.setdefault(handle, [])
+
+    _apply_identity_fallback(catalog, uses.keys(), fallback_source_identity_map)
 
     # Usable tool material gives its cited studies a selection opportunity even
     # when the earlier owner tasks did not yet name them.
@@ -1710,6 +1794,50 @@ def arrangement_messages(
 _FENCE_RE = re.compile(r"^```(?:json)?\s*|\s*```$", re.IGNORECASE)
 
 
+def _escape_inner_json_quotes(text: str) -> str:
+    """Escape an unescaped quote that is clearly inside a JSON string.
+
+    This targets a common model typo where prose contains an ASCII quote next
+    to CJK text.  Structural quotes are preserved, and the input string is
+    never modified in place.
+    """
+
+    out: list[str] = []
+    in_string = False
+    escaped = False
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if escaped:
+            out.append(char)
+            escaped = False
+            index += 1
+            continue
+        if in_string and char == "\\":
+            out.append(char)
+            escaped = True
+            index += 1
+            continue
+        if char == '"':
+            if not in_string:
+                in_string = True
+                out.append(char)
+            else:
+                lookahead = index + 1
+                while lookahead < len(text) and text[lookahead].isspace():
+                    lookahead += 1
+                if lookahead >= len(text) or text[lookahead] in ",}:]":
+                    in_string = False
+                    out.append(char)
+                else:
+                    out.extend(("\\", '"'))
+            index += 1
+            continue
+        out.append(char)
+        index += 1
+    return "".join(out)
+
+
 def parse_arrangement_response(raw: Any) -> dict[str, Any]:
     """Read the editor's JSON object from a client response."""
 
@@ -1729,12 +1857,23 @@ def parse_arrangement_response(raw: Any) -> dict[str, Any]:
     try:
         parsed = json.loads(text)
     except json.JSONDecodeError:
-        try:
-            from json_repair import repair_json
+        normalized = _escape_inner_json_quotes(text)
+        if normalized != text:
+            try:
+                parsed = json.loads(normalized)
+            except json.JSONDecodeError:
+                parsed = None
+        else:
+            parsed = None
+        if parsed is not None:
+            pass
+        else:
+            try:
+                from json_repair import repair_json
 
-            parsed = repair_json(text, return_objects=True)
-        except Exception as exc:  # noqa: BLE001 - report the contract failure
-            raise ChapterArrangementError("arrangement_response_unparsable") from exc
+                parsed = repair_json(text, return_objects=True)
+            except Exception as exc:  # noqa: BLE001 - report the contract failure
+                raise ChapterArrangementError("arrangement_response_unparsable") from exc
     if not isinstance(parsed, Mapping):
         raise ChapterArrangementError("arrangement_response_must_be_object")
     return dict(parsed)

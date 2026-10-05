@@ -1,6 +1,7 @@
 """Bounded WO06 controls: synthetic model boundary, actual run/write functions."""
 import importlib.util
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -101,11 +102,101 @@ def test_caller_payload_mapping_and_link_code_preservation(tmp_path):
     assert result['body_markdown'] == body.replace('Finding [1, 2].','Finding [P0002][P0001].')
 
 
+def test_planning_revision_local_aliases_are_explicit_and_ambiguous_aliases_stay_unmapped(tmp_path):
+    mapping = w._local_numeric_citation_map(['P0001', 'P0002', 'P0057', 'P00057'])
+    assert mapping['1'] == 'P0001'
+    assert mapping['2'] == 'P0002'
+    assert '57' not in mapping
+    assert mapping['0057'] == 'P0057'
+
+    payload = w.unit_payload(fixture.view())
+    payload['planning_revision_mode'] = True
+    payload['citation_number_map'] = w._local_numeric_citation_map(['P0001', 'P0002'])
+    result, _, _ = ordinary(tmp_path, {'body_markdown':'Finding [1].\n\n'+TABLE}, payload=payload)
+    assert result['body_markdown'].startswith('Finding [P0001].')
+
+
+def test_planning_revision_run_declares_and_consumes_same_local_map():
+    response = {'body_markdown':'Finding [1].\n\n'+TABLE, 'complete':True, 'finish_reason':'stop'}
+    client = fixture.Fake(response)
+    result = w.run_unit_writing(fixture.view(), client=client, model='offline-synthetic',
+                                planning_revision=True)
+    sent = json.loads(result['messages'][-1]['content'])
+    assert sent['citation_number_map']['1'] == 'P0001'
+    assert result['body_markdown'].startswith('Finding [P0001].')
+
+    explicit_empty = w.unit_payload(fixture.view(), planning_revision=True,
+                                     citation_number_map={})
+    preserved = w.run_unit_writing(fixture.view(), client=fixture.Fake(response),
+                                   model='offline-synthetic', payload=explicit_empty,
+                                   planning_revision=True)
+    assert json.loads(preserved['messages'][-1]['content'])['citation_number_map'] == {}
+    assert preserved['body_markdown'].startswith('Finding [1].')
+
+    explicit = w.run_unit_writing(
+        fixture.view(), client=fixture.Fake(response), model='offline-synthetic',
+        planning_revision=True, citation_number_map={'1': 'P0002'})
+    assert json.loads(explicit['messages'][-1]['content'])['citation_number_map'] == {'1': 'P0002'}
+    assert explicit['body_markdown'].startswith('Finding [P0002].')
+
+
+def test_exact_local_bibliography_title_overrides_generated_alias_but_not_custom_map():
+    title = 'Microbial metabolic pathways guide response to immune checkpoint blockade therapy.'
+    base = fixture.view()
+    materials = [
+        {'source_handle': 'P0001', 'title': 'Unrelated local source',
+         'study_summary_A': {'key_findings': 'local'}},
+        {'source_handle': 'P0002', 'title': 'Synthetic source',
+         'study_summary_A': {'key_findings': 'synthetic'}},
+        {'source_handle': 'P0444', 'title': title,
+         'study_summary_A': {'key_findings': 'exact title'}}]
+    view = replace(base, materials=materials,
+                   sources={item['source_handle']: item for item in materials})
+    body = f'Finding [1].\n\n' + TABLE + f'\n\n[1] {title}'
+    automatic = w.run_unit_writing(
+        view, client=fixture.Fake({'body_markdown': body, 'complete': True,
+                                   'finish_reason': 'stop'}),
+        model='offline-synthetic', planning_revision=True)
+    assert automatic['body_markdown'].count('[P0444]') == 2
+    assert automatic['body_markdown'].count('[P0001]') == 0
+    assert automatic['bibliography_title_citation_map'] == {'1': 'P0444'}
+
+    custom = w.run_unit_writing(
+        view, client=fixture.Fake({'body_markdown': body, 'complete': True,
+                                   'finish_reason': 'stop'}),
+        model='offline-synthetic', planning_revision=True,
+        citation_number_map={'1': 'P0001'})
+    assert custom['body_markdown'].count('[P0001]') == 2
+    assert custom['body_markdown'].count('[P0444]') == 0
+
+    empty_payload = w.unit_payload(view, planning_revision=True,
+                                    citation_number_map={})
+    empty = w.run_unit_writing(
+        view, client=fixture.Fake({'body_markdown': body, 'complete': True,
+                                   'finish_reason': 'stop'}),
+        model='offline-synthetic', payload=empty_payload,
+        planning_revision=True)
+    assert empty['body_markdown'].count('[1]') == 2
+    assert empty['bibliography_title_citation_map'] == {'1': 'P0444'}
+
+    unmarked_payload = dict(w.unit_payload(
+        view, planning_revision=True, citation_number_map={'1': 'P0001'}))
+    unmarked_payload.pop('citation_number_map_origin', None)
+    unmarked = w.run_unit_writing(
+        view, client=fixture.Fake({'body_markdown': body, 'complete': True,
+                                   'finish_reason': 'stop'}),
+        model='offline-synthetic', payload=unmarked_payload,
+        planning_revision=True)
+    assert unmarked['body_markdown'].count('[P0001]') == 2
+    assert unmarked['body_markdown'].count('[P0444]') == 0
+
+
 def test_completion_independent_table_original_bytes_and_report(tmp_path):
     client = fixture.Fake({'body_markdown':'New finding [1][P9999].', 'table_markdown':TABLE,
         'status':'appended', 'complete':True})
     result = w.run_unit_completion(fixture.view(),existing_body=fixture.PREFIX,task_ids=['T1'],client=client,
         model='offline-synthetic',citation_number_map={'1':'P0002'})
+    assert json.loads(result['messages'][-1]['content'])['citation_number_map'] == {'1': 'P0002'}
     assert not result['pending']
     assert result['body_markdown'].startswith(fixture.PREFIX)
     assert result['unknown_citations'] == ['P9999']
