@@ -526,6 +526,69 @@ def trim_deep_read_material(material: Any, *, keep_references: bool = False) -> 
     return kept, note
 
 
+def _has_usable_supplement(value: Any) -> bool:
+    if not isinstance(value, Mapping):
+        return isinstance(value, str) and bool(value.strip())
+    return any(isinstance(value.get(key), str) and bool(value[key].strip())
+               for key in ("usable_content", "text", "content", "plain_text"))
+
+
+def _explicit_source_aliases(catalog: Mapping[str, Any]) -> dict[str, str]:
+    """Consume declared aliases only; never infer identity from titles or IDs.
+
+    A catalog key is an independent material authority. An alias colliding with
+    one, or claimed by two authorities, is ambiguous and must fail closed.
+    """
+    aliases: dict[str, str] = {}
+    for canonical, entry in catalog.items():
+        if not isinstance(entry, Mapping):
+            continue
+        declared = entry.get("aliases") or []
+        if not isinstance(declared, list):
+            raise UnitWritingError("source_alias_invalid:" + str(canonical))
+        if declared and entry.get("source_handle", canonical) != canonical:
+            raise UnitWritingError("source_alias_identity_conflict:" + str(canonical))
+        for alias in declared:
+            if not isinstance(alias, str) or not alias or alias != alias.strip():
+                raise UnitWritingError("source_alias_invalid:" + str(canonical))
+            if alias in catalog or (alias in aliases and aliases[alias] != canonical):
+                raise UnitWritingError("source_alias_ambiguous:" + alias)
+            aliases[alias] = canonical
+    return aliases
+
+
+def _check_alias_packet_identity(
+    catalog: Mapping[str, Any], aliases: Mapping[str, str], packet: Mapping[str, Any],
+) -> None:
+    """Reject contradictory packet identity without making packets alias authority.
+
+    Different historical record IDs with the same DOI are legitimate duplicate
+    records. Without a matching DOI, contradictory nonempty record IDs are not.
+    """
+    from .chapter_arrangement import normalize_doi
+
+    identities = packet.get("source_identity_map") or {}
+    rows = list(packet.get("source_materials") or ())
+    if isinstance(identities, Mapping):
+        rows.extend(dict(row, source_handle=handle) for handle, row in identities.items()
+                    if isinstance(row, Mapping))
+    for row in rows:
+        if not isinstance(row, Mapping):
+            continue
+        handle = str(row.get("source_handle") or "")
+        canonical = aliases.get(handle, handle if handle in aliases.values() else None)
+        if canonical is None:
+            continue
+        entry = catalog[canonical]
+        doi, expected_doi = normalize_doi(row.get("doi")), normalize_doi(entry.get("doi"))
+        paper = str(row.get("canonical_paper_id") or row.get("paper_id") or "")
+        expected_paper = str(entry.get("canonical_paper_id") or entry.get("paper_id") or "")
+        if ((doi and expected_doi and doi != expected_doi)
+                or (paper and expected_paper and paper != expected_paper
+                    and not (doi and doi == expected_doi))):
+            raise UnitWritingError("source_alias_identity_conflict:" + handle)
+
+
 def _material_entry(
     handle: str,
     catalog: Mapping[str, Any],
@@ -741,6 +804,8 @@ def build_unit_view(
     if not source_catalog:
         raise UnitWritingError("arrangement_without_source_catalog:" + str(arrangement_file))
 
+    aliases = _explicit_source_aliases(source_catalog)
+
     resolved_view_path = Path(view_path) if view_path else arrangement_file.parent / "ARRANGEMENT_INPUT.json"
     chapter_view: dict[str, Any] = {}
     if resolved_view_path.is_file():
@@ -761,10 +826,11 @@ def build_unit_view(
     packet_materials: dict[str, Any] | None = None
     locator_packet = ""
     for handle in unit_handles(unit)[:1]:
-        locator_packet = str(((source_catalog.get(handle) or {}).get("locator") or {}).get("writer_packet") or "")
+        locator_packet = str(((source_catalog.get(aliases.get(handle, handle)) or {}).get("locator") or {}).get("writer_packet") or "")
     packet_path = Path(locator_packet) if locator_packet else None
     if packet_path and packet_path.is_file():
         packet = _load_json(packet_path, what="writer_packet")
+        _check_alias_packet_identity(source_catalog, aliases, packet)
         packet_materials = {
             str(row.get("source_handle")): row for row in packet.get("source_materials") or ()
         }
@@ -786,13 +852,14 @@ def build_unit_view(
             continue
         for source in tool.get("sources") or ():
             handle = str(source.get("source_handle") or "") if isinstance(source, Mapping) else ""
-            if handle in source_catalog and handle not in handles:
+            if (handle in source_catalog or handle in aliases) and handle not in handles:
                 handles.append(handle)
     if not handles:
         raise UnitWritingError(f"unit_uses_no_sources:{unit_id}")
     materials: list[dict[str, Any]] = []
     notes: list[dict[str, Any]] = []
-    for handle in handles:
+    material_handles = list(dict.fromkeys(aliases.get(handle, handle) for handle in handles))
+    for handle in material_handles:
         entry, note = _material_entry(
             handle, source_catalog, packet_materials=packet_materials,
             max_chars_per_source=max_material_chars_per_source,
@@ -844,14 +911,26 @@ def build_unit_view(
             dict(unit["owner_unit_context"]) if isinstance(unit.get("owner_unit_context"), Mapping)
             else {}),
     )
-    view.sources = {handle: source_catalog.get(handle) for handle in handles}
+    view.sources = {handle: source_catalog.get(aliases.get(handle, handle)) for handle in handles}
     missing = [item["source_handle"] for item in materials if item.get("missing_material")]
     if missing:
         view.warnings.append({"code": "sources_missing_from_catalog", "handles": missing})
+    # An original reported by a review can have usable linked tool text without
+    # its own A/B card. Identity/status metadata alone is still not material.
+    linked_tool_handles = {
+        aliases.get(handle, handle)
+        for tool in relevant_tools if str(tool.get("usable_content") or "").strip()
+        for handle in _source_handles_from_value(tool)
+    }
     no_material = [
         item["source_handle"] for item in materials
         if not (item.get("study_summary_A") or item.get("review_planning_B")
-                or item.get("deep_read_material") or item.get("card_material"))
+                or item.get("deep_read_material") or item.get("card_material")
+                or _has_usable_supplement(item.get("supplement_material"))
+                or any(_has_usable_supplement(raw) for raw in item.get("supplement_materials") or ())
+                or _has_usable_supplement(item.get("local_passages"))
+                or any(_has_usable_supplement(raw) for raw in item.get("tool_supplement_materials") or ())
+                or item["source_handle"] in linked_tool_handles)
     ]
     if no_material:
         view.warnings.append({"code": "sources_without_any_material", "handles": no_material})
@@ -1150,21 +1229,27 @@ def build_completion_payload(
         for item in view.materials
         if isinstance(item, Mapping)
     }
+    aliases = _explicit_source_aliases(by_handle)
+    selected_canonical = list(dict.fromkeys(aliases.get(handle, handle) for handle in handles))
+    equivalent_handles = [alias for alias, canonical in aliases.items() if canonical in selected_canonical]
     tools = _completion_tool_materials(
-        view.chapter_tool_materials, unit_id=view.unit_id, handles=handles)
+        view.chapter_tool_materials, unit_id=view.unit_id,
+        handles=list(dict.fromkeys([*handles, *selected_canonical, *equivalent_handles])))
     for item in tools:
         if not str(item.get("usable_content") or "").strip():
             continue
         for handle in _source_handles_from_value(item):
-            if handle in by_handle and handle not in handles:
+            if (handle in by_handle or handle in aliases) and handle not in handles:
                 handles.append(handle)
     missing = [
         handle for handle in handles
-        if handle not in by_handle or by_handle[handle].get("missing_material")
+        if aliases.get(handle, handle) not in by_handle
+        or by_handle[aliases.get(handle, handle)].get("missing_material")
     ]
     if missing:
         raise UnitWritingError("completion_source_missing:" + ",".join(missing))
-    sources = [deepcopy(by_handle[handle]) for handle in handles]
+    sources = [deepcopy(by_handle[handle]) for handle in
+               dict.fromkeys(aliases.get(handle, handle) for handle in handles)]
     return {
         "completion_mode": True,
         "chapter_id": view.chapter_id,
@@ -1207,7 +1292,8 @@ def completion_messages(
         payload["citation_number_map_origin"] = "caller_explicit"
     elif planning_revision:
         payload["citation_number_map"] = _local_numeric_citation_map(
-            payload.get("requested_source_handles") or ())
+            _material_known_handles(payload.get("sources") or (),
+                                    payload.get("requested_source_handles") or ()))
         payload["citation_number_map_origin"] = "generated_local_aliases"
     system = prompt if prompt is not None else load_writer_prompt(planning_revision=planning_revision)
     if planning_revision:
@@ -1406,16 +1492,18 @@ def run_unit_completion(
         if explicit_map is not None and not map_origin:
             map_origin = "caller_explicit"
         mapping_diagnostics: list[dict[str, Any]] = []
+        known_handles = _material_known_handles(
+            payload.get("sources") or (), payload.get("requested_source_handles") or ())
         effective_map, title_map = _effective_numeric_citation_map(
-            fragment, view.materials, explicit_map,
+            fragment, payload.get("sources") or (), explicit_map,
             origin=map_origin, planning_revision=planning_revision, diagnostics=mapping_diagnostics,
         )
         fragment, repairs = _repair_numeric_citations(
-            fragment, effective_map, payload.get("requested_source_handles", []))
+            fragment, effective_map, known_handles)
         for repair in repairs:
             repair["mapping_origin"] = ("bibliography_exact_title" if map_origin == "generated_local_aliases"
                                         or explicit_map is None else "caller_explicit")
-        result.update(_output_diagnostics(fragment, payload.get("requested_source_handles", []),
+        result.update(_output_diagnostics(fragment, known_handles,
                                           _known_tool_identifiers(payload)))
         result["citation_mapping_diagnostics"] = mapping_diagnostics
         result["citation_problems"].extend(mapping_diagnostics)
@@ -2059,8 +2147,17 @@ def _consume_unit_output(response: Any) -> tuple[str, list[dict[str, Any]]]:
     raise UnitWritingError("unit_body_empty_or_unreadable")
 
 
+def _material_known_handles(
+    materials: Iterable[Mapping[str, Any]], requested: Iterable[str] = (),
+) -> list[str]:
+    catalog = {str(item.get("source_handle") or ""): item for item in materials
+               if isinstance(item, Mapping)}
+    aliases = _explicit_source_aliases(catalog)
+    return list(dict.fromkeys([*requested, *catalog, *aliases]))
+
+
 def _known_unit_handles(view: UnitWritingView) -> list[str]:
-    return list(view.sources) or [str(item.get("source_handle") or "") for item in view.materials]
+    return _material_known_handles(view.materials, view.sources)
 
 
 def _table_consumption_report(body: str, table_requested: bool) -> dict[str, Any]:
@@ -2277,7 +2374,10 @@ def write_unit_output(
     consumption = _table_consumption_report(body, bool(view.table_tasks))
     used = diagnostics["used_source_handles"]
     unknown = diagnostics["unknown_citations"]
-    unused = [handle for handle in view.sources if handle not in used]
+    material_catalog = {str(item.get("source_handle") or ""): item for item in view.materials}
+    aliases = _explicit_source_aliases(material_catalog)
+    used_canonical = {aliases.get(handle, handle) for handle in used}
+    unused = [handle for handle in view.sources if aliases.get(handle, handle) not in used_canonical]
     banner = simulated_banner(view, simulated_from) if mode == "fake" else ""
     markdown_path = target / ("UNIT_BODY.simulated.md" if mode == "fake" else "UNIT_BODY.md")
     markdown_path.write_text(banner + body.rstrip() + "\n", encoding="utf-8")
@@ -2296,7 +2396,7 @@ def write_unit_output(
         "used_source_handles": used,
         "unused_source_handles": unused,
         "unknown_citations": unknown,
-        "source_count": len(view.sources),
+        "source_count": len(view.materials),
         "material_summary": view.material_summary(),
         "material_notes": view.material_notes,
         "warnings": view.warnings,
