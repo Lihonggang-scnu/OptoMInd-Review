@@ -1,0 +1,100 @@
+{
+  "source_commit": "dc661cf47bdb8ec70a348c02bc8f15a0b40253f4",
+  "target_base": "02c018bdd440cc061ddedbb5aef07b115e7de081",
+  "changes": [
+    {
+      "path": "optomind_research/runtime/upgrade3/review_delivery.py",
+      "added_lines": 232,
+      "removed_lines": 12,
+      "sha256": "f729d4d316bd46bbea04f207fa903e6c47372cf5d01fd5422b6ce2f94bfdc472"
+    },
+    {
+      "path": "docs/POST_BODY_MANUSCRIPT_PARTS.md",
+      "added_lines": 100,
+      "removed_lines": 0,
+      "sha256": "49a072e46c3b0afda8be2a3d982b3572e74e457c489b53cdbc1243ea7c288b91"
+    },
+    {
+      "path": "docs/POST_BODY_PARTS_IMPLEMENTATION_PLAN.md",
+      "added_lines": 37,
+      "removed_lines": 0,
+      "sha256": "8009c8a7e4e36923dc805a523e28d9f6cb1e00344d0500309224e4d971eeedcd"
+    },
+    {
+      "path": "docs/POST_BODY_PARTS_OFFLINE_ACCEPTANCE.md",
+      "added_lines": 47,
+      "removed_lines": 0,
+      "sha256": "f5d735374fc0bb586ae9ac17d0d7cb32f4aaf48d1a0c72acbf92e697122afe67"
+    },
+    {
+      "path": "docs/POST_BODY_PARTS_QUALITY_GUIDE.md",
+      "added_lines": 104,
+      "removed_lines": 0,
+      "sha256": "f4e52efae59dd6dfc50ec98824366a9819ded8f5314dffbc4e3eb814455ea628"
+    },
+    {
+      "path": "optomind_research/runtime/upgrade3/serial_manuscript_parts.py",
+      "added_lines": 484,
+      "removed_lines": 0,
+      "sha256": "d6a77596fa93a74c041f569f5263580cf1febfe3d1ec3279c498dbce87695e72"
+    },
+    {
+      "path": "optomind_research/runtime/upgrade3/serial_parts_application.py",
+      "added_lines": 448,
+      "removed_lines": 0,
+      "sha256": "3da1f7bbab808db266376db476488dcff5a82f70aa88996014381d98e7039d55"
+    },
+    {
+      "path": "schemas/upgrade3/post_body_manuscript_parts_plan.schema.json",
+      "added_lines": 92,
+      "removed_lines": 0,
+      "sha256": "4a75c8d62e2325a2595be8ce1c78969ff95622d2f510d793e80dcf8a5ae950d2"
+    },
+    {
+      "path": "scripts/upgrade3/manuscript_parts.py",
+      "added_lines": 88,
+      "removed_lines": 0,
+      "sha256": "c2518cfc8b15311476a67023aa79127fe8c0ff5e189188739e0fff14de5c8ff9"
+    },
+    {
+      "path": "tests/upgrade3/test_serial_manuscript_parts.py",
+      "added_lines": 369,
+      "removed_lines": 0,
+      "sha256": "93ef96268b73b033912903d184362ce1763540f814e63e809a7c46b758ee4cb1"
+    },
+    {
+      "path": "tests/upgrade3/test_serial_parts_application.py",
+      "added_lines": 342,
+      "removed_lines": 0,
+      "sha256": "a29c19cdfae5d935fe04c8bd88364735a601866501124994121377c047401558"
+    },
+    {
+      "path": "tests/upgrade3/test_serial_parts_delivery_integration.py",
+      "added_lines": 451,
+      "removed_lines": 0,
+      "sha256": "5747e32d9aacace53913a358c75b812789e97104c503396cdc9ceef4843ae12a"
+    }
+  ],
+  "assembly_gate_byte_identical": true,
+  "protected_files_byte_identical": [
+    "optomind_research/runtime/upgrade3/progressive_review_plan.py",
+    "optomind_research/runtime/upgrade3/chapter_arrangement.py",
+    "optomind_research/runtime/upgrade3/review_unit_writer.py",
+    "scripts/upgrade3/full_review_draft.py",
+    "optomind_research/runtime/upgrade3/manuscript_front_back.py",
+    "optomind_research/runtime/upgrade3/delivery_citations.py"
+  ],
+  "prompts_unchanged": true,
+  "tests": {
+    "command": "PYTHONPATH=\"$PWD/docs/workorders/body-chain-20261003/records/body40_identity_citations/offline_bootstrap:/tmp/optomind-consolidation-deps:$PWD\" PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q tests/upgrade3/test_serial_manuscript_parts.py tests/upgrade3/test_serial_parts_application.py tests/upgrade3/test_serial_parts_delivery_integration.py tests/upgrade3/test_body07_delivery_pending_gate.py",
+    "result": "225 passed in 0.55s",
+    "network": "Inherited socket denial active; no model, provider or external calls"
+  },
+  "caveats": [
+    "Bounded offline synthetic/recorded tests only; not a full suite, paid generation, scientific-quality validation, or PDF visual acceptance.",
+    "Default legacy dispatch and legacy partial handling remain; restored additive config/report keys and owned-marker metadata parsing are not byte-for-byte old response-shape equivalence."
+  ],
+  "staged": false,
+  "committed": false,
+  "pushed": false
+}

@@ -1,0 +1,164 @@
+{
+  "script_sha256": "40b923ffdb665fe1c44aa830ccbabe4315609d2be4c20484ca7e5f62c37765a8",
+  "results": [
+    {
+      "test": "dry_run_preserves_all_refs",
+      "passed": true,
+      "details": {
+        "error": null,
+        "output": "{\"status\": \"verified_not_applied\", \"branch_count\": 5, \"deleted_count\": 0, \"receipt\": \"/tmp/cleanup-synthetic-fayrsbk2/dry_run/backup/cleanup-receipt.json\"}"
+      }
+    },
+    {
+      "test": "bundle_hash_verified",
+      "passed": true,
+      "details": {}
+    },
+    {
+      "test": "apply_deletes_only_old_refs",
+      "passed": true,
+      "details": {
+        "error": null,
+        "output": "{\"status\": \"complete\", \"branch_count\": 3, \"deleted_count\": 2, \"receipt\": \"/tmp/cleanup-synthetic-fayrsbk2/apply/backup/cleanup-receipt.json\"}"
+      }
+    },
+    {
+      "test": "archive_retains_original_tips",
+      "passed": true,
+      "details": {}
+    },
+    {
+      "test": "idempotent_fresh_backup",
+      "passed": true,
+      "details": {
+        "error": null,
+        "output": "{\"status\": \"complete\", \"branch_count\": 3, \"deleted_count\": 0, \"receipt\": \"/tmp/cleanup-synthetic-fayrsbk2/apply/backup2/cleanup-receipt.json\"}"
+      }
+    },
+    {
+      "test": "existing_backup_refused",
+      "passed": true,
+      "details": {
+        "error": "[Errno 17] File exists: '/tmp/cleanup-synthetic-fayrsbk2/apply/backup2'"
+      }
+    },
+    {
+      "test": "reject_moved_main",
+      "passed": true,
+      "details": {
+        "error": "retained branch missing or moved; no refs changed"
+      }
+    },
+    {
+      "test": "reject_moved_active",
+      "passed": true,
+      "details": {
+        "error": "retained branch missing or moved; no refs changed"
+      }
+    },
+    {
+      "test": "reject_moved_archive",
+      "passed": true,
+      "details": {
+        "error": "retained branch missing or moved; no refs changed"
+      }
+    },
+    {
+      "test": "reject_moved_old",
+      "passed": true,
+      "details": {
+        "error": "historical tip changed; no refs changed"
+      }
+    },
+    {
+      "test": "reject_new_branch",
+      "passed": true,
+      "details": {
+        "error": "new unreviewed branches exist; no refs changed"
+      }
+    },
+    {
+      "test": "reject_unarchived_tip",
+      "passed": true,
+      "details": {
+        "error": ""
+      }
+    },
+    {
+      "test": "atomic_server_rejection_changes_nothing",
+      "passed": true,
+      "details": {
+        "error": "remote: error: hook declined to update refs/heads/old/b        \nTo /tmp/cleanup-synthetic-fayrsbk2/atomic_rejection/remote.git\n ! [remote rejected] old/a (atomic push failure)\n ! [remote rejected] old/b (hook declined)\nerror: failed to push some refs to '/tmp/cleanup-synthetic-fayrsbk2/atomic_rejection/remote.git'"
+      }
+    },
+    {
+      "test": "race_old_race",
+      "passed": true,
+      "details": {
+        "error": "error: atomic push failed for ref refs/heads/old/a. status: 7\nTo /tmp/cleanup-synthetic-fayrsbk2/old_race/remote.git\n ! [rejected]        (delete) -> old/a (stale info)\n ! [rejected]        (delete) -> old/b (atomic push failed)\nerror: failed to push some refs to '/tmp/cleanup-synthetic-fayrsbk2/old_race/remote.git'",
+        "surviving_old_refs": [
+          "old/a",
+          "old/b"
+        ],
+        "output": ""
+      }
+    },
+    {
+      "test": "race_main_race",
+      "passed": true,
+      "details": {
+        "error": "post-cleanup refs differ from expected; inspect receipt",
+        "surviving_old_refs": [],
+        "output": "{\"status\": \"needs_review\", \"branch_count\": 3, \"deleted_count\": 2, \"receipt\": \"/tmp/cleanup-synthetic-fayrsbk2/main_race/backup/cleanup-receipt.json\"}"
+      }
+    },
+    {
+      "test": "race_archive_race",
+      "passed": true,
+      "details": {
+        "error": "post-cleanup refs differ from expected; inspect receipt",
+        "surviving_old_refs": [],
+        "output": "{\"status\": \"needs_review\", \"branch_count\": 3, \"deleted_count\": 2, \"receipt\": \"/tmp/cleanup-synthetic-fayrsbk2/archive_race/backup/cleanup-receipt.json\"}"
+      }
+    },
+    {
+      "test": "race_new_race",
+      "passed": true,
+      "details": {
+        "error": "post-cleanup refs differ from expected; inspect receipt",
+        "surviving_old_refs": [],
+        "output": "{\"status\": \"needs_review\", \"branch_count\": 4, \"deleted_count\": 2, \"receipt\": \"/tmp/cleanup-synthetic-fayrsbk2/new_race/backup/cleanup-receipt.json\"}"
+      }
+    },
+    {
+      "test": "destination_pushurl_regression",
+      "passed": true,
+      "details": {
+        "error": null,
+        "intended_remote_branch_count": 3,
+        "other_remote_branch_count": 5,
+        "expected": "Only the intended remote loses old refs; the other remote must be unchanged"
+      }
+    },
+    {
+      "test": "reject_pushInsteadOf_destination",
+      "passed": true,
+      "details": {
+        "error": "repository URL rewrite detected; no refs changed",
+        "intended_remote_branch_count": 5,
+        "other_remote_branch_count": 5,
+        "backup_created": false
+      }
+    },
+    {
+      "test": "reject_insteadOf_destination",
+      "passed": true,
+      "details": {
+        "error": "repository URL rewrite detected; no refs changed",
+        "intended_remote_branch_count": 5,
+        "other_remote_branch_count": 5,
+        "backup_created": false
+      }
+    }
+  ]
+}

@@ -1,58 +1,47 @@
-# OptoMind-Review — 研究与写作链路
+# OptoMind 新版完整研究与写作链路
 
-本分支是持续升级中的精简源码版，当前保留上游冻结点 review-v2-content-handoff-20260929，并加入2026-09-30离线交付层；云端采用精简快照，不携带本地完整开发历史。
-比赛提交版和技术报告中引用的代码保留在 [main](https://github.com/Lihonggang-scnu/OptoMInd-Review/tree/main)；本分支不会替换 main 或原有报告链接。
+本分支 `lihonggang-dev` 是新版唯一开发入口。原比赛/技术报告代码保留在 `main`，本次整理不修改它。
 
-## 链路与代码入口
+**先读 [当前链路与状态](docs/current/PIPELINE.md)，再读 [给 AI 助手的阅读顺序](docs/current/AI_READING_GUIDE.md)。** 不必从几十个历史工单猜当前实现。
 
-| 环节 | 职责 | 主要代码 |
-| --- | --- | --- |
-| 研究问题分解与检索规划 | 将问题拆成 Facet、关键词查询、语义检索式与范围 | `optomind_research/runtime/upgrade3/query_plan.py` |
-| 学术检索与候选语料 | 多通道检索、论文归并、候选材料集合 | `optomind_research/runtime/upgrade3/candidate_corpus.py` |
-| 学术关系骨架 | 根据现有材料及引用关系组织候选研究 | `optomind_research/runtime/upgrade3/scholarly_skeleton.py` |
-| 本地材料工具层 | 多来源获取材料，解析正文；PDF 可使用 GROBID | `optomind_research/runtime/upgrade3/local_materials.py`、`tools/academic_backends/` |
-| 阅读与材料卡片 | 通用理解 A、面向当前综述的规划材料 B、问题导向解析 | `scripts/upgrade3/paper_reading_card.py`、`scripts/upgrade3/paper_reading_batch.py`、`scripts/upgrade3/module4.py` |
-| 材料补充与定向精读 | 本地优先补取材料，按具体需求补充与阅读 | `scripts/upgrade3/planning_supplement.py`、`scripts/upgrade3/directed_reading.py` |
-| 逐级规划 | 范围、章节分工、细纲、案例与全局协调 | `optomind_research/runtime/upgrade3/progressive_review_plan.py` |
-| 编排、写作与汇编 | 段落/表格任务、单元正文、全文与参考文献 | `scripts/upgrade3/chapter_arrangement.py`、`review_unit_writer.py`、`full_review_draft.py` |
+## 三个分支的职责
 
-`run_review_harness.py` 保留原有综合入口；升级模块还提供独立 CLI，不能把源码齐全理解成所有新模块已经默认串入综合入口。
+| 分支 | 用途 |
+|---|---|
+| `main` | 最初提交版，原历史链接与代码保持不变 |
+| `lihonggang-dev` | 当前完整源码、必要测试与唯一后续开发入口 |
+| `archive/history` | 全部旧分支的固定提交、历史资料及恢复索引，不是当前生产实现 |
 
-新增规划修订路径通过 --planning-revision 显式启用，默认关闭以兼容旧调用。它已经冻结为当前阶段唯一的升级开发基线；旧模式仅作兼容，不是并行候选方案。冻结不代表论文内容零错误，已知边界见 [冻结基线说明](docs/REVIEW_V2_FROZEN_BASELINE.md)。
+[历史归档与旧分支映射](https://github.com/Lihonggang-scnu/OptoMInd-Review/tree/archive/history)。归档保留完整 Git 历史，不把失败方案的算法混进新版。清理旧分支名称不改变固定 SHA 的历史文件树。
 
-BODY 案例链恢复说明见 [2026-10-02 恢复记录](docs/BODY_CASE_CHAIN_RESTORATION_20261002.md)。该记录说明本轮用户决定如何覆盖冻结文档中较早的“案例先交负责人采纳”顺序。
+## 新版包含什么
 
-## 本地运行准备
+研究问题与检索计划 → 候选文献 → 学术关系骨架 → 本地材料获取/解析 → 单篇理解及 A/B 卡片 → 逐级 BODY 规划与补充阅读 → 全局协调和负责人修订 → 案例正式附加 → 编排 → 单元写作 → 全文装配。
 
-使用 Python 3.11+，在仓库根目录安装依赖：
+另保留两个**显式启用**的下游模块：
+- 独立首尾模块：正文后构思、结语、引言、摘要/题名，保留原 BODY；目前不代表首尾写作质量已通过
+- A/B/C 局部修订实验：固定正文、按材料提出和核验局部补丁；仍是实验候选，不能自动替代正式稿或宣称质量胜出
 
-```powershell
+当前源码来自 `02c018bdd440cc061ddedbb5aef07b115e7de081`，包含已验收的 BODY40 身份/引用/alias 修复及下游修订实验。独立首尾代码从 `dc661cf47bdb8ec70a348c02bc8f15a0b40253f4` 有界接回，保留当前装配未决阻断；没有合入早期并行 `manuscript_parts_plan` 对 BODY 的改造。
+
+“源码完整”不等于所有模块已由一个命令默认串行启用，也不等于完成了新一轮端到端科学质量验收。具体 API、CLI、显式开关及验证边界见 [PIPELINE.md](docs/current/PIPELINE.md)。
+
+## 本地准备
+
+Python 3.11+；依赖见 `requirements-research.txt` / `pyproject.toml`。凭据仅在本地配置，不提交密钥、数据库或权利不明论文全文。任何真实模型运行须使用明确预算。
+
+```bash
 python -m pip install -r requirements-research.txt
-python run_review_harness.py --help
 python scripts/upgrade3/progressive_review_plan.py --help
-python scripts/upgrade3/review_unit_writer.py --help
+python scripts/upgrade3/full_review_draft.py --help
+python scripts/upgrade3/manuscript_parts.py --help
+python scripts/upgrade3/post_body_revision.py --help
 ```
 
-凭据需自行在本机配置，具体环境变量或密钥文件位置见 `config/qwen_config.py`、`config/secret_pool.py` 和各后端配置。`api_keys/` 不随仓库发布。Qwen 调用沿用直连客户端；付费运行前配置明确预算。`--help` 只查看参数，不发起模型调用。
+GROBID 相关部署保留在 `deploy/grobid/`；`run_review_harness.py` 保留既有综合/兼容入口，新模块是否接入须沿实际调用核查。
 
-PDF 结构化解析可使用 `deploy/grobid/docker-compose.yml`，默认访问 `http://127.0.0.1:8070`。各模块的输入与调用说明见 `docs/`；示例问题见 `examples/research_question.json`。示例只是任务输入，不是已验证的综述成果。
+## 历史材料为什么仍有一部分在目录中
 
-## 发布范围
+`docs/acceptance/`、`docs/workorders/` 含验收资料和离线测试依赖，暂保留原路径避免破坏测试。它们不是当前开发规范；按明确问题才读对应记录。原 `advisor/` 阅读包已从当前工作树移出，完整内容可从归档索引的原提交恢复。
 
-保留链路源码、提示词、运行时 schema、必要配置、接口说明及一个问题示例。没有包含真实密钥、论文全文、数据库、模型响应、历史工单、测试运行产物或静态回放站点。本分支使用精简快照，不携带本地开发历史。
-
-## 本次更新（2026-09-29）
-
-修复 A/B、精读、补充与本地片段从章节负责人到写作者的传递；案例建议须交给负责人结合真实材料采纳；改进局部缺口、跨章分工的提示要求，以及部分完成稿的汇编和引用编号。
-
-本次进一步保留章节负责人原任务及其条件、指标和来源关系，使编排负责顺序与拆合，写作者逐条消费原任务后再综合。该实现已冻结为下一阶段开发基线；测试结论、限制和后续方向见 [冻结基线说明](docs/REVIEW_V2_FROZEN_BASELINE.md)。
-
-## 2026-09-30完整综述交付层
-
-正式入口通过 `--delivery-start history|plan --delivery-config 配置路径` 连接装配→全文编辑→结语/引言/摘要→图表引用→Markdown/TeX/PDF。当前交付分支使用录制响应或标注fixture；不声称已验证真实模型投稿质量。
-
-- [当前实现与验收范围](docs/REVIEW_V2_DELIVERY_STATUS_20260930.md)
-- [外部顾问阅读包：稿件、重要测试、30篇范例、AI意见](advisor/20260930/README.md)
-- [统一入口](optomind_research/runtime/upgrade3/review_delivery.py) / [全文编辑](optomind_research/runtime/upgrade3/article_text_editor.py) / [首尾提炼](optomind_research/runtime/upgrade3/manuscript_front_back.py) / [图表引用](optomind_research/runtime/upgrade3/delivery_citations.py)
-
-顾问阅读包与运行输入分离，未来可独立删除。`main`保持旧技术报告链接不变。
+整理范围、备份校验与来源证明见 [BRANCH_CONSOLIDATION.md](docs/current/BRANCH_CONSOLIDATION.md)。

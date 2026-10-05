@@ -475,6 +475,53 @@ class DeliveryConfigError(ValueError):
     """
 
 
+def load_post_body_context(
+    value: Any = None, *, base_dir: str | Path = ".",
+) -> dict[str, Any]:
+    """Load optional post-BODY context without importing a planner or model.
+
+    The context can be an inline object or a JSON file reference (a path or
+    ``{"path": "context.json"}``).  ``final_outline``, ``material_records``
+    and ``source_identity_map`` also accept JSON file references.  Every path
+    resolves against the caller's explicit base directory, never the process
+    working directory.  No conception card or early PartPlan is required.
+    """
+    base_dir = Path(base_dir).resolve()
+
+    def read_reference(entry: Any, field: str) -> Any:
+        reference = None
+        if isinstance(entry, (str, Path)):
+            reference = entry
+        elif isinstance(entry, Mapping) and set(entry) == {"path"}:
+            reference = entry["path"]
+        if reference is None:
+            return entry
+        if not isinstance(reference, (str, Path)) or not str(reference).strip():
+            raise DeliveryConfigError(f"post_body_context_bad_path:{field}")
+        path = Path(reference)
+        if not path.is_absolute():
+            path = base_dir / path
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, ValueError) as exc:
+            raise DeliveryConfigError(
+                f"post_body_context_unreadable:{field}:{path}:{type(exc).__name__}"
+            ) from exc
+
+    if value is None:
+        return {}
+    value = read_reference(value, "context")
+    if not isinstance(value, Mapping):
+        raise DeliveryConfigError("post_body_context_not_object")
+    context = dict(value)
+    for field in ("final_outline", "material_records", "source_identity_map"):
+        if field in context:
+            context[field] = read_reference(context[field], field)
+    if "material_records" in context and not isinstance(context["material_records"], list):
+        raise DeliveryConfigError("post_body_context_material_records_not_list")
+    return context
+
+
 def load_delivery_config(path: str | Path) -> dict[str, Any]:
     """Load and validate the downstream delivery config.
 
@@ -487,6 +534,8 @@ def load_delivery_config(path: str | Path) -> dict[str, Any]:
           "chapter_roles": [{"chapter_id": "…", "title": "…", "role": "…"}],
           "text_edit":   {"fixture": "EDIT_FIXTURE.json"},   # or {"recordings": …}
           "front_back":  {"fixture": "PARTS_FIXTURE.json"},  # or {"recordings": …}
+          # Opt in only: front_back.mode="post_body" uses conception first.
+          "post_body_context": {"shared_scope": "…", "final_outline": []},
           "identity_catalogs": {"path": "IDENTITY_CATALOGS.json"},  # or inline list
           "figure_assets": {"path": "FIGURE_ASSETS.json"},          # or inline list
           "table_moves": {}, "figure_moves": {},     # optional {"3": 5}
@@ -559,8 +608,35 @@ def load_delivery_config(path: str | Path) -> dict[str, Any]:
 
     text_edit_fixture, text_edit_recordings = _stage_input(
         data.get("text_edit"), "text_edit")
-    front_back_fixture, front_back_recordings = _stage_input(
-        data.get("front_back"), "front_back")
+    front_back_entry = data.get("front_back")
+    if front_back_entry is not None and not isinstance(front_back_entry, Mapping):
+        raise DeliveryConfigError("delivery_config_stage_bad:front_back")
+    front_back_entry = dict(front_back_entry or {})
+    front_back_mode = str(front_back_entry.get("mode") or "legacy")
+    if front_back_mode not in ("legacy", "post_body"):
+        raise DeliveryConfigError(f"delivery_config_front_back_mode_unsupported:{front_back_mode}")
+    if front_back_mode == "post_body" and not (
+        front_back_entry.get("fixture") or front_back_entry.get("recordings")
+    ):
+        front_back_fixture, front_back_recordings = None, None
+    else:
+        front_back_fixture, front_back_recordings = _stage_input(
+            data.get("front_back"), "front_back")
+    post_body_context: dict[str, Any] = {}
+    if front_back_mode == "post_body":
+        post_body_context = load_post_body_context(
+            front_back_entry.get("post_body_context", data.get("post_body_context")),
+            base_dir=cfg_dir,
+        )
+        # Supplementary material may be supplied directly without a context
+        # file or an earlier PartPlan; the actual BODY remains the main input.
+        direct_context = {
+            field: front_back_entry.get(field, data.get(field))
+            for field in ("material_records", "source_identity_map")
+            if field in front_back_entry or field in data
+        }
+        if direct_context:
+            post_body_context.update(load_post_body_context(direct_context, base_dir=cfg_dir))
     figure_assets = _resolve_list(
         data.get("figure_assets"), "figure_assets") or []
     # Each asset's own file path also resolves relative to the config file.
@@ -579,7 +655,7 @@ def load_delivery_config(path: str | Path) -> dict[str, Any]:
     return {
         "config_path": str(config_path),
         "language": str(data.get("language") or "zh"),
-        "research_question": str(data.get("research_question") or "").strip(),
+        "research_question": str(data.get("research_question") or post_body_context.get("research_question") or "").strip(),
         "chapter_roles": [dict(row)
                           for row in (data.get("chapter_roles") or [])
                           if isinstance(row, Mapping)],
@@ -587,6 +663,8 @@ def load_delivery_config(path: str | Path) -> dict[str, Any]:
         "text_edit_recordings": text_edit_recordings,
         "front_back_fixture": front_back_fixture,
         "front_back_recordings": front_back_recordings,
+        "front_back_mode": front_back_mode,
+        "post_body_context": post_body_context,
         "identity_catalogs": _resolve_list(
             data.get("identity_catalogs"), "identity_catalogs") or [],
         "figure_assets": resolved_assets,
@@ -599,6 +677,112 @@ def load_delivery_config(path: str | Path) -> dict[str, Any]:
 def _stage_pending(stage: str, reason: str) -> dict[str, Any]:
     return {"stage": stage, "status": "pending", "reason": reason,
             "model_calls": 0, "external_requests": 0}
+
+
+def _post_body_identity_context(
+    context: Mapping[str, Any], catalogs: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Validate exact citation ownership before generation, without routing.
+
+    Bare handles follow stage 04's primary-catalog convention.  Namespaced
+    handles remain distinct.  The serial runtime keeps this full inventory
+    local and exposes only BODY/selected-material identities in its prompts.
+    """
+    if not catalogs and not context.get("source_identity_map") and not context.get("material_records"):
+        return dict(context)
+    from .delivery_citations import _iter_catalog_identities
+    from .serial_manuscript_parts import (
+        merge_source_identity_maps, normalize_source_identity_map,
+    )
+    indexed: dict[str, Any] = {}
+    primary_namespace = str(catalogs[0].get("namespace") or "") if catalogs else ""
+    for catalog in catalogs:
+        namespace = str(catalog.get("namespace") or "")
+        for row in _iter_catalog_identities(catalog):
+            handles = row.get("handles") or [
+                row.get("source_handle") or row.get("handle") or row.get("source_key") or ""]
+            if isinstance(handles, str):
+                handles = [handles]
+            for handle in handles:
+                handle = str(handle).strip()
+                if not handle:
+                    continue
+                token = f"{namespace}::{handle}" if namespace else handle
+                indexed = merge_source_identity_maps(
+                    indexed, {token: {**dict(row), "source_handle": token}})
+    explicit_bare = {token for token in indexed if "::" not in token}
+    # This mirrors stage 04: an explicit bare declaration wins; otherwise
+    # only the primary namespace supplies aliases for bare BODY citations.
+    if primary_namespace:
+        prefix = primary_namespace + "::"
+        for token, identity in list(indexed.items()):
+            if token.startswith(prefix):
+                bare = token[len(prefix):]
+                if bare not in indexed:
+                    indexed[bare] = {**identity, "source_handle": bare}
+    supplied = normalize_source_identity_map(
+        context.get("source_identity_map", {}),
+        material_records=context.get("material_records", []),
+    )
+    # The same paper may be addressed with a primary namespace or its bare
+    # alias; validate both spellings against supplied declarations.
+    if primary_namespace:
+        for token, identity in list(supplied.items()):
+            alias = token[len(primary_namespace) + 2:] if token.startswith(primary_namespace + "::") \
+                else f"{primary_namespace}::{token}" if "::" not in token else None
+            bare = token.split("::", 1)[-1]
+            if alias and bare not in explicit_bare:
+                for source in (indexed, supplied):
+                    if alias in source:
+                        merge_source_identity_maps({alias: source[alias]},
+                                                   {alias: {**identity, "source_handle": alias}})
+    merged = merge_source_identity_maps(indexed, supplied)
+    # Catch catalog-resolution ambiguity before any model/provider invocation.
+    _post_body_delivery_catalogs(catalogs, supplied)
+    return {**dict(context), "source_identity_map": merged}
+
+
+def _post_body_delivery_catalogs(
+    catalogs: Sequence[Mapping[str, Any]], identities: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    """Add only the runtime's validated selected identities to stage 04."""
+    from .delivery_citations import _iter_catalog_identities
+    from .manuscript_front_back import FrontBackError
+    result: list[dict[str, Any]] = []
+    for catalog in catalogs:
+        entries = []
+        for row in _iter_catalog_identities(catalog):
+            handles = row.get("handles") or [
+                row.get("source_handle") or row.get("handle") or row.get("source_key") or ""]
+            if isinstance(handles, str):
+                handles = [handles]
+            entries.append({**dict(row), "handles": [str(h) for h in handles if str(h).strip()]})
+        result.append({"namespace": str(catalog.get("namespace") or ""), "entries": entries})
+    primary_namespace = str(catalogs[0].get("namespace") or "") if catalogs else ""
+    explicit_bare = {
+        handle for catalog in result if not catalog["namespace"]
+        for row in catalog["entries"] for handle in row["handles"]
+    }
+    additions: dict[str, list[dict[str, Any]]] = {}
+    for token, identity in identities.items():
+        namespace, handle = token.split("::", 1) if "::" in token \
+            else ("" if token in explicit_bare else primary_namespace, token)
+        additions.setdefault(namespace, []).append(
+            {**dict(identity), "source_handle": handle, "handles": [handle]})
+    for namespace, entries in additions.items():
+        result.append({"namespace": namespace, "entries": entries})
+    handle_only_namespaces: dict[str, set[str]] = {}
+    for catalog in result:
+        for row in catalog["entries"]:
+            if row.get("doi") or row.get("paper_id") or not row.get("handles"):
+                continue
+            canonical_handle = row["handles"][0]
+            namespaces = handle_only_namespaces.setdefault(canonical_handle, set())
+            namespaces.add(catalog["namespace"])
+            if len(namespaces) > 1:
+                raise FrontBackError(
+                    f"post_body_ambiguous_identity:{canonical_handle}:namespace_collision_requires_doi_or_paper_id")
+    return result
 
 
 def run_downstream_delivery(
@@ -705,37 +889,59 @@ def run_downstream_delivery(
     else:
         from .manuscript_front_back import FrontBackError, run_front_back_stage
         try:
-            stages["03_front_back"] = run_front_back_stage(
+            runner = run_front_back_stage
+            extra: dict[str, Any] = {}
+            if config.get("front_back_mode") == "post_body":
+                from .serial_manuscript_parts import run_serial_parts
+                runner = run_serial_parts
+                extra["context"] = _post_body_identity_context(
+                    config.get("post_body_context") or {}, config.get("identity_catalogs") or [])
+            stages["03_front_back"] = runner(
                 draft_path=edited,
                 research_question=str(config.get("research_question") or ""),
                 chapter_roles=config.get("chapter_roles") or [],
                 out_dir=out_dir / "03_front_back",
                 parts_fixture_path=config.get("front_back_fixture"),
                 recordings=config.get("front_back_recordings"),
-                language=str(config.get("language") or "zh"))
+                language=str(config.get("language") or "zh"),
+                **extra)
         except FrontBackError as exc:
             stages["03_front_back"] = {"stage": "front_back", "status": "failed",
                                        "error": str(exc),
+                                       "final_manuscript": None,
                                        "model_calls": 0, "external_requests": 0}
     r3 = stages["03_front_back"]
     final_md = Path(str(r3.get("final_manuscript") or ""))
-    if r3.get("status") in ("pending", "no_parts_generated", "failed") \
+    if (config.get("front_back_mode") == "post_body" and r3.get("status") != "generated") \
+            or r3.get("status") in ("pending", "no_parts_generated", "failed") \
             or not str(r3.get("final_manuscript") or "") or not final_md.is_file():
         halt.append("03_front_back")
         return _downstream_report(config, stages, halt)
 
     # ---- 04: figures + citations over the FINAL manuscript -----------------
     from .delivery_citations import run_figures_citations_stage
+    identity_catalogs = config.get("identity_catalogs") or []
+    if config.get("front_back_mode") == "post_body":
+        try:
+            identity_catalogs = _post_body_delivery_catalogs(
+                identity_catalogs, r3.get("source_identity_map") or {})
+        except FrontBackError as exc:
+            stages["04_figures_citations"] = {
+                "stage": "figures_citations", "status": "failed",
+                "error": str(exc), "model_calls": 0, "external_requests": 0,
+            }
+            return _downstream_report(config, stages, ["04_figures_citations"])
     stages["04_figures_citations"] = run_figures_citations_stage(
         final_draft_path=final_md,
-        identity_catalogs=config.get("identity_catalogs") or [],
+        identity_catalogs=identity_catalogs,
         out_dir=out_dir / "04_figures_citations",
         figure_assets=config.get("figure_assets") or [],
         table_moves=config.get("table_moves") or None,
         figure_moves=config.get("figure_moves") or None)
     r4 = stages["04_figures_citations"]
     reader_draft = Path(str(r4.get("reader_draft") or ""))
-    if not str(r4.get("reader_draft") or "") or not reader_draft.is_file():
+    if (config.get("front_back_mode") == "post_body" and r4.get("status") != "complete") \
+            or not str(r4.get("reader_draft") or "") or not reader_draft.is_file():
         halt.append("04_figures_citations")
         return _downstream_report(config, stages, halt)
 
@@ -975,6 +1181,18 @@ def _extract_front_matter(text: str) -> dict[str, Any]:
     missing title stays empty and lets verification fail — never a default
     placeholder.
     """
+    owned = "<!-- manuscript-part:abstract:start -->" in text
+    if owned:
+        from .serial_parts_application import extract_owned_parts
+        parts = extract_owned_parts(text)
+        # Read only declared front matter. BODY may itself contain a
+        # substantive Abstract/摘要 heading, and marker comments are not prose.
+        # Literal marker examples inside code do not establish ownership.
+        owned = "abstract" in parts
+        if owned:
+            text = parts.get("title", "") + "\n\n" + parts["abstract"]
+    keyword_line = re.compile(r"^\*\*(?:关键词|Keywords)[：:]\*\*.*$", re.I) \
+        if owned else _KEYWORDS_LINE_RE
     title = ""
     abstract = ""
     keywords: list[str] = []
@@ -988,10 +1206,12 @@ def _extract_front_matter(text: str) -> dict[str, Any]:
             continue
         if in_abstract and line.startswith("#"):
             in_abstract = False
-        if in_abstract and not _KEYWORDS_LINE_RE.match(line):
+        if in_abstract and not keyword_line.match(line):
             abstract += line + "\n"
-        match = re.search(r"\*\*关键词[：:]\*\*\s*(.+)", line)
+        match = re.search(r"\*\*(?:关键词|Keywords)[：:]\*\*\s*(.+)", line, re.I) \
+            if owned else re.search(r"\*\*关键词[：:]\*\*\s*(.+)", line)
         if match:
-            keywords = [k.strip() for k in match.group(1).split("；") if k.strip()]
+            tokens = re.split(r"[；;]", match.group(1)) if owned else match.group(1).split("；")
+            keywords = [k.strip() for k in tokens if k.strip()]
     return {"title": title, "abstract": abstract.strip(),
             "keywords": keywords}
