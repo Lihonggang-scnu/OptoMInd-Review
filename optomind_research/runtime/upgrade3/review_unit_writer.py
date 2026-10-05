@@ -28,6 +28,8 @@ from .portable_paths import portable_component
 SCHEMA_VERSION = "optomind.review_unit_writer.v1"
 INPUT_SCHEMA = "optomind.review_unit_writer.input.v1"
 RESULT_SCHEMA = "optomind.review_unit_writer.result.v1"
+DEFAULT_OUTPUT_TOKENS = 32768
+DEFAULT_THINKING_BUDGET = 8192
 PROMPT_PATH = Path("prompts/review_unit_writer.md")
 PLANNING_REVISION_INSTRUCTIONS = (
     "\n\n【章节论证模式】写作者以更新后的 paragraph_tasks/table_tasks 与 chapter_frame 为主，"
@@ -178,6 +180,14 @@ def _checked_unit_tasks(unit: Mapping[str, Any], chapter_view: Mapping[str, Any]
     for owner in chapter_view.get("units") or ():
         if not isinstance(owner, Mapping):
             continue
+        if str(owner.get("unit_id") or "") == unit_id:
+            context = unit.get("owner_unit_context")
+            context = dict(context) if isinstance(context, Mapping) else {}
+            for key in ("evidence_conditions", "synthesis", "transition", "argument_relations"):
+                if key in owner:
+                    context[key] = deepcopy(owner[key])
+            if context:
+                unit["owner_unit_context"] = context
         for brief in owner.get("paragraph_briefs") or ():
             if not isinstance(brief, Mapping):
                 continue
@@ -199,7 +209,13 @@ def _checked_unit_tasks(unit: Mapping[str, Any], chapter_view: Mapping[str, Any]
         if paragraph_id in owners and task.get("portion"):
             raise UnitWritingError(f"paragraph_id_brief_conflict:{paragraph_id}")
         if refs is None:
-            continue
+            # An explicitly retained owner id establishes provenance even for
+            # normal/older arrangements without source_briefs. Never guess by
+            # position or replace the arrangement's point/development.
+            if paragraph_id not in owners or task.get("carried_over") is False:
+                continue
+            refs = [paragraph_id]
+            task["source_briefs"] = refs
         if not isinstance(refs, list):
             raise UnitWritingError(f"brief_reference_not_list:{paragraph_id}")
         if paragraph_id in owners and refs and (
@@ -1413,8 +1429,9 @@ def run_unit_completion(
     model: str = DEFAULT_MODEL,
     prompt: str | None = None,
     language: str = "zh",
-    output_tokens: int = 4000,
-    thinking_budget: int = 0,
+    output_tokens: int | None = None,
+    thinking_budget: int | None = None,
+    thinking: bool | None = None,
     raw_response_dir: str | Path | None = None,
     planning_revision: bool = False,
     simulated: bool = False,
@@ -1430,10 +1447,25 @@ def run_unit_completion(
     call_id = f"unit_completion_{view.chapter_id}_{view.unit_id}_{int(time.time())}"
     response: Any = None
     call_error = ""
+    output_tokens = output_tokens if output_tokens is not None else getattr(client, "max_output_tokens", DEFAULT_OUTPUT_TOKENS)
+    if thinking_budget is None:
+        if thinking is True:
+            # A non-thinking client exposes an effective zero but can retain
+            # a nonzero allowance for explicit per-call re-enablement.
+            thinking_budget = getattr(
+                client, "_configured_thinking_budget",
+                getattr(client, "thinking_budget", DEFAULT_THINKING_BUDGET),
+            ) or DEFAULT_THINKING_BUDGET
+        else:
+            thinking_budget = getattr(client, "thinking_budget", DEFAULT_THINKING_BUDGET)
+        if thinking is None:
+            thinking = getattr(client, "thinking", bool(thinking_budget))
+    enabled = bool(thinking_budget) if thinking is None else bool(thinking)
     try:
         response = invoke_client(
             client, messages, call_id=call_id, model=model,
-            max_output_tokens=output_tokens, thinking_budget=thinking_budget)
+            max_output_tokens=output_tokens, thinking=enabled,
+            thinking_budget=thinking_budget if enabled else 0)
     except Exception as exc:
         call_error = type(exc).__name__ + ":" + str(exc)
         record = getattr(exc, "record", None)
@@ -1467,6 +1499,8 @@ def run_unit_completion(
         "issues": [],
         "raw_response": raw_path,
         "usage": dict(response.get("usage") or {}) if isinstance(response, Mapping) else {},
+        **({key: deepcopy(response[key]) for key in ("effective_request", "cap_pressure") if key in response}
+           if isinstance(response, Mapping) else {}),
         "finish_reason": response.get("finish_reason") or "" if isinstance(response, Mapping) else "",
         "complete": (
             bool(response.get("complete")) if response.get("complete") is not None
@@ -1630,6 +1664,7 @@ def write_unit_completion(
         "call_error": result.get("call_error") or "",
         "estimate": dict(estimate),
         "usage": dict(result.get("usage") or {}),
+        **{key: deepcopy(result[key]) for key in ("effective_request", "cap_pressure") if key in result},
         "finish_reason": result.get("finish_reason") or "",
         "complete": bool(result.get("complete", False)),
         "raw_response": result.get("raw_response") or "",
@@ -1699,8 +1734,8 @@ def estimate_unit_cost(
     messages: Sequence[Mapping[str, Any]],
     *,
     model: str = DEFAULT_MODEL,
-    output_tokens: int = 4000,
-    thinking_budget: int = 0,
+    output_tokens: int = DEFAULT_OUTPUT_TOKENS,
+    thinking_budget: int = DEFAULT_THINKING_BUDGET,
     token_counter: Any | None = None,
 ) -> dict[str, Any]:
     """Conservative pre-dispatch estimate for one unit writing call."""
@@ -1918,7 +1953,9 @@ def _local_numeric_citation_map(known_handles: Iterable[str]) -> dict[str, str]:
             aliases.setdefault(key, set()).add(handle)
     return {
         key: next(iter(handles))
-        for key, handles in aliases.items()
+        # Stable message bytes across processes/cache replay; mappings and
+        # ambiguity handling are unchanged.
+        for key, handles in sorted(aliases.items())
         if len(handles) == 1
     }
 
@@ -2350,6 +2387,8 @@ def write_unit_output(
     partial_error: str = "",
     issues: Sequence[Mapping[str, Any]] = (),
     citation_diagnostics: Mapping[str, Any] | None = None,
+    effective_request: Mapping[str, Any] | None = None,
+    cap_pressure: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Store the model's Markdown and the program's honest bookkeeping."""
 
@@ -2402,6 +2441,8 @@ def write_unit_output(
         "warnings": view.warnings,
         "estimate": dict(estimate),
         "usage": dict(usage or {}),
+        **({"effective_request": deepcopy(dict(effective_request))} if effective_request is not None else {}),
+        **({"cap_pressure": deepcopy(dict(cap_pressure))} if cap_pressure is not None else {}),
         "finish_reason": finish_reason,
         "complete": bool(complete),
         "completion_status": (
@@ -2482,6 +2523,9 @@ def run_unit_writing(
     raw_response_dir: str | Path | None = None,
     planning_revision: bool = False,
     citation_number_map: Mapping[Any, Any] | None = None,
+    output_tokens: int | None = None,
+    thinking_budget: int | None = None,
+    thinking: bool | None = None,
 ) -> dict[str, Any]:
     """One writing call, with the raw response kept on disk."""
 
@@ -2499,8 +2543,25 @@ def run_unit_writing(
     if isinstance(decoded_payload, Mapping):
         effective_payload = decoded_payload
     partial_error = ""
+    output_tokens = output_tokens if output_tokens is not None else getattr(client, "max_output_tokens", DEFAULT_OUTPUT_TOKENS)
+    if thinking_budget is None:
+        if thinking is True:
+            # A non-thinking client exposes an effective zero but can retain
+            # a nonzero allowance for explicit per-call re-enablement.
+            thinking_budget = getattr(
+                client, "_configured_thinking_budget",
+                getattr(client, "thinking_budget", DEFAULT_THINKING_BUDGET),
+            ) or DEFAULT_THINKING_BUDGET
+        else:
+            thinking_budget = getattr(client, "thinking_budget", DEFAULT_THINKING_BUDGET)
+        if thinking is None:
+            thinking = getattr(client, "thinking", bool(thinking_budget))
+    enabled = bool(thinking_budget) if thinking is None else bool(thinking)
     try:
-        response = invoke_client(client, messages)
+        response = invoke_client(
+            client, messages, model=model, max_output_tokens=output_tokens,
+            thinking=enabled, thinking_budget=thinking_budget if enabled else 0,
+        )
     except Exception as exc:
         # The direct Qwen client records a ``length`` response before raising
         # its transport error.  Keep that usable Markdown for continuation,
@@ -2558,6 +2619,7 @@ def run_unit_writing(
         "citation_number_map_origin": map_origin or "none",
         "messages": messages,
         "usage": dict(response.get("usage") or {}),
+        **{key: deepcopy(response[key]) for key in ("effective_request", "cap_pressure") if key in response},
         "finish_reason": response.get("finish_reason") or "",
         "complete": bool(response.get("complete", not partial_error)),
         "partial_error": partial_error,

@@ -24,25 +24,40 @@ from typing import Any, Callable, Mapping, Sequence
 TRANSIENT_HTTP = {408, 409, 425, 429, 500, 502, 503, 504}
 
 # Official Model Studio North China 2 (Beijing) real-time prices, CNY per
-# million tokens.  These are deliberately explicit: the M4 paid evaluation
-# is restricted to these two model IDs and must never silently fall back to a
-# different tier or model.
+# million tokens. Model IDs stay explicit; never silently downgrade a call.
+# Output/context capabilities and prices checked 2026-10-05:
+# https://help.aliyun.com/en/model-studio/qwen3-7-flash
+# https://help.aliyun.com/en/model-studio/qwen3-5-plus
+# https://help.aliyun.com/en/model-studio/qwen3-8-max
+# https://help.aliyun.com/en/model-studio/qwen-api-via-openai-chat-completions
 MODEL_PRICING_CNY: dict[str, dict[str, Any]] = {
     "qwen3.7-flash": {
         "tiers": ((32_000, 0.2, 0.8), (256_000, 0.6, 2.4), (991_808, 1.2, 4.8)),
         "max_input_tokens": 991_808,
         "max_output_tokens": 131_072,
+        "context_window": 1_000_000,
+        "completion_token_parameter": "max_completion_tokens",
         "thinking_json": True,
     },
     "qwen3.5-plus": {
         "tiers": ((128_000, 0.8, 4.8), (256_000, 2.0, 12.0), (1_000_000, 4.0, 24.0)),
         "max_input_tokens": 991_808,
         "max_output_tokens": 65_536,
-        # Alibaba's structured-output guide does not support JSON-object mode
-        # together with thinking for this model.  The direct client can still
-        # run that combination when callers explicitly disable json_mode; the
-        # reader then owns JSON parsing and schema validation.
+        "context_window": 1_000_000,
+        "completion_token_parameter": "max_completion_tokens",
+        # Alibaba does not guarantee strict JSON together with thinking for
+        # this model. Preserve the existing contract: disable json_mode and
+        # let the reader own JSON parsing and schema validation.
         "thinking_json": False,
+    },
+    "qwen3.8-max": {
+        "tiers": ((1_000_000, 12.0, 36.0),),
+        "max_input_tokens": 991_808,
+        "max_output_tokens": 131_072,
+        "context_window": 1_000_000,
+        "completion_token_parameter": "max_completion_tokens",
+        "thinking_json": True,
+        "thinking_budget_maps_to_effort": True,
     },
 }
 
@@ -173,7 +188,7 @@ def _transport_exception_record(error: BaseException) -> dict[str, Any]:
     return {"error": names[0], "reason_code": reason_code, **codes}
 
 
-def _uncertain_telemetry(error: QwenTransportError, *, key_index: int, attempt: int) -> dict[str, Any]:
+def _uncertain_telemetry(error: QwenTransportError, *, key_index: int, attempt: int, effective_request: Mapping[str, Any] | None = None) -> dict[str, Any]:
     """Persist only bounded error identity when a request has unknown billing."""
     error_class = "".join(char for char in type(error).__name__[:40] if char.isalnum() or char in "-_")
     reason = "".join(char for char in (error.reason_code or "unknown")[:80] if char.isalnum() or char in "-_")
@@ -182,6 +197,46 @@ def _uncertain_telemetry(error: QwenTransportError, *, key_index: int, attempt: 
         "status_code": error.status_code,
         "key_index": key_index,
         "attempt": attempt + 1,
+        "effective_request": dict(effective_request or {}),
+    }
+
+
+def _cap_pressure(usage: Mapping[str, Any], effective_request: Mapping[str, Any], finish_reason: str) -> dict[str, Any]:
+    """Report budget pressure, never reject an otherwise complete response.
+
+    Answer tokens are an allocation, not a separate wire cap: unused thinking
+    capacity can be used by the answer. Do not infer reasoning use when the
+    provider omits its counter.
+    """
+
+    def count(value: Any) -> int | None:
+        try:
+            return max(0, int(value)) if value is not None else None
+        except (TypeError, ValueError, OverflowError):
+            return None
+
+    completion = count(usage.get("completion_tokens") if usage.get("completion_tokens") is not None else usage.get("output_tokens"))
+    details = usage.get("completion_tokens_details")
+    reasoning = count(details.get("reasoning_tokens")) if isinstance(details, Mapping) else None
+    if reasoning is None and not effective_request["enable_thinking"]:
+        reasoning = 0
+    answer = max(0, completion - reasoning) if completion is not None and reasoning is not None else None
+    near = []
+    for name, used, allocated in (
+        ("completion", completion, effective_request["total_output_tokens"]),
+        ("thinking", reasoning, effective_request["thinking_budget"]),
+        ("answer_allocation", answer, effective_request["answer_tokens"]),
+    ):
+        if used is not None and allocated > 0 and used >= 0.9 * allocated:
+            near.append(name)
+    return {
+        "near_limit": bool(near) or finish_reason == "length",
+        "near_limits": near,
+        "completion_tokens": completion,
+        "reasoning_tokens": reasoning,
+        "answer_tokens": answer,
+        "finish_reason_length": finish_reason == "length",
+        "diagnostic_only": True,
     }
 
 
@@ -207,7 +262,7 @@ class GlobalBudgetLedger:
                 db.execute("CREATE TABLE IF NOT EXISTS budget_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
                 db.execute("CREATE TABLE IF NOT EXISTS reservations (reservation_id TEXT PRIMARY KEY, call_id TEXT NOT NULL, amount_cny REAL NOT NULL, actual_cny REAL, status TEXT NOT NULL, created_at REAL NOT NULL, usage_json TEXT, returned_model TEXT, finish_reason TEXT, request_id TEXT, raw_response_sha256 TEXT, status_code INTEGER)")
                 columns = {row[1] for row in db.execute("PRAGMA table_info(reservations)").fetchall()}
-                for name, sql_type in (("usage_json", "TEXT"), ("returned_model", "TEXT"), ("finish_reason", "TEXT"), ("request_id", "TEXT"), ("raw_response_sha256", "TEXT"), ("status_code", "INTEGER"), ("provider_error_code", "TEXT"), ("key_index", "INTEGER"), ("attempt", "INTEGER")):
+                for name, sql_type in (("usage_json", "TEXT"), ("returned_model", "TEXT"), ("finish_reason", "TEXT"), ("request_id", "TEXT"), ("raw_response_sha256", "TEXT"), ("status_code", "INTEGER"), ("provider_error_code", "TEXT"), ("key_index", "INTEGER"), ("attempt", "INTEGER"), ("request_metadata_json", "TEXT")):
                     if name not in columns:
                         db.execute(f"ALTER TABLE reservations ADD COLUMN {name} {sql_type}")
                 if self.limit_cny is not None:
@@ -267,7 +322,7 @@ class GlobalBudgetLedger:
                     raise QwenTransportError("unknown_budget_reservation", transient=False, record={"reservation_id": reservation_id})
                 if row[0] in {"settled", "uncertain"}:
                     raise QwenTransportError("budget_reservation_already_settled", transient=False, record={"reservation_id": reservation_id})
-                db.execute("UPDATE reservations SET actual_cny=?, status=?, usage_json=?, returned_model=?, finish_reason=?, request_id=?, raw_response_sha256=?, status_code=?, provider_error_code=?, key_index=?, attempt=? WHERE reservation_id=?", (
+                db.execute("UPDATE reservations SET actual_cny=?, status=?, usage_json=?, returned_model=?, finish_reason=?, request_id=?, raw_response_sha256=?, status_code=?, provider_error_code=?, key_index=?, attempt=?, request_metadata_json=? WHERE reservation_id=?", (
                     amount if actual_cny is not None else None, status,
                     json.dumps(telemetry.get("usage"), ensure_ascii=False, sort_keys=True) if telemetry.get("usage") is not None else None,
                     _text(telemetry.get("returned_model")) or None, _text(telemetry.get("finish_reason")) or None,
@@ -275,7 +330,9 @@ class GlobalBudgetLedger:
                     int(telemetry["status_code"]) if telemetry.get("status_code") is not None else None,
                     _text(telemetry.get("provider_error_code")) or None,
                     int(telemetry["key_index"]) if telemetry.get("key_index") is not None else None,
-                    int(telemetry["attempt"]) if telemetry.get("attempt") is not None else None, reservation_id,
+                    int(telemetry["attempt"]) if telemetry.get("attempt") is not None else None,
+                    json.dumps({key: telemetry[key] for key in ("effective_request", "cap_pressure") if key in telemetry}, ensure_ascii=False, sort_keys=True),
+                    reservation_id,
                 ))
                 db.commit()
             self._refresh_from_db()
@@ -308,11 +365,13 @@ class GlobalBudgetLedger:
         self._refresh_from_db()
         if self.path:
             with sqlite3.connect(self.path) as db:
-                rows = db.execute("SELECT reservation_id,call_id,amount_cny,actual_cny,status,usage_json,returned_model,finish_reason,request_id,raw_response_sha256,status_code,provider_error_code,key_index,attempt FROM reservations ORDER BY created_at,reservation_id").fetchall()
+                rows = db.execute("SELECT reservation_id,call_id,amount_cny,actual_cny,status,usage_json,returned_model,finish_reason,request_id,raw_response_sha256,status_code,provider_error_code,key_index,attempt,request_metadata_json FROM reservations ORDER BY created_at,reservation_id").fetchall()
             reservations = []
             for row in rows:
                 item = {"reservation_id": row[0], "call_id": row[1], "amount_cny": row[2], "actual_cny": row[3], "status": row[4]}
                 telemetry = {"usage": json.loads(row[5]) if row[5] else None, "returned_model": row[6], "finish_reason": row[7], "request_id": row[8], "raw_response_sha256": row[9], "status_code": row[10], "provider_error_code": row[11], "key_index": row[12], "attempt": row[13]}
+                if row[14]:
+                    telemetry.update(json.loads(row[14]))
                 if any(value is not None for value in telemetry.values()):
                     item["telemetry"] = telemetry
                 reservations.append(item)
@@ -365,9 +424,9 @@ class QwenDirectClient:
             raise QwenTransportError("invalid_thinking_budget", transient=False, record={"model": self.model}) from exc
         if configured_thinking_budget < 0:
             raise QwenTransportError("invalid_thinking_budget", transient=False, record={"model": self.model})
-        # `max_tokens` is the visible answer budget for thinking requests.
-        # Reserve and bound the thinking allowance separately so the combined
-        # completion cannot exceed this model's published output capacity.
+        # Keep the configured allowance even when the default is non-thinking:
+        # an explicit per-call thinking=True must be honored with that budget.
+        self._configured_thinking_budget = configured_thinking_budget
         self.thinking_budget = configured_thinking_budget if self.thinking else 0
         if self.max_output_tokens + self.thinking_budget > int(pricing["max_output_tokens"]):
             raise QwenTransportError(
@@ -438,6 +497,9 @@ class QwenDirectClient:
         if model != self.model:
             raise QwenTransportError("runtime_model_mismatch", transient=False, record={"requested": model, "configured": self.model})
         pricing = model_pricing(model)
+        thinking = bool(kwargs.get("thinking", self.thinking))
+        if thinking and self.json_mode and not bool(pricing["thinking_json"]):
+            raise QwenTransportError("thinking_json_unsupported_for_model", transient=False, record={"model": model, "thinking": True, "response_format": {"type": "json_object"}})
         if self.json_mode and not any("json" in _text(item.get("content")).casefold() for item in messages if isinstance(item, Mapping)):
             raise QwenTransportError("json_keyword_required_for_json_object", transient=False, record={"model": model})
         requested_output_tokens = int(kwargs.get("max_output_tokens") or self.max_output_tokens)
@@ -446,7 +508,7 @@ class QwenDirectClient:
         if requested_output_tokens < 64:
             requested_output_tokens = 64
         try:
-            thinking_budget = int(kwargs.get("thinking_budget", self.thinking_budget)) if self.thinking else 0
+            thinking_budget = int(kwargs.get("thinking_budget", self._configured_thinking_budget)) if thinking else 0
         except (TypeError, ValueError) as exc:
             raise QwenTransportError("invalid_thinking_budget", transient=False, record={"model": model}) from exc
         if thinking_budget < 0:
@@ -463,18 +525,36 @@ class QwenDirectClient:
                     "max_output_tokens": pricing["max_output_tokens"],
                 },
             )
+        # For these supported Qwen generations, max_completion_tokens counts
+        # reasoning + answer. Sending answer alone would steal answer capacity.
+        # Keep a legacy max_tokens path for explicitly registered older models.
+        token_parameter = pricing.get("completion_token_parameter", "max_tokens")
         body = {
             "model": model,
             "messages": [dict(item) for item in messages],
-            "max_tokens": requested_output_tokens,
+            token_parameter: total_output_tokens if token_parameter == "max_completion_tokens" else requested_output_tokens,
             "temperature": float(kwargs.get("temperature", 0.1)),
-            "enable_thinking": self.thinking,
+            "enable_thinking": thinking,
             "stream": False,
         }
         if self.json_mode:
             body["response_format"] = {"type": "json_object"}
-        if self.thinking:
+        if thinking:
             body["thinking_budget"] = thinking_budget
+        effective_request = {
+            "model": model,
+            "enable_thinking": thinking,
+            "thinking_budget": thinking_budget,
+            "answer_tokens": requested_output_tokens,
+            "total_output_tokens": total_output_tokens,
+            "max_completion_tokens": body.get("max_completion_tokens"),
+            "max_tokens": body.get("max_tokens"),
+            "response_format": body.get("response_format"),
+        }
+        if thinking and pricing.get("thinking_budget_maps_to_effort"):
+            # Informational provider mapping, not another request parameter:
+            # Qwen3.8 rejects reasoning_effort together with thinking_budget.
+            effective_request["mapped_reasoning_effort"] = "low" if thinking_budget <= 4096 else "medium" if thinking_budget <= 16384 else "xhigh"
         request_bytes = _json_bytes(body)
         last_error: QwenTransportError | None = None
         for key_index, key in enumerate(self._keys()[: self.max_keys]):
@@ -535,10 +615,12 @@ class QwenDirectClient:
                         "attempt": attempt + 1,
                         "key_index": key_index,
                         "elapsed_seconds": time.monotonic() - started,
+                        "effective_request": dict(effective_request),
                     }
+                    result["cap_pressure"] = _cap_pressure(result["usage"], effective_request, finish_reason)
                     if self.budget_ledger is not None and reservation:
                         usage = result.get("usage") or {}
-                        telemetry = {"usage": usage, "returned_model": result.get("returned_model"), "finish_reason": result.get("finish_reason"), "request_id": result.get("request_id"), "raw_response_sha256": result.get("raw_response_sha256"), "status_code": status_code}
+                        telemetry = {"usage": usage, "returned_model": result.get("returned_model"), "finish_reason": result.get("finish_reason"), "request_id": result.get("request_id"), "raw_response_sha256": result.get("raw_response_sha256"), "status_code": status_code, "effective_request": dict(effective_request), "cap_pressure": result["cap_pressure"]}
                         has_usage = usage and (usage.get("prompt_tokens") is not None or usage.get("input_tokens") is not None) and (usage.get("completion_tokens") is not None or usage.get("output_tokens") is not None)
                         if has_usage:
                             self.budget_ledger.settle(reservation["reservation_id"], estimated_cost_cny(usage, model=model), uncertain=False, telemetry=telemetry)
@@ -553,10 +635,11 @@ class QwenDirectClient:
                         raise QwenTransportError("qwen_incomplete_response", transient=False, status_code=status_code, record=result)
                     return result
                 except QwenTransportError as exc:
+                    exc.record.setdefault("effective_request", dict(effective_request))
                     if self.budget_ledger is not None and reservation and not reservation_settled:
                         self.budget_ledger.settle(
                             reservation["reservation_id"], None, uncertain=True,
-                            telemetry=_uncertain_telemetry(exc, key_index=key_index, attempt=attempt),
+                            telemetry=_uncertain_telemetry(exc, key_index=key_index, attempt=attempt, effective_request=effective_request),
                         )
                         reservation_settled = True
                     raise
@@ -578,11 +661,12 @@ class QwenDirectClient:
                         "status_code": status, "raw_response_sha256": hashlib.sha256(raw).hexdigest(),
                         "call_id": call_id, "request_id": request_id or None, "provider_error_code": provider_error_code,
                         "key_index": key_index, "attempt": attempt + 1, "rotate_key": rotate_key,
+                        "effective_request": dict(effective_request),
                     }
                     transient = status in TRANSIENT_HTTP
                     last_error = QwenTransportError("qwen_account_rejection" if rotate_key else "qwen_http_error", transient=transient, status_code=status, record=record)
                     if self.budget_ledger is not None and reservation and not reservation_settled:
-                        telemetry = {"usage": None, "request_id": request_id or None, "raw_response_sha256": record["raw_response_sha256"], "status_code": status, "provider_error_code": provider_error_code, "key_index": key_index, "attempt": attempt + 1}
+                        telemetry = {"usage": None, "request_id": request_id or None, "raw_response_sha256": record["raw_response_sha256"], "status_code": status, "provider_error_code": provider_error_code, "key_index": key_index, "attempt": attempt + 1, "effective_request": dict(effective_request)}
                         # A definitive 4xx, including an account rejection,
                         # consumed no model tokens.  Server errors and rate
                         # limits remain uncertain because the provider may
@@ -599,7 +683,7 @@ class QwenDirectClient:
                     last_error = QwenTransportError(
                         "qwen_transport_error",
                         transient=True,
-                        record={"call_id": call_id, **transport_record},
+                        record={"call_id": call_id, "effective_request": dict(effective_request), **transport_record},
                         reason_code=transport_record["reason_code"],
                     )
                 if last_error and last_error.record.get("rotate_key"):
@@ -611,14 +695,14 @@ class QwenDirectClient:
                     if self.budget_ledger is not None and reservation and not reservation_settled:
                         self.budget_ledger.settle(
                             reservation["reservation_id"], None, uncertain=True,
-                            telemetry=_uncertain_telemetry(last_error, key_index=key_index, attempt=attempt),
+                            telemetry=_uncertain_telemetry(last_error, key_index=key_index, attempt=attempt, effective_request=effective_request),
                         )
                         reservation_settled = True
                     raise last_error
                 if self.budget_ledger is not None and reservation and not reservation_settled:
                     self.budget_ledger.settle(
                         reservation["reservation_id"], None, uncertain=True,
-                        telemetry=_uncertain_telemetry(last_error, key_index=key_index, attempt=attempt),
+                        telemetry=_uncertain_telemetry(last_error, key_index=key_index, attempt=attempt, effective_request=effective_request),
                     )
                     reservation_settled = True
                 if attempt < self.max_retries:

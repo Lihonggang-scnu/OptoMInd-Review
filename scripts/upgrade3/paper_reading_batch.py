@@ -21,6 +21,7 @@ from optomind_research.runtime.upgrade3.paper_reading_batch import (  # noqa: E4
 from optomind_research.runtime.upgrade3.paper_reading_card import (  # noqa: E402
     DEFAULT_CONCISE_OUTPUT,
     DEFAULT_INPUT_PROFILE,
+    DEFAULT_MAX_OUTPUT_TOKENS,
     DEFAULT_THINKING,
     DEFAULT_THINKING_BUDGET,
 )
@@ -35,7 +36,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--no-thinking", action="store_true", default=not DEFAULT_THINKING)
     parser.add_argument("--thinking-budget", type=int, default=DEFAULT_THINKING_BUDGET)
     parser.add_argument("--concise-output", action="store_true", default=DEFAULT_CONCISE_OUTPUT)
-    parser.add_argument("--max-output-tokens", type=int, default=8192)
+    parser.add_argument("--max-output-tokens", type=int, default=DEFAULT_MAX_OUTPUT_TOKENS)
     parser.add_argument("--timeout-seconds", type=float, default=300.0)
     parser.add_argument("--key-file", default="", help="Required with --run; file contents are never printed")
     parser.add_argument("--budget-ledger", default="", help="Shared sqlite ledger, required with --run")

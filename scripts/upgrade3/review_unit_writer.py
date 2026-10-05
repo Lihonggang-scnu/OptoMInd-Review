@@ -21,6 +21,8 @@ if str(PROJECT_ROOT) not in sys.path:
 from optomind_research.runtime.upgrade3.review_unit_writer import (
     DEFAULT_MAX_MATERIAL_CHARS_PER_SOURCE,
     DEFAULT_MODEL,
+    DEFAULT_OUTPUT_TOKENS,
+    DEFAULT_THINKING_BUDGET,
     LARGE_INPUT_TOKENS,
     UnitWritingError,
     _default_qwen_token_counter,
@@ -67,8 +69,9 @@ def _parser() -> argparse.ArgumentParser:
                         help="0 disables the per-source ceiling (nothing is dropped silently)")
     parser.add_argument("--keep-deep-read-references", action="store_true",
                         help="Also send the source paper's own bibliography from the deep read")
-    parser.add_argument("--output-tokens", type=int, default=4000)
-    parser.add_argument("--thinking-budget", type=int, default=0)
+    parser.add_argument("--output-tokens", type=int, default=DEFAULT_OUTPUT_TOKENS)
+    parser.add_argument("--thinking-budget", type=int, default=DEFAULT_THINKING_BUDGET,
+                        help="Reasoning token allocation; set 0 to explicitly disable thinking")
     parser.add_argument("--timeout-seconds", type=float, default=900.0)
     parser.add_argument("--key-file", default=str(DEFAULT_KEY_FILE))
     parser.add_argument("--budget-ledger", default=str(DEFAULT_LEDGER),
@@ -299,6 +302,8 @@ def main(argv: list[str] | None = None) -> int:
             result = run_unit_writing(
                 view, client=client, model=args.model, prompt=prompt, language=args.language,
                 payload=payload,
+                output_tokens=args.output_tokens,
+                thinking_budget=args.thinking_budget,
                 raw_response_dir=None if mode == "fake" else unit_dir / "raw_responses",
                 planning_revision=args.planning_revision)
             if mode == "run":
@@ -310,7 +315,8 @@ def main(argv: list[str] | None = None) -> int:
                 simulated_from=str(Path(args.fake_client).resolve()) if mode == "fake" else "",
                 response_path=result["raw_response"], finish_reason=result["finish_reason"],
                 complete=result.get("complete", True), partial_error=result.get("partial_error", ""),
-                issues=result.get("issues") or [], citation_diagnostics=result)
+                issues=result.get("issues") or [], citation_diagnostics=result,
+                effective_request=result.get("effective_request"), cap_pressure=result.get("cap_pressure"))
             entry.update({
                 "status": (
                     "written" if mode == "run" and result.get("complete", True)
@@ -327,6 +333,7 @@ def main(argv: list[str] | None = None) -> int:
                 "completion_status": written["completion_status"],
                 "partial_error": result.get("partial_error", ""),
                 "usage": result["usage"],
+                **{key: result[key] for key in ("effective_request", "cap_pressure") if key in result},
                 "issues": result.get("issues") or [],
                 **{key: written[key] for key in (
                     "citation_problems", "unresolved_numeric_citations",

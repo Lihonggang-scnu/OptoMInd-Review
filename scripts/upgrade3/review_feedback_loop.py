@@ -334,7 +334,7 @@ class FeedbackLoop:
             max_retries=0,
             timeout_seconds=self.args.timeout_seconds,
             max_output_tokens=self.args.arrangement_output_tokens,
-            thinking=True,
+            thinking=bool(self.args.arrangement_thinking_budget),
             thinking_budget=self.args.arrangement_thinking_budget,
             json_mode=False,
             budget_ledger=self.ledger,
@@ -350,6 +350,8 @@ class FeedbackLoop:
             prompt=arranging.load_editor_prompt(planning_revision=True),
             view_payload=payload,
             call_id="planning-revision:wp4-feedback:arrangement",
+            output_tokens=self.args.arrangement_output_tokens,
+            thinking_budget=self.args.arrangement_thinking_budget,
             raw_response_dir=output_dir / "raw_responses" / "arrangement",
             planning_revision=True,
         )
@@ -433,6 +435,8 @@ class FeedbackLoop:
             payload=payload,
             raw_response_dir=unit_dir / "raw_responses",
             planning_revision=True,
+            output_tokens=self.args.writer_output_tokens,
+            thinking_budget=self.args.writer_thinking_budget,
         )
         return writing.write_unit_output(
             view,
@@ -449,6 +453,8 @@ class FeedbackLoop:
             complete=result.get("complete", True),
             partial_error=result.get("partial_error") or "",
             issues=result.get("issues") or [],
+            effective_request=result.get("effective_request"),
+            cap_pressure=result.get("cap_pressure"),
         )
 
 
@@ -548,12 +554,12 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--owner-model", default="qwen3.5-plus")
     parser.add_argument("--arrangement-model", default="qwen3.5-plus")
     parser.add_argument("--writer-model", default=writing.DEFAULT_MODEL)
-    parser.add_argument("--owner-output-tokens", type=int, default=12000)
-    parser.add_argument("--owner-thinking-budget", type=int, default=2048)
-    parser.add_argument("--arrangement-output-tokens", type=int, default=5000)
-    parser.add_argument("--arrangement-thinking-budget", type=int, default=1024)
-    parser.add_argument("--writer-output-tokens", type=int, default=4000)
-    parser.add_argument("--writer-thinking-budget", type=int, default=0)
+    parser.add_argument("--owner-output-tokens", type=int, default=planning.DEFAULT_PLANNER_OUTPUT_TOKENS)
+    parser.add_argument("--owner-thinking-budget", type=int, default=planning.DEFAULT_PLANNER_THINKING_BUDGET)
+    parser.add_argument("--arrangement-output-tokens", type=int, default=arranging.DEFAULT_OUTPUT_TOKENS)
+    parser.add_argument("--arrangement-thinking-budget", type=int, default=arranging.DEFAULT_THINKING_BUDGET)
+    parser.add_argument("--writer-output-tokens", type=int, default=writing.DEFAULT_OUTPUT_TOKENS)
+    parser.add_argument("--writer-thinking-budget", type=int, default=writing.DEFAULT_THINKING_BUDGET)
     parser.add_argument("--timeout-seconds", type=float, default=900.0)
     parser.add_argument("--max-source-chars", type=int, default=1200)
     parser.add_argument("--max-material-chars", type=int, default=writing.DEFAULT_MAX_MATERIAL_CHARS_PER_SOURCE)

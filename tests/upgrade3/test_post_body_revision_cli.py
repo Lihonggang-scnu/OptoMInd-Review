@@ -112,6 +112,7 @@ def test_live_uses_explicit_models_one_shared_ledger_no_retries(tmp_path, monkey
 def test_config_rejects_incompatible_thinking():
     c = config("C")
     c["model_settings"]["qwen3.5-plus"]["thinking"] = True
+    c["model_settings"]["qwen3.5-plus"]["json_mode"] = True
     with pytest.raises(ValueError, match="thinking_json"):
         cli.validate_config(c, "C")
 

@@ -43,7 +43,8 @@ MODEL = "qwen3.7-flash"
 INPUT_PROFILES = {"standard", "economy"}
 DEFAULT_INPUT_PROFILE = "economy"
 DEFAULT_THINKING = True
-DEFAULT_THINKING_BUDGET = 512
+DEFAULT_THINKING_BUDGET = 4096
+DEFAULT_MAX_OUTPUT_TOKENS = 12288
 DEFAULT_CONCISE_OUTPUT = False
 _STOP_REASONS = {"stop", "end_turn", "completed", "complete"}
 _ROLE_LABELS = {
@@ -604,6 +605,7 @@ def _extract_telemetry(result: Mapping[str, Any]) -> dict[str, Any]:
         "request_id": _text(result.get("request_id") or ""),
         "call_id": _text(result.get("call_id") or ""),
         "elapsed_seconds": result.get("elapsed_seconds"),
+        **{key: dict(result[key]) for key in ("effective_request", "cap_pressure") if isinstance(result.get(key), Mapping)},
     }
 
 
@@ -739,7 +741,7 @@ def run_paper_reading_card(
     input_profile: str = DEFAULT_INPUT_PROFILE,
     thinking: bool = DEFAULT_THINKING,
     concise_output: bool = DEFAULT_CONCISE_OUTPUT,
-    max_output_tokens: int = 8192,
+    max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS,
     thinking_budget: int = DEFAULT_THINKING_BUDGET,
     timeout_seconds: float = 300.0,
     max_retries: int = 0,
@@ -752,6 +754,7 @@ def run_paper_reading_card(
     profile = _normalize_input_profile(input_profile)
     if concise_output and profile != "economy":
         raise CardInputError("concise_output_requires_economy_profile")
+    max_output_tokens = max(64, int(max_output_tokens))
     effective_thinking_budget = int(thinking_budget) if thinking else 0
     if client is None:
         if not key_file:
@@ -943,7 +946,7 @@ def preflight_card(
     input_profile: str = DEFAULT_INPUT_PROFILE,
     thinking: bool = DEFAULT_THINKING,
     concise_output: bool = DEFAULT_CONCISE_OUTPUT,
-    max_output_tokens: int = 8192,
+    max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS,
     thinking_budget: int = DEFAULT_THINKING_BUDGET,
     timeout_seconds: float = 300.0,
     max_retries: int = 0,
@@ -953,6 +956,7 @@ def preflight_card(
     profile = _normalize_input_profile(input_profile)
     if concise_output and profile != "economy":
         raise CardInputError("concise_output_requires_economy_profile")
+    max_output_tokens = max(64, int(max_output_tokens))
     effective_thinking_budget = int(thinking_budget) if thinking else 0
     snapshot = PreparedSnapshotProvider(snapshot_dir).load()
     plan = _load_plan(plan_path)
@@ -991,6 +995,7 @@ def preflight_card(
         "thinking": bool(thinking),
         "concise_output": bool(concise_output),
         "thinking_budget": effective_thinking_budget,
+        "max_output_tokens": int(max_output_tokens),
         "input_audit_sha256": _sha(input_audit) if input_audit is not None else "",
         "request_bytes": len(request_bytes),
         "estimated_reserved_cny": _estimate_reservation(messages, output_tokens=max_output_tokens, thinking_budget=effective_thinking_budget),
@@ -1005,7 +1010,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--key-file", default="")
     parser.add_argument("--budget-ledger", default="")
     parser.add_argument("--budget-limit-cny", type=float, default=None)
-    parser.add_argument("--max-output-tokens", type=int, default=8192)
+    parser.add_argument("--max-output-tokens", type=int, default=DEFAULT_MAX_OUTPUT_TOKENS)
     parser.add_argument("--thinking-budget", type=int, default=DEFAULT_THINKING_BUDGET)
     parser.add_argument("--input-profile", choices=sorted(INPUT_PROFILES), default=DEFAULT_INPUT_PROFILE)
     parser.add_argument("--no-thinking", action="store_true", default=not DEFAULT_THINKING, help="Disable model thinking and reserve no thinking tokens")

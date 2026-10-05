@@ -32,6 +32,12 @@ from .module4.runtime import QwenTransportError
 SCHEMA_VERSION = "optomind.progressive_review_plan.v1"
 DEFAULT_PLANNER_MODEL = "qwen3.5-plus"
 DEFAULT_READER_MODEL = "qwen3.7-flash"
+DEFAULT_PLANNER_THINKING_BUDGET = 16_384
+DEFAULT_PLANNER_OUTPUT_TOKENS = 32_768
+DEFAULT_READER_THINKING_BUDGET = 8_192
+DEFAULT_READER_OUTPUT_TOKENS = 20_000
+QUERY_REFINEMENT_THINKING_BUDGET = 4_096
+QUERY_REFINEMENT_OUTPUT_TOKENS = 4_096
 DEFAULT_POOL_PATH = Path("outputs/planning_support/20260923/practical_refresh/supplement_live/PLANNING_POOL.jsonl")
 DEFAULT_PLAN_PATH = Path("outputs/upgrade3/CROSSDOMAIN_REWORK/X1_microbiome_ICI/PLAN.json")
 DEFAULT_BUDGET_LEDGER = Path("outputs/review_blueprint/20260922_phase1/budget.sqlite")
@@ -72,9 +78,11 @@ class ProgressivePlannerConfig:
     chapter_model: str = DEFAULT_READER_MODEL
     reader_model: str = DEFAULT_READER_MODEL
     timeout_seconds: float = 900.0
-    thinking_budget: int = 8_192
-    planner_output_tokens: int = 18_000
-    chapter_output_tokens: int = 14_000
+    thinking_budget: int = DEFAULT_PLANNER_THINKING_BUDGET
+    planner_output_tokens: int = DEFAULT_PLANNER_OUTPUT_TOKENS
+    # Historical API name: chapter_output_tokens configures the directed reader,
+    # while every planner stage uses planner_output_tokens without reductions.
+    chapter_output_tokens: int = DEFAULT_READER_OUTPUT_TOKENS
     tokenizer_path: Path = DEFAULT_TOKENIZER_PATH
     # M1 is deliberately opt-in.  The legacy planner keeps its existing
     # chapter payload and call sequence when this is false.
@@ -87,6 +95,7 @@ class ProgressivePlannerConfig:
     # from history: callers name the exact prior output root to use.
     recovery_from: Path | None = None
     recovery_chapters: tuple[str, ...] = ()
+    reader_thinking_budget: int = DEFAULT_READER_THINKING_BUDGET
 
 
 def _json_default(value: Any) -> Any:
@@ -1722,6 +1731,49 @@ def _messages_for(stage: str, payload: Mapping[str, Any]) -> list[dict[str, str]
     ]
 
 
+def _planner_call_settings(planner: Any, stage: str, *, config: Any = None) -> dict[str, Any]:
+    """Use the same effective allowances for calls, context estimates and caches.
+
+    Stage selection only changes the model. Budget flags apply to every planner
+    stage, including routing, chapter batches, cases and owner revisions.
+    """
+    model_field = "chapter_model" if stage in {"chapter_details", "case_groups"} else "model"
+    config_model_field = "chapter_model" if model_field == "chapter_model" else "planner_model"
+    default_model = DEFAULT_READER_MODEL if model_field == "chapter_model" else DEFAULT_PLANNER_MODEL
+    model = getattr(planner, model_field, getattr(config, config_model_field, default_model))
+    output = int(getattr(planner, "output_tokens", getattr(config, "planner_output_tokens", DEFAULT_PLANNER_OUTPUT_TOKENS)))
+    thinking = int(getattr(planner, "thinking_budget", getattr(config, "thinking_budget", DEFAULT_PLANNER_THINKING_BUDGET)))
+    if thinking < 0:
+        raise ProgressivePlanError("thinking_budget_must_be_nonnegative")
+    return {"model": model, "output_tokens": max(64, output), "thinking_budget": thinking}
+
+
+def _directed_reader_settings(config: ProgressivePlannerConfig) -> dict[str, Any]:
+    from .directed_reading import directed_reader_runtime_config
+
+    return directed_reader_runtime_config(model=config.reader_model,
+        max_output_tokens=config.chapter_output_tokens, thinking_budget=config.reader_thinking_budget)
+
+
+def _planning_helper_settings(config: ProgressivePlannerConfig) -> dict[str, Any]:
+    from .planning_supplement import planning_helper_runtime_config
+
+    settings = planning_helper_runtime_config()
+    settings["local_triage"]["model"] = config.reader_model
+    settings["query_refinement"] = {"model": config.reader_model, "thinking": True,
+        "thinking_budget": QUERY_REFINEMENT_THINKING_BUDGET,
+        "max_output_tokens": QUERY_REFINEMENT_OUTPUT_TOKENS}
+    return settings
+
+
+def _directed_material_runtime_compatible(material: Mapping[str, Any], config: ProgressivePlannerConfig,
+                                          explicit_prior_ids: set[str] | None = None) -> bool:
+    # Explicit prior-reading inputs are deliberate historical material reuse,
+    # separately labeled by the caller; automatic caches require exact limits.
+    return (material.get("runtime_config") == _directed_reader_settings(config)
+            or _text(material.get("paper_id")) in (explicit_prior_ids or set()))
+
+
 def _chapter_details_capacity(
     planner: Any,
     payload: Mapping[str, Any],
@@ -1739,8 +1791,9 @@ def _chapter_details_capacity(
     counter = getattr(planner, "counter", None)
     if not callable(counter):
         return None
-    output_tokens = min(int(getattr(planner, "output_tokens", 16_000)), 16_000)
-    thinking_tokens = 2_048  # QwenProgressivePlanner.__call__ uses this for chapter_details.
+    settings = _planner_call_settings(planner, "chapter_details")
+    output_tokens = settings["output_tokens"]
+    thinking_tokens = settings["thinking_budget"]
     messages = _messages_for("chapter_details", payload)
     local_tokens = int(counter(b"", messages))
     estimated_input = int(math.ceil(local_tokens * TOKEN_MARGIN_MULTIPLIER) + TOKEN_FRAMING_MARGIN)
@@ -1853,7 +1906,8 @@ def _chapter_details_adaptive_batches(
         # A fixed envelope with no source records cannot be made smaller by
         # partitioning.  Stop before any paid request.
         raise ProgressivePlanError("chapter_details_fixed_context_exceeds_capacity")
-    available = max(1, int((MAX_INPUT_TOKENS - TOKEN_FRAMING_MARGIN) / TOKEN_MARGIN_MULTIPLIER) - base_capacity["message_tokens"])
+    input_limit = min(MAX_INPUT_TOKENS, 999_999 - base_capacity["output_tokens"] - base_capacity["thinking_tokens"])
+    available = max(1, int((input_limit - TOKEN_FRAMING_MARGIN) / TOKEN_MARGIN_MULTIPLIER) - base_capacity["message_tokens"])
     initial_count = max(2, math.ceil(sum(weights) / available))
     initial_count = min(initial_count, len(rows))
     for count in range(initial_count, len(rows) + 1):
@@ -1875,14 +1929,13 @@ def _chapter_details_adaptive_batches(
 def _chapter_details_cache_signature(payload: Mapping[str, Any], *, planner: Any = None) -> str:
     clean = dict(payload)
     clean.pop("call_id", None)
-    model = _text(getattr(planner, "chapter_model", "")) or _text(getattr(planner, "model", ""))
-    output_tokens = min(int(getattr(planner, "output_tokens", 16_000)), 16_000)
+    settings = _planner_call_settings(planner, "chapter_details")
     messages = _messages_for("chapter_details", clean)
     return _material_content_signature({
         "contract": "chapter_details.batch.v2",
-        "model": model,
-        "output_tokens": output_tokens,
-        "thinking_tokens": 2_048,
+        "model": settings["model"],
+        "output_tokens": settings["output_tokens"],
+        "thinking_tokens": settings["thinking_budget"],
         "messages": messages,
     })
 
@@ -2136,7 +2189,7 @@ def _parse_planner_response(raw: Any) -> tuple[dict[str, Any], dict[str, Any]]:
             raise ProgressivePlanError("planner_response_must_be_object")
         telemetry = {
             key: raw.get(key)
-            for key in ("usage", "requested_model", "returned_model", "finish_reason", "complete", "call_id", "elapsed_seconds")
+            for key in ("usage", "requested_model", "returned_model", "finish_reason", "complete", "call_id", "elapsed_seconds", "effective_request", "cap_pressure")
             if key in raw
         }
         return dict(parsed), telemetry
@@ -2168,8 +2221,8 @@ class QwenProgressivePlanner:
         output_dir: str | Path,
         tokenizer_path: str | Path = DEFAULT_TOKENIZER_PATH,
         timeout_seconds: float = 900.0,
-        thinking_budget: int = 8_192,
-        output_tokens: int = 18_000,
+        thinking_budget: int = DEFAULT_PLANNER_THINKING_BUDGET,
+        output_tokens: int = DEFAULT_PLANNER_OUTPUT_TOKENS,
         chapter_model: str = DEFAULT_READER_MODEL,
     ):
         from .module4.runtime import GlobalBudgetLedger, QwenDirectClient
@@ -2189,17 +2242,10 @@ class QwenProgressivePlanner:
         from .module4.runtime import QwenDirectClient
 
         messages = _messages_for(stage, payload)
-        call_model = self.chapter_model if stage in {"chapter_details", "case_groups"} else self.model
-        output_tokens = self.output_tokens
-        call_thinking_budget = 2_048 if stage in {"source_routing", "chapter_details", "case_groups"} else self.thinking_budget
-        if stage == "chapter_details":
-            output_tokens = min(output_tokens, 16_000)
-        if stage == "whole_plan_improvement":
-            output_tokens = min(output_tokens, 5_000)
-            call_thinking_budget = min(call_thinking_budget, 1_024)
-        elif stage == "affected_chapter_revision":
-            output_tokens = min(output_tokens, 16_000)
-            call_thinking_budget = min(call_thinking_budget, 1_024)
+        settings = _planner_call_settings(self, stage)
+        call_model = settings["model"]
+        output_tokens = settings["output_tokens"]
+        call_thinking_budget = settings["thinking_budget"]
         estimated_input = int(self.counter(b"", messages) * TOKEN_MARGIN_MULTIPLIER + 0.999999) + TOKEN_FRAMING_MARGIN
         total_context_estimate = estimated_input + output_tokens + (call_thinking_budget if call_thinking_budget else 0)
         if estimated_input > MAX_INPUT_TOKENS or total_context_estimate >= 1_000_000:
@@ -2215,11 +2261,11 @@ class QwenProgressivePlanner:
             max_retries=1,
             timeout_seconds=self.timeout_seconds,
             max_output_tokens=output_tokens,
-            thinking=True,
+            thinking=bool(call_thinking_budget),
             thinking_budget=call_thinking_budget,
             json_mode=False,
             budget_ledger=self.ledger,
-            raw_response_dir=self.output_dir / "raw_responses" / _safe_id(call_id),
+            raw_response_dir=self.output_dir / "raw_responses" / _safe_id(call_id) / _material_content_signature({"settings": settings, "messages": messages}),
             prompt_token_counter=self.counter,
             prompt_token_multiplier=TOKEN_MARGIN_MULTIPLIER,
             prompt_token_framing_margin=TOKEN_FRAMING_MARGIN,
@@ -2229,11 +2275,12 @@ class QwenProgressivePlanner:
             messages,
             model=call_model,
             max_output_tokens=output_tokens,
-            thinking=True,
+            thinking=bool(call_thinking_budget),
             thinking_budget=call_thinking_budget,
             call_id=call_id,
         )
         response, telemetry = _parse_planner_response(raw)
+        telemetry["runtime_config"] = {**settings, "thinking": bool(call_thinking_budget)}
         telemetry["prompt_estimation"] = {
             "tokenizer": "data/tokenizers/qwen3_5_9b/tokenizer.json",
             "multiplier": TOKEN_MARGIN_MULTIPLIER,
@@ -3561,9 +3608,16 @@ def _decorate_directed_material(
         prior_material = None
     output["_progressive_task_signature"] = _directed_task_signature(task)
     output["_progressive_task_requirements"] = _directed_task_requirements(task)
-    if prior_material and not _directed_material_compatible(task, prior_material):
-        prior_questions = _material_question_rows(prior_material)
+    if prior_material:
+        # Re-entering an earlier task can restore it from the reader store
+        # while the paper-level cache holds a later partial task. Keep their
+        # shared history, but never duplicate the current answer as history.
+        # This makes both same-task and cross-task replay idempotent.
         current_questions = _material_current_question_rows(material)
+        current_keys = {json.dumps(row, ensure_ascii=False, sort_keys=True, default=_json_default)
+                        for row in current_questions}
+        prior_questions = [row for row in _material_question_rows(prior_material)
+                           if json.dumps(row, ensure_ascii=False, sort_keys=True, default=_json_default) not in current_keys]
         if prior_questions:
             # Keep the complete reading history in the field consumed by
             # material compaction and chapter payload construction.  The
@@ -3574,7 +3628,7 @@ def _decorate_directed_material(
             output["question_material"] = _unique_question_rows([
                 *prior_questions, *_material_question_rows(material), *current_questions,
             ])
-    elif "current_question_material" not in output:
+    if "current_question_material" not in output:
         current_questions = _material_question_rows(material)
         if current_questions:
             output["current_question_material"] = current_questions
@@ -3649,22 +3703,12 @@ class ProgressiveReviewPlanner:
 
         stage = {"harmonized_scope": "harmonize_scope"}.get(stage, stage)
         payload = project(payload)
-        model = getattr(self.planner, "chapter_model", self.config.chapter_model) if stage in {"chapter_details", "case_groups"} else getattr(self.planner, "model", self.config.planner_model)
-        output_tokens = getattr(self.planner, "output_tokens", self.config.planner_output_tokens)
-        thinking_budget = getattr(self.planner, "thinking_budget", self.config.thinking_budget)
-        if stage in {"source_routing", "chapter_details", "case_groups"}:
-            thinking_budget = 2048
-        if stage in {"chapter_details", "affected_chapter_revision"}:
-            output_tokens = min(output_tokens, 16000)
-        if stage == "whole_plan_improvement":
-            output_tokens = min(output_tokens, 5000)
-        if stage in {"whole_plan_improvement", "affected_chapter_revision"}:
-            thinking_budget = min(thinking_budget, 1024)
+        settings = _planner_call_settings(self.planner, stage, config=self.config)
         contract = {"version": 1, "stage": stage,
                     # Tool orchestration has no planner prompt of its own; its
                     # complete outer arguments are the compatibility boundary.
                     "messages": payload if stage.endswith("_tools") else _messages_for(stage, payload if isinstance(payload, Mapping) else {"inputs": payload}),
-                    "model": model, "output_tokens": output_tokens, "thinking_budget": thinking_budget}
+                    **settings}
         return hashlib.sha256(json.dumps(contract, ensure_ascii=False, sort_keys=True, default=_json_default).encode("utf-8")).hexdigest()
 
     def _model_stage(self, name: str, payload: Mapping[str, Any], *, resume: bool, state: dict[str, Any]) -> Any:
@@ -4230,7 +4274,8 @@ class ProgressiveReviewPlanner:
                                           {_text(task.get("paper_id")) for task in directed_requests}},
             "shared_deep_read_budget": self.config.shared_deep_read_budget,
             "reader_model": self.config.reader_model,
-            "thinking_budget": self.config.thinking_budget,
+            "directed_reader_runtime_config": _directed_reader_settings(self.config),
+            "planning_helper_runtime_config": _planning_helper_settings(self.config),
             "adaptive_queue": self.retrieval_loop_runner is not None,
         }
 
@@ -4291,7 +4336,8 @@ class ProgressiveReviewPlanner:
             pool_by_id = {str(row.get("_paper_id")): dict(row) for row in pool_rows}
             already_read = _all_directed_ids(prior_directed or {})
             blocked_no_reacquire = _blocked_directed_ids(prior_directed or {})
-            already_read.update(_text(row.get("paper_id")) for row in self.prior_readings if _text(row.get("paper_id")))
+            explicit_prior_ids = {_text(row.get("paper_id")) for row in self.prior_readings if _text(row.get("paper_id"))}
+            already_read.update(explicit_prior_ids)
             prior_material_by_id: dict[str, dict[str, Any]] = {}
             for row in self.prior_readings:
                 paper_id = _text(row.get("paper_id"))
@@ -4316,7 +4362,7 @@ class ProgressiveReviewPlanner:
                 prior_material = prior_material_by_id.get(paper_id) or self._read_materials.get(paper_id)
                 if paper_id in blocked_no_reacquire:
                     reused.append({**task, "status": "review_reported_source_no_reacquire", "material": {}})
-                elif prior_material is not None and _directed_material_compatible(task, prior_material) and _prior_read_source_compatible(pool_by_id.get(paper_id, {}), prior_material):
+                elif prior_material is not None and _directed_material_runtime_compatible(prior_material, self.config, explicit_prior_ids) and _directed_material_compatible(task, prior_material) and _prior_read_source_compatible(pool_by_id.get(paper_id, {}), prior_material):
                     reused.append({**task, "status": "reused_prior_deep_read", "material": dict(prior_material)})
                     reused_materials.append(dict(prior_material))
                 elif paper_id in already_read:
@@ -4373,6 +4419,7 @@ class ProgressiveReviewPlanner:
                             result, task=task, prior_material=task.get("_prior_material"),
                         )
                     decorated = dict(result)
+                    decorated.setdefault("runtime_config", _directed_reader_settings(self.config))
                     decorated_materials.append(decorated)
                     self._read_materials[paper_id] = decorated
             decorated_materials = [*reused_materials, *decorated_materials]
@@ -4839,6 +4886,7 @@ class ProgressiveReviewPlanner:
             def revise_one(item: tuple[int, tuple[str, Mapping[str, Any]]]) -> tuple[int, dict[str, Any]]:
                 index, (chapter_id, revision_payload) = item
                 cache_path = revision_root / f"{_safe_id(chapter_id)}.json"
+                contract = self._cache_contract("affected_chapter_revision", revision_payload)
                 if resume and cache_path.is_file():
                     try:
                         cached = _read_json(cache_path)
@@ -4846,6 +4894,7 @@ class ProgressiveReviewPlanner:
                             isinstance(cached, Mapping)
                             and cached.get("status") == "complete"
                             and cached.get("cache_inputs") == revision_payload
+                            and cached.get("cache_contract") == contract
                         ):
                             return index, dict(cached)
                     except ProgressivePlanError:
@@ -4868,6 +4917,7 @@ class ProgressiveReviewPlanner:
                         "error_detail": str(exc)[:1000],
                         "cache_inputs": dict(revision_payload),
                     }
+                saved["cache_contract"] = contract
                 _atomic_json(cache_path, saved)
                 return index, saved
 
@@ -7771,6 +7821,9 @@ def make_retrieval_loop_runner(
     read_materials = dict(read_cache.get("materials") or {})
     read_task_signatures = dict(read_cache.get("task_signatures") or {})
     consumed_ids = set(read_cache.get("consumed_paper_ids") or [])
+    explicit_prior_ids = {_text(item.get("paper_id")) for item in prior_readings if _text(item.get("paper_id"))}
+    reader_settings = _directed_reader_settings(config)
+    helper_settings = _planning_helper_settings(config)
     for item in prior_readings:
         paper_id = _text(item.get("paper_id"))
         if paper_id:
@@ -7876,6 +7929,10 @@ def make_retrieval_loop_runner(
 
         for need, request in zip(needs, gaps):
             contract = _supplement_need_contract(request, need)
+            contract["runtime_config"] = helper_settings
+            contract["reuse_key"] = hashlib.sha256(json.dumps(
+                {"research": contract["research"], "acceptance": contract["acceptance"],
+                 "runtime_config": helper_settings}, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
             need.success_criteria = tuple(sorted(set(
                 _supplement_contract_token(item) for item in
                 [*(request.get("success_criteria") or []), *(request.get("required_outputs") or [])]
@@ -7908,7 +7965,8 @@ def make_retrieval_loop_runner(
                 cached_answer_by_id[need.need_id] = exact["state"]
             covered = {key: set() for key in ("success_criteria", "required_outputs")}
             for row in inherited:
-                if lookup_compatible(row, nominations) and _supplement_answered(row.get("state") or {}):
+                if ((row.get("contract") or {}).get("runtime_config") == helper_settings
+                        and lookup_compatible(row, nominations) and _supplement_answered(row.get("state") or {})):
                     for key in covered:
                         covered[key].update((row.get("contract") or {}).get("acceptance", {}).get(key) or [])
             delta = dict(request)
@@ -7922,7 +7980,9 @@ def make_retrieval_loop_runner(
                 _text(row.get("state", {}).get("usable_content")) for row in inherited
                 if _text(row.get("state", {}).get("usable_content"))))
             if inherited and not any(delta[key] for key in covered):
-                answered_states = [row["state"] for row in inherited if lookup_compatible(row, nominations) and _supplement_answered(row.get("state") or {})]
+                answered_states = [row["state"] for row in inherited
+                                   if (row.get("contract") or {}).get("runtime_config") == helper_settings
+                                   and lookup_compatible(row, nominations) and _supplement_answered(row.get("state") or {})]
                 if answered_states:
                     cached_answer_by_id[need.need_id] = {
                         **dict(answered_states[0]), "status": "answered", "still_missing": "",
@@ -7945,6 +8005,9 @@ def make_retrieval_loop_runner(
             current_source = current_sources.get(paper_id)
             if current_source is not None:
                 need_id += "-" + _material_content_signature(_directed_source_state(current_source))
+            # Journal replay is also a cache: changing reader capacity must not
+            # restore a lower-budget completion before reaching the reader.
+            need_id += "-" + _material_content_signature(reader_settings)
             round_specs = tuple(task.get("round_specs") or ())
             need = InformationNeed(
                 need_id=need_id,
@@ -8090,7 +8153,7 @@ def make_retrieval_loop_runner(
             from .planning_material_triage import QwenLocalTriageJudge
             client = QwenDirectClient(model=config.reader_model, key_file=key_file,
                                       budget_ledger=GlobalBudgetLedger(limit_cny=budget_limit_cny, path=Path(budget_ledger_path)),
-                                      max_output_tokens=1600, thinking=True, thinking_budget=1024,
+                                      max_output_tokens=QUERY_REFINEMENT_OUTPUT_TOKENS, thinking=True, thinking_budget=QUERY_REFINEMENT_THINKING_BUDGET,
                                       json_mode=config.reader_model == "qwen3.7-flash", max_retries=0,
                                       timeout_seconds=config.timeout_seconds, raw_response_dir=root / "query_refinements")
             response = invoke_client(client, [
@@ -8098,7 +8161,7 @@ def make_retrieval_loop_runner(
                 {"role": "user", "content": json.dumps({"review_scope": need.user_scope, "question": need.question,
                      "previous_queries": previous_queries, "useful_material": usable_content,
                      "still_missing": still_missing, "next_round": round_index}, ensure_ascii=False)},
-            ], model=config.reader_model, max_output_tokens=1600, thinking=True, thinking_budget=1024,
+            ], model=config.reader_model, max_output_tokens=QUERY_REFINEMENT_OUTPUT_TOKENS, thinking=True, thinking_budget=QUERY_REFINEMENT_THINKING_BUDGET,
                call_id=f"query-refinement:{need.need_id}:{round_index}")
             decoded = QwenLocalTriageJudge._decode(response.get("content"))
             return [dict(item) for item in decoded.get("targeted_queries") or [] if isinstance(item, Mapping)][:2]
@@ -8194,6 +8257,7 @@ def make_retrieval_loop_runner(
             prior_material = read_materials.get(paper_id)
             prior_signature = read_task_signatures.get(paper_id) or _material_task_signature(prior_material)
             if prior_material is not None and prior_signature and prior_signature == task_signature \
+                    and _directed_material_runtime_compatible(prior_material, config, explicit_prior_ids) \
                     and _directed_material_compatible(request, prior_material) \
                     and _prior_read_source_compatible(pool_by_id.get(paper_id, {}), prior_material):
                 raw = {"status": "reused_prior_deep_read", "materials": [dict(prior_material)],
@@ -8210,6 +8274,7 @@ def make_retrieval_loop_runner(
                         decorated = _decorate_directed_material(
                             item, task=request, prior_material=prior_material,
                         )
+                        decorated.setdefault("runtime_config", reader_settings)
                         item_paper_id = _text(item.get("paper_id"))
                         read_materials[item_paper_id] = decorated
                         read_task_signatures[item_paper_id] = task_signature
@@ -8228,7 +8293,7 @@ def make_retrieval_loop_runner(
                     **(dict(item["content"]) if isinstance(item.get("content"), Mapping) else {}),
                     "question_material": _material_current_question_rows(item),
                     "plain_text": _text(item.get("plain_text")),
-                }, ensure_ascii=False)
+                }, ensure_ascii=False, sort_keys=True)
                 for item in materials
                 if isinstance(item, Mapping) and _directed_material_status(request, item) != "unmet"
             )
@@ -8491,8 +8556,9 @@ def make_directed_reading_runner(
                     key_file=key_file,
                     budget_ledger_path=budget_ledger_path,
                     budget_limit_cny=budget_limit_cny,
+                    model=config.reader_model,
                     max_output_tokens=config.chapter_output_tokens,
-                    thinking_budget=config.thinking_budget,
+                    thinking_budget=config.reader_thinking_budget,
                     retry_empty_result=task.get("retry_empty_result") is True or context.get("retry_empty_result") is True,
                 )
                 artifact = result.get("output") if isinstance(result.get("output"), Mapping) else {}

@@ -4,6 +4,8 @@
 
 **先读 [当前链路与状态](docs/current/PIPELINE.md)，再读 [给 AI 助手的阅读顺序](docs/current/AI_READING_GUIDE.md)。** 不必从几十个历史工单猜当前实现。
 
+开发宗旨：[严格拒绝过度防御，以产品质量和实际帮助为先](docs/current/PRODUCT_PRINCIPLES.md)。最新预算与材料交接更新、下一轮本地开工入口：[QUALITY_CAPACITY_HANDOFF.md](docs/current/QUALITY_CAPACITY_HANDOFF.md)。
+
 ## 三个分支的职责
 
 | 分支 | 用途 |
@@ -23,6 +25,8 @@
 - A/B/C 局部修订实验：固定正文、按材料提出和核验局部补丁；仍是实验候选，不能自动替代正式稿或宣称质量胜出
 
 当前源码来自 `02c018bdd440cc061ddedbb5aef07b115e7de081`，包含已验收的 BODY40 身份/引用/alias 修复及下游修订实验。独立首尾代码从 `dc661cf47bdb8ec70a348c02bc8f15a0b40253f4` 有界接回，保留当前装配未决阻断；没有合入早期并行 `manuscript_parts_plan` 对 BODY 的改造。
+
+在上述整合基线之上，当前已加入质量优先预算、实际请求参数记录、条件与论证关系交接修复；具体源码变化和验证见 [QUALITY_CAPACITY_VERIFICATION.md](docs/current/QUALITY_CAPACITY_VERIFICATION.md)。`CORE_SOURCE_INVARIANTS.json` 是分支整理当时的历史校验，不是后续源码永远不变的约束。
 
 “源码完整”不等于所有模块已由一个命令默认串行启用，也不等于完成了新一轮端到端科学质量验收。具体 API、CLI、显式开关及验证边界见 [PIPELINE.md](docs/current/PIPELINE.md)。
 

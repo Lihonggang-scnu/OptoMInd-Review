@@ -26,6 +26,8 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .chapter_arrangement import (
+    DEFAULT_OUTPUT_TOKENS as ARRANGEMENT_OUTPUT_TOKENS,
+    DEFAULT_THINKING_BUDGET as ARRANGEMENT_THINKING_BUDGET,
     arrangement_messages,
     build_chapter_view,
     build_source_catalog,
@@ -36,6 +38,8 @@ from .chapter_arrangement import (
     write_view,
 )
 from .review_unit_writer import (
+    DEFAULT_OUTPUT_TOKENS as WRITER_OUTPUT_TOKENS,
+    DEFAULT_THINKING_BUDGET as WRITER_THINKING_BUDGET,
     build_unit_view,
     load_writer_prompt,
     run_unit_writing,
@@ -263,6 +267,10 @@ def run_plan_delivery(
     out_dir: str | Path,
     language: str = "zh",
     models: Mapping[str, str] | None = None,
+    arrangement_output_tokens: int = ARRANGEMENT_OUTPUT_TOKENS,
+    arrangement_thinking_budget: int = ARRANGEMENT_THINKING_BUDGET,
+    writer_output_tokens: int = WRITER_OUTPUT_TOKENS,
+    writer_thinking_budget: int = WRITER_THINKING_BUDGET,
 ) -> dict[str, Any]:
     """Frozen planning_revision chain with replayed responses, then assembly."""
     packet_path = Path(packet_path).resolve()
@@ -289,6 +297,7 @@ def run_plan_delivery(
         arrangement = run_arrangement(
             view, client=replay, model=models.get("arrangement", "qwen3.5-plus"),
             prompt=prompt, view_payload=payload, call_id=f"delivery-replay:{key}",
+            output_tokens=arrangement_output_tokens, thinking_budget=arrangement_thinking_budget,
             raw_response_dir=out_dir / "raw_responses", planning_revision=True)
     except MissingRecording:
         pending.append({"step": key, "status": PENDING_MISSING_RECORDING})
@@ -338,7 +347,8 @@ def run_plan_delivery(
                                            payload=unit_payload_dict, planning_revision=True)
         _write_json(out_dir / "messages" / f"{unit_id}_messages.json", unit_messages_list)
         estimate = estimate_unit_cost(unit_messages_list, model=models.get("writer", "qwen3.7-flash"),
-                                      output_tokens=4000, thinking_budget=0, token_counter=None)
+                                      output_tokens=writer_output_tokens, thinking_budget=writer_thinking_budget,
+                                      token_counter=None)
         write_unit_input(wview, unit_messages_list, unit_dir, estimate=estimate, language=language)
 
         sha = hashlib.sha256(json.dumps(
@@ -367,6 +377,7 @@ def run_plan_delivery(
             result = run_unit_writing(
                 wview, client=replay, model=models.get("writer", "qwen3.7-flash"),
                 prompt=writer_prompt, language=language, payload=unit_payload_dict,
+                output_tokens=writer_output_tokens, thinking_budget=writer_thinking_budget,
                 raw_response_dir=unit_dir / "raw_responses", planning_revision=True)
         except MissingRecording:
             if unchanged_input:
@@ -389,7 +400,8 @@ def run_plan_delivery(
             finish_reason=result.get("finish_reason") or "",
             complete=result.get("complete", True),
             partial_error=result.get("partial_error") or "",
-            issues=result.get("issues") or [])
+            issues=result.get("issues") or [],
+            effective_request=result.get("effective_request"), cap_pressure=result.get("cap_pressure"))
         sha_path.write_text(sha, encoding="utf-8")
         jobs.append({"chapter_id": chapter_id, "unit_id": unit_id,
                      "arrangement": str(arrangement_path), "output": str(unit_dir)})

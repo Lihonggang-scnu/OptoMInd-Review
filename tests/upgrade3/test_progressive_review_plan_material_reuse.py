@@ -190,6 +190,7 @@ def test_exact_directed_task_reuses_without_provider_and_enters_materials(tmp_pa
     task = _directed_task()
     prior = {
         "paper_id": "paper-1",
+        "runtime_config": directed_reading.directed_reader_runtime_config(),
         "_progressive_task_signature": _directed_task_signature(task),
         "question_material": [{"question_id": "Q1", "finding": "old answer", "conditions": "old conditions"}],
     }
@@ -625,3 +626,23 @@ def test_adaptive_external_closure_does_not_fulfill_from_empty_current_history(t
     assert captured["result"]["status"] == "unmet"
     assert captured["result"]["usable_content"] == ""
 
+
+
+def test_replaying_old_then_partial_task_keeps_history_and_owner_input_stable():
+    first_task = _directed_task()
+    next_task = _directed_task(question="Which boundary remains unresolved?")
+    first_raw = {"paper_id": "paper-1", "question_material": [{"question_id": "Q1", "finding": "original"}]}
+    partial_raw = {"paper_id": "paper-1", "question_material": [{"question_id": "Q1", "finding": "partial", "remaining_points": ["boundary"]}]}
+    first = _decorate_directed_material(first_raw, task=first_task)
+    partial = _decorate_directed_material(partial_raw, task=next_task, prior_material=first)
+    # Disk persistence sorts object keys. Revisit the first task while the
+    # paper-level cache contains the second, then revisit that partial task.
+    restored_first = _decorate_directed_material(json.loads(json.dumps(first_raw, sort_keys=True)),
+        task=first_task, prior_material=partial)
+    restored_partial = _decorate_directed_material(json.loads(json.dumps(partial_raw, sort_keys=True)),
+        task=next_task, prior_material=restored_first)
+    assert restored_partial == partial
+    assert restored_partial["prior_question_material"] == first_raw["question_material"]
+    assert restored_partial["current_question_material"] == partial_raw["question_material"]
+    same_task_replay = _decorate_directed_material(partial_raw, task=next_task, prior_material=restored_partial)
+    assert same_task_replay == restored_partial

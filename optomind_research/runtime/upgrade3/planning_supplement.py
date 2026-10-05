@@ -48,7 +48,34 @@ MAX_PER_QUERY_HARD = 50
 DEFAULT_MAX_CANDIDATES = 20
 DEFAULT_MAX_ACQUISITIONS = 2
 DEFAULT_PER_QUERY_LIMIT = 20
+DEFAULT_JUDGE_MAX_OUTPUT_TOKENS = 8192
+DEFAULT_JUDGE_THINKING_BUDGET = 8192
+DEFAULT_CANDIDATE_MAX_OUTPUT_TOKENS = 4096
+DEFAULT_CANDIDATE_THINKING_BUDGET = 4096
 JUDGMENT_STATUSES = {"fulfilled", "partial", "unmet", "unjudgeable"}
+
+
+def planning_helper_runtime_config() -> dict[str, Any]:
+    """Default helper contracts for automatic planner/retrieval cache keys."""
+    from . import paper_reading_card as card
+    from . import planning_material_triage as triage
+
+    return {
+        "fulfillment_judge": {"model": "qwen3.5-plus", "thinking": True,
+                              "max_output_tokens": DEFAULT_JUDGE_MAX_OUTPUT_TOKENS,
+                              "thinking_budget": DEFAULT_JUDGE_THINKING_BUDGET},
+        "candidate_selector": {"model": "qwen3.7-flash", "thinking": True,
+                               "max_output_tokens": DEFAULT_CANDIDATE_MAX_OUTPUT_TOKENS,
+                               "thinking_budget": DEFAULT_CANDIDATE_THINKING_BUDGET},
+        "local_triage": {"model": "qwen3.7-flash", "quantitative_model": "qwen3.5-plus", "thinking": True,
+                         "max_output_tokens": triage.DEFAULT_TRIAGE_MAX_OUTPUT_TOKENS,
+                         "thinking_budget": triage.DEFAULT_TRIAGE_THINKING_BUDGET,
+                         "interpretation_max_output_tokens": triage.DEFAULT_INTERPRETATION_MAX_OUTPUT_TOKENS,
+                         "interpretation_thinking_budget": triage.DEFAULT_INTERPRETATION_THINKING_BUDGET},
+        "paper_card": {"model": card.MODEL, "thinking": card.DEFAULT_THINKING,
+                       "max_output_tokens": card.DEFAULT_MAX_OUTPUT_TOKENS,
+                       "thinking_budget": card.DEFAULT_THINKING_BUDGET},
+    }
 
 
 class PlanningSupplementError(ValueError):
@@ -1484,8 +1511,8 @@ class QwenFulfillmentJudge:
         key_file: str | Path,
         budget_ledger_path: str | Path,
         budget_limit_cny: float,
-        max_output_tokens: int = 3072,
-        thinking_budget: int = 2048,
+        max_output_tokens: int = DEFAULT_JUDGE_MAX_OUTPUT_TOKENS,
+        thinking_budget: int = DEFAULT_JUDGE_THINKING_BUDGET,
         timeout_seconds: float = 300.0,
         raw_response_dir: str | Path | None = None,
         model: str = "qwen3.5-plus",
@@ -1497,7 +1524,7 @@ class QwenFulfillmentJudge:
         self.key_file = Path(key_file)
         self.budget_ledger_path = Path(budget_ledger_path)
         self.budget_limit_cny = float(budget_limit_cny)
-        self.max_output_tokens = int(max_output_tokens)
+        self.max_output_tokens = max(64, int(max_output_tokens))
         self.thinking_budget = int(thinking_budget)
         self.timeout_seconds = float(timeout_seconds)
         self.raw_response_dir = Path(raw_response_dir) if raw_response_dir else None
@@ -2014,7 +2041,8 @@ class _LocalJudgeCheckpoint:
             "explicit_papers": sorted(gap.existing_paper_ids),
             "judge": type(self.judge).__qualname__,
             "settings": {key: getattr(self.judge, key, None) for key in
-                         ("model", "quantitative_model", "max_output_tokens", "thinking_budget")},
+                         ("model", "quantitative_model", "max_output_tokens", "thinking_budget",
+                          "interpretation_max_output_tokens", "interpretation_thinking_budget")},
         }
         signature = hashlib.sha256(json.dumps(effective, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
         bucket = self.root / signature if self.root else None
@@ -2193,10 +2221,13 @@ def run_gap_local_triage(
 
 class QwenCandidateSelector:
     """Spend a short abstract read to avoid downloading irrelevant studies."""
-    def __init__(self, *, key_file: str | Path, budget_ledger_path: str | Path, budget_limit_cny: float):
+    def __init__(self, *, key_file: str | Path, budget_ledger_path: str | Path, budget_limit_cny: float,
+                 max_output_tokens: int = DEFAULT_CANDIDATE_MAX_OUTPUT_TOKENS, thinking_budget: int = DEFAULT_CANDIDATE_THINKING_BUDGET):
         self.key_file = key_file
         self.budget_ledger_path = budget_ledger_path
         self.budget_limit_cny = budget_limit_cny
+        self.max_output_tokens = max(64, int(max_output_tokens))
+        self.thinking_budget = int(thinking_budget)
 
     def __call__(self, *, gap: Mapping[str, Any], candidates: Sequence[Mapping[str, Any]], limit: int) -> list[int]:
         if not candidates:
@@ -2204,13 +2235,13 @@ class QwenCandidateSelector:
         from .module4.runtime import GlobalBudgetLedger, QwenDirectClient, invoke_client
         ledger = GlobalBudgetLedger(limit_cny=self.budget_limit_cny, path=self.budget_ledger_path)
         client = QwenDirectClient(model="qwen3.7-flash", key_file=self.key_file, timeout_seconds=300,
-            max_output_tokens=1800, max_retries=0, thinking=True, thinking_budget=1024,
+            max_output_tokens=self.max_output_tokens, max_retries=0, thinking=True, thinking_budget=self.thinking_budget,
             json_mode=True, budget_ledger=ledger)
         rows = [{"index": i, "title": c.get("title"), "abstract": str(c.get("abstract") or "")[:4500],
                  "snippets": (c.get("snippets") or [])[:4]} for i,c in enumerate(candidates)]
         prompt = "你为一个具体综述缺口挑选值得获取和阅读的论文。读标题、摘要与片段，按研究对象或材料、研究设置、方法、比较、结果或论证、验证方式是否对题及新增信息排序。仅出现相同技术词或设计标签不够；另一对象、设置或方法的研究不能直接回答本问题。优先选择能补足当前核心缺口的新材料，而不是再收同主题背景。问题明确要求的研究对象、材料、设置、方法或测量类型应能在摘要或片段中对上；明显只有另一对象或另一类型数据的研究不要占本轮名额。选择互补且能带回具体内容的少量论文，可以少于上限或为0；有价值的反例是回答本问题相反方向的结果或论证，不是其他问题的材料。缺摘要可按真实片段判断，未知不是假定相关。返回JSON selected_indices（0起始、最多limit个、最值得先读、可为空）以及简短reason。"
         raw = invoke_client(client,[{"role":"system","content":prompt},{"role":"user","content":json.dumps({"gap":gap,"candidates":rows,"limit":limit},ensure_ascii=False)}],
-            model="qwen3.7-flash",max_output_tokens=1800,thinking=True,thinking_budget=1024,call_id="planning-candidate-selection")
+            model="qwen3.7-flash",max_output_tokens=self.max_output_tokens,thinking=True,thinking_budget=self.thinking_budget,call_id="planning-candidate-selection")
         content = raw.get("content")
         value = content if isinstance(content,Mapping) else json.loads(str(content))
         return list(value.get("selected_indices") or [])
@@ -3063,8 +3094,8 @@ def run_qwen_fulfillment_judge(
     key_file: str | Path,
     budget_ledger_path: str | Path,
     budget_limit_cny: float,
-    max_output_tokens: int = 3072,
-    thinking_budget: int = 2048,
+    max_output_tokens: int = DEFAULT_JUDGE_MAX_OUTPUT_TOKENS,
+    thinking_budget: int = DEFAULT_JUDGE_THINKING_BUDGET,
     timeout_seconds: float = 300.0,
 ) -> QwenFulfillmentJudge:
     """Factory spelling for callers that want the live Qwen judge."""
@@ -3091,6 +3122,7 @@ __all__ = [
     "run_planning_supplement",
     "normalize_practical_fulfillment_judgment",
     "revalidate_planning_supplement_judgments",
+    "planning_helper_runtime_config",
     "QwenFulfillmentJudge",
     "run_qwen_fulfillment_judge",
 ]

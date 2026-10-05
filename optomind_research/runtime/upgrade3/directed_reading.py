@@ -33,7 +33,7 @@ from typing import Any, Callable, Iterable, Mapping, Sequence
 
 from .local_materials import PreparedSnapshot, PreparedSnapshotProvider
 from .module4.provenance import resolve_anchor
-from .module4.runtime import GlobalBudgetLedger, QwenDirectClient, estimated_cost_cny, invoke_client
+from .module4.runtime import GlobalBudgetLedger, QwenDirectClient, estimated_cost_cny, invoke_client, model_pricing
 from .practical_materials import (
     build_practical_reader_messages,
     decode_practical_json,
@@ -57,7 +57,9 @@ MODEL = "qwen3.7-flash"
 CORE_PAPER_CAP = 40
 _APPROVAL_META_KEY = "_directed_reading_planner_approved_core"
 DEFAULT_MAX_OUTPUT_TOKENS = 20_000
-DEFAULT_THINKING_BUDGET = 4_096
+DEFAULT_THINKING_BUDGET = 8_192
+# Keep the exported historical verifier workflow on its original contract.
+LEGACY_DEFAULT_THINKING_BUDGET = 4_096
 DEFAULT_VERIFIER_THINKING_BUDGET = 4_096
 DEFAULT_MAX_INPUT_TOKENS = 900_000
 DEFAULT_VERIFIER_OUTPUT_TOKENS = 8_192
@@ -3954,7 +3956,7 @@ def _validate_task_against_request(request: Mapping[str, Any], task: Mapping[str
             raise AdmissionError("task_output_request_mismatch")
 
 
-def preflight_directed_reading_legacy(*, request: Mapping[str, Any], paper: Mapping[str, Any], snapshot_dir: str | Path, task: Mapping[str, Any] | None = None, max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS, thinking_budget: int = DEFAULT_THINKING_BUDGET, max_input_tokens: int = DEFAULT_MAX_INPUT_TOKENS, selected_source_packet_path: str | Path | None = None) -> dict[str, Any]:
+def preflight_directed_reading_legacy(*, request: Mapping[str, Any], paper: Mapping[str, Any], snapshot_dir: str | Path, task: Mapping[str, Any] | None = None, max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS, thinking_budget: int = LEGACY_DEFAULT_THINKING_BUDGET, max_input_tokens: int = DEFAULT_MAX_INPUT_TOKENS, selected_source_packet_path: str | Path | None = None) -> dict[str, Any]:
     validation = validate_request(request)
     if not validation["valid"]:
         raise RequestValidationError("request_invalid:" + ",".join(_text(item.get("code")) for item in validation["issues"] if item.get("severity") != "warning"))
@@ -3993,12 +3995,12 @@ def _save_response_cache(path: Path, *, stage: str, request: Mapping[str, Any], 
     _atomic_json(path, {"schema_version": SCHEMA_VERSION, "stage": stage, "review_id": _text(request.get("review_id")), "topic_binding": _text(request.get("topic_binding")), "task_hash": _text(task.get("task_hash")), "source_hash": source_hash, "prompt_sha256": prompt_hash, "raw_response_sha256": sha256_value(raw), "raw_response": dict(raw)})
 
 
-def _message_cost_cny(messages: Sequence[Mapping[str, Any]], *, output_tokens: int, thinking_budget: int) -> float:
-    body = {"model": MODEL, "messages": [dict(row) for row in messages], "max_tokens": int(output_tokens), "temperature": 0.1, "enable_thinking": bool(thinking_budget), "stream": False, "response_format": {"type": "json_object"}}
+def _message_cost_cny(messages: Sequence[Mapping[str, Any]], *, output_tokens: int, thinking_budget: int, model: str = MODEL) -> float:
+    body = {"model": model, "messages": [dict(row) for row in messages], "max_tokens": int(output_tokens), "temperature": 0.1, "enable_thinking": bool(thinking_budget), "stream": False, "response_format": {"type": "json_object"}}
     if thinking_budget:
         body["thinking_budget"] = int(thinking_budget)
     prompt_upper = len(_canonical(body)) + 8192 + (256 * max(1, len(messages)))
-    return estimated_cost_cny({"prompt_tokens": prompt_upper, "completion_tokens": int(output_tokens) + int(thinking_budget)}, model=MODEL, conservative=True)
+    return estimated_cost_cny({"prompt_tokens": prompt_upper, "completion_tokens": int(output_tokens) + int(thinking_budget)}, model=model, conservative=True)
 
 
 def _verifier_input_upper(audit: Mapping[str, Any], *, max_output_tokens: int) -> int:
@@ -4036,7 +4038,7 @@ def run_directed_reading_legacy(
     reader_response_from: str | Path | None = None,
     selected_source_packet_path: str | Path | None = None,
     max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS,
-    thinking_budget: int = DEFAULT_THINKING_BUDGET,
+    thinking_budget: int = LEGACY_DEFAULT_THINKING_BUDGET,
     max_input_tokens: int = DEFAULT_MAX_INPUT_TOKENS,
     verifier_output_tokens: int = DEFAULT_VERIFIER_OUTPUT_TOKENS,
     attempt: int = 1,
@@ -4299,12 +4301,28 @@ def _practical_reading_plan(
     return receipt, messages, material, questions, outputs, gaps
 
 
+def directed_reader_runtime_config(
+    *,
+    model: str = MODEL,
+    max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS,
+    thinking_budget: int = DEFAULT_THINKING_BUDGET,
+) -> dict[str, Any]:
+    """The exact model/answer/reasoning contract used for automatic reuse."""
+    return {
+        "model": model,
+        "thinking": True,
+        "max_output_tokens": max(64, int(max_output_tokens)),
+        "thinking_budget": int(thinking_budget),
+    }
+
+
 def preflight_directed_reading(
     *,
     request: Mapping[str, Any],
     paper: Mapping[str, Any],
     snapshot_dir: str | Path,
     task: Mapping[str, Any] | None = None,
+    model: str = MODEL,
     max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS,
     thinking_budget: int = DEFAULT_THINKING_BUDGET,
     max_input_tokens: int = DEFAULT_MAX_INPUT_TOKENS,
@@ -4315,8 +4333,9 @@ def preflight_directed_reading(
     receipt, _messages, _material, _questions, _outputs, _gaps = _practical_reading_plan(
         request=request, paper=paper, snapshot_dir=snapshot_dir, task=task, max_input_tokens=max_input_tokens
     )
-    receipt["max_output_tokens"] = int(max_output_tokens)
-    receipt["thinking_budget"] = int(thinking_budget)
+    runtime_config = directed_reader_runtime_config(model=model, max_output_tokens=max_output_tokens, thinking_budget=thinking_budget)
+    receipt.update(runtime_config)
+    receipt["runtime_config"] = runtime_config
     if selected_source_packet_path:
         receipt["note"] = "The practical path uses the readable snapshot view; source-selection packets are optional and not validated or required."
     return receipt
@@ -4409,6 +4428,7 @@ def run_directed_reading(
     key_file: str | Path | None = None,
     budget_ledger_path: str | Path | None = None,
     budget_limit_cny: float | None = None,
+    model: str = MODEL,
     max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS,
     thinking_budget: int = DEFAULT_THINKING_BUDGET,
     max_input_tokens: int = DEFAULT_MAX_INPUT_TOKENS,
@@ -4441,10 +4461,19 @@ def run_directed_reading(
     source_digest = sha256_value(material)
     source_identity = {"canonical_paper_id": paper_id, "title": _norm(effective_paper.get("title")),
                        **({"doi": _norm(effective_paper.get("doi"))} if effective_paper.get("doi") else {})}
-    task_source_hash = sha256_value({"source_hash": source_digest, "paper_identity": source_identity})
+    runtime_config = directed_reader_runtime_config(
+        model=model, max_output_tokens=max_output_tokens, thinking_budget=thinking_budget
+    )
+    max_output_tokens = runtime_config["max_output_tokens"]
+    thinking_budget = runtime_config["thinking_budget"]
+    # A completed low-budget read remains historical material, but is not an
+    # automatic hit for a different model, prompt, answer or reasoning budget.
+    prompt_digest = sha256_value(messages)
+    task_source_hash = sha256_value({"source_hash": source_digest, "paper_identity": source_identity,
+                                    "runtime_config": runtime_config, "prompt_sha256": prompt_digest})
     # Legacy practical tasks used an empty source hash. Their saved prompt is
-    # explicit content/task proof; keep a matching committed reading in place.
-    # Missing proof never exempts a new read, and old artifacts are not edited.
+    # explicit content/task proof; reuse only with a matching runtime contract.
+    # Missing budget proof never exempts a new read; old artifacts stay intact.
     for saved_reading in reversed(store.readings(review_id, paper_id)):
         legacy_task = store.task(_text(saved_reading.get("task_id"))) or {}
         if legacy_task.get("source_hash") or legacy_task.get("gap_keys") != gaps:
@@ -4458,7 +4487,7 @@ def run_directed_reading(
         if not isinstance(old_prompt, Mapping) or old_prompt.get("messages") != messages or not isinstance(old_artifact, Mapping):
             continue
         from .progressive_review_plan import _saved_card_identity_conflict
-        if old_artifact.get("workflow") != "practical_materials" or _saved_card_identity_conflict(source_identity, old_artifact) is not None:
+        if old_artifact.get("workflow") != "practical_materials" or old_artifact.get("runtime_config") != runtime_config or _saved_card_identity_conflict(source_identity, old_artifact) is not None:
             continue
         retained_legacy = _practical_cached_result(old_artifact, old_root, questions)
         if retained_legacy["fulfilled"]:
@@ -4475,6 +4504,7 @@ def run_directed_reading(
     task_id = _norm(added.get("task_id"))
     effective_task = store.task(task_id) or {"task_id": task_id, "questions": questions, "required_outputs": outputs, "gap_keys": gaps}
     receipt["task_id"] = task_id
+    receipt["runtime_config"] = runtime_config
     output = _practical_output_directory(Path(output_dir), task_id)
     saved = store.committed_reading(review_id, task_id)
     attempts = store.attempts(task_id)
@@ -4543,8 +4573,8 @@ def run_directed_reading(
             raise DirectedReadingError("raw_response_task_identity_unverified")
     raw = None if retry_empty_result else _load_practical_raw(raw_path)
     live = raw is None
-    prompt_payload = {"workflow": "practical_materials", "prompt_version": PRACTICAL_PROMPT_VERSION, "messages": messages}
-    input_payload = {"workflow": "practical_materials", "review_id": review_id, "paper_id": paper_id, "task_id": task_id, "source_hash": source_digest, "paper_identity": source_identity, "paper": {key: effective_paper.get(key) for key in ("canonical_paper_id", "title", "paper_kind", "material_scope")}, "task": {"questions": questions, "required_outputs": outputs, "gap_keys": gaps}}
+    prompt_payload = {"workflow": "practical_materials", "prompt_version": PRACTICAL_PROMPT_VERSION, "prompt_sha256": prompt_digest, "messages": messages}
+    input_payload = {"workflow": "practical_materials", "runtime_config": runtime_config, "prompt_sha256": prompt_digest, "review_id": review_id, "paper_id": paper_id, "task_id": task_id, "source_hash": source_digest, "paper_identity": source_identity, "paper": {key: effective_paper.get(key) for key in ("canonical_paper_id", "title", "paper_kind", "material_scope")}, "task": {"questions": questions, "required_outputs": outputs, "gap_keys": gaps}}
     claim = store.claim_task(task_id)
     if not claim.get("claimed"):
         if claim.get("route") == "reuse":
@@ -4564,14 +4594,14 @@ def run_directed_reading(
             if not budget_ledger_path or budget_limit_cny is None or not math.isfinite(float(budget_limit_cny)) or float(budget_limit_cny) <= 0:
                 raise DirectedReadingError("live_run_finite_positive_budget_required")
             ledger = GlobalBudgetLedger(limit_cny=float(budget_limit_cny), path=budget_ledger_path)
-            _budget_preflight(ledger, required_cny=_message_cost_cny(messages, output_tokens=max_output_tokens, thinking_budget=thinking_budget))
+            _budget_preflight(ledger, required_cny=_message_cost_cny(messages, output_tokens=max_output_tokens, thinking_budget=thinking_budget, model=model))
             client = QwenDirectClient(
-                model=MODEL,
+                model=model,
                 key_file=key_file,
                 max_output_tokens=int(max_output_tokens),
                 thinking=True,
                 thinking_budget=int(thinking_budget),
-                json_mode=True,
+                json_mode=bool(model_pricing(model)["thinking_json"]),
                 raw_response_dir=output / "raw_responses",
                 budget_ledger=ledger,
             )
@@ -4582,7 +4612,7 @@ def run_directed_reading(
             raw = invoke_client(
                 client,
                 messages,
-                model=MODEL,
+                model=model,
                 max_output_tokens=int(max_output_tokens),
                 thinking=True,
                 thinking_budget=int(thinking_budget),
@@ -4596,6 +4626,9 @@ def run_directed_reading(
         artifact = {
             "schema_version": OUTPUT_SCHEMA_VERSION,
             "workflow": "practical_materials",
+            "runtime_config": runtime_config,
+            "prompt_sha256": prompt_digest,
+            **{key: dict(raw[key]) for key in ("effective_request", "cap_pressure") if isinstance(raw.get(key), Mapping)},
             "status": "material_ready" if fulfilled else "partial" if ready else "no_writing_material_returned",
             "fulfilled": fulfilled,
             "questions": questions,
@@ -4682,6 +4715,7 @@ def _cli_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Prepare practical writing material from an admitted paper; preflight is offline by default.")
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("preflight", help="preview the ordinary reading prompt and token estimate without network")
+    p.add_argument("--model", default=MODEL)
     p.add_argument("--request", required=True); p.add_argument("--paper", required=True); p.add_argument("--snapshot", required=True); p.add_argument("--task"); p.add_argument("--max-input-tokens", type=int, default=DEFAULT_MAX_INPUT_TOKENS); p.add_argument("--max-output-tokens", type=int, default=DEFAULT_MAX_OUTPUT_TOKENS); p.add_argument("--thinking-budget", type=int, default=DEFAULT_THINKING_BUDGET); p.add_argument("--output-dir")
     p = sub.add_parser("selection-preflight", help="build and optionally resolve an offline source-selection packet; never calls a model")
     p.add_argument("--request", required=True); p.add_argument("--paper", required=True); p.add_argument("--snapshot", required=True); p.add_argument("--task"); p.add_argument("--output-dir", required=True); p.add_argument("--selector-model", choices=SELECTOR_MODELS, default=DEFAULT_SELECTOR_MODEL); p.add_argument("--thinking-budget", type=int, default=DEFAULT_SELECTION_THINKING_BUDGET); p.add_argument("--max-input-tokens", type=int, default=DEFAULT_SELECTION_MAX_INPUT_TOKENS); p.add_argument("--selection-response", help="optional offline JSON response to validate and preview; does not call a provider")
@@ -4694,6 +4728,7 @@ def _cli_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("inspect", help="inspect durable review state")
     p.add_argument("--store", required=True); p.add_argument("--review-id", required=True)
     p = sub.add_parser("run", help="read an admitted task into practical writing material")
+    p.add_argument("--model", default=MODEL)
     p.add_argument("--retry-empty-result", action="store_true", help="explicitly retry a saved empty answer once in a new directory, preserving its result and raw response")
     p.add_argument("--request", required=True); p.add_argument("--paper", required=True); p.add_argument("--snapshot", required=True); p.add_argument("--store", required=True); p.add_argument("--task"); p.add_argument("--output-dir", required=True); p.add_argument("--key-file"); p.add_argument("--budget-ledger"); p.add_argument("--budget-limit-cny", type=float); p.add_argument("--max-output-tokens", type=int, default=DEFAULT_MAX_OUTPUT_TOKENS); p.add_argument("--thinking-budget", type=int, default=DEFAULT_THINKING_BUDGET); p.add_argument("--max-input-tokens", type=int, default=DEFAULT_MAX_INPUT_TOKENS)
     return parser
@@ -4776,13 +4811,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(json.dumps({key: result.get(key) for key in ("status", "output_dir", "network_call", "estimated_required_cny", "selected_packet_audit")}, ensure_ascii=False, indent=2))
             return 0
         if args.command == "preflight":
-            receipt = preflight_directed_reading(request=request, paper=paper, snapshot_dir=args.snapshot, task=task, max_output_tokens=args.max_output_tokens, thinking_budget=args.thinking_budget, max_input_tokens=args.max_input_tokens)
+            receipt = preflight_directed_reading(request=request, paper=paper, snapshot_dir=args.snapshot, task=task, model=args.model, max_output_tokens=args.max_output_tokens, thinking_budget=args.thinking_budget, max_input_tokens=args.max_input_tokens)
             if args.output_dir:
                 _atomic_json(Path(args.output_dir) / "DIRECTED_PREFLIGHT.json", receipt)
             print(json.dumps(receipt, ensure_ascii=False, indent=2))
             return 0
         store = DirectedReadingStore(args.store) if args.store else None
-        result = run_directed_reading(request=request, paper=paper, snapshot_dir=args.snapshot, output_dir=args.output_dir, store=store, task=task, retry_empty_result=args.retry_empty_result, key_file=args.key_file, budget_ledger_path=args.budget_ledger, budget_limit_cny=args.budget_limit_cny, max_output_tokens=args.max_output_tokens, thinking_budget=args.thinking_budget, max_input_tokens=args.max_input_tokens)
+        result = run_directed_reading(request=request, paper=paper, snapshot_dir=args.snapshot, output_dir=args.output_dir, store=store, task=task, retry_empty_result=args.retry_empty_result, key_file=args.key_file, budget_ledger_path=args.budget_ledger, budget_limit_cny=args.budget_limit_cny, model=args.model, max_output_tokens=args.max_output_tokens, thinking_budget=args.thinking_budget, max_input_tokens=args.max_input_tokens)
         print(json.dumps({"output_dir": result.get("output_dir"), "reused": result.get("reused", False)}, ensure_ascii=False, indent=2))
         return 0
     except (DirectedReadingError, OSError, ValueError) as exc:
@@ -4796,7 +4831,7 @@ __all__ = [
     "DirectedReadingStore", "build_directed_request", "validate_request", "build_source_index", "snapshot_hash",
     "build_source_selection_catalog", "build_source_selection_messages", "parse_source_selection", "build_selected_source_packet", "selection_preflight_directed_reading", "run_source_selection",
     "build_reader_messages", "build_verifier_messages", "normalize_directed_output", "apply_verifier_result",
-    "preflight_directed_reading", "run_directed_reading", "practical_result_status", "preflight_directed_reading_legacy", "run_directed_reading_legacy", "render_directed_markdown", "main",
+    "directed_reader_runtime_config", "preflight_directed_reading", "run_directed_reading", "practical_result_status", "preflight_directed_reading_legacy", "run_directed_reading_legacy", "render_directed_markdown", "main",
 ]
 
 

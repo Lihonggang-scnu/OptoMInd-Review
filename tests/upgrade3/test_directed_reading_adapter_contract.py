@@ -339,3 +339,49 @@ def test_real_retrieval_preserves_top_level_prose_with_empty_answer_rows(tmp_pat
     state = result["retrieval_loop"]["needs"][0]
     assert state["status"] == "partial"
     assert "Replication used three synthetic samples" in state["usable_content"]
+
+
+def test_progressive_reader_explicit_model_and_budgets_reach_actual_client(tmp_path, monkeypatch):
+    from dataclasses import replace
+    runner, context, calls, config = fixture(tmp_path, monkeypatch, [answer(), answer("Higher-capacity reading")])
+    first = runner([task()], **context)
+    old_path = Path(first["results"][0]["output_dir"]) / "DIRECTED_READING.json"
+    old_bytes = old_path.read_bytes()
+    changed = replace(config, reader_model="qwen3.5-plus", reader_thinking_budget=12_000, chapter_output_tokens=24_000)
+    updated = make_directed_reading_runner(changed, key_file=tmp_path / "synthetic-placeholder.txt",
+        budget_ledger_path=tmp_path / "ledger.json", budget_limit_cny=30)
+    second = updated([task()], **context)
+    assert len(calls) == 2
+    assert calls[0]["thinking_budget"] == 8192 and calls[0]["max_output_tokens"] == 20000
+    assert calls[1]["model"] == "qwen3.5-plus"
+    assert calls[1]["thinking_budget"] == 12000 and calls[1]["max_output_tokens"] == 24000
+    assert second["results"][0]["output_dir"] != first["results"][0]["output_dir"]
+    assert old_path.read_bytes() == old_bytes
+    updated([task()], **context)
+    assert len(calls) == 2
+
+
+def test_progressive_directed_journal_rechecks_changed_budgets_preserving_material(tmp_path, monkeypatch):
+    from dataclasses import replace
+    from optomind_research.runtime.upgrade3 import progressive_review_plan as p
+    reader, context, calls, config = fixture(tmp_path, monkeypatch, [answer("ORIGINAL observation"), answer("REFINED observation")])
+    pool = list(context["pool_by_id"].values())
+    plan = {"question": "What changed?"}
+    request = {**task(), "chapter_ids": ["C1"]}
+    collect = p.make_retrieval_loop_runner(config, directed_reader=reader, allow_external=False)
+    first = collect(phase="same", directed_requests=[request], pool_rows=pool, plan=plan)
+    collect(phase="same", directed_requests=[request], pool_rows=pool, plan=plan)
+    assert len(calls) == 1
+    changed = replace(config, reader_thinking_budget=12_000)
+    updated_reader = make_directed_reading_runner(changed, key_file=tmp_path / "synthetic-placeholder.txt",
+        budget_ledger_path=tmp_path / "ledger.json", budget_limit_cny=30)
+    recollect = p.make_retrieval_loop_runner(changed, directed_reader=updated_reader, allow_external=False)
+    second = recollect(phase="same", directed_requests=[request], pool_rows=pool, plan=plan)
+    assert len(calls) == 2
+    assert first["retrieval_loop"]["needs"][0]["need_id"] != second["retrieval_loop"]["needs"][0]["need_id"]
+    material = second["directed_results"][0]["materials"][0]
+    assert material["runtime_config"]["thinking_budget"] == 12000
+    assert "REFINED observation" in json.dumps(material["current_question_material"])
+    assert "ORIGINAL observation" in json.dumps(material["prior_question_material"])
+    recollect(phase="same", directed_requests=[request], pool_rows=pool, plan=plan)
+    assert len(calls) == 2

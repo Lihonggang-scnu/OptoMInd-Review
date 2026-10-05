@@ -230,7 +230,7 @@ def test_first_selected_independent_deep_reaches_actual_writer(tmp_path, monkeyp
 
 
 @pytest.mark.parametrize("change,expected_case_calls", [
-    ("same", 0), ("model", 1), ("output_tokens", 1), ("inactive_thinking", 0),
+    ("same", 0), ("model", 1), ("output_tokens", 1), ("thinking_budget", 1),
     ("prompt", 1), ("material", 1), ("metadata_only", 0),
     ("clipped_suffix", 0), ("legacy_batch", 1), ("failed_batch", 1),
 ])
@@ -246,8 +246,8 @@ def test_actual_case_batch_cache_reentry(tmp_path, monkeypatch, change, expected
         driver.adapter.chapter_model = "offline-case-model-b"
     elif change == "output_tokens":
         driver.adapter.output_tokens = 9000
-    elif change == "inactive_thinking":
-        driver.adapter.thinking_budget = 4096  # case adapter always uses 2048
+    elif change == "thinking_budget":
+        driver.adapter.thinking_budget = 4096  # global flags now govern every planner stage
     elif change == "prompt":
         old = planning._planner_instructions
         monkeypatch.setattr(planning, "_planner_instructions", lambda stage, **kwargs:
@@ -274,7 +274,7 @@ def test_actual_case_batch_cache_reentry(tmp_path, monkeypatch, change, expected
                                      "resumed_case_calls": actual})
     assert len(actual) == expected_case_calls
     if actual:
-        assert actual[0]["thinking_budget"] == 2048
+        assert actual[0]["thinking_budget"] == driver.adapter.thinking_budget
     if change == "material":
         assert "UPDATED_CASE_ANSWER" in json.dumps(actual[0]["payload"]["source_materials"])
     if change == "clipped_suffix":

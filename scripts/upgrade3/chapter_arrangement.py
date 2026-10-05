@@ -25,6 +25,8 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from optomind_research.runtime.upgrade3.chapter_arrangement import (
+    DEFAULT_OUTPUT_TOKENS,
+    DEFAULT_THINKING_BUDGET,
     ROUND_CALL_PREFIX,
     ChapterArrangementError,
     RoundBudgetExceeded,
@@ -73,8 +75,9 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--budget-ledger", default=str(DEFAULT_LEDGER))
     parser.add_argument("--round-cap-cny", type=float, default=10.0,
                         help="This round's own ceiling; never above 10.0")
-    parser.add_argument("--output-tokens", type=int, default=20000)
-    parser.add_argument("--thinking-budget", type=int, default=12000)
+    parser.add_argument("--output-tokens", type=int, default=DEFAULT_OUTPUT_TOKENS)
+    parser.add_argument("--thinking-budget", type=int, default=DEFAULT_THINKING_BUDGET,
+                        help="Reasoning token allocation; set 0 to explicitly disable thinking")
     parser.add_argument("--timeout-seconds", type=float, default=900.0)
     parser.add_argument("--max-source-chars", type=int, default=240)
     parser.add_argument("--no-retry", action="store_true", help="Disable transport retries (each attempt is billed)")
@@ -132,7 +135,8 @@ def _save_result(cache_dir: Path, signature: str, value: dict) -> None:
         json.dumps(value, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
 
 
-def _cache_entry(payload: dict, *, model: str, signature: str, raw_response: str = "") -> dict:
+def _cache_entry(payload: dict, *, model: str, signature: str, raw_response: str = "",
+                 call: Mapping | None = None) -> dict:
     return {
         "schema_version": "optomind.chapter_arrangement.cache.v1",
         "saved_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -140,6 +144,7 @@ def _cache_entry(payload: dict, *, model: str, signature: str, raw_response: str
         "signature": signature,
         "raw_response": raw_response,
         "payload": payload,
+        **({"call": dict(call)} if call else {}),
     }
 
 
@@ -158,6 +163,7 @@ def _payload_from_saved(saved: dict) -> tuple[dict, dict]:
             "saved_at": saved.get("saved_at") or "",
             "model": saved.get("model") or "",
             "raw_response": saved.get("raw_response") or "",
+            **({"call": dict(saved["call"])} if isinstance(saved.get("call"), Mapping) else {}),
         }
     payload = {
         key: saved[key]
@@ -170,6 +176,7 @@ def _payload_from_saved(saved: dict) -> tuple[dict, dict]:
         "saved_at": saved.get("saved_at") or "",
         "model": "",
         "raw_response": "",
+        **({"call": dict(saved["call"])} if isinstance(saved.get("call"), Mapping) else {}),
     }
 
 
@@ -225,9 +232,10 @@ def _save_payload_cache(
     *,
     model: str,
     raw_response: str,
+    call: Mapping | None = None,
 ) -> None:
     _save_result(cache_dir, signature, _cache_entry(
-        payload, model=model, signature=signature, raw_response=raw_response))
+        payload, model=model, signature=signature, raw_response=raw_response, call=call))
 
 
 def _reexport_provenance(source: Path, meta: dict) -> dict:
@@ -344,6 +352,8 @@ def main(argv: list[str] | None = None) -> int:
                 saved_payload, meta = _payload_from_saved_path(source)
                 arrangement = validate_arrangement(saved_payload, view, planning_revision=args.planning_revision)
                 arrangement["provenance"] = _reexport_provenance(source, meta)
+                if meta.get("call"):
+                    arrangement["call"] = dict(meta["call"])
                 entry["status"] = _status_for(arrangement, prefix="reimported_")
                 entry["revalidated_from"] = str(source)
                 entry["legacy_cache"] = bool(meta.get("legacy_cache"))
@@ -368,6 +378,8 @@ def main(argv: list[str] | None = None) -> int:
                 saved_payload, meta = _payload_from_saved(cached)
                 arrangement = validate_arrangement(saved_payload, view, planning_revision=args.planning_revision)
                 raw_hint = meta.get("raw_response") or ""
+                if meta.get("call"):
+                    arrangement["call"] = dict(meta["call"])
                 arrangement["provenance"] = {
                     "model_call": True,
                     "restored_from_cache": True,
@@ -396,7 +408,7 @@ def main(argv: list[str] | None = None) -> int:
                 max_retries=retries,
                 timeout_seconds=args.timeout_seconds,
                 max_output_tokens=args.output_tokens,
-                thinking=True,
+                thinking=bool(args.thinking_budget),
                 thinking_budget=args.thinking_budget,
                 json_mode=False,
                 budget_ledger=ledger,
@@ -412,6 +424,8 @@ def main(argv: list[str] | None = None) -> int:
                     call_id=f"{ROUND_CALL_PREFIX}{chapter_id}",
                     raw_response_dir=chapter_dir / "raw_responses",
                     planning_revision=args.planning_revision,
+                    output_tokens=args.output_tokens,
+                    thinking_budget=args.thinking_budget,
                 )
                 report["model_calls"] = report.get("model_calls", 0) + 1
             except RoundBudgetExceeded as exc:
@@ -435,6 +449,7 @@ def main(argv: list[str] | None = None) -> int:
                     cache_dir, signature, saved_payload_from(arrangement),
                     model=args.model,
                     raw_response=str(raw_files[-1]) if raw_files else "",
+                    call=arrangement.get("call"),
                 )
             entry["round_state"] = ledger.round_state()
             _export(chapter_dir, view, arrangement)

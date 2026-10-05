@@ -13,6 +13,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from copy import deepcopy
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
@@ -22,6 +23,8 @@ VIEW_SCHEMA = "optomind.chapter_arrangement.view.v1"
 OUTPUT_SCHEMA = "optomind.chapter_arrangement.output.v1"
 USAGE_SCHEMA = "optomind.chapter_arrangement.source_usage.v1"
 ID_MAP_SCHEMA = "optomind.chapter_arrangement.id_map.v1"
+DEFAULT_OUTPUT_TOKENS = 32768
+DEFAULT_THINKING_BUDGET = 16384
 
 #: Handle shape used by the upstream plan (e.g. P0001).  Bare handles are legal
 #: input and are kept even when their material is not resolvable locally.
@@ -170,6 +173,10 @@ class ParagraphBrief:
             "point": self.point,
             "development": self.development,
             "source_handles": list(self.source_handles),
+            # Owner conditions can be text, lists, or structured records. Keep
+            # their exact shape instead of folding them into development.
+            **({"finding_conditions": deepcopy(self.raw["finding_conditions"])}
+               if "finding_conditions" in self.raw else {}),
         }
 
 
@@ -186,6 +193,7 @@ class UnitView:
     synthesis: str
     transition: str
     raw_keys: tuple[str, ...]
+    argument_relations: Any = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -198,6 +206,8 @@ class UnitView:
             "case_uses": self.case_uses,
             "evidence_conditions": self.evidence_conditions,
             "synthesis": self.synthesis,
+            **({"argument_relations": deepcopy(self.argument_relations)}
+               if self.argument_relations is not None or "argument_relations" in self.raw_keys else {}),
             "transition": self.transition,
         }
 
@@ -333,6 +343,8 @@ class ChapterView:
                     "ordered_development": clip(unit.ordered_development),
                     "evidence_conditions": clip(unit.evidence_conditions),
                     "synthesis": clip(unit.synthesis),
+                    **({"argument_relations": deepcopy(unit.argument_relations)}
+                       if unit.argument_relations is not None or "argument_relations" in unit.raw_keys else {}),
                     "transition": clip(unit.transition),
                     "existing_paragraph_tasks": [brief.to_dict() for brief in unit.paragraph_briefs],
                     "case_level_uses": [
@@ -1139,6 +1151,7 @@ def build_chapter_view(
             ),
             transition=str(unit.get("transition") or ""),
             raw_keys=tuple(sorted(unit.keys())),
+            argument_relations=deepcopy(unit.get("argument_relations")),
         ))
     ids.save()
 
@@ -1964,7 +1977,7 @@ def _restore_owner_paragraph_briefs(
         if bad:
             errors.append(f"brief_reference_unknown:{unit_id}:{','.join(bad)}")
             refs = [ref for ref in refs if ref in briefs_by_id]
-        if not refs and restore_text and explicit_id and entry["paragraph_id"] in briefs_by_id:
+        if not refs and explicit_id and entry["paragraph_id"] in briefs_by_id:
             refs = [entry["paragraph_id"]]
         if refs:
             claimed.update(refs)
@@ -2184,18 +2197,19 @@ def validate_arrangement(
             "paragraph_tasks": paragraphs,
             "table_tasks": tables,
             "unit_notes": str(raw_unit.get("unit_notes") or "").strip(),
+            # Owner context also belongs to the normal writing path. Argument
+            # relations remain independent of the legacy synthesis field.
+            "owner_unit_context": {
+                "evidence_conditions": owner_unit.evidence_conditions,
+                "synthesis": owner_unit.synthesis,
+                "transition": owner_unit.transition,
+                **({"argument_relations": deepcopy(owner_unit.argument_relations)}
+                   if owner_unit.argument_relations is not None or "argument_relations" in owner_unit.raw_keys else {}),
+            },
             **({
                 # Model-added tasks that reference no owner brief: allowed
                 # (connective organization), but visible instead of silent.
                 **({"unmapped_paragraph_tasks": unmapped_tasks} if unmapped_tasks else {}),
-                # The owner unit's own conditions/synthesis/transition travel
-                # with the unit so paragraph-level content is not the only
-                # place those constraints live.
-                "owner_unit_context": {
-                    "evidence_conditions": owner_unit.evidence_conditions,
-                    "synthesis": owner_unit.synthesis,
-                    "transition": owner_unit.transition,
-                },
             } if planning_revision else {}),
         })
 
@@ -2287,6 +2301,9 @@ def run_arrangement(
     raw_response_dir: str | Path | None = None,
     planning_revision: bool = False,
     feedback_issues: Sequence[Mapping[str, Any]] = (),
+    output_tokens: int | None = None,
+    thinking_budget: int | None = None,
+    thinking: bool | None = None,
 ) -> dict[str, Any]:
     """One model call, then contract validation against the same view."""
 
@@ -2300,7 +2317,27 @@ def run_arrangement(
             payload["feedback_issues"] = [dict(item) for item in feedback_issues if isinstance(item, Mapping)]
     messages = arrangement_messages(payload, prompt=prompt, planning_revision=planning_revision)
     identifier = call_id or f"{ROUND_CALL_PREFIX}{view.chapter_id}"
-    raw = invoke_client(client, messages, model=model, call_id=identifier)
+    # Preserve explicitly configured injected clients. Unconfigured clients
+    # receive the same quality defaults as the CLI; call kwargs take priority.
+    output_tokens = output_tokens if output_tokens is not None else getattr(client, "max_output_tokens", DEFAULT_OUTPUT_TOKENS)
+    if thinking_budget is None:
+        if thinking is True:
+            # A non-thinking client exposes an effective zero but can retain
+            # a nonzero allowance for explicit per-call re-enablement.
+            thinking_budget = getattr(
+                client, "_configured_thinking_budget",
+                getattr(client, "thinking_budget", DEFAULT_THINKING_BUDGET),
+            ) or DEFAULT_THINKING_BUDGET
+        else:
+            thinking_budget = getattr(client, "thinking_budget", DEFAULT_THINKING_BUDGET)
+        if thinking is None:
+            thinking = getattr(client, "thinking", bool(thinking_budget))
+    enabled = bool(thinking_budget) if thinking is None else bool(thinking)
+    raw = invoke_client(
+        client, messages, model=model, call_id=identifier,
+        max_output_tokens=output_tokens, thinking=enabled,
+        thinking_budget=thinking_budget if enabled else 0,
+    )
     parsed = parse_arrangement_response(raw)
     arrangement = validate_arrangement(parsed, view, planning_revision=planning_revision)
     arrangement["call"] = {
@@ -2310,6 +2347,8 @@ def run_arrangement(
         "finish_reason": raw.get("finish_reason") if isinstance(raw, Mapping) else None,
         "complete": raw.get("complete") if isinstance(raw, Mapping) else None,
         "usage": raw.get("usage") if isinstance(raw, Mapping) else None,
+        **({key: deepcopy(raw[key]) for key in ("effective_request", "cap_pressure") if key in raw}
+           if isinstance(raw, Mapping) else {}),
     }
     return arrangement
 

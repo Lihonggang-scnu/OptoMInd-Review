@@ -31,8 +31,12 @@ def parser():
     p.add_argument("--reader-workers", type=int, default=3)
     p.add_argument("--chapter-model", default=planning.DEFAULT_READER_MODEL)
     p.add_argument("--timeout-seconds", type=float, default=900)
-    p.add_argument("--thinking-budget", type=int, default=8192)
-    p.add_argument("--output-tokens", type=int, default=18000)
+    p.add_argument("--thinking-budget", type=int, default=planning.DEFAULT_PLANNER_THINKING_BUDGET,
+                   help="Thinking allowance for every planner stage; 0 disables thinking")
+    p.add_argument("--output-tokens", type=int, default=planning.DEFAULT_PLANNER_OUTPUT_TOKENS,
+                   help="Answer allowance for every planner stage")
+    p.add_argument("--reader-thinking-budget", type=int, default=planning.DEFAULT_READER_THINKING_BUDGET)
+    p.add_argument("--reader-output-tokens", type=int, default=planning.DEFAULT_READER_OUTPUT_TOKENS)
     p.add_argument("--tokenizer", type=Path, default=planning.DEFAULT_TOKENIZER_PATH)
     p.add_argument("--prior-reading", type=Path, action="append", default=[])
     p.add_argument("--local-material-index", type=Path,
@@ -85,7 +89,8 @@ def preflight(cfg, args):
     messages = planning._messages_for("provisional_scope", payload)
     count = planning.qwen_local_token_counter(cfg.tokenizer_path)(b"", messages)
     reserved_input = math.ceil(count * planning.TOKEN_MARGIN_MULTIPLIER) + planning.TOKEN_FRAMING_MARGIN
-    total = reserved_input + cfg.planner_output_tokens + cfg.thinking_budget
+    settings = planning._planner_call_settings(None, "provisional_scope", config=cfg)
+    total = reserved_input + settings["output_tokens"] + settings["thinking_budget"]
     if total >= 1_000_000:
         raise planning.ProgressivePlanError(f"full_pool_context_too_large:{total}")
     missing = [str(r.get("card_path")) for r in rows if not Path(str(r.get("card_path") or "")).is_file()]
@@ -93,9 +98,10 @@ def preflight(cfg, args):
             "local_input_token_estimate": count, "input_with_estimation_margin": reserved_input,
             "total_context_with_output_and_thinking": total, "missing_card_paths": missing,
             "first_call_reservation_estimate_cny": estimated_cost_cny({"prompt_tokens": reserved_input,
-                "completion_tokens": cfg.planner_output_tokens + cfg.thinking_budget}, model=cfg.planner_model, conservative=True),
+                "completion_tokens": settings["output_tokens"] + settings["thinking_budget"]}, model=cfg.planner_model, conservative=True),
             "budget": budget_snapshot(args.budget_ledger), "deep_read_limit": cfg.shared_deep_read_budget,
             "planner_model": cfg.planner_model, "reader_model": cfg.reader_model,
+            "planner_runtime_config": settings, "directed_reader_runtime_config": planning._directed_reader_settings(cfg),
             "notes": ["本地分词估算，真实用量以服务返回为准。", "首次调用成本不是完整流程费用。", "各级与章内按具体问题补充，先查本地、再小批外部检索；所有章节共享精读额度。"]}
 
 
@@ -111,6 +117,7 @@ def main(argv=None):
         chapter_model=args.chapter_model,
         timeout_seconds=args.timeout_seconds, thinking_budget=args.thinking_budget,
         planner_output_tokens=args.output_tokens, tokenizer_path=args.tokenizer.resolve(),
+        reader_thinking_budget=args.reader_thinking_budget, chapter_output_tokens=args.reader_output_tokens,
         planning_revision_enabled=bool(args.planning_revision),
         local_material_index_path=(args.local_material_index.resolve() if args.local_material_index else None),
         recovery_from=(args.recover_chapters_from.resolve() if args.recover_chapters_from else None),

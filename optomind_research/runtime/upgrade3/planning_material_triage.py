@@ -46,6 +46,11 @@ SCHEMA_VERSION = "optomind.planning_material_triage.v1"
 READING_SCHEMA_VERSION = "optomind.planning_material_local_reading.v1"
 REQUEST_SCHEMA = "optomind.planning_material_external_request.v1"
 
+DEFAULT_TRIAGE_MAX_OUTPUT_TOKENS = 12000
+DEFAULT_TRIAGE_THINKING_BUDGET = 8192
+DEFAULT_INTERPRETATION_MAX_OUTPUT_TOKENS = 8192
+DEFAULT_INTERPRETATION_THINKING_BUDGET = 8192
+
 DECISIONS = ("direct_use", "local_deep_read", "external_research")
 
 #: What the section wants from the material.  A background mention and a
@@ -708,11 +713,13 @@ class QwenLocalTriageJudge:
         budget_ledger_path: str | Path,
         budget_limit_cny: float,
         model: str = "qwen3.7-flash",
-        max_output_tokens: int = 6000,
-        thinking_budget: int = 4096,
+        max_output_tokens: int = DEFAULT_TRIAGE_MAX_OUTPUT_TOKENS,
+        thinking_budget: int = DEFAULT_TRIAGE_THINKING_BUDGET,
         timeout_seconds: float = 300.0,
         raw_response_dir: str | Path | None = None,
         quantitative_model: str | None = "qwen3.5-plus",
+        interpretation_max_output_tokens: int = DEFAULT_INTERPRETATION_MAX_OUTPUT_TOKENS,
+        interpretation_thinking_budget: int = DEFAULT_INTERPRETATION_THINKING_BUDGET,
     ) -> None:
         if not key_file or not budget_ledger_path:
             raise PlanningMaterialTriageError("triage_key_and_ledger_required")
@@ -721,8 +728,10 @@ class QwenLocalTriageJudge:
         self.budget_limit_cny = float(budget_limit_cny)
         self.model = model
         self.quantitative_model = quantitative_model
-        self.max_output_tokens = int(max_output_tokens)
+        self.max_output_tokens = max(64, int(max_output_tokens))
         self.thinking_budget = int(thinking_budget)
+        self.interpretation_max_output_tokens = max(64, int(interpretation_max_output_tokens))
+        self.interpretation_thinking_budget = int(interpretation_thinking_budget)
         self.timeout_seconds = float(timeout_seconds)
         self.raw_response_dir = Path(raw_response_dir) if raw_response_dir else None
 
@@ -767,7 +776,7 @@ class QwenLocalTriageJudge:
                 {"role": "system", "content": "你把已经读出的分组结果组织为综述素材。先对比用户问的那个设置、时间或子组，不用总体结果冒充指定部分。不同设置、对象或结果方向不同时，开头明确说明不一致，再解释哪些比较提示正向、负向或无明显差异。原文缩写按group_definitions解释，不调换组名。比大小不等于统计显著，总体或多组统计量不代表任意两组显著，更不证明哪组驱动总体结果；显著性只依据reported_statistics；缺少某种统计量不等于没有统计检验，不把观察性差异说成操作造成，也不猜论文未报告的机制。写一个紧凑usable_content和适用条件；不要重复整张数字表。返回JSON {usable_content:...}。"},
                 {"role": "user", "content": json.dumps({"question": gap.question, "review_scope": gap.user_scope,
                     "comparisons": comparisons, "remaining_information": decoded.get("still_missing")}, ensure_ascii=False)},
-            ], model=model, max_output_tokens=1800, thinking=True, thinking_budget=self.thinking_budget,
+            ], model=model, max_output_tokens=self.interpretation_max_output_tokens, thinking=True, thinking_budget=self.interpretation_thinking_budget,
                call_id=f"planning-material-interpretation:{gap.gap_id}")
             interpreted = self._decode(summary.get("content"))
             if interpreted.get("usable_content"):

@@ -247,9 +247,13 @@ def test_scalar_question_is_one_executable_question(reading):
 
 def test_conflicting_task_owned_output_never_overwritten(reading):
     questions, outputs, gaps = dr._practical_task_rows(reading["request"], None)
+    _, messages, _, _, _, _ = dr._practical_reading_plan(
+        **{k: reading[k] for k in ("request", "paper", "snapshot_dir")}, task=None,
+        max_input_tokens=dr.DEFAULT_MAX_INPUT_TOKENS)
     added = reading["store"].add_task(review_id="synthetic-review", paper_id="synthetic-paper", questions=questions, required_outputs=outputs, gap_keys=gaps,
         source_hash=dr.sha256_value({"source_hash": dr.sha256_value(dr.load_practical_material(reading["snapshot_dir"])),
-                                     "paper_identity": {"canonical_paper_id": "synthetic-paper", "title": "Synthetic fixture"}}))
+                                     "paper_identity": {"canonical_paper_id": "synthetic-paper", "title": "Synthetic fixture"},
+                                     "runtime_config": dr.directed_reader_runtime_config(), "prompt_sha256": dr.sha256_value(messages)}))
     output = Path(reading["output_dir"]) / added["task_id"]
     output.mkdir(parents=True)
     old = json.dumps({"task_id": "foreign-task", "workflow": "practical_materials", "content": answer()})
@@ -299,3 +303,134 @@ def test_bare_question_collection_is_not_answer_content(reading):
     result = dr.run_directed_reading(**reading, client=client)
     assert not result["ready"] and not result["fulfilled"]
     assert reading["store"].summary("synthetic-review")["reading_count"] == 0
+
+
+def test_directed_reader_default_kwargs_and_preflight_agree(reading):
+    client = ModelBoundary(answer())
+    result = dr.run_directed_reading(**reading, client=client)
+    runtime_config = dr.directed_reader_runtime_config()
+    assert runtime_config == {"model": "qwen3.7-flash", "thinking": True,
+                              "max_output_tokens": 20000, "thinking_budget": 8192}
+    assert all(client.calls[0][1][key] == value for key, value in runtime_config.items())
+    assert result["output"]["runtime_config"] == runtime_config
+    saved_input = json.loads((Path(result["output_dir"]) / "INPUT.json").read_text())
+    assert saved_input["runtime_config"] == runtime_config
+    preflight = dr.preflight_directed_reading(**{k: reading[k] for k in ("request", "paper", "snapshot_dir")})
+    assert preflight["runtime_config"] == runtime_config
+    assert preflight["thinking_budget"] == 8192 and preflight["max_output_tokens"] == 20000
+
+
+@pytest.mark.parametrize("changed", [{"thinking_budget": 16384}, {"max_output_tokens": 24000}, {"model": "qwen3.5-plus"}])
+def test_directed_fulfilled_cache_changes_with_effective_runtime_keeps_history(reading, changed):
+    client = ModelBoundary(answer(), answer("A new higher-capacity answer"))
+    first = dr.run_directed_reading(**reading, client=client)
+    old_root = Path(first["output_dir"])
+    frozen = {p: p.read_bytes() for p in old_root.rglob("*") if p.is_file()}
+    second = dr.run_directed_reading(**reading, client=client, **changed)
+    assert len(client.calls) == 2 and second["fulfilled"] and not second["reused"]
+    assert first["output"]["task_id"] != second["output"]["task_id"]
+    assert second["output_dir"] != first["output_dir"]
+    assert all(client.calls[-1][1][key] == value for key, value in changed.items())
+    assert all(p.read_bytes() == data for p, data in frozen.items())
+    assert dr.run_directed_reading(**reading, client=client, **changed)["reused"]
+    assert dr.run_directed_reading(**reading, client=client)["output_dir"] == first["output_dir"]
+    assert len(client.calls) == 2 and reading["store"].core_count("synthetic-review") == 1
+    assert len(reading["store"].readings("synthetic-review", "synthetic-paper")) == 2
+
+
+@pytest.mark.parametrize("proof", ["current", "missing", "old_budget"])
+def test_directed_legacy_reuse_requires_matching_budget_proof_preserves_artifact(reading, proof):
+    _, messages, _, questions, outputs, gaps = dr._practical_reading_plan(
+        **{k: reading[k] for k in ("request", "paper", "snapshot_dir")}, task=None,
+        max_input_tokens=dr.DEFAULT_MAX_INPUT_TOKENS)
+    legacy = reading["store"].add_task(review_id="synthetic-review", paper_id="synthetic-paper",
+        questions=questions, required_outputs=outputs, gap_keys=gaps, source_hash="")
+    old_root = Path(reading["output_dir"]) / "legacy"
+    old_root.mkdir(parents=True)
+    artifact = {"workflow": "practical_materials", "task_id": legacy["task_id"], "paper_id": "synthetic-paper",
+                "content": answer(), "question_material": answer()["question_material"]}
+    if proof != "missing":
+        artifact["runtime_config"] = dr.directed_reader_runtime_config(thinking_budget=4096 if proof == "old_budget" else 8192)
+    (old_root / "DIRECTED_READING.json").write_text(json.dumps(artifact))
+    (old_root / "PROMPT.json").write_text(json.dumps({"messages": messages}))
+    reading["store"].commit_reading(review_id="synthetic-review", task_id=legacy["task_id"], output_dir=str(old_root), source_hash="", gap_keys=gaps)
+    frozen = {p: p.read_bytes() for p in old_root.iterdir() if p.is_file()}
+    client = ModelBoundary(answer())
+    result = dr.run_directed_reading(**reading, client=client)
+    assert result["fulfilled"]
+    assert result["reused"] is (proof == "current")
+    assert len(client.calls) == (0 if proof == "current" else 1)
+    assert all(p.read_bytes() == data for p, data in frozen.items())
+
+
+def test_directed_floor_keys_effective_answer_limit(reading):
+    client = ModelBoundary(answer())
+    first = dr.run_directed_reading(**reading, client=client, max_output_tokens=1)
+    second = dr.run_directed_reading(**reading, client=client, max_output_tokens=64)
+    assert second["reused"] and second["output_dir"] == first["output_dir"]
+    assert client.calls[0][1]["max_output_tokens"] == 64
+    assert first["output"]["runtime_config"]["max_output_tokens"] == 64
+
+
+def test_directed_cli_defaults_and_override_model():
+    parser = dr._cli_parser()
+    for command in ("run", "preflight"):
+        args = [command, "--request", "r", "--paper", "p", "--snapshot", "s"]
+        if command == "run":
+            args.extend(["--store", "store", "--output-dir", "out"])
+        defaults = parser.parse_args(args)
+        assert defaults.max_output_tokens == 20000 and defaults.thinking_budget == 8192
+        assert parser.parse_args([*args, "--model", "qwen3.5-plus"]).model == "qwen3.5-plus"
+
+
+@pytest.mark.parametrize("model,json_mode", [("qwen3.7-flash", True), ("qwen3.5-plus", False)])
+def test_live_reader_constructor_receives_effective_model_budget(reading, monkeypatch, tmp_path, model, json_mode):
+    constructors, calls = [], []
+    metadata = {"effective_request": {"model": model, "answer_tokens": 24000, "thinking_budget": 16384},
+                "cap_pressure": {"thinking": True}}
+
+    class Client:
+        def __init__(self, **kwargs):
+            constructors.append(kwargs)
+
+        def complete(self, messages, **kwargs):
+            calls.append(kwargs)
+            return {"content": answer(), **metadata}
+
+    monkeypatch.setattr(dr, "QwenDirectClient", Client)
+    key = tmp_path / "fixture-not-a-real-key.txt"
+    key.write_text("synthetic-test-placeholder")
+    result = dr.run_directed_reading(**reading, key_file=key, budget_ledger_path=tmp_path / "ledger.sqlite",
+        budget_limit_cny=100, model=model, max_output_tokens=24000, thinking_budget=16384)
+    assert len(constructors) == len(calls) == 1
+    for item in (constructors[0], calls[0]):
+        assert item["model"] == model
+        assert item["max_output_tokens"] == 24000 and item["thinking_budget"] == 16384
+    assert constructors[0]["json_mode"] is json_mode
+    assert all(result["output"][key] == value for key, value in metadata.items())
+
+
+def test_interrupted_reader_raw_only_reuses_exact_runtime(reading):
+    blocked = []
+
+    def interrupted(messages, **kwargs):
+        task_id = kwargs["call_id"].split(":")[-2]
+        artifact_path = Path(reading["output_dir"]) / task_id / "DIRECTED_READING.json"
+        artifact_path.mkdir()
+        blocked.append(artifact_path)
+        return {"content": answer()}
+
+    with pytest.raises(OSError):
+        dr.run_directed_reading(**reading, client=interrupted)
+    old_root = blocked[0].parent
+    old_raw = (old_root / "RAW_RESPONSE.json").read_bytes()
+    new_client = ModelBoundary(answer("New budget answer"))
+    changed = dr.run_directed_reading(**reading, client=new_client, thinking_budget=16384)
+    assert len(new_client.calls) == 1 and changed["fulfilled"]
+    assert changed["output_dir"] != str(old_root)
+    assert (old_root / "RAW_RESPONSE.json").read_bytes() == old_raw
+    blocked[0].rmdir()
+    same_budget_client = ModelBoundary()
+    resumed = dr.run_directed_reading(**reading, client=same_budget_client)
+    assert resumed["fulfilled"] and resumed["output_dir"] == str(old_root)
+    assert not same_budget_client.calls
