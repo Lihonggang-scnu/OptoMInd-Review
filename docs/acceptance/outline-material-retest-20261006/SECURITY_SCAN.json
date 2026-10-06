@@ -1,0 +1,86 @@
+{
+  "scan_scope": "all copied experiment/input/report files, excluding this governance record, SECURITY_SCAN.md, README.md, and manifest files",
+  "credential_field_patterns": [
+    "api_key",
+    "authorization",
+    "bearer",
+    "password",
+    "secret",
+    "private_key",
+    "qwen-api-key"
+  ],
+  "credential_field_hits": [],
+  "credential_value_pattern_hits": [],
+  "broad_pattern_false_positives": [
+    {
+      "archive_path": "inputs/INPUT_PAYLOAD_SANITIZED.json",
+      "pattern": "sk-[A-Za-z0-9]{20,}",
+      "cause": "the broad pattern matched the sk- substring inside ordinary task- business identifiers; no standalone credential token"
+    },
+    {
+      "archive_path": "groups/full_material_plus/ARRANGEMENT_INPUT.json",
+      "pattern": "sk-[A-Za-z0-9]{20,}",
+      "cause": "the broad pattern matched the sk- substring inside ordinary task- business identifiers; no standalone credential token"
+    },
+    {
+      "archive_path": "groups/full_material_plus/ARRANGEMENT_PACKET.json",
+      "pattern": "sk-[A-Za-z0-9]{20,}",
+      "cause": "the broad pattern matched the sk- substring inside ordinary task- business identifiers; no standalone credential token"
+    },
+    {
+      "archive_path": "groups/full_material_plus/REQUEST_SANITIZED.json",
+      "pattern": "sk-[A-Za-z0-9]{20,}",
+      "cause": "the broad pattern matched the sk- substring inside ordinary task- business identifiers; no standalone credential token"
+    },
+    {
+      "archive_path": "groups/full_material_plus/RESULT_SANITIZED.json",
+      "pattern": "sk-[A-Za-z0-9]{20,}",
+      "cause": "the broad pattern matched the sk- substring inside ordinary task- business identifiers; no standalone credential token"
+    },
+    {
+      "archive_path": "groups/full_material_plus/WIRE_REQUEST_SANITIZED.json",
+      "pattern": "sk-[A-Za-z0-9]{20,}",
+      "cause": "the broad pattern matched the sk- substring inside ordinary task- business identifiers; no standalone credential token"
+    },
+    {
+      "archive_path": "groups/semantic_catalog_max/ARRANGEMENT_INPUT.json",
+      "pattern": "sk-[A-Za-z0-9]{20,}",
+      "cause": "the broad pattern matched the sk- substring inside ordinary task- business identifiers; no standalone credential token"
+    },
+    {
+      "archive_path": "groups/semantic_catalog_max/ARRANGEMENT_PACKET.json",
+      "pattern": "sk-[A-Za-z0-9]{20,}",
+      "cause": "the broad pattern matched the sk- substring inside ordinary task- business identifiers; no standalone credential token"
+    },
+    {
+      "archive_path": "groups/semantic_catalog_max/OWNER_INITIAL_RESULT_SANITIZED.json",
+      "pattern": "sk-[A-Za-z0-9]{20,}",
+      "cause": "the broad pattern matched the sk- substring inside ordinary task- business identifiers; no standalone credential token"
+    },
+    {
+      "archive_path": "groups/semantic_catalog_max/OWNER_RESULT_SANITIZED.json",
+      "pattern": "sk-[A-Za-z0-9]{20,}",
+      "cause": "the broad pattern matched the sk- substring inside ordinary task- business identifiers; no standalone credential token"
+    }
+  ],
+  "excluded_sensitive_paths": [
+    "SQLite budget database",
+    "LIVE_BUDGET_BASELINE.json full row snapshot",
+    "api_keys and credentials",
+    "environment files",
+    "pycache",
+    "PIDs and live logs",
+    "OWNER_REQUEST_TEMPLATE_UNRESOLVED.json",
+    "OWNER_UPPER_BOUND_REQUEST_ALL_CATALOG.json",
+    "PDFs and direct paper full text"
+  ],
+  "direct_text_omissions": [],
+  "empty_direct_text_fields_retained": {
+    "count": 8,
+    "field": "plain_text",
+    "bytes_each": 2,
+    "reason": "empty JSON values were retained; no source text was present to disclose"
+  },
+  "source_path_references_allowed": true,
+  "status": "PASS"
+}

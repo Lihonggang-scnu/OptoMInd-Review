@@ -1,0 +1,691 @@
+{
+  "metadata": {
+    "source_payload_sha256": "f2ba4ddfd16b37d2afcedc9b54b90e704b745a2b1c4664532fd7592c1e778fd9",
+    "original_plan_sha256": "6d7395691c2a16f22584033fe574cb6ae460cbcdecaa2d70383fde94515f43a0",
+    "full_material_plus_plan_sha256": "870bcc294f13f5a7d6a38851986e0d11a3ec2d2a64cc9c7b4932ca2bb89ed64e",
+    "semantic_catalog_max_plan_sha256": "ea5f4070d14fc37c1d8117f80c1fa5042348997f3be15ca8632178a057e31768",
+    "full_material_plus_cost_cny": 0.353414,
+    "semantic_catalog_access_plus_cost_cny": 0.084012,
+    "semantic_catalog_max_owner_cost_cny": 2.440908,
+    "semantic_catalog_max_total_cost_cny": 2.52492,
+    "full_material_plus_status": "updated",
+    "semantic_catalog_max_status": "updated"
+  },
+  "plans": {
+    "original": {
+      "reader_objective": "使读者能够准确评估不同实体瘤类型中肠道微生物特征与 ICI 临床结局的观察性关联强度，理解外部干扰因素与纵向动态对关联强度的修饰作用，并清晰区分当前证据的阶梯分布（从强观察性关联到弱干预性概念验证），避免将相关性误读为因果性或普适性生物标志物。",
+      "thesis": "跨癌种观察性队列证实特定肠道微生物特征（分类学与功能通路）与 ICI 疗效存在显著关联，但缺乏普适性单一标志物；外部药物暴露（抗生素、PPIs）及联合治疗方案构成关键修饰变量，其影响具有明确的时间窗口特异性；基线单次采样难以捕捉治疗诱导的生态重塑，纵向动态变化比静态丰度更能反映真实疗效轨迹；当前证据呈现明显的阶梯状分布，概念验证性干预显示初步希望但异质性大，Phase III RCT 证据完全缺失，且安全性信号受 ICI 方案严格调节。",
+      "units": [
+        {
+          "argument_relations": "共性信号确立微生物-ICI 关联的生物学合理性 → 跨队列异质性统计依据否定普适性单一标志物假设 → 方案特异性修饰效应进一步限制泛化边界。",
+          "ordered_development": "先展示跨癌种共性信号（高多样性、产 SCFA 菌富集），再指出跨队列荟萃分析揭示的“无通用标志物”现象，最后以 JCOG2007 辅助研究说明方案特异性。",
+          "paragraph_briefs": [
+            {
+              "development": "先列举黑色素瘤、NSCLC、RCC 等队列中反复出现的阳性信号（如 Akkermansia muciniphila、Bifidobacterium longum、Faecalibacterium prausnitzii 富集及高α多样性），随后指出结直肠癌与肝细胞癌中部分信号反转或失效，说明证据强度呈癌种特异性分布。",
+              "finding_conditions": "在黑色素瘤、NSCLC 和 RCC 队列中，Akkermansia muciniphila、Bifidobacterium longum 及 Faecalibacterium prausnitzii 富集与更好的 ICI 预后相关（P0096, P0146）；但在肝细胞癌及部分结直肠癌队列中，相同信号失效或反转（P0585）。",
+              "point": "展示跨癌种共性信号与癌种特异性分布",
+              "source_handles": [
+                "P0096",
+                "P0146",
+                "P0585"
+              ]
+            },
+            {
+              "development": "引用 PERMANOVA 分析结果，证明“队列”本身是解释微生物群落组成变异的最大因素（解释方差远超临床参数），机器学习跨队列泛化能力极差（留一法交叉验证平均 AUC-ROC 仅为 0.59-0.60），确认黑色素瘤 ICI 反应中微生物关联的复杂性和队列依赖性。",
+              "finding_conditions": "在整合 5 个新测序队列（n=165）和 4 个公开数据集（n=147）后，PERMANOVA 分析显示“队列”因素对微生物群落组成的解释方差是其他任何变量的近十倍；留一法交叉验证的平均 AUC-ROC 仅为 0.59-0.60，仅约 31.4% 的情况超过 0.6（P0478）。",
+              "point": "解释跨队列异质性与“无通用标志物”的统计依据",
+              "source_handles": [
+                "P0478"
+              ]
+            },
+            {
+              "development": "对比 NIC（尼莫鲁单抗 + 伊匹木单抗 + 铂类双药）与 PC 组，指出 Fusicatenibacter 和 Butyricicoccus 高丰度仅在 NIC 组中与更好 OS 相关（HR 分别为 0.56 和 0.52），而 Prevotellaceae NK3B31 高丰度在 NIC 组中与更高死亡风险相关（HR=2.33），说明微生物效应方向受具体给药方案严格修饰。",
+              "finding_conditions": "在 NIC 臂（Nivolumab-ipilimumab + platinum doublet chemotherapy）vs PC 臂中，Fusicatenibacter 高丰度患者 HR=0.56，Butyricicoccus 高丰度患者 HR=0.52；Prevotellaceae NK3B31 高丰度患者 HR=2.33（P0585）。",
+              "point": "阐明治疗方案与给药时序的修饰效应",
+              "source_handles": [
+                "P0585"
+              ]
+            }
+          ],
+          "substantive_point": "跨癌种观察性队列证实特定肠道微生物特征（分类学与功能通路）与 ICI 疗效存在显著关联，但缺乏普适性单一标志物，证据强度呈癌种特异性分布。",
+          "supporting_studies": [
+            {
+              "contribution": "提供NSCLC背景下跨癌种（黑色素瘤、肾癌）的微生物特征清单，指出特定菌属富集与疗效正相关但存在阈值风险，支撑综述中“跨癌种共性信号与情境依赖性”的论述。",
+              "paper_id": "261e0a3618ae7acf6e831646379929eff88857d5",
+              "source_handle": "P0096"
+            },
+            {
+              "contribution": "揭示微生物标志物的肠型特异性（如E2肠型中Collinsella与响应相关），解释为何单一物种难以成为普适性生物标志物，为“无通用标志物”的统计依据提供群落背景视角。",
+              "paper_id": "4a1e10851c0bf838d11646a65bc0ee57b10b940a",
+              "source_handle": "P0170"
+            },
+            {
+              "contribution": "证明菌株级签名在联合免疫治疗中具有泛癌种预测力，但在单药队列中失效，直接支撑“治疗方案严格修饰微生物效应方向”及“缺乏普适性单一标志物”的核心论点。",
+              "paper_id": "08a484e3c782bc9552d2df812bad2ec86f231edc",
+              "source_handle": "P0015"
+            },
+            {
+              "contribution": "提供NSCLC与黑色素瘤的大样本荟萃分析数据，量化高α多样性及Akkermansia/Faecalibacterium富集对ICI生存期的正向预后效应，支撑“跨癌种共性信号”的论述。",
+              "paper_id": "82318ae05cff1667b2348961675db67dee4d8360",
+              "source_handle": "P0298"
+            },
+            {
+              "contribution": "展示HCC多界微生物组特征，揭示细菌/代谢物在持久获益与非获益组间的显著差异而真菌差异较小，用于论证微生物效应具有高度癌种特异性及多界异质性。",
+              "paper_id": "58ddfd822378599d43b877cd0905dfe067a4375f",
+              "source_handle": "P0204"
+            },
+            {
+              "contribution": "基于SCRUM-Japan大规模队列证实整体α多样性与ICI疗效无普遍关联，且粪便口腔细菌比例升高预测较差PFS（尤其合并PPI使用时），为“无通用标志物”及统计异质性提供关键反例。",
+              "paper_id": "7fe882e8b39d1a041fd2fee47d9321c965f01aa5",
+              "source_handle": "P0289"
+            },
+            {
+              "contribution": "报道mCRPC患者中A. muciniphila丰度与ICI疗效呈负相关，挑战跨癌种通用正相关假设，并验证ICI治疗期间菌群高度稳定，支撑治疗方案史修饰效应及基线决定论。",
+              "paper_id": "74786f8df0c7648840756833a4b4bc49ace34be6",
+              "source_handle": "P0270"
+            },
+            {
+              "contribution": "提供多界微生物组（细菌+真菌+古菌+病毒）整合分析证据，证实高多样性及特定属组合与ICI疗效正相关，补充单一细菌视角的局限，支撑“生态网络稳定性促进疗效”的观点。",
+              "paper_id": "a9e58de949ced186b4882146c14b79b306ae9ef5",
+              "source_handle": "P0393"
+            },
+            {
+              "contribution": "提出“功能趋同”理论框架，解释分类学不一致背后的共享免疫通路（如SCFA产生、DC激活），为跨队列异质性提供机制整合视角，支持向基于功能的生物标志物开发转型。",
+              "paper_id": "9dd62eb058feb9dbd44c28e9c8d004181dd8d19d",
+              "source_handle": "P0364"
+            },
+            {
+              "contribution": "展示基因水平微生物丰度结合生物先验知识在预测ICI反应中优于传统分类学特征，揭示治疗策略（联合免疫阻断vs单药）对微生物信号泛化性的修饰作用，丰富标志物开发的维度。",
+              "paper_id": "bfb5efeaf486304583ce74567d60f84cf138a0ae",
+              "source_handle": "P0437"
+            },
+            {
+              "contribution": "提供波兰队列中饮食模式（高植物/低乳制品）与特定菌群协同影响抗PD-1疗效的实证，支撑“微生物标志物具有人群与生活方式依赖性”的分析。",
+              "paper_id": "f31246cd559d1a06b99a32b0ee47bb1ce0265772",
+              "source_handle": "P0545"
+            },
+            {
+              "contribution": "系统综述黑色素瘤数据，揭示真菌失调与较差预后的关联，补充单一细菌视角局限，论证多界微生物生态对ICI疗效的综合调节作用。",
+              "paper_id": "f9a9ef8d406ee51983cd285f9e60fc41574ae937",
+              "source_handle": "P0565"
+            },
+            {
+              "contribution": "基于转移性黑色素瘤宏基因组荟萃分析，确认维生素B代谢通路富集与响应正相关，为“功能趋同优于单一分类学标志物”提供跨队列统计支持。",
+              "paper_id": "e533262a6b45c7d00cff83bd889cdc367c85f377",
+              "source_handle": "P0511"
+            }
+          ],
+          "transition": "既然基线快照与方案特异性已严重限制单一标志物的泛化，必须审视外部药物暴露如何进一步修饰这些关联。",
+          "unit_id": "U1_跨癌种关联图谱"
+        },
+        {
+          "argument_relations": "量化暴露效应与时间窗特异性 → 联合方案修饰/反转效应方向 → 强调校正必要性与残余偏倚风险，确立外部干扰作为核心混杂/修饰变量的地位。",
+          "ordered_development": "先量化抗生素/PPIs 暴露的效应大小与时间窗特异性，再讨论联合方案如何改变微生物效应方向，最后强调校正必要性与残余偏倚风险。",
+          "paragraph_briefs": [
+            {
+              "development": "汇总 Meta 分析数据，指出抗生素使用与 OS 恶化（HR=1.61）、PFS 缩短（HR=1.43）及 ORR 降低（RR=0.58）显著相关；亚组分析证实负面关联在 ICI 治疗前后 [-45, 45] 天窗口内最强（β=0.2192, p=0.008），同期 PPIs 暴露亦导致 OS 恶化（HR≈1.31）。",
+              "finding_conditions": "抗生素暴露与 OS 恶化（HR=1.61, 95% CI 1.44-1.81）、PFS 缩短（HR=1.43, 95% CI 1.27-1.60）及 ORR 降低（RR=0.58, 95% CI 0.51-0.66）显著相关；在 ICI 治疗前后 [-45, 45] 天窗口内使用抗生素，OS 恶化风险最高（β=0.2192, p=0.008）（P0081, P0402）。",
+              "point": "量化抗生素/PPIs 暴露的效应量与时间窗特异性",
+              "source_handles": [
+                "P0081",
+                "P0402"
+              ]
+            },
+            {
+              "development": "对比 NIC 与 PC 组，指出 Fusicatenibacter 和 Butyricicoccus 高丰度仅在 NIC 组中与更好 OS 相关（HR 分别为 0.56 和 0.52），而 Prevotellaceae NK3B31 高丰度在 NIC 组中与更高死亡风险相关（HR=2.33），说明联合方案可反转或放大微生物效应方向。",
+              "finding_conditions": "在 NIC 臂（Nivolumab-ipilimumab + platinum doublet chemotherapy）vs PC 臂中，Fusicatenibacter 高丰度患者 HR=0.56，Butyricicoccus 高丰度患者 HR=0.52；Prevotellaceae NK3B31 高丰度患者 HR=2.33（P0585）。",
+              "point": "讨论联合方案对微生物效应的修饰与反转",
+              "source_handles": [
+                "P0585"
+              ]
+            },
+            {
+              "development": "指出指示偏倚（Indication Bias）可能导致抗生素负面效应被高估；强调未来研究需标准化暴露定义（种类、剂量、持续时间、指征）并进行多变量校正，否则单纯检测微生物组而不考虑用药史会导致结果不一致。",
+              "finding_conditions": "观察性研究中的指示偏倚（重症患者更多使用抗生素）可能导致抗生素负面效应被高估；标准化暴露定义与多变量校正是避免结果不一致的必要前提（P0081, P0402）。",
+              "point": "强调校正必要性与残余偏倚风险",
+              "source_handles": [
+                "P0081",
+                "P0402"
+              ]
+            }
+          ],
+          "substantive_point": "外部药物暴露（抗生素、PPIs）及联合治疗方案构成关键混杂/修饰变量，其影响具有明确的时间窗口特异性和剂量依赖性，需在关联分析中严格校正。",
+          "supporting_studies": [
+            {
+              "contribution": "量化抗酸药（PPIs）使用导致链球菌增加及短PFS的关联，并对比化疗预处理对微生物组的持久影响，支撑“外部药物暴露具有明确时间窗特异性与剂量依赖性”的分析任务。",
+              "paper_id": "35f3b135b6c865df8bb304e1f28a8247e55c25fd",
+              "source_handle": "P0123"
+            },
+            {
+              "contribution": "汇总抗生素、PPIs及类固醇暴露对ICI预后的负面效应量，特别强调抗生素使用时机（治疗后vs治疗前）的差异，为讨论指示偏倚高估负面效应及需标准化校正提供实证对照。",
+              "paper_id": "45ca27020bec6c917c6b71d8b1bad217f5abd0ed",
+              "source_handle": "P0157"
+            },
+            {
+              "contribution": "展示PPI使用者与非使用者在微生物动态轨迹上的显著差异（如Streptococcus thermophilus变化方向相反），说明合并用药可重塑菌群演化路径，需在关联分析中作为关键协变量严格校正。",
+              "paper_id": "0f25b980517704cd7fa782dd9e51d16b77d00249",
+              "source_handle": "P0033"
+            },
+            {
+              "contribution": "提供超5万名实体瘤患者的系统综述与荟萃分析数据，量化全身性抗生素暴露导致PFS和OS显著缩短的效应量，确立抗生素作为负面预后调节因子的流行病学证据等级。",
+              "paper_id": "62379160afa6c14c9a9ae85a0684ccec8ed9c07e",
+              "source_handle": "P0236"
+            },
+            {
+              "contribution": "聚焦拉丁美洲NSCLC人群，证实抗生素暴露显著降低OS但未影响PFS，提示地域/人群特征可能扰动微生物-疗效轴，补充外部干扰效应的群体异质性背景。",
+              "paper_id": "70ba511d3bb0697cd93e53d4880c68ce77471bde",
+              "source_handle": "P0266"
+            },
+            {
+              "contribution": "揭示质子泵抑制剂(PPI)使用者粪便中口腔细菌比例显著升高，且该特征在PPI亚组中与更差PFS趋势强相关，阐明合并用药通过重塑肠道生态位构成关键混杂/修饰变量。",
+              "paper_id": "7fe882e8b39d1a041fd2fee47d9321c965f01aa5",
+              "source_handle": "P0289"
+            },
+            {
+              "contribution": "针对HCC人群的Meta分析显示抗生素使用未显著恶化ICI疗效(OS/PFS/ORR)，提出肝硬化基线免疫抑制状态可能缓冲抗生素扰动，为讨论指示偏倚及肿瘤类型特异性校正必要性提供反面对照。",
+              "paper_id": "768ceed11b5509cd8f6c24d07e8fa015646929c0",
+              "source_handle": "P0275"
+            },
+            {
+              "contribution": "提供大样本荟萃分析数据，量化PPI使用与ICI生存结局恶化的关联，并细化使用时窗（基线/前60天 vs 同期）的效应差异，为讨论药物暴露的时间依赖性干扰提供流行病学基准。",
+              "paper_id": "9225e04c4f9620a87d4eb74932067cab87644bf2",
+              "source_handle": "P0339"
+            },
+            {
+              "contribution": "提供妇科肿瘤真实世界数据，明确抗生素使用时长（≥14天）与OS显著缩短的独立关联，区分短期反应指标与长期生存获益的差异，强化用药阈值效应的临床证据。",
+              "paper_id": "9cfb62b17064ed5abe1c447f8fa2f46e716b6c0d",
+              "source_handle": "P0360"
+            },
+            {
+              "contribution": "提供肌肉量这一非微生物宿主因素对ICI疗效影响的实证数据，显示低肌肉量在肺癌中未降低PFS且不增加毒性，作为对比背景说明除菌群外其他宿主因素的预测价值存在异质性。",
+              "paper_id": "b7d5f0bd4b9b2ff5ccb0fca4182d84c2111a7fdf",
+              "source_handle": "P0421"
+            },
+            {
+              "contribution": "证实NSCLC中抗生素暴露的负面效应高度依赖PD-L1表达水平，为“宿主生物标志物状态严格修饰微生物干预效应方向”提供临床分层依据。",
+              "paper_id": "e8fb88935a5c5757dc683f56d1ff0c0f356b20ae",
+              "source_handle": "P0517"
+            },
+            {
+              "contribution": "系统综述明确ICI启动前30天内的抗生素暴露是预后恶化的核心风险窗口，同期暴露影响较弱，量化时间窗特异性并提示需区分暴露时机进行校正。",
+              "paper_id": "CorpusId:286786239",
+              "source_handle": "P0576"
+            },
+            {
+              "contribution": "整合多尺度证据指出抗生素效应在不同实体瘤中存在异质性，警示简单归因于“菌群破坏”，强调需结合肿瘤免疫原性与疾病背景综合评估。",
+              "paper_id": "f381ac20e0012cee8a359a479037e3d12ee6e878",
+              "source_handle": "P0548"
+            }
+          ],
+          "transition": "外部干扰虽可量化，但基线单次采样仍难以捕捉治疗诱导的生态重塑，必须转向纵向动态监测。",
+          "unit_id": "U2_外部干扰与宿主背景"
+        }
+      ]
+    },
+    "full_material_plus": {
+      "reader_objective": "使读者能够准确评估不同实体瘤类型中肠道微生物特征与 ICI 临床结局的观察性关联强度，理解外部干扰因素与纵向动态对关联强度的修饰作用，并清晰区分当前证据的阶梯分布（从强观察性关联到弱干预性概念验证），避免将相关性误读为因果性或普适性生物标志物。",
+      "thesis": "跨癌种观察性队列证实特定肠道微生物特征（分类学与功能通路）与 ICI 疗效存在显著关联，但缺乏普适性单一标志物；外部药物暴露（抗生素、PPIs）及联合治疗方案构成关键修饰变量，其影响具有明确的时间窗口特异性；基线单次采样难以捕捉治疗诱导的生态重塑，纵向动态变化比静态丰度更能反映真实疗效轨迹；当前证据呈现明显的阶梯状分布，概念验证性干预显示初步希望但异质性大，Phase III RCT 证据完全缺失，且安全性信号受 ICI 方案严格调节。",
+      "units": [
+        {
+          "unit_id": "U1_跨癌种关联图谱",
+          "substantive_point": "跨癌种观察性队列证实特定肠道微生物特征（分类学与功能通路）与 ICI 疗效存在显著关联，但缺乏普适性单一标志物，证据强度呈癌种特异性分布。",
+          "argument_relations": "共性信号确立微生物-ICI 关联的生物学合理性 → 跨队列异质性统计依据否定普适性单一标志物假设 → 方案特异性修饰效应进一步限制泛化边界。",
+          "ordered_development": "先展示跨癌种共性信号（高多样性、产 SCFA 菌富集），再指出跨队列荟萃分析揭示的\"无通用标志物\"现象，最后以 JCOG2007 辅助研究说明方案特异性。",
+          "paragraph_briefs": [
+            {
+              "point": "展示跨癌种共性信号与癌种特异性分布",
+              "development": "先列举黑色素瘤、NSCLC、RCC 等队列中反复出现的阳性信号（如 Akkermansia muciniphila、Bifidobacterium longum、Faecalibacterium prausnitzii 富集及高α多样性），随后指出结直肠癌与肝细胞癌中部分信号反转或失效，说明证据强度呈癌种特异性分布。",
+              "finding_conditions": "在黑色素瘤、NSCLC 和 RCC 队列中，Akkermansia muciniphila、Bifidobacterium longum 及 Faecalibacterium prausnitzii 富集与更好的 ICI 预后相关（P0096, P0146, P0298, P0565）；但在肝细胞癌及部分结直肠癌队列中，相同信号失效或反转（P0204, P0270, P0545）。多界微生物组整合分析证实更高多样性及稳定的共现网络结构往往预示着更好的 ICI 反应（P0393）。",
+              "source_handles": [
+                "P0096",
+                "P0146",
+                "P0298",
+                "P0565",
+                "P0204",
+                "P0270",
+                "P0545",
+                "P0393"
+              ]
+            },
+            {
+              "point": "解释跨队列异质性与\"无通用标志物\"的统计依据",
+              "development": "引用 PERMANOVA 分析结果，证明\"队列\"本身是解释微生物群落组成变异的最大因素（解释方差远超临床参数），机器学习跨队列泛化能力极差（留一法交叉验证平均 AUC-ROC 仅为 0.59-0.60），确认黑色素瘤 ICI 反应中微生物关联的复杂性和队列依赖性。",
+              "finding_conditions": "在整合 5 个新测序队列（n=165）和 4 个公开数据集（n=147）后，PERMANOVA 分析显示\"队列\"因素对微生物群落组成的解释方差是其他任何变量的近十倍；留一法交叉验证的平均 AUC-ROC 仅为 0.59-0.60，仅约 31.4% 的情况超过 0.6（P0478）。肠型分层分析显示 Collinsella 属主要在 E2 肠型中与响应相关，而 Bacteroides 属主要在 E1 肠型中作为标志物（P0170）。SCRUM-Japan 大规模筛查显示整体α多样性与 ICI 疗效无显著关联，反而是粪便中高比例的口腔细菌易位与较短的 PFS 显著相关（P0289）。",
+              "source_handles": [
+                "P0478",
+                "P0170",
+                "P0289"
+              ]
+            },
+            {
+              "point": "阐明治疗方案与给药时序的修饰效应",
+              "development": "对比 NIC（尼莫鲁单抗 + 伊匹木单抗 + 铂类双药）与 PC 组，指出 Fusicatenibacter 和 Butyricicoccus 高丰度仅在 NIC 组中与更好 OS 相关（HR 分别为 0.56 和 0.52），而 Prevotellaceae NK3B31 高丰度在 NIC 组中与更高死亡风险相关（HR=2.33），说明微生物效应方向受具体给药方案严格修饰。",
+              "finding_conditions": "在 JCOG2007 III 期试验辅助生物标志物研究中，NIC 臂（Nivolumab-ipilimumab + platinum doublet chemotherapy）vs PC 臂中，Fusicatenibacter 高丰度患者 HR=0.56，Butyricicoccus 高丰度患者 HR=0.52；Prevotellaceae NK3B31 高丰度患者 HR=2.33（P0585）。菌株水平分析显示基于 CICB 训练的模型在单药队列中预测能力完全丧失（平均 AUC=0.51）（P0015）。",
+              "source_handles": [
+                "P0585",
+                "P0015"
+              ]
+            }
+          ],
+          "supporting_studies": [
+            {
+              "contribution": "提供 NSCLC 背景下跨癌种（黑色素瘤、肾癌）的微生物特征清单，指出特定菌属富集与疗效正相关但存在阈值风险，支撑综述中\"跨癌种共性信号与情境依赖性\"的论述。",
+              "paper_id": "261e0a3618ae7acf6e831646379929eff88857d5",
+              "source_handle": "P0096"
+            },
+            {
+              "contribution": "揭示微生物标志物的肠型特异性（如 E2 肠型中 Collinsella 与响应相关），解释为何单一物种难以成为普适性生物标志物，为\"无通用标志物\"的统计依据提供群落背景视角。",
+              "paper_id": "4a1e10851c0bf838d11646a65bc0ee57b10b940a",
+              "source_handle": "P0170"
+            },
+            {
+              "contribution": "证明菌株级签名在联合免疫治疗中具有泛癌种预测力，但在单药队列中失效，直接支撑\"治疗方案严格修饰微生物效应方向\"及\"缺乏普适性单一标志物\"的核心论点。",
+              "paper_id": "08a484e3c782bc9552d2df812bad2ec86f231edc",
+              "source_handle": "P0015"
+            },
+            {
+              "contribution": "提供 NSCLC 与黑色素瘤的大样本荟萃分析数据，量化高α多样性及 Akkermansia/Faecalibacterium 富集对 ICI 生存期的正向预后效应，支撑\"跨癌种共性信号\"的论述。",
+              "paper_id": "82318ae05cff1667b2348961675db67dee4d8360",
+              "source_handle": "P0298"
+            },
+            {
+              "contribution": "展示 HCC 多界微生物组特征，揭示细菌/代谢物在持久获益与非获益组间的显著差异而真菌差异较小，用于论证微生物效应具有高度癌种特异性及多界异质性。",
+              "paper_id": "58ddfd822378599d43b877cd0905dfe067a4375f",
+              "source_handle": "P0204"
+            },
+            {
+              "contribution": "基于 SCRUM-Japan 大规模队列证实整体α多样性与 ICI 疗效无普遍关联，且粪便口腔细菌比例升高预测较差 PFS（尤其合并 PPI 使用时），为\"无通用标志物\"及统计异质性提供关键反例。",
+              "paper_id": "7fe882e8b39d1a041fd2fee47d9321c965f01aa5",
+              "source_handle": "P0289"
+            },
+            {
+              "contribution": "报道 mCRPC 患者中 A. muciniphila 丰度与 ICI 疗效呈负相关，挑战跨癌种通用正相关假设，并验证 ICI 治疗期间菌群高度稳定，支撑治疗方案史修饰效应及基线决定论。",
+              "paper_id": "74786f8df0c7648840756833a4b4bc49ace34be6",
+              "source_handle": "P0270"
+            },
+            {
+              "contribution": "提供多界微生物组（细菌 + 真菌 + 古菌 + 病毒）整合分析证据，证实高多样性及特定属组合与 ICI 疗效正相关，补充单一细菌视角的局限，支撑\"生态网络稳定性促进疗效\"的观点。",
+              "paper_id": "a9e58de949ced186b4882146c14b79b306ae9ef5",
+              "source_handle": "P0393"
+            },
+            {
+              "contribution": "提供波兰队列中饮食模式（高植物/低乳制品）与特定菌群协同影响抗 PD-1 疗效的实证，支撑\"微生物标志物具有人群与生活方式依赖性\"的分析。",
+              "paper_id": "f31246cd559d1a06b99a32b0ee47bb1ce0265772",
+              "source_handle": "P0545"
+            },
+            {
+              "contribution": "系统综述黑色素瘤数据，揭示真菌失调与较差预后的关联，补充单一细菌视角局限，论证多界微生物生态对 ICI 疗效的综合调节作用。",
+              "paper_id": "f9a9ef8d406ee51983cd285f9e60fc41574ae937",
+              "source_handle": "P0565"
+            },
+            {
+              "contribution": "基于转移性黑色素瘤宏基因组荟萃分析，确认维生素 B 代谢通路富集与响应正相关，为\"功能趋同优于单一分类学标志物\"提供跨队列统计支持。",
+              "paper_id": "e533262a6b45c7d00cff83bd889cdc367c85f377",
+              "source_handle": "P0511"
+            }
+          ],
+          "transition": "既然基线快照与方案特异性已严重限制单一标志物的泛化，必须审视外部药物暴露如何进一步修饰这些关联。"
+        },
+        {
+          "unit_id": "U2_外部干扰与宿主背景",
+          "substantive_point": "外部药物暴露（抗生素、PPIs）及联合治疗方案构成关键混杂/修饰变量，其影响具有明确的时间窗口特异性和剂量依赖性，需在关联分析中严格校正。",
+          "argument_relations": "量化暴露效应与时间窗特异性 → 联合方案修饰/反转效应方向 → 强调校正必要性与残余偏倚风险，确立外部干扰作为核心混杂/修饰变量的地位。",
+          "ordered_development": "先量化抗生素/PPIs 暴露的效应大小与时间窗特异性，再讨论联合方案如何改变微生物效应方向，最后强调校正必要性与残余偏倚风险。",
+          "paragraph_briefs": [
+            {
+              "point": "量化抗生素/PPIs 暴露的效应量与时间窗特异性",
+              "development": "汇总 Meta 分析数据，指出抗生素使用与 OS 恶化（HR=1.61）、PFS 缩短（HR=1.43）及 ORR 降低（RR=0.58）显著相关；亚组分析证实负面关联在 ICI 治疗前后 [-45, 45] 天窗口内最强（β=0.2192, p=0.008），同期 PPIs 暴露亦导致 OS 恶化（HR≈1.31）。",
+              "finding_conditions": "抗生素暴露与 OS 恶化（HR=1.61, 95% CI 1.44-1.81）、PFS 缩短（HR=1.43, 95% CI 1.27-1.60）及 ORR 降低（RR=0.58, 95% CI 0.51-0.66）显著相关；在 ICI 治疗前后 [-45, 45] 天窗口内使用抗生素，OS 恶化风险最高（β=0.2192, p=0.008）（P0081, P0402）。PPIs 使用与 OS（HR≈1.31）和 PFS（HR=1.30）的显著下降相关（P0081, P0339）。ICI 启动前 30 天内的短期抗生素暴露是导致预后恶化的核心风险窗口（P0402, P0123）。ICI 前≥14 天的抗生素使用独立预测了更差的 OS（HR=2.286）（P0360）。",
+              "source_handles": [
+                "P0081",
+                "P0402",
+                "P0339",
+                "P0123",
+                "P0360"
+              ]
+            },
+            {
+              "point": "讨论联合方案对微生物效应的修饰与反转",
+              "development": "对比 NIC 与 PC 组，指出 Fusicatenibacter 和 Butyricicoccus 高丰度仅在 NIC 组中与更好 OS 相关（HR 分别为 0.56 和 0.52），而 Prevotellaceae NK3B31 高丰度在 NIC 组中与更高死亡风险相关（HR=2.33），说明联合方案可反转或放大微生物效应方向。",
+              "finding_conditions": "在 JCOG2007 III 期试验 NIC 臂（Nivolumab-ipilimumab + platinum doublet chemotherapy）vs PC 臂中，Fusicatenibacter 高丰度患者 HR=0.56，Butyricicoccus 高丰度患者 HR=0.52；Prevotellaceae NK3B31 高丰度患者 HR=2.33（P0585）。PD-L1 高表达（≥50%）是抗生素负面效应的关键预测因子，而在低表达人群中未发现显著影响（P0517）。HCC 因肝硬化导致的基线免疫抑制状态可能缓冲抗生素的扰动，使其对 ICI 疗效的影响呈现中性（P0275）。",
+              "source_handles": [
+                "P0585",
+                "P0517",
+                "P0275"
+              ]
+            },
+            {
+              "point": "强调校正必要性与残余偏倚风险",
+              "development": "指出指示偏倚（Indication Bias）可能导致抗生素负面效应被高估；强调未来研究需标准化暴露定义（种类、剂量、持续时间、指征）并进行多变量校正，否则单纯检测微生物组而不考虑用药史会导致结果不一致。",
+              "finding_conditions": "观察性研究中的指示偏倚（重症患者更多使用抗生素）可能导致抗生素负面效应被高估；标准化暴露定义与多变量校正是避免结果不一致的必要前提（P0081, P0402）。PPIs 通过改变胃内 pH 值促进口腔细菌易位至肠道，这种由药物诱导的生态重塑直接导致了 PFS 的缩短（P0289）。非微生物类的宿主因素如低肌肉量（少肌症）在调整协变量后并未显示出一致的负面预测价值（P0421）。",
+              "source_handles": [
+                "P0081",
+                "P0402",
+                "P0289",
+                "P0421"
+              ]
+            }
+          ],
+          "supporting_studies": [
+            {
+              "contribution": "量化抗酸药（PPIs）使用导致链球菌增加及短 PFS 的关联，并对比化疗预处理对微生物组的持久影响，支撑\"外部药物暴露具有明确时间窗特异性与剂量依赖性\"的分析任务。",
+              "paper_id": "35f3b135b6c865df8bb304e1f28a8247e55c25fd",
+              "source_handle": "P0123"
+            },
+            {
+              "contribution": "汇总抗生素、PPIs 及类固醇暴露对 ICI 预后的负面效应量，特别强调抗生素使用时机（治疗后 vs 治疗前）的差异，为讨论指示偏倚高估负面效应及需标准化校正提供实证对照。",
+              "paper_id": "45ca27020bec6c917c6b71d8b1bad217f5abd0ed",
+              "source_handle": "P0157"
+            },
+            {
+              "contribution": "展示 PPI 使用者与非使用者在微生物动态轨迹上的显著差异（如 Streptococcus thermophilus 变化方向相反），说明合并用药可重塑菌群演化路径，需在关联分析中作为关键协变量严格校正。",
+              "paper_id": "0f25b980517704cd7fa782dd9e51d16b77d00249",
+              "source_handle": "P0033"
+            },
+            {
+              "contribution": "提供超 5 万名实体瘤患者的系统综述与荟萃分析数据，量化全身性抗生素暴露导致 PFS 和 OS 显著缩短的效应量，确立抗生素作为负面预后调节因子的流行病学证据等级。",
+              "paper_id": "62379160afa6c14c9a9ae85a0684ccec8ed9c07e",
+              "source_handle": "P0236"
+            },
+            {
+              "contribution": "聚焦拉丁美洲 NSCLC 人群，证实抗生素暴露显著降低 OS 但未影响 PFS，提示地域/人群特征可能扰动微生物 - 疗效轴，补充外部干扰效应的群体异质性背景。",
+              "paper_id": "70ba511d3bb0697cd93e53d4880c68ce77471bde",
+              "source_handle": "P0266"
+            },
+            {
+              "contribution": "揭示质子泵抑制剂 (PPI) 使用者粪便中口腔细菌比例显著升高，且该特征在 PPI 亚组中与更差 PFS 趋势强相关，阐明合并用药通过重塑肠道生态位构成关键混杂/修饰变量。",
+              "paper_id": "7fe882e8b39d1a041fd2fee47d9321c965f01aa5",
+              "source_handle": "P0289"
+            },
+            {
+              "contribution": "针对 HCC 人群的 Meta 分析显示抗生素使用未显著恶化 ICI 疗效 (OS/PFS/ORR)，提出肝硬化基线免疫抑制状态可能缓冲抗生素扰动，为讨论指示偏倚及肿瘤类型特异性校正必要性提供反面对照。",
+              "paper_id": "768ceed11b5509cd8f6c24d07e8fa015646929c0",
+              "source_handle": "P0275"
+            },
+            {
+              "contribution": "提供大样本荟萃分析数据，量化 PPI 使用与 ICI 生存结局恶化的关联，并细化使用时窗（基线/前 60 天 vs 同期）的效应差异，为讨论药物暴露的时间依赖性干扰提供流行病学基准。",
+              "paper_id": "9225e04c4f9620a87d4eb74932067cab87644bf2",
+              "source_handle": "P0339"
+            },
+            {
+              "contribution": "提供妇科肿瘤真实世界数据，明确抗生素使用时长（≥14 天）与 OS 显著缩短的独立关联，区分短期反应指标与长期生存获益的差异，强化用药阈值效应的临床证据。",
+              "paper_id": "9cfb62b17064ed5abe1c447f8fa2f46e716b6c0d",
+              "source_handle": "P0360"
+            },
+            {
+              "contribution": "提供肌肉量这一非微生物宿主因素对 ICI 疗效影响的实证数据，显示低肌肉量在肺癌中未降低 PFS 且不增加毒性，作为对比背景说明除菌群外其他宿主因素的预测价值存在异质性。",
+              "paper_id": "b7d5f0bd4b9b2ff5ccb0fca4182d84c2111a7fdf",
+              "source_handle": "P0421"
+            },
+            {
+              "contribution": "证实 NSCLC 中抗生素暴露的负面效应高度依赖 PD-L1 表达水平，为\"宿主生物标志物状态严格修饰微生物干预效应方向\"提供临床分层依据。",
+              "paper_id": "e8fb88935a5c5757dc683f56d1ff0c0f356b20ae",
+              "source_handle": "P0517"
+            },
+            {
+              "contribution": "整合多尺度证据指出抗生素效应在不同实体瘤中存在异质性，警示简单归因于\"菌群破坏\"，强调需结合肿瘤免疫原性与疾病背景综合评估。",
+              "paper_id": "f381ac20e0012cee8a359a479037e3d12ee6e878",
+              "source_handle": "P0548"
+            }
+          ],
+          "transition": "外部干扰虽可量化，但基线单次采样仍难以捕捉治疗诱导的生态重塑，必须转向纵向动态监测。"
+        }
+      ]
+    },
+    "semantic_catalog_max": {
+      "title": "实体瘤中肠道微生物组与 ICI 疗效的临床关联证据",
+      "purpose": "使读者能够准确评估不同实体瘤类型中肠道微生物特征与 ICI 临床结局的观察性关联强度，理解外部干扰因素与纵向动态对关联强度的修饰作用，并清晰区分当前证据的阶梯分布，避免将相关性误读为因果性或普适性生物标志物。",
+      "reader_objective": "使读者能够准确评估不同实体瘤类型中肠道微生物特征与 ICI 临床结局的观察性关联强度，理解外部干扰因素与纵向动态对关联强度的修饰作用，并清晰区分当前证据的阶梯分布（从观察性关联到早期概念验证），避免将相关性误读为因果性或普适性生物标志物。",
+      "thesis": "跨癌种观察性队列证实特定肠道微生物特征（分类学、功能通路和多界生态）与 ICI 疗效存在显著关联，但缺乏普适性单一标志物；外部药物暴露（抗生素、PPIs）及治疗方案构成关键修饰变量，其影响具有时间窗、剂量和肿瘤背景依赖性；基线单次采样难以捕捉治疗诱导的生态重塑，纵向动态变化可能比静态丰度更能反映疗效轨迹；当前证据以观察性关联和早期概念验证为主，针对微生物干预的 Phase III RCT 仍缺失，而大型 III 期试验的附属生物标志物分析提示方案特异性关联。",
+      "scope": "本章聚焦实体瘤患者接受 ICI 治疗的人类观察性队列证据，梳理基线微生物分类学、功能通路、多界生态特征与 ORR、PFS、OS 的关联，并纳入阴性或矛盾结果。外部药物暴露与宿主/肿瘤背景作为关键混杂或修饰变量在本章展开；纵向动态与证据阶梯分别由后续单元承接。本章不展开干预性试验疗效判断，也不将附属生物标志物分析等同于微生物干预的因果证据。",
+      "substantive_threads": [
+        "跨癌种观察性队列证实特定肠道微生物特征与 ICI 疗效存在关联，但证据强度和方向依赖癌种、队列背景、肠型和治疗方案，缺乏普适性单一标志物。",
+        "抗生素、PPIs 等外部药物暴露与 ICI 结局的观察性关联具有时间窗、剂量和肿瘤背景依赖性，必须在微生物组关联分析中作为关键协变量处理。",
+        "基线单次采样难以捕捉治疗诱导的生态重塑，纵向动态变化可能比静态丰度更能反映疗效轨迹，但纵向数据仍受采样窗口和方法学标准化限制。",
+        "当前证据以观察性关联为主，早期概念验证性干预异质性大；针对微生物干预的 Phase III RCT 仍缺失，但大型 III 期试验附属生物标志物分析提示治疗方案会修饰微生物关联。"
+      ],
+      "units": [
+        {
+          "unit_id": "U1_跨癌种关联图谱",
+          "substantive_point": "跨癌种观察性队列显示特定肠道微生物分类学、功能与多界生态特征与 ICI 结局存在关联，但关联强度与方向依赖癌种、队列背景、肠型和治疗方案，尚无可泛化的单一生物标志物。",
+          "argument_relations": "共性信号与多界生态特征确立微生物-ICI 关联的生物学合理性 → 跨队列异质性、肠型分层和阴性/反转结果否定普适性单一标志物假设 → 治疗方案与菌株/基因分辨率证据进一步限定泛化边界。",
+          "ordered_development": "先概括黑色素瘤、NSCLC 等队列中的多样性与候选菌信号，并用多界/功能证据说明关联不止于单一细菌；随后用跨队列荟萃、肠型分层、阴性或反转案例说明队列与癌种特异性；最后用 JCOG2007 附属分析和菌株/基因水平证据说明治疗方案与分辨率对关联的修饰。",
+          "paragraph_briefs": [
+            {
+              "point": "跨癌种候选信号与多界/功能背景",
+              "development": "在黑色素瘤和 NSCLC 的系统综述与荟萃分析中，较高α多样性、Akkermansia muciniphila 存在或 Faecalibacterium 高丰度与更好 ORR、PFS 或 OS 相关（P0298, P0565, P0146, P0096）。但这类信号不应被简化为单一“有益菌”：多界整合分析提示高多样性和稳定共现网络与更好结局相关（P0393），黑色素瘤宏基因组荟萃也显示功能通路（如维生素 B 代谢）可能比单一物种更一致（P0511, P0364）。",
+              "finding_conditions": "主要基于黑色素瘤和 NSCLC 观察性队列及系统综述。P0298 汇总显示高α多样性与 OS、PFS 改善相关，Akkermansia 与 ORR 提升相关，Faecalibacterium 与 PFS 改善相关；P0393 为多癌种多界回顾性整合；P0511 为转移性黑色素瘤宏基因组荟萃，功能推断基于基因潜力而非实测代谢物。",
+              "source_handles": [
+                "P0298",
+                "P0565",
+                "P0146",
+                "P0096",
+                "P0393",
+                "P0511",
+                "P0364"
+              ]
+            },
+            {
+              "point": "队列异质性、肠型背景与阴性/反转案例",
+              "development": "P0478 整合 5 个新测序黑色素瘤队列和 4 个公开数据集后发现，“队列”本身解释微生物群落组成变异远超临床变量，留一法跨队列预测 AUC 仅约 0.59–0.60，且无单一物种在所有数据集中完全一致。P0170 进一步显示响应相关标志物依赖肠型背景，如 Collinsella 与 E2 肠型相关、Bacteroides 与 E1 肠型相关。在特定癌种或人群中，候选信号可减弱或反转：mCRPC 中 A. muciniphila 与治疗反应负相关（P0270），波兰黑色素瘤中 F. prausnitzii 在非响应者富集（P0545），SCRUM-Japan 泛实体瘤队列中整体α多样性与 ICI 疗效无显著关联而粪便口腔细菌比例与较短 PFS 相关（P0289）。HCC 前瞻性多界队列则显示细菌与代谢物差异大于真菌，提示不同癌种可能依赖不同多界特征（P0204）。",
+              "finding_conditions": "P0478 限于晚期皮肤黑色素瘤；P0170 整合 9 项研究共 569 个样本，E2 肠型偏向黑色素瘤，独立验证队列仅含卓越响应者；P0270 为 n=23 的 mCRPC 患者，且处于恩杂鲁胺进展后；P0545 为波兰黑色素瘤小样本队列；P0289 为日本晚期实体瘤 16S 队列，口腔细菌定义基于特定参考集，PPI 亚组为提示性；P0204 为 80 例晚期 HCC 前瞻性队列，预测模型未经外部验证。",
+              "source_handles": [
+                "P0478",
+                "P0170",
+                "P0270",
+                "P0545",
+                "P0289",
+                "P0204"
+              ]
+            },
+            {
+              "point": "治疗方案与分辨率的修饰",
+              "development": "在 JCOG2007/NIPPON III 期试验的附属生物标志物研究中，晚期 NSCLC 患者基线 16S 特征与 OS 的关联呈方案依赖：NIC 臂中 Fusicatenibacter 和 Butyricicoccus 高丰度与更好 OS 相关（HR 分别为 0.56 和 0.52），Prevotellaceae NK3B31 高丰度与更高死亡风险相关（HR=2.33）；该研究为附属观察性分析，摘要未详述多重校正，不能推断因果，也不宜将 NIC 结果直接外推到 PC 或单药背景（P0585）。菌株/基因水平证据进一步显示，联合免疫检查点阻断相关签名在抗 PD-1 单药队列中失效（P0015, P0437），提示微生物效应与治疗骨架耦合。",
+              "finding_conditions": "P0585 为晚期无驱动基因 NSCLC 一线化疗-免疫治疗 III 期试验的基线粪便 16S 附属研究，n=270，分辨率限于属水平；P0015 针对罕见实体瘤 CICB 和外部黑色素瘤队列，CICB 外部验证平均 AUC 约 0.65，抗 PD-1 单药约 0.51；P0437 显示基因水平特征在 CICB 背景下优于分类学特征，但单药背景泛化差。",
+              "source_handles": [
+                "P0585",
+                "P0015",
+                "P0437"
+              ]
+            }
+          ],
+          "supporting_studies": [
+            {
+              "source_handle": "P0298",
+              "paper_id": "82318ae05cff1667b2348961675db67dee4d8360",
+              "contribution": "提供 NSCLC 和黑色素瘤中基线α多样性、Akkermansia、Faecalibacterium 与 OS/PFS/ORR 的定量荟萃关联，支撑共性信号，同时限定为观察性预后关联。"
+            },
+            {
+              "source_handle": "P0565",
+              "paper_id": "f9a9ef8d406ee51983cd285f9e60fc41574ae937",
+              "contribution": "系统综述黑色素瘤微生物组与 ICI 反应，提示产 SCFA 菌、真菌失调和队列异质性并存，支持避免将单一菌属普适化。"
+            },
+            {
+              "source_handle": "P0146",
+              "paper_id": "4171288ecca93c6bca3eee61295418d704bb00fd",
+              "contribution": "提供肠道菌群与 ICI 疗效关联的综述性背景，列出不同癌种和 ICI 类型中可能相关的有益或风险类群，并强调机制多来自模型系统。"
+            },
+            {
+              "source_handle": "P0096",
+              "paper_id": "261e0a3618ae7acf6e831646379929eff88857d5",
+              "contribution": "提供 NSCLC 背景下微生物组与 ICI 疗效关联的综述素材，包括候选有益菌、潜在风险阈值及抗生素干扰。"
+            },
+            {
+              "source_handle": "P0393",
+              "paper_id": "a9e58de949ced186b4882146c14b79b306ae9ef5",
+              "contribution": "提供多界微生物组整合分析证据，显示高多样性和稳定共现网络与更好 ICI 结局相关，补充单一细菌视角的不足。"
+            },
+            {
+              "source_handle": "P0511",
+              "paper_id": "e533262a6b45c7d00cff83bd889cdc367c85f377",
+              "contribution": "通过转移性黑色素瘤宏基因组荟萃识别跨队列物种与功能通路信号，支持功能层面可能比单一物种更稳定。"
+            },
+            {
+              "source_handle": "P0364",
+              "paper_id": "9dd62eb058feb9dbd44c28e9c8d004181dd8d19d",
+              "contribution": "提出分类学变异背后的功能趋同框架，用于解释不同队列中物种不一致但免疫代谢通路可能共享的现象。"
+            },
+            {
+              "source_handle": "P0478",
+              "paper_id": "d4c18d58cffce0cab6831c84535e02c608d4db49",
+              "contribution": "提供跨队列黑色素瘤数据中“队列效应”主导微生物变异、跨队列预测能力有限和无单一通用标志物的关键统计证据。"
+            },
+            {
+              "source_handle": "P0170",
+              "paper_id": "4a1e10851c0bf838d11646a65bc0ee57b10b940a",
+              "contribution": "显示 ICI 响应相关微生物标志物依赖肠型背景，解释单一物种在不同群落环境中表现不一致的原因。"
+            },
+            {
+              "source_handle": "P0270",
+              "paper_id": "74786f8df0c7648840756833a4b4bc49ace34be6",
+              "contribution": "提供 mCRPC 中 A. muciniphila 与抗 PD-1 反应负相关的反例，挑战跨癌种通用正相关假设。"
+            },
+            {
+              "source_handle": "P0545",
+              "paper_id": "f31246cd559d1a06b99a32b0ee47bb1ce0265772",
+              "contribution": "提供波兰黑色素瘤队列中人群特异性微生物模式，显示 F. prausnitzii 可在非响应者中富集。"
+            },
+            {
+              "source_handle": "P0289",
+              "paper_id": "7fe882e8b39d1a041fd2fee47d9321c965f01aa5",
+              "contribution": "提供大型泛实体瘤队列中整体α多样性与 ICI 疗效无显著关联、口腔细菌比例与较短 PFS 相关的证据，平衡阳性多样性信号。"
+            },
+            {
+              "source_handle": "P0204",
+              "paper_id": "58ddfd822378599d43b877cd0905dfe067a4375f",
+              "contribution": "提供 HCC 多界微生物组证据，显示细菌与代谢物差异大于真菌，强调癌种特异性和多界异质性。"
+            },
+            {
+              "source_handle": "P0585",
+              "paper_id": "8016df1aa5a8160b7ccd412fa6851a6a508e2731",
+              "contribution": "提供大型 III 期试验附属生物标志物证据，显示 NSCLC 中微生物-生存关联依赖具体化疗-免疫方案。"
+            },
+            {
+              "source_handle": "P0015",
+              "paper_id": "08a484e3c782bc9552d2df812bad2ec86f231edc",
+              "contribution": "证明菌株水平签名在 CICB 背景下具有跨癌种预测力，但在抗 PD-1 单药背景中失效，支持治疗方案特异性。"
+            },
+            {
+              "source_handle": "P0437",
+              "paper_id": "bfb5efeaf486304583ce74567d60f84cf138a0ae",
+              "contribution": "提供基因水平微生物特征预测 ICI 反应的证据，并显示其泛化能力受治疗策略限制。"
+            }
+          ],
+          "transition": "既然基线快照、队列背景与方案特异性已限制单一标志物的泛化，下一步需要审视外部药物暴露如何进一步修饰这些观察性关联。"
+        },
+        {
+          "unit_id": "U2_外部干扰与宿主背景",
+          "substantive_point": "抗生素、PPIs 等外部药物暴露与宿主/肿瘤背景构成关键混杂或修饰变量，其影响具有时间窗、剂量和癌种依赖性，需在微生物组-ICI 关联分析中标准化定义并严格校正。",
+          "argument_relations": "量化抗生素和 PPI 暴露与 ICI 结局的关联及时间窗 → 用微生物生态位变化、宿主标志物和癌种背景解释异质性 → 强调指示偏倚、暴露定义标准化和多变量校正的必要性。",
+          "ordered_development": "先汇总抗生素和 PPI 的荟萃/大型观察性证据、时间窗与剂量信号；再讨论暴露如何通过微生物生态位、宿主生物标志物和癌种背景产生异质效应；最后说明指示偏倚和校正需求，界定观察性证据的解释边界。",
+          "paragraph_briefs": [
+            {
+              "point": "抗生素和 PPI 暴露的效应量、时间窗与剂量信号",
+              "development": "系统综述与 Meta 分析显示，抗生素暴露与 OS、PFS 和 ORR 恶化相关：P0081 报告抗生素与 OS HR=1.61、PFS HR=1.43、ORR RR=0.58 相关，PPI 与 OS HR=1.28、PFS HR=1.22、ORR RR=0.82 相关。P0339 汇总 PPI 使用与 OS HR=1.31、PFS HR=1.30 相关，且负面关联主要见于 ICI 基线或前 60 天开始使用者，而 RCC 和黑色素瘤亚组未达显著。P0081 的 Meta 回归提示抗生素在 ICI 前后 [-45, 45] 天窗口内负面关联最强；P0402 和 P0157 亦强调 ICI 启动前短期暴露比同期暴露更一致。另一项大型荟萃报告抗生素暴露与整体实体瘤 OS HR=1.16 相关，NSCLC 亚组 PFS HR=1.16，提示效应量因纳入人群和终点而异（P0236）。剂量/疗程也可能重要：妇科肿瘤队列中 ICI 前 60 天内累计抗生素 ≥14 天与更差 OS 独立相关，而短期疾病控制率未显示同等差异（P0360）。",
+              "finding_conditions": "这些证据主要来自观察性研究汇总，不能直接证明因果。P0081 纳入 69 项研究、102 个队列；P0339 纳入 33 项研究；P0236 纳入 15 项研究、52,489 例患者，NSCLC 为预设亚组；P0402 和 P0157 为叙述性综述，不能单独作为定量证据；P0360 为回顾性妇科肿瘤队列，未直接测量微生物组。",
+              "source_handles": [
+                "P0081",
+                "P0339",
+                "P0402",
+                "P0157",
+                "P0236",
+                "P0360"
+              ]
+            },
+            {
+              "point": "微生物生态位、宿主标志物与癌种背景对暴露效应的修饰",
+              "development": "暴露效应并非均匀分布。P0289 显示 PPI 使用者粪便中口腔细菌比例升高，且高口腔细菌比例与较短 PFS 相关，在 PPI 使用者中趋势更强，提示胃酸抑制可能促进口腔细菌易位并改变肠道生态位。P0123 在 NSCLC 队列中观察到抗酸药使用与链球菌属增加相关，而链球菌属又与短 PFS 相关；P0033 显示 PPI 使用者与非使用者在微生物动态轨迹上存在差异，如 Streptococcus thermophilus 变化方向不同，提示合并用药可改变微生物动态。宿主肿瘤标志物也修饰抗生素效应：NSCLC 中抗生素的负面关联主要见于 PD-L1 ≥50% 亚组，而在 PD-L1 低表达亚组不显著（P0517）。癌种背景同样重要：拉丁美洲 NSCLC 队列中抗生素与 OS 缩短相关但 PFS 未显著（P0266），HCC Meta 分析未显示抗生素显著恶化 ICI 结局（P0275），提示肝硬化、免疫背景或疾病特征可能缓冲或混杂暴露效应。",
+              "finding_conditions": "P0289 为日本 16S 队列，口腔细菌定义基于特定参考集，PPI 亚组 p=0.08 为提示性；P0123 为高加索 NSCLC 宏基因组观察性研究；P0033 为晚期黑色素瘤纵向队列，采样仅覆盖治疗前 12 周；P0517 为 NSCLC ICI 单药回顾性队列；P0266 样本量较小且未直接测量微生物组；P0275 为 HCC 回顾性研究荟萃，未区分抗生素类别。",
+              "source_handles": [
+                "P0289",
+                "P0123",
+                "P0033",
+                "P0517",
+                "P0266",
+                "P0275"
+              ]
+            },
+            {
+              "point": "校正必要性、指示偏倚与残余不确定性",
+              "development": "由于感染、症状或疾病严重度可能同时驱动抗生素/PPI 使用和较差预后，观察性关联可能被指示偏倚放大（P0081, P0402）。因此，微生物组-疗效分析需要记录并标准化暴露种类、剂量、持续时间、适应症和相对 ICI 的时间窗，并在多变量模型中校正；仅检测基线微生物组而不纳入用药史容易产生不一致结果（P0081, P0402, P0548）。不同癌种和宿主背景下的效应异质性也提示，不能把药物暴露简单归约为统一的“菌群破坏”机制，而应结合肿瘤免疫背景、合并用药和观察性研究设计边界进行解释。",
+              "finding_conditions": "P0081 和 P0402 为综述/荟萃分析，提示偏倚风险而非直接测量个体微生物变化；P0548 为叙述性综述，强调抗生素效应在不同实体瘤中的异质性。本节结论限于观察性证据的解释边界，不推断药物暴露的因果效应。",
+              "source_handles": [
+                "P0081",
+                "P0402",
+                "P0548"
+              ]
+            }
+          ],
+          "supporting_studies": [
+            {
+              "source_handle": "P0081",
+              "paper_id": "1d2792ae1850f48accaf1c111b2d92b6b2ebc6c0",
+              "contribution": "提供抗生素、PPIs 和益生菌对 ICI 结局影响的系统综述与 Meta 分析，包括效应量和暴露时间窗信息。"
+            },
+            {
+              "source_handle": "P0339",
+              "paper_id": "9225e04c4f9620a87d4eb74932067cab87644bf2",
+              "contribution": "提供 PPI 使用与 ICI 生存结局关联的 Meta 分析，并细化基线、前 60 天和同期使用时窗的差异。"
+            },
+            {
+              "source_handle": "P0402",
+              "paper_id": "affb01ce6dd2c0ea0909edc814fd8af01596e021",
+              "contribution": "综述抗生素暴露与 ICI 疗效的临床证据，强调 ICI 启动前短期暴露的负面关联更一致。"
+            },
+            {
+              "source_handle": "P0157",
+              "paper_id": "45ca27020bec6c917c6b71d8b1bad217f5abd0ed",
+              "contribution": "提供抗生素、PPIs 和类固醇等合并用药可能干扰微生物组并影响 ICI 疗效的综述背景，并提示用药时机的重要性。"
+            },
+            {
+              "source_handle": "P0236",
+              "paper_id": "62379160afa6c14c9a9ae85a0684ccec8ed9c07e",
+              "contribution": "提供大型系统综述与 Meta 分析，显示全身性抗生素暴露与实体瘤尤其是 NSCLC 患者较差生存结局相关。"
+            },
+            {
+              "source_handle": "P0360",
+              "paper_id": "9cfb62b17064ed5abe1c447f8fa2f46e716b6c0d",
+              "contribution": "提供妇科肿瘤真实世界数据，显示 ICI 前抗生素累计时长 ≥14 天与更差 OS 独立相关。"
+            },
+            {
+              "source_handle": "P0289",
+              "paper_id": "7fe882e8b39d1a041fd2fee47d9321c965f01aa5",
+              "contribution": "显示 PPI 使用者粪便口腔细菌比例升高，且口腔细菌与较短 PFS 相关，为 PPI 重塑肠道生态位提供队列证据。"
+            },
+            {
+              "source_handle": "P0123",
+              "paper_id": "35f3b135b6c865df8bb304e1f28a8247e55c25fd",
+              "contribution": "在 NSCLC 抗 PD-1 队列中显示抗酸药使用与链球菌属增加相关，并将特定微生物特征与短 PFS 联系起来。"
+            },
+            {
+              "source_handle": "P0033",
+              "paper_id": "0f25b980517704cd7fa782dd9e51d16b77d00249",
+              "contribution": "提供黑色素瘤纵向队列中 PPI 使用与微生物轨迹差异的实例，仅用于说明合并用药可影响动态，不展开纵向预测主论。"
+            },
+            {
+              "source_handle": "P0517",
+              "paper_id": "e8fb88935a5c5757dc683f56d1ff0c0f356b20ae",
+              "contribution": "显示 NSCLC 中抗生素负面效应主要由 PD-L1 高表达亚组驱动，提供宿主生物标志物修饰暴露效应的证据。"
+            },
+            {
+              "source_handle": "P0266",
+              "paper_id": "70ba511d3bb0697cd93e53d4880c68ce77471bde",
+              "contribution": "提供拉丁美洲 NSCLC 队列中抗生素暴露与 OS 缩短相关但 PFS 不显著的异质性案例。"
+            },
+            {
+              "source_handle": "P0275",
+              "paper_id": "768ceed11b5509cd8f6c24d07e8fa015646929c0",
+              "contribution": "提供 HCC 人群中抗生素使用未显著恶化 ICI 疗效的阴面对照，强调癌种背景对暴露效应的修饰。"
+            },
+            {
+              "source_handle": "P0548",
+              "paper_id": "f381ac20e0012cee8a359a479037e3d12ee6e878",
+              "contribution": "综述抗生素和微生物组效应在不同实体瘤中的异质性，警示不能将单一“菌群破坏”解释泛化到所有癌种。"
+            }
+          ],
+          "transition": "外部干扰虽可量化并需严格校正，但基线单次采样仍难以捕捉治疗诱导的生态重塑，后续单元将转向纵向动态监测。"
+        }
+      ]
+    }
+  }
+}
