@@ -1,0 +1,28 @@
+{
+  "baseline": "b56cba83436ebf76208807ab31bb569afb611fb6",
+  "baseline_suite": "1355 passed, 12 failed, 8 subtests passed",
+  "final_suite": "1385 passed, 12 failed, 8 subtests passed",
+  "same_failure_set": true,
+  "baseline_failures": [
+    "tests/upgrade3/test_review_delivery_editing.py::test_front_back_inserts_all_parts_into_plan_draft",
+    "tests/upgrade3/test_review_delivery_editing.py::test_front_back_updates_existing_parts_and_inserts_missing",
+    "tests/upgrade3/test_review_delivery_editing.py::test_intro_changed_version_keeps_only_new",
+    "tests/upgrade3/test_review_delivery_editing.py::test_intro_located_by_role_when_title_lacks_the_word",
+    "tests/upgrade3/test_review_delivery_editing.py::test_intro_repeat_runs_do_not_accumulate",
+    "tests/upgrade3/test_review_delivery_editing.py::test_text_edit_second_run_is_no_change",
+    "tests/upgrade3/test_review_delivery_editing.py::test_text_edit_stage_applies_fixture_to_real_draft",
+    "tests/upgrade3/test_review_delivery_entry.py::test_harness_parser_has_delivery_branch_and_help_is_offline",
+    "tests/upgrade3/test_review_delivery_figures_citations.py::test_real_draft_map_and_reader_rendering",
+    "tests/upgrade3/test_review_delivery_figures_citations.py::test_stage_cross_refs_captions_and_map_all_agree",
+    "tests/upgrade3/test_review_delivery_integration.py::test_history_full_chain_via_cli_subprocess",
+    "tests/upgrade3/test_review_delivery_integration.py::test_plan_restricted_chain_via_entry"
+  ],
+  "focused": "88 passed, including 42 selector tests",
+  "baseline_failure_first": "24 expected failures, 13 passes in pre-change module snapshot; 5 CLI cases excluded",
+  "commands": [
+    "python -m pytest -q tests/upgrade3 --tb=short",
+    "python -m pytest -q tests/upgrade3/test_outline_selection.py tests/upgrade3/test_outline_selection_local_contract.py tests/upgrade3/test_outline_strengthening.py tests/upgrade3/test_material_visibility_catalog.py tests/upgrade3/test_material_visibility_planner.py",
+    "python docs/verification/selector-local-depth-20261006/replay_messages.py"
+  ],
+  "paid_model_calls": 0
+}

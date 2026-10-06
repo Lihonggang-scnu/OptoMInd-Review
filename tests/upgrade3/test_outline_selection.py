@@ -84,7 +84,7 @@ def test_selector_messages_include_complete_plan_without_manual_targets():
     assert "review_targets" not in text
     assert "expected_answers" not in text
     assert "updated_plan" in text  # only in the prohibition contract, never as output schema
-    assert "跨章逻辑组" in text
+    assert payload["selection_mode"]["allow_cross_chapter_groups"] is False
     assert all(
         "study_summary_A" not in row and "review_planning_B" not in row
         for chapter in payload["chapters"]
@@ -96,11 +96,12 @@ def test_selector_messages_include_complete_plan_without_manual_targets():
 def test_model_visible_projection_keeps_plans_and_deduplicates_metadata_losslessly():
     payload, chapters = _selection_payload()
     original = copy.deepcopy(payload)
-    # Same handle with a different identity must remain two catalog entries.
-    payload["chapters"][1]["source_identity_map"] = {
-        "P0001": {"source_handle": "P0001", "paper_id": "different-paper", "title": "Different identity", "card_path": "F:\\secret\\card.json"}
-    }
-    visible = selection.model_visible_selection_payload(payload)
+    # Conflicting scientific records stay separate even with the same handle.
+    chapters["CH-B"]["source_materials"][0]["paper_id"] = "different-paper"
+    chapters["CH-B"]["source_materials"][0]["card_path"] = "F:\\secret\\card.json"
+    chapters["CH-B"]["input_integrity"] = strengthening._input_integrity(chapters["CH-B"])
+    payload = selection.build_selection_payload(list(chapters.values()))
+    visible = selection.model_visible_selection_payload(payload, include_material_index=True)
     check = selection.verify_model_visible_projection(payload, visible)
     assert check["unit_count"] == len(payload["all_unit_ids"])
     assert all(
@@ -110,12 +111,12 @@ def test_model_visible_projection_keeps_plans_and_deduplicates_metadata_lossless
     assert all("source_identity_map" not in chapter and "material_index" not in chapter for chapter in visible["chapters"])
     assert all(not ("card_path" in json.dumps(chapter, ensure_ascii=False) or "excluded_source_ids" in json.dumps(chapter, ensure_ascii=False)) for chapter in visible["chapters"])
     assert all("readonly_neighbor_unit_roles" not in chapter and all(isinstance(unit_id, str) for unit_id in chapter.get("readonly_neighbor_unit_ids", [])) for chapter in visible["chapters"])
-    assert "material_identity_catalog" not in visible
-    assert all(chapter["material_identity_refs"] == [] for chapter in visible["chapters"])
+    assert visible["material_identity_catalog"]
+    assert all(chapter["material_identity_refs"] for chapter in visible["chapters"])
     indexed = selection.model_visible_selection_payload(payload, include_material_index=True)
     refs = [pointer for chapter in indexed["chapters"] for pointer in chapter["material_identity_refs"]]
     assert refs and all(pointer.startswith("#/material_identity_catalog/") for pointer in refs)
-    assert any(set(entry["paper_ids"]) == {"different-paper"} for entry in indexed["material_identity_catalog"])
+    assert any(entry["identity"].get("paper_id") == "different-paper" for entry in indexed["material_identity_catalog"])
     assert payload["chapters"][0]["chapter_plan"] == original["chapters"][0]["chapter_plan"]
 
 
@@ -125,7 +126,8 @@ def test_model_visible_selection_messages_use_projection_and_keep_full_plan_mark
     messages = selection.selection_messages(payload, model_payload=visible)
     text = json.dumps(messages, ensure_ascii=False)
     assert "ALPHA-UNTRUNCATED" in text
-    assert "material_identity_catalog" not in text
+    assert visible["model_visible_projection"]["outline_first"] is True
+    assert all(not row["source_supplied_locators"] for row in visible["material_identity_catalog"])
     assert "本地绝对卡片位置" in text
     assert "F:\\secret\\card.json" not in text
     indexed = selection.model_visible_selection_payload(payload, include_material_index=True)
@@ -140,22 +142,23 @@ def test_selection_profile_is_explicit_high_capacity_max_role():
     assert profile["max_output_tokens"] == 32768
 
 
-def test_cross_chapter_group_projects_local_editors_and_full_readonly_boundaries():
+def test_same_chapter_group_projects_local_editor_and_full_readonly_boundaries():
     payload, chapters = _selection_payload()
     parsed = {
         "status": "selected",
         "groups": [{
-            "group_id": "model-cross-chapter",
-            "unit_ids": ["CH-A_U01", "CH-B_U02"],
+            "group_id": "model-local-chapter",
+            "unit_ids": ["CH-A_U01", "CH-A_U02"],
             "selection_reason": "The two responsibilities need a shared comparison boundary.",
             "improvement_focus": ["align conditions and cross-chapter transition"],
-            "related_read_only_unit_ids": ["CH-A_U03"],
+            "related_read_only_unit_ids": ["CH-A_U03", "CH-B_U02"],
         }],
     }
     checked = selection.validate_selection_response(payload, parsed)
     assert checked["status"] == "selected", checked
     projected = selection.selection_to_on_demand_payloads(chapters, checked)
-    assert {row["chapter_id"] for row in projected} == {"CH-A", "CH-B"}
+    assert {row["chapter_id"] for row in projected} == {"CH-A"}
+    assert "CH-B_U02" in projected[0]["read_only_unit_ids"]
     for row in projected:
         chapter_id = row["chapter_id"]
         selected = set(row["modifiable_unit_ids"])

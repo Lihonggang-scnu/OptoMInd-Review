@@ -38,14 +38,18 @@ The prepared request records both the access request and an all-catalog owner up
 
 ## Autonomous unit selection
 
-The optional `--mode select` entry is a first layer before on-demand strengthening. It reads the complete detailed plans for the supplied chapters, the research question, whole-review duties, conditions, argument relations, paragraph briefs, supporting-study uses, transitions, and chapter-level duties. The model-visible view preserves every chapter plan field exactly, removes absolute card locations and repeated exclusion inventories, and represents repeated neighbor duties as stable IDs. It does not copy full source cards or the whole identity directory into this first request by default; the downstream owner still receives the original complete chapter payload and can request material through the existing access path. Add `--include-selection-material-index` only when the caller explicitly wants the compact shared identity directory.
+The optional `--mode select` first layer identifies necessary, high-benefit local gaps in how the existing outline develops knowledge. It preserves every complete chapter plan. It does not redesign the review, dictate scientific answers, or require a fixed number of edits. Groups are chapter-local; other chapters remain read-only context. Invalid cross-chapter results are recorded and rejected rather than silently split into different work.
 
-The selector chooses any number of worthwhile units, can return `none` or `no_change`, and may place units from different chapters in one logical group. It supplies a reason and improvement focus only as machine-generated advisory provenance. The projection creates one owner payload per affected chapter, keeps the shared group identity and reason, makes other group units readonly context, and automatically retains every unselected unit in that chapter as readonly context. It never generates an updated plan or scientific answer.
+The default input is outline-first: full claims, paragraph duties, case uses and conditions, plus compact navigation for sources actually referenced in those plans. It does not send the full A/B and tool-material pool a second time. Complete records remain available to the unchanged on-demand owner. The explicit `--include-selection-material-index` option expands material diagnostics and can be substantially larger; it is not required for the normal route. Source fields are never reduced to a fixed character prefix.
 
-Prepare the selector offline first:
+`selection_reason` records why a local gap is worth addressing; `improvement_focus` and `selection_context` pass advisory responsibilities to the existing second layer. The owner verifies the premise against materials and may decline or retain the original task. No default cross-chapter restructuring or whole-chapter bundling is performed.
+
+Prepare offline from a list or chapter-ID mapping of genuine complete chapter packets, or a newly built selector envelope:
 
 ```text
-python scripts/upgrade3/outline_strengthening.py --mode select --input <selection-payload.json> --output <selection-run-dir> --selection-profile outline_selection --tokenizer <qwen-tokenizer.json>
+python scripts/upgrade3/outline_strengthening.py --mode select --input <complete-chapter-payloads.json> --output <selection-run-dir> --selection-profile outline_selection --tokenizer <qwen-tokenizer.json>
 ```
 
-The prepared request uses the explicit `outline_selection` profile (`qwen3.8-max`, 32768 thinking and 32768 answer tokens). A paid selector run requires the same prepared directory, budget ledger, and key file with `--run`; it is an opt-in first layer and is not automatically connected to every chapter. Its validated output can be passed to `selection_to_on_demand_payloads`, after which the existing on-demand material access and owner contracts apply. Ordinary BODY and whole-paper defaults remain unchanged.
+The profile remains `qwen3.8-max`, 32768 thinking and 32768 answer tokens. Explicit `--run` still requires the prepared directory, budget ledger and key file. A valid selection is projected through `selection_to_on_demand_payloads`; second-layer algorithms, prompts and profiles are unchanged. Use fresh preparation for the new contract; historical attempts remain available for audit.
+
+See [implementation and offline message evidence](../verification/selector-local-depth-20261006/README.md).

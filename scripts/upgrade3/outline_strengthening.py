@@ -81,16 +81,46 @@ def _on_demand_profiles(args: argparse.Namespace) -> tuple[str, str]:
     return str(args.access_profile or DEFAULT_ACCESS_PROFILE), str(args.profile or DEFAULT_PROFILE)
 
 
+def _selection_input(raw: Any) -> dict[str, Any]:
+    """Accept a current selector envelope or genuine complete chapter packets.
+
+    Historical outline-only selector files cannot reconstruct missing science;
+    callers should supply their original complete packets instead.
+    """
+    if isinstance(raw, Mapping) and isinstance(raw.get("selection_mode"), Mapping):
+        return dict(raw)
+    if isinstance(raw, Mapping) and isinstance(raw.get("chapter_plan"), Mapping):
+        rows = [raw]
+    elif isinstance(raw, Mapping):
+        rows = list(raw.values())
+    elif isinstance(raw, list):
+        rows = raw
+    else:
+        raise SystemExit("selection_input_requires_complete_chapter_packets")
+    if not rows or any(not isinstance(row, Mapping) or not isinstance(row.get("chapter_plan"), Mapping) for row in rows):
+        raise SystemExit("selection_input_requires_complete_chapter_packets")
+    first = rows[0]
+    return selection.build_selection_payload(
+        rows,
+        research_question=str(first.get("research_question") or ""),
+        shared_outline=first.get("shared_outline") or [],
+        shared_scope=first.get("shared_scope") or {},
+        review_argument=first.get("review_argument") or "",
+        review_argument_status=str(first.get("review_argument_status") or ""),
+        review_argument_source=str(first.get("review_argument_source") or ""),
+    )
+
+
 def prepare_selection(args: argparse.Namespace) -> dict[str, Any]:
     """Prepare the first-layer selector without crossing the paid boundary."""
 
-    payload = _load(Path(args.input))
+    payload = _selection_input(_load(Path(args.input)))
     selection._verify_selection_payload(payload)
     profile_name = str(args.selection_profile or DEFAULT_SELECTION_PROFILE)
     profile = load_quality_profile(profile_name)
     tokenizer = Path(args.tokenizer) if args.tokenizer else planning.DEFAULT_TOKENIZER_PATH
     counter = planning.qwen_local_token_counter(tokenizer) if tokenizer.is_file() else None
-    include_material_index = bool(args.include_selection_material_index)
+    include_material_index = bool(getattr(args, "include_selection_material_index", False))
     model_payload = selection.model_visible_selection_payload(payload, include_material_index=include_material_index)
     projection_check = selection.verify_model_visible_projection(payload, model_payload)
     messages = selection.selection_messages(payload, model_payload=model_payload)
@@ -145,7 +175,7 @@ def run_selection_cli(args: argparse.Namespace) -> dict[str, Any]:
     selection._verify_selection_payload(payload)
     model_payload = request.get("model_payload") or {}
     projection_check = selection.verify_model_visible_projection(payload, model_payload)
-    include_material_index = bool(args.include_selection_material_index)
+    include_material_index = bool(getattr(args, "include_selection_material_index", False))
     if bool(request.get("include_selection_material_index")) != include_material_index:
         raise SystemExit("prepared_selection_material_index_mode_changed:rerun_prepare")
     profile_name = str(args.selection_profile or DEFAULT_SELECTION_PROFILE)
@@ -532,7 +562,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--owner-profile", default=DEFAULT_OWNER_PROFILE)
     parser.add_argument("--access-profile", default=DEFAULT_ACCESS_PROFILE)
     parser.add_argument("--selection-profile", default=DEFAULT_SELECTION_PROFILE)
-    parser.add_argument("--include-selection-material-index", action="store_true")
+    parser.add_argument("--include-selection-material-index", action=argparse.BooleanOptionalAction, default=False,
+                        help="Optional expanded material view; default uses full outlines and compact task-linked navigation")
     parser.add_argument("--tokenizer", default="")
     parser.add_argument("--run", action="store_true", help="Cross the explicit paid-call boundary")
     parser.add_argument("--budget-ledger", default="")
