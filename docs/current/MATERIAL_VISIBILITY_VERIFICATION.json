@@ -1,0 +1,43 @@
+{
+  "baseline_sha": "51e5503f097a6325702f6df15fe5308545656d1a",
+  "priority_catalog_commit": "4d81a772bdecc4da18a84a8bc90298fb1a38f625",
+  "command": "python -m pytest -q tests/upgrade3 --tb=short",
+  "baseline_summary": "12 failed, 1282 passed, 8 subtests passed in 67.30s (0:01:07)",
+  "final_summary": "12 failed, 1333 passed, 8 subtests passed in 67.13s (0:01:07)",
+  "baseline_failure_set_unchanged": true,
+  "failed_tests": [
+    "tests/upgrade3/test_review_delivery_editing.py::test_front_back_inserts_all_parts_into_plan_draft",
+    "tests/upgrade3/test_review_delivery_editing.py::test_front_back_updates_existing_parts_and_inserts_missing",
+    "tests/upgrade3/test_review_delivery_editing.py::test_intro_changed_version_keeps_only_new",
+    "tests/upgrade3/test_review_delivery_editing.py::test_intro_located_by_role_when_title_lacks_the_word",
+    "tests/upgrade3/test_review_delivery_editing.py::test_intro_repeat_runs_do_not_accumulate",
+    "tests/upgrade3/test_review_delivery_editing.py::test_text_edit_second_run_is_no_change",
+    "tests/upgrade3/test_review_delivery_editing.py::test_text_edit_stage_applies_fixture_to_real_draft",
+    "tests/upgrade3/test_review_delivery_entry.py::test_harness_parser_has_delivery_branch_and_help_is_offline",
+    "tests/upgrade3/test_review_delivery_figures_citations.py::test_real_draft_map_and_reader_rendering",
+    "tests/upgrade3/test_review_delivery_figures_citations.py::test_stage_cross_refs_captions_and_map_all_agree",
+    "tests/upgrade3/test_review_delivery_integration.py::test_history_full_chain_via_cli_subprocess",
+    "tests/upgrade3/test_review_delivery_integration.py::test_plan_restricted_chain_via_entry"
+  ],
+  "new_visibility_tests": 51,
+  "priority_release_focused_tests": 44,
+  "production_git_blobs": {
+    "optomind_research/runtime/upgrade3/progressive_review_plan.py": "e4cd7906745056567e7b1677200a477b66ef9c1f",
+    "optomind_research/runtime/upgrade3/chapter_arrangement.py": "209ab74c4bec7e53d8fd6a89be01bce9cd98e314",
+    "optomind_research/runtime/upgrade3/review_unit_writer.py": "18d6c49caf1de2bd92405643bde589057d0f419d",
+    "scripts/upgrade3/progressive_review_plan.py": "9f489ab6a6fd1ec1c3ecb3beb17dfe0149c3177c",
+    "scripts/upgrade3/chapter_arrangement.py": "b98ab6e8d1b88795700690f90d36b4633a1aa335",
+    "scripts/upgrade3/review_unit_writer.py": "2f27bccb894cfc543a97d9760ced087b887ca4a9",
+    "scripts/upgrade3/review_feedback_loop.py": "fd2b79eaba3d065ff9fcf5563675664e90ee278d"
+  },
+  "paid_model_calls": 0,
+  "body_generation_calls": 0,
+  "diff_check": "passed",
+  "compileall": "passed",
+  "full_input_policy": "preserve scientific records; declared context overflow requires task/record batching, never silent prefix trimming",
+  "limits": [
+    "No new automatic writer or arrangement splitting/merge loop",
+    "The on-demand resolver/checkpoint/budget seams from prior review remain outside this input-visibility change",
+    "Unregistered injected offline model names have no declared capacity and skip model-capacity enforcement"
+  ]
+}

@@ -22,7 +22,7 @@
 ## 执行与使用边界
 
 - BODY 保持实际已恢复的顺序：协调及负责人修订 → 案例正式附加 → 编排 → 写作。不能按 `_post_case_review` 等函数名称猜阶段关系或再次加入案例后的整章改写。
-- `--planning-revision` 是历史升级规划入口的显式开关；核对当前 CLI 及运行记录，旧兼容模式不是另一套质量候选。
+- 正式规划默认开启 `planning_revision`；`--planning-revision` 仍兼容，`--no-planning-revision` 显式选择历史编排模式。两种模式的章节细化都保留完整 A/B，路由说明不能替代科研材料。运行前先读 [运行须知](RUN_GUIDE.md)。
 - 深度背景、理论、机制、方法比较和实质 Outlook 属于 BODY；独立首尾负责文章入口、范围宣告及收束。没有重新导入早期并行 PartsPlan 流水线。
 - 独立首尾仅显式 `post_body` 方式启用；CLI 采用 fixture/recordings，真实 provider 需本地另行注入与预算管理。普通交付的缺省路径不自动改成该模式。
 - 单元/装配 pending 继续阻止不当向后交付；已保存正文仍保留。首尾接回不能绕过这一门槛。

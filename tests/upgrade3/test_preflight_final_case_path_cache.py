@@ -83,7 +83,7 @@ def test_actual_case_batch_reuses_moved_reading_but_invalidates_science_and_sett
         "comparison": {"same_saved_reading_bytes": original.read_bytes() == moved.read_bytes(),
             "provenance_changed": initial_row["deep_read_material"]["reused_from"] != resumed_row["deep_read_material"]["reused_from"],
             "same_scientific_selection_projection": same_science,
-            "note": "Selection intentionally clips each string to 1200 characters plus ellipsis; writer retains the full answer including UNCLIPPED_TAIL. Conditions and limitations are identical."}})
+            "note": "Selection and writer both retain the full answer including UNCLIPPED_TAIL. Conditions and limitations are identical."}})
 
     for change in ("finding", "conditions", "task", "model", "output_tokens"):
         if change in {"finding", "conditions"}:

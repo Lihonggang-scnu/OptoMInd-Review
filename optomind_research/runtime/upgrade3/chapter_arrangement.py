@@ -25,6 +25,7 @@ USAGE_SCHEMA = "optomind.chapter_arrangement.source_usage.v1"
 ID_MAP_SCHEMA = "optomind.chapter_arrangement.id_map.v1"
 DEFAULT_OUTPUT_TOKENS = 32768
 DEFAULT_THINKING_BUDGET = 16384
+DEFAULT_MAX_SOURCE_CHARS = 0
 
 #: Handle shape used by the upstream plan (e.g. P0001).  Bare handles are legal
 #: input and are kept even when their material is not resolvable locally.
@@ -264,23 +265,19 @@ class ChapterView:
             ),
         }
 
-    def arrangement_payload(self, *, max_source_chars: int = 900) -> dict[str, Any]:
-        """The compact payload the arrangement model actually receives.
+    def arrangement_payload(self, *, max_source_chars: int = DEFAULT_MAX_SOURCE_CHARS) -> dict[str, Any]:
+        """Preserve scientific task context and every source caution intact.
 
-        The writer packet holds full B material for every source; sending all of
-        it would swamp the call and the budget.  The model only needs, per
-        source, who it is, how deep the material is, where it is currently used,
-        and a one-line purpose — the catalogue with the full material stays
-        local and is attached to the exported tasks instead.
+        The legacy size option is navigation-only: a positive value abbreviates
+        source titles and other chapters' purpose labels. Zero (the default)
+        leaves even navigation text intact. Scientific claims, conditions,
+        development, synthesis, case uses, and original briefs are never clipped.
+        Full source records remain in the exported catalog for the writer.
         """
 
-        def clip(value: Any) -> Any:
-            if isinstance(value, str):
-                return value if len(value) <= max_source_chars else value[:max_source_chars] + " …"
-            if isinstance(value, list):
-                return [clip(item) for item in value]
-            if isinstance(value, dict):
-                return {key: clip(item) for key, item in value.items()}
+        def navigation_text(value: Any) -> Any:
+            if isinstance(value, str) and max_source_chars > 0 and len(value) > max_source_chars:
+                return value[:max_source_chars] + " …"
             return value
 
         sources = []
@@ -291,7 +288,7 @@ class ChapterView:
                 purpose = str(source.planning_view.get("planning_summary") or "")
             sources.append({
                 "source_handle": source.source_handle,
-                "title": clip(source.title),
+                "title": navigation_text(source.title),
                 "year": source.year,
                 "material_depth": source.material_depth,
                 "material_status": source.material_status,
@@ -301,22 +298,20 @@ class ChapterView:
                         "kind": use.get("kind"),
                         "unit_id": use.get("unit_id", ""),
                         "paragraph_id": use.get("paragraph_id", ""),
-                        "purpose": clip(str(use.get("text") or "")) if use.get("kind") == "case" else "",
+                        "purpose": str(use.get("text") or "") if use.get("kind") == "case" else "",
                     }
                     for use in uses
                 ],
-                "material_purpose": clip(purpose),
-                "conditions": clip(
-                    "; ".join(str(item) for item in (source.planning_view.get("scope_interpretation_cautions") or [])[:2])
-                ),
+                "material_purpose": purpose,
+                "conditions": deepcopy(source.planning_view.get("scope_interpretation_cautions") or []),
             })
         return {
             "chapter_id": self.chapter_id,
             "title": self.title,
-            "purpose": clip(self.purpose),
-            "scope": clip(self.scope),
-            "thesis": clip(self.thesis),
-            "reader_objective": clip(self.reader_objective),
+            "purpose": self.purpose,
+            "scope": self.scope,
+            "thesis": self.thesis,
+            "reader_objective": self.reader_objective,
             "research_question": self.research_question,
             "review_argument": self.review_argument,
             "task_identity_contract": {
@@ -331,7 +326,7 @@ class ChapterView:
             "review_argument_status": self.review_argument_status,
             "review_argument_source": self.review_argument_source,
             "other_chapters": [
-                {"chapter_id": row.get("chapter_id"), "title": row.get("title"), "purpose": clip(row.get("purpose"))}
+                {"chapter_id": row.get("chapter_id"), "title": row.get("title"), "purpose": navigation_text(row.get("purpose"))}
                 for row in self.other_chapters
             ],
             "units": [
@@ -339,20 +334,20 @@ class ChapterView:
                     "unit_id": unit.unit_id,
                     "unit_index": unit.unit_index,
                     "title": unit.title,
-                    "substantive_point": clip(unit.substantive_point),
-                    "ordered_development": clip(unit.ordered_development),
-                    "evidence_conditions": clip(unit.evidence_conditions),
-                    "synthesis": clip(unit.synthesis),
+                    "substantive_point": unit.substantive_point,
+                    "ordered_development": unit.ordered_development,
+                    "evidence_conditions": unit.evidence_conditions,
+                    "synthesis": unit.synthesis,
                     **({"argument_relations": deepcopy(unit.argument_relations)}
                        if unit.argument_relations is not None or "argument_relations" in unit.raw_keys else {}),
-                    "transition": clip(unit.transition),
+                    "transition": unit.transition,
                     "existing_paragraph_tasks": [brief.to_dict() for brief in unit.paragraph_briefs],
                     "case_level_uses": [
                         {
                             "source_handle": row["source_handle"],
                             "field": row["field"],
-                            "purpose": clip(row["text"]),
-                            "conditions": clip(row["conditions"]),
+                            "purpose": row["text"],
+                            "conditions": row["conditions"],
                         }
                         for row in unit.case_uses
                     ],
@@ -1759,31 +1754,12 @@ def estimate_arrangement_cost(
     thinking_budget: int,
     token_counter: Any | None = None,
 ) -> dict[str, Any]:
-    """Conservative pre-dispatch estimate for one arrangement call."""
+    """Use the same lossless input estimate as actual dispatch preflight."""
+    from .review_unit_writer import estimate_unit_cost
 
-    from .module4.runtime import estimated_cost_cny
-
-    prompt_tokens = 0
-    if token_counter is not None:
-        prompt_tokens = int(token_counter(b"", messages))
-    else:
-        raw = json.dumps(messages, ensure_ascii=False)
-        prompt_tokens = max(1, len(raw) // 3)
-    reserved_input = int(prompt_tokens * 1.12) + 8192
-    total_context = reserved_input + int(output_tokens) + int(thinking_budget)
-    return {
-        "prompt_tokens_estimate": prompt_tokens,
-        "reserved_input_tokens": reserved_input,
-        "output_tokens": int(output_tokens),
-        "thinking_budget": int(thinking_budget),
-        "total_context_tokens": total_context,
-        "estimated_cost_cny": estimated_cost_cny(
-            {"prompt_tokens": reserved_input, "completion_tokens": int(output_tokens) + int(thinking_budget)},
-            model=model,
-            conservative=True,
-        ),
-        "model": model,
-    }
+    return estimate_unit_cost(
+        messages, model=model, output_tokens=output_tokens,
+        thinking_budget=thinking_budget, token_counter=token_counter)
 
 
 def arrangement_messages(
@@ -2333,6 +2309,11 @@ def run_arrangement(
         if thinking is None:
             thinking = getattr(client, "thinking", bool(thinking_budget))
     enabled = bool(thinking_budget) if thinking is None else bool(thinking)
+    from .review_unit_writer import assert_input_capacity
+
+    assert_input_capacity(
+        messages, client=client, model=model, output_tokens=output_tokens,
+        thinking_budget=thinking_budget if enabled else 0, error_type=ChapterArrangementError)
     raw = invoke_client(
         client, messages, model=model, call_id=identifier,
         max_output_tokens=output_tokens, thinking=enabled,

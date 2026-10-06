@@ -26,6 +26,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from optomind_research.runtime.upgrade3.chapter_arrangement import (
     DEFAULT_OUTPUT_TOKENS,
+    DEFAULT_MAX_SOURCE_CHARS,
     DEFAULT_THINKING_BUDGET,
     ROUND_CALL_PREFIX,
     ChapterArrangementError,
@@ -79,7 +80,8 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--thinking-budget", type=int, default=DEFAULT_THINKING_BUDGET,
                         help="Reasoning token allocation; set 0 to explicitly disable thinking")
     parser.add_argument("--timeout-seconds", type=float, default=900.0)
-    parser.add_argument("--max-source-chars", type=int, default=240)
+    parser.add_argument("--max-source-chars", type=int, default=DEFAULT_MAX_SOURCE_CHARS,
+                        help="Navigation labels only; 0 keeps all text. Scientific material is never clipped.")
     parser.add_argument("--no-retry", action="store_true", help="Disable transport retries (each attempt is billed)")
     parser.add_argument("--force", action="store_true", help="Ignore the saved result for the same input")
     parser.add_argument(

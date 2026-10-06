@@ -66,7 +66,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--max-material-chars-per-source", type=int,
                         default=DEFAULT_MAX_MATERIAL_CHARS_PER_SOURCE,
-                        help="0 disables the per-source ceiling (nothing is dropped silently)")
+                        help="Informational per-source capacity threshold; 0 disables it. Full material is always preserved.")
     parser.add_argument("--keep-deep-read-references", action="store_true",
                         help="Also send the source paper's own bibliography from the deep read")
     parser.add_argument("--output-tokens", type=int, default=DEFAULT_OUTPUT_TOKENS)
@@ -271,6 +271,7 @@ def main(argv: list[str] | None = None) -> int:
                 "with_deep_read_material": summary["with_deep_read_material"],
                 "material_read_from_disk": summary["read_from_disk"],
                 "material_truncated": summary["truncated"],
+                "material_capacity_threshold_exceeded": summary["capacity_threshold_exceeded"],
                 "input_path": str(unit_dir / "UNIT_INPUT.json"),
                 "messages_path": str(unit_dir / "UNIT_MESSAGES.json"),
                 "estimate": estimate,

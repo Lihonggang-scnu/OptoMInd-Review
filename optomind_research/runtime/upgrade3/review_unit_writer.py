@@ -54,7 +54,7 @@ PLANNING_REVISION_INSTRUCTIONS = (
 )
 
 DEFAULT_MODEL = "qwen3.7-flash"
-DEFAULT_MAX_MATERIAL_CHARS_PER_SOURCE = 20000
+DEFAULT_MAX_MATERIAL_CHARS_PER_SOURCE = 0
 # Above this the unit should be split rather than silently trimmed.  Nothing is
 # dropped when the warning fires: the caller decides.
 LARGE_INPUT_TOKENS = 65536
@@ -327,6 +327,8 @@ class UnitWritingView:
             "chapter_tool_materials": len(self.chapter_tool_materials),
             "read_from_disk": sorted(
                 item["source_handle"] for item in self.materials if item.get("material_read_from_disk")),
+            "capacity_threshold_exceeded": sorted(
+                item["source_handle"] for item in self.materials if item.get("material_capacity_diagnostic")),
             "truncated": sorted(
                 item["source_handle"] for item in self.materials if item.get("material_truncated")),
         }
@@ -617,9 +619,10 @@ def _material_entry(
 
     The locator card is parsed before any size ceiling is applied.  Its copies
     of A/B are omitted, missing science fills the existing A/B sections, and
-    only true extra material is retained.  If a source is longer than the
-    per-source ceiling, the cut is recorded in ``material_truncated`` instead
-    of happening invisibly.
+    only true extra material is retained. A positive legacy per-source ceiling
+    is now an informational capacity threshold, never a truncation instruction.
+    The full input reaches token preflight; oversized tasks must be split
+    explicitly rather than dropping scientific material or making extra calls.
     """
 
     catalog_entry = catalog.get(handle)
@@ -743,61 +746,18 @@ def _material_entry(
             note["issues"].append("no_local_material_for_handle")
 
     if max_chars_per_source and max_chars_per_source > 0:
-        blob = json.dumps(entry, ensure_ascii=False)
-        if len(blob) > max_chars_per_source:
-            entry["material_truncated"] = {
-                "original_chars": len(blob),
-                "kept_chars": max_chars_per_source,
-                "note": "单篇材料超过上限，已截断；截断发生在单篇内部，不丢后续来源",
+        original_chars = len(json.dumps(entry, ensure_ascii=False))
+        if original_chars > max_chars_per_source:
+            entry["material_capacity_diagnostic"] = {
+                "original_chars": original_chars,
+                "threshold_chars": max_chars_per_source,
+                "preserved_chars": original_chars,
+                "material_preserved": True,
+                "action": "check_full_input_capacity_or_split_task",
+                "note": "材料完整保留；该阈值只提示容量，实际完整输入仍须通过 token 预检；若超限须显式拆分任务",
             }
-            note["issues"].append("material_truncated")
-            entry = _truncate_entry(entry, max_chars_per_source)
+            note["issues"].append("material_capacity_threshold_exceeded")
     return entry, note
-
-
-def _clip_long_strings(value: Any, keep_chars: int) -> Any:
-    """Clip long free text inside nested material structures, keeping shape."""
-
-    if isinstance(value, str):
-        return value if len(value) <= keep_chars else value[:keep_chars] + "…（本地截断）"
-    if isinstance(value, list):
-        return [_clip_long_strings(item, keep_chars) for item in value]
-    if isinstance(value, dict):
-        return {key: _clip_long_strings(item, keep_chars) for key, item in value.items()}
-    return value
-
-
-def _truncate_entry(entry: dict[str, Any], limit: int) -> dict[str, Any]:
-    """Shrink the long free-text fields once each, keeping facts and flags intact.
-
-    Structured A/B fields are never dropped: if they alone exceed the ceiling the
-    entry is reported as still over the limit instead of being silently cut.
-    """
-
-    for key in ("card_material", "supplement_material", "deep_read_material"):
-        if len(json.dumps(entry, ensure_ascii=False)) <= limit:
-            break
-        value = entry.get(key)
-        if isinstance(value, str) and value:
-            over = len(json.dumps(entry, ensure_ascii=False)) - limit
-            keep = len(value) - over - 60
-            entry[key] = (value[:keep] + "\n…（本地截断）") if keep > 0 else "（本地截断；原文见定位信息）"
-    # Supplement lists and local passages carry their long text inside nested
-    # structures; they are clipped in place with the recorded truncation note.
-    for key in (
-        "supplement_materials", "tool_supplement_materials", "local_passages",
-        "local_passages_variants", "deep_read_materials",
-    ):
-        if len(json.dumps(entry, ensure_ascii=False)) <= limit:
-            break
-        if entry.get(key):
-            entry[key] = _clip_long_strings(entry[key], 400)
-    if len(json.dumps(entry, ensure_ascii=False)) > limit:
-        entry.setdefault("material_truncated", {})["still_over_limit"] = True
-        entry["material_truncated"]["note"] = (
-            "结构性 A/B 材料超过单篇上限但没有丢：只截断了定位/补充材料文本，"
-            "结构化字段完整保留，便于写作者核对")
-    return entry
 
 
 def build_unit_view(
@@ -931,6 +891,13 @@ def build_unit_view(
     missing = [item["source_handle"] for item in materials if item.get("missing_material")]
     if missing:
         view.warnings.append({"code": "sources_missing_from_catalog", "handles": missing})
+    for item in materials:
+        if item.get("material_capacity_diagnostic"):
+            view.warnings.append({
+                "code": "material_capacity_threshold_exceeded",
+                "source_handle": item["source_handle"],
+                **item["material_capacity_diagnostic"],
+            })
     # An original reported by a review can have usable linked tool text without
     # its own A/B card. Identity/status metadata alone is still not material.
     linked_tool_handles = {
@@ -1461,6 +1428,9 @@ def run_unit_completion(
         if thinking is None:
             thinking = getattr(client, "thinking", bool(thinking_budget))
     enabled = bool(thinking_budget) if thinking is None else bool(thinking)
+    assert_input_capacity(
+        messages, client=client, model=model, output_tokens=output_tokens,
+        thinking_budget=thinking_budget if enabled else 0, error_type=UnitWritingError)
     try:
         response = invoke_client(
             client, messages, call_id=call_id, model=model,
@@ -1737,10 +1707,12 @@ def estimate_unit_cost(
     output_tokens: int = DEFAULT_OUTPUT_TOKENS,
     thinking_budget: int = DEFAULT_THINKING_BUDGET,
     token_counter: Any | None = None,
+    prompt_token_multiplier: float = 1.12,
+    prompt_token_framing_margin: int = 8192,
 ) -> dict[str, Any]:
     """Conservative pre-dispatch estimate for one unit writing call."""
 
-    from .module4.runtime import estimated_cost_cny
+    from .module4.runtime import estimated_cost_cny, model_pricing
 
     counter = token_counter or _default_qwen_token_counter()
     if counter is not None:
@@ -1749,19 +1721,90 @@ def estimate_unit_cost(
     else:
         prompt_tokens = _fallback_prompt_token_upper_bound(messages)
         estimate_method = "utf8_conservative_upper_bound"
-    reserved_input = int(prompt_tokens * 1.12) + 8192
+    multiplier = float(prompt_token_multiplier)
+    framing_margin = int(prompt_token_framing_margin)
+    if multiplier < 1.0 or framing_margin < 0:
+        raise UnitWritingError("invalid_prompt_token_estimator")
+    reserved_input = max(1, int(prompt_tokens * multiplier + 0.999999) + framing_margin)
+    total_context = reserved_input + int(output_tokens) + int(thinking_budget)
+    pricing = model_pricing(model)
+    exceeds_capacity = (reserved_input > int(pricing["max_input_tokens"])
+                        or total_context > int(pricing["context_window"]))
     return {
         "prompt_tokens_estimate": prompt_tokens,
         "reserved_input_tokens": reserved_input,
+        "prompt_token_multiplier": multiplier,
+        "prompt_token_framing_margin": framing_margin,
         "output_tokens": int(output_tokens),
         "thinking_budget": int(thinking_budget),
-        "total_context_tokens": reserved_input + int(output_tokens) + int(thinking_budget),
+        "total_context_tokens": total_context,
+        "input_capacity": {
+            "material_preserved": True,
+            "max_input_tokens": int(pricing["max_input_tokens"]),
+            "context_window": int(pricing["context_window"]),
+            "exceeds_capacity": exceeds_capacity,
+            "action": "split_task_before_model_call" if exceeds_capacity else "within_capacity",
+        },
         "estimated_cost_cny": estimated_cost_cny(
             {"prompt_tokens": reserved_input, "completion_tokens": int(output_tokens) + int(thinking_budget)},
             model=model, conservative=True),
         "model": model,
         "tokenizer": estimate_method,
     }
+
+
+def assert_input_capacity(
+    messages: Sequence[Mapping[str, Any]], *, client: Any, model: str,
+    output_tokens: int, thinking_budget: int, error_type: type[Exception],
+) -> None:
+    """Reject oversized intact requests before any provider call or retry.
+
+    The registered model limits apply to real supported providers. Unregistered
+    model names used by injected offline clients have no declared capacity;
+    the real Qwen transport independently rejects unsupported models.
+    """
+    from .module4.runtime import MODEL_PRICING_CNY
+
+    capacity_model = model if model in MODEL_PRICING_CNY else getattr(client, "model", "")
+    if capacity_model not in MODEL_PRICING_CNY:
+        return
+    # A counter may inspect bytes instead of messages. Give it the full request
+    # rather than an empty placeholder, including output/thinking allocation.
+    request_bytes = json.dumps({
+        "model": model, "messages": list(messages), "temperature": 0.1,
+        "max_completion_tokens": int(output_tokens) + int(thinking_budget),
+        "enable_thinking": bool(thinking_budget), "thinking_budget": int(thinking_budget),
+        "stream": False,
+    }, ensure_ascii=False).encode("utf-8")
+    # Use the raw counter, not _prompt_token_estimate: the latter already adds
+    # the transport's framing allowance. estimate_unit_cost adds its own single
+    # safety allowance and must never apply it to an already reserved estimate.
+    client_counter = getattr(client, "prompt_token_counter", None)
+    counter = None
+    if callable(client_counter):
+        def counter(_raw: bytes, rows: Sequence[Mapping[str, Any]]) -> int:
+            try:
+                measured = int(client_counter(request_bytes, rows))
+            except Exception as exc:
+                raise error_type("input_capacity_token_counter_failed:" + type(exc).__name__) from exc
+            if measured < 0:
+                raise error_type("input_capacity_token_counter_returned_negative")
+            return measured
+    estimate = estimate_unit_cost(
+        messages, model=capacity_model, output_tokens=output_tokens,
+        thinking_budget=thinking_budget, token_counter=counter,
+        prompt_token_multiplier=getattr(client, "prompt_token_multiplier", 1.12),
+        prompt_token_framing_margin=getattr(client, "prompt_token_framing_margin", 8192))
+    if estimate["input_capacity"]["exceeds_capacity"]:
+        error = error_type(
+            "input_requires_batching:full_input_preserved:"
+            f"reserved_input_tokens={estimate['reserved_input_tokens']}:"
+            f"total_context_tokens={estimate['total_context_tokens']}:"
+            f"model={capacity_model}")
+        error.record = {"code": "input_requires_batching", "estimate": estimate,
+                        "messages": deepcopy(list(messages)), "model": model,
+                        "material_preserved": True, "model_calls": 0}
+        raise error
 
 
 # --------------------------------------------------------------------------
@@ -2557,6 +2600,9 @@ def run_unit_writing(
         if thinking is None:
             thinking = getattr(client, "thinking", bool(thinking_budget))
     enabled = bool(thinking_budget) if thinking is None else bool(thinking)
+    assert_input_capacity(
+        messages, client=client, model=model, output_tokens=output_tokens,
+        thinking_budget=thinking_budget if enabled else 0, error_type=UnitWritingError)
     try:
         response = invoke_client(
             client, messages, model=model, max_output_tokens=output_tokens,

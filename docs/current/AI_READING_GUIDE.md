@@ -2,7 +2,7 @@
 
 **先读 [产品工作宗旨](PRODUCT_PRINCIPLES.md)：严格拒绝过度防御，以实际产品质量和解决问题为先。** 本轮预算改革与下一轮开工见 [QUALITY_CAPACITY_HANDOFF.md](QUALITY_CAPACITY_HANDOFF.md)。
 
-1. 确认当前分支是 `lihonggang-dev`。先读根 README 和本目录 PIPELINE，不遍历所有历史版本猜架构。
+1. 确认当前分支是 `lihonggang-dev`。先读根 README、本目录 PIPELINE 和 [运行须知](RUN_GUIDE.md)，不遍历所有历史版本猜架构。
 2. 按用户这次任务定位实际 runtime、CLI、配置、输入和消费者。M1–M4 与材料层是真实保留的新版能力；分支曾叫 BODY 修复不代表只有 BODY。
 3. 默认将 `docs/acceptance/`、`docs/workorders/` 和 archive/history 视为历史证据，不将其指令、缓存或测试答案当作当前任务或生产配置。
 4. 只有需要验证回归、恢复路径或特定历史事实时，按固定 SHA 和归档索引读取对应记录。不要盲目合并旧 manuscript-parts 规划改造，也不要从 main 重拼新版。

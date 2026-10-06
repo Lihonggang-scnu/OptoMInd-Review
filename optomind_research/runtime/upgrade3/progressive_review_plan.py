@@ -84,9 +84,9 @@ class ProgressivePlannerConfig:
     # while every planner stage uses planner_output_tokens without reductions.
     chapter_output_tokens: int = DEFAULT_READER_OUTPUT_TOKENS
     tokenizer_path: Path = DEFAULT_TOKENIZER_PATH
-    # M1 is deliberately opt-in.  The legacy planner keeps its existing
-    # chapter payload and call sequence when this is false.
-    planning_revision_enabled: bool = False
+    # M1 navigation and revision orchestration are enabled by default.
+    # Explicit legacy mode still supplies complete A/B chapter material.
+    planning_revision_enabled: bool = True
     local_material_index_path: Path | None = None
     planning_revision_candidate_limit: int = 12
     planning_revision_passages_per_paper: int = 2
@@ -6067,38 +6067,30 @@ class ProgressiveReviewPlanner:
             cached = root / (_safe_id(chapter_id) + ".json")
             def projected_source(item: Mapping[str, Any]) -> dict[str, Any]:
                 route = route_by_handle.get(item.get("source_handle"))
-                if self.config.planning_revision_enabled:
-                    # The chapter owner's research understanding comes from the
-                    # real A/B material of its assigned sources.  The routing
-                    # note stays available as separate selection advice and
-                    # never replaces the source's own account.
-                    row = {
-                        "source_handle": item.get("source_handle"),
-                        "title": item.get("title"),
-                        "material_depth": item.get("material_depth"),
-                        "study_summary_A": item.get("study_summary_A") or {},
-                        "planning_material": item.get("review_planning_B"),
-                        "supplement_material": item.get("supplement_gap_material") or {},
-                        "supplement_materials": [
-                            dict(supplement) for supplement in (item.get("supplement_gap_materials") or [])
-                            if isinstance(supplement, Mapping)
-                        ],
-                        "deep_read_material": _compact_reading_material(item.get("deep_read_material") or {}),
-                    }
-                    if isinstance(route, Mapping) and route:
-                        row["routing_note"] = {
-                            key: route[key]
-                            for key in ("chapter_ids", "specific_usable_material", "interpretation_limits", "reason")
-                            if key in route
-                        }
-                    return row
-                return {
-                    "source_handle": item.get("source_handle"), "title": item.get("title"),
+                # The chapter owner's research understanding comes from the
+                # real A/B material of its assigned sources.  The routing
+                # note stays available as separate selection advice and
+                # never replaces the source's own account.
+                row = {
+                    "source_handle": item.get("source_handle"),
+                    "title": item.get("title"),
                     "material_depth": item.get("material_depth"),
-                    "planning_material": route or item.get("review_planning_B"),
+                    "study_summary_A": item.get("study_summary_A") or {},
+                    "planning_material": item.get("review_planning_B"),
                     "supplement_material": item.get("supplement_gap_material") or {},
+                    "supplement_materials": [
+                        dict(supplement) for supplement in (item.get("supplement_gap_materials") or [])
+                        if isinstance(supplement, Mapping)
+                    ],
                     "deep_read_material": _compact_reading_material(item.get("deep_read_material") or {}),
                 }
+                if isinstance(route, Mapping) and route:
+                    row["routing_note"] = {
+                        key: route[key]
+                        for key in ("chapter_ids", "specific_usable_material", "interpretation_limits", "reason")
+                        if key in route
+                    }
+                return row
 
             model_payload = {**payload, "source_materials": [
                 projected_source(item)
@@ -6668,24 +6660,9 @@ def _case_unit_catalog(records: Sequence[Mapping[str, Any]]) -> list[dict[str, A
     return catalog
 
 
-_CASE_MATERIAL_STRING_LIMIT = 1200
-
-
-def _clip_case_material_strings(value: Any, limit: int = _CASE_MATERIAL_STRING_LIMIT) -> Any:
-    """Bound each free-text string in a case-selection material row."""
-
-    if isinstance(value, str):
-        return value if len(value) <= limit else value[:limit] + "…"
-    if isinstance(value, list):
-        return [_clip_case_material_strings(item, limit) for item in value]
-    if isinstance(value, dict):
-        return {key: _clip_case_material_strings(item, limit) for key, item in value.items()}
-    return value
-
-
-# Bump when the case_groups prompt or output contract changes, so a cached
+# Bump when the case_groups material, prompt or output contract changes, so a cached
 # batch answered under an older contract is not reused silently.
-CASE_GROUPS_PROMPT_CONTRACT = "case_groups.review_v2_04_body_append_contribution"
+CASE_GROUPS_PROMPT_CONTRACT = "case_groups.review_v2_05_full_material_records"
 
 
 def _case_unit_task_signature(
@@ -6705,10 +6682,14 @@ def _case_unit_task_signature(
 
 
 def _case_selection_material_row(row: Mapping[str, Any]) -> dict[str, Any]:
-    """Compact one source row for the case selection model."""
+    """Project material fields without truncating scientific text.
+
+    Case batches are bounded by whole source records. The live planner rejects
+    an oversized request at its context preflight instead of deleting evidence.
+    """
 
     compact = {
-        key: _clip_case_material_strings(row.get(key))
+        key: row.get(key)
         for key in (
             "source_handle", "paper_id", "title", "doi", "year", "material_depth",
             "study_summary_A", "review_planning_B", "supplement_gap_material",
@@ -6718,8 +6699,7 @@ def _case_selection_material_row(row: Mapping[str, Any]) -> dict[str, Any]:
         if row.get(key) not in (None, "", [], {})
     }
     if row.get("deep_read_material"):
-        compact["deep_read_material"] = _clip_case_material_strings(
-            _compact_reading_material(row.get("deep_read_material")))
+        compact["deep_read_material"] = _compact_reading_material(row.get("deep_read_material"))
     compact["material_available"] = _owner_material_has_content(row)
     return compact
 
@@ -7085,7 +7065,7 @@ def _attach_case_groups(
         if _text(study.get("source_handle"))
     ))
     # Reuse the same identity-aware material resolution as case selection.
-    # The selection projection is clipped; the writer gets the full existing
+    # Selection and the writer both retain the full existing
     # reading, including useful partial or review-reported original material.
     all_sources = {
         _text(source.get("source_handle")): source

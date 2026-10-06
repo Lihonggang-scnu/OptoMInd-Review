@@ -49,8 +49,9 @@ def parser():
                    help="可选的内容编辑意见 JSON，交给已有审阅与章节返修环节")
     p.add_argument(
         "--planning-revision",
-        action="store_true",
-        help="启用默认关闭的 M1 材料导航与本地按需回填路径",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="默认启用 M1 材料导航与本地按需回填；--no-planning-revision 使用旧编排，但仍提供完整 A/B 材料",
     )
     p.add_argument(
         "--recover-chapters-from",
@@ -102,6 +103,8 @@ def preflight(cfg, args):
             "budget": budget_snapshot(args.budget_ledger), "deep_read_limit": cfg.shared_deep_read_budget,
             "planner_model": cfg.planner_model, "reader_model": cfg.reader_model,
             "planner_runtime_config": settings, "directed_reader_runtime_config": planning._directed_reader_settings(cfg),
+            "planning_revision_enabled": cfg.planning_revision_enabled,
+            "chapter_material_view": "full_A_B",
             "notes": ["本地分词估算，真实用量以服务返回为准。", "首次调用成本不是完整流程费用。", "各级与章内按具体问题补充，先查本地、再小批外部检索；所有章节共享精读额度。"]}
 
 
@@ -110,6 +113,8 @@ def main(argv=None):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8")
     args = parser().parse_args(argv)
+    if not args.planning_revision:
+        print("Warning: --no-planning-revision selects legacy orchestration without M1 navigation; chapter planning still receives full A/B material.", file=sys.stderr)
     cfg = planning.ProgressivePlannerConfig(
         topic_id=args.topic_id, pool_path=args.pool.resolve(), plan_path=args.plan.resolve(),
         output_dir=args.output_dir.resolve(), shared_deep_read_budget=args.deep_read_limit,
@@ -175,6 +180,7 @@ def main(argv=None):
             usage_path = cfg.output_dir / ("CALL_COST" + ("_" + args.stop_after if args.stop_after else "") + ".json")
             usage_path.write_text(json.dumps(usage, ensure_ascii=False, indent=2), encoding="utf-8")
             result = {"status": result.get("status"), "completed_through": result.get("completed_through", "chapter_details" if result.get("status") == "initial_draft" else "complete"),
+                      "planning_revision_enabled": cfg.planning_revision_enabled, "chapter_material_view": "full_A_B",
                       "output_dir": str(cfg.output_dir), "chapter_count": len(result.get("chapters") or []),
                       "candidate_screening": {k: v for k, v in (result.get("candidate_screening") or {}).items() if k != "candidate_rows"},
                       "deep_read_budget": result.get("deep_read_budget"), **usage}

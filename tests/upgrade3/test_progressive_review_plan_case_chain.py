@@ -200,7 +200,7 @@ def test_case_prompt_uses_formal_contribution_and_direct_append_contract():
     assert "本阶段直接把已选案例追加到正文计划" in system["content"]
     assert "最终案例由章节负责人对照材料确认" not in system["content"]
     assert "case_suggestions" not in system["content"]
-    assert CASE_GROUPS_PROMPT_CONTRACT == "case_groups.review_v2_04_body_append_contribution"
+    assert CASE_GROUPS_PROMPT_CONTRACT == "case_groups.review_v2_05_full_material_records"
 
 
 def _owner_test_planner(tmp_path: Path):

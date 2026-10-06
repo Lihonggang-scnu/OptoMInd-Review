@@ -196,7 +196,7 @@ def test_first_selected_independent_deep_reaches_actual_writer(tmp_path, monkeyp
     candidate = next(row for row in case["payload"]["source_materials"] if row["source_handle"] == "P0002")
     assert candidate["material_available"] is True
     assert "DEEP_ONLY_ANSWER" in json.dumps(candidate)
-    assert "UNCLIPPED_TAIL" not in json.dumps(candidate)  # selection alone is bounded
+    assert "UNCLIPPED_TAIL" in json.dumps(candidate)  # selection retains complete scientific records
     packet = read(root / "run/writer_packets/CH01.json")
     # Explicit failure-first evidence precedes the regression assertion.
     dump(root / "FIRST_SELECTION_RESULT.json", {
@@ -232,7 +232,7 @@ def test_first_selected_independent_deep_reaches_actual_writer(tmp_path, monkeyp
 @pytest.mark.parametrize("change,expected_case_calls", [
     ("same", 0), ("model", 1), ("output_tokens", 1), ("thinking_budget", 1),
     ("prompt", 1), ("material", 1), ("metadata_only", 0),
-    ("clipped_suffix", 0), ("legacy_batch", 1), ("failed_batch", 1),
+    ("material_suffix", 1), ("legacy_batch", 1), ("failed_batch", 1),
 ])
 def test_actual_case_batch_cache_reentry(tmp_path, monkeypatch, change, expected_case_calls):
     root = root_for(tmp_path, "cache_" + change)
@@ -254,8 +254,8 @@ def test_actual_case_batch_cache_reentry(tmp_path, monkeypatch, change, expected
                             old(stage, **kwargs) + ("\nCASE_TEST_CHANGED_PROMPT" if stage == "case_groups" else ""))
     elif change == "material":
         driver.planner._read_materials["paper-2"]["question_material"][0]["explanation"] = "UPDATED_CASE_ANSWER"
-    elif change == "clipped_suffix":
-        driver.planner._read_materials["paper-2"]["question_material"][0]["explanation"] += " UPDATED_UNSEEN_SUFFIX"
+    elif change == "material_suffix":
+        driver.planner._read_materials["paper-2"]["question_material"][0]["explanation"] += " UPDATED_MATERIAL_SUFFIX"
     elif change in {"legacy_batch", "failed_batch"}:
         mutated = dict(before)
         if change == "legacy_batch":
@@ -277,11 +277,12 @@ def test_actual_case_batch_cache_reentry(tmp_path, monkeypatch, change, expected
         assert actual[0]["thinking_budget"] == driver.adapter.thinking_budget
     if change == "material":
         assert "UPDATED_CASE_ANSWER" in json.dumps(actual[0]["payload"]["source_materials"])
-    if change == "clipped_suffix":
-        assert before["material_signature"] == after["material_signature"]
-        assert "UPDATED_UNSEEN_SUFFIX" in json.dumps(read(root / "run/writer_packets/CH01.json"))
+    if change == "material_suffix":
+        assert before["material_signature"] != after["material_signature"]
+        assert "UPDATED_MATERIAL_SUFFIX" in json.dumps(actual[0]["payload"]["source_materials"])
+        assert "UPDATED_MATERIAL_SUFFIX" in json.dumps(read(root / "run/writer_packets/CH01.json"))
         _, messages = writer_handoff(root, name="suffix_resumed")
-        assert "UPDATED_UNSEEN_SUFFIX" in json.dumps(messages)
+        assert "UPDATED_MATERIAL_SUFFIX" in json.dumps(messages)
 
 
 

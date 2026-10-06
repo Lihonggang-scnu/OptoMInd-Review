@@ -561,7 +561,8 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--writer-output-tokens", type=int, default=writing.DEFAULT_OUTPUT_TOKENS)
     parser.add_argument("--writer-thinking-budget", type=int, default=writing.DEFAULT_THINKING_BUDGET)
     parser.add_argument("--timeout-seconds", type=float, default=900.0)
-    parser.add_argument("--max-source-chars", type=int, default=1200)
+    parser.add_argument("--max-source-chars", type=int, default=arranging.DEFAULT_MAX_SOURCE_CHARS,
+                        help="Navigation label limit only; 0 keeps labels intact. Scientific task/material fields are preserved.")
     parser.add_argument("--max-material-chars", type=int, default=writing.DEFAULT_MAX_MATERIAL_CHARS_PER_SOURCE)
     parser.add_argument("--unit", default="")
     parser.add_argument("--language", default="zh")
