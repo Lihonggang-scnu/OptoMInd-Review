@@ -72,19 +72,108 @@ def _paths(row: Mapping[str, Any]) -> list[str]:
     return list(dict.fromkeys(result))
 
 
-def _locator_summary(row: Mapping[str, Any]) -> list[dict[str, str]]:
-    """Expose short source supplied locators, never a model generated summary."""
+# Per material root, eight times the former 600-character JSON prefix.  This
+# targets bounded displayed content, with one atomic overflow if the view
+# would otherwise be empty. Full records remain available to the resolver.
+_LOCATOR_CONTENT_BUDGET = 4800
+_LOCATOR_PRIORITY = (
+    "problem_or_question", "research_question", "question", "research_scope", "scope",
+    "key_findings", "key_results", "finding", "findings", "claim", "results",
+    "planning_summary", "contribution_and_limits", "conditions", "boundary_conditions",
+    "limits", "limitations", "scope_interpretation_cautions", "paper_kind",
+    "work_summary", "facet_contributions", "broader_review_uses", "topic_handles",
+    "usable_content", "approach",
+)
+_LOCATOR_CLAIMS = frozenset({
+    "key_findings", "key_results", "finding", "findings", "claim", "result", "results",
+    "contribution",
+})
+_LOCATOR_QUALIFIERS = frozenset({
+    "condition", "conditions", "boundary_conditions", "limits", "limitations",
+})
 
-    result = []
-    for key in (
-        "study_summary_A", "review_planning_B", "usable_content", "deep_read_material",
-        "supplement_material", "supplement_gap_material", "local_passages",
-    ):
-        if key not in row:
-            continue
-        value = json.dumps(row[key], ensure_ascii=False, default=str, separators=(",", ":"))
-        result.append({"path": key, "source_excerpt": value[:600], "excerpt": len(value) > 600})
-    return result
+
+def _locator_json(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, default=str, separators=(",", ":"))
+
+
+def _semantic_locator(value: Any, path: str) -> dict[str, Any]:
+    """Select source-authored whole fields/records; never cut or paraphrase text.
+
+    Unknown fields remain eligible after semantic fields, so this is not a
+    domain-specific evidence filter. Finding/condition objects are atomic;
+    sibling qualifiers and claims are also selected together or omitted together.
+    """
+    original = _locator_json(value)
+    if len(original) <= _LOCATOR_CONTENT_BUDGET:
+        return {"path": path, "source_excerpt": original, "excerpt": False}
+
+    omitted = []
+    if isinstance(value, Mapping):
+        selected: dict[str, Any] = {}
+        priority = {key: index for index, key in enumerate(_LOCATOR_PRIORITY)}
+        keys = sorted(value, key=lambda key: (priority.get(key, len(priority)), str(key)))
+        paired = (set(value) & _LOCATOR_CLAIMS) | (set(value) & _LOCATOR_QUALIFIERS)
+        if not (set(value) & _LOCATOR_CLAIMS and set(value) & _LOCATOR_QUALIFIERS):
+            paired = set()
+        handled = set()
+        first_addition = {}
+        for key in keys:
+            if key in handled:
+                continue
+            group = [other for other in keys if other in paired] if key in paired else [key]
+            handled.update(group)
+            addition = {other: value[other] for other in group}
+            if not first_addition:
+                first_addition = addition
+            if len(_locator_json({**selected, **addition})) <= _LOCATOR_CONTENT_BUDGET:
+                selected.update(addition)
+                continue
+            # Each list record retains all its fields, including its conditions.
+            # Do not split a list coupled to qualifiers stored beside that list.
+            if len(group) == 1 and isinstance(value[key], list):
+                records = []
+                for record in value[key]:
+                    candidate = {**selected, key: [*records, record]}
+                    if len(_locator_json(candidate)) <= _LOCATOR_CONTENT_BUDGET:
+                        records.append(record)
+                if records:
+                    selected[key] = records
+            omitted.extend(f"{path}.{other}" for other in group)
+        if not selected:
+            selected = first_addition
+            omitted = [item for item in omitted if item not in {f"{path}.{key}" for key in selected}]
+        excerpt = _locator_json(selected)
+    elif isinstance(value, list):
+        records = []
+        for record in value:
+            if len(_locator_json([*records, record])) <= _LOCATOR_CONTENT_BUDGET:
+                records.append(record)
+        if not records and value:
+            records = [value[0]]
+        excerpt = _locator_json(records)
+        if len(records) != len(value):
+            omitted.append(path)
+    else:
+        # A long passage is an atomic source field, not a safe prefix to quote.
+        excerpt = original
+    return {
+        "path": path,
+        "source_excerpt": excerpt,
+        "excerpt": bool(omitted),
+        "atomic_content_budget_overflow": len(excerpt) > _LOCATOR_CONTENT_BUDGET,
+        "omitted_material_paths": omitted,
+        "omitted_materials_requestable": True,
+    }
+
+
+def _locator_summary(row: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Expose bounded semantic source locators, never generated summaries."""
+    return [
+        _semantic_locator(row[key], key)
+        for key in sorted(_CONTENT_KEYS)
+        if key in row
+    ]
 
 
 def build_material_catalog(payload: Mapping[str, Any]) -> dict[str, Any]:
@@ -152,11 +241,19 @@ def build_material_catalog(payload: Mapping[str, Any]) -> dict[str, Any]:
     coverage = {channel: 0 for channel in (*_MATERIAL_CHANNELS, "candidate_navigation")}
     for entry in entries:
         coverage[entry["channel"]] = coverage.get(entry["channel"], 0) + 1
+    locator_policy = {
+        "version": "semantic_whole_fields_v1",
+        "content_char_budget_per_material_root": _LOCATOR_CONTENT_BUDGET,
+        "selection": "whole_fields_or_records",
+        "empty_view_fallback": "one_whole_atomic_field_or_record_may_exceed_budget",
+        "omitted_materials_requestable": True,
+    }
     catalog = {
         "schema_version": "optomind.outline_on_demand_catalog.v1",
+        "locator_policy": locator_policy,
         "coverage": coverage,
         "entries": entries,
-        "catalog_sha256": _hash(entries),
+        "catalog_sha256": _hash({"entries": entries, "locator_policy": locator_policy}),
     }
     # Keep the local lookup private to the resolver; it is never sent as an
     # answer or used to replace the source payload.
@@ -184,6 +281,7 @@ def access_messages(payload: Mapping[str, Any], catalog: Mapping[str, Any]) -> l
         "每项可带 unit_ids 和 reason；不得返回 updated_plan、chapter_updates、issues、正文、答案或科学修订建议。"
         "目录覆盖 source_materials、candidate_materials、candidate_navigation、tool_materials，"
         "包含原研究身份和可用条件路径；综述转述材料不因没有自身 A/B 或全文而失去资格。"
+        "目录按完整字段或记录展示原材料；excerpt=true 表示有内容省略，omitted_material_paths 中的材料仍可请求。"
         "未出现在本轮已取记录中表示尚未读取，不表示不存在；不要把本规划结果当成材料过滤硬限制。"
     )
     user_value = {
