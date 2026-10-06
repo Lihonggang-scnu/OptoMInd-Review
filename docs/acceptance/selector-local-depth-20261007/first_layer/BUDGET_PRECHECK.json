@@ -1,0 +1,42 @@
+{
+  "status": "preflight_only_no_ledger_mutation",
+  "ledger_path": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\budget.sqlite",
+  "ledger_read_only": true,
+  "ledger_metadata_before_new_round": {
+    "limit_cny": "85.0"
+  },
+  "ledger_rows_before_new_round": 72,
+  "historical_settled_cny": 57.2292076,
+  "historical_reserved_cny": 9.421812,
+  "historical_uncertain_cny": 0.2137224,
+  "historical_total_reserved_or_uncertain_cny": 9.6355344,
+  "new_round_authorized_limit_cny": 40.0,
+  "new_round_spent_before_call_cny": 0.0,
+  "new_round_reserved_before_call_cny": 0.0,
+  "new_round_uncertain_before_call_cny": 0.0,
+  "first_call_estimated_reservation_cny": 3.533136,
+  "new_round_remaining_after_reservation_estimate_cny": 36.466864,
+  "shared_limit_current_cny": 85.0,
+  "shared_limit_if_raise_required_cny": 125.0,
+  "raise_applied_by_prepare": false,
+  "profile": {
+    "model": "qwen3.8-max",
+    "thinking": true,
+    "thinking_budget": 32768,
+    "max_output_tokens": 32768,
+    "json_mode": false,
+    "timeout_seconds": 900
+  },
+  "estimate": {
+    "model": "qwen3.8-max",
+    "prompt_tokens_estimate": 80025,
+    "reserved_input_tokens": 97820,
+    "output_tokens": 32768,
+    "thinking_budget": 32768,
+    "max_completion_tokens": 65536,
+    "total_context_tokens": 163356,
+    "estimated_cost_cny": 3.533136,
+    "tokenizer": "provided_token_counter"
+  },
+  "guard": "First paid call must use this request/profile and reserve no more than the new-round 40 CNY cap; no second-layer paid call is in scope."
+}

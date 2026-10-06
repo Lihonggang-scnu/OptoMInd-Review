@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "scanned_file_count": 32,
+  "prohibited_filename_hits": [],
+  "credential_field_name_hits": [],
+  "credential_value_hits": [],
+  "signed_url_hits": [],
+  "small_empty_files": [],
+  "notes": [
+    "Credential field-name and value scans were reviewed without exposing matched values. sk-prefixed matches are task_id business IDs, not API keys.",
+    "No API key, access token, password, Authorization/Bearer value, private key, signed URL, SQLite, PDF, pyc or environment file is included.",
+    "Explicit full-text/local-passage fields in the public input are replaced by original SHA256/byte-count markers."
+  ],
+  "false_positive_patterns": [
+    {
+      "pattern": "sk_like_value",
+      "count": 22,
+      "reason": "all matches are deep_read_material.task_id business identifiers at explicit task_id paths, not credentials"
+    },
+    {
+      "pattern": "signed_url_value",
+      "count": 7,
+      "reason": "regex matched ordinary narrative words containing the substring sig; no URL or assignment context"
+    }
+  ]
+}
