@@ -1,0 +1,110 @@
+{
+  "schema_version": "optomind.outline_revision_quality.v1",
+  "purpose": "Quality-first next outline revision run. Output limits are capacities, not required lengths.",
+  "profiles": {
+    "autonomous_outline": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "reviewer_plus": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "strong_outline": {
+      "model": "qwen3.8-max",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "outline_selection": {
+      "model": "qwen3.8-max",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "independent_review": {
+      "model": "qwen3.8-max",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "owner_revision": {
+      "model": "qwen3.8-max",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "arrangement": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 16384,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "writer": {
+      "model": "qwen3.7-flash",
+      "thinking": true,
+      "thinking_budget": 8192,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "completion": {
+      "model": "qwen3.7-flash",
+      "thinking": true,
+      "thinking_budget": 8192,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "task_diagnosis": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 16384,
+      "max_output_tokens": 24576,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "evaluation": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 16384,
+      "max_output_tokens": 24576,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "strong_outline_chapter": {
+      "model": "qwen3.8-max",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 65536,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "owner_revision_chapter": {
+      "model": "qwen3.8-max",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 65536,
+      "json_mode": false,
+      "timeout_seconds": 900
+    }
+  }
+}

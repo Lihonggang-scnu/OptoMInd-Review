@@ -35,3 +35,17 @@ python scripts/upgrade3/outline_strengthening.py --mode on_demand --input <paylo
 ```
 
 The prepared request records both the access request and an all-catalog owner upper-bound estimate. An explicit `--run` with the same input, output directory, profiles, tokenizer, budget ledger, and key file crosses the paid boundary. The owner uses the existing outline response validator and arrangement projection. One bounded continuation read is allowed when the owner returns a valid material request; a normal final response uses one owner call. Access responses cannot carry an updated plan, issue list, manuscript body, or revision answer. This mode is opt-in and does not change the ordinary BODY prompt or whole-paper pipeline defaults.
+
+## Autonomous unit selection
+
+The optional `--mode select` entry is a first layer before on-demand strengthening. It reads the complete detailed plans for the supplied chapters, the research question, whole-review duties, conditions, argument relations, paragraph briefs, supporting-study uses, transitions, and chapter-level duties. The model-visible view preserves every chapter plan field exactly, removes absolute card locations and repeated exclusion inventories, and represents repeated neighbor duties as stable IDs. It does not copy full source cards or the whole identity directory into this first request by default; the downstream owner still receives the original complete chapter payload and can request material through the existing access path. Add `--include-selection-material-index` only when the caller explicitly wants the compact shared identity directory.
+
+The selector chooses any number of worthwhile units, can return `none` or `no_change`, and may place units from different chapters in one logical group. It supplies a reason and improvement focus only as machine-generated advisory provenance. The projection creates one owner payload per affected chapter, keeps the shared group identity and reason, makes other group units readonly context, and automatically retains every unselected unit in that chapter as readonly context. It never generates an updated plan or scientific answer.
+
+Prepare the selector offline first:
+
+```text
+python scripts/upgrade3/outline_strengthening.py --mode select --input <selection-payload.json> --output <selection-run-dir> --selection-profile outline_selection --tokenizer <qwen-tokenizer.json>
+```
+
+The prepared request uses the explicit `outline_selection` profile (`qwen3.8-max`, 32768 thinking and 32768 answer tokens). A paid selector run requires the same prepared directory, budget ledger, and key file with `--run`; it is an opt-in first layer and is not automatically connected to every chapter. Its validated output can be passed to `selection_to_on_demand_payloads`, after which the existing on-demand material access and owner contracts apply. Ordinary BODY and whole-paper defaults remain unchanged.
