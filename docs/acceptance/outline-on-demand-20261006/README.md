@@ -1,0 +1,13 @@
+# Outline on-demand 2026-10-06 cloud review package
+
+**Status: `WAITING_CLOUD_REVIEW`.** At the preparation scan, this was a local, review-only package: no cloud upload, paid call, formal production connection, commit, or push had occurred. A cloud reviewer may decide whether the on-demand path and its execution conditions should be accepted.
+
+The package contains four bounded outline arms, their sanitized trace records, the actual model responses, the full three-arm and four-arm comparisons, source candidate snapshots, cost facts, root quality records, and a separate root-agent opinion. The root opinion and quality reviews are explicitly outside every model request.
+
+The full-material Max arm delivered **29 related `source_materials` records plus 2 `tool_materials` records** for the two editable units. This is not a 585-paper full-text pool. The on-demand Max arm used the same chapter plan and source-material set for local validation, but its model-visible payload carried a full lightweight catalog (32 source catalog entries, 38 tool catalog entries, and 1 candidate-navigation entry) plus **10 complete selected source records**; its model-visible top-level tool list was 0 because tool-derived material was nested in selected records. Selection is not a claim that the rest of the source pool does not exist. No model continuation read was triggered in this run.
+
+Historical sample charges are preserved as evidence: strict Plus 0.387294 CNY, Plus access 0.046572 CNY, on-demand Max 2.159832 CNY, on-demand total 2.206404 CNY, and the full-pool Max reference 2.692428 CNY. The user-authorized next-stage shared cap is an additional 40 CNY over the current shared 45 CNY limit, for a proposed upper limit of 85 CNY, approved pending execution after cloud review. This preparation did not alter the ledger; future new-prefix actual, reservation, and uncertain rows must remain within the additional 40 CNY. Historical sample charges do not count toward that future increment.
+
+Only explicit direct literature full-text fields are omitted from sanitized JSON by replacing them with their original SHA256 and character count. Generated `actual_local_body`, `usable_content`, A/B-derived fields, finite locator excerpts, actual model outputs, and outline/body fields needed for evaluation are retained. Files named `*.sanitized.json` are explicitly not claimed to be byte-identical wire requests; their original paths and hashes are in `SHA256_MANIFEST.json`.
+
+Candidate source files under `source_candidates/` are snapshots for cloud judgment only. The on-demand path remains opt-in and experimental; it is not the ordinary BODY default, not automatically connected to the whole-paper pipeline, and not a manuscript-rewrite feature.

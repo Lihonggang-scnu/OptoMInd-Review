@@ -2,6 +2,22 @@
   "schema_version": "optomind.outline_revision_quality.v1",
   "purpose": "Quality-first next outline revision run. Output limits are capacities, not required lengths.",
   "profiles": {
+    "autonomous_outline": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "reviewer_plus": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
     "strong_outline": {
       "model": "qwen3.8-max",
       "thinking": true,

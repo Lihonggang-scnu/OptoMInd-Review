@@ -1,0 +1,1661 @@
+{
+  "status": "access_plan",
+  "material_requests": [
+    {
+      "access_id": "source_materials[2].deep_read_material",
+      "reason": "验证 U1 中跨队列异质性统计依据（PERMANOVA 队列效应解释方差、留一法交叉验证 AUC-ROC 0.59-0.60）的具体数据"
+    },
+    {
+      "access_id": "source_materials[7].study_summary_A",
+      "reason": "核实 U1 中菌株级签名在联合免疫治疗中泛癌种预测力但在单药队列失效的具体证据（P0015）"
+    },
+    {
+      "access_id": "source_materials[11].study_summary_A",
+      "reason": "确认 U1 中 mCRPC 患者 A. muciniphila 丰度与 ICI 疗效负相关的反例数据（P0270）"
+    },
+    {
+      "access_id": "source_materials[15].study_summary_A",
+      "reason": "验证 U1 中波兰队列 F. prausnitzii 高丰度与非响应者相关的特异性发现（P0545）"
+    },
+    {
+      "access_id": "source_materials[4].local_passages",
+      "reason": "核实 U2 中抗生素暴露效应量（OS HR=1.61, PFS HR=1.43, ORR RR=0.58）及时间窗特异性数据（P0081）"
+    },
+    {
+      "access_id": "source_materials[24].study_summary_A",
+      "reason": "确认 U2 中 PPI 使用与 ICI 生存结局恶化的荟萃分析数据及时窗差异（P0339）"
+    },
+    {
+      "access_id": "source_materials[23].study_summary_A",
+      "reason": "验证 U2 中 HCC 人群抗生素使用未显著恶化 ICI 疗效的反面对照数据（P0275）"
+    },
+    {
+      "access_id": "source_materials[20].study_summary_A",
+      "reason": "支持 U2 中 PPI 使用者微生物动态轨迹差异及口腔细菌易位机制（P0033）"
+    },
+    {
+      "access_id": "source_materials[21].study_summary_A",
+      "reason": "补充 U2 中 5 万名实体瘤患者抗生素暴露系统综述数据（P0236）"
+    },
+    {
+      "access_id": "source_materials[27].study_summary_A",
+      "reason": "验证 U2 中抗生素效应在 NSCLC 中依赖 PD-L1 表达水平的分层证据（P0517）"
+    }
+  ],
+  "selected_materials": [
+    {
+      "access_id": "source_materials[2]",
+      "channel": "source_materials",
+      "index_path": "source_materials[2]",
+      "identity": {
+        "source_handle": "P0478",
+        "paper_id": "d4c18d58cffce0cab6831c84535e02c608d4db49",
+        "title": "Cross-cohort gut microbiome associations with immune checkpoint inhibitor response in advanced melanoma",
+        "doi": "10.1038/s41591-022-01695-5"
+      },
+      "requested_paths": [
+        "deep_read_material"
+      ],
+      "unit_ids": [],
+      "record": {
+        "deep_read_material": {
+          "_progressive_task_requirements": {
+            "knowledge_gaps": [
+              "跨队列黑色素瘤研究，需详细提取其关于‘无通用标志物’的具体统计依据及队列间异质性来源分析。"
+            ],
+            "questions": [
+              {
+                "gap_key": "跨队列黑色素瘤研究，需详细提取其关于‘无通用标志物’的具体统计依据及队列间异质性来源分析。",
+                "purpose": "Supply a concrete, attributed case for the coordinated review.",
+                "question": "跨队列黑色素瘤研究，需详细提取其关于‘无通用标志物’的具体统计依据及队列间异质性来源分析。",
+                "question_id": "Q01",
+                "required_output_ids": [
+                  "O01"
+                ]
+              }
+            ],
+            "required_outputs": [
+              {
+                "description": "Source-based findings, conditions, methods and limits useful to the review.",
+                "output_id": "O01",
+                "output_type": "practical_material"
+              }
+            ]
+          },
+          "_progressive_task_signature": "b52d0f73a30cd0a1",
+          "current_question_material": [
+            {
+              "examples": [
+                {
+                  "attribution": "本研究",
+                  "conditions": "研究对象为接受ICI治疗的晚期皮肤黑色素瘤患者；终点指标为客观缓解率（ORR）和12个月无进展生存期（PFS12）；分析方法包括PERMANOVA、Lasso机器学习模型（100次重复五折分层交叉验证）、以及包含8种差异丰度方法的随机效应荟萃分析；比较对象包括PRIMM-UK、PRIMM-NL、Manchester、Leeds、Barcelona队列及4个公开数据集（Matson et al., Gopalakrishnan et al., Frankel et al., WindTT_2020等）。",
+                  "finding": "在整合5个新测序队列（n=165）和4个公开队列（n=147）后，PERMANOVA分析显示“队列”因素对微生物群落组成的解释方差是其他任何变量（包括临床参数）的近十倍。机器学习模型验证显示，基于物种丰度的预测能力在不同队列间缺乏可重复性：仅在PRIMM-NL中PFS12预测AUC-ROC为0.64，在PRIMM-UK中ORR预测AUC-ROC为0.78；而在跨队列测试中，仅约31.4%的情况AUC-ROC超过0.6，且留一法交叉验证的平均AUC-ROC仅为0.59-0.60。尽管通过荟萃分析识别出与反应者相关的物种面板（如Bifidobacterium pseudocatenulatum, Roseburia spp., Akkermansia muciniphila），但没有任何单一细菌在所有数据集中成为完全一致的生物标志物。相比之下，结直肠癌数据的相同方法显示出强且一致的生物标志物，证明该结果并非由分析方法导致。",
+                  "reference_ids": [],
+                  "use_in_review": "提供跨队列黑色素瘤免疫检查点抑制剂（ICI）治疗反应研究中‘无通用标志物’的具体统计证据及异质性来源分析，作为直接材料。"
+                },
+                {
+                  "attribution": "Routy et al. (2018)",
+                  "conditions": "针对上皮肿瘤患者的PD-1免疫疗法反应研究；使用宏基因组测序分析粪便样本。",
+                  "finding": "发现ICI反应者中Akermansia muciniphila、Alistipes属和厚壁菌门（Firmicutes）的相对丰度显著高于非反应者。",
+                  "reference_ids": [
+                    "R11"
+                  ],
+                  "use_in_review": "作为背景研究，展示早期单队列研究中发现的特定菌种关联，用于对比说明当前研究中观察到的不一致性和缺乏共识的现象。"
+                },
+                {
+                  "attribution": "Gopalakrishnan et al. (2018)",
+                  "conditions": "针对黑色素瘤患者抗PD-1免疫疗法反应的研究；使用宏基因组测序分析肠道微生物组。",
+                  "finding": "发现ICI反应者中Faecalibacterium prausnitzii的相对丰度高于非反应者。",
+                  "reference_ids": [
+                    "R6"
+                  ],
+                  "use_in_review": "作为背景研究，展示另一项早期独立研究发现的不同菌种关联，进一步佐证不同研究间结果的差异性。"
+                },
+                {
+                  "attribution": "Matson et al. (2018)",
+                  "conditions": "针对转移性黑色素瘤患者抗PD-1疗法反应的研究；关注共生微生物组。",
+                  "finding": "发现PD-1治疗的反应性由一组八个物种的增加定义，主要由Bifidobacterium longum驱动。",
+                  "reference_ids": [
+                    "R5"
+                  ],
+                  "use_in_review": "作为背景研究，展示第三项独立研究发现的菌种组合关联，强调人类环境中缺乏统一共识的现状。"
+                },
+                {
+                  "attribution": "Frankel et al. (2017)",
+                  "conditions": "针对黑色素瘤患者的宏基因组鸟枪法和代谢组学分析；关注不同ICI方案下的微生物组和代谢物。",
+                  "finding": "报告微生物组因ICI治疗方案而异，但在接受任何ICI方案的反应者中，Bacteroides caccae的富集是常见的。",
+                  "reference_ids": [
+                    "R12"
+                  ],
+                  "use_in_review": "作为背景研究，展示微生物组差异可能取决于ICI治疗方案，并指出某些菌种（如Bacteroides caccae）在不同方案中普遍富集，但同样未形成跨研究的通用标志物。"
+                }
+              ],
+              "explanation": "跨队列黑色素瘤研究中‘无通用标志物’的统计依据主要源于巨大的队列间异质性。首先，PERMANOVA分析证实“队列”本身是解释微生物群落组成变异的最大因素，其影响远超临床或人口统计学变量。其次，机器学习模型的跨队列泛化能力极差，内部验证表现尚可但外部验证（跨队列测试）的AUC-ROC值普遍较低且波动大，表明基于特定队列训练的微生物特征无法可靠地预测其他队列的反应。最后，尽管荟萃分析能识别出一些在多个队列中趋势一致的物种（如Roseburia spp.、Akkermansia muciniphila），但没有任何单一物种在所有数据集中达到统计学显著性并成为普适性生物标志物。这种不一致性被归因于人群特异性特征、样本处理和分析的方法学选择、饮食和药物使用的差异，以及微生物信号的功能相关性与队列内在特性。作者通过结直肠癌数据的对照分析排除了方法学缺陷的可能性，确认了黑色素瘤ICI反应中微生物关联的复杂性和队列依赖性。",
+              "question_id": "Q01",
+              "remaining_points": [
+                "具体哪些临床协变量（如PPI使用、既往治疗）在多大程度上介导了队列间的微生物差异及其对ICI反应的混淆作用，虽有提及但未深入量化其交互机制。",
+                "菌株水平的特异性如何具体影响跨队列的一致性，文中提到需要数千人的样本量来解析菌株多样性，但未提供具体的菌株水平跨队列分析数据。"
+              ]
+            }
+          ],
+          "fulfilled": false,
+          "material_ready": true,
+          "paper_id": "d4c18d58cffce0cab6831c84535e02c608d4db49",
+          "paper_identity": {
+            "canonical_paper_id": "d4c18d58cffce0cab6831c84535e02c608d4db49",
+            "doi": "10.1038/s41591-022-01695-5",
+            "title": "Cross-cohort gut microbiome associations with immune checkpoint inhibitor response in advanced melanoma"
+          },
+          "paper_title": "Cross-cohort gut microbiome associations with immune checkpoint inhibitor response in advanced melanoma",
+          "plain_text": "",
+          "prior_question_material": [
+            {
+              "examples": [
+                {
+                  "attribution": "本研究",
+                  "conditions": "研究对象为接受ICI治疗的晚期皮肤黑色素瘤患者；终点指标为客观缓解率（ORR）和12个月无进展生存期（PFS12）；分析方法包括PERMANOVA、Lasso机器学习模型（100次重复五折分层交叉验证）、以及包含8种差异丰度方法的随机效应荟萃分析；比较对象包括PRIMM-UK、PRIMM-NL、Manchester、Leeds、Barcelona队列及4个公开数据集（Matson et al., Gopalakrishnan et al., Frankel et al., WindTT_2020等）。",
+                  "finding": "在整合5个新测序队列（n=165）和4个公开队列（n=147）后，PERMANOVA分析显示“队列”因素对微生物群落组成的解释方差是其他任何变量（包括临床参数）的近十倍。机器学习模型验证显示，基于物种丰度的预测能力在不同队列间缺乏可重复性：仅在PRIMM-NL中PFS12预测AUC-ROC为0.64，在PRIMM-UK中ORR预测AUC-ROC为0.78；而在跨队列测试中，仅约31.4%的情况AUC-ROC超过0.6，且留一法交叉验证的平均AUC-ROC仅为0.59-0.60。尽管通过荟萃分析识别出与反应者相关的物种面板（如Bifidobacterium pseudocatenulatum, Roseburia spp., Akkermansia muciniphila），但没有任何单一细菌在所有数据集中成为完全一致的生物标志物。相比之下，结直肠癌数据的相同方法显示出强且一致的生物标志物，证明该结果并非由分析方法导致。",
+                  "reference_ids": [],
+                  "use_in_review": "提供跨队列黑色素瘤免疫检查点抑制剂（ICI）治疗反应研究中‘无通用标志物’的具体统计证据及异质性来源分析，作为直接材料。"
+                },
+                {
+                  "attribution": "Routy et al. (2018)",
+                  "conditions": "针对上皮肿瘤患者的PD-1免疫疗法反应研究；使用宏基因组测序分析粪便样本。",
+                  "finding": "发现ICI反应者中Akermansia muciniphila、Alistipes属和厚壁菌门（Firmicutes）的相对丰度显著高于非反应者。",
+                  "reference_ids": [
+                    "R11"
+                  ],
+                  "use_in_review": "作为背景研究，展示早期单队列研究中发现的特定菌种关联，用于对比说明当前研究中观察到的不一致性和缺乏共识的现象。"
+                },
+                {
+                  "attribution": "Gopalakrishnan et al. (2018)",
+                  "conditions": "针对黑色素瘤患者抗PD-1免疫疗法反应的研究；使用宏基因组测序分析肠道微生物组。",
+                  "finding": "发现ICI反应者中Faecalibacterium prausnitzii的相对丰度高于非反应者。",
+                  "reference_ids": [
+                    "R6"
+                  ],
+                  "use_in_review": "作为背景研究，展示另一项早期独立研究发现的不同菌种关联，进一步佐证不同研究间结果的差异性。"
+                },
+                {
+                  "attribution": "Matson et al. (2018)",
+                  "conditions": "针对转移性黑色素瘤患者抗PD-1疗法反应的研究；关注共生微生物组。",
+                  "finding": "发现PD-1治疗的反应性由一组八个物种的增加定义，主要由Bifidobacterium longum驱动。",
+                  "reference_ids": [
+                    "R5"
+                  ],
+                  "use_in_review": "作为背景研究，展示第三项独立研究发现的菌种组合关联，强调人类环境中缺乏统一共识的现状。"
+                },
+                {
+                  "attribution": "Frankel et al. (2017)",
+                  "conditions": "针对黑色素瘤患者的宏基因组鸟枪法和代谢组学分析；关注不同ICI方案下的微生物组和代谢物。",
+                  "finding": "报告微生物组因ICI治疗方案而异，但在接受任何ICI方案的反应者中，Bacteroides caccae的富集是常见的。",
+                  "reference_ids": [
+                    "R12"
+                  ],
+                  "use_in_review": "作为背景研究，展示微生物组差异可能取决于ICI治疗方案，并指出某些菌种（如Bacteroides caccae）在不同方案中普遍富集，但同样未形成跨研究的通用标志物。"
+                }
+              ],
+              "explanation": "跨队列黑色素瘤研究中‘无通用标志物’的统计依据主要源于巨大的队列间异质性。首先，PERMANOVA分析证实“队列”本身是解释微生物群落组成变异的最大因素，其影响远超临床或人口统计学变量。其次，机器学习模型的跨队列泛化能力极差，内部验证表现尚可但外部验证（跨队列测试）的AUC-ROC值普遍较低且波动大，表明基于特定队列训练的微生物特征无法可靠地预测其他队列的反应。最后，尽管荟萃分析能识别出一些在多个队列中趋势一致的物种（如Roseburia spp.、Akkermansia muciniphila），但没有任何单一物种在所有数据集中达到统计学显著性并成为普适性生物标志物。这种不一致性被归因于人群特异性特征、样本处理和分析的方法学选择、饮食和药物使用的差异，以及微生物信号的功能相关性与队列内在特性。作者通过结直肠癌数据的对照分析排除了方法学缺陷的可能性，确认了黑色素瘤ICI反应中微生物关联的复杂性和队列依赖性。",
+              "question_id": "Q01",
+              "remaining_points": [
+                "具体哪些临床协变量（如PPI使用、既往治疗）在多大程度上介导了队列间的微生物差异及其对ICI反应的混淆作用，虽有提及但未深入量化其交互机制。",
+                "菌株水平的特异性如何具体影响跨队列的一致性，文中提到需要数千人的样本量来解析菌株多样性，但未提供具体的菌株水平跨队列分析数据。"
+              ]
+            }
+          ],
+          "question_material": [
+            {
+              "examples": [
+                {
+                  "attribution": "本研究",
+                  "conditions": "研究对象为接受ICI治疗的晚期皮肤黑色素瘤患者；终点指标为客观缓解率（ORR）和12个月无进展生存期（PFS12）；分析方法包括PERMANOVA、Lasso机器学习模型（100次重复五折分层交叉验证）、以及包含8种差异丰度方法的随机效应荟萃分析；比较对象包括PRIMM-UK、PRIMM-NL、Manchester、Leeds、Barcelona队列及4个公开数据集（Matson et al., Gopalakrishnan et al., Frankel et al., WindTT_2020等）。",
+                  "finding": "在整合5个新测序队列（n=165）和4个公开队列（n=147）后，PERMANOVA分析显示“队列”因素对微生物群落组成的解释方差是其他任何变量（包括临床参数）的近十倍。机器学习模型验证显示，基于物种丰度的预测能力在不同队列间缺乏可重复性：仅在PRIMM-NL中PFS12预测AUC-ROC为0.64，在PRIMM-UK中ORR预测AUC-ROC为0.78；而在跨队列测试中，仅约31.4%的情况AUC-ROC超过0.6，且留一法交叉验证的平均AUC-ROC仅为0.59-0.60。尽管通过荟萃分析识别出与反应者相关的物种面板（如Bifidobacterium pseudocatenulatum, Roseburia spp., Akkermansia muciniphila），但没有任何单一细菌在所有数据集中成为完全一致的生物标志物。相比之下，结直肠癌数据的相同方法显示出强且一致的生物标志物，证明该结果并非由分析方法导致。",
+                  "reference_ids": [],
+                  "use_in_review": "提供跨队列黑色素瘤免疫检查点抑制剂（ICI）治疗反应研究中‘无通用标志物’的具体统计证据及异质性来源分析，作为直接材料。"
+                },
+                {
+                  "attribution": "Routy et al. (2018)",
+                  "conditions": "针对上皮肿瘤患者的PD-1免疫疗法反应研究；使用宏基因组测序分析粪便样本。",
+                  "finding": "发现ICI反应者中Akermansia muciniphila、Alistipes属和厚壁菌门（Firmicutes）的相对丰度显著高于非反应者。",
+                  "reference_ids": [
+                    "R11"
+                  ],
+                  "use_in_review": "作为背景研究，展示早期单队列研究中发现的特定菌种关联，用于对比说明当前研究中观察到的不一致性和缺乏共识的现象。"
+                },
+                {
+                  "attribution": "Gopalakrishnan et al. (2018)",
+                  "conditions": "针对黑色素瘤患者抗PD-1免疫疗法反应的研究；使用宏基因组测序分析肠道微生物组。",
+                  "finding": "发现ICI反应者中Faecalibacterium prausnitzii的相对丰度高于非反应者。",
+                  "reference_ids": [
+                    "R6"
+                  ],
+                  "use_in_review": "作为背景研究，展示另一项早期独立研究发现的不同菌种关联，进一步佐证不同研究间结果的差异性。"
+                },
+                {
+                  "attribution": "Matson et al. (2018)",
+                  "conditions": "针对转移性黑色素瘤患者抗PD-1疗法反应的研究；关注共生微生物组。",
+                  "finding": "发现PD-1治疗的反应性由一组八个物种的增加定义，主要由Bifidobacterium longum驱动。",
+                  "reference_ids": [
+                    "R5"
+                  ],
+                  "use_in_review": "作为背景研究，展示第三项独立研究发现的菌种组合关联，强调人类环境中缺乏统一共识的现状。"
+                },
+                {
+                  "attribution": "Frankel et al. (2017)",
+                  "conditions": "针对黑色素瘤患者的宏基因组鸟枪法和代谢组学分析；关注不同ICI方案下的微生物组和代谢物。",
+                  "finding": "报告微生物组因ICI治疗方案而异，但在接受任何ICI方案的反应者中，Bacteroides caccae的富集是常见的。",
+                  "reference_ids": [
+                    "R12"
+                  ],
+                  "use_in_review": "作为背景研究，展示微生物组差异可能取决于ICI治疗方案，并指出某些菌种（如Bacteroides caccae）在不同方案中普遍富集，但同样未形成跨研究的通用标志物。"
+                }
+              ],
+              "explanation": "跨队列黑色素瘤研究中‘无通用标志物’的统计依据主要源于巨大的队列间异质性。首先，PERMANOVA分析证实“队列”本身是解释微生物群落组成变异的最大因素，其影响远超临床或人口统计学变量。其次，机器学习模型的跨队列泛化能力极差，内部验证表现尚可但外部验证（跨队列测试）的AUC-ROC值普遍较低且波动大，表明基于特定队列训练的微生物特征无法可靠地预测其他队列的反应。最后，尽管荟萃分析能识别出一些在多个队列中趋势一致的物种（如Roseburia spp.、Akkermansia muciniphila），但没有任何单一物种在所有数据集中达到统计学显著性并成为普适性生物标志物。这种不一致性被归因于人群特异性特征、样本处理和分析的方法学选择、饮食和药物使用的差异，以及微生物信号的功能相关性与队列内在特性。作者通过结直肠癌数据的对照分析排除了方法学缺陷的可能性，确认了黑色素瘤ICI反应中微生物关联的复杂性和队列依赖性。",
+              "question_id": "Q01",
+              "remaining_points": [
+                "具体哪些临床协变量（如PPI使用、既往治疗）在多大程度上介导了队列间的微生物差异及其对ICI反应的混淆作用，虽有提及但未深入量化其交互机制。",
+                "菌株水平的特异性如何具体影响跨队列的一致性，文中提到需要数千人的样本量来解析菌株多样性，但未提供具体的菌株水平跨队列分析数据。"
+              ]
+            }
+          ],
+          "questions": [
+            {
+              "gap_key": "跨队列黑色素瘤研究，需详细提取其关于‘无通用标志物’的具体统计依据及队列间异质性来源分析。",
+              "purpose": "Supply a concrete, attributed case for the coordinated review.",
+              "question": "跨队列黑色素瘤研究，需详细提取其关于‘无通用标志物’的具体统计依据及队列间异质性来源分析。",
+              "question_id": "Q01",
+              "required_output_ids": [
+                "O01"
+              ]
+            }
+          ],
+          "reading_mode": "focused_local_search",
+          "references": [
+            {
+              "citation": "5.MatsonVThe commensal microbiome is associated with anti–PD-1 efficacy in metastatic melanoma patientsScience201835910410810.1126/science.aao329029302014PMC6707353",
+              "reference_id": "R5",
+              "source_marker": "5."
+            },
+            {
+              "citation": "6.GopalakrishnanVGut microbiome modulates response to anti-PD-1 immunotherapy in melanoma patientsScience20183599710310.1126/science.aan423629097493PMC5827966",
+              "reference_id": "R6",
+              "source_marker": "6."
+            },
+            {
+              "citation": "11.RoutyBGut microbiome influences efficacy of PD-1-based immunotherapy against epithelial tumorsScience2018359919710.1126/science.aan370629097494",
+              "reference_id": "R11",
+              "source_marker": "11."
+            },
+            {
+              "citation": "12.FrankelAEMetagenomic shotgun sequencing and unbiased metabolomic profiling identify specific human gut microbiota and metabolites associated with immune checkpoint therapy efficacy in melanoma patientsNeoplasia20171984885510.1016/j.neo.2017.08.00428923537PMC5602478",
+              "reference_id": "R12",
+              "source_marker": "12."
+            }
+          ],
+          "required_outputs": [
+            {
+              "description": "Source-based findings, conditions, methods and limits useful to the review.",
+              "output_id": "O01",
+              "output_type": "practical_material"
+            }
+          ],
+          "review_id": "microbiome_ici_review",
+          "schema_version": "optomind.upgrade3.directed_reading.output.v4",
+          "source_hash": "4cdf58a599e11ca7b93baf2c267e1b30189b0393a89b9875f38140bd7574ba3f",
+          "status": "partial",
+          "task_hash": "a71dcc1b5ddfee261ccada9c9f7edbb5042e134009909bfd315f039f5f5b5be8",
+          "task_id": "dr-task-a71dcc1b5ddfee261ccada9c",
+          "workflow": "practical_materials"
+        },
+        "doi": "10.1038/s41591-022-01695-5",
+        "material_depth": "fulltext",
+        "paper_id": "d4c18d58cffce0cab6831c84535e02c608d4db49",
+        "reading_role": "",
+        "review_planning_B": {
+          "broader_review_uses": [
+            {
+              "connection_to_review": "Contextualizes the field's transition from discovery of initial biomarkers to understanding their limitations.",
+              "material": "Discussion of cohort effects explaining variance more than clinical parameters; comparison with colorectal cancer meta-analyses showing stronger consistency.",
+              "purpose": "To highlight methodological and biological sources of heterogeneity in microbiome-Ici studies, serving as a cautionary example for interpreting positive findings in other papers."
+            },
+            {
+              "connection_to_review": "Provides data on clinical covariates (PPIs, antibiotics) and their independent association with microbiome composition.",
+              "material": "Analysis showing PPI use strongly links to microbiome structure but is independent of ICI response.",
+              "purpose": "To discuss how common clinical interventions and patient characteristics confound microbiome measurements, necessitating careful adjustment in review synthesis."
+            }
+          ],
+          "facet_contributions": [
+            {
+              "boundaries": "These associations are not perfect predictors; no single species is a definitive biomarker. The effect size and consistency vary, and the study emphasizes complexity over simple presence/absence rules.",
+              "contribution": "Identifies a panel of species (Bifidobacterium pseudocatenulatum, Roseburia spp., Akkermansia muciniphila) consistently associated with responders across multiple datasets, providing specific taxonomic candidates for further investigation rather than dismissing the microbiome's role entirely.",
+              "facet_id": "F1",
+              "possible_uses": "Can be used to illustrate that while universal biomarkers are elusive, certain beneficial taxa appear repeatedly, suggesting a core set of potentially helpful microbes."
+            },
+            {
+              "boundaries": "Performance metrics are specific to this dataset combination; other studies might find better generalization with different preprocessing or larger sample sizes.",
+              "contribution": "Demonstrates limited cross-cohort reproducibility of machine learning models trained on microbiome data, with AUC-ROC values dropping significantly when applied to external cohorts.",
+              "facet_id": "F1",
+              "possible_uses": "Supports arguments about the difficulty of translating microbiome-based diagnostics across diverse populations and highlights the need for large-scale, standardized data collection."
+            },
+            {
+              "boundaries": "These are correlative associations based on metagenomic potential; actual functional activity and host interaction mechanisms are not directly measured or proven in this study.",
+              "contribution": "Discusses functional pathways (e.g., glycosyltransferases, DNA adenine methylases) associated with response, offering mechanistic hypotheses beyond taxonomy.",
+              "facet_id": "F2",
+              "possible_uses": "Provides leads for mechanistic exploration (F2) by linking specific KOs to responder status, although causal mechanisms are not established here."
+            }
+          ],
+          "planning_summary": "This paper serves as a critical counter-narrative to early claims of universal microbiome biomarkers for ICI efficacy. It provides empirical evidence of high inter-cohort heterogeneity and low cross-cohort reproducibility of predictive signatures. For the review, it offers concrete examples of 'negative' or 'null' results regarding universal biomarkers, details specific microbial panels that show partial consistency, and discusses methodological challenges (batch effects, cohort bias) in microbiome-immunotherapy research.",
+          "scope_interpretation_cautions": [
+            "Findings are specific to advanced cutaneous melanoma; do not generalize to other cancer types or ICI regimens without caution.",
+            "The 'lack of universal biomarkers' conclusion is based on the specific cohorts and analytical methods used; it does not prove that no such biomarkers exist, but rather that they are difficult to identify with current data scales.",
+            "Associations identified are correlational; causal mechanisms are inferred or hypothesized but not demonstrated."
+          ],
+          "topic_handles": [
+            "cross-cohort heterogeneity",
+            "reproducibility of microbiome biomarkers",
+            "machine learning generalization in microbiome studies",
+            "cohort-specific vs universal microbial signatures",
+            "methodological confounders (diet, medication, batch effects)"
+          ]
+        },
+        "section_path": [],
+        "source_handle": "P0478",
+        "study_summary_A": {
+          "approach": "The study utilized a multi-cohort design combining prospective observational cohorts (PRIMM-UK, PRIMM-NL) and retrospective cohorts (Manchester, Leeds, Barcelona) alongside public datasets. Baseline stool samples were subjected to shotgun metagenomic sequencing. Taxonomic profiling was performed using MetaPhlAn 3.0, and functional potential using HUMAnN 3.0. Statistical associations were tested using PERMANOVA, ANCOM-BC, and various differential abundance methods within a meta-analysis framework. Machine learning prediction capabilities were assessed using Lasso logistic regression with nested cross-validation for within-cohort accuracy and leave-one-cohort-out validation for cross-cohort generalizability.",
+          "contribution_and_limits": [
+            {
+              "contribution": "Provides one of the largest integrated metagenomic analyses of ICI response in melanoma, demonstrating that while microbiome-response links exist, they are strongly context-dependent and lack universal single-species biomarkers.",
+              "limits": "Sample sizes per cohort remain relatively small for robust strain-level resolution. The study focuses on cutaneous melanoma, limiting generalizability to other solid tumors or mucosal/uveal melanoma subtypes. Confounding factors like diet and medication use were adjusted for but residual confounding cannot be fully excluded. The inability to establish universal biomarkers suggests current methodological and biological complexities prevent simple translation to clinical practice without larger, standardized trials."
+            }
+          ],
+          "key_findings": [
+            {
+              "conditions": "Within individual cohorts (PRIMM-UK vs PRIMM-NL)",
+              "finding": "Microbiome composition showed significant association with ORR in PRIMM-UK (PERMANOVA P=0.05) but not in PRIMM-NL (P=0.61). Prediction accuracy varied by endpoint and cohort (e.g., AUC-ROC 0.78 for ORR in UK vs 0.53 in NL)."
+            },
+            {
+              "conditions": "Cross-cohort integration and meta-analysis",
+              "finding": "Cohort effects explained nearly ten times more variance than clinical variables. No single bacterial species served as a fully consistent biomarker across all datasets. However, a panel of species including Bifidobacterium pseudocatenulatum, Roseburia spp., and Akkermansia muciniphila were consistently enriched in responders."
+            },
+            {
+              "conditions": "Machine learning prediction across cohorts",
+              "finding": "Models trained on one cohort generally failed to predict response in another (AUC-ROC often <0.6). Leave-one-cohort-out validation yielded modest average performance (AUC ~0.59-0.60), indicating limited cross-population reproducibility of microbiome-based signatures."
+            }
+          ],
+          "paper_kind": "empirical",
+          "problem_or_question": "To determine if there are consistent, reproducible gut microbiome biomarkers (taxonomic or functional) associated with response to ICIs in melanoma patients, and to assess the extent of cohort-specific variability that may explain lack of consensus in previous literature.",
+          "research_scope": "Advanced cutaneous melanoma patients treated with immune checkpoint inhibitors (ICIs); gut microbiome composition and functional potential; multiple observational cohorts across UK, Netherlands, Spain, and public datasets.",
+          "work_summary": "This study investigates the association between baseline gut microbiome features and clinical response to ICIs in advanced melanoma. By integrating shotgun metagenomic sequencing data from five newly recruited cohorts (n=165) with 147 samples from previously published studies, the authors aimed to reconcile conflicting findings from smaller single-cohort studies. The research employed multivariate statistical analyses, machine learning models (Lasso), and meta-analysis approaches to identify microbial taxa and functions associated with overall response rate (ORR) and progression-free survival at 12 months (PFS12). The work highlights that while the microbiome is relevant to ICI response, these associations are highly cohort-dependent, with limited reproducibility of specific biomarkers or predictive signatures across different populations."
+        },
+        "title": "Cross-cohort gut microbiome associations with immune checkpoint inhibitor response in advanced melanoma",
+        "tool_materials": [
+          {
+            "allowed_use": [],
+            "conditions": [],
+            "decision": "stop",
+            "intended_use": "",
+            "limits": [],
+            "need_id": "N6202b6492ea8-fb99a64ac28c133a",
+            "question": "跨队列黑色素瘤研究，需详细提取其关于‘无通用标志物’的具体统计依据及队列间异质性来源分析。",
+            "sources": [
+              {
+                "doi": "10.1038/s41591-022-01695-5",
+                "material_depth": "",
+                "paper_id": "d4c18d58cffce0cab6831c84535e02c608d4db49",
+                "reading_role": "",
+                "section_path": [],
+                "source_handle": "P0478",
+                "title": "Cross-cohort gut microbiome associations with immune checkpoint inhibitor response in advanced melanoma",
+                "year": "2022"
+              }
+            ],
+            "still_missing": "跨队列黑色素瘤研究，需详细提取其关于‘无通用标志物’的具体统计依据及队列间异质性来源分析。",
+            "usable_content": "{\"question_material\": [{\"examples\": [{\"attribution\": \"本研究\", \"conditions\": \"研究对象为接受ICI治疗的晚期皮肤黑色素瘤患者；终点指标为客观缓解率（ORR）和12个月无进展生存期（PFS12）；分析方法包括PERMANOVA、Lasso机器学习模型（100次重复五折分层交叉验证）、以及包含8种差异丰度方法的随机效应荟萃分析；比较对象包括PRIMM-UK、PRIMM-NL、Manchester、Leeds、Barcelona队列及4个公开数据集（Matson et al., Gopalakrishnan et al., Frankel et al., WindTT_2020等）。\", \"finding\": \"在整合5个新测序队列（n=165）和4个公开队列（n=147）后，PERMANOVA分析显示“队列”因素对微生物群落组成的解释方差是其他任何变量（包括临床参数）的近十倍。机器学习模型验证显示，基于物种丰度的预测能力在不同队列间缺乏可重复性：仅在PRIMM-NL中PFS12预测AUC-ROC为0.64，在PRIMM-UK中ORR预测AUC-ROC为0.78；而在跨队列测试中，仅约31.4%的情况AUC-ROC超过0.6，且留一法交叉验证的平均AUC-ROC仅为0.59-0.60。尽管通过荟萃分析识别出与反应者相关的物种面板（如Bifidobacterium pseudocatenulatum, Roseburia spp., Akkermansia muciniphila），但没有任何单一细菌在所有数据集中成为完全一致的生物标志物。相比之下，结直肠癌数据的相同方法显示出强且一致的生物标志物，证明该结果并非由分析方法导致。\", \"reference_ids\": [], \"use_in_review\": \"提供跨队列黑色素瘤免疫检查点抑制剂（ICI）治疗反应研究中‘无通用标志物’的具体统计证据及异质性来源分析，作为直接材料。\"}, {\"attribution\": \"Routy et al. (2018)\", \"conditions\": \"针对上皮肿瘤患者的PD-1免疫疗法反应研究；使用宏基因组测序分析粪便样本。\", \"finding\": \"发现ICI反应者中Akermansia muciniphila、Alistipes属和厚壁菌门（Firmicutes）的相对丰度显著高于非反应者。\", \"reference_ids\": [\"R11\"], \"use_in_review\": \"作为背景研究，展示早期单队列研究中发现的特定菌种关联，用于对比说明当前研究中观察到的不一致性和缺乏共识的现象。\"}, {\"attribution\": \"Gopalakrishnan et al. (2018)\", \"conditions\": \"针对黑色素瘤患者抗PD-1免疫疗法反应的研究；使用宏基因组测序分析肠道微生物组。\", \"finding\": \"发现ICI反应者中Faecalibacterium prausnitzii的相对丰度高于非反应者。\", \"reference_ids\": [\"R6\"], \"use_in_review\": \"作为背景研究，展示另一项早期独立研究发现的不同菌种关联，进一步佐证不同研究间结果的差异性。\"}, {\"attribution\": \"Matson et al. (2018)\", \"conditions\": \"针对转移性黑色素瘤患者抗PD-1疗法反应的研究；关注共生微生物组。\", \"finding\": \"发现PD-1治疗的反应性由一组八个物种的增加定义，主要由Bifidobacterium longum驱动。\", \"reference_ids\": [\"R5\"], \"use_in_review\": \"作为背景研究，展示第三项独立研究发现的菌种组合关联，强调人类环境中缺乏统一共识的现状。\"}, {\"attribution\": \"Frankel et al. (2017)\", \"conditions\": \"针对黑色素瘤患者的宏基因组鸟枪法和代谢组学分析；关注不同ICI方案下的微生物组和代谢物。\", \"finding\": \"报告微生物组因ICI治疗方案而异，但在接受任何ICI方案的反应者中，Bacteroides caccae的富集是常见的。\", \"reference_ids\": [\"R12\"], \"use_in_review\": \"作为背景研究，展示微生物组差异可能取决于ICI治疗方案，并指出某些菌种（如Bacteroides caccae）在不同方案中普遍富集，但同样未形成跨研究的通用标志物。\"}], \"explanation\": \"跨队列黑色素瘤研究中‘无通用标志物’的统计依据主要源于巨大的队列间异质性。首先，PERMANOVA分析证实“队列”本身是解释微生物群落组成变异的最大因素，其影响远超临床或人口统计学变量。其次，机器学习模型的跨队列泛化能力极差，内部验证表现尚可但外部验证（跨队列测试）的AUC-ROC值普遍较低且波动大，表明基于特定队列训练的微生物特征无法可靠地预测其他队列的反应。最后，尽管荟萃分析能识别出一些在多个队列中趋势一致的物种（如Roseburia spp.、Akkermansia muciniphila），但没有任何单一物种在所有数据集中达到统计学显著性并成为普适性生物标志物。这种不一致性被归因于人群特异性特征、样本处理和分析的方法学选择、饮食和药物使用的差异，以及微生物信号的功能相关性与队列内在特性。作者通过结直肠癌数据的对照分析排除了方法学缺陷的可能性，确认了黑色素瘤ICI反应中微生物关联的复杂性和队列依赖性。\", \"question_id\": \"Q01\", \"remaining_points\": [\"具体哪些临床协变量（如PPI使用、既往治疗）在多大程度上介导了队列间的微生物差异及其对ICI反应的混淆作用，虽有提及但未深入量化其交互机制。\", \"菌株水平的特异性如何具体影响跨队列的一致性，文中提到需要数千人的样本量来解析菌株多样性，但未提供具体的菌株水平跨队列分析数据。\"]}], \"plain_text\": \"\"}"
+          }
+        ],
+        "tool_supplement_materials": [
+          {
+            "allowed_use": [],
+            "conditions": [],
+            "decision": "stop",
+            "intended_use": "",
+            "limits": [],
+            "need_id": "N6202b6492ea8-fb99a64ac28c133a",
+            "question": "跨队列黑色素瘤研究，需详细提取其关于‘无通用标志物’的具体统计依据及队列间异质性来源分析。",
+            "sources": [
+              {
+                "doi": "10.1038/s41591-022-01695-5",
+                "paper_id": "d4c18d58cffce0cab6831c84535e02c608d4db49",
+                "source_handle": "P0478",
+                "title": "Cross-cohort gut microbiome associations with immune checkpoint inhibitor response in advanced melanoma",
+                "year": "2022"
+              }
+            ],
+            "still_missing": "跨队列黑色素瘤研究，需详细提取其关于‘无通用标志物’的具体统计依据及队列间异质性来源分析。",
+            "usable_content": "{\"question_material\": [{\"examples\": [{\"attribution\": \"本研究\", \"conditions\": \"研究对象为接受ICI治疗的晚期皮肤黑色素瘤患者；终点指标为客观缓解率（ORR）和12个月无进展生存期（PFS12）；分析方法包括PERMANOVA、Lasso机器学习模型（100次重复五折分层交叉验证）、以及包含8种差异丰度方法的随机效应荟萃分析；比较对象包括PRIMM-UK、PRIMM-NL、Manchester、Leeds、Barcelona队列及4个公开数据集（Matson et al., Gopalakrishnan et al., Frankel et al., WindTT_2020等）。\", \"finding\": \"在整合5个新测序队列（n=165）和4个公开队列（n=147）后，PERMANOVA分析显示“队列”因素对微生物群落组成的解释方差是其他任何变量（包括临床参数）的近十倍。机器学习模型验证显示，基于物种丰度的预测能力在不同队列间缺乏可重复性：仅在PRIMM-NL中PFS12预测AUC-ROC为0.64，在PRIMM-UK中ORR预测AUC-ROC为0.78；而在跨队列测试中，仅约31.4%的情况AUC-ROC超过0.6，且留一法交叉验证的平均AUC-ROC仅为0.59-0.60。尽管通过荟萃分析识别出与反应者相关的物种面板（如Bifidobacterium pseudocatenulatum, Roseburia spp., Akkermansia muciniphila），但没有任何单一细菌在所有数据集中成为完全一致的生物标志物。相比之下，结直肠癌数据的相同方法显示出强且一致的生物标志物，证明该结果并非由分析方法导致。\", \"reference_ids\": [], \"use_in_review\": \"提供跨队列黑色素瘤免疫检查点抑制剂（ICI）治疗反应研究中‘无通用标志物’的具体统计证据及异质性来源分析，作为直接材料。\"}, {\"attribution\": \"Routy et al. (2018)\", \"conditions\": \"针对上皮肿瘤患者的PD-1免疫疗法反应研究；使用宏基因组测序分析粪便样本。\", \"finding\": \"发现ICI反应者中Akermansia muciniphila、Alistipes属和厚壁菌门（Firmicutes）的相对丰度显著高于非反应者。\", \"reference_ids\": [\"R11\"], \"use_in_review\": \"作为背景研究，展示早期单队列研究中发现的特定菌种关联，用于对比说明当前研究中观察到的不一致性和缺乏共识的现象。\"}, {\"attribution\": \"Gopalakrishnan et al. (2018)\", \"conditions\": \"针对黑色素瘤患者抗PD-1免疫疗法反应的研究；使用宏基因组测序分析肠道微生物组。\", \"finding\": \"发现ICI反应者中Faecalibacterium prausnitzii的相对丰度高于非反应者。\", \"reference_ids\": [\"R6\"], \"use_in_review\": \"作为背景研究，展示另一项早期独立研究发现的不同菌种关联，进一步佐证不同研究间结果的差异性。\"}, {\"attribution\": \"Matson et al. (2018)\", \"conditions\": \"针对转移性黑色素瘤患者抗PD-1疗法反应的研究；关注共生微生物组。\", \"finding\": \"发现PD-1治疗的反应性由一组八个物种的增加定义，主要由Bifidobacterium longum驱动。\", \"reference_ids\": [\"R5\"], \"use_in_review\": \"作为背景研究，展示第三项独立研究发现的菌种组合关联，强调人类环境中缺乏统一共识的现状。\"}, {\"attribution\": \"Frankel et al. (2017)\", \"conditions\": \"针对黑色素瘤患者的宏基因组鸟枪法和代谢组学分析；关注不同ICI方案下的微生物组和代谢物。\", \"finding\": \"报告微生物组因ICI治疗方案而异，但在接受任何ICI方案的反应者中，Bacteroides caccae的富集是常见的。\", \"reference_ids\": [\"R12\"], \"use_in_review\": \"作为背景研究，展示微生物组差异可能取决于ICI治疗方案，并指出某些菌种（如Bacteroides caccae）在不同方案中普遍富集，但同样未形成跨研究的通用标志物。\"}], \"explanation\": \"跨队列黑色素瘤研究中‘无通用标志物’的统计依据主要源于巨大的队列间异质性。首先，PERMANOVA分析证实“队列”本身是解释微生物群落组成变异的最大因素，其影响远超临床或人口统计学变量。其次，机器学习模型的跨队列泛化能力极差，内部验证表现尚可但外部验证（跨队列测试）的AUC-ROC值普遍较低且波动大，表明基于特定队列训练的微生物特征无法可靠地预测其他队列的反应。最后，尽管荟萃分析能识别出一些在多个队列中趋势一致的物种（如Roseburia spp.、Akkermansia muciniphila），但没有任何单一物种在所有数据集中达到统计学显著性并成为普适性生物标志物。这种不一致性被归因于人群特异性特征、样本处理和分析的方法学选择、饮食和药物使用的差异，以及微生物信号的功能相关性与队列内在特性。作者通过结直肠癌数据的对照分析排除了方法学缺陷的可能性，确认了黑色素瘤ICI反应中微生物关联的复杂性和队列依赖性。\", \"question_id\": \"Q01\", \"remaining_points\": [\"具体哪些临床协变量（如PPI使用、既往治疗）在多大程度上介导了队列间的微生物差异及其对ICI反应的混淆作用，虽有提及但未深入量化其交互机制。\", \"菌株水平的特异性如何具体影响跨队列的一致性，文中提到需要数千人的样本量来解析菌株多样性，但未提供具体的菌株水平跨队列分析数据。\"]}], \"plain_text\": \"\"}"
+          },
+          {
+            "allowed_use": [],
+            "conditions": [],
+            "decision": "stop",
+            "intended_use": "",
+            "limits": [],
+            "need_id": "N6202b6492ea8-fb99a64ac28c133a",
+            "question": "跨队列黑色素瘤研究，需详细提取其关于‘无通用标志物’的具体统计依据及队列间异质性来源分析。",
+            "sources": [
+              {
+                "doi": "10.1038/s41591-022-01695-5",
+                "paper_id": "d4c18d58cffce0cab6831c84535e02c608d4db49",
+                "source_handle": "P0478",
+                "title": "Cross-cohort gut microbiome associations with immune checkpoint inhibitor response in advanced melanoma",
+                "year": "2022"
+              }
+            ],
+            "still_missing": "跨队列黑色素瘤研究，需详细提取其关于‘无通用标志物’的具体统计依据及队列间异质性来源分析。",
+            "usable_content": "{\"question_material\": [{\"question_id\": \"Q01\", \"examples\": [{\"attribution\": \"本研究\", \"use_in_review\": \"提供跨队列黑色素瘤免疫检查点抑制剂（ICI）治疗反应研究中‘无通用标志物’的具体统计证据及异质性来源分析，作为直接材料。\", \"finding\": \"在整合5个新测序队列（n=165）和4个公开队列（n=147）后，PERMANOVA分析显示“队列”因素对微生物群落组成的解释方差是其他任何变量（包括临床参数）的近十倍。机器学习模型验证显示，基于物种丰度的预测能力在不同队列间缺乏可重复性：仅在PRIMM-NL中PFS12预测AUC-ROC为0.64，在PRIMM-UK中ORR预测AUC-ROC为0.78；而在跨队列测试中，仅约31.4%的情况AUC-ROC超过0.6，且留一法交叉验证的平均AUC-ROC仅为0.59-0.60。尽管通过荟萃分析识别出与反应者相关的物种面板（如Bifidobacterium pseudocatenulatum, Roseburia spp., Akkermansia muciniphila），但没有任何单一细菌在所有数据集中成为完全一致的生物标志物。相比之下，结直肠癌数据的相同方法显示出强且一致的生物标志物，证明该结果并非由分析方法导致。\", \"conditions\": \"研究对象为接受ICI治疗的晚期皮肤黑色素瘤患者；终点指标为客观缓解率（ORR）和12个月无进展生存期（PFS12）；分析方法包括PERMANOVA、Lasso机器学习模型（100次重复五折分层交叉验证）、以及包含8种差异丰度方法的随机效应荟萃分析；比较对象包括PRIMM-UK、PRIMM-NL、Manchester、Leeds、Barcelona队列及4个公开数据集（Matson et al., Gopalakrishnan et al., Frankel et al., WindTT_2020等）。\", \"reference_ids\": []}, {\"attribution\": \"Routy et al. (2018)\", \"use_in_review\": \"作为背景研究，展示早期单队列研究中发现的特定菌种关联，用于对比说明当前研究中观察到的不一致性和缺乏共识的现象。\", \"finding\": \"发现ICI反应者中Akermansia muciniphila、Alistipes属和厚壁菌门（Firmicutes）的相对丰度显著高于非反应者。\", \"conditions\": \"针对上皮肿瘤患者的PD-1免疫疗法反应研究；使用宏基因组测序分析粪便样本。\", \"reference_ids\": [\"R11\"]}, {\"attribution\": \"Gopalakrishnan et al. (2018)\", \"use_in_review\": \"作为背景研究，展示另一项早期独立研究发现的不同菌种关联，进一步佐证不同研究间结果的差异性。\", \"finding\": \"发现ICI反应者中Faecalibacterium prausnitzii的相对丰度高于非反应者。\", \"conditions\": \"针对黑色素瘤患者抗PD-1免疫疗法反应的研究；使用宏基因组测序分析肠道微生物组。\", \"reference_ids\": [\"R6\"]}, {\"attribution\": \"Matson et al. (2018)\", \"use_in_review\": \"作为背景研究，展示第三项独立研究发现的菌种组合关联，强调人类环境中缺乏统一共识的现状。\", \"finding\": \"发现PD-1治疗的反应性由一组八个物种的增加定义，主要由Bifidobacterium longum驱动。\", \"conditions\": \"针对转移性黑色素瘤患者抗PD-1疗法反应的研究；关注共生微生物组。\", \"reference_ids\": [\"R5\"]}, {\"attribution\": \"Frankel et al. (2017)\", \"use_in_review\": \"作为背景研究，展示微生物组差异可能取决于ICI治疗方案，并指出某些菌种（如Bacteroides caccae）在不同方案中普遍富集，但同样未形成跨研究的通用标志物。\", \"finding\": \"报告微生物组因ICI治疗方案而异，但在接受任何ICI方案的反应者中，Bacteroides caccae的富集是常见的。\", \"conditions\": \"针对黑色素瘤患者的宏基因组鸟枪法和代谢组学分析；关注不同ICI方案下的微生物组和代谢物。\", \"reference_ids\": [\"R12\"]}], \"explanation\": \"跨队列黑色素瘤研究中‘无通用标志物’的统计依据主要源于巨大的队列间异质性。首先，PERMANOVA分析证实“队列”本身是解释微生物群落组成变异的最大因素，其影响远超临床或人口统计学变量。其次，机器学习模型的跨队列泛化能力极差，内部验证表现尚可但外部验证（跨队列测试）的AUC-ROC值普遍较低且波动大，表明基于特定队列训练的微生物特征无法可靠地预测其他队列的反应。最后，尽管荟萃分析能识别出一些在多个队列中趋势一致的物种（如Roseburia spp.、Akkermansia muciniphila），但没有任何单一物种在所有数据集中达到统计学显著性并成为普适性生物标志物。这种不一致性被归因于人群特异性特征、样本处理和分析的方法学选择、饮食和药物使用的差异，以及微生物信号的功能相关性与队列内在特性。作者通过结直肠癌数据的对照分析排除了方法学缺陷的可能性，确认了黑色素瘤ICI反应中微生物关联的复杂性和队列依赖性。\", \"remaining_points\": [\"具体哪些临床协变量（如PPI使用、既往治疗）在多大程度上介导了队列间的微生物差异及其对ICI反应的混淆作用，虽有提及但未深入量化其交互机制。\", \"菌株水平的特异性如何具体影响跨队列的一致性，文中提到需要数千人的样本量来解析菌株多样性，但未提供具体的菌株水平跨队列分析数据。\"]}], \"plain_text\": \"\"}"
+          },
+          {
+            "allowed_use": [],
+            "conditions": [],
+            "decision": "stop",
+            "intended_use": "",
+            "limits": [],
+            "need_id": "N6202b6492ea8-fb99a64ac28c133a",
+            "question": "跨队列黑色素瘤研究，需详细提取其关于‘无通用标志物’的具体统计依据及队列间异质性来源分析。",
+            "sources": [
+              {
+                "doi": "10.1038/s41591-022-01695-5",
+                "material_depth": "",
+                "paper_id": "d4c18d58cffce0cab6831c84535e02c608d4db49",
+                "reading_role": "",
+                "section_path": [],
+                "source_handle": "P0478",
+                "title": "Cross-cohort gut microbiome associations with immune checkpoint inhibitor response in advanced melanoma",
+                "year": "2022"
+              }
+            ],
+            "still_missing": "跨队列黑色素瘤研究，需详细提取其关于‘无通用标志物’的具体统计依据及队列间异质性来源分析。",
+            "usable_content": "{\"question_material\": [{\"examples\": [{\"attribution\": \"本研究\", \"conditions\": \"研究对象为接受ICI治疗的晚期皮肤黑色素瘤患者；终点指标为客观缓解率（ORR）和12个月无进展生存期（PFS12）；分析方法包括PERMANOVA、Lasso机器学习模型（100次重复五折分层交叉验证）、以及包含8种差异丰度方法的随机效应荟萃分析；比较对象包括PRIMM-UK、PRIMM-NL、Manchester、Leeds、Barcelona队列及4个公开数据集（Matson et al., Gopalakrishnan et al., Frankel et al., WindTT_2020等）。\", \"finding\": \"在整合5个新测序队列（n=165）和4个公开队列（n=147）后，PERMANOVA分析显示“队列”因素对微生物群落组成的解释方差是其他任何变量（包括临床参数）的近十倍。机器学习模型验证显示，基于物种丰度的预测能力在不同队列间缺乏可重复性：仅在PRIMM-NL中PFS12预测AUC-ROC为0.64，在PRIMM-UK中ORR预测AUC-ROC为0.78；而在跨队列测试中，仅约31.4%的情况AUC-ROC超过0.6，且留一法交叉验证的平均AUC-ROC仅为0.59-0.60。尽管通过荟萃分析识别出与反应者相关的物种面板（如Bifidobacterium pseudocatenulatum, Roseburia spp., Akkermansia muciniphila），但没有任何单一细菌在所有数据集中成为完全一致的生物标志物。相比之下，结直肠癌数据的相同方法显示出强且一致的生物标志物，证明该结果并非由分析方法导致。\", \"reference_ids\": [], \"use_in_review\": \"提供跨队列黑色素瘤免疫检查点抑制剂（ICI）治疗反应研究中‘无通用标志物’的具体统计证据及异质性来源分析，作为直接材料。\"}, {\"attribution\": \"Routy et al. (2018)\", \"conditions\": \"针对上皮肿瘤患者的PD-1免疫疗法反应研究；使用宏基因组测序分析粪便样本。\", \"finding\": \"发现ICI反应者中Akermansia muciniphila、Alistipes属和厚壁菌门（Firmicutes）的相对丰度显著高于非反应者。\", \"reference_ids\": [\"R11\"], \"use_in_review\": \"作为背景研究，展示早期单队列研究中发现的特定菌种关联，用于对比说明当前研究中观察到的不一致性和缺乏共识的现象。\"}, {\"attribution\": \"Gopalakrishnan et al. (2018)\", \"conditions\": \"针对黑色素瘤患者抗PD-1免疫疗法反应的研究；使用宏基因组测序分析肠道微生物组。\", \"finding\": \"发现ICI反应者中Faecalibacterium prausnitzii的相对丰度高于非反应者。\", \"reference_ids\": [\"R6\"], \"use_in_review\": \"作为背景研究，展示另一项早期独立研究发现的不同菌种关联，进一步佐证不同研究间结果的差异性。\"}, {\"attribution\": \"Matson et al. (2018)\", \"conditions\": \"针对转移性黑色素瘤患者抗PD-1疗法反应的研究；关注共生微生物组。\", \"finding\": \"发现PD-1治疗的反应性由一组八个物种的增加定义，主要由Bifidobacterium longum驱动。\", \"reference_ids\": [\"R5\"], \"use_in_review\": \"作为背景研究，展示第三项独立研究发现的菌种组合关联，强调人类环境中缺乏统一共识的现状。\"}, {\"attribution\": \"Frankel et al. (2017)\", \"conditions\": \"针对黑色素瘤患者的宏基因组鸟枪法和代谢组学分析；关注不同ICI方案下的微生物组和代谢物。\", \"finding\": \"报告微生物组因ICI治疗方案而异，但在接受任何ICI方案的反应者中，Bacteroides caccae的富集是常见的。\", \"reference_ids\": [\"R12\"], \"use_in_review\": \"作为背景研究，展示微生物组差异可能取决于ICI治疗方案，并指出某些菌种（如Bacteroides caccae）在不同方案中普遍富集，但同样未形成跨研究的通用标志物。\"}], \"explanation\": \"跨队列黑色素瘤研究中‘无通用标志物’的统计依据主要源于巨大的队列间异质性。首先，PERMANOVA分析证实“队列”本身是解释微生物群落组成变异的最大因素，其影响远超临床或人口统计学变量。其次，机器学习模型的跨队列泛化能力极差，内部验证表现尚可但外部验证（跨队列测试）的AUC-ROC值普遍较低且波动大，表明基于特定队列训练的微生物特征无法可靠地预测其他队列的反应。最后，尽管荟萃分析能识别出一些在多个队列中趋势一致的物种（如Roseburia spp.、Akkermansia muciniphila），但没有任何单一物种在所有数据集中达到统计学显著性并成为普适性生物标志物。这种不一致性被归因于人群特异性特征、样本处理和分析的方法学选择、饮食和药物使用的差异，以及微生物信号的功能相关性与队列内在特性。作者通过结直肠癌数据的对照分析排除了方法学缺陷的可能性，确认了黑色素瘤ICI反应中微生物关联的复杂性和队列依赖性。\", \"question_id\": \"Q01\", \"remaining_points\": [\"具体哪些临床协变量（如PPI使用、既往治疗）在多大程度上介导了队列间的微生物差异及其对ICI反应的混淆作用，虽有提及但未深入量化其交互机制。\", \"菌株水平的特异性如何具体影响跨队列的一致性，文中提到需要数千人的样本量来解析菌株多样性，但未提供具体的菌株水平跨队列分析数据。\"]}], \"plain_text\": \"\"}"
+          }
+        ],
+        "year": "2022"
+      }
+    },
+    {
+      "access_id": "source_materials[7]",
+      "channel": "source_materials",
+      "index_path": "source_materials[7]",
+      "identity": {
+        "source_handle": "P0015",
+        "paper_id": "08a484e3c782bc9552d2df812bad2ec86f231edc",
+        "title": "A gut microbial signature for combination immune checkpoint blockade across cancer types",
+        "doi": "10.1038/s41591-024-02823-z"
+      },
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": [],
+      "record": {
+        "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\08a484e3c782bc9552d2df812bad2ec86f231edc\\21f509eb3bb18adea1edf730e615b6fb\\attempt-01\\PAPER_READING_CARD.json",
+        "doi": "10.1038/s41591-024-02823-z",
+        "external_calls": 0,
+        "material_depth": "fulltext",
+        "paper_id": "08a484e3c782bc9552d2df812bad2ec86f231edc",
+        "review_planning_B": {
+          "broader_review_uses": [
+            {
+              "connection_to_review": "可用于综述的方法学部分，讨论当前微生物组研究中分辨率不足的问题，以及标准化菌株级分析流程的重要性。",
+              "material": "论文指出既往物种水平标志物重现性差，并展示了如何通过构建自定义菌株参考库和严格的QC流程来解决这一问题。",
+              "purpose": "领域现状与方法论批判"
+            },
+            {
+              "connection_to_review": "用于提醒综述作者在整合不同研究时，必须严格控制治疗方案这一混杂因素，否则可能导致错误的综合结论。",
+              "material": "论文显示，即使在同一类癌症（黑色素瘤）中，如果治疗方案不同（CICB vs 单药），微生物预测模型也会失效。",
+              "purpose": "反例或边界条件"
+            }
+          ],
+          "facet_contributions": [
+            {
+              "boundaries": "该结论主要基于罕见实体瘤的CICB治疗数据，外推至其他癌症类型或单药治疗时需保持谨慎。",
+              "contribution": "提供了具体的实证数据，证明在CICB治疗背景下，菌株水平的微生物特征能显著提升预测准确率（AUC从物种级的较低值提升至0.73），且该签名跨越不同罕见癌症类型有效。",
+              "facet_id": "F1",
+              "possible_uses": "用于论证在综述中应强调高分辨率微生物分析的价值，以及解释为何某些跨癌种的微生物信号可能存在但被低分辨率分析所掩盖。"
+            },
+            {
+              "boundaries": "这一发现限制了跨治疗方案直接比较微生物标志物的可行性，提示在综合不同研究结果时必须考虑治疗方案的匹配性。",
+              "contribution": "揭示了微生物预测签名的‘治疗方案特异性’：针对CICB训练的模型无法预测抗PD-1单药的反应，反之亦然（尽管文中主要展示了CICB模型在单药上的失败）。",
+              "facet_id": "F1",
+              "possible_uses": "用于支持综述中关于‘需根据具体免疫治疗 regimen 定制微生物生物标志物’的观点，避免笼统地讨论‘ICB与微生物的关系’。"
+            },
+            {
+              "boundaries": "这仅是基于基因组潜力的相关性观察，未提供直接的因果机制证据（如代谢物测量或动物模型验证），不能单独作为机制确定的依据。",
+              "contribution": "通过功能注释发现，与CICB反应正相关的菌株（如特定Faecalibacterium菌株）富含完整的丁酸合成基因簇，而负相关菌株则缺失，提出了丁酸代谢作为潜在机制线索。",
+              "facet_id": "F2",
+              "possible_uses": "作为机制探讨部分的背景材料，提供具体的代谢通路（丁酸生成）与特定菌株关联的证据，供后续结合其他文献深入讨论短链脂肪酸作用时使用。"
+            }
+          ],
+          "planning_summary": "该论文为综述提供了关于肠道微生物组预测ICB疗效的关键方法论启示和分层策略素材。它证明了单纯依赖物种水平分类会导致信息丢失，强调了菌株分辨率的重要性；同时，它有力地支持了将ICB疗效按治疗方案（CICB vs 单药）进行细分分析的必要性，反驳了单一通用微生物标志物的假设。",
+          "scope_interpretation_cautions": [
+            "该研究的‘泛癌种’结论仅限于三种罕见实体瘤（UGB, NEN, GYN）及外部黑色素瘤队列，不代表所有实体瘤。",
+            "‘菌株特异性’结论是基于计算生物学预测和统计关联，非实验验证的因果机制。",
+            "外部验证队列主要来自工业化国家，地理多样性有限。"
+          ],
+          "topic_handles": [
+            "菌株分辨率 vs 物种分辨率的预测效能差异",
+            "泛癌种微生物签名 (Pan-cancer microbiome signatures)",
+            "治疗方案特异性 (Regimen-specificity: CICB vs Anti-PD-1 monotherapy)",
+            "丁酸产生途径与免疫反应关联",
+            "Faecalibacterium spp. 在CICB中的角色"
+          ]
+        },
+        "source_handle": "P0015",
+        "study_summary_A": {
+          "approach": "1. 发现队列分析：对CA209-538试验（n=106）的基线粪便样本进行深度鸟枪法宏基因组测序，采用基因组解析宏基因组学方法（MAG组装+GTDB参考补充）构建菌株级参考库，量化菌株丰度。2. 机器学习建模：使用随机森林算法，比较临床因素、不同分类层级（科、属、种、株）的微生物特征及其组合对最佳总体反应（BOR）和12个月无进展生存期（PFS12）的预测性能（AUC）。3. 内部泛化验证：执行留一组织学队列交叉验证，评估签名在UGB、NEN和GYN三种罕见癌症亚型间的通用性。4. 外部荟萃分析：检索并重新分析6个公开的外部ICB宏基因组队列（共364名患者），统一映射至同一菌株参考库，分别评估签名在CICB队列和抗PD-1单药队列中的外部泛化能力，并比较“同方案”与“异方案”训练/测试对的预测差异。",
+          "contribution_and_limits": [
+            {
+              "contribution": "提供了证据表明，在ICB疗效预测中，菌株分辨率比物种分辨率更具预测力，且这种微生物签名是‘泛癌种’但‘治疗方案特异’的。",
+              "limits": "外部验证仅在黑色素瘤队列中进行，尚未在更多样化的实体瘤类型中验证；模型在外部队列中的绝对预测精度（AUC~0.65）尚不足以直接用于临床决策；因果机制仅基于代谢通路存在与否的相关性推断，未通过体外或体内实验确证因果关系。"
+            }
+          ],
+          "key_findings": [
+            {
+              "conditions": "CA209-538发现队列 (n=106, CICB治疗)",
+              "finding": "菌株水平的微生物特征显著优于物种水平及临床因素，预测CICB反应的最佳AUC为0.73。"
+            },
+            {
+              "conditions": "内部交叉验证 (UGB, NEN, GYN)",
+              "finding": "菌株响应签名在三种不同的罕见癌症组织学亚型间表现出稳健的预测能力（平均AUC=0.75），提示其具有泛癌种特性。"
+            },
+            {
+              "conditions": "外部荟萃分析 (6个独立队列, n=364)",
+              "finding": "当训练集和测试集均为CICB方案时，签名具有中等程度的外部泛化能力（平均AUC=0.65）；但当应用于抗PD-1单药队列时，预测能力丧失（平均AUC=0.51）。"
+            },
+            {
+              "conditions": "关键驱动菌株功能分析",
+              "finding": "正向关联的主要菌株属于Firmicutes门Ruminococcaceae科，特别是Faecalibacterium属，且这些菌株普遍拥有完整的乙酰辅酶A丁酸生成途径；而负向关联菌株中部分缺乏该途径。"
+            }
+          ],
+          "paper_kind": "empirical",
+          "problem_or_question": "既往基于物种水平的肠道微生物标志物在预测ICB疗效时缺乏跨队列的可重复性；同时，不同ICB方案（如联合治疗vs单药）是否共享相同的微生物预测机制尚不明确。",
+          "research_scope": "针对接受联合免疫检查点阻断（CICB，即抗PD-1加抗CTLA-4）治疗的多种罕见实体瘤患者，以及外部验证队列中的黑色素瘤患者，研究基线肠道微生物组对治疗反应的预测价值。",
+          "work_summary": "本研究旨在解决既往基于物种水平的微生物标志物在跨队列中可重复性差的问题，提出菌株水平分辨率可能更精准地捕捉与免疫检查点阻断（ICB）反应相关的微生物特征。作者利用CA209-538临床试验的106名罕见实体瘤患者的基线粪便样本进行深度鸟枪法宏基因组测序，构建了一个包含1,397个菌株基因组的自定义参考数据库。通过监督机器学习模型，发现菌株水平的微生物丰度比物种水平或临床因素更能预测CICB的治疗反应和12个月无进展生存期。进一步通过对六个外部独立研究的荟萃分析，证实了该菌株响应签名在不同癌症类型和国家间具有泛癌种有效性，但其预测能力严格依赖于训练集和测试集使用相同的ICB治疗方案（CICB或抗PD-1单药），表明微生物-宿主关系具有治疗方案的特异性而非肿瘤类型的特异性。"
+        },
+        "title": "A gut microbial signature for combination immune checkpoint blockade across cancer types",
+        "year": "2024"
+      }
+    },
+    {
+      "access_id": "source_materials[11]",
+      "channel": "source_materials",
+      "index_path": "source_materials[11]",
+      "identity": {
+        "source_handle": "P0270",
+        "paper_id": "74786f8df0c7648840756833a4b4bc49ace34be6",
+        "title": "Composition of gastrointestinal microbiota in association with treatment response in individuals with metastatic castrate resistant prostate cancer progressing on enzalutamide and initiating treatment with anti-PD-1 (pembrolizumab)",
+        "doi": "10.1016/j.neo.2022.100822"
+      },
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": [],
+      "record": {
+        "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\74786f8df0c7648840756833a4b4bc49ace34be6\\c1940e865b3b0f03711a8874b089c162\\attempt-01\\PAPER_READING_CARD.json",
+        "doi": "10.1016/j.neo.2022.100822",
+        "external_calls": 0,
+        "material_depth": "fulltext",
+        "paper_id": "74786f8df0c7648840756833a4b4bc49ace34be6",
+        "review_planning_B": {
+          "broader_review_uses": [
+            {
+              "connection_to_review": "背景与概念：既往雄激素剥夺疗法（ADT）对肠道微生物组的影响。",
+              "material": "文中提到既往研究显示恩杂鲁胺等雄激素受体轴靶向治疗会增加A. muciniphila水平，这可能构成了本研究中患者基线微生物组的背景状态。",
+              "purpose": "帮助解释为何本研究中A. muciniphila的表现与其他ICI研究不同，提示既往内分泌治疗可能是塑造微生物组-ICI反应关系的关键情境变量。"
+            },
+            {
+              "connection_to_review": "实例：口腔与肠道微生物组的解耦。",
+              "material": "S. salivarius在粪便中与疗效相关，但在口腔样本中无关联，且两者水平不相关。",
+              "purpose": "作为实例说明非侵入性口腔采样可能无法准确代表肠道微生物状态，特别是在涉及特定口腔来源但定植于肠道的细菌时，强调采样部位选择的重要性。"
+            },
+            {
+              "connection_to_review": "反例：通用预测模型的失效。",
+              "material": "Shaikh等人的综合指数在本队列中无预测价值。",
+              "purpose": "作为反例，证明并非所有癌症都对相同的微生物组合产生反应，反对过度泛化的微生物生物标志物主张。"
+            }
+          ],
+          "facet_contributions": [
+            {
+              "boundaries": "仅限mCRPC人群，且处于恩杂鲁胺治疗失败后阶段；不能直接外推至初治前列腺癌或其他早期癌症。",
+              "contribution": "提供了mCRPC背景下特定的微生物标志物列表：S. salivarius（正向关联）、Bacteroides thetaiotaomicron（正向关联）、Enterococcaceae（正向关联）以及Akkermansia muciniphila（负向关联）。",
+              "facet_id": "F1",
+              "possible_uses": "用于回答“哪些细菌与ICI疗效相关”，特别是用于对比不同实体瘤（如黑色素瘤、肺癌）中的通用标志物，论证标志物的异质性。"
+            },
+            {
+              "boundaries": "指数构建依赖于原始研究的分类学一致性，本研究中因分类差异进行了修正，结果反映的是修正后的指数表现。",
+              "contribution": "展示了基于多癌种数据的“综合指数”在本队列中失效的结果，强调了单一通用指数可能不适用于所有癌症类型。",
+              "facet_id": "F1",
+              "possible_uses": "用于讨论现有微生物预测模型的局限性，支持需要针对特定癌症亚型开发个性化生物标志物的观点。"
+            },
+            {
+              "boundaries": "这些机制多为基于文献的推测或体外/动物模型证据，本研究本身未直接测定肌苷水平或进行功能实验，属于作者的解释性讨论而非直接实验证据。",
+              "contribution": "探讨了A. muciniphila产生肌苷（inosine）的可能机制，并提出在前列腺癌中肌苷可能促进转移的相反假说，解释了为何其在反应者中减少。同时提及S. salivarius可能通过调节PPAR gamma发挥免疫调节作用。",
+              "facet_id": "F2",
+              "possible_uses": "用于解释微生物影响ICI疗效的潜在分子机制，特别是提供与经典机制（如肌苷-T细胞激活）相悖的案例，丰富机制部分的复杂性讨论。"
+            },
+            {
+              "boundaries": "仅涵盖短期治疗周期（4个周期+监测期），长期效应未知。",
+              "contribution": "纵向数据显示ICI治疗期间微生物组高度稳定，排除了治疗药物本身导致微生物组剧烈波动从而间接影响疗效的主要可能性。",
+              "facet_id": "F1",
+              "possible_uses": "用于支持“基线微生物组决定疗效”而非“治疗诱导的微生物组变化决定疗效”的观点，或用于排除治疗时间点的混杂效应。"
+            }
+          ],
+          "planning_summary": "该论文为综述提供了关于“癌症类型特异性微生物标志物”的关键实证素材。它挑战了跨癌种通用的微生物预测模型（如A. muciniphila作为通用增效菌的假设），并提出了“既往内分泌治疗史”可能重塑微生物组对ICI反应的影响这一重要视角。同时，其纵向数据证明了ICI治疗本身对微生物组的稳定性，排除了药物急性干扰作为主要混淆因素的可能性。",
+          "scope_interpretation_cautions": [
+            "该研究结果严格限定于“恩杂鲁胺治疗进展后”的mCRPC患者，其微生物组状态深受既往内分泌治疗影响，不能直接推广至未经内分泌治疗的前列腺癌患者或初治实体瘤患者。",
+            "A. muciniphila在反应者中的减少与多数其他ICI研究相反，这可能与前列腺癌的特定病理生理环境（如肌苷促转移风险）或既往用药有关，解读时需避免将其视为普适规律。",
+            "S. salivarius的发现虽显著，但其具体免疫调节机制在本研究中仅为推测，需结合其他功能学研究谨慎引用。",
+            "样本量较小（n=23），发现的差异丰度菌群可能存在假阳性风险，尤其是qPCR验证仅针对少数几个菌种。"
+          ],
+          "topic_handles": [
+            "metastatic castrate resistant prostate cancer (mCRPC)",
+            "anti-PD-1 therapy (pembrolizumab)",
+            "prior androgen receptor axis-targeted therapy (enzalutamide)",
+            "fecal microbiome composition",
+            "oral vs. gut microbiome dissociation",
+            "microbiome stability during ICI treatment",
+            "integrated microbiome prediction index failure"
+          ]
+        },
+        "source_handle": "P0270",
+        "study_summary_A": {
+          "approach": "采用前瞻性观察性队列设计。收集23名mCRPC患者在基线及治疗期间的直肠拭子（粪便）和口腔漱口水样本。使用Ion Torrent平台进行16S rRNA基因多重高变区测序，结合DADA2去噪和QIIME2分析流程进行物种分类。使用GLM整合多区域数据以评估差异丰度。通过qPCR独立验证关键菌种（S. salivarius, A. muciniphila）。纵向分析了9名患者的全程治疗样本以评估时间效应。将结果与既往文献及Shaikh等人的“综合指数”进行比较。",
+          "contribution_and_limits": [
+            {
+              "contribution": "提供了首个针对mCRPC患者在接受ICI治疗前/初期微生物组特征的系统描述，揭示了该人群中特有的微生物-反应关联模式（如S. salivarius的正向关联和A. muciniphila的负向关联）。",
+              "limits": "样本量较小（n=23），统计效力有限；仅使用16S rRNA测序而非宏基因组，分辨率受限；未深入探讨具体的代谢机制或因果路径；结果可能受既往恩杂鲁胺治疗、饮食、地理因素等混杂因素影响；作者承认部分分类学鉴定存在不确定性（如Roseburia属）。"
+            }
+          ],
+          "key_findings": [
+            {
+              "conditions": "First Timepoint cohort (n=23), 16S sequencing & qPCR",
+              "finding": "整体α和β多样性在反应者与非反应者间无显著差异；个体间变异占主导（~50%）。"
+            },
+            {
+              "conditions": "First Timepoint cohort, GLM analysis of multiple hypervariable regions",
+              "finding": "Streptococcus salivarius在反应者粪便中显著富集（p=0.004），且qPCR证实该趋势；但该菌在口腔漱口水中的水平与反应无关，且口腔与粪便水平不相关。"
+            },
+            {
+              "conditions": "First Timepoint cohort, 16S sequencing (V6-7 region) & qPCR",
+              "finding": "Akkermansia muciniphila在反应者中显著降低（与黑色素瘤等其他癌症报道相反），qPCR确认了这一减少趋势。"
+            },
+            {
+              "conditions": "Longitudinal analysis (n=9 patients across treatment cycles)",
+              "finding": "帕博利珠单抗治疗未引起全局微生物组成的显著变化；个体内样本聚类紧密，时间点对变异贡献极小（<3%）。"
+            },
+            {
+              "conditions": "Application of Shaikh et al. integrated index",
+              "finding": "该综合指数未能区分本队列中的反应者与非反应者，表明不同癌症类型或治疗史可能导致微生物信号的特异性。"
+            }
+          ],
+          "paper_kind": "empirical",
+          "problem_or_question": "既往研究表明肠道微生物影响ICI疗效，但在mCRPC背景下，特别是经过雄激素受体抑制剂（如恩杂鲁胺）预处理后的患者中，微生物组特征如何预测帕博利珠单抗的治疗反应？是否存在不同于其他实体瘤（如黑色素瘤）的微生物标志物？",
+          "research_scope": "转移性去势抵抗性前列腺癌（mCRPC）患者，在恩杂鲁胺治疗进展后接受抗PD-1免疫检查点抑制剂（帕博利珠单抗）治疗。样本为粪便和口腔漱口水DNA。",
+          "work_summary": "本研究旨在探究肠道微生物组组成与mCRPC患者对免疫检查点抑制剂（ICI）治疗反应的关联。研究纳入了23名在恩杂鲁胺治疗下疾病进展并即将开始帕博利珠单抗治疗的mCRPC患者。通过16S rRNA基因测序（覆盖多个高变区）和定量PCR（qPCR），比较了治疗反应者（PSA下降>50%或影像学缓解）与非反应者的微生物特征。研究发现，尽管整体α和β多样性在主要队列中无显著差异，但特定菌属存在差异：反应者中粪肠球菌、拟杆菌等富集，而此前在其他癌症中被认为促进ICI疗效的黏蛋白降解菌Akkermansia muciniphila在反应者中反而减少。此外，发现口腔共生菌Streptococcus salivarius在粪便中的丰度与反应正相关，但在口腔样本中无此关联，提示其作用具有部位特异性。研究还验证了一个综合微生物指数在本队列中无效，并观察到治疗期间微生物组总体稳定。"
+        },
+        "title": "Composition of gastrointestinal microbiota in association with treatment response in individuals with metastatic castrate resistant prostate cancer progressing on enzalutamide and initiating treatment with anti-PD-1 (pembrolizumab)",
+        "year": "2022"
+      }
+    },
+    {
+      "access_id": "source_materials[15]",
+      "channel": "source_materials",
+      "index_path": "source_materials[15]",
+      "identity": {
+        "source_handle": "P0545",
+        "paper_id": "f31246cd559d1a06b99a32b0ee47bb1ce0265772",
+        "title": "A Clinical Outcome of the Anti-PD-1 Therapy of Melanoma in Polish Patients Is Mediated by Population-Specific Gut Microbiome Composition",
+        "doi": "10.3390/cancers14215369"
+      },
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": [],
+      "record": {
+        "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\f31246cd559d1a06b99a32b0ee47bb1ce0265772\\a1da9943002238adab3f796903973274\\attempt-01\\PAPER_READING_CARD.json",
+        "doi": "10.3390/cancers14215369",
+        "external_calls": 0,
+        "material_depth": "fulltext",
+        "paper_id": "f31246cd559d1a06b99a32b0ee47bb1ce0265772",
+        "review_planning_B": {
+          "broader_review_uses": [
+            {
+              "connection_to_review": "提供关于肠道微生物组与ICI疗效关联中“人群特异性”的重要案例。",
+              "material": "作者指出与其他队列（如中国NSCLC患者中P. copri有益，或某些黑色素瘤队列中Faecalibacterium有益）结果的矛盾，强调单一物种不能作为跨人群的通用生物标志物。",
+              "purpose": "用于综述中论证微生物标志物开发的复杂性，支持需要结合人群背景、饮食和生活习惯进行个性化分析的结论。"
+            },
+            {
+              "connection_to_review": "提供饮食与微生物组互作影响免疫治疗的实证数据。",
+              "material": "研究发现高植物摄入和低乳制品摄入与良好预后相关，并引用文献说明膳食纤维可能通过产生短链脂肪酸（SCFAs）增强T细胞反应。",
+              "purpose": "用于综述中讨论饮食因素作为调节微生物组进而影响免疫治疗疗效的可干预靶点。"
+            }
+          ],
+          "facet_contributions": [
+            {
+              "boundaries": "仅限波兰人群，不能直接外推至其他种族或地理区域；观察性关联，非因果证明。",
+              "contribution": "提供了波兰人群中与抗PD-1治疗响应正相关的特定微生物类群（P. copri, B. uniformis）和负相关类群（F. prausnitzii, D. intestinalis）的具体数据。",
+              "facet_id": "F1",
+              "possible_uses": "用于支持综述中关于“不同人群中存在不同的微生物预测标志物”的论点，或作为特定菌属在治疗响应中作用的实例。"
+            },
+            {
+              "boundaries": "基于自我报告问卷，缺乏对具体营养成分或代谢产物的直接测量；混杂因素（如整体生活方式）未完全控制。",
+              "contribution": "提供了饮食模式（高植物摄入、低乳制品摄入）与ICI治疗响应相关的流行病学证据。",
+              "facet_id": "F1",
+              "possible_uses": "用于综述中讨论饮食干预或自然饮食状态如何可能通过调节微生物组来影响免疫治疗效果的背景信息。"
+            },
+            {
+              "boundaries": "钙卫蛋白差异无统计学意义；未直接测定免疫细胞浸润或细胞因子水平；机制链条不完整。",
+              "contribution": "探讨了肠道菌群组成与宿主肠道炎症状态（通过粪便钙卫蛋白衡量）的潜在联系，尽管统计上不显著，但趋势显示响应者炎症水平较低。",
+              "facet_id": "F2",
+              "possible_uses": "用于讨论肠道局部免疫环境（如炎症水平）可能与全身抗肿瘤免疫反应相关的假设，作为机制探讨的背景素材。"
+            }
+          ],
+          "planning_summary": "该论文为综述提供了关于肠道微生物组影响免疫检查点抑制剂（ICI）疗效的人群特异性证据。其核心价值在于揭示了在波兰人群中，特定的微生物组合（P. copri, B. uniformis）和饮食模式（高植物、低乳制品）与治疗响应正相关，这与部分其他队列（如Chaput et al.发现Faecalibacterium有益）的结果形成对比，有助于综述讨论“微生物标志物的人群依赖性”和“饮食-微生物-免疫”交互作用。",
+          "scope_interpretation_cautions": [
+            "该研究的发现基于波兰特定人群，其微生物组特征受当地饮食和文化影响，结果不能直接推广到其他种族或地区。",
+            "对照组年龄显著小于患者组，且样本量小，这可能影响基线微生物组比较的解释力，需谨慎对待与健康对照的比较结果。",
+            "饮食数据来自问卷，存在主观性和回忆偏差，且未量化具体营养素摄入量，仅能反映大致饮食模式。",
+            "虽然发现了微生物与响应的关联，但未阐明具体的分子机制（如代谢产物、抗原模拟等），因此不能用于解释确切的生物学通路。"
+          ],
+          "topic_handles": [
+            "gut microbiome composition in melanoma patients",
+            "anti-PD-1 therapy response prediction",
+            "population-specific microbial signatures",
+            "dietary impact on ICI efficacy",
+            "Prevotella copri and Bacteroides uniformis abundance",
+            "Bacteroidota/Firmicutes ratio",
+            "intestinal inflammation (calprotectin)"
+          ]
+        },
+        "source_handle": "P0545",
+        "study_summary_A": {
+          "approach": "采用前瞻性队列研究设计。纳入标准：组织学确诊的不可切除III期或IV期皮肤黑色素瘤患者，接受抗PD-1单药治疗（纳武利尤单抗或帕博利珠单抗）。对照组为患者的直系亲属（健康人）。主要终点：根据RECIST v.1.1标准评估的治疗反应（完全缓解CR、部分缓解PR定义为响应者；疾病稳定SD、进展PD定义为非响应者）。数据采集：治疗前通过问卷收集社会人口学、临床、生活方式和饮食变量；采集基线粪便样本。实验室分析：使用DNeasy PowerSoil Pro提取DNA，扩增16S rRNA基因V3-V4区进行Illumina MiSeq测序，使用DADA2流程生成ASVs并基于SILVA数据库进行分类；对部分样本进行宏基因组鸟枪法测序以重建MAGs。统计分析：比较各组间的菌群多样性（Alpha/Beta）、相对丰度及临床特征差异，使用Kruskal-Wallis检验、Fisher精确检验及limma线性模型识别差异物种。",
+          "contribution_and_limits": [
+            {
+              "contribution": "提供了波兰这一特定欧洲人群背景下，肠道微生物组特征与抗PD-1治疗反应的关联证据，指出了与该人群饮食模式（如高植物摄入）相关的潜在有益菌属（P. copri, B. uniformis）。",
+              "limits": "样本量较小（尤其是对照组仅10人，且年龄显著小于患者组）；观察性研究设计无法确立因果关系；饮食数据依赖自我报告问卷，可能存在回忆偏倚；未直接测量微生物代谢产物机制；不同研究间关于特定菌属（如Faecalibacterium）作用的矛盾结果提示人群异质性，限制了单一生物标志物的普适性。"
+            }
+          ],
+          "key_findings": [
+            {
+              "conditions": "波兰黑色素瘤患者队列，基线状态",
+              "finding": "响应者（n=25）的拟杆菌门/厚壁菌门比值显著高于非响应者（n=32），且响应者的细菌物种丰富度（Richness）显著低于非响应者。"
+            },
+            {
+              "conditions": "波兰黑色素瘤患者队列，基线状态",
+              "finding": "响应者肠道中普雷沃氏菌（Prevotella copri）和均匀拟杆菌（Bacteroides uniformis）的丰度显著升高；非响应者中普拉梭菌（Faecalibacterium prausnitzii）、肠脱硫弧菌（Desulfovibrio intestinalis）及部分未分类厚壁菌显著富集。"
+            },
+            {
+              "conditions": "波兰黑色素瘤患者队列，基线饮食调查",
+              "finding": "高植物性食物（水果和蔬菜总和）摄入与响应概率增加2.9倍相关；低乳制品摄入（每日≤1份）与响应概率增加2.0倍相关。"
+            },
+            {
+              "conditions": "波兰黑色素瘤患者队列，基线状态",
+              "finding": "响应者的粪便钙卫蛋白水平（炎症标志物）中位数低于非响应者，但组间差异无统计学意义。"
+            }
+          ],
+          "paper_kind": "empirical",
+          "problem_or_question": "在波兰人群中，基线肠道微生物组的组成以及饮食等外在因素是否与黑色素瘤患者对抗PD-1治疗的临床反应（响应 vs. 非响应）相关？是否存在人群特异性的微生物标志物？",
+          "research_scope": "波兰人群中的转移性黑色素瘤患者（接受抗PD-1治疗）及健康对照，聚焦基线肠道微生物组组成、饮食模式与免疫检查点抑制剂（ICI）疗效的关联。",
+          "work_summary": "本研究旨在探讨波兰裔黑色素瘤患者对抗PD-1治疗的反应与其基线肠道微生物组及外在修饰因素（如饮食）之间的关联。研究招募了64名接受抗PD-1治疗的患者和10名健康对照，通过问卷调查收集人口统计学、生活方式和饮食数据，并在治疗前采集粪便样本进行16S rRNA基因测序（metataxonomics）及部分宏基因组鸟枪法测序。结果显示，响应者（R）与非响应者（NR）在肠道菌群结构上存在显著差异：响应者的拟杆菌门/厚壁菌门（Bacteroidota/Firmicutes）比值较高，物种丰富度较低；响应者肠道中普雷沃氏菌（Prevotella copri）和均匀拟杆菌（Bacteroides uniformis）丰度较高，而非响应者则富集普拉梭菌（Faecalibacterium prausnitzii）、肠脱硫弧菌（Desulfovibrio intestinalis）及部分未分类厚壁菌。此外，高植物摄入和低乳制品摄入与更好的治疗反应相关。该研究强调了肠道微生物组和饮食对ICI疗效的影响具有人群特异性。"
+        },
+        "title": "A Clinical Outcome of the Anti-PD-1 Therapy of Melanoma in Polish Patients Is Mediated by Population-Specific Gut Microbiome Composition",
+        "year": "2022"
+      }
+    },
+    {
+      "access_id": "source_materials[4]",
+      "channel": "source_materials",
+      "index_path": "source_materials[4]",
+      "identity": {
+        "source_handle": "P0081",
+        "paper_id": "1d2792ae1850f48accaf1c111b2d92b6b2ebc6c0",
+        "title": "Unraveling gut microbiome interferences in cancer immunotherapy: a meta-analysis of diverse drug effects",
+        "doi": "10.1186/s12885-025-15094-9"
+      },
+      "requested_paths": [
+        "local_passages"
+      ],
+      "unit_ids": [],
+      "record": {
+        "doi": "10.1186/s12885-025-15094-9",
+        "external_calls": 0,
+        "local_passages": {
+          "external_calls": 0,
+          "passages": [
+            {
+              "best_sentence": "5 Effect of concomitant use of antibiotics on PFS others categorized as \"Multiple\", the OS, PFS, and ORR during ICI treatment were significantly lower among those who used antibiotics compared to those who did not.The heterogeneity of OS was mainly attributed to the non-small cell lung cancer group (I²=55.3%)and the multiple types of groups (I²=46.9%),with no statistically significant differences between subgroups (interaction P = 0.628).Notably, in patients with RCC, both OS and PFS were significantly reduced (HR = 2.08, 95% CI 1.41-3.06;HR = 2.22, 95% CI 1.70-2.91),as was the ORR (RR = 0.44, 95% CI 0.26-0.74).",
+              "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\1d2792ae1850f48accaf1c111b2d92b6b2ebc6c0\\6306ccac684d884f60ffc329cc05a0e0\\attempt-01\\PAPER_READING_CARD.json",
+              "doi": "10.1186/s12885-025-15094-9",
+              "limits": [],
+              "match_terms": [
+                "mechanisms mediate effect",
+                "ici",
+                "orr",
+                "pfs",
+                "os",
+                "nsclc",
+                "rcc",
+                "hcc"
+              ],
+              "material_depth": "fulltext",
+              "paper_id": "1d2792ae1850f48accaf1c111b2d92b6b2ebc6c0",
+              "pool_action": "already_in_pool",
+              "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\1d2792ae1850f48accaf1c111b2d92b6b2ebc6c0\\snapshot-47bff19cde8d0f84f50042e9",
+              "score": 45.351038,
+              "section_path": [
+                "Subgroup analyses according to the cancer type"
+              ],
+              "segment_kind": "document_block",
+              "source_handle": "P0081",
+              "text": "groups (interaction P = 0.705).In patients with NSCLC, melanoma, urothelial carcinoma (UC), renal cell carcinoma (RCC), hepatocellular carcinoma (HCC), and Fig. ts with NSCLC, melanoma, urothelial carcinoma (UC), renal cell carcinoma (RCC), hepatocellular carcinoma (HCC), and Fig. 5 Effect of concomitant use of antibiotics on PFS others categorized as \"Multiple\", the OS, PFS, and ORR during ICI treatment were significantly lower among those who used antibiotics compared to those who did not.The heterogeneity of OS was mainly attributed to the non-small cell lung cancer group (I²=55.3%)and the multiple types of groups (I²=46.9%),with no statistically significant differences between subgroups (interaction P = 0.628).Notably, in patients with RCC, both OS and PFS were significantly reduced (HR = 2.08, 95% CI 1.41-3.06;HR = 2.22, 95% CI 1.70-2.91),as was the ORR (RR = 0.44, 95% CI 0.26-0.74). Regarding PPI treatment, for OS, heterogeneity primarily originated from the multiple cancer types subgroup (I²=71.5%),with no statistically significant differe",
+              "title": "Unraveling gut microbiome interferences in cancer immunotherapy: a meta-analysis of diverse drug effects",
+              "usable_fields": [],
+              "year": "2025"
+            },
+            {
+              "best_sentence": "solid tumours (NSCLC, melanoma, RCC, etc.)",
+              "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\1d2792ae1850f48accaf1c111b2d92b6b2ebc6c0\\6306ccac684d884f60ffc329cc05a0e0\\attempt-01\\PAPER_READING_CARD.json",
+              "doi": "10.1186/s12885-025-15094-9",
+              "limits": [],
+              "match_terms": [
+                "gut microbiome modulate efficacy immune checkpoint inhibitors solid tumours",
+                "nsclc",
+                "rcc"
+              ],
+              "material_depth": "fulltext",
+              "paper_id": "1d2792ae1850f48accaf1c111b2d92b6b2ebc6c0",
+              "pool_action": "already_in_pool",
+              "reading_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\materials\\1d2792ae1850f48accaf1c111b2d92b6b2ebc6c0\\snapshot-47bff19cde8d0f84f50042e9",
+              "score": 5.750227,
+              "section_path": [
+                "review planning",
+                "topic handles"
+              ],
+              "segment_kind": "card_topic_handle",
+              "source_handle": "P0081",
+              "text": "probiotics supplementation solid tumours (NSCLC, melanoma, RCC, etc.) clinical outcomes (OS, PFS, ORR)",
+              "title": "Unraveling gut microbiome interferences in cancer immunotherapy: a meta-analysis of diverse drug effects",
+              "usable_fields": [],
+              "year": "2025"
+            }
+          ],
+          "question": "How does the gut microbiome modulate the efficacy of immune checkpoint inhibitors in solid tumours, and what mechanisms mediate that effect? 实体瘤中肠道微生物组与 ICI 疗效的临床关联证据 系统评估不同实体瘤类型中肠道微生物特征（分类学、功能、动态变化）与 ICI 临床结局（ORR, PFS, OS）的观察性关联，明确证据强度、肿瘤特异性及外部干扰因素，避免将相关性误读为因果性或普适性生物标志物。 涵盖黑色素瘤、NSCLC、RCC、CRC、HCC 等主要实体瘤的回顾性与前瞻性队列研究；包括 16S rRNA、宏基因组及代谢组数据；区分基线特征与治疗期间动态变化；纳入阴性或矛盾结果以平衡证据；排除无微生物组数据的纯临床研究及非 ICI 疗法（如 CAR-T）研究。",
+          "reading_mode": "focused_local_search"
+        },
+        "material_depth": "fulltext",
+        "paper_id": "1d2792ae1850f48accaf1c111b2d92b6b2ebc6c0",
+        "review_planning_B": {
+          "broader_review_uses": [
+            {
+              "connection_to_review": "用于论证本综述的必要性：需要整合现有分散证据，统一评估标准，以澄清微生物组在ICI疗效中的真实作用。",
+              "material": "文章指出当前证据基础碎片化，大多数研究为回顾性、单中心、小样本，且暴露定义和混杂因素调整不一致。",
+              "purpose": "背景与现状描述"
+            },
+            {
+              "connection_to_review": "提醒综述作者在综合微生物组研究时，必须警惕类似的方法学缺陷，并在评估证据质量时考虑潜在的残余混杂。",
+              "material": "文章强调了观察性研究中的指示偏倚（Indication Bias），即重症患者更多使用抗生素，导致抗生素负面效应被高估。",
+              "purpose": "方法学警示"
+            },
+            {
+              "connection_to_review": "可作为综述‘局限性与展望’部分的素材，强调从相关性向因果性转变的需求，以及精准微生物组干预的潜力。",
+              "material": "建议未来研究应关注特定益生菌菌株和抗生素类别的影响，标准化微生物组测量协议，并进行前瞻性随机对照试验。",
+              "purpose": "未来研究方向"
+            }
+          ],
+          "facet_contributions": [
+            {
+              "boundaries": "仅反映统计学关联，不能证明因果机制；益生菌的结果基于较少研究且证据等级较低，不宜作为强证据引用；未区分具体细菌物种的变化。",
+              "contribution": "提供了抗生素、PPIs和益生菌对ICI疗效影响的汇总效应量（HR/RR）。具体数据显示抗生素和PPIs显著降低OS、PFS和ORR，而益生菌显著改善这些指标。这有助于解释在观察微生物组与ICI疗效关系时，为何不同研究间存在巨大差异——因为患者群体的用药背景不同。",
+              "facet_id": "F1",
+              "possible_uses": "用于支持‘临床用药史是微生物组-ICI疗效关联中的关键混杂因素’这一论点；提供具体的效应大小参考，说明药物干扰的严重程度。"
+            },
+            {
+              "boundaries": "时间窗定义在不同原始研究中可能存在差异，合并分析依赖于作者的重新分类。",
+              "contribution": "揭示了药物暴露的时间窗特异性：在ICI治疗前后[-45, 45]天内使用抗生素或PPIs，对预后的负面影响最为显著。",
+              "facet_id": "F1",
+              "possible_uses": "用于综述中讨论‘干预时机’的重要性，提示在评估微生物组影响时，需精确界定暴露时间窗，而非笼统地考虑‘是否用过药’。"
+            },
+            {
+              "boundaries": "这些是作者基于现有文献的解释性假说，并非本Meta分析的新实验发现；缺乏直接的微生物组测序数据支持，属于间接推断。",
+              "contribution": "提出了可能的机制假说：抗生素通过广谱消除有益菌破坏免疫反应；PPIs通过改变胃pH值扰乱免疫调节菌群平衡；益生菌通过促进有益菌生长增强抗肿瘤免疫。",
+              "facet_id": "F2",
+              "possible_uses": "作为理论框架的一部分，用于连接‘药物-微生物组-免疫’通路，尽管这些机制在该文中未被直接验证，但为后续机制研究提供了方向。"
+            }
+          ],
+          "planning_summary": "该Meta分析为综述提供了关于‘伴随用药’这一关键混杂因素或调节变量的大规模实证数据。它不直接揭示微生物组机制，但确立了临床实践中必须控制的药物干扰类型及其对预后的量化影响。可用于综述中讨论‘外部干预如何掩盖或修饰微生物组-免疫互作信号’，以及‘为何单纯检测微生物组而不考虑用药史会导致结果不一致’。",
+          "scope_interpretation_cautions": [
+            "该研究为Meta分析，其结论是基于已发表观察性研究的汇总，而非新的原始实验数据。",
+            "益生菌的益处证据等级较低（Low to Moderate certainty），不应视为确证性结论，仅具提示意义。",
+            "抗生素和PPIs的负面效应可能受到‘适应症偏倚’（即病情重者多用抗生素）的影响，实际因果效应可能被高估。",
+            "研究未直接测量肠道微生物组的具体组成变化，而是通过药物使用作为代理变量，因此不能直接回答‘哪些特定细菌’介导了疗效变化，只能回答‘哪些药物干扰’影响了疗效。"
+          ],
+          "topic_handles": [
+            "immune checkpoint inhibitors (ICIs)",
+            "gut microbiome modulation by drugs",
+            "antibiotics interference",
+            "proton pump inhibitors (PPIs)",
+            "probiotics supplementation",
+            "solid tumours (NSCLC, melanoma, RCC, etc.)",
+            "clinical outcomes (OS, PFS, ORR)"
+          ]
+        },
+        "source_handle": "P0081",
+        "study_summary_A": {
+          "approach": "1. 文献检索与筛选：遵循PRISMA指南，检索2011年4月至2024年5月发表的英文临床研究，纳入标准包括确诊癌症、接受ICI治疗、有微生物组干扰药物暴露数据及明确结局指标。排除动物研究、个案报告及样本量<10的研究。 2. 数据提取与质量评价：双人独立提取数据，优先提取多变量调整后的HR/RR以控制混杂。使用Newcastle-Ottawa Scale (NOS)评估队列研究质量，使用GRADE系统评估证据确定性。 3. Meta分析：计算各干预措施对OS、PFS和ORR的合并效应量。对于高异质性（I²>50%）采用随机效应模型。 4. 异质性探索：进行亚组分析（按肿瘤类型、暴露时间窗、治疗方案）和单变量Meta回归，识别导致异质性的协变量。 5. 敏感性分析与偏倚评估：使用“留一法”检验稳健性，通过漏斗图和Egger/Begg测试评估发表偏倚。",
+          "contribution_and_limits": [
+            {
+              "contribution": "提供了目前最大规模的关于抗生素、PPIs和益生菌对ICI疗效影响的定量综合证据，明确了这三类药物对疗效影响的总体方向（抗生素/PPIs负面，益生菌正面）。",
+              "limits": "所纳入研究均为观察性设计，存在固有的指示偏倚（Indication Bias），即病情更重的患者更可能使用抗生素，可能导致抗生素负面效应的夸大。此外，肠道微生物组的具体组成变化未作为直接暴露变量，而是通过药物代理，机制解释受限。"
+            },
+            {
+              "contribution": "通过Meta回归量化了异质性来源，发现治疗方案和暴露时间窗是抗生素效应异质性的主要解释因素。",
+              "limits": "部分亚组（如特定肿瘤类型的ORR）统计效能不足，结果需谨慎解读。GRADE评级显示多数生存结局证据确定性不高，限制了临床指南的直接应用。"
+            }
+          ],
+          "key_findings": [
+            {
+              "conditions": "抗生素暴露 vs 无暴露",
+              "finding": "抗生素使用与OS（HR=1.61, 95% CI 1.44-1.81）、PFS（HR=1.43, 95% CI 1.27-1.60）和ORR（RR=0.58, 95% CI 0.51-0.66）显著降低相关。证据确定性为低（OS/PFS）至中等（ORR）。"
+            },
+            {
+              "conditions": "PPIs暴露 vs 无暴露",
+              "finding": "PPIs使用与OS（HR=1.28, 95% CI 1.17-1.41）、PFS（HR=1.22, 95% CI 1.12-1.34）和ORR（RR=0.82, 95% CI 0.75-0.90）显著降低相关。证据确定性为中等（OS/PFS）至低（ORR）。"
+            },
+            {
+              "conditions": "益生菌暴露 vs 无暴露",
+              "finding": "益生菌使用与OS（HR=0.67, 95% CI 0.55-0.82）、PFS（HR=0.55, 95% CI 0.46-0.67）和ORR（RR=1.24, 95% CI 1.07-1.44）显著改善相关。但由于研究数量少且多为观察性研究，证据确定性较低至中等，结果被视为假设生成性而非确证性。"
+            },
+            {
+              "conditions": "亚组分析：抗生素暴露时间窗",
+              "finding": "在ICI治疗前后[-45, 45]天窗口内使用抗生素，OS恶化风险最高（β=0.2192, p=0.008）。"
+            },
+            {
+              "conditions": "亚组分析：PPIs暴露时间窗",
+              "finding": "在[-45, 45]天和同期使用时，PPIs与OS恶化的关联最强（HR≈1.31）。"
+            }
+          ],
+          "paper_kind": "review",
+          "problem_or_question": "尽管已知肠道微生物组影响ICI疗效，但现有研究在暴露定义、混杂因素调整和结果上存在巨大异质性和冲突。本研究旨在量化三种主要干扰肠道微生物组的药物干预（抗生素、PPIs、益生菌）对ICI治疗结局的整体影响方向、 magnitude 及其异质性来源，为临床合理用药提供综合证据。",
+          "research_scope": "针对接受免疫检查点抑制剂（ICIs）治疗的实体瘤患者，系统评估三种常见伴随用药（抗生素、质子泵抑制剂PPIs、益生菌）对肠道微生物组及ICI疗效的影响。研究涵盖非小细胞肺癌（NSCLC）、黑色素瘤、肾细胞癌（RCC）、尿路上皮癌（UC）、肝细胞癌（HCC）等多种肿瘤类型，纳入69项研究、102个队列，共22,568名患者。",
+          "work_summary": "这是一篇基于PRISMA指南的系统综述与Meta分析，旨在解决当前关于肠道微生物组调节剂影响ICI疗效的证据碎片化问题。作者通过检索PubMed、Embase等数据库，筛选出观察性研究（主要为回顾性队列），提取了进展无生存期（PFS）、总生存期（OS）和客观缓解率（ORR）数据。研究采用随机效应或固定效应模型计算合并风险比（HR/RR），并依据肿瘤类型、药物暴露时间窗（如[-90, 90]天）和治疗方案（单药vs联合）进行亚组分析。同时，利用Meta回归探索异质性来源，并通过GRADE系统评估证据确定性。结果显示，抗生素和PPIs的使用与ICI疗效降低显著相关，而益生菌补充则显示出改善疗效的趋势，但证据强度存在差异。"
+        },
+        "title": "Unraveling gut microbiome interferences in cancer immunotherapy: a meta-analysis of diverse drug effects",
+        "year": "2025"
+      }
+    },
+    {
+      "access_id": "source_materials[24]",
+      "channel": "source_materials",
+      "index_path": "source_materials[24]",
+      "identity": {
+        "source_handle": "P0339",
+        "paper_id": "9225e04c4f9620a87d4eb74932067cab87644bf2",
+        "title": "Association of proton pump inhibitor use with survival outcomes in cancer patients treated with immune checkpoint inhibitors: a systematic review and meta-analysis",
+        "doi": "10.1177/17588359221111703"
+      },
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": [],
+      "record": {
+        "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\9225e04c4f9620a87d4eb74932067cab87644bf2\\b00930fc889c0b10c13559898cc68e06\\attempt-01\\PAPER_READING_CARD.json",
+        "doi": "10.1177/17588359221111703",
+        "external_calls": 0,
+        "material_depth": "fulltext",
+        "paper_id": "9225e04c4f9620a87d4eb74932067cab87644bf2",
+        "review_planning_B": {
+          "broader_review_uses": [
+            {
+              "connection_to_review": "背景与争议梳理",
+              "material": "文中提到的既往meta分析结果矛盾（Li et al., Qin et al., Liu et al.），以及本研究通过扩大样本量和纳入会议摘要来解决这些矛盾的努力。",
+              "purpose": "用于综述的背景部分，说明该领域研究现状的复杂性和本综述纳入此类大样本荟萃分析的必要性。"
+            },
+            {
+              "connection_to_review": "临床实践指导意义",
+              "material": "建议对于接受ICI治疗的患者，应严格控制PPI的使用，特别是在ICI开始前；若必须使用，短期伴随使用似乎不影响生存。",
+              "purpose": "用于综述的讨论或结论部分，探讨干预措施的可能性。即通过管理共病用药（如PPI）来优化ICI疗效的策略。"
+            }
+          ],
+          "facet_contributions": [
+            {
+              "boundaries": "仅证明统计学关联，不直接展示菌群变化过程。不能直接用于解释分子机制，只能作为现象描述的证据。",
+              "contribution": "提供了PPI使用对ICI疗效影响的定量汇总证据：整体HR>1，但在不同癌症类型（NSCLC/UC vs. RCC/Melanoma）和使用时窗上存在显著差异。",
+              "facet_id": "F1",
+              "possible_uses": "用于回答“肠道菌群如何调节ICI疗效”中的外部因素干扰部分。特别是用于说明当肠道菌群受到药物（PPI）干扰时，ICI疗效可能受损，但这种影响并非在所有情境下都一致。"
+            },
+            {
+              "boundaries": "机制解释主要依赖作者对既往文献的引用和推测，而非本研究的实证数据。需结合其他提供直接微生物组数据的研究共同构建机制图景。",
+              "contribution": "提出了“使用时窗”作为潜在机制的解释线索：仅在ICI前长期使用PPI才导致疗效下降，暗示需要时间累积的菌群失调（如细菌丰富度降低）是中介因素。同时指出特定菌属（Akkermansia muciniphila, Ruminococcus sp.）可能在NSCLC中起关键作用，而PPI对其有负面影响。",
+              "facet_id": "F2",
+              "possible_uses": "用于辅助回答“机制是什么”。虽然本文未提供直接机制数据，但其讨论部分引用的文献和观察到的时窗效应，为“菌群组成改变->免疫微环境改变->疗效下降”这一链条提供了临床层面的合理性支持和边界条件。"
+            }
+          ],
+          "planning_summary": "该论文为综述提供了关键的宏观流行病学证据，证实了PPI使用与ICI疗效之间的负面关联，并提出了“使用时窗”这一重要调节变量。它有助于解释为何不同研究间存在异质性，并为“肠道菌群介导”假说提供了间接的临床支持线索（即长期菌群扰动才有害）。",
+          "scope_interpretation_cautions": [
+            "该研究为观察性数据的荟萃分析，存在混杂因素风险（尽管进行了多变量调整，但仍可能有未测量混杂）。",
+            "“无显著影响”不等于“无关联”，特别是在RCC和黑色素瘤亚组中，可能受限于统计效能或生物学特异性。",
+            "使用时窗的分类（基线、前60天、同期）是基于原始研究报告的聚合，不同研究的具体定义可能存在细微差异，需谨慎外推。",
+            "作者提出的机制解释（如特定菌属）是基于文献回顾和自身结果的推断，并非本研究直接测得，阅读时需区分事实发现与理论假设。"
+          ],
+          "topic_handles": [
+            "Proton Pump Inhibitors (PPIs)",
+            "Immune Checkpoint Inhibitors (ICIs)",
+            "Gut Microbiome Modulation",
+            "Survival Outcomes (OS/PFS)",
+            "Drug-Drug Interaction in Oncology",
+            "Timing of Concomitant Medication"
+          ]
+        },
+        "source_handle": "P0339",
+        "study_summary_A": {
+          "approach": "采用PRISMA 2020指南进行系统综述和荟萃分析。检索EMBASE、MEDLINE/PubMed、Cochrane Library及主要肿瘤学会议摘要。纳入标准包括报告ICI治疗癌症患者中PPI使用者与非使用者的OS或PFS HR值的研究。数据提取后，使用随机效应模型合并HR，并通过Cochran's Q检验和I²指数评估异质性。进一步按PPI使用时窗、癌症类型、ICI类型、治疗线数和地理区域进行亚组分析，并使用Meta回归和Egger's检验评估偏倚。",
+          "contribution_and_limits": [
+            {
+              "contribution": "提供了目前最大规模的证据综合，确认了PPI使用与ICI疗效降低之间的整体负相关关系，并细化了这种关联依赖于PPI使用时窗（长期/预防性 vs. 短期/伴随）和癌症类型。",
+              "limits": "所给材料未交代具体的微生物组测序数据或机制验证实验，结论基于流行病学观察数据的汇总。亚组分析受限于原始研究中缺失的临床细节（如具体PPI种类、饮食、种族、PD-L1状态），且部分亚组（如抗CTLA-4）样本量不足，无法得出确切结论。"
+            }
+          ],
+          "key_findings": [
+            {
+              "conditions": "总体人群（33项研究，约15,957名OS患者）",
+              "finding": "PPI使用与较短的OS（HR=1.31, 95% CI 1.19–1.44）和PFS（HR=1.30, 95% CI 1.17–1.46）显著相关。"
+            },
+            {
+              "conditions": "PPI使用时窗：基线治疗或ICI前60天内开始",
+              "finding": "在基线使用PPI（Group A）或ICI前60天内开始使用PPI（Group B）的患者中，OS和PFS均显著缩短；而在ICI治疗期间或之后才开始使用PPI（Group C）时，未观察到显著的生存负面影响。"
+            },
+            {
+              "conditions": "癌症类型：非小细胞肺癌（NSCLC）和尿路上皮癌（UC）",
+              "finding": "PPI使用显著缩短NSCLC和UC患者的OS和PFS；而在肾细胞癌（RCC）和黑色素瘤患者中，未观察到显著的生存影响。"
+            },
+            {
+              "conditions": "ICI类型：抗PD-1/PD-L1单抗",
+              "finding": "在抗PD-1、抗PD-L1及抗PD-(L)1治疗亚组中，PPI使用显著降低生存率；由于样本量极少，抗CTLA-4单药或联合疗法的亚组结果不具统计效力。"
+            }
+          ],
+          "paper_kind": "review",
+          "problem_or_question": "尽管已有研究表明肠道菌群调节可能影响ICI疗效，且PPI已知会改变肠道菌群，但既往关于PPI与ICI联用对患者生存结局影响的观察结果存在矛盾。本研究旨在通过整合现有证据，明确PPI使用是否以及如何在不同临床情境下影响ICI治疗的生存获益。",
+          "research_scope": "接受免疫检查点抑制剂（ICI）治疗的实体瘤患者，考察质子泵抑制剂（PPI）的使用与总生存期（OS）和无进展生存期（PFS）之间的关联。",
+          "work_summary": "这是一篇系统综述和荟萃分析，旨在解决关于PPI使用对ICI疗效影响的研究结果矛盾问题。作者检索了截至2022年3月的多项数据库及会议摘要，纳入比较ICI单药与ICI联合PPI治疗患者的生存数据研究。通过随机效应模型汇总风险比（HR），并进行亚组分析和Meta回归，以探索异质性来源并确定特定人群中的关联模式。"
+        },
+        "title": "Association of proton pump inhibitor use with survival outcomes in cancer patients treated with immune checkpoint inhibitors: a systematic review and meta-analysis",
+        "year": "2022"
+      }
+    },
+    {
+      "access_id": "source_materials[23]",
+      "channel": "source_materials",
+      "index_path": "source_materials[23]",
+      "identity": {
+        "source_handle": "P0275",
+        "paper_id": "768ceed11b5509cd8f6c24d07e8fa015646929c0",
+        "title": "The association between antibiotic use and outcomes of HCC patients treated with immune checkpoint inhibitors",
+        "doi": "10.3389/fimmu.2022.956533"
+      },
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": [],
+      "record": {
+        "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\768ceed11b5509cd8f6c24d07e8fa015646929c0\\cfc11a1cb98d5924cc25ea46792d5251\\attempt-01\\PAPER_READING_CARD.json",
+        "doi": "10.3389/fimmu.2022.956533",
+        "external_calls": 0,
+        "material_depth": "fulltext",
+        "paper_id": "768ceed11b5509cd8f6c24d07e8fa015646929c0",
+        "review_planning_B": {
+          "broader_review_uses": [
+            {
+              "connection_to_review": "帮助综述建立“肿瘤组织学类型决定微生物干预后果”的分类框架，避免将单一机制泛化到所有固体肿瘤。",
+              "material": "与其他实体瘤（肺癌、黑色素瘤等）中抗生素导致ICI疗效下降的Meta分析结果进行对比。",
+              "purpose": "作为比较基准"
+            },
+            {
+              "connection_to_review": "补充关于宿主基础状态（comorbidities）如何影响微生物-药物互作的背景信息。",
+              "material": "HCC患者中常见的菌群失调特征（如双歧杆菌减少、拟杆菌属增加）及其与肝硬化、免疫抑制的关系。",
+              "purpose": "背景知识"
+            }
+          ],
+          "facet_contributions": [
+            {
+              "boundaries": "仅限HCC人群；回顾性数据；未区分抗生素种类；不能外推至所有实体瘤。",
+              "contribution": "提供了HCC患者中抗生素使用与ICI疗效关联的定量综合证据（OS, PFS, ORR均无显著负面影响）。",
+              "facet_id": "F1",
+              "possible_uses": "用于回答“肠道微生物群如何调节实体瘤中ICI疗效”的问题，特别是作为“非普遍负面效应”的反例或特例，展示不同肿瘤类型间的异质性。"
+            },
+            {
+              "boundaries": "主要为理论推导和动物模型引用；人类临床数据的直接因果链条尚不明确；属于作者的解释性观点而非直接实验验证。",
+              "contribution": "提出了HCC特有的机制解释：肝硬化导致的基线免疫抑制状态和特定的菌群组成（如革兰氏阴性菌增加）可能使抗生素对免疫系统的额外扰动不产生额外的负面效应，甚至可能通过消除某些抑制性菌群而维持或轻微改善免疫反应。",
+              "facet_id": "F2",
+              "possible_uses": "用于回答“介导该效应的机制是什么”，提供关于宿主基础疾病（肝硬化）如何修饰微生物-免疫互作的具体病理生理学假设。"
+            }
+          ],
+          "planning_summary": "该论文为综述规划提供了重要的“阴性结果”案例和机制解释素材。它证明了在HCC这一特定实体瘤中，抗生素-微生物轴对ICI疗效的影响模式可能不同于其他癌症。这有助于在综述中构建“肿瘤类型特异性”的比较维度，并支持关于肝硬化背景下免疫微环境独特性的机制讨论。",
+          "scope_interpretation_cautions": [
+            "该研究的阴性结果不应被解读为抗生素在所有情况下对ICI都无害，其结论严格局限于HCC这一特定癌种。",
+            "作者提出的机制解释（如抗生素可能增强γδ T细胞活性）主要基于小鼠模型和理论推测，需谨慎对待其在人类中的适用性。",
+            "由于缺乏抗生素具体类型的细分数据，无法判断不同类别抗生素（如广谱vs窄谱）是否存在差异。"
+          ],
+          "topic_handles": [
+            "肝细胞癌 (HCC)",
+            "免疫检查点抑制剂 (ICI)",
+            "抗生素暴露",
+            "肠道微生物群失调",
+            "肝硬化背景下的免疫微环境",
+            "抗肿瘤免疫反应的肿瘤类型差异"
+          ]
+        },
+        "source_handle": "P0275",
+        "study_summary_A": {
+          "approach": "遵循PRISMA指南进行系统综述和Meta分析。检索PubMed、EMBASE、Cochrane Library等数据库。纳入标准：确诊HCC、接受ICI治疗、按抗生素使用史分组、报告OS/PFS/ORR/DCR结局。采用随机效应模型（异质性高时）或固定效应模型处理数据，计算HR和OR及其95%置信区间。进行敏感性分析、亚组分析（如排除中国文献以检验稳健性）及发表偏倚检测（Begg's/Egger's test）。",
+          "contribution_and_limits": [
+            {
+              "contribution": "提供了首个专门针对HCC人群的Meta分析证据，表明抗生素使用不损害ICI疗效，与其他实体瘤（如肺癌、黑色素瘤）中观察到的负面效应形成对比。",
+              "limits": "纳入研究均为回顾性性质，存在选择偏倚风险；样本量相对较小（仅1056人）；主要基于亚洲人群数据；无法进行基于抗生素类型、剂量或具体菌群的亚组分析；未能评估抗生素与ICI相关不良事件的关系。"
+            }
+          ],
+          "key_findings": [
+            {
+              "conditions": "6项回顾性研究，1056名HCC患者（352名使用抗生素），ICI治疗背景",
+              "finding": "抗生素使用未显著影响总体生存期（OS: HR 1.41, P=0.088）和无进展生存期（PFS: HR 1.21, P=0.459）。"
+            },
+            {
+              "conditions": "同上人群，关注肿瘤反应",
+              "finding": "抗生素使用未显著降低客观缓解率（ORR: OR 1.06, P=0.784）或疾病控制率（DCR: OR 0.42, P=0.286）。"
+            }
+          ],
+          "paper_kind": "review",
+          "problem_or_question": "在肝细胞癌（HCC）患者中，抗生素的使用是否会负面影响免疫检查点抑制剂（ICI）的治疗疗效（包括生存期和肿瘤反应）？",
+          "research_scope": "肝细胞癌（HCC）患者接受免疫检查点抑制剂（ICI）治疗的情境；聚焦于抗生素使用史对ICI疗效的影响。纳入6项回顾性队列研究，共1056名患者。",
+          "work_summary": "本研究是一项系统综述与Meta分析，旨在评估抗生素使用是否影响接受ICI治疗的HCC患者的生存和临床疗效。鉴于肠道微生物群在ICI疗效中的关键作用以及抗生素对其的潜在干扰，且此前关于HCC中这一关联的研究结论存在争议，作者汇总了截至2022年5月的现有证据。通过对总体生存期（OS）、无进展生存期（PFS）、客观缓解率（ORR）和控制率（DCR）进行合并分析，结果显示抗生素使用并未显著降低HCC患者ICI治疗的疗效。讨论部分提出，由于HCC常伴随肝硬化及固有的免疫抑制微环境，抗生素引起的菌群失调可能不会像在其他癌症中那样进一步恶化预后，甚至可能通过改变免疫平衡产生中性或特定效应。"
+        },
+        "title": "The association between antibiotic use and outcomes of HCC patients treated with immune checkpoint inhibitors",
+        "year": "2022"
+      }
+    },
+    {
+      "access_id": "source_materials[20]",
+      "channel": "source_materials",
+      "index_path": "source_materials[20]",
+      "identity": {
+        "source_handle": "P0033",
+        "paper_id": "0f25b980517704cd7fa782dd9e51d16b77d00249",
+        "title": "Longitudinal gut microbiome changes in immune checkpoint blockade-treated advanced melanoma",
+        "doi": "10.1038/s41591-024-02803-3"
+      },
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": [],
+      "record": {
+        "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\0f25b980517704cd7fa782dd9e51d16b77d00249\\3c874f5c02dd72c3ac4f597e72a44263\\attempt-01\\PAPER_READING_CARD.json",
+        "doi": "10.1038/s41591-024-02803-3",
+        "external_calls": 0,
+        "material_depth": "fulltext",
+        "paper_id": "0f25b980517704cd7fa782dd9e51d16b77d00249",
+        "review_planning_B": {
+          "broader_review_uses": [
+            {
+              "connection_to_review": "提供方法学参考和概念框架",
+              "material": "使用贝叶斯高阶交互模型处理纵向 compositional data，并构建微生物平衡（balance）指标进行生存分析。",
+              "purpose": "在综述的方法学部分或讨论部分，引用此类高级统计方法来处理微生物组数据的复杂性和组成性偏差，作为当前领域内严谨数据分析的代表。"
+            },
+            {
+              "connection_to_review": "提供临床实践中的干扰因素示例",
+              "material": "PPI使用和抗生素历史对微生物组动态的显著影响，以及它们如何改变微生物与预后的关联。",
+              "purpose": "在综述中讨论混杂因素的重要性，指出未来研究或临床试验设计中必须标准化或记录这些药物使用情况，以准确解读微生物组数据。"
+            }
+          ],
+          "facet_contributions": [
+            {
+              "boundaries": "仅限于晚期黑色素瘤人群；结果依赖于特定的SGB定义和贝叶斯模型假设；独立验证队列规模有限，需谨慎外推至其他肿瘤类型或更大人群。",
+              "contribution": "提供了175例晚期黑色素瘤患者纵向队列中，与长期无进展生存（PFS ≥12个月）相关的特定微生物SGBs及其代谢通路（主要是SCFA合成）的动态变化证据。识别出5种持续高丰度的有益菌和4种持续高丰度的潜在耐药菌。",
+              "facet_id": "F1",
+              "possible_uses": "用于回答“哪些微生物特征与ICB疗效相关”的子问题，特别是强调治疗过程中的动态积累效应。可作为支持SCFA产生菌在ICB疗效中作用的实证素材。"
+            },
+            {
+              "boundaries": "这是观察性关联，不能直接证明因果关系；亚组样本量较小，统计效力受限；结论主要基于统计学上的斜率差异，而非直接的生物学机制验证。",
+              "contribution": "展示了同一微生物在不同临床情境（单药vs联合治疗、有无结肠炎、PPI使用）下表现出截然不同的丰度轨迹，甚至出现相反的方向性。",
+              "facet_id": "F1",
+              "possible_uses": "用于解释综述中可能存在的异质性来源，说明为何不同研究或不同患者群体中观察到的微生物标志物不同。提示在评估微生物疗效时需考虑临床协变量。"
+            },
+            {
+              "boundaries": "文章主要基于宏基因组的功能潜力预测（MetaCyc pathways），而非实测代谢物浓度；机制解释多为推测性，需结合其他实验研究确认因果链条；所给材料未提供直接的免疫细胞浸润或功能验证数据。",
+              "contribution": "提出了微生物动态与宿主免疫反应（通过irAEs如结肠炎体现）及代谢产物（SCFA, polyamines, menaquinol）之间的潜在联系。例如，发现丁酸产生菌与避免结肠炎相关，多胺合成途径与PFS ≥12相关。",
+              "facet_id": "F2",
+              "possible_uses": "为“机制介导”子问题提供间接线索，特别是微生物代谢产物（SCFA、多胺）可能作为中介因子影响免疫治疗和副作用的假说支持。"
+            }
+          ],
+          "planning_summary": "该论文提供了ICB治疗期间肠道微生物组纵向演变的实证数据，特别强调了‘治疗后动态’相对于‘基线静态’的预测价值。它为综述提供了关于微生物群落如何响应免疫治疗的时间维度证据，以及不同临床背景（药物类型、副作用、合并用药）如何重塑这种响应的具体案例。可用于支持‘微生物组动态监测优于单次基线检测’的观点，并为解释不同研究中微生物标志物不一致的现象提供情境化解释。",
+          "scope_interpretation_cautions": [
+            "该研究的对象是晚期黑色素瘤，其微生物组特征和治疗反应可能与其他实体瘤（如肺癌、肾癌）存在差异，外推至其他肿瘤类型时需保持谨慎。",
+            "纵向采样仅覆盖前12周，未能捕捉长期治疗（如维持治疗阶段）的微生物变化，因此发现的动态模式可能仅代表早期治疗反应。",
+            "微生物功能的推断基于基因含量（MetaCyc），而非实际表达的蛋白质或代谢物水平，因此关于SCFA或多胺的作用仅为潜在机制假设。",
+            "独立验证队列的样本量和异质性较大，部分验证结果不显著，表明该微生物签名可能在特定条件下才稳健，并非普适性极强的单一 biomarker。"
+          ],
+          "topic_handles": [
+            "Longitudinal microbiome dynamics during ICB",
+            "Species-level genome bins (SGBs) as predictive markers",
+            "Short-chain fatty acid (SCFA) producing taxa trajectories",
+            "Impact of clinical context (monotherapy vs combination, colitis, PPI use) on microbial response",
+            "Microbial balances (log ratios) for survival prediction"
+          ]
+        },
+        "source_handle": "P0033",
+        "study_summary_A": {
+          "approach": "采用多中心前瞻性队列设计，对175例晚期黑色素瘤患者进行全基因组鸟枪法宏基因组测序（MetaPhlAn4和HuMAnN3）。使用基于Pibble模型的贝叶斯高阶交互回归模型，控制混杂因素（如年龄、性别、BMI、抗生素使用、癌症中心等），模拟PFS ≥12个月与PFS <12个月患者在四个时间点（基线+3次随访）的微生物SGBs和通路的线性轨迹斜率。通过事后对比（post hoc contrasts）比较不同临床亚组（单药vs联合治疗、有无结肠炎、有无PPI使用）中的微生物动态。构建优势比（balance/log ratio）指标，并通过交叉验证和独立队列验证其预测能力。",
+          "contribution_and_limits": [
+            {
+              "contribution": "提供了ICB治疗期间肠道微生物组纵向变化的详细图谱，揭示了基线后微生物动态对预后的独立预测价值，并指出了单一基线分析的局限性。",
+              "limits": "所给摘要未交代具体的代谢功能验证实验（如代谢组学关联的具体机制链条）；样本量对于某些亚组分析（如特定药物组合下的结肠炎亚组）较小；将复杂的微生物动态简化为线性轨迹可能忽略非线性变化；独立验证队列样本量有限且异质性大，限制了泛化性的确证强度。"
+            }
+          ],
+          "key_findings": [
+            {
+              "conditions": "比较PFS ≥12个月与PFS <12个月患者",
+              "finding": "99个SGBs能区分两组，其中20个仅在基线有差异，42个仅在治疗后出现差异。5个SGBs（如Agathobaculum butyriciproducens, Intestinibacter bartlettii等）在PFS ≥12组中持续高丰度，主要涉及短链脂肪酸（SCFA）合成；4个SGBs（如Ruthenibacterium lactatiformans, Prevotella copri clade A等）在PFS <12组中持续高丰度。"
+            },
+            {
+              "conditions": "基于持续差异SGBs构建的对数比率（Balance）",
+              "finding": "该平衡指数在基线和早期治疗阶段能有效区分PFS组别（AUC约0.66-0.74），并与总生存期（OS）显著相关（HR > 1.6, P < 0.05）。在部分独立验证队列中显示出可比的预测能力。"
+            },
+            {
+              "conditions": "不同临床情境：治疗方案",
+              "finding": "单药与联合治疗共享部分微生物信号，但部分SGBs（如Coprococcus eutactus）在两种方案下对PFS的预测方向相反。单药治疗中，某些拟杆菌属（Bacteroides）在PFS <12组中增加，而在联合治疗中未观察到此现象。"
+            },
+            {
+              "conditions": "不同临床情境：ICB诱导的结肠炎",
+              "finding": "未发生结肠炎的患者中丁酸产生菌（如Roseburia, Faecalibacterium prausnitzii）丰度较高或下降较少。发生结肠炎的患者中，Akkermansia muciniphila基线高但随后急剧下降。基于结肠炎相关SGBs构建的平衡指数可预测结肠炎发生（AUC ~0.72）。"
+            },
+            {
+              "conditions": "不同临床情境：PPI使用",
+              "finding": "PPI使用者与非使用者在微生物动态上存在差异，例如Streptococcus thermophilus在非使用者（PFS ≥12）中增加，而在使用者中减少。"
+            }
+          ],
+          "paper_kind": "empirical",
+          "problem_or_question": "既往基于基线的横断面研究在识别ICB疗效相关的微生物生物标志物时存在异质性和缺乏共识。本研究试图回答：在ICB治疗过程中，肠道微生物组如何随时间动态变化？这些纵向动态是否能比基线数据更准确地预测患者的无进展生存期（PFS）和总生存期（OS），以及这些动态是否受治疗方案和副作用等临床因素的调节？",
+          "research_scope": "针对接受免疫检查点阻断（ICB）治疗的晚期黑色素瘤患者，进行纵向肠道微生物组分析。研究涉及来自英国、荷兰和西班牙五个队列的175名患者，样本采集覆盖治疗前基线及治疗后12周内的三个时间点。",
+          "work_summary": "该研究旨在解决既往横断面研究中微生物标志物缺乏共识的问题，通过纵向追踪ICB治疗期间肠道微生物组的动态变化，区分长期无进展生存（PFS ≥12个月）与短期生存患者的微生物特征。研究利用贝叶斯回归模型分析物种水平基因组箱（SGBs）和代谢通路的丰度轨迹，并考察不同临床情境（如治疗方案、结肠炎发生、质子泵抑制剂使用）对微生物动态的影响。研究发现，除了基线差异外，许多微生物在治疗后的丰度变化模式具有预测价值，且同一微生物在不同临床背景下可能呈现相反的动态趋势。"
+        },
+        "title": "Longitudinal gut microbiome changes in immune checkpoint blockade-treated advanced melanoma",
+        "year": "2024"
+      }
+    },
+    {
+      "access_id": "source_materials[21]",
+      "channel": "source_materials",
+      "index_path": "source_materials[21]",
+      "identity": {
+        "source_handle": "P0236",
+        "paper_id": "62379160afa6c14c9a9ae85a0684ccec8ed9c07e",
+        "title": "Systemic antibiotic exposure and outcomes of immune checkpoint inhibitors in non–small cell lung cancer.",
+        "doi": "10.1200/jco.2026.44.16_suppl.e20602"
+      },
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": [],
+      "record": {
+        "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\62379160afa6c14c9a9ae85a0684ccec8ed9c07e\\d1590e8bbbc44704c2f0e0880c85c113\\attempt-01\\PAPER_READING_CARD.json",
+        "doi": "10.1200/jco.2026.44.16_suppl.e20602",
+        "external_calls": 0,
+        "material_depth": "abstract",
+        "paper_id": "62379160afa6c14c9a9ae85a0684ccec8ed9c07e",
+        "review_planning_B": {
+          "broader_review_uses": [
+            {
+              "connection_to_review": "强调研究肠道微生物群对ICI疗效影响的临床紧迫性和现实意义，即优化抗生素使用可能是提高ICI疗效的策略之一。",
+              "material": "指出尽管ICI改变了实体瘤管理，但仅部分患者获益，且抗生素使用常见且可能有害。",
+              "purpose": "背景与临床相关性"
+            },
+            {
+              "connection_to_review": "为综述提供当前关于抗生素-ICI相互作用的高质量证据水平参考，表明这是一个已被广泛观察且具有统计学意义的现象，而非个别案例。",
+              "material": "汇总了15项研究、超过5万名患者的数据，显示了抗生素暴露与不良预后之间的一致性趋势，尤其是在NSCLC中。",
+              "purpose": "领域现状与证据等级"
+            }
+          ],
+          "facet_contributions": [
+            {
+              "boundaries": "仅展示了抗生素暴露与临床预后的关联，未直接测量或分析微生物群的具体变化。不能直接说明是哪种微生物或机制导致了这种效果。",
+              "contribution": "提供了大规模荟萃分析数据，证实全身性抗生素暴露与实体瘤（特别是NSCLC）患者ICI治疗后的较差生存结局（OS和PFS）相关。具体数据显示NSCLC患者中PFS风险显著增加（HR 1.16）。",
+              "facet_id": "F1",
+              "possible_uses": "用于回答“肠道微生物群如何调节实体瘤中免疫检查点抑制剂的疗效”这一问题，提供临床层面的负面调节证据。可作为抗生素干扰ICI疗效的临床后果的具体量化指标。"
+            },
+            {
+              "boundaries": "本身不提供具体的分子或细胞机制细节（如特定菌群、代谢物、免疫细胞通路）。其机制主张是基于观察性关联的推论，需结合其他提供机制详情的研究。",
+              "contribution": "提出了“微生物群介导的免疫治疗疗效受损”作为潜在机制的解释框架，并呼吁未来研究整合微生物谱分析和标准化的抗生素暴露定义。",
+              "facet_id": "F2",
+              "possible_uses": "为机制探讨提供理论背景和方向指引。虽然未提供直接的分子机制数据，但其结论强化了微生物群在ICI疗效中的核心地位，有助于构建从微生物扰动到临床结局的逻辑链条。"
+            }
+          ],
+          "planning_summary": "该论文提供了关于全身性抗生素暴露如何负面影响免疫检查点抑制剂（ICI）疗效的大规模荟萃分析证据，特别是在非小细胞肺癌（NSCLC）中。它为“微生物群介导的ICI疗效受损”这一假设提供了强有力的流行病学支持，并指出了抗生素管理在ICI治疗中的重要性。对于综述而言，它是解释临床观察到的疗效差异的重要背景材料，也是连接微生物群理论与临床预后结果的桥梁。",
+          "scope_interpretation_cautions": [
+            "该研究为系统综述和荟萃分析，其结论依赖于纳入的观察性研究的质量和设计。",
+            "关联不等于因果；抗生素暴露可能与患者整体健康状况、感染严重程度等其他混杂因素有关，尽管研究试图控制这些变量，但残余混杂仍可能存在。",
+            "NSCLC亚组的分析是预先指定的敏感性分析，其结果可能不适用于所有实体瘤类型或其他ICI药物组合。",
+            "所给摘要未提供具体的抗生素类别、疗程、给药时间与ICI开始时间的关系等细节，这些细节对理解机制和影响程度至关重要。"
+          ],
+          "topic_handles": [
+            "Systemic antibiotic exposure (ABT)",
+            "Immune checkpoint inhibitors (ICIs)",
+            "Non-small cell lung cancer (NSCLC)",
+            "Overall survival (OS)",
+            "Progression-free survival (PFS)",
+            "Gut microbiota disruption",
+            "Microbiome-mediated impairment of immunotherapy efficacy"
+          ]
+        },
+        "source_handle": "P0236",
+        "study_summary_A": {
+          "approach": "采用系统综述和荟萃分析方法。按照PRISMA 2020指南进行文献检索（PubMed, Scopus, EMBASE），纳入2018-2025年发表的研究。纳入标准包括：评估实体瘤患者ICI治疗期间ABT暴露与时间事件结局关联的研究，且明确定义了ABT暴露窗口。统计分析主要使用随机效应模型。预先指定的敏感性分析专注于NSCLC亚组，因其样本量最大且方法学同质性最高。",
+          "contribution_and_limits": [
+            {
+              "contribution": "提供了截至2025年关于全身性抗生素暴露影响实体瘤ICI疗效的最新系统综述和荟萃分析数据，特别强调了NSCLC亚组中PFS受损的稳健证据。",
+              "limits": "所给摘要未交代具体的抗生素种类、给药时机细节、微生物群具体组成变化机制、以及不同ICI药物类型的分层分析结果。结论基于观察性研究的汇总，因果推断受限。"
+            }
+          ],
+          "key_findings": [
+            {
+              "conditions": "所有纳入的实体瘤患者（N=52,489）",
+              "finding": "ABT暴露与较差的总生存期（OS）相关（随机效应HR 1.16, 95% CI 1.03–1.29），以及数值上较差的无进展生存期（PFS）（随机效应HR 1.11, 95% CI 0.95–1.27）。"
+            },
+            {
+              "conditions": "NSCLC亚组敏感性分析（N=45,896）",
+              "finding": "OS方面观察到中度异质性（I² = 51%），合并固定效应HR为1.05 (95% CI 0.996–1.11)，显示ABT暴露倾向于导致生存率下降的趋势。PFS方面无异质性（I² = 0%），ABT暴露与疾病进展风险显著增加相关（HR 1.16, 95% CI 1.02–1.30），固定效应和随机效应估计值一致。"
+            }
+          ],
+          "paper_kind": "review",
+          "problem_or_question": "尽管免疫检查点抑制剂改变了实体瘤的管理，但只有部分患者能获得持久获益。鉴于肠道微生物群是抗肿瘤免疫的关键调节者，且全身性抗生素治疗会破坏微生物稳态，观察性研究显示抗生素可能损害ICI疗效，但结果异质性大。本研究旨在通过更新的综合分析，特别是针对肿瘤特异性分析，来澄清这种关联。",
+          "research_scope": "实体瘤患者接受免疫检查点抑制剂（ICI）治疗期间，全身性抗生素暴露（ABT）与时间事件结局（总生存期OS、无进展生存期PFS）的关联；特别聚焦于非小细胞肺癌（NSCLC）亚组。",
+          "work_summary": "该研究旨在综合现有证据，评估在实体瘤免疫治疗背景下，全身性抗生素使用对疗效的影响。作者遵循PRISMA 2020指南进行了系统综述和荟萃分析，检索了2018年至2025年间PubMed、Scopus和EMBASE数据库中的相关研究。主要发现表明，整体而言，抗生素暴露与较差的总生存期相关，且在非小细胞肺癌亚组中，抗生素暴露与显著增加的疾病进展风险（无进展生存期缩短）一致。这支持了微生物群介导的免疫治疗疗效受损假说。"
+        },
+        "title": "Systemic antibiotic exposure and outcomes of immune checkpoint inhibitors in non–small cell lung cancer.",
+        "year": "2026"
+      }
+    },
+    {
+      "access_id": "source_materials[27]",
+      "channel": "source_materials",
+      "index_path": "source_materials[27]",
+      "identity": {
+        "source_handle": "P0517",
+        "paper_id": "e8fb88935a5c5757dc683f56d1ff0c0f356b20ae",
+        "title": "The effects of antibiotics on the efficacy of immune checkpoint inhibitors in patients with non-small-cell lung cancer differ based on PD-L1 expression.",
+        "doi": "10.1016/j.ejca.2021.02.040"
+      },
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": [],
+      "record": {
+        "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\e8fb88935a5c5757dc683f56d1ff0c0f356b20ae\\e10b3bbe331c85470c05050fa7e09204\\attempt-01\\PAPER_READING_CARD.json",
+        "doi": "10.1016/j.ejca.2021.02.040",
+        "external_calls": 0,
+        "material_depth": "abstract",
+        "paper_id": "e8fb88935a5c5757dc683f56d1ff0c0f356b20ae",
+        "review_planning_B": {
+          "broader_review_uses": [
+            {
+              "connection_to_review": "可用于综述中讨论临床管理建议的部分，强调在制定ICI治疗方案时，应谨慎评估患者的抗生素使用史，特别是对于PD-L1高表达患者。",
+              "material": "抗生素使用导致PD-L1高表达NSCLC患者OS显著缩短的数据。",
+              "purpose": "提供临床实践中的警示案例"
+            },
+            {
+              "connection_to_review": "帮助综述避免过度概括“抗生素总是有害”的观点，指出效应的情境依赖性，促进更精细化的综述框架构建。",
+              "material": "在PD-L1低表达人群中未发现抗生素使用的显著负面影响。",
+              "purpose": "界定研究领域的知识边界"
+            }
+          ],
+          "facet_contributions": [
+            {
+              "boundaries": "仅限于NSCLC人群；仅评估ICI单药治疗；未直接测量肠道菌群变化，而是通过抗生素使用作为菌群扰动的代理指标。",
+              "contribution": "提供了抗生素使用对NSCLC患者ICI疗效影响的实证数据，证实了负面效应的存在，并量化了其对OS和PFS的具体影响幅度。",
+              "facet_id": "F1",
+              "possible_uses": "可用于支持综述中关于“抗生素使用通常与较差的ICI预后相关”这一观点的证据链，特别是针对肺癌这一主要适应症。"
+            },
+            {
+              "boundaries": "这是观察性关联，不能直接推断因果机制；PD-L1阈值（50%）的选择可能影响结果的普适性；需确认其他研究中是否有类似的分层发现以验证此特异性。",
+              "contribution": "揭示了PD-L1高表达（≥50%）是抗生素负面效应的关键预测因子，而在低表达人群中未发现显著影响。",
+              "facet_id": "F1",
+              "possible_uses": "用于解释ICI疗效受微生物组干预影响的异质性来源。提示在综述中讨论宿主因素（如PD-L1状态）如何与微生物组状态交互作用，从而决定治疗结局。"
+            },
+            {
+              "boundaries": "本研究的观察性质决定了它无法区分是PD-L1本身导致了敏感性，还是与PD-L1相关的其他因素（如肿瘤负荷、既往治疗史）所致。不能据此断定具体的分子机制。",
+              "contribution": "虽然未直接阐明分子机制，但其发现的PD-L1依赖性效应为机制假说提供了约束条件。例如，它暗示高PD-L1表达可能与特定的肠道菌群组成或免疫微环境状态相关联，使得这些患者对菌群扰动更为敏感。",
+              "facet_id": "F2",
+              "possible_uses": "可作为机制讨论部分的背景线索，引导读者思考潜在的生物学通路（如T细胞耗竭程度、炎症状态等），而非直接提供机制证据。"
+            }
+          ],
+          "planning_summary": "该论文为综述提供了关于肠道菌群/抗生素干预如何调节免疫检查点抑制剂（ICI）疗效的重要临床观察证据。其核心价值在于指出了这种调节作用并非普遍一致，而是高度依赖于宿主的生物标志物状态（此处为PD-L1表达水平）。这为理解“为什么某些患者受抗生素负面影响而另一些不受影响”提供了关键的临床分层视角，有助于细化综述中关于效应异质性的讨论。",
+          "scope_interpretation_cautions": [
+            "该研究仅涉及NSCLC，其结论不能直接外推到其他类型的实体瘤，尽管综述主题包括所有实体瘤，但需注意癌种间的异质性。",
+            "PD-L1表达水平的测定方法和阈值在不同研究中可能存在差异，本研究的50%阈值结果需与其他使用不同阈值的研究进行比较时保持谨慎。",
+            "抗生素的使用类型、剂量、疗程及具体种类在摘要中未详细列出，这可能影响对“抗生素”这一暴露因素的精确解读，不同种类的抗生素对菌群的影响各异。",
+            "回顾性研究设计意味着存在未测量混杂因素的风险，尽管进行了多变量分析，但仍不能完全排除残余混杂。"
+          ],
+          "topic_handles": [
+            "gut microbiome modulation of ICI efficacy",
+            "antibiotic exposure timing relative to ICI initiation",
+            "PD-L1 expression as an effect modifier",
+            "non-small-cell lung cancer (NSCLC) clinical outcomes",
+            "overall survival (OS) and progression-free survival (PFS) stratification"
+          ]
+        },
+        "source_handle": "P0517",
+        "study_summary_A": {
+          "approach": "采用多中心回顾性队列研究设计。纳入标准：确诊为NSCLC且接受ICI单药治疗的患者。暴露变量：在ICI治疗开始前2个月至开始后1个月内是否使用抗生素。主要结局指标：无进展生存期（PFS）和总生存期（OS）。统计分析方法：使用Kaplan-Meier法绘制生存曲线并进行Log-rank检验，使用Cox比例风险回归模型进行多变量分析以调整混杂因素。亚组分析：根据PD-L1表达水平（<50% vs ≥50%）将患者分为两组，分别评估抗生素使用对各亚组生存预后的影响。",
+          "contribution_and_limits": [
+            {
+              "contribution": "提供了在NSCLC特定人群中，抗生素使用对ICI疗效影响的临床证据，特别是揭示了PD-L1表达水平作为潜在效应修饰因子的重要性。",
+              "limits": "所给摘要未交代具体的多变量分析中调整了哪些协变量；未提供PD-L1检测的具体平台或阈值判定细节；样本量虽大但为回顾性研究，可能存在选择偏倚和混杂因素；仅关注ICI单药治疗，未涵盖联合治疗方案；结果仅在NSCLC背景下成立，外推至其他癌种需谨慎。"
+            }
+          ],
+          "key_findings": [
+            {
+              "conditions": "整体NSCLC人群 (N=531)",
+              "finding": "抗生素使用与较短的中位OS显著相关（11.7个月 vs 16.1个月, p=0.028），但与PFS无显著关联（3.5个月 vs 3.5个月, p=0.287）。"
+            },
+            {
+              "conditions": "PD-L1表达 <50% 的亚组 (N=部分, 具体人数未明确给出但包含在265名有PD-L1数据的患者中)",
+              "finding": "抗生素使用与未使用者相比，中位PFS（3.3 vs 2.8个月, p=0.88）和中位OS（9.5 vs 17.1个月, p=0.24）均无显著差异。"
+            },
+            {
+              "conditions": "PD-L1表达 ≥50% 的亚组 (N=部分, 具体人数未明确给出但包含在265名有PD-L1数据的患者中)",
+              "finding": "抗生素使用者显示出显著更短的中位PFS（4.2 vs 9.4个月, p=0.012）和中位OS（11.9 vs 28.4个月, p=0.011）。该亚组中抗生素的负面影响比整体人群更为显著。"
+            }
+          ],
+          "paper_kind": "empirical",
+          "problem_or_question": "尽管已有研究表明肠道菌群失调可能通过抗生素使用负面影响实体瘤的ICI疗效，但这种效应在NSCLC中是否适用尚不明确。此外，抗生素对ICI疗效的影响是否依赖于肿瘤的PD-L1表达状态，也是本研究试图解决的关键问题。",
+          "research_scope": "非小细胞肺癌（NSCLC）患者，接受免疫检查点抑制剂（ICI）单药治疗（抗PD-1或抗PD-L1），研究抗生素使用对预后的影响，并按PD-L1表达水平分层。",
+          "work_summary": "该研究旨在探讨抗生素使用对NSCLC患者ICI疗效的影响，并特别关注这种影响是否因肿瘤PD-L1表达水平的不同而存在差异。研究回顾性分析了9家医疗机构在2015年12月至2018年5月期间收治的531名接受ICI单药治疗的NSCLC患者数据。通过Kaplan-Meier法和Cox比例风险模型，比较了在使用ICI前后两个月内使用抗生素与未使用抗生素患者的无进展生存期（PFS）和总生存期（OS）。结果显示，整体人群中抗生素使用显著缩短OS，但不影响PFS；进一步分析发现，这种负面影响主要集中在PD-L1高表达（≥50%）的患者亚组中，而在低表达（<50%）亚组中未见显著影响。"
+        },
+        "title": "The effects of antibiotics on the efficacy of immune checkpoint inhibitors in patients with non-small-cell lung cancer differ based on PD-L1 expression.",
+        "year": "2021"
+      }
+    }
+  ],
+  "trace": [
+    {
+      "access_id": "source_materials[2]",
+      "channel": "source_materials",
+      "index_path": "source_materials[2]",
+      "identity": {
+        "source_handle": "P0478",
+        "paper_id": "d4c18d58cffce0cab6831c84535e02c608d4db49",
+        "title": "Cross-cohort gut microbiome associations with immune checkpoint inhibitor response in advanced melanoma",
+        "doi": "10.1038/s41591-022-01695-5"
+      },
+      "record_sha256": "4de5557f0c045d7b8dc76b300fcfafce74c3025a3c7737d5ce95ff2251da828d",
+      "requested_paths": [
+        "deep_read_material"
+      ],
+      "unit_ids": []
+    },
+    {
+      "access_id": "source_materials[7]",
+      "channel": "source_materials",
+      "index_path": "source_materials[7]",
+      "identity": {
+        "source_handle": "P0015",
+        "paper_id": "08a484e3c782bc9552d2df812bad2ec86f231edc",
+        "title": "A gut microbial signature for combination immune checkpoint blockade across cancer types",
+        "doi": "10.1038/s41591-024-02823-z"
+      },
+      "record_sha256": "015f6721633cb1b0aeb759f501d4511f10e8a50b77b2c97732e8ea72ce982a0b",
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": []
+    },
+    {
+      "access_id": "source_materials[11]",
+      "channel": "source_materials",
+      "index_path": "source_materials[11]",
+      "identity": {
+        "source_handle": "P0270",
+        "paper_id": "74786f8df0c7648840756833a4b4bc49ace34be6",
+        "title": "Composition of gastrointestinal microbiota in association with treatment response in individuals with metastatic castrate resistant prostate cancer progressing on enzalutamide and initiating treatment with anti-PD-1 (pembrolizumab)",
+        "doi": "10.1016/j.neo.2022.100822"
+      },
+      "record_sha256": "bf5c77ac498f7573628969d6edc531b142fdf13bcf128b9b1da22f0ebd31a8fe",
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": []
+    },
+    {
+      "access_id": "source_materials[15]",
+      "channel": "source_materials",
+      "index_path": "source_materials[15]",
+      "identity": {
+        "source_handle": "P0545",
+        "paper_id": "f31246cd559d1a06b99a32b0ee47bb1ce0265772",
+        "title": "A Clinical Outcome of the Anti-PD-1 Therapy of Melanoma in Polish Patients Is Mediated by Population-Specific Gut Microbiome Composition",
+        "doi": "10.3390/cancers14215369"
+      },
+      "record_sha256": "8ca3bee7b7e3c1c28b662e5ef618106a64aee7247f649bdaaccf92ca9a5dac4a",
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": []
+    },
+    {
+      "access_id": "source_materials[4]",
+      "channel": "source_materials",
+      "index_path": "source_materials[4]",
+      "identity": {
+        "source_handle": "P0081",
+        "paper_id": "1d2792ae1850f48accaf1c111b2d92b6b2ebc6c0",
+        "title": "Unraveling gut microbiome interferences in cancer immunotherapy: a meta-analysis of diverse drug effects",
+        "doi": "10.1186/s12885-025-15094-9"
+      },
+      "record_sha256": "213585e91aa27d070d215bc22c23dec36c5f99e0ff73c2f8ae73d04b3e6e4ad4",
+      "requested_paths": [
+        "local_passages"
+      ],
+      "unit_ids": []
+    },
+    {
+      "access_id": "source_materials[24]",
+      "channel": "source_materials",
+      "index_path": "source_materials[24]",
+      "identity": {
+        "source_handle": "P0339",
+        "paper_id": "9225e04c4f9620a87d4eb74932067cab87644bf2",
+        "title": "Association of proton pump inhibitor use with survival outcomes in cancer patients treated with immune checkpoint inhibitors: a systematic review and meta-analysis",
+        "doi": "10.1177/17588359221111703"
+      },
+      "record_sha256": "b3d525cbb03c541375828d277c039dd39d17f07476a5a500292a0c18c75cde8d",
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": []
+    },
+    {
+      "access_id": "source_materials[23]",
+      "channel": "source_materials",
+      "index_path": "source_materials[23]",
+      "identity": {
+        "source_handle": "P0275",
+        "paper_id": "768ceed11b5509cd8f6c24d07e8fa015646929c0",
+        "title": "The association between antibiotic use and outcomes of HCC patients treated with immune checkpoint inhibitors",
+        "doi": "10.3389/fimmu.2022.956533"
+      },
+      "record_sha256": "9f732534488ac66587f5d2ac4143f16f4f7f2bc0615768cba9bda716797a5100",
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": []
+    },
+    {
+      "access_id": "source_materials[20]",
+      "channel": "source_materials",
+      "index_path": "source_materials[20]",
+      "identity": {
+        "source_handle": "P0033",
+        "paper_id": "0f25b980517704cd7fa782dd9e51d16b77d00249",
+        "title": "Longitudinal gut microbiome changes in immune checkpoint blockade-treated advanced melanoma",
+        "doi": "10.1038/s41591-024-02803-3"
+      },
+      "record_sha256": "c6b54908688ba5b0073adbd4c2e008175c8333b70c563d0c074d79800dc04d69",
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": []
+    },
+    {
+      "access_id": "source_materials[21]",
+      "channel": "source_materials",
+      "index_path": "source_materials[21]",
+      "identity": {
+        "source_handle": "P0236",
+        "paper_id": "62379160afa6c14c9a9ae85a0684ccec8ed9c07e",
+        "title": "Systemic antibiotic exposure and outcomes of immune checkpoint inhibitors in non–small cell lung cancer.",
+        "doi": "10.1200/jco.2026.44.16_suppl.e20602"
+      },
+      "record_sha256": "91bc00af65f8f092a86ccb8ef4d5365197bd293740a2844c1c7a16b028992868",
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": []
+    },
+    {
+      "access_id": "source_materials[27]",
+      "channel": "source_materials",
+      "index_path": "source_materials[27]",
+      "identity": {
+        "source_handle": "P0517",
+        "paper_id": "e8fb88935a5c5757dc683f56d1ff0c0f356b20ae",
+        "title": "The effects of antibiotics on the efficacy of immune checkpoint inhibitors in patients with non-small-cell lung cancer differ based on PD-L1 expression.",
+        "doi": "10.1016/j.ejca.2021.02.040"
+      },
+      "record_sha256": "b3b040ea602c6effe5705a9fc4c7006e30be413dec53d05d88f6e9eb18cc0567",
+      "requested_paths": [
+        "study_summary_A"
+      ],
+      "unit_ids": []
+    }
+  ],
+  "resolved_count": 10,
+  "access_ids": [
+    "source_materials[11]",
+    "source_materials[15]",
+    "source_materials[20]",
+    "source_materials[21]",
+    "source_materials[23]",
+    "source_materials[24]",
+    "source_materials[27]",
+    "source_materials[2]",
+    "source_materials[4]",
+    "source_materials[7]"
+  ],
+  "catalog_sha256": "d473f873354628d12789a135f5a47adc1eb87ec0f4adb83a2dd5292b49673df8"
+}

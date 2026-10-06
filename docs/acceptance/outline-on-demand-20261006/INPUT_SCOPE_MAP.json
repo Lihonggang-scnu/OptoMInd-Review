@@ -1,0 +1,60 @@
+{
+  "status": "WAITING_CLOUD_REVIEW",
+  "model_calls_started_during_package_assembly": 0,
+  "future_budget": {
+    "current_shared_ledger_limit_cny": 45.0,
+    "historical_settled_and_holds_preserved": true,
+    "proposed_total_upper_limit_cny": 85.0,
+    "new_increment_accounting": "future strengthening reservation + actual + uncertain rows with the new run prefix must remain <=40; historical sample charges are excluded; no ledger was changed during preparation",
+    "reserved_for": "full-outline opt-in strengthening, local material rereads and bounded recovery; no manuscript rewrite",
+    "authorized_additional_shared_cap_cny": 40.0,
+    "execution_status": "approved_pending_execution_after_cloud_review"
+  },
+  "input_groups": [
+    {
+      "name": "baseline_no_strengthening",
+      "payload_source": "experiments/max_dedup/REQUEST.sanitized.json",
+      "model_request_material_scope": "29 source records + 2 tool records in model_payload; stored original payload is preserved only as a sanitized trace; this is the full-material Max arm."
+    },
+    {
+      "name": "strict_plus",
+      "payload_source": "experiments/strict_plus/REQUEST.sanitized.json",
+      "model_request_material_scope": "same prepared messages/payload as the Max dedup request, with model/profile replacement only; Plus result remains an experiment"
+    },
+    {
+      "name": "on_demand_access",
+      "payload_source": "experiments/on_demand/ACCESS_REQUEST.sanitized.json",
+      "model_request_material_scope": "full lightweight catalog with 32 source entries, 38 tool entries, and 1 candidate-navigation entry; Plus returned 10 access records; access is a locator planner only"
+    },
+    {
+      "name": "on_demand_max_owner",
+      "payload_source": "experiments/on_demand/ACTUAL_MAX_REQUEST.sanitized.json",
+      "model_request_material_scope": "model-visible payload carries 10 selected complete source records + the full lightweight catalog/identity map; top-level tool_materials is 0 because tool-derived material is nested in selected records; unselected full records remain local for validation; no model continuation was triggered"
+    }
+  ],
+  "model_input_exclusions": [
+    "ROOT_DECISION_OPINION.md",
+    "reviews/ROOT_QUALITY_REVIEW.md",
+    "reviews/ROOT_STRICT_MODEL_REVIEW.md",
+    "previous candidate outputs from other arms",
+    "credentials, keys, environment files, sqlite ledgers"
+  ],
+  "copyright_handling": "A/B-derived fields, finite locator excerpts, actual model outputs and user-generated outline/body fields needed for evaluation are retained; long source/full-body fields in sanitized JSON are replaced by original hash and character count. Sanitized files are not claimed to be byte-identical requests.",
+  "same_input_checks": {
+    "full_material_max_vs_on_demand_local_payload": {
+      "chapter_plan_equal": true,
+      "source_materials_equal": true,
+      "full_material_source_record_count": 29,
+      "full_material_tool_record_count": 2
+    },
+    "on_demand_model_visible_counts": {
+      "source_materials": 10,
+      "tool_materials": 0,
+      "catalog_source_entries": 32,
+      "catalog_tool_entries": 38,
+      "catalog_candidate_navigation_entries": 1,
+      "source_identity_map": 29
+    },
+    "note": "Catalog entry counts include nested records; they are not distinct paper counts and do not contradict the 29-source/2-tool full-material input boundary."
+  }
+}
