@@ -1,0 +1,145 @@
+{
+  "status": "prepared_no_paid_calls",
+  "chapter_id": "Ch5",
+  "chapter_title": "微生物干预策略的临床转化现状",
+  "units": 5,
+  "modifiable_unit_ids": [
+    "Ch5_U01",
+    "Ch5_U02",
+    "Ch5_U03",
+    "Ch5_U04",
+    "Ch5_U05"
+  ],
+  "read_only_unit_count": 7,
+  "read_only_unit_ids": [
+    "Ch4_U01",
+    "Ch4_U02",
+    "Ch4_U03",
+    "Ch6_U1",
+    "Ch6_U2",
+    "Ch6_U3",
+    "Ch6_U4"
+  ],
+  "source_material_count": 34,
+  "candidate_material_count": 8,
+  "tool_material_count": 6,
+  "source_identity_count": 75,
+  "actual_body_chars": 7747,
+  "input_payload_sha256": "1573047045ceb4437adf80ef1f6fe8915169e3da65d8d44859a9ee33400c93f3",
+  "full_messages_sha256": "a0a6c137134a54773c57b34a3f09b848d5cc1817aabadf19ff49ff7ab4319fd6",
+  "demand_access_messages_sha256": "c187d69802b8a6316cfdec9f4aa4eae792fbbea1f960c230329a89f7e2c8bae8",
+  "demand_owner_messages_sha256": "f5f688210a78ecfbe3c42ea4beac2a31c4b30e9a8b98fc3c0dc2979a0d8d24bd",
+  "serialized_message_chars": {
+    "full_material_max": 971827,
+    "demand_access_plus": 750868,
+    "demand_owner_upper_bound_max": 1087526
+  },
+  "tokenizer": "F:\\OptoMind-Review-2\\data\\tokenizers\\qwen3_5_9b\\tokenizer.json",
+  "profiles": {
+    "full_material_max": {
+      "model": "qwen3.8-max",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 65536,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "demand_access_plus": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900
+    },
+    "demand_owner_max": {
+      "model": "qwen3.8-max",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 65536,
+      "json_mode": false,
+      "timeout_seconds": 900
+    }
+  },
+  "estimates": {
+    "full_material_max": {
+      "model": "qwen3.8-max",
+      "prompt_tokens_estimate": 331374,
+      "reserved_input_tokens": 379331,
+      "output_tokens": 65536,
+      "thinking_budget": 32768,
+      "max_completion_tokens": 98304,
+      "total_context_tokens": 477635,
+      "estimated_cost_cny": 8.090916,
+      "tokenizer": "provided_token_counter"
+    },
+    "demand_access_plus": {
+      "model": "qwen3.5-plus",
+      "prompt_tokens_estimate": 250483,
+      "reserved_input_tokens": 288733,
+      "output_tokens": 32768,
+      "thinking_budget": 32768,
+      "max_completion_tokens": 65536,
+      "total_context_tokens": 354269,
+      "estimated_cost_cny": 2.727796,
+      "tokenizer": "provided_token_counter"
+    },
+    "demand_owner_upper_bound_max": {
+      "model": "qwen3.8-max",
+      "prompt_tokens_estimate": 375857,
+      "reserved_input_tokens": 429152,
+      "output_tokens": 65536,
+      "thinking_budget": 32768,
+      "max_completion_tokens": 98304,
+      "total_context_tokens": 527456,
+      "estimated_cost_cny": 8.688768,
+      "tokenizer": "provided_token_counter"
+    },
+    "demand_access_plus_plus_owner_upper_bound_max": {
+      "estimated_cost_cny": 11.416564,
+      "input_reserved_tokens": 717885
+    }
+  },
+  "demand_owner_to_full_serialized_char_ratio": 1.1190530824930776,
+  "context_limit_assumption_tokens": 1000000,
+  "full_material_fits_context_assumption": true,
+  "preparation_mode_recommendation": "full_material_max",
+  "recommendation_basis": "If the complete material owner request fits the 1000000-token production pricing/context assumption and the demand upper-bound owner request is within 10% of its serialized size, direct Max avoids the Plus selector; this is a preparation heuristic, not a paid decision.",
+  "catalog_coverage": {
+    "source_materials": 38,
+    "candidate_materials": 8,
+    "tool_materials": 69,
+    "candidate_navigation": 0
+  },
+  "catalog_entry_count": 115,
+  "upper_bound_unique_selected_count": 102,
+  "upper_bound_duplicate_access_ids_omitted": [
+    "tool_materials[1].sources[0]",
+    "tool_materials[1].sources[1]",
+    "tool_materials[1].sources[4]",
+    "tool_materials[2].sources[0]",
+    "tool_materials[2].sources[1]",
+    "tool_materials[2].sources[2]",
+    "tool_materials[2].sources[3]",
+    "tool_materials[2].sources[4]",
+    "tool_materials[2].sources[6]",
+    "tool_materials[2].sources[7]",
+    "tool_materials[2].sources[8]",
+    "tool_materials[3].sources[0]",
+    "tool_materials[4].sources[2]"
+  ],
+  "provenance": {
+    "source_head_at_prepare": "a0b645e096a148382196b5aadd3dcf36c43c69d6",
+    "input_plan": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\DETAILED_REVIEW_PLAN.json",
+    "input_packet": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch5.json",
+    "adjacent_packets": [
+      "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch4.json",
+      "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch6.json"
+    ],
+    "id_map": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\arrangement_repaired\\ID_MAP.json",
+    "body": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\body_assembly_final\\chapters\\Ch5.md",
+    "no_model_call": true,
+    "no_root_scientific_opinion_in_input": true,
+    "historical_candidates_not_in_input": true
+  }
+}

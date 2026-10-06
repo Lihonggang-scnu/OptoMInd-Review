@@ -1,0 +1,782 @@
+diff --git a/optomind_research/runtime/upgrade3/outline_on_demand.py b/optomind_research/runtime/upgrade3/outline_on_demand.py
+index 6fb2bf4..5eb86d6 100644
+--- a/optomind_research/runtime/upgrade3/outline_on_demand.py
++++ b/optomind_research/runtime/upgrade3/outline_on_demand.py
+@@ -10,7 +10,9 @@ from __future__ import annotations
+ 
+ import hashlib
+ import json
++import re
+ from collections.abc import Mapping, Sequence
++from pathlib import Path
+ from typing import Any
+ 
+ from . import outline_strengthening as strengthening
+@@ -279,6 +281,8 @@ def access_messages(payload: Mapping[str, Any], catalog: Mapping[str, Any]) -> l
+         "status 为 access_plan、partial 或 no_change，并可带 material_requests。"
+         "material_requests 只能请求当前目录中的 access_id、source_handle 或材料路径，"
+         "每项可带 unit_ids 和 reason；不得返回 updated_plan、chapter_updates、issues、正文、答案或科学修订建议。"
++        "本轮可修改任务严格限于 modifiable_unit_ids；优先为这些任务取材。read_only_unit_ids 和邻居职责只能用于边界参照，"
++        "若共享证据同时服务可编辑任务可以共同标注；若材料只被只读邻居标注，仍保留请求并让负责人看到范围诊断，不把只读任务变成编辑任务。"
+         "目录覆盖 source_materials、candidate_materials、candidate_navigation、tool_materials，"
+         "包含原研究身份和可用条件路径；综述转述材料不因没有自身 A/B 或全文而失去资格。"
+         "目录按完整字段或记录展示原材料；excerpt=true 表示有内容省略，omitted_material_paths 中的材料仍可请求。"
+@@ -298,6 +302,8 @@ def access_messages(payload: Mapping[str, Any], catalog: Mapping[str, Any]) -> l
+             "status_values": ["access_plan", "partial", "no_change"],
+             "material_requests_only": True,
+             "no_scientific_revision": True,
++            "editable_scope_only": True,
++            "readonly_evidence_may_be_preserved_with_diagnostic": True,
+         },
+     }
+     return [
+@@ -418,9 +424,52 @@ def resolve_material_requests(
+         "resolved_count": len(selected),
+         "access_ids": sorted(seen),
+         "catalog_sha256": catalog.get("catalog_sha256"),
++        "selection_diagnostics": _selection_diagnostics(payload, selected),
+     }
+ 
+ 
++def _selection_diagnostics(payload: Mapping[str, Any], selected: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
++    """Expose generic scope diagnostics without changing an access result.
++
++    An access model may legitimately choose evidence attached to a read-only
++    neighbour.  Preserve that evidence and make the scope mismatch visible to
++    the owner instead of silently reselecting or discarding it.
++    """
++
++    modifiable, readonly = _unit_ids(payload)
++    modifiable_set = set(modifiable)
++    readonly_set = set(readonly)
++    readonly_only = []
++    unknown = []
++    for item in selected:
++        ids = [str(value) for value in item.get("unit_ids") or [] if str(value).strip()]
++        item_id = str(item.get("access_id") or "")
++        if ids and not (set(ids) & modifiable_set):
++            if set(ids) & readonly_set:
++                readonly_only.append({"access_id": item_id, "unit_ids": ids})
++            else:
++                unknown.append({"access_id": item_id, "unit_ids": ids})
++    return {
++        "modifiable_unit_ids": modifiable,
++        "read_only_unit_ids": readonly,
++        "readonly_only_materials": readonly_only,
++        "unknown_unit_materials": unknown,
++        "evidence_preserved": True,
++        "action": "owner_may_use_shared_evidence; no_automatic_reselection",
++    }
++
++
++_NESTED_ACCESS_RE = re.compile(r"^(?P<parent>.+)\.(?P<key>[A-Za-z_][A-Za-z0-9_]*)\[(?P<index>\d+)\]$")
++
++
++def _nested_access_parent(access_id: str) -> tuple[str, str] | None:
++    match = _NESTED_ACCESS_RE.match(str(access_id or ""))
++    if not match:
++        return None
++    suffix = f"/{match.group('key')}/{match.group('index')}"
++    return match.group("parent"), suffix
++
++
+ def full_catalog_trace(catalog: Mapping[str, Any]) -> dict[str, Any]:
+     """Build a conservative offline upper-bound trace from unique catalog rows."""
+ 
+@@ -482,6 +531,7 @@ def _owner_payload(payload: Mapping[str, Any], catalog: Mapping[str, Any], trace
+         "catalog": public_catalog(catalog),
+         "resolved_materials": _copy(trace.get("selected_materials") or []),
+         "trace": _copy(trace.get("trace") or []),
++        "selection_diagnostics": _copy(trace.get("selection_diagnostics") or {}),
+         "unread_materials_remain_requestable": True,
+         "continuation": bool(continuation),
+     }
+@@ -506,17 +556,46 @@ def _model_visible_payload(full_payload: Mapping[str, Any], catalog: Mapping[str
+     source_rows = []
+     candidate_rows = []
+     tool_rows = []
+-    for item in selected:
++    pointers: dict[str, str] = {}
++
++    def append_unique(rows: list[dict[str, Any]], record: Mapping[str, Any], access_id: str, root_key: str) -> str:
++        record_hash = _hash(record)
++        for index, existing in enumerate(rows):
++            if _hash(existing) == record_hash:
++                pointer = f"#/{root_key}/{index}"
++                pointers[access_id] = pointer
++                return pointer
++        rows.append(_copy(record))
++        pointer = f"#/{root_key}/{len(rows) - 1}"
++        pointers[access_id] = pointer
++        return pointer
++
++    navigation_refs = []
++    selected_ids = {str(item.get("access_id") or "") for item in selected if isinstance(item, Mapping)}
++    ordered_selected = sorted(
++        selected,
++        key=lambda item: 1 if _nested_access_parent(str(item.get("access_id") or ""))
++        and _nested_access_parent(str(item.get("access_id") or ""))[0] in selected_ids else 0,
++    )
++    for item in ordered_selected:
+         record = item.get("record")
+         if not isinstance(record, Mapping):
+             continue
+         channel = str(item.get("channel") or "")
++        access_id = str(item.get("access_id") or "")
++        nested = _nested_access_parent(access_id)
++        if nested and nested[0] in pointers:
++            pointers[access_id] = pointers[nested[0]] + nested[1]
++            if channel in {"candidate_materials", "candidate_navigation"}:
++                navigation_refs.append({"access_id": access_id, "material_ref": pointers[access_id]})
++            continue
+         if channel == "source_materials":
+-            source_rows.append(_copy(record))
++            append_unique(source_rows, record, access_id, "source_materials")
+         elif channel in {"candidate_materials", "candidate_navigation"}:
+-            candidate_rows.append(_copy(record))
++            pointer = append_unique(candidate_rows, record, access_id, "candidate_materials")
++            navigation_refs.append({"access_id": access_id, "material_ref": pointer})
+         elif channel == "tool_materials":
+-            tool_rows.append(_copy(record))
++            append_unique(tool_rows, record, access_id, "tool_materials")
+     visible["source_materials"] = source_rows
+     visible["candidate_materials"] = candidate_rows
+     visible["tool_materials"] = tool_rows
+@@ -526,9 +605,13 @@ def _model_visible_payload(full_payload: Mapping[str, Any], catalog: Mapping[str
+         for key in ("access_contract", "chapter_id", "query", "candidate_count", "returned_count", "omitted_candidate_count", "unassigned_relevant_count"):
+             if key in navigation:
+                 nav_shell[key] = _copy(navigation[key])
+-    nav_shell["candidate_materials"] = candidate_rows
++    # Candidate records have one canonical location in the request.  The
++    # navigation shell points there instead of sending a second full copy.
++    nav_shell["candidate_materials"] = []
++    nav_shell["candidate_material_refs"] = navigation_refs
+     visible["candidate_navigation"] = nav_shell
+     visible_access = _copy(visible.get("on_demand_material_access") or {})
++    visible_access["catalog"] = _catalog_with_material_refs(catalog, pointers)
+     visible_access["resolved_materials"] = [
+         {
+             key: _copy(item[key])
+@@ -538,11 +621,39 @@ def _model_visible_payload(full_payload: Mapping[str, Any], catalog: Mapping[str
+         for item in selected
+     ]
+     visible_access["trace"] = _copy(trace.get("trace") or [])
++    visible_access["selection_diagnostics"] = _copy(trace.get("selection_diagnostics") or {})
+     visible_access["continuation"] = bool(continuation)
+     visible["on_demand_material_access"] = visible_access
+     return visible
+ 
+ 
++def _catalog_with_material_refs(catalog: Mapping[str, Any], pointers: Mapping[str, str]) -> dict[str, Any]:
++    """Point selected catalog entries at full records in the request root."""
++
++    output = public_catalog(catalog)
++    entries = []
++    for entry in output.get("entries") or []:
++        current = _copy(entry)
++        access_id = str(current.get("access_id") or "")
++        pointer = pointers.get(access_id)
++        nested = _nested_access_parent(access_id)
++        if pointer is None and nested:
++            parent_pointer = pointers.get(nested[0])
++            if parent_pointer:
++                pointer = parent_pointer + nested[1]
++        if pointer:
++            current.pop("source_supplied_locators", None)
++            current["material_ref"] = pointer
++            current["material_ref_scope"] = "model_payload_root"
++            current["full_record_in_request"] = True
++            if nested and pointers.get(access_id) is None:
++                current["material_ref_reason"] = "nested_record_of_selected_parent"
++        entries.append(current)
++    output["entries"] = entries
++    output["selected_entries_point_to_full_records"] = True
++    return output
++
++
+ def owner_messages(
+     payload: Mapping[str, Any], catalog: Mapping[str, Any], trace: Mapping[str, Any], *, continuation: bool = False,
+ ) -> list[dict[str, str]]:
+@@ -552,6 +663,8 @@ def owner_messages(
+     overlay = (
+         "【按需材料读取合同】本轮消息同时包含已经取得的材料记录和覆盖全部材料通道的轻量目录。"
+         "目录中未附完整记录表示尚未读取，不表示没有相关材料；不得把 Plus 访问计划当作科学问题清单或材料硬过滤。"
++        "已读取记录的目录项含指向当前请求完整记录的 JSON pointer，使用该记录且不要重复发送候选内容。"
++        "选材若只标注只读邻居，保留共享证据并按 selection_diagnostics 作为范围诊断，不自动重选。"
+         "你可以在证据不足时只返回 status=needs_materials 及 material_requests，请求目录中的未初选材料或具体材料路径；"
+         "本运行最多再进行一次本地取材续读。材料请求必须使用已有 access_id/source_handle，保留原研究身份、综述转述身份、条件和限制。"
+         "材料充分时返回现有负责人合同要求的 status=updated 和完整可编辑计划，或合理 status=no_change；不要返回正文。"
+@@ -575,6 +688,53 @@ def _access_record(messages: Sequence[Mapping[str, Any]], parsed: Mapping[str, A
+     }
+ 
+ 
++def _checkpoint_signature(
++    messages: Sequence[Mapping[str, Any]], *, payload: Mapping[str, Any], catalog: Mapping[str, Any],
++    model: str, thinking_budget: int, max_output_tokens: int, profile: Mapping[str, Any] | None = None,
++) -> dict[str, Any]:
++    return {
++        "request_sha256": _hash(messages),
++        "payload_sha256": _hash(payload),
++        "catalog_sha256": str(catalog.get("catalog_sha256") or ""),
++        "model": str(model),
++        "thinking_budget": int(thinking_budget),
++        "max_output_tokens": int(max_output_tokens),
++        "profile": _copy(profile or {}),
++    }
++
++
++def _checkpoint_path(stage_dir: str | Path | None, name: str) -> Path | None:
++    if stage_dir is None:
++        return None
++    path = Path(stage_dir) / name
++    path.parent.mkdir(parents=True, exist_ok=True)
++    return path
++
++
++def _write_checkpoint(path: Path | None, value: Mapping[str, Any]) -> None:
++    if path is None:
++        return
++    path.write_text(json.dumps(value, ensure_ascii=False, indent=2, default=str) + "\n", encoding="utf-8")
++
++
++def _load_compatible_checkpoint(path: Path | None, signature: Mapping[str, Any], *, resume: bool) -> dict[str, Any] | None:
++    if path is None or not resume or not path.is_file():
++        return None
++    try:
++        saved = json.loads(path.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return None
++    if saved.get("signature") == dict(signature):
++        return saved
++    history = path.parent / "history"
++    history.mkdir(parents=True, exist_ok=True)
++    identity = _hash(saved.get("signature") or {"path": str(path), "bytes": path.stat().st_size})[:16]
++    preserved = history / f"{path.stem}.{identity}{path.suffix}"
++    if not preserved.exists():
++        preserved.write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
++    return None
++
++
+ def _needs_materials(parsed: Mapping[str, Any]) -> bool:
+     return str(parsed.get("status") or "").casefold() in {"needs_materials", "needs_more_materials", "needs_material"}
+ 
+@@ -584,6 +744,8 @@ def run_on_demand_strengthening(
+     access_client: Any, access_model: str, access_thinking_budget: int, access_max_output_tokens: int,
+     owner_client: Any, owner_model: str, owner_thinking_budget: int, owner_max_output_tokens: int,
+     access_call_id: str | None = None, owner_call_id: str | None = None,
++    checkpoint_dir: str | Path | None = None, resume: bool = False,
++    access_profile: Mapping[str, Any] | None = None, owner_profile: Mapping[str, Any] | None = None,
+ ) -> dict[str, Any]:
+     """Run Plus access planning, local resolution, and one Max owner call.
+ 
+@@ -595,13 +757,40 @@ def run_on_demand_strengthening(
+     catalog = build_material_catalog(payload)
+     access_request = access_messages(payload, catalog)
+     from .module4 import runtime
+-    raw_access = runtime.invoke_client(
+-        access_client, access_request, model=access_model,
+-        max_output_tokens=int(access_max_output_tokens), thinking=True,
+-        thinking_budget=int(access_thinking_budget),
+-        call_id=access_call_id or (str(payload.get("call_id") or "outline-on-demand") + ":access"),
++    access_signature = _checkpoint_signature(
++        access_request, payload=payload, catalog=catalog, model=access_model,
++        thinking_budget=access_thinking_budget, max_output_tokens=access_max_output_tokens,
++        profile=access_profile,
+     )
+-    access_parsed, access_telemetry = planning._parse_planner_response(raw_access)
++    access_stage_path = _checkpoint_path(checkpoint_dir, "ACCESS_STAGE.json")
++    access_stage = _load_compatible_checkpoint(access_stage_path, access_signature, resume=resume)
++    access_reused = access_stage is not None
++    access_raw_reused = False
++    if access_reused:
++        raw_access = access_stage.get("raw_response") or {}
++        access_parsed = access_stage.get("parsed_response") or {}
++        access_telemetry = access_stage.get("telemetry") or {}
++    else:
++        access_raw_path = _checkpoint_path(checkpoint_dir, "ACCESS_RAW_STAGE.json")
++        raw_stage = _load_compatible_checkpoint(access_raw_path, access_signature, resume=resume)
++        if raw_stage is not None:
++            raw_access = raw_stage.get("raw_response") or {}
++            access_raw_reused = True
++        else:
++            raw_access = runtime.invoke_client(
++                access_client, access_request, model=access_model,
++                max_output_tokens=int(access_max_output_tokens), thinking=True,
++                thinking_budget=int(access_thinking_budget),
++                call_id=access_call_id or (str(payload.get("call_id") or "outline-on-demand") + ":access"),
++            )
++            _write_checkpoint(access_raw_path, {
++                "signature": access_signature, "raw_response": _copy(raw_access),
++            })
++        access_parsed, access_telemetry = planning._parse_planner_response(raw_access)
++        _write_checkpoint(access_stage_path, {
++            "signature": access_signature, "raw_response": _copy(raw_access),
++            "parsed_response": _copy(access_parsed), "telemetry": _copy(access_telemetry),
++        })
+     try:
+         access_validated = validate_access_response(access_parsed, catalog)
+     except OnDemandMaterialError as exc:
+@@ -621,19 +810,52 @@ def run_on_demand_strengthening(
+             "on_demand_strengthening": {
+                 "access": record,
+                 "owner_not_called": True,
++                "access_reused": access_reused,
++                "access_raw_reused": access_raw_reused,
+                 "catalog": public_catalog(catalog),
+             },
+         }
+     trace = resolve_material_requests(payload, catalog, access_validated)
+     owner_payload = _owner_payload(payload, catalog, trace)
+     owner_request = owner_messages(payload, catalog, trace)
+-    first_owner = strengthening._run_owner_with_messages(
+-        owner_payload, messages=owner_request, client=owner_client, model=owner_model,
++    owner_signature = _checkpoint_signature(
++        owner_request, payload=owner_payload, catalog=catalog, model=owner_model,
+         thinking_budget=owner_thinking_budget, max_output_tokens=owner_max_output_tokens,
+-        call_id=owner_call_id or (str(payload.get("call_id") or "outline-on-demand") + ":owner"),
++        profile=owner_profile,
+     )
++    owner_stage_path = _checkpoint_path(checkpoint_dir, "OWNER_STAGE.json")
++    owner_stage = _load_compatible_checkpoint(owner_stage_path, owner_signature, resume=resume)
++    owner_reused = owner_stage is not None
++    owner_raw_reused = False
++    if owner_reused:
++        first_owner = _copy(owner_stage.get("result") or {})
++    else:
++        owner_raw_path = _checkpoint_path(checkpoint_dir, "OWNER_RAW_STAGE.json")
++        raw_owner_stage = _load_compatible_checkpoint(owner_raw_path, owner_signature, resume=resume)
++        if raw_owner_stage is not None:
++            owner_raw_reused = True
++            first_owner = strengthening._run_owner_with_messages(
++                owner_payload, messages=owner_request, client=owner_client, model=owner_model,
++                thinking_budget=owner_thinking_budget, max_output_tokens=owner_max_output_tokens,
++                raw_response=raw_owner_stage.get("raw_response") or {},
++                call_id=owner_call_id or (str(payload.get("call_id") or "outline-on-demand") + ":owner"),
++            )
++        else:
++            def save_owner_raw(raw: Mapping[str, Any]) -> None:
++                _write_checkpoint(owner_raw_path, {
++                    "signature": owner_signature, "raw_response": _copy(raw),
++                })
++
++            first_owner = strengthening._run_owner_with_messages(
++                owner_payload, messages=owner_request, client=owner_client, model=owner_model,
++                thinking_budget=owner_thinking_budget, max_output_tokens=owner_max_output_tokens,
++                raw_response_callback=save_owner_raw,
++                call_id=owner_call_id or (str(payload.get("call_id") or "outline-on-demand") + ":owner"),
++            )
++        _write_checkpoint(owner_stage_path, {"signature": owner_signature, "result": _copy(first_owner)})
+     final_owner = first_owner
+     continuation = None
++    continuation_reused = False
+     parsed_owner = first_owner.get("parsed_response") if isinstance(first_owner.get("parsed_response"), Mapping) else {}
+     if _needs_materials(parsed_owner):
+         try:
+@@ -656,13 +878,48 @@ def run_on_demand_strengthening(
+                 "access_ids": continuation_trace.get("access_ids") or trace.get("access_ids") or [],
+                 "catalog_sha256": catalog.get("catalog_sha256"),
+             }
++            combined_trace["selection_diagnostics"] = _selection_diagnostics(
++                payload, combined_trace["selected_materials"],
++            )
+             continuation_payload = _owner_payload(payload, catalog, combined_trace, continuation=True)
+             continuation_request = owner_messages(payload, catalog, combined_trace, continuation=True)
+-            continuation = strengthening._run_owner_with_messages(
+-                continuation_payload, messages=continuation_request, client=owner_client, model=owner_model,
++            continuation_signature = _checkpoint_signature(
++                continuation_request, payload=continuation_payload, catalog=catalog, model=owner_model,
+                 thinking_budget=owner_thinking_budget, max_output_tokens=owner_max_output_tokens,
+-                call_id=(owner_call_id or (str(payload.get("call_id") or "outline-on-demand") + ":owner")) + ":continuation",
++                profile=owner_profile,
+             )
++            continuation_path = _checkpoint_path(checkpoint_dir, "OWNER_CONTINUATION_STAGE.json")
++            continuation_stage = _load_compatible_checkpoint(continuation_path, continuation_signature, resume=resume)
++            if continuation_stage is not None:
++                continuation = _copy(continuation_stage.get("result") or {})
++                continuation_reused = True
++            else:
++                continuation_raw_path = _checkpoint_path(checkpoint_dir, "OWNER_CONTINUATION_RAW_STAGE.json")
++                raw_continuation_stage = _load_compatible_checkpoint(
++                    continuation_raw_path, continuation_signature, resume=resume,
++                )
++                if raw_continuation_stage is not None:
++                    continuation = strengthening._run_owner_with_messages(
++                        continuation_payload, messages=continuation_request, client=owner_client, model=owner_model,
++                        thinking_budget=owner_thinking_budget, max_output_tokens=owner_max_output_tokens,
++                        raw_response=raw_continuation_stage.get("raw_response") or {},
++                        call_id=(owner_call_id or (str(payload.get("call_id") or "outline-on-demand") + ":owner")) + ":continuation",
++                    )
++                else:
++                    def save_continuation_raw(raw: Mapping[str, Any]) -> None:
++                        _write_checkpoint(continuation_raw_path, {
++                            "signature": continuation_signature, "raw_response": _copy(raw),
++                        })
++
++                    continuation = strengthening._run_owner_with_messages(
++                        continuation_payload, messages=continuation_request, client=owner_client, model=owner_model,
++                        thinking_budget=owner_thinking_budget, max_output_tokens=owner_max_output_tokens,
++                        raw_response_callback=save_continuation_raw,
++                        call_id=(owner_call_id or (str(payload.get("call_id") or "outline-on-demand") + ":owner")) + ":continuation",
++                    )
++                _write_checkpoint(continuation_path, {
++                    "signature": continuation_signature, "result": _copy(continuation),
++                })
+             final_owner = continuation
+             trace = combined_trace
+     result = dict(final_owner)
+@@ -672,6 +929,12 @@ def run_on_demand_strengthening(
+         "material_access_trace": _copy(trace),
+         "owner_initial": _copy(first_owner),
+         "owner_continuation": _copy(continuation) if continuation is not None else None,
++        "access_reused": access_reused,
++        "access_raw_reused": access_raw_reused,
++        "owner_reused": owner_reused,
++        "owner_raw_reused": owner_raw_reused,
++        "owner_continuation_reused": continuation_reused,
++        "checkpoint_dir": str(checkpoint_dir) if checkpoint_dir is not None else None,
+         "owner_call_count": 2 if continuation is not None else 1,
+     }
+     return result
+diff --git a/optomind_research/runtime/upgrade3/outline_strengthening.py b/optomind_research/runtime/upgrade3/outline_strengthening.py
+index e652608..c11e166 100644
+--- a/optomind_research/runtime/upgrade3/outline_strengthening.py
++++ b/optomind_research/runtime/upgrade3/outline_strengthening.py
+@@ -601,20 +601,26 @@ def _run_owner_with_messages(
+     payload: Mapping[str, Any], *, messages: Sequence[Mapping[str, Any]], client: Any,
+     model: str, thinking_budget: int, max_output_tokens: int,
+     call_id: str | None = None, allow_machine_review: bool = False,
++    raw_response: Mapping[str, Any] | None = None, raw_response_callback: Any | None = None,
+ ) -> dict[str, Any]:
+     """Invoke one owner request and apply the production response validation."""
+ 
+     _verify_envelope(payload, allow_machine_review=allow_machine_review)
+     from .module4 import runtime
+-    raw = runtime.invoke_client(
+-        client,
+-        messages,
+-        model=model,
+-        max_output_tokens=int(max_output_tokens),
+-        thinking=True,
+-        thinking_budget=int(thinking_budget),
+-        call_id=call_id or str(payload.get("call_id") or "autonomous-outline"),
+-    )
++    if raw_response is None:
++        raw = runtime.invoke_client(
++            client,
++            messages,
++            model=model,
++            max_output_tokens=int(max_output_tokens),
++            thinking=True,
++            thinking_budget=int(thinking_budget),
++            call_id=call_id or str(payload.get("call_id") or "autonomous-outline"),
++        )
++        if raw_response_callback is not None:
++            raw_response_callback(raw)
++    else:
++        raw = _json_copy(raw_response)
+     parsed, telemetry = planning._parse_planner_response(raw)
+     adopted_materials, adoption_resolution = planning._close_owner_response_materials(payload, parsed)
+     returned_plan = planning._owner_response_plan(parsed)
+diff --git a/scripts/upgrade3/outline_strengthening.py b/scripts/upgrade3/outline_strengthening.py
+index 40517e7..4de2430 100644
+--- a/scripts/upgrade3/outline_strengthening.py
++++ b/scripts/upgrade3/outline_strengthening.py
+@@ -279,6 +279,10 @@ def run_on_demand_cli(args: argparse.Namespace) -> dict[str, Any]:
+         owner_max_output_tokens=owner_profile["max_output_tokens"],
+         access_call_id=str(payload.get("call_id") or "outline-on-demand") + ":access",
+         owner_call_id=str(payload.get("call_id") or "outline-on-demand") + ":owner",
++        checkpoint_dir=out / "stages",
++        resume=True,
++        access_profile=access_profile,
++        owner_profile=owner_profile,
+     )
+     _dump(out / "RESULT.json", result)
+     arrangement_path = None
+@@ -296,6 +300,12 @@ def run_on_demand_cli(args: argparse.Namespace) -> dict[str, Any]:
+         "arrangement_input": str(arrangement_path) if arrangement_path else None,
+         "accepted_source_material_count": len(packet.get("source_materials") or []) if packet else 0,
+         "owner_call_count": (result.get("on_demand_strengthening") or {}).get("owner_call_count"),
++        "access_reused": (result.get("on_demand_strengthening") or {}).get("access_reused"),
++        "access_raw_reused": (result.get("on_demand_strengthening") or {}).get("access_raw_reused"),
++        "owner_reused": (result.get("on_demand_strengthening") or {}).get("owner_reused"),
++        "owner_raw_reused": (result.get("on_demand_strengthening") or {}).get("owner_raw_reused"),
++        "owner_continuation_reused": (result.get("on_demand_strengthening") or {}).get("owner_continuation_reused"),
++        "checkpoint_dir": (result.get("on_demand_strengthening") or {}).get("checkpoint_dir"),
+     }
+     _dump(out / "RUN_REPORT.json", report)
+     return report
+diff --git a/tests/upgrade3/test_outline_strengthening.py b/tests/upgrade3/test_outline_strengthening.py
+index 810294f..a9c9bfc 100644
+--- a/tests/upgrade3/test_outline_strengthening.py
++++ b/tests/upgrade3/test_outline_strengthening.py
+@@ -9,6 +9,7 @@ import pytest
+ from optomind_research.runtime.upgrade3 import outline_strengthening as strengthening
+ from optomind_research.runtime.upgrade3 import outline_on_demand as on_demand
+ from optomind_research.runtime.upgrade3 import chapter_arrangement as arranging
++from optomind_research.runtime.upgrade3 import progressive_review_plan as planning
+ from optomind_research.runtime.upgrade3.quality_capacity import load_quality_profile
+ 
+ 
+@@ -377,6 +378,98 @@ def test_on_demand_catalog_covers_tool_candidate_navigation_and_mediated_identit
+     assert "updated_plan" not in on_demand.access_messages(payload, catalog)[1]["content"]
+ 
+ 
++def test_on_demand_readonly_only_selection_is_diagnosed_and_preserved():
++    payload = _payload(
++        candidate_materials=[_source("P0002", extra="shared evidence")],
++        modifiable_unit_ids=["CH01_U01"],
++        read_only_unit_ids=["CH01_U02"],
++    )
++    catalog = on_demand.build_material_catalog(payload)
++    trace = on_demand.resolve_material_requests(
++        payload,
++        catalog,
++        {
++            "status": "partial",
++            "material_requests": [{
++                "access_id": "candidate_materials[0]",
++                "unit_ids": ["CH01_U02"],
++                "reason": "The neighbour role identifies a relevant boundary.",
++            }],
++        },
++    )
++    diagnostics = trace["selection_diagnostics"]
++    assert diagnostics["readonly_only_materials"] == [{
++        "access_id": "candidate_materials[0]",
++        "unit_ids": ["CH01_U02"],
++    }]
++    assert diagnostics["evidence_preserved"] is True
++    assert diagnostics["action"] == "owner_may_use_shared_evidence; no_automatic_reselection"
++    owner = on_demand.owner_messages(payload, catalog, trace)
++    rendered = json.dumps(owner, ensure_ascii=False)
++    assert "selection_diagnostics" in rendered
++    assert "shared evidence" in rendered
++    assert "CH01_U02" in rendered
++
++
++def test_on_demand_selected_catalog_points_to_full_record_without_candidate_duplicate():
++    candidate = _source("P0002", extra="candidate full record")
++    payload = _payload(
++        candidate_materials=[candidate],
++        candidate_navigation={"candidate_materials": [candidate]},
++    )
++    catalog = on_demand.build_material_catalog(payload)
++    trace = on_demand.resolve_material_requests(
++        payload,
++        catalog,
++        {
++            "status": "partial",
++            "material_requests": [
++                {"access_id": "candidate_materials[0]", "unit_ids": ["CH01_U01"]},
++            ],
++        },
++    )
++    model_payload = on_demand._model_visible_payload(
++        on_demand._owner_payload(payload, catalog, trace), catalog, trace,
++    )
++    assert len(model_payload["candidate_materials"]) == 1
++    assert model_payload["candidate_navigation"]["candidate_materials"] == []
++    pointer = model_payload["candidate_navigation"]["candidate_material_refs"][0]["material_ref"]
++    assert pointer == "#/candidate_materials/0"
++    entry = next(item for item in model_payload["on_demand_material_access"]["catalog"]["entries"]
++                 if item["access_id"] == "candidate_materials[0]")
++    assert entry["material_ref"] == "#/candidate_materials/0"
++    assert entry["full_record_in_request"] is True
++    assert "source_supplied_locators" not in entry
++    assert model_payload["candidate_materials"][0] == candidate
++
++
++def test_on_demand_nested_record_points_to_selected_parent_without_duplicate_full_copy():
++    child = _source("P0002", extra="nested child full record")
++    parent = _source("P0001", extra="parent full record")
++    parent["sources"] = [child]
++    payload = _payload(source_materials=[parent])
++    catalog = on_demand.build_material_catalog(payload)
++    trace = on_demand.resolve_material_requests(
++        payload,
++        catalog,
++        {
++            "status": "partial",
++            "material_requests": [
++                {"access_id": "source_materials[0]", "unit_ids": ["CH01_U01"]},
++                {"access_id": "source_materials[0].sources[0]", "unit_ids": ["CH01_U01"]},
++            ],
++        },
++    )
++    model_payload = on_demand._model_visible_payload(
++        on_demand._owner_payload(payload, catalog, trace), catalog, trace,
++    )
++    assert len(model_payload["source_materials"]) == 1
++    child_entry = next(item for item in model_payload["on_demand_material_access"]["catalog"]["entries"]
++                       if item["access_id"] == "source_materials[0].sources[0]")
++    assert child_entry["material_ref"] == "#/source_materials/0/sources/0"
++    assert model_payload["source_materials"][0]["sources"][0] == child
++
++
+ def test_on_demand_resolves_unselected_material_into_one_max_request_and_arrangement(tmp_path):
+     candidate = {
+         "source_handle": "P0002", "paper_id": "paper-P0002", "title": "Candidate evidence",
+@@ -446,6 +539,154 @@ def test_on_demand_owner_can_request_one_continuation_and_no_change_is_valid():
+     assert result["on_demand_strengthening"]["material_access_trace"]["resolved_count"] == 1
+ 
+ 
++def test_on_demand_checkpoint_resume_reuses_compatible_paid_stages(tmp_path):
++    payload = _payload()
++    calls = {"access": 0, "owner": 0}
++    profile = {"model": "qwen3.8-max", "thinking_budget": 32768, "max_output_tokens": 32768}
++    access_profile = {"model": "qwen3.5-plus", "thinking_budget": 32768, "max_output_tokens": 32768}
++
++    def access_client(messages, **kwargs):
++        calls["access"] += 1
++        return {"content": json.dumps({"status": "no_change", "material_requests": []}),
++                "complete": True, "finish_reason": "stop",
++                "usage": {"prompt_tokens": 20, "completion_tokens": 8}}
++
++    def owner_client(messages, **kwargs):
++        calls["owner"] += 1
++        return {"content": json.dumps({"status": "no_change", "chapter_updates": []}),
++                "complete": True, "finish_reason": "stop",
++                "usage": {"prompt_tokens": 30, "completion_tokens": 12}}
++
++    first = on_demand.run_on_demand_strengthening(
++        payload,
++        access_client=access_client, access_model=access_profile["model"],
++        access_thinking_budget=access_profile["thinking_budget"],
++        access_max_output_tokens=access_profile["max_output_tokens"],
++        owner_client=owner_client, owner_model=profile["model"],
++        owner_thinking_budget=profile["thinking_budget"], owner_max_output_tokens=profile["max_output_tokens"],
++        checkpoint_dir=tmp_path / "stages", resume=True,
++        access_profile=access_profile, owner_profile=profile,
++    )
++    assert first["status"] == "no_change"
++    assert calls == {"access": 1, "owner": 1}
++    assert (tmp_path / "stages" / "ACCESS_STAGE.json").is_file()
++    assert (tmp_path / "stages" / "OWNER_STAGE.json").is_file()
++
++    def should_not_call(messages, **kwargs):
++        raise AssertionError("compatible checkpoint should prevent a second paid call")
++
++    second = on_demand.run_on_demand_strengthening(
++        payload,
++        access_client=should_not_call, access_model=access_profile["model"],
++        access_thinking_budget=access_profile["thinking_budget"],
++        access_max_output_tokens=access_profile["max_output_tokens"],
++        owner_client=should_not_call, owner_model=profile["model"],
++        owner_thinking_budget=profile["thinking_budget"], owner_max_output_tokens=profile["max_output_tokens"],
++        checkpoint_dir=tmp_path / "stages", resume=True,
++        access_profile=access_profile, owner_profile=profile,
++    )
++    assert second["status"] == "no_change"
++    assert second["on_demand_strengthening"]["access_reused"] is True
++    assert second["on_demand_strengthening"]["owner_reused"] is True
++
++
++def test_on_demand_raw_checkpoint_recovers_parse_failure_without_new_call(tmp_path, monkeypatch):
++    payload = _payload()
++    access_calls = []
++    owner_calls = []
++
++    def access_client(messages, **kwargs):
++        access_calls.append(messages)
++        return {"content": json.dumps({"status": "no_change", "material_requests": []}),
++                "complete": True, "finish_reason": "stop",
++                "usage": {"prompt_tokens": 20, "completion_tokens": 8}}
++
++    def owner_client(messages, **kwargs):
++        owner_calls.append(messages)
++        return {"content": json.dumps({"status": "no_change", "chapter_updates": []}),
++                "complete": True, "finish_reason": "stop",
++                "usage": {"prompt_tokens": 30, "completion_tokens": 12}}
++
++    original_parser = planning._parse_planner_response
++    failed_once = {"value": True}
++
++    def fail_access_parse(raw):
++        if failed_once["value"]:
++            failed_once["value"] = False
++            raise ValueError("synthetic access parse failure")
++        return original_parser(raw)
++
++    monkeypatch.setattr(planning, "_parse_planner_response", fail_access_parse)
++    access_checkpoint = tmp_path / "access_failure"
++    with pytest.raises(ValueError, match="synthetic access parse failure"):
++        on_demand.run_on_demand_strengthening(
++            payload,
++            access_client=access_client, access_model="qwen3.5-plus",
++            access_thinking_budget=32768, access_max_output_tokens=32768,
++            owner_client=owner_client, owner_model="qwen3.8-max",
++            owner_thinking_budget=32768, owner_max_output_tokens=32768,
++            checkpoint_dir=access_checkpoint, resume=True,
++        )
++    assert len(access_calls) == 1
++    assert (access_checkpoint / "ACCESS_RAW_STAGE.json").is_file()
++
++    monkeypatch.setattr(planning, "_parse_planner_response", original_parser)
++
++    def should_not_call(messages, **kwargs):
++        raise AssertionError("raw response recovery must not repeat a paid call")
++
++    recovered = on_demand.run_on_demand_strengthening(
++        payload,
++        access_client=should_not_call, access_model="qwen3.5-plus",
++        access_thinking_budget=32768, access_max_output_tokens=32768,
++        owner_client=owner_client, owner_model="qwen3.8-max",
++        owner_thinking_budget=32768, owner_max_output_tokens=32768,
++        checkpoint_dir=access_checkpoint, resume=True,
++    )
++    assert recovered["status"] == "no_change"
++    assert recovered["on_demand_strengthening"]["access_raw_reused"] is True
++    assert len(access_calls) == 1
++    assert len(owner_calls) == 1
++
++    owner_checkpoint = tmp_path / "owner_failure"
++    parse_calls = {"count": 0}
++
++    def fail_owner_parse(raw):
++        parse_calls["count"] += 1
++        if parse_calls["count"] == 2:
++            raise ValueError("synthetic owner parse failure")
++        return original_parser(raw)
++
++    monkeypatch.setattr(planning, "_parse_planner_response", fail_owner_parse)
++    with pytest.raises(ValueError, match="synthetic owner parse failure"):
++        on_demand.run_on_demand_strengthening(
++            payload,
++            access_client=access_client, access_model="qwen3.5-plus",
++            access_thinking_budget=32768, access_max_output_tokens=32768,
++            owner_client=owner_client, owner_model="qwen3.8-max",
++            owner_thinking_budget=32768, owner_max_output_tokens=32768,
++            checkpoint_dir=owner_checkpoint, resume=True,
++        )
++    assert (owner_checkpoint / "ACCESS_STAGE.json").is_file()
++    assert (owner_checkpoint / "OWNER_RAW_STAGE.json").is_file()
++    access_count_before_recovery = len(access_calls)
++    owner_count_before_recovery = len(owner_calls)
++
++    monkeypatch.setattr(planning, "_parse_planner_response", original_parser)
++    recovered_owner = on_demand.run_on_demand_strengthening(
++        payload,
++        access_client=should_not_call, access_model="qwen3.5-plus",
++        access_thinking_budget=32768, access_max_output_tokens=32768,
++        owner_client=should_not_call, owner_model="qwen3.8-max",
++        owner_thinking_budget=32768, owner_max_output_tokens=32768,
++        checkpoint_dir=owner_checkpoint, resume=True,
++    )
++    assert recovered_owner["status"] == "no_change"
++    assert recovered_owner["on_demand_strengthening"]["owner_raw_reused"] is True
++    assert len(access_calls) == access_count_before_recovery
++    assert len(owner_calls) == owner_count_before_recovery
++
++
+ def test_on_demand_prepare_has_explicit_two_owner_cost_guard_and_lightweight_owner_view(tmp_path):
+     from scripts.upgrade3 import outline_strengthening as cli
+ 
+@@ -467,7 +708,7 @@ def test_on_demand_prepare_has_explicit_two_owner_cost_guard_and_lightweight_own
+     )
+     owner_user = request["owner_upper_bound_messages"][1]["content"]
+     assert '"source_materials"' in owner_user
+-    assert "source_supplied_locators" in owner_user
++    assert "material_ref" in owner_user or "source_supplied_locators" in owner_user
+     assert request["catalog"]["coverage"]["tool_materials"] == 1
+ 
+ 

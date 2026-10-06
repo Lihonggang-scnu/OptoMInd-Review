@@ -1,0 +1,17 @@
+--- prior_system
++++ current_system
+@@ -10,6 +10,4 @@
+ 
+ 【自主细纲强化模式】本轮没有人工问题清单、预期答案或上一候选供你追随。请独立检查原始章节计划、完整材料、邻近单元职责、研究条件与论证关系，只有发现对组织、证据分工、条件边界或读者任务有实质收益的改动才修改；计划已经充分时返回 status=no_change。不得把本段指令当作事实，不得补充外部研究或正文；保持有效 source_handle、材料来源身份、研究转述身份、条件和 argument_relations。
+ 
+-【自主范围与返回合同】本次输入的 chapter_plan 只包含并只允许修改 payload.modifiable_unit_ids。这里的 complete updated_plan 指对这组可编辑单元的完整计划；可以在这些单元内拆分或合并，但必须保留稳定新 unit_id 并提供有效 unit_id_remap。readonly_neighbor_unit_roles 只提供邻章职责参照，绝不能作为本轮返回任务或被改写。不得返回只读邻居单元、虚构来源或输入中没有实质材料的 source_handle。
+-
+-【材料传输说明】输入中的 $material_ref 是当前请求内同一材料通道中完整相同材料子树的 JSON pointer；它只节省重复传输，不表示材料缺失。请按 pointer 使用当前请求中的完整原内容，保持所有独有字段、来源身份、条件和限制。+【自主范围与返回合同】本次输入的 chapter_plan 只包含并只允许修改 payload.modifiable_unit_ids。这里的 complete updated_plan 指对这组可编辑单元的完整计划；可以在这些单元内拆分或合并，但必须保留稳定新 unit_id 并提供有效 unit_id_remap。readonly_neighbor_unit_roles 只提供邻章职责参照，绝不能作为本轮返回任务或被改写。不得返回只读邻居单元、虚构来源或输入中没有实质材料的 source_handle。--- prior_user_suffix
++++ current_user_suffix
+@@ -2,6 +2,4 @@
+ 
+ 【本轮交付】本轮只返回 {"status":"updated"或"no_change", "chapter_updates":[{"chapter_id":"...", "updated_plan":{...}}], "unit_id_remap":{"new_unit_id":["old_unit_id"]}}。updated_plan 是完整章节计划；若材料和任务无需改变，明确返回 status=no_change 并可复用完整原计划。若拆分或合并单元，所有新单元必须有稳定 unit_id，并提供显式 unit_id_remap，不能按列表位置猜测对应关系。不要返回只有说明没有 updated_plan 的成功结果。
+ 
+-【自主范围与返回合同】本次输入的 chapter_plan 只包含并只允许修改 payload.modifiable_unit_ids。这里的 complete updated_plan 指对这组可编辑单元的完整计划；可以在这些单元内拆分或合并，但必须保留稳定新 unit_id 并提供有效 unit_id_remap。readonly_neighbor_unit_roles 只提供邻章职责参照，绝不能作为本轮返回任务或被改写。不得返回只读邻居单元、虚构来源或输入中没有实质材料的 source_handle。
+-
+-【材料传输说明】输入中的 $material_ref 是当前请求内同一材料通道中完整相同材料子树的 JSON pointer；它只节省重复传输，不表示材料缺失。请按 pointer 使用当前请求中的完整原内容，保持所有独有字段、来源身份、条件和限制。+【自主范围与返回合同】本次输入的 chapter_plan 只包含并只允许修改 payload.modifiable_unit_ids。这里的 complete updated_plan 指对这组可编辑单元的完整计划；可以在这些单元内拆分或合并，但必须保留稳定新 unit_id 并提供有效 unit_id_remap。readonly_neighbor_unit_roles 只提供邻章职责参照，绝不能作为本轮返回任务或被改写。不得返回只读邻居单元、虚构来源或输入中没有实质材料的 source_handle。
