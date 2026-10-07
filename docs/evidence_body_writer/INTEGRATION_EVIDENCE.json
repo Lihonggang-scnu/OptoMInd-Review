@@ -1,0 +1,101 @@
+{
+  "schema_version": "optomind.evidence_body_integration_evidence.v1",
+  "captured_at_utc": "2026-10-07T20:05:58.614921+00:00",
+  "archive_commit": "a5df7195ed90da5278011a6efd38ea2ef84690a4",
+  "input_source_bytes": 10100355,
+  "input_source_sha256": "d92696307ad1433475037fce9caae7f8fed4586da3eed672718fb3c24944e030",
+  "test_command": "python -m pytest -q tests/upgrade3/test_evidence_body_integration.py",
+  "test_result": "See VERIFICATION.md and final TEST_RESULTS.json for final aggregate run; historical focused integration 7 passed.",
+  "test_method": {
+    "imports": "ordinary project imports under complete virtual environment; no package initialization bypass",
+    "substitution": "Only callable model boundary replaced with recorded responses or explicitly controlled return; real shared stage execution, file store, parser, cache and accounting paths",
+    "network": "socket.connect and create_connection denied",
+    "new_paid_calls": 0,
+    "controlled_meter": "1000 prompt tokens, exclusively to test routing; never a tokenizer or spending estimate",
+    "entry_scope": "Archive response replay exercises new runtime with real shared stage/store/parser/cache; separate CLI tests exercise formal manifest/prepared-input and mocked Qwen HTTP/SSE. Public redacted book fails original production seal and is not passed off as a production CLI cache."
+  },
+  "observed_results": [
+    {
+      "case": "Actual continuous raw replay",
+      "result": "All seven archived author responses consumed by packed_continuous yield byte-identical historical complete BODY and all 95 task IDs; same-code second run uses cache without further model-boundary calls",
+      "quality_claim": false
+    },
+    {
+      "case": "Actual workbench missing table with controlled completion interruption",
+      "result": "Exactly one missing-table completion attempted, failure preserves exact original Ch1 prose; complete remains false",
+      "quality_claim": false
+    },
+    {
+      "case": "Actual workbench raw plus controlled insertion and real subsequent raw",
+      "result": "One explicitly synthetic table insertion plus six archived subsequent chapter responses reaches 95-task structural completion; original Ch1 prose unchanged",
+      "quality_claim": false,
+      "synthetic_text_label": "Controlled fixture / Contract only / Not quality evidence"
+    },
+    {
+      "case": "Actual historical reader issues adapted to stable block IDs",
+      "result": "Exact issue anchors mapped locally; two existing historical revision replacements applied as whole-block edits; third invalid-hash group rejected. Produced BODY is byte-identical to historical partial revision; whole BODY stays available while revision stays incomplete",
+      "quality_claim": false
+    },
+    {
+      "case": "Cross-domain schema",
+      "result": "Materials recovery fixture keeps exact task conditions, source alias, unknown sibling humidity and scope, and nested review-mediated provenance/secondary evidence after selective atom request",
+      "quality_claim": false
+    }
+  ],
+  "message_size_comparison": {
+    "method": "Regenerated prior formal _author_payload/_messages from SHA-verified archived FULL_BODY_INPUT compared with new _payload/_messages; compact outer JSON UTF-8 byte length",
+    "limitations": [
+      "Byte lengths are not model token counts",
+      "No local tokenizer asset available; packed_whole capacity fit is unproven",
+      "Default evidence is explicit field/source selection plus deduplication; only the complete archive is lossless",
+      "Prior saved MESSAGES cannot be used as byte-exact canonical input because selected split parts fail archive SHA verification"
+    ],
+    "rows": [
+      {
+        "prior_route": "whole_author",
+        "new_route": "packed_whole",
+        "prior_messages_wire_bytes": 4890822,
+        "new_messages_wire_bytes": 3463610,
+        "wire_byte_reduction_fraction": 0.2918143412293476,
+        "task_count": 95,
+        "new_atoms": 4655,
+        "new_sources": 194,
+        "new_payload_sha256": "f6927f6f646915146793152b1a5ff486e8ce95a6207934b1dbe9a1fb6e14b13d"
+      },
+      {
+        "prior_route": "continuous_author",
+        "new_route": "packed_continuous",
+        "prior_messages_wire_bytes": 2257864,
+        "new_messages_wire_bytes": 1089441,
+        "wire_byte_reduction_fraction": 0.517490424578274,
+        "task_count": 13,
+        "new_atoms": 1365,
+        "new_sources": 55,
+        "new_payload_sha256": "e7b136dc3005c3e96837a6d6b6762c9df19d08ce1cde54066f28edcfbd7688bc"
+      },
+      {
+        "prior_route": "workbench",
+        "new_route": "packed_continuous",
+        "prior_messages_wire_bytes": 2390117,
+        "new_messages_wire_bytes": 1089441,
+        "wire_byte_reduction_fraction": 0.5441892593542492,
+        "task_count": 13,
+        "new_atoms": 1365,
+        "new_sources": 55,
+        "new_payload_sha256": "e7b136dc3005c3e96837a6d6b6762c9df19d08ce1cde54066f28edcfbd7688bc"
+      }
+    ]
+  },
+  "archive_integrity_issue": {
+    "scope": "preview_whole_author saved MESSAGES split parts",
+    "finding": "parts 0003 and 0004 include UTF-8 replacement characters at byte splits; sizes after optional CRLF removal exceed original 600000 bytes and SHA check fails",
+    "policy": "No silent repair, replacement stripping or relaxed hash verification performed",
+    "not_affected": "FULL_BODY_INPUT and raw responses exercised by tests passed strict split length/SHA reconstruction"
+  },
+  "source_hashes": {
+    "tests/upgrade3/test_evidence_body_integration.py": "ec62db2ea820c5b12215cf9fb9946aa3aa94feeeeca1f4535e66921fecb05455",
+    "optomind_research/runtime/upgrade3/writing_evidence.py": "a4b66e733e904dac2a33125a535666908f7fb6609fe6ccaa59fe24eb13b12e50",
+    "optomind_research/runtime/upgrade3/evidence_body_writer.py": "d2d63d44557e1f187991131fa8053cb1d0396f722f81cc8bbc63204292bdf560",
+    "optomind_research/runtime/upgrade3/scoped_body_revision.py": "0ec4b655b0f880143fda93a65cf6c49b6b0ce62026c547929f2db5b1e232c375"
+  }
+}
