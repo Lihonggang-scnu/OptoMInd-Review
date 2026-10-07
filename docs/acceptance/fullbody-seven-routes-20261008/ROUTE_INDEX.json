@@ -1,6 +1,6 @@
 {
   "archive": "fullbody-seven-routes-20261008",
-  "publication_stage": "advanced-four-first; plain-three-pending",
+  "publication_stage": "advanced-four-plus-plain-results",
   "advanced": {
     "source_commit": "344f21b39dc68708ffafc1513aec2577dc29c43c",
     "input_manifest_sha256": "98e1ee62c4bf239fc54ed133d57c8c6c666b7231fd86c6e2065e79fcddf777a7",
@@ -15,11 +15,11 @@
     "source_commit": "50cc633795fa28b7a42fea96b9946931f49e3ddd",
     "input_manifest_sha256": "98e1ee62c4bf239fc54ed133d57c8c6c666b7231fd86c6e2065e79fcddf777a7",
     "cap_cny": 40,
-    "settled_cny": 0,
+    "settled_cny": 5.316296,
     "reserved_cny": 0,
-    "uncertain_cny": 0,
-    "remaining_cny": 40,
-    "status": "not_started_at_initial_publication"
+    "uncertain_cny": 3.33094,
+    "remaining_cny": 31.352764,
+    "status": "finalized_partial"
   },
   "routes": [
     {
@@ -80,26 +80,26 @@
     {
       "route": "chapter_concat",
       "budget": "plain",
-      "status": "not_yet_included_in_this_batch",
-      "detail": "Independent run reached three chapters; chapter four timed out with no response or usage. Detailed artifacts arrive in the second batch.",
+      "status": "partial_completed",
+      "detail": "Chapters 1-3 completed; chapter 4 timed out without response or usage. Detailed requests, raw returns, messages, bodies, and error are in plain_chapter_concat/.",
       "calls": 4,
       "settled_cny": 5.316296,
       "reserved_cny": 0,
       "uncertain_cny": 3.33094,
       "final_stage": "chapter_004_timeout",
-      "result_path": null
+      "result_path": "plain_chapter_concat/"
     },
     {
       "route": "hierarchical_full",
       "budget": "plain",
-      "status": "not_yet_included_in_this_batch",
-      "detail": "Formal CLI precondition rejected the partial independent draft (requires_complete) before any paid dispatch; detailed rejection report arrives in the second batch.",
+      "status": "blocked_requires_complete_draft",
+      "detail": "Formal CLI precondition rejected the partial independent draft (requires_complete) before any paid dispatch.",
       "calls": 0,
       "settled_cny": 0,
       "reserved_cny": 0,
       "uncertain_cny": 0,
       "final_stage": null,
-      "result_path": null
+      "result_path": "plain_second_batch/HIERARCHICAL_PREVIEW_REJECTION.json"
     }
   ]
 }

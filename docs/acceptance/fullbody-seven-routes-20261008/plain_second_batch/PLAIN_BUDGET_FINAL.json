@@ -1,0 +1,53 @@
+{
+  "record_type": "plain_fullbody_experiment_final_status",
+  "source_commit": "50cc633795fa28b7a42fea96b9946931f49e3ddd",
+  "manifest_sha256": "98e1ee62c4bf239fc54ed133d57c8c6c666b7231fd86c6e2065e79fcddf777a7",
+  "input_hash": "94590c2b7a3365b76af5e0fe4bad5ae5a677cd6d36f80e48a1e4ab90aa098aaa",
+  "routes": {
+    "plain_whole": {
+      "mode": "offline_preview",
+      "status": "capacity_blocked",
+      "model_calls": 0,
+      "reserved_cny": 0.0,
+      "preview_path": "F:\\OptoMind-Review-2\\outputs\\plain_fullbody_local_20261008_40cny\\live_plain_whole"
+    },
+    "chapter_concat": {
+      "mode": "paid",
+      "status": "incomplete_after_chapter_004_timeout",
+      "completed": [
+        "chapter_001",
+        "chapter_002",
+        "chapter_003"
+      ],
+      "uncertain_stage": "chapter_004",
+      "not_called": [
+        "chapter_005",
+        "chapter_006",
+        "chapter_007"
+      ],
+      "receipt_path": "F:\\OptoMind-Review-2\\outputs\\plain_fullbody_local_20261008_40cny\\PLAIN_CHAPTER_CONCAT_RUN_RECEIPT.json",
+      "status_path": "F:\\OptoMind-Review-2\\outputs\\plain_fullbody_local_20261008_40cny\\PLAIN_CHAPTER_CONCAT_STATUS.json"
+    },
+    "hierarchical_full": {
+      "mode": "offline_preview",
+      "status": "prerequisite_blocked_incomplete_draft",
+      "model_calls": 0,
+      "reserved_cny": 0.0,
+      "rejection_path": "F:\\OptoMind-Review-2\\outputs\\plain_fullbody_local_20261008_40cny\\HIERARCHICAL_PREVIEW_REJECTION.json"
+    }
+  },
+  "ledger": {
+    "path": "F:\\OptoMind-Review-2\\outputs\\plain_fullbody_local_20261008_40cny\\plain_only_budget.sqlite",
+    "cap_cny": 40.0,
+    "reservation_count": 4,
+    "settled_cny": 5.316296,
+    "held_or_uncertain_cny": 3.33094,
+    "remaining_after_settled_and_held_cny": 31.352764,
+    "no_release": true,
+    "no_reset": true,
+    "sha256": "6f49d3d537f27d880ed7098af9e65d752a3acbe0ad3111fb0a9f391a69d9c0a5"
+  },
+  "no_new_paid_calls_after_chapter_004": true,
+  "archival_note": "Preserve chapter_001-003 requests, raw responses, usage, bodies, chapter_004 request/raw/error/result and uncertain reservation; do not retry or release uncertain amount."
+}
+

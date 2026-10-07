@@ -1,0 +1,86 @@
+{
+  "record_type": "plain_chapter_concat_run_receipt",
+  "source_commit": "50cc633795fa28b7a42fea96b9946931f49e3ddd",
+  "route": "chapter_concat",
+  "started_local": "2026-10-08T02:53:01+08:00",
+  "finished_local": "2026-10-08T03:15:34+08:00",
+  "exec_session_id": 54252,
+  "supervisor_pid": 6236,
+  "python_pid": 25608,
+  "process_alive_after_exit": false,
+  "exit_code": 1,
+  "command": "C:\\Anaconda\\python.exe -X utf8 scripts/upgrade3/fullbody_writer.py --manifest F:\\OptoMind-Review-2\\outputs\\plain_fullbody_local_20261008_40cny\\SOURCE_INPUTS.json --route chapter_concat --config config\\fullbody_writer\\plus_first.json --tokenizer F:\\OptoMind-Review-2\\data\\tokenizers\\qwen3_5_9b\\tokenizer.json --output F:\\OptoMind-Review-2\\outputs\\plain_fullbody_local_20261008_40cny\\live_chapter_concat --run --budget-ledger F:\\OptoMind-Review-2\\outputs\\plain_fullbody_local_20261008_40cny\\plain_only_budget.sqlite --budget-limit 40 --key-file <redacted-local-key-path>",
+  "key_file_path": "[REDACTED_SECRET_OR_AUTH_FIELD]",
+  "config_path": "F:\\OptoMind-Review-2\\outputs\\plain_fullbody_local_20261008_40cny\\worktree\\config\\fullbody_writer\\plus_first.json",
+  "config_sha256": "6c20021eee3a46fd4d61f4802ad47dc3384d2644c17745f181c432313bbe7b62",
+  "manifest_path": "F:\\OptoMind-Review-2\\outputs\\plain_fullbody_local_20261008_40cny\\SOURCE_INPUTS.json",
+  "manifest_sha256": "98e1ee62c4bf239fc54ed133d57c8c6c666b7231fd86c6e2065e79fcddf777a7",
+  "tokenizer_path": "F:\\OptoMind-Review-2\\data\\tokenizers\\qwen3_5_9b\\tokenizer.json",
+  "tokenizer_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+  "input_hash": "94590c2b7a3365b76af5e0fe4bad5ae5a677cd6d36f80e48a1e4ab90aa098aaa",
+  "output_dir": "F:\\OptoMind-Review-2\\outputs\\plain_fullbody_local_20261008_40cny\\live_chapter_concat",
+  "completed_chapters": [
+    "chapter_001",
+    "chapter_002",
+    "chapter_003"
+  ],
+  "pending_chapters": [
+    "chapter_004",
+    "chapter_005",
+    "chapter_006",
+    "chapter_007"
+  ],
+  "stop_reason": "chapter_004 transport TimeoutError after 900.656 seconds inactivity; no usage, no response request id; official route stopped without retry; chapters 005-007 were not called",
+  "no_retry": true,
+  "reservations": [
+    {
+      "reservation_id": "res-c315564969a14615",
+      "call_id": "chapter_001-15a1058ead56-attempt_001:key0:attempt0",
+      "reserved_cny": 4.097828,
+      "actual_cny": 2.403052,
+      "status": "settled",
+      "request_id": "chatcmpl-ede841cb-fd03-90c5-b165-e18a39ded039",
+      "provider_error_code": null,
+      "finish_reason": "stop"
+    },
+    {
+      "reservation_id": "res-03cfb37a107a4c74",
+      "call_id": "chapter_002-4be5a44aca7a-attempt_001:key0:attempt0",
+      "reserved_cny": 3.112256,
+      "actual_cny": 1.52164,
+      "status": "settled",
+      "request_id": "chatcmpl-89722ebe-aa9d-95ef-8c89-b734e8267f5b",
+      "provider_error_code": null,
+      "finish_reason": "stop"
+    },
+    {
+      "reservation_id": "res-70869cb5636d4865",
+      "call_id": "chapter_003-eab359ca3b66-attempt_001:key0:attempt0",
+      "reserved_cny": 2.977532,
+      "actual_cny": 1.391604,
+      "status": "settled",
+      "request_id": "chatcmpl-391f2476-f3a6-9f17-a25a-f296d9917eaa",
+      "provider_error_code": null,
+      "finish_reason": "stop"
+    },
+    {
+      "reservation_id": "res-86571b29cbf84504",
+      "call_id": "chapter_004-a50fc05c4d3f-attempt_001:key0:attempt0",
+      "reserved_cny": 3.33094,
+      "actual_cny": null,
+      "status": "uncertain",
+      "request_id": null,
+      "provider_error_code": "QwenTransportError:TimeoutError",
+      "finish_reason": null
+    }
+  ],
+  "settled_cny": 5.316296,
+  "held_or_uncertain_cny": 3.33094,
+  "ledger_cap_cny": 40.0,
+  "remaining_after_settled_and_held_cny": 31.352764,
+  "ledger_path": "F:\\OptoMind-Review-2\\outputs\\plain_fullbody_local_20261008_40cny\\plain_only_budget.sqlite",
+  "ledger_sha256": "6f49d3d537f27d880ed7098af9e65d752a3acbe0ad3111fb0a9f391a69d9c0a5",
+  "status_path": "F:\\OptoMind-Review-2\\outputs\\plain_fullbody_local_20261008_40cny\\PLAIN_CHAPTER_CONCAT_STATUS.json",
+  "status_sha256": "91cff58b21e251de479234143f31db11afa482114f349133f9e426c6d2af5c62"
+}
+

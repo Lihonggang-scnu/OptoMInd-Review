@@ -1,0 +1,48 @@
+{
+  "error_type": "QwenTransportError",
+  "error": "qwen_transport_error",
+  "record": {
+    "call_id": "chapter_004-a50fc05c4d3f-attempt_001",
+    "effective_request": {
+      "model": "qwen3.5-plus",
+      "enable_thinking": true,
+      "thinking_budget": 16384,
+      "answer_tokens": 49152,
+      "total_output_tokens": 65536,
+      "max_completion_tokens": 65536,
+      "max_tokens": null,
+      "response_format": null,
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      },
+      "stream_inactivity_timeout_seconds": 900.0,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "stream": true,
+    "transport_events": [
+      {
+        "stage": "request_open_start",
+        "epoch": 1791399634.178683,
+        "elapsed_seconds": 0.0,
+        "stream": true,
+        "timeout_seconds": 900.0,
+        "overall_timeout_seconds": 3600.0,
+        "request_body_bytes": 1555375,
+        "request_body_sha256": "9fe0ee51bdcd30bfb2622936ce1426242df0430f83d230e9460045782875ca10",
+        "sequence": 1
+      },
+      {
+        "stage": "transport_exception",
+        "epoch": 1791400534.8364756,
+        "elapsed_seconds": 900.6560000001919,
+        "error": "TimeoutError",
+        "reason_code": "TimeoutError",
+        "sequence": 2
+      }
+    ],
+    "error": "TimeoutError",
+    "reason_code": "TimeoutError"
+  }
+}
+
