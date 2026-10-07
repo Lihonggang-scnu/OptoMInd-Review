@@ -26,7 +26,8 @@ from .fullbody_contracts import (fullbody_task_catalog, parse_fullbody_response,
                                  project_fullbody)
 
 SCHEMA_VERSION = "optomind.fullbody_writer.v1"
-ROUTES = ("whole_author", "continuous_author", "workbench", "reader_revision")
+PLAIN_ROUTES = ("plain_whole", "chapter_concat", "hierarchical_full")
+ROUTES = ("whole_author", "continuous_author", "workbench", "reader_revision", *PLAIN_ROUTES)
 PROMPT_ROOT = ROOT / "prompts" / "fullbody_writer"
 
 
@@ -475,6 +476,138 @@ def _choose_author_stage(book, route, segments, config, counter, index):
     return fitting or whole
 
 
+def _plain_payload(book: Mapping[str, Any], ids: Sequence[str], route: str) -> dict[str, Any]:
+    """The same lossless material contract, deliberately without prior prose."""
+    payload = project_fullbody(book, list(ids))
+    payload.pop("input_manifest", None)
+    payload.pop("book_sha256", None)
+    catalog = fullbody_task_catalog(book)
+    payload.update(baseline_route=route, current_task_ids=list(ids),
+                   current_chapter_ids=list(dict.fromkeys(catalog[key]["chapter_id"] for key in ids)),
+                   draft_scope="entire_approved_body" if route == "plain_whole" else "independent_approved_chapter_or_intact_task_group",
+                   preceding_prose_included=False, original_requirements_immutable=True)
+    return payload
+
+
+def _plain_stage(book, ids, route, config, counter, index):
+    payload = _plain_payload(book, ids, route)
+    stage_id = "plain_whole" if route == "plain_whole" else f"chapter_{index:03d}"
+    stage = _stage(stage_id, "writer", _messages(_prompt("plain_writer", route), payload),
+                   config["writer"], config, counter, task_ids=list(ids),
+                   independent_draft=True, preceding_prose_included=False,
+                   original_outline_sha256=_hash(payload.get("shared_fullbody_context")),
+                   material_manifest={"preserved": True, "source_records": [{"sha256": _hash(source),
+                       "source_handle": source.get("source_handle")} for source in payload.get("sources", [])]})
+    if not stage["estimate"]["fits"]:
+        stage["required_action"] = (
+            "The complete BODY plan and evidence exceed this plain-whole profile's input capacity. Increase input capacity or explicitly choose chapter_concat; no material was shortened or route switched."
+            if route == "plain_whole" else
+            "The immutable full BODY plan plus one intact task and its complete evidence exceed writer capacity. Increase input capacity; no task or source material was shortened.")
+    if route == "plain_whole":
+        _full_output_capacity(stage, config, "writer")
+    return stage
+
+
+def _full_output_capacity(stage, config, role):
+    required = config.get("whole_body_output_tokens")
+    if required and required > config[role]["max_output_tokens"]:
+        stage.update(status="capacity_blocked", output_capacity_blocked=True,
+                     required_action="The explicit full-BODY output requirement exceeds this " + role +
+                     " profile's visible-output allowance. Increase max_output_tokens within provider limits; no abbreviated BODY or windowed substitute will be generated.")
+
+
+def _choose_plain_stage(book, remaining, config, counter, index):
+    """A natural chapter boundary; subdivide only for measured input capacity."""
+    catalog = fullbody_task_catalog(book)
+    chapter_id = catalog[remaining[0]]["chapter_id"]
+    ids = [key for key in remaining if catalog[key]["chapter_id"] == chapter_id]
+    whole = _plain_stage(book, ids, "chapter_concat", config, counter, index)
+    if whole["estimate"]["fits"]:
+        return whole
+    fitting = None
+    for end in range(1, len(ids) + 1):
+        proposed = _plain_stage(book, ids[:end], "chapter_concat", config, counter, index)
+        if not proposed["estimate"]["fits"]:
+            return fitting or proposed
+        fitting = proposed
+    return fitting or whole
+
+
+def _integration_stage(book, draft, config, counter):
+    ids = list(fullbody_task_catalog(book))
+    payload = _plain_payload(book, ids, "hierarchical_full")
+    payload.update(draft_scope="entire_approved_body", original_body_markdown=draft["body_markdown"],
+                   original_body_sha256=_text_hash(draft["body_markdown"]),
+                   editing_scope="entire_original_full_body", output_scope="complete_replacement_body",
+                   original_draft_is_scientific_evidence=False)
+    stage = _stage("integrate_full_body", "reviser", _messages(_prompt("plain_writer", "hierarchical_full"), payload),
+                   config["reviser"], config, counter, task_ids=ids,
+                   full_original_body_sha256=_text_hash(draft["body_markdown"]),
+                   full_body_replacement=True,
+                   material_manifest={"preserved": True, "source_records": [{"sha256": _hash(source),
+                       "source_handle": source.get("source_handle")} for source in payload.get("sources", [])]},
+                   required_action="The complete assembled BODY, immutable full plan and complete evidence must fit one reviser request. Increase reviser context/input capacity or explicitly select a suitable editor profile and reuse INDEPENDENT_FULL_BODY_RESULT.json. The complete independent draft is preserved; no windowed editing is represented as full integration.")
+    _full_output_capacity(stage, config, "reviser")
+    return stage
+
+
+def _independent_base_validate(base, book, input_hash):
+    if not isinstance(base, Mapping) or (base.get("effective_route") or base.get("requested_route")) != "chapter_concat":
+        raise CandidateError("hierarchical_full_requires_complete_chapter_concat_draft")
+    try:
+        checked = _base_validate(base, book, input_hash)
+    except CandidateError as exc:
+        raise CandidateError(str(exc).replace("reader_revision", "hierarchical_full")) from exc
+    expected = [chapter["chapter_id"] for chapter in book["chapters"]]
+    if checked.get("approved_chapter_order") != expected:
+        raise CandidateError("hierarchical_full_draft_chapter_order_mismatch")
+    catalog = fullbody_task_catalog(book)
+    segments = checked.get("segments", [])
+    covered = [key for segment in segments for key in segment.get("task_ids", [])]
+    if not segments or covered != list(catalog):
+        raise CandidateError("hierarchical_full_draft_independent_segment_coverage_mismatch")
+    return checked
+
+
+def _plain_segment(parsed, scope, catalog, outcome, output, index):
+    content = parsed["body_markdown"]
+    segment_id = f"segment_{index:04d}"
+    path = output / "manuscript" / _text_hash(content) / (segment_id + ".md")
+    _write(path, content, text=True)
+    return {"segment_id": segment_id, "task_ids": list(scope),
+            "chapter_ids": list(dict.fromkeys(catalog[key]["chapter_id"] for key in scope)),
+            "body_markdown": content, "sha256": _text_hash(content), "full_text_path": str(path),
+            "stage_id": outcome["stage_id"], "result_sha256": outcome["result_sha256"],
+            "task_dispositions": deepcopy(parsed.get("task_dispositions", []))}
+
+
+def _independent_draft(book, body, segments, stages, *, output, input_hash, input_path, run_id, execution_mode):
+    """A self-contained complete draft, saved before attempting any global edit."""
+    ids = list(fullbody_task_catalog(book))
+    checked = parse_fullbody_response({"body_markdown": body, "completed_task_ids": ids, "complete": True}, book)
+    if not checked["complete"]:
+        raise CandidateError("independent_fullbody_draft_structural_validation_failed")
+    identity_map = {"source_identities": book.get("source_identities", {}), "source_aliases": book.get("source_aliases", {})}
+    identity_path = output / "inputs" / input_hash / "SOURCE_IDENTITY_MAP.json"
+    _write(identity_path, identity_map)
+    paid = None if any(row.get("paid_dispatch_count") is None for row in stages) else sum(row.get("paid_dispatch_count", 0) for row in stages)
+    calls = sum(row.get("model_calls", 0) for row in stages)
+    return {**checked, "schema_version": SCHEMA_VERSION + ".result", "body_complete": True,
+            "input_hash": input_hash, "input_path": str(input_path), "body_sha256": _text_hash(body),
+            "source_identity_map_path": str(identity_path), "source_identity_map_sha256": _hash(identity_map),
+            "approved_chapter_order": [chapter["chapter_id"] for chapter in book["chapters"]],
+            "fullbody_input_manifest_sha256": _hash(book.get("input_manifest", {})),
+            "segments": deepcopy(segments), "task_dispositions": [deepcopy(disposition) for segment in segments
+                for disposition in segment.get("task_dispositions", [])],
+            "requested_route": "chapter_concat", "effective_route": "chapter_concat", "status": "complete",
+            "run_id": run_id, "output_dir": str(output), "execution_mode": execution_mode,
+            "selected_kind": "independent_chapter_concatenation", "global_integration_performed": False,
+            "assembly_method": "approved_chapter_order_exact_text_join", "material_preserved": True,
+            "semantic_quality_unreviewed": True, "model_calls": calls, "client_invocations": calls,
+            "paid_dispatch_count": paid, "cost_summary": _cost_summary(stages, None),
+            "stage_lineage": [_dependency(row) | {"role": row["role"], "status": row["status"]} for row in stages]}
+
+
 def _dependency(outcome: Mapping[str, Any]) -> dict[str, Any]:
     return {key: outcome.get(key) for key in ("stage_id", "cache_key", "result_sha256")}
 
@@ -656,7 +789,8 @@ def run_fullbody_candidate(book: dict[str, Any], *, route: str, output_dir: str 
 
     Preview emits only requests whose actual inputs are available. Later
     continuation and edit requests cannot be honestly precomputed without prose.
-    ``base_result`` is mandatory for reader_revision and is never regenerated.
+    ``base_result`` is mandatory for reader_revision and optional for hierarchical_full.
+    A complete chapter_concat draft is reused verbatim without purchasing draft calls.
     """
     output = Path(output_dir).resolve()
     with _output_lock(output):
@@ -688,15 +822,16 @@ def _run(book, *, route, output, config, client_factory, run, retry_failed, coun
     segments, partial, body, completed, patches = [], "", "", [], []
     base, dependencies, catalog = None, [], {}
     revision_complete = False
+    integration_complete, independent_draft = False, None
     pending_reader_issues = []
 
     def checkpoint():
         _write(run_dir / "RUN_MANIFEST.json", manifest)
         _write(output / "RUN_MANIFEST.json", manifest)
 
-    def execute(stage, parser):
-        outcome = _execute_stage(stage, output=output, run_dir=run_dir, route=route, code_hash=code_hash,
-            input_hash=input_hash, dependencies=deepcopy(dependencies), client_factory=client_factory,
+    def execute(stage, parser, *, stage_route=None, stage_dependencies=None):
+        outcome = _execute_stage(stage, output=output, run_dir=run_dir, route=stage_route or route, code_hash=code_hash,
+            input_hash=input_hash, dependencies=deepcopy(dependencies if stage_dependencies is None else stage_dependencies), client_factory=client_factory,
             run=run, retry_failed=retry_failed, config=config, counter=counter, parser=parser)
         manifest["stages"].append(outcome)
         checkpoint()
@@ -711,6 +846,8 @@ def _run(book, *, route, output, config, client_factory, run, retry_failed, coun
             raise CandidateError("fullbody_has_no_tasks")
         if continue_incomplete and retry_failed:
             raise CandidateError("choose_continue_incomplete_or_retry_failed_not_both")
+        if continue_incomplete and route in PLAIN_ROUTES:
+            raise CandidateError("plain_routes_do_not_support_prefix_continuation:use continuous_author or workbench for prefix continuation")
         if route == "reader_revision":
             base = _base_validate(base_result, book, input_hash)
             body, completed = base["body_markdown"], list(catalog)
@@ -806,6 +943,82 @@ def _run(book, *, route, output, config, client_factory, run, retry_failed, coun
                     revision_complete = all(row["status"] == "complete" for row in outcomes) and not pending_reader_issues
             else:
                 manifest["not_executed"].append({"role": "reviser", "reason": "requires_successful_complete_body_reader"})
+        elif route in PLAIN_ROUTES:
+            if base_result is not None and route != "hierarchical_full":
+                raise CandidateError("base_result_only_supported_for_reader_revision_or_hierarchical_full")
+            manifest.update(baseline=True, prior_actual_prose_used_for_drafting=False,
+                            assembly_method="single_full_body_call" if route == "plain_whole" else "approved_chapter_order_exact_text_join",
+                            global_integration_requested=route == "hierarchical_full")
+            if route == "hierarchical_full" and base_result is not None:
+                base = _independent_base_validate(base_result, book, input_hash)
+                independent_draft = deepcopy(base)
+                body, completed = base["body_markdown"], list(catalog)
+                segments = deepcopy(base["segments"])
+                manifest["base_result"] = {"run_id": base.get("run_id"), "input_hash": base["input_hash"],
+                    "result_sha256": _hash({k: v for k, v in base.items() if k != "_loaded_from"}),
+                    "loaded_from": base.get("_loaded_from"), "cost_summary": base.get("cost_summary")}
+            else:
+                remaining = list(catalog)
+                while remaining:
+                    if len(manifest["stages"]) >= config["max_author_calls"]:
+                        manifest["not_executed"].append({"role": "writer", "reason": "explicit_max_author_calls_reached",
+                            "required_action": "Increase max_author_calls to continue from cached independent chapter drafts."})
+                        break
+                    stage = (_plain_stage(book, remaining, "plain_whole", config, counter, 1) if route == "plain_whole" else
+                             _choose_plain_stage(book, remaining, config, counter, len(manifest["stages"]) + 1))
+                    scope = stage["task_ids"]
+                    # Independently authored chapters do not depend on earlier
+                    # responses. Share their cache between concat and hierarchy.
+                    outcome = execute(stage, _author_parser(book, scope, allow_reads=False),
+                        stage_route="plain_whole" if route == "plain_whole" else "chapter_concat", stage_dependencies=[])
+                    parsed = outcome.get("result", {})
+                    remaining = [key for key in remaining if key not in scope]
+                    if outcome["status"] == "planned":
+                        continue  # All independent requests can be previewed honestly.
+                    if outcome["status"] != "complete":
+                        partial = parsed.get("body_markdown", "")
+                        break  # Keep useful prose and cache; never invent missing chapters.
+                    segments.append(_plain_segment(parsed, scope, catalog, outcome, output, len(segments) + 1))
+                    completed.extend(scope)
+                    body = _join(segments)
+                    _write(run_dir / "PARTIAL_BODY.md", body, text=True)
+                    _write(run_dir / "MANUSCRIPT_SEGMENTS.json", segments)
+                    checkpoint()
+                if route != "plain_whole" and completed == list(catalog):
+                    independent_draft = _independent_draft(book, body, segments, manifest["stages"], output=output,
+                        input_hash=input_hash, input_path=input_path, run_id=run_id, execution_mode=manifest["execution_mode"])
+            if independent_draft is not None:
+                # Immutable per-run copy remains usable when a later editor
+                # errors, is interrupted, or changes its configured model.
+                for directory in (run_dir, output):
+                    _write(directory / "INDEPENDENT_FULL_BODY_RESULT.json", independent_draft)
+                    _write(directory / "INDEPENDENT_FULL_BODY.md", independent_draft["body_markdown"], text=True)
+                manifest["independent_draft_result_path"] = str(run_dir / "INDEPENDENT_FULL_BODY_RESULT.json")
+                manifest["independent_draft_body_path"] = str(run_dir / "INDEPENDENT_FULL_BODY.md")
+                checkpoint()
+            if route == "hierarchical_full":
+                if independent_draft is None:
+                    manifest["not_executed"].append({"role": "reviser", "reason": "requires_complete_independent_full_body_draft",
+                        "required_action": "Complete every approved chapter before requesting full-BODY integration."})
+                else:
+                    _write(run_dir / "ORIGINAL_FULL_BODY.md", body, text=True)
+                    _write(run_dir / "ORIGINAL_FULL_BODY_RESULT.json", independent_draft)
+                    stage = _integration_stage(book, independent_draft, config, counter)
+                    draft_dependency = {"stage_id": "complete_independent_body", "result_sha256": _hash({
+                        "input_hash": input_hash, "body_markdown": body,
+                        "completed_task_ids": independent_draft["completed_task_ids"],
+                        "task_dispositions": independent_draft.get("task_dispositions", [])})}
+                    outcome = execute(stage, _author_parser(book, list(catalog), allow_reads=False), stage_dependencies=[draft_dependency])
+                    if outcome["status"] == "complete":
+                        parsed = outcome["result"]
+                        replacement_segments = [_plain_segment(parsed, list(catalog), catalog, outcome, output, 1)]
+                        body, segments = parsed["body_markdown"], replacement_segments
+                        integration_complete = True
+                    else:
+                        actual_capacity_blocked = "actual_client_meter_requires_batching" in str(outcome.get("call_error") or "")
+                        outcome["required_action"] = stage.get("required_action") if outcome["status"] == "capacity_blocked" or actual_capacity_blocked else (
+                            "The full-BODY edit was not accepted. The complete independent draft is preserved. Inspect the saved raw response and shared ledger; use --retry-failed only to explicitly authorize another attempt, or reuse INDEPENDENT_FULL_BODY_RESULT.json with a suitable editor profile.")
+                        checkpoint()
         else:
             while len(completed) < len(catalog):
                 if len(manifest["stages"]) >= config["max_author_calls"]:
@@ -905,24 +1118,48 @@ def _run(book, *, route, output, config, client_factory, run, retry_failed, coun
                 if anchor and body.count(anchor) != 1:
                     disposition["original_location"] = disposition.pop("location")
                     disposition["location_invalidated_by_revision"] = True
-        complete = bool(checked.get("complete") and (route != "reader_revision" or revision_complete))
+        complete = bool(checked.get("complete") and (route != "reader_revision" or revision_complete) and
+                        (route != "hierarchical_full" or integration_complete))
         manifest["status"] = "complete" if complete else "preview" if not run else "pending"
         result = {**checked, "complete": complete, "body_complete": bool(checked.get("complete")), "body_markdown": body,
                   "pending_task_ids": [key for key in catalog if key not in completed],
                   "completed_task_ids": completed, "segments": segments, "accepted_patches": patches,
-                  "task_dispositions": deepcopy(base.get("task_dispositions", [])) if base else
+                  "task_dispositions": deepcopy(base.get("task_dispositions", [])) if base and not integration_complete else
                       [deepcopy(disposition) for segment in segments for disposition in segment.get("task_dispositions", [])],
                   "selected_kind": "reader_revised" if patches else "original_base" if base else "draft",
                   "reader_revision_complete": revision_complete if route == "reader_revision" else None,
                   "reader_revision_status": ("complete" if revision_complete else "partial" if patches else "pending") if route == "reader_revision" else None,
                   "pending_reader_issues": pending_reader_issues,
                   "partial_unaccepted_prose": bool(partial)}
+        if route in PLAIN_ROUTES:
+            result.update(baseline=True, global_integration_performed=integration_complete,
+                assembly_method="single_full_body_replacement_of_independent_draft" if integration_complete else manifest["assembly_method"],
+                selected_kind=("full_body_integrated" if integration_complete else "independent_chapter_concatenation"
+                    if route != "plain_whole" else "plain_whole_draft"),
+                independent_draft_result_path=manifest.get("independent_draft_result_path"),
+                independent_draft_body_path=manifest.get("independent_draft_body_path"))
+            if route == "hierarchical_full":
+                result.update(integration_complete=integration_complete, integration_pending=not integration_complete,
+                    integration_status="complete" if integration_complete else "pending" if independent_draft else "awaiting_complete_draft")
+                if not integration_complete:
+                    last = manifest["stages"][-1] if manifest["stages"] else {}
+                    result["required_action"] = last.get("required_action") or "Complete every approved chapter before full-BODY integration; no missing chapter is inferred."
     except Exception as exc:
         manifest.update(status="blocked", error=_safe_error(exc))
+        if route == "hierarchical_full" and independent_draft is not None:
+            body = independent_draft["body_markdown"]
+            segments = deepcopy(independent_draft["segments"])
+            completed = list(independent_draft["completed_task_ids"])
         result = {"complete": False, "body_markdown": body, "completed_task_ids": completed,
                   "pending_task_ids": [key for key in catalog if key not in completed],
                   "segments": segments, "issues": [manifest["error"]], "accepted_patches": patches,
                   "pending_reader_issues": pending_reader_issues}
+        if route == "hierarchical_full":
+            result.update(body_complete=bool(independent_draft), integration_complete=False, integration_pending=True,
+                          integration_status="pending" if independent_draft else "awaiting_complete_draft",
+                          independent_draft_result_path=manifest.get("independent_draft_result_path"),
+                          independent_draft_body_path=manifest.get("independent_draft_body_path"),
+                          required_action="Inspect the recorded failure before retrying. The complete independent draft, when available, remains reusable for one full-BODY editor call.")
     calls = sum(row.get("model_calls", 0) for row in manifest["stages"])
     paid = None if any(row.get("paid_dispatch_count") is None for row in manifest["stages"]) else sum(row.get("paid_dispatch_count", 0) for row in manifest["stages"])
     cost = _cost_summary(manifest["stages"], base)

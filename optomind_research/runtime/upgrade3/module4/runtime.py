@@ -611,8 +611,10 @@ class GlobalBudgetLedger:
             return
         with sqlite3.connect(self.path) as db:
             row = db.execute("SELECT value FROM budget_meta WHERE key='limit_cny'").fetchone()
-            if self.limit_cny is None and row:
-                self.limit_cny = float(row[0])
+            if row:
+                stored_limit = float(row[0])
+                self.limit_cny = (stored_limit if self.limit_cny is None
+                                  else min(float(self.limit_cny), stored_limit))
             row = db.execute("SELECT COALESCE(SUM(amount_cny),0) FROM reservations WHERE status IN ('reserved','uncertain')").fetchone()
             self.reserved_cny = float(row[0] or 0.0)
             row = db.execute("SELECT COALESCE(SUM(actual_cny),0) FROM reservations").fetchone()
@@ -625,7 +627,11 @@ class GlobalBudgetLedger:
             with sqlite3.connect(self.path, timeout=30.0) as db:
                 db.execute("BEGIN IMMEDIATE")
                 row = db.execute("SELECT value FROM budget_meta WHERE key='limit_cny'").fetchone()
-                limit = self.limit_cny if self.limit_cny is not None else (float(row[0]) if row else None)
+                stored_limit = float(row[0]) if row else None
+                limits = [float(value) for value in (self.limit_cny, stored_limit) if value is not None]
+                # A lowered shared ceiling applies even to an already-created
+                # client; never keep spending under its stale larger limit.
+                limit = min(limits) if limits else None
                 used = db.execute("SELECT COALESCE(SUM(CASE WHEN status='settled' THEN COALESCE(actual_cny,amount_cny) ELSE amount_cny END),0) FROM reservations").fetchone()[0]
                 if limit is not None and float(used or 0.0) + amount > float(limit) + 1e-9:
                     raise QwenTransportError("global_budget_exceeded", transient=False, record={"call_id": call_id, "amount_cny": amount})

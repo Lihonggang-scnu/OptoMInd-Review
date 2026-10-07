@@ -26,7 +26,8 @@ from scripts.upgrade3 import writer_candidates as shared
 
 DEFAULT_CONFIG = PROJECT_ROOT / "config/fullbody_writer/plus_first.json"
 MANIFEST_SCHEMA = "optomind.fullbody_manifest.v1"
-ROUTES = ("whole_author", "continuous_author", "workbench", "reader_revision")
+ROUTES = ("whole_author", "continuous_author", "workbench", "reader_revision",
+          "plain_whole", "chapter_concat", "hierarchical_full")
 read_json = shared.read_json
 write_json = shared.write_json
 sha256_file = shared.sha256_file
@@ -331,19 +332,27 @@ class RecordingFactory(shared.RecordingFactory):
                                        "complete": True, "finish_reason": "stop"}
 
 
-def load_draft(path: str | Path) -> dict[str, Any]:
+def load_draft(path: str | Path, *, route: str = "reader_revision") -> dict[str, Any]:
+    """Load an exact complete BODY, retaining its lineage and scientific scope."""
+    if route not in ("reader_revision", "hierarchical_full"):
+        raise ValueError("draft_only_supported_for_reader_revision_or_hierarchical_full")
     source = Path(path).expanduser().resolve()
-    if source.name != "FULL_BODY_RESULT.json":
-        raise ValueError("reader_revision_requires_FULL_BODY_RESULT_json")
+    allowed_names = {"FULL_BODY_RESULT.json"}
+    if route == "hierarchical_full":
+        allowed_names.add("INDEPENDENT_FULL_BODY_RESULT.json")
+    if source.name not in allowed_names:
+        raise ValueError(route + "_requires_FULL_BODY_RESULT_json")
     result = read_json(source)
     if not isinstance(result, dict) or result.get("complete") is not True or result.get("pending_task_ids"):
-        raise ValueError("reader_revision_requires_complete_fullbody_draft")
+        raise ValueError(route + "_requires_complete_fullbody_draft")
+    if route == "hierarchical_full" and (result.get("effective_route") or result.get("requested_route")) != "chapter_concat":
+        raise ValueError("hierarchical_full_requires_chapter_concat_draft")
     body = result.get("body_markdown")
     if not isinstance(body, str) or not body.strip():
-        raise ValueError("reader_revision_fullbody_draft_has_no_body")
+        raise ValueError(route + "_fullbody_draft_has_no_body")
     digest = hashlib.sha256(body.encode()).hexdigest()
     if result.get("body_sha256") and result["body_sha256"] != digest:
-        raise ValueError("reader_revision_draft_body_hash_mismatch")
+        raise ValueError(route + "_draft_body_hash_mismatch")
     result["_loaded_from"] = {"path": str(source), "sha256": sha256_file(source), "body_sha256": digest}
     return result
 
@@ -357,14 +366,14 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--output", help="Candidate artifact directory; reuse it only with the same pinned input versions")
     p.add_argument("--config", default=str(DEFAULT_CONFIG))
     p.add_argument("--language", help="Explicit language override; otherwise manifest, approved plan, then zh")
-    p.add_argument("--draft", help="Explicit complete FULL_BODY_RESULT.json; required for reader_revision")
+    p.add_argument("--draft", help="Complete FULL_BODY_RESULT.json: required for reader_revision; optional chapter_concat result for hierarchical_full (also INDEPENDENT_FULL_BODY_RESULT.json)")
     mode = p.add_mutually_exclusive_group()
     mode.add_argument("--run", action="store_true", help="Explicit paid execution; requires one shared finite CNY ledger")
     mode.add_argument("--responses", help="Offline JSON stage-id or role to recorded response mapping")
     p.add_argument("--allow-max", action="store_true", help="Explicit paid Max permission; never selects or upgrades a model")
     p.add_argument("--retry-failed", action="store_true", help="Explicitly allow another attempt for failed or uncertain stages")
-    p.add_argument("--continue-incomplete", action="store_true", help="Explicitly continue saved finish_reason=length prose in another paid author call")
-    p.add_argument("--budget-ledger", help="One SQLite ledger shared by all four routes, continuations and revisions")
+    p.add_argument("--continue-incomplete", action="store_true", help="Explicitly continue saved finish_reason=length prose in continuous_author/workbench; not supported by plain baselines")
+    p.add_argument("--budget-ledger", help="One SQLite ledger shared by all advanced/plain routes, continuations and revisions")
     p.add_argument("--budget-limit", type=float, help="ABSOLUTE lifetime CNY cap, not additional credit; existing ledger cap cannot silently change")
     p.add_argument("--key-file", help="Local credentials, read only by an actual --run transport call")
     p.add_argument("--tokenizer", help="Existing local tokenizer.json; no download or network lookup")
@@ -387,22 +396,29 @@ def main(argv=None) -> int:
             return 0
         if not args.output:
             raise ValueError("output_required")
+        if args.continue_incomplete and args.route in ("plain_whole", "chapter_concat", "hierarchical_full"):
+            raise ValueError("continue_incomplete_not_supported_for_plain_routes:use continuous_author or workbench for prefix continuation")
         if args.route == "reader_revision" and not args.draft:
             raise ValueError("reader_revision_requires_explicit_draft")
-        if args.route != "reader_revision" and args.draft:
-            raise ValueError("draft_only_supported_for_reader_revision")
+        if args.route not in ("reader_revision", "hierarchical_full") and args.draft:
+            raise ValueError("draft_only_supported_for_reader_revision_or_hierarchical_full")
         from optomind_research.runtime.upgrade3.fullbody_writer import run_fullbody_candidate, validate_config
         config = read_json(args.config)
         shared._no_secrets(config)
         config = validate_config(config)
-        roles = ("reader", "reviser") if args.route == "reader_revision" else ("writer",)
+        if args.route == "reader_revision":
+            roles = ("reader", "reviser")
+        elif args.route == "hierarchical_full":
+            roles = ("reviser",) if args.draft else ("writer", "reviser")
+        else:
+            roles = ("writer",)
         shared._require_max_permission(args, {role: config[role] for role in roles})
         book, prepared = load_body_manifest(args.manifest, plan_path=args.plan, language=args.language)
-        base_result = load_draft(args.draft) if args.draft else None
+        base_result = load_draft(args.draft, route=args.route) if args.draft else None
         if base_result is not None and base_result.get("input_hash") != _hash(book):
-            raise ValueError("reader_revision_draft_input_hash_mismatch")
+            raise ValueError(args.route + "_draft_input_hash_mismatch")
         if args.run and base_result is not None and base_result.get("execution_mode") != "live":
-            raise ValueError("live_reader_revision_requires_live_fullbody_draft:use preview or --responses for recorded drafts")
+            raise ValueError("live_" + args.route + "_requires_live_fullbody_draft:use preview or --responses for recorded drafts")
         counter, meter = tokenizer_counter(args.tokenizer)
         mode = "live" if args.run else "recording" if args.responses else "preview"
         output = Path(args.output).expanduser().resolve()
