@@ -100,6 +100,8 @@ def test_page_and_search_requests_expand_complete_original_records():
     assert paged["trace"][0]["catalog_total_matches"] == 8
     assert paged["trace"][0]["catalog_remaining_count"] == 4
     assert paged["trace"][0]["catalog_next_request"]["offset"] == 4
+    assert len({row["canonical_access_id"] for row in paged["selected_materials"]}) == 2
+    assert all(len(row["identity_aliases"]) == 1 for row in paged["selected_materials"])
     mixed = _resolve(payload, catalog, [
         {"request_type": "catalog_search", "query": "NO-SUCH-RECORD", "limit": 2},
         {"request_type": "catalog_search", "query": "NEGATIVE-MARKER-1", "limit": 1},

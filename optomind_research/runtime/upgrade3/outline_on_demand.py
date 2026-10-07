@@ -927,13 +927,22 @@ def resolve_material_requests(
             if access_id in seen:
                 continue
             seen.add(access_id)
+            if request_type in {"catalog_page", "catalog_search"}:
+                # A discovery page contains different papers, not aliases of
+                # its first result.  Keep each identity group independent for
+                # later complete-record batching and audit.
+                row_alias_ids = _identity_aliases(access_id, lookup)
+                row_canonical_id = _canonical_access_id(row_alias_ids, lookup)
+            else:
+                row_alias_ids = alias_ids
+                row_canonical_id = canonical_access_id
             record_info = lookup[access_id]
             row = _copy(record_info["record"])
             entry = _copy(record_info["entry"])
             selected.append({
                 "access_id": access_id,
-                "canonical_access_id": canonical_access_id,
-                "identity_aliases": _copy(alias_ids),
+                "canonical_access_id": row_canonical_id,
+                "identity_aliases": _copy(row_alias_ids),
                 "channel": entry["channel"],
                 "index_path": entry["index_path"],
                 "identity": entry["identity"],
@@ -945,8 +954,8 @@ def resolve_material_requests(
             })
             trace_rows.append({
                 "access_id": access_id,
-                "canonical_access_id": canonical_access_id,
-                "identity_aliases": _copy(alias_ids),
+                "canonical_access_id": row_canonical_id,
+                "identity_aliases": _copy(row_alias_ids),
                 "channel": entry["channel"],
                 "index_path": entry["index_path"],
                 "identity": entry["identity"],
