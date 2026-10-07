@@ -9,6 +9,7 @@ from __future__ import annotations
 import importlib.util
 import io
 import json
+import gc
 import sys
 import tempfile
 import unittest
@@ -40,6 +41,25 @@ class FakeResponse:
         pass
 
 
+class FakeStreamResponse:
+    status = 200
+    headers = {"x-request-id": "offline-stream-request", "content-type": "text/event-stream"}
+
+    def __init__(self, lines):
+        self.lines = []
+        for line in lines:
+            self.lines.extend(line.splitlines(keepends=True))
+
+    def readline(self):
+        return self.lines.pop(0) if self.lines else b""
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        pass
+
+
 class CaptureOpener:
     def __init__(self, *, usage=None, finish_reason="stop", error=None):
         self.bodies = []
@@ -62,6 +82,16 @@ class CaptureOpener:
                 "completion_tokens_details": {"reasoning_tokens": 10},
             },
         })
+
+
+class StreamOpener:
+    def __init__(self, lines):
+        self.lines = list(lines)
+        self.bodies = []
+
+    def open(self, request, timeout):
+        self.bodies.append(json.loads(request.data))
+        return FakeStreamResponse(self.lines)
 
 
 class EffectiveTokenTransportTests(unittest.TestCase):
@@ -103,12 +133,157 @@ class EffectiveTokenTransportTests(unittest.TestCase):
                 self.assertEqual(effective["max_completion_tokens"], body["max_completion_tokens"])
                 self.assertIsNone(effective["max_tokens"])
                 self.assertTrue(result["complete"])
+                self.assertFalse(body["stream"])
+                self.assertNotIn("stream_options", body)
+
+    def test_opt_in_stream_preserves_answer_reasoning_usage_and_phase_audit(self):
+        lines = [
+            b'data: {"id":"stream-1","model":"qwen3.8-max","choices":[{"delta":{"reasoning_content":"check "},"finish_reason":null}]}\r\n\r\n',
+            b'data: {"id":"stream-1","choices":[{"delta":{"content":"{\\"ok\\":"},"finish_reason":null}]}\r\n\r\n',
+            b'data: {"id":"stream-1","choices":[{"delta":{"content":"true}"},"finish_reason":"stop"}]}\r\n\r\n',
+            b'data: {"id":"stream-1","choices":[],"usage":{"prompt_tokens":12,"completion_tokens":9,"completion_tokens_details":{"reasoning_tokens":2}}}\r\n\r\n',
+            b'data: [DONE]\r\n\r\n',
+        ]
+        # Keep the second event visibly valid after constructing it with a
+        # JSON round trip; the line above remains CRLF to exercise SSE parsing.
+        lines[1] = (b'data: ' + json.dumps({
+            "id": "stream-1", "choices": [{"delta": {"content": '{"ok":'}, "finish_reason": None}],
+        }, separators=(",", ":")).encode() + b"\r\n\r\n")
+        opener = StreamOpener(lines)
+        with tempfile.TemporaryDirectory() as temp:
+            events = []
+            client = runtime.QwenDirectClient(
+                model="qwen3.8-max", max_output_tokens=32768, thinking_budget=32768,
+                json_mode=False, raw_response_dir=Path(temp), timeout_seconds=30,
+            )
+            body, result = self.invoke(client, opener=opener, stream=True, transport_observer=events, call_id="stream-test")
+            self.assertTrue(body["stream"])
+            self.assertEqual(body["stream_options"], {"include_usage": True})
+            self.assertEqual(result["content"], '{"ok":true}')
+            self.assertEqual(result["reasoning_content"], "check ")
+            self.assertEqual(result["usage"]["prompt_tokens"], 12)
+            self.assertTrue(result["complete"])
+            self.assertEqual(result["finish_reason"], "stop")
+            self.assertEqual(result["normalized_response"]["choices"][0]["message"]["content"], '{"ok":true}')
+            self.assertTrue(any(event["stage"] == "response_opened" for event in events))
+            self.assertTrue(any(event["stage"] == "stream_first_byte" for event in events))
+            self.assertTrue(any(event["stage"] == "stream_complete" for event in events))
+            self.assertTrue(Path(result["raw_stream_path"]).exists())
+
+    def test_stream_error_event_preserves_partial_evidence_and_does_not_adopt(self):
+        opener = StreamOpener([
+            b'data: {"id":"stream-error","choices":[{"delta":{"content":"partial"},"finish_reason":null}]}\n\n',
+            b'data: {"error":{"code":"provider_busy"}}\n\n',
+        ])
+        with tempfile.TemporaryDirectory() as temp:
+            ledger = runtime.GlobalBudgetLedger(limit_cny=10)
+            client = runtime.QwenDirectClient(
+                model="qwen3.8-max", max_output_tokens=32768, thinking_budget=32768,
+                json_mode=False, raw_response_dir=Path(temp), budget_ledger=ledger,
+                prompt_token_counter=lambda *_: 100, max_retries=0,
+            )
+            with self.assertRaisesRegex(runtime.QwenTransportError, "qwen_stream_error_event") as caught:
+                self.invoke(client, opener=opener, stream=True, call_id="stream-error")
+            self.assertEqual(caught.exception.record["transport_phase"], "stream_event")
+            self.assertGreater(caught.exception.record["partial_content_bytes"], 0)
+            row = ledger.as_dict()["reservations"][0]
+            self.assertEqual(row["status"], "uncertain")
+            self.assertTrue(list(Path(temp).glob("*.sse.partial")))
+
+    def test_stream_socket_timeout_records_read_phase(self):
+        class TimeoutResponse(FakeStreamResponse):
+            def readline(self):
+                raise TimeoutError("offline timeout")
+
+        class TimeoutOpener(StreamOpener):
+            def open(self, request, timeout):
+                self.bodies.append(json.loads(request.data))
+                return TimeoutResponse([])
+
+        opener = TimeoutOpener([])
+        client = runtime.QwenDirectClient(model="qwen3.8-max", json_mode=False, max_retries=0)
+        with self.assertRaisesRegex(runtime.QwenTransportError, "qwen_stream_read_timeout") as caught:
+            self.invoke(client, opener=opener, stream=True, call_id="stream-timeout")
+        self.assertEqual(caught.exception.record["transport_phase"], "stream_read")
+
+    def test_stream_malformed_event_is_rejected_without_adoption(self):
+        opener = StreamOpener([b"data: {not-json}\r\n\r\n"])
+        with tempfile.TemporaryDirectory() as temp:
+            client = runtime.QwenDirectClient(
+                model="qwen3.8-max", json_mode=False, raw_response_dir=Path(temp), max_retries=0,
+            )
+            with self.assertRaisesRegex(runtime.QwenTransportError, "qwen_stream_event_not_json"):
+                self.invoke(client, opener=opener, stream=True, call_id="stream-malformed")
+            self.assertTrue(list(Path(temp).glob("*.sse.partial")))
+
+    def test_stream_observer_failure_does_not_fail_complete_response(self):
+        lines = [
+            b'data: {"id":"observer-ok","choices":[{"delta":{"content":"ok"},"finish_reason":"stop"}]}\n\n',
+            b'data: {"id":"observer-ok","choices":[],"usage":{"prompt_tokens":3,"completion_tokens":1}}\n\n',
+            b"data: [DONE]\n\n",
+        ]
+        opener = StreamOpener(lines)
+        def failing_observer(_event):
+            raise RuntimeError("audit sink unavailable")
+        client = runtime.QwenDirectClient(model="qwen3.8-max", json_mode=False, max_retries=0)
+        _, result = self.invoke(client, opener=opener, stream=True, transport_observer=failing_observer)
+        self.assertEqual(result["content"], "ok")
+        self.assertTrue(result["complete"])
+
+    def test_stream_audit_keeps_periodic_event_boundary(self):
+        lines = [
+            (b'data: ' + json.dumps({
+                "id": "periodic", "choices": [{"delta": {"content": "x"}, "finish_reason": None}],
+            }, separators=(",", ":")).encode() + b"\n\n")
+            for _ in range(130)
+        ]
+        lines.extend([
+            b'data: {"id":"periodic","choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+            b'data: {"id":"periodic","choices":[],"usage":{"prompt_tokens":3,"completion_tokens":131}}\n\n',
+            b"data: [DONE]\n\n",
+        ])
+        opener = StreamOpener(lines)
+        events = []
+        client = runtime.QwenDirectClient(model="qwen3.8-max", json_mode=False, max_retries=0)
+        _, result = self.invoke(client, opener=opener, stream=True, transport_observer=events)
+        self.assertEqual(len(result["content"]), 130)
+        self.assertTrue(any(event.get("event_count") == 128 for event in events))
+        self.assertTrue(any(event["stage"] == "stream_complete" for event in events))
 
     def test_max_strong_profile_is_not_artificially_capped_at_32768(self):
         client = runtime.QwenDirectClient(model="qwen3.8-max", max_output_tokens=65_536, thinking_budget=32_768)
         body, _ = self.invoke(client)
         self.assertEqual(body["max_completion_tokens"], 98_304)
         self.assertEqual(runtime.model_pricing("qwen3.8-max")["max_output_tokens"], 131_072)
+
+    def test_shared_wire_meter_matches_live_reservation_with_and_without_counter(self):
+        messages = [{"role": "user", "content": "Return JSON with the supplied condition."}]
+        model = "qwen3.8-max"
+        answer = 256
+        thinking = 128
+        wire, _ = runtime.build_qwen_wire_body(
+            messages, model=model, max_output_tokens=answer,
+            thinking=True, thinking_budget=thinking, json_mode=True, stream=False,
+        )
+        for counter in (lambda *_: 100, None):
+            with self.subTest(counter=counter is not None):
+                ledger = runtime.GlobalBudgetLedger(limit_cny=100)
+                client = runtime.QwenDirectClient(
+                    model=model, max_output_tokens=answer, thinking_budget=thinking,
+                    budget_ledger=ledger, prompt_token_counter=counter, max_retries=0,
+                )
+                with patch.object(runtime.urllib.request, "build_opener", return_value=CaptureOpener()):
+                    client(messages, call_id="meter-match")
+                if counter is None:
+                    meter = runtime.estimate_prompt_tokens(wire, messages)
+                else:
+                    meter = runtime.estimate_prompt_tokens(wire, messages, prompt_token_counter=counter)
+                expected = runtime.estimated_cost_cny(
+                    {"prompt_tokens": meter["prompt_tokens"], "completion_tokens": answer + thinking},
+                    model=model, conservative=True,
+                )
+                row = ledger.as_dict()["reservations"][0]
+                self.assertAlmostEqual(float(row["amount_cny"]), expected, places=9)
 
     def test_per_call_thinking_overrides_constructor_both_directions(self):
         client = runtime.QwenDirectClient(thinking=False, thinking_budget=16_384)
@@ -175,12 +350,15 @@ class EffectiveTokenTransportTests(unittest.TestCase):
                 budget_ledger=ledger, prompt_token_counter=lambda *_: 100,
             )
             _, result = self.invoke(client)
-            row = runtime.GlobalBudgetLedger(path=path).as_dict()["reservations"][0]
+            reopened = runtime.GlobalBudgetLedger(path=path)
+            row = reopened.as_dict()["reservations"][0]
             self.assertAlmostEqual(row["amount_cny"], (100 * 12 + 98_304 * 36) / 1_000_000)
             self.assertEqual(row["telemetry"]["effective_request"], result["effective_request"])
             self.assertEqual(row["telemetry"]["cap_pressure"], result["cap_pressure"])
             self.assertEqual(row["status"], "settled")
             self.assertNotIn("offline-placeholder", json.dumps(row))
+            del reopened
+            gc.collect()
 
     def test_missing_usage_keeps_full_reservation_and_request_metadata(self):
         ledger = runtime.GlobalBudgetLedger(limit_cny=10)

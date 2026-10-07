@@ -12,6 +12,8 @@ import hashlib
 import json
 import os
 import sqlite3
+import socket
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -93,6 +95,92 @@ def _conservative_prompt_token_upper_bound(request_bytes: bytes, messages: Seque
 
     protocol_margin = 8_192 + (256 * max(1, len(messages)))
     return max(1, len(request_bytes) + protocol_margin)
+
+
+def estimate_prompt_tokens(
+    request_bytes: bytes,
+    messages: Sequence[Mapping[str, Any]],
+    *,
+    prompt_token_counter: Callable[[bytes, Sequence[Mapping[str, Any]]], int] | None = None,
+    prompt_token_multiplier: float = 1.0,
+    prompt_token_framing_margin: int = 0,
+) -> dict[str, Any]:
+    """Return the prompt estimate used by :class:`QwenDirectClient`.
+
+    Preparation code must use the same tokenizer, multiplier, framing margin,
+    and conservative UTF-8 fallback as the client that will reserve the call.
+    Keeping this calculation public avoids a prepared request being priced with
+    a different meter from the request that is eventually sent.
+    """
+
+    try:
+        multiplier = float(prompt_token_multiplier)
+        framing_margin = int(prompt_token_framing_margin)
+    except (TypeError, ValueError) as exc:
+        raise QwenTransportError("invalid_prompt_token_estimator", transient=False) from exc
+    if multiplier < 1.0 or framing_margin < 0:
+        raise QwenTransportError("invalid_prompt_token_estimator", transient=False)
+    if prompt_token_counter is None:
+        return {
+            "prompt_tokens": _conservative_prompt_token_upper_bound(request_bytes, messages),
+            "method": "utf8_conservative_upper_bound",
+            "multiplier": 1.0,
+            "framing_margin": 0,
+        }
+    try:
+        measured = int(prompt_token_counter(request_bytes, messages))
+    except Exception as exc:
+        raise QwenTransportError(
+            "prompt_token_estimator_failed",
+            transient=False,
+            record={"error": type(exc).__name__},
+        ) from exc
+    if measured < 0:
+        raise QwenTransportError("prompt_token_estimator_returned_negative", transient=False)
+    estimated = max(1, int(measured * multiplier + 0.999999) + framing_margin)
+    return {
+        "prompt_tokens": estimated,
+        "measured_tokens": measured,
+        "method": "provided_token_counter",
+        "multiplier": multiplier,
+        "framing_margin": framing_margin,
+    }
+
+
+def build_qwen_wire_body(
+    messages: Sequence[Mapping[str, Any]], *, model: str, max_output_tokens: int,
+    thinking: bool = True, thinking_budget: int = 0, json_mode: bool = True,
+    stream: bool = False, temperature: float = 0.1,
+) -> tuple[bytes, dict[str, Any]]:
+    """Serialize the exact request body used by :class:`QwenDirectClient`.
+
+    Preparation and live reservation must meter this same body.  Keeping this
+    small pure helper public avoids a fallback UTF-8 estimate silently using a
+    different envelope from the wire request.
+    """
+
+    pricing = model_pricing(str(model))
+    requested_output_tokens = max(64, int(max_output_tokens))
+    budget = int(thinking_budget) if thinking else 0
+    total_output_tokens = requested_output_tokens + budget
+    if total_output_tokens > int(pricing["max_output_tokens"]):
+        raise QwenTransportError("model_total_output_exceeded", transient=False)
+    token_parameter = pricing.get("completion_token_parameter", "max_tokens")
+    body: dict[str, Any] = {
+        "model": str(model),
+        "messages": [dict(item) for item in messages],
+        token_parameter: total_output_tokens if token_parameter == "max_completion_tokens" else requested_output_tokens,
+        "temperature": float(temperature),
+        "enable_thinking": bool(thinking),
+        "stream": bool(stream),
+    }
+    if stream:
+        body["stream_options"] = {"include_usage": True}
+    if json_mode:
+        body["response_format"] = {"type": "json_object"}
+    if thinking:
+        body["thinking_budget"] = budget
+    return _json_bytes(body), body
 
 
 def _safe_error_code(raw: bytes) -> str:
@@ -192,13 +280,17 @@ def _uncertain_telemetry(error: QwenTransportError, *, key_index: int, attempt: 
     """Persist only bounded error identity when a request has unknown billing."""
     error_class = "".join(char for char in type(error).__name__[:40] if char.isalnum() or char in "-_")
     reason = "".join(char for char in (error.reason_code or "unknown")[:80] if char.isalnum() or char in "-_")
-    return {
+    telemetry = {
         "provider_error_code": f"{error_class}:{reason}"[:128],
         "status_code": error.status_code,
         "key_index": key_index,
         "attempt": attempt + 1,
         "effective_request": dict(effective_request or {}),
     }
+    for key in ("stream", "transport_events", "transport_phase", "partial_raw_path", "raw_stream_path"):
+        if key in error.record:
+            telemetry[key] = error.record[key]
+    return telemetry
 
 
 def _cap_pressure(usage: Mapping[str, Any], effective_request: Mapping[str, Any], finish_reason: str) -> dict[str, Any]:
@@ -237,6 +329,239 @@ def _cap_pressure(usage: Mapping[str, Any], effective_request: Mapping[str, Any]
         "answer_tokens": answer,
         "finish_reason_length": finish_reason == "length",
         "diagnostic_only": True,
+    }
+
+
+_SAFE_RESPONSE_HEADERS = {
+    "date", "server", "content-type", "content-length", "transfer-encoding",
+    "connection", "x-request-id", "request-id", "x-dashscope-partialresponse",
+}
+
+
+def _safe_response_headers(headers: Any) -> dict[str, str]:
+    """Keep only bounded, non-credential response headers in transport audits."""
+
+    if headers is None or not hasattr(headers, "items"):
+        return {}
+    result: dict[str, str] = {}
+    for key, value in headers.items():
+        if _text(key).casefold() in _SAFE_RESPONSE_HEADERS:
+            result[_text(key).casefold()] = _text(value)[:256]
+    return result
+
+
+def _emit_transport_event(observer: Any, event: Mapping[str, Any]) -> None:
+    """Best-effort audit callback; observer failures never fail a paid call."""
+
+    if observer is None:
+        return
+    try:
+        if callable(observer):
+            observer(dict(event))
+        elif hasattr(observer, "append"):
+            observer.append(dict(event))
+    except Exception:
+        return
+
+
+def _stream_event_record(
+    *, stage: str, started: float, **fields: Any,
+) -> dict[str, Any]:
+    return {
+        "stage": stage,
+        "epoch": time.time(),
+        "elapsed_seconds": time.monotonic() - started,
+        **fields,
+    }
+
+
+def _stream_response(
+    response: Any, *, started: float, observer: Any, raw_path: Path,
+    overall_timeout_seconds: float,
+) -> dict[str, Any]:
+    """Read Qwen SSE without treating partial content as a completed answer."""
+
+    content_parts: list[str] = []
+    reasoning_parts: list[str] = []
+    raw_bytes = bytearray()
+    data_lines: list[bytes] = []
+    usage: dict[str, Any] = {}
+    finish_reason = ""
+    returned_model = ""
+    request_id = ""
+    done = False
+    event_count = 0
+    content_bytes = 0
+    reasoning_bytes = 0
+    raw_path.parent.mkdir(parents=True, exist_ok=True)
+    raw_handle = raw_path.open("wb")
+
+    def emit(stage: str, **fields: Any) -> None:
+        # Call sites below already select first chunks, periodic progress, and
+        # terminal events. Do not apply a second counter here: an audit event
+        # such as ``stream_read_start`` must not shift the every-128-chunk
+        # boundary. The raw SSE file remains the complete evidence.
+        _emit_transport_event(observer, _stream_event_record(stage=stage, started=started, **fields))
+
+    def set_read_timeout(seconds: float) -> None:
+        """Best-effort socket inactivity bound for urllib's HTTPResponse."""
+
+        bounded = max(0.1, float(seconds))
+        candidates = [response]
+        fp = getattr(response, "fp", None)
+        if fp is not None:
+            candidates.append(fp)
+            raw = getattr(fp, "raw", None)
+            if raw is not None:
+                candidates.append(raw)
+                sock = getattr(raw, "_sock", None)
+                if sock is not None:
+                    candidates.append(sock)
+        for candidate in candidates:
+            setter = getattr(candidate, "settimeout", None)
+            if callable(setter):
+                try:
+                    setter(bounded)
+                except (OSError, ValueError):
+                    continue
+
+    def fail(reason: str, *, stage: str, **fields: Any) -> None:
+        emit("stream_error", reason=reason, phase=stage, **fields)
+        raise QwenTransportError(
+            reason,
+            transient=False,
+            record={
+                "transport_phase": stage,
+                "stream_event_count": event_count,
+                "stream_done": done,
+                "partial_raw_path": str(raw_path),
+                "partial_raw_bytes": len(raw_bytes),
+                "partial_content_bytes": content_bytes,
+                "partial_reasoning_bytes": reasoning_bytes,
+            },
+        )
+
+    def process_data(data: bytes) -> None:
+        nonlocal done, event_count, content_bytes, reasoning_bytes, usage, finish_reason, returned_model, request_id
+        if not data:
+            return
+        if data.strip() == b"[DONE]":
+            done = True
+            emit("stream_done", event_count=event_count, raw_bytes=len(raw_bytes))
+            return
+        try:
+            payload = json.loads(data.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            fail("qwen_stream_event_not_json", stage="stream_event", event_sha256=hashlib.sha256(data).hexdigest())
+        if not isinstance(payload, Mapping):
+            fail("qwen_stream_event_not_object", stage="stream_event")
+        if payload.get("error") is not None:
+            fail("qwen_stream_error_event", stage="stream_event")
+        event_count += 1
+        model = _text(payload.get("model"))
+        if model:
+            returned_model = model
+        payload_id = _text(payload.get("id"))
+        if payload_id:
+            request_id = payload_id[:200]
+        candidate_usage = payload.get("usage")
+        if isinstance(candidate_usage, Mapping):
+            usage = dict(candidate_usage)
+        choices = payload.get("choices")
+        if not isinstance(choices, Sequence) or not choices:
+            emit("stream_chunk", event_count=event_count, choices=0, usage_present=bool(candidate_usage))
+            return
+        choice = choices[0] if isinstance(choices[0], Mapping) else {}
+        if choice.get("finish_reason") is not None:
+            finish_reason = _text(choice.get("finish_reason"))
+        delta = choice.get("delta") if isinstance(choice.get("delta"), Mapping) else {}
+        piece = delta.get("content")
+        if isinstance(piece, list):
+            piece = "".join(_text(item.get("text")) if isinstance(item, Mapping) else _text(item) for item in piece)
+        piece = _text(piece)
+        if piece:
+            content_parts.append(piece)
+            content_bytes += len(piece.encode("utf-8"))
+        reasoning = delta.get("reasoning_content")
+        if reasoning is None:
+            reasoning = delta.get("reasoning")
+        if isinstance(reasoning, list):
+            reasoning = "".join(_text(item.get("text")) if isinstance(item, Mapping) else _text(item) for item in reasoning)
+        reasoning = _text(reasoning)
+        if reasoning:
+            reasoning_parts.append(reasoning)
+            reasoning_bytes += len(reasoning.encode("utf-8"))
+        if event_count <= 8 or event_count % 128 == 0:
+            emit("stream_chunk", event_count=event_count, choices=1, content_bytes=content_bytes, reasoning_bytes=reasoning_bytes, usage_present=bool(candidate_usage))
+
+    try:
+        while not done:
+            remaining = overall_timeout_seconds - (time.monotonic() - started)
+            if remaining <= 0:
+                fail("qwen_stream_overall_timeout", stage="stream_read", event_count=event_count)
+            set_read_timeout(remaining)
+            emit("stream_read_start", event_count=event_count) if event_count == 0 else None
+            try:
+                line = response.readline()
+            except (socket.timeout, TimeoutError):
+                fail("qwen_stream_read_timeout", stage="stream_read", event_count=event_count)
+            except OSError:
+                fail("qwen_stream_read_error", stage="stream_read", event_count=event_count)
+            if not line:
+                if data_lines:
+                    process_data(b"\n".join(data_lines))
+                    data_lines.clear()
+                if not done:
+                    fail("qwen_stream_incomplete", stage="stream_eof", event_count=event_count)
+                break
+            first_wire_byte = not raw_bytes
+            raw_bytes.extend(line)
+            raw_handle.write(line)
+            raw_handle.flush()
+            if first_wire_byte:
+                emit("stream_first_byte", bytes=len(line))
+            stripped = line.rstrip(b"\r\n")
+            if stripped == b"":
+                if data_lines:
+                    process_data(b"\n".join(data_lines))
+                    data_lines.clear()
+                continue
+            if stripped.startswith(b":"):
+                continue
+            if stripped.startswith(b"data:"):
+                data_lines.append(stripped[5:].lstrip())
+                continue
+        if not done:
+            fail("qwen_stream_incomplete", stage="stream_eof", event_count=event_count)
+    finally:
+        raw_handle.close()
+    if finish_reason != "stop" or not content_parts:
+        fail("qwen_stream_incomplete", stage="stream_terminal", finish_reason=finish_reason, event_count=event_count)
+    if not usage or not any(usage.get(key) is not None for key in ("completion_tokens", "output_tokens")):
+        fail("qwen_stream_usage_missing", stage="stream_terminal", event_count=event_count)
+    normalized = {
+        "id": request_id or None,
+        "model": returned_model or None,
+        "choices": [{
+            "message": {
+                "content": "".join(content_parts),
+                **({"reasoning_content": "".join(reasoning_parts)} if reasoning_parts else {}),
+            },
+            "finish_reason": finish_reason,
+        }],
+        "usage": usage,
+    }
+    emit("stream_complete", event_count=event_count, content_bytes=content_bytes, reasoning_bytes=reasoning_bytes, usage_present=True)
+    return {
+        "raw_bytes": bytes(raw_bytes),
+        "normalized": normalized,
+        "content": "".join(content_parts),
+        "reasoning_content": "".join(reasoning_parts),
+        "usage": usage,
+        "finish_reason": finish_reason,
+        "returned_model": returned_model,
+        "request_id": request_id,
+        "event_count": event_count,
     }
 
 
@@ -331,7 +656,7 @@ class GlobalBudgetLedger:
                     _text(telemetry.get("provider_error_code")) or None,
                     int(telemetry["key_index"]) if telemetry.get("key_index") is not None else None,
                     int(telemetry["attempt"]) if telemetry.get("attempt") is not None else None,
-                    json.dumps({key: telemetry[key] for key in ("effective_request", "cap_pressure") if key in telemetry}, ensure_ascii=False, sort_keys=True),
+                    json.dumps({key: telemetry[key] for key in ("effective_request", "cap_pressure", "stream", "transport_events", "transport_phase", "partial_raw_path", "raw_stream_path") if key in telemetry}, ensure_ascii=False, sort_keys=True),
                     reservation_id,
                 ))
                 db.commit()
@@ -381,7 +706,7 @@ class GlobalBudgetLedger:
 
 
 class QwenDirectClient:
-    """Direct non-streaming JSON-object Qwen client with explicit model."""
+    """Direct Qwen client with explicit model and opt-in SSE transport."""
 
     def __init__(
         self,
@@ -402,6 +727,7 @@ class QwenDirectClient:
         prompt_token_counter: Callable[[bytes, Sequence[Mapping[str, Any]]], int] | None = None,
         prompt_token_multiplier: float = 1.0,
         prompt_token_framing_margin: int = 0,
+        stream_overall_timeout_seconds: float = 3600.0,
     ):
         self.model = str(model)
         pricing = model_pricing(self.model)
@@ -451,21 +777,21 @@ class QwenDirectClient:
             raise QwenTransportError("invalid_prompt_token_estimator", transient=False) from exc
         if self.prompt_token_multiplier < 1.0 or self.prompt_token_framing_margin < 0:
             raise QwenTransportError("invalid_prompt_token_estimator", transient=False)
+        try:
+            self.stream_overall_timeout_seconds = max(self.timeout_seconds, float(stream_overall_timeout_seconds))
+        except (TypeError, ValueError) as exc:
+            raise QwenTransportError("invalid_stream_overall_timeout", transient=False) from exc
+        if self.stream_overall_timeout_seconds <= 0:
+            raise QwenTransportError("invalid_stream_overall_timeout", transient=False)
 
     def _prompt_token_estimate(self, request_bytes: bytes, messages: Sequence[Mapping[str, Any]]) -> int:
-        if self.prompt_token_counter is None:
-            return _conservative_prompt_token_upper_bound(request_bytes, messages)
-        try:
-            measured = int(self.prompt_token_counter(request_bytes, messages))
-        except Exception as exc:
-            raise QwenTransportError(
-                "prompt_token_estimator_failed",
-                transient=False,
-                record={"error": type(exc).__name__},
-            ) from exc
-        if measured < 0:
-            raise QwenTransportError("prompt_token_estimator_returned_negative", transient=False)
-        return max(1, int(measured * self.prompt_token_multiplier + 0.999999) + self.prompt_token_framing_margin)
+        return int(estimate_prompt_tokens(
+            request_bytes,
+            messages,
+            prompt_token_counter=self.prompt_token_counter,
+            prompt_token_multiplier=self.prompt_token_multiplier,
+            prompt_token_framing_margin=self.prompt_token_framing_margin,
+        )["prompt_tokens"])
 
     def _keys(self) -> list[str]:
         try:
@@ -498,6 +824,43 @@ class QwenDirectClient:
             raise QwenTransportError("runtime_model_mismatch", transient=False, record={"requested": model, "configured": self.model})
         pricing = model_pricing(model)
         thinking = bool(kwargs.get("thinking", self.thinking))
+        stream = bool(kwargs.get("stream", False))
+        transport_observer = kwargs.get("transport_observer")
+        try:
+            request_timeout_seconds = max(5.0, float(kwargs.get("timeout_seconds", self.timeout_seconds)))
+        except (TypeError, ValueError) as exc:
+            raise QwenTransportError("invalid_request_timeout", transient=False, record={"model": model}) from exc
+        audit_enabled = stream or transport_observer is not None
+        audit_events: list[dict[str, Any]] = []
+        audit_sequence = 0
+
+        def record_transport_event(event: Mapping[str, Any]) -> None:
+            nonlocal audit_sequence
+            if not audit_enabled:
+                return
+            audit_sequence += 1
+            # Keep only a bounded structured audit in memory. Raw SSE is
+            # written incrementally and is the complete transport evidence.
+            stage = _text(event.get("stage"))
+            event_count = event.get("event_count")
+            keep = len(audit_events) < 16 or stage in {"stream_done", "stream_error", "stream_eof", "stream_complete", "transport_exception"}
+            if isinstance(event_count, int) and event_count > 0 and event_count % 128 == 0:
+                keep = True
+            if keep and len(audit_events) < 64:
+                item = dict(event)
+                item["sequence"] = audit_sequence
+                audit_events.append(item)
+            _emit_transport_event(transport_observer, event)
+
+        try:
+            stream_overall_timeout_seconds = max(
+                request_timeout_seconds,
+                float(kwargs.get("stream_overall_timeout_seconds", self.stream_overall_timeout_seconds)),
+            )
+        except (TypeError, ValueError) as exc:
+            raise QwenTransportError("invalid_stream_overall_timeout", transient=False, record={"model": model}) from exc
+        if stream_overall_timeout_seconds <= 0:
+            raise QwenTransportError("invalid_stream_overall_timeout", transient=False, record={"model": model})
         if thinking and self.json_mode and not bool(pricing["thinking_json"]):
             raise QwenTransportError("thinking_json_unsupported_for_model", transient=False, record={"model": model, "thinking": True, "response_format": {"type": "json_object"}})
         if self.json_mode and not any("json" in _text(item.get("content")).casefold() for item in messages if isinstance(item, Mapping)):
@@ -526,21 +889,14 @@ class QwenDirectClient:
                 },
             )
         # For these supported Qwen generations, max_completion_tokens counts
-        # reasoning + answer. Sending answer alone would steal answer capacity.
-        # Keep a legacy max_tokens path for explicitly registered older models.
-        token_parameter = pricing.get("completion_token_parameter", "max_tokens")
-        body = {
-            "model": model,
-            "messages": [dict(item) for item in messages],
-            token_parameter: total_output_tokens if token_parameter == "max_completion_tokens" else requested_output_tokens,
-            "temperature": float(kwargs.get("temperature", 0.1)),
-            "enable_thinking": thinking,
-            "stream": False,
-        }
-        if self.json_mode:
-            body["response_format"] = {"type": "json_object"}
-        if thinking:
-            body["thinking_budget"] = thinking_budget
+        # reasoning + answer.  The shared pure builder keeps preparation and
+        # live reservation on the exact same serialized request envelope.
+        request_bytes, body = build_qwen_wire_body(
+            messages, model=model, max_output_tokens=requested_output_tokens,
+            thinking=thinking, thinking_budget=thinking_budget,
+            json_mode=self.json_mode, stream=stream,
+            temperature=float(kwargs.get("temperature", 0.1)),
+        )
         effective_request = {
             "model": model,
             "enable_thinking": thinking,
@@ -551,11 +907,13 @@ class QwenDirectClient:
             "max_tokens": body.get("max_tokens"),
             "response_format": body.get("response_format"),
         }
+        if stream:
+            effective_request["stream"] = True
+            effective_request["stream_options"] = {"include_usage": True}
         if thinking and pricing.get("thinking_budget_maps_to_effort"):
             # Informational provider mapping, not another request parameter:
             # Qwen3.8 rejects reasoning_effort together with thinking_budget.
             effective_request["mapped_reasoning_effort"] = "low" if thinking_budget <= 4096 else "medium" if thinking_budget <= 16384 else "xhigh"
-        request_bytes = _json_bytes(body)
         last_error: QwenTransportError | None = None
         for key_index, key in enumerate(self._keys()[: self.max_keys]):
             for attempt in range(self.max_retries + 1):
@@ -577,20 +935,67 @@ class QwenDirectClient:
                     headers={"Authorization": "Bearer " + key, "Content-Type": "application/json", "Connection": "close"},
                     method="POST",
                 )
+                record_transport_event(_stream_event_record(
+                    stage="request_open_start", started=started,
+                    stream=stream, timeout_seconds=request_timeout_seconds,
+                    overall_timeout_seconds=stream_overall_timeout_seconds if stream else None,
+                    request_body_bytes=len(request_bytes),
+                    request_body_sha256=hashlib.sha256(request_bytes).hexdigest(),
+                ))
+                partial_path: Path | None = None
                 try:
                     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-                    with opener.open(request, timeout=self.timeout_seconds) as response:
-                        raw = response.read()
-                        if self.raw_response_dir:
-                            self.raw_response_dir.mkdir(parents=True, exist_ok=True)
-                            temp = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.tmp")
-                            target = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.raw")
-                            temp.write_bytes(raw)
-                            os.replace(temp, target)
+                    with opener.open(request, timeout=request_timeout_seconds) as response:
                         status_code = int(getattr(response, "status", 200))
                         headers = dict(response.headers.items()) if getattr(response, "headers", None) else {}
+                        record_transport_event(_stream_event_record(
+                            stage="response_opened", started=started,
+                            status_code=status_code, headers=_safe_response_headers(headers),
+                        ))
+                        if stream:
+                            self.raw_response_dir.mkdir(parents=True, exist_ok=True) if self.raw_response_dir else None
+                            if self.raw_response_dir:
+                                partial_path = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.sse.partial")
+                            else:
+                                fd, temp_name = tempfile.mkstemp(prefix=safe_call_id + "-", suffix=".sse.partial")
+                                os.close(fd)
+                                partial_path = Path(temp_name)
+                            stream_result = _stream_response(
+                                response,
+                                started=started,
+                                observer=record_transport_event,
+                                raw_path=partial_path,
+                                overall_timeout_seconds=stream_overall_timeout_seconds,
+                            )
+                            raw = stream_result["raw_bytes"]
+                            if self.raw_response_dir:
+                                target = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.sse.raw")
+                                os.replace(partial_path, target)
+                                partial_path = target
+                            else:
+                                partial_path.unlink(missing_ok=True)
+                                partial_path = None
+                            payload = stream_result["normalized"]
+                            record_transport_event(_stream_event_record(
+                                stage="read_complete", started=started,
+                                bytes=len(raw), stream=True,
+                            ))
+                        else:
+                            record_transport_event(_stream_event_record(stage="read_start", started=started, stream=False))
+                            raw = response.read()
+                            record_transport_event(_stream_event_record(
+                                stage="read_complete", started=started,
+                                bytes=len(raw), stream=False,
+                            ))
+                            if self.raw_response_dir:
+                                self.raw_response_dir.mkdir(parents=True, exist_ok=True)
+                                temp = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.tmp")
+                                target = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.raw")
+                                temp.write_bytes(raw)
+                                os.replace(temp, target)
                     try:
-                        payload = json.loads(raw.decode("utf-8"))
+                        if not stream:
+                            payload = json.loads(raw.decode("utf-8"))
                     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
                         raise QwenTransportError("qwen_response_not_json", transient=False, status_code=status_code, record={"raw_sha256": hashlib.sha256(raw).hexdigest()}) from exc
                     if not isinstance(payload, Mapping):
@@ -598,7 +1003,8 @@ class QwenDirectClient:
                     choices = payload.get("choices") if isinstance(payload.get("choices"), Sequence) else []
                     choice = choices[0] if choices and isinstance(choices[0], Mapping) else {}
                     finish_reason = _text(choice.get("finish_reason"))
-                    content = self._message_content(payload)
+                    content = stream_result["content"] if stream else self._message_content(payload)
+                    usage_payload = stream_result["usage"] if stream else payload.get("usage")
                     complete = finish_reason == "stop" and bool(content)
                     result = {
                         "content": content,
@@ -608,8 +1014,8 @@ class QwenDirectClient:
                         "returned_model": _text(payload.get("model")) or None,
                         "finish_reason": finish_reason,
                         "complete": complete,
-                        "request_id": _text(payload.get("id") or headers.get("x-request-id") or headers.get("X-Request-ID")),
-                        "usage": dict(payload.get("usage") or {}) if isinstance(payload.get("usage"), Mapping) else {},
+                        "request_id": _text((stream_result.get("request_id") if stream else payload.get("id")) or headers.get("x-request-id") or headers.get("X-Request-ID")),
+                        "usage": dict(usage_payload or {}) if isinstance(usage_payload, Mapping) else {},
                         "status_code": status_code,
                         "call_id": call_id,
                         "attempt": attempt + 1,
@@ -617,10 +1023,19 @@ class QwenDirectClient:
                         "elapsed_seconds": time.monotonic() - started,
                         "effective_request": dict(effective_request),
                     }
+                    if stream:
+                        result["normalized_response"] = payload
+                        result["normalized_response_json"] = _json_bytes(payload).decode("utf-8")
+                        result["raw_stream_sha256"] = hashlib.sha256(raw).hexdigest()
+                        result["reasoning_content"] = stream_result.get("reasoning_content", "")
+                        result["raw_stream_path"] = str(partial_path) if partial_path else None
+                        result["stream_event_count"] = stream_result.get("event_count", 0)
+                    if audit_events:
+                        result["transport_events"] = list(audit_events)
                     result["cap_pressure"] = _cap_pressure(result["usage"], effective_request, finish_reason)
                     if self.budget_ledger is not None and reservation:
                         usage = result.get("usage") or {}
-                        telemetry = {"usage": usage, "returned_model": result.get("returned_model"), "finish_reason": result.get("finish_reason"), "request_id": result.get("request_id"), "raw_response_sha256": result.get("raw_response_sha256"), "status_code": status_code, "effective_request": dict(effective_request), "cap_pressure": result["cap_pressure"]}
+                        telemetry = {"usage": usage, "returned_model": result.get("returned_model"), "finish_reason": result.get("finish_reason"), "request_id": result.get("request_id"), "raw_response_sha256": result.get("raw_response_sha256"), "status_code": status_code, "effective_request": dict(effective_request), "cap_pressure": result["cap_pressure"], "stream": stream, "transport_events": list(audit_events)}
                         has_usage = usage and (usage.get("prompt_tokens") is not None or usage.get("input_tokens") is not None) and (usage.get("completion_tokens") is not None or usage.get("output_tokens") is not None)
                         if has_usage:
                             self.budget_ledger.settle(reservation["reservation_id"], estimated_cost_cny(usage, model=model), uncertain=False, telemetry=telemetry)
@@ -636,6 +1051,11 @@ class QwenDirectClient:
                     return result
                 except QwenTransportError as exc:
                     exc.record.setdefault("effective_request", dict(effective_request))
+                    exc.record.setdefault("stream", stream)
+                    if audit_events:
+                        exc.record.setdefault("transport_events", list(audit_events))
+                    if partial_path is not None:
+                        exc.record.setdefault("partial_raw_path", str(partial_path))
                     if self.budget_ledger is not None and reservation and not reservation_settled:
                         self.budget_ledger.settle(
                             reservation["reservation_id"], None, uncertain=True,
@@ -663,10 +1083,12 @@ class QwenDirectClient:
                         "key_index": key_index, "attempt": attempt + 1, "rotate_key": rotate_key,
                         "effective_request": dict(effective_request),
                     }
+                    if audit_events:
+                        record["transport_events"] = list(audit_events)
                     transient = status in TRANSIENT_HTTP
                     last_error = QwenTransportError("qwen_account_rejection" if rotate_key else "qwen_http_error", transient=transient, status_code=status, record=record)
                     if self.budget_ledger is not None and reservation and not reservation_settled:
-                        telemetry = {"usage": None, "request_id": request_id or None, "raw_response_sha256": record["raw_response_sha256"], "status_code": status, "provider_error_code": provider_error_code, "key_index": key_index, "attempt": attempt + 1, "effective_request": dict(effective_request)}
+                        telemetry = {"usage": None, "request_id": request_id or None, "raw_response_sha256": record["raw_response_sha256"], "status_code": status, "provider_error_code": provider_error_code, "key_index": key_index, "attempt": attempt + 1, "effective_request": dict(effective_request), "stream": stream, "transport_events": list(audit_events)}
                         # A definitive 4xx, including an account rejection,
                         # consumed no model tokens.  Server errors and rate
                         # limits remain uncertain because the provider may
@@ -680,10 +1102,21 @@ class QwenDirectClient:
                         raise last_error
                 except (urllib.error.URLError, TimeoutError, OSError) as exc:
                     transport_record = _transport_exception_record(exc)
+                    record_transport_event(_stream_event_record(
+                        stage="transport_exception", started=started,
+                        error=transport_record.get("error"),
+                        reason_code=transport_record.get("reason_code"),
+                    ))
                     last_error = QwenTransportError(
                         "qwen_transport_error",
                         transient=True,
-                        record={"call_id": call_id, "effective_request": dict(effective_request), **transport_record},
+                        record={
+                            "call_id": call_id,
+                            "effective_request": dict(effective_request),
+                            "stream": stream,
+                            "transport_events": list(audit_events),
+                            **transport_record,
+                        },
                         reason_code=transport_record["reason_code"],
                     )
                 if last_error and last_error.record.get("rotate_key"):
@@ -758,4 +1191,4 @@ def estimated_cost_cny(
     return (inp * float(input_rate) + out * float(output_rate)) / 1_000_000.0
 
 
-__all__ = ["QwenDirectClient", "QwenTransportError", "MissingCredentialError", "GlobalBudgetLedger", "invoke_client", "estimated_cost_cny", "model_pricing", "MODEL_PRICING_CNY"]
+__all__ = ["QwenDirectClient", "QwenTransportError", "MissingCredentialError", "GlobalBudgetLedger", "invoke_client", "estimated_cost_cny", "estimate_prompt_tokens", "build_qwen_wire_body", "model_pricing", "MODEL_PRICING_CNY"]

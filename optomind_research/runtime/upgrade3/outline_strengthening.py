@@ -586,19 +586,32 @@ def estimate_strengthening_request(
     *,
     profile: Mapping[str, Any],
     token_counter: Any = None,
+    stream: bool = False,
+    json_mode: bool | None = None,
 ) -> dict[str, Any]:
     """Return the same input/capacity estimate used by the production client."""
 
-    if callable(token_counter):
-        prompt_tokens = int(token_counter(b"", messages))
-        tokenizer = "provided_token_counter"
-    else:
-        prompt_tokens = max(1, len(json.dumps(list(messages), ensure_ascii=False, default=str)) // 2)
-        tokenizer = "conservative_utf8_approximation"
-    reserved_input = int(prompt_tokens * planning.TOKEN_MARGIN_MULTIPLIER + 0.999999) + planning.TOKEN_FRAMING_MARGIN
+    from .module4 import runtime
+    effective_json_mode = bool(profile.get("json_mode", True)) if json_mode is None else bool(json_mode)
+    request_bytes, _wire_body = runtime.build_qwen_wire_body(
+        messages,
+        model=str(profile["model"]),
+        max_output_tokens=int(profile["max_output_tokens"]),
+        thinking=True,
+        thinking_budget=int(profile["thinking_budget"]),
+        json_mode=effective_json_mode,
+        stream=bool(stream),
+    )
+    meter = runtime.estimate_prompt_tokens(
+        request_bytes,
+        messages,
+        prompt_token_counter=token_counter,
+    )
+    reserved_input = int(meter["prompt_tokens"])
+    prompt_tokens = int(meter.get("measured_tokens") or reserved_input)
+    tokenizer = str(meter.get("method") or "shared_runtime_meter")
     output_tokens = int(profile["max_output_tokens"])
     thinking_budget = int(profile["thinking_budget"])
-    from .module4 import runtime
     return {
         "model": profile["model"],
         "prompt_tokens_estimate": prompt_tokens,
@@ -612,6 +625,11 @@ def estimate_strengthening_request(
             model=str(profile["model"]), conservative=True,
         ),
         "tokenizer": tokenizer,
+        "prompt_meter": meter,
+        "wire_body_bytes": len(request_bytes),
+        "wire_body_sha256": hashlib.sha256(request_bytes).hexdigest(),
+        "stream": bool(stream),
+        "json_mode": effective_json_mode,
     }
 
 
@@ -793,21 +811,28 @@ def _run_owner_with_messages(
     model: str, thinking_budget: int, max_output_tokens: int,
     call_id: str | None = None, allow_machine_review: bool = False,
     raw_response: Mapping[str, Any] | None = None, raw_response_callback: Any | None = None,
+    stream: bool = False, stream_overall_timeout_seconds: float | None = None,
+    transport_observer: Any | None = None,
 ) -> dict[str, Any]:
     """Invoke one owner request and apply the production response validation."""
 
     _verify_envelope(payload, allow_machine_review=allow_machine_review)
     from .module4 import runtime
     if raw_response is None:
-        raw = runtime.invoke_client(
-            client,
-            messages,
-            model=model,
-            max_output_tokens=int(max_output_tokens),
-            thinking=True,
-            thinking_budget=int(thinking_budget),
-            call_id=call_id or str(payload.get("call_id") or "autonomous-outline"),
-        )
+        invoke_kwargs = {
+            "model": model,
+            "max_output_tokens": int(max_output_tokens),
+            "thinking": True,
+            "thinking_budget": int(thinking_budget),
+            "call_id": call_id or str(payload.get("call_id") or "autonomous-outline"),
+        }
+        if stream:
+            invoke_kwargs["stream"] = True
+        if stream_overall_timeout_seconds is not None:
+            invoke_kwargs["stream_overall_timeout_seconds"] = float(stream_overall_timeout_seconds)
+        if transport_observer is not None:
+            invoke_kwargs["transport_observer"] = transport_observer
+        raw = runtime.invoke_client(client, messages, **invoke_kwargs)
         if raw_response_callback is not None:
             raw_response_callback(raw)
     else:

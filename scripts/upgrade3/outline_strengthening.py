@@ -236,8 +236,20 @@ def prepare_on_demand(args: argparse.Namespace) -> dict[str, Any]:
     access_estimate = strengthening.estimate_strengthening_request(
         access_request, profile=access_profile, token_counter=counter,
     )
-    upper_bound_trace = on_demand.full_catalog_trace(catalog)
-    owner_request = on_demand.owner_messages(payload, catalog, upper_bound_trace)
+    # Do not construct/send an all-catalog owner upper bound here.  The access
+    # response is the first paid step; the production run resolves the actual
+    # requested records and estimates that concrete owner request immediately
+    # before reserving it.  Keep an empty-read preview only for offline sizing.
+    initial_trace = {
+        "status": "initial_no_materials",
+        "material_requests": [],
+        "selected_materials": [],
+        "trace": [],
+        "resolved_count": 0,
+        "access_ids": [],
+        "catalog_sha256": catalog.get("catalog_sha256"),
+    }
+    owner_request = on_demand.owner_messages(payload, catalog, initial_trace)
     owner_estimate = strengthening.estimate_strengthening_request(
         owner_request, profile=owner_profile, token_counter=counter,
     )
@@ -251,34 +263,42 @@ def prepare_on_demand(args: argparse.Namespace) -> dict[str, Any]:
         "owner_profile": owner_profile,
         "access_messages": access_request,
         "access_request_sha256": _hash(access_request),
-        "owner_upper_bound_messages": owner_request,
-        "owner_upper_bound_request_sha256": _hash(owner_request),
+        "owner_initial_messages": owner_request,
+        "owner_initial_request_sha256": _hash(owner_request),
         "access_estimate": access_estimate,
-        "owner_upper_bound_estimate": owner_estimate,
-        "worst_case_estimated_cost_cny": float(access_estimate["estimated_cost_cny"]) + 2.0 * float(owner_estimate["estimated_cost_cny"]),
-        "owner_upper_bound_calls": 2,
+        # This is an empty-read preview only.  It is deliberately not called
+        # an upper bound: resolved material and any continuation are estimated
+        # at the actual paid step after the access response.
+        "owner_initial_estimate": owner_estimate,
+        "initial_estimated_cost_cny": float(access_estimate["estimated_cost_cny"]) + 2.0 * float(owner_estimate["estimated_cost_cny"]),
+        "owner_upper_bound_calls": None,
         "max_continuation_reads": 1,
-        "owner_upper_bound_trace": upper_bound_trace,
+        "owner_initial_trace": initial_trace,
+        "combined_uppergate_removed": True,
+        "owner_upper_bound_status": "removed_from_launch",
+        "owner_upper_bound_messages": None,
+        "owner_upper_bound_request_sha256": None,
+        "owner_upper_bound_estimate": None,
+        "worst_case_estimated_cost_cny": None,
     }
     out = Path(args.output)
     _dump(out / "ACCESS_REQUEST.json", {"messages": access_request, "request_sha256": request["access_request_sha256"], "profile": access_profile})
-    _dump(out / "OWNER_UPPER_BOUND_REQUEST.json", {"messages": owner_request, "request_sha256": request["owner_upper_bound_request_sha256"], "profile": owner_profile})
+    _dump(out / "OWNER_INITIAL_REQUEST.json", {"messages": owner_request, "request_sha256": request["owner_initial_request_sha256"], "profile": owner_profile, "trace": initial_trace})
     _dump(out / "REQUEST.json", request)
     report = {
         "status": "prepared_no_paid_calls",
         "mode": "on_demand",
         "request_path": str(out / "REQUEST.json"),
         "access_request_path": str(out / "ACCESS_REQUEST.json"),
-        "owner_upper_bound_request_path": str(out / "OWNER_UPPER_BOUND_REQUEST.json"),
+        "owner_initial_request_path": str(out / "OWNER_INITIAL_REQUEST.json"),
         "access_request_sha256": request["access_request_sha256"],
-        "owner_upper_bound_request_sha256": request["owner_upper_bound_request_sha256"],
+        "owner_initial_request_sha256": request["owner_initial_request_sha256"],
         "access_profile_name": access_profile_name,
         "owner_profile_name": owner_profile_name,
         "access_estimate": access_estimate,
-        "owner_upper_bound_estimate": owner_estimate,
-        "worst_case_estimated_cost_cny": request["worst_case_estimated_cost_cny"],
-        "owner_upper_bound_basis": "all_unique_catalog_records",
-        "owner_upper_bound_duplicate_access_ids_omitted": upper_bound_trace.get("duplicate_access_ids_omitted") or [],
+        "owner_initial_estimate": owner_estimate,
+        "initial_estimated_cost_cny": request["initial_estimated_cost_cny"],
+        "owner_upper_bound_status": "removed_from_launch; actual_resolved_trace_only",
         "payload_contract": {
             "modifiable_unit_ids": payload.get("modifiable_unit_ids") or [],
             "read_only_unit_ids": payload.get("read_only_unit_ids") or [],

@@ -491,7 +491,9 @@ def test_on_demand_catalog_covers_tool_candidate_navigation_and_mediated_identit
     assert catalog["coverage"]["tool_materials"] == 1
     text = json.dumps(on_demand.access_messages(payload, catalog), ensure_ascii=False)
     assert "P0003" in text and "original-3" in text and "condition" in text
-    assert "Reported bounded result" in text
+    # An unlinked candidate remains requestable by stable identity; its
+    # deep/usable content is disclosed only after an explicit material request.
+    assert "Reported bounded result" not in text
     assert "updated_plan" not in on_demand.access_messages(payload, catalog)[1]["content"]
 
 
@@ -587,6 +589,90 @@ def test_on_demand_nested_record_points_to_selected_parent_without_duplicate_ful
     assert model_payload["source_materials"][0]["sources"][0] == child
 
 
+def test_on_demand_same_identity_aliases_preserve_distinct_channel_records():
+    source = _source("P0002", extra="source-only detail")
+    candidate = {**source, "candidate_only_detail": "candidate retelling"}
+    tool = {
+        "source_handle": "P0002",
+        "paper_id": "paper-P0002",
+        "title": "Study P0002",
+        "usable_content": "Tool-only bounded retelling.",
+    }
+    payload = _payload(
+        source_materials=[source],
+        candidate_materials=[candidate],
+        tool_materials=[tool],
+    )
+    catalog = on_demand.build_material_catalog(payload)
+    trace = on_demand.resolve_material_requests(
+        payload,
+        catalog,
+        {
+            "status": "partial",
+            "material_requests": [{
+                "source_handle": "P0002",
+                "unit_ids": ["CH01_U01"],
+                "reason": "Read all supplied records for this study.",
+            }],
+        },
+    )
+    selected_ids = {row["access_id"] for row in trace["selected_materials"]}
+    assert selected_ids == {
+        "source_materials[0]",
+        "candidate_materials[0]",
+        "tool_materials[0]",
+    }
+    assert all(row["identity_aliases"] == sorted(selected_ids) for row in trace["selected_materials"])
+    owner = on_demand._owner_payload(payload, catalog, trace)
+    model_payload = on_demand._model_visible_payload(owner, catalog, trace)
+    assert model_payload["source_materials"][0]["extra"] == "source-only detail"
+    assert model_payload["candidate_materials"][0]["candidate_only_detail"] == "candidate retelling"
+    assert model_payload["tool_materials"][0]["usable_content"] == "Tool-only bounded retelling."
+    visible_ids = {
+        row["access_id"]
+        for row in model_payload["on_demand_material_access"]["resolved_materials"]
+    }
+    assert visible_ids == selected_ids
+
+
+def test_on_demand_identity_alias_group_rejects_conflicting_stable_fields():
+    first = _source("P0003")
+    second = {**_source("P0003"), "paper_id": "paper-P0003-other", "doi": "10.1000/conflict"}
+    incomplete = {"source_handle": "P0003", "title": "Incomplete locator"}
+    payload = _payload(source_materials=[incomplete, first, second])
+    catalog = on_demand.build_material_catalog(payload)
+    with pytest.raises(on_demand.OnDemandMaterialError, match="material_request_identity_conflict"):
+        on_demand.resolve_material_requests(
+            payload,
+            catalog,
+            {
+                "status": "partial",
+                "material_requests": [{
+                    "source_handle": "P0003",
+                    "unit_ids": ["CH01_U01"],
+                }],
+            },
+        )
+
+
+def test_on_demand_explicit_access_id_identity_mismatch_is_rejected():
+    payload = _payload(source_materials=[_source("P0004")])
+    catalog = on_demand.build_material_catalog(payload)
+    with pytest.raises(on_demand.OnDemandMaterialError, match="material_request_identity_conflict"):
+        on_demand.resolve_material_requests(
+            payload,
+            catalog,
+            {
+                "status": "partial",
+                "material_requests": [{
+                    "access_id": "source_materials[0]",
+                    "paper_id": "paper-other",
+                    "unit_ids": ["CH01_U01"],
+                }],
+            },
+        )
+
+
 def test_on_demand_resolves_unselected_material_into_one_max_request_and_arrangement(tmp_path):
     candidate = {
         "source_handle": "P0002", "paper_id": "paper-P0002", "title": "Candidate evidence",
@@ -630,6 +716,33 @@ def test_on_demand_resolves_unselected_material_into_one_max_request_and_arrange
     packet_path.write_text(json.dumps(packet, ensure_ascii=False), encoding="utf-8")
     view = arranging.build_chapter_view(packet_path, id_map_path=tmp_path / "ID_MAP.json")
     assert view.units[0].substantive_point == "Changed point grounded in the resolved candidate"
+
+
+def test_on_demand_owner_stream_is_explicit_opt_in_and_preserves_contract():
+    payload = _payload()
+    access_kwargs = []
+    owner_kwargs = []
+
+    def access_client(messages, **kwargs):
+        access_kwargs.append(kwargs)
+        return {"content": json.dumps({"status": "no_change", "material_requests": []}), "complete": True, "finish_reason": "stop", "usage": {"prompt_tokens": 20, "completion_tokens": 8}}
+
+    def owner_client(messages, **kwargs):
+        owner_kwargs.append(kwargs)
+        return {"content": json.dumps({"status": "no_change", "chapter_updates": []}), "complete": True, "finish_reason": "stop", "usage": {"prompt_tokens": 30, "completion_tokens": 12}}
+
+    result = on_demand.run_on_demand_strengthening(
+        payload,
+        access_client=access_client, access_model="qwen3.5-plus", access_thinking_budget=32768, access_max_output_tokens=32768,
+        owner_client=owner_client, owner_model="qwen3.8-max", owner_thinking_budget=32768, owner_max_output_tokens=32768,
+        access_stream=True, access_stream_overall_timeout_seconds=3600,
+        owner_stream=True, owner_stream_overall_timeout_seconds=3600,
+    )
+    assert result["status"] == "no_change"
+    assert access_kwargs[0]["stream"] is True
+    assert access_kwargs[0]["stream_overall_timeout_seconds"] == 3600
+    assert owner_kwargs[0]["stream"] is True
+    assert owner_kwargs[0]["stream_overall_timeout_seconds"] == 3600
 
 
 def test_on_demand_owner_can_request_one_continuation_and_no_change_is_valid():
@@ -804,7 +917,7 @@ def test_on_demand_raw_checkpoint_recovers_parse_failure_without_new_call(tmp_pa
     assert len(owner_calls) == owner_count_before_recovery
 
 
-def test_on_demand_prepare_has_explicit_two_owner_cost_guard_and_lightweight_owner_view(tmp_path):
+def test_on_demand_prepare_has_actual_step_cost_preview_and_lightweight_owner_view(tmp_path):
     from scripts.upgrade3 import outline_strengthening as cli
 
     payload = _payload(tool_materials=[{
@@ -820,10 +933,10 @@ def test_on_demand_prepare_has_explicit_two_owner_cost_guard_and_lightweight_own
     report = cli.prepare_on_demand(args)
     request = json.loads((tmp_path / "prepared" / "REQUEST.json").read_text(encoding="utf-8"))
     assert report["status"] == "prepared_no_paid_calls"
-    assert request["worst_case_estimated_cost_cny"] == pytest.approx(
-        request["access_estimate"]["estimated_cost_cny"] + 2 * request["owner_upper_bound_estimate"]["estimated_cost_cny"]
-    )
-    owner_user = request["owner_upper_bound_messages"][1]["content"]
+    assert request["owner_upper_bound_status"] == "removed_from_launch"
+    assert request["owner_upper_bound_estimate"] is None
+    assert request["worst_case_estimated_cost_cny"] is None
+    owner_user = request["owner_initial_messages"][1]["content"]
     assert '"source_materials"' in owner_user
     assert "material_ref" in owner_user or "source_supplied_locators" in owner_user
     assert request["catalog"]["coverage"]["tool_materials"] == 1
