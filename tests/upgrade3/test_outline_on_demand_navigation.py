@@ -3,6 +3,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -67,6 +70,21 @@ def test_navigation_keeps_all_identity_entries_but_only_priority_semantics():
     assert all("source_supplied_locators" not in row for row in view["entries"])
     assert any("CONDITION-0" in json.dumps(row, ensure_ascii=False) for row in view["priority_semantic_entries"])
     assert view["semantic_page"]["next_page_request"]["request_type"] == "catalog_page"
+
+
+def test_actual_access_messages_are_stable_across_process_hash_seeds():
+    code = '''
+import runpy, hashlib, json
+from optomind_research.runtime.upgrade3 import outline_on_demand as od
+p = runpy.run_path("tests/upgrade3/test_outline_on_demand_navigation.py")["_payload"]()
+m = od.access_messages(p, od.build_material_catalog(p))
+print(hashlib.sha256(json.dumps(m, ensure_ascii=False, sort_keys=True).encode()).hexdigest())
+'''
+    hashes = [subprocess.check_output(
+        [sys.executable, "-c", code], cwd=Path(__file__).resolve().parents[2],
+        env={**os.environ, "PYTHONHASHSEED": seed}, text=True,
+    ).strip() for seed in ("1", "2", "3")]
+    assert len(set(hashes)) == 1
 
 
 def test_page_and_search_requests_expand_complete_original_records():

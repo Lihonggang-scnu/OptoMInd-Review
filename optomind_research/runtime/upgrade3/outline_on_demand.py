@@ -466,7 +466,7 @@ def _priority_source_locators(record: Mapping[str, Any]) -> list[dict[str, Any]]
         return _copy(value) if key in selected_keys else None
 
     locators = []
-    for root_key in _CONTENT_KEYS:
+    for root_key in sorted(_CONTENT_KEYS):
         if root_key not in record:
             continue
         extracted = extract(record[root_key], root_key)
@@ -1113,7 +1113,7 @@ def _model_visible_readonly_roles(
         if unit_id and unit_id in direct:
             result.append(_copy(row))
             continue
-        compact = {key: _copy(row[key]) for key in compact_keys if key in row}
+        compact = {key: _copy(row[key]) for key in sorted(compact_keys) if key in row}
         if unit_id:
             compact["expandable_readback"] = {"unit_id": unit_id, "source": "local_full_payload"}
             expandable.append(unit_id)
