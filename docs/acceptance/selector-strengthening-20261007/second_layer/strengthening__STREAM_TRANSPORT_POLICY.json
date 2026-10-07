@@ -1,0 +1,95 @@
+{
+  "record_kind": "stream_transport_round_policy",
+  "status": "persisted_before_any_future_paid_call",
+  "source_scope": "opt_in_transport_observability_only; science_prompt_materials_and_model_capacity_unchanged",
+  "default_wire": {
+    "stream": false,
+    "nonstream_behavior": "unchanged"
+  },
+  "stream_wire": {
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "thinking_and_answer_capacity": "caller_profile_unchanged"
+  },
+  "timeout": {
+    "socket_read_inactivity": "remaining_overall_deadline_best_effort",
+    "overall_seconds_default": 3600.0,
+    "active_streams_not_killed_at_900_seconds": true
+  },
+  "completion_contract": {
+    "requires_terminal_done": true,
+    "requires_finish_reason": "stop",
+    "requires_content": true,
+    "requires_prompt_or_input_tokens": true,
+    "requires_completion_or_output_tokens": true,
+    "partial_text_adopted": false
+  },
+  "audit": {
+    "raw_sse_incremental": true,
+    "safe_response_headers_only": true,
+    "first_events": 8,
+    "periodic_event_interval": 128,
+    "max_in_memory_events": 64,
+    "reasoning_separate_from_answer": true
+  },
+  "round_budget": {
+    "shared_ledger": "<LOCAL_PATH_REDACTED>",
+    "shared_limit_cny": 125.0,
+    "new_round_cap_cny": 25.0,
+    "current_round_exempt_uncertain_cny": 8.533428,
+    "current_round_exempt_reservation_ids": [
+      "res-e50dd5e3f2d44902",
+      "res-9cde6a09cf714811"
+    ],
+    "exemption_reason": "user-approved: prior owner/access transport uncertainties are retained in history and excluded only from this round cap; future uncertainties are not exempt",
+    "enforced_spendable_cny": 23.051,
+    "historical_reservations_unchanged": true,
+    "future_uncertain_exemption": false,
+    "snapshot_round_settled_cny": 1.949,
+    "snapshot_label": "transport_repair_policy_snapshot_before_selector_and_group_strengthening_calls",
+    "current_observed_round_settled_cny": 12.206108,
+    "current_observed_round_remaining_cny": 12.793892,
+    "current_observed_at": "after_group4_access_2026-10-07"
+  },
+  "offline_verification": {
+    "test_command": "python -m unittest tests/upgrade3/test_qwen_effective_token_transport.py",
+    "tests_passed": 80,
+    "paid_calls_started": 0,
+    "source_files": {
+      "optomind_research/runtime/upgrade3/module4/runtime.py": "dfc8a06b5c2caf82a84cfb7d074903e8efa8b6c8139dc084c9c35b54d6af2548",
+      "optomind_research/runtime/upgrade3/outline_on_demand.py": "7752c830bded5c773ba9796548aae0ef1569d1baa3a4d17dabe9ccec85c295bc",
+      "optomind_research/runtime/upgrade3/outline_strengthening.py": "555becade3423aa67a1e5e72634b45ddaad5f9d2efa29d8c444f73c99cbe886b",
+      "tests/upgrade3/test_qwen_effective_token_transport.py": "312bef6acd46089344c9a833e68c85debe1a07b91216905eac61acd60393ab59",
+      "tests/upgrade3/test_outline_strengthening.py": "b8126da871e64c0c858e438ebf057f70bc3ff7c572a10b1bf20769067c6e9954"
+    },
+    "coverage": [
+      "CRLF SSE",
+      "usage-only no-choice chunk",
+      "error event",
+      "malformed JSON",
+      "partial timeout",
+      "observer failure",
+      "periodic audit boundary",
+      "nonstream wire unchanged"
+    ],
+    "test_commands": [
+      "python -m pytest -q tests/upgrade3/test_qwen_effective_token_transport.py tests/upgrade3/test_outline_strengthening.py",
+      "PYTHONPATH=tests/upgrade3 python -m pytest -q tests/upgrade3/test_outline_selection_local_contract.py"
+    ],
+    "production_paid_calls_started": 0,
+    "test_breakdown": {
+      "transport_and_strengthening": 50,
+      "selector_local_contract": 30,
+      "total": 80
+    },
+    "test_count_note": "Counts are from the two recorded offline command runs; this policy snapshot is not a claim that the 80 tests were rerun while writing this metadata."
+  },
+  "next_call": {
+    "status": "root_review_required",
+    "paid_call_started": false,
+    "resume_source": "saved_access_stage_and_exact_owner_messages",
+    "no_reselection": true
+  }
+}

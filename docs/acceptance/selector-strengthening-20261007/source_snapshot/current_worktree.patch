@@ -1,0 +1,1227 @@
+diff --git a/optomind_research/runtime/upgrade3/module4/runtime.py b/optomind_research/runtime/upgrade3/module4/runtime.py
+index 137aa2a..a442220 100644
+--- a/optomind_research/runtime/upgrade3/module4/runtime.py
++++ b/optomind_research/runtime/upgrade3/module4/runtime.py
+@@ -12,6 +12,8 @@ import hashlib
+ import json
+ import os
+ import sqlite3
++import socket
++import tempfile
+ import time
+ import urllib.error
+ import urllib.request
+@@ -192,13 +194,17 @@ def _uncertain_telemetry(error: QwenTransportError, *, key_index: int, attempt:
+     """Persist only bounded error identity when a request has unknown billing."""
+     error_class = "".join(char for char in type(error).__name__[:40] if char.isalnum() or char in "-_")
+     reason = "".join(char for char in (error.reason_code or "unknown")[:80] if char.isalnum() or char in "-_")
+-    return {
++    telemetry = {
+         "provider_error_code": f"{error_class}:{reason}"[:128],
+         "status_code": error.status_code,
+         "key_index": key_index,
+         "attempt": attempt + 1,
+         "effective_request": dict(effective_request or {}),
+     }
++    for key in ("stream", "transport_events", "transport_phase", "partial_raw_path", "raw_stream_path"):
++        if key in error.record:
++            telemetry[key] = error.record[key]
++    return telemetry
+ 
+ 
+ def _cap_pressure(usage: Mapping[str, Any], effective_request: Mapping[str, Any], finish_reason: str) -> dict[str, Any]:
+@@ -240,6 +246,239 @@ def _cap_pressure(usage: Mapping[str, Any], effective_request: Mapping[str, Any]
+     }
+ 
+ 
++_SAFE_RESPONSE_HEADERS = {
++    "date", "server", "content-type", "content-length", "transfer-encoding",
++    "connection", "x-request-id", "request-id", "x-dashscope-partialresponse",
++}
++
++
++def _safe_response_headers(headers: Any) -> dict[str, str]:
++    """Keep only bounded, non-credential response headers in transport audits."""
++
++    if headers is None or not hasattr(headers, "items"):
++        return {}
++    result: dict[str, str] = {}
++    for key, value in headers.items():
++        if _text(key).casefold() in _SAFE_RESPONSE_HEADERS:
++            result[_text(key).casefold()] = _text(value)[:256]
++    return result
++
++
++def _emit_transport_event(observer: Any, event: Mapping[str, Any]) -> None:
++    """Best-effort audit callback; observer failures never fail a paid call."""
++
++    if observer is None:
++        return
++    try:
++        if callable(observer):
++            observer(dict(event))
++        elif hasattr(observer, "append"):
++            observer.append(dict(event))
++    except Exception:
++        return
++
++
++def _stream_event_record(
++    *, stage: str, started: float, **fields: Any,
++) -> dict[str, Any]:
++    return {
++        "stage": stage,
++        "epoch": time.time(),
++        "elapsed_seconds": time.monotonic() - started,
++        **fields,
++    }
++
++
++def _stream_response(
++    response: Any, *, started: float, observer: Any, raw_path: Path,
++    overall_timeout_seconds: float,
++) -> dict[str, Any]:
++    """Read Qwen SSE without treating partial content as a completed answer."""
++
++    content_parts: list[str] = []
++    reasoning_parts: list[str] = []
++    raw_bytes = bytearray()
++    data_lines: list[bytes] = []
++    usage: dict[str, Any] = {}
++    finish_reason = ""
++    returned_model = ""
++    request_id = ""
++    done = False
++    event_count = 0
++    content_bytes = 0
++    reasoning_bytes = 0
++    raw_path.parent.mkdir(parents=True, exist_ok=True)
++    raw_handle = raw_path.open("wb")
++
++    def emit(stage: str, **fields: Any) -> None:
++        # Call sites below already select first chunks, periodic progress, and
++        # terminal events. Do not apply a second counter here: an audit event
++        # such as ``stream_read_start`` must not shift the every-128-chunk
++        # boundary. The raw SSE file remains the complete evidence.
++        _emit_transport_event(observer, _stream_event_record(stage=stage, started=started, **fields))
++
++    def set_read_timeout(seconds: float) -> None:
++        """Best-effort socket inactivity bound for urllib's HTTPResponse."""
++
++        bounded = max(0.1, float(seconds))
++        candidates = [response]
++        fp = getattr(response, "fp", None)
++        if fp is not None:
++            candidates.append(fp)
++            raw = getattr(fp, "raw", None)
++            if raw is not None:
++                candidates.append(raw)
++                sock = getattr(raw, "_sock", None)
++                if sock is not None:
++                    candidates.append(sock)
++        for candidate in candidates:
++            setter = getattr(candidate, "settimeout", None)
++            if callable(setter):
++                try:
++                    setter(bounded)
++                except (OSError, ValueError):
++                    continue
++
++    def fail(reason: str, *, stage: str, **fields: Any) -> None:
++        emit("stream_error", reason=reason, phase=stage, **fields)
++        raise QwenTransportError(
++            reason,
++            transient=False,
++            record={
++                "transport_phase": stage,
++                "stream_event_count": event_count,
++                "stream_done": done,
++                "partial_raw_path": str(raw_path),
++                "partial_raw_bytes": len(raw_bytes),
++                "partial_content_bytes": content_bytes,
++                "partial_reasoning_bytes": reasoning_bytes,
++            },
++        )
++
++    def process_data(data: bytes) -> None:
++        nonlocal done, event_count, content_bytes, reasoning_bytes, usage, finish_reason, returned_model, request_id
++        if not data:
++            return
++        if data.strip() == b"[DONE]":
++            done = True
++            emit("stream_done", event_count=event_count, raw_bytes=len(raw_bytes))
++            return
++        try:
++            payload = json.loads(data.decode("utf-8"))
++        except (UnicodeDecodeError, json.JSONDecodeError):
++            fail("qwen_stream_event_not_json", stage="stream_event", event_sha256=hashlib.sha256(data).hexdigest())
++        if not isinstance(payload, Mapping):
++            fail("qwen_stream_event_not_object", stage="stream_event")
++        if payload.get("error") is not None:
++            fail("qwen_stream_error_event", stage="stream_event")
++        event_count += 1
++        model = _text(payload.get("model"))
++        if model:
++            returned_model = model
++        payload_id = _text(payload.get("id"))
++        if payload_id:
++            request_id = payload_id[:200]
++        candidate_usage = payload.get("usage")
++        if isinstance(candidate_usage, Mapping):
++            usage = dict(candidate_usage)
++        choices = payload.get("choices")
++        if not isinstance(choices, Sequence) or not choices:
++            emit("stream_chunk", event_count=event_count, choices=0, usage_present=bool(candidate_usage))
++            return
++        choice = choices[0] if isinstance(choices[0], Mapping) else {}
++        if choice.get("finish_reason") is not None:
++            finish_reason = _text(choice.get("finish_reason"))
++        delta = choice.get("delta") if isinstance(choice.get("delta"), Mapping) else {}
++        piece = delta.get("content")
++        if isinstance(piece, list):
++            piece = "".join(_text(item.get("text")) if isinstance(item, Mapping) else _text(item) for item in piece)
++        piece = _text(piece)
++        if piece:
++            content_parts.append(piece)
++            content_bytes += len(piece.encode("utf-8"))
++        reasoning = delta.get("reasoning_content")
++        if reasoning is None:
++            reasoning = delta.get("reasoning")
++        if isinstance(reasoning, list):
++            reasoning = "".join(_text(item.get("text")) if isinstance(item, Mapping) else _text(item) for item in reasoning)
++        reasoning = _text(reasoning)
++        if reasoning:
++            reasoning_parts.append(reasoning)
++            reasoning_bytes += len(reasoning.encode("utf-8"))
++        if event_count <= 8 or event_count % 128 == 0:
++            emit("stream_chunk", event_count=event_count, choices=1, content_bytes=content_bytes, reasoning_bytes=reasoning_bytes, usage_present=bool(candidate_usage))
++
++    try:
++        while not done:
++            remaining = overall_timeout_seconds - (time.monotonic() - started)
++            if remaining <= 0:
++                fail("qwen_stream_overall_timeout", stage="stream_read", event_count=event_count)
++            set_read_timeout(remaining)
++            emit("stream_read_start", event_count=event_count) if event_count == 0 else None
++            try:
++                line = response.readline()
++            except (socket.timeout, TimeoutError):
++                fail("qwen_stream_read_timeout", stage="stream_read", event_count=event_count)
++            except OSError:
++                fail("qwen_stream_read_error", stage="stream_read", event_count=event_count)
++            if not line:
++                if data_lines:
++                    process_data(b"\n".join(data_lines))
++                    data_lines.clear()
++                if not done:
++                    fail("qwen_stream_incomplete", stage="stream_eof", event_count=event_count)
++                break
++            first_wire_byte = not raw_bytes
++            raw_bytes.extend(line)
++            raw_handle.write(line)
++            raw_handle.flush()
++            if first_wire_byte:
++                emit("stream_first_byte", bytes=len(line))
++            stripped = line.rstrip(b"\r\n")
++            if stripped == b"":
++                if data_lines:
++                    process_data(b"\n".join(data_lines))
++                    data_lines.clear()
++                continue
++            if stripped.startswith(b":"):
++                continue
++            if stripped.startswith(b"data:"):
++                data_lines.append(stripped[5:].lstrip())
++                continue
++        if not done:
++            fail("qwen_stream_incomplete", stage="stream_eof", event_count=event_count)
++    finally:
++        raw_handle.close()
++    if finish_reason != "stop" or not content_parts:
++        fail("qwen_stream_incomplete", stage="stream_terminal", finish_reason=finish_reason, event_count=event_count)
++    if not usage or not any(usage.get(key) is not None for key in ("completion_tokens", "output_tokens")):
++        fail("qwen_stream_usage_missing", stage="stream_terminal", event_count=event_count)
++    normalized = {
++        "id": request_id or None,
++        "model": returned_model or None,
++        "choices": [{
++            "message": {
++                "content": "".join(content_parts),
++                **({"reasoning_content": "".join(reasoning_parts)} if reasoning_parts else {}),
++            },
++            "finish_reason": finish_reason,
++        }],
++        "usage": usage,
++    }
++    emit("stream_complete", event_count=event_count, content_bytes=content_bytes, reasoning_bytes=reasoning_bytes, usage_present=True)
++    return {
++        "raw_bytes": bytes(raw_bytes),
++        "normalized": normalized,
++        "content": "".join(content_parts),
++        "reasoning_content": "".join(reasoning_parts),
++        "usage": usage,
++        "finish_reason": finish_reason,
++        "returned_model": returned_model,
++        "request_id": request_id,
++        "event_count": event_count,
++    }
++
++
+ class MissingCredentialError(QwenTransportError):
+     pass
+ 
+@@ -331,7 +570,7 @@ class GlobalBudgetLedger:
+                     _text(telemetry.get("provider_error_code")) or None,
+                     int(telemetry["key_index"]) if telemetry.get("key_index") is not None else None,
+                     int(telemetry["attempt"]) if telemetry.get("attempt") is not None else None,
+-                    json.dumps({key: telemetry[key] for key in ("effective_request", "cap_pressure") if key in telemetry}, ensure_ascii=False, sort_keys=True),
++                    json.dumps({key: telemetry[key] for key in ("effective_request", "cap_pressure", "stream", "transport_events", "transport_phase", "partial_raw_path", "raw_stream_path") if key in telemetry}, ensure_ascii=False, sort_keys=True),
+                     reservation_id,
+                 ))
+                 db.commit()
+@@ -381,7 +620,7 @@ class GlobalBudgetLedger:
+ 
+ 
+ class QwenDirectClient:
+-    """Direct non-streaming JSON-object Qwen client with explicit model."""
++    """Direct Qwen client with explicit model and opt-in SSE transport."""
+ 
+     def __init__(
+         self,
+@@ -402,6 +641,7 @@ class QwenDirectClient:
+         prompt_token_counter: Callable[[bytes, Sequence[Mapping[str, Any]]], int] | None = None,
+         prompt_token_multiplier: float = 1.0,
+         prompt_token_framing_margin: int = 0,
++        stream_overall_timeout_seconds: float = 3600.0,
+     ):
+         self.model = str(model)
+         pricing = model_pricing(self.model)
+@@ -451,6 +691,12 @@ class QwenDirectClient:
+             raise QwenTransportError("invalid_prompt_token_estimator", transient=False) from exc
+         if self.prompt_token_multiplier < 1.0 or self.prompt_token_framing_margin < 0:
+             raise QwenTransportError("invalid_prompt_token_estimator", transient=False)
++        try:
++            self.stream_overall_timeout_seconds = max(self.timeout_seconds, float(stream_overall_timeout_seconds))
++        except (TypeError, ValueError) as exc:
++            raise QwenTransportError("invalid_stream_overall_timeout", transient=False) from exc
++        if self.stream_overall_timeout_seconds <= 0:
++            raise QwenTransportError("invalid_stream_overall_timeout", transient=False)
+ 
+     def _prompt_token_estimate(self, request_bytes: bytes, messages: Sequence[Mapping[str, Any]]) -> int:
+         if self.prompt_token_counter is None:
+@@ -498,6 +744,39 @@ class QwenDirectClient:
+             raise QwenTransportError("runtime_model_mismatch", transient=False, record={"requested": model, "configured": self.model})
+         pricing = model_pricing(model)
+         thinking = bool(kwargs.get("thinking", self.thinking))
++        stream = bool(kwargs.get("stream", False))
++        transport_observer = kwargs.get("transport_observer")
++        audit_enabled = stream or transport_observer is not None
++        audit_events: list[dict[str, Any]] = []
++        audit_sequence = 0
++
++        def record_transport_event(event: Mapping[str, Any]) -> None:
++            nonlocal audit_sequence
++            if not audit_enabled:
++                return
++            audit_sequence += 1
++            # Keep only a bounded structured audit in memory. Raw SSE is
++            # written incrementally and is the complete transport evidence.
++            stage = _text(event.get("stage"))
++            event_count = event.get("event_count")
++            keep = len(audit_events) < 16 or stage in {"stream_done", "stream_error", "stream_eof", "stream_complete", "transport_exception"}
++            if isinstance(event_count, int) and event_count > 0 and event_count % 128 == 0:
++                keep = True
++            if keep and len(audit_events) < 64:
++                item = dict(event)
++                item["sequence"] = audit_sequence
++                audit_events.append(item)
++            _emit_transport_event(transport_observer, event)
++
++        try:
++            stream_overall_timeout_seconds = max(
++                self.timeout_seconds,
++                float(kwargs.get("stream_overall_timeout_seconds", self.stream_overall_timeout_seconds)),
++            )
++        except (TypeError, ValueError) as exc:
++            raise QwenTransportError("invalid_stream_overall_timeout", transient=False, record={"model": model}) from exc
++        if stream_overall_timeout_seconds <= 0:
++            raise QwenTransportError("invalid_stream_overall_timeout", transient=False, record={"model": model})
+         if thinking and self.json_mode and not bool(pricing["thinking_json"]):
+             raise QwenTransportError("thinking_json_unsupported_for_model", transient=False, record={"model": model, "thinking": True, "response_format": {"type": "json_object"}})
+         if self.json_mode and not any("json" in _text(item.get("content")).casefold() for item in messages if isinstance(item, Mapping)):
+@@ -535,8 +814,13 @@ class QwenDirectClient:
+             token_parameter: total_output_tokens if token_parameter == "max_completion_tokens" else requested_output_tokens,
+             "temperature": float(kwargs.get("temperature", 0.1)),
+             "enable_thinking": thinking,
+-            "stream": False,
++            "stream": stream,
+         }
++        if stream:
++            # DashScope includes token usage in the final SSE event only when
++            # explicitly requested. This is opt-in; the default non-stream
++            # request remains byte-for-byte compatible.
++            body["stream_options"] = {"include_usage": True}
+         if self.json_mode:
+             body["response_format"] = {"type": "json_object"}
+         if thinking:
+@@ -551,6 +835,9 @@ class QwenDirectClient:
+             "max_tokens": body.get("max_tokens"),
+             "response_format": body.get("response_format"),
+         }
++        if stream:
++            effective_request["stream"] = True
++            effective_request["stream_options"] = {"include_usage": True}
+         if thinking and pricing.get("thinking_budget_maps_to_effort"):
+             # Informational provider mapping, not another request parameter:
+             # Qwen3.8 rejects reasoning_effort together with thinking_budget.
+@@ -577,20 +864,67 @@ class QwenDirectClient:
+                     headers={"Authorization": "Bearer " + key, "Content-Type": "application/json", "Connection": "close"},
+                     method="POST",
+                 )
++                record_transport_event(_stream_event_record(
++                    stage="request_open_start", started=started,
++                    stream=stream, timeout_seconds=self.timeout_seconds,
++                    overall_timeout_seconds=stream_overall_timeout_seconds if stream else None,
++                    request_body_bytes=len(request_bytes),
++                    request_body_sha256=hashlib.sha256(request_bytes).hexdigest(),
++                ))
++                partial_path: Path | None = None
+                 try:
+                     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                     with opener.open(request, timeout=self.timeout_seconds) as response:
+-                        raw = response.read()
+-                        if self.raw_response_dir:
+-                            self.raw_response_dir.mkdir(parents=True, exist_ok=True)
+-                            temp = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.tmp")
+-                            target = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.raw")
+-                            temp.write_bytes(raw)
+-                            os.replace(temp, target)
+                         status_code = int(getattr(response, "status", 200))
+                         headers = dict(response.headers.items()) if getattr(response, "headers", None) else {}
++                        record_transport_event(_stream_event_record(
++                            stage="response_opened", started=started,
++                            status_code=status_code, headers=_safe_response_headers(headers),
++                        ))
++                        if stream:
++                            self.raw_response_dir.mkdir(parents=True, exist_ok=True) if self.raw_response_dir else None
++                            if self.raw_response_dir:
++                                partial_path = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.sse.partial")
++                            else:
++                                fd, temp_name = tempfile.mkstemp(prefix=safe_call_id + "-", suffix=".sse.partial")
++                                os.close(fd)
++                                partial_path = Path(temp_name)
++                            stream_result = _stream_response(
++                                response,
++                                started=started,
++                                observer=record_transport_event,
++                                raw_path=partial_path,
++                                overall_timeout_seconds=stream_overall_timeout_seconds,
++                            )
++                            raw = stream_result["raw_bytes"]
++                            if self.raw_response_dir:
++                                target = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.sse.raw")
++                                os.replace(partial_path, target)
++                                partial_path = target
++                            else:
++                                partial_path.unlink(missing_ok=True)
++                                partial_path = None
++                            payload = stream_result["normalized"]
++                            record_transport_event(_stream_event_record(
++                                stage="read_complete", started=started,
++                                bytes=len(raw), stream=True,
++                            ))
++                        else:
++                            record_transport_event(_stream_event_record(stage="read_start", started=started, stream=False))
++                            raw = response.read()
++                            record_transport_event(_stream_event_record(
++                                stage="read_complete", started=started,
++                                bytes=len(raw), stream=False,
++                            ))
++                            if self.raw_response_dir:
++                                self.raw_response_dir.mkdir(parents=True, exist_ok=True)
++                                temp = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.tmp")
++                                target = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.raw")
++                                temp.write_bytes(raw)
++                                os.replace(temp, target)
+                     try:
+-                        payload = json.loads(raw.decode("utf-8"))
++                        if not stream:
++                            payload = json.loads(raw.decode("utf-8"))
+                     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                         raise QwenTransportError("qwen_response_not_json", transient=False, status_code=status_code, record={"raw_sha256": hashlib.sha256(raw).hexdigest()}) from exc
+                     if not isinstance(payload, Mapping):
+@@ -598,7 +932,8 @@ class QwenDirectClient:
+                     choices = payload.get("choices") if isinstance(payload.get("choices"), Sequence) else []
+                     choice = choices[0] if choices and isinstance(choices[0], Mapping) else {}
+                     finish_reason = _text(choice.get("finish_reason"))
+-                    content = self._message_content(payload)
++                    content = stream_result["content"] if stream else self._message_content(payload)
++                    usage_payload = stream_result["usage"] if stream else payload.get("usage")
+                     complete = finish_reason == "stop" and bool(content)
+                     result = {
+                         "content": content,
+@@ -608,8 +943,8 @@ class QwenDirectClient:
+                         "returned_model": _text(payload.get("model")) or None,
+                         "finish_reason": finish_reason,
+                         "complete": complete,
+-                        "request_id": _text(payload.get("id") or headers.get("x-request-id") or headers.get("X-Request-ID")),
+-                        "usage": dict(payload.get("usage") or {}) if isinstance(payload.get("usage"), Mapping) else {},
++                        "request_id": _text((stream_result.get("request_id") if stream else payload.get("id")) or headers.get("x-request-id") or headers.get("X-Request-ID")),
++                        "usage": dict(usage_payload or {}) if isinstance(usage_payload, Mapping) else {},
+                         "status_code": status_code,
+                         "call_id": call_id,
+                         "attempt": attempt + 1,
+@@ -617,10 +952,19 @@ class QwenDirectClient:
+                         "elapsed_seconds": time.monotonic() - started,
+                         "effective_request": dict(effective_request),
+                     }
++                    if stream:
++                        result["normalized_response"] = payload
++                        result["normalized_response_json"] = _json_bytes(payload).decode("utf-8")
++                        result["raw_stream_sha256"] = hashlib.sha256(raw).hexdigest()
++                        result["reasoning_content"] = stream_result.get("reasoning_content", "")
++                        result["raw_stream_path"] = str(partial_path) if partial_path else None
++                        result["stream_event_count"] = stream_result.get("event_count", 0)
++                    if audit_events:
++                        result["transport_events"] = list(audit_events)
+                     result["cap_pressure"] = _cap_pressure(result["usage"], effective_request, finish_reason)
+                     if self.budget_ledger is not None and reservation:
+                         usage = result.get("usage") or {}
+-                        telemetry = {"usage": usage, "returned_model": result.get("returned_model"), "finish_reason": result.get("finish_reason"), "request_id": result.get("request_id"), "raw_response_sha256": result.get("raw_response_sha256"), "status_code": status_code, "effective_request": dict(effective_request), "cap_pressure": result["cap_pressure"]}
++                        telemetry = {"usage": usage, "returned_model": result.get("returned_model"), "finish_reason": result.get("finish_reason"), "request_id": result.get("request_id"), "raw_response_sha256": result.get("raw_response_sha256"), "status_code": status_code, "effective_request": dict(effective_request), "cap_pressure": result["cap_pressure"], "stream": stream, "transport_events": list(audit_events)}
+                         has_usage = usage and (usage.get("prompt_tokens") is not None or usage.get("input_tokens") is not None) and (usage.get("completion_tokens") is not None or usage.get("output_tokens") is not None)
+                         if has_usage:
+                             self.budget_ledger.settle(reservation["reservation_id"], estimated_cost_cny(usage, model=model), uncertain=False, telemetry=telemetry)
+@@ -636,6 +980,11 @@ class QwenDirectClient:
+                     return result
+                 except QwenTransportError as exc:
+                     exc.record.setdefault("effective_request", dict(effective_request))
++                    exc.record.setdefault("stream", stream)
++                    if audit_events:
++                        exc.record.setdefault("transport_events", list(audit_events))
++                    if partial_path is not None:
++                        exc.record.setdefault("partial_raw_path", str(partial_path))
+                     if self.budget_ledger is not None and reservation and not reservation_settled:
+                         self.budget_ledger.settle(
+                             reservation["reservation_id"], None, uncertain=True,
+@@ -663,10 +1012,12 @@ class QwenDirectClient:
+                         "key_index": key_index, "attempt": attempt + 1, "rotate_key": rotate_key,
+                         "effective_request": dict(effective_request),
+                     }
++                    if audit_events:
++                        record["transport_events"] = list(audit_events)
+                     transient = status in TRANSIENT_HTTP
+                     last_error = QwenTransportError("qwen_account_rejection" if rotate_key else "qwen_http_error", transient=transient, status_code=status, record=record)
+                     if self.budget_ledger is not None and reservation and not reservation_settled:
+-                        telemetry = {"usage": None, "request_id": request_id or None, "raw_response_sha256": record["raw_response_sha256"], "status_code": status, "provider_error_code": provider_error_code, "key_index": key_index, "attempt": attempt + 1, "effective_request": dict(effective_request)}
++                        telemetry = {"usage": None, "request_id": request_id or None, "raw_response_sha256": record["raw_response_sha256"], "status_code": status, "provider_error_code": provider_error_code, "key_index": key_index, "attempt": attempt + 1, "effective_request": dict(effective_request), "stream": stream, "transport_events": list(audit_events)}
+                         # A definitive 4xx, including an account rejection,
+                         # consumed no model tokens.  Server errors and rate
+                         # limits remain uncertain because the provider may
+@@ -680,10 +1031,21 @@ class QwenDirectClient:
+                         raise last_error
+                 except (urllib.error.URLError, TimeoutError, OSError) as exc:
+                     transport_record = _transport_exception_record(exc)
++                    record_transport_event(_stream_event_record(
++                        stage="transport_exception", started=started,
++                        error=transport_record.get("error"),
++                        reason_code=transport_record.get("reason_code"),
++                    ))
+                     last_error = QwenTransportError(
+                         "qwen_transport_error",
+                         transient=True,
+-                        record={"call_id": call_id, "effective_request": dict(effective_request), **transport_record},
++                        record={
++                            "call_id": call_id,
++                            "effective_request": dict(effective_request),
++                            "stream": stream,
++                            "transport_events": list(audit_events),
++                            **transport_record,
++                        },
+                         reason_code=transport_record["reason_code"],
+                     )
+                 if last_error and last_error.record.get("rotate_key"):
+diff --git a/optomind_research/runtime/upgrade3/outline_on_demand.py b/optomind_research/runtime/upgrade3/outline_on_demand.py
+index a483e54..d25a5c2 100644
+--- a/optomind_research/runtime/upgrade3/outline_on_demand.py
++++ b/optomind_research/runtime/upgrade3/outline_on_demand.py
+@@ -62,6 +62,79 @@ def _material_identity(row: Mapping[str, Any]) -> dict[str, Any]:
+     return {key: _copy(row[key]) for key in keys if key in row}
+ 
+ 
++# These fields identify a study across the source, candidate, and tool
++# channels.  A single study can legitimately have a full source card plus
++# several tool or navigation records with different useful content.  The
++# resolver must distinguish those aliases from records whose identity fields
++# actually disagree.
++_STABLE_IDENTITY_FIELDS = (
++    "source_handle", "paper_id", "original_paper_id", "original_source_handle",
++    "doi", "study_id",
++)
++
++
++def _identity_value(identity: Mapping[str, Any], key: str) -> str:
++    value = identity.get(key)
++    if value is None:
++        return ""
++    return str(value).strip().casefold()
++
++
++def _identities_compatible(left: Mapping[str, Any], right: Mapping[str, Any]) -> bool:
++    """Return whether two catalog identities can be aliases of one study.
++
++    Missing fields are allowed because tool and mediated records often carry
++    only a subset of the source identity.  Any shared stable field must agree;
++    this keeps a same-handle/different-DOI collision an explicit error.
++    """
++
++    shared = False
++    for key in _STABLE_IDENTITY_FIELDS:
++        left_value = _identity_value(left, key)
++        right_value = _identity_value(right, key)
++        if left_value and right_value:
++            shared = True
++            if left_value != right_value:
++                return False
++    return shared
++
++
++def _identity_group_compatible(identities: Sequence[Mapping[str, Any]]) -> bool:
++    """Reject any disagreement among non-empty stable identity fields."""
++
++    for key in _STABLE_IDENTITY_FIELDS:
++        values = {
++            _identity_value(identity, key)
++            for identity in identities
++            if _identity_value(identity, key)
++        }
++        if len(values) > 1:
++            return False
++    return True
++
++
++def _canonical_access_id(access_ids: Sequence[str], lookup: Mapping[str, Any]) -> str:
++    """Choose a stable representative without dropping any alias record."""
++
++    channel_rank = {
++        "source_materials": 0,
++        "candidate_materials": 1,
++        "candidate_navigation": 2,
++        "tool_materials": 3,
++    }
++
++    def rank(access_id: str) -> tuple[int, int, int, str]:
++        info = lookup.get(access_id) if isinstance(lookup, Mapping) else None
++        entry = info.get("entry") if isinstance(info, Mapping) else {}
++        record = info.get("record") if isinstance(info, Mapping) else {}
++        content_fields = sum(1 for key in _CONTENT_KEYS if isinstance(record, Mapping) and key in record)
++        record_size = len(json.dumps(record, ensure_ascii=False, sort_keys=True, default=str))
++        channel = channel_rank.get(str(entry.get("channel") or ""), 9)
++        return (-content_fields, -record_size, channel, str(access_id))
++
++    return min((str(value) for value in access_ids), key=rank)
++
++
+ def _paths(row: Mapping[str, Any]) -> list[str]:
+     result = []
+     for key, value in row.items():
+@@ -357,29 +430,86 @@ def validate_access_response(parsed: Mapping[str, Any], catalog: Mapping[str, An
+     return {"status": status, "material_requests": requests}
+ 
+ 
+-def _find_access_id(request: Mapping[str, Any], catalog: Mapping[str, Any]) -> str:
++def _request_access_matches(
++    request: Mapping[str, Any], catalog: Mapping[str, Any],
++) -> tuple[list[str], bool]:
++    """Return matching paths and whether the request named an exact path."""
++
+     lookup = catalog.get("_lookup") if isinstance(catalog, Mapping) else {}
+     access_id = str(request.get("access_id") or "").strip()
+     if access_id and access_id in lookup:
+-        return access_id
+-    if access_id:
++        matches = [access_id]
++        explicit = True
++    elif access_id:
+         # A planner may name a concrete field or passage as
+         # ``source_materials[2].deep_read_material``.  Resolve the record
+         # prefix while retaining the suffix in the access trace.
+         prefixes = [str(key) for key in lookup if access_id.startswith(str(key) + ".")]
+-        if prefixes:
+-            return max(prefixes, key=len)
+-    handle = str(request.get("source_handle") or request.get("paper_id") or "").strip()
+-    if not handle:
+-        raise OnDemandMaterialError("material_request_identity_missing")
+-    matches = []
+-    for key, value in lookup.items():
+-        identity = value.get("entry", {}).get("identity", {}) if isinstance(value, Mapping) else {}
+-        if handle in {str(identity.get("source_handle") or ""), str(identity.get("paper_id") or "")}:
+-            matches.append(str(key))
+-    if len(matches) != 1:
+-        raise OnDemandMaterialError("material_request_identity_ambiguous_or_missing")
+-    return matches[0]
++        if not prefixes:
++            raise OnDemandMaterialError("material_request_identity_ambiguous_or_missing")
++        matches = [max(prefixes, key=len)]
++        explicit = True
++    else:
++        handle = str(request.get("source_handle") or request.get("paper_id") or "").strip()
++        if not handle:
++            raise OnDemandMaterialError("material_request_identity_missing")
++        matches = []
++        for key, value in lookup.items():
++            identity = value.get("entry", {}).get("identity", {}) if isinstance(value, Mapping) else {}
++            if handle in {str(identity.get("source_handle") or ""), str(identity.get("paper_id") or "")}:
++                matches.append(str(key))
++        if not matches:
++            raise OnDemandMaterialError("material_request_identity_ambiguous_or_missing")
++        explicit = False
++
++    # When a request includes both a path and an identity, the identity must
++    # agree with that path.  This prevents an explicit access_id from being
++    # used to smuggle a different paper identity into the owner request.
++    requested_identity = {
++        key: request.get(key)
++        for key in _STABLE_IDENTITY_FIELDS
++        if request.get(key) not in (None, "")
++    }
++    if requested_identity:
++        entry = lookup[matches[0]].get("entry", {})
++        identity = entry.get("identity", {}) if isinstance(entry, Mapping) else {}
++        if not _identities_compatible(requested_identity, identity):
++            raise OnDemandMaterialError("material_request_identity_conflict")
++
++    identities = [
++        (lookup[match].get("entry", {}) or {}).get("identity", {})
++        for match in matches
++    ]
++    if len(matches) > 1 and not _identity_group_compatible(identities):
++        raise OnDemandMaterialError("material_request_identity_conflict")
++    return matches, explicit
++
++
++def _identity_aliases(canonical: str, lookup: Mapping[str, Any]) -> list[str]:
++    """Return all catalog paths for the canonical study identity."""
++
++    info = lookup.get(canonical) if isinstance(lookup, Mapping) else None
++    entry = info.get("entry") if isinstance(info, Mapping) else {}
++    identity = entry.get("identity", {}) if isinstance(entry, Mapping) else {}
++    aliases = []
++    for access_id, value in lookup.items():
++        candidate_entry = value.get("entry", {}) if isinstance(value, Mapping) else {}
++        candidate_identity = candidate_entry.get("identity", {}) if isinstance(candidate_entry, Mapping) else {}
++        if _identities_compatible(identity, candidate_identity):
++            aliases.append(str(access_id))
++    matching_identities = [
++        (lookup[access_id].get("entry", {}) or {}).get("identity", {})
++        for access_id in aliases
++    ]
++    if not _identity_group_compatible(matching_identities):
++        raise OnDemandMaterialError("material_request_identity_conflict")
++    return sorted(aliases)
++
++
++def _find_access_id(request: Mapping[str, Any], catalog: Mapping[str, Any]) -> str:
++    lookup = catalog.get("_lookup") if isinstance(catalog, Mapping) else {}
++    matches, _explicit = _request_access_matches(request, catalog)
++    return _canonical_access_id(matches, lookup)
+ 
+ 
+ def resolve_material_requests(
+@@ -394,35 +524,47 @@ def resolve_material_requests(
+     trace_rows: list[dict[str, Any]] = []
+     seen = set(str(value) for value in prior_access_ids)
+     for request in validated["material_requests"]:
+-        access_id = _find_access_id(request, catalog)
+-        record_info = lookup[access_id]
+-        if access_id in seen:
+-            continue
+-        seen.add(access_id)
+-        row = _copy(record_info["record"])
+-        entry = _copy(record_info["entry"])
++        requested_matches, explicit_path = _request_access_matches(request, catalog)
++        canonical_access_id = _canonical_access_id(requested_matches, lookup)
++        # A handle/paper_id request may match the same study in multiple
++        # channels.  Keep every alias so tool retellings and source cards
++        # contribute their distinct fields.  An explicit access_id remains
++        # path-scoped, while its alias list is still visible to the owner.
++        access_ids = [canonical_access_id] if explicit_path else _identity_aliases(canonical_access_id, lookup)
++        alias_ids = [canonical_access_id] if explicit_path else _identity_aliases(canonical_access_id, lookup)
+         requested_paths = request.get("material_paths") or request.get("paths") or []
+         raw_access_id = str(request.get("access_id") or "")
+-        if not requested_paths and raw_access_id.startswith(access_id + "."):
+-            requested_paths = [raw_access_id[len(access_id) + 1:]]
+-        selected.append({
+-            "access_id": access_id,
+-            "channel": entry["channel"],
+-            "index_path": entry["index_path"],
+-            "identity": entry["identity"],
+-            "requested_paths": _copy(requested_paths),
+-            "unit_ids": [str(value) for value in request.get("unit_ids") or []],
+-            "record": row,
+-        })
+-        trace_rows.append({
+-            "access_id": access_id,
+-            "channel": entry["channel"],
+-            "index_path": entry["index_path"],
+-            "identity": entry["identity"],
+-            "record_sha256": entry["record_sha256"],
+-            "requested_paths": _copy(requested_paths),
+-            "unit_ids": [str(value) for value in request.get("unit_ids") or []],
+-        })
++        if not requested_paths and raw_access_id.startswith(canonical_access_id + "."):
++            requested_paths = [raw_access_id[len(canonical_access_id) + 1:]]
++        for access_id in access_ids:
++            if access_id in seen:
++                continue
++            seen.add(access_id)
++            record_info = lookup[access_id]
++            row = _copy(record_info["record"])
++            entry = _copy(record_info["entry"])
++            selected.append({
++                "access_id": access_id,
++                "canonical_access_id": canonical_access_id,
++                "identity_aliases": _copy(alias_ids),
++                "channel": entry["channel"],
++                "index_path": entry["index_path"],
++                "identity": entry["identity"],
++                "requested_paths": _copy(requested_paths),
++                "unit_ids": [str(value) for value in request.get("unit_ids") or []],
++                "record": row,
++            })
++            trace_rows.append({
++                "access_id": access_id,
++                "canonical_access_id": canonical_access_id,
++                "identity_aliases": _copy(alias_ids),
++                "channel": entry["channel"],
++                "index_path": entry["index_path"],
++                "identity": entry["identity"],
++                "record_sha256": entry["record_sha256"],
++                "requested_paths": _copy(requested_paths),
++                "unit_ids": [str(value) for value in request.get("unit_ids") or []],
++            })
+     return {
+         "status": validated["status"],
+         "material_requests": _copy(validated["material_requests"]),
+@@ -622,7 +764,10 @@ def _model_visible_payload(full_payload: Mapping[str, Any], catalog: Mapping[str
+     visible_access["resolved_materials"] = [
+         {
+             key: _copy(item[key])
+-            for key in ("access_id", "channel", "index_path", "identity", "requested_paths", "unit_ids")
++            for key in (
++                "access_id", "canonical_access_id", "identity_aliases", "channel", "index_path",
++                "identity", "requested_paths", "unit_ids",
++            )
+             if key in item
+         }
+         for item in selected
+@@ -753,6 +898,8 @@ def run_on_demand_strengthening(
+     access_call_id: str | None = None, owner_call_id: str | None = None,
+     checkpoint_dir: str | Path | None = None, resume: bool = False,
+     access_profile: Mapping[str, Any] | None = None, owner_profile: Mapping[str, Any] | None = None,
++    owner_stream: bool = False, owner_stream_overall_timeout_seconds: float | None = None,
++    owner_transport_observer: Any | None = None,
+ ) -> dict[str, Any]:
+     """Run Plus access planning, local resolution, and one Max owner call.
+ 
+@@ -846,6 +993,9 @@ def run_on_demand_strengthening(
+                 thinking_budget=owner_thinking_budget, max_output_tokens=owner_max_output_tokens,
+                 raw_response=raw_owner_stage.get("raw_response") or {},
+                 call_id=owner_call_id or (str(payload.get("call_id") or "outline-on-demand") + ":owner"),
++                stream=owner_stream,
++                stream_overall_timeout_seconds=owner_stream_overall_timeout_seconds,
++                transport_observer=owner_transport_observer,
+             )
+         else:
+             def save_owner_raw(raw: Mapping[str, Any]) -> None:
+@@ -858,6 +1008,9 @@ def run_on_demand_strengthening(
+                 thinking_budget=owner_thinking_budget, max_output_tokens=owner_max_output_tokens,
+                 raw_response_callback=save_owner_raw,
+                 call_id=owner_call_id or (str(payload.get("call_id") or "outline-on-demand") + ":owner"),
++                stream=owner_stream,
++                stream_overall_timeout_seconds=owner_stream_overall_timeout_seconds,
++                transport_observer=owner_transport_observer,
+             )
+         _write_checkpoint(owner_stage_path, {"signature": owner_signature, "result": _copy(first_owner)})
+     final_owner = first_owner
+@@ -911,6 +1064,9 @@ def run_on_demand_strengthening(
+                         thinking_budget=owner_thinking_budget, max_output_tokens=owner_max_output_tokens,
+                         raw_response=raw_continuation_stage.get("raw_response") or {},
+                         call_id=(owner_call_id or (str(payload.get("call_id") or "outline-on-demand") + ":owner")) + ":continuation",
++                        stream=owner_stream,
++                        stream_overall_timeout_seconds=owner_stream_overall_timeout_seconds,
++                        transport_observer=owner_transport_observer,
+                     )
+                 else:
+                     def save_continuation_raw(raw: Mapping[str, Any]) -> None:
+@@ -923,6 +1079,9 @@ def run_on_demand_strengthening(
+                         thinking_budget=owner_thinking_budget, max_output_tokens=owner_max_output_tokens,
+                         raw_response_callback=save_continuation_raw,
+                         call_id=(owner_call_id or (str(payload.get("call_id") or "outline-on-demand") + ":owner")) + ":continuation",
++                        stream=owner_stream,
++                        stream_overall_timeout_seconds=owner_stream_overall_timeout_seconds,
++                        transport_observer=owner_transport_observer,
+                     )
+                 _write_checkpoint(continuation_path, {
+                     "signature": continuation_signature, "result": _copy(continuation),
+diff --git a/optomind_research/runtime/upgrade3/outline_strengthening.py b/optomind_research/runtime/upgrade3/outline_strengthening.py
+index 27f171a..caa9028 100644
+--- a/optomind_research/runtime/upgrade3/outline_strengthening.py
++++ b/optomind_research/runtime/upgrade3/outline_strengthening.py
+@@ -793,21 +793,28 @@ def _run_owner_with_messages(
+     model: str, thinking_budget: int, max_output_tokens: int,
+     call_id: str | None = None, allow_machine_review: bool = False,
+     raw_response: Mapping[str, Any] | None = None, raw_response_callback: Any | None = None,
++    stream: bool = False, stream_overall_timeout_seconds: float | None = None,
++    transport_observer: Any | None = None,
+ ) -> dict[str, Any]:
+     """Invoke one owner request and apply the production response validation."""
+ 
+     _verify_envelope(payload, allow_machine_review=allow_machine_review)
+     from .module4 import runtime
+     if raw_response is None:
+-        raw = runtime.invoke_client(
+-            client,
+-            messages,
+-            model=model,
+-            max_output_tokens=int(max_output_tokens),
+-            thinking=True,
+-            thinking_budget=int(thinking_budget),
+-            call_id=call_id or str(payload.get("call_id") or "autonomous-outline"),
+-        )
++        invoke_kwargs = {
++            "model": model,
++            "max_output_tokens": int(max_output_tokens),
++            "thinking": True,
++            "thinking_budget": int(thinking_budget),
++            "call_id": call_id or str(payload.get("call_id") or "autonomous-outline"),
++        }
++        if stream:
++            invoke_kwargs["stream"] = True
++        if stream_overall_timeout_seconds is not None:
++            invoke_kwargs["stream_overall_timeout_seconds"] = float(stream_overall_timeout_seconds)
++        if transport_observer is not None:
++            invoke_kwargs["transport_observer"] = transport_observer
++        raw = runtime.invoke_client(client, messages, **invoke_kwargs)
+         if raw_response_callback is not None:
+             raw_response_callback(raw)
+     else:
+diff --git a/tests/upgrade3/test_outline_strengthening.py b/tests/upgrade3/test_outline_strengthening.py
+index 96aa5e8..142da51 100644
+--- a/tests/upgrade3/test_outline_strengthening.py
++++ b/tests/upgrade3/test_outline_strengthening.py
+@@ -587,6 +587,90 @@ def test_on_demand_nested_record_points_to_selected_parent_without_duplicate_ful
+     assert model_payload["source_materials"][0]["sources"][0] == child
+ 
+ 
++def test_on_demand_same_identity_aliases_preserve_distinct_channel_records():
++    source = _source("P0002", extra="source-only detail")
++    candidate = {**source, "candidate_only_detail": "candidate retelling"}
++    tool = {
++        "source_handle": "P0002",
++        "paper_id": "paper-P0002",
++        "title": "Study P0002",
++        "usable_content": "Tool-only bounded retelling.",
++    }
++    payload = _payload(
++        source_materials=[source],
++        candidate_materials=[candidate],
++        tool_materials=[tool],
++    )
++    catalog = on_demand.build_material_catalog(payload)
++    trace = on_demand.resolve_material_requests(
++        payload,
++        catalog,
++        {
++            "status": "partial",
++            "material_requests": [{
++                "source_handle": "P0002",
++                "unit_ids": ["CH01_U01"],
++                "reason": "Read all supplied records for this study.",
++            }],
++        },
++    )
++    selected_ids = {row["access_id"] for row in trace["selected_materials"]}
++    assert selected_ids == {
++        "source_materials[0]",
++        "candidate_materials[0]",
++        "tool_materials[0]",
++    }
++    assert all(row["identity_aliases"] == sorted(selected_ids) for row in trace["selected_materials"])
++    owner = on_demand._owner_payload(payload, catalog, trace)
++    model_payload = on_demand._model_visible_payload(owner, catalog, trace)
++    assert model_payload["source_materials"][0]["extra"] == "source-only detail"
++    assert model_payload["candidate_materials"][0]["candidate_only_detail"] == "candidate retelling"
++    assert model_payload["tool_materials"][0]["usable_content"] == "Tool-only bounded retelling."
++    visible_ids = {
++        row["access_id"]
++        for row in model_payload["on_demand_material_access"]["resolved_materials"]
++    }
++    assert visible_ids == selected_ids
++
++
++def test_on_demand_identity_alias_group_rejects_conflicting_stable_fields():
++    first = _source("P0003")
++    second = {**_source("P0003"), "paper_id": "paper-P0003-other", "doi": "10.1000/conflict"}
++    incomplete = {"source_handle": "P0003", "title": "Incomplete locator"}
++    payload = _payload(source_materials=[incomplete, first, second])
++    catalog = on_demand.build_material_catalog(payload)
++    with pytest.raises(on_demand.OnDemandMaterialError, match="material_request_identity_conflict"):
++        on_demand.resolve_material_requests(
++            payload,
++            catalog,
++            {
++                "status": "partial",
++                "material_requests": [{
++                    "source_handle": "P0003",
++                    "unit_ids": ["CH01_U01"],
++                }],
++            },
++        )
++
++
++def test_on_demand_explicit_access_id_identity_mismatch_is_rejected():
++    payload = _payload(source_materials=[_source("P0004")])
++    catalog = on_demand.build_material_catalog(payload)
++    with pytest.raises(on_demand.OnDemandMaterialError, match="material_request_identity_conflict"):
++        on_demand.resolve_material_requests(
++            payload,
++            catalog,
++            {
++                "status": "partial",
++                "material_requests": [{
++                    "access_id": "source_materials[0]",
++                    "paper_id": "paper-other",
++                    "unit_ids": ["CH01_U01"],
++                }],
++            },
++        )
++
++
+ def test_on_demand_resolves_unselected_material_into_one_max_request_and_arrangement(tmp_path):
+     candidate = {
+         "source_handle": "P0002", "paper_id": "paper-P0002", "title": "Candidate evidence",
+@@ -632,6 +716,28 @@ def test_on_demand_resolves_unselected_material_into_one_max_request_and_arrange
+     assert view.units[0].substantive_point == "Changed point grounded in the resolved candidate"
+ 
+ 
++def test_on_demand_owner_stream_is_explicit_opt_in_and_preserves_contract():
++    payload = _payload()
++    owner_kwargs = []
++
++    def access_client(messages, **kwargs):
++        return {"content": json.dumps({"status": "no_change", "material_requests": []}), "complete": True, "finish_reason": "stop", "usage": {"prompt_tokens": 20, "completion_tokens": 8}}
++
++    def owner_client(messages, **kwargs):
++        owner_kwargs.append(kwargs)
++        return {"content": json.dumps({"status": "no_change", "chapter_updates": []}), "complete": True, "finish_reason": "stop", "usage": {"prompt_tokens": 30, "completion_tokens": 12}}
++
++    result = on_demand.run_on_demand_strengthening(
++        payload,
++        access_client=access_client, access_model="qwen3.5-plus", access_thinking_budget=32768, access_max_output_tokens=32768,
++        owner_client=owner_client, owner_model="qwen3.8-max", owner_thinking_budget=32768, owner_max_output_tokens=32768,
++        owner_stream=True, owner_stream_overall_timeout_seconds=3600,
++    )
++    assert result["status"] == "no_change"
++    assert owner_kwargs[0]["stream"] is True
++    assert owner_kwargs[0]["stream_overall_timeout_seconds"] == 3600
++
++
+ def test_on_demand_owner_can_request_one_continuation_and_no_change_is_valid():
+     payload = _payload(candidate_materials=[_source("P0002", extra="late material")])
+     owner_calls = []
+diff --git a/tests/upgrade3/test_qwen_effective_token_transport.py b/tests/upgrade3/test_qwen_effective_token_transport.py
+index d9630a6..fbae1f9 100644
+--- a/tests/upgrade3/test_qwen_effective_token_transport.py
++++ b/tests/upgrade3/test_qwen_effective_token_transport.py
+@@ -9,6 +9,7 @@ from __future__ import annotations
+ import importlib.util
+ import io
+ import json
++import gc
+ import sys
+ import tempfile
+ import unittest
+@@ -40,6 +41,25 @@ class FakeResponse:
+         pass
+ 
+ 
++class FakeStreamResponse:
++    status = 200
++    headers = {"x-request-id": "offline-stream-request", "content-type": "text/event-stream"}
++
++    def __init__(self, lines):
++        self.lines = []
++        for line in lines:
++            self.lines.extend(line.splitlines(keepends=True))
++
++    def readline(self):
++        return self.lines.pop(0) if self.lines else b""
++
++    def __enter__(self):
++        return self
++
++    def __exit__(self, *_args):
++        pass
++
++
+ class CaptureOpener:
+     def __init__(self, *, usage=None, finish_reason="stop", error=None):
+         self.bodies = []
+@@ -64,6 +84,16 @@ class CaptureOpener:
+         })
+ 
+ 
++class StreamOpener:
++    def __init__(self, lines):
++        self.lines = list(lines)
++        self.bodies = []
++
++    def open(self, request, timeout):
++        self.bodies.append(json.loads(request.data))
++        return FakeStreamResponse(self.lines)
++
++
+ class EffectiveTokenTransportTests(unittest.TestCase):
+     def setUp(self):
+         self.env_patch = patch.dict(runtime.os.environ, {"OPTOMIND_ECONOMY_TEXT_CEILING": "0"})
+@@ -103,6 +133,122 @@ class EffectiveTokenTransportTests(unittest.TestCase):
+                 self.assertEqual(effective["max_completion_tokens"], body["max_completion_tokens"])
+                 self.assertIsNone(effective["max_tokens"])
+                 self.assertTrue(result["complete"])
++                self.assertFalse(body["stream"])
++                self.assertNotIn("stream_options", body)
++
++    def test_opt_in_stream_preserves_answer_reasoning_usage_and_phase_audit(self):
++        lines = [
++            b'data: {"id":"stream-1","model":"qwen3.8-max","choices":[{"delta":{"reasoning_content":"check "},"finish_reason":null}]}\r\n\r\n',
++            b'data: {"id":"stream-1","choices":[{"delta":{"content":"{\\"ok\\":"},"finish_reason":null}]}\r\n\r\n',
++            b'data: {"id":"stream-1","choices":[{"delta":{"content":"true}"},"finish_reason":"stop"}]}\r\n\r\n',
++            b'data: {"id":"stream-1","choices":[],"usage":{"prompt_tokens":12,"completion_tokens":9,"completion_tokens_details":{"reasoning_tokens":2}}}\r\n\r\n',
++            b'data: [DONE]\r\n\r\n',
++        ]
++        # Keep the second event visibly valid after constructing it with a
++        # JSON round trip; the line above remains CRLF to exercise SSE parsing.
++        lines[1] = (b'data: ' + json.dumps({
++            "id": "stream-1", "choices": [{"delta": {"content": '{"ok":'}, "finish_reason": None}],
++        }, separators=(",", ":")).encode() + b"\r\n\r\n")
++        opener = StreamOpener(lines)
++        with tempfile.TemporaryDirectory() as temp:
++            events = []
++            client = runtime.QwenDirectClient(
++                model="qwen3.8-max", max_output_tokens=32768, thinking_budget=32768,
++                json_mode=False, raw_response_dir=Path(temp), timeout_seconds=30,
++            )
++            body, result = self.invoke(client, opener=opener, stream=True, transport_observer=events, call_id="stream-test")
++            self.assertTrue(body["stream"])
++            self.assertEqual(body["stream_options"], {"include_usage": True})
++            self.assertEqual(result["content"], '{"ok":true}')
++            self.assertEqual(result["reasoning_content"], "check ")
++            self.assertEqual(result["usage"]["prompt_tokens"], 12)
++            self.assertTrue(result["complete"])
++            self.assertEqual(result["finish_reason"], "stop")
++            self.assertEqual(result["normalized_response"]["choices"][0]["message"]["content"], '{"ok":true}')
++            self.assertTrue(any(event["stage"] == "response_opened" for event in events))
++            self.assertTrue(any(event["stage"] == "stream_first_byte" for event in events))
++            self.assertTrue(any(event["stage"] == "stream_complete" for event in events))
++            self.assertTrue(Path(result["raw_stream_path"]).exists())
++
++    def test_stream_error_event_preserves_partial_evidence_and_does_not_adopt(self):
++        opener = StreamOpener([
++            b'data: {"id":"stream-error","choices":[{"delta":{"content":"partial"},"finish_reason":null}]}\n\n',
++            b'data: {"error":{"code":"provider_busy"}}\n\n',
++        ])
++        with tempfile.TemporaryDirectory() as temp:
++            ledger = runtime.GlobalBudgetLedger(limit_cny=10)
++            client = runtime.QwenDirectClient(
++                model="qwen3.8-max", max_output_tokens=32768, thinking_budget=32768,
++                json_mode=False, raw_response_dir=Path(temp), budget_ledger=ledger,
++                prompt_token_counter=lambda *_: 100, max_retries=0,
++            )
++            with self.assertRaisesRegex(runtime.QwenTransportError, "qwen_stream_error_event") as caught:
++                self.invoke(client, opener=opener, stream=True, call_id="stream-error")
++            self.assertEqual(caught.exception.record["transport_phase"], "stream_event")
++            self.assertGreater(caught.exception.record["partial_content_bytes"], 0)
++            row = ledger.as_dict()["reservations"][0]
++            self.assertEqual(row["status"], "uncertain")
++            self.assertTrue(list(Path(temp).glob("*.sse.partial")))
++
++    def test_stream_socket_timeout_records_read_phase(self):
++        class TimeoutResponse(FakeStreamResponse):
++            def readline(self):
++                raise TimeoutError("offline timeout")
++
++        class TimeoutOpener(StreamOpener):
++            def open(self, request, timeout):
++                self.bodies.append(json.loads(request.data))
++                return TimeoutResponse([])
++
++        opener = TimeoutOpener([])
++        client = runtime.QwenDirectClient(model="qwen3.8-max", json_mode=False, max_retries=0)
++        with self.assertRaisesRegex(runtime.QwenTransportError, "qwen_stream_read_timeout") as caught:
++            self.invoke(client, opener=opener, stream=True, call_id="stream-timeout")
++        self.assertEqual(caught.exception.record["transport_phase"], "stream_read")
++
++    def test_stream_malformed_event_is_rejected_without_adoption(self):
++        opener = StreamOpener([b"data: {not-json}\r\n\r\n"])
++        with tempfile.TemporaryDirectory() as temp:
++            client = runtime.QwenDirectClient(
++                model="qwen3.8-max", json_mode=False, raw_response_dir=Path(temp), max_retries=0,
++            )
++            with self.assertRaisesRegex(runtime.QwenTransportError, "qwen_stream_event_not_json"):
++                self.invoke(client, opener=opener, stream=True, call_id="stream-malformed")
++            self.assertTrue(list(Path(temp).glob("*.sse.partial")))
++
++    def test_stream_observer_failure_does_not_fail_complete_response(self):
++        lines = [
++            b'data: {"id":"observer-ok","choices":[{"delta":{"content":"ok"},"finish_reason":"stop"}]}\n\n',
++            b'data: {"id":"observer-ok","choices":[],"usage":{"prompt_tokens":3,"completion_tokens":1}}\n\n',
++            b"data: [DONE]\n\n",
++        ]
++        opener = StreamOpener(lines)
++        def failing_observer(_event):
++            raise RuntimeError("audit sink unavailable")
++        client = runtime.QwenDirectClient(model="qwen3.8-max", json_mode=False, max_retries=0)
++        _, result = self.invoke(client, opener=opener, stream=True, transport_observer=failing_observer)
++        self.assertEqual(result["content"], "ok")
++        self.assertTrue(result["complete"])
++
++    def test_stream_audit_keeps_periodic_event_boundary(self):
++        lines = [
++            (b'data: ' + json.dumps({
++                "id": "periodic", "choices": [{"delta": {"content": "x"}, "finish_reason": None}],
++            }, separators=(",", ":")).encode() + b"\n\n")
++            for _ in range(130)
++        ]
++        lines.extend([
++            b'data: {"id":"periodic","choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
++            b'data: {"id":"periodic","choices":[],"usage":{"prompt_tokens":3,"completion_tokens":131}}\n\n',
++            b"data: [DONE]\n\n",
++        ])
++        opener = StreamOpener(lines)
++        events = []
++        client = runtime.QwenDirectClient(model="qwen3.8-max", json_mode=False, max_retries=0)
++        _, result = self.invoke(client, opener=opener, stream=True, transport_observer=events)
++        self.assertEqual(len(result["content"]), 130)
++        self.assertTrue(any(event.get("event_count") == 128 for event in events))
++        self.assertTrue(any(event["stage"] == "stream_complete" for event in events))
+ 
+     def test_max_strong_profile_is_not_artificially_capped_at_32768(self):
+         client = runtime.QwenDirectClient(model="qwen3.8-max", max_output_tokens=65_536, thinking_budget=32_768)
+@@ -175,12 +321,15 @@ class EffectiveTokenTransportTests(unittest.TestCase):
+                 budget_ledger=ledger, prompt_token_counter=lambda *_: 100,
+             )
+             _, result = self.invoke(client)
+-            row = runtime.GlobalBudgetLedger(path=path).as_dict()["reservations"][0]
++            reopened = runtime.GlobalBudgetLedger(path=path)
++            row = reopened.as_dict()["reservations"][0]
+             self.assertAlmostEqual(row["amount_cny"], (100 * 12 + 98_304 * 36) / 1_000_000)
+             self.assertEqual(row["telemetry"]["effective_request"], result["effective_request"])
+             self.assertEqual(row["telemetry"]["cap_pressure"], result["cap_pressure"])
+             self.assertEqual(row["status"], "settled")
+             self.assertNotIn("offline-placeholder", json.dumps(row))
++            del reopened
++            gc.collect()
+ 
+     def test_missing_usage_keeps_full_reservation_and_request_metadata(self):
+         ledger = runtime.GlobalBudgetLedger(limit_cny=10)

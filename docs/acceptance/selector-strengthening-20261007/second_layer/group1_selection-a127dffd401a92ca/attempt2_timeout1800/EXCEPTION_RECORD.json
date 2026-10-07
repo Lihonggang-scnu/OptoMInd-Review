@@ -1,0 +1,72 @@
+{
+  "record_kind": "posthoc_transport_failure_record",
+  "created_at_epoch": 1791317300.4060268,
+  "attempt_id": "attempt2_timeout1800",
+  "process": {
+    "pid": 42204,
+    "exited": true,
+    "transport_timeout_seconds": 1800.0,
+    "max_retries": 0
+  },
+  "call": {
+    "owner_call_id": "outline-selection:selection-a127dffd401a92ca:Ch1:owner:recovery1800",
+    "access_call_id": "outline-selection:selection-a127dffd401a92ca:Ch1:access:recovery1800",
+    "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+    "transport": "urllib.build_opener(ProxyHandler({})); non_streaming; response.read() before status/headers persistence"
+  },
+  "exception_from_driver": {
+    "error_type": "QwenTransportError",
+    "error": "qwen_transport_error",
+    "attempt_id": "attempt2_timeout1800",
+    "transport_timeout_seconds": 1800.0,
+    "access_call_id": "outline-selection:selection-a127dffd401a92ca:Ch1:access:recovery1800",
+    "owner_call_id": "outline-selection:selection-a127dffd401a92ca:Ch1:owner:recovery1800"
+  },
+  "exception_from_stderr": {
+    "type": "UnboundLocalError",
+    "message": "packet_path was not initialized on the exception path; this wrapper bug occurred after the owner transport exception",
+    "sha256": "b678b08c57d234fcfe9f2daaabdff2adbddb49d5d6202f3b7233249d2a8ef9f1"
+  },
+  "ledger_owner_row": {
+    "reservation_id": "res-9cde6a09cf714811",
+    "call_id": "outline-selection:selection-a127dffd401a92ca:Ch1:owner:recovery1800:key0:attempt0",
+    "reserved_cny": 6.037356,
+    "actual_cny": null,
+    "status": "uncertain",
+    "returned_model": null,
+    "finish_reason": null,
+    "request_id": null,
+    "status_code": null,
+    "provider_error_code": "QwenTransportError:TimeoutError",
+    "raw_response_sha256": null,
+    "usage_json": null,
+    "request_metadata_json": "{\"effective_request\":{\"answer_tokens\":32768,\"enable_thinking\":true,\"mapped_reasoning_effort\":\"xhigh\",\"max_completion_tokens\":65536,\"max_tokens\":null,\"model\":\"qwen3.8-max\",\"response_format\":null,\"thinking_budget\":32768,\"total_output_tokens\":65536}}"
+  },
+  "transport_observed": {
+    "outer_error": "QwenTransportError",
+    "reason_code": "TimeoutError",
+    "provider_error_code": "QwenTransportError:TimeoutError",
+    "status_code": null,
+    "request_id": null,
+    "raw_response_sha256": null,
+    "usage": null,
+    "response_headers_observed": false,
+    "response_body_observed": false
+  },
+  "phase_diagnostics": {
+    "connect_open_read_phase": "unknown",
+    "first_byte_time": "not_recorded",
+    "why": "Current client only records response status/headers after response.read() returns. The bounded exception record retains class/reason and effective request but not socket phase or partial bytes. No provider error/status was observed."
+  },
+  "preserved_files": {
+    "stderr": "<LOCAL_PATH_REDACTED>",
+    "exception_json": "<LOCAL_PATH_REDACTED>",
+    "ledger_after": "<LOCAL_PATH_REDACTED>",
+    "owner_sent_request": "<LOCAL_PATH_REDACTED>"
+  },
+  "driver_patch": {
+    "file": "<LOCAL_PATH_REDACTED>",
+    "change": "packet_path initialized before try so exception report can be written",
+    "sha256_after_patch": "7de4f6afd06b53d02c606eba929e8d3a5aa19e902b1306621630cd0698199449"
+  }
+}
