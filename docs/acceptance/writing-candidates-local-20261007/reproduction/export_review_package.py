@@ -110,7 +110,7 @@ def export_route(name: str):
         prefix = f"runs/{name}/{label}"
         if (path / "MESSAGES.json").exists():
             export_messages(path / "MESSAGES.json", prefix + "/MESSAGES_PUBLIC_PROJECTION.json")
-        for filename in ["ACTUAL_REQUEST.json", "REQUEST.json", "USAGE.json"]:
+        for filename in ["ACTUAL_REQUEST.json", "REQUEST.json", "USAGE.json", "ERROR.json", "RESULT.json"]:
             if (path / filename).exists():
                 json_projection(path / filename, prefix + "/" + filename, "Effective parameters, request signature, capacity/usage")
         if (path / "RAW_RESPONSE.json").exists():
@@ -127,6 +127,12 @@ def export_route(name: str):
             original = path / "BODY.md"
             write(prefix + "/BODY.md", original.read_bytes(), origin=original, purpose="Original parsed stage body")
     for run in sorted(source.glob("runs/*")):
+        for original in sorted((run / "plans").rglob("*.json")):
+            relative = f"runs/{name}/{run.name}/plans/" + str(original.relative_to(run / "plans")).replace('\\', '/')
+            if original.name == "MESSAGES.json":
+                export_messages(original, relative.replace("MESSAGES.json", "MESSAGES_PUBLIC_PROJECTION.json"))
+            else:
+                json_projection(original, relative, "Offline preparation/preview, not an executed paid stage; paper-text fields withheld")
         for filename in ["DRAFT_BODY.md", "CHAPTER_BODY.md", "DRAFT_RESULT.json", "CHAPTER_RESULT.json", "IMPLEMENTATION_REPORT.json", "RUN_MANIFEST.json"]:
             origin = run / filename
             if not origin.exists():
@@ -152,7 +158,7 @@ def main():
                 raise ValueError("Prior manifest path escapes public directory")
             if old.is_file() and sha(old.read_bytes()) == record.get("sha256"):
                 old.unlink()
-    for filename in ["USER_SCOPE.md", "ROOT_REVIEW_A.md", "ROOT_REVIEW_B.md", "ROOT_REVIEW_PLUS_REASONING.md", "ROOT_REVIEW_MAX.md", "FINAL_REVIEW.md"]:
+    for filename in ["USER_SCOPE.md", "PREPARED.md", "ROOT_REVIEW_A.md", "ROOT_REVIEW_B.md", "ROOT_REVIEW_PLUS_REASONING.md", "ROOT_REVIEW_MAX.md", "FINAL_REVIEW.md", "offline_acceptance.log"]:
         original = ROOT / filename
         if original.exists():
             write("records/" + filename, original.read_bytes(), origin=original, purpose="Human authorization or independent review; never model input")
@@ -168,7 +174,7 @@ def main():
         write("reproduction/" + filename, original.read_bytes(), origin=original, purpose="Local archival/accounting helper source; paths refer to the preserved original local run root")
     original = next((ROOT / "chapter_live/inputs").glob("*/CHAPTER_INPUT.json"))
     json_projection(original, "inputs/CHAPTER_INPUT_PUBLIC_PROJECTION.json", "Adopted complete chapter/tasks and model-generated A/B summaries; reading text omitted by hash")
-    for route in ["chapter_live", "units_edit_live", "units_edit_live_after_timeout_fix", "units_reasoning_edit_live", "selective_max_live", "second_chapter_live"]:
+    for route in ["chapter_live", "units_edit_live", "units_edit_live_after_timeout_fix", "units_reasoning_edit_live", "selective_max_live", "second_chapter_live", "chapter_preview", "units_edit_preview", "hierarchical_preview", "units_edit_plus_reasoning_preview"]:
         export_route(route)
     for name in ["B_STOP_REPORT.json", "B_STOP_RECORD.json", "UNIT_002_PARTIAL_INSPECTION.json", "UNIT_002_PARTIAL_RESULT.json", "UNIT_002_PARTIAL_BODY.md", "B_STOP_FINANCE_CORRECTION.json", "B_LEDGER_CORRECTION.json", "TIMEOUT_FIX_VERIFICATION.json"]:
         original = ROOT / "units_edit_live" / name

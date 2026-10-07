@@ -15,6 +15,8 @@
 
 `runs/` 保留独立运行和原始模型输出 `MODEL_RETURN.json`、actual request、usage、完整阶段/缓存/尝试路径。不要把旧失败报告、初稿、编辑稿或顶层最新选择混读。
 
+补齐了 `*_preview` 离线准备记录及原始 [124 项基线检查日志](records/offline_acceptance.log)、[启动准备快照](records/PREPARED.md)。修后 126 项候选检查及 23 项超时控制记录在 `runs/units_edit_live/cancelled/TIMEOUT_FIX_VERIFICATION.json`。预览与录制回放没有新增模型调用；其中未完成或 placeholder 返回不是科学质量结果。预算和采用结果请以最终报告为准，不以启动快照中的旧余额为准。
+
 ## 锁定代码与输入
 
 - 云端基线 `fe2f1c2adde414e71341287845d0520325e602c6`。
