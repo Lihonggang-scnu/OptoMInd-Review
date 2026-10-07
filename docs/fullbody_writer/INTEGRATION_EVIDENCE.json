@@ -1,0 +1,210 @@
+{
+  "schema_version": "optomind.fullbody_integration_evidence.v1",
+  "date": "2026-10-07",
+  "scope": "Independent offline input, CLI, runtime, parser, cache, filesystem and transport integration",
+  "paid_provider_calls": 0,
+  "new_scientific_quality_trial": false,
+  "credentials_read": false,
+  "verification": {
+    "independent_integration": {
+      "command": "python -m pytest tests/upgrade3/test_fullbody_integration.py -q",
+      "result": "17 passed in 7.78s"
+    },
+    "targeted_regression": {
+      "command": "python -m pytest tests/upgrade3/test_fullbody_integration.py tests/upgrade3/test_fullbody_contracts.py tests/upgrade3/test_fullbody_engine.py tests/upgrade3/test_fullbody_cli.py tests/upgrade3/test_writer_candidates_contracts.py tests/upgrade3/test_writer_candidates_engine.py tests/upgrade3/test_writer_candidates_cli.py tests/upgrade3/test_writer_candidates_integration.py tests/upgrade3/test_qwen_effective_token_transport.py -q",
+      "result": "271 passed, 10 subtests passed in 12.06s",
+      "latest_engine_changes_included": "Reader diagnostics with one invalid location do not prevent valid independent issues from being processed; all focused suites rerun after the implementation update"
+    },
+    "baseline_upgrade3_before_implementation": {
+      "command": "python -m pytest tests/upgrade3 -q",
+      "result": "17 failed, 1616 passed, 10 subtests passed in 73.38s",
+      "existing_failure_groups": {
+        "material_catalog_source_supplied_locators_key_error": 5,
+        "absent_private_legacy_output_fixtures": 11,
+        "hardcoded_windows_working_directory": 1
+      },
+      "failed_tests": [
+        "tests/upgrade3/test_material_visibility_catalog.py::test_semantic_material_visible_after_long_method_in_actual_messages[Optical response peaks at 820 nm-Only for the measured polarization]",
+        "tests/upgrade3/test_material_visibility_catalog.py::test_semantic_material_visible_after_long_method_in_actual_messages[Clinical response differs between arms-Adults in the randomized cohort only]",
+        "tests/upgrade3/test_material_visibility_catalog.py::test_semantic_material_visible_after_long_method_in_actual_messages[Historical accounts disagree on the date-Only the surviving archive was reviewed]",
+        "tests/upgrade3/test_material_visibility_catalog.py::test_atomic_findings_never_cut_and_omitted_records_are_requestable",
+        "tests/upgrade3/test_material_visibility_catalog.py::test_generous_locator_retains_complete_multikilobyte_finding_and_full_b",
+        "tests/upgrade3/test_review_delivery_editing.py::test_text_edit_stage_applies_fixture_to_real_draft",
+        "tests/upgrade3/test_review_delivery_editing.py::test_text_edit_second_run_is_no_change",
+        "tests/upgrade3/test_review_delivery_editing.py::test_front_back_updates_existing_parts_and_inserts_missing",
+        "tests/upgrade3/test_review_delivery_editing.py::test_front_back_inserts_all_parts_into_plan_draft",
+        "tests/upgrade3/test_review_delivery_editing.py::test_intro_repeat_runs_do_not_accumulate",
+        "tests/upgrade3/test_review_delivery_editing.py::test_intro_changed_version_keeps_only_new",
+        "tests/upgrade3/test_review_delivery_editing.py::test_intro_located_by_role_when_title_lacks_the_word",
+        "tests/upgrade3/test_review_delivery_entry.py::test_harness_parser_has_delivery_branch_and_help_is_offline",
+        "tests/upgrade3/test_review_delivery_figures_citations.py::test_real_draft_map_and_reader_rendering",
+        "tests/upgrade3/test_review_delivery_figures_citations.py::test_stage_cross_refs_captions_and_map_all_agree",
+        "tests/upgrade3/test_review_delivery_integration.py::test_history_full_chain_via_cli_subprocess",
+        "tests/upgrade3/test_review_delivery_integration.py::test_plan_restricted_chain_via_entry"
+      ]
+    },
+    "broad_final_suite": "Run and reported separately by the coordinating engineer; targeted tests are not a full-suite claim"
+  },
+  "controlled_short_chains": [
+    "Three approved chapters use the production arranger CLI, full chapter material builder, manifest loader, runtime, parser and saved artifacts",
+    "whole_author creates one complete BODY in one recorded call; continuous_author passes actual accepted prose to each next call",
+    "workbench keeps recent exact prose, retrieves requested distant prose and full source material, and preserves each retrieved scientific record once",
+    "Fresh reader receives the complete original BODY and original question, request and target reader, without author materials or self-evaluation",
+    "Exact reader patches preserve every other byte; revised segments, saved reread files and SHA256 agree with the revised BODY",
+    "All four routes resume without new calls; rerunning a cached base does not charge a repeated reader or reviser call",
+    "Actual Qwen serializer, SSE parser and temporary SQLite shared ledger forward writer, reader and reviser model profiles, thinking and answer ceilings, stream flags and timeouts; only credential and HTTP boundaries are substituted",
+    "Incomplete transport retains useful prose and immutable raw responses, does not implicitly retry, and accepts only an explicit retry",
+    "Raw response recovery reparses saved bytes without a call; changed scientific material, task, profile or prompt invalidates relevant cache",
+    "Failed or capacity-blocked replacements preserve the previous valid selected BODY",
+    "Prepared manifests pin actual cards and plan files; a locally shortened chapter list cannot override the complete approved plan",
+    "Valid locator cards add complete material; unavailable foreign Windows locators keep inline A/B with diagnostics; wrong-identity cards do not import unrelated science",
+    "Explicit aliases spanning old chapter-local canonical handles reconcile only when stable publication identity agrees; complementary records remain available and true conflicts still reject"
+  ],
+  "historical_replay": {
+    "two_chapter_rebuild": "Ch1 quality-capacity public arrangement/materials and Ch2 published owner response/outline were rebuilt through production input builders; new prose is controlled and these two archives are not presented as an original complete approved plan",
+    "original_ch2_paid_prose": "The original malformed-quote chapter response is parsed through its historical blocks contract; the unchanged paid prose is then tested in the new fullbody envelope with the same recoverable literal-quote failure. This adapts the envelope only, not prose or scientific content",
+    "seven_chapter_public_input": "Exact published BODY40 plan and seven writer packets are decompressed to a temporary directory; explicit archived repaired arrangements and views are read without source-path guessing or upstream edits. Missing private locators stay unavailable. Complete-scope CLI preflight is a permanent integration test",
+    "preflight_results": {
+      "whole_author": {
+        "execution_mode": "preview",
+        "status": "preview",
+        "model_calls": 0,
+        "actual_chapter_ids": [
+          "Ch1",
+          "Ch2",
+          "Ch3",
+          "Ch4",
+          "Ch5",
+          "Ch6",
+          "Ch7"
+        ],
+        "units": 29,
+        "tasks": 91,
+        "exact_source_records": 288,
+        "unified_source_identities": 222,
+        "source_files_present": 22,
+        "source_files_unavailable": 226,
+        "missing_original_context_fields": [
+          "user_request",
+          "target_reader"
+        ],
+        "stages": [
+          {
+            "stage_id": "author_whole",
+            "status": "capacity_blocked",
+            "task_count": 91,
+            "estimate": {
+              "prompt_tokens": 4087401,
+              "method": "utf8_conservative_upper_bound",
+              "multiplier": 1.0,
+              "framing_margin": 0,
+              "reserved_input_tokens": 4087401,
+              "input_limit_tokens": 934464,
+              "completion_allowance_tokens": 65536,
+              "context_window": 1000000,
+              "fits": false,
+              "estimated_max_cost_cny": 17.922468,
+              "wire_request_sha256": "d227ad9fefe834aba829c70f99b54169f73e8e1d0e2d1d3ad215893023062fc9",
+              "wire_parameters": {
+                "model": "qwen3.5-plus",
+                "max_completion_tokens": 65536,
+                "temperature": 0.1,
+                "enable_thinking": true,
+                "stream": true,
+                "stream_options": {
+                  "include_usage": true
+                },
+                "thinking_budget": 16384
+              }
+            }
+          }
+        ]
+      },
+      "continuous_author": {
+        "execution_mode": "preview",
+        "status": "preview",
+        "model_calls": 0,
+        "actual_chapter_ids": [
+          "Ch1",
+          "Ch2",
+          "Ch3",
+          "Ch4",
+          "Ch5",
+          "Ch6",
+          "Ch7"
+        ],
+        "units": 29,
+        "tasks": 91,
+        "exact_source_records": 288,
+        "unified_source_identities": 222,
+        "source_files_present": 22,
+        "source_files_unavailable": 226,
+        "missing_original_context_fields": [
+          "user_request",
+          "target_reader"
+        ],
+        "stages": [
+          {
+            "stage_id": "author_001",
+            "status": "capacity_blocked",
+            "task_count": 1,
+            "estimate": {
+              "prompt_tokens": 1047258,
+              "method": "utf8_conservative_upper_bound",
+              "multiplier": 1.0,
+              "framing_margin": 0,
+              "reserved_input_tokens": 1047258,
+              "input_limit_tokens": 934464,
+              "completion_allowance_tokens": 65536,
+              "context_window": 1000000,
+              "fits": false,
+              "estimated_max_cost_cny": 5.761896,
+              "wire_request_sha256": "9453be8715e31e3d41917220735ea2f44d71b3d3b2a9c2d559c94b7742410614",
+              "wire_parameters": {
+                "model": "qwen3.5-plus",
+                "max_completion_tokens": 65536,
+                "temperature": 0.1,
+                "enable_thinking": true,
+                "stream": true,
+                "stream_options": {
+                  "include_usage": true
+                },
+                "thinking_budget": 16384
+              }
+            }
+          }
+        ]
+      }
+    },
+    "capacity_interpretation": "These preflights used UTF-8-byte upper bounds because a local tokenizer asset was absent. Whole-BODY and first-atom continuation are blocked by that conservative meter. This does not establish actual provider-token overcapacity. An explicit local tokenizer is needed before meaningful live capacity or cost decisions",
+    "P0584_alias": "P0584 and P0333 have an explicit alias relation and DOI 10.3389/fimmu.2026.1803970 across chapter scopes; global identity now resolves P0584 to P0333 without changing original material records"
+  },
+  "serialization_overhead": {
+    "measurement": "Compact UTF-8 JSON bytes, not actual provider tokens or paid input",
+    "historical_ch2": {
+      "prior_chapter_payload_bytes": 393532,
+      "fullbody_payload_bytes": 408388,
+      "overhead_fraction": 0.03775042436193243,
+      "regression_limit_fraction": 0.1
+    },
+    "historical_seven_chapters": {
+      "sum_prior_chapter_payload_bytes": 3321270,
+      "fullbody_payload_bytes": 3418070,
+      "overhead_fraction": 0.029145477483011106
+    },
+    "preservation": "Exact selected task bodies and scientific source records remain complete; savings come from navigation references and keeping provenance on disk"
+  },
+  "evidence_boundaries": [
+    "No new real model prose, scientific-quality ranking or paid route winner is established",
+    "Public historical exports do not restore missing private cards, raw requests or other omitted material",
+    "Controlled HTTP/SSE and SQLite reservations validate transport/accounting wiring; they are not external service calls or actual charges",
+    "No retrieval or directed-reading store is replaced by an upper-layer fake or claimed tested by these fullbody tests"
+  ],
+  "source_hashes": {
+    "tests/upgrade3/test_fullbody_integration.py": "58d20293e727a84c1c8715ef318a87309dccaa23a3ea4fb8b9889d8bb0ef28db",
+    "docs/acceptance/writing-candidates-local-20261007/inputs/CHAPTER_INPUT_PUBLIC_PROJECTION.json": "35c2088de93c950c93eb59161653b6ef42aa2a8bb3f188ae0c3fbf860ffd5f5e",
+    "docs/acceptance/body40-20261005/planning/DETAILED_REVIEW_PLAN.json.gz": "b8ae191df3c0f517f89da059095035656397a28eafc4bb02d0f484aa7a65ef40",
+    "docs/verification/on-demand-efficiency-20261007/integration_handoff/OWNER_RESPONSE.json": "8b4bf8c23d9d2369af2c086592ec0d8b0c37029d2af3aeb92d43f0c0a8abcd28",
+    "docs/acceptance/quality-capacity-20261006/evidence/04_approved_arrangement.json": "58e5924ce8ed939a7ef0ca8da5f961dc13f56e4597dd0f17fcc011daee9173cc"
+  }
+}

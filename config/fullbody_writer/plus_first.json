@@ -1,0 +1,40 @@
+{
+  "schema_version": "optomind.fullbody_writer_config.v1",
+  "purpose": "Default Plus-first whole-BODY profile. Every author, reader and reviser uses Plus, 16,384 thinking plus 49,152 answer tokens, 65,536 combined. No hidden editor or automatic model change. Capacities are not length targets. Stream idle timeout is 900 seconds and total timeout is 3,600 seconds. Paid calls require --run and one shared finite CNY ledger; --budget-limit is an absolute lifetime cap, not added credit.",
+  "writer": {
+    "model": "qwen3.5-plus",
+    "thinking": true,
+    "thinking_budget": 16384,
+    "max_output_tokens": 49152,
+    "json_mode": false,
+    "timeout_seconds": 900,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "reader": {
+    "model": "qwen3.5-plus",
+    "thinking": true,
+    "thinking_budget": 16384,
+    "max_output_tokens": 49152,
+    "json_mode": false,
+    "timeout_seconds": 900,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "reviser": {
+    "model": "qwen3.5-plus",
+    "thinking": true,
+    "thinking_budget": 16384,
+    "max_output_tokens": 49152,
+    "json_mode": false,
+    "timeout_seconds": 900,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  }
+}

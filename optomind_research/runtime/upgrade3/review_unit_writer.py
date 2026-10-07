@@ -409,9 +409,16 @@ def _read_card_material(
     """
 
     target = Path(path)
-    if not target.is_file():
-        raise UnitWritingError("locator_file_missing:" + str(target))
-    text = target.read_text(encoding="utf-8", errors="replace")
+    try:
+        if not target.is_file():
+            raise UnitWritingError("locator_file_missing:" + str(target))
+        text = target.read_text(encoding="utf-8", errors="replace")
+    except OSError as exc:
+        # A foreign-platform or inaccessible optional card must not discard
+        # usable inline evidence. The caller records this locator diagnostic.
+        raise UnitWritingError(
+            "locator_file_unreadable:" + str(target) + ":" + type(exc).__name__
+        ) from exc
     try:
         payload = json.loads(text)
     except ValueError:

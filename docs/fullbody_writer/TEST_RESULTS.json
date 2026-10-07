@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-07",
+  "base_commit": "80180d9c6fc975e9dfa3430adcfd3a89b361697a",
+  "focused_tests": {
+    "command": "python -m pytest -q tests/upgrade3/test_fullbody_contracts.py tests/upgrade3/test_fullbody_engine.py tests/upgrade3/test_fullbody_cli.py tests/upgrade3/test_fullbody_integration.py",
+    "result": "122 passed in 8.90s"
+  },
+  "full_suite": {
+    "command": "python -m pytest -q tests/upgrade3 --tb=short",
+    "result": "17 failed, 1738 passed, 10 subtests passed in 79.60s (0:01:19)",
+    "baseline_result": "17 failed, 1616 passed, 10 subtests passed",
+    "failure_set_unchanged": true,
+    "failures": [
+      "tests/upgrade3/test_material_visibility_catalog.py::test_semantic_material_visible_after_long_method_in_actual_messages[Optical response peaks at 820 nm-Only for the measured polarization]",
+      "tests/upgrade3/test_material_visibility_catalog.py::test_semantic_material_visible_after_long_method_in_actual_messages[Clinical response differs between arms-Adults in the randomized cohort only]",
+      "tests/upgrade3/test_material_visibility_catalog.py::test_semantic_material_visible_after_long_method_in_actual_messages[Historical accounts disagree on the date-Only the surviving archive was reviewed]",
+      "tests/upgrade3/test_material_visibility_catalog.py::test_atomic_findings_never_cut_and_omitted_records_are_requestable",
+      "tests/upgrade3/test_material_visibility_catalog.py::test_generous_locator_retains_complete_multikilobyte_finding_and_full_b",
+      "tests/upgrade3/test_review_delivery_editing.py::test_text_edit_stage_applies_fixture_to_real_draft",
+      "tests/upgrade3/test_review_delivery_editing.py::test_text_edit_second_run_is_no_change",
+      "tests/upgrade3/test_review_delivery_editing.py::test_front_back_updates_existing_parts_and_inserts_missing",
+      "tests/upgrade3/test_review_delivery_editing.py::test_front_back_inserts_all_parts_into_plan_draft",
+      "tests/upgrade3/test_review_delivery_editing.py::test_intro_repeat_runs_do_not_accumulate",
+      "tests/upgrade3/test_review_delivery_editing.py::test_intro_changed_version_keeps_only_new",
+      "tests/upgrade3/test_review_delivery_editing.py::test_intro_located_by_role_when_title_lacks_the_word",
+      "tests/upgrade3/test_review_delivery_entry.py::test_harness_parser_has_delivery_branch_and_help_is_offline",
+      "tests/upgrade3/test_review_delivery_figures_citations.py::test_real_draft_map_and_reader_rendering",
+      "tests/upgrade3/test_review_delivery_figures_citations.py::test_stage_cross_refs_captions_and_map_all_agree",
+      "tests/upgrade3/test_review_delivery_integration.py::test_history_full_chain_via_cli_subprocess",
+      "tests/upgrade3/test_review_delivery_integration.py::test_plan_restricted_chain_via_entry"
+    ]
+  },
+  "compileall": "passed",
+  "diff_check": "passed",
+  "paid_provider_calls": 0,
+  "changed_algorithm_scope": "new optional full-BODY writers; one existing optional-card OSError boundary",
+  "source_sha256": {
+    "optomind_research/runtime/upgrade3/fullbody_contracts.py": "d151efec40222e6a40a5084fcbb06941a9ce02adcf1bc3fa3e8630e9764f9c87",
+    "optomind_research/runtime/upgrade3/fullbody_writer.py": "5576898cb460c0319b5c13e2925b3177893ff34986df64c574902a3bcf9658a3",
+    "optomind_research/runtime/upgrade3/review_unit_writer.py": "851dbc368ffce5aef8a6c646c762f66242cd38bffc2cae21db70f6f648425266",
+    "scripts/upgrade3/fullbody_writer.py": "cfe06c2b8643088cf08e58be16c7ed2c0503b508c254b5dd63d6afeb0a0321c9",
+    "prompts/fullbody_writer/continuous_author.md": "d3ee9154f739ae7be90bd9d37d09386624b857c7864afd0ccdc8e60aba15fc7d",
+    "prompts/fullbody_writer/reader.md": "da83e7cf9ff29209571d3ea151e480cc44817c74357761f612cac33b7a47ec96",
+    "prompts/fullbody_writer/revision.md": "37845a70dd99a9fc32c558d177c0925c3d9f4fde7ac7f5544c85bcfb707dc0e5",
+    "prompts/fullbody_writer/whole_author.md": "d81c9257c7019937cf3d6868871768b890a0423b92273ad201ddd765e35fd2f7",
+    "prompts/fullbody_writer/workbench.md": "c97d0da27d98b4e72859f1fe0139a22fe41167ae80aedf09ff2505b49459462b",
+    "prompts/fullbody_writer/writer.md": "467e33737e1e0b289b22e55772cdc0433f3aae0a125b4631675f1d00d641249c",
+    "config/fullbody_writer/economy_flash.json": "57384046eccf9582d7c1fcfa9cc5a80af9c578b64ff212f174057b3946c003b9",
+    "config/fullbody_writer/plus_first.json": "e5be5ac04418ff64a4c774e0c39df126aea13a49ebd6501b79ddd3f874ea80d3",
+    "config/fullbody_writer/plus_reasoning.json": "435fe5a46ab6350acf7512dfe2e733c2be03b9fcac0794edfbb49dd7d5e12d4a",
+    "config/fullbody_writer/selective_max.json": "62910b97f7572f52fc12fe49643eec2e3f26abd3d4124df7b416c588b2dee0ea",
+    "tests/upgrade3/test_fullbody_cli.py": "0104d69d6cba8c41b3f1137d067b5e395d768151d01450049088a3118c46d57c",
+    "tests/upgrade3/test_fullbody_contracts.py": "3c74652ab8ef3cca016c1bd81614a1543a12417d241bf921e440b3dc273fbd39",
+    "tests/upgrade3/test_fullbody_engine.py": "45fd65a788966c6322bd76762246fb32060bd08395e1fd468558a1265716e39d",
+    "tests/upgrade3/test_fullbody_integration.py": "58d20293e727a84c1c8715ef318a87309dccaa23a3ea4fb8b9889d8bb0ef28db"
+  }
+}

@@ -13,6 +13,7 @@
 | BODY 逐级规划 | 问题、PLAN、A/B、精读/补充 → 章级任务与细纲 | `runtime/upgrade3/progressive_review_plan.py`；`scripts/upgrade3/progressive_review_plan.py` |
 | 编排 | 已形成的知识任务与来源 → 顺序、拆合及 writer 输入 | `runtime/upgrade3/chapter_arrangement.py`；同名 CLI |
 | 写作/补写 | 实际任务与材料 → 单元正文、引用与未决报告 | `runtime/upgrade3/review_unit_writer.py`；同名 CLI |
+| 可选全文写作候选 | 完整批准细纲、全部章节编排与材料 → 一次成文/连续作者/长文工作台/读者修订的完整 BODY | `runtime/upgrade3/fullbody_writer.py`、`fullbody_contracts.py`；`scripts/upgrade3/fullbody_writer.py`，见 [说明](../fullbody_writer/README.md) |
 | 全文装配 | 选定批次和单元结果 → BODY 与交付状态 | `scripts/upgrade3/full_review_draft.py`、`runtime/upgrade3/review_delivery.py` |
 | 独立首尾 | 已完成 BODY、上下文/材料 → 后置职责构思、首尾与题名 | `serial_manuscript_parts.py`、`serial_parts_application.py`；`scripts/upgrade3/manuscript_parts.py` |
 | 局部修订实验 | 固定正文、细纲、材料 → A/B/C 独立候选与评价 | `post_body_revision*.py`；`scripts/upgrade3/post_body_revision.py` 与 `evaluate_post_body_revision.py` |
@@ -37,3 +38,5 @@
 - BODY40 实际顺序：`docs/acceptance/body40-20261005/RECOVERY_AND_STAGE_ORDER.md`
 
 历史文件中的“下一步”“已通过”只针对其当时范围。当前目录的说明也不替代源码核查和真实科学质量验收。
+
+当前全文候选以全部批准 BODY 章节为交付范围；历史单章 `writer_candidates.py` 保留作局部工具与对照。连续路线每次消费真实已写正文，所需调用与恢复均显式记录；全文独立首尾仍在 BODY 完成之后。
