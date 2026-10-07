@@ -22,7 +22,7 @@ from typing import Any, Mapping
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
-DEFAULT_CONFIG = PROJECT_ROOT / "config/writer_candidates/quality.json"
+DEFAULT_CONFIG = PROJECT_ROOT / "config/writer_candidates/balanced.json"
 DEFAULT_TOKENIZER = PROJECT_ROOT / "data/tokenizers/qwen3_5_9b/tokenizer.json"
 PROFILE_FIELDS = {
     "model", "thinking", "thinking_budget", "max_output_tokens", "json_mode",
@@ -153,6 +153,17 @@ class RecordingFactory:
         return replay
 
 
+def _require_max_permission(args: argparse.Namespace, profiles: Mapping[str, Mapping[str, Any]]) -> None:
+    """Reject an unapproved Max role before any live provider or ledger work."""
+    if not args.run or getattr(args, "allow_max", False):
+        return
+    max_roles = [role for role, profile in profiles.items()
+                 if "-max" in str(profile.get("model", "")).strip().lower()]
+    if max_roles:
+        raise ValueError("max_execution_requires_allow_max:" + ",".join(max_roles)
+                         + ":pass --allow-max only for an explicitly approved Max run")
+
+
 def make_live_factory(args: argparse.Namespace, *, token_counter=None):
     """Create one lazy shared-ledger factory; no keys are read here."""
     if not args.run or args.responses:
@@ -169,6 +180,7 @@ def make_live_factory(args: argparse.Namespace, *, token_counter=None):
 
     def factory(role: str, stage_dir: Path, profile: Mapping[str, Any]):
         nonlocal ledger
+        _require_max_permission(args, {role: profile})
         from optomind_research.runtime.upgrade3.module4.runtime import GlobalBudgetLedger, QwenDirectClient
         if ledger is None:
             ledger = GlobalBudgetLedger(limit_cny=limit, path=ledger_path)
@@ -219,6 +231,7 @@ def parser() -> argparse.ArgumentParser:
     mode = p.add_mutually_exclusive_group()
     mode.add_argument("--run", action="store_true", help="Explicitly execute paid provider stages under the shared budget")
     mode.add_argument("--responses", help="Offline JSON stage-id/role to recorded response mapping")
+    p.add_argument("--allow-max", action="store_true", help="Explicitly permit Max for a paid run; never changes the selected models or budget")
     p.add_argument("--retry-failed", action="store_true", help="Explicitly permit a new attempt for failed cached stages")
     p.add_argument("--fallback-hierarchical", action="store_true", help="Explicitly permit a reported hierarchical capacity fallback")
     p.add_argument("--budget-ledger", help="One SQLite ledger shared by all compared routes and chapters")
@@ -261,6 +274,13 @@ def main(argv=None) -> int:
         config = read_json(args.config)
         _no_secrets(config)
         config = validate_config(config)
+        # A chapter normally uses only its writer. An explicitly requested
+        # capacity fallback can introduce an editor, so approve it before
+        # paying for any drafts rather than discovering the gate mid-run.
+        live_roles = {"writer": config["writer"]}
+        if args.route != "chapter" or (args.fallback_hierarchical and config["editor_pass"]):
+            live_roles["editor"] = config["editor"]
+        _require_max_permission(args, live_roles)
         counter, meter = tokenizer_counter(args.tokenizer)
         packet_root = resolve_packet_root(args.packet_root)
         chapter = build_chapter_input(args.arrangement, view_path=args.view, packet_root=packet_root, language=args.language)
@@ -276,6 +296,7 @@ def main(argv=None) -> int:
         }
         _execution_context(output, context)
         invocation = {**context, "requested_route": args.route, "retry_failed": args.retry_failed,
+                      "allow_max": args.allow_max,
                       "fallback_hierarchical": args.fallback_hierarchical,
                       "started_at": datetime.now(timezone.utc).isoformat()}
         invocation_path = output / "cli_invocations" / (uuid.uuid4().hex + ".json")

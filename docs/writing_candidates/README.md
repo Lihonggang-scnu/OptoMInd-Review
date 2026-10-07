@@ -35,7 +35,7 @@ python scripts/upgrade3/writer_candidates.py \
   --arrangement /path/CH01/CHAPTER_ARRANGEMENT.json \
   --view /path/CH01/ARRANGEMENT_INPUT.json \
   --route chapter \
-  --config config/writer_candidates/quality.json \
+  --config config/writer_candidates/balanced.json \
   --output outputs/writer_candidates/chapter
 ```
 
@@ -78,7 +78,7 @@ Do not run this command unless the local experiment and spending have been appro
 python scripts/upgrade3/writer_candidates.py \
   --arrangement /path/CH01/CHAPTER_ARRANGEMENT.json \
   --route chapter --output outputs/writer_candidates/chapter_live \
-  --config config/writer_candidates/quality.json \
+  --config config/writer_candidates/balanced.json \
   --tokenizer /local/path/tokenizer.json \
   --run --budget-ledger /path/to/comparison-shared.sqlite --budget-limit 200 \
   --key-file /local/path/qwen-api-key.txt
@@ -88,13 +88,23 @@ python scripts/upgrade3/writer_candidates.py \
 
 The real client is `QwenDirectClient`, with explicit role models, `max_retries=0`, and one credential candidate per call. Streaming and both timeout settings reach the actual transport. Credentials and the key-file path are never written into candidate artifacts.
 
-### Quality and balanced profiles
+### Five explicit cost and capability profiles
 
-- Default `quality.json`: Max (`qwen3.8-max`) for both writer and editor; 65,536 answer tokens plus 32,768 thinking tokens, for a 98,304 combined ceiling
-- Optional `balanced.json`: Plus (`qwen3.5-plus`) for both roles; 49,152 answer tokens plus 16,384 thinking tokens, for a 65,536 combined ceiling
-- Both: `json_mode: false`, `stream: true`, 900-second request/read timeout, 3,600-second overall stream timeout, explicit estimator margin/multiplier
+The default is **balanced.json, Plus for both roles**. The engine never escalates to Max by itself. Paid CLI execution that could use Max requires the deliberate `--allow-max` switch as well as selecting the relevant configuration; preview and recorded-response checks need no Max permission. In the chapter route an unused Max editor is not charged or invoked; an enabled hierarchical fallback may introduce that editor and therefore needs the switch.
 
-The runtime registry currently allows combined output ceilings of 131,072 for Max and 65,536 for Plus, with a 1,000,000-token context window and a 991,808 input ceiling. Validation uses that registry, including input plus reserved output fitting context. Answer allowance and thinking allowance are distinct from actual written length; combined output capacity is distinct from the CNY spending cap. A high ceiling is permission for a complete answer, never a request to pad the manuscript. Role-specific models are supported, but changing them is a separate experimental condition and must be recorded rather than confused with a route effect.
+| File | Writer | Editor | Intended use |
+|---|---|---|---|
+| `economy.json` | Flash, 16,384 thinking + 49,152 answer | Plus, 16,384 + 49,152 | Test whether inexpensive drafting plus capable integration preserves quality |
+| `balanced.json` | Plus, 16,384 + 49,152 | Plus, 16,384 + 49,152 | Default and first practical candidate |
+| `plus_reasoning.json` | Plus, 32,768 + 32,768 | Plus, 32,768 + 32,768 | Complex reasoning with moderate prose length, before considering Max |
+| `selective_max.json` | Plus, 16,384 + 49,152 | Max, 32,768 + 65,536 | Explicit last-resort integration of a selected difficult chapter/cluster |
+| `quality.json` | Max, 32,768 + 65,536 | Max, 32,768 + 65,536 | Retained upper-quality reference only, not a normal starting configuration |
+
+These are alternative combinations, not five universally increasing quality levels. Plus has a 65,536 combined output ceiling in the current registry, so the reasoning profile trades some answer allowance for more thinking; it does not increase both. All answer allowances are generous capacities, not target lengths. For a long chapter needing the larger answer space, retain balanced rather than blindly changing to plus_reasoning.
+
+All profiles use `json_mode: false`, `stream: true`, 900-second request/read timeout, 3,600-second overall stream timeout, and an explicit estimator margin/multiplier. The runtime registry currently allows 131,072 combined output tokens for Max/Flash and 65,536 for Plus, a 1,000,000-token context window and a 991,808 input ceiling. Input plus reserved output must fit the model. Provider usage and CNY spending remain separate from capacity.
+
+Do not multiply three routes by five configurations. Start with Plus and select the next comparison from actual weaknesses or cost. Max is an explicitly chosen fallback for important unresolved work, not an automatic review stage. See `LOCAL_AGENT_HANDOFF_60_CNY.md` for the current bounded local experiment.
 
 ## Artifacts, recovery, and selection
 

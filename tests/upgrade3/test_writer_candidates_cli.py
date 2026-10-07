@@ -11,6 +11,7 @@ import pytest
 
 from scripts.upgrade3 import writer_candidates as cli
 from optomind_research.runtime.upgrade3.module4 import runtime
+from optomind_research.runtime.upgrade3.writer_candidates import validate_config
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -50,9 +51,42 @@ def case(tmp_path):
 
 
 def args(**changes):
-    value = argparse.Namespace(run=False, responses=None, budget_limit=None, budget_ledger=None, key_file=None)
+    value = argparse.Namespace(run=False, responses=None, allow_max=False, budget_limit=None, budget_ledger=None, key_file=None)
     value.__dict__.update(changes)
     return value
+
+
+def test_default_cli_profile_is_plus_first():
+    parsed = cli.parser().parse_args(["--output", "unused-preview"])
+    assert Path(parsed.config) == ROOT / "config/writer_candidates/balanced.json"
+    assert parsed.allow_max is False
+    config = validate_config(cli.read_json(parsed.config))
+    for role in ("writer", "editor"):
+        assert config[role]["model"] == "qwen3.5-plus"
+        assert config[role]["thinking_budget"] == 16384
+        assert config[role]["max_output_tokens"] == 49152
+
+
+@pytest.mark.parametrize("name,writer_model,editor_model,writer_budgets,editor_budgets", [
+    ("economy", "qwen3.7-flash", "qwen3.5-plus", (16384, 49152), (16384, 49152)),
+    ("balanced", "qwen3.5-plus", "qwen3.5-plus", (16384, 49152), (16384, 49152)),
+    ("plus_reasoning", "qwen3.5-plus", "qwen3.5-plus", (32768, 32768), (32768, 32768)),
+    ("selective_max", "qwen3.5-plus", "qwen3.8-max", (16384, 49152), (32768, 65536)),
+    ("quality", "qwen3.8-max", "qwen3.8-max", (32768, 65536), (32768, 65536)),
+])
+def test_named_profiles_have_explicit_valid_capacities(name, writer_model, editor_model, writer_budgets, editor_budgets):
+    config = validate_config(cli.read_json(ROOT / f"config/writer_candidates/{name}.json"))
+    assert config["editor_pass"] is True
+    for role, model, budgets in (("writer", writer_model, writer_budgets), ("editor", editor_model, editor_budgets)):
+        profile = config[role]
+        assert profile["model"] == model
+        assert (profile["thinking_budget"], profile["max_output_tokens"]) == budgets
+        assert sum(budgets) <= runtime.model_pricing(model)["max_output_tokens"]
+        assert profile["thinking"] is True
+        assert profile["json_mode"] is False
+        assert profile["stream"] is True
+        assert profile["timeout_seconds"] == 900
+        assert profile["stream_overall_timeout_seconds"] == 3600
 
 
 def test_current_plan_relative_pointer_resolves_from_pointer_not_cwd(tmp_path, monkeypatch):
@@ -87,14 +121,18 @@ def test_missing_explicit_tokenizer_fails_and_default_fallback_is_labeled(tmp_pa
         cli.tokenizer_counter(tmp_path / "explicit-missing.json")
 
 
-def test_preview_uses_real_builder_engine_without_provider_or_key_read(tmp_path, case, monkeypatch):
+@pytest.mark.parametrize("config_name", [None, "quality"])
+def test_preview_uses_real_builder_engine_without_provider_or_key_read(tmp_path, case, monkeypatch, config_name):
     def forbidden(*_args, **_kwargs):
         pytest.fail("offline preview constructed a live provider or ledger")
     monkeypatch.setattr(runtime, "QwenDirectClient", forbidden)
     monkeypatch.setattr(runtime, "GlobalBudgetLedger", forbidden)
     output = tmp_path / "preview"
-    assert cli.main(["--arrangement", str(case["arrangement"]), "--output", str(output),
-                     "--key-file", "/never/read/secret"]) == 0
+    argv = ["--arrangement", str(case["arrangement"]), "--output", str(output),
+            "--key-file", "/never/read/secret"]
+    if config_name:
+        argv += ["--config", str(ROOT / f"config/writer_candidates/{config_name}.json")]
+    assert cli.main(argv) == 0
     report = cli.read_json(output / "CLI_RUN.json")
     assert report["execution_mode"] == "preview"
     assert report["semantic_quality_unreviewed"] is True
@@ -104,7 +142,8 @@ def test_preview_uses_real_builder_engine_without_provider_or_key_read(tmp_path,
 
 
 @pytest.mark.parametrize("route", ["chapter", "units_edit", "hierarchical"])
-def test_recordings_drive_real_route_and_resume(tmp_path, case, monkeypatch, route):
+@pytest.mark.parametrize("config_name", [None, "quality"])
+def test_recordings_drive_real_route_and_resume(tmp_path, case, monkeypatch, route, config_name):
     def forbidden(*_args, **_kwargs):
         pytest.fail("offline recording mode constructed a provider or ledger")
     monkeypatch.setattr(runtime, "QwenDirectClient", forbidden)
@@ -112,6 +151,8 @@ def test_recordings_drive_real_route_and_resume(tmp_path, case, monkeypatch, rou
     output = tmp_path / route
     argv = ["--arrangement", str(case["arrangement"]), "--route", route,
             "--output", str(output), "--responses", str(case["responses"])]
+    if config_name:
+        argv += ["--config", str(ROOT / f"config/writer_candidates/{config_name}.json")]
     assert cli.main(argv) == 0
     first = cli.read_json(output / "CLI_RUN.json")
     assert first["execution_mode"] == "recording"
@@ -140,6 +181,47 @@ def test_invalid_live_gate_never_constructs_provider_or_ledger(changes, monkeypa
     monkeypatch.setattr(runtime, "GlobalBudgetLedger", forbidden)
     with pytest.raises(ValueError):
         cli.make_live_factory(args(**changes))
+
+
+@pytest.mark.parametrize("config_name,route,fallback", [
+    ("quality", "chapter", False),
+    ("quality", "units_edit", False),
+    ("quality", "hierarchical", False),
+    ("selective_max", "units_edit", False),
+    ("selective_max", "hierarchical", False),
+    ("selective_max", "chapter", True),
+])
+def test_live_max_gate_precedes_credentials_provider_and_ledger(tmp_path, case, monkeypatch, capsys,
+                                                               config_name, route, fallback):
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("Max permission gate reached a live provider, credentials, or ledger")
+    monkeypatch.setattr(runtime.QwenDirectClient, "_keys", forbidden)
+    monkeypatch.setattr(runtime, "QwenDirectClient", forbidden)
+    monkeypatch.setattr(runtime, "GlobalBudgetLedger", forbidden)
+    monkeypatch.setattr(cli, "make_live_factory", forbidden)
+    output, ledger = tmp_path / "blocked", tmp_path / "shared.sqlite"
+    argv = ["--arrangement", str(case["arrangement"]), "--route", route, "--output", str(output),
+            "--config", str(ROOT / f"config/writer_candidates/{config_name}.json"),
+            "--run", "--budget-ledger", str(ledger), "--budget-limit", "60",
+            "--key-file", "/never/read/secret"]
+    if fallback:
+        argv.append("--fallback-hierarchical")
+    assert cli.main(argv) == 2
+    assert "max_execution_requires_allow_max" in capsys.readouterr().err
+    assert not ledger.exists()
+    assert not output.exists()
+
+
+def test_live_factory_max_gate_precedes_provider_or_ledger(tmp_path, monkeypatch):
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("Unapproved Max profile constructed a live provider or ledger")
+    monkeypatch.setattr(runtime, "QwenDirectClient", forbidden)
+    monkeypatch.setattr(runtime, "GlobalBudgetLedger", forbidden)
+    factory = cli.make_live_factory(args(run=True, budget_limit=60, budget_ledger=str(tmp_path / "shared.sqlite")))
+    profile = cli.read_json(ROOT / "config/writer_candidates/quality.json")["writer"]
+    with pytest.raises(ValueError, match="max_execution_requires_allow_max:writer"):
+        factory("writer", tmp_path / "attempt", profile)
+    assert not (tmp_path / "shared.sqlite").exists()
 
 
 def test_recording_mode_cannot_be_reused_as_live_cache(tmp_path):
@@ -185,10 +267,46 @@ class Opener:
         return StreamResponse(body, self.content)
 
 
+@pytest.mark.parametrize("config_name,route,allow_max", [
+    (None, "chapter", False),
+    (None, "units_edit", False),
+    (None, "chapter", True),  # Permission does not upgrade a Plus profile.
+    ("selective_max", "chapter", False),  # Its Max editor is unused.
+    ("quality", "chapter", True),
+    ("selective_max", "units_edit", True),
+])
+def test_live_cli_uses_selected_role_profiles_on_real_wire(tmp_path, case, monkeypatch, config_name, route, allow_max):
+    monkeypatch.setattr(runtime.QwenDirectClient, "_keys", lambda self: ["offline-placeholder"])
+    opener = Opener(json.dumps(case["response"]))
+    monkeypatch.setattr(runtime.urllib.request, "build_opener", lambda *_: opener)
+    output = tmp_path / "candidate"
+    argv = ["--arrangement", str(case["arrangement"]), "--route", route, "--output", str(output),
+            "--run", "--budget-ledger", str(tmp_path / "shared.sqlite"), "--budget-limit", "60"]
+    if config_name:
+        argv += ["--config", str(ROOT / f"config/writer_candidates/{config_name}.json")]
+    if allow_max:
+        argv.append("--allow-max")
+    assert cli.main(argv) == 0
+    config = cli.read_json(ROOT / f"config/writer_candidates/{config_name or 'balanced'}.json")
+    roles = ("writer",) if route == "chapter" else ("writer", "editor")
+    assert len(opener.requests) == len(roles)
+    for request, role in zip(opener.requests, roles):
+        wire, profile = request["body"], config[role]
+        assert wire["model"] == profile["model"]
+        assert wire["thinking_budget"] == profile["thinking_budget"]
+        assert wire["max_completion_tokens"] == profile["thinking_budget"] + profile["max_output_tokens"]
+        assert wire["enable_thinking"] is True
+        assert wire["stream"] is True
+        assert "response_format" not in wire
+        assert request["timeout"] == 900
+    report = cli.read_json(output / "CLI_RUN.json")
+    assert cli.read_json(report["cli_invocation"])["allow_max"] is allow_max
+
+
 def test_real_qwen_wire_stream_profile_and_shared_durable_budget(tmp_path, monkeypatch):
     profile = cli.read_json(ROOT / "config/writer_candidates/quality.json")["writer"]
     counter = lambda *_: 100
-    factory = cli.make_live_factory(args(run=True, budget_limit=20,
+    factory = cli.make_live_factory(args(run=True, allow_max=True, budget_limit=20,
         budget_ledger=str(tmp_path / "shared.sqlite"), key_file="never-opened"), token_counter=counter)
     monkeypatch.setattr(runtime.QwenDirectClient, "_keys", lambda self: ["offline-placeholder"])
     opener = Opener('{"blocks":[],"issues":[]}')
@@ -215,7 +333,7 @@ def test_real_qwen_wire_stream_profile_and_shared_durable_budget(tmp_path, monke
     assert ledger["actual_cny"] == pytest.approx(2 * (100 * 12 + 20 * 36) / 1_000_000)
     assert all(row["status"] == "settled" for row in ledger["reservations"])
     with pytest.raises(runtime.QwenTransportError, match="global_budget_limit_conflict"):
-        other = cli.make_live_factory(args(run=True, budget_limit=30, budget_ledger=str(tmp_path / "shared.sqlite")))
+        other = cli.make_live_factory(args(run=True, allow_max=True, budget_limit=30, budget_ledger=str(tmp_path / "shared.sqlite")))
         other("writer", tmp_path / "other", profile)
 
 

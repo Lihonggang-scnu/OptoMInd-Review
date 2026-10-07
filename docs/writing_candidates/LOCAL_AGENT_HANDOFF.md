@@ -23,14 +23,14 @@ $py = 'python'
 $arr = '已批准的CHAPTER_ARRANGEMENT.json'
 $view = '对应的ARRANGEMENT_INPUT.json'
 $tok = 'data/tokenizers/qwen3_5_9b/tokenizer.json'
-$config = 'config/writer_candidates/quality.json'
+$config = 'config/writer_candidates/balanced.json'
 $root = 'outputs/writer_candidates_local'
 foreach ($route in @('chapter','units_edit','hierarchical')) {
   & $py scripts/upgrade3/writer_candidates.py --arrangement $arr --view $view --tokenizer $tok --route $route --config $config --output "$root/$route"
 }
 ```
 
-质量配置是Max写作与Max编辑；balanced.json是Plus写作与Plus编辑。第一轮优先选同一配置比较三种写作方式，随后对有用路线再降成本。不是要求每个配置与每条路线都跑遍。
+默认使用balanced.json，即Plus写作与Plus编辑。另有Flash写作＋Plus编辑、Plus更多思考、显式Max统稿和全Max参考配置。Max仅作最后底牌，付费执行还需明确 --allow-max。不要将三个路线与五种配置排列组合；本轮以LOCAL_AGENT_HANDOFF_60_CNY.md为最新执行指令。
 
 预览中的后续编辑请求需要真实初稿才可构造，因此该阶段会明确标为尚待初稿，不要用预先伪造的编辑请求替代真实运行。
 
