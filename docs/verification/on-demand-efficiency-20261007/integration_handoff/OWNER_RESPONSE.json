@@ -1,0 +1,413 @@
+{
+  "schema_version": "optomind.on_demand.integration_handoff.response.v1",
+  "source": {
+    "run_relative_path": "live_ch2/stages/OWNER_STAGE.json",
+    "original_sha256": "3f06aa70a9e038dc425d7af183b49ded8cd82a1ee0885f8a55453f25e388bc93",
+    "original_bytes": 6603007
+  },
+  "source_commit_used_by_paid_run": "00a91359fd50ddcc26355c94c8bb067c25985f6a",
+  "stage_signature": {
+    "request_sha256": "68a53788252ac0d0efa40fcaa0fb01137d60f00408986efb735de589dd41f217",
+    "payload_sha256": "23d3927467a762fce8be8fc908ddb32356d74afb7af28f6cf2555814949f157a",
+    "catalog_sha256": "48b949602dfe891fe02999fece584d1b272579e05e15d653a51d87af37b640d6",
+    "model": "qwen3.8-max",
+    "thinking_budget": 32768,
+    "max_output_tokens": 32768,
+    "profile": {
+      "model": "qwen3.8-max",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900
+    }
+  },
+  "model_output": {
+    "content": "{\"status\":\"updated\",\"chapter_updates\":[{\"chapter_id\":\"Ch2\",\"updated_plan\":{\"chapter_id\":\"Ch2\",\"title\":\"微生物调节 ICI 疗效的免疫学机制\",\"reader_objective\":\"帮助读者建立“微生物信号→先天识别→适应性启动→髓系/屏障重塑”的条件化机制链条认知，明确哪些环节由特定菌株、分子结构、DC 亚群、屏障状态或细菌易位驱动，哪些证据来自小鼠模型、体外/芯片系统，哪些仅来自人类队列或早期干预试验的伴随观察，为后续代谢物专论（Ch3）与临床转化（Ch5）奠定生物学基础。\",\"thesis\":\"肠道微生物组通过结构特异的微生物相关分子模式、先天识别受体（TLR4、NOD2、cGAS-STING）、DC 亚群成熟与迁移、肠道屏障状态及细菌易位、髓系细胞重编程等条件化环节，调节实体瘤 ICI 的抗肿瘤免疫；这些机制的因果证据主要来自特定小鼠模型与体外/芯片系统，人类证据多为队列关联或早期干预试验中的伴随观察，外推需受肿瘤类型、ICI 方案与模型系统限制。\",\"modifiable_unit_ids\":[\"Ch2_U01\",\"Ch2_U03\"],\"units\":[{\"unit_id\":\"Ch2_U01\",\"substantive_point\":\"先天免疫识别与树突状细胞（DC）的抗原呈递启动：微生物分子结构（如六酰化 LPS）与 PRR/STING 通路决定 DC 成熟、迁移和 CD8+ T 细胞启动，但人类证据主要为宏基因组关联、临床干预伴随观察或肿瘤内微生物生态相关数据。\",\"ordered_development\":\"先以 LPS 酰化状态与 MAMPs 说明先天识别的结构特异性；再以 CD103+ DC、IRF8、迁移及 cGAS-STING/IFN-β 说明 DC 如何桥接微生物信号与 CD8+ T 细胞启动；最后对比小鼠因果扰动与人类队列/肿瘤内观察，标注外推边界。\",\"case_objects\":[{\"conditions\":\"112 例黑色素瘤患者基线粪便宏基因组；小鼠 MC38 结肠腺癌模型，抗 PD-1 治疗；口服六酰化或五酰化 LPS；TLR4 抑制剂 TAK-242 或粘菌素 B 干预。\",\"finding\":\"响应者中编码六酰化 LPS 的 lpxM 基因富集，非响应者中总 LPS 合成基因及五酰化 lpxL 基因更高；小鼠中六酰化 LPS 经 TLR4/NF-κB 增强抗 PD-1 疗效并增加肿瘤浸润 IFNγ+/TNF+ CD8+ T 细胞，五酰化 LPS 无效且可拮抗六酰化 LPS。该研究提供人类关联与小鼠因果验证，但宏基因组推断的是基因潜力，且主要限于黑色素瘤与 MC38 模型。\",\"paper_id\":\"1c98ea21fbac0226e1f0c817968ad885448151f3\",\"source_handle\":\"P0080\"},{\"conditions\":\"从 PD-1 响应实体瘤患者粪便中分离的新型 Ruminococcaceae 菌株；动物模型中联合 PD-1 阻断，包括非响应者粪便移植背景；机制分析聚焦 CD103+ DC、IRF8、TLR 信号与 CD8+ T 细胞。\",\"finding\":\"该菌株通过刺激多个 TLR，促进 IRF8 驱动的 CD103+ DC 分化、成熟及向肿瘤微环境和肿瘤引流淋巴结迁移；DC 与 CD8+ T 细胞接触延长，经 NFATc1 核转位增强肿瘤抗原特异性 CD8+ T 细胞激活并上调 PD-1。该证据为动物模型中的机制发现，摘要未提供完整样本量与统计细节。\",\"paper_id\":\"3138b2ba3413f9ffc9b5e0000b6c0310cb34cd84\",\"source_handle\":\"P0114\"},{\"conditions\":\"无菌鼠、抗生素处理鼠、定植健康人/小鼠微生物群或患者粪便的 C57BL/6 小鼠；MC38、B16-OVA 等肿瘤模型；抗 PD-1/PD-L1 联合抗 PD-L2 或抗 RGMb 干预。\",\"finding\":\"Coprobacillus cateniformis 表面提取物可经 MYD88 依赖途径下调 DC 表面 PD-L2，减弱 PD-L2 与 T 细胞 RGMb 的抑制性互作；在微生物缺失或患者非响应者粪便定植模型中，阻断 PD-L2/RGMb 可恢复抗 PD-1/PD-L1 疗效。该机制主要基于小鼠模型，尚缺人体直接验证。\",\"paper_id\":\"657c221351daa09b93f85f8beef5195760d2acbb\",\"source_handle\":\"P0242\"},{\"conditions\":\"FMT-LUMINate II 期试验：晚期 NSCLC 接受 FMT 联合抗 PD-1 单药，黑色素瘤接受 FMT 联合抗 PD-1/CTLA-4；微生物组、血浆代谢组与免疫表型伴随分析。\",\"finding\":\"响应者并非主要依赖供体菌株定植，而是表现为基线有害细菌物种（如 Enterocloster、Clostridium 等）的大幅丢失，伴随血浆色氨酸代谢产物降低和效应性 CD8+ T 细胞增加；动物回输实验提示清除这些有害菌是疗效所需。该人类试验提供微生物重塑与免疫微环境改善的伴随关联，但不直接证明 DC 迁移或 STING 因果。\",\"paper_id\":\"071823eff68d7dbea395490dd4643170131b5f6a\",\"source_handle\":\"P0583\"},{\"conditions\":\"多种实体瘤中肿瘤内微生物群的综述性证据；涉及 Bifidobacterium、Akkermansia、Fusobacterium nucleatum 及 STING、PD-L1 等通路。\",\"finding\":\"肿瘤内有益菌（如 Bifidobacterium）可与 STING 激活、免疫增强和 ICI 响应相关，而 Fn 等可诱导免疫抑制；但该证据属于肿瘤内微生物生态，不能直接等同肠道菌群因果机制，且多为临床前或相关性观察。\",\"paper_id\":\"eea4059be35526f75d745cc8d16db8ec33658f69\",\"source_handle\":\"P0535\"}],\"paragraph_briefs\":[{\"paragraph_id\":\"Ch2_U01_P01\",\"unit_id\":\"Ch2_U01\",\"point\":\"先天识别不是“有菌即激活”，而受微生物分子结构与受体语境调节。\",\"development\":\"以六酰化 LPS 与五酰化 LPS 的差异为核心，说明 LPS 酰化状态如何通过 TLR4/NF-κB 改变 DC/髓系细胞激活及抗 PD-1 疗效；同时引入 MAMPs 经 TLR/NOD2 刺激抗原呈递细胞、促进 Th1 极化的综述框架，并用 CRC 综述中 TLR4/NLRP3 与 Fn/cGAS-IFN-β 的语境差异提示同一通路在不同肿瘤或微生物背景下可能产生不同方向。\",\"source_handles\":[\"P0080\",\"P0309\",\"P0028\"]},{\"paragraph_id\":\"Ch2_U01_P02\",\"unit_id\":\"Ch2_U01\",\"point\":\"DC 亚群成熟、迁移与 STING/IFN-β 轴是微生物信号转化为 CD8+ T 细胞启动的关键节点。\",\"development\":\"以 P0114 的 Ruminococcaceae 菌株为例，说明 TLR 刺激如何经 IRF8 驱动 CD103+ DC 分化并向肿瘤及引流淋巴结迁移，进而通过 NFATc1 增强 CD8+ T 细胞激活和 PD-1 表达；再以综述中的临床前证据补充口服乳酸杆菌、LGG、BF839 或 c-di-AMP 等通过 cGAS-STING/IFN-β 增强 DC 功能和 CD8+ T 细胞浸润，但需明确这些多为动物或综述归纳证据，不能直接外推为人类普适机制。\",\"source_handles\":[\"P0114\",\"P0132\",\"P0333\",\"P0309\"]},{\"paragraph_id\":\"Ch2_U01_P03\",\"unit_id\":\"Ch2_U01\",\"point\":\"微生物还可调节 DC 检查点语气，但人类证据仍以关联和伴随观察为主。\",\"development\":\"以 P0242 的 C. cateniformis 为例，说明微生物表面成分可通过 MYD88 下调 DC PD-L2，减弱 PD-L2/RGMb 对 CD8+ T 细胞的抑制，从而在微生物缺失或非响应者粪便模型中恢复 ICI 疗效；随后用 P0080 的人类黑色素瘤 lpxM 关联、P0583 的 FMT 后有害菌丢失与 CD8+ T 细胞增加，以及 P0535 的肿瘤内 Bifidobacterium/STING 观察，对比人类层面的关联证据与肿瘤内生态线索，强调这些人类数据不能直接证明与小鼠相同的因果链条。\",\"source_handles\":[\"P0242\",\"P0080\",\"P0583\",\"P0535\"]}],\"supporting_studies\":[{\"source_handle\":\"P0080\",\"paper_id\":\"1c98ea21fbac0226e1f0c817968ad885448151f3\",\"contribution\":\"提供六酰化 LPS 经 TLR4/NF-κB 增强抗 PD-1 疗效、五酰化 LPS 拮抗的具体分子案例，并配套人类黑色素瘤宏基因组关联与 MC38 小鼠因果验证。\",\"conditions\":\"人类黑色素瘤基线宏基因组；小鼠 MC38 抗 PD-1 模型；LPS 结构差异。\",\"limits\":\"宏基因组推断基因潜力而非直接测量 LPS 产物；主要限于黑色素瘤与 MC38；人与小鼠 TLR4/MD2 对 LPS 酰化状态敏感性可能不同。\"},{\"source_handle\":\"P0114\",\"paper_id\":\"3138b2ba3413f9ffc9b5e0000b6c0310cb34cd84\",\"contribution\":\"提供响应者来源 Ruminococcaceae 菌株通过 TLR/IRF8 驱动 CD103+ DC 分化、迁移并增强 CD8+ T 细胞激活的 DC 亚群特异性机制。\",\"conditions\":\"动物模型；PD-1 响应者粪便分离菌株；非响应者粪便移植背景。\",\"limits\":\"会议摘要，样本量、统计细节和普适性不足；仅限单一菌株与特定 DC 亚群。\"},{\"source_handle\":\"P0132\",\"paper_id\":\"3ae3c79b877e85a192dae9804adf84211ceedab7\",\"contribution\":\"提供综述层面的临床前证据，说明口服乳酸杆菌等可通过 cGAS/STING 诱导 DC IFN-β 并促进 CD8+ T 细胞浸润。\",\"conditions\":\"综述归纳；主要为肿瘤治疗背景下的动物模型与机制研究。\",\"limits\":\"综述未提供新原始数据；具体效应依赖所引用研究，不能视为统一人类机制。\"},{\"source_handle\":\"P0242\",\"paper_id\":\"657c221351daa09b93f85f8beef5195760d2acbb\",\"contribution\":\"提供微生物直接调控 DC 检查点分子 PD-L2/RGMb 的因果案例，补充先天识别之外微生物调节 DC 抑制性语气的路径。\",\"conditions\":\"无菌/抗生素小鼠、患者粪便移植、MC38/B16 等模型；抗 PD-1/PD-L1 联合抗 PD-L2/RGMb。\",\"limits\":\"主要基于小鼠；并非所有肿瘤模型均显示联合获益；人体中 PD-L2/PD-1 与 PD-L2/RGMb 相对贡献未明。\"},{\"source_handle\":\"P0333\",\"paper_id\":\"8e25ec1d06aea0a73a479436c268bc6fab267259\",\"contribution\":\"提供 LGG、BF839、Akkermansia 等通过 cGAS-STING 或其他通路调节 DC 与 CD8+ T 细胞的综述性机制图谱。\",\"conditions\":\"综述；跨 ICI 方案与多癌种机制归纳。\",\"limits\":\"叙述性综述，缺乏正式质量评估；多数机制来自临床前或小样本研究。\"},{\"source_handle\":\"P0309\",\"paper_id\":\"8552db34c533ee32ec30305e104babc5da9914ae\",\"contribution\":\"提供 MAMPs（如鞭毛蛋白、肽聚糖）经 TLR/NOD2 刺激 APC、促进 Th1 极化和抗原呈递的跨免疫干预框架。\",\"conditions\":\"综述；涵盖 ICI 与疫苗反应比较。\",\"limits\":\"机制多来自临床前模型；SCFA 等效应具有情境依赖性，不能线性外推。\"},{\"source_handle\":\"P0028\",\"paper_id\":\"0d36b62772e0930cc8aead7edc85535b5b389e25\",\"contribution\":\"提供 CRC 背景下 TLR4/NLRP3、Fn 琥珀酸抑制 cGAS-IFN-β、B. fragilis 多糖与 CTLA-4 协同等语境化案例，防止将 PRR 通路写成单向促免疫。\",\"conditions\":\"CRC 免疫微环境综述；部分机制来自小鼠或体外。\",\"limits\":\"主要聚焦 CRC；不同微生物与癌种中同一通路方向可能不同。\"},{\"source_handle\":\"P0535\",\"paper_id\":\"eea4059be35526f75d745cc8d16db8ec33658f69\",\"contribution\":\"提供肿瘤内微生物群与 STING、PD-L1、MDSC 等免疫调节通路的综述证据，作为肠道机制与局部肿瘤生态之间的边界参照。\",\"conditions\":\"肿瘤内微生物群综述；多癌种、多方法学证据。\",\"limits\":\"聚焦肿瘤内微生物而非肠道微生物；低生物量与污染问题需谨慎；多为相关性或临床前机制。\"},{\"source_handle\":\"P0583\",\"paper_id\":\"071823eff68d7dbea395490dd4643170131b5f6a\",\"contribution\":\"提供人类 II 期 FMT 联合 ICI 中微生物重塑、色氨酸代谢产物下降与 CD8+ T 细胞增加的伴随机制线索，作为临床层级证据。\",\"conditions\":\"FMT-LUMINate II 期试验；NSCLC 抗 PD-1 单药，黑色素瘤抗 PD-1/CTLA-4 双药。\",\"limits\":\"单臂、小样本；机制关联需结合动物实验，不能单独证明人类因果；不深入代谢物浓度与剂量问题。\"}],\"synthesis_and_transition\":\"先天识别与 DC 成熟构成微生物信号进入抗肿瘤免疫的第一道闸门，但其方向取决于微生物分子结构、DC 亚群、检查点语气和肿瘤背景。小鼠模型提供了受体、细胞与菌株层面的因果链条，人类队列则主要提供宏基因组、免疫表型或干预伴随关联。DC 启动之后，T 细胞克隆扩增、亚群平衡与耗竭状态将决定疗效能否持续，这是下一单元的任务。\",\"argument_relations\":\"本单元为 Ch2_U02 的 T 细胞 priming 与亚群平衡提供上游先天识别/DC 机制；不展开代谢物浓度与剂量问题，相关代谢物中介主要留给 Ch3。\"},{\"unit_id\":\"Ch2_U03\",\"substantive_point\":\"屏障完整性、细菌易位与髓系重编程构成连续而条件依赖的机制链：屏障破坏或治疗诱导的主动易位可将微生物信号送入肠系膜淋巴结、肿瘤或全身免疫区室；其后果取决于易位菌种/分子、受体通路及肿瘤微环境中的髓系细胞状态。\",\"ordered_development\":\"先建立肠道屏障完整性作为条件闸门；再解析免疫检查点阻断或肿瘤背景下细菌向次级淋巴器官/肿瘤的主动易位；随后说明易位微生物如何通过 PRR 重编程 TAM/MDSC 并改变 CD8+ T 细胞启动；最后用人类 FMT 与同一菌种双重效应标注证据边界。\",\"case_objects\":[{\"conditions\":\"集成蠕动功能的人源肠芯片；黑色素瘤 ICI 响应者/非响应者粪便悬液或上清；Caco-2/HT-29 或 hiPSC 肠类器官与内皮细胞共培养；LPS 与鞭毛蛋白对照。\",\"finding\":\"非响应者粪便或 LPS 重现屏障损伤：ZO-1/β-catenin 下调、通透性增加、TNF/IL-6/NF-κB 促炎通路激活；响应者粪便富含鞭毛蛋白相关基因，激活 TLR-5 并伴随 IL-1β/IL-10 变化，屏障较稳定；纯化鞭毛蛋白可部分逆转 LPS 损伤。该模型提供人类粪便功能差异的体外机制证据，但未整合完整免疫系统。\",\"paper_id\":\"1a747439d702aff9bb8fb4513e8de0c1063c237a\",\"source_handle\":\"P0073\"},{\"conditions\":\"B16-F10 黑色素瘤小鼠；联合抗 PD-1/CTLA-4；DC 耗竭、CCR7 缺失、MLN 切除、抗生素处理或特定菌株回补。\",\"finding\":\"ICT 诱导特定肠道细菌（如 Enterococcus faecalis、Lactobacillus johnsonii）经 DC 摄取并以 CCR7 依赖方式转移至肠系膜淋巴结、肿瘤引流淋巴结和肿瘤；MLN 切除降低远端细菌负荷并削弱 ICT 诱导的 CD8+ T 细胞活化与抗肿瘤疗效；抗生素清除肠道菌群削弱疗效，回补可转移菌株部分恢复疗效。该过程不依赖全身肠道屏障通透性的普遍增加。\",\"paper_id\":\"48ff8778babb3307819f8c65b752079c1045f3a6\",\"source_handle\":\"P0166\"},{\"conditions\":\"黑色素瘤/NSCLC ICI 队列；ir-colitis 患者粪便培养组学；抗生素处理小鼠 FMT；Caco-2 屏障共培养；DSS 结肠炎与 MCA-205 肿瘤模型；P. bifermentans 活菌、上清或 <3 kDa 组分。\",\"finding\":\"Paraclostridium bifermentans 在急性 ir-colitis 中富集；活菌破坏 Caco-2 ZO-1/Occludin 并增加 TNF-α/IL-1β，而细胞游离上清不重现屏障破坏；口服活菌增强双 ICI 抗肿瘤反应，且 <3 kDa 小分子组分保留增效作用。该案例显示同一菌种可通过活菌依赖的屏障/炎症效应与代谢组分介导的疗效效应并行。\",\"paper_id\":\"7cdc8a62c7a781f0b9a88abe52934ab9b889134d\",\"source_handle\":\"P0284\"},{\"conditions\":\"PDAC 小鼠模型、KPC 粪便移植、抗生素处理、体外/体内巨噬细胞实验；综述整合门静脉、肠系膜淋巴结或胆道等潜在易位路径。\",\"finding\":\"肠道菌群或肿瘤内易位细菌可通过 PRR（如 TLR 信号）诱导巨噬细胞/TAM 向免疫抑制表型转化，抑制 T 细胞活化；清除肠道菌群后 TAM 更偏促炎表型，CD8+ T 细胞浸润增加，抗生素与抗 PD-1 在 PDAC 模型中显示协同。该证据主要为临床前综述整合，人体直接验证有限。\",\"paper_id\":\"1e9bcb85e156528e8eb9e781e4d4845dc4149ed6\",\"source_handle\":\"P0084\"},{\"conditions\":\"FMT-LUMINate II 期试验：NSCLC 抗 PD-1 单药，黑色素瘤抗 PD-1/CTLA-4 双药；宏基因组、代谢组、流式细胞术与小鼠因果验证。\",\"finding\":\"响应者以基线有害菌丢失为主，而非供体菌定植；伴随血浆色氨酸代谢产物降低与效应 CD8+ T 细胞增加；重新引入丢失的有害菌可抵消小鼠中的疗效。黑色素瘤双 ICI 背景下，富含 Prevotella 的供体簇与更严重免疫相关不良事件相关，而单药抗 PD-1 背景未观察到同等毒性。该案例提供人类干预中微生物重塑、免疫代谢与安全性情境依赖的边界。\",\"paper_id\":\"071823eff68d7dbea395490dd4643170131b5f6a\",\"source_handle\":\"P0583\"}],\"paragraph_briefs\":[{\"paragraph_id\":\"Ch2_U03_P01\",\"unit_id\":\"Ch2_U03\",\"point\":\"肠道屏障完整性是微生物信号能否转化为全身免疫事件的条件闸门。\",\"development\":\"用肠芯片证据说明非响应者粪便/LPS 可破坏 ZO-1/β-catenin 并激活 TNF/IL-6/NF-κB，而响应者粪便中鞭毛蛋白/TLR-5 相关信号与屏障维持相关；再引入 P. bifermentans 活菌破坏上皮屏障并诱导炎症、但其无细胞小分子组分保留抗肿瘤增效的双重结构，强调屏障损伤与疗效增强并非同一机制的必然结果。\",\"source_handles\":[\"P0073\",\"P0284\"]},{\"paragraph_id\":\"Ch2_U03_P02\",\"unit_id\":\"Ch2_U03\",\"point\":\"细菌易位可以是治疗诱导的主动免疫转运过程，而非单纯被动漏肠。\",\"development\":\"以 P0166 为核心，说明联合 ICT 诱导特定肠道细菌经 DC 摄取并以 CCR7 依赖方式进入 MLN、TDLN 和肿瘤，MLN 切除会削弱远端抗肿瘤免疫；结合 PDAC 综述中细菌经门静脉/淋巴/胆道等路径进入肿瘤或次级淋巴器官并激活局部 PRR 的描述，以及消化道肿瘤中 Fn 等病原菌局部免疫抑制的案例，建立“屏障—转运—局部免疫”的解剖链条。\",\"source_handles\":[\"P0166\",\"P0084\",\"P0438\"]},{\"paragraph_id\":\"Ch2_U03_P03\",\"unit_id\":\"Ch2_U03\",\"point\":\"易位微生物的免疫后果主要由髓系细胞重编程决定。\",\"development\":\"说明易位细菌或屏障来源信号可通过 TLR/PRR 改变 TAM、MDSC 和巨噬细胞表型：在 PDAC 背景中促进免疫抑制性 TAM 并限制 T 细胞活化，抗生素清除后可恢复促炎表型与抗 PD-1 反应；同时用广谱 ICI 耐药综述补充 MDSC、M2 样 TAM、TGF-β/IL-10、缺氧和乳酸积累等共同构成免疫抑制网络；再用 FMT 综述指出微生物干预可能增加效应 T 细胞或减少抑制性髓系细胞，但失败案例同样存在。\",\"source_handles\":[\"P0084\",\"P0362\",\"P0438\",\"P0573\"]},{\"paragraph_id\":\"Ch2_U03_P04\",\"unit_id\":\"Ch2_U03\",\"point\":\"人类证据显示微生物屏障/易位相关重塑具有疗效与毒性的情境依赖，但不能直接外推小鼠因果。\",\"development\":\"用 FMT-LUMINate 说明人类响应者以有害菌丢失、色氨酸代谢产物下降和 CD8+ T 细胞增加为特征，而 Prevotella 富集供体仅在双 ICI 背景下与严重毒性相关；结合 P. bifermentans 的活菌炎症/小分子增效双重机制与 FMT 综述中的异质性结果，强调同一微生物状态可能同时关联疗效与毒性，且依赖 ICI 方案、宿主基线与肿瘤类型。此处不展开代谢物浓度与剂量问题，留给 Ch3。\",\"source_handles\":[\"P0583\",\"P0284\",\"P0573\",\"P0584\"]}],\"supporting_studies\":[{\"source_handle\":\"P0073\",\"paper_id\":\"1a747439d702aff9bb8fb4513e8de0c1063c237a\",\"contribution\":\"提供人源肠芯片中响应者/非响应者粪便对屏障完整性、炎症通路和微生物分子（LPS/鞭毛蛋白）差异的功能证据。\",\"conditions\":\"黑色素瘤患者粪便；肠芯片；LPS 与鞭毛蛋白对照。\",\"limits\":\"体外模型未整合完整免疫系统；样本量小；不能直接等同体内全身疗效。\"},{\"source_handle\":\"P0166\",\"paper_id\":\"48ff8778babb3307819f8c65b752079c1045f3a6\",\"contribution\":\"提供 ICT 诱导肠道细菌经 DC/CCR7 向 MLN、TDLN 和肿瘤转移，并增强肠外抗肿瘤免疫的因果路径。\",\"conditions\":\"B16-F10 小鼠；联合抗 PD-1/CTLA-4；DC 耗竭、CCR7 缺失、MLN 切除、抗生素与菌株回补。\",\"limits\":\"仅限黑色素瘤小鼠模型；联合 ICT 与单药可能不同；检测方法影响可见菌群。\"},{\"source_handle\":\"P0084\",\"paper_id\":\"1e9bcb85e156528e8eb9e781e4d4845dc4149ed6\",\"contribution\":\"提供 PDAC 中肠道菌群/细菌易位通过 PRR 和巨噬细胞/TAM 重编程形成局部免疫抑制的综述性机制框架。\",\"conditions\":\"PDAC 小鼠模型、KPC 粪便移植、抗生素与抗 PD-1 联合；综述整合。\",\"limits\":\"人体直接证据有限；具体菌株与人体互作细节未完全验证。\"},{\"source_handle\":\"P0284\",\"paper_id\":\"7cdc8a62c7a781f0b9a88abe52934ab9b889134d\",\"contribution\":\"提供同一菌种 P. bifermentans 通过活菌破坏屏障/促炎、而小分子组分增强双 ICI 疗效的双重机制案例。\",\"conditions\":\"黑色素瘤/NSCLC 队列；培养组学；Caco-2 屏障；DSS/MCA-205 小鼠模型；<3 kDa 上清组分。\",\"limits\":\"活性代谢物身份未明；小鼠模型不能完全复现人类 ir-colitis；临床关联为队列观察。\"},{\"source_handle\":\"P0362\",\"paper_id\":\"9d35f21e0312f02012226526155eabf2efc7472f\",\"contribution\":\"提供 ICI 耐药中 MDSC、TAM、Treg、缺氧、乳酸和氨基酸代谢等免疫抑制网络的背景框架。\",\"conditions\":\"多实体瘤耐药机制综述。\",\"limits\":\"叙述性综述，非微生物特异；未分层量化微生物贡献。\"},{\"source_handle\":\"P0438\",\"paper_id\":\"c01d091d25a86879909c5dbeacff09210ff73402\",\"contribution\":\"提供消化道肿瘤中 Fn 抑制 NK/招募 MDSC、Barnesiella 增强 T 细胞浸润等局部微生物调控案例，补充易位后髓系/NK 语境。\",\"conditions\":\"胃癌、结直肠癌、胰腺癌等消化道肿瘤综述；部分机制来自感染或化疗背景。\",\"limits\":\"主要聚焦消化道肿瘤；许多机制来自特定病原或临床前模型，不能直接等同 ICI 普遍机制。\"},{\"source_handle\":\"P0573\",\"paper_id\":\"ff51b7d7a956ceb17d4fb9e0f36c3446c6a4cf65\",\"contribution\":\"提供 FMT 联合 ICI 的机制异质性综述：可增加效应 T 细胞、减少 Treg/MDSC，也可能失败或引入不利代谢/菌群。\",\"conditions\":\"FMT 与 ICI 联合治疗的临床前/临床研究综述。\",\"limits\":\"叙述性综述；供体、受体和方案差异大；不能替代原始因果证据。\"},{\"source_handle\":\"P0583\",\"paper_id\":\"071823eff68d7dbea395490dd4643170131b5f6a\",\"contribution\":\"提供人类 FMT 联合 ICI 中基线有害菌清除、代谢产物下降、CD8+ T 细胞增加及方案依赖毒性信号的核心临床证据。\",\"conditions\":\"FMT-LUMINate II 期；NSCLC 抗 PD-1 单药，黑色素瘤抗 PD-1/CTLA-4 双药。\",\"limits\":\"单臂小样本；毒性关联需更大试验验证；机制外推受肿瘤类型和 ICI 方案限制。\"},{\"source_handle\":\"P0584\",\"paper_id\":\"CorpusId:290154100\",\"contribution\":\"提供微生物-代谢物-免疫轴的情境依赖综述框架，提示不同癌种、方案和宿主背景下同一微生物特征可能产生不同效应。\",\"conditions\":\"叙述性综述；涵盖多癌种、多 ICI 靶点与早期干预研究。\",\"limits\":\"无正式质量评估；多数机制来自临床前或小样本研究；不用于支持具体代谢物剂量结论。\"}],\"synthesis_and_transition\":\"屏障、易位与髓系重编程不是彼此并列的名词，而是一条条件化链条：屏障状态和治疗背景决定微生物信号是否进入肠外免疫区室，易位后的菌种/分子决定髓系细胞是被激活还是被抑制，髓系状态又反过来决定 CD8+ T 细胞能否有效启动。人类干预试验显示这一链条可伴随疗效或毒性，但其因果细节仍主要由小鼠和体外模型支持。下一单元将比较这些机制在不同肿瘤类型与模型系统中的表达差异及外推边界。\",\"argument_relations\":\"本单元承接 Ch2_U01 的先天识别/DC 启动，转向屏障与髓系层面的系统重塑，并为 Ch2_U04 的肿瘤类型特异性与模型差异提供机制基础；不重复 Ch5 的干预试验评价，也不深入 Ch3 的代谢物浓度/剂量问题。\"}]}}],\"unit_id_remap\":{\"Ch2_U01\":[\"Ch2_U01\"],\"Ch2_U03\":[\"Ch2_U03\"]}}",
+    "reasoning_content": "我们需要回答用户：要求返回 JSON，包含 status 和 chapter_updates。任务是对 Ch2 的 modifiable_unit_ids: Ch2_U01, Ch2_U03 做编辑，基于给定材料，完善细纲。不能添加外部研究或新证据，只能用输入中的材料。需要返回完整章节计划（可能只包含可编辑单元？说明：updated_plan 是完整章节计划；但自主范围说本次输入的 chapter_plan 只包含并只允许修改 modifiable_unit_ids，complete updated_plan 指对这组可编辑单元的完整计划。可能返回 updated_plan 包含 reader_objective, thesis, units 仅两个单元？需要看合同。\"Return chapter_updates, with one item per target containing chapter_id and a complete updated_plan.\" 对 chapter_id Ch2。updated_plan 可能应包含完整章节计划，但只更新两个单元？要求不返回只读邻居。为了满足，最好 updated_plan 包含 chapter_id, title, reader_objective, thesis, units: [updated Ch2_U01, updated Ch2_U03]。或者包含 full_unit_order? 但只可编辑单元。不要返回只读单元。也可以包含 unit_id_remap mapping same IDs to themselves.\n\n需要分析现有计划问题并改进。\n\nCh2_U01 当前：\n- case_objects include P0583 FMT-LUMINate? finding says FMT联合ICI后，响应者基线有害病原体清除导致DC迁移至引流淋巴结，且STING通路激活与疗效正相关。材料 P0583 主要说响应者基线有害菌清除，降低色氨酸代谢，CD8+ T 增加；并未明确 DC 迁移至引流淋巴结或 STING？材料 P0583 没有 STING 或 DC迁移。可能错误。P0561? source P0561 title Tumour neoantigen mimicry by microbial species? case says B16-F0/4T1 ICI联合治疗诱导DC活化，STING通路激活。材料中 P0561 没有完整记录？在 source_materials catalog but not full? It is included as case object but not in source_materials full? We have P0561 in catalog identity but not full record in current source_materials? It appears in case_objects but not full source_materials? Actually source_materials includes P0561? I see P0561 in catalog entry 346 but not full record in provided source_materials list? The full list includes P0561? It includes P0561? At end source_materials full: P0028, P0080, P0114, P0132, P0242, P0309, P0333, P0535, P0073, P0084, P0166, P0284, P0362, P0438, P0539, P0573, P0583, P0584. No P0561, P0146? P0146 not full? Actually P0146 appears in case_objects and catalog but not full? It may not be in source_materials full? There is no P0146 full in provided list? I see source_materials[79] P0146 but not full record? The full source_materials list includes P0146? It starts with P0028, P0080, P0114, P0132, P0242, P0309, P0333, P0535, P0073, P0084, P0166, P0284, P0362, P0438, P0539, P0573, P0583, P0584. So P0146 and P0561 are not included in full materials? But they are in chapter_plan case_objects. The instruction says use supplied source_materials and related tool_materials to correct mistakes. Do not return source_handles without substantial material in input. However existing plan includes P0561, P0146; are they in source_materials? Maybe not full, but they are in chapter_plan case_objects and catalog identity. But \"不得返回...输入中没有实质材料的 source_handle\". If P0561/P0146 lack full material in input, maybe should remove? But they are existing evidence? Need be careful. The supplied source_materials includes P0583 etc. It may not include P0561/P0146 as full, but they are in case_objects. The task says preserve each chapter's evidence, source handles, conditions and limitations; where material shows thesis etc needs correction. But also do not return source_handles without substantial material. The input includes case_objects for P0561 and P0146 with findings; that is substantial? It is in chapter_plan but not source_materials. However source_materials are the chapter's cited A/B evidence. P0561/P0146 may not be in source_materials but in case_objects. The instruction: Use supplied source_materials (the chapter's cited A/B evidence) and related tool_materials to correct factual... Preserve each chapter's evidence, source handles... Do not add sources. Existing plan has P0561/P0146, likely should preserve if present in input. But if they are unsupported by full materials, maybe avoid strong claims. The selection focus says Ch2_U01 locate P0080, P0114, P0132, P0242, P0333, P0309. It doesn't mention P0561/P0146/P0583/P0535? But current case objects include P0583, P0561, P0146, P0535. We can keep P0583 if supported for human FMT mechanism but not STING/DC migration. P0535 is review intratumoral microbiota, can support DC infiltration/prognosis? But maybe not needed. Need avoid unsupported STING in P0583. P0146 CheckMate 025 high inosine and cGAS-STING axis? This is likely from P0582 inosine UBA6? Actually P0146 maybe gut microbiota shapes cancer immunotherapy responses; case says human RCC CheckMate 025 high inosine with OS, cGAS-STING axis enrichment. But material not full in input? There is P0582 in readonly U3_2 with CheckMate 025 inosine, but P0146 not full. For Ch2_U01, we should not rely on P0146 if not in supplied full? Could keep as case_object? But selection says not deep metabolite concentration/dose, leave Ch3. Inosine belongs Ch3. So remove P0146 from U01? But preserving evidence? It may be better to move or remove because boundary: not metabolite concentration. But unit is innate recognition STING; inosine/cGAS-STING could be relevant but Ch3 handles inosine. The current U01 P02 uses P0146 cGAS-STING axis in RCC. But if no material and crosses boundary, remove or downplay. Need complete updated plan for modifiable units; can adjust case_objects.\n\nCh2_U01 improvement: Need connect TLR4, NOD2, cGAS-STING with DC maturation, migration, cross-presentation. Use P0080 hexa-acylated LPS TLR4/NF-kB, MC38 anti-PD-1, human melanoma metagenomics lpxM responders; P0114 Ruminococcaceae strain TLRs -> IRF8-dependent CD103+ DC differentiation, migration to TME/dLN, CD8+ T activation NFATc1, PD-1 expression; P0132 review: oral Lactobacillus increases L. murinus/B. uniformis via cGAS/STING DC IFN-beta -> CD8 infiltration (preclinical); P0333 review: LGG/BF839 activate cGAS-STING in DC, Akk produces c-di-AMP activates STING; P0309 review: MAMPs flagellin/peptidoglycan TLR/NOD2 APC Th1; SCFAs context-dependent; P0242 C. cateniformis surface extract downregulates DC PD-L2 via MYD88, releases RGMb inhibition of CD8; GF/ABX mouse models, patient fecal transplant. P0028 CRC review: TLR4/NLRP3, Fn succinate suppress cGAS-IFN-beta, B. fragilis polysaccharide CTLA-4; but focus maybe negative control/context. P0535 intratumoral microbiota: Bifidobacterium STING, Fn suppress cGAS-IFN? Could support intratumoral local but boundary gut vs intratumoral. P0583 FMT-LUMINate human phase 2: response associated with loss of baseline deleterious bacteria, tryptophan metabolites lower, CD8 increase; not direct DC/STING. Can use human clinical observation that microbiome remodeling correlates with immune improvement, but not causal mechanism. Could include as human contrast to preclinical mechanistic strains. Need not claim DC migration. Maybe paragraph 3: human evidence mostly correlative: melanoma cohorts lpxM (P0080), FMT-LUMINate pathobiont loss (P0583), intratumoral DC/Bifidobacterium associations (P0535) but causal perturbation mostly mouse.\n\nNeed paragraph_briefs ordered. Existing has 2 paragraphs. We can expand to 3 or 4. Need each paragraph with point, development, source_handles. Also unit fields: case_objects, ordered_development, paragraph_briefs, substantive_point, supporting_studies, synthesis_and_transition, unit_id. Could also include thesis? Chapter plan includes reader_objective, thesis. Need update maybe.\n\nNeed ensure conditions enter point/development. Avoid overclaim. For P0114: abstract only, animal model, solid tumors, PD-1 responder-derived strain; not human clinical causality. For P0080: human melanoma metagenomic association plus mouse MC38 causal TLR4; note human/mouse TLR4/MD2 sensitivity differences, lpxM gene potential not measured LPS. P0242: mouse GF/ABX, MC38/B16, patient fecal transplant; C. cateniformis surface extract MYD88 downregulates PD-L2; PD-L2/RGMb; not all tumors (E0771 no extra benefit). P0132/P0333/P0309 are reviews, not primary; use as framework and specify they summarize preclinical. P0028 review CRC; Fn succinate suppress cGAS-IFN-beta, TLR4/NLRP3 context. Could use as counterpoint: same PRR pathways can be tumor-context dependent. But U01 focus positive initiation; maybe include negative regulation to avoid linear narrative. But not too much.\n\nNeed not use P0561 if no material? But current unit case_objects include P0561. Selection focus doesn't require. If we remove, unit_id_remap unchanged. Is it allowed? Preserve evidence? It says preserve each chapter's evidence, but where thesis/scope needs correction implement. P0561 claim STING in B16-F0/4T1 maybe not supported by full material. Could remove to correct factual mistakes. But if P0561 is in input case object with finding, it's evidence? Yet no full material. The instruction says do not return source_handles without substantial material in input. It has a case object finding but not A/B material. I'd remove P0561 and P0146 to be safe, or keep only if can support from P0333/P0132? P0561 title neoantigen mimicry, more relevant Ch2_U02 (molecular mimicry). So remove from U01. P0146 inosine -> Ch3. Remove. P0535 can remain as review of intratumoral bacteria and DC/STING? But if not central, maybe keep as human observational/intratumoral contrast. P0535 full material is present. It says Bifidobacterium activating STING, beneficial taxa enhance ICI; but it's intratumoral, not gut. Chapter scope says gut microbiome; but can mention boundary: intratumoral bacteria may parallel gut mechanisms but distinct niche. U01 could use P0535 cautiously for DC infiltration/prognosis? The case object says tumor内DC浸润空间分布与预后正相关. P0535 material doesn't specifically DC spatial distribution? It mentions immune modulation, Bifidobacterium/Akk enhance. Could use for context but not necessary. Maybe keep P0535 in paragraph 3 as human/observational and spatial/intratumoral context, but note not direct gut evidence.\n\nCh2_U03 current:\n- case_objects: P0573 FMT-LUMINate? Actually P0573 is review FMT, case says FMT介导基线有害病原体清除导致血浆色氨酸代谢产物降低... That is P0583, not P0573. P0573 review may summarize FMT mechanisms. P0539 hematologic malignancy review, indole derivatives/AhR barrier and cardiotoxicity, myeloid bias poor prognosis. Material P0539 is blood cancers; use with caution. P0584 (duplicate P0333? CorpusId:290154100) case says ADA1 converts adenosine to inosine restores NK; myeloid bias shorter PFS/OS. But P0584 is review gut-metabolite-immune axis; ADA1? It might not contain ADA1? Actually P0584 material says review; no ADA1? It mentions mechanisms LGG/BF839 STING, Enterococcus NOD2, AhR. It does not mention ADA1? The case object may be from P0586/P0587? So factual mistake. P0573 case also Prevotella cluster B irAEs; that's P0583 deep read, not P0573? P0573 review may mention FMT-LUMINate? It could, but detailed trial data is P0583. Need correct source handles: use P0583 for FMT-LUMINate pathobiont loss and Prevotella cluster B toxicity. P0573 can support FMT mechanisms and failures, TME remodeling, SCFAs/bile acids, TLR/Wnt. P0539 maybe not needed due hematologic; but can provide barrier/myeloid general? Better limit to solid tumor materials: P0073 gut-on-chip melanoma responder/NR feces; P0166 ICT induces gut bacteria translocation via DC CCR7 to MLN/TDLN/tumor, MLN resection; P0084 PDAC review: bacterial translocation PRR/TAM immunosuppressive; P0284 P. bifermentans live bacteria barrier disruption/colitis, metabolite <3kDa enhances dual ICI; P0362 resistance review MDSC/TAM metabolic immunosuppression; P0438 GI cancer review Barnesiella T cell infiltration, Fn inhibits NK/recruits MDSCs. P0583 for human FMT pathobiont loss and Prevotella dual ICI toxicity; P0573 for FMT review mechanisms; P0584 for context? Could use P0584 to mention myeloid and AhR/STING but it's same review as P0333. But P0584 is in U03 case objects. It has material full (CorpusId:290154100) identical to P0333? It is a duplicate with different handle. We can use P0584 for context-dependent myeloid/irAE? But avoid ADA1 unsupported. P0539 hematologic may be excluded or used only as cross-system background with explicit boundary? The chapter is solid tumors; shared scope excludes hematologic unless mechanism comparison. Could use P0539 only for barrier integrity/myeloid general but mark cross-system. But enough solid tumor materials. Maybe remove P0539 to avoid off-scope. But existing supporting_studies includes P0539? Current case_objects include P0539. We can remove if not needed. Need preserve? It's off scope. The instruction: according to research question and material judge relevance; preserve real research type. Better remove hematologic P0539 from substantive U03 unless as comparative footnote. But complete plan can drop.\n\nNeed build U03 argument: barrier integrity -> bacterial translocation -> myeloid reprogramming. Conditions: gut-on-chip (human melanoma fecal samples, ex vivo) shows NR feces/LPS disrupt ZO-1/E-cadherin, responder flagellin/TLR5 protects; not full systemic immune. P0284: live P. bifermentans disrupts Caco-2 barrier and colitis; cell-free <3kDa metabolite enhances dual ICI tumor response; demonstrates same species dual effects, barrier disruption vs metabolite efficacy. P0166: mouse melanoma ICT induces DC-mediated CCR7-dependent translocation of E. faecalis etc to MLN/TDLN/tumor, MLN required for CD8 response; not dependent on generalized barrier permeability. P0084: PDAC models bacterial translocation via portal/MLN/biliary? activates PRRs/TAMs immunosuppressive; antibiotics reduce MDSC, increase CD8, anti-PD-1 synergy. P0362: MDSC/TAM/M2, hypoxia/lactate immunosuppressive network. P0438: Fn recruits MDSC/inhibits NK; Barnesiella enhances T cell infiltration for chemo, not ICI? Use as local myeloid/NK examples. P0583: human FMT responders lose harmful bacteria, lower tryptophan metabolites, increased CD8; Prevotella cluster B severe irAEs only dual ICI; connects human clinical perturbation and safety. P0573: FMT can reshape TME increasing CD8, decreasing Tregs/MDSCs, but failures; mechanisms context dependent. P0584 maybe review: context-dependent taxa, myeloid, AhR/STING; but avoid metabolite dose.\n\nParagraphs: maybe 3 or 4.\nP1: Barrier integrity as conditional gate: P0073, P0284, P0583? NR feces/LPS disrupt barrier; responder flagellin/TLR5; P. bifermentans live vs metabolite. Point: barrier integrity determines whether microbial signals remain mucosal or become inflammatory/translocation. Evidence conditions.\nP2: Translocation route: P0166 ICT induces DC CCR7 bacteria to MLN/TDLN, MLN resection; P0084 PDAC translocation to TME/TAM PRR; P0438 Fn/pathobiont local effects. Point: translocation is active, cell-mediated and context-dependent, not merely passive leakiness; can augment or suppress immunity depending on receiving niche.\nP3: Myeloid reprogramming: P0084 TAM M2/TLR, P0362 MDSC/TAM metabolic suppression, P0438 MDSC/NK, P0573/P0583 human FMT TME myeloid changes? Point: translocated microbes and barrier-derived signals reprogram myeloid cells, which can either support CD8 or establish suppressive barrier; distinguish mouse causal depletion vs human observational FMT.\nP4: Evidence boundary and dual effects: P0583 human FMT pathobiont loss and Prevotella toxicity dual ICI; P0284 dual species; P0573 failures; state not all barrier disruption beneficial, not all translocation beneficial; clinical extrapolation limited. Could integrate into P3/P4.\n\nNeed update chapter thesis/reader objective? Could keep but refine: include “条件化机制” and evidence boundary. Maybe thesis: 肠道微生物组通过 PRR/STING 等先天通路、DC 抗原呈递、屏障与易位以及髓系重编程调节 ICI 疗效；这些环节依赖菌株/分子结构、肿瘤模型与 ICI 方案，临床前因果与人类关联需区分。 Good.\n\nNeed include argument_relations? Existing units don't have explicit argument_relations field except readonly neighbors. Could add? The required behavior says preserve argument_relations; current units don't have. Maybe not needed. But can add \"argument_relations\" string? Not required. The output JSON can include fields.\n\nNeed ensure no unsupported claims:\n- P0080: hexa-acylated LPS via TLR4/NF-kB enhances CD8 infiltration and anti-PD-1; human melanoma lpxM responders; mouse MC38 TAK-242/PMB abolishes; penta-acylated antagonizes. Conditions. Limits: gene potential, mouse TLR4 differences, single MC38.\n- P0114: responder-derived Ruminococcaceae strain stimulates TLRs, IRF8 CD103+ DC differentiation/migration to TME/dLN, prolongs CD8 contact, NFATc1, PD-1+ CD8 broader TCR; animal models including non-responder fecal transplant; abstract no sample sizes. Use as DC migration/cross-priming.\n- P0242: C. cateniformis surface extract downregulates DC PD-L2 via MYD88; PD-L2/RGMb inhibitory axis; GF/ABX mice resistant to PD-L1, anti-PD-L2/RGMb restores; patient NR fecal transplant; not all tumors.\n- P0132: review says oral live Lactobacillus increases L. murinus/B. uniformis, cGAS/STING DC IFN-beta, CD8 infiltration; mostly preclinical.\n- P0333: LGG/BF839 cGAS-STING DC, Akk c-di-AMP STING; context-dependent. Use as examples not primary.\n- P0309: MAMPs TLR/NOD2 APC Th1; NOD2 specifically. Good.\n- P0028: CRC review: TLR4/NLRP3 can promote/inhibit depending model; Fn succinate suppress cGAS-IFN-beta, B fragilis polysaccharide with CTLA-4. Use to show pathway direction not universal.\n\nPotential paragraph briefs for U01:\n1. PRR structural specificity and innate sensing: P0080, P0309, P0028. Point: microbial molecules not generic; LPS acylation determines TLR4 output. Development: hexa-acylated LPS lpxM responders, penta antagonism; MAMPs TLR/NOD2; CRC context TLR4/NLRP3 and Fn suppression. Source P0080 P0309 P0028.\n2. DC subset maturation/migration and antigen presentation: P0114, P0309, P0132, P0333. Point: PRR signals program CD103+ DC and STING/IFN-beta. Development: Ruminococcaceae TLR->IRF8 CD103+ DC migration dLN/TME, CD8 NFATc1 PD-1; cGAS-STING Lactobacillus/LGG/BF839 DC IFN-beta; note preclinical.\n3. DC checkpoint tone and human correlative boundary: P0242, P0583, P0535 maybe P0080 human. Point: microbial signals alter DC inhibitory ligands and human evidence remains associative. Development: C. cateniformis downregulates PD-L2/RGMb in mouse; human melanoma lpxM and FMT-LUMINate pathobiont loss/CD8; intratumoral Bifidobacterium/STING associations; do not infer human causal. Sources P0242 P0080 P0583 P0535.\nMaybe include P0146? No.\n\nNeed case_objects for U01: include concrete cases with conditions and finding. Could list:\n- P0080: 112 melanoma baseline metagenomes; MC38 anti-PD-1; hexa-LPS/TLR4.\n- P0114: animal models, responder-derived Ruminococcaceae; CD103+ DC IRF8.\n- P0242: GF/ABX and patient fecal transplant mice; C. cateniformis PD-L2/RGMb.\n- P0583: phase 2 FMT-LUMINate NSCLC/melanoma; pathobiont loss, tryptophan metabolites lower, CD8 increase; safety Prevotella only dual ICI? For U01 maybe only immune microenvironment, not toxicity. Could include as human perturbation.\n- P0333/P0132? reviews not case objects maybe supporting studies.\n- P0535: intratumoral microbiota review; Bifidobacterium STING, context. Maybe case object? Could keep.\nNeed not include P0561/P0146.\n\nSupporting_studies for U01: include P0080, P0114, P0132, P0242, P0333, P0309, P0028, P0535, P0583? supporting_studies can include all. Need contribution and limits? Existing has contribution only. We can include contribution and maybe conditions? JSON fields free. Keep source_handle, paper_id, contribution. Could include \"conditions\" and \"limits\" to satisfy conditions. The instruction says research conditions must enter substantive_point, thesis, synthesis, transition themselves; not all in limitation field. But adding conditions/limits okay. Need not overdo.\n\nCh2_U03 detailed:\nCurrent case_objects wrong source handles. Need update case_objects:\n- P0073 gut-on-chip melanoma feces: NR feces/LPS disrupt ZO-1/β-catenin, permeability, inflammatory TNF/IL-6/NF-kB; responder flagellin TLR5 IL-1β/IL-10, barrier maintained; purified flagellin rescues. Limits: ex vivo chip no immune system, small sample, melanoma.\n- P0166 B16-F10 mice anti-PD-1/CTLA-4: ICT induces E. faecalis/L. johnsonii translocation to MLN/TDLN/tumor via DC CCR7; MLN resection reduces CD8 and efficacy; antibiotics block; not generalized permeability. Limits melanoma mouse, dual ICT.\n- P0284 melanoma/NSCLC cohorts and mouse: P. bifermentans enriched ir-colitis; live bacteria disrupt Caco-2 ZO-1/occludin and TNF/IL-1; cell-free <3kDa metabolite enhances dual ICI in MCA-205; FMT from ir-colitis enhances dual ICI and inflammation. Limits metabolite unidentified, mouse models.\n- P0084 PDAC mouse/review: bacterial translocation to tumor/MLN via portal/lymph/biliary? activates PRRs (TLR9 etc), TAMs immunosuppressive; antibiotics reduce MDSC, increase CD8, anti-PD-1 synergy; KPC fecal transplant accelerates. Limits PDAC, mostly preclinical.\n- P0583 FMT-LUMINate: responders lose baseline deleterious species (Enterocloster/Clostridium), lower plasma tryptophan metabolites, CD8 increase; mouse re-introduction abolishes; Prevotella cluster B severe irAEs only dual ICI. Use human clinical condition. Limits single-arm, small, toxicity context.\n- P0573 review FMT: mechanisms include TME remodeling CD8, Tregs/MDSCs, metabolites SCFA/bile acids, failures; provides heterogeneity. Could be supporting not case.\n- P0362 resistance review: MDSC/TAM/M2, TGF-beta/IL-10, hypoxia/lactate suppress CD8. Background.\n- P0438 GI cancer review: Fn recruits MDSC/inhibits NK; Barnesiella enhances T-cell infiltration for cyclophosphamide; context GI.\n- P0584 review: context-dependent microbial taxa and mechanisms; maybe use for myeloid/AhR? But if duplicate P0333, can include as supporting for context but not ADA1.\n\nParagraph briefs U03:\n1. 屏障完整性作为条件闸门：P0073, P0284, maybe P0583? development: NR melanoma feces/LPS reduce ZO-1/E-cadherin, increase permeability and inflammatory NF-kB; responder flagellin/TLR5 maintains; P. bifermentans live disrupts barrier/colitis while metabolite enhances ICI, showing barrier disruption and efficacy can be mechanistically separated. Source P0073 P0284.\n2. 细菌易位的主动路径与解剖中转：P0166, P0084, P0438. development: ICT induces DC CCR7 uptake and MLN/TDLN/tumor translocation; MLN required; PDAC translocation activates PRR/TAM; local pathobionts can suppress NK/MDSC. Emphasize not passive leak, depends on treatment and immune carriers. Sources P0166 P0084 P0438.\n3. 髓系重编程决定易位后果：P0084, P0362, P0438, P0573/P0584? development: translocated PRR ligands and barrier-derived signals polarize TAMs/MDSCs; in PDAC TLR/TAM suppress, antibiotics restore M1/CD8; general resistance network MDSC/TAM/hypoxia; FMT reviews show TME myeloid remodeling can be beneficial or suppressive. Sources P0084 P0362 P0438 P0573.\n4. 人类证据与情境边界：P0583, P0284, P0573, P0584? development: human FMT-LUMINate responders lose harmful taxa, lower tryptophan metabolites, CD8 increase; Prevotella cluster B severe irAEs only dual ICI; P. bifermentans dual toxicity/efficacy; FMT failures show not universal. Do not infer clinical causality from mouse. Sources P0583 P0284 P0573 P0584.\nMaybe combine 3/4 to keep 3 paragraphs? We can have 4. The original had 2. More detailed okay.\n\nNeed update ordered_development: from barrier -> translocation -> myeloid -> human boundary.\n\nSubstantive_point: 髓系重编程与屏障/易位不是并列名词，而是条件化顺序：屏障状态与菌株/治疗背景决定细菌是否易位；易位至 MLN/肿瘤的微生物经 DC/PRR 重编程髓系与 T 细胞反应，可增强或抑制 ICI。\n\nSynthesis_and_transition: summarize and transition to Ch2_U04? U03 next is Ch2_U04 tumor type/model differences. Need transition: these mechanisms vary by tumor and model, next unit compares. Good.\n\nNeed ensure not deep metabolite concentration/dose. P0583 tryptophan metabolites lower; we can mention systemic metabolic changes but not concentration/dose, refer Ch3. P0284 <3kDa metabolite unidentified; mention as functional fraction, not dose. Avoid inosine/UBA6.\n\nNeed unit_id_remap: {\"Ch2_U01\":[\"Ch2_U01\"], \"Ch2_U03\":[\"Ch2_U03\"]}.\n\nNeed output JSON only. Need valid JSON. Use Chinese strings. Ensure no trailing commas.\n\nPotential issue: updated_plan: Should include only units? Could include chapter_id, title, reader_objective, thesis, units. The instruction says complete updated_plan. If we omit readonly units, is it complete? They said complete updated_plan for modifiable units. To be safe, include \"modifiable_unit_ids\"? Maybe:\nupdated_plan: {\n  \"chapter_id\": \"Ch2\",\n  \"title\": \"...\",\n  \"reader_objective\": \"...\",\n  \"thesis\": \"...\",\n  \"units\": [Ch2_U01, Ch2_U03],\n  \"modifiable_unit_ids\": [\"Ch2_U01\",\"Ch2_U03\"],\n  \"note\": \"本更新计划仅覆盖本轮可编辑单元；只读邻章单元未改写\"\n}\nBut adding note maybe okay. But they may expect full chapter plan with all units? The instruction: \"Return a complete replacement plan including every existing substantive unit, even when only one unit needs correction.\" But then autonomous scope: \"本次输入的 chapter_plan 只包含并只允许修改 payload.modifiable_unit_ids。这里的 complete updated_plan 指对这组可编辑单元的完整计划；可以在这些单元内拆分或合并...\" So only two units. Good.\n\nNeed decide whether include case_objects for P0561/P0146 removed. Could mention in synthesis? No.\n\nNeed maybe include \"evidence_level_comparison\" field? Could be useful. But not required.\n\nLet's draft JSON carefully.\n\nCh2_U01 fields:\nunit_id: \"Ch2_U01\"\nsubstantive_point: string.\nordered_development: string.\ncase_objects: array of objects with conditions, finding, paper_id, source_handle. Need include only supported. Use P0080, P0114, P0242, P0583, P0535? P0535 case maybe:\nconditions: \"多种实体瘤组织与肿瘤内微生物群综述证据；关注 Bifidobacterium、Akkermansia 及 STING 等通路。\"\nfinding: \"肿瘤内有益菌（如 Bifidobacterium）与 STING 激活、免疫增强和 ICI 响应相关，但该证据属于肿瘤内微生物生态，不能直接等同肠道菌群因果机制。\"\nsource P0535. Good.\nMaybe P0333/P0132 not case objects but supporting.\n\nparagraph_briefs:\n[\n{paragraph_id:\"Ch2_U01_P01\", unit_id:\"Ch2_U01\", point:\"...\", development:\"...\", source_handles:[\"P0080\",\"P0309\",\"P0028\"]},\n{paragraph_id:\"Ch2_U01_P02\", point:\"DC 亚群、迁移与 STING/IFN-β 轴\", development:\"...\", source_handles:[\"P0114\",\"P0132\",\"P0333\",\"P0309\"]},\n{paragraph_id:\"Ch2_U01_P03\", point:\"DC 检查点语气与人类证据边界\", development:\"...\", source_handles:[\"P0242\",\"P0080\",\"P0583\",\"P0535\"]}\n]\nNeed maybe P0132/P0333 are reviews; development should say “综述汇总的临床前证据”.\n\nsupporting_studies: include P0080, P0114, P0132, P0242, P0333, P0309, P0028, P0535, P0583. Need paper_id values from input.\nP0080 paper_id 1c98...\nP0114 3138...\nP0132 3ae...\nP0242 657...\nP0333 8e25...\nP0309 8552...\nP0028 0d36...\nP0535 eea...\nP0583 0718...\nContribution strings with conditions/limits.\n\nsynthesis_and_transition: Need mention PRR/DC initiation, boundary to U02 T cell priming. Good.\n\nCh2_U03 fields:\ncase_objects: P0073, P0166, P0284, P0084, P0583, maybe P0573? P0573 is review, not case. Could include P0362? Maybe case objects should be concrete studies. Include P0573? It is review; can be supporting. Case objects can include reviews? Existing included. But better concrete: P0073, P0166, P0284, P0084, P0583. Add P0362? It's general resistance review, not case. Use supporting.\n\nparagraph_briefs 4:\nCh2_U03_P01 barrier gate: sources P0073, P0284.\nCh2_U03_P02 active translocation: sources P0166, P0084, P0438.\nCh2_U03_P03 myeloid reprogramming: sources P0084, P0362, P0438, P0573.\nCh2_U03_P04 human perturbation and dual effects boundary: sources P0583, P0284, P0573, P0584.\nNeed P0584 source material present. Use P0584 only for context-dependent taxa/mechanisms, not ADA1. Could include source P0584 in P04 or P03. But P0584 is same review as P0333; okay. It says mechanisms LGG/BF839 STING, Enterococcus NOD2, AhR, context; not myeloid? It includes irAE and interventions. Use as context for human boundary? Maybe P0584 supports context-dependent biomarkers and preclinical mechanisms. But to avoid overuse, include P0584 in P04 with P0573.\n\nsupporting_studies U03: P0073, P0166, P0084, P0284, P0362, P0438, P0573, P0583, P0584. Maybe remove P0539. Include paper_ids:\nP0073 1a747...\nP0166 48ff...\nP0084 1e9b...\nP0284 7cdc...\nP0362 9d35...\nP0438 c01d...\nP0573 ff51...\nP0583 0718...\nP0584 CorpusId:290154100.\nContribution strings.\n\nNeed maybe include \"argument_relations\"? Could add in unit:\n\"argument_relations\": \"先天识别与 DC 启动为后续 T 细胞亚群与耗竭讨论提供上游机制；本单元仅处理 PRR/DC 层面，不展开代谢物剂量。\"\nBut not necessary. Could include to help.\n\nNeed ensure no claims like \"P0583 STING\". In U01 paragraph 3: use P0583 for human FMT pathobiont loss and CD8, not STING. P0535 for STING associations but intratumoral. Good.\n\nNeed correct P0573 case in U03? We won't use P0573 for FMT-LUMINate detailed; use P0583. P0573 supporting as review of FMT mechanisms/failures.\n\nNeed mention evidence levels in thesis and unit syntheses.\n\nPotential JSON size large but okay.\n\nDouble-check source handles and paper_ids:\nP0028 paper_id 0d36b62772e0930cc8aead7edc85535b5b389e25\nP0080 1c98ea21fbac0226e1f0c817968ad885448151f3\nP0114 3138b2ba3413f9ffc9b5e0000b6c0310cb34cd84\nP0132 3ae3c79b877e85a192dae9804adf84211ceedab7\nP0242 657c221351daa09b93f85f8beef5195760d2acbb\nP0309 8552db34c533ee32ec30305e104babc5da9914ae\nP0333 8e25ec1d06aea0a73a479436c268bc6fab267259\nP0535 eea4059be35526f75d745cc8d16db8ec33658f69\nP0583 071823eff68d7dbea395490dd4643170131b5f6a\nP0073 1a747439d702aff9bb8fb4513e8de0c1063c237a\nP0166 48ff8778babb3307819f8c65b752079c1045f3a6\nP0084 1e9bcb85e156528e8eb9e781e4d4845dc4149ed6\nP0284 7cdc8a62c7a781f0b9a88abe52934ab9b889134d\nP0362 9d35f21e0312f02012226526155eabf2efc7472f\nP0438 c01d091d25a86879909c5dbeacff09210ff73402\nP0573 ff51b7d7a956ceb17d4fb9e0f36c3446c6a4cf65\nP0584 CorpusId:290154100\n\nNeed maybe P0584 is same as P0333? It has source_handle P0584 and paper_id CorpusId:290154100. Use as given.\n\nNeed avoid using P0539. It was in original case objects; removing. Is that okay? Yes due off-scope and unsupported. Could mention in updated_plan note? Not necessary.\n\nNeed status \"updated\".\n\nLet's craft JSON. Ensure all quotes escaped? We'll output raw JSON.\n\nPotential issue: \"paper_id\":\"CorpusId:290154100\" okay.\n\nLet's formulate strings concise but detailed.\n\nCh2 thesis:\n\"肠道微生物组通过结构特异的微生物相关分子模式、先天识别受体（TLR4/NOD2/cGAS-STING）、DC 亚群成熟与迁移、肠道屏障状态及细菌易位、髓系细胞重编程等条件化环节，调节实体瘤 ICI 的抗肿瘤免疫；这些机制的因果证据主要来自特定小鼠模型与体外/芯片系统，人类证据多为队列关联或早期干预试验中的伴随观察，外推需受肿瘤类型、ICI 方案与模型系统限制。\"\nGood.\n\nReader objective similar.\n\nCh2_U01 substantive_point:\n\"先天免疫识别与 DC 抗原呈递启动：微生物分子结构（如六酰化 LPS）与 PRR/STING 通路决定 DC 成熟、迁移和 CD8+ T 细胞启动，但人类证据主要为宏基因组关联、临床干预伴随观察或肿瘤内微生物生态相关数据。\"\n\nordered_development:\n\"先以 LPS 酰化与 MAMPs 说明先天识别的结构特异性；再以 CD103+ DC、IRF8、CCR7/迁移和 cGAS-STING/IFN-β 说明 DC 如何桥接微生物信号与 CD8+ T 细胞启动；最后对比小鼠因果扰动与人类队列/肿瘤内观察，标注外推边界。\"\n\nCase object P0583: finding should not say DC migration. \"响应者表现为基线有害菌大幅丢失、血浆色氨酸代谢产物降低和效应 CD8+ T 细胞增加；该人类试验提供微生物重塑与免疫微环境改善的伴随关联，但不直接证明 DC 迁移或 STING 因果。\" Good.\n\nP0535 case: \"肿瘤内有益菌与 STING 激活/免疫增强相关，但属于肿瘤内微生物生态，需与肠道菌群机制区分。\"\n\nParagraph 3 development: \"C. cateniformis 通过表面提取物经 MYD88 下调 DC PD-L2，减弱 PD-L2/RGMb 抑制；人类黑色素瘤 lpxM 富集与 FMT-LUMINate 有害菌丢失提供关联/伴随证据；肿瘤内 Bifidobacterium-STING 等观察提示局部生态可能呼应类似通路，但不能替代肠道因果验证。\"\n\nNeed include P0028 in paragraph 1: Fn succinate suppress cGAS-IFN-beta, TLR4/NLRP3 context. Good.\n\nCh2_U03 substantive_point:\n\"屏障完整性、细菌易位与髓系重编程构成连续而条件依赖的机制链：屏障破坏或治疗诱导的主动易位可将微生物信号送入 MLN、肿瘤或全身免疫区室；其后果取决于易位菌种/分子、受体通路及肿瘤微环境中的髓系细胞状态。\"\n\nordered_development:\n\"先建立屏障完整性作为闸门；再解析 ICT/肿瘤背景下的主动细菌易位与解剖中转；随后说明易位微生物如何通过 PRR 重编程 TAM/MDSC 并改变 CD8+ T 细胞启动；最后用人类 FMT 与同一菌种双重效应标注证据边界。\"\n\nParagraph 1 development: include P0073 NR feces LPS, ZO-1/β-catenin, permeability, TNF/IL-6/NF-kB; responder flagellin TLR5/IL-1β/IL-10; P0284 live P. bifermentans disrupts ZO-1/occludin, TNF/IL-1, metabolite <3kDa retains anti-tumor benefit. Note chip lacks immune cells.\n\nParagraph 2: P0166 ICT induces DC CCR7 bacteria to MLN/TDLN/tumor; MLN resection; antibiotics; not generalized permeability. P0084 PDAC translocation PRR/TAM; P0438 Fn MDSC/NK. Good.\n\nParagraph 3: P0084 TAM/TLR immunosuppressive, antibiotics M1/CD8; P0362 MDSC/TAM/TGF-beta/IL-10/hypoxia/lactate; P0438; P0573 FMT TME remodeling CD8/Treg/MDSC, failures. Good.\n\nParagraph 4: P0583 human FMT responders lose harmful taxa, lower tryptophan metabolites, CD8; mouse re-introduction; Prevotella cluster B severe irAEs only dual ICI; P0284 dual; P0573/P0584 context. Note not dose/metabolite concentration (Ch3). Good.\n\nSynthesis U03: \"屏障与易位并非天然有益；同一菌种可同时介导屏障损伤/毒性与代谢组分增效。人类证据显示微生物重塑与免疫变化相关，但因果链条主要由小鼠/体外模型支持。下一单元比较肿瘤类型与模型差异。\"\n\nNeed maybe include \"limitations\" in supporting studies? We can include \"limits\" field. But not too much.\n\nLet's ensure JSON valid. Use arrays and objects. No comments.\n\nOne more thought: The user says \"Do not let one unanswered retrieval need dominate...\" irrelevant.\n\nNeed not request materials. Materials sufficient.\n\nPotential issue: P0333 and P0584 are same paper? If both used, duplicate? It's okay but maybe avoid double counting. U01 uses P0333; U03 uses P0584. They are same identity but different handles. Input has both; preserve namespaces. Good.\n\nPotential issue: P0583 deep read says melanoma cohort 19/20 any AE, 12/20 grade3+, 3 myocarditis; ORR etc. In U03 P4 we can mention toxicity. But U03 is efficacy mechanisms; toxicity relevant dual effects. Keep concise.\n\nPotential issue: P0284 clinical cohorts show grade≥2 irAEs associated with longer OS/PFS; could mention but not necessary. It supports dual. Use conditions.\n\nPotential issue: P0166 says translocation does not depend on systemic barrier permeability. Good to contrast with barrier disruption. Include.\n\nPotential issue: P0073 uses responder fecal flagellin TLR5, IL-1β usually inflammatory but here barrier protection. Mention context.\n\nPotential issue: P0080 penta-acylated LPS can antagonize hexa-LPS; good.\n\nPotential issue: P0114 is conference abstract; note evidence strength limited. In supporting contribution: \"会议摘要，机制细节来自动物模型\".\n\nPotential issue: P0132/P0309/P0333 are reviews; use as summaries not primary. In paragraph development specify \"综述归纳的临床前机制\".\n\nNow final JSON. Ensure status top-level. unit_id_remap.\n\nNeed maybe include \"chapter_updates\" one item. updated_plan includes units. Good.\n\nLet's produce final.",
+    "parsed_output": {
+      "status": "updated",
+      "chapter_updates": [
+        {
+          "chapter_id": "Ch2",
+          "updated_plan": {
+            "chapter_id": "Ch2",
+            "title": "微生物调节 ICI 疗效的免疫学机制",
+            "reader_objective": "帮助读者建立“微生物信号→先天识别→适应性启动→髓系/屏障重塑”的条件化机制链条认知，明确哪些环节由特定菌株、分子结构、DC 亚群、屏障状态或细菌易位驱动，哪些证据来自小鼠模型、体外/芯片系统，哪些仅来自人类队列或早期干预试验的伴随观察，为后续代谢物专论（Ch3）与临床转化（Ch5）奠定生物学基础。",
+            "thesis": "肠道微生物组通过结构特异的微生物相关分子模式、先天识别受体（TLR4、NOD2、cGAS-STING）、DC 亚群成熟与迁移、肠道屏障状态及细菌易位、髓系细胞重编程等条件化环节，调节实体瘤 ICI 的抗肿瘤免疫；这些机制的因果证据主要来自特定小鼠模型与体外/芯片系统，人类证据多为队列关联或早期干预试验中的伴随观察，外推需受肿瘤类型、ICI 方案与模型系统限制。",
+            "modifiable_unit_ids": [
+              "Ch2_U01",
+              "Ch2_U03"
+            ],
+            "units": [
+              {
+                "unit_id": "Ch2_U01",
+                "substantive_point": "先天免疫识别与树突状细胞（DC）的抗原呈递启动：微生物分子结构（如六酰化 LPS）与 PRR/STING 通路决定 DC 成熟、迁移和 CD8+ T 细胞启动，但人类证据主要为宏基因组关联、临床干预伴随观察或肿瘤内微生物生态相关数据。",
+                "ordered_development": "先以 LPS 酰化状态与 MAMPs 说明先天识别的结构特异性；再以 CD103+ DC、IRF8、迁移及 cGAS-STING/IFN-β 说明 DC 如何桥接微生物信号与 CD8+ T 细胞启动；最后对比小鼠因果扰动与人类队列/肿瘤内观察，标注外推边界。",
+                "case_objects": [
+                  {
+                    "conditions": "112 例黑色素瘤患者基线粪便宏基因组；小鼠 MC38 结肠腺癌模型，抗 PD-1 治疗；口服六酰化或五酰化 LPS；TLR4 抑制剂 TAK-242 或粘菌素 B 干预。",
+                    "finding": "响应者中编码六酰化 LPS 的 lpxM 基因富集，非响应者中总 LPS 合成基因及五酰化 lpxL 基因更高；小鼠中六酰化 LPS 经 TLR4/NF-κB 增强抗 PD-1 疗效并增加肿瘤浸润 IFNγ+/TNF+ CD8+ T 细胞，五酰化 LPS 无效且可拮抗六酰化 LPS。该研究提供人类关联与小鼠因果验证，但宏基因组推断的是基因潜力，且主要限于黑色素瘤与 MC38 模型。",
+                    "paper_id": "1c98ea21fbac0226e1f0c817968ad885448151f3",
+                    "source_handle": "P0080"
+                  },
+                  {
+                    "conditions": "从 PD-1 响应实体瘤患者粪便中分离的新型 Ruminococcaceae 菌株；动物模型中联合 PD-1 阻断，包括非响应者粪便移植背景；机制分析聚焦 CD103+ DC、IRF8、TLR 信号与 CD8+ T 细胞。",
+                    "finding": "该菌株通过刺激多个 TLR，促进 IRF8 驱动的 CD103+ DC 分化、成熟及向肿瘤微环境和肿瘤引流淋巴结迁移；DC 与 CD8+ T 细胞接触延长，经 NFATc1 核转位增强肿瘤抗原特异性 CD8+ T 细胞激活并上调 PD-1。该证据为动物模型中的机制发现，摘要未提供完整样本量与统计细节。",
+                    "paper_id": "3138b2ba3413f9ffc9b5e0000b6c0310cb34cd84",
+                    "source_handle": "P0114"
+                  },
+                  {
+                    "conditions": "无菌鼠、抗生素处理鼠、定植健康人/小鼠微生物群或患者粪便的 C57BL/6 小鼠；MC38、B16-OVA 等肿瘤模型；抗 PD-1/PD-L1 联合抗 PD-L2 或抗 RGMb 干预。",
+                    "finding": "Coprobacillus cateniformis 表面提取物可经 MYD88 依赖途径下调 DC 表面 PD-L2，减弱 PD-L2 与 T 细胞 RGMb 的抑制性互作；在微生物缺失或患者非响应者粪便定植模型中，阻断 PD-L2/RGMb 可恢复抗 PD-1/PD-L1 疗效。该机制主要基于小鼠模型，尚缺人体直接验证。",
+                    "paper_id": "657c221351daa09b93f85f8beef5195760d2acbb",
+                    "source_handle": "P0242"
+                  },
+                  {
+                    "conditions": "FMT-LUMINate II 期试验：晚期 NSCLC 接受 FMT 联合抗 PD-1 单药，黑色素瘤接受 FMT 联合抗 PD-1/CTLA-4；微生物组、血浆代谢组与免疫表型伴随分析。",
+                    "finding": "响应者并非主要依赖供体菌株定植，而是表现为基线有害细菌物种（如 Enterocloster、Clostridium 等）的大幅丢失，伴随血浆色氨酸代谢产物降低和效应性 CD8+ T 细胞增加；动物回输实验提示清除这些有害菌是疗效所需。该人类试验提供微生物重塑与免疫微环境改善的伴随关联，但不直接证明 DC 迁移或 STING 因果。",
+                    "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a",
+                    "source_handle": "P0583"
+                  },
+                  {
+                    "conditions": "多种实体瘤中肿瘤内微生物群的综述性证据；涉及 Bifidobacterium、Akkermansia、Fusobacterium nucleatum 及 STING、PD-L1 等通路。",
+                    "finding": "肿瘤内有益菌（如 Bifidobacterium）可与 STING 激活、免疫增强和 ICI 响应相关，而 Fn 等可诱导免疫抑制；但该证据属于肿瘤内微生物生态，不能直接等同肠道菌群因果机制，且多为临床前或相关性观察。",
+                    "paper_id": "eea4059be35526f75d745cc8d16db8ec33658f69",
+                    "source_handle": "P0535"
+                  }
+                ],
+                "paragraph_briefs": [
+                  {
+                    "paragraph_id": "Ch2_U01_P01",
+                    "unit_id": "Ch2_U01",
+                    "point": "先天识别不是“有菌即激活”，而受微生物分子结构与受体语境调节。",
+                    "development": "以六酰化 LPS 与五酰化 LPS 的差异为核心，说明 LPS 酰化状态如何通过 TLR4/NF-κB 改变 DC/髓系细胞激活及抗 PD-1 疗效；同时引入 MAMPs 经 TLR/NOD2 刺激抗原呈递细胞、促进 Th1 极化的综述框架，并用 CRC 综述中 TLR4/NLRP3 与 Fn/cGAS-IFN-β 的语境差异提示同一通路在不同肿瘤或微生物背景下可能产生不同方向。",
+                    "source_handles": [
+                      "P0080",
+                      "P0309",
+                      "P0028"
+                    ]
+                  },
+                  {
+                    "paragraph_id": "Ch2_U01_P02",
+                    "unit_id": "Ch2_U01",
+                    "point": "DC 亚群成熟、迁移与 STING/IFN-β 轴是微生物信号转化为 CD8+ T 细胞启动的关键节点。",
+                    "development": "以 P0114 的 Ruminococcaceae 菌株为例，说明 TLR 刺激如何经 IRF8 驱动 CD103+ DC 分化并向肿瘤及引流淋巴结迁移，进而通过 NFATc1 增强 CD8+ T 细胞激活和 PD-1 表达；再以综述中的临床前证据补充口服乳酸杆菌、LGG、BF839 或 c-di-AMP 等通过 cGAS-STING/IFN-β 增强 DC 功能和 CD8+ T 细胞浸润，但需明确这些多为动物或综述归纳证据，不能直接外推为人类普适机制。",
+                    "source_handles": [
+                      "P0114",
+                      "P0132",
+                      "P0333",
+                      "P0309"
+                    ]
+                  },
+                  {
+                    "paragraph_id": "Ch2_U01_P03",
+                    "unit_id": "Ch2_U01",
+                    "point": "微生物还可调节 DC 检查点语气，但人类证据仍以关联和伴随观察为主。",
+                    "development": "以 P0242 的 C. cateniformis 为例，说明微生物表面成分可通过 MYD88 下调 DC PD-L2，减弱 PD-L2/RGMb 对 CD8+ T 细胞的抑制，从而在微生物缺失或非响应者粪便模型中恢复 ICI 疗效；随后用 P0080 的人类黑色素瘤 lpxM 关联、P0583 的 FMT 后有害菌丢失与 CD8+ T 细胞增加，以及 P0535 的肿瘤内 Bifidobacterium/STING 观察，对比人类层面的关联证据与肿瘤内生态线索，强调这些人类数据不能直接证明与小鼠相同的因果链条。",
+                    "source_handles": [
+                      "P0242",
+                      "P0080",
+                      "P0583",
+                      "P0535"
+                    ]
+                  }
+                ],
+                "supporting_studies": [
+                  {
+                    "source_handle": "P0080",
+                    "paper_id": "1c98ea21fbac0226e1f0c817968ad885448151f3",
+                    "contribution": "提供六酰化 LPS 经 TLR4/NF-κB 增强抗 PD-1 疗效、五酰化 LPS 拮抗的具体分子案例，并配套人类黑色素瘤宏基因组关联与 MC38 小鼠因果验证。",
+                    "conditions": "人类黑色素瘤基线宏基因组；小鼠 MC38 抗 PD-1 模型；LPS 结构差异。",
+                    "limits": "宏基因组推断基因潜力而非直接测量 LPS 产物；主要限于黑色素瘤与 MC38；人与小鼠 TLR4/MD2 对 LPS 酰化状态敏感性可能不同。"
+                  },
+                  {
+                    "source_handle": "P0114",
+                    "paper_id": "3138b2ba3413f9ffc9b5e0000b6c0310cb34cd84",
+                    "contribution": "提供响应者来源 Ruminococcaceae 菌株通过 TLR/IRF8 驱动 CD103+ DC 分化、迁移并增强 CD8+ T 细胞激活的 DC 亚群特异性机制。",
+                    "conditions": "动物模型；PD-1 响应者粪便分离菌株；非响应者粪便移植背景。",
+                    "limits": "会议摘要，样本量、统计细节和普适性不足；仅限单一菌株与特定 DC 亚群。"
+                  },
+                  {
+                    "source_handle": "P0132",
+                    "paper_id": "3ae3c79b877e85a192dae9804adf84211ceedab7",
+                    "contribution": "提供综述层面的临床前证据，说明口服乳酸杆菌等可通过 cGAS/STING 诱导 DC IFN-β 并促进 CD8+ T 细胞浸润。",
+                    "conditions": "综述归纳；主要为肿瘤治疗背景下的动物模型与机制研究。",
+                    "limits": "综述未提供新原始数据；具体效应依赖所引用研究，不能视为统一人类机制。"
+                  },
+                  {
+                    "source_handle": "P0242",
+                    "paper_id": "657c221351daa09b93f85f8beef5195760d2acbb",
+                    "contribution": "提供微生物直接调控 DC 检查点分子 PD-L2/RGMb 的因果案例，补充先天识别之外微生物调节 DC 抑制性语气的路径。",
+                    "conditions": "无菌/抗生素小鼠、患者粪便移植、MC38/B16 等模型；抗 PD-1/PD-L1 联合抗 PD-L2/RGMb。",
+                    "limits": "主要基于小鼠；并非所有肿瘤模型均显示联合获益；人体中 PD-L2/PD-1 与 PD-L2/RGMb 相对贡献未明。"
+                  },
+                  {
+                    "source_handle": "P0333",
+                    "paper_id": "8e25ec1d06aea0a73a479436c268bc6fab267259",
+                    "contribution": "提供 LGG、BF839、Akkermansia 等通过 cGAS-STING 或其他通路调节 DC 与 CD8+ T 细胞的综述性机制图谱。",
+                    "conditions": "综述；跨 ICI 方案与多癌种机制归纳。",
+                    "limits": "叙述性综述，缺乏正式质量评估；多数机制来自临床前或小样本研究。"
+                  },
+                  {
+                    "source_handle": "P0309",
+                    "paper_id": "8552db34c533ee32ec30305e104babc5da9914ae",
+                    "contribution": "提供 MAMPs（如鞭毛蛋白、肽聚糖）经 TLR/NOD2 刺激 APC、促进 Th1 极化和抗原呈递的跨免疫干预框架。",
+                    "conditions": "综述；涵盖 ICI 与疫苗反应比较。",
+                    "limits": "机制多来自临床前模型；SCFA 等效应具有情境依赖性，不能线性外推。"
+                  },
+                  {
+                    "source_handle": "P0028",
+                    "paper_id": "0d36b62772e0930cc8aead7edc85535b5b389e25",
+                    "contribution": "提供 CRC 背景下 TLR4/NLRP3、Fn 琥珀酸抑制 cGAS-IFN-β、B. fragilis 多糖与 CTLA-4 协同等语境化案例，防止将 PRR 通路写成单向促免疫。",
+                    "conditions": "CRC 免疫微环境综述；部分机制来自小鼠或体外。",
+                    "limits": "主要聚焦 CRC；不同微生物与癌种中同一通路方向可能不同。"
+                  },
+                  {
+                    "source_handle": "P0535",
+                    "paper_id": "eea4059be35526f75d745cc8d16db8ec33658f69",
+                    "contribution": "提供肿瘤内微生物群与 STING、PD-L1、MDSC 等免疫调节通路的综述证据，作为肠道机制与局部肿瘤生态之间的边界参照。",
+                    "conditions": "肿瘤内微生物群综述；多癌种、多方法学证据。",
+                    "limits": "聚焦肿瘤内微生物而非肠道微生物；低生物量与污染问题需谨慎；多为相关性或临床前机制。"
+                  },
+                  {
+                    "source_handle": "P0583",
+                    "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a",
+                    "contribution": "提供人类 II 期 FMT 联合 ICI 中微生物重塑、色氨酸代谢产物下降与 CD8+ T 细胞增加的伴随机制线索，作为临床层级证据。",
+                    "conditions": "FMT-LUMINate II 期试验；NSCLC 抗 PD-1 单药，黑色素瘤抗 PD-1/CTLA-4 双药。",
+                    "limits": "单臂、小样本；机制关联需结合动物实验，不能单独证明人类因果；不深入代谢物浓度与剂量问题。"
+                  }
+                ],
+                "synthesis_and_transition": "先天识别与 DC 成熟构成微生物信号进入抗肿瘤免疫的第一道闸门，但其方向取决于微生物分子结构、DC 亚群、检查点语气和肿瘤背景。小鼠模型提供了受体、细胞与菌株层面的因果链条，人类队列则主要提供宏基因组、免疫表型或干预伴随关联。DC 启动之后，T 细胞克隆扩增、亚群平衡与耗竭状态将决定疗效能否持续，这是下一单元的任务。",
+                "argument_relations": "本单元为 Ch2_U02 的 T 细胞 priming 与亚群平衡提供上游先天识别/DC 机制；不展开代谢物浓度与剂量问题，相关代谢物中介主要留给 Ch3。"
+              },
+              {
+                "unit_id": "Ch2_U03",
+                "substantive_point": "屏障完整性、细菌易位与髓系重编程构成连续而条件依赖的机制链：屏障破坏或治疗诱导的主动易位可将微生物信号送入肠系膜淋巴结、肿瘤或全身免疫区室；其后果取决于易位菌种/分子、受体通路及肿瘤微环境中的髓系细胞状态。",
+                "ordered_development": "先建立肠道屏障完整性作为条件闸门；再解析免疫检查点阻断或肿瘤背景下细菌向次级淋巴器官/肿瘤的主动易位；随后说明易位微生物如何通过 PRR 重编程 TAM/MDSC 并改变 CD8+ T 细胞启动；最后用人类 FMT 与同一菌种双重效应标注证据边界。",
+                "case_objects": [
+                  {
+                    "conditions": "集成蠕动功能的人源肠芯片；黑色素瘤 ICI 响应者/非响应者粪便悬液或上清；Caco-2/HT-29 或 hiPSC 肠类器官与内皮细胞共培养；LPS 与鞭毛蛋白对照。",
+                    "finding": "非响应者粪便或 LPS 重现屏障损伤：ZO-1/β-catenin 下调、通透性增加、TNF/IL-6/NF-κB 促炎通路激活；响应者粪便富含鞭毛蛋白相关基因，激活 TLR-5 并伴随 IL-1β/IL-10 变化，屏障较稳定；纯化鞭毛蛋白可部分逆转 LPS 损伤。该模型提供人类粪便功能差异的体外机制证据，但未整合完整免疫系统。",
+                    "paper_id": "1a747439d702aff9bb8fb4513e8de0c1063c237a",
+                    "source_handle": "P0073"
+                  },
+                  {
+                    "conditions": "B16-F10 黑色素瘤小鼠；联合抗 PD-1/CTLA-4；DC 耗竭、CCR7 缺失、MLN 切除、抗生素处理或特定菌株回补。",
+                    "finding": "ICT 诱导特定肠道细菌（如 Enterococcus faecalis、Lactobacillus johnsonii）经 DC 摄取并以 CCR7 依赖方式转移至肠系膜淋巴结、肿瘤引流淋巴结和肿瘤；MLN 切除降低远端细菌负荷并削弱 ICT 诱导的 CD8+ T 细胞活化与抗肿瘤疗效；抗生素清除肠道菌群削弱疗效，回补可转移菌株部分恢复疗效。该过程不依赖全身肠道屏障通透性的普遍增加。",
+                    "paper_id": "48ff8778babb3307819f8c65b752079c1045f3a6",
+                    "source_handle": "P0166"
+                  },
+                  {
+                    "conditions": "黑色素瘤/NSCLC ICI 队列；ir-colitis 患者粪便培养组学；抗生素处理小鼠 FMT；Caco-2 屏障共培养；DSS 结肠炎与 MCA-205 肿瘤模型；P. bifermentans 活菌、上清或 <3 kDa 组分。",
+                    "finding": "Paraclostridium bifermentans 在急性 ir-colitis 中富集；活菌破坏 Caco-2 ZO-1/Occludin 并增加 TNF-α/IL-1β，而细胞游离上清不重现屏障破坏；口服活菌增强双 ICI 抗肿瘤反应，且 <3 kDa 小分子组分保留增效作用。该案例显示同一菌种可通过活菌依赖的屏障/炎症效应与代谢组分介导的疗效效应并行。",
+                    "paper_id": "7cdc8a62c7a781f0b9a88abe52934ab9b889134d",
+                    "source_handle": "P0284"
+                  },
+                  {
+                    "conditions": "PDAC 小鼠模型、KPC 粪便移植、抗生素处理、体外/体内巨噬细胞实验；综述整合门静脉、肠系膜淋巴结或胆道等潜在易位路径。",
+                    "finding": "肠道菌群或肿瘤内易位细菌可通过 PRR（如 TLR 信号）诱导巨噬细胞/TAM 向免疫抑制表型转化，抑制 T 细胞活化；清除肠道菌群后 TAM 更偏促炎表型，CD8+ T 细胞浸润增加，抗生素与抗 PD-1 在 PDAC 模型中显示协同。该证据主要为临床前综述整合，人体直接验证有限。",
+                    "paper_id": "1e9bcb85e156528e8eb9e781e4d4845dc4149ed6",
+                    "source_handle": "P0084"
+                  },
+                  {
+                    "conditions": "FMT-LUMINate II 期试验：NSCLC 抗 PD-1 单药，黑色素瘤抗 PD-1/CTLA-4 双药；宏基因组、代谢组、流式细胞术与小鼠因果验证。",
+                    "finding": "响应者以基线有害菌丢失为主，而非供体菌定植；伴随血浆色氨酸代谢产物降低与效应 CD8+ T 细胞增加；重新引入丢失的有害菌可抵消小鼠中的疗效。黑色素瘤双 ICI 背景下，富含 Prevotella 的供体簇与更严重免疫相关不良事件相关，而单药抗 PD-1 背景未观察到同等毒性。该案例提供人类干预中微生物重塑、免疫代谢与安全性情境依赖的边界。",
+                    "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a",
+                    "source_handle": "P0583"
+                  }
+                ],
+                "paragraph_briefs": [
+                  {
+                    "paragraph_id": "Ch2_U03_P01",
+                    "unit_id": "Ch2_U03",
+                    "point": "肠道屏障完整性是微生物信号能否转化为全身免疫事件的条件闸门。",
+                    "development": "用肠芯片证据说明非响应者粪便/LPS 可破坏 ZO-1/β-catenin 并激活 TNF/IL-6/NF-κB，而响应者粪便中鞭毛蛋白/TLR-5 相关信号与屏障维持相关；再引入 P. bifermentans 活菌破坏上皮屏障并诱导炎症、但其无细胞小分子组分保留抗肿瘤增效的双重结构，强调屏障损伤与疗效增强并非同一机制的必然结果。",
+                    "source_handles": [
+                      "P0073",
+                      "P0284"
+                    ]
+                  },
+                  {
+                    "paragraph_id": "Ch2_U03_P02",
+                    "unit_id": "Ch2_U03",
+                    "point": "细菌易位可以是治疗诱导的主动免疫转运过程，而非单纯被动漏肠。",
+                    "development": "以 P0166 为核心，说明联合 ICT 诱导特定肠道细菌经 DC 摄取并以 CCR7 依赖方式进入 MLN、TDLN 和肿瘤，MLN 切除会削弱远端抗肿瘤免疫；结合 PDAC 综述中细菌经门静脉/淋巴/胆道等路径进入肿瘤或次级淋巴器官并激活局部 PRR 的描述，以及消化道肿瘤中 Fn 等病原菌局部免疫抑制的案例，建立“屏障—转运—局部免疫”的解剖链条。",
+                    "source_handles": [
+                      "P0166",
+                      "P0084",
+                      "P0438"
+                    ]
+                  },
+                  {
+                    "paragraph_id": "Ch2_U03_P03",
+                    "unit_id": "Ch2_U03",
+                    "point": "易位微生物的免疫后果主要由髓系细胞重编程决定。",
+                    "development": "说明易位细菌或屏障来源信号可通过 TLR/PRR 改变 TAM、MDSC 和巨噬细胞表型：在 PDAC 背景中促进免疫抑制性 TAM 并限制 T 细胞活化，抗生素清除后可恢复促炎表型与抗 PD-1 反应；同时用广谱 ICI 耐药综述补充 MDSC、M2 样 TAM、TGF-β/IL-10、缺氧和乳酸积累等共同构成免疫抑制网络；再用 FMT 综述指出微生物干预可能增加效应 T 细胞或减少抑制性髓系细胞，但失败案例同样存在。",
+                    "source_handles": [
+                      "P0084",
+                      "P0362",
+                      "P0438",
+                      "P0573"
+                    ]
+                  },
+                  {
+                    "paragraph_id": "Ch2_U03_P04",
+                    "unit_id": "Ch2_U03",
+                    "point": "人类证据显示微生物屏障/易位相关重塑具有疗效与毒性的情境依赖，但不能直接外推小鼠因果。",
+                    "development": "用 FMT-LUMINate 说明人类响应者以有害菌丢失、色氨酸代谢产物下降和 CD8+ T 细胞增加为特征，而 Prevotella 富集供体仅在双 ICI 背景下与严重毒性相关；结合 P. bifermentans 的活菌炎症/小分子增效双重机制与 FMT 综述中的异质性结果，强调同一微生物状态可能同时关联疗效与毒性，且依赖 ICI 方案、宿主基线与肿瘤类型。此处不展开代谢物浓度与剂量问题，留给 Ch3。",
+                    "source_handles": [
+                      "P0583",
+                      "P0284",
+                      "P0573",
+                      "P0584"
+                    ]
+                  }
+                ],
+                "supporting_studies": [
+                  {
+                    "source_handle": "P0073",
+                    "paper_id": "1a747439d702aff9bb8fb4513e8de0c1063c237a",
+                    "contribution": "提供人源肠芯片中响应者/非响应者粪便对屏障完整性、炎症通路和微生物分子（LPS/鞭毛蛋白）差异的功能证据。",
+                    "conditions": "黑色素瘤患者粪便；肠芯片；LPS 与鞭毛蛋白对照。",
+                    "limits": "体外模型未整合完整免疫系统；样本量小；不能直接等同体内全身疗效。"
+                  },
+                  {
+                    "source_handle": "P0166",
+                    "paper_id": "48ff8778babb3307819f8c65b752079c1045f3a6",
+                    "contribution": "提供 ICT 诱导肠道细菌经 DC/CCR7 向 MLN、TDLN 和肿瘤转移，并增强肠外抗肿瘤免疫的因果路径。",
+                    "conditions": "B16-F10 小鼠；联合抗 PD-1/CTLA-4；DC 耗竭、CCR7 缺失、MLN 切除、抗生素与菌株回补。",
+                    "limits": "仅限黑色素瘤小鼠模型；联合 ICT 与单药可能不同；检测方法影响可见菌群。"
+                  },
+                  {
+                    "source_handle": "P0084",
+                    "paper_id": "1e9bcb85e156528e8eb9e781e4d4845dc4149ed6",
+                    "contribution": "提供 PDAC 中肠道菌群/细菌易位通过 PRR 和巨噬细胞/TAM 重编程形成局部免疫抑制的综述性机制框架。",
+                    "conditions": "PDAC 小鼠模型、KPC 粪便移植、抗生素与抗 PD-1 联合；综述整合。",
+                    "limits": "人体直接证据有限；具体菌株与人体互作细节未完全验证。"
+                  },
+                  {
+                    "source_handle": "P0284",
+                    "paper_id": "7cdc8a62c7a781f0b9a88abe52934ab9b889134d",
+                    "contribution": "提供同一菌种 P. bifermentans 通过活菌破坏屏障/促炎、而小分子组分增强双 ICI 疗效的双重机制案例。",
+                    "conditions": "黑色素瘤/NSCLC 队列；培养组学；Caco-2 屏障；DSS/MCA-205 小鼠模型；<3 kDa 上清组分。",
+                    "limits": "活性代谢物身份未明；小鼠模型不能完全复现人类 ir-colitis；临床关联为队列观察。"
+                  },
+                  {
+                    "source_handle": "P0362",
+                    "paper_id": "9d35f21e0312f02012226526155eabf2efc7472f",
+                    "contribution": "提供 ICI 耐药中 MDSC、TAM、Treg、缺氧、乳酸和氨基酸代谢等免疫抑制网络的背景框架。",
+                    "conditions": "多实体瘤耐药机制综述。",
+                    "limits": "叙述性综述，非微生物特异；未分层量化微生物贡献。"
+                  },
+                  {
+                    "source_handle": "P0438",
+                    "paper_id": "c01d091d25a86879909c5dbeacff09210ff73402",
+                    "contribution": "提供消化道肿瘤中 Fn 抑制 NK/招募 MDSC、Barnesiella 增强 T 细胞浸润等局部微生物调控案例，补充易位后髓系/NK 语境。",
+                    "conditions": "胃癌、结直肠癌、胰腺癌等消化道肿瘤综述；部分机制来自感染或化疗背景。",
+                    "limits": "主要聚焦消化道肿瘤；许多机制来自特定病原或临床前模型，不能直接等同 ICI 普遍机制。"
+                  },
+                  {
+                    "source_handle": "P0573",
+                    "paper_id": "ff51b7d7a956ceb17d4fb9e0f36c3446c6a4cf65",
+                    "contribution": "提供 FMT 联合 ICI 的机制异质性综述：可增加效应 T 细胞、减少 Treg/MDSC，也可能失败或引入不利代谢/菌群。",
+                    "conditions": "FMT 与 ICI 联合治疗的临床前/临床研究综述。",
+                    "limits": "叙述性综述；供体、受体和方案差异大；不能替代原始因果证据。"
+                  },
+                  {
+                    "source_handle": "P0583",
+                    "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a",
+                    "contribution": "提供人类 FMT 联合 ICI 中基线有害菌清除、代谢产物下降、CD8+ T 细胞增加及方案依赖毒性信号的核心临床证据。",
+                    "conditions": "FMT-LUMINate II 期；NSCLC 抗 PD-1 单药，黑色素瘤抗 PD-1/CTLA-4 双药。",
+                    "limits": "单臂小样本；毒性关联需更大试验验证；机制外推受肿瘤类型和 ICI 方案限制。"
+                  },
+                  {
+                    "source_handle": "P0584",
+                    "paper_id": "CorpusId:290154100",
+                    "contribution": "提供微生物-代谢物-免疫轴的情境依赖综述框架，提示不同癌种、方案和宿主背景下同一微生物特征可能产生不同效应。",
+                    "conditions": "叙述性综述；涵盖多癌种、多 ICI 靶点与早期干预研究。",
+                    "limits": "无正式质量评估；多数机制来自临床前或小样本研究；不用于支持具体代谢物剂量结论。"
+                  }
+                ],
+                "synthesis_and_transition": "屏障、易位与髓系重编程不是彼此并列的名词，而是一条条件化链条：屏障状态和治疗背景决定微生物信号是否进入肠外免疫区室，易位后的菌种/分子决定髓系细胞是被激活还是被抑制，髓系状态又反过来决定 CD8+ T 细胞能否有效启动。人类干预试验显示这一链条可伴随疗效或毒性，但其因果细节仍主要由小鼠和体外模型支持。下一单元将比较这些机制在不同肿瘤类型与模型系统中的表达差异及外推边界。",
+                "argument_relations": "本单元承接 Ch2_U01 的先天识别/DC 启动，转向屏障与髓系层面的系统重塑，并为 Ch2_U04 的肿瘤类型特异性与模型差异提供机制基础；不重复 Ch5 的干预试验评价，也不深入 Ch3 的代谢物浓度/剂量问题。"
+              }
+            ]
+          }
+        }
+      ],
+      "unit_id_remap": {
+        "Ch2_U01": [
+          "Ch2_U01"
+        ],
+        "Ch2_U03": [
+          "Ch2_U03"
+        ]
+      }
+    }
+  },
+  "telemetry": {
+    "requested_model": "qwen3.8-max",
+    "returned_model": "qwen3.8-max",
+    "finish_reason": "stop",
+    "complete": true,
+    "request_id": "chatcmpl-a288729e-72c1-96e5-a8b8-e1595a1b0e9e",
+    "status_code": 200,
+    "call_id": "outline-selection:selection-de60904848d5c217:Ch2:efficiency:owner",
+    "attempt": 1,
+    "elapsed_seconds": 396.34399999980815,
+    "usage": {
+      "completion_tokens": 19526,
+      "completion_tokens_details": {
+        "reasoning_tokens": 11412,
+        "text_tokens": 19526
+      },
+      "prompt_tokens": 142254,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "text_tokens": 142254
+      },
+      "total_tokens": 161780
+    },
+    "effective_request": {
+      "model": "qwen3.8-max",
+      "enable_thinking": true,
+      "thinking_budget": 32768,
+      "answer_tokens": 32768,
+      "total_output_tokens": 65536,
+      "max_completion_tokens": 65536,
+      "max_tokens": null,
+      "response_format": null,
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      },
+      "mapped_reasoning_effort": "xhigh"
+    },
+    "stream_event_count": 5471,
+    "raw_stream_sha256": "fcf94150e98d8da032729cdac0da2ca77dabe8c4dafb442e23ae2acee57b24e5",
+    "cap_pressure": {
+      "near_limit": false,
+      "near_limits": [],
+      "completion_tokens": 19526,
+      "reasoning_tokens": 11412,
+      "answer_tokens": 8114,
+      "finish_reason_length": false,
+      "diagnostic_only": true
+    }
+  },
+  "omitted_transport_fields": [
+    {
+      "field": "raw_response.raw_response",
+      "reason": "redundant_stream_or_normalized_transport_copy",
+      "original_sha256": "fcf94150e98d8da032729cdac0da2ca77dabe8c4dafb442e23ae2acee57b24e5",
+      "original_length": 1464744
+    },
+    {
+      "field": "raw_response.normalized_response_json",
+      "reason": "redundant_stream_or_normalized_transport_copy",
+      "original_sha256": "ecdce058281fe6bd8d0ce0302643c38057e7f9ded218321e039e4b9f4656805d",
+      "original_length": 53459
+    }
+  ]
+}

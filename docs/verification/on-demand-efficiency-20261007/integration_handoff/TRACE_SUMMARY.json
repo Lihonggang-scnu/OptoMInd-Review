@@ -1,0 +1,726 @@
+{
+  "schema_version": "optomind.on_demand.integration_handoff.trace.v1",
+  "status": "updated",
+  "source_commits": {
+    "paid_run_source": "00a91359fd50ddcc26355c94c8bb067c25985f6a",
+    "parent_paid_run_commit": "db219744",
+    "current_final_source": "4604451df04b7ce9896fe28c5fd8410493fb9cb8",
+    "post_paid_run_change": "final current source includes the navigation identity-group fix from 00a9135 to 4604451"
+  },
+  "measurement_convention": {
+    "message_chars": {
+      "access": 292983,
+      "owner": 412601,
+      "basis": "sum of actual PRECALL message content lengths across roles; this is message-character count, not JSON file bytes or wire-body bytes",
+      "exported_copy_note": "ACCESS_MESSAGES.json and OWNER_MESSAGES.json are sanitized reading copies; their exported message hashes differ where paths/restricted fields were replaced. The original PRECALL messages_sha256 fields are retained for local traceability."
+    },
+    "settled_paid_cost_cny": {
+      "qwen3.5-plus_access": 0.09414,
+      "qwen3.8-max_owner": 2.409984,
+      "new_paid_calls_total": 2.504124,
+      "basis": "ledger settled rows and ACTUAL_COMPARISON.new_paid_calls"
+    },
+    "parent_readme_drift": "The parent README previously carried 316168 message chars and component settled values 0.093908/2.410216; the parent README was corrected separately to the PRECALL/ledger convention. Those obsolete figures are not used by this pack."
+  },
+  "calls": {
+    "access": {
+      "messages_artifact": "ACCESS_MESSAGES.json",
+      "response_artifact": "ACCESS_RESPONSE.json",
+      "request_sha256": "9852372de6b9ee6ef1abece6b78d229a4b68b5aeff395ccfcbf66bf4e277a17e",
+      "payload_sha256": "abb49b8d42b774b52d0c3713683c717405f17a5ca407c2a99ff66a3b67df0535",
+      "catalog_sha256": "48b949602dfe891fe02999fece584d1b272579e05e15d653a51d87af37b640d6",
+      "model": "qwen3.5-plus",
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 101721,
+        "completion_tokens": 2659,
+        "total_tokens": 104380,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1017,
+          "text_tokens": 2659
+        },
+        "prompt_tokens_details": {
+          "text_tokens": 101721
+        }
+      },
+      "effective_request": {
+        "model": "qwen3.5-plus",
+        "enable_thinking": true,
+        "thinking_budget": 32768,
+        "answer_tokens": 32768,
+        "total_output_tokens": 65536,
+        "max_completion_tokens": 65536,
+        "max_tokens": null,
+        "response_format": null,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "elapsed_seconds": 49.20399999991059,
+      "stream_event_count": 735
+    },
+    "owner": {
+      "messages_artifact": "OWNER_MESSAGES.json",
+      "response_artifact": "OWNER_RESPONSE.json",
+      "request_sha256": "68a53788252ac0d0efa40fcaa0fb01137d60f00408986efb735de589dd41f217",
+      "payload_sha256": "23d3927467a762fce8be8fc908ddb32356d74afb7af28f6cf2555814949f157a",
+      "catalog_sha256": "48b949602dfe891fe02999fece584d1b272579e05e15d653a51d87af37b640d6",
+      "model": "qwen3.8-max",
+      "finish_reason": "stop",
+      "usage": {
+        "completion_tokens": 19526,
+        "completion_tokens_details": {
+          "reasoning_tokens": 11412,
+          "text_tokens": 19526
+        },
+        "prompt_tokens": 142254,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 142254
+        },
+        "total_tokens": 161780
+      },
+      "effective_request": {
+        "model": "qwen3.8-max",
+        "enable_thinking": true,
+        "thinking_budget": 32768,
+        "answer_tokens": 32768,
+        "total_output_tokens": 65536,
+        "max_completion_tokens": 65536,
+        "max_tokens": null,
+        "response_format": null,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "mapped_reasoning_effort": "xhigh"
+      },
+      "elapsed_seconds": 396.34399999980815,
+      "stream_event_count": 5471
+    }
+  },
+  "parsed_selection_and_read_trace": {
+    "status": "access_plan",
+    "material_requests": [
+      {
+        "access_id": "source_materials[9]",
+        "unit_ids": [
+          "Ch2_U01"
+        ],
+        "reason": "Priority reference for Ch2_U01: PRR pathways (TLR4, NOD2, AhR) and DC maturation mechanisms in CRC/ICI context; need full record for molecular case details and human observational controls."
+      },
+      {
+        "access_id": "source_materials[38]",
+        "unit_ids": [
+          "Ch2_U01"
+        ],
+        "reason": "Priority reference for Ch2_U01: Hexa-acylated LPS via TLR4/NF-κB activating DC and promoting CD8+ T cell infiltration; need complete mechanistic chain from microbial signal to adaptive immunity."
+      },
+      {
+        "access_id": "source_materials[59]",
+        "unit_ids": [
+          "Ch2_U01"
+        ],
+        "reason": "Priority reference for Ch2_U01: Ruminococcaceae strain via IRF8-dependent pathway stimulating CD103+ DC differentiation and migration to TME; supports DC subset-specific activation mechanism."
+      },
+      {
+        "access_id": "source_materials[70]",
+        "unit_ids": [
+          "Ch2_U01"
+        ],
+        "reason": "Priority reference for Ch2_U01: Lactobacillus via cGAS/STING axis inducing DC IFN-β production and CD8+ T cell infiltration; completes innate recognition to adaptive initiation chain."
+      },
+      {
+        "access_id": "source_materials[147]",
+        "unit_ids": [
+          "Ch2_U01"
+        ],
+        "reason": "Priority reference for Ch2_U01: Coprobacillus cateniformis surface extract downregulating DC PD-L2 expression via MYD88; provides microbial direct regulation of DC checkpoint molecules."
+      },
+      {
+        "access_id": "source_materials[194]",
+        "unit_ids": [
+          "Ch2_U01"
+        ],
+        "reason": "Priority reference for Ch2_U01: MAMPs via TLR/NOD2 receptors stimulating APCs and driving Th1 polarization; provides cross-cancer background framework for DC maturation."
+      },
+      {
+        "access_id": "source_materials[207]",
+        "unit_ids": [
+          "Ch2_U01"
+        ],
+        "reason": "Priority reference for Ch2_U01: LGG and specific strains activating cGAS-STING pathway promoting DC maturation and CD8+ T cell infiltration; supplements innate-to-adaptive molecular chain."
+      },
+      {
+        "access_id": "source_materials[327]",
+        "unit_ids": [
+          "Ch2_U01",
+          "Ch2_U03"
+        ],
+        "reason": "Priority reference for both units: Intratumoral microbiota spatial distribution correlating with prognosis; provides human TCGA/CPTAC dataset evidence for DC infiltration and tumor-type heterogeneity."
+      },
+      {
+        "access_id": "source_materials[32]",
+        "unit_ids": [
+          "Ch2_U03"
+        ],
+        "reason": "Priority reference for Ch2_U03: Gut-on-a-chip model confirming responder fecal flagellin maintaining ZO-1/E-cadherin barrier integrity vs non-responder LPS causing barrier disruption; critical for barrier integrity mechanism."
+      },
+      {
+        "access_id": "source_materials[40]",
+        "unit_ids": [
+          "Ch2_U03"
+        ],
+        "reason": "Priority reference for Ch2_U03: PDAC model gut microbiota translocation activating PRRs inducing macrophage immunosuppressive phenotype; supplements myeloid reprogramming and barrier damage association."
+      },
+      {
+        "access_id": "source_materials[93]",
+        "unit_ids": [
+          "Ch2_U03"
+        ],
+        "reason": "Priority reference for Ch2_U03: ICT-induced gut bacteria (E. faecalis) translocation via CCR7-dependent DC uptake to MLN and distant tumors; fills physical mechanism gap for translocation to secondary lymphoid organs."
+      },
+      {
+        "access_id": "source_materials[176]",
+        "unit_ids": [
+          "Ch2_U03"
+        ],
+        "reason": "Priority reference for Ch2_U03: Paraclostridium bifermentans dual mechanism—live bacteria disrupting epithelial barrier causing colitis vs <3kDa metabolite enhancing ICI efficacy; provides functional causal evidence for same-species dual effects."
+      },
+      {
+        "access_id": "source_materials[228]",
+        "unit_ids": [
+          "Ch2_U03"
+        ],
+        "reason": "Priority reference for Ch2_U03: MDSCs, TAMs, and metabolic reprogramming (hypoxia, lactate) constructing immunosuppressive microenvironment; supplements pathological background for myeloid reprogramming and barrier damage association."
+      },
+      {
+        "access_id": "source_materials[267]",
+        "unit_ids": [
+          "Ch2_U03"
+        ],
+        "reason": "Priority reference for Ch2_U03: GI cancer resistance mechanisms including Barnesiella intestinihominis recruiting T cells enhancing chemo/immune efficacy vs Fusobacterium inhibiting NK cells; supplements local myeloid regulation evidence before translocation to secondary lymphoid organs."
+      },
+      {
+        "access_id": "source_materials[330]",
+        "unit_ids": [
+          "Ch2_U03"
+        ],
+        "reason": "Priority reference for Ch2_U03: Hematologic malignancy review with ICI/CAR-T microbiome mechanisms (Akkermansia, Faecalibacterium, SCFAs promoting DC antigen presentation and CD8+ T cell infiltration); provides comparative mechanistic framework for barrier function and immune modulation."
+      },
+      {
+        "access_id": "source_materials[356]",
+        "unit_ids": [
+          "Ch2_U03",
+          "Ch2_U04"
+        ],
+        "reason": "Priority reference for Ch2_U03/Ch2_U04: FMT optimization review covering microbiota, metabolites, TME, and signaling pathways; provides synthesis of beneficial and detrimental pathways for barrier-translocation mechanism discussion."
+      },
+      {
+        "access_id": "source_materials[363]",
+        "unit_ids": [
+          "Ch2_U01",
+          "Ch2_U03"
+        ],
+        "reason": "Priority reference for both units: FMT-LUMINate Phase 2 trial—NSCLC ORR 80%, melanoma ORR 75%; responder baseline pathogen clearance (Enterocloster, Clostridium) vs donor strain engraftment; provides human clinical evidence for barrier-immune axis."
+      },
+      {
+        "access_id": "source_materials[364]",
+        "unit_ids": [
+          "Ch2_U03"
+        ],
+        "reason": "Priority reference for Ch2_U03: Gut-metabolite-immune axis review covering SCFAs, indoles, TMAO protecting against toxicity via AhR/PPARα/NF-κB; provides metabolite-mediated barrier and myeloid regulation mechanisms."
+      }
+    ],
+    "trace": [
+      {
+        "access_id": "source_materials[9]",
+        "canonical_access_id": "source_materials[9]",
+        "identity_aliases": [
+          "source_materials[9]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[9]",
+        "identity": {
+          "source_handle": "P0028",
+          "paper_id": "0d36b62772e0930cc8aead7edc85535b5b389e25",
+          "title": "Bidirectional regulation of the gut microbiome-immune axis in the immune microenvironment of colorectal cancer and targeted interventions",
+          "doi": "10.4251/wjgo.v17.i10.109503"
+        },
+        "record_sha256": "ac3fc1c2f95dc4c52d00ad5df814ef276e73b3aeb7b146d5025aaba6dc9e4191",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U01"
+        ]
+      },
+      {
+        "access_id": "source_materials[38]",
+        "canonical_access_id": "source_materials[38]",
+        "identity_aliases": [
+          "source_materials[38]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[38]",
+        "identity": {
+          "source_handle": "P0080",
+          "paper_id": "1c98ea21fbac0226e1f0c817968ad885448151f3",
+          "title": "Gut microbiota-derived hexa-acylated lipopolysaccharides enhance cancer immunotherapy responses",
+          "doi": "10.1038/s41564-025-01930-y"
+        },
+        "record_sha256": "0a2bc600be39a4ea2a6bb95a65cff15bda3b36fe8a516aa68542204712d3447c",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U01"
+        ]
+      },
+      {
+        "access_id": "source_materials[59]",
+        "canonical_access_id": "source_materials[59]",
+        "identity_aliases": [
+          "source_materials[59]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[59]",
+        "identity": {
+          "source_handle": "P0114",
+          "paper_id": "3138b2ba3413f9ffc9b5e0000b6c0310cb34cd84",
+          "title": "Abstract 6686: The mechanism of gut microbiome-mediated immune activation on the clinical efficacy of PD-1 blocking treatment in solid tumors",
+          "doi": "10.1158/1538-7445.am2024-6686"
+        },
+        "record_sha256": "20d27f28d3a8c2cc5bbb7e5723ebadf3ebb2a850a86c23346387f7c50dd47c3e",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U01"
+        ]
+      },
+      {
+        "access_id": "source_materials[70]",
+        "canonical_access_id": "source_materials[70]",
+        "identity_aliases": [
+          "source_materials[70]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[70]",
+        "identity": {
+          "source_handle": "P0132",
+          "paper_id": "3ae3c79b877e85a192dae9804adf84211ceedab7",
+          "title": "Human Microbiome and Its Medical Applications",
+          "doi": "10.3389/fmolb.2021.703585"
+        },
+        "record_sha256": "be4b4fbb992349fe25d3dbeca5e7dc6781a967b04ff86aed380c653d772cbcbb",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U01"
+        ]
+      },
+      {
+        "access_id": "source_materials[147]",
+        "canonical_access_id": "source_materials[147]",
+        "identity_aliases": [
+          "source_materials[147]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[147]",
+        "identity": {
+          "source_handle": "P0242",
+          "paper_id": "657c221351daa09b93f85f8beef5195760d2acbb",
+          "title": "Targeting PD-L2/RGMb overcomes microbiome-related immunotherapy resistance",
+          "doi": "10.1038/s41586-023-06026-3"
+        },
+        "record_sha256": "6a2b34ae8ebc4e121d860b18adc16c93009c7ce139d77d3ca85094375989b5de",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U01"
+        ]
+      },
+      {
+        "access_id": "source_materials[194]",
+        "canonical_access_id": "source_materials[194]",
+        "identity_aliases": [
+          "source_materials[194]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[194]",
+        "identity": {
+          "source_handle": "P0309",
+          "paper_id": "8552db34c533ee32ec30305e104babc5da9914ae",
+          "title": "Immunomodulation by the Commensal Microbiome During Immune-Targeted Interventions: Focus on Cancer Immune Checkpoint Inhibitor Therapy and Vaccination",
+          "doi": "10.3389/fimmu.2021.643255"
+        },
+        "record_sha256": "1e5cb77fb22ed6feffd3ffae4daadee379733b9c8c66bab285a94943f11d45ea",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U01"
+        ]
+      },
+      {
+        "access_id": "source_materials[207]",
+        "canonical_access_id": "source_materials[207]",
+        "identity_aliases": [
+          "source_materials[207]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[207]",
+        "identity": {
+          "source_handle": "P0333",
+          "paper_id": "8e25ec1d06aea0a73a479436c268bc6fab267259",
+          "title": "Navigating the gut–metabolite–immune axis: enhancing efficacy and mitigating toxicity of immune checkpoint inhibitors",
+          "doi": "10.3389/fimmu.2026.1803970"
+        },
+        "record_sha256": "f315cf4deb194e8416a548052a71d53bf755b8e7dc96a7a04a6cc676fc3473fe",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U01"
+        ]
+      },
+      {
+        "access_id": "source_materials[327]",
+        "canonical_access_id": "source_materials[327]",
+        "identity_aliases": [
+          "source_materials[327]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[327]",
+        "identity": {
+          "source_handle": "P0535",
+          "paper_id": "eea4059be35526f75d745cc8d16db8ec33658f69",
+          "title": "Intratumoral Microbiota in Tumor: Current Understandings and Future Perspectives",
+          "doi": "10.1002/mco2.70825"
+        },
+        "record_sha256": "3a96a6888718accfb6e8425650775fe1185b72aafa8429ac7cb03a066dc9239e",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U01",
+          "Ch2_U03"
+        ]
+      },
+      {
+        "access_id": "source_materials[32]",
+        "canonical_access_id": "source_materials[32]",
+        "identity_aliases": [
+          "source_materials[32]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[32]",
+        "identity": {
+          "source_handle": "P0073",
+          "paper_id": "1a747439d702aff9bb8fb4513e8de0c1063c237a",
+          "title": "A gut-on-a-chip incorporating human faecal samples and peristalsis predicts responses to immune checkpoint inhibitors for melanoma",
+          "doi": "10.1038/s41551-024-01318-z"
+        },
+        "record_sha256": "4c8abb8bd64648cd3ce157ac419a58c5a023498b51fa8af996bb680f5ef6844d",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U03"
+        ]
+      },
+      {
+        "access_id": "source_materials[40]",
+        "canonical_access_id": "source_materials[40]",
+        "identity_aliases": [
+          "source_materials[40]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[40]",
+        "identity": {
+          "source_handle": "P0084",
+          "paper_id": "1e9bcb85e156528e8eb9e781e4d4845dc4149ed6",
+          "title": "Involvement of the Gut Microbiome in the Local and Systemic Immune Response to Pancreatic Ductal Adenocarcinoma",
+          "doi": "10.3390/cancers16050996"
+        },
+        "record_sha256": "2fba93fec9f886347e49fc24af9519e0b20c073559fa6266245ac548aae171f5",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U03"
+        ]
+      },
+      {
+        "access_id": "source_materials[93]",
+        "canonical_access_id": "source_materials[93]",
+        "identity_aliases": [
+          "source_materials[93]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[93]",
+        "identity": {
+          "source_handle": "P0166",
+          "paper_id": "48ff8778babb3307819f8c65b752079c1045f3a6",
+          "title": "Immune checkpoint blockade induces gut microbiota translocation that augments extraintestinal anti-tumor immunity",
+          "doi": "10.1126/sciimmunol.abo2003"
+        },
+        "record_sha256": "25cda1648fa21222c001baba00f7a811388a91f94c8006f3755384b9cec541b2",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U03"
+        ]
+      },
+      {
+        "access_id": "source_materials[176]",
+        "canonical_access_id": "source_materials[176]",
+        "identity_aliases": [
+          "source_materials[176]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[176]",
+        "identity": {
+          "source_handle": "P0284",
+          "paper_id": "7cdc8a62c7a781f0b9a88abe52934ab9b889134d",
+          "title": "Metagenomics and culturomics reveal the dual role of the gut microbiome in the development of immune-related toxicities and the efficacy of immune checkpoint inhibitors in cancer",
+          "doi": "10.1186/s40168-026-02419-4"
+        },
+        "record_sha256": "72d5f03f18af186db83716125d2b216bc3f52a9d52463bc0a6932ab8aeeb8350",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U03"
+        ]
+      },
+      {
+        "access_id": "source_materials[228]",
+        "canonical_access_id": "source_materials[228]",
+        "identity_aliases": [
+          "source_materials[228]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[228]",
+        "identity": {
+          "source_handle": "P0362",
+          "paper_id": "9d35f21e0312f02012226526155eabf2efc7472f",
+          "title": "Biological mechanisms of resistance to immune checkpoint inhibitors and overcoming this resistance: Challenges in medical oncology",
+          "doi": "10.15421/022412"
+        },
+        "record_sha256": "6dcb38f7bdc7bc5f543b8b71fc37109453dca0f740b9a963cd1610971efa4e08",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U03"
+        ]
+      },
+      {
+        "access_id": "source_materials[267]",
+        "canonical_access_id": "source_materials[267]",
+        "identity_aliases": [
+          "source_materials[267]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[267]",
+        "identity": {
+          "source_handle": "P0438",
+          "paper_id": "c01d091d25a86879909c5dbeacff09210ff73402",
+          "title": "Gastrointestinal cancer resistance to treatment: the role of microbiota",
+          "doi": "10.1186/s13027-024-00605-3"
+        },
+        "record_sha256": "99de0ae3567da726e7f11f2c0cccc8220d0540cc30cf61cea36c92d4a327aeab",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U03"
+        ]
+      },
+      {
+        "access_id": "source_materials[330]",
+        "canonical_access_id": "source_materials[330]",
+        "identity_aliases": [
+          "source_materials[330]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[330]",
+        "identity": {
+          "source_handle": "P0539",
+          "paper_id": "efd1aa361f5e673221fcff47fd48ef597cbb9128",
+          "title": "The silent pharmacist: Harnessing the gut microbiome to improve therapy in hematologic malignancies",
+          "doi": "10.1016/j.tranon.2026.102833"
+        },
+        "record_sha256": "8ea25e81f50b978efce1a2eb536a75ccb82f6faf644b5b8364829e1db097a3a4",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U03"
+        ]
+      },
+      {
+        "access_id": "source_materials[356]",
+        "canonical_access_id": "source_materials[356]",
+        "identity_aliases": [
+          "source_materials[356]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[356]",
+        "identity": {
+          "source_handle": "P0573",
+          "paper_id": "ff51b7d7a956ceb17d4fb9e0f36c3446c6a4cf65",
+          "title": "From chaos to order: optimizing fecal microbiota transplantation for enhanced immune checkpoint inhibitors efficacy",
+          "doi": "10.1080/19490976.2025.2452277"
+        },
+        "record_sha256": "7d5884cbe6e926287022b495e49488f1891b73038051d87ebfb8bbaac07b2d34",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U03",
+          "Ch2_U04"
+        ]
+      },
+      {
+        "access_id": "source_materials[363]",
+        "canonical_access_id": "source_materials[363]",
+        "identity_aliases": [
+          "source_materials[363]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[363]",
+        "identity": {
+          "source_handle": "P0583",
+          "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a",
+          "title": "Fecal microbiota transplantation plus immunotherapy in non-small cell lung cancer and melanoma: the phase 2 FMT-LUMINate trial",
+          "doi": "10.1038/s41591-025-04186-5"
+        },
+        "record_sha256": "b4f4e1d4a7972fb00d3c142998cc1376f4c9be172f21958a9ee4d262a0cee8ee",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U01",
+          "Ch2_U03"
+        ]
+      },
+      {
+        "access_id": "source_materials[364]",
+        "canonical_access_id": "source_materials[364]",
+        "identity_aliases": [
+          "source_materials[364]"
+        ],
+        "channel": "source_materials",
+        "index_path": "source_materials[364]",
+        "identity": {
+          "source_handle": "P0584",
+          "paper_id": "CorpusId:290154100",
+          "title": "Navigating the gut–metabolite–immune axis: enhancing efficacy and mitigating toxicity of immune checkpoint inhibitors",
+          "doi": "10.3389/fimmu.2026.1803970"
+        },
+        "record_sha256": "7f4a903ee6dbf1720c5cea0149baeb5c20fd123865b6a6fc20c082183d5e7a41",
+        "request_type": "material",
+        "requested_paths": [],
+        "unit_ids": [
+          "Ch2_U03"
+        ]
+      }
+    ],
+    "resolved_count": 18,
+    "access_ids": [
+      "source_materials[147]",
+      "source_materials[176]",
+      "source_materials[194]",
+      "source_materials[207]",
+      "source_materials[228]",
+      "source_materials[267]",
+      "source_materials[327]",
+      "source_materials[32]",
+      "source_materials[330]",
+      "source_materials[356]",
+      "source_materials[363]",
+      "source_materials[364]",
+      "source_materials[38]",
+      "source_materials[40]",
+      "source_materials[59]",
+      "source_materials[70]",
+      "source_materials[93]",
+      "source_materials[9]"
+    ],
+    "catalog_sha256": "48b949602dfe891fe02999fece584d1b272579e05e15d653a51d87af37b640d6",
+    "selection_diagnostics": {
+      "modifiable_unit_ids": [
+        "Ch2_U01",
+        "Ch2_U03"
+      ],
+      "read_only_unit_ids": [
+        "Ch2_U02",
+        "Ch2_U04",
+        "Ch4_U01",
+        "Ch4_U02",
+        "Ch4_U03",
+        "Ch5_U01",
+        "Ch5_U02",
+        "Ch5_U03",
+        "Ch5_U04",
+        "Ch5_U05",
+        "Ch6_U1",
+        "Ch6_U2",
+        "Ch6_U3",
+        "Ch6_U4",
+        "Ch7_U01",
+        "Ch7_U02",
+        "Ch7_U03",
+        "Ch7_U04",
+        "U1_跨癌种关联图谱",
+        "U2_外部干扰与宿主背景",
+        "U3_1",
+        "U3_2",
+        "U3_3",
+        "U3_4",
+        "U3_5",
+        "U3_动态监测与纵向演变",
+        "U4_证据阶梯与转化边界"
+      ],
+      "readonly_only_materials": [],
+      "unknown_unit_materials": [],
+      "evidence_preserved": true,
+      "action": "owner_may_use_shared_evidence; no_automatic_reselection"
+    },
+    "readonly_context_reads": []
+  },
+  "owner_merge_and_identity": {
+    "status": "updated",
+    "chapter_id": "Ch2",
+    "unit_id_remap": {
+      "Ch2_U01": [
+        "Ch2_U01"
+      ],
+      "Ch2_U03": [
+        "Ch2_U03"
+      ]
+    },
+    "structural_errors": [],
+    "adoption_material_resolution_counts": {
+      "requested_handles": 17,
+      "resolved_from_current_pool": 350,
+      "already_present": 17,
+      "unresolved": 0
+    },
+    "accepted_source_material_count": 367
+  },
+  "checkpoint_and_reuse": {
+    "checkpoint_dir": "live_ch2/stages",
+    "access_reused": false,
+    "access_raw_reused": false,
+    "owner_reused": false,
+    "owner_raw_reused": false,
+    "owner_continuation_reused": false,
+    "owner_call_count": 1,
+    "readonly_context_reads": 0
+  },
+  "downstream_execution_observed": {
+    "arrangement_packet": false,
+    "arrangement_input": false,
+    "arrangement_call": false,
+    "writer_call": false,
+    "full_manuscript_merge": false,
+    "basis": "live_ch2/RUN_REPORT.json has no arrangement_input; RESULT.json ends at updated plan and local resume check."
+  },
+  "references": {
+    "parent_comparison": "../ACTUAL_COMPARISON.json",
+    "parent_plan": "../UPDATED_PLAN.json",
+    "parent_resume": "../REAL_RESULT_RESUME_CHECK.json",
+    "parent_manifest": "../MANIFEST.json"
+  }
+}

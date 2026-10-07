@@ -1,0 +1,272 @@
+{
+  "schema_version": "optomind.on_demand.integration_handoff.export_manifest.v1",
+  "status": "prepared_for_cloud_review",
+  "root": ".",
+  "source": {
+    "current_final_source": "4604451df04b7ce9896fe28c5fd8410493fb9cb8",
+    "paid_run_source": "00a91359fd50ddcc26355c94c8bb067c25985f6a",
+    "parent_implementation": "db219744"
+  },
+  "file_count": 9,
+  "total_bytes_excluding_manifest": 1077885,
+  "files": [
+    {
+      "path": "ACCESS_MESSAGES.json",
+      "bytes": 378553,
+      "sha256": "83741ba3a13674ab6abaa7d3840ea27dd7bfc5e23c2ef0ac2f00d4eeb87fc48c"
+    },
+    {
+      "path": "ACCESS_RESPONSE.json",
+      "bytes": 18761,
+      "sha256": "7a85aac6ed7a9b9b5958b280b95708a8e29dc0d6631ddaa16145f46c2c7e19db"
+    },
+    {
+      "path": "CLOUD_READ_PROMPT.md",
+      "bytes": 2418,
+      "sha256": "08c0feefc3f0dfed46f9e76f0fb03cd36924f28ad4e626999f06a3e9a8a1b28f"
+    },
+    {
+      "path": "OWNER_MESSAGES.json",
+      "bytes": 545799,
+      "sha256": "8193620f6ac3e3fcfde287e2bff7e246ce68e577e9936ca3f9a468512c1cf03c"
+    },
+    {
+      "path": "OWNER_RESPONSE.json",
+      "bytes": 94673,
+      "sha256": "8b4bf8c23d9d2369af2c086592ec0d8b0c37029d2af3aeb92d43f0c0a8abcd28"
+    },
+    {
+      "path": "PRIVACY_SCAN.json",
+      "bytes": 687,
+      "sha256": "f2548718f2b1b47c7f9cdedce8a37d4cd12e21a1fbf40923cbb8b265341652e5"
+    },
+    {
+      "path": "SEAMS.md",
+      "bytes": 8903,
+      "sha256": "24beb52afe8029447db3e0e406c81175dccb1c1cb6f9dde21045c77214611fec"
+    },
+    {
+      "path": "TRACE_SUMMARY.json",
+      "bytes": 28091,
+      "sha256": "82494f9ac1e625939377f1225e5aa21c8233be419fcfae3c9caace58f597a080"
+    }
+  ],
+  "source_provenance": [
+    {
+      "export_path": "ACCESS_MESSAGES.json",
+      "original_run_path": "live_ch2/CALL_GUARDS/01_autonomous_outline_PRECALL.json",
+      "original_sha256": "0bfdc18bdaf2aa63635fe6c94c6fb726cf4c67a687b3d62924b6ea7dfce93ace",
+      "original_bytes": 386225,
+      "exported_sha256": "e6f79b6dfbe500bfc7f5f54b71c0dcf59512aebc5560934538f29385b5d4fb62",
+      "exported_bytes": 378617,
+      "transformation": "nested path/credential/restricted-field sanitization; semantic messages retained; strict replay requires local original"
+    },
+    {
+      "export_path": "OWNER_MESSAGES.json",
+      "original_run_path": "live_ch2/CALL_GUARDS/01_owner_revision_PRECALL.json",
+      "original_sha256": "836791e49eb97c4fcabccc16c041660f040a9bd40520520e0dd75b309754c075",
+      "original_bytes": 557123,
+      "exported_sha256": "00b3f91e4d6801cfc364cf378294c4bd2742a65422f165a7d218b730687c7876",
+      "exported_bytes": 545863,
+      "transformation": "nested path/credential/restricted-field sanitization; semantic messages retained; strict replay requires local original"
+    },
+    {
+      "export_path": "ACCESS_RESPONSE.json",
+      "original_run_path": "live_ch2/stages/ACCESS_STAGE.json",
+      "original_sha256": "461224e0dcfe11324b01327c1ccb4cb28a973a87db5b2666436d66e2959152b6",
+      "original_bytes": 295008,
+      "exported_sha256": "fc73bb221d1057aa0adfe1d69a625f3240858ca0513784b055119cc8e6f29f38",
+      "exported_bytes": 18986,
+      "transformation": "aggregated content/parsed output/effective request retained; SSE and normalized transport copies omitted"
+    },
+    {
+      "export_path": "OWNER_RESPONSE.json",
+      "original_run_path": "live_ch2/stages/OWNER_STAGE.json",
+      "original_sha256": "3f06aa70a9e038dc425d7af183b49ded8cd82a1ee0885f8a55453f25e388bc93",
+      "original_bytes": 6603007,
+      "exported_sha256": "875604221165b8739d3b019335535d662a8fbc36aff2e200ea8f0d15e3973c0f",
+      "exported_bytes": 95086,
+      "transformation": "aggregated content/parsed output/effective request retained; SSE and normalized transport copies omitted"
+    }
+  ],
+  "redactions": [
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[0].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "0cc74de576208f55d06dc0d0709b6547eaafa7817d91b0adc845d4c8a971b1bd",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[1].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "c9ee251f8e1c7a373f7e18e7b4d1b165dbd4237122ac460e4ae52b7b05d4dd13",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[2].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "d53ce5262ce92079929e3b9310ef1e81e9378952c9f9f9bb68199b64f461490d",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[3].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "7b79cf527c0710d6a73c88fbfc06288321274482b28a50c495336a7e4064ac18",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[4].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "efcef7813e8c22277830f87a3f969b93cbc92e2a815107dbd55235060e18dc87",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[5].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "0fab0b098015f0d5826e069daa2f640595850c254be142781c97958018e07cb9",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[6].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "26460e83b1bd66d674decfa39a9c45e0c374dee1914fd31e311b1925e46ddcdf",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[7].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "25312d9fe1cb379b46b42419c136dab2d7d2080fb4929cb083cc218f341fa279",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[8].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "2f6f79ff1d27b91689c8646178d9795dac630cb3212fd6b11879d9210bf69284",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[9].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "3a79f6f50f49cc555946ecf1348bf09e6c82847b66fea9740f5c4987c2c2e860",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[10].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "76ab51e26c2e719d6804a6663778d4cc10fc327e7490cef763b5e1016cc5c4f7",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[11].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "fd2ed7ab76a25edbc532ef967c43cadf2797dac4f2e0f380bdf5795ad09298a5",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[12].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "5a31bb737fd293d8d3a5574c03707a3c1d0bd32122afe799f4b31debe751fa6a",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[13].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "78ae325a983c9e5c7e541ec9dd93b11eb2e3b55c7214860c2b3b57a04b7390ba",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[14].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "8226a773c0a83ef8462e6e1d1360863d58a194ff27fc975d7f04cf4dd3091f6a",
+      "original_length": 189
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[15].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "5585ade8e02b18f89fb5a9559d79b021c3e1b859bc94fb1374a9a4677cd2d48c",
+      "original_length": 156
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[16].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "46c93965b9e58efda34a896626b6d5c3651f1cba3f34b3d1a7eac538182f1edc",
+      "original_length": 198
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[16].supplement_gap_material.judgment_path",
+      "reason": "local_path_substitution",
+      "original_sha256": "1e6bba4df70e1671687813a270c1ba63574f399f29055a23f3059ca5aa3a9519",
+      "original_length": 195
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[16].supplement_gap_materials[0].judgment_path",
+      "reason": "local_path_substitution",
+      "original_sha256": "1e6bba4df70e1671687813a270c1ba63574f399f29055a23f3059ca5aa3a9519",
+      "original_length": 195
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[16].supplement_material.judgment_path",
+      "reason": "local_path_substitution",
+      "original_sha256": "1e6bba4df70e1671687813a270c1ba63574f399f29055a23f3059ca5aa3a9519",
+      "original_length": 195
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[16].supplement_materials[0].judgment_path",
+      "reason": "local_path_substitution",
+      "original_sha256": "1e6bba4df70e1671687813a270c1ba63574f399f29055a23f3059ca5aa3a9519",
+      "original_length": 195
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[17].card_path",
+      "reason": "local_path_field",
+      "original_sha256": "67eafe111592e5dfc0dd809fa8e92befb3ad23e694c87946d9723861f7779bd5",
+      "original_length": 198
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[17].supplement_gap_material.judgment_path",
+      "reason": "local_path_substitution",
+      "original_sha256": "60ceca5287c15d1c5e271f33417ce64043f1bd568b8d1d06049c69676b03ee27",
+      "original_length": 195
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[17].supplement_gap_materials[0].judgment_path",
+      "reason": "local_path_substitution",
+      "original_sha256": "60ceca5287c15d1c5e271f33417ce64043f1bd568b8d1d06049c69676b03ee27",
+      "original_length": 195
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[17].supplement_material.judgment_path",
+      "reason": "local_path_substitution",
+      "original_sha256": "60ceca5287c15d1c5e271f33417ce64043f1bd568b8d1d06049c69676b03ee27",
+      "original_length": 195
+    },
+    {
+      "path": "$.messages[1].content<embedded>.source_materials[17].supplement_materials[0].judgment_path",
+      "reason": "local_path_substitution",
+      "original_sha256": "60ceca5287c15d1c5e271f33417ce64043f1bd568b8d1d06049c69676b03ee27",
+      "original_length": 195
+    },
+    {
+      "path": "$.messages[1].content<embedded>.selection_source_provenance.packet",
+      "reason": "local_path_substitution",
+      "original_sha256": "c36441e95cdfa44066ef8f2b70a740a026ca6b9b9a2e2e8545cbcabea657dedd",
+      "original_length": 104
+    },
+    {
+      "path": "$.messages[1].content<embedded>.selection_source_provenance.body_path_for_downstream_owner",
+      "reason": "local_path_substitution",
+      "original_sha256": "0af4b498acb0e706bd662a1257e16a9b755fa584164401f5fc7414ee3ac045f3",
+      "original_length": 107
+    }
+  ],
+  "omitted_material": {
+    "original_paper_passages_fulltext_pdf": "masked in exported nested records when present; originals remain only in local run/source locations",
+    "raw_sse_chunks": "omitted from ACCESS_RESPONSE.json and OWNER_RESPONSE.json as redundant transport copies; original SHA256/length retained there",
+    "parent_plan_and_cost_summaries": "referenced from parent artifacts rather than duplicated",
+    "credentials_database_pdf_files": "not exported"
+  },
+  "references": {
+    "parent_directory": "../",
+    "local_run_root": "local-run-root (absolute local path intentionally omitted; source_ref entries retain run-relative paths and original SHA256)"
+  }
+}
