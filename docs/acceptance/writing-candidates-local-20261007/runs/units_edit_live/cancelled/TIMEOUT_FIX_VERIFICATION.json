@@ -1,0 +1,50 @@
+{
+  "schema_version": "optomind.writer_candidates.timeout_fix_verification.v1",
+  "status": "offline_verified",
+  "created_utc": "2026-10-07T12:40:00Z",
+  "production_change": "module4._stream_response separates socket inactivity timeout from overall stream timeout",
+  "effective_request_record": {
+    "model": "qwen3.5-plus",
+    "stream": true,
+    "request_timeout_seconds": 900,
+    "stream_inactivity_timeout_seconds": 900,
+    "stream_overall_timeout_seconds": 3600,
+    "autoretry": 0,
+    "thinking_budget": 16384,
+    "answer_tokens": 49152
+  },
+  "offline_transport_assertions": [
+    {
+      "case": "request_inactivity_vs_overall",
+      "inactivity_seconds": 900,
+      "overall_seconds": 3600,
+      "observed_first_socket_bound_at_most_seconds": 900,
+      "result": "passed"
+    },
+    {
+      "case": "overall_remaining_is_smaller",
+      "inactivity_seconds": 900,
+      "overall_seconds": 3,
+      "observed_first_socket_bound_at_most_seconds": 3,
+      "stream_read_start_records_both_bounds": true,
+      "result": "passed"
+    },
+    {
+      "case": "continuous_valid_stream",
+      "done_marker": true,
+      "finish_reason": "stop",
+      "usage_present": true,
+      "result": "passed"
+    }
+  ],
+  "tests": {
+    "targeted": "tests/upgrade3/test_qwen_effective_token_transport.py",
+    "targeted_result": "23 passed",
+    "official_candidate_suite": "tests/upgrade3/test_writer_candidates_contracts.py tests/upgrade3/test_writer_candidates_engine.py tests/upgrade3/test_writer_candidates_cli.py tests/upgrade3/test_writer_candidates_integration.py",
+    "official_result": "126 passed",
+    "diff_check": "passed"
+  },
+  "new_model_calls": 0,
+  "new_paid_calls": 0,
+  "ready_for_root_commit": true
+}

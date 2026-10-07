@@ -1,0 +1,29 @@
+{
+  "schema_version": "optomind.writer_candidates_config.v1",
+  "purpose": "Approved bounded recovery: balanced Plus writers reused; official selective_max editor model with answer capacity reduced to 32768 while preserving 32768 thinking and total 65536 output.",
+  "writer": {
+    "model": "qwen3.5-plus",
+    "thinking": true,
+    "thinking_budget": 16384,
+    "max_output_tokens": 49152,
+    "json_mode": false,
+    "timeout_seconds": 900,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "editor": {
+    "model": "qwen3.8-max",
+    "thinking": true,
+    "thinking_budget": 32768,
+    "max_output_tokens": 32768,
+    "json_mode": false,
+    "timeout_seconds": 900,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "editor_pass": true
+}

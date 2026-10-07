@@ -1,0 +1,86 @@
+{
+  "schema_version": "optomind.writer_candidates.format_repair_replay.v1",
+  "replay_mode": "offline_saved_response_only",
+  "adoption_status": "proposed_for_root_review",
+  "model_calls": 0,
+  "ledger_writes": 0,
+  "scientific_text_edits": 0,
+  "source": {
+    "raw_response_path": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\chapter_live\\stages\\writer_chapter\\1ecb76a1c97d3064daac392fe29c0f8db53ff258cad6faa7d81ab27836b94d0d\\attempt_001\\RAW_RESPONSE.json",
+    "raw_response_file_sha256": "93dd5610c37d126a910dbde00f8fed45e3fe7e16e7514b042e887e500c44e219",
+    "raw_stream_path": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\chapter_live\\stages\\writer_chapter\\1ecb76a1c97d3064daac392fe29c0f8db53ff258cad6faa7d81ab27836b94d0d\\attempt_001\\transport\\writer_chapter-1ecb76a1c97d-attempt_001-key0-attempt0.sse.raw",
+    "raw_stream_sha256": "f28358450b41d304fd2b19b4b189b38cbf8fda238b97fb706964d04aa77e289b",
+    "raw_response_record_sha256": "f28358450b41d304fd2b19b4b189b38cbf8fda238b97fb706964d04aa77e289b",
+    "original_result_path": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\chapter_live\\stages\\writer_chapter\\1ecb76a1c97d3064daac392fe29c0f8db53ff258cad6faa7d81ab27836b94d0d\\attempt_001\\RESULT.json",
+    "original_result_file_sha256": "624d2ca1e07a765f3c3fabe9c580738b0c96548869bd9c5ec2b22c3724ffd349",
+    "run_id": "20261007T115231Z-f1a78a9f11",
+    "call_id": "writer_chapter-1ecb76a1c97d-attempt_001",
+    "provider_request_id": "chatcmpl-b5543f04-d299-914b-82e8-a5c045e60bb1",
+    "reservation_id": "res-a427d185cd084c4c",
+    "actual_cost_cny": 0.1378104
+  },
+  "input": {
+    "arrangement_path": "F:\\OptoMind-Review-2\\outputs\\on_demand_promotion_local_20261007_10cny\\arrangement_paid\\Ch2\\CHAPTER_ARRANGEMENT.json",
+    "view_path": "F:\\OptoMind-Review-2\\outputs\\on_demand_promotion_local_20261007_10cny\\arrangement_paid\\Ch2\\ARRANGEMENT_INPUT.json",
+    "chapter_id": "Ch2",
+    "task_count": 12,
+    "source_count": 32
+  },
+  "transport": {
+    "complete": true,
+    "finish_reason": "stop",
+    "status_code": 200,
+    "usage": {
+      "prompt_tokens": 126321,
+      "completion_tokens": 7657,
+      "total_tokens": 133978,
+      "completion_tokens_details": {
+        "reasoning_tokens": 832,
+        "text_tokens": 7657
+      },
+      "prompt_tokens_details": {
+        "text_tokens": 126321
+      }
+    }
+  },
+  "repair": [
+    {
+      "code": "candidate_json_inner_quote_repaired",
+      "method": "bounded_inner_json_quote_escape",
+      "original_sha256": "3b89208793969ad427ae6edac8b1587034840d242d3786e9fbd6ee7eec8ae218",
+      "normalized_sha256": "cb3b1c9443cec050a7216c87a7558b54ee7b1ce59ff6d5ca7b589c6a581744c3",
+      "original_char_count": 11738,
+      "normalized_char_count": 11744,
+      "inserted_escape_characters": 6,
+      "strict_json_parse": true
+    }
+  ],
+  "validation": {
+    "complete": true,
+    "pending_task_ids": [],
+    "block_count": 6,
+    "body_char_count": 9110,
+    "old_partial_body_prefix_match": true,
+    "table_checks": [
+      {
+        "task_id": "Ch2_U04::Ch2_U04_T01",
+        "block_id": "Ch2_block_06",
+        "valid": true,
+        "header_cells": 5,
+        "data_cells": 5,
+        "line": 9
+      }
+    ],
+    "unknown_citations": [],
+    "unresolved_numeric_citations": [],
+    "non_source_identifier_citations": [],
+    "semantic_quality_unreviewed": true,
+    "content_review_status": "not_reviewed"
+  },
+  "preservation": {
+    "original_raw_response_preserved": true,
+    "original_result_preserved": true,
+    "adopted_body_is_parser_output_only": true,
+    "recovery_does_not_claim_new_model_run": true
+  }
+}

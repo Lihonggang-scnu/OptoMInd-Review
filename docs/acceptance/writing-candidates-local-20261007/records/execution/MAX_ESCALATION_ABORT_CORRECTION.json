@@ -1,0 +1,63 @@
+{
+  "schema_version": "optomind.writer_candidates.max_escalation_abort_correction.v2",
+  "original_record": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live_after_timeout_fix\\MAX_ESCALATION_ABORT_REPORT.json",
+  "run_id": "20261007T131101Z-a2fe9d97db",
+  "pid": 2652,
+  "process_status_now": "not_found",
+  "process_exit_code": null,
+  "process_exit_code_evidence": "No Process object, saved Process handle, or Windows process exit event was available after Start-Process; local Security/Application event queries for the launch interval returned no matching events.",
+  "stop_process_actor": "unknown",
+  "stop_process_evidence": "No Stop-Process record found in local PowerShell history; cannot identify an actor.",
+  "termination_interval": {
+    "last_saved_artifact_utc": "2026-10-07T13:11:03.1530752Z",
+    "reservation_created_epoch": 1791378663.2980464,
+    "reservation_created_utc": "2026-10-07T13:11:03.2980464Z",
+    "first_transport_event_persisted": false
+  },
+  "provider_dispatch_status": "unknown",
+  "previous_provider_call_made_claim_corrected": true,
+  "corrected_interpretation": "A reservation exists, but absence of raw/usage/request_id does not prove no provider call. The process disappeared after reservation and before any transport evidence was persisted; provider acceptance is unknown and the reservation must remain held/uncertain pending root ledger decision.",
+  "transport": {
+    "transport_directory": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live_after_timeout_fix\\stages\\editor_chapter\\70989c23a691e5e0bebca533c5c2e2ed10970d677ed269ffc44934ebd74e93e7\\attempt_001\\transport",
+    "transport_directory_exists": false,
+    "partial_files": [],
+    "raw_files": [],
+    "jsonl_files": [],
+    "last_transport_event": null,
+    "request_open_start_persisted": false,
+    "response_opened_persisted": false,
+    "first_byte_persisted": false
+  },
+  "attempt_files": {
+    "request": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live_after_timeout_fix\\stages\\editor_chapter\\70989c23a691e5e0bebca533c5c2e2ed10970d677ed269ffc44934ebd74e93e7\\attempt_001\\REQUEST.json",
+    "actual_request": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live_after_timeout_fix\\stages\\editor_chapter\\70989c23a691e5e0bebca533c5c2e2ed10970d677ed269ffc44934ebd74e93e7\\attempt_001\\ACTUAL_REQUEST.json",
+    "messages": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live_after_timeout_fix\\stages\\editor_chapter\\70989c23a691e5e0bebca533c5c2e2ed10970d677ed269ffc44934ebd74e93e7\\attempt_001\\MESSAGES.json",
+    "error_file": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live_after_timeout_fix\\stages\\editor_chapter\\70989c23a691e5e0bebca533c5c2e2ed10970d677ed269ffc44934ebd74e93e7\\attempt_001\\ERROR.json",
+    "raw_response": {
+      "public_omission": true,
+      "reason": "duplicate transport wrapper; model text exported separately"
+    },
+    "usage": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live_after_timeout_fix\\stages\\editor_chapter\\70989c23a691e5e0bebca533c5c2e2ed10970d677ed269ffc44934ebd74e93e7\\attempt_001\\USAGE.json",
+    "result": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live_after_timeout_fix\\stages\\editor_chapter\\70989c23a691e5e0bebca533c5c2e2ed10970d677ed269ffc44934ebd74e93e7\\attempt_001\\RESULT.json"
+  },
+  "client_sequence": {
+    "source_file": "optomind_research/runtime/upgrade3/module4/runtime.py",
+    "source_sha256_in_run_manifest": "c4eeffb88f9c2790cc7a69b999ec05f188066db391647b4c3d6b15fa5a21b9e6",
+    "reservation_line": 940,
+    "request_open_start_line": 949,
+    "opener_open_line": 959,
+    "partial_path_line": 969,
+    "transport_exception_line": 1115,
+    "interpretation": "GlobalBudgetLedger.reserve occurs before request_open_start and before opener.open. Transport events are held in memory and only included in a later result/error; an external termination at this boundary leaves no persisted event."
+  },
+  "reservation": {
+    "reservation_id": "res-56f2dee4f67e450c",
+    "call_id": "editor_chapter-70989c23a691-attempt_001:key0:attempt0",
+    "amount_cny": 5.411664,
+    "ledger_status": "reserved",
+    "actual_cny": null,
+    "ledger_mutated_by_agent": false
+  },
+  "no_paid_retry": true,
+  "created_at": "2026-10-07T13:16:33.2272055Z"
+}

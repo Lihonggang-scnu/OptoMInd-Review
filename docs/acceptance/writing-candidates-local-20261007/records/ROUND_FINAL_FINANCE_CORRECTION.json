@@ -1,0 +1,422 @@
+{
+  "schema_version": "optomind.writer_candidates.round_final_finance_correction.v1",
+  "created_utc": "2026-10-07T12:56:15.434643+00:00",
+  "status": "root_readable_corrected_round_reconciliation",
+  "ledger_path": "F:\\OptoMind-Review-2\\outputs\\post_body_revision_local_experiment_20261005\\live\\budget.sqlite",
+  "round_budget_start_path": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\ROUND_BUDGET_START.json",
+  "round_budget_start_sha256": "b507a2f21544b689d5c6bfc59d9e5eb617d0f66c2b9732cde9b736a8d1c03f1c",
+  "historical_ids_count": 90,
+  "starting_used_cny": 95.76091219999999,
+  "global_cap_cny": 155.7609122,
+  "baseline_formula": "current reservation rows whose IDs are absent from ROUND_BUDGET_START.historical_reservation_ids",
+  "calls": [
+    {
+      "reservation_id": "res-a427d185cd084c4c",
+      "phase": "A_chapter",
+      "call_id": "writer_chapter-1ecb76a1c97d-attempt_001:key0:attempt0",
+      "amount_cny": 2.171508,
+      "actual_cny": 0.1378104,
+      "status": "settled",
+      "created_at_epoch": 1791373952.054501,
+      "request_id": "chatcmpl-b5543f04-d299-914b-82e8-a5c045e60bb1",
+      "returned_model": "qwen3.5-plus",
+      "finish_reason": "stop",
+      "raw_response_sha256": "f28358450b41d304fd2b19b4b189b38cbf8fda238b97fb706964d04aa77e289b",
+      "usage": {
+        "completion_tokens": 7657,
+        "completion_tokens_details": {
+          "reasoning_tokens": 832,
+          "text_tokens": 7657
+        },
+        "prompt_tokens": 126321,
+        "prompt_tokens_details": {
+          "text_tokens": 126321
+        },
+        "total_tokens": 133978
+      },
+      "effective_request": {
+        "answer_tokens": 49152,
+        "enable_thinking": true,
+        "max_completion_tokens": 65536,
+        "max_tokens": null,
+        "model": "qwen3.5-plus",
+        "response_format": null,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "thinking_budget": 16384,
+        "total_output_tokens": 65536
+      },
+      "transport_event_count": 31,
+      "observed_elapsed_seconds": 135.15599999995902,
+      "last_transport_stage": "stream_complete"
+    },
+    {
+      "reservation_id": "res-9132d5f6abc2400d",
+      "phase": "Bv1_writer_unit_001",
+      "call_id": "writer_unit_001-2db1938434c6-attempt_001:key0:attempt0",
+      "amount_cny": 1.872376,
+      "actual_cny": 0.065972,
+      "status": "settled",
+      "created_at_epoch": 1791375122.475017,
+      "request_id": "chatcmpl-2dc519cc-1877-936f-9e72-03389d4b264b",
+      "returned_model": "qwen3.5-plus",
+      "finish_reason": "stop",
+      "raw_response_sha256": "0c996663d0155d4e4d784f83e78f0a9673ba0b532e6d134d51e5f06e5f655145",
+      "usage": {
+        "completion_tokens": 3819,
+        "completion_tokens_details": {
+          "reasoning_tokens": 2664,
+          "text_tokens": 3819
+        },
+        "prompt_tokens": 59551,
+        "prompt_tokens_details": {
+          "text_tokens": 59551
+        },
+        "total_tokens": 63370
+      },
+      "effective_request": {
+        "answer_tokens": 49152,
+        "enable_thinking": true,
+        "max_completion_tokens": 65536,
+        "max_tokens": null,
+        "model": "qwen3.5-plus",
+        "response_format": null,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "thinking_budget": 16384,
+        "total_output_tokens": 65536
+      },
+      "transport_event_count": 23,
+      "observed_elapsed_seconds": 67.5,
+      "last_transport_stage": "stream_complete"
+    },
+    {
+      "reservation_id": "res-a34e406e4d2d42c3",
+      "phase": "Bv1_writer_unit_002_partial_uncertain",
+      "call_id": "writer_unit_002-4712b3364c52-attempt_001:key0:attempt0",
+      "amount_cny": 1.826132,
+      "actual_cny": null,
+      "status": "uncertain",
+      "created_at_epoch": 1791375190.0972896,
+      "request_id": "chatcmpl-6845e3ac-8eeb-9971-a95d-0e151c00e070",
+      "returned_model": "qwen3.5-plus",
+      "finish_reason": null,
+      "raw_response_sha256": "f397e3f7fde846a67b525638048b746b3ed826ec22232add906f4c99f314bcde",
+      "usage": null,
+      "effective_request": {
+        "autoretry": 0,
+        "model": "qwen3.5-plus",
+        "request_timeout_seconds": 900,
+        "stream": true,
+        "stream_inactivity_timeout_seconds": 900,
+        "stream_overall_timeout_seconds": 3600
+      },
+      "transport_event_count": 0,
+      "observed_elapsed_seconds": null,
+      "last_transport_stage": null,
+      "observed_elapsed_seconds_until_stop": 1155.300638,
+      "partial_transport": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live\\stages\\writer_unit_002\\4712b3364c5238760c4da00fcc4e0de5a79178f877e396898c2188b021a20906\\attempt_001\\transport\\writer_unit_002-4712b3364c52-attempt_001-key0-attempt0.sse.partial",
+        "bytes": 286089,
+        "sha256": "f397e3f7fde846a67b525638048b746b3ed826ec22232add906f4c99f314bcde",
+        "event_count": 956,
+        "done_marker": false,
+        "usage_count": 0,
+        "content_chars": 1612,
+        "reasoning_chars": 7855,
+        "finish_reasons": []
+      }
+    },
+    {
+      "reservation_id": "res-59c8796bd26d485b",
+      "phase": "Bv2_writer_unit_001",
+      "call_id": "writer_unit_001-9b85be84a18e-attempt_001:key0:attempt0",
+      "amount_cny": 1.872376,
+      "actual_cny": 0.0660824,
+      "status": "settled",
+      "created_at_epoch": 1791376939.2533321,
+      "request_id": "chatcmpl-0287a476-338c-9983-9b96-339088119308",
+      "returned_model": "qwen3.5-plus",
+      "finish_reason": "stop",
+      "raw_response_sha256": "6e620dfa7235effb9bd1b36ad5563ce9343897996dac9d58118e0c495f68faaa",
+      "usage": {
+        "completion_tokens": 3842,
+        "completion_tokens_details": {
+          "reasoning_tokens": 2390,
+          "text_tokens": 3842
+        },
+        "prompt_tokens": 59551,
+        "prompt_tokens_details": {
+          "text_tokens": 59551
+        },
+        "total_tokens": 63393
+      },
+      "effective_request": {
+        "answer_tokens": 49152,
+        "enable_thinking": true,
+        "max_completion_tokens": 65536,
+        "max_tokens": null,
+        "model": "qwen3.5-plus",
+        "response_format": null,
+        "stream": true,
+        "stream_inactivity_timeout_seconds": 900.0,
+        "stream_options": {
+          "include_usage": true
+        },
+        "stream_overall_timeout_seconds": 3600.0,
+        "thinking_budget": 16384,
+        "total_output_tokens": 65536
+      },
+      "transport_event_count": 23,
+      "observed_elapsed_seconds": 67.85999999986961,
+      "last_transport_stage": "stream_complete"
+    },
+    {
+      "reservation_id": "res-b4ab85e657ae4efa",
+      "phase": "Bv2_writer_unit_002",
+      "call_id": "writer_unit_002-baf2df9c9c6b-attempt_001:key0:attempt0",
+      "amount_cny": 1.826132,
+      "actual_cny": 0.0575024,
+      "status": "settled",
+      "created_at_epoch": 1791377007.2495482,
+      "request_id": "chatcmpl-ac45bb01-58db-9858-932a-47d3983f1672",
+      "returned_model": "qwen3.5-plus",
+      "finish_reason": "stop",
+      "raw_response_sha256": "e16fb978f42e625bb2df0ee460c68193fd38e4dc77149bef93de4c740969f849",
+      "usage": {
+        "completion_tokens": 3775,
+        "completion_tokens_details": {
+          "reasoning_tokens": 2506,
+          "text_tokens": 3775
+        },
+        "prompt_tokens": 49228,
+        "prompt_tokens_details": {
+          "text_tokens": 49228
+        },
+        "total_tokens": 53003
+      },
+      "effective_request": {
+        "answer_tokens": 49152,
+        "enable_thinking": true,
+        "max_completion_tokens": 65536,
+        "max_tokens": null,
+        "model": "qwen3.5-plus",
+        "response_format": null,
+        "stream": true,
+        "stream_inactivity_timeout_seconds": 900.0,
+        "stream_options": {
+          "include_usage": true
+        },
+        "stream_overall_timeout_seconds": 3600.0,
+        "thinking_budget": 16384,
+        "total_output_tokens": 65536
+      },
+      "transport_event_count": 23,
+      "observed_elapsed_seconds": 66.42200000002049,
+      "last_transport_stage": "stream_complete"
+    },
+    {
+      "reservation_id": "res-c8d06b730d804791",
+      "phase": "Bv2_writer_unit_003",
+      "call_id": "writer_unit_003-938bc182804f-attempt_001:key0:attempt0",
+      "amount_cny": 1.865496,
+      "actual_cny": 0.0597464,
+      "status": "settled",
+      "created_at_epoch": 1791377073.825087,
+      "request_id": "chatcmpl-dabdf3d7-868e-9e84-9176-9463ae0351ec",
+      "returned_model": "qwen3.5-plus",
+      "finish_reason": "stop",
+      "raw_response_sha256": "46377337802369d10e4f5bb40cc92040a7f6b0bf2d310c89ba7118b325f0dbb8",
+      "usage": {
+        "completion_tokens": 2778,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1477,
+          "text_tokens": 2778
+        },
+        "prompt_tokens": 58015,
+        "prompt_tokens_details": {
+          "text_tokens": 58015
+        },
+        "total_tokens": 60793
+      },
+      "effective_request": {
+        "answer_tokens": 49152,
+        "enable_thinking": true,
+        "max_completion_tokens": 65536,
+        "max_tokens": null,
+        "model": "qwen3.5-plus",
+        "response_format": null,
+        "stream": true,
+        "stream_inactivity_timeout_seconds": 900.0,
+        "stream_options": {
+          "include_usage": true
+        },
+        "stream_overall_timeout_seconds": 3600.0,
+        "thinking_budget": 16384,
+        "total_output_tokens": 65536
+      },
+      "transport_event_count": 21,
+      "observed_elapsed_seconds": 49.70299999997951,
+      "last_transport_stage": "stream_complete"
+    },
+    {
+      "reservation_id": "res-c7a00e376d9b4d4f",
+      "phase": "Bv2_writer_unit_004",
+      "call_id": "writer_unit_004-2f71c8642d8c-attempt_001:key0:attempt0",
+      "amount_cny": 1.866788,
+      "actual_cny": 0.06540560000000001,
+      "status": "settled",
+      "created_at_epoch": 1791377123.691227,
+      "request_id": "chatcmpl-ea2855ad-acad-9e75-af05-0a41f79bc3dd",
+      "returned_model": "qwen3.5-plus",
+      "finish_reason": "stop",
+      "raw_response_sha256": "82afee48726ad01b2bb4aa9f940d3a5a2cbba7b3f2d04b2bf66959563f61b1b1",
+      "usage": {
+        "completion_tokens": 3909,
+        "completion_tokens_details": {
+          "reasoning_tokens": 2468,
+          "text_tokens": 3909
+        },
+        "prompt_tokens": 58303,
+        "prompt_tokens_details": {
+          "text_tokens": 58303
+        },
+        "total_tokens": 62212
+      },
+      "effective_request": {
+        "answer_tokens": 49152,
+        "enable_thinking": true,
+        "max_completion_tokens": 65536,
+        "max_tokens": null,
+        "model": "qwen3.5-plus",
+        "response_format": null,
+        "stream": true,
+        "stream_inactivity_timeout_seconds": 900.0,
+        "stream_options": {
+          "include_usage": true
+        },
+        "stream_overall_timeout_seconds": 3600.0,
+        "thinking_budget": 16384,
+        "total_output_tokens": 65536
+      },
+      "transport_event_count": 23,
+      "observed_elapsed_seconds": 71.70299999997951,
+      "last_transport_stage": "stream_complete"
+    },
+    {
+      "reservation_id": "res-6916e5a0dc784a46",
+      "phase": "Bv2_editor",
+      "call_id": "editor_chapter-44967598d5e1-attempt_001:key0:attempt0",
+      "amount_cny": 2.197104,
+      "actual_cny": 0.380002,
+      "status": "settled",
+      "created_at_epoch": 1791377195.9322648,
+      "request_id": "chatcmpl-6aeb7b21-04c5-9c0a-ab28-4dc5792eccd5",
+      "returned_model": "qwen3.5-plus",
+      "finish_reason": "stop",
+      "raw_response_sha256": "e1d9bace77cb94d649573d8ec1ac27f08ae9e863fe0b7a0856cbd726a2e06278",
+      "usage": {
+        "completion_tokens": 9661,
+        "completion_tokens_details": {
+          "reasoning_tokens": 4109,
+          "text_tokens": 9661
+        },
+        "prompt_tokens": 132035,
+        "prompt_tokens_details": {
+          "text_tokens": 132035
+        },
+        "total_tokens": 141696
+      },
+      "effective_request": {
+        "answer_tokens": 49152,
+        "enable_thinking": true,
+        "max_completion_tokens": 65536,
+        "max_tokens": null,
+        "model": "qwen3.5-plus",
+        "response_format": null,
+        "stream": true,
+        "stream_inactivity_timeout_seconds": 900.0,
+        "stream_options": {
+          "include_usage": true
+        },
+        "stream_overall_timeout_seconds": 3600.0,
+        "thinking_budget": 16384,
+        "total_output_tokens": 65536
+      },
+      "transport_event_count": 35,
+      "observed_elapsed_seconds": 169.98500000010245,
+      "last_transport_stage": "stream_complete"
+    }
+  ],
+  "phase_totals": {
+    "A_chapter_settled_actual_cny": 0.1378104,
+    "Bv1_settled_actual_cny": 0.065972,
+    "Bv1_partial_uncertain_hold_cny": 1.826132,
+    "Bv2_settled_actual_cny": 0.6287388,
+    "A_plus_Bv1_settled_actual_cny": 0.2037824,
+    "all_new_settled_actual_cny": 0.8325212,
+    "all_new_uncertain_hold_cny": 1.826132,
+    "all_new_exposure_delta_cny": 2.6586532
+  },
+  "corrected_round_totals": {
+    "new_paid_dispatch_count": 8,
+    "new_model_call_count": 8,
+    "all_new_settled_actual_cny": 0.8325212,
+    "all_new_uncertain_hold_cny": 1.826132,
+    "all_new_exposure_delta_cny": 2.6586532,
+    "new60_remaining_exposure_cny": 57.3413468,
+    "global_committed_after_cny": 98.4195654
+  },
+  "max_completed_request": {
+    "phase": "Bv2_editor",
+    "reservation_id": "res-6916e5a0dc784a46",
+    "provider_prompt_tokens": 132035,
+    "reserved_input_tokens": 156060,
+    "estimated_max_cost_cny": 2.197104,
+    "actual_cost_cny": 0.380002,
+    "effective_request": {
+      "answer_tokens": 49152,
+      "enable_thinking": true,
+      "max_completion_tokens": 65536,
+      "max_tokens": null,
+      "model": "qwen3.5-plus",
+      "response_format": null,
+      "stream": true,
+      "stream_inactivity_timeout_seconds": 900.0,
+      "stream_options": {
+        "include_usage": true
+      },
+      "stream_overall_timeout_seconds": 3600.0,
+      "thinking_budget": 16384,
+      "total_output_tokens": 65536
+    },
+    "observed_elapsed_seconds": 169.98500000010245
+  },
+  "editor_actual_draft_input": {
+    "messages_path": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live_after_timeout_fix\\stages\\editor_chapter\\44967598d5e11beceb115423ed9db7f3e0544c8b9d331956dffe27b2898a742a\\attempt_001\\MESSAGES.json",
+    "draft_input_json_path": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live_after_timeout_fix\\stages\\editor_chapter\\44967598d5e11beceb115423ed9db7f3e0544c8b9d331956dffe27b2898a742a\\attempt_001\\DRAFT_INPUT_ACTUAL.json",
+    "draft_input_merged_path": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live_after_timeout_fix\\stages\\editor_chapter\\44967598d5e11beceb115423ed9db7f3e0544c8b9d331956dffe27b2898a742a\\attempt_001\\DRAFT_INPUT_MERGED.md",
+    "unit_count": 4,
+    "draft_block_count": 10
+  },
+  "cache_and_recovery_evidence": {
+    "A_post_call_recovery_pointer": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\chapter_live\\format_repair\\ADOPTED_A_POINTER.json",
+    "A_new_model_calls_for_recovery": 0,
+    "Bv1_partial_recovery": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live\\UNIT_002_PARTIAL_RESULT.json",
+    "Bv1_partial_adopted_as_answer": false,
+    "Bv1_uncertain_hold_preserved": true,
+    "Bv2_run_manifest": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live_after_timeout_fix\\RUN_MANIFEST.json",
+    "Bv2_cli_run": "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live_after_timeout_fix\\CLI_RUN.json",
+    "Bv2_cache_reuse_for_writers": false,
+    "Bv2_paid_dispatch_count": 5
+  },
+  "prior_reports_preserved": [
+    "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\chapter_live\\ROUND_STATE.json",
+    "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live\\B_STOP_REPORT.json",
+    "F:\\OptoMind-Review-2\\outputs\\writer_candidates_local_20261007_60cny\\units_edit_live\\ROUND_STATE.json"
+  ]
+}

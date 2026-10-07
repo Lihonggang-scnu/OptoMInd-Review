@@ -1,0 +1,29 @@
+{
+  "schema_version": "optomind.writer_candidates_config.v1",
+  "purpose": "Local comparison profile: balanced Plus writer is byte-for-byte copied from the official balanced writer profile; only the official plus_reasoning editor profile is substituted (32,768 thinking + 32,768 answer).",
+  "writer": {
+    "model": "qwen3.5-plus",
+    "thinking": true,
+    "thinking_budget": 16384,
+    "max_output_tokens": 49152,
+    "json_mode": false,
+    "timeout_seconds": 900,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "editor": {
+    "model": "qwen3.5-plus",
+    "thinking": true,
+    "thinking_budget": 32768,
+    "max_output_tokens": 32768,
+    "json_mode": false,
+    "timeout_seconds": 900,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "editor_pass": true
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": "optomind.writer_candidates_config.v1",
+  "purpose": "Default Plus-first candidate profile: Plus writer and Plus editor. Each role allows 16,384 thinking plus 49,152 answer tokens (65,536 combined). Token limits are capacities, not targets. Paid execution requires --run and one shared finite CNY ledger. Models never upgrade automatically.",
+  "writer": {
+    "model": "qwen3.5-plus",
+    "thinking": true,
+    "thinking_budget": 16384,
+    "max_output_tokens": 49152,
+    "json_mode": false,
+    "timeout_seconds": 900,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "editor": {
+    "model": "qwen3.5-plus",
+    "thinking": true,
+    "thinking_budget": 16384,
+    "max_output_tokens": 49152,
+    "json_mode": false,
+    "timeout_seconds": 900,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "editor_pass": true
+}

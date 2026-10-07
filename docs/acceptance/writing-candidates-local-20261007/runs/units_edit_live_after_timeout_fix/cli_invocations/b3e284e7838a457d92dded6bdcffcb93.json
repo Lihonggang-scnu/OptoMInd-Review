@@ -1,0 +1,48 @@
+{
+  "schema_version": "optomind.writer_candidates_cli.v1",
+  "execution_mode": "live",
+  "arrangement_sha256": "c9a7ebafefc253a211ab0c6b5345cee5acaa66e30d490e7638e40b6bce8e40ad",
+  "config": {
+    "schema_version": "optomind.writer_candidates_config.v1",
+    "purpose": "Approved bounded recovery: balanced Plus writers reused; official selective_max editor model with answer capacity reduced to 32768 while preserving 32768 thinking and total 65536 output.",
+    "writer": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 16384,
+      "max_output_tokens": 49152,
+      "json_mode": false,
+      "timeout_seconds": 900.0,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192
+    },
+    "editor": {
+      "model": "qwen3.8-max",
+      "thinking": true,
+      "thinking_budget": 32768,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900.0,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192
+    },
+    "editor_pass": true
+  },
+  "meter": {
+    "mode": "local_tokenizer_estimate",
+    "tokenizer_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "tokenizer_implementation_version": "0.23.2",
+    "actual_provider_token_count": false
+  },
+  "fixture_sha256": null,
+  "packet_root": null,
+  "semantic_quality_unreviewed": true,
+  "requested_route": "units_edit",
+  "retry_failed": false,
+  "allow_max": true,
+  "fallback_hierarchical": false,
+  "started_at": "2026-10-07T13:21:15.386523+00:00"
+}
