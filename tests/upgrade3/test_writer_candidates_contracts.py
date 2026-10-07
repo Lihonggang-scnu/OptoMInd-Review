@@ -198,6 +198,34 @@ def test_flexible_cross_unit_blocks_round_trip_provider_envelopes(files, wrap):
     assert result["diagnostics"]["coverage_kind"] == "model_declared_structural_only"
 
 
+def test_completed_json_with_inner_quotes_uses_bounded_format_repair(files):
+    chapter = chapter_from(files)
+    expected = output(chapter)
+    expected["issues"] = [{"code": "other_discipline_note", "detail": 'A literal "quoted" term.'}]
+    expected["blocks"][0]["body_markdown"] = 'A generic other-discipline example says "quoted".\n\n' + TABLE
+    encoded = json.dumps(expected, ensure_ascii=False)
+    malformed = encoded.replace('\\"', '"')
+
+    result = parse_candidate_response(malformed, chapter)
+
+    assert result["complete"]
+    assert result["body_markdown"] == expected["blocks"][0]["body_markdown"]
+    assert result["issues"][0] == expected["issues"][0]
+    repairs = result["diagnostics"]["format_repair"]
+    assert len(repairs) == 1
+    assert repairs[0]["method"] == "bounded_inner_json_quote_escape"
+    assert repairs[0]["strict_json_parse"] is True
+    assert repairs[0]["inserted_escape_characters"] > 0
+
+
+def test_valid_json_has_no_format_repair(files):
+    chapter = chapter_from(files)
+    result = parse_candidate_response(json.dumps(output(chapter), ensure_ascii=False), chapter)
+
+    assert result["complete"]
+    assert result["diagnostics"]["format_repair"] == []
+
+
 @pytest.mark.parametrize("body", ["This text claims the table is complete.",
                                   "```markdown\n" + TABLE + "\n```",
                                   "| Setting | Result |\n|---|---|\n| wrong | extra | cells |"])
@@ -244,6 +272,7 @@ def test_truncated_json_keeps_complete_blocks_and_unfinished_prose(files):
     assert not result["complete"]
     assert result["body_markdown"] == "First useful block.\n\nUseful unfinished \nsecond"
     assert result["raw_response"] == raw
+    assert result["diagnostics"]["format_repair"] == []
     assert "CH01:U1::A1" not in result["pending_task_ids"]
     assert "CH01:U2::A2" in result["pending_task_ids"]
 

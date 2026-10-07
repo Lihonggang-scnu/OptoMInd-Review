@@ -15,7 +15,7 @@ import re
 from typing import Any, Iterable, Mapping, Sequence
 
 from . import review_unit_writer as _writer
-from .chapter_arrangement import normalize_doi
+from .chapter_arrangement import _escape_inner_json_quotes, normalize_doi
 
 INPUT_SCHEMA = "optomind.writer_candidates.input.v1"
 PAYLOAD_SCHEMA = "optomind.writer_candidates.payload.v1"
@@ -528,6 +528,25 @@ def _envelope(response: Any) -> tuple[dict[str, Any], list[dict[str, Any]], bool
         try:
             decoded = json.loads(text, strict=False)
         except ValueError:
+            normalized = _escape_inner_json_quotes(text)
+            if normalized != text:
+                try:
+                    decoded = json.loads(normalized, strict=False)
+                except ValueError:
+                    decoded = None
+                if isinstance(decoded, Mapping):
+                    repaired = {
+                        "code": "candidate_json_inner_quote_repaired",
+                        "method": "bounded_inner_json_quote_escape",
+                        "original_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+                        "normalized_sha256": hashlib.sha256(normalized.encode("utf-8")).hexdigest(),
+                        "original_char_count": len(text),
+                        "normalized_char_count": len(normalized),
+                        "inserted_escape_characters": len(normalized) - len(text),
+                        "strict_json_parse": True,
+                    }
+                    envelope, nested_problems, valid = _envelope(decoded)
+                    return envelope, [repaired, *nested_problems], valid
             recovered = _partial_blocks(text)
             if recovered:
                 return {"blocks": recovered}, [{"code": "candidate_json_incomplete_or_invalid"}], False
@@ -638,10 +657,13 @@ def parse_candidate_response(
     except _writer.UnitWritingError as exc:
         raise CandidateError(str(exc)) from exc
     diagnostics = _writer._output_diagnostics(body, known, _writer._known_tool_identifiers(payload))
+    format_repairs = [issue for issue in issues
+                      if isinstance(issue, Mapping) and issue.get("code") == "candidate_json_inner_quote_repaired"]
     diagnostics.update({"table_checks": table_checks, "coverage_kind": "model_declared_structural_only",
                         "declared_covered_task_ids": [key for key in selected if key in covered],
                         "semantic_quality_unreviewed": True, "transport_incomplete": incomplete,
-                        "valid_response_envelope": valid_envelope, "numeric_citation_repairs": []})
+                        "valid_response_envelope": valid_envelope, "numeric_citation_repairs": [],
+                        "format_repair": format_repairs})
     result = {"schema_version": RESULT_SCHEMA, "blocks": blocks, "body_markdown": body,
               "issues": issues, "complete": bool(body and valid_envelope and not pending and not incomplete),
               "pending_task_ids": pending, "diagnostics": diagnostics,
