@@ -38,6 +38,15 @@ _CASE_FIELDS = (
     "concrete_studies",
     "cases_and_sources",
     "cases_and_references",
+    "case_objects",
+)
+# Keep complete owner records alongside the compact source-use index. These
+# fields can contain distinct findings, identities, conditions and limits that
+# cannot be reconstructed from paragraph text or a single contribution string.
+_OWNER_DETAIL_FIELDS = (*_CASE_FIELDS, "synthesis_and_transition")
+OWNER_UNIT_CONTEXT_FIELDS = (
+    "evidence_conditions", "synthesis", "transition", "argument_relations",
+    *_OWNER_DETAIL_FIELDS,
 )
 
 #: B fields handed to the arrangement model, in a fixed order.
@@ -116,6 +125,17 @@ class SourceMaterial:
     tool_supplement_materials: list[dict[str, Any]] = field(default_factory=list)
     aliases: list[str] = field(default_factory=list)
     material_status: str = "resolved"  # resolved | unresolvable_handle | no_material
+    study_summary_a_variants: list[dict[str, Any]] = field(default_factory=list)
+    planning_view_variants: list[dict[str, Any]] = field(default_factory=list)
+
+    def material_variants(self) -> dict[str, Any]:
+        """Complementary records stay under one source identity."""
+        return {
+            **({"study_summary_A_variants": deepcopy(self.study_summary_a_variants)}
+               if self.study_summary_a_variants else {}),
+            **({"review_planning_B_variants": deepcopy(self.planning_view_variants)}
+               if self.planning_view_variants else {}),
+        }
 
     def to_dict(self, *, include_material: bool = True) -> dict[str, Any]:
         row = {
@@ -130,11 +150,8 @@ class SourceMaterial:
         }
         if include_material:
             row["card_path"] = self.card_path
-            row["review_planning_B"] = {
-                key: self.planning_view.get(key)
-                for key in B_FIELDS
-                if self.planning_view.get(key) not in (None, "", [], {})
-            }
+            row.update(self.material_variants())
+            row["review_planning_B"] = deepcopy(self.planning_view)
             if self.study_summary_a:
                 row["study_summary_A"] = self.study_summary_a
             if self.deep_read_material:
@@ -195,6 +212,17 @@ class UnitView:
     transition: str
     raw_keys: tuple[str, ...]
     argument_relations: Any = None
+    owner_details: dict[str, Any] = field(default_factory=dict)
+
+    def owner_context(self) -> dict[str, Any]:
+        return {
+            "evidence_conditions": self.evidence_conditions,
+            "synthesis": self.synthesis,
+            "transition": self.transition,
+            **({"argument_relations": deepcopy(self.argument_relations)}
+               if self.argument_relations is not None or "argument_relations" in self.raw_keys else {}),
+            **deepcopy(self.owner_details),
+        }
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -205,11 +233,7 @@ class UnitView:
             "ordered_development": self.ordered_development,
             "paragraph_briefs": [brief.to_dict() for brief in self.paragraph_briefs],
             "case_uses": self.case_uses,
-            "evidence_conditions": self.evidence_conditions,
-            "synthesis": self.synthesis,
-            **({"argument_relations": deepcopy(self.argument_relations)}
-               if self.argument_relations is not None or "argument_relations" in self.raw_keys else {}),
-            "transition": self.transition,
+            **self.owner_context(),
         }
 
 
@@ -304,6 +328,7 @@ class ChapterView:
                 ],
                 "material_purpose": purpose,
                 "conditions": deepcopy(source.planning_view.get("scope_interpretation_cautions") or []),
+                **source.material_variants(),
             })
         return {
             "chapter_id": self.chapter_id,
@@ -336,11 +361,7 @@ class ChapterView:
                     "title": unit.title,
                     "substantive_point": unit.substantive_point,
                     "ordered_development": unit.ordered_development,
-                    "evidence_conditions": unit.evidence_conditions,
-                    "synthesis": unit.synthesis,
-                    **({"argument_relations": deepcopy(unit.argument_relations)}
-                       if unit.argument_relations is not None or "argument_relations" in unit.raw_keys else {}),
-                    "transition": unit.transition,
+                    **unit.owner_context(),
                     "existing_paragraph_tasks": [brief.to_dict() for brief in unit.paragraph_briefs],
                     "case_level_uses": [
                         {
@@ -348,6 +369,7 @@ class ChapterView:
                             "field": row["field"],
                             "purpose": row["text"],
                             "conditions": row["conditions"],
+                            **({"limits": deepcopy(row["limits"])} if "limits" in row else {}),
                         }
                         for row in unit.case_uses
                     ],
@@ -531,7 +553,8 @@ def _case_uses(unit: Mapping[str, Any]) -> list[dict[str, Any]]:
                     or item.get("use")
                     or ""
                 ).strip(),
-                "conditions": str(item.get("conditions_limits") or item.get("conditions") or "").strip(),
+                "conditions": deepcopy(item.get("conditions_limits") or item.get("conditions") or ""),
+                **({"limits": deepcopy(item["limits"])} if "limits" in item else {}),
             })
     return rows
 
@@ -702,6 +725,14 @@ def _source_catalog(packet: Mapping[str, Any], chapter_id: str) -> dict[str, Sou
                 card_path=str(item.get("card_path") or ""),
                 planning_view=dict(item.get("review_planning_B") or {}) if isinstance(item.get("review_planning_B"), Mapping) else {},
                 study_summary_a=dict(item.get("study_summary_A") or {}) if isinstance(item.get("study_summary_A"), Mapping) else {},
+                study_summary_a_variants=[
+                    deepcopy(dict(row)) for row in (item.get("study_summary_A_variants") or [])
+                    if isinstance(row, Mapping)
+                ],
+                planning_view_variants=[
+                    deepcopy(dict(row)) for row in (item.get("review_planning_B_variants") or [])
+                    if isinstance(row, Mapping)
+                ],
                 deep_read_material=dict(item.get("deep_read_material") or {}) if isinstance(item.get("deep_read_material"), Mapping) else {},
                 deep_read_materials=[
                     dict(row) for row in (item.get("deep_read_materials") or [])
@@ -950,6 +981,15 @@ def _unique_materials(values: Iterable[Any]) -> list[dict[str, Any]]:
 def _merge_duplicate_source_material(keeper: SourceMaterial, source: SourceMaterial) -> None:
     """Fold duplicate-record material without overwriting complementary data."""
 
+    for primary, variants in (("study_summary_a", "study_summary_a_variants"),
+                              ("planning_view", "planning_view_variants")):
+        records = _unique_materials([
+            getattr(keeper, primary), *getattr(keeper, variants),
+            getattr(source, primary), *getattr(source, variants),
+        ])
+        setattr(keeper, primary, records[0] if records else {})
+        setattr(keeper, variants, records[1:])
+
     deep_reads = _unique_materials([
         keeper.deep_read_material,
         *keeper.deep_read_materials,
@@ -1147,6 +1187,7 @@ def build_chapter_view(
             transition=str(unit.get("transition") or ""),
             raw_keys=tuple(sorted(unit.keys())),
             argument_relations=deepcopy(unit.get("argument_relations")),
+            owner_details={key: deepcopy(unit[key]) for key in _OWNER_DETAIL_FIELDS if key in unit},
         ))
     ids.save()
 
@@ -1167,6 +1208,7 @@ def build_chapter_view(
                 "field": row["field"],
                 "text": row["text"],
                 "conditions": row["conditions"],
+                **({"limits": deepcopy(row["limits"])} if "limits" in row else {}),
             })
     for unit in units:
         for handle in _dedupe(row["source_handle"] for row in unit.case_uses):
@@ -1190,6 +1232,7 @@ def build_chapter_view(
         if material is None:
             material = SourceMaterial(source_handle=handle, material_status="unresolvable_handle")
         elif not (material.planning_view or material.study_summary_a
+                  or material.planning_view_variants or material.study_summary_a_variants
                   or material.deep_read_material or material.deep_read_materials
                   or material.supplement_material or material.supplement_materials
                   or material.local_passages or material.local_passages_variants
@@ -2175,13 +2218,7 @@ def validate_arrangement(
             "unit_notes": str(raw_unit.get("unit_notes") or "").strip(),
             # Owner context also belongs to the normal writing path. Argument
             # relations remain independent of the legacy synthesis field.
-            "owner_unit_context": {
-                "evidence_conditions": owner_unit.evidence_conditions,
-                "synthesis": owner_unit.synthesis,
-                "transition": owner_unit.transition,
-                **({"argument_relations": deepcopy(owner_unit.argument_relations)}
-                   if owner_unit.argument_relations is not None or "argument_relations" in owner_unit.raw_keys else {}),
-            },
+            "owner_unit_context": owner_unit.owner_context(),
             **({
                 # Model-added tasks that reference no owner brief: allowed
                 # (connective organization), but visible instead of silent.

@@ -2636,25 +2636,47 @@ def _resolve_owner_source_materials(
     feedback_materials: Sequence[Mapping[str, Any]] = (),
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Close only selected sources from actual supplied channels, preserving provenance."""
-    rows = {_text(item.get("source_handle")): dict(item) for item in source_materials
-            if isinstance(item, Mapping) and _text(item.get("source_handle"))}
+    rows: dict[str, dict[str, Any]] = {}
+    for item in source_materials:
+        if isinstance(item, Mapping) and _text(item.get("source_handle")):
+            # Keep the first authoritative identity. Duplicate records must go
+            # through the same conflict/combination checks as candidate rows.
+            rows.setdefault(_text(item.get("source_handle")), dict(item))
     referenced = _owner_referenced_source_handles(chapter_plan, chapter_feedback)
     report: dict[str, Any] = {"requested_handles": sorted(referenced), "resolved_from_current_pool": [],
                              "already_present": sorted(referenced & rows.keys()), "unresolved": []}
     candidates: dict[str, list[tuple[str, dict[str, Any]]]] = {}
-    def offer(channel: str, item: Mapping[str, Any]) -> None:
+    def offer(channel: str, item: Mapping[str, Any], *, include_record: bool = True) -> None:
         handle = _text(item.get("source_handle"))
-        if handle:
+        if handle and include_record:
             normalized = dict(item)
             if not normalized.get("paper_id") and normalized.get("canonical_paper_id"):
                 normalized["paper_id"] = normalized["canonical_paper_id"]
             candidates.setdefault(handle, []).append((channel, normalized))
+        # A supplied original study can live inside a review record. Its own
+        # content and identity travel together; parent identity or A/B are not
+        # borrowed to manufacture material for an identity-only bibliography.
+        for key in ("sources", "source_materials", "candidate_materials", "tool_supplement_materials"):
+            nested = item.get(key) or []
+            if isinstance(nested, Sequence) and not isinstance(nested, (str, bytes, Mapping)):
+                for child in nested:
+                    if isinstance(child, Mapping):
+                        offer(f"{channel}.{key}", child)
+    for item in source_materials:
+        if isinstance(item, Mapping): offer("source_materials", item)
     for item in candidate_materials:
         if isinstance(item, Mapping): offer("candidate_materials", item)
     for item in (candidate_navigation or {}).get("candidate_materials") or []:
         if isinstance(item, Mapping): offer("candidate_navigation", item)
     for item in feedback_materials:
         if isinstance(item, Mapping): offer("feedback_materials", item)
+    for item in tool_materials:
+        if isinstance(item, Mapping):
+            # Full original records nested in a tool response have the same
+            # adoption path as originals inside a source or navigation record.
+            # Resolve the tool narrative itself through its existing identity
+            # resolver below rather than attributing it to its container handle.
+            offer("tool_materials", item, include_record=False)
     for raw in pool_rows:
         if not isinstance(raw, Mapping): continue
         if _text(raw.get("_source_handle")) not in referenced | rows.keys():
@@ -2683,6 +2705,72 @@ def _resolve_owner_source_materials(
             # pretending the original study has its own downloaded A/B card.
             if not any(_text(identity.get(k)) for k in ("paper_id", "doi", "title")): continue
             offer("tool_materials", {**dict(identity), "tool_materials": [dict(tool)]})
+
+    def merge_material_fields(current: Mapping[str, Any], incoming: Mapping[str, Any],
+                              *, prefer_incoming: bool) -> dict[str, Any]:
+        merged = dict(current)
+        for key, value in incoming.items():
+            if key not in merged or merged[key] in (None, "", [], {}):
+                merged[key] = value
+        # Preserve intact, distinct material values, including their conditions.
+        # Singular fields remain compatible with existing consumers; plural
+        # fields carry complementary snapshots instead of silently losing them.
+        families = (
+            (("study_summary_A",), ("study_summary_A_variants",)),
+            (("review_planning_B",), ("review_planning_B_variants",)),
+            (("deep_read_material",), ("deep_read_materials",)),
+            (("local_passages",), ("local_passages_variants",)),
+            (("supplement_gap_material", "supplement_material"),
+             ("supplement_materials", "supplement_gap_materials")),
+        )
+        ordered = (current, incoming)
+        for singulars, plurals in families:
+            material_rows = ordered
+            if prefer_incoming and any(incoming.get(key) for key in (*singulars, *plurals)):
+                # A current-pool refresh is an authoritative corrected snapshot,
+                # not another complementary offer. Superseded content must not
+                # be revived as a same-study variant (including stale aliases).
+                material_rows = (incoming,)
+                for key in (*singulars, *plurals):
+                    merged.pop(key, None)
+            values: list[Any] = []
+            signatures: set[str] = set()
+            for row in material_rows:
+                parts = [row.get(key) for key in singulars]
+                for key in plurals:
+                    parts.extend(row.get(key) or [])
+                for value in parts:
+                    if value in (None, "", [], {}):
+                        continue
+                    signature = json.dumps(value, ensure_ascii=False, sort_keys=True, default=str)
+                    if signature not in signatures:
+                        signatures.add(signature)
+                        values.append(value)
+            if not values:
+                continue
+            primary = next((key for key in singulars if merged.get(key) or incoming.get(key)), singulars[-1])
+            merged[primary] = values[0]
+            if len(values) > 1 or any(key in merged for key in plurals):
+                merged[plurals[0]] = values[1:]
+                # Existing consumers also accept the gap-prefixed alias. Keep
+                # both aliases complete when both are present in a record.
+                for key in plurals[1:]:
+                    if key in merged:
+                        merged[key] = values[1:]
+        for key in ("tool_materials", "tool_supplement_materials"):
+            if key not in current and key not in incoming:
+                continue
+            values = []
+            signatures = set()
+            for row in ordered:
+                for value in row.get(key) or []:
+                    signature = json.dumps(value, ensure_ascii=False, sort_keys=True, default=str)
+                    if signature not in signatures:
+                        signatures.add(signature)
+                        values.append(value)
+            merged[key] = values
+        return merged
+
     for handle in sorted(referenced | rows.keys()):
         current = rows.get(handle, {})
         channels = []
@@ -2696,16 +2784,9 @@ def _resolve_owner_source_materials(
                 continue
             if not _owner_material_has_content(incoming):
                 continue
-            merged = dict(current)
-            for key, value in incoming.items():
-                if key not in merged or merged[key] in (None, "", [], {}): merged[key] = value
             # Current substantive snapshots supersede older content only after
             # identity agreement; empty cards never erase usable review material.
-            if channel == "current_pool":
-                for key in ("study_summary_A", "review_planning_B", "supplement_gap_material", "supplement_gap_materials",
-                            "supplement_material", "supplement_materials", "local_passages", "deep_read_material"):
-                    if incoming.get(key): merged[key] = incoming[key]
-            current = merged
+            current = merge_material_fields(current, incoming, prefer_incoming=channel == "current_pool")
             channels.append(channel)
         if current:
             if conflict: current["material_identity_conflict"] = True

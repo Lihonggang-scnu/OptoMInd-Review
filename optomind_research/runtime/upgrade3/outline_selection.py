@@ -835,6 +835,15 @@ def project_selection_group(
         raise ValueError("selection_projection_editable_readonly_overlap")
     chapter_ids = actual_chapters
     current_roles = _current_unit_roles(chapter_payloads)
+    def current_readonly_ids(unit_id: str) -> list[str]:
+        descendants = [new_id for packet in chapter_payloads.values()
+                       for new_id, ancestors in (packet.get("unit_id_remap") or {}).items()
+                       if unit_id in ancestors and new_id in current_roles]
+        resolved = ([unit_id] if unit_id in current_roles else []) + descendants
+        # Truly external legacy context remains useful when no known lineage
+        # replaces it. A known renamed role must not survive beside its update.
+        return _ids(resolved) or [unit_id]
+
     outputs = []
     for chapter_id in chapter_ids:
         source = chapter_payloads.get(chapter_id)
@@ -849,16 +858,27 @@ def project_selection_group(
         units = [row for row in original_plan.get("units") or [] if isinstance(row, Mapping) and _unit_id(row) in local_set]
         projected_plan = _copy(original_plan)
         projected_plan["units"] = units
+        # Owner remaps describe this immediate revision, not historical lineage.
+        projected_plan.pop("unit_id_remap", None)
+        projected.pop("unit_id_remap", None)
         projected["chapter_plan"] = projected_plan
         context = _copy(projected.get("full_chapter_context") or {})
         context.update(_chapter_sequence_context(source))
         projected["full_chapter_context"] = context
         existing_roles = [row for row in projected.get("readonly_neighbor_unit_roles") or [] if isinstance(row, Mapping)]
-        role_by_id = {
-            _unit_id(row): _copy(row)
-            for row in existing_roles
-            if _unit_id(row) and _unit_id(row) not in local_set
-        }
+        role_by_id = {}
+        for row in existing_roles:
+            old_id = _unit_id(row)
+            if not old_id:
+                continue
+            for resolved_id in current_readonly_ids(old_id):
+                if resolved_id in local_set:
+                    continue
+                current = current_roles.get(resolved_id)
+                role_by_id[resolved_id] = (
+                    _role_from_unit(current[1], current[0], reason="current_total_outline_context")
+                    if current is not None else _copy(row)
+                )
         # The current complete payload wins over a role copied from an older
         # projection.  Keep unknown legacy roles only as an audit fallback.
         for unit_id in list(role_by_id):
@@ -884,7 +904,9 @@ def project_selection_group(
                 role_by_id[unit_id] = _role_from_unit(other_units[unit_id], owner_chapter, reason="related_read_only_context")
         # Existing read-only IDs may not have had a role object in a prior
         # packet.  Resolve them from the latest total outline when possible.
-        for unit_id in _ids(projected.get("read_only_unit_ids") or []):
+        refreshed_readonly = _ids([new_id for old_id in _ids(projected.get("read_only_unit_ids") or [])
+                                   for new_id in current_readonly_ids(old_id)])
+        for unit_id in refreshed_readonly:
             if unit_id in local_set or unit_id in role_by_id:
                 continue
             current = current_roles.get(unit_id)
@@ -893,7 +915,7 @@ def project_selection_group(
                 role_by_id[unit_id] = _role_from_unit(
                     current_unit, owner_chapter, reason="current_total_outline_context",
                 )
-        readonly_ids = set(_ids(projected.get("read_only_unit_ids") or [])) | set(role_by_id)
+        readonly_ids = set(refreshed_readonly) | set(role_by_id)
         readonly_ids -= local_set
         projected["readonly_neighbor_unit_roles"] = list(role_by_id.values())
         projected["modifiable_unit_ids"] = local_selected
@@ -1009,6 +1031,7 @@ def run_selection(
     payload: Mapping[str, Any], *, client: Any, model: str, thinking_budget: int, max_output_tokens: int,
     call_id: str | None = None, checkpoint_dir: str | Path | None = None, resume: bool = True,
     profile: Mapping[str, Any] | None = None, model_payload: Mapping[str, Any] | None = None,
+    retry_unresolved: bool = False,
 ) -> dict[str, Any]:
     _verify_selection_payload(payload)
     if model_payload is None:
@@ -1017,6 +1040,11 @@ def run_selection(
     signature = _checkpoint_signature(messages, model=model, thinking_budget=thinking_budget, max_output_tokens=max_output_tokens, profile=profile)
     stage_path = _checkpoint(checkpoint_dir, "SELECTION_STAGE.json")
     stage = _load(stage_path, signature, resume)
+    if (retry_unresolved and stage is not None
+            and validate_selection_response(payload, stage.get("parsed_response") or {}).get("status") == "invalid"):
+        from .outline_on_demand import _archive_rejected_checkpoints
+        _archive_rejected_checkpoints((stage_path, _checkpoint(checkpoint_dir, "SELECTION_RAW_STAGE.json")), signature)
+        stage = None
     raw_reused = False
     if stage is not None:
         raw = stage.get("raw_response") or {}

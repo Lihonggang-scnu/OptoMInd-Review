@@ -173,6 +173,8 @@ def _checked_unit_tasks(unit: Mapping[str, Any], chapter_view: Mapping[str, Any]
     ambiguous identities at this final read boundary as well; rebuild complete
     brief details from the authoritative input when references are present.
     """
+    from .chapter_arrangement import OWNER_UNIT_CONTEXT_FIELDS
+
     unit = deepcopy(dict(unit))
     unit_id = str(unit.get("unit_id") or "")
     all_briefs: dict[str, dict[str, Any]] = {}
@@ -183,7 +185,7 @@ def _checked_unit_tasks(unit: Mapping[str, Any], chapter_view: Mapping[str, Any]
         if str(owner.get("unit_id") or "") == unit_id:
             context = unit.get("owner_unit_context")
             context = dict(context) if isinstance(context, Mapping) else {}
-            for key in ("evidence_conditions", "synthesis", "transition", "argument_relations"):
+            for key in OWNER_UNIT_CONTEXT_FIELDS:
                 if key in owner:
                     context[key] = deepcopy(owner[key])
             if context:
@@ -643,20 +645,15 @@ def _material_entry(
     }
     a_material = catalog_entry.get("study_summary_A") or {}
     if a_material:
-        entry["study_summary_A"] = {
-            key: deepcopy(a_material[key]) for key in A_FIELDS if a_material.get(key)
-        }
-        for key, value in a_material.items():
-            if key not in entry["study_summary_A"] and value not in (None, "", [], {}):
-                entry["study_summary_A"][key] = deepcopy(value)
+        entry["study_summary_A"] = deepcopy(a_material)
     b_material = catalog_entry.get("review_planning_B") or {}
     if b_material:
-        entry["review_planning_B"] = {
-            key: deepcopy(b_material[key]) for key in B_FIELDS if b_material.get(key)
-        }
-        for key, value in b_material.items():
-            if key not in entry["review_planning_B"] and value not in (None, "", [], {}):
-                entry["review_planning_B"][key] = deepcopy(value)
+        entry["review_planning_B"] = deepcopy(b_material)
+    for key in ("study_summary_A_variants", "review_planning_B_variants"):
+        variants = [deepcopy(dict(row)) for row in (catalog_entry.get(key) or [])
+                    if isinstance(row, Mapping)]
+        if variants:
+            entry[key] = variants
     deep_materials: list[dict[str, Any]] = []
     deep_signatures: set[str] = set()
     for raw in [catalog_entry.get("deep_read_material"), *(catalog_entry.get("deep_read_materials") or [])]:
@@ -908,6 +905,7 @@ def build_unit_view(
     no_material = [
         item["source_handle"] for item in materials
         if not (item.get("study_summary_A") or item.get("review_planning_B")
+                or item.get("study_summary_A_variants") or item.get("review_planning_B_variants")
                 or item.get("deep_read_material") or item.get("card_material")
                 or _has_usable_supplement(item.get("supplement_material"))
                 or any(_has_usable_supplement(raw) for raw in item.get("supplement_materials") or ())

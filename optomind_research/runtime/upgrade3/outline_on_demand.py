@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import tempfile
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -27,8 +29,10 @@ _CATALOG_FORBIDDEN = frozenset({
 })
 _CONTENT_KEYS = frozenset({
     "study_summary_A", "review_planning_B", "deep_read_material",
+    "study_summary_A_variants", "review_planning_B_variants",
     "deep_read_materials", "supplement_material", "supplement_materials",
     "supplement_gap_material", "supplement_gap_materials", "local_passages",
+    "local_passages_variants",
     "tool_supplement_materials", "usable_content",
 })
 
@@ -1353,6 +1357,72 @@ def _checkpoint_signature(
     }
 
 
+def _semantic_signature(signature: Mapping[str, Any]) -> dict[str, Any]:
+    """Transport changes do not invalidate a completed scientific result.
+
+    Keep old signatures readable, including the old full-profile shape. The
+    execution policy is separate evidence and is never rewritten on a hit.
+    """
+    semantic = _copy(signature)
+    profile = semantic.get("profile")
+    if isinstance(profile, dict):
+        for key in ("timeout_seconds", "stream", "stream_overall_timeout_seconds"):
+            profile.pop(key, None)
+    return semantic
+
+
+def _call_policy(client: Any, *, model: str, thinking_budget: int, max_output_tokens: int,
+                 profile: Mapping[str, Any] | None, stream: bool,
+                 timeout_seconds: float | None, overall_timeout: float | None) -> dict[str, Any]:
+    inner = getattr(client, "inner", client)
+    timeout = timeout_seconds if timeout_seconds is not None else getattr(inner, "timeout_seconds", None)
+    overall = overall_timeout if overall_timeout is not None else getattr(inner, "stream_overall_timeout_seconds", None)
+    timeout = max(5.0, float(timeout)) if timeout is not None else None
+    overall = max(timeout or 0, float(overall)) if overall is not None else None
+    return {
+        "model": model, "thinking": True, "thinking_budget": int(thinking_budget),
+        "max_output_tokens": int(max_output_tokens),
+        "json_mode": getattr(inner, "json_mode", (profile or {}).get("json_mode")),
+        "stream": bool(stream), "timeout_seconds": timeout,
+        "stream_overall_timeout_seconds": overall if stream else None,
+    }
+
+
+def _execution_record(raw: Mapping[str, Any], requested: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    # Observed wire metadata wins over wrapper/client defaults. Legacy caches
+    # without these fields stay usable but their missing policy stays unknown.
+    policy = _copy(requested or {})
+    effective = raw.get("effective_request") or {}
+    for source, target in (("model", "model"), ("enable_thinking", "thinking"),
+                           ("thinking_budget", "thinking_budget"), ("answer_tokens", "max_output_tokens")):
+        if source in effective:
+            policy[target] = effective[source]
+    if effective:
+        policy["stream"] = bool(effective.get("stream", False))
+        policy["json_mode"] = bool(effective.get("response_format"))
+    observed = False
+    for event in raw.get("transport_events") or []:
+        if event.get("stage") == "request_open_start":
+            policy.update(stream=bool(event.get("stream")), timeout_seconds=event.get("timeout_seconds"),
+                          stream_overall_timeout_seconds=event.get("overall_timeout_seconds"))
+            observed = True
+            break
+    return {"policy": policy, "policy_sha256": _hash(policy),
+            "source": "observed_transport" if observed else "invocation_policy" if requested is not None else "legacy_response_only"}
+
+
+def _execution_provenance(requested: Mapping[str, Any], executed: Mapping[str, Any], *, reused: bool) -> dict[str, Any]:
+    policy = executed.get("policy") or {}
+    known = set(requested).issubset(policy) and all(value is not None or key == "stream_overall_timeout_seconds"
+                                                    for key, value in policy.items())
+    matches = policy == dict(requested) if known else None
+    return {"requested_policy": _copy(requested), "original_execution": _copy(executed),
+            "reused": reused, "physical_call_this_run": not reused,
+            "requested_policy_exercised_this_run": not reused and matches is True,
+            "matches_requested_policy": matches,
+            "reuse_policy": "semantic_result_preserving_original_execution"}
+
+
 def _checkpoint_path(stage_dir: str | Path | None, name: str) -> Path | None:
     if stage_dir is None:
         return None
@@ -1364,17 +1434,43 @@ def _checkpoint_path(stage_dir: str | Path | None, name: str) -> Path | None:
 def _write_checkpoint(path: Path | None, value: Mapping[str, Any]) -> None:
     if path is None:
         return
-    path.write_text(json.dumps(value, ensure_ascii=False, indent=2, default=str) + "\n", encoding="utf-8")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    encoded = json.dumps(value, ensure_ascii=False, indent=2, default=str) + "\n"
+    # Keep the last accepted owner result available if a new attempt fails.
+    if isinstance(value.get("result"), Mapping) and value["result"].get("status") in {"updated", "no_change"}:
+        _atomic_checkpoint_write(path.with_name(path.stem + ".last_valid.json"), encoded)
+    _atomic_checkpoint_write(path, encoded)
+
+
+def _atomic_checkpoint_write(path: Path, encoded: str) -> None:
+    fd, temporary = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as target:
+            target.write(encoded)
+            target.flush()
+            os.fsync(target.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 def _load_compatible_checkpoint(path: Path | None, signature: Mapping[str, Any], *, resume: bool) -> dict[str, Any] | None:
-    if path is None or not resume or not path.is_file():
+    if path is None or not resume:
         return None
     try:
         saved = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
+        try:
+            saved = json.loads(path.with_name(path.stem + ".last_valid.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+        if isinstance(saved, dict) and _semantic_signature(saved.get("signature") or {}) == _semantic_signature(signature):
+            return saved
         return None
-    if saved.get("signature") == dict(signature):
+    if not isinstance(saved, dict):
+        return None
+    if _semantic_signature(saved.get("signature") or {}) == _semantic_signature(signature):
         return saved
     history = path.parent / "history"
     history.mkdir(parents=True, exist_ok=True)
@@ -1383,6 +1479,28 @@ def _load_compatible_checkpoint(path: Path | None, signature: Mapping[str, Any],
     if not preserved.exists():
         preserved.write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
     return None
+
+
+def _archive_rejected_checkpoints(paths: Sequence[Path | None], signature: Mapping[str, Any]) -> None:
+    """Retire only this validated rejection, keeping all paid evidence.
+
+    Called once before an explicitly requested retry, never after an exception
+    or merely because a RAW checkpoint exists. Copy every file before removal.
+    """
+    archived = []
+    for path in paths:
+        if path is None or not path.is_file():
+            continue
+        saved = json.loads(path.read_text(encoding="utf-8"))
+        if _semantic_signature(saved.get("signature") or {}) != _semantic_signature(signature):
+            continue
+        history = path.parent / "history"
+        history.mkdir(parents=True, exist_ok=True)
+        destination = history / f"{path.stem}.rejected-{_hash(saved)[:16]}{path.suffix}"
+        _atomic_checkpoint_write(destination, json.dumps(saved, ensure_ascii=False, indent=2, default=str) + "\n")
+        archived.append(path)
+    for path in archived:
+        path.unlink()
 
 
 def _needs_materials(parsed: Mapping[str, Any]) -> bool:
@@ -1459,7 +1577,13 @@ def _run_complete_material_batches(
                         "result": _copy(result)})
         if result.get("status") not in {"updated", "no_change"}:
             return {**result, "last_valid_plan": _copy(current["chapter_plan"]),
+                    "last_valid_source_materials": _copy(current.get("source_materials") or []),
                     "material_batch_results": results, "material_batch_count": len(partitions)}
+        # Adoption is cumulative just like the plan: later passes can retain or
+        # stop citing a newly adopted study without losing its supplied material.
+        # The accepted pool already includes the previous authoritative rows.
+        current["source_materials"] = _copy(result.get("accepted_source_materials")
+                                            or current.get("source_materials") or [])
         if result.get("status") == "updated":
             changed = True
             current["chapter_plan"] = _copy(result["updated_plan"])
@@ -1467,18 +1591,20 @@ def _run_complete_material_batches(
             ids = [str(unit.get("unit_id") or unit.get("id")) for unit in current["chapter_plan"].get("units") or []]
             if set(ids) != set(current.get("modifiable_unit_ids") or []):
                 return {"status": "partial", "last_valid_plan": current["chapter_plan"],
+                        "last_valid_source_materials": _copy(current["source_materials"]),
                         "structural_errors": ["batch_unit_id_remap_requires_integration"],
                         "material_batch_results": results}
-            current["input_integrity"] = strengthening._input_integrity(current)
+        current["input_integrity"] = strengthening._input_integrity(current)
         _write_checkpoint(_checkpoint_path(base_dir, "MATERIAL_BATCH_PROGRESS.json"), {
             "catalog_sha256": catalog.get("catalog_sha256"), "completed_batches": index + 1,
             "batch_count": len(partitions), "latest_plan": current["chapter_plan"],
+            "accepted_source_materials": current["source_materials"],
             "material_record_sha256s": [_hash(row) for row in rows],
         })
     final = dict(results[-1]["result"])
     final.update(status="updated" if changed else "no_change",
                  updated_plan=_copy(current["chapter_plan"]),
-                 accepted_source_materials=_copy(payload.get("source_materials") or []),
+                 accepted_source_materials=_copy(current.get("source_materials") or []),
                  material_batch_results=results, material_batch_count=len(partitions))
     final.setdefault("on_demand_strengthening", {})["material_access_trace"] = _copy(trace)
     return final
@@ -1490,10 +1616,13 @@ def run_on_demand_strengthening(
     owner_client: Any, owner_model: str, owner_thinking_budget: int, owner_max_output_tokens: int,
     access_call_id: str | None = None, owner_call_id: str | None = None,
     checkpoint_dir: str | Path | None = None, resume: bool = False,
+    retry_unresolved: bool = False,
     access_profile: Mapping[str, Any] | None = None, owner_profile: Mapping[str, Any] | None = None,
     access_stream: bool = False, access_stream_overall_timeout_seconds: float | None = None,
+    access_timeout_seconds: float | None = None,
     access_transport_observer: Any | None = None,
     owner_stream: bool = False, owner_stream_overall_timeout_seconds: float | None = None,
+    owner_timeout_seconds: float | None = None,
     owner_transport_observer: Any | None = None,
     owner_token_counter: Any | None = None, owner_context_limit_tokens: int | None = None,
     _resolved_access_state: Mapping[str, Any] | None = None,
@@ -1509,11 +1638,22 @@ def run_on_demand_strengthening(
     catalog = build_material_catalog(payload)
     access_request = access_messages(payload, catalog)
     from .module4 import runtime
+    access_policy = _call_policy(
+        access_client, model=access_model, thinking_budget=access_thinking_budget,
+        max_output_tokens=access_max_output_tokens, profile=access_profile, stream=access_stream,
+        timeout_seconds=access_timeout_seconds, overall_timeout=access_stream_overall_timeout_seconds,
+    )
+    owner_policy = _call_policy(
+        owner_client, model=owner_model, thinking_budget=owner_thinking_budget,
+        max_output_tokens=owner_max_output_tokens, profile=owner_profile, stream=owner_stream,
+        timeout_seconds=owner_timeout_seconds, overall_timeout=owner_stream_overall_timeout_seconds,
+    )
     if _resolved_access_state is not None:
         access_request = _copy(_resolved_access_state["access_request"])
         raw_access = _copy(_resolved_access_state["raw_access"])
         access_parsed = _copy(_resolved_access_state["access_parsed"])
         access_telemetry = _copy(_resolved_access_state["access_telemetry"])
+        access_execution = _copy(_resolved_access_state.get("access_execution") or _execution_record(raw_access))
         access_reused = True
         access_raw_reused = False
         trace = _copy(_resolved_access_state["trace"])
@@ -1531,11 +1671,13 @@ def run_on_demand_strengthening(
             raw_access = access_stage.get("raw_response") or {}
             access_parsed = access_stage.get("parsed_response") or {}
             access_telemetry = access_stage.get("telemetry") or {}
+            access_execution = access_stage.get("execution") or _execution_record(raw_access)
         else:
             access_raw_path = _checkpoint_path(checkpoint_dir, "ACCESS_RAW_STAGE.json")
             raw_stage = _load_compatible_checkpoint(access_raw_path, access_signature, resume=resume)
             if raw_stage is not None:
                 raw_access = raw_stage.get("raw_response") or {}
+                access_execution = raw_stage.get("execution") or _execution_record(raw_access)
                 access_raw_reused = True
             else:
                 access_invoke_kwargs = {
@@ -1549,16 +1691,21 @@ def run_on_demand_strengthening(
                     access_invoke_kwargs["stream"] = True
                 if access_stream_overall_timeout_seconds is not None:
                     access_invoke_kwargs["stream_overall_timeout_seconds"] = float(access_stream_overall_timeout_seconds)
+                if access_timeout_seconds is not None:
+                    access_invoke_kwargs["timeout_seconds"] = float(access_timeout_seconds)
                 if access_transport_observer is not None:
                     access_invoke_kwargs["transport_observer"] = access_transport_observer
                 raw_access = runtime.invoke_client(access_client, access_request, **access_invoke_kwargs)
+                access_execution = _execution_record(raw_access, access_policy)
                 _write_checkpoint(access_raw_path, {
                     "signature": access_signature, "raw_response": _copy(raw_access),
+                    "execution": access_execution,
                 })
             access_parsed, access_telemetry = planning._parse_planner_response(raw_access)
             _write_checkpoint(access_stage_path, {
                 "signature": access_signature, "raw_response": _copy(raw_access),
                 "parsed_response": _copy(access_parsed), "telemetry": _copy(access_telemetry),
+                "execution": access_execution,
             })
         try:
             access_validated = validate_access_response(access_parsed, catalog)
@@ -1581,6 +1728,8 @@ def run_on_demand_strengthening(
                     "owner_not_called": True,
                     "access_reused": access_reused,
                     "access_raw_reused": access_raw_reused,
+                    "execution_provenance": {"access": _execution_provenance(
+                        access_policy, access_execution, reused=access_reused or access_raw_reused)},
                     "catalog": public_catalog(catalog),
                 },
             }
@@ -1606,36 +1755,93 @@ def run_on_demand_strengthening(
             return {"status": "capacity_blocked", "updated_plan": None,
                     "structural_errors": ["complete_record_or_task_context_exceeds_capacity"],
                     "capacity_estimate": estimate, "context_limit_tokens": capacity}
-        return _run_complete_material_batches(
+        batched = _run_complete_material_batches(
             payload, catalog, trace,
             access_state={"access_request": access_request, "raw_access": raw_access,
                           "access_parsed": access_parsed, "access_telemetry": access_telemetry,
+                          "access_execution": access_execution,
                           "final_read": final_read},
             owner_client=owner_client, owner_model=owner_model,
             owner_thinking_budget=owner_thinking_budget, owner_max_output_tokens=owner_max_output_tokens,
             access_client=access_client, access_model=access_model,
             access_thinking_budget=access_thinking_budget, access_max_output_tokens=access_max_output_tokens,
             access_profile=access_profile, owner_profile=effective_profile,
+            access_stream=access_stream, access_timeout_seconds=access_timeout_seconds,
+            access_stream_overall_timeout_seconds=access_stream_overall_timeout_seconds,
             owner_call_id=owner_call_id, checkpoint_dir=checkpoint_dir, resume=resume,
+            retry_unresolved=retry_unresolved,
             owner_stream=owner_stream, owner_stream_overall_timeout_seconds=owner_stream_overall_timeout_seconds,
+            owner_timeout_seconds=owner_timeout_seconds,
             owner_transport_observer=owner_transport_observer, counter=counter, capacity=capacity,
         )
+        metadata = batched.setdefault("on_demand_strengthening", {})
+        metadata.update(access_reused=access_reused, access_raw_reused=access_raw_reused)
+        batch_results = batched.get("material_batch_results") or []
+        # Do not present the last batch's execution policy as the whole run.
+        metadata["execution_provenance"] = {
+            "access": _execution_provenance(access_policy, access_execution, reused=access_reused or access_raw_reused),
+            "material_batches": [{"batch": item["batch"],
+                                  "execution_provenance": (item["result"].get("on_demand_strengthening") or {}).get("execution_provenance")}
+                                 for item in batch_results],
+        }
+        metadata["owner_call_count"] = sum((item["result"].get("on_demand_strengthening") or {}).get("owner_call_count", 0)
+                                           for item in batch_results)
+        return batched
     owner_signature = _checkpoint_signature(
         owner_request, payload=owner_payload, catalog=catalog, model=owner_model,
         thinking_budget=owner_thinking_budget, max_output_tokens=owner_max_output_tokens,
         profile=owner_profile,
     )
     owner_stage_path = _checkpoint_path(checkpoint_dir, "OWNER_STAGE.json")
+    owner_raw_path = _checkpoint_path(checkpoint_dir, "OWNER_RAW_STAGE.json")
     owner_stage = _load_compatible_checkpoint(owner_stage_path, owner_signature, resume=resume)
+    cached_owner = _copy((owner_stage or {}).get("result") or {})
+    cached_execution = (owner_stage or {}).get("execution")
+    owner_revalidated = False
+    owner_revalidation_source = None
+    revalidation_raw = cached_owner.get("raw_response")
+    if owner_stage is not None:
+        if isinstance(revalidation_raw, Mapping) and revalidation_raw:
+            owner_revalidation_source = "stage_raw_response"
+        else:
+            saved_raw = _load_compatible_checkpoint(owner_raw_path, owner_signature, resume=resume)
+            revalidation_raw = (saved_raw or {}).get("raw_response")
+            if isinstance(revalidation_raw, Mapping) and revalidation_raw:
+                owner_revalidation_source = "matching_raw_checkpoint"
+                cached_execution = cached_execution or (saved_raw or {}).get("execution")
+            elif isinstance(cached_owner.get("parsed_response"), Mapping) and cached_owner["parsed_response"]:
+                # Imported parsed-only artifacts can still be revalidated. This
+                # adapter is local reconstruction, not original provider bytes.
+                owner_revalidation_source = "saved_parsed_response"
+                revalidation_raw = {"_planner_call": True, "response": cached_owner["parsed_response"],
+                                    "telemetry": cached_owner.get("telemetry") or {}}
+    if owner_stage is not None and owner_revalidation_source is not None:
+        # Reapply local parsing/material closure fixes without another paid
+        # request. Original wire policy remains attached to the saved response.
+        cached_owner = strengthening._run_owner_with_messages(
+            owner_payload, messages=owner_request, client=owner_client, model=owner_model,
+            thinking_budget=owner_thinking_budget, max_output_tokens=owner_max_output_tokens,
+            raw_response=revalidation_raw,
+        )
+        owner_revalidated = owner_revalidation_source != "saved_parsed_response"
+    if (retry_unresolved and owner_stage is not None and cached_owner.get("status") == "unresolved"
+            and not _needs_materials(cached_owner.get("parsed_response") or {})):
+        _archive_rejected_checkpoints((owner_stage_path, owner_raw_path), owner_signature)
+        owner_stage = None
+        owner_revalidated = False
+        owner_revalidation_source = None
     owner_reused = owner_stage is not None
     owner_raw_reused = False
     if owner_reused:
-        first_owner = _copy(owner_stage.get("result") or {})
+        first_owner = cached_owner
+        owner_execution = cached_execution or _execution_record(first_owner.get("raw_response") or {})
+        if cached_execution is None and owner_revalidation_source == "saved_parsed_response":
+            owner_execution["source"] = "reconstructed_from_saved_parsed_response"
     else:
-        owner_raw_path = _checkpoint_path(checkpoint_dir, "OWNER_RAW_STAGE.json")
         raw_owner_stage = _load_compatible_checkpoint(owner_raw_path, owner_signature, resume=resume)
         if raw_owner_stage is not None:
             owner_raw_reused = True
+            owner_execution = raw_owner_stage.get("execution") or _execution_record(raw_owner_stage.get("raw_response") or {})
             first_owner = strengthening._run_owner_with_messages(
                 owner_payload, messages=owner_request, client=owner_client, model=owner_model,
                 thinking_budget=owner_thinking_budget, max_output_tokens=owner_max_output_tokens,
@@ -1643,12 +1849,14 @@ def run_on_demand_strengthening(
                 call_id=owner_call_id or (str(payload.get("call_id") or "outline-on-demand") + ":owner"),
                 stream=owner_stream,
                 stream_overall_timeout_seconds=owner_stream_overall_timeout_seconds,
+                timeout_seconds=owner_timeout_seconds,
                 transport_observer=owner_transport_observer,
             )
         else:
             def save_owner_raw(raw: Mapping[str, Any]) -> None:
                 _write_checkpoint(owner_raw_path, {
                     "signature": owner_signature, "raw_response": _copy(raw),
+                    "execution": _execution_record(raw, owner_policy),
                 })
 
             first_owner = strengthening._run_owner_with_messages(
@@ -1658,9 +1866,12 @@ def run_on_demand_strengthening(
                 call_id=owner_call_id or (str(payload.get("call_id") or "outline-on-demand") + ":owner"),
                 stream=owner_stream,
                 stream_overall_timeout_seconds=owner_stream_overall_timeout_seconds,
+                timeout_seconds=owner_timeout_seconds,
                 transport_observer=owner_transport_observer,
             )
-        _write_checkpoint(owner_stage_path, {"signature": owner_signature, "result": _copy(first_owner)})
+            owner_execution = _execution_record(first_owner.get("raw_response") or {}, owner_policy)
+        _write_checkpoint(owner_stage_path, {"signature": owner_signature, "result": _copy(first_owner),
+                                             "execution": owner_execution})
     final_owner = first_owner
     continuation = None
     continuation_reused = False
@@ -1701,11 +1912,16 @@ def run_on_demand_strengthening(
                 owner_call_id=(owner_call_id or "outline-on-demand:owner") + ":continuation",
                 checkpoint_dir=(Path(checkpoint_dir) / "continuation") if checkpoint_dir else None,
                 resume=resume, access_profile=access_profile, owner_profile=owner_profile,
+                retry_unresolved=retry_unresolved,
+                access_stream=access_stream, access_timeout_seconds=access_timeout_seconds,
+                access_stream_overall_timeout_seconds=access_stream_overall_timeout_seconds,
                 owner_stream=owner_stream, owner_stream_overall_timeout_seconds=owner_stream_overall_timeout_seconds,
+                owner_timeout_seconds=owner_timeout_seconds,
                 owner_transport_observer=owner_transport_observer,
                 owner_token_counter=counter, owner_context_limit_tokens=capacity,
                 _resolved_access_state={"access_request": access_request, "raw_access": raw_access,
                                         "access_parsed": access_parsed, "access_telemetry": access_telemetry,
+                                        "access_execution": access_execution,
                                         "trace": combined_trace, "final_read": True},
                 _allow_material_batches=_allow_material_batches,
             )
@@ -1723,9 +1939,16 @@ def run_on_demand_strengthening(
         "access_raw_reused": access_raw_reused,
         "owner_reused": owner_reused,
         "owner_raw_reused": owner_raw_reused,
+        "owner_revalidated_from_raw": owner_revalidated,
+        "owner_revalidation_source": owner_revalidation_source,
         "owner_continuation_reused": continuation_reused,
         "checkpoint_dir": str(checkpoint_dir) if checkpoint_dir is not None else None,
         "owner_call_count": 2 if continuation is not None else 1,
+        "execution_provenance": {
+            "access": _execution_provenance(access_policy, access_execution, reused=access_reused or access_raw_reused),
+            "owner": _execution_provenance(owner_policy, owner_execution, reused=owner_reused or owner_raw_reused),
+            "owner_continuation": (continuation.get("on_demand_strengthening") or {}).get("execution_provenance") if continuation is not None else None,
+        },
     }
     return result
 

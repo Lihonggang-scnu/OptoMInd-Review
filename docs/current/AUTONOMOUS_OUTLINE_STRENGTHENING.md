@@ -53,3 +53,7 @@ python scripts/upgrade3/outline_strengthening.py --mode select --input <complete
 The profile remains `qwen3.8-max`, 32768 thinking and 32768 answer tokens. Explicit `--run` still requires the prepared directory, budget ledger and key file. A valid selection is projected through `selection_to_on_demand_payloads`; second-layer algorithms, prompts and profiles are unchanged. Use fresh preparation for the new contract; historical attempts remain available for audit.
 
 See [implementation and offline message evidence](../verification/selector-local-depth-20261006/README.md).
+
+## 2026-10-07：完整章节正式接入
+
+默认按需引擎通过显式可选入口 `scripts/upgrade3/outline_strengthening_pipeline.py` 接入。输入完整 planner 目录，串接原 selector 与 on-demand owner，输出完整章节快照供原编排/写作消费。未选单元保留；单组结果不再作为整章使用。操作、恢复及本地验收说明见 [正式接入记录](../verification/on-demand-promotion-20261007/README.md)。

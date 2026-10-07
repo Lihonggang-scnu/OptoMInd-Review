@@ -705,6 +705,24 @@ def _merge_accepted_materials(
     return output
 
 
+def _merge_unit_id_remap(value: Any) -> dict[str, list[str]]:
+    """Read the canonical new-unit -> previous-unit identity contract."""
+
+    if not isinstance(value, Mapping):
+        raise OutlineStrengtheningError("owner_merge_remap_not_object")
+    remap: dict[str, list[str]] = {}
+    for new_id, old_ids in value.items():
+        new_id = str(new_id).strip()
+        if isinstance(old_ids, str):
+            old_ids = [old_ids]
+        if not new_id or not isinstance(old_ids, Sequence) or isinstance(old_ids, bytes):
+            raise OutlineStrengtheningError("owner_merge_remap_invalid_sources")
+        if not old_ids or any(not isinstance(old_id, str) or not old_id.strip() for old_id in old_ids):
+            raise OutlineStrengtheningError("owner_merge_remap_invalid_sources")
+        remap[new_id] = _clean_ids(old_ids)
+    return remap
+
+
 def merge_owner_result_into_chapter_payloads(
     chapter_payloads: Mapping[str, Mapping[str, Any]],
     owner_payload: Mapping[str, Any],
@@ -736,48 +754,69 @@ def merge_owner_result_into_chapter_payloads(
             base.get("source_materials") or [], projected.get("source_materials") or [],
         )
         latest[chapter_id]["outline_strengthening_status"] = status
+        latest[chapter_id]["input_integrity"] = _input_integrity(latest[chapter_id])
         return latest
 
     base_plan = base.get("chapter_plan") if isinstance(base.get("chapter_plan"), Mapping) else {}
     owner_plan = projected.get("chapter_plan") if isinstance(projected.get("chapter_plan"), Mapping) else {}
-    base_units = [row for row in base_plan.get("units") or [] if isinstance(row, Mapping)]
-    owner_units = [row for row in owner_plan.get("units") or [] if isinstance(row, Mapping)]
+    base_units = base_plan.get("units") or []
+    owner_units = owner_plan.get("units") or []
+
+    def unit_ids(rows: Sequence[Mapping[str, Any]]) -> list[str]:
+        ids = [str(row.get("unit_id") or row.get("id") or "").strip()
+               if isinstance(row, Mapping) else "" for row in rows]
+        if not ids or any(not unit_id for unit_id in ids) or len(ids) != len(set(ids)):
+            raise OutlineStrengtheningError("owner_merge_invalid_unit_ids")
+        return ids
+
+    base_ids = unit_ids(base_units)
+    returned_order = unit_ids(owner_units)
     editable = set(_clean_ids(owner_payload.get("modifiable_unit_ids") or []))
-    readonly = set(_clean_ids(owner_payload.get("read_only_unit_ids") or []))
-    returned_by_id = {
-        str(row.get("unit_id") or row.get("id") or "").strip(): row
-        for row in owner_units if str(row.get("unit_id") or row.get("id") or "").strip()
-    }
+    base_readonly = set(_clean_ids(base.get("read_only_unit_ids") or []))
+    base_editable = (
+        set(_clean_ids(base.get("modifiable_unit_ids") or []))
+        if "modifiable_unit_ids" in base else set(base_ids) - base_readonly
+    )
+    readonly = base_readonly | set(_clean_ids(owner_payload.get("read_only_unit_ids") or []))
+    if not editable or editable - set(base_ids) or editable - base_editable or editable & readonly:
+        raise OutlineStrengtheningError("owner_merge_editable_scope_invalid")
+    returned_by_id = dict(zip(returned_order, owner_units))
     returned_ids = set(returned_by_id)
     if returned_ids & readonly:
         raise OutlineStrengtheningError("owner_merge_readonly_unit_returned")
-    remap_raw = result.get("unit_id_remap") or {}
-    remap: dict[str, list[str]] = {
-        str(old): _clean_ids(values if isinstance(values, Sequence) and not isinstance(values, (str, bytes)) else [values])
-        for old, values in remap_raw.items()
-    }
-    remap_targets = [value for values in remap.values() for value in values]
-    if len(remap_targets) != len(set(remap_targets)):
-        # A legal merge may point multiple old IDs at one new ID.  The
-        # duplicate is handled once during ordering below; duplicates within a
-        # single split declaration are malformed and cannot be placed twice.
-        for old, values in remap.items():
-            if len(values) != len(set(values)):
-                raise OutlineStrengtheningError("owner_merge_remap_target_repeated")
-    allowed_returned = set(editable)
-    for old, new_ids in remap.items():
-        if old not in editable:
-            raise OutlineStrengtheningError("owner_merge_remap_outside_editable_scope")
-        allowed_returned.update(new_ids)
-    if not returned_ids.issubset(allowed_returned):
+    # A fresh ID must never take over an unselected unit, even if a malformed
+    # caller omitted that unit from the projected read-only list.
+    occupied_ids = set(base_ids) - editable
+    for other_chapter, payload in latest.items():
+        if other_chapter != chapter_id:
+            other_plan = payload.get("chapter_plan") or {}
+            occupied_ids.update(str(row.get("unit_id") or row.get("id") or "").strip()
+                                for row in other_plan.get("units") or [] if isinstance(row, Mapping))
+    if returned_ids & occupied_ids:
         raise OutlineStrengtheningError("owner_merge_returned_unit_outside_editable_scope")
-    replacement_by_old: dict[str, list[str]] = {}
-    for old in editable:
-        replacement_by_old[old] = remap.get(old) or ([old] if old in returned_ids else [])
-        if not replacement_by_old[old]:
-            raise OutlineStrengtheningError("owner_merge_editable_unit_missing")
+    remap = _merge_unit_id_remap(result.get("unit_id_remap") or owner_plan.get("unit_id_remap") or {})
+    for new_id, old_ids in remap.items():
+        if new_id not in returned_ids:
+            raise OutlineStrengtheningError("owner_merge_remap_target_missing")
+        if set(old_ids) - editable:
+            raise OutlineStrengtheningError("owner_merge_remap_outside_editable_scope")
+    if returned_ids - editable - set(remap):
+        raise OutlineStrengtheningError("owner_merge_returned_unit_outside_editable_scope")
+    immediate_sources = {new_id: remap.get(new_id, [new_id]) for new_id in returned_order}
+    covered_old = {old_id for old_ids in immediate_sources.values() for old_id in old_ids}
+    # The producer also permits retained stable IDs without redundant self
+    # entries, including a retained target explicitly adopting another unit.
+    if editable - returned_ids - covered_old:
+        raise OutlineStrengtheningError("owner_merge_editable_unit_missing")
+    # Place a merged unit at its first previous slot.  Split siblings follow
+    # owner unit order, never dictionary order in the remap.  Intervening
+    # unselected units keep their existing order and are copied verbatim.
+    base_positions = {unit_id: index for index, unit_id in enumerate(base_ids)}
+    replacement_by_old: dict[str, list[str]] = {old_id: [] for old_id in editable}
+    for new_id, old_ids in immediate_sources.items():
+        anchor = min(old_ids, key=base_positions.__getitem__)
+        replacement_by_old[anchor].append(new_id)
     merged_units: list[dict[str, Any]] = []
-    consumed: set[str] = set()
     for row in base_units:
         unit_id = str(row.get("unit_id") or row.get("id") or "").strip()
         replacement_ids = replacement_by_old.get(unit_id)
@@ -785,19 +824,41 @@ def merge_owner_result_into_chapter_payloads(
             merged_units.append(_json_copy(row))
             continue
         for returned_id in replacement_ids:
-            if returned_id not in returned_by_id:
-                raise OutlineStrengtheningError("owner_merge_remap_target_missing")
-            if returned_id in consumed:
-                # Two editable old units may legally merge into one new unit.
-                continue
             merged_units.append(_json_copy(returned_by_id[returned_id]))
-            consumed.add(returned_id)
-    for returned_id, row in returned_by_id.items():
-        if returned_id not in consumed:
-            merged_units.append(_json_copy(row))
+
+    # The full packet records current -> original lineage.  A later accepted
+    # group maps to the then-current IDs, so compose exactly one generation;
+    # recursively following roots could confuse a reused stable ID with an
+    # earlier incarnation of that same ID.
+    previous_remap = _merge_unit_id_remap(base.get("unit_id_remap") or base_plan.get("unit_id_remap") or {})
+    if set(previous_remap) - set(base_ids):
+        raise OutlineStrengtheningError("owner_merge_previous_remap_target_missing")
+    current_ids = unit_ids(merged_units)
+    composed_remap: dict[str, list[str]] = {}
+    for unit_id in current_ids:
+        if unit_id in immediate_sources:
+            old_ids = immediate_sources[unit_id]
+            if unit_id in remap or any(old_id in previous_remap for old_id in old_ids):
+                composed_remap[unit_id] = _clean_ids([
+                    root for old_id in old_ids for root in previous_remap.get(old_id, [old_id])
+                ])
+        elif unit_id in previous_remap:
+            composed_remap[unit_id] = previous_remap[unit_id]
     merged_plan = _json_copy(base_plan)
     merged_plan["units"] = merged_units
+    if composed_remap or "unit_id_remap" in base:
+        latest[chapter_id]["unit_id_remap"] = _json_copy(composed_remap)
+    if "unit_id_remap" in merged_plan:
+        merged_plan["unit_id_remap"] = _json_copy(composed_remap)
     latest[chapter_id]["chapter_plan"] = merged_plan
+    latest[chapter_id]["modifiable_unit_ids"] = [
+        unit_id for unit_id in current_ids if unit_id in returned_ids or unit_id in base_editable - editable
+    ]
+    contract = _json_copy(base.get("unit_identity_contract") or {})
+    contract["existing_unit_ids"] = current_ids
+    latest[chapter_id]["unit_identity_contract"] = contract
+    if "existing_unit_ids" in base:
+        latest[chapter_id]["existing_unit_ids"] = list(current_ids)
     latest[chapter_id]["source_materials"] = _merge_accepted_materials(
         base.get("source_materials") or [], projected.get("source_materials") or [],
     )
@@ -813,6 +874,7 @@ def _run_owner_with_messages(
     raw_response: Mapping[str, Any] | None = None, raw_response_callback: Any | None = None,
     stream: bool = False, stream_overall_timeout_seconds: float | None = None,
     transport_observer: Any | None = None,
+    timeout_seconds: float | None = None,
 ) -> dict[str, Any]:
     """Invoke one owner request and apply the production response validation."""
 
@@ -830,6 +892,8 @@ def _run_owner_with_messages(
             invoke_kwargs["stream"] = True
         if stream_overall_timeout_seconds is not None:
             invoke_kwargs["stream_overall_timeout_seconds"] = float(stream_overall_timeout_seconds)
+        if timeout_seconds is not None:
+            invoke_kwargs["timeout_seconds"] = float(timeout_seconds)
         if transport_observer is not None:
             invoke_kwargs["transport_observer"] = transport_observer
         raw = runtime.invoke_client(client, messages, **invoke_kwargs)

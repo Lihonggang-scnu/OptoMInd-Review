@@ -1,0 +1,83 @@
+{
+  "baseline_sha": "57848a4aaf89d5b11a34f37cfaf81ce49c067f20",
+  "offline_only": true,
+  "provider_calls": 0,
+  "test_file": "tests/upgrade3/test_on_demand_material_adoption.py",
+  "tests_in_file": 26,
+  "nested_original": {
+    "status": "updated",
+    "owner_received_finding_and_condition": true,
+    "accepted_record_exactly_preserved": true,
+    "own_A_or_B_required": false,
+    "accepted_identity": {
+      "source_handle": "P0101",
+      "paper_id": "original-study",
+      "doi": "10.fixture/original"
+    },
+    "old_cited_source_unrequested_but_preserved": true
+  },
+  "complementary_material": {
+    "domains": {
+      "optical pulse": "passed_full_findings_and_conditions",
+      "student feedback": "passed_full_findings_and_conditions"
+    },
+    "singular_primary_preserved": true,
+    "dedupe": "exact_full_content_only",
+    "families": [
+      "study_summary_A",
+      "review_planning_B",
+      "deep_read_material",
+      "supplement_material",
+      "local_passages"
+    ],
+    "actual_fake_client_messages_checked": [
+      "OWNER",
+      "arrangement",
+      "writer",
+      "completion"
+    ]
+  },
+  "cumulative_batches": {
+    "status": "updated",
+    "material_batch_count": 4,
+    "accepted_source_handles": [
+      "P0000",
+      "P0001",
+      "P0002",
+      "P0003"
+    ],
+    "final_plan_referenced_handles": [
+      "P0000",
+      "P0001",
+      "P0003"
+    ],
+    "earlier_adopted_now_uncited_source_preserved": true,
+    "pause_after_adoption_then_resume": "passed",
+    "completed_stage_not_called_again": "passed",
+    "identical_completed_replay_zero_calls": "passed"
+  },
+  "authoritative_current_pool": {
+    "corrected_snapshot_replaces_refreshed_family": "passed",
+    "superseded_text_not_revived_as_variants": "passed",
+    "stale_supplement_aliases_removed": "passed",
+    "empty_cards_preserve_untouched_usable_material": "passed"
+  },
+  "negative_controls": {
+    "paper_id_conflict": "rejected",
+    "doi_conflict": "rejected",
+    "canonical_id_conflict": "rejected",
+    "nested_empty_answers": "rejected"
+  },
+  "focused_regression": {
+    "passed": 198,
+    "failed": 0,
+    "git_diff_check": "clean",
+    "includes": "Final compatible-checkpoint offline closure reclassification integration"
+  },
+  "cache_reclassification": {
+    "test": "tests/upgrade3/test_outline_on_demand_execution.py::test_cached_owner_closure_is_revalidated_offline_before_retry",
+    "status": "passed",
+    "paid_calls_on_reclassification": 0,
+    "original_execution_provenance_preserved": true
+  }
+}

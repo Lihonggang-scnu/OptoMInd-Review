@@ -1,0 +1,327 @@
+{
+  "schema": "optomind.promotion.downstream_guidance.v1",
+  "baseline_commit": "57848a4aaf89d5b11a34f37cfaf81ce49c067f20",
+  "working_tree_base_commit": "57848a4aaf89d5b11a34f37cfaf81ce49c067f20",
+  "input_provenance": {
+    "files": [
+      {
+        "path": "docs/verification/on-demand-efficiency-20261007/UPDATED_PLAN.json",
+        "sha256": "eee77ad1c32e84ef749e382fb91886235acbc7547163ab8480df747a1c7261d0"
+      },
+      {
+        "path": "docs/verification/on-demand-efficiency-20261007/integration_handoff/OWNER_MESSAGES.json",
+        "sha256": "8193620f6ac3e3fcfde287e2bff7e246ce68e577e9936ca3f9a468512c1cf03c"
+      },
+      {
+        "path": "docs/verification/on-demand-efficiency-20261007/integration_handoff/OWNER_RESPONSE.json",
+        "sha256": "8b4bf8c23d9d2369af2c086592ec0d8b0c37029d2af3aeb92d43f0c0a8abcd28"
+      }
+    ],
+    "note": "Recorded UPDATED_PLAN and sanitized archived owner messages expanded through expand_material_projection. The archived message copy is not a byte-exact replay of the original paid request. This check uses its 18 selected source records, not the full 367-record local material pool."
+  },
+  "verification": {
+    "test": "tests/upgrade3/test_promotion_downstream_owner_guidance.py",
+    "command": "python -m pytest -q tests/upgrade3/test_promotion_downstream_owner_guidance.py",
+    "test_sha256": "6ba782d8f2f57325f4f41321fc487c7c3bb2e113084d9982bc32d7d7b90b1077",
+    "method": "After checks capture production run_arrangement and run_unit_writing calls using controlled offline responses; owner paragraph tasks are retained verbatim. Before checks inspect the prior baseline probe actual message-builder artifacts. Counts and exact equality refer to delivered input, not generated prose quality.",
+    "live_model_calls": 0,
+    "network_calls": 0,
+    "source_files": [
+      {
+        "path": "optomind_research/runtime/upgrade3/chapter_arrangement.py",
+        "sha256": "74c958cc22b663836fe79994f7e8b113777755c2a510e7940b008148bb04c9f1"
+      },
+      {
+        "path": "optomind_research/runtime/upgrade3/review_unit_writer.py",
+        "sha256": "990698330a42349b7589fcd15483eec2fb47d0972b93d00410fa44e25a7e28f8"
+      }
+    ]
+  },
+  "before": {
+    "messages": [
+      {
+        "path": "/workspace/scratch/695e15fe638d/promotion-downstream-probe/ARRANGER_MESSAGES.json",
+        "sha256": "6a6b9d2e4292776b046af36991408c508fd8daef7c7467216a1205c4d42abc84"
+      },
+      {
+        "path": "/workspace/scratch/695e15fe638d/promotion-downstream-probe/Ch2_U01_WRITER_MESSAGES.json",
+        "sha256": "f642198b07cbfed2390a015218139daf4af42d5986cf0f67baefbcf163d1ccb6"
+      },
+      {
+        "path": "/workspace/scratch/695e15fe638d/promotion-downstream-probe/Ch2_U03_WRITER_MESSAGES.json",
+        "sha256": "b6d11b8ae0cec21d98c43b762d606028c10d3ca600fe4504305d4e16e1587872"
+      }
+    ],
+    "units": {
+      "Ch2_U01": {
+        "arranger_exact": {
+          "case_objects": false,
+          "supporting_studies": false,
+          "synthesis_and_transition": false,
+          "argument_relations": true
+        },
+        "writer_owner_context_exact": {
+          "case_objects": false,
+          "supporting_studies": false,
+          "synthesis_and_transition": false,
+          "argument_relations": true
+        },
+        "case_objects_expected": 5,
+        "case_findings_in_arranger_unit_context": 0,
+        "case_findings_in_writer_owner_context": 0,
+        "supporting_limits_expected": 9,
+        "supporting_limits_in_arranger_unit_context": 0,
+        "supporting_limits_in_writer_owner_context": 0,
+        "paragraph_tasks": 3,
+        "paragraph_ids_exact": true,
+        "paragraph_details_exact": true
+      },
+      "Ch2_U03": {
+        "arranger_exact": {
+          "case_objects": false,
+          "supporting_studies": false,
+          "synthesis_and_transition": false,
+          "argument_relations": true
+        },
+        "writer_owner_context_exact": {
+          "case_objects": false,
+          "supporting_studies": false,
+          "synthesis_and_transition": false,
+          "argument_relations": true
+        },
+        "case_objects_expected": 5,
+        "case_findings_in_arranger_unit_context": 0,
+        "case_findings_in_writer_owner_context": 0,
+        "supporting_limits_expected": 9,
+        "supporting_limits_in_arranger_unit_context": 0,
+        "supporting_limits_in_writer_owner_context": 0,
+        "paragraph_tasks": 4,
+        "paragraph_ids_exact": true,
+        "paragraph_details_exact": true
+      }
+    },
+    "totals": {
+      "case_objects_expected": 10,
+      "case_findings_in_arranger_unit_context": 0,
+      "case_findings_in_writer_owner_context": 0,
+      "supporting_limits_expected": 18,
+      "supporting_limits_in_arranger_unit_context": 0,
+      "supporting_limits_in_writer_owner_context": 0,
+      "paragraph_tasks": 7
+    },
+    "writer_source_materials_exact": true,
+    "writer_unique_source_handles": [
+      "P0028",
+      "P0073",
+      "P0080",
+      "P0084",
+      "P0114",
+      "P0132",
+      "P0166",
+      "P0242",
+      "P0284",
+      "P0309",
+      "P0333",
+      "P0362",
+      "P0438",
+      "P0535",
+      "P0573",
+      "P0583"
+    ]
+  },
+  "after": {
+    "normal_mode": {
+      "messages": [
+        {
+          "path": "/workspace/scratch/695e15fe638d/promotion-consumer-test-evidence/test_recorded_plan_guidance_re0/ARRANGER_MESSAGES.json",
+          "sha256": "e43b8c12f556792a307b14629922645bda6fac7565513b504e2585c32c9850a8"
+        },
+        {
+          "path": "/workspace/scratch/695e15fe638d/promotion-consumer-test-evidence/test_recorded_plan_guidance_re0/Ch2_U01_WRITER_MESSAGES.json",
+          "sha256": "d92a0e2668294b1d3003632667f70178729f53e23d0826ee620b4b4369ebe9a9"
+        },
+        {
+          "path": "/workspace/scratch/695e15fe638d/promotion-consumer-test-evidence/test_recorded_plan_guidance_re0/Ch2_U03_WRITER_MESSAGES.json",
+          "sha256": "6c8697889fad895e0cdc69f88a8d9a272022fe17d4a874b8cd69be6fedb0b86f"
+        }
+      ],
+      "units": {
+        "Ch2_U01": {
+          "arranger_exact": {
+            "case_objects": true,
+            "supporting_studies": true,
+            "synthesis_and_transition": true,
+            "argument_relations": true
+          },
+          "writer_owner_context_exact": {
+            "case_objects": true,
+            "supporting_studies": true,
+            "synthesis_and_transition": true,
+            "argument_relations": true
+          },
+          "case_objects_expected": 5,
+          "case_findings_in_arranger_unit_context": 5,
+          "case_findings_in_writer_owner_context": 5,
+          "supporting_limits_expected": 9,
+          "supporting_limits_in_arranger_unit_context": 9,
+          "supporting_limits_in_writer_owner_context": 9,
+          "paragraph_tasks": 3,
+          "paragraph_ids_exact": true,
+          "paragraph_details_exact": true
+        },
+        "Ch2_U03": {
+          "arranger_exact": {
+            "case_objects": true,
+            "supporting_studies": true,
+            "synthesis_and_transition": true,
+            "argument_relations": true
+          },
+          "writer_owner_context_exact": {
+            "case_objects": true,
+            "supporting_studies": true,
+            "synthesis_and_transition": true,
+            "argument_relations": true
+          },
+          "case_objects_expected": 5,
+          "case_findings_in_arranger_unit_context": 5,
+          "case_findings_in_writer_owner_context": 5,
+          "supporting_limits_expected": 9,
+          "supporting_limits_in_arranger_unit_context": 9,
+          "supporting_limits_in_writer_owner_context": 9,
+          "paragraph_tasks": 4,
+          "paragraph_ids_exact": true,
+          "paragraph_details_exact": true
+        }
+      },
+      "totals": {
+        "case_objects_expected": 10,
+        "case_findings_in_arranger_unit_context": 10,
+        "case_findings_in_writer_owner_context": 10,
+        "supporting_limits_expected": 18,
+        "supporting_limits_in_arranger_unit_context": 18,
+        "supporting_limits_in_writer_owner_context": 18,
+        "paragraph_tasks": 7
+      },
+      "writer_source_materials_exact": true,
+      "writer_unique_source_handles": [
+        "P0028",
+        "P0073",
+        "P0080",
+        "P0084",
+        "P0114",
+        "P0132",
+        "P0166",
+        "P0242",
+        "P0284",
+        "P0309",
+        "P0333",
+        "P0362",
+        "P0438",
+        "P0535",
+        "P0573",
+        "P0583"
+      ]
+    },
+    "planning_revision_mode": {
+      "messages": [
+        {
+          "path": "/workspace/scratch/695e15fe638d/promotion-consumer-test-evidence/test_recorded_plan_guidance_re1/ARRANGER_MESSAGES.json",
+          "sha256": "7443d5a4cbc603cec0d6a176133b9ff70c88873943c1d4247cf79b88616c08f2"
+        },
+        {
+          "path": "/workspace/scratch/695e15fe638d/promotion-consumer-test-evidence/test_recorded_plan_guidance_re1/Ch2_U01_WRITER_MESSAGES.json",
+          "sha256": "70f3ab20324e6d1728fde520f72bcd12d692b80625e45a5b58ae7d1b1365ca28"
+        },
+        {
+          "path": "/workspace/scratch/695e15fe638d/promotion-consumer-test-evidence/test_recorded_plan_guidance_re1/Ch2_U03_WRITER_MESSAGES.json",
+          "sha256": "e145ee015253eb3a1729b13317e2edf9c2085918eb552436b8f0c252b9d50fd0"
+        }
+      ],
+      "units": {
+        "Ch2_U01": {
+          "arranger_exact": {
+            "case_objects": true,
+            "supporting_studies": true,
+            "synthesis_and_transition": true,
+            "argument_relations": true
+          },
+          "writer_owner_context_exact": {
+            "case_objects": true,
+            "supporting_studies": true,
+            "synthesis_and_transition": true,
+            "argument_relations": true
+          },
+          "case_objects_expected": 5,
+          "case_findings_in_arranger_unit_context": 5,
+          "case_findings_in_writer_owner_context": 5,
+          "supporting_limits_expected": 9,
+          "supporting_limits_in_arranger_unit_context": 9,
+          "supporting_limits_in_writer_owner_context": 9,
+          "paragraph_tasks": 3,
+          "paragraph_ids_exact": true,
+          "paragraph_details_exact": true
+        },
+        "Ch2_U03": {
+          "arranger_exact": {
+            "case_objects": true,
+            "supporting_studies": true,
+            "synthesis_and_transition": true,
+            "argument_relations": true
+          },
+          "writer_owner_context_exact": {
+            "case_objects": true,
+            "supporting_studies": true,
+            "synthesis_and_transition": true,
+            "argument_relations": true
+          },
+          "case_objects_expected": 5,
+          "case_findings_in_arranger_unit_context": 5,
+          "case_findings_in_writer_owner_context": 5,
+          "supporting_limits_expected": 9,
+          "supporting_limits_in_arranger_unit_context": 9,
+          "supporting_limits_in_writer_owner_context": 9,
+          "paragraph_tasks": 4,
+          "paragraph_ids_exact": true,
+          "paragraph_details_exact": true
+        }
+      },
+      "totals": {
+        "case_objects_expected": 10,
+        "case_findings_in_arranger_unit_context": 10,
+        "case_findings_in_writer_owner_context": 10,
+        "supporting_limits_expected": 18,
+        "supporting_limits_in_arranger_unit_context": 18,
+        "supporting_limits_in_writer_owner_context": 18,
+        "paragraph_tasks": 7
+      },
+      "writer_source_materials_exact": true,
+      "writer_unique_source_handles": [
+        "P0028",
+        "P0073",
+        "P0080",
+        "P0084",
+        "P0114",
+        "P0132",
+        "P0166",
+        "P0242",
+        "P0284",
+        "P0309",
+        "P0333",
+        "P0362",
+        "P0438",
+        "P0535",
+        "P0573",
+        "P0583"
+      ]
+    }
+  },
+  "additional_coverage": [
+    "Structured solar-cell case conditions and limits preserve their exact mapping/list shapes",
+    "All existing case field aliases stay distinct and complete",
+    "Combined synthesis_and_transition stays independent of existing synthesis, transition and argument_relations",
+    "Legacy arrangements restore owner context from the saved arrangement input",
+    "Missing optional owner fields are not invented",
+    "Complete primary A/B and complementary A/B variants reach writer including provenance and explicit empty/null/zero/false values",
+    "DOI-confirmed aliases keep complementary mappings under one source identity; variant-only material remains available"
+  ]
+}

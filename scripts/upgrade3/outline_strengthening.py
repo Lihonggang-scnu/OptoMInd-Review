@@ -7,7 +7,10 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import inspect
+import importlib.metadata
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any, Mapping
@@ -79,6 +82,44 @@ def _payload(raw: Mapping[str, Any]) -> dict[str, Any]:
 
 def _on_demand_profiles(args: argparse.Namespace) -> tuple[str, str]:
     return str(args.access_profile or DEFAULT_ACCESS_PROFILE), str(args.profile or DEFAULT_PROFILE)
+
+
+def _on_demand_execution_policy(args: argparse.Namespace) -> dict[str, Any]:
+    """Explicit on-demand transport settings, shared by preview and dispatch."""
+    timeout = float(getattr(args, "on_demand_request_timeout", 1800.0))
+    overall = float(getattr(args, "on_demand_stream_overall_timeout", 3600.0))
+    if not math.isfinite(timeout) or timeout < 5 or not math.isfinite(overall) or overall < timeout:
+        raise SystemExit("invalid_on_demand_timeouts:require_5<=request<=overall")
+    return {
+        "stream": bool(getattr(args, "on_demand_stream", True)),
+        "timeout_seconds": timeout,
+        "stream_overall_timeout_seconds": overall,
+    }
+
+
+def _on_demand_meter(args: argparse.Namespace) -> tuple[Any, dict[str, Any]]:
+    tokenizer = Path(args.tokenizer) if args.tokenizer else planning.DEFAULT_TOKENIZER_PATH
+    counter = planning.qwen_local_token_counter(tokenizer) if tokenizer.is_file() else None
+    # The asset hash and metering implementation bind prepare to execution;
+    # moving identical assets to another path does not require re-preparation.
+    implementations = (planning.qwen_local_token_counter, runtime.estimate_prompt_tokens,
+                       runtime.build_qwen_wire_body, strengthening.estimate_strengthening_request)
+    code = []
+    for implementation in implementations:
+        try:
+            code.append(inspect.getsource(implementation))
+        except (OSError, TypeError):
+            code.append(f"{type(implementation).__module__}.{type(implementation).__qualname__}")
+    try:
+        tokenizer_version = importlib.metadata.version("tokenizers") if counter is not None else None
+    except importlib.metadata.PackageNotFoundError:
+        tokenizer_version = None
+    return counter, {
+        "mode": "local_tokenizer" if counter is not None else "utf8_byte_upper_bound",
+        "tokenizer_sha256": hashlib.sha256(tokenizer.read_bytes()).hexdigest() if counter is not None else None,
+        "meter_implementation_sha256": _hash(code),
+        "tokenizer_implementation_version": tokenizer_version,
+    }
 
 
 def _selection_input(raw: Any) -> dict[str, Any]:
@@ -208,6 +249,7 @@ def run_selection_cli(args: argparse.Namespace) -> dict[str, Any]:
         thinking_budget=profile["thinking_budget"], max_output_tokens=profile["max_output_tokens"],
         call_id=str(payload.get("call_id") or "outline-unit-selection"),
         checkpoint_dir=out / "stages", resume=True, profile=profile, model_payload=model_payload,
+        retry_unresolved=bool(getattr(args, "retry_unresolved", False)),
     )
     _dump(out / "SELECTION_RESULT.json", result)
     report = {
@@ -230,11 +272,11 @@ def prepare_on_demand(args: argparse.Namespace) -> dict[str, Any]:
     access_profile_name, owner_profile_name = _on_demand_profiles(args)
     access_profile = load_quality_profile(access_profile_name)
     owner_profile = load_quality_profile(owner_profile_name)
-    tokenizer = Path(args.tokenizer) if args.tokenizer else planning.DEFAULT_TOKENIZER_PATH
-    counter = planning.qwen_local_token_counter(tokenizer) if tokenizer.is_file() else None
+    policy = _on_demand_execution_policy(args)
+    counter, metering = _on_demand_meter(args)
     access_request = on_demand.access_messages(payload, catalog)
     access_estimate = strengthening.estimate_strengthening_request(
-        access_request, profile=access_profile, token_counter=counter,
+        access_request, profile=access_profile, token_counter=counter, stream=policy["stream"],
     )
     # Do not construct/send an all-catalog owner upper bound here.  The access
     # response is the first paid step; the production run resolves the actual
@@ -251,7 +293,7 @@ def prepare_on_demand(args: argparse.Namespace) -> dict[str, Any]:
     }
     owner_request = on_demand.owner_messages(payload, catalog, initial_trace)
     owner_estimate = strengthening.estimate_strengthening_request(
-        owner_request, profile=owner_profile, token_counter=counter,
+        owner_request, profile=owner_profile, token_counter=counter, stream=policy["stream"],
     )
     request = {
         "mode": "on_demand",
@@ -261,6 +303,8 @@ def prepare_on_demand(args: argparse.Namespace) -> dict[str, Any]:
         "access_profile": access_profile,
         "owner_profile_name": owner_profile_name,
         "owner_profile": owner_profile,
+        "execution_policy": policy,
+        "metering": metering,
         "access_messages": access_request,
         "access_request_sha256": _hash(access_request),
         "owner_initial_messages": owner_request,
@@ -282,8 +326,11 @@ def prepare_on_demand(args: argparse.Namespace) -> dict[str, Any]:
         "worst_case_estimated_cost_cny": None,
     }
     out = Path(args.output)
-    _dump(out / "ACCESS_REQUEST.json", {"messages": access_request, "request_sha256": request["access_request_sha256"], "profile": access_profile})
-    _dump(out / "OWNER_INITIAL_REQUEST.json", {"messages": owner_request, "request_sha256": request["owner_initial_request_sha256"], "profile": owner_profile, "trace": initial_trace})
+    _dump(out / "ACCESS_REQUEST.json", {"messages": access_request, "request_sha256": request["access_request_sha256"],
+                                       "profile": access_profile, "execution_policy": policy, "metering": metering})
+    _dump(out / "OWNER_INITIAL_REQUEST.json", {"messages": owner_request, "request_sha256": request["owner_initial_request_sha256"],
+                                              "profile": owner_profile, "trace": initial_trace,
+                                              "execution_policy": policy, "metering": metering})
     _dump(out / "REQUEST.json", request)
     report = {
         "status": "prepared_no_paid_calls",
@@ -295,6 +342,8 @@ def prepare_on_demand(args: argparse.Namespace) -> dict[str, Any]:
         "owner_initial_request_sha256": request["owner_initial_request_sha256"],
         "access_profile_name": access_profile_name,
         "owner_profile_name": owner_profile_name,
+        "execution_policy": policy,
+        "metering": metering,
         "access_estimate": access_estimate,
         "owner_initial_estimate": owner_estimate,
         "initial_estimated_cost_cny": request["initial_estimated_cost_cny"],
@@ -410,21 +459,27 @@ def run_on_demand_cli(args: argparse.Namespace) -> dict[str, Any]:
     current_access = on_demand.access_messages(payload, catalog)
     if _hash(current_access) != request.get("access_request_sha256"):
         raise SystemExit("prepared_access_messages_changed:rerun_prepare")
+    current_owner = on_demand.owner_messages(payload, catalog, request.get("owner_initial_trace") or {})
+    if _hash(current_owner) != request.get("owner_initial_request_sha256"):
+        raise SystemExit("prepared_owner_messages_changed:rerun_prepare")
     access_profile_name, owner_profile_name = _on_demand_profiles(args)
     access_profile = load_quality_profile(access_profile_name)
     owner_profile = load_quality_profile(owner_profile_name)
     if request.get("access_profile_name") != access_profile_name or request.get("owner_profile_name") != owner_profile_name:
         raise SystemExit("prepared_profile_changed:rerun_prepare")
     for saved, current in ((request.get("access_profile") or {}, access_profile), (request.get("owner_profile") or {}, owner_profile)):
-        for key in ("model", "thinking", "thinking_budget", "max_output_tokens"):
-            if saved.get(key) != current.get(key):
-                raise SystemExit("prepared_profile_changed:rerun_prepare")
+        if saved != current:
+            raise SystemExit("prepared_profile_changed:rerun_prepare")
+    policy = _on_demand_execution_policy(args)
+    if request.get("execution_policy") != policy:
+        raise SystemExit("prepared_execution_policy_changed:rerun_prepare")
+    counter, metering = _on_demand_meter(args)
+    if request.get("metering") != metering:
+        raise SystemExit("prepared_metering_changed:rerun_prepare")
     ledger_path = Path(args.budget_ledger) if args.budget_ledger else None
     key_path = Path(args.key_file) if args.key_file else None
     if ledger_path is None or key_path is None:
         raise SystemExit("run_requires_budget_ledger_and_key_file")
-    tokenizer = Path(args.tokenizer) if args.tokenizer else planning.DEFAULT_TOKENIZER_PATH
-    counter = planning.qwen_local_token_counter(tokenizer) if tokenizer.is_file() else None
     ledger = runtime.GlobalBudgetLedger(path=ledger_path, limit_cny=args.budget_limit)
     access_client = strengthening.make_strengthening_client(
         role=access_profile_name, key_file=key_path, budget_ledger=ledger,
@@ -448,6 +503,11 @@ def run_on_demand_cli(args: argparse.Namespace) -> dict[str, Any]:
         resume=True,
         access_profile=access_profile,
         owner_profile=owner_profile,
+        access_stream=policy["stream"], owner_stream=policy["stream"],
+        access_timeout_seconds=policy["timeout_seconds"], owner_timeout_seconds=policy["timeout_seconds"],
+        access_stream_overall_timeout_seconds=policy["stream_overall_timeout_seconds"],
+        owner_stream_overall_timeout_seconds=policy["stream_overall_timeout_seconds"],
+        retry_unresolved=bool(getattr(args, "retry_unresolved", False)),
     )
     _dump(out / "RESULT.json", result)
     arrangement_path = None
@@ -471,6 +531,9 @@ def run_on_demand_cli(args: argparse.Namespace) -> dict[str, Any]:
         "owner_raw_reused": (result.get("on_demand_strengthening") or {}).get("owner_raw_reused"),
         "owner_continuation_reused": (result.get("on_demand_strengthening") or {}).get("owner_continuation_reused"),
         "checkpoint_dir": (result.get("on_demand_strengthening") or {}).get("checkpoint_dir"),
+        "execution_policy": policy,
+        "execution_provenance": (result.get("on_demand_strengthening") or {}).get("execution_provenance"),
+        "metering": metering,
     }
     _dump(out / "RUN_REPORT.json", report)
     return report
@@ -571,7 +634,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     return report
 
 
-def main(argv: list[str] | None = None) -> int:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", required=True, help="Current generic chapter packet JSON")
     parser.add_argument("--output", required=True, help="New run output directory")
@@ -582,13 +645,23 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--owner-profile", default=DEFAULT_OWNER_PROFILE)
     parser.add_argument("--access-profile", default=DEFAULT_ACCESS_PROFILE)
     parser.add_argument("--selection-profile", default=DEFAULT_SELECTION_PROFILE)
+    parser.add_argument("--on-demand-stream", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--on-demand-request-timeout", type=float, default=1800.0)
+    parser.add_argument("--on-demand-stream-overall-timeout", type=float, default=3600.0)
     parser.add_argument("--include-selection-material-index", action=argparse.BooleanOptionalAction, default=False,
                         help="Optional expanded material view; default uses full outlines and compact task-linked navigation")
     parser.add_argument("--tokenizer", default="")
     parser.add_argument("--run", action="store_true", help="Cross the explicit paid-call boundary")
+    parser.add_argument("--retry-unresolved", action="store_true",
+                        help="After inspection, retry one cached invalid selector or unresolved owner stage; retain valid work")
     parser.add_argument("--budget-ledger", default="")
     parser.add_argument("--budget-limit", type=float, default=30.0)
     parser.add_argument("--key-file", default="")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
     args = parser.parse_args(argv)
     if args.mode == "select":
         report = run_selection_cli(args) if args.run else prepare_selection(args)

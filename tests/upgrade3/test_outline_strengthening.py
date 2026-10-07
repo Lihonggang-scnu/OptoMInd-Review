@@ -218,14 +218,18 @@ def test_owner_result_merge_remap_does_not_duplicate_merged_new_unit():
         modifiable_unit_ids=["CH01_U01", "CH01_U02"], read_only_unit_ids=[],
     )
     owner_payload = dict(base)
-    owner_payload["chapter_plan"] = {"chapter_id": "CH01", "units": [{"unit_id": "CH01_UM", "substantive_point": "Merged", "paragraph_briefs": []}]}
+    updated_plan = {"chapter_id": "CH01", "units": [{"unit_id": "CH01_UM", "substantive_point": "Merged", "paragraph_briefs": []}]}
     owner_payload["modifiable_unit_ids"] = ["CH01_U01", "CH01_U02"]
     owner_payload["read_only_unit_ids"] = []
     result = {
-        "status": "updated", "updated_plan": owner_payload["chapter_plan"],
-        "unit_id_remap": {"CH01_U01": ["CH01_UM"], "CH01_U02": ["CH01_UM"]},
+        "status": "updated", "updated_plan": updated_plan,
+        "unit_id_remap": {"CH01_UM": ["CH01_U01", "CH01_U02"]},
         "accepted_source_materials": [first],
     }
+    _, errors = planning._validate_owner_plan_update(
+        owner_payload["chapter_plan"], updated_plan, [first], owner_response=result,
+    )
+    assert errors == []
     merged = strengthening.merge_owner_result_into_chapter_payloads({"CH01": base}, owner_payload, result)
     assert [row["unit_id"] for row in merged["CH01"]["chapter_plan"]["units"]] == ["CH01_UM"]
 
@@ -236,15 +240,19 @@ def test_owner_result_split_remap_preserves_both_new_units_in_place():
     owner_payload = dict(base)
     owner_payload["modifiable_unit_ids"] = ["CH01_U01"]
     owner_payload["read_only_unit_ids"] = []
-    owner_payload["chapter_plan"] = {"chapter_id": "CH01", "units": [
+    updated_plan = {"chapter_id": "CH01", "units": [
         {"unit_id": "CH01_U01A", "substantive_point": "Split A", "paragraph_briefs": []},
         {"unit_id": "CH01_U01B", "substantive_point": "Split B", "paragraph_briefs": []},
     ]}
     result = {
-        "status": "updated", "updated_plan": owner_payload["chapter_plan"],
-        "unit_id_remap": {"CH01_U01": ["CH01_U01A", "CH01_U01B"]},
+        "status": "updated", "updated_plan": updated_plan,
+        "unit_id_remap": {"CH01_U01A": ["CH01_U01"], "CH01_U01B": ["CH01_U01"]},
         "accepted_source_materials": [first],
     }
+    _, errors = planning._validate_owner_plan_update(
+        owner_payload["chapter_plan"], updated_plan, [first], owner_response=result,
+    )
+    assert errors == []
     merged = strengthening.merge_owner_result_into_chapter_payloads({"CH01": base}, owner_payload, result)
     assert [row["unit_id"] for row in merged["CH01"]["chapter_plan"]["units"]] == ["CH01_U01A", "CH01_U01B"]
 
