@@ -1,0 +1,79 @@
+{
+  "schema_version": "optomind.fullbody_writer_cli.v1",
+  "execution_mode": "preview",
+  "manifest_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\SOURCE_INPUTS.json",
+  "manifest_sha256": "98e1ee62c4bf239fc54ed133d57c8c6c666b7231fd86c6e2065e79fcddf777a7",
+  "source_manifest_sha256": "37242cc51bc9b6b96a7e92543a6092c17bfdbd0d8f8ab068a2e3d9c1e3db58e7",
+  "expected_chapter_ids": [
+    "Ch1",
+    "Ch2",
+    "Ch3",
+    "Ch4",
+    "Ch5",
+    "Ch6",
+    "Ch7"
+  ],
+  "actual_chapter_ids": [
+    "Ch1",
+    "Ch2",
+    "Ch3",
+    "Ch4",
+    "Ch5",
+    "Ch6",
+    "Ch7"
+  ],
+  "config": {
+    "schema_version": "optomind.fullbody_writer_config.v1",
+    "purpose": "Default Plus-first whole-BODY profile. Every author, reader and reviser uses Plus, 16,384 thinking plus 49,152 answer tokens, 65,536 combined. No hidden editor or automatic model change. Capacities are not length targets. Stream idle timeout is 900 seconds and total timeout is 3,600 seconds. Paid calls require --run and one shared finite CNY ledger; --budget-limit is an absolute lifetime cap, not added credit.",
+    "writer": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 16384,
+      "max_output_tokens": 49152,
+      "json_mode": false,
+      "timeout_seconds": 900.0,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192
+    },
+    "reader": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 16384,
+      "max_output_tokens": 49152,
+      "json_mode": false,
+      "timeout_seconds": 900.0,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192
+    },
+    "reviser": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 16384,
+      "max_output_tokens": 49152,
+      "json_mode": false,
+      "timeout_seconds": 900.0,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192
+    },
+    "recent_prose_segments": 2,
+    "max_rereads_per_window": 8,
+    "max_author_calls": 256
+  },
+  "meter": {
+    "mode": "local_tokenizer_estimate",
+    "tokenizer_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "tokenizer_implementation_version": "0.23.2",
+    "actual_provider_token_count": false
+  },
+  "fixture_sha256": null,
+  "draft": null,
+  "semantic_quality_unreviewed": true,
+  "budget_limit_semantics": "absolute_shared_ledger_lifetime_CNY_ceiling_not_incremental_credit"
+}
+

@@ -1,0 +1,58 @@
+{
+  "stage_id": "reader_full_body",
+  "role": "reader",
+  "effective_profile": {
+    "model": "qwen3.5-plus",
+    "thinking": true,
+    "thinking_budget": 16384,
+    "max_output_tokens": 49152,
+    "json_mode": false,
+    "timeout_seconds": 900.0,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600.0,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "estimate": {
+    "prompt_tokens": 34819,
+    "measured_tokens": 23774,
+    "method": "provided_token_counter",
+    "multiplier": 1.12,
+    "framing_margin": 8192,
+    "reserved_input_tokens": 34819,
+    "input_limit_tokens": 934464,
+    "completion_allowance_tokens": 65536,
+    "context_window": 1000000,
+    "fits": true,
+    "estimated_max_cost_cny": 1.71214,
+    "wire_request_sha256": "589841faf9982d13605006025af700b5f66e0441ecd80fa47891adc57ed25750",
+    "wire_parameters": {
+      "model": "qwen3.5-plus",
+      "max_completion_tokens": 65536,
+      "temperature": 0.1,
+      "enable_thinking": true,
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      },
+      "thinking_budget": 16384
+    }
+  },
+  "status": "ready",
+  "full_original_body_sha256": "3298bf3114adb878235cfde8c70710c9609ea2c1519995a8c151c1fa97dc1a8b",
+  "required_action": "A fresh reader must receive the entire original BODY. Increase reader context capacity; no partial reading is represented as full review.",
+  "cache_key": "50440c45395b6fa4f37306ffa6b1c85387ff7f5a7e1630444600fbeb4786e009",
+  "dependencies": [
+    {
+      "stage_id": "reused_complete_body",
+      "result_sha256": "428d5f6352c64bce11a099f0b67ed5ce6562a87bb8333af755a6866b2f6ebedc"
+    }
+  ],
+  "messages_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\runs\\20261007T182313Z-0b613b0c37\\plans\\reader_full_body\\MESSAGES.json",
+  "model_calls": 0,
+  "client_invocations": 0,
+  "paid_dispatch_count": 0,
+  "call_id": "reader_full_body-50440c45395b-attempt_001",
+  "signature": "[REDACTED_SECRET_OR_AUTH_FIELD]"
+}
+

@@ -1,0 +1,85 @@
+{
+  "stage_id": "revision_002",
+  "role": "reviser",
+  "effective_profile": {
+    "model": "qwen3.5-plus",
+    "thinking": true,
+    "thinking_budget": 16384,
+    "max_output_tokens": 49152,
+    "json_mode": false,
+    "timeout_seconds": 900.0,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600.0,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "estimate": {
+    "prompt_tokens": 794310,
+    "measured_tokens": 701891,
+    "method": "provided_token_counter",
+    "multiplier": 1.12,
+    "framing_margin": 8192,
+    "reserved_input_tokens": 794310,
+    "input_limit_tokens": 934464,
+    "completion_allowance_tokens": 65536,
+    "context_window": 1000000,
+    "fits": true,
+    "estimated_max_cost_cny": 4.750104,
+    "wire_request_sha256": "82a284fa12bf7552e1e4848b806ac6b881b662e860d8d43c5e92214a47a9a27f",
+    "wire_parameters": {
+      "model": "qwen3.5-plus",
+      "max_completion_tokens": 65536,
+      "temperature": 0.1,
+      "enable_thinking": true,
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      },
+      "thinking_budget": 16384
+    }
+  },
+  "status": "ready",
+  "task_ids": [
+    "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_P01",
+    "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_P03",
+    "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_T01",
+    "Ch2::Ch2_U01::Ch2_U01_P03",
+    "Ch2::Ch2_U03::Ch2_U03_P04",
+    "Ch4::Ch4_U03::Ch4_U03_P02",
+    "Ch5::Ch5_U01::Ch5_U01_P01",
+    "Ch5::Ch5_U01::Ch5_U01_P02",
+    "Ch5::Ch5_U04::Ch5_U04_P01",
+    "Ch5::Ch5_U04::Ch5_U04_P02",
+    "Ch6::Ch6_U3::Ch6_U3_P01",
+    "Ch6::Ch6_U3::Ch6_U3_P02",
+    "Ch6::Ch6_U3::Ch6_U3_T01"
+  ],
+  "issue_ids": [
+    "FMT_LUMINate_data_repetition"
+  ],
+  "required_action": "The original full BODY plus this issue's full approved evidence do not fit. Increase reviser capacity; the original draft remains selected.",
+  "cache_key": "9205efe96cb7a103d894a1a3e4248cf6822cbc86aa36e638af7392dbc3569471",
+  "dependencies": [
+    {
+      "stage_id": "reused_complete_body",
+      "result_sha256": "428d5f6352c64bce11a099f0b67ed5ce6562a87bb8333af755a6866b2f6ebedc"
+    },
+    {
+      "stage_id": "reader_full_body",
+      "cache_key": "50440c45395b6fa4f37306ffa6b1c85387ff7f5a7e1630444600fbeb4786e009",
+      "result_sha256": "92218dbe651b60a2868d14ea267103c06e6b381520777ea7409dd639b250618f"
+    },
+    {
+      "stage_id": "revision_001",
+      "cache_key": "484a61ea178c3daf99f98be5f63969dbd1922d3ed23c79d8b99cfc19928465fc",
+      "result_sha256": "2c46b6d1a4883b478623adc286bbea9de6c486949193dc2461fb64049dd3b38c"
+    }
+  ],
+  "messages_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\runs\\20261007T182313Z-0b613b0c37\\plans\\revision_002\\MESSAGES.json",
+  "model_calls": 0,
+  "client_invocations": 0,
+  "paid_dispatch_count": 0,
+  "call_id": "revision_002-9205efe96cb7-attempt_001",
+  "signature": "[REDACTED_SECRET_OR_AUTH_FIELD]"
+}
+

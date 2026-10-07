@@ -1,0 +1,18 @@
+{
+  "record_type": "plain_archive_replay_failure_detail",
+  "test": "tests/upgrade3/test_fullbody_plain_integration.py::test_actual_seven_chapter_archive_replay_preserves_full_scope_with_controlled_meter",
+  "routes": [
+    "plain_whole",
+    "chapter_concat",
+    "hierarchical_full"
+  ],
+  "exit_code": 1,
+  "failure_location": "test_fullbody_plain_integration.py:375",
+  "assertion": "assert any(row[\"exists\"] is False for row in prepared[\"source_files\"])",
+  "observed": "prepared[\"source_files\"] had no row with exists=False in all three parametrizations; the controlled archive fixture was fully present in this environment.",
+  "interpretation": "fixture/environment mismatch with the test assumption about a missing public-archive source file; the preceding controlled replay route, task coverage, chapter ordering, payload material checks, and no-prior-prose checks ran before this final fixture assertion.",
+  "source_changes": false,
+  "paid_calls": 0,
+  "created_at_epoch": 1791399052.239354
+}
+

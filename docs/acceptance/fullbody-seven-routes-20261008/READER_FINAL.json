@@ -1,0 +1,202 @@
+{
+  "record_type": "reader_revision_route_final",
+  "route": "reader_revision",
+  "run_id": "20261007T182313Z-0b613b0c37",
+  "output_dir": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision",
+  "status": "partial",
+  "complete": false,
+  "reader_revision_status": "partial",
+  "stage_count": 3,
+  "model_calls": 3,
+  "paid_dispatch_count": 3,
+  "stages": [
+    {
+      "stage_id": "reader_full_body",
+      "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\reader_full_body\\50440c45395b6fa4f37306ffa6b1c85387ff7f5a7e1630444600fbeb4786e009\\attempt_001",
+      "request_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\reader_full_body\\50440c45395b6fa4f37306ffa6b1c85387ff7f5a7e1630444600fbeb4786e009\\attempt_001\\REQUEST.json",
+      "messages_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\reader_full_body\\50440c45395b6fa4f37306ffa6b1c85387ff7f5a7e1630444600fbeb4786e009\\attempt_001\\MESSAGES.json",
+      "actual_request_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\reader_full_body\\50440c45395b6fa4f37306ffa6b1c85387ff7f5a7e1630444600fbeb4786e009\\attempt_001\\ACTUAL_REQUEST.json",
+      "raw_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\reader_full_body\\50440c45395b6fa4f37306ffa6b1c85387ff7f5a7e1630444600fbeb4786e009\\attempt_001\\RAW_RESPONSE.json",
+      "usage_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\reader_full_body\\50440c45395b6fa4f37306ffa6b1c85387ff7f5a7e1630444600fbeb4786e009\\attempt_001\\USAGE.json",
+      "result_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\reader_full_body\\50440c45395b6fa4f37306ffa6b1c85387ff7f5a7e1630444600fbeb4786e009\\attempt_001\\RESULT.json",
+      "result_sha256": "56dce5576c8cc429df2d83a99b9261d0db6d277e2aae3737b64e28b071d36702",
+      "raw_sha256": "0b85351fc1342d9bc0fb50b54f1e2fd2e157c11b00240dccc8267cc78ce6c2c2",
+      "transport_complete": true,
+      "result_complete": true,
+      "finish_reason": "stop",
+      "request_id": "chatcmpl-1eedb520-36a9-94f9-bd41-db97e7cd8ebc",
+      "usage": {
+        "prompt_tokens": 23784,
+        "completion_tokens": 9476,
+        "total_tokens": 33260,
+        "completion_tokens_details": {
+          "reasoning_tokens": 8295,
+          "text_tokens": 9476
+        },
+        "prompt_tokens_details": {
+          "text_tokens": 23784
+        }
+      },
+      "reserved_cny": 1.71214,
+      "actual_cny": 0.064512,
+      "reservation_id": "res-4ceb6218d2df4bb8",
+      "parser_issues": [
+        {
+          "issue_id": "FMT_refractory_efficacy_contradiction",
+          "anchor": "FMT 在难治性肿瘤中表现较一致 ORR 提升",
+          "problem": "第一章表格中“干预策略对比”行总结 FMT 在难治性肿瘤中“表现较一致 ORR 提升”，但第五章正文\"FMT 在 ICI 耐药人群中的疗效局限性与生物学屏障”节明确指出\"FMT 在 ICI 耐药人群中的疗效显著受限... MITRIC IIa 期篮子试验... 观察到 ORR 为 0%\"。表格的概括性结论（一致提升）与正文的具体试验数据（显著受限/0%）直接冲突，导致读者无法判断 FMT 在难治人群中的真实疗效预期。",
+          "reader_understanding": "从第一章表格我理解为 FMT 在难治肿瘤中通常能提升 ORR；但从第五章我理解为 FMT 在难治人群中往往无效（如 ORR 0%）。这两处信息矛盾，使我无法确定 FMT 是否适用于耐药患者。",
+          "suggested_action": "需统一第一章表格与第五章正文关于 FMT 在难治/耐药人群中疗效的描述。若第五章的阴性结果更具代表性，应修正表格中的概括性结论，或注明表格数据来源于特定早期研究而正文包含了更新的阴性试验证据。"
+        },
+        {
+          "issue_id": "MC38_model_context_missing",
+          "anchor": "在黑色素瘤患者基线宏基因组分析及 MC38 小鼠模型中发现",
+          "problem": "第二章“先天免疫识别与树突状细胞的抗原呈递启动”节中，将“黑色素瘤患者”与\"MC38 小鼠模型”并列作为发现六酰化 LPS 富集的证据来源，但未注明 MC38 是结肠癌模型。读者可能误以为 MC38 是黑色素瘤模型，从而高估该机制在黑色素瘤小鼠模型中的验证程度，或混淆跨癌种机制的适用范围。",
+          "reader_understanding": "我读到此处时，不确定 MC38 模型是否代表黑色素瘤。如果 MC38 是结肠癌模型，那么该机制是在黑色素瘤患者和结肠癌小鼠中分别发现的，而非在黑色素瘤小鼠中验证。缺乏这一背景信息影响我对机制跨癌种一致性的判断。",
+          "suggested_action": "建议在提及 MC38 小鼠模型时补充其肿瘤类型背景（如\"MC38 结肠癌小鼠模型”），以明确机制验证的模型系统差异，避免读者误解为黑色素瘤特异性模型验证。"
+        },
+        {
+          "issue_id": "FMT_LUMINate_data_repetition",
+          "anchor": "FMT-LUMINate II 期试验报告了晚期 NSCLC 和黑色素瘤初治患者的高缓解率：NSCLC 队列（抗 PD-1 单药，n=20）ORR 达 80%",
+          "problem": "FMT-LUMINate 试验的疗效数据（NSCLC ORR 80%, 黑色素瘤 ORR 75%）在第一章表格、第五章\"FMT 联合一线 ICI...\"节、第六章“微生物干预的安全性...\"节中三次详细重复。虽然第五章侧重疗效、第六章侧重安全，但疗效数字的完全重复未提供新信息，造成阅读冗余，且可能让读者误以为这是三个独立试验的数据。",
+          "reader_understanding": "我在第一、五、六章都看到了完全相同的 FMT-LUMINate 疗效数字。这让我感到内容重复，且需反复确认这是否是同一个试验的不同分析，还是不同试验的巧合。",
+          "suggested_action": "建议在第五章详细展开该试验数据后，第一、六章引用时简化为“见第五章”或仅保留与本章主题（如安全性）直接相关的数据，避免疗效数字的机械重复。"
+        }
+      ],
+      "reader_issues": [
+        {
+          "issue_id": "FMT_refractory_efficacy_contradiction",
+          "anchor": "FMT 在难治性肿瘤中表现较一致 ORR 提升",
+          "problem": "第一章表格中“干预策略对比”行总结 FMT 在难治性肿瘤中“表现较一致 ORR 提升”，但第五章正文\"FMT 在 ICI 耐药人群中的疗效局限性与生物学屏障”节明确指出\"FMT 在 ICI 耐药人群中的疗效显著受限... MITRIC IIa 期篮子试验... 观察到 ORR 为 0%\"。表格的概括性结论（一致提升）与正文的具体试验数据（显著受限/0%）直接冲突，导致读者无法判断 FMT 在难治人群中的真实疗效预期。",
+          "reader_understanding": "从第一章表格我理解为 FMT 在难治肿瘤中通常能提升 ORR；但从第五章我理解为 FMT 在难治人群中往往无效（如 ORR 0%）。这两处信息矛盾，使我无法确定 FMT 是否适用于耐药患者。",
+          "suggested_action": "需统一第一章表格与第五章正文关于 FMT 在难治/耐药人群中疗效的描述。若第五章的阴性结果更具代表性，应修正表格中的概括性结论，或注明表格数据来源于特定早期研究而正文包含了更新的阴性试验证据。"
+        },
+        {
+          "issue_id": "MC38_model_context_missing",
+          "anchor": "在黑色素瘤患者基线宏基因组分析及 MC38 小鼠模型中发现",
+          "problem": "第二章“先天免疫识别与树突状细胞的抗原呈递启动”节中，将“黑色素瘤患者”与\"MC38 小鼠模型”并列作为发现六酰化 LPS 富集的证据来源，但未注明 MC38 是结肠癌模型。读者可能误以为 MC38 是黑色素瘤模型，从而高估该机制在黑色素瘤小鼠模型中的验证程度，或混淆跨癌种机制的适用范围。",
+          "reader_understanding": "我读到此处时，不确定 MC38 模型是否代表黑色素瘤。如果 MC38 是结肠癌模型，那么该机制是在黑色素瘤患者和结肠癌小鼠中分别发现的，而非在黑色素瘤小鼠中验证。缺乏这一背景信息影响我对机制跨癌种一致性的判断。",
+          "suggested_action": "建议在提及 MC38 小鼠模型时补充其肿瘤类型背景（如\"MC38 结肠癌小鼠模型”），以明确机制验证的模型系统差异，避免读者误解为黑色素瘤特异性模型验证。"
+        },
+        {
+          "issue_id": "FMT_LUMINate_data_repetition",
+          "anchor": "FMT-LUMINate II 期试验报告了晚期 NSCLC 和黑色素瘤初治患者的高缓解率：NSCLC 队列（抗 PD-1 单药，n=20）ORR 达 80%",
+          "problem": "FMT-LUMINate 试验的疗效数据（NSCLC ORR 80%, 黑色素瘤 ORR 75%）在第一章表格、第五章\"FMT 联合一线 ICI...\"节、第六章“微生物干预的安全性...\"节中三次详细重复。虽然第五章侧重疗效、第六章侧重安全，但疗效数字的完全重复未提供新信息，造成阅读冗余，且可能让读者误以为这是三个独立试验的数据。",
+          "reader_understanding": "我在第一、五、六章都看到了完全相同的 FMT-LUMINate 疗效数字。这让我感到内容重复，且需反复确认这是否是同一个试验的不同分析，还是不同试验的巧合。",
+          "suggested_action": "建议在第五章详细展开该试验数据后，第一、六章引用时简化为“见第五章”或仅保留与本章主题（如安全性）直接相关的数据，避免疗效数字的机械重复。"
+        }
+      ],
+      "patches": []
+    },
+    {
+      "stage_id": "revision_001",
+      "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\revision_001\\484a61ea178c3daf99f98be5f63969dbd1922d3ed23c79d8b99cfc19928465fc\\attempt_001",
+      "request_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\revision_001\\484a61ea178c3daf99f98be5f63969dbd1922d3ed23c79d8b99cfc19928465fc\\attempt_001\\REQUEST.json",
+      "messages_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\revision_001\\484a61ea178c3daf99f98be5f63969dbd1922d3ed23c79d8b99cfc19928465fc\\attempt_001\\MESSAGES.json",
+      "actual_request_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\revision_001\\484a61ea178c3daf99f98be5f63969dbd1922d3ed23c79d8b99cfc19928465fc\\attempt_001\\ACTUAL_REQUEST.json",
+      "raw_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\revision_001\\484a61ea178c3daf99f98be5f63969dbd1922d3ed23c79d8b99cfc19928465fc\\attempt_001\\RAW_RESPONSE.json",
+      "usage_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\revision_001\\484a61ea178c3daf99f98be5f63969dbd1922d3ed23c79d8b99cfc19928465fc\\attempt_001\\USAGE.json",
+      "result_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\revision_001\\484a61ea178c3daf99f98be5f63969dbd1922d3ed23c79d8b99cfc19928465fc\\attempt_001\\RESULT.json",
+      "result_sha256": "a22300e1a0e6a3d76f79a4b775e7f4501f3bee43e5ebb370de6fa7d49aa0f4e9",
+      "raw_sha256": "65626fc5418312cf678933148e2c1254e2041bbec1ae403de0810e6b42986608",
+      "transport_complete": true,
+      "result_complete": true,
+      "finish_reason": "stop",
+      "request_id": "chatcmpl-dd785a79-db82-9465-af3d-a2033b44c2e3",
+      "usage": {
+        "prompt_tokens": 637510,
+        "completion_tokens": 1965,
+        "total_tokens": 639475,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1722,
+          "text_tokens": 1965
+        },
+        "prompt_tokens_details": {
+          "text_tokens": 637510
+        }
+      },
+      "reserved_cny": 4.461632,
+      "actual_cny": 2.5972,
+      "reservation_id": "res-0993dd9a40d64cea",
+      "parser_issues": [],
+      "reader_issues": [],
+      "patches": [
+        {
+          "issue_id": "FMT_refractory_efficacy_contradiction",
+          "anchor": "FMT 在难治性肿瘤中表现较一致 ORR 提升",
+          "replacement": "早期难治性黑色素瘤研究显示 ORR 提升，但泛癌种难治人群疗效受限（如 MITRIC 试验 ORR 0%）",
+          "reason": "修正第一章表格中关于 FMT 在难治人群中疗效的概括性结论，使其与第五章正文引用的 MITRIC 试验阴性结果（ORR 0%）保持一致，避免读者对 FMT 在耐药患者中的真实疗效预期产生混淆。"
+        },
+        {
+          "issue_id": "MC38_model_context_missing",
+          "anchor": "在黑色素瘤患者基线宏基因组分析及 MC38 小鼠模型中发现",
+          "replacement": "在黑色素瘤患者基线宏基因组分析及 MC38 结肠腺癌小鼠模型中发现",
+          "reason": "明确 MC38 小鼠模型的肿瘤类型（结肠腺癌而非黑色素瘤），避免读者误以为该机制在黑色素瘤小鼠模型中得到了验证，从而准确理解跨癌种机制验证的模型系统差异。"
+        }
+      ]
+    },
+    {
+      "stage_id": "revision_002",
+      "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\revision_002\\9205efe96cb7a103d894a1a3e4248cf6822cbc86aa36e638af7392dbc3569471\\attempt_001",
+      "request_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\revision_002\\9205efe96cb7a103d894a1a3e4248cf6822cbc86aa36e638af7392dbc3569471\\attempt_001\\REQUEST.json",
+      "messages_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\revision_002\\9205efe96cb7a103d894a1a3e4248cf6822cbc86aa36e638af7392dbc3569471\\attempt_001\\MESSAGES.json",
+      "actual_request_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\revision_002\\9205efe96cb7a103d894a1a3e4248cf6822cbc86aa36e638af7392dbc3569471\\attempt_001\\ACTUAL_REQUEST.json",
+      "raw_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\revision_002\\9205efe96cb7a103d894a1a3e4248cf6822cbc86aa36e638af7392dbc3569471\\attempt_001\\RAW_RESPONSE.json",
+      "usage_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\revision_002\\9205efe96cb7a103d894a1a3e4248cf6822cbc86aa36e638af7392dbc3569471\\attempt_001\\USAGE.json",
+      "result_path": "F:\\OptoMind-Review-2\\outputs\\fullbody_writer_local_20261008_40cny\\live_reader_revision\\stages\\revision_002\\9205efe96cb7a103d894a1a3e4248cf6822cbc86aa36e638af7392dbc3569471\\attempt_001\\RESULT.json",
+      "result_sha256": "faa639ad9cf37371d59f5aba54fb6a514b74343779e845231b5eed894b7c5e51",
+      "raw_sha256": "5f45f585d234974a8ec2b531b09bf8394a8df4d3b6a76dabeb28faeffb813189",
+      "transport_complete": true,
+      "result_complete": false,
+      "finish_reason": "stop",
+      "request_id": "chatcmpl-e1c857a1-77f7-9194-8b5b-f9d23df1fa67",
+      "usage": {
+        "prompt_tokens": 701901,
+        "completion_tokens": 10024,
+        "total_tokens": 711925,
+        "completion_tokens_details": {
+          "reasoning_tokens": 9350,
+          "text_tokens": 10024
+        },
+        "prompt_tokens_details": {
+          "text_tokens": 701901
+        }
+      },
+      "reserved_cny": 4.750104,
+      "actual_cny": 3.04818,
+      "reservation_id": "res-847ed91c583642ed",
+      "parser_issues": [
+        {
+          "code": "response_parse_failed",
+          "error_type": "CandidateError",
+          "detail": "revision_anchor_nonunique:FMT_LUMINate_data_repetition"
+        }
+      ],
+      "reader_issues": [],
+      "patches": []
+    }
+  ],
+  "route_policy": {
+    "automatic_retry": false,
+    "retry_performed": false,
+    "new_max_call": false,
+    "root_review_injected": false,
+    "reader_received_complete_body": true
+  },
+  "ledger": {
+    "settled_total_cny": 21.146148,
+    "open_hold_cny": 0,
+    "reservation_count": 11,
+    "limit_cny": 60.0,
+    "route_cost_cny": 5.709892
+  },
+  "wrapper_exit": {
+    "terminal_session_id": 87080,
+    "python_pid": 6964,
+    "exit_code": 1,
+    "manifest_status": "pending",
+    "reason": "revision_002 response transport complete but official parser returned CandidateError for nonunique anchor; no retry authorized"
+  },
+  "created_at_epoch": 1791397918.3601925
+}
+
