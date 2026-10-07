@@ -1,0 +1,29 @@
+{
+  "schema_version": "optomind.writer_candidates_config.v1",
+  "purpose": "Quality-first candidate comparison. Token limits are capacities, never scientific or length targets. No paid execution without --run and one shared finite CNY ledger.",
+  "writer": {
+    "model": "qwen3.8-max",
+    "thinking": true,
+    "thinking_budget": 32768,
+    "max_output_tokens": 65536,
+    "json_mode": false,
+    "timeout_seconds": 900,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "editor": {
+    "model": "qwen3.8-max",
+    "thinking": true,
+    "thinking_budget": 32768,
+    "max_output_tokens": 65536,
+    "json_mode": false,
+    "timeout_seconds": 900,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "editor_pass": true
+}
