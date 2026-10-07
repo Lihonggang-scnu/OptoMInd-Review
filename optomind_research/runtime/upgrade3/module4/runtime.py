@@ -377,7 +377,7 @@ def _stream_event_record(
 
 def _stream_response(
     response: Any, *, started: float, observer: Any, raw_path: Path,
-    overall_timeout_seconds: float,
+    overall_timeout_seconds: float, inactivity_timeout_seconds: float | None = None,
 ) -> dict[str, Any]:
     """Read Qwen SSE without treating partial content as a completed answer."""
 
@@ -395,6 +395,11 @@ def _stream_response(
     reasoning_bytes = 0
     raw_path.parent.mkdir(parents=True, exist_ok=True)
     raw_handle = raw_path.open("wb")
+    inactivity_timeout = (
+        max(0.1, float(inactivity_timeout_seconds))
+        if inactivity_timeout_seconds is not None
+        else max(0.1, float(overall_timeout_seconds))
+    )
 
     def emit(stage: str, **fields: Any) -> None:
         # Call sites below already select first chunks, periodic progress, and
@@ -499,8 +504,12 @@ def _stream_response(
             remaining = overall_timeout_seconds - (time.monotonic() - started)
             if remaining <= 0:
                 fail("qwen_stream_overall_timeout", stage="stream_read", event_count=event_count)
-            set_read_timeout(remaining)
-            emit("stream_read_start", event_count=event_count) if event_count == 0 else None
+            read_timeout = min(inactivity_timeout, remaining)
+            set_read_timeout(read_timeout)
+            if event_count == 0:
+                emit("stream_read_start", event_count=event_count,
+                     read_timeout_seconds=read_timeout,
+                     overall_remaining_seconds=remaining)
             try:
                 line = response.readline()
             except (socket.timeout, TimeoutError):
@@ -910,6 +919,8 @@ class QwenDirectClient:
         if stream:
             effective_request["stream"] = True
             effective_request["stream_options"] = {"include_usage": True}
+            effective_request["stream_inactivity_timeout_seconds"] = request_timeout_seconds
+            effective_request["stream_overall_timeout_seconds"] = stream_overall_timeout_seconds
         if thinking and pricing.get("thinking_budget_maps_to_effort"):
             # Informational provider mapping, not another request parameter:
             # Qwen3.8 rejects reasoning_effort together with thinking_budget.
@@ -965,6 +976,7 @@ class QwenDirectClient:
                                 started=started,
                                 observer=record_transport_event,
                                 raw_path=partial_path,
+                                inactivity_timeout_seconds=request_timeout_seconds,
                                 overall_timeout_seconds=stream_overall_timeout_seconds,
                             )
                             raw = stream_result["raw_bytes"]

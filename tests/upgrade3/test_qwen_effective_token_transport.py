@@ -60,6 +60,21 @@ class FakeStreamResponse:
         pass
 
 
+class TimeoutTrackingStreamResponse(FakeStreamResponse):
+    def __init__(self, lines, *, timeout_error=False):
+        super().__init__(lines)
+        self.timeouts = []
+        self.timeout_error = timeout_error
+
+    def settimeout(self, value):
+        self.timeouts.append(value)
+
+    def readline(self):
+        if self.timeout_error:
+            raise TimeoutError("offline timeout")
+        return super().readline()
+
+
 class CaptureOpener:
     def __init__(self, *, usage=None, finish_reason="stop", error=None):
         self.bodies = []
@@ -169,6 +184,65 @@ class EffectiveTokenTransportTests(unittest.TestCase):
             self.assertTrue(any(event["stage"] == "stream_first_byte" for event in events))
             self.assertTrue(any(event["stage"] == "stream_complete" for event in events))
             self.assertTrue(Path(result["raw_stream_path"]).exists())
+
+    def test_stream_inactivity_bound_is_separate_from_overall_bound(self):
+        response = TimeoutTrackingStreamResponse([], timeout_error=True)
+
+        class TrackingOpener(StreamOpener):
+            def open(self, request, timeout):
+                self.bodies.append(json.loads(request.data))
+                return response
+
+        client = runtime.QwenDirectClient(
+            model="qwen3.8-max", json_mode=False, max_retries=0,
+            timeout_seconds=900, stream_overall_timeout_seconds=3600,
+        )
+        with self.assertRaisesRegex(runtime.QwenTransportError, "qwen_stream_read_timeout"):
+            self.invoke(client, opener=TrackingOpener([]), stream=True, call_id="stream-bounds")
+        self.assertTrue(response.timeouts)
+        self.assertGreater(response.timeouts[0], 0)
+        self.assertLessEqual(response.timeouts[0], 900)
+
+    def test_stream_read_bound_uses_smaller_overall_remaining(self):
+        response = TimeoutTrackingStreamResponse([], timeout_error=True)
+        events = []
+        with tempfile.TemporaryDirectory() as temp:
+            with self.assertRaisesRegex(runtime.QwenTransportError, "qwen_stream_read_timeout"):
+                runtime._stream_response(
+                    response,
+                    started=runtime.time.monotonic(),
+                    observer=events,
+                    raw_path=Path(temp) / "partial.sse",
+                    inactivity_timeout_seconds=900,
+                    overall_timeout_seconds=3,
+                )
+        self.assertTrue(response.timeouts)
+        self.assertLessEqual(response.timeouts[0], 3)
+        read_start = next(event for event in events if event["stage"] == "stream_read_start")
+        self.assertLessEqual(read_start["read_timeout_seconds"], 3)
+        self.assertLessEqual(read_start["overall_remaining_seconds"], 3)
+
+    def test_stream_with_inactivity_bound_still_completes(self):
+        lines = [
+            b'data: {"id":"bounded-ok","choices":[{"delta":{"content":"ok"},"finish_reason":"stop"}]}\n\n',
+            b'data: {"id":"bounded-ok","choices":[],"usage":{"prompt_tokens":3,"completion_tokens":1}}\n\n',
+            b"data: [DONE]\n\n",
+        ]
+        response = TimeoutTrackingStreamResponse(lines)
+
+        class TrackingOpener(StreamOpener):
+            def open(self, request, timeout):
+                self.bodies.append(json.loads(request.data))
+                return response
+
+        client = runtime.QwenDirectClient(
+            model="qwen3.8-max", json_mode=False, max_retries=0,
+            timeout_seconds=900, stream_overall_timeout_seconds=3600,
+        )
+        _, result = self.invoke(client, opener=TrackingOpener([]), stream=True, call_id="stream-bounded-ok")
+        self.assertTrue(result["complete"])
+        self.assertEqual(result["content"], "ok")
+        self.assertTrue(response.timeouts)
 
     def test_stream_error_event_preserves_partial_evidence_and_does_not_adopt(self):
         opener = StreamOpener([
