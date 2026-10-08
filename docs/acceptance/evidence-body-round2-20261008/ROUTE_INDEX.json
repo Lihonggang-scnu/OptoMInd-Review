@@ -1,30 +1,30 @@
 {
   "archive": "evidence-body-round2-20261008",
-  "publication_stage": "preparation_ready_for_root_review",
+  "publication_stage": "final_local_archive_ready_for_root_upload",
   "source_commit": "f1b78750fae6ff47dbc4d4694f88af3b53c8cf9c",
   "input_manifest_sha256": "98e1ee62c4bf239fc54ed133d57c8c6c666b7231fd86c6e2065e79fcddf777a7",
   "budget": {
     "cap_cny": 60.0,
     "ledger_start": "new_round2_budget.sqlite.evidence_round2.json",
     "old_ledgers_touched": false,
-    "current_spend": "packed_continuous completed: settled 4.347772 CNY; no held or uncertain amount",
+    "current_spend": "round2 final ledger: settled 6.6382292 CNY; held/reserved 0",
     "raw_sqlite_public": false,
-    "settled_cny": 4.347772,
+    "settled_cny": 6.6382292,
     "held_or_uncertain_cny": 0.0,
-    "remaining_cny": 55.652228
+    "remaining_cny": 53.3617708
   },
   "routes": [
     {
       "route": "packed_whole",
-      "status": "capacity_blocked_before_paid",
+      "status": "capacity_blocked_preview",
       "model_calls": 0,
       "estimated_max_cost_cny": 5.73166,
       "fits": false,
-      "result_path": null
+      "result_path": "routes/packed_whole/ not published; local preview retained"
     },
     {
       "route": "packed_continuous",
-      "status": "completed",
+      "status": "completed_root_selected",
       "model_calls": 7,
       "estimated_max_cost_cny": 2.908264,
       "fits": true,
@@ -35,28 +35,38 @@
       "stage_count": 7,
       "settled_cny": 4.347772,
       "held_or_uncertain_cny": 0.0,
-      "remaining_cny": 55.652228,
+      "remaining_cny": 53.3617708,
       "full_body": "packed_continuous/FULL_BODY.md",
       "completion_record": "packed_continuous/COMPLETION_RECORD.json"
     },
     {
       "route": "dossier_author",
-      "status": "preview_only_awaiting_root_review",
-      "model_calls": 0,
+      "status": "curator_failed_author_skipped",
+      "model_calls": 1,
       "estimated_max_cost_cny": 2.256836,
       "fits": true,
-      "result_path": null,
-      "publication_status": "not_included_in_this_increment; consult current local run records"
+      "result_path": "routes/dossier_author/",
+      "publication_status": "not_included_in_this_increment; consult current local run records",
+      "settled_cny": 1.341644
     },
     {
       "route": "scoped_revision",
-      "status": "preview_only_requires_complete_body",
-      "model_calls": 0,
+      "status": "completed_technical_diff_not_scientifically_adopted",
+      "model_calls": 3,
       "estimated_max_cost_cny": 1.614092,
       "fits": true,
-      "result_path": null,
-      "publication_status": "not_included_in_this_increment; consult current local run records"
+      "result_path": "routes/scoped_revision_live/",
+      "publication_status": "not_included_in_this_increment; consult current local run records",
+      "settled_cny": 0.9488132
     }
   ],
-  "increment_note": "This increment publishes only the completed packed_continuous route. Other route conclusions are deliberately not inferred or included."
+  "increment_note": "Final local round-two archive includes actual dossier failure and scoped reader/editor records. Root selected the unedited continuous body; scoped technical edits are preserved for audit and are not a whole-body scientific approval.",
+  "final_artifacts": {
+    "root_review": "review/ROOT_ROUND2_REVIEW.md",
+    "scoped_diff_check": "review/ROOT_SCOPED_DIFF_CHECK.json",
+    "scoped_diff": "review/SCOPED_BODY_DIFF.patch",
+    "selection": "review/FINAL_SELECTION_STATUS.json",
+    "ledger": "review/ROUND2_LEDGER_FINAL_STATS.json",
+    "recovery": "review/RECOVERY_ENTRY.md"
+  }
 }

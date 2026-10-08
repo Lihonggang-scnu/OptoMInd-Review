@@ -9,3 +9,13 @@
 - Other round-2 routes remain outside this increment. No final selection or overall round conclusion is asserted.
 
 
+
+
+## Final increment
+
+Added root review, ledger, recovery, dossier failure, and scoped reader/editor records with complete model-generated messages and returns. Stable cache hashes, stage/cache IDs, block IDs, task IDs, wire request hashes, and scientific signatures are retained for audit. Authentication fields, credentials, bearer values, auth headers, signed URLs/signatures, key-file paths, cookies, passwords, and personal emails are redacted. Transport SSE streams and SQLite remain local. The selected body is the untouched packed_continuous output; scoped before/after bodies are preserved as experimental artifacts and are not presented as root-approved science.
+
+
+## Final increment
+
+Added root review, ledger, recovery, dossier failure, and scoped reader/editor records with complete model-generated messages and returns. Stable cache hashes, stage/cache IDs, block IDs, task IDs, wire request hashes, and scientific signatures are retained for audit. Authentication fields, credentials, bearer values, auth headers, signed URLs/signatures, key-file paths, cookies, passwords, and personal emails are redacted. Transport SSE streams and SQLite remain local. The selected body is the untouched packed_continuous output; scoped before/after bodies are preserved as experimental artifacts and are not presented as root-approved science.

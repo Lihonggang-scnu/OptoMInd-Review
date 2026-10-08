@@ -1,0 +1,387 @@
+{
+  "schema_version": "optomind.scoped_body_revision.v1",
+  "run_id": "20261008T031448Z-ea2b85762c",
+  "status": "pending",
+  "source_file_hashes": {
+    "optomind_research\\runtime\\upgrade3\\scoped_body_revision.py": "e7fd07205aafd46ed34e5246b670f79eb78d05c6768c137281d4c1ea3bb43d84",
+    "optomind_research\\runtime\\upgrade3\\writing_evidence.py": "3e7a626aca72b89bb373ba4b2ae919a908e5bd92734ec86bd4d38e68e20596d2",
+    "prompts\\evidence_body_writer\\scoped_reader.md": "ef39c25be271fb609d3f315a9e83e11341e627110dbda66c7038577e29356b37",
+    "prompts\\evidence_body_writer\\scoped_revision.md": "ffafaf6c495fd41df955bcaa9ad7db5fe78e14ae391e1dfde57c4bfeb3c319cd",
+    "optomind_research\\runtime\\upgrade3\\fullbody_writer.py": "281f9d30c211b381c0b921c69f6f51e70be3241d5d530b78d13a13cfa6faf25f",
+    "optomind_research\\runtime\\upgrade3\\fullbody_contracts.py": "d2f68d5c4f91151e4a1aea00af4f5a1a26b7592f431a5a34b15a0beeb3c31e14",
+    "optomind_research\\runtime\\upgrade3\\writer_candidates.py": "3fabb331ef4f796df5ccc8b1a17d86ed962e99bacf41edeea8f3e442b9fe4c5f",
+    "optomind_research\\runtime\\upgrade3\\writer_candidates_contracts.py": "68d73b9482275d5afd8b13d8f2558e0c118efdfada26f2ef83f8739beec7a17d",
+    "optomind_research\\runtime\\upgrade3\\review_unit_writer.py": "19d9ed5c6d19da4e7ce0300e680b67e896fa4f8f6bb00b5a075c74fa10914e46",
+    "optomind_research\\runtime\\upgrade3\\chapter_arrangement.py": "7bd64cd3cd9700cf9723064c3171d0d74c5f85d26d8659fea69275647e209b16",
+    "optomind_research\\runtime\\upgrade3\\module4\\runtime.py": "6d2055b024b5ec21d26940f456970629f5b263903c694bb33582c922c0d30cd9"
+  },
+  "code_hash": "04ac8fb32833b5c064c75dee73697039dee77a3e9762c734601d3b2ead69d331",
+  "stages": [
+    {
+      "stage_id": "scoped_reader",
+      "role": "reader",
+      "effective_profile": {
+        "model": "qwen3.5-plus",
+        "thinking": true,
+        "thinking_budget": 16384,
+        "max_output_tokens": 24576,
+        "json_mode": false,
+        "timeout_seconds": 1800.0,
+        "stream": true,
+        "stream_overall_timeout_seconds": 3600.0,
+        "prompt_token_multiplier": 1.12,
+        "prompt_token_framing_margin": 8192
+      },
+      "estimate": {
+        "prompt_tokens": 212272,
+        "measured_tokens": 182214,
+        "method": "provided_token_counter",
+        "multiplier": 1.12,
+        "framing_margin": 8192,
+        "reserved_input_tokens": 212272,
+        "input_limit_tokens": 959040,
+        "completion_allowance_tokens": 40960,
+        "context_window": 1000000,
+        "fits": true,
+        "estimated_max_cost_cny": 1.832128,
+        "wire_request_sha256": "918e7030a85c124962a0231de07fe3d20374ad64e61b6330a2db9763aa91ec9a",
+        "wire_parameters": {
+          "model": "qwen3.5-plus",
+          "max_completion_tokens": 40960,
+          "temperature": 0.1,
+          "enable_thinking": true,
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "thinking_budget": 16384
+        }
+      },
+      "status": "complete",
+      "cache_key": "a98088588fca3127d20bd6067a1dc2da1fe251ad6811d57e83d8903127dfb1f9",
+      "dependencies": [
+        {
+          "stage_id": "verified_base",
+          "result_sha256": "e7917da9ea7f104625afa85dc28c278927d5f521678752eac4037974f31dd02a",
+          "body_sha256": "5f334c674ce54672b0f327e719bbbd3a7a4e6d26b243b02d73fbe99e5c174b51",
+          "book_sha256": "94590c2b7a3365b76af5e0fe4bad5ae5a677cd6d36f80e48a1e4ab90aa098aaa"
+        }
+      ],
+      "messages_path": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\scoped_revision_live\\runs\\20261008T031448Z-ea2b85762c\\plans\\scoped_reader\\MESSAGES.json",
+      "model_calls": 1,
+      "client_invocations": 1,
+      "paid_dispatch_count": 1,
+      "cache_hit": false,
+      "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\scoped_revision_live\\stages\\scoped_reader\\a98088588fca3127d20bd6067a1dc2da1fe251ad6811d57e83d8903127dfb1f9\\attempt_001",
+      "result_sha256": "9a249c3dac5c690d575452f4586dec67f9e0eaece933139ab15d06f140f3c587",
+      "call_error": null,
+      "usage": {
+        "usage": {
+          "prompt_tokens": 182224,
+          "completion_tokens": 4583,
+          "total_tokens": 186807,
+          "completion_tokens_details": {
+            "reasoning_tokens": 1271,
+            "text_tokens": 4583
+          },
+          "prompt_tokens_details": {
+            "text_tokens": 182224
+          }
+        },
+        "usage_known": true,
+        "model": "qwen3.5-plus",
+        "provider_request_id": "chatcmpl-a9175f8e-2e25-93ff-9ba9-8ce79df1b5db",
+        "effective_request": {
+          "model": "qwen3.5-plus",
+          "enable_thinking": true,
+          "thinking_budget": 16384,
+          "answer_tokens": 24576,
+          "total_output_tokens": 40960,
+          "max_completion_tokens": 40960,
+          "max_tokens": null,
+          "response_format": null,
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "stream_inactivity_timeout_seconds": 1800.0,
+          "stream_overall_timeout_seconds": 3600.0
+        },
+        "estimated_actual_cost_cny": 0.419444
+      }
+    },
+    {
+      "stage_id": "scoped_revision_001_00",
+      "role": "reviser",
+      "effective_profile": {
+        "model": "qwen3.5-plus",
+        "thinking": true,
+        "thinking_budget": 16384,
+        "max_output_tokens": 49152,
+        "json_mode": false,
+        "timeout_seconds": 1800.0,
+        "stream": true,
+        "stream_overall_timeout_seconds": 3600.0,
+        "prompt_token_multiplier": 1.12,
+        "prompt_token_framing_margin": 8192
+      },
+      "estimate": {
+        "prompt_tokens": 236356,
+        "measured_tokens": 203717,
+        "method": "provided_token_counter",
+        "multiplier": 1.12,
+        "framing_margin": 8192,
+        "reserved_input_tokens": 236356,
+        "input_limit_tokens": 934464,
+        "completion_allowance_tokens": 65536,
+        "context_window": 1000000,
+        "fits": true,
+        "estimated_max_cost_cny": 2.518288,
+        "wire_request_sha256": "cf68633453f7eba3be891b1cc1f1f986acfeda6331ce5aafe904a916e94490e3",
+        "wire_parameters": {
+          "model": "qwen3.5-plus",
+          "max_completion_tokens": 65536,
+          "temperature": 0.1,
+          "enable_thinking": true,
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "thinking_budget": 16384
+        }
+      },
+      "status": "complete",
+      "cache_key": "8d0f095702bd2444b74225603c9ef1707fcdf6632e7e0297ebe6831606083a08",
+      "dependencies": [
+        {
+          "stage_id": "verified_base",
+          "result_sha256": "e7917da9ea7f104625afa85dc28c278927d5f521678752eac4037974f31dd02a",
+          "body_sha256": "5f334c674ce54672b0f327e719bbbd3a7a4e6d26b243b02d73fbe99e5c174b51",
+          "book_sha256": "94590c2b7a3365b76af5e0fe4bad5ae5a677cd6d36f80e48a1e4ab90aa098aaa"
+        },
+        {
+          "stage_id": "scoped_reader",
+          "cache_key": "a98088588fca3127d20bd6067a1dc2da1fe251ad6811d57e83d8903127dfb1f9",
+          "result_sha256": "9a249c3dac5c690d575452f4586dec67f9e0eaece933139ab15d06f140f3c587"
+        }
+      ],
+      "messages_path": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\scoped_revision_live\\runs\\20261008T031448Z-ea2b85762c\\plans\\scoped_revision_001_00\\MESSAGES.json",
+      "model_calls": 1,
+      "client_invocations": 1,
+      "paid_dispatch_count": 1,
+      "cache_hit": false,
+      "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\scoped_revision_live\\stages\\scoped_revision_001_00\\8d0f095702bd2444b74225603c9ef1707fcdf6632e7e0297ebe6831606083a08\\attempt_001",
+      "result_sha256": "a696ff8c188fd0797f5bef8e9ac0e35c90a493366bf1b28cbcfd4d544a272686",
+      "call_error": null,
+      "usage": {
+        "usage": {
+          "prompt_tokens": 203727,
+          "completion_tokens": 1565,
+          "total_tokens": 205292,
+          "completion_tokens_details": {
+            "reasoning_tokens": 579,
+            "text_tokens": 1565
+          },
+          "prompt_tokens_details": {
+            "text_tokens": 203727
+          }
+        },
+        "usage_known": true,
+        "model": "qwen3.5-plus",
+        "provider_request_id": "chatcmpl-79a27c60-904e-9232-9f9f-0bc85a17381b",
+        "effective_request": {
+          "model": "qwen3.5-plus",
+          "enable_thinking": true,
+          "thinking_budget": 16384,
+          "answer_tokens": 49152,
+          "total_output_tokens": 65536,
+          "max_completion_tokens": 65536,
+          "max_tokens": null,
+          "response_format": null,
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "stream_inactivity_timeout_seconds": 1800.0,
+          "stream_overall_timeout_seconds": 3600.0
+        },
+        "estimated_actual_cost_cny": 0.426234
+      }
+    },
+    {
+      "stage_id": "scoped_revision_002_00",
+      "role": "reviser",
+      "effective_profile": {
+        "model": "qwen3.5-plus",
+        "thinking": true,
+        "thinking_budget": 16384,
+        "max_output_tokens": 49152,
+        "json_mode": false,
+        "timeout_seconds": 1800.0,
+        "stream": true,
+        "stream_overall_timeout_seconds": 3600.0,
+        "prompt_token_multiplier": 1.12,
+        "prompt_token_framing_margin": 8192
+      },
+      "estimate": {
+        "prompt_tokens": 138848,
+        "measured_tokens": 116657,
+        "method": "provided_token_counter",
+        "multiplier": 1.12,
+        "framing_margin": 8192,
+        "reserved_input_tokens": 138848,
+        "input_limit_tokens": 934464,
+        "completion_allowance_tokens": 65536,
+        "context_window": 1000000,
+        "fits": true,
+        "estimated_max_cost_cny": 2.128256,
+        "wire_request_sha256": "7b4ae0b3d6e262508a07c6589101302ef47cf00ad414a36db48d02ce45ed24c4",
+        "wire_parameters": {
+          "model": "qwen3.5-plus",
+          "max_completion_tokens": 65536,
+          "temperature": 0.1,
+          "enable_thinking": true,
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "thinking_budget": 16384
+        }
+      },
+      "status": "complete",
+      "cache_key": "82b8e02bfeff65f392c01847a845002d2eac2f616ebdaba27f6d92aeefacf3bd",
+      "dependencies": [
+        {
+          "stage_id": "verified_base",
+          "result_sha256": "e7917da9ea7f104625afa85dc28c278927d5f521678752eac4037974f31dd02a",
+          "body_sha256": "5f334c674ce54672b0f327e719bbbd3a7a4e6d26b243b02d73fbe99e5c174b51",
+          "book_sha256": "94590c2b7a3365b76af5e0fe4bad5ae5a677cd6d36f80e48a1e4ab90aa098aaa"
+        },
+        {
+          "stage_id": "scoped_reader",
+          "cache_key": "a98088588fca3127d20bd6067a1dc2da1fe251ad6811d57e83d8903127dfb1f9",
+          "result_sha256": "9a249c3dac5c690d575452f4586dec67f9e0eaece933139ab15d06f140f3c587"
+        }
+      ],
+      "messages_path": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\scoped_revision_live\\runs\\20261008T031448Z-ea2b85762c\\plans\\scoped_revision_002_00\\MESSAGES.json",
+      "model_calls": 1,
+      "client_invocations": 1,
+      "paid_dispatch_count": 1,
+      "cache_hit": false,
+      "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\scoped_revision_live\\stages\\scoped_revision_002_00\\82b8e02bfeff65f392c01847a845002d2eac2f616ebdaba27f6d92aeefacf3bd\\attempt_001",
+      "result_sha256": "dbf512fe7771b1a6477b3073a05affdec2dbaa03b118079ceae8aaa98dd22c34",
+      "call_error": null,
+      "usage": {
+        "usage": {
+          "prompt_tokens": 116667,
+          "completion_tokens": 2042,
+          "total_tokens": 118709,
+          "completion_tokens_details": {
+            "reasoning_tokens": 643,
+            "text_tokens": 2042
+          },
+          "prompt_tokens_details": {
+            "text_tokens": 116667
+          }
+        },
+        "usage_known": true,
+        "model": "qwen3.5-plus",
+        "provider_request_id": "chatcmpl-c8fbd6a6-37f4-9988-9f8f-65b8561dd844",
+        "effective_request": {
+          "model": "qwen3.5-plus",
+          "enable_thinking": true,
+          "thinking_budget": 16384,
+          "answer_tokens": 49152,
+          "total_output_tokens": 65536,
+          "max_completion_tokens": 65536,
+          "max_tokens": null,
+          "response_format": null,
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "stream_inactivity_timeout_seconds": 1800.0,
+          "stream_overall_timeout_seconds": 3600.0
+        },
+        "estimated_actual_cost_cny": 0.10313520000000001
+      }
+    }
+  ],
+  "cost_summary": {
+    "candidate_stage_known_cost_cny": 0.9488131999999999,
+    "candidate_stage_cost_complete": true,
+    "unknown_cost_attempts": [],
+    "all_attempts_including_retries": [
+      {
+        "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\scoped_revision_live\\stages\\scoped_reader\\a98088588fca3127d20bd6067a1dc2da1fe251ad6811d57e83d8903127dfb1f9\\attempt_001",
+        "estimated_actual_cost_cny": 0.419444,
+        "usage_known": true
+      },
+      {
+        "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\scoped_revision_live\\stages\\scoped_revision_001_00\\8d0f095702bd2444b74225603c9ef1707fcdf6632e7e0297ebe6831606083a08\\attempt_001",
+        "estimated_actual_cost_cny": 0.426234,
+        "usage_known": true
+      },
+      {
+        "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\scoped_revision_live\\stages\\scoped_revision_002_00\\82b8e02bfeff65f392c01847a845002d2eac2f616ebdaba27f6d92aeefacf3bd\\attempt_001",
+        "estimated_actual_cost_cny": 0.10313520000000001,
+        "usage_known": true
+      }
+    ],
+    "base_cost_attribution": {
+      "candidate_stage_known_cost_cny": 4.347771999999999,
+      "candidate_stage_cost_complete": true,
+      "unknown_cost_attempts": [],
+      "all_attempts_including_retries": [
+        {
+          "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\packed_continuous\\stages\\author_001\\3cbfc438a2e10e8c27932c735db3dbc70d2ceaf1b11dfb5207fa5529b8ec97be\\attempt_001",
+          "estimated_actual_cost_cny": 1.316656,
+          "usage_known": true
+        },
+        {
+          "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\packed_continuous\\stages\\author_002\\b85e409e43ddc2cc814dd2a30020633b3d29280bd078e5e007b9eaafd515fea5\\attempt_001",
+          "estimated_actual_cost_cny": 0.434636,
+          "usage_known": true
+        },
+        {
+          "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\packed_continuous\\stages\\author_003\\37206f743af89b5e716f8a1c47090b73bd2e5c407cc3a012b984c944727be7ac\\attempt_001",
+          "estimated_actual_cost_cny": 0.417254,
+          "usage_known": true
+        },
+        {
+          "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\packed_continuous\\stages\\author_004\\fd14393f1e028a9a798f4192b7134fa4df2905a31ea5996b79fa20555b8031ca\\attempt_001",
+          "estimated_actual_cost_cny": 0.36534,
+          "usage_known": true
+        },
+        {
+          "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\packed_continuous\\stages\\author_005\\4cfe2ebea7c0560dc4cf27c5fca5036d66e6eabc1a685834e5d1aef66121f3cb\\attempt_001",
+          "estimated_actual_cost_cny": 0.626536,
+          "usage_known": true
+        },
+        {
+          "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\packed_continuous\\stages\\author_006\\97f02953227246804cf8fc16d9a89c4621be7e4d017034e794a313a7a3250cb0\\attempt_001",
+          "estimated_actual_cost_cny": 0.587058,
+          "usage_known": true
+        },
+        {
+          "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\packed_continuous\\stages\\author_007\\1232a5d2ae29f78c7566db81b32ef2e99c849fba53d79d5a63f7d50d6bc656ee\\attempt_001",
+          "estimated_actual_cost_cny": 0.600292,
+          "usage_known": true
+        }
+      ],
+      "base_cost_attribution": null,
+      "base_reuse_charged_again": false,
+      "total_known_cost_including_base_cny": 4.347771999999999,
+      "total_cost_complete": true,
+      "accounting_note": "Known costs are provider-usage estimates. Missing usage is unknown, never zero; shared-ledger uncertain reservations remain retained. Reused base cost is attributable but is not dispatched or charged again."
+    },
+    "base_reuse_charged_again": false,
+    "total_known_cost_including_base_cny": 5.296585199999999,
+    "total_cost_complete": true,
+    "accounting_note": "Known costs are provider-usage estimates. Missing usage is unknown, never zero; shared-ledger uncertain reservations remain retained. Reused base cost is attributable but is not dispatched or charged again."
+  },
+  "model_calls": 3,
+  "paid_dispatch_count": 3,
+  "selected_version": "20261008T031448Z-ea2b85762c",
+  "verification_scope": "Exact scoped application and provenance only; assess the natural complete manuscript independently."
+}

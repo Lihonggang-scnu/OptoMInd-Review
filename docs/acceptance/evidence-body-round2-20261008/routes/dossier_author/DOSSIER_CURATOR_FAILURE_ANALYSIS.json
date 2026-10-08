@@ -1,0 +1,76 @@
+{
+  "schema_version": "evidence_body_round2.dossier_curator_failure_analysis.v1",
+  "recorded_at_utc": "2026-10-08T03:07:32.099787+00:00",
+  "route": "dossier_author",
+  "stage_id": "curator_001",
+  "attempt": 1,
+  "classification": "invalid_atom_ids_not_in_sealed_archive",
+  "classification_detail": "The provider returned 187 selected IDs; 183 are in the exact considered batch, 0 are globally-known atoms outside that batch, and 3 unique IDs are absent from the sealed WRITING_EVIDENCE archive. One selected ID is duplicated. This is a response-format/ID validation failure, not a transport failure and not a legal-global-but-outside-batch selection.",
+  "result": {
+    "complete": false,
+    "body_markdown": "",
+    "issues": [
+      {
+        "code": "response_parse_failed",
+        "error_type": "CandidateError",
+        "detail": "curator_atom_outside_considered_batch"
+      }
+    ],
+    "transport_complete": true
+  },
+  "raw_response_path": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\dossier_author\\stages\\curator_001\\e17a0343c09cad24ff193cc310ed37fcd224df990a1f4635739d0fb07024076e\\attempt_001\\RAW_RESPONSE.json",
+  "raw_response_sha256": "02d675b39b85016202f967308b7e24400d87e79b64f09daeb2c7f82cc9ec5fe1",
+  "request_path": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\dossier_author\\stages\\curator_001\\e17a0343c09cad24ff193cc310ed37fcd224df990a1f4635739d0fb07024076e\\attempt_001\\REQUEST.json",
+  "request_sha256": "23d3d34d38abc511aa547de2b8b1ec3730ec84854be8d0c8e14780cd6c548db8",
+  "usage_path": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\dossier_author\\stages\\curator_001\\e17a0343c09cad24ff193cc310ed37fcd224df990a1f4635739d0fb07024076e\\attempt_001\\USAGE.json",
+  "usage_sha256": "58ba5c8dd20c02c3aebd7cd7f1c4a4345da45d155033d11a29f9d91f2e12acab",
+  "messages_path": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\dossier_author\\runs\\20261008T030044Z-1cbdd9c851\\plans\\curator_001\\MESSAGES.json",
+  "raw_stream_path": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\dossier_author\\stages\\curator_001\\e17a0343c09cad24ff193cc310ed37fcd224df990a1f4635739d0fb07024076e\\attempt_001\\transport\\curator_001-e17a0343c09c-attempt_001-key0-attempt0.sse.raw",
+  "raw_stream_sha256": "35c54f5f4b30ea8564bd64e633e759fe25a93164ebac452c60bc48b619830c20",
+  "request_id": "chatcmpl-128215e7-1e8d-957f-afb3-5b01e8464877",
+  "requested_model": "qwen3.5-plus",
+  "returned_model": "qwen3.5-plus",
+  "finish_reason": "stop",
+  "elapsed_seconds": 178.56200000015087,
+  "stream_event_count": 2613,
+  "prompt_tokens": 277025,
+  "completion_tokens": 9731,
+  "total_tokens": 286756,
+  "actual_cost_cny": 1.341644,
+  "sealed_archive_path": "F:\\OptoMind-Review-2\\outputs\\evidence_body_round2_20261008_60cny\\dossier_author\\inputs\\94590c2b7a3365b76af5e0fe4bad5ae5a677cd6d36f80e48a1e4ab90aa098aaa\\WRITING_EVIDENCE.json",
+  "sealed_archive_sha256": "9d31977942ae394f072606b3caed847aac39598ed27c8f94885778466d24ebbb",
+  "considered_batch_count": 1365,
+  "sealed_atom_count": 10252,
+  "selected_count": 187,
+  "selected_unique_count": 186,
+  "duplicate_selected_count": 1,
+  "selected_in_considered_batch_count": 183,
+  "selected_known_outside_batch_count": 0,
+  "selected_unknown_count": 3,
+  "unknown_selected_atom_ids": [
+    "atom::03e062188fa13a809c33fb1",
+    "atom::8ee5a9383b2afdaa1326e9",
+    "atom::bea945b34f7b89a9c4a4002"
+  ],
+  "known_outside_batch_examples": [],
+  "unknown_outside_batch_ids": [
+    "atom::03e062188fa13a809c33fb1",
+    "atom::8ee5a9383b2afdaa1326e9",
+    "atom::bea945b34f7b89a9c4a4002"
+  ],
+  "valid_in_batch_examples": [
+    "atom::024518a823f6006dd3e972f9",
+    "atom::025edc534ec6facc5918e970",
+    "atom::04c94e3ebea4e25ebe48718f",
+    "atom::058b87cda922009663d4afdd",
+    "atom::0698d1c77cb0d200e790e2f0",
+    "atom::0836a8c74dab91d3a0b4f4ce",
+    "atom::08554aa4c222491df9d38ef8",
+    "atom::085aa5d13333e18f891b3108",
+    "atom::0c4539dfe7511b5ee26afddc",
+    "atom::0eb61fe9830b1063300638cd"
+  ],
+  "no_retry_or_reselection": true,
+  "author_stage_invoked": false,
+  "provider_response_preserved": true
+}
