@@ -1,0 +1,62 @@
+{
+  "archive": "evidence-body-round2-20261008",
+  "publication_stage": "preparation_ready_for_root_review",
+  "source_commit": "f1b78750fae6ff47dbc4d4694f88af3b53c8cf9c",
+  "input_manifest_sha256": "98e1ee62c4bf239fc54ed133d57c8c6c666b7231fd86c6e2065e79fcddf777a7",
+  "budget": {
+    "cap_cny": 60.0,
+    "ledger_start": "new_round2_budget.sqlite.evidence_round2.json",
+    "old_ledgers_touched": false,
+    "current_spend": "packed_continuous completed: settled 4.347772 CNY; no held or uncertain amount",
+    "raw_sqlite_public": false,
+    "settled_cny": 4.347772,
+    "held_or_uncertain_cny": 0.0,
+    "remaining_cny": 55.652228
+  },
+  "routes": [
+    {
+      "route": "packed_whole",
+      "status": "capacity_blocked_before_paid",
+      "model_calls": 0,
+      "estimated_max_cost_cny": 5.73166,
+      "fits": false,
+      "result_path": null
+    },
+    {
+      "route": "packed_continuous",
+      "status": "completed",
+      "model_calls": 7,
+      "estimated_max_cost_cny": 2.908264,
+      "fits": true,
+      "launch_receipt": "PACKED_CONTINUOUS_LIVE_LAUNCH.json",
+      "result_path": "packed_continuous/",
+      "completed_tasks": 95,
+      "pending_tasks": 0,
+      "stage_count": 7,
+      "settled_cny": 4.347772,
+      "held_or_uncertain_cny": 0.0,
+      "remaining_cny": 55.652228,
+      "full_body": "packed_continuous/FULL_BODY.md",
+      "completion_record": "packed_continuous/COMPLETION_RECORD.json"
+    },
+    {
+      "route": "dossier_author",
+      "status": "preview_only_awaiting_root_review",
+      "model_calls": 0,
+      "estimated_max_cost_cny": 2.256836,
+      "fits": true,
+      "result_path": null,
+      "publication_status": "not_included_in_this_increment; consult current local run records"
+    },
+    {
+      "route": "scoped_revision",
+      "status": "preview_only_requires_complete_body",
+      "model_calls": 0,
+      "estimated_max_cost_cny": 1.614092,
+      "fits": true,
+      "result_path": null,
+      "publication_status": "not_included_in_this_increment; consult current local run records"
+    }
+  ],
+  "increment_note": "This increment publishes only the completed packed_continuous route. Other route conclusions are deliberately not inferred or included."
+}

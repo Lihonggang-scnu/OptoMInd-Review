@@ -1,0 +1,159 @@
+{
+  "schema_version": "optomind.fullbody.result.v1",
+  "body_markdown": "## 第一章 实体瘤中肠道微生物组与 ICI 疗效的临床关联证据\n\n### 1.1 跨癌种关联图谱：共性信号与情境特异性\n\n在黑色素瘤、非小细胞肺癌（NSCLC）和肾细胞癌（RCC）等实体瘤队列中，特定肠道微生物特征与免疫检查点抑制剂（ICI）疗效的关联已得到反复验证。多项荟萃分析证实，基线高α多样性与改善的总生存期（OS）和无进展生存期（PFS）显著相关（pooled HR 分别为 0.52 和 0.58），且这一关联在 NSCLC 和黑色素瘤亚组中均保持稳健 [P0298]。在分类学层面，*Akkermansia muciniphila*、*Bifidobacterium longum* 及 *Faecalibacterium prausnitzii* 的富集通常与更好的 ICI 预后相关 [P0096, P0146]。例如，*Akkermansia* 基线存在显著增加客观缓解率（ORR）（pooled OR 2.15），而 *Faecalibacterium* 高丰度显著改善 PFS（pooled HR 0.68）[P0298]。\n\n然而，这种关联并非普适。在肝细胞癌（HCC）及部分结直肠癌队列中，相同信号出现失效或反转。一项针对 80 例 HCC 患者的多组学研究发现，细菌和代谢物在持久临床获益（DCB）与非获益（NDB）组间差异显著，但真菌差异较小，且预测模型的 AUC 仅为 75.63%，提示微生物效应在 HCC 中具有高度癌种特异性 [P0204]。更具挑战性的是，在转移性去势抵抗性前列腺癌（mCRPC）患者中，*A. muciniphila* 丰度与 ICI 疗效呈负相关，这与黑色素瘤和 NSCLC 中的正向关联形成鲜明对比 [P0270]。该研究还发现，既往恩杂鲁胺治疗可能重塑基线微生物组状态，导致同一菌种在不同治疗史背景下产生相反的效应方向。\n\n跨队列异质性的统计根源在于\"队列\"本身是解释微生物群落组成变异的最大因素。一项整合 5 个新测序队列（n=165）和 4 个公开数据集（n=147）的荟萃分析显示，PERMANOVA 分析中\"队列\"因素对微生物群落组成的解释方差是其他任何临床变量的近十倍 [P0478]。机器学习模型的跨队列泛化能力极差：留一法交叉验证的平均 AUC-ROC 仅为 0.59-0.60，仅约 31.4% 的情况超过 0.6。相比之下，结直肠癌数据在相同分析方法下显示出强且一致的生物标志物，证明该结果并非由分析方法缺陷导致，而是反映了黑色素瘤 ICI 反应中微生物关联的复杂性和队列依赖性 [P0478]。\n\n这种不一致性部分源于肠型特异性。一项基于 569 个样本的整合分析将患者聚类为两个主要肠型（E1 和 E2），发现 *Collinsella* 属在 E2 肠型中与响应相关，而 *Bacteroides* 属主要在 E1 肠型中作为标志物 [P0170]。然而，E2 肠型几乎全部由黑色素瘤患者组成，导致肠型间的反应率差异无法独立于肿瘤类型进行因果推断。此外，波兰队列研究发现，响应者中 *Prevotella copri* 和 *Bacteroides uniformis* 丰度显著升高，而非响应者中 *F. prausnitzii* 富集，这与部分其他队列的结果形成对比，进一步支持微生物标志物具有人群与生活方式依赖性 [P0545]。\n\n治疗方案严格修饰微生物效应的方向。在 JCOG2007 III 期试验的辅助生物标志物研究中，对比尼莫鲁单抗 + 伊匹木单抗 + 铂类双药化疗（NIC）与培美曲塞 + 铂类化疗（PC）组，发现 *Fusicatenibacter* 和 *Butyricicoccus* 高丰度仅在 NIC 组中与更好 OS 相关（HR 分别为 0.56 和 0.52），而 *Prevotellaceae* NK3B31 高丰度在 NIC 组中与更高死亡风险相关（HR=2.33）[P0585]。这表明微生物效应方向受具体给药方案严格修饰，不能脱离治疗背景简单概括某一菌属的\"有益\"或\"有害\"属性。\n\n### 1.2 外部干扰与宿主背景：药物暴露的效应量与时间窗\n\n抗生素和质子泵抑制剂（PPIs）作为常见合并用药，对肠道微生物组稳态构成显著外部干扰，其效应具有明确的时间窗口特异性和剂量依赖性。一项纳入 69 项研究、22,568 名患者的荟萃分析显示，抗生素使用与 OS 恶化（HR=1.61, 95% CI 1.44-1.81）、PFS 缩短（HR=1.43, 95% CI 1.27-1.60）及 ORR 降低（RR=0.58, 95% CI 0.51-0.66）显著相关 [P0081]。亚组分析证实，负面关联在 ICI 治疗前后 [-45, 45] 天窗口内最强（β=0.2192, p=0.008），同期 PPIs 暴露亦导致 OS 恶化（HR≈1.31）[P0081, P0402]。\n\n时间窗特异性在多项独立研究中得到验证。Pinato 等（2019）的前瞻性多中心队列研究严格区分 ICI 启动前 30 天内使用的抗生素（pATB）和 ICI 期间同时使用的抗生素（cATB），发现仅 pATB 与显著的预后不良（OS 缩短、反应率降低）相关，而 cATB 与生存受损无关 [P0402]。这一关联在调整抗生素类别、体能状态和皮质类固醇使用后仍然显著。在拉丁美洲 NSCLC 人群中，抗生素暴露显著降低 OS 但未影响 PFS，提示地域/人群特征可能扰动微生物 - 疗效轴 [P0266]。\n\n然而，肿瘤类型特异性校正至关重要。针对 HCC 人群的 Meta 分析显示，抗生素使用未显著恶化 ICI 疗效（OS: HR 1.41, P=0.088; PFS: HR 1.21, P=0.459），这与肺癌、黑色素瘤等队列中的负面效应形成对比 [P0275]。作者提出，肝硬化基线免疫抑制状态和特定的菌群组成（如革兰氏阴性菌增加）可能使抗生素对免疫系统的额外扰动不产生额外的负面效应，甚至可能通过消除某些抑制性菌群而维持或轻微改善免疫反应。这一阴性结果不应被解读为抗生素在所有情况下对 ICI 都无害，其结论严格局限于 HCC 这一特定癌种。\n\nPPIs 的影响同样具有时间依赖性。一项纳入 33 项研究、约 15,957 名 OS 患者的荟萃分析显示，PPI 使用与较短的 OS（HR=1.31, 95% CI 1.19–1.44）和 PFS（HR=1.30, 95% CI 1.17–1.46）显著相关 [P0339]。亚组分析发现，在基线使用 PPI 或 ICI 前 60 天内开始使用 PPI 的患者中，OS 和 PFS 均显著缩短；而在 ICI 治疗期间或之后才开始使用 PPI 时，未观察到显著的生存负面影响。在 NSCLC 队列中，抗酸药使用导致链球菌属（如 *S. salivarius*）增加，这与短 PFS 相关，提示药物可能间接影响疗效 [P0123]。\n\n观察性研究中的指示偏倚（Indication Bias）可能导致抗生素负面效应被高估：重症患者更多使用抗生素，其较差预后可能部分归因于疾病本身而非抗生素暴露 [P0081, P0402]。此外，NSCLC 中抗生素暴露的负面效应高度依赖 PD-L1 表达水平：在 PD-L1≥50% 的亚组中，抗生素使用者显示出显著更短的中位 PFS（4.2 vs 9.4 个月，p=0.012）和 OS（11.9 vs 28.4 个月，p=0.011），而在 PD-L1<50% 亚组中未见显著影响 [P0517]。这提示宿主生物标志物状态严格修饰微生物干预效应方向，未来研究需标准化暴露定义（种类、剂量、持续时间、指征）并进行多变量校正，否则单纯检测微生物组而不考虑用药史会导致结果不一致。\n\n### 1.3 动态监测与纵向演变：超越基线快照\n\n基线单次采样难以捕捉治疗诱导的生态重塑，纵向动态变化比静态丰度更能反映真实疗效轨迹。在早期 NSCLC 新辅助研究中，基线快照难以捕捉治疗诱导的生态重塑，静态阈值缺陷明显 [P0569, P0585]。一项纳入 175 例晚期黑色素瘤患者的纵向队列研究发现，99 个物种水平基因组箱（SGBs）能区分 PFS≥12 个月与 PFS<12 个月患者，其中 20 个仅在基线有差异，42 个仅在治疗后出现差异 [P0033]。5 个 SGBs（如 *Agathobaculum butyriciproducens*, *Intestinibacter bartlettii*）在 PFS≥12 组中持续高丰度，主要涉及短链脂肪酸（SCFA）合成；4 个 SGBs（如 *Ruthenibacterium lactatiformans*, *Prevotella copri* clade A）在 PFS<12 组中持续高丰度。\n\n纵向动态演变的预测价值在干预性试验中得到进一步验证。FMT-LUMINate II 期试验数据显示，响应者获益主要源于基线有害细菌物种（如 *Enterocloster*, *Clostridium*）的大量丢失，而非供体菌株的成功定植 [P0583, P0585]。这种丢失与血浆中色氨酸代谢产物水平降低及效应性 CD8+ T 细胞增加相关。在 MIMic I 期试验中，持久定植者获得更长生存，中位 OS 达 52.8 个月，ORR 为 65% [P0577]。然而，在 MITRIC IIa 期篮子试验中，12 名 ICI 耐药实体瘤患者接受来自 ICI 响应者的 FMT，ORR 为 0%，中位 PFS 仅 1.5 个月 [P0578]。机制分析显示，基线时髓系偏倚环境和幼稚 T 细胞表型与较差预后相关；治疗后 CD14+ 单核细胞和血清 IL-8 水平升高，这与较短的 PFS 和 OS 相关，表明 FMT 未能逆转这种不利的免疫微环境。\n\n纵向采样面临现实障碍与标准化需求。当前领域缺乏前瞻性验证、技术标准化不足、地理多样性缺乏 [P0584, P0273]。一项 NSCLC 基线队列研究中，肠道微生物组成、SCFA 谱及肠屏障通透性指标均未能预测 ICI 反应或 irAEs，指出标准化缺失与参考值未建立是主要方法学障碍 [P0327]。活体生物制品与后生元在临床试验中的动态监测需求指出，标准化采样频率与存储条件缺失是阻碍纵向数据转化为临床决策的主要方法学瓶颈 [P0546]。此外，纵向采样需解决采集频率、存储条件及 AI 辅助语言工具辅助的语言精炼问题 [P0273]。\n\n### 1.4 证据阶梯与转化边界：从观察到干预\n\n当前证据呈现明显的阶梯状分布：观察性关联证据最强，概念验证性干预（FMT）显示初步希望但异质性大，Phase III RCT 证据完全缺失。FMT-LUMINate II 期试验报告了 NSCLC 患者 ORR 为 80%，并指出响应者基线有害菌种丢失，而非供体菌株定植 [P0583, P0584]。在黑色素瘤队列中，ORR 为 75%，但观察到较文献报道更早发生的严重免疫相关不良反应（irAEs），包括心肌炎（发生率 15%，显著高于文献报道的<1%）[P0583]。部分严重 AEs 与富含 *Prevotella* 的供体有关，且这种毒性仅在双免疫检查点抑制（抗 PD-1+ 抗 CTLA-4）背景下出现，而在抗 PD-1 单药治疗背景下未观察到类似毒性 [P0583]。\n\n对比阴性干预试验揭示患者选择与供体匹配的决定性作用。MITRIC IIa 期篮子试验阴性结果（ORR 0%）归因于快速进展性疾病背景、供体匹配次优及免疫微环境限制（髓系主导、IL-8 升高）[P0578]。该研究使用了三名不同的供体，而之前报告阳性结果的试验（如 Baruch 等和 Davar 等）中所有响应者均来自单一供体，提示使用多名供体可能导致供体 - 受体匹配次优，或者缺乏对特定获益至关重要的微生物群落。此外，MITRIC 中的大多数患者表现为弥漫性、快速生长的疾病，可能没有给予 FMT 足够的时间来发挥有意义的生物学效应。\n\n目前缺乏 Phase III RCT 证据支持微生物干预的常规临床应用 [P0584, P0273, P0583]。TACITO 试验（Phase 2a RCT）中，d-FMT 组相较于 p-FMT 组在 12 个月 PFS 率（70% vs 41%）、中位 PFS（24.0 vs 9.0 个月）及中位 OS（41.0 vs 28.3 个月）上数值更高，但原文未提供统计检验结果，不能认定具有统计学显著性 [tool::9d5fc83b]。安全信号（如心肌炎）仅在双 ICI 背景下出现（*Prevotella* 相关），单药抗 PD-1 未观察到类似毒性，凸显安全性受 ICI 方案严格调节 [P0583, P0260]。\n\n**表 1.1 主要微生物干预临床试验的设计、人群、疗效结果及局限性比较**\n\n| 试验名称/阶段 | 目标人群 | 干预策略 | 主要疗效结果 (ORR/PFS) | 关键局限性/失败原因 |\n| :--- | :--- | :--- | :--- | :--- |\n| FMT-LUMINate (Phase 2) | NSCLC (n=20), 黑色素瘤 (n=20) | 健康供体 FMT + ICI（NSCLC: 抗 PD-1; 黑色素瘤：抗 PD-1+CTLA-4） | NSCLC ORR 80%; 黑色素瘤 ORR 75% | 单臂设计；黑色素瘤队列中严重 irAEs（心肌炎 15%）；供体 *Prevotella* 富集与双 ICI 背景下毒性相关 [P0583] |\n| MITRIC (Phase 2a) | ICI 耐药实体瘤 (n=12) | ICI 响应者供体 FMT + 持续 ICI | ORR 0%; 中位 PFS 1.5 个月 | 快速进展性疾病背景；多供体匹配次优；髓系主导免疫微环境未逆转 [P0578] |\n| MIMic (Phase 1) | 晚期黑色素瘤 (n=20) | 健康供体 FMT（口服胶囊）+ 抗 PD-1 | ORR 65%; 中位 PFS 29.6 个月; 中位 OS 52.8 个月 | 小样本；单臂设计；患者选择偏倚（排除适合联合治疗者）[P0577] |\n| 早期 FMT/益生菌综述 | 多种实体瘤 | FMT、益生菌、饮食干预 | ORR 约 20%（FMT 克服耐药） | 多数证据来自病例报告或小样本系列研究；缺乏 Phase III RCT [P0026, P0144] |\n| 干预策略对比 (FMT vs 益生菌) | 难治性肿瘤 | FMT vs 定义菌群 vs 益生菌 | FMT ORR 20-77%；益生菌效果高度特异 | FMT 在难治性肿瘤中表现较一致 ORR 提升；益生菌效果高度依赖菌株特异性 [P0387] |\n\n综上，跨癌种观察性队列证实特定肠道微生物特征（分类学与功能通路）与 ICI 疗效存在显著关联，但缺乏普适性单一标志物；外部药物暴露（抗生素、PPIs）及联合治疗方案构成关键修饰变量，其影响具有明确的时间窗口特异性；基线单次采样难以捕捉治疗诱导的生态重塑，纵向动态变化比静态丰度更能反映真实疗效轨迹；当前证据呈现明显的阶梯状分布，概念验证性干预显示初步希望但异质性大，Phase III RCT 证据完全缺失，且安全性信号受 ICI 方案严格调节。\n",
+  "task_dispositions": [
+    {
+      "task_id": "Ch1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1_P01",
+      "status": "completed"
+    },
+    {
+      "task_id": "Ch1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1_P02",
+      "status": "completed"
+    },
+    {
+      "task_id": "Ch1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1_P03",
+      "status": "completed"
+    },
+    {
+      "task_id": "Ch1::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF_P01",
+      "status": "completed"
+    },
+    {
+      "task_id": "Ch1::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF_P02",
+      "status": "completed"
+    },
+    {
+      "task_id": "Ch1::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF_P03",
+      "status": "completed"
+    },
+    {
+      "task_id": "Ch1::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98_P01",
+      "status": "completed"
+    },
+    {
+      "task_id": "Ch1::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98_P02",
+      "status": "completed"
+    },
+    {
+      "task_id": "Ch1::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98_P03",
+      "status": "completed"
+    },
+    {
+      "task_id": "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_P01",
+      "status": "completed"
+    },
+    {
+      "task_id": "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_P02",
+      "status": "completed"
+    },
+    {
+      "task_id": "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_P03",
+      "status": "completed"
+    },
+    {
+      "task_id": "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_T01",
+      "status": "completed"
+    }
+  ],
+  "completed_task_ids": [
+    "Ch1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1_P01",
+    "Ch1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1_P02",
+    "Ch1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1_P03",
+    "Ch1::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF_P01",
+    "Ch1::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF_P02",
+    "Ch1::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF_P03",
+    "Ch1::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98_P01",
+    "Ch1::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98_P02",
+    "Ch1::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98_P03",
+    "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_P01",
+    "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_P02",
+    "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_P03",
+    "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_T01"
+  ],
+  "pending_task_ids": [],
+  "complete": true,
+  "issues": [],
+  "diagnostics": {
+    "used_source_handles": [
+      "P0298",
+      "P0096",
+      "P0146",
+      "P0204",
+      "P0270",
+      "P0478",
+      "P0170",
+      "P0545",
+      "P0585",
+      "P0081",
+      "P0402",
+      "P0266",
+      "P0275",
+      "P0339",
+      "P0123",
+      "P0517",
+      "P0569",
+      "P0033",
+      "P0583",
+      "P0577",
+      "P0578",
+      "P0584",
+      "P0273",
+      "P0327",
+      "P0546",
+      "P0260",
+      "P0026",
+      "P0144",
+      "P0387"
+    ],
+    "unknown_citations": [],
+    "known_tool_identifiers": [
+      "Q01"
+    ],
+    "non_source_identifier_citations": [],
+    "unresolved_numeric_citations": [],
+    "citation_problems": [],
+    "fence_report": {
+      "remaining_fenced_lines": []
+    },
+    "content_review_status": "not_reviewed",
+    "known_source_citations_outside_projection": [],
+    "coverage_kind": "model_declared_structural_only",
+    "semantic_quality_unreviewed": true,
+    "scientific_fidelity_verified": false,
+    "declared_completed_task_ids": [
+      "Ch1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1_P01",
+      "Ch1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1_P02",
+      "Ch1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1_P03",
+      "Ch1::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF_P01",
+      "Ch1::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF_P02",
+      "Ch1::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF_P03",
+      "Ch1::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98_P01",
+      "Ch1::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98_P02",
+      "Ch1::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98_P03",
+      "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_P01",
+      "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_P02",
+      "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_P03",
+      "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_T01"
+    ],
+    "transport_incomplete": false,
+    "finish_reasons": [
+      "stop"
+    ],
+    "valid_response_envelope": true,
+    "table_check": {
+      "valid": true,
+      "header_cells": 5,
+      "data_cells": 5,
+      "line": 45
+    },
+    "table_task_mapping_verified": false,
+    "numeric_citation_repairs": [],
+    "body_complete_self_claim": true,
+    "task_dispositions_are_not_proof": true,
+    "format_repair": []
+  },
+  "semantic_quality_unreviewed": true,
+  "finish_reason": "stop",
+  "kind": "author",
+  "transport_complete": true
+}

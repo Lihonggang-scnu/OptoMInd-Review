@@ -1,0 +1,33 @@
+{
+  "record_type": "round2_public_content_scope_review",
+  "route": "packed_continuous",
+  "source_commit": "f1b78750fae6ff47dbc4d4694f88af3b53c8cf9c",
+  "checked_sources": [
+    "inputs/94590c2b7a3365b76af5e0fe4bad5ae5a677cd6d36f80e48a1e4ab90aa098aaa/FULL_BODY_INPUT.json",
+    "inputs/94590c2b7a3365b76af5e0fe4bad5ae5a677cd6d36f80e48a1e4ab90aa098aaa/WRITING_EVIDENCE.json"
+  ],
+  "structural_scan": {
+    "forbidden_whole_source_field_patterns": [
+      "fulltext",
+      "full_text",
+      "rawpaper",
+      "raw_paper",
+      "normalized_full",
+      "paper_text",
+      "article_text"
+    ],
+    "matches": 0,
+    "encoding": "utf-8"
+  },
+  "observed_material_fields": [
+    "study_summary_A",
+    "deep_read_material",
+    "deep_read_material_trimmed",
+    "usable_content",
+    "local_passages",
+    "plain_text",
+    "passages"
+  ],
+  "scope_finding": "The snapshots contain project-generated A/B study summaries, deep-read supplements, evidence atoms and bounded material records. No structurally named normalized full text or raw paper text field was found. Rights-bound full-source passages are not intentionally added as a separate public source; any bounded project material fields remain subject to root review.",
+  "public_boundary": "generated model body and evidence records are retained; authentication data, signed downloads, raw transport streams and raw SQLite remain excluded."
+}

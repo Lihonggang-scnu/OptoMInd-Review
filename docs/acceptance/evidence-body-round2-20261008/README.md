@@ -1,0 +1,13 @@
+# Evidence BODY round 2 publication preparation (2026-10-08)
+
+This local preparation package now contains the completed `packed_continuous` route for root review. It is bound to source commit `f1b78750fae6ff47dbc4d4694f88af3b53c8cf9c` and the official `scripts/upgrade3/evidence_body_writer.py` entry. The completed run is `20261008T023215Z-a020d3cc1c`: seven model calls, 95 completed tasks, seven chapters, no pending tasks, and no retry.
+
+The route includes the complete generated body, manuscript segments, effective configuration, CLI/run manifests, sanitized actual requests, message records, model returns, result receipts, usage records, root quality reading log, and a sanitized finance receipt. The settled amount is `4.347772` CNY from the independent 60 CNY round-2 ledger; held or uncertain amount is `0`, leaving `55.652228` CNY. The seven-stage evidence is under `packed_continuous/stages/author_001` through `author_007`.
+
+`packed_continuous/inputs/canonical_input` is the single public representation of the 10,099,935-byte canonical input snapshot. `packed_continuous/inputs/evidence_book` is the single public representation of the 25,908,835-byte project-generated evidence book. Their original local byte counts and SHA-256 values are recorded in `packed_continuous/PROVENANCE.json` and `packed_continuous/COMPLETION_RECORD.json`; public copies are sanitized JSON and strict UTF-8 parts. The evidence book is a project material snapshot, not a public upload of rights-bound full papers.
+
+Sensitive fields and values were replaced before copying: credentials, API keys, bearer/auth headers, request/reservation/call IDs, signed URLs, cookies, passwords, key-file fields, and personal email addresses. `new_round2_budget.sqlite` and all `transport/*.sse.raw` streams remain local and are excluded. Local paths are audit labels only, not web links.
+
+Every large public text payload is split at strict UTF-8 character boundaries with a `.parts.json` manifest. Run `VERIFY_CANONICAL_PAYLOADS.py <this-directory> --index` before publication; it verifies every indexed file and every reconstructed split payload. If the GitHub connector appends a transport CRLF, verify canonical payloads after stripping only that documented trailer; the hashes in the manifests refer to canonical public payload bytes.
+
+`packed_whole` remains capacity blocked before paid dispatch. Other routes are intentionally not represented as completed results in this increment; their local run status and root review decide later additions. This first increment publishes the completed continuous route; final four-route findings will follow as a separate increment.
