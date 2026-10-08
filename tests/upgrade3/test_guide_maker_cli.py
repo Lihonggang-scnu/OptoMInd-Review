@@ -257,3 +257,41 @@ def test_preview_cap_increase_preserves_recording_provenance(tmp_path, case, mon
     assert cli.main(args) == 0
     context = cli.read_json(out / 'CLI_CONTEXT.json')
     assert context['config']['max_model_calls'] == 2 and context['execution_mode'] == 'recording'
+
+
+def test_dedicated_mock_live_resume_binds_original_ledger(tmp_path, case, monkeypatch):
+    from test_fullbody_integration import install_controlled_http
+    captured = install_controlled_http(monkeypatch, lambda payload: guide_response())
+    ledger = tmp_path / 'guide.sqlite'
+    out = tmp_path / 'dedicated'
+    config = cli.read_json(cli.DEFAULT_CONFIG)
+    config['max_model_calls'] = 1
+    path = dump(tmp_path / 'config.json', config)
+    base = command(case, out, '--config', str(path))
+    live = ['--run', '--budget-mode', 'dedicated', '--budget-ledger', str(ledger),
+            '--budget-limit', '30', '--key-file', '/mock-key']
+    assert cli.main(base + live) == 0
+    first = cli.read_json(out / 'CLI_RUN.json')
+    assert first['budget_after']['actual_cny'] > 0
+    binding = cli.read_json(out / 'CLI_CONTEXT.json')['budget_binding']
+    # Increasing the cap via preview must retain budget provenance too.
+    config['max_model_calls'] = 2
+    dump(path, config)
+    assert cli.main(base) == 0
+    assert cli.read_json(out / 'CLI_CONTEXT.json')['budget_binding'] == binding
+    assert cli.main(base + live) == 0
+    assert len(captured) == 1
+    assert cli.read_json(out / 'CLI_RUN.json')['budget_after']['actual_cny'] == first['budget_after']['actual_cny']
+    changed = list(live)
+    other = tmp_path / 'other.sqlite'
+    changed[changed.index(str(ledger))] = str(other)
+    assert cli.main(base + changed) == 2
+    assert cli.read_json(out / 'CLI_EXCEPTION.json')['message'] == 'guide_live_resume_budget_changed'
+    assert not other.exists() and len(captured) == 1
+
+
+def test_implementation_hashes_use_portable_relative_keys():
+    hashes = cli._implementation_hashes()
+    assert 'scripts/upgrade3/guide_maker.py' in hashes
+    assert 'prompts/guide_maker/generate.md' in hashes
+    assert all('\\' not in path for path in hashes)

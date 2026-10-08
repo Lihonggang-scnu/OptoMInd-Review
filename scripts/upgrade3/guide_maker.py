@@ -1,14 +1,16 @@
 """Independent outline-to-guide middleware, offline preview by default.
 
 GUIDE.json is input to the existing guided BODY writer; generation does not run
-or validate manuscript writing. Future local paid runs must reuse the original
-CNY 60 lifetime ledger. Do not launch concurrently with the local writer A/B.
+or validate manuscript writing. Legacy runs reuse the original CNY 60 lifetime
+ledger; explicit dedicated mode uses a guide-only lifetime cap of at most CNY 30.
 """
 from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
 import json
+import math
+import sqlite3
 from pathlib import Path
 import sys
 import uuid
@@ -43,11 +45,63 @@ def parser():
     mode.add_argument('--responses', help='Offline recorded-response fixture')
     p.add_argument('--allow-max', action='store_true', help='Explicit permission; never automatically selects Max')
     p.add_argument('--retry-failed', action='store_true')
-    p.add_argument('--budget-ledger', help='Existing original round-two SQLite ledger and original marker')
-    p.add_argument('--budget-limit', type=float, help='Original lifetime ceiling, exactly 60 CNY, not a new allowance')
+    p.add_argument('--budget-mode', choices=('legacy', 'dedicated'), default='legacy', help='Explicit dedicated guide ledger; legacy remains the default')
+    p.add_argument('--budget-ledger', help='Legacy original round-two ledger, or explicitly selected dedicated guide ledger')
+    p.add_argument('--budget-limit', type=float, help='Lifetime ceiling: legacy exactly 60 CNY; dedicated at most 30 CNY; never resets spend')
     p.add_argument('--key-file')
     p.add_argument('--tokenizer')
     return p
+
+
+def _dedicated_ledger_guard(args):
+    """Explicit guide-only capped ledger; reuse durable atomic accounting."""
+    limit = args.budget_limit
+    if not args.budget_ledger or limit is None or isinstance(limit, bool) or not math.isfinite(limit) or not 0 < limit <= 30:
+        raise ValueError('dedicated_guide_budget_requires_finite_cap_at_most_30_CNY')
+    ledger = Path(args.budget_ledger).expanduser().resolve()
+    marker = ledger.with_name(ledger.name + '.guide_maker.json')
+    expected = {'schema_version': 'optomind.guide_maker_budget.v1', 'ledger_path': str(ledger), 'limit_cny': float(limit)}
+    if ledger.exists() and not marker.is_file():
+        raise ValueError('dedicated_guide_ledger_must_be_new_or_previously_marked')
+    if marker.is_file() and read_json(marker) != expected:
+        raise ValueError('dedicated_guide_ledger_identity_or_limit_changed')
+    if marker.exists() and not ledger.is_file():
+        raise ValueError('dedicated_guide_ledger_missing:no_budget_reset')
+    if not ledger.exists():
+        from optomind_research.runtime.upgrade3.module4.runtime import GlobalBudgetLedger
+        GlobalBudgetLedger(limit_cny=float(limit), path=ledger)
+        write_json(marker, expected)
+    # Existing ledgers are checked read-only before a client can initialize or
+    # migrate anything. Empty/corrupt databases must never become new budgets.
+    try:
+        with sqlite3.connect(ledger.as_uri() + '?mode=ro', uri=True) as db:
+            row = db.execute("SELECT value FROM budget_meta WHERE key='limit_cny'").fetchone()
+            if row is None or not math.isfinite(float(row[0])) or float(row[0]) != float(limit):
+                raise ValueError('dedicated_guide_stored_limit_changed')
+            reservations = db.execute('SELECT amount_cny, actual_cny, status FROM reservations').fetchall()
+    except sqlite3.Error as exc:
+        raise ValueError('dedicated_guide_ledger_invalid_sqlite') from exc
+    actual, held, used = 0.0, 0.0, 0.0
+    for amount, cost, status in reservations:
+        if status not in ('settled', 'reserved', 'uncertain'):
+            raise ValueError('dedicated_guide_invalid_reservation_status')
+        if amount is None or not math.isfinite(float(amount)) or float(amount) < 0 or (cost is not None and (not math.isfinite(float(cost)) or float(cost) < 0)):
+            raise ValueError('dedicated_guide_invalid_reservation_amount')
+        actual += float(cost or 0)
+        held += float(amount) if status in ('reserved', 'uncertain') else 0
+        used += float(cost if cost is not None else amount) if status == 'settled' else float(amount)
+    if not all(math.isfinite(value) for value in (actual, held, used)):
+        raise ValueError('dedicated_guide_invalid_total')
+    return {'ledger_path': str(ledger), 'limit_cny': float(limit), 'actual_cny': actual,
+            'reserved_cny': held, 'remaining_cny': max(0.0, float(limit) - used),
+            'reservation_count': len(reservations), 'marker_sha256': sha256_file(marker),
+            'budget_policy': 'dedicated_guide_lifetime_cap'}
+
+
+def _execution_budget_guard(args):
+    if getattr(args, 'budget_mode', 'legacy') == 'dedicated':
+        return _dedicated_ledger_guard(args)
+    return _ledger_guard(args)
 
 
 def _implementation_hashes():
@@ -59,7 +113,7 @@ def _implementation_hashes():
         'guided_body_contracts.py', 'writing_evidence.py', 'fullbody_contracts.py',
         'fullbody_writer.py', 'writer_candidates.py', 'writer_candidates_contracts.py', 'module4/runtime.py')]
     paths += sorted((PROJECT_ROOT / 'prompts/guide_maker').rglob('*.md'))
-    return {str(path.relative_to(PROJECT_ROOT)): sha256_file(path) for path in paths}
+    return {path.relative_to(PROJECT_ROOT).as_posix(): sha256_file(path) for path in paths}
 
 
 def _check_context(output, context):
@@ -82,6 +136,8 @@ def _check_context(output, context):
         # execution provenance, just as the shared context guard normally does.
         if cap_increase and context['execution_mode'] == 'preview' and prior.get('execution_mode') not in (None, 'preview'):
             context = {**context, 'execution_mode': prior['execution_mode']}
+            if 'budget_binding' in prior:
+                context['budget_binding'] = prior['budget_binding']
     shared._execution_context(output, context)
 
 
@@ -114,8 +170,16 @@ def main(argv=None):
         snapshot = output / 'SOURCE_MANIFEST.json'
         if snapshot.is_file() and _hash(read_json(snapshot)) != _hash(prepared):
             raise ValueError('input_source_versions_changed_use_new_output_directory')
+        if args.run:
+            binding = {'mode': args.budget_mode, 'ledger_path': str(Path(args.budget_ledger).expanduser().resolve()) if args.budget_ledger else None, 'limit_cny': args.budget_limit}
+            prior_context_path = output / 'CLI_CONTEXT.json'
+            if prior_context_path.is_file():
+                prior_context = read_json(prior_context_path)
+                if prior_context.get('execution_mode') == 'live' and prior_context.get('budget_binding') != binding:
+                    raise ValueError('guide_live_resume_budget_changed')
+            context['budget_binding'] = binding
         _check_context(output, context)
-        budget = _ledger_guard(args) if args.run else None
+        budget = _execution_budget_guard(args) if args.run else None
         write_json(snapshot, prepared)
         write_json(output / 'EFFECTIVE_CONFIG.json', config)
         factory = make_live_factory(args, token_counter=counter) if args.run else RecordingFactory(args.responses) if args.responses else None
@@ -133,7 +197,7 @@ def main(argv=None):
                   'expected_chapter_ids': prepared['expected_chapter_ids'], 'actual_chapter_ids': prepared['actual_chapter_ids']}
         if args.run:
             result['budget_before'] = budget
-            result['budget_after'] = _ledger_guard(args)
+            result['budget_after'] = _execution_budget_guard(args)
         if factory is not None and hasattr(factory, 'ledger_snapshot'):
             result['budget'] = factory.ledger_snapshot()
         if isinstance(factory, RecordingFactory):

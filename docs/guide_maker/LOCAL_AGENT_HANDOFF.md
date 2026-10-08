@@ -1,63 +1,53 @@
-# 中间层本地测试说明
+# 中间层独立复测交接（2026-10-08）
 
-本轮新增“细纲转写作指南”。现有人工 A/B 指南转正文正在测试，先让它们按原冻结版本运行并结算，不中途更换代码或提示。
+本次修改只针对细纲→指南的写法决定和专用预算入口；规划冻结、材料不重跑，正文作者不修改。当前交付只做免费测试，没有真实模型调用或自动写正文。旧冷启动归档保持原样，见 `docs/acceptance/guide-maker-cold-start-20261008/`。
 
-中间层测试稍后单独进行。规划不改，材料不重跑，使用同一真实 manifest。初次测试不传人工 A/B 指南，不提供手选文献清单，默认不传旧稿反馈，检验真正冷启动。
+## 先确认代码与输入
 
-## 免费检查
-
-先在新的隔离 worktree 或确认干净的工作区拉取交付代码，运行：
+在新的隔离 worktree 中使用交付提交，不覆盖另一个助手的工作区。运行：
 
 ```powershell
-python -m pytest -q tests/upgrade3/test_guide_maker_contracts.py tests/upgrade3/test_guide_maker.py tests/upgrade3/test_guide_maker_cli.py
+python -m pytest -q tests/upgrade3/test_guide_maker_contracts.py tests/upgrade3/test_guide_maker.py tests/upgrade3/test_guide_maker_cli.py tests/upgrade3/test_guide_maker_dedicated_budget.py tests/upgrade3/test_guide_maker_prompt.py
 ```
 
-原始输入历史位置：
+继续用原真实 manifest：
 
 `F:\OptoMind-Review-2\outputs\evidence_body_round2_20261008_60cny\PREPARED_MANIFEST.json`
 
-先检查该文件及依赖仍存在，再做实际 tokenizer 预览：
+核验 manifest、依赖文件及 tokenizer 哈希；规划、95 项原任务、表格和独特条件均不得裁剪。首次 materials=[]、prior_guide=null，不传人工 A/B 指南、旧正文、人工手选材料或旧评价反馈。使用新输出目录，不覆盖或恢复旧提示生成的指南。
+
+## 免费预览
 
 ```powershell
-python -X utf8 scripts/upgrade3/guide_maker.py --manifest "F:\OptoMind-Review-2\outputs\evidence_body_round2_20261008_60cny\PREPARED_MANIFEST.json" --config config/guide_maker/plus_first.json --tokenizer "<之前已验证的 tokenizer.json>" --output "F:\OptoMind-Review-2\outputs\guide_maker_trial_20261008\cold_start"
+python -X utf8 scripts/upgrade3/guide_maker.py --manifest "F:\OptoMind-Review-2\outputs\evidence_body_round2_20261008_60cny\PREPARED_MANIFEST.json" --config config/guide_maker/plus_first.json --tokenizer "F:\OptoMind-Review-2\data\tokenizers\qwen3_5_9b\tokenizer.json" --output "F:\OptoMind-Review-2\outputs\guide_maker_acceptance_20261008_30cny\cold_start_prompt_fix"
 ```
 
-检查第一次请求有完整细纲和来源导航，materials 为空、prior_guide 为空，没有旧正文或人工指南。预览只验证当前可构造请求，不预先保证后续所有材料都能放入上下文。
+检查实际请求确实使用本次提示、完整细纲和来源/工具导航，核实 token 计量与输出预留可容纳请求。未预先保证所有补读材料都能放入；保持完整材料分批和容量失败停机规则。
 
-## 付费生成指南
+## 独立 30 元账本，不是新增 30 元
 
-等当前 A/B 测试完成、费用结算清楚以后，读取原账本实际余额。历史 53.3617708 元只是 A/B 开跑之前的预计余额，现在不能继续当作可用余额。
+只使用已经存在的：
 
-原账本：
+`F:\OptoMind-Review-2\outputs\guide_maker_acceptance_20261008_30cny\guide_budget.sqlite`
 
-`F:\OptoMind-Review-2\outputs\evidence_body_round2_20261008_60cny\new_round2_budget.sqlite`
+及其原始 `.guide_maker.json` 身份标记。不得新建替代账本、复制成新预算、修改上限、清空花费或丢弃未决占额，不借用另一个助手的 60 元账本。
 
-在上述预览命令追加：
+归档 `BUDGET_FINAL.json` 记录累计实耗 0.517030 元、未决占额 0、当时剩余 29.482970 元。这个数只属于归档时刻。真实运行前必须读取上述原 SQLite 账本，重新核对 limit、actual、reserved/uncertain 和 remaining；若账本/标记缺失、身份不符、已有未知费用或余额不足，停下报告，不重建账本。CLI 的 budget_before/budget_after 应记录本次真实状态。
+
+仅在用户允许进行真实复测后，在已通过的预览命令追加：
 
 ```text
---run --budget-ledger "F:\OptoMind-Review-2\outputs\evidence_body_round2_20261008_60cny\new_round2_budget.sqlite" --budget-limit 60 --key-file "<现有密钥文件>"
+--run --budget-mode dedicated --budget-ledger "F:\OptoMind-Review-2\outputs\guide_maker_acceptance_20261008_30cny\guide_budget.sqlite" --budget-limit 30 --key-file "<原有本地密钥文件>"
 ```
 
-所有试验共用原累计上限，不能新建账本、清空花费或丢弃未决占额。预算不足、容量不足或未知花费时保留草稿并报告，不为获得成功结果自动重试或升级模型。
+默认模型配置不变，不自动升级模型、不隐式重试未知花费。保留原子预占、结算和恢复记录。相同代码/提示/输入/配置的恢复可复用缓存；改动这些内容必须另建输出目录，仍绑定原账本。legacy 默认仍按原 60 元规则，作者入口原样保留。
 
-本轮先做一次冷启动生成。仅在看清其具体问题、预算允许时，再考虑 `--feedback "<UTF-8 阅读评价文件>"` 的另一个新输出目录；不要默认形成多模型、多提示排列组合。
+## 亲读与复测边界
 
-## 检查指南和选读行为
+逐章核对：重复材料的主讲位置、后章增量与回指是否具体；解释是否利用原细纲的关系和条件而非统一模板；比较是否有维度、设计或适用条件；承接是否推进认识，而非重复证据不足；指南是否真有作者可执行的安排而非细纲摘要。
 
-读最终指南，并查看阅读轨迹：需求是否真的帮助组织和解释；候选来源是否由当前题目决定；是否读取了比较对象、关键实验及影响含义的条件；补读是否改变了具体写法；是否只是复制细纲或重新写了一套细任务树。
+阅读需求必须指向尚未确定的写法选择，记录实际交付材料与其带来的可观察调整。不要要求固定阅读篇数，也不要把零补读本身判失败。complete 只是模型声明与结构状态，不等于质量验收通过。当前免费测试不能证明真实生成效果。
 
-不要求它选择与人工版本完全相同的文献，也不以字面相似程度评分。没有补读但指南已足够、选择不同材料但更有帮助，均可能是合理结果。重复读取、无效需求和失败也要保留。
+完成后可先用本轮 GUIDE.json 做作者免费预览。不得把 DRAFT_GUIDE 或旧目录残留文件当成新终稿。指南专用 dedicated 参数不能直接传给未改动的正文作者；付费正文是另一项授权及预算安排，不在这次复测中自动执行。
 
-## 再交给同一正文作者
-
-只有本次 `GUIDE_RESULT.json` 显示完成，且 `GUIDE.json` 对应本次版本时，才用它调用新作者。先免费预览：
-
-```powershell
-python -X utf8 scripts/upgrade3/guided_body_writer.py --manifest "F:\OptoMind-Review-2\outputs\evidence_body_round2_20261008_60cny\PREPARED_MANIFEST.json" --guide "F:\OptoMind-Review-2\outputs\guide_maker_trial_20261008\cold_start\GUIDE.json" --config config/guided_body_writer/plus_first.json --tokenizer "<同一 tokenizer.json>" --output "F:\OptoMind-Review-2\outputs\guide_maker_trial_20261008\generated_guide_body"
-```
-
-预算允许且预览合格，再加同一组付费参数。不得将 DRAFT_GUIDE 或旧目录残留的成功指南冒充本次完成结果。自动指南生成成本与后续全文写作成本都计入比较。
-
-最终与人工 A/B 的完整正文比较阅读流畅性、跨章增量、综合能力和细节保留。记录哪份指南实际生成了哪份正文，使用相同作者配置，避免把模型设置变化误认为指南差异。
-
-归档完整成功/失败状态、实际请求响应、阅读轨迹、指南各版本、全文、费用及未决记录和亲读结论。回传遵循用户已明确授权的方式，不上传密钥、原账本数据库或未授权论文全文。
+保留全部请求响应、指南版本、阅读轨迹、费用、失败/缓存状态和亲读结论。此交接不授权公开上传；分享须另行按用户授权，排除密钥、原账本数据库及未授权全文材料。
