@@ -41,6 +41,7 @@ def parser():
     mode.add_argument('--responses', help='Offline recorded-response fixture')
     p.add_argument('--allow-max', action='store_true', help='Explicit permission only; never automatically selects Max')
     p.add_argument('--retry-failed', action='store_true')
+    p.add_argument('--metadata-declarations', help='JSON list of explicit human completion declarations bound to saved stage/response/body hashes; no rewrite')
     p.add_argument('--budget-ledger', help='Existing original round-two SQLite ledger, with its original marker')
     p.add_argument('--budget-limit', type=float, help='Original lifetime ceiling, exactly 60 CNY, not a new allowance')
     p.add_argument('--key-file')
@@ -131,8 +132,9 @@ def main(argv=None):
         write_json(invocation, {**context, 'started_at': datetime.now(timezone.utc).isoformat(),
                                'allow_max': args.allow_max, 'retry_failed': args.retry_failed,
                                'fixture_sha256': getattr(factory, 'fixture_sha256', None), 'budget_before': budget})
+        declarations = read_json(args.metadata_declarations) if args.metadata_declarations else None
         result = run_guided_body(book, guide, output, config, client_factory=factory,
-                                 run=bool(args.run or args.responses), retry_failed=args.retry_failed, token_counter=counter)
+                                 run=bool(args.run or args.responses), retry_failed=args.retry_failed, token_counter=counter, metadata_declarations=declarations)
         result = {**result, 'execution_mode': mode, 'input_mode': context['input_mode'], 'meter': meter,
                   'cli_invocation': str(invocation), 'guide_sha256': context['guide_sha256'],
                   'source_manifest_sha256': _hash(prepared), 'semantic_quality_unreviewed': True,

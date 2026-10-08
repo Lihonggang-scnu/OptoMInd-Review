@@ -22,7 +22,8 @@ _TOOL_ORCHESTRATION = {"need_id", "unit_key", "unit_id", "chapter_ids", "chapter
     "task_hash", "source_hash", "required_outputs", "fulfilled", "model_calls",
     "downloads", "whole_paper_rereads", "_progressive_task_requirements",
     "_progressive_task_signature", "tasks", "task", "unit_contexts", "chapter_frames",
-    "paragraph_tasks", "table_tasks", "review_argument", "planning_summary", "topic_handles"}
+    "paragraph_tasks", "table_tasks", "review_argument", "planning_summary", "topic_handles",
+    "outline_action"}
 
 
 def _strings(value: Any, label: str) -> list[str]:
@@ -135,6 +136,34 @@ def resolve_read_request(pack: Mapping[str, Any], request: Mapping[str, Any]) ->
     return list(dict.fromkeys([*atoms, *_science_ids(pack, handles)]))
 
 
+def render_manuscript_guide(guide: Mapping[str, Any]) -> str:
+    """Expose every chapter arrangement without rewriting the approved guide.
+
+    Exact containment only avoids repeating already embedded manual arrangements;
+    no semantic similarity, heading guesses, or deletion from the original text.
+    """
+    original = guide["manuscript_guide"]
+    additions = [f"{row['chapter_id']} — {row['title']}\n{row['writing_arrangement']}"
+                 for row in guide["chapters"] if row["writing_arrangement"] not in original]
+    return original + ("\n\n全文章节写作安排：\n\n" + "\n\n".join(additions) if additions else "")
+
+
+def normalize_citation_handles(body: str, known_handles: Sequence[str]) -> str:
+    """Only format exact known P#### identities; never guess or renumber them.
+
+    Preserve code, URLs and Markdown links/images. This is presentation repair,
+    not evidence validation: even a known handle can support the wrong claim.
+    """
+    known = {h for h in known_handles if re.fullmatch(r"P[0-9]{4}", h)}
+    protected = r"(```[\s\S]*?(?:```|$)|~~~[\s\S]*?(?:~~~|$)|`[^`\n]*`|!?\[[^]\n]*\]\([^\n)]*\)|https?://[^\s<>]+|\[[^\]\n]*\])"
+    token = re.compile(r"(?<![A-Za-z0-9_:\[/\-])(?:\[(P[0-9]{4})\]|[（(](P[0-9]{4})[）)]|【(P[0-9]{4})】|［(P[0-9]{4})］|(P[0-9]{4}))(?![A-Za-z0-9_:\]/\-])")
+    def replace(match):
+        handle = next(group for group in match.groups() if group is not None)
+        return "[" + handle + "]" if handle in known else match.group(0)
+    pieces = re.split(protected, body)
+    return "".join(piece if index % 2 else token.sub(replace, piece) for index, piece in enumerate(pieces))
+
+
 def build_author_payload(pack: Mapping[str, Any], guide: Mapping[str, Any],
                          chapter: str | Mapping[str, Any], accepted_body_markdown: str,
                          reread_atoms: Sequence[str] = ()) -> dict[str, Any]:
@@ -168,7 +197,7 @@ def build_author_payload(pack: Mapping[str, Any], guide: Mapping[str, Any],
         "read_protocol": {"request": {"read_source_handles": ["exact source_handle"], "read_atom_ids": ["exact atom_id"]},
             "separate_from_prose": True, "unknown_addresses": "error; no fuzzy matching",
             "scientific_fidelity_verified": False}}
-    return {"manuscript_guide": guide["manuscript_guide"], "chapter_assignment": deepcopy(assignment),
+    return {"manuscript_guide": render_manuscript_guide(guide), "chapter_assignment": deepcopy(assignment),
         "materials": materials, "accepted_body_markdown": accepted_body_markdown}
 
 

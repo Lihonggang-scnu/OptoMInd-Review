@@ -279,3 +279,91 @@ def test_interrupted_attempt_without_response_is_not_implicitly_retried(tmp_path
     assert second["status"] == "uncertain_attempt" and second["model_calls"] == 0
     assert len(factory.calls) == 3
     assert second["selected_version"] == first["run_id"]
+
+
+class MissingMetadata(Factory):
+    def __call__(self, role, directory, profile):
+        normal = super().__call__(role, directory, profile)
+        def call(messages, **kwargs):
+            response = normal(messages, **kwargs)
+            if json.loads(messages[-1]['content'])['chapter_assignment']['chapter_id'] == 'C1':
+                response['content'] = 'Exact saved prose for C1. (P0001)\n'
+            return response
+        return call
+
+
+def test_metadata_unresolved_is_distinct_and_resume_never_rewrites_author(tmp_path, book, guide, config):
+    factory = MissingMetadata()
+    first = execute(tmp_path, book, guide, config, factory)
+    assert first['status'] == 'metadata_unresolved' and len(factory.calls) == 1
+    assert first['body_markdown'] == 'Exact saved prose for C1. (P0001)\n'
+    attempt = Path(first['stages'][0]['attempt_dir'])
+    raw = (attempt / 'RAW_RESPONSE.json').read_bytes()
+    cached_result = (attempt / 'RESULT.json').read_bytes()
+    declaration = {**first['required_action']['declaration_binding'], 'complete': True, 'remaining_content': []}
+    resumed = execute(tmp_path, book, guide, config, factory, metadata_declarations=[declaration])
+    assert resumed['complete'] and resumed['model_calls'] == 2
+    assert factory.calls[1]['accepted_body_markdown'] == first['body_markdown']
+    assert (attempt / 'RAW_RESPONSE.json').read_bytes() == raw
+    assert (attempt / 'RESULT.json').read_bytes() == cached_result
+    replay = execute(tmp_path, book, guide, config, factory, metadata_declarations=[declaration])
+    assert replay['complete'] and replay['model_calls'] == 0 and len(factory.calls) == 3
+
+
+@pytest.mark.parametrize('field', ['cache_key', 'raw_response_sha256', 'body_sha256'])
+def test_metadata_recovery_rejects_wrong_bindings_without_dispatch(tmp_path, book, guide, config, field):
+    factory = MissingMetadata()
+    first = execute(tmp_path, book, guide, config, factory)
+    declaration = {**first['required_action']['declaration_binding'], 'complete': True, 'remaining_content': []}
+    declaration[field] = 'wrong'
+    result = execute(tmp_path, book, guide, config, factory, metadata_declarations=[declaration], retry_failed=True)
+    assert result['status'] == 'blocked' and len(factory.calls) == 1
+
+
+def test_metadata_recovery_declared_gap_uses_only_existing_supplement(tmp_path, book, guide, config):
+    factory = MissingMetadata()
+    first = execute(tmp_path, book, guide, config, factory)
+    declaration = {**first['required_action']['declaration_binding'], 'complete': False, 'remaining_content': ['Explain boundary']}
+    # Supply a normal completion without altering the recorded first attempt.
+    normal = Factory()
+    result = execute(tmp_path, book, guide, config, normal, metadata_declarations=[declaration])
+    assert result['complete'] and len(normal.calls) == 3
+    assert normal.calls[0]['chapter_assignment']['draft_body_markdown'] == first['body_markdown']
+
+
+@pytest.mark.parametrize('declarations', [{}, '', [{'stage_id': 'author_999', 'cache_key': 'a' * 64}],
+                                          [{'stage_id': 'author_001', 'cache_key': 'a' * 64}]])
+def test_bad_recovery_preflight_never_dispatches(tmp_path, book, guide, config, declarations):
+    factory = Factory()
+    result = execute(tmp_path, book, guide, config, factory, metadata_declarations=declarations)
+    assert result['status'] == 'blocked' and not factory.calls
+
+
+def test_delivery_copy_formats_known_handles_without_changing_exact_prefix(tmp_path, book, guide, config):
+    factory = MissingMetadata()
+    result = execute(tmp_path, book, guide, config, factory)
+    assert result['body_markdown'] == 'Exact saved prose for C1. (P0001)\n'
+    assert Path(result['delivery_body_path']).read_text() == 'Exact saved prose for C1. [P0001]\n'
+    assert result['delivery_body_sha256'] != result['body_sha256']
+
+
+def test_recovery_cannot_override_transport_failure(tmp_path, book, guide, config):
+    import hashlib
+    factory = Factory('length')
+    first = execute(tmp_path, book, guide, config, factory)
+    stage = first['stages'][0]
+    declaration = {'stage_id': stage['stage_id'], 'cache_key': stage['cache_key'],
+        'raw_response_sha256': hashlib.sha256((Path(stage['attempt_dir']) / 'RAW_RESPONSE.json').read_bytes()).hexdigest(),
+        'body_sha256': engine._text_hash(first['body_markdown']), 'complete': True, 'remaining_content': []}
+    result = execute(tmp_path, book, guide, config, factory, metadata_declarations=[declaration])
+    assert result['status'] == 'blocked' and len(factory.calls) == 1
+
+
+def test_recovery_rejects_changed_guide_before_any_new_calls(tmp_path, book, guide, config):
+    factory = MissingMetadata()
+    first = execute(tmp_path, book, guide, config, factory)
+    declaration = {**first['required_action']['declaration_binding'], 'complete': True, 'remaining_content': []}
+    changed = deepcopy(guide)
+    changed['manuscript_guide'] += ' New arrangement.'
+    result = execute(tmp_path, book, changed, config, factory, metadata_declarations=[declaration])
+    assert result['status'] == 'blocked' and len(factory.calls) == 1

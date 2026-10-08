@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import hashlib
+import re
 from pathlib import Path
 import time
 from typing import Any, Mapping
@@ -17,7 +18,7 @@ from .fullbody_writer import (_cost_summary, _dependency, _execute_stage, _messa
 from .writer_candidates import ROOT, _git_commit, _hash, _output_lock, _profile, _read, _safe_error, _write
 from .writer_candidates_contracts import CandidateError
 from .guided_body_contracts import (validate_guide, compile_guided_materials, build_author_payload,
-    resolve_read_request, parse_guided_response, parse_completion_response, apply_insertions)
+    resolve_read_request, parse_guided_response, parse_completion_response, apply_insertions, normalize_citation_handles)
 
 SCHEMA_VERSION = "optomind.guided_body_writer.v1"
 PROMPT_ROOT = ROOT / "prompts" / "guided_body_writer"
@@ -72,8 +73,42 @@ def _completion_parser(response, original):
     return parsed
 
 
+_METADATA_ERRORS = {"guided_metadata_missing", "guided_metadata_incomplete_or_invalid",
+                    "guided_complete_missing_or_invalid", "guided_remaining_content_invalid",
+                    "guided_complete_with_remaining_content"}
+
+
+def _metadata_unresolved(parsed):
+    errors = set(parsed.get("errors", []))
+    return bool(parsed.get("transport_complete") and parsed.get("body_markdown") and
+                errors and errors <= _METADATA_ERRORS)
+
+
+def _recover_metadata(outcome, declaration):
+    """Human metadata only, bound to this request and immutable saved response."""
+    expected = {"stage_id", "cache_key", "raw_response_sha256", "body_sha256", "complete", "remaining_content"}
+    if not isinstance(declaration, Mapping) or set(declaration) != expected:
+        raise CandidateError("guided_metadata_declaration_fields_invalid")
+    parsed = outcome.get("result", {})
+    if not _metadata_unresolved(parsed) or parsed.get("call_error"):
+        raise CandidateError("guided_metadata_recovery_requires_delivered_body_with_metadata_error")
+    path = Path(outcome["attempt_dir"]) / "RAW_RESPONSE.json"
+    checks = {"stage_id": outcome["stage_id"], "cache_key": outcome["cache_key"],
+              "raw_response_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+              "body_sha256": _text_hash(parsed["body_markdown"])}
+    for key, value in checks.items():
+        if declaration[key] != value:
+            raise CandidateError("guided_metadata_declaration_mismatch:" + key)
+    recovered = _author_parser({"body_markdown": parsed["body_markdown"],
+        "complete": declaration["complete"], "remaining_content": declaration["remaining_content"]})
+    if recovered.get("errors"):
+        raise CandidateError("guided_metadata_declaration_invalid")
+    recovered["metadata_recovery"] = {"source": "explicit_human_declaration", **deepcopy(dict(declaration))}
+    return {**outcome, "result": recovered, "result_sha256": _hash(recovered), "status": "complete"}
+
+
 def run_guided_body(book, guide, output_dir, config, client_factory=None, run=False,
-                    retry_failed=False, token_counter=None, counter=None):
+                    retry_failed=False, token_counter=None, counter=None, metadata_declarations=None):
     """Preview or run the frozen guide, retaining full evidence and actual prose.
 
     Preview stops at the first unknown author output. An oversized chapter is
@@ -82,10 +117,10 @@ def run_guided_body(book, guide, output_dir, config, client_factory=None, run=Fa
     output = Path(output_dir).resolve()
     with _output_lock(output):
         return _run(book, guide, output, config, client_factory, run, retry_failed,
-                    token_counter if token_counter is not None else counter)
+                    token_counter if token_counter is not None else counter, metadata_declarations)
 
 
-def _run(book, guide, output, config, client_factory, run, retry_failed, counter):
+def _run(book, guide, output, config, client_factory, run, retry_failed, counter, metadata_declarations):
     run_id = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + uuid.uuid4().hex[:10]
     run_dir = output / "runs" / run_id
     run_dir.mkdir(parents=True)
@@ -106,6 +141,9 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
     segments, issues, completed = [], [], []
     dependencies = [{"input_hash": input_hash, "guide_sha256": guide_hash}]
     body, status, action = "", "pending", None
+    declarations = [] if metadata_declarations is None else metadata_declarations
+    used_declarations = set()
+    known_handles = []
 
     def checkpoint():
         _write(run_dir / "RUN_MANIFEST.json", manifest)
@@ -123,9 +161,11 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
         if not stage["estimate"]["fits"]:
             stage["required_action"] = ("The whole guide, intact chapter evidence and full actual prefix exceed input capacity. "
                 "Increase available context capacity. Natural within-chapter guide subdivision is not implemented in this route; frozen chapter identities cannot be split here. No truncation or legacy task subdivision was performed.")
+        declaration = next((row for row in declarations if row["stage_id"] == stage_id), None)
         outcome = _execute_stage(stage, output=output, run_dir=run_dir, route="guided_body",
             code_hash=manifest["code_hash"], input_hash=input_hash, dependencies=deepcopy(dependencies),
-            client_factory=client_factory, run=run, retry_failed=retry_failed, config=config, counter=counter, parser=parser)
+            client_factory=client_factory, run=run and declaration is None,
+            retry_failed=retry_failed and declaration is None, config=config, counter=counter, parser=parser)
         # The shared transport wrapper predates direct guide JSON and treats
         # every top-level complete:false as a transport failure. A direct body
         # or insertion object instead declares a semantic gap. Reparse only
@@ -143,6 +183,10 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
                                    status="complete" if reparsed.get("complete") else "pending")
                     _write(Path(outcome["attempt_dir"]) / "RESULT.json", reparsed)
                     _write(Path(outcome["attempt_dir"]) / "BODY.md", reparsed.get("body_markdown", ""), text=True)
+        if declaration is not None:
+            outcome = _recover_metadata(outcome, declaration)
+            used_declarations.add(stage_id)
+            _write(run_dir / "metadata_recovery" / (stage_id + ".json"), declaration)
         manifest["stages"].append(outcome)
         checkpoint()
         if "result" not in outcome:
@@ -154,10 +198,41 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
 
     checkpoint()
     try:
+        if not isinstance(declarations, list) or any(not isinstance(row, Mapping) or
+                not isinstance(row.get("stage_id"), str) for row in declarations):
+            raise CandidateError("guided_metadata_declarations_must_be_list")
+        if len({row["stage_id"] for row in declarations}) != len(declarations):
+            raise CandidateError("guided_metadata_declaration_duplicate_stage")
         config = validate_config(config)
         manifest["config"] = config
         normalized = validate_guide(guide, book)
+        # Fail stale/typo declarations before ANY stage can dispatch. Do not
+        # migrate old-code or another guide's saved attempt into this run.
+        for declaration in declarations:
+            stage_id, key = declaration["stage_id"], declaration.get("cache_key", "")
+            match = re.fullmatch(r"author_([0-9]{3})(?:_reread_[0-9]{2})?", stage_id)
+            if (not match or not 1 <= int(match.group(1)) <= len(normalized["chapters"])
+                    or not isinstance(key, str) or not re.fullmatch(r"[0-9a-f]{64}", key)):
+                raise CandidateError("guided_metadata_declaration_stage_invalid")
+            attempts = sorted((output / "stages" / stage_id / key).glob("attempt_*"))
+            if not attempts:
+                raise CandidateError("guided_metadata_declaration_saved_stage_missing")
+            attempt = attempts[-1]
+            request = _read(attempt / "REQUEST.json")
+            signature = request["signature"]
+            saved_messages = _read(attempt / "MESSAGES.json")
+            current_system = _messages((PROMPT_ROOT / "writer.md").read_text(encoding="utf-8"), {})[0]
+            if (signature["code_hash"] != manifest["code_hash"] or
+                    signature["dependencies"][0] != dependencies[0] or
+                    signature["effective_profile"] != config["writer"] or
+                    signature["execution_mode"] != mode or
+                    signature.get("recording_fixture_sha256") != getattr(client_factory, "fixture_sha256", None) or
+                    saved_messages[0] != current_system):
+                raise CandidateError("guided_metadata_declaration_context_changed")
+            _recover_metadata({"stage_id": stage_id, "cache_key": key,
+                "attempt_dir": str(attempt), "result": _read(attempt / "RESULT.json")}, declaration)
         pack = compile_guided_materials(book)
+        known_handles = list(dict.fromkeys([*pack["source_identities"], *pack["source_aliases"]]))
         for index, chapter in enumerate(normalized["chapters"], 1):
             chapter_id = chapter["chapter_id"]
             atoms, reads = [], 0
@@ -219,6 +294,13 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
                 completed.append(chapter_id)
             if not healthy:
                 status = "transport_failed" if not parsed.get("transport_complete") or (supplement and not supplement["result"].get("transport_complete")) else "response_invalid"
+                if _metadata_unresolved(parsed):
+                    status = "metadata_unresolved"
+                    raw_path = Path(outcome["attempt_dir"]) / "RAW_RESPONSE.json"
+                    action = {"instruction": "Review this exact saved body and explicitly declare complete and remaining_content; resume with metadata_declarations. No author rewrite is needed.",
+                        "declaration_binding": {"stage_id": outcome["stage_id"], "cache_key": outcome["cache_key"],
+                            "raw_response_sha256": hashlib.sha256(raw_path.read_bytes()).hexdigest(),
+                            "body_sha256": _text_hash(draft)}}
                 issues.extend(parsed.get("errors", parsed.get("issues", [])))
                 break
             if remaining and supplement is None and config["completion_on_missing"]:
@@ -226,6 +308,8 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
             # A healthy provisional chapter remains in the exact prefix; pending
             # declared gaps never become a claim of complete manuscript coverage.
         else:
+            if {row["stage_id"] for row in declarations} != used_declarations:
+                raise CandidateError("guided_metadata_declaration_unused")
             status = "complete" if len(completed) == len(normalized["chapters"]) else "pending"
     except Exception as exc:
         status = "blocked"
@@ -242,7 +326,13 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
             record["estimated_actual_cost_cny"] = 0
     manifest.update(status=status, model_calls=calls, client_invocations=calls, paid_dispatch_count=paid, cost_summary=cost)
     order = [row["chapter_id"] for row in guide.get("chapters", [])] if isinstance(guide, Mapping) else []
-    result = dict(schema_version=SCHEMA_VERSION + ".result", run_id=run_id, complete=complete, body_complete=complete,
+    delivery_body = normalize_citation_handles(body, known_handles)
+    delivery_path = run_dir / "DELIVERY_BODY.md"
+    _write(delivery_path, delivery_body, text=True)
+    result = dict(delivery_body_path=str(delivery_path), delivery_body_sha256=_text_hash(delivery_body),
+        delivery_citation_format_only=True,
+        unknown_citation_handles=sorted(set(re.findall(r"(?<![A-Za-z0-9_])P[0-9]{4}(?![A-Za-z0-9_])", body)) - set(known_handles)),
+        schema_version=SCHEMA_VERSION + ".result", run_id=run_id, complete=complete, body_complete=complete,
         body_markdown=body, body_sha256=_text_hash(body), segments=segments,
         completed_chapter_ids=completed, pending_chapter_ids=[key for key in order if key not in completed],
         approved_chapter_order=order, issues=issues, status=status, required_action=action,
@@ -263,6 +353,7 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
     if selected is result:
         _write(existing, result)
         _write(output / "FULL_BODY.md", body, text=True)
+        _write(output / "DELIVERY_BODY.md", delivery_body, text=True)
     manifest.update(selected_version=selected["run_id"], current_run_version=run_id,
         selected_input_matches_current=selected.get("input_hash") == input_hash and selected.get("guide_sha256") == guide_hash,
         selected_result_path=str(output / "runs" / selected["run_id"] / "FULL_BODY_RESULT.json"))

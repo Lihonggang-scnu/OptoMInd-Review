@@ -210,3 +210,77 @@ def test_known_nested_orchestration_removed_but_scientific_siblings_intact():
     assert p["materials"]["tool_materials"][0]["wrapper"]["review_planning_B"]["conditions"] == "ambient pressure"
     assert any(atom["value"] == {"conditions": "dry atmosphere", "measurement": 5}
                for atom in p["materials"]["evidence_atoms"])
+
+
+def test_full_manuscript_arrangements_visible_and_manual_exact_embedding_not_duplicated():
+    g = guide()
+    p = payload(g=g)
+    for row in g['chapters']:
+        assert row['writing_arrangement'] in p['manuscript_guide']
+    g['manuscript_guide'] += '\n' + '\n'.join(row['writing_arrangement'] for row in g['chapters'])
+    p = payload(g=g)
+    for row in g['chapters']:
+        assert p['manuscript_guide'].count(row['writing_arrangement']) == 1
+    assert p['manuscript_guide'].startswith(g['manuscript_guide'])
+
+
+def test_nested_outline_action_removed_from_tools_and_source_supplement_only():
+    b = book()
+    supplement = {'outline_action': 'OLD-Incorporate this into section',
+                  'finding': 'gain remains', 'conditions': ['dry', 'cold'], 'variant': {'finding': 'loss'}}
+    b['chapters'][0]['sources'][0]['supplement_material'] = deepcopy(supplement)
+    b['chapters'][0]['chapter_tool_materials'][0]['nested'] = [deepcopy(supplement)]
+    p = payload(b)
+    assert 'outline_action' not in json.dumps(p) and 'OLD-Incorporate' not in json.dumps(p)
+    assert p['materials']['tool_materials'][0]['nested'][0] == {
+        'finding': 'gain remains', 'conditions': ['dry', 'cold'], 'variant': {'finding': 'loss'}}
+    assert 'gain remains' in json.dumps(p['materials']['evidence_atoms'])
+
+
+def test_known_citation_compatibility_never_invents_identity_or_edits_code_links():
+    from optomind_research.runtime.upgrade3.guided_body_contracts import normalize_citation_handles
+    text = '[P0001] (P0001) （P0001） 【P0001】 ［P0001］ P0001 P9999 XP0001 P00010 '
+    text += '`P0001` [P0001](https://x/P0001) https://x/P0001\n```\nP0001\n```'
+    result = normalize_citation_handles(text, ['P0001'])
+    assert result.startswith('[P0001] ' * 6 + 'P9999 XP0001 P00010 ')
+    assert result.endswith('`P0001` [P0001](https://x/P0001) https://x/P0001\n```\nP0001\n```')
+    assert normalize_citation_handles(result, ['P0001']) == result
+
+
+def test_citation_chinese_adjacency_and_qualified_identifiers():
+    from optomind_research.runtime.upgrade3.guided_body_contracts import normalize_citation_handles
+    assert normalize_citation_handles('结果P0001表明 ns::P0001 key-P0001 [P0001, P0002]', ['P0001', 'P0002']) == '结果[P0001]表明 ns::P0001 key-P0001 [P0001, P0002]'
+
+
+def test_archived_b6_metadata_and_delivery_consumer():
+    from pathlib import Path
+    from optomind_research.runtime.upgrade3.guided_body_contracts import normalize_citation_handles
+    from optomind_research.runtime.upgrade3.delivery_citations import build_delivery_citation_map
+    archive = Path(__file__).resolve().parents[2] / 'docs/acceptance/guided-body-20261008/routes/B/stages/author_006'
+    attempt = next(archive.glob('*/attempt_001'))
+    raw = json.loads((attempt / 'RAW_RESPONSE.json').read_text())
+    parsed = parse_guided_response(raw)
+    assert parsed['transport_complete'] and not parsed['complete']
+    assert 'guided_metadata_missing' in parsed['errors']
+    manifest = json.loads((attempt / 'MESSAGES.json.parts.json').read_text())
+    messages = json.loads(''.join((attempt / part['path']).read_text() for part in manifest['parts']))
+    materials = json.loads(messages[-1]['content'])['materials']
+    identities = materials['source_identities']
+    delivery = normalize_citation_handles(parsed['body_markdown'], identities)
+    catalog = [{'references': [{'source_handle': h, **row} for h, row in identities.items()]}]
+    before = build_delivery_citation_map(final_handle_draft=parsed['body_markdown'], identity_catalogs=catalog)
+    after = build_delivery_citation_map(final_handle_draft=delivery, identity_catalogs=catalog)
+    assert not before['references']
+    assert len(after['references']) > 10
+    assert normalize_citation_handles(delivery, identities) == delivery
+
+
+def test_grouped_citations_already_work_with_delivery_consumer_and_unclosed_code_is_preserved():
+    from optomind_research.runtime.upgrade3.guided_body_contracts import normalize_citation_handles
+    from optomind_research.runtime.upgrade3.delivery_citations import build_delivery_citation_map
+    text = '[P0092, P0223]'
+    assert normalize_citation_handles(text, ['P0092', 'P0223']) == text
+    result = build_delivery_citation_map(final_handle_draft=text, identity_catalogs=[{'references': [
+        {'source_handle': 'P0092', 'doi': '10.1/a'}, {'source_handle': 'P0223', 'doi': '10.1/b'}]}])
+    assert result['reference_count'] == 2 and not result['unknown_handles']
+    assert normalize_citation_handles('```python\nP0092', ['P0092']) == '```python\nP0092'
