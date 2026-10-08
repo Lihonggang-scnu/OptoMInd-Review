@@ -1,0 +1,116 @@
+{
+  "archive": "guided-body-20261008",
+  "publication_stage": "final_local_archive_ready_for_root_upload",
+  "source_commit": "e63b12282d2269ca146a53266a47d06f2309a47e",
+  "official_entry": "scripts/upgrade3/guided_body_writer.py",
+  "input_hash": "94590c2b7a3365b76af5e0fe4bad5ae5a677cd6d36f80e48a1e4ab90aa098aaa",
+  "shared_input": "shared/canonical_input/FULL_BODY_INPUT.json.parts.json",
+  "routes": [
+    {
+      "route": "A",
+      "status": "complete_7_chapters_root_reviewed_not_default_route",
+      "run_manifest_status": "complete",
+      "model_calls": 7,
+      "paid_dispatch_count": 7,
+      "result_path": "routes/A/",
+      "full_body_path": "routes/A/FULL_BODY.md",
+      "full_body_result_path": "routes/A/FULL_BODY_RESULT.json",
+      "guide": "shared/guides/guide_A.json",
+      "complete_claim": true,
+      "root_quality_status": "reviewed; no default-route adoption claim",
+      "actual_cost_cny": 6.75073,
+      "completed_chapters": [
+        "Ch1",
+        "Ch2",
+        "Ch3",
+        "Ch4",
+        "Ch5",
+        "Ch6",
+        "Ch7"
+      ],
+      "retained_body_segments": [
+        "Ch1",
+        "Ch2",
+        "Ch3",
+        "Ch4",
+        "Ch5",
+        "Ch6",
+        "Ch7"
+      ],
+      "pending_chapters": [],
+      "known_issues": []
+    },
+    {
+      "route": "B",
+      "status": "partial_6_chapters_5_complete_ch6_metadata_failure_ch7_not_called",
+      "run_manifest_status": "response_invalid",
+      "model_calls": 6,
+      "paid_dispatch_count": 6,
+      "result_path": "routes/B/",
+      "full_body_path": "routes/B/FULL_BODY.md",
+      "full_body_result_path": "routes/B/FULL_BODY_RESULT.json",
+      "guide": "shared/guides/guide_B.json",
+      "complete_claim": false,
+      "root_quality_status": "reviewed; no default-route adoption claim",
+      "actual_cost_cny": 4.971964,
+      "completed_chapters": [
+        "Ch1",
+        "Ch2",
+        "Ch3",
+        "Ch4",
+        "Ch5"
+      ],
+      "retained_body_segments": [
+        "Ch1",
+        "Ch2",
+        "Ch3",
+        "Ch4",
+        "Ch5",
+        "Ch6"
+      ],
+      "pending_chapters": [
+        "Ch6",
+        "Ch7"
+      ],
+      "known_issues": [
+        "guided_metadata_missing",
+        "guided_complete_missing_or_invalid"
+      ]
+    }
+  ],
+  "budget": {
+    "source": "review/FINAL_EXECUTION_SUMMARY.json; SQLite excluded from public package",
+    "snapshot_path": "FINANCE_SUMMARY.json",
+    "cap_cny": 60.0,
+    "prior_settled_cny": 6.6382292,
+    "increment_settled_cny": 11.722694,
+    "settled_cny": 18.3609232,
+    "held_cny": 0.0,
+    "remaining_cny": 41.6390768
+  },
+  "final_review_files": [
+    "review/ROOT_GUIDED_BODY_REVIEW.md",
+    "review/ROOT_QUALITY_LOG.json",
+    "review/ROOT_ACTUAL_REQUEST_AUDIT.json",
+    "review/SOURCE_CONFLICT_SPOTCHECK.json",
+    "review/A_B_MESSAGE_PREFIX_WIRE_CHECK.json",
+    "review/FINAL_EXECUTION_SUMMARY.json"
+  ],
+  "input_contract_audit": {
+    "author_top_level_fields": [
+      "manuscript_guide",
+      "chapter_assignment",
+      "materials",
+      "accepted_body_markdown"
+    ],
+    "old_task_unit_completion_key_structures_found": 0,
+    "outline_action_found_in_material_projection": true,
+    "outline_action_handling": "preserved in audited actual requests; flagged as an input projection leak; no broad claim that all historical planning fields were absent"
+  },
+  "omissions": [
+    "SQLite databases and budget keys excluded",
+    "transport SSE/raw streams excluded",
+    "third-party or rights-bound full-paper text excluded; generated/project material and model bodies retained where present",
+    "no model-science answer was injected into prompts; root review is preserved as post-run evaluation"
+  ]
+}

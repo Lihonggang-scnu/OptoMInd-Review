@@ -1,0 +1,19 @@
+{
+  "schema_version": "optomind.guided_body_writer_config.v1",
+  "purpose": "Guide-first continuous author. Reuse the existing lifetime CNY 60 ledger and its remaining balance. No automatic Max or paid retry. No task-by-task coverage map or automatic critic.",
+  "writer": {
+    "model": "qwen3.5-plus",
+    "thinking": true,
+    "thinking_budget": 16384,
+    "max_output_tokens": 49152,
+    "json_mode": false,
+    "timeout_seconds": 1800,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "max_rereads_per_chapter": 3,
+  "max_author_calls": 64,
+  "completion_on_missing": true
+}
