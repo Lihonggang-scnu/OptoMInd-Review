@@ -1,0 +1,240 @@
+{
+  "schema_version": "optomind.guide_maker.v1",
+  "run_id": "20261008T080543Z-515a3f83b0",
+  "input_hash": "8aca4a730d0e57dbc15ada7c4daa25f0247a54b0fe2680c8c6bfb89dee0e2ea4",
+  "input_path": "F:\\OptoMind-Review-2\\outputs\\guide_maker_acceptance_20261008_30cny\\cold_start_final\\inputs\\8aca4a730d0e57dbc15ada7c4daa25f0247a54b0fe2680c8c6bfb89dee0e2ea4\\FULL_BODY_INPUT.json",
+  "execution_mode": "live",
+  "run": true,
+  "stages": [
+    {
+      "stage_id": "maker_001",
+      "role": "maker",
+      "effective_profile": {
+        "model": "qwen3.5-plus",
+        "thinking": true,
+        "thinking_budget": 16384,
+        "max_output_tokens": 32768,
+        "json_mode": false,
+        "timeout_seconds": 1800.0,
+        "stream": true,
+        "stream_overall_timeout_seconds": 3600.0,
+        "prompt_token_multiplier": 1.12,
+        "prompt_token_framing_margin": 8192
+      },
+      "estimate": {
+        "prompt_tokens": 247002,
+        "measured_tokens": 213223,
+        "method": "provided_token_counter",
+        "multiplier": 1.12,
+        "framing_margin": 8192,
+        "reserved_input_tokens": 247002,
+        "input_limit_tokens": 950848,
+        "completion_allowance_tokens": 49152,
+        "context_window": 1000000,
+        "fits": true,
+        "estimated_max_cost_cny": 2.167656,
+        "wire_request_sha256": "854e67e0e8edeb094949cdcd00f02eb02821828bd8c54be3c82af728328dee48",
+        "wire_parameters": {
+          "model": "qwen3.5-plus",
+          "max_completion_tokens": 49152,
+          "temperature": 0.1,
+          "enable_thinking": true,
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "thinking_budget": 16384
+        }
+      },
+      "status": "complete",
+      "guide_before_sha256": null,
+      "material_preserved": true,
+      "cache_key": "d4f695314ce81c5bbe1ee83ad463f0ee02dc49bba9396ceab807a5236872059b",
+      "dependencies": [],
+      "messages_path": "F:\\OptoMind-Review-2\\outputs\\guide_maker_acceptance_20261008_30cny\\cold_start_final\\runs\\20261008T080543Z-515a3f83b0\\plans\\maker_001\\MESSAGES.json",
+      "model_calls": 1,
+      "client_invocations": 1,
+      "paid_dispatch_count": 1,
+      "cache_hit": false,
+      "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\guide_maker_acceptance_20261008_30cny\\cold_start_final\\stages\\maker_001\\d4f695314ce81c5bbe1ee83ad463f0ee02dc49bba9396ceab807a5236872059b\\attempt_001",
+      "result": {
+        "guide": {
+          "schema_version": "optomind.guided_body_guide.v1",
+          "manuscript_guide": "全篇写作需严格遵循'证据阶梯'逻辑：从强观察性关联（Ch1）到机制解析（Ch2-3），再到外部干扰（Ch4）与干预现状（Ch5），最后讨论毒性（Ch6）与方法学（Ch7）。核心基调是'区分相关与因果'：人类队列多为关联，机制多为动物模型，干预缺乏 III 期 RCT。各章之间需通过'转化缺口'（如 Ch3 代谢物 TME 浓度缺失、Ch5 缺乏 III 期证据）进行承接，避免重复。语气上保持批判性，特别是在引用单一队列或动物数据时，需明确标注局限性。图表应服务于证据对比（如干预试验 ORR 对比表）而非单纯罗列数据。",
+          "chapters": [
+            {
+              "chapter_id": "Ch1",
+              "title": "实体瘤中肠道微生物组与 ICI 疗效的临床关联证据",
+              "writing_arrangement": "本章作为全篇基石，需先确立'跨癌种共性信号'（如黑色素瘤、NSCLC 中的 Akkermansia 富集），随即用'队列异质性统计'（P0478）打破'通用标志物'幻想，引出'无普适性单一标志物'结论。随后讨论外部干扰（抗生素/PPI）和纵向动态对关联的修饰，最后以'证据阶梯'（观察性 vs 干预性）收尾，为 Ch5 铺垫。写作时需注意：1. 区分癌种特异性（如 HCC 与黑色素瘤信号差异）；2. 强调 P0585 等研究中治疗方案对微生物效应的修饰；3. 明确指出基线单次采样的局限，引导至 Ch3/Ch5 的机制与干预讨论。",
+              "required_content": [
+                "需包含跨癌种微生物特征对比表（黑色素瘤 vs NSCLC vs RCC）",
+                "需引用 P0478 说明队列间异质性统计依据（PERMANOVA 结果）",
+                "需明确标注 FMT-LUMINate 等干预试验为 Phase II，非 III 期"
+              ]
+            },
+            {
+              "chapter_id": "Ch2",
+              "title": "微生物调节 ICI 疗效的免疫学机制",
+              "writing_arrangement": "按'先天识别→适应性启动→髓系/屏障重塑'链条组织。重点在于'严格区分动物因果与人类关联'：小鼠模型中的敲除/回补实验可作为机制假说，但人类数据多为宏基因组关联或伴随观察。需特别强调 Ch2_U03 中'屏障完整性'的条件闸门作用，避免将细菌易位简单等同于'漏肠'。结尾需指出机制外推的肿瘤类型特异性（如黑色素瘤 vs 消化道肿瘤），为 Ch4/Ch5 的情境依赖性讨论埋下伏笔。",
+              "required_content": [
+                "需包含不同肿瘤类型机制异质性对比表（Ch2_U04_T01）",
+                "需明确标注 P0080 等机制研究的小鼠模型背景，避免直接外推至人类"
+              ]
+            },
+            {
+              "chapter_id": "Ch3",
+              "title": "微生物代谢物的中介作用与分子机制",
+              "writing_arrangement": "聚焦四大类代谢物（SCFAs、肌苷、胆汁酸、色氨酸）。写作核心是'情境依赖性'（如 SCFAs 在 PD-1 vs CTLA-4 下的双向作用）和'证据缺口'（特别是肌苷在 TME 内浓度缺失）。需避免将血浆浓度等同于 TME 暴露。每类代谢物按'分子靶点→下游通路→临床关联→局限性'展开。结尾需强调'功能性通路优于物种分类'的观点，呼应 Ch7 的方法学建议。",
+              "required_content": [
+                "需明确指出肌苷在人体 TME 内实测数据缺失（仅血浆数据）",
+                "需包含代谢物双向作用示意图（如 SCFAs 在不同 ICI 背景下的效应）"
+              ]
+            },
+            {
+              "chapter_id": "Ch4",
+              "title": "外部因素对微生物 - 免疫轴的干扰",
+              "writing_arrangement": "按'药物暴露（抗生素/PPI）→饮食/生活方式'顺序。重点在于'时间窗口特异性'（如抗生素在 ICI 前后 30-90 天影响最大）和'混杂偏倚'（如适应症偏倚）。需量化效应（如 Meta 分析 HR 值），同时指出 HCC 等特定癌种的阴性结果以展示异质性。饮食部分需区分'高纤维/特定成分'与'商业益生菌'的证据等级差异，强调'食物基质优于补充剂'。",
+              "required_content": [
+                "需量化抗生素/PPI 暴露的效应量（HR/RR 值）及时间窗",
+                "需讨论 HCC 人群中抗生素效应不显著的例外情况（P0275）"
+              ]
+            },
+            {
+              "chapter_id": "Ch5",
+              "title": "微生物干预策略的临床转化现状",
+              "writing_arrangement": "按'证据等级'组织：FMT（初治 vs 难治）→活体生物药（LBPs）→益生菌。核心对比是'初治人群高 ORR（如 FMT-LUMINate）'与'难治人群阴性（如 MITRIC）'，以此说明'疾病背景与供体匹配'的重要性。必须明确'缺乏 Phase III RCT'的现状。安全性部分需强调'ICI 方案依赖性'（如双免背景下心肌炎风险）。结尾提出标准化与人群分层是未来关键。",
+              "required_content": [
+                "需包含主要干预临床试验对比表（FMT-LUMINate vs MITRIC vs MIMic）",
+                "需明确标注所有引用干预试验均为 I/II 期，无 III 期确证"
+              ]
+            },
+            {
+              "chapter_id": "Ch6",
+              "title": "微生物组与免疫治疗毒性的关联",
+              "writing_arrangement": "先讨论'预测潜力'（结肠炎证据强，心肌炎证据弱），再分析'疗效 - 毒性耦合/解耦'（如 Akkermansia 既增效又增毒），最后聚焦'干预安全性'（供体特征与 ICI 方案交互）。需特别警示'非结肠炎 irAEs 样本量不足'的局限。机制部分需区分'屏障受损'与'分子模拟/髓系激活'。写作时需平衡'生物标志物潜力'与'临床落地困难'。",
+              "required_content": [
+                "需明确区分结肠炎与非结肠炎 irAEs 的证据等级差异",
+                "需包含供体聚类与毒性风险关联表（Cluster A vs B）"
+              ]
+            },
+            {
+              "chapter_id": "Ch7",
+              "title": "方法学挑战与未来研究方向",
+              "writing_arrangement": "从'技术变异'（测序/生信）到'因果推断'（观察性局限/混杂）再到'转化瓶颈'（缺乏 III 期/TME 数据）。需提出具体解决方案：功能导向（代谢通路）、多组学整合、标准化采样、前瞻性队列。避免空泛呼吁，需结合 Ch1-6 的具体缺口（如 Ch3 的 TME 浓度、Ch5 的 RCT）提出针对性建议。结尾强调'从描述性关联向精准临床转化跨越'的必要性。",
+              "required_content": [
+                "需列出关键技术标准化建议（如采样频率、存储条件）",
+                "需提出'功能性菌群失调评分'替代传统多样性指标的建议"
+              ]
+            }
+          ]
+        },
+        "reading_needs": [],
+        "complete": true,
+        "changes": [
+          "Initial guide generation based on calibrated full_outline and source_catalog."
+        ],
+        "transport_complete": true,
+        "errors": [],
+        "guide_complete": true
+      },
+      "result_sha256": "b02928fc8c7f2885f289d9d3ef0614944a00deeb9bfd49b712fb09d1ae251c9f",
+      "call_error": null,
+      "usage": {
+        "usage": {
+          "prompt_tokens": 213233,
+          "completion_tokens": 7547,
+          "total_tokens": 220780,
+          "completion_tokens_details": {
+            "reasoning_tokens": 5736,
+            "text_tokens": 7547
+          },
+          "prompt_tokens_details": {
+            "text_tokens": 213233
+          }
+        },
+        "usage_known": true,
+        "model": "qwen3.5-plus",
+        "provider_request_id": "chatcmpl-dc8729a2-6f74-9f41-afcd-232178137bf2",
+        "effective_request": {
+          "model": "qwen3.5-plus",
+          "enable_thinking": true,
+          "thinking_budget": 16384,
+          "answer_tokens": 32768,
+          "total_output_tokens": 49152,
+          "max_completion_tokens": 49152,
+          "max_tokens": null,
+          "response_format": null,
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "stream_inactivity_timeout_seconds": 1800.0,
+          "stream_overall_timeout_seconds": 3600.0
+        },
+        "estimated_actual_cost_cny": 0.51703
+      }
+    }
+  ],
+  "status": "complete",
+  "git_commit": "9a5e1d90c70dc102352082a5917a929bf30903a2",
+  "material_preserved": true,
+  "automatic_paid_retries": false,
+  "semantic_quality_unreviewed": true,
+  "requested_route": "guide_maker",
+  "effective_route": "guide_maker",
+  "config": {
+    "schema_version": "optomind.guide_maker_config.v1",
+    "purpose": "Independent outline-to-guide middleware. Cold start uses full outline and a light source catalog; explicit needs retrieve intact scientific objects. Optional feedback. Reuse the original lifetime CNY 60 ledger; no automatic writer launch or Max upgrade.",
+    "maker": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 16384,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192
+    },
+    "max_model_calls": 8
+  },
+  "source_file_hashes": {
+    "optomind_research\\runtime\\upgrade3\\guide_maker.py": "3a990a5ef929f9a984f3dbd85d8b44ebb4674a62af3fbc594e29e3f2562ea9b5",
+    "optomind_research\\runtime\\upgrade3\\guide_maker_contracts.py": "a282f61c6b7a3a8470fdc1300b48b9a7b2489ff5e2c7d9d44a63af5bca2a6e96",
+    "optomind_research\\runtime\\upgrade3\\guided_body_contracts.py": "b22d570fadb77425b96859770fe6722c4622b0c31fd98b90b7b7019eeb30f287",
+    "optomind_research\\runtime\\upgrade3\\writing_evidence.py": "3e7a626aca72b89bb373ba4b2ae919a908e5bd92734ec86bd4d38e68e20596d2",
+    "optomind_research\\runtime\\upgrade3\\fullbody_writer.py": "bd268043f1f6b1050cb6715df184522347ae3dfeee8ff29f3b0f24f14d2dcd7c",
+    "optomind_research\\runtime\\upgrade3\\writer_candidates.py": "bf573884cea5b0e476f2588a189930d721a604ed528221da6a919c79877a7ed6",
+    "optomind_research\\runtime\\upgrade3\\writer_candidates_contracts.py": "68d73b9482275d5afd8b13d8f2558e0c118efdfada26f2ef83f8739beec7a17d",
+    "optomind_research\\runtime\\upgrade3\\module4\\runtime.py": "6d2055b024b5ec21d26940f456970629f5b263903c694bb33582c922c0d30cd9"
+  },
+  "code_hash": "9bcc8bc4e63cc49b91a67f997ce9bb41eeaaff8b2ff32c557cf2dc99bfc893f8",
+  "prompt_file_hashes": {
+    "generate.md": "5afc89479aedd77f307175f656a60cd7a28929fc858c1aa19e168aacec9f4469"
+  },
+  "model_calls": 1,
+  "client_invocations": 1,
+  "paid_dispatch_count": 1,
+  "cost_summary": {
+    "candidate_stage_known_cost_cny": 0.51703,
+    "candidate_stage_cost_complete": true,
+    "unknown_cost_attempts": [],
+    "all_attempts_including_retries": [
+      {
+        "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\guide_maker_acceptance_20261008_30cny\\cold_start_final\\stages\\maker_001\\d4f695314ce81c5bbe1ee83ad463f0ee02dc49bba9396ceab807a5236872059b\\attempt_001",
+        "estimated_actual_cost_cny": 0.51703,
+        "usage_known": true
+      }
+    ],
+    "base_cost_attribution": null,
+    "base_reuse_charged_again": false,
+    "total_known_cost_including_base_cny": 0.51703,
+    "total_cost_complete": true,
+    "accounting_note": "Known costs are provider-usage estimates. Missing usage is unknown, never zero; shared-ledger uncertain reservations remain retained. Reused base cost is attributable but is not dispatched or charged again."
+  },
+  "selected_version": "20261008T080543Z-515a3f83b0",
+  "current_run_version": "20261008T080543Z-515a3f83b0",
+  "selected_input_matches_current": true,
+  "selected_result_path": "F:\\OptoMind-Review-2\\outputs\\guide_maker_acceptance_20261008_30cny\\cold_start_final\\runs\\20261008T080543Z-515a3f83b0\\GUIDE_RESULT.json"
+}

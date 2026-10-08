@@ -1,0 +1,473 @@
+{
+  "schema_version": "optomind.guide_maker_cli.v1",
+  "execution_mode": "live",
+  "input_mode": "live_source_manifest",
+  "input_sha256": "98e1ee62c4bf239fc54ed133d57c8c6c666b7231fd86c6e2065e79fcddf777a7",
+  "book_sha256": "3662038f6f241a48979bc8f9e30c8382776def734fcaa4cdddb82858d6cb6322",
+  "source_manifest_sha256": "37242cc51bc9b6b96a7e92543a6092c17bfdbd0d8f8ab068a2e3d9c1e3db58e7",
+  "feedback_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+  "feedback_file_sha256": null,
+  "config": {
+    "schema_version": "optomind.guide_maker_config.v1",
+    "purpose": "Independent outline-to-guide middleware. Cold start uses full outline and a light source catalog; explicit needs retrieve intact scientific objects. Optional feedback. Reuse the original lifetime CNY 60 ledger; no automatic writer launch or Max upgrade.",
+    "maker": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 16384,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192
+    },
+    "max_model_calls": 8
+  },
+  "config_file_sha256": "aefede5133a211ee007611b8bdf7169cb45d299e8405ae971f91d64281c32483",
+  "meter": {
+    "mode": "local_tokenizer_estimate",
+    "tokenizer_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "tokenizer_implementation_version": "0.23.2",
+    "actual_provider_token_count": false
+  },
+  "implementation_hashes": {
+    "scripts/upgrade3/guide_maker.py": "a91a03cce2347742d964af302bc1c6a0da4b5e6b6c5cd83677c597ea831f78e6",
+    "scripts/upgrade3/evidence_body_writer.py": "b9ef3ddb78e463a5a1d8ad92e2d1a0063663699d5d4f28224ddcf72548143ed1",
+    "scripts/upgrade3/writer_candidates.py": "c5c9af4291a19213463e013b6b34b21156f3d0b42087556d5054e11a654d8f38",
+    "scripts/upgrade3/guided_body_writer.py": "06ed421d533976cace701708ce7c6467e905585b7da4054d999c0248dcf837d9",
+    "scripts/upgrade3/fullbody_writer.py": "028a8d5042dae14bfb2e9f2c910874b28ea2afb41dffba324f84aff22eff882e",
+    "optomind_research/runtime/upgrade3/guide_maker.py": "3a990a5ef929f9a984f3dbd85d8b44ebb4674a62af3fbc594e29e3f2562ea9b5",
+    "optomind_research/runtime/upgrade3/guide_maker_contracts.py": "a282f61c6b7a3a8470fdc1300b48b9a7b2489ff5e2c7d9d44a63af5bca2a6e96",
+    "optomind_research/runtime/upgrade3/guided_body_contracts.py": "b22d570fadb77425b96859770fe6722c4622b0c31fd98b90b7b7019eeb30f287",
+    "optomind_research/runtime/upgrade3/writing_evidence.py": "3e7a626aca72b89bb373ba4b2ae919a908e5bd92734ec86bd4d38e68e20596d2",
+    "optomind_research/runtime/upgrade3/fullbody_contracts.py": "d2f68d5c4f91151e4a1aea00af4f5a1a26b7592f431a5a34b15a0beeb3c31e14",
+    "optomind_research/runtime/upgrade3/fullbody_writer.py": "bd268043f1f6b1050cb6715df184522347ae3dfeee8ff29f3b0f24f14d2dcd7c",
+    "optomind_research/runtime/upgrade3/writer_candidates.py": "bf573884cea5b0e476f2588a189930d721a604ed528221da6a919c79877a7ed6",
+    "optomind_research/runtime/upgrade3/writer_candidates_contracts.py": "68d73b9482275d5afd8b13d8f2558e0c118efdfada26f2ef83f8739beec7a17d",
+    "optomind_research/runtime/upgrade3/module4/runtime.py": "6d2055b024b5ec21d26940f456970629f5b263903c694bb33582c922c0d30cd9",
+    "prompts/guide_maker/generate.md": "cf7ec338896f23870067e3c783144cdd43f03b92480b786e81b5e27ef28934ee"
+  },
+  "semantic_quality_unreviewed": true,
+  "writing_tested": false,
+  "budget_binding": {
+    "mode": "dedicated",
+    "ledger_path": "F:\\OptoMind-Review-2\\outputs\\guide_maker_acceptance_20261008_30cny\\guide_budget.sqlite",
+    "limit_cny": 30.0
+  },
+  "started_at": "2026-10-08T08:16:26.335277+00:00",
+  "allow_max": false,
+  "retry_failed": false,
+  "fixture_sha256": null,
+  "budget_before": {
+    "limit_cny": 30.0,
+    "reserved_cny": 0.0,
+    "actual_cny": 0.51703,
+    "ledger_path": "F:\\OptoMind-Review-2\\outputs\\guide_maker_acceptance_20261008_30cny\\guide_budget.sqlite",
+    "reservations": [
+      {
+        "reservation_id": "res-fa22351923534eb1",
+        "call_id": "maker_001-d4f695314ce8-attempt_001:key0:attempt0",
+        "amount_cny": 2.167656,
+        "actual_cny": 0.51703,
+        "status": "settled",
+        "telemetry": {
+          "usage": {
+            "completion_tokens": 7547,
+            "completion_tokens_details": {
+              "reasoning_tokens": 5736,
+              "text_tokens": 7547
+            },
+            "prompt_tokens": 213233,
+            "prompt_tokens_details": {
+              "text_tokens": 213233
+            },
+            "total_tokens": 220780
+          },
+          "returned_model": "qwen3.5-plus",
+          "finish_reason": "stop",
+          "request_id": "chatcmpl-dc8729a2-6f74-9f41-afcd-232178137bf2",
+          "raw_response_sha256": "4d052c940114c7a78d4ee1f917c9a14b8a37ba7407caf6aff6dbb188467d5dbe",
+          "status_code": 200,
+          "provider_error_code": null,
+          "key_index": null,
+          "attempt": null,
+          "cap_pressure": {
+            "answer_tokens": 1811,
+            "completion_tokens": 7547,
+            "diagnostic_only": true,
+            "finish_reason_length": false,
+            "near_limit": false,
+            "near_limits": [],
+            "reasoning_tokens": 5736
+          },
+          "effective_request": {
+            "answer_tokens": 32768,
+            "enable_thinking": true,
+            "max_completion_tokens": 49152,
+            "max_tokens": null,
+            "model": "qwen3.5-plus",
+            "response_format": null,
+            "stream": true,
+            "stream_inactivity_timeout_seconds": 1800.0,
+            "stream_options": {
+              "include_usage": true
+            },
+            "stream_overall_timeout_seconds": 3600.0,
+            "thinking_budget": 16384,
+            "total_output_tokens": 49152
+          },
+          "stream": true,
+          "transport_events": [
+            {
+              "elapsed_seconds": 0.0,
+              "epoch": 1791446746.137295,
+              "overall_timeout_seconds": 3600.0,
+              "request_body_bytes": 852813,
+              "request_body_sha256": "854e67e0e8edeb094949cdcd00f02eb02821828bd8c54be3c82af728328dee48",
+              "sequence": 1,
+              "stage": "request_open_start",
+              "stream": true,
+              "timeout_seconds": 1800.0
+            },
+            {
+              "elapsed_seconds": 10.031999999890104,
+              "epoch": 1791446756.164919,
+              "headers": {
+                "connection": "close",
+                "content-type": "text/event-stream;charset=utf-8",
+                "date": "Thu, 08 Oct 2026 08:05:58 GMT",
+                "server": "istio-envoy",
+                "transfer-encoding": "chunked",
+                "x-request-id": "dc8729a2-6f74-9f41-afcd-232178137bf2"
+              },
+              "sequence": 2,
+              "stage": "response_opened",
+              "status_code": 200
+            },
+            {
+              "elapsed_seconds": 10.031999999890104,
+              "epoch": 1791446756.165912,
+              "event_count": 0,
+              "overall_remaining_seconds": 3589.96800000011,
+              "read_timeout_seconds": 1800.0,
+              "sequence": 3,
+              "stage": "stream_read_start"
+            },
+            {
+              "bytes": 308,
+              "elapsed_seconds": 10.031999999890104,
+              "epoch": 1791446756.165912,
+              "sequence": 4,
+              "stage": "stream_first_byte"
+            },
+            {
+              "elapsed_seconds": 10.031999999890104,
+              "epoch": 1791446756.165912,
+              "event_count": 0,
+              "overall_remaining_seconds": 3589.96800000011,
+              "read_timeout_seconds": 1800.0,
+              "sequence": 5,
+              "stage": "stream_read_start"
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.031999999890104,
+              "epoch": 1791446756.165912,
+              "event_count": 1,
+              "reasoning_bytes": 3,
+              "sequence": 6,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.109999999869615,
+              "epoch": 1791446756.2500265,
+              "event_count": 2,
+              "reasoning_bytes": 14,
+              "sequence": 7,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.171999999787658,
+              "epoch": 1791446756.3178334,
+              "event_count": 3,
+              "reasoning_bytes": 34,
+              "sequence": 8,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.202999999979511,
+              "epoch": 1791446756.335912,
+              "event_count": 4,
+              "reasoning_bytes": 36,
+              "sequence": 9,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.265999999828637,
+              "epoch": 1791446756.4036775,
+              "event_count": 5,
+              "reasoning_bytes": 58,
+              "sequence": 10,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.327999999979511,
+              "epoch": 1791446756.4598424,
+              "event_count": 6,
+              "reasoning_bytes": 73,
+              "sequence": 11,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.390999999828637,
+              "epoch": 1791446756.524196,
+              "event_count": 7,
+              "reasoning_bytes": 106,
+              "sequence": 12,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.421999999787658,
+              "epoch": 1791446756.5549052,
+              "event_count": 8,
+              "reasoning_bytes": 110,
+              "sequence": 13,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 17.359999999869615,
+              "epoch": 1791446763.4905927,
+              "event_count": 128,
+              "reasoning_bytes": 1791,
+              "sequence": 14,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 24.656999999890104,
+              "epoch": 1791446770.801135,
+              "event_count": 256,
+              "reasoning_bytes": 3478,
+              "sequence": 15,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 31.609999999869615,
+              "epoch": 1791446777.754719,
+              "event_count": 384,
+              "reasoning_bytes": 5269,
+              "sequence": 16,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 38.71899999980815,
+              "epoch": 1791446784.861046,
+              "event_count": 512,
+              "reasoning_bytes": 7026,
+              "sequence": 17,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 45.781999999890104,
+              "epoch": 1791446791.915807,
+              "event_count": 640,
+              "reasoning_bytes": 8664,
+              "sequence": 18,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 52.79699999978766,
+              "epoch": 1791446798.9349039,
+              "event_count": 768,
+              "reasoning_bytes": 10315,
+              "sequence": 19,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 59.734999999869615,
+              "epoch": 1791446805.869037,
+              "event_count": 896,
+              "reasoning_bytes": 12056,
+              "sequence": 20,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 66.93799999984913,
+              "epoch": 1791446813.076833,
+              "event_count": 1024,
+              "reasoning_bytes": 13733,
+              "sequence": 21,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 74.0,
+              "epoch": 1791446820.1353855,
+              "event_count": 1152,
+              "reasoning_bytes": 15295,
+              "sequence": 22,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 80.96899999980815,
+              "epoch": 1791446827.1028974,
+              "event_count": 1280,
+              "reasoning_bytes": 16894,
+              "sequence": 23,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 88.04699999978766,
+              "epoch": 1791446834.1907592,
+              "event_count": 1408,
+              "reasoning_bytes": 18427,
+              "sequence": 24,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 95.17199999978766,
+              "epoch": 1791446841.3132539,
+              "event_count": 1536,
+              "reasoning_bytes": 19943,
+              "sequence": 25,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 102.375,
+              "epoch": 1791446848.514642,
+              "event_count": 1664,
+              "reasoning_bytes": 21671,
+              "sequence": 26,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 426,
+              "elapsed_seconds": 109.59399999980815,
+              "epoch": 1791446855.7286677,
+              "event_count": 1792,
+              "reasoning_bytes": 22888,
+              "sequence": 27,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 1930,
+              "elapsed_seconds": 116.51599999982864,
+              "epoch": 1791446862.648886,
+              "event_count": 1920,
+              "reasoning_bytes": 22888,
+              "sequence": 28,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 3663,
+              "elapsed_seconds": 124.0,
+              "epoch": 1791446870.1440454,
+              "event_count": 2048,
+              "reasoning_bytes": 22888,
+              "sequence": 29,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 5297,
+              "elapsed_seconds": 131.31299999984913,
+              "epoch": 1791446877.455296,
+              "event_count": 2176,
+              "reasoning_bytes": 22888,
+              "sequence": 30,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "elapsed_seconds": 138.3279999999795,
+              "epoch": 1791446884.459916,
+              "event_count": 2302,
+              "raw_bytes": 691170,
+              "sequence": 32,
+              "stage": "stream_done"
+            },
+            {
+              "content_bytes": 6906,
+              "elapsed_seconds": 138.3279999999795,
+              "epoch": 1791446884.4609168,
+              "event_count": 2302,
+              "reasoning_bytes": 22888,
+              "sequence": 33,
+              "stage": "stream_complete",
+              "usage_present": true
+            }
+          ]
+        }
+      }
+    ],
+    "marker_sha256": "117e9e313090bfd8ebc935c3b82230ce25adc544f5743121554b1feacc426292",
+    "budget_policy": "dedicated_guide_lifetime_cap"
+  }
+}

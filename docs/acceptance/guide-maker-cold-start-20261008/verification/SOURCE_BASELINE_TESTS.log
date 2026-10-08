@@ -1,0 +1,140 @@
+.................................................F...................... [ 97%]
+..                                                                       [100%]
+================================== FAILURES ===================================
+________________ test_preview_no_credentials_budget_or_writer _________________
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-1386/test_preview_no_credentials_bu0')
+case = {'manifest': WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-1386/test_preview_n...strator/AppData/Local/Temp/pytest-of-Administrator/pytest-1386/test_preview_no_credentials_bu0/promoted/current'), ...}
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000021E9895C410>
+
+    def test_preview_no_credentials_budget_or_writer(tmp_path, case, monkeypatch):
+        fail = forbid(monkeypatch)
+        monkeypatch.setattr(cli, '_ledger_guard', fail)
+        from optomind_research.runtime.upgrade3 import guided_body_writer
+        monkeypatch.setattr(guided_body_writer, 'run_guided_body', fail)
+        out = tmp_path / 'preview'
+        assert cli.main(command(case, out, '--key-file', '/must-never-read-secret')) == 0
+        result = cli.read_json(out / 'CLI_RUN.json')
+        assert result['execution_mode'] == 'preview' and result['writing_tested'] is False
+        context = cli.read_json(out / 'CLI_CONTEXT.json')
+        assert context['feedback_file_sha256'] is None
+        assert context['book_sha256'] and context['implementation_hashes']
+        assert any('guide_maker.py' in p for p in context['implementation_hashes'])
+>       assert any('prompts/guide_maker/' in p for p in context['implementation_hashes'])
+E       assert False
+E        +  where False = any(<generator object test_preview_no_credentials_budget_or_writer.<locals>.<genexpr> at 0x0000021E98959490>)
+
+tests\upgrade3\test_guide_maker_cli.py:61: AssertionError
+---------------------------- Captured stdout call -----------------------------
+{
+  "schema_version": "optomind.guide_maker.v1.result",
+  "run_id": "20261008T081530Z-13da894595",
+  "status": "preview",
+  "complete": false,
+  "guide": null,
+  "guide_sha256": null,
+  "issues": [],
+  "required_action": null,
+  "input_hash": "728950134c6a8c55140f3639c0552c156548cf871c50f05efc7ee482bcc53a38",
+  "input_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\pytest-of-Administrator\\pytest-1386\\test_preview_no_credentials_bu0\\preview\\inputs\\728950134c6a8c55140f3639c0552c156548cf871c50f05efc7ee482bcc53a38\\FULL_BODY_INPUT.json",
+  "output_dir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\pytest-of-Administrator\\pytest-1386\\test_preview_no_credentials_bu0\\preview",
+  "outstanding_reading_needs": [],
+  "queued_source_handles": [],
+  "read_history": [],
+  "read_trace": [],
+  "model_calls": 0,
+  "client_invocations": 0,
+  "paid_dispatch_count": 0,
+  "execution_mode": "preview",
+  "cost_summary": {
+    "candidate_stage_known_cost_cny": 0,
+    "candidate_stage_cost_complete": true,
+    "unknown_cost_attempts": [],
+    "all_attempts_including_retries": [],
+    "base_cost_attribution": null,
+    "base_reuse_charged_again": false,
+    "total_known_cost_including_base_cny": 0,
+    "total_cost_complete": true,
+    "accounting_note": "Offline replay/recording/preview has no provider charge."
+  },
+  "requested_route": "guide_maker",
+  "effective_route": "guide_maker",
+  "material_preserved": true,
+  "semantic_quality_unreviewed": true,
+  "stages": [
+    {
+      "stage_id": "maker_001",
+      "role": "maker",
+      "effective_profile": {
+        "model": "qwen3.5-plus",
+        "thinking": true,
+        "thinking_budget": 16384,
+        "max_output_tokens": 32768,
+        "json_mode": false,
+        "timeout_seconds": 1800.0,
+        "stream": true,
+        "stream_overall_timeout_seconds": 3600.0,
+        "prompt_token_multiplier": 1.12,
+        "prompt_token_framing_margin": 8192
+      },
+      "estimate": {
+        "prompt_tokens": 18290,
+        "method": "utf8_conservative_upper_bound",
+        "multiplier": 1.0,
+        "framing_margin": 0,
+        "reserved_input_tokens": 18290,
+        "input_limit_tokens": 950848,
+        "completion_allowance_tokens": 49152,
+        "context_window": 1000000,
+        "fits": true,
+        "estimated_max_cost_cny": 1.252808,
+        "wire_request_sha256": "5e42273705cda5b501be474b1e3268a7a93760d6a119e5015a90f7a1e529cd50",
+        "wire_parameters": {
+          "model": "qwen3.5-plus",
+          "max_completion_tokens": 49152,
+          "temperature": 0.1,
+          "enable_thinking": true,
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "thinking_budget": 16384
+        }
+      },
+      "status": "planned",
+      "guide_before_sha256": null,
+      "material_preserved": true,
+      "cache_key": "ebd053df475437414cf28085f5e7931e8a48fbcb55d90677d850110ef160bfe8",
+      "dependencies": [],
+      "messages_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\pytest-of-Administrator\\pytest-1386\\test_preview_no_credentials_bu0\\preview\\runs\\20261008T081530Z-13da894595\\plans\\maker_001\\MESSAGES.json",
+      "model_calls": 0,
+      "client_invocations": 0,
+      "paid_dispatch_count": 0
+    }
+  ],
+  "selected_version": "20261008T081530Z-13da894595",
+  "selected_result_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\pytest-of-Administrator\\pytest-1386\\test_preview_no_credentials_bu0\\preview\\runs\\20261008T081530Z-13da894595\\GUIDE_RESULT.json",
+  "selected_input_matches_current": true,
+  "input_mode": "live_source_manifest",
+  "meter": {
+    "mode": "utf8_byte_upper_bound",
+    "tokenizer_sha256": null,
+    "actual_provider_token_count": false,
+    "warning": "Default local tokenizer is absent. UTF-8 byte upper bounds may reject or partition inputs that fit the model. Supply --tokenizer PATH for a local tokenizer estimate; no automatic download occurs."
+  },
+  "cli_invocation": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\pytest-of-Administrator\\pytest-1386\\test_preview_no_credentials_bu0\\preview\\cli_invocations\\8aab33257efe4db7a96c3041ad3cfa54.json",
+  "source_manifest_sha256": "84c46cbe931496026829e202080ce8a80521bdb5e53bb921f6a3267c81a81d0f",
+  "writing_tested": false,
+  "generation_complete": false,
+  "expected_chapter_ids": [
+    "CH01",
+    "CH02"
+  ],
+  "actual_chapter_ids": [
+    "CH01",
+    "CH02"
+  ]
+}
+=========================== short test summary info ===========================
+FAILED tests/upgrade3/test_guide_maker_cli.py::test_preview_no_credentials_budget_or_writer
+1 failed, 73 passed in 13.71s

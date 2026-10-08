@@ -1,0 +1,89 @@
+diff --git a/scripts/upgrade3/guide_maker.py b/scripts/upgrade3/guide_maker.py
+index 62c2f053..ec594e11 100644
+--- a/scripts/upgrade3/guide_maker.py
++++ b/scripts/upgrade3/guide_maker.py
+@@ -9,6 +9,8 @@ from __future__ import annotations
+ import argparse
+ from datetime import datetime, timezone
+ import json
++import math
++import sqlite3
+ from pathlib import Path
+ import sys
+ import uuid
+@@ -43,6 +45,7 @@ def parser():
+     mode.add_argument('--responses', help='Offline recorded-response fixture')
+     p.add_argument('--allow-max', action='store_true', help='Explicit permission; never automatically selects Max')
+     p.add_argument('--retry-failed', action='store_true')
++    p.add_argument('--budget-mode', choices=('legacy', 'dedicated'), default='legacy', help='Explicit dedicated guide ledger; legacy remains the default')
+     p.add_argument('--budget-ledger', help='Existing original round-two SQLite ledger and original marker')
+     p.add_argument('--budget-limit', type=float, help='Original lifetime ceiling, exactly 60 CNY, not a new allowance')
+     p.add_argument('--key-file')
+@@ -50,6 +53,31 @@ def parser():
+     return p
+ 
+ 
++def _dedicated_ledger_guard(args):
++    """Explicit guide-only capped ledger; reuse durable atomic accounting."""
++    limit = args.budget_limit
++    if not args.budget_ledger or limit is None or isinstance(limit, bool) or not math.isfinite(limit) or not 0 < limit <= 30:
++        raise ValueError('dedicated_guide_budget_requires_finite_cap_at_most_30_CNY')
++    ledger = Path(args.budget_ledger).expanduser().resolve()
++    marker = ledger.with_name(ledger.name + '.guide_maker.json')
++    expected = {'schema_version': 'optomind.guide_maker_budget.v1', 'ledger_path': str(ledger), 'limit_cny': float(limit)}
++    if ledger.exists() and not marker.is_file():
++        raise ValueError('dedicated_guide_ledger_must_be_new_or_previously_marked')
++    if marker.is_file() and read_json(marker) != expected:
++        raise ValueError('dedicated_guide_ledger_identity_or_limit_changed')
++    from optomind_research.runtime.upgrade3.module4.runtime import GlobalBudgetLedger
++    instance = GlobalBudgetLedger(limit_cny=float(limit), path=ledger)
++    if not marker.is_file():
++        write_json(marker, expected)
++    return {**instance.as_dict(), 'ledger_path': str(ledger), 'marker_sha256': sha256_file(marker), 'budget_policy': 'dedicated_guide_lifetime_cap'}
++
++
++def _execution_budget_guard(args):
++    if getattr(args, 'budget_mode', 'legacy') == 'dedicated':
++        return _dedicated_ledger_guard(args)
++    return _ledger_guard(args)
++
++
+ def _implementation_hashes():
+     """Bind replay/resume to code and guidance, including shared input adapters."""
+     root = PROJECT_ROOT / 'optomind_research/runtime/upgrade3'
+@@ -59,7 +87,7 @@ def _implementation_hashes():
+         'guided_body_contracts.py', 'writing_evidence.py', 'fullbody_contracts.py',
+         'fullbody_writer.py', 'writer_candidates.py', 'writer_candidates_contracts.py', 'module4/runtime.py')]
+     paths += sorted((PROJECT_ROOT / 'prompts/guide_maker').rglob('*.md'))
+-    return {str(path.relative_to(PROJECT_ROOT)): sha256_file(path) for path in paths}
++    return {path.relative_to(PROJECT_ROOT).as_posix(): sha256_file(path) for path in paths}
+ 
+ 
+ def _check_context(output, context):
+@@ -114,8 +142,16 @@ def main(argv=None):
+         snapshot = output / 'SOURCE_MANIFEST.json'
+         if snapshot.is_file() and _hash(read_json(snapshot)) != _hash(prepared):
+             raise ValueError('input_source_versions_changed_use_new_output_directory')
++        if args.run:
++            binding = {'mode': args.budget_mode, 'ledger_path': str(Path(args.budget_ledger).expanduser().resolve()) if args.budget_ledger else None, 'limit_cny': args.budget_limit}
++            prior_context_path = output / 'CLI_CONTEXT.json'
++            if prior_context_path.is_file():
++                prior_context = read_json(prior_context_path)
++                if prior_context.get('execution_mode') == 'live' and prior_context.get('budget_binding') != binding:
++                    raise ValueError('guide_live_resume_budget_changed')
++            context['budget_binding'] = binding
+         _check_context(output, context)
+-        budget = _ledger_guard(args) if args.run else None
++        budget = _execution_budget_guard(args) if args.run else None
+         write_json(snapshot, prepared)
+         write_json(output / 'EFFECTIVE_CONFIG.json', config)
+         factory = make_live_factory(args, token_counter=counter) if args.run else RecordingFactory(args.responses) if args.responses else None
+@@ -133,7 +169,7 @@ def main(argv=None):
+                   'expected_chapter_ids': prepared['expected_chapter_ids'], 'actual_chapter_ids': prepared['actual_chapter_ids']}
+         if args.run:
+             result['budget_before'] = budget
+-            result['budget_after'] = _ledger_guard(args)
++            result['budget_after'] = _execution_budget_guard(args)
+         if factory is not None and hasattr(factory, 'ledger_snapshot'):
+             result['budget'] = factory.ledger_snapshot()
+         if isinstance(factory, RecordingFactory):

@@ -1,0 +1,39 @@
+................................................................F.F..... [ 97%]
+..                                                                       [100%]
+================================== FAILURES ===================================
+_____________ test_original_budget_guard_is_shared_and_read_only ______________
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-1382/test_original_budget_guard_is_0')
+
+    def test_original_budget_guard_is_shared_and_read_only(tmp_path):
+>       assert cli._ledger_guard is old_cli._ledger_guard
+E       assert <function _guide_ledger_guard at 0x000001C328B63560> is <function _ledger_guard at 0x000001C328B632E0>
+E        +  where <function _guide_ledger_guard at 0x000001C328B63560> = cli._ledger_guard
+E        +  and   <function _ledger_guard at 0x000001C328B632E0> = old_cli._ledger_guard
+
+tests\upgrade3\test_guide_maker_cli.py:152: AssertionError
+____________ test_mock_live_uses_only_maker_and_retains_old_spend _____________
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-1382/test_mock_live_uses_only_maker0')
+case = {'manifest': WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-1382/test_mock_live...strator/AppData/Local/Temp/pytest-of-Administrator/pytest-1382/test_mock_live_uses_only_maker0/promoted/current'), ...}
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001C328B8B590>
+
+    def test_mock_live_uses_only_maker_and_retains_old_spend(tmp_path, case, monkeypatch):
+        from test_fullbody_integration import install_controlled_http
+        ledger, marker = existing_ledger(tmp_path)
+        marker_before = marker.read_bytes()
+        captured = install_controlled_http(monkeypatch, lambda payload: guide_response())
+        out = tmp_path / 'mock-live'
+        args = command(case, out, '--run', '--budget-ledger', str(ledger), '--budget-limit', '60', '--key-file', '/mock-key')
+>       assert cli.main(args) == 0
+E       AssertionError: assert 2 == 0
+E        +  where 2 = <function main at 0x000001C328B63740>(['--manifest', 'C:\\Users\\Administrator\\AppData\\Local\\Temp\\pytest-of-Administrator\\pytest-1382\\test_mock_live_u...mp\\pytest-of-Administrator\\pytest-1382\\test_mock_live_uses_only_maker0\\mock-live', '--run', '--budget-ledger', ...])
+E        +    where <function main at 0x000001C328B63740> = cli.main
+
+tests\upgrade3\test_guide_maker_cli.py:176: AssertionError
+---------------------------- Captured stderr call -----------------------------
+{"error": "ValueError", "message": "guide_maker_live_requires_isolated_finite_absolute_budget_at_most_30_CNY", "route": "guide_maker"}
+=========================== short test summary info ===========================
+FAILED tests/upgrade3/test_guide_maker_cli.py::test_original_budget_guard_is_shared_and_read_only
+FAILED tests/upgrade3/test_guide_maker_cli.py::test_mock_live_uses_only_maker_and_retains_old_spend
+2 failed, 72 passed in 13.82s

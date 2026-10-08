@@ -1,0 +1,278 @@
+diff --git a/optomind_research/runtime/upgrade3/fullbody_writer.py b/optomind_research/runtime/upgrade3/fullbody_writer.py
+index 09fe21ee..bd14d215 100644
+--- a/optomind_research/runtime/upgrade3/fullbody_writer.py
++++ b/optomind_research/runtime/upgrade3/fullbody_writer.py
+@@ -259,7 +259,7 @@ def _execute_stage(stage: dict[str, Any], *, output: Path, run_dir: Path, route:
+                  "code_hash": code_hash, "dependencies": dependencies}
+     key = _hash(signature)
+     plan_dir = run_dir / "plans" / stage["stage_id"]
+-    _write(plan_dir / "MESSAGES.json", stage["messages"])
++    _write(plan_dir / "MESSAGES.json", stage["messages"], ascii_only=(route == "guide_maker"))
+     public = {k: v for k, v in stage.items() if k != "messages"}
+     public.update(cache_key=key, dependencies=dependencies, messages_path=str(plan_dir / "MESSAGES.json"),
+                   model_calls=0, client_invocations=0, paid_dispatch_count=0)
+@@ -296,7 +296,7 @@ def _execute_stage(stage: dict[str, Any], *, output: Path, run_dir: Path, route:
+     attempt = stage_root / f"attempt_{len(attempts) + 1:03d}"
+     attempt.mkdir(parents=True, exist_ok=False)
+     call_id = stage["stage_id"] + "-" + key[:12] + "-" + attempt.name
+-    _write(attempt / "MESSAGES.json", stage["messages"])
++    _write(attempt / "MESSAGES.json", stage["messages"], ascii_only=(route == "guide_maker"))
+     _write(attempt / "REQUEST.json", {**public, "call_id": call_id, "signature": {k: v for k, v in signature.items() if k != "messages"}})
+     profile = stage["effective_profile"]
+     error, response, invoked = None, None, False
+diff --git a/optomind_research/runtime/upgrade3/guide_maker.py b/optomind_research/runtime/upgrade3/guide_maker.py
+index 731c7564..b6cd359f 100644
+--- a/optomind_research/runtime/upgrade3/guide_maker.py
++++ b/optomind_research/runtime/upgrade3/guide_maker.py
+@@ -24,6 +24,44 @@ SCHEMA_VERSION = "optomind.guide_maker.v1"
+ PROMPT_ROOT = ROOT / "prompts" / "guide_maker"
+ 
+ 
++def _record_request_composition(stage, outcome, *, run_dir, input_hash, code_hash,
++                                dependencies):
++    """Persist the exact stage shape without duplicating provider secrets/raw text."""
++    messages_path = Path(outcome["messages_path"])
++    composition_path = messages_path.with_name("REQUEST_COMPOSITION.json")
++    rows = stage.get("messages", [])
++    actual_path = None
++    actual = None
++    if outcome.get("attempt_dir"):
++        candidate = Path(outcome["attempt_dir"]) / "ACTUAL_REQUEST.json"
++        if candidate.is_file():
++            actual_path = str(candidate)
++            actual = _read(candidate)
++    composition = {
++        "schema_version": "optomind.guide_maker.v1.request_composition",
++        "stage_id": stage["stage_id"],
++        "role": stage["role"],
++        "execution_mode": outcome.get("execution_mode", "preview"),
++        "status": outcome.get("status"),
++        "messages_path": str(messages_path),
++        "message_count": len(rows),
++        "message_roles": [row.get("role") for row in rows if isinstance(row, Mapping)],
++        "message_sha256": _text_hash(rows),
++        "message_characters": sum(len(str(row.get("content", ""))) for row in rows if isinstance(row, Mapping)),
++        "wire_request_sha256": stage.get("estimate", {}).get("wire_request_sha256"),
++        "wire_parameters": stage.get("estimate", {}).get("wire_parameters"),
++        "estimate": stage.get("estimate"),
++        "actual_request_path": actual_path,
++        "actual_request": actual,
++        "input_hash": input_hash,
++        "code_hash": code_hash,
++        "dependencies": deepcopy(dependencies),
++    }
++    _write(composition_path, composition, ascii_only=True)
++    outcome["request_composition_path"] = str(composition_path)
++    return composition
++
++
+ def validate_config(config):
+     if not isinstance(config, Mapping):
+         raise CandidateError("config_must_be_object")
+@@ -149,6 +187,8 @@ def _run(book, output, config, client_factory, run, retry_failed, counter, feedb
+                 code_hash=manifest["code_hash"], input_hash=input_hash, dependencies=deepcopy(dependencies),
+                 client_factory=client_factory, run=run, retry_failed=retry_failed, config=config,
+                 counter=counter, parser=parser)
++            _record_request_composition(stage, outcome, run_dir=run_dir, input_hash=input_hash,
++                                        code_hash=manifest["code_hash"], dependencies=dependencies)
+             # Direct synthetic JSON complete:false is a provisional guide, not
+             # a provider transport failure. Never override provider envelopes.
+             parsed = outcome.get("result", {})
+diff --git a/optomind_research/runtime/upgrade3/writer_candidates.py b/optomind_research/runtime/upgrade3/writer_candidates.py
+index 25a9cdd9..cbba9b98 100644
+--- a/optomind_research/runtime/upgrade3/writer_candidates.py
++++ b/optomind_research/runtime/upgrade3/writer_candidates.py
+@@ -42,11 +42,11 @@ def _hash(value: Any) -> str:
+     return hashlib.sha256(_json(value).encode("utf-8")).hexdigest()
+ 
+ 
+-def _write(path: Path, value: Any, *, text: bool = False) -> None:
++def _write(path: Path, value: Any, *, text: bool = False, ascii_only: bool = False) -> None:
+     path.parent.mkdir(parents=True, exist_ok=True)
+     tmp = path.with_name(path.name + ".tmp-" + uuid.uuid4().hex)
+     with tmp.open("w", encoding="utf-8") as handle:
+-        handle.write(str(value) if text else json.dumps(value, ensure_ascii=False, indent=2, default=str) + "\n")
++        handle.write(str(value) if text else json.dumps(value, ensure_ascii=ascii_only, indent=2, default=str) + "\n")
+         handle.flush()
+         os.fsync(handle.fileno())
+     os.replace(tmp, path)
+diff --git a/scripts/upgrade3/guide_maker.py b/scripts/upgrade3/guide_maker.py
+index 62c2f053..b8541a03 100644
+--- a/scripts/upgrade3/guide_maker.py
++++ b/scripts/upgrade3/guide_maker.py
+@@ -9,7 +9,9 @@ from __future__ import annotations
+ import argparse
+ from datetime import datetime, timezone
+ import json
++import math
+ from pathlib import Path
++import sqlite3
+ import sys
+ import uuid
+ 
+@@ -26,8 +28,6 @@ read_json, write_json, sha256_file = evidence.read_json, evidence.write_json, ev
+ load_body_manifest, load_book = evidence.load_body_manifest, evidence.load_book
+ make_live_factory, RecordingFactory = shared.make_live_factory, evidence.RecordingFactory
+ tokenizer_counter, _hash = shared.tokenizer_counter, evidence._hash
+-# Keep the original ledger identity, marker and read-only lifetime-budget check.
+-_ledger_guard = guided._ledger_guard
+ 
+ 
+ def parser():
+@@ -43,8 +43,10 @@ def parser():
+     mode.add_argument('--responses', help='Offline recorded-response fixture')
+     p.add_argument('--allow-max', action='store_true', help='Explicit permission; never automatically selects Max')
+     p.add_argument('--retry-failed', action='store_true')
+-    p.add_argument('--budget-ledger', help='Existing original round-two SQLite ledger and original marker')
+-    p.add_argument('--budget-limit', type=float, help='Original lifetime ceiling, exactly 60 CNY, not a new allowance')
++    p.add_argument('--budget-mode', choices=('legacy', 'dedicated'), default='legacy',
++                   help='Paid ledger policy: legacy reuses the original 60-CNY guard; dedicated enables an isolated cap')
++    p.add_argument('--budget-ledger', help='Isolated SQLite ledger for this guide-maker run')
++    p.add_argument('--budget-limit', type=float, help='Absolute guide-maker CNY cap; this isolated acceptance run uses 30 CNY')
+     p.add_argument('--key-file')
+     p.add_argument('--tokenizer')
+     return p
+@@ -59,7 +61,80 @@ def _implementation_hashes():
+         'guided_body_contracts.py', 'writing_evidence.py', 'fullbody_contracts.py',
+         'fullbody_writer.py', 'writer_candidates.py', 'writer_candidates_contracts.py', 'module4/runtime.py')]
+     paths += sorted((PROJECT_ROOT / 'prompts/guide_maker').rglob('*.md'))
+-    return {str(path.relative_to(PROJECT_ROOT)): sha256_file(path) for path in paths}
++    return {path.relative_to(PROJECT_ROOT).as_posix(): sha256_file(path) for path in paths}
++
++
++def _guide_budget_marker(ledger: Path) -> Path:
++    return ledger.with_name(ledger.name + '.guide_maker.json')
++
++
++def _guide_ledger_guard(args):
++    """Create/read the isolated guide-maker ledger without touching the 60-CNY ledger."""
++    limit = getattr(args, 'budget_limit', None)
++    if (not args.budget_ledger or limit is None or isinstance(limit, bool)
++            or not math.isfinite(limit) or not 0 < limit <= 30):
++        raise ValueError('guide_maker_live_requires_isolated_finite_absolute_budget_at_most_30_CNY')
++    ledger = Path(args.budget_ledger).expanduser().resolve()
++    marker = _guide_budget_marker(ledger)
++    expected = {
++        'schema_version': 'optomind.guide_maker_budget.v1',
++        'ledger_path': str(ledger),
++        'limit_cny': float(limit),
++        'owner': 'guide_maker',
++    }
++    if ledger.exists() and not marker.is_file():
++        raise ValueError('existing_unmarked_ledger_forbidden:use_isolated_guide_maker_ledger')
++    if marker.is_file() and read_json(marker) != expected:
++        raise ValueError('guide_maker_ledger_cap_or_identity_changed')
++    from optomind_research.runtime.upgrade3.module4.runtime import GlobalBudgetLedger
++    try:
++        instance = GlobalBudgetLedger(limit_cny=float(limit), path=ledger)
++        snapshot = instance.as_dict()
++    except sqlite3.Error as exc:
++        raise ValueError('guide_maker_ledger_invalid_sqlite') from exc
++    if not marker.is_file():
++        write_json(marker, expected)
++    return {
++        **snapshot,
++        'marker_path': str(marker),
++        'marker_sha256': sha256_file(marker),
++        'budget_policy': 'isolated_guide_maker_absolute_30_cny_cap',
++    }
++
++
++def _manifest_provenance(prepared, manifest_path, tokenizer_path, meter):
++    dependencies = []
++    for item in prepared.get('source_files', []) if isinstance(prepared, dict) else []:
++        if not isinstance(item, dict):
++            continue
++        path = Path(str(item.get('path', ''))).expanduser()
++        dependencies.append({
++            'path': str(path),
++            'declared_sha256': item.get('sha256'),
++            'exists': path.is_file(),
++            'actual_sha256': sha256_file(path) if path.is_file() else None,
++        })
++    return {
++        'manifest_path': str(Path(manifest_path).expanduser().resolve()),
++        'manifest_sha256': sha256_file(manifest_path),
++        'prepared_manifest_sha256': _hash(prepared),
++        'plan_path': prepared.get('plan_path') if isinstance(prepared, dict) else None,
++        'plan_sha256': prepared.get('plan_sha256') if isinstance(prepared, dict) else None,
++        'dependencies': dependencies,
++        'tokenizer': {
++            'path': str(Path(tokenizer_path).expanduser().resolve()) if tokenizer_path else None,
++            **dict(meter or {}),
++        },
++    }
++
++
++# Keep the legacy guard as the default public helper for compatibility. The
++# isolated guard is selected only by the explicit dedicated budget mode.
++_ledger_guard = guided._ledger_guard
++
++
++def _selected_ledger_guard(args):
++    return _guide_ledger_guard if getattr(args, 'budget_mode', 'legacy') == 'dedicated' else _ledger_guard
+ 
+ 
+ def _check_context(output, context):
+@@ -73,7 +148,9 @@ def _check_context(output, context):
+             and {k: v for k, v in previous_config.items() if k != 'max_model_calls'}
+             == {k: v for k, v in next_config.items() if k != 'max_model_calls'})
+         for field in ('input_sha256', 'book_sha256', 'source_manifest_sha256', 'feedback_sha256',
+-                      'feedback_file_sha256', 'config', 'config_file_sha256', 'meter', 'implementation_hashes'):
++                      'feedback_file_sha256', 'config', 'config_file_sha256', 'meter',
++                      'implementation_hashes', 'manifest_provenance', 'budget_mode',
++                      'budget_scope'):
+             if cap_increase and field in ('config', 'config_file_sha256'):
+                 continue
+             if prior.get(field) != context.get(field):
+@@ -103,6 +180,8 @@ def main(argv=None):
+         compile_guide_input(book, feedback=feedback)
+         counter, meter = tokenizer_counter(args.tokenizer)
+         mode = 'live' if args.run else 'recording' if args.responses else 'preview'
++        provenance = _manifest_provenance(prepared, args.book or args.manifest,
++                                          args.tokenizer, meter)
+         context = {'schema_version': 'optomind.guide_maker_cli.v1', 'execution_mode': mode,
+                    'input_mode': 'offline_archive' if args.book else 'live_source_manifest',
+                    'input_sha256': sha256_file(args.book or args.manifest), 'book_sha256': book['book_sha256'],
+@@ -110,18 +189,25 @@ def main(argv=None):
+                    'feedback_file_sha256': sha256_file(args.feedback) if args.feedback else None,
+                    'config': config, 'config_file_sha256': sha256_file(args.config), 'meter': meter,
+                    'implementation_hashes': _implementation_hashes(), 'semantic_quality_unreviewed': True,
+-                   'writing_tested': False}
++                   'writing_tested': False, 'manifest_provenance': provenance,
++                   'budget_mode': args.budget_mode,
++                   'budget_scope': ('isolated_guide_maker_30_cny' if args.budget_mode == 'dedicated'
++                                   else 'legacy_round_two_60_cny') if args.run else None}
+         snapshot = output / 'SOURCE_MANIFEST.json'
+         if snapshot.is_file() and _hash(read_json(snapshot)) != _hash(prepared):
+             raise ValueError('input_source_versions_changed_use_new_output_directory')
+         _check_context(output, context)
+-        budget = _ledger_guard(args) if args.run else None
++        budget_guard = _selected_ledger_guard(args)
++        budget = budget_guard(args) if args.run else None
+         write_json(snapshot, prepared)
++        write_json(output / 'SOURCE_MANIFEST_HASHES.json', provenance)
++        write_json(output / 'INPUT_PROVENANCE.json', provenance)
+         write_json(output / 'EFFECTIVE_CONFIG.json', config)
+         factory = make_live_factory(args, token_counter=counter) if args.run else RecordingFactory(args.responses) if args.responses else None
+         invocation = output / 'cli_invocations' / (uuid.uuid4().hex + '.json')
+         write_json(invocation, {**context, 'started_at': datetime.now(timezone.utc).isoformat(),
+                                'allow_max': args.allow_max, 'retry_failed': args.retry_failed,
++                               'budget_mode': args.budget_mode,
+                                'fixture_sha256': getattr(factory, 'fixture_sha256', None), 'budget_before': budget})
+         result = run_guide_maker(book, output, config, client_factory=factory,
+                                 run=bool(args.run or args.responses), retry_failed=args.retry_failed,
+@@ -129,11 +215,12 @@ def main(argv=None):
+         result = {**result, 'execution_mode': mode, 'input_mode': context['input_mode'], 'meter': meter,
+                   'cli_invocation': str(invocation), 'source_manifest_sha256': _hash(prepared),
+                   'semantic_quality_unreviewed': True, 'writing_tested': False,
++                  'manifest_provenance': provenance,
+                   'generation_complete': result.get('complete') is True,
+                   'expected_chapter_ids': prepared['expected_chapter_ids'], 'actual_chapter_ids': prepared['actual_chapter_ids']}
+         if args.run:
+             result['budget_before'] = budget
+-            result['budget_after'] = _ledger_guard(args)
++            result['budget_after'] = budget_guard(args)
+         if factory is not None and hasattr(factory, 'ledger_snapshot'):
+             result['budget'] = factory.ledger_snapshot()
+         if isinstance(factory, RecordingFactory):
