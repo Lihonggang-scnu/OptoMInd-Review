@@ -1,0 +1,3706 @@
+{
+  "schema_version": "optomind.guide_maker.v1.result",
+  "run_id": "20261009T170901Z-7a347c0447",
+  "status": "blocked",
+  "complete": false,
+  "guide": {
+    "schema_version": "optomind.guided_body_guide.v1",
+    "manuscript_guide": "全文按“临床关联证据→免疫机制→代谢物中介→外部干扰→干预转化→毒性管理→方法学未来”推进。Ch1 主讲观察性关联的强度、异质性、外部修饰与证据阶梯；Ch2 主讲免疫机制链条并严格区分动物因果与人类关联；Ch3 主讲代谢物分子靶点与 TME 浓度缺口；Ch4 主讲抗生素/PPI/饮食等外部暴露的时机、剂量与癌种差异；Ch5 主讲 FMT/LBP/益生菌干预的证据等级、初治与难治差异、安全性边界；Ch6 主讲 irAE 微生物预测、疗效-毒性耦合/解耦与供体-方案情境安全；Ch7 主讲技术标准化、因果推断、III 期缺口与未来设计。重复案例采用分层复用：FMT-LUMINate 在 Ch1 作为证据阶梯案例，在 Ch2 作为人类伴随机制线索，在 Ch5 作为初治干预主讲案例，在 Ch6 作为供体毒性主讲案例；MITRIC 在 Ch1 作为阴性对照，在 Ch5 作为难治人群主讲案例；JCOG2007 在 Ch1 主讲方案特异性，在 Ch4 作为化疗时序修饰对照，在 Ch5 仅作背景。写作中保留阴性结果、条件限定、样本量限制与证据等级标注。全文实际引用目标为去重后不少于 150 篇；相关来源可在背景、方法、解释与比较中共同引用，合并论述时保留各自支撑作用。",
+    "chapters": [
+      {
+        "chapter_id": "Ch1",
+        "title": "实体瘤中肠道微生物组与 ICI 疗效的临床关联证据",
+        "writing_arrangement": "本章先建立跨癌种观察性关联的总体图景，再立即用统计与反例限制“通用标志物”推断；随后引入外部药物暴露与治疗方案作为修饰变量，再转向纵向动态对基线快照的补充，最后以证据阶梯收束。解释顺序为：共性信号→异质性与无通用标志物→方案/暴露修饰→纵向动态→证据等级与转化边界。写作中每次引用具体数字时标明研究设计、癌种、治疗方案与时间窗；对 FMT-LUMINate、MITRIC、MIMic、JCOG2007 等案例只作本章所需的证据等级展示，不展开后续章节的机制与安全性细节。",
+        "required_content": [
+          "章首用一段说明本章只评估临床关联与证据等级，机制细节留给 Ch2/Ch3，外部因素系统展开留给 Ch4，干预试验系统评价留给 Ch5。",
+          "在证据阶梯单元中明确表格承担的比较：试验阶段、目标人群、干预策略、疗效结果与关键局限；正文解释表格而不是重复表格。",
+          "保留 P0289、P0275、P0270、P0327 等阴性或反例证据，避免将观察性关联写成普适结论。"
+        ],
+        "source_handles": [],
+        "writing_units": [
+          {
+            "unit_id": "Ch1_W1",
+            "title": "跨癌种关联图谱与无通用标志物的统计依据",
+            "writing_arrangement": "先写黑色素瘤、NSCLC、RCC 等队列中反复出现的分类学与功能信号，再写 HCC、mCRPC、结直肠癌等信号失效或反转，随后用跨队列 PERMANOVA、机器学习泛化差、肠型特异性与功能趋同解释为何没有普适单一标志物。最后以 JCOG2007 的方案特异性作为过渡，说明关联方向受治疗方案修饰。",
+            "content_task_ids": [
+              "Ch1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1_P01",
+              "Ch1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1_P02",
+              "Ch1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1::U1_%E8%B7%A8%E7%99%8C%E7%A7%8D%E5%85%B3%E8%81%94%E5%9B%BE%E8%B0%B1_P03"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch1_W2",
+            "title": "外部药物暴露与宿主背景对关联强度的修饰",
+            "writing_arrangement": "本单元量化抗生素与 PPIs 的效应量和时间窗，比较不同癌种与人群中的阳性/阴性结果，再讨论联合方案对微生物效应方向的反转或放大。最后写校正必要性、指示偏倚与残余偏倚，为 Ch4 的系统展开留出接口但不重复其全部机制。",
+            "content_task_ids": [
+              "Ch1::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF_P01",
+              "Ch1::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF_P02",
+              "Ch1::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF::U2_%E5%A4%96%E9%83%A8%E5%B9%B2%E6%89%B0%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%83%8C%E6%99%AF_P03"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch1_W3",
+            "title": "基线快照局限与纵向动态的预测价值",
+            "writing_arrangement": "从基线单次采样无法捕捉治疗诱导生态重塑写起，比较新辅助与晚期疾病中稳定性/多样性信号的差异；再写纵向动态（有害菌丢失、定植、稳定性丧失、多组学轨迹）的预测价值；最后写采样频率、存储、标准化与参考值缺失等方法学障碍。此处只作临床观察层面的动态证据，不展开机制。",
+            "content_task_ids": [
+              "Ch1::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98_P01",
+              "Ch1::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98_P02",
+              "Ch1::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98::U3_%E5%8A%A8%E6%80%81%E7%9B%91%E6%B5%8B%E4%B8%8E%E7%BA%B5%E5%90%91%E6%BC%94%E5%8F%98_P03"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch1_W4",
+            "title": "证据阶梯、阴性干预与安全信号的情境依赖",
+            "writing_arrangement": "总结观察性证据最强、概念验证干预异质性大、Phase III 缺失的证据阶梯；比较 FMT-LUMINate 阳性、MITRIC 阴性与早期综述/荟萃证据；用表格呈现主要干预试验设计与局限；最后用安全信号仅在双 ICI 背景出现说明方案调节，并过渡到下一章机制。",
+            "content_task_ids": [
+              "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_P01",
+              "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_P02",
+              "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_P03",
+              "Ch1::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C::U4_%E8%AF%81%E6%8D%AE%E9%98%B6%E6%A2%AF%E4%B8%8E%E8%BD%AC%E5%8C%96%E8%BE%B9%E7%95%8C_T01"
+            ],
+            "source_handles": []
+          }
+        ]
+      },
+      {
+        "chapter_id": "Ch2",
+        "title": "微生物调节 ICI 疗效的免疫学机制",
+        "writing_arrangement": "本章建立“微生物信号→先天识别→适应性启动→屏障/易位/髓系重塑→肿瘤类型与模型边界”的机制链。每个机制节点都按“动物因果证据→人类关联/伴随证据→外推限制”组织。与 Ch1 的衔接是：Ch1 已证明关联存在但非普适，本章解释可能机制；与 Ch3 的分工是：本章写细胞与受体通路，不深入代谢物浓度/剂量；与 Ch5/Ch6 的分工是：本章不评价干预试验成败，只在必要处引用人类试验作为伴随证据。",
+        "required_content": [
+          "每个机制段落标注证据类型：小鼠因果、体外功能、人类宏基因组关联、人类干预伴随观察。",
+          "保留 CRC、PDAC、消化道肿瘤等语境差异，防止 PRR/STING/屏障机制被写成单向促免疫。",
+          "表格承担不同肿瘤类型中关键微生物特征、机制通路、证据类型与来源比较；正文解释差异含义。"
+        ],
+        "source_handles": [],
+        "writing_units": [
+          {
+            "unit_id": "Ch2_W1",
+            "title": "先天识别与 DC 启动：结构、受体与检查点语气",
+            "writing_arrangement": "先写 LPS 酰化状态、MAMPs/TLR/NOD2 等结构-受体语境，说明“有菌不等于激活”；再写 DC 亚群成熟、迁移与 STING/IFN-β 轴；最后写微生物调节 DC PD-L2/RGMb 等检查点语气。人类证据用黑色素瘤 lpxM 关联、FMT 后 CD8+ 增加与肿瘤内微生物观察作对照，强调不能直接外推小鼠因果。",
+            "content_task_ids": [
+              "Ch2::Ch2_U01::Ch2_U01_P01",
+              "Ch2::Ch2_U01::Ch2_U01_P02",
+              "Ch2::Ch2_U01::Ch2_U01_P03"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch2_W2",
+            "title": "适应性免疫启动：分子模拟、T 细胞 priming 与亚群平衡",
+            "writing_arrangement": "先写分子模拟与交叉反应性 CD8+ 激活，区分小鼠功能回补与人类生物信息学/体外证据；再写 T 细胞 priming、Th17/Treg、非经典 T 细胞与耗竭调控。代谢物只作为微环境因素点名，详细分子靶点留给 Ch3。",
+            "content_task_ids": [
+              "Ch2::Ch2_U02::Ch2_U02_P01",
+              "Ch2::Ch2_U02::Ch2_U02_P02"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch2_W3",
+            "title": "屏障、细菌易位与髓系重编程的条件链",
+            "writing_arrangement": "按“屏障状态→主动易位→髓系后果→人类情境”写。先用肠芯片与 P. bifermentans 说明屏障损伤与疗效增强可分离；再写 ICT 诱导 DC/CCR7 依赖易位；随后写易位后髓系重编程决定免疫方向；最后用 FMT-LUMINate 与综述异质性说明人类证据的情境依赖。",
+            "content_task_ids": [
+              "Ch2::Ch2_U03::Ch2_U03_P01",
+              "Ch2::Ch2_U03::Ch2_U03_P02",
+              "Ch2::Ch2_U03::Ch2_U03_P03",
+              "Ch2::Ch2_U03::Ch2_U03_P04"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch2_W4",
+            "title": "肿瘤类型特异性与模型系统差异",
+            "writing_arrangement": "比较黑色素瘤、NSCLC、RCC、HCC、mCRPC、TNBC、消化道肿瘤与下呼吸道/肿瘤内微生物证据，说明机制表达受肿瘤背景、治疗史与部位影响。最后严格总结临床前因果与人类观察性证据的边界，并用表格承载跨肿瘤比较。",
+            "content_task_ids": [
+              "Ch2::Ch2_U04::Ch2_U04_P01",
+              "Ch2::Ch2_U04::Ch2_U04_P02",
+              "Ch2::Ch2_U04::Ch2_U04_T01"
+            ],
+            "source_handles": []
+          }
+        ]
+      },
+      {
+        "chapter_id": "Ch3",
+        "title": "微生物代谢物的中介作用与分子机制",
+        "writing_arrangement": "本章按四大代谢物类别展开，但统一采用“分子靶点→证据层级→情境依赖→浓度/递送缺口”的写法。Ch2 已写免疫细胞通路，本章聚焦代谢物本身：SCFAs 的 HDAC/GPCR 双向效应；肌苷的 UBA6/A2AR/碳源区分；胆汁酸与色氨酸代谢物的核受体网络；功能通路与表观遗传整合。最后集中讨论血浆/粪便代理与人体 TME 浓度缺失。写作中严格区分血浆、粪便、体外设定浓度与人体组织实测值。",
+        "required_content": [
+          "每个代谢物单元标明证据来源是血浆/粪便关联、动物机制还是体外浓度实验。",
+          "肌苷部分必须保留 CheckMate 025 血浆关联、UBA6 机制、II 期随机数据与 TME 实测缺失之间的层级差异。",
+          "最后单元提出微透析、空间代谢组学、配对组织-血液采样等未来路线，但不写成过度承诺。"
+        ],
+        "source_handles": [],
+        "writing_units": [
+          {
+            "unit_id": "Ch3_W1",
+            "title": "SCFAs：HDAC/GPCR 双通路与 ICI 靶点依赖的双向效应",
+            "writing_arrangement": "先写丁酸/丙酸/乙酸的基础生化路径；再写抗 PD-1 背景下高粪便 SCFA 与 PFS/响应的正向关联；随后写抗 CTLA-4 背景下的负面或限制性证据；最后写缺氧、浓度阈值与肿瘤细胞逆向摄取导致效应反转。",
+            "content_task_ids": [
+              "Ch3::U3_1::U3_1_P01",
+              "Ch3::U3_1::U3_1_P02",
+              "Ch3::U3_1::U3_1_P03",
+              "Ch3::U3_1::U3_1_P04"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch3_W2",
+            "title": "肌苷：UBA6 抑制、T 细胞外在作用与临床关联",
+            "writing_arrangement": "先写肌苷结合/抑制 UBA6 的生化与遗传学证据；再写 CheckMate 025 血浆肌苷与 OS 关联及随机 II 期 PFS 信号；随后区分肿瘤内在 UBA6 作用与 T 细胞 A2AR/碳源作用；最后明确人体 TME 实测浓度缺失与药代挑战。",
+            "content_task_ids": [
+              "Ch3::U3_2::U3_2_P01",
+              "Ch3::U3_2::U3_2_P02",
+              "Ch3::U3_2::U3_2_P03",
+              "Ch3::U3_2::U3_2_P04"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch3_W3",
+            "title": "次级胆汁酸与色氨酸代谢物：核受体网络与系统/局部差异",
+            "writing_arrangement": "先写 TDCA/UDCA 等通过 TGR5/FXR 增强 CD8+ 与巨噬细胞 M1 极化，并用 HCC 队列关联临床预后；再写 IPA、犬尿氨酸等通过 AhR/RORγt 调控 T 细胞与髓系；最后讨论肠道局部稳态与远端 TME 重塑中的剂量/分布差异。",
+            "content_task_ids": [
+              "Ch3::U3_3::U3_3_P01",
+              "Ch3::U3_3::U3_3_P02",
+              "Ch3::U3_3::U3_3_P03"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch3_W4",
+            "title": "功能通路、表观遗传整合与功能性评分的必要性",
+            "writing_arrangement": "用 MEP/核黄素通路与 Vδ2/MAIT 活化说明功能通路优于单一分类学；再写代谢物通过 HDAC 抑制、染色质开放与能量代谢锁定免疫细胞表型；最后提出功能性菌群失调评分/多组学模型替代传统多样性指标，但保留验证限制。",
+            "content_task_ids": [
+              "Ch3::U3_4::U3_4_P01",
+              "Ch3::U3_4::U3_4_P02",
+              "Ch3::U3_4::U3_4_P03"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch3_W5",
+            "title": "血浆/粪便代理的效能、TME 浓度缺口与未来测量路线",
+            "writing_arrangement": "先客观评价血浆/粪便代谢组学的临床可行性与偏差；再以肌苷为核心剖析缺乏 TME 阈值如何阻碍剂量优化与体内复现；最后提出微透析、MALDI-MSI、配对组织-血液纵向采样与局部浓度-受体占有率-结局映射。",
+            "content_task_ids": [
+              "Ch3::U3_5::U3_5_P01",
+              "Ch3::U3_5::U3_5_P02",
+              "Ch3::U3_5::U3_5_P03"
+            ],
+            "source_handles": []
+          }
+        ]
+      },
+      {
+        "chapter_id": "Ch4",
+        "title": "外部因素对微生物 - 免疫轴的干扰",
+        "writing_arrangement": "本章系统展开 Ch1 已提示的外部干扰。顺序为抗生素→PPI→饮食/生活方式。每类因素按“效应量与时间窗→微生物机制假说→癌种/宿主修饰→因果边界与临床建议”组织。与 Ch1 的增量是：Ch1 只把外部暴露作为关联修饰变量，本章提供系统证据、机制假说和实践含义；与 Ch5 的分工是：本章写被动干扰与可修饰暴露，不评价主动微生物干预试验。",
+        "required_content": [
+          "抗生素部分保留 HCC 阴性结果与 PD-L1 分层，避免写成所有癌种一致负面。",
+          "PPI 部分保留化疗时序修饰、口腔化易位与 H2B 对照，并区分疗效与毒性药物警戒信号。",
+          "饮食/益生菌部分保留商业益生菌矛盾证据与食物基质优于补充剂的条件性结论。"
+        ],
+        "source_handles": [],
+        "writing_units": [
+          {
+            "unit_id": "Ch4_W1",
+            "title": "抗生素：时间窗、疗程剂量与癌种特异性",
+            "writing_arrangement": "先界定 ICI 前后高危窗口并比较术前/术后暴露；再写疗程长度与广谱类别的剂量-反应关系；最后引入 HCC 阴性结果、肝硬化免疫缓冲与外推边界。",
+            "content_task_ids": [
+              "Ch4::Ch4_U01::Ch4_U01_P01",
+              "Ch4::Ch4_U01::Ch4_U01_P02",
+              "Ch4::Ch4_U01::Ch4_U01_P03"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch4_W2",
+            "title": "PPIs：胃酸抑制、口腔化易位与抑酸药物选择",
+            "writing_arrangement": "先量化 PPI 与 OS/PFS 的负相关及使用时窗；再写化疗近期暴露的修饰与口腔细菌易位/多样性丧失机制；最后比较 PPI 与 H2B，提出必须抑酸时的降级与监测建议。",
+            "content_task_ids": [
+              "Ch4::Ch4_U02::Ch4_U02_P01",
+              "Ch4::Ch4_U02::Ch4_U02_P02",
+              "Ch4::Ch4_U02::Ch4_U02_P03"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch4_W3",
+            "title": "饮食、益生菌与生活方式：可塑性、菌株特异性与间接路径",
+            "writing_arrangement": "先写高纤维/特定宏量营养素与产 SCFA 菌、PFS 的关联；再写商业益生菌的矛盾证据、菌株特异性、生态位竞争与食物基质原则；最后简述昼夜节律/心理压力的神经内分泌-色氨酸路径，并标注证据层级。",
+            "content_task_ids": [
+              "Ch4::Ch4_U03::Ch4_U03_P01",
+              "Ch4::Ch4_U03::Ch4_U03_P02",
+              "Ch4::Ch4_U03::Ch4_U03_P03"
+            ],
+            "source_handles": []
+          }
+        ]
+      },
+      {
+        "chapter_id": "Ch5",
+        "title": "微生物干预策略的临床转化现状",
+        "writing_arrangement": "本章从“观察性关联”转向“因果性干预”的临床评估。顺序为初治人群阳性信号→难治人群阴性边界→定义菌株制剂→安全性→证据等级与转化瓶颈。与 Ch1 的增量是：Ch1 只展示证据阶梯概览，本章系统比较试验设计、人群、供体、机制假说与失败原因；与 Ch6 的分工是：本章写干预安全性作为转化边界，Ch6 写 irAE 预测与管理；与 Ch7 的分工是：本章提出瓶颈，Ch7 提供方法学设计原则。",
+        "required_content": [
+          "FMT-LUMINate 在本章主讲初治疗效与有害菌清除机制，但毒性细节主要留给 Ch6；本章只保留安全性 boundary。",
+          "MITRIC 必须作为难治人群主讲阴性案例，解释快速进展、定植短暂与髓系主导微环境。",
+          "明确目前没有已完成大型 Phase III RCT 支持常规临床应用；TACITO 作为早期随机但未达主要终点的对照。"
+        ],
+        "source_handles": [],
+        "writing_units": [
+          {
+            "unit_id": "Ch5_W1",
+            "title": "初治人群：FMT 联合一线 ICI 的缓解信号与机制假说",
+            "writing_arrangement": "报告 FMT-LUMINate 与 MIMic 的 ORR/PFS/OS 信号，比较单药与双药背景；解释有害菌清除优于供体定植的机制假说；引入 TACITO 随机对照的数值改善与统计局限。强调单臂/历史对照偏倚。",
+            "content_task_ids": [
+              "Ch5::Ch5_U01::Ch5_U01_P01",
+              "Ch5::Ch5_U01::Ch5_U01_P02",
+              "Ch5::Ch5_U01::Ch5_U01_P03"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch5_W2",
+            "title": "难治人群：FMT 的生物学屏障与阴性结果",
+            "writing_arrangement": "报告 MITRIC 的 ORR 0% 与 PFS 数据；解析定植短暂、基线髓系偏倚、高 IL-8 与免疫微环境固化；补充 Kim 等低响应数据，说明 FMT 难以普遍克服已建立耐药。",
+            "content_task_ids": [
+              "Ch5::Ch5_U02::Ch5_U02_P01",
+              "Ch5::Ch5_U02::Ch5_U02_P02",
+              "Ch5::Ch5_U02::Ch5_U02_P03"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch5_W3",
+            "title": "LBPs/定义菌群：标准化优势、早期信号与开发困境",
+            "writing_arrangement": "评估 CBM588 对肠道稳态的微生物学合理性；报告 MRx0518 安全性与初步疗效/机制假说；概述 MET4 等定义菌群的免疫反应、监管与实施困难。强调疗效终点仍为探索性。",
+            "content_task_ids": [
+              "Ch5::Ch5_U03::Ch5_U03_P01",
+              "Ch5::Ch5_U03::Ch5_U03_P02",
+              "Ch5::Ch5_U03::Ch5_U03_P03"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch5_W4",
+            "title": "干预安全性：方案背景与供体特征的情境依赖",
+            "writing_arrangement": "比较 NSCLC 单药与黑色素瘤双药下毒性发生率与起病时间；写供体 Cluster B/Prevotella/S. copri 与双 ICI 背景毒性的关联；汇总总体 AE 谱与供体筛查/制造控制必要性。机制细节留给 Ch6。",
+            "content_task_ids": [
+              "Ch5::Ch5_U04::Ch5_U04_P01",
+              "Ch5::Ch5_U04::Ch5_U04_P02",
+              "Ch5::Ch5_U04::Ch5_U04_P03"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch5_W5",
+            "title": "证据等级、可重复性变量与转化瓶颈",
+            "writing_arrangement": "确认 Phase III 空白；剖析供体来源、预处理、给药途径与基线菌群等关键变量；提出纵向监测、功能预测模型与生态药理学框架。此处为 Ch7 的方法学展开做铺垫。",
+            "content_task_ids": [
+              "Ch5::Ch5_U05::Ch5_U05_P01",
+              "Ch5::Ch5_U05::Ch5_U05_P02",
+              "Ch5::Ch5_U05::Ch5_U05_P03"
+            ],
+            "source_handles": []
+          }
+        ]
+      },
+      {
+        "chapter_id": "Ch6",
+        "title": "微生物组与免疫治疗毒性的关联",
+        "writing_arrangement": "本章从毒性预测与管理角度补充疗效章节。顺序为毒性微生物指纹→疗效-毒性耦合/解耦→干预安全与供体情境→分子机制。与 Ch5 的增量是：Ch5 从干预转化角度提安全性，本章系统写 irAE 预测标志物、耦合/解耦生物学与情境化管理；与 Ch2/Ch3 的增量是：本章把屏障、代谢物、分子模拟与髓系通路用于毒性解释。必须强调当前结论主要来自结肠炎，非结肠炎 irAEs 样本量不足。",
+        "required_content": [
+          "保留结肠炎证据最强、心肌炎/神经毒性证据受限的层级差异。",
+          "供体毒性表格承担 Cluster A/B、特征菌、ICI 方案、毒性事件与关联强度比较。",
+          "机制部分区分动物因果、人类关联与尚未解析的 Prevotella 心肌炎机制。"
+        ],
+        "source_handles": [],
+        "writing_units": [
+          {
+            "unit_id": "Ch6_W1",
+            "title": "irAE 微生物指纹、器官特异性与预测模型困境",
+            "writing_arrangement": "先写结肠炎型微生物指纹与动物因果验证；再写胃肠道癌保护性菌群与器官特异性毒性；最后评估机器学习预测模型性能、多重检验问题与非结肠炎样本量不足。",
+            "content_task_ids": [
+              "Ch6::Ch6_U1::Ch6_U1_P01",
+              "Ch6::Ch6_U1::Ch6_U1_P02",
+              "Ch6::Ch6_U1::Ch6_U1_P03"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch6_W2",
+            "title": "疗效与毒性耦合/解耦及免疫稳态中介",
+            "writing_arrangement": "先写共享免疫激活的双刃剑效应；再写无毒性响应者的解耦菌群证据；最后用基线免疫稳态与纵向动态（Tregs、Ruminococcaceae 等）解释中介路径。保留回顾性证据限制。",
+            "content_task_ids": [
+              "Ch6::Ch6_U2::Ch6_U2_P01",
+              "Ch6::Ch6_U2::Ch6_U2_P02",
+              "Ch6::Ch6_U2::Ch6_U2_P03"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch6_W3",
+            "title": "微生物干预安全性的供体与方案情境",
+            "writing_arrangement": "报告 FMT-LUMINate 单药/双药毒性分化；解析供体聚类与特定毒性事件；写益生菌双向作用与伴随用药干扰。表格比较供体聚类与方案背景下的毒性风险。",
+            "content_task_ids": [
+              "Ch6::Ch6_U3::Ch6_U3_P01",
+              "Ch6::Ch6_U3::Ch6_U3_P02",
+              "Ch6::Ch6_U3::Ch6_U3_P03",
+              "Ch6::Ch6_U3::Ch6_U3_T01"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch6_W4",
+            "title": "介导毒性的屏障、代谢物与免疫通路机制",
+            "writing_arrangement": "按屏障受损/内毒素易位→代谢物表观遗传与炎症调节→MyD88/髓系与心肌炎 CD8-TNF 轴组织。强调机制多来自模型，Prevotella 特异性机制未解析。",
+            "content_task_ids": [
+              "Ch6::Ch6_U4::Ch6_U4_P01",
+              "Ch6::Ch6_U4::Ch6_U4_P02",
+              "Ch6::Ch6_U4::Ch6_U4_P03"
+            ],
+            "source_handles": []
+          }
+        ]
+      },
+      {
+        "chapter_id": "Ch7",
+        "title": "方法学挑战与未来研究方向",
+        "writing_arrangement": "本章收束全文，不再引入新临床主张，而是解释为何前述章节反复出现异质性、条件限定与证据等级差异。顺序为技术变异→观察性因果限制→证据等级与人群缺口→未来功能导向与工程化研究。与前面章节的承接是：Ch1 的跨队列异质、Ch3 的 TME 浓度缺口、Ch4 的混杂暴露、Ch5 的 III 期空白与 Ch6 的非结肠炎样本不足，在此统一转化为设计原则。",
+        "required_content": [
+          "保留标准化重分析的积极证据，避免写成“微生物信号纯属噪音”。",
+          "MR/统计工具只定位为假设生成器，不替代前瞻性干预试验。",
+          "未来方向必须与前述缺口对应：TME 浓度、纵向采样、供体标准化、人群分层、安全监测。"
+        ],
+        "source_handles": [],
+        "writing_units": [
+          {
+            "unit_id": "Ch7_W1",
+            "title": "测序、生信、样本处理与低生物量污染的技术变异",
+            "writing_arrangement": "先写领域从物种普查到功能解析的演进；再比较 16S/宏基因组、引物偏好、宿主 DNA、生信管道与低生物量污染；用标准化重分析说明真实信号可被恢复；最后引入培养组学与多界检测补位。",
+            "content_task_ids": [
+              "Ch7::Ch7_U01::Ch7_U01_P01",
+              "Ch7::Ch7_U01::Ch7_U01_P02",
+              "Ch7::Ch7_U01::Ch7_U01_P03",
+              "Ch7::Ch7_U01::Ch7_U01_P04"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch7_W2",
+            "title": "观察性关联的因果倒置、混杂与跨物种外推",
+            "writing_arrangement": "写横断面/回顾性设计的因果倒置风险；列举抗生素、PPI、饮食、时间生物学、年龄/人群等混杂；比较无菌小鼠与人类复杂生态；评估 MR 等统计工具的适用边界。",
+            "content_task_ids": [
+              "Ch7::Ch7_U02::Ch7_U02_P01",
+              "Ch7::Ch7_U02::Ch7_U02_P02",
+              "Ch7::Ch7_U02::Ch7_U02_P03",
+              "Ch7::Ch7_U02::Ch7_U02_P04"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch7_W3",
+            "title": "证据等级断层、纵向前瞻性短缺与人群表征盲区",
+            "writing_arrangement": "盘点 I/II 期信号与 III 期缺席；写纵向前瞻性数据结构性短缺；讨论老年、儿科、种族与地理饮食表征不足；用临床医生需求反衬转化能力不足。",
+            "content_task_ids": [
+              "Ch7::Ch7_U03::Ch7_U03_P01",
+              "Ch7::Ch7_U03::Ch7_U03_P02",
+              "Ch7::Ch7_U03::Ch7_U03_P03",
+              "Ch7::Ch7_U03::Ch7_U03_P04"
+            ],
+            "source_handles": []
+          },
+          {
+            "unit_id": "Ch7_W4",
+            "title": "功能导向、多组学/AI、先进模型与精准干预安全框架",
+            "writing_arrangement": "论证基因/通路水平分析的必要性；介绍 AI 多模态整合的潜力与泛化风险；评估类器官/芯片相对动物模型的定位；最后提出供体标准化、制剂工艺、给药时序、长期安全监测与监管框架。",
+            "content_task_ids": [
+              "Ch7::Ch7_U04::Ch7_U04_P01",
+              "Ch7::Ch7_U04::Ch7_U04_P02",
+              "Ch7::Ch7_U04::Ch7_U04_P03",
+              "Ch7::Ch7_U04::Ch7_U04_P04"
+            ],
+            "source_handles": []
+          }
+        ]
+      }
+    ]
+  },
+  "guide_sha256": "7b978cedc39489416cea353fa0fab0b435212d6326ad080ad18ab24f9a19b2fb",
+  "issues": [
+    {
+      "error_type": "CandidateError",
+      "error": "repeated_read_request:P0212:explicit_new_reread_reason_required",
+      "record": null
+    }
+  ],
+  "required_action": null,
+  "input_hash": "98ca59ba83d5c83781b15c05b7cdc83e243d7c30a7382abcdfa293919544a52c",
+  "input_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\inputs\\98ca59ba83d5c83781b15c05b7cdc83e243d7c30a7382abcdfa293919544a52c\\FULL_BODY_INPUT.json",
+  "output_dir": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live",
+  "outstanding_reading_needs": [
+    {
+      "need_id": "N1",
+      "question": "确认是否存在已完成大型 Phase III RCT 或新的随机证据，以避免 Ch1/Ch5/Ch7 将“Phase III 缺失”写成过时结论。",
+      "source_handles": [
+        "P0212",
+        "P0573",
+        "P0387",
+        "P0333"
+      ]
+    },
+    {
+      "need_id": "N2",
+      "question": "确认肌苷人体 TME 实测浓度或空间代谢组学新证据，以决定 Ch3 是否仍将其作为核心浓度缺口案例。",
+      "source_handles": [
+        "P0582",
+        "P0588",
+        "P0593",
+        "P0413"
+      ]
+    },
+    {
+      "need_id": "N3",
+      "question": "确认非结肠炎 irAEs（尤其心肌炎、神经毒性）是否有新的大样本微生物组研究，以校准 Ch6 的证据限制表述。",
+      "source_handles": [
+        "P0600",
+        "P0049",
+        "P0312"
+      ]
+    }
+  ],
+  "queued_source_handles": [],
+  "read_history": [
+    {
+      "source_handle": "P0212",
+      "need_ids": [
+        "N1"
+      ],
+      "questions": [
+        "确认是否存在已完成大型 Phase III RCT 或新的随机证据，以避免 Ch1/Ch5/Ch7 将“Phase III 缺失”写成过时结论。"
+      ],
+      "packet_sha256": "3d493d330b5f0891bcd83ba28d5ed0a8a8879e661f4e04918fa4d5116b9497cf",
+      "reread_reasons": [
+        null
+      ],
+      "stage_id": "maker_002"
+    },
+    {
+      "source_handle": "P0573",
+      "need_ids": [
+        "N1"
+      ],
+      "questions": [
+        "确认是否存在已完成大型 Phase III RCT 或新的随机证据，以避免 Ch1/Ch5/Ch7 将“Phase III 缺失”写成过时结论。"
+      ],
+      "packet_sha256": "eb2f3b0bb650404fbba382da0c3ff780de0a9b8b2c0a2124c079c575ac4c0272",
+      "reread_reasons": [
+        null
+      ],
+      "stage_id": "maker_002"
+    },
+    {
+      "source_handle": "P0387",
+      "need_ids": [
+        "N1"
+      ],
+      "questions": [
+        "确认是否存在已完成大型 Phase III RCT 或新的随机证据，以避免 Ch1/Ch5/Ch7 将“Phase III 缺失”写成过时结论。"
+      ],
+      "packet_sha256": "c421cb12927dfb323b8e2db1cff429c1c3155baf7de3ff50201e02309ae3f6a4",
+      "reread_reasons": [
+        null
+      ],
+      "stage_id": "maker_002"
+    },
+    {
+      "source_handle": "P0333",
+      "need_ids": [
+        "N1"
+      ],
+      "questions": [
+        "确认是否存在已完成大型 Phase III RCT 或新的随机证据，以避免 Ch1/Ch5/Ch7 将“Phase III 缺失”写成过时结论。"
+      ],
+      "packet_sha256": "0648393c078235230ffe8a499a39dfeb00891da991a9b719351ac9ee5b2d4255",
+      "reread_reasons": [
+        null
+      ],
+      "stage_id": "maker_002"
+    },
+    {
+      "source_handle": "P0582",
+      "need_ids": [
+        "N2"
+      ],
+      "questions": [
+        "确认肌苷人体 TME 实测浓度或空间代谢组学新证据，以决定 Ch3 是否仍将其作为核心浓度缺口案例。"
+      ],
+      "packet_sha256": "14d49065cc0df9aa923591eb603d6aa3e8f69c1cace9914cfb12dc4f1042316c",
+      "reread_reasons": [
+        null
+      ],
+      "stage_id": "maker_002"
+    },
+    {
+      "source_handle": "P0588",
+      "need_ids": [
+        "N2"
+      ],
+      "questions": [
+        "确认肌苷人体 TME 实测浓度或空间代谢组学新证据，以决定 Ch3 是否仍将其作为核心浓度缺口案例。"
+      ],
+      "packet_sha256": "fc25c7f58a437781172685103458aab5f8f9650cbf97f5fb0ad0697ce6370054",
+      "reread_reasons": [
+        null
+      ],
+      "stage_id": "maker_002"
+    },
+    {
+      "source_handle": "P0593",
+      "need_ids": [
+        "N2"
+      ],
+      "questions": [
+        "确认肌苷人体 TME 实测浓度或空间代谢组学新证据，以决定 Ch3 是否仍将其作为核心浓度缺口案例。"
+      ],
+      "packet_sha256": "69dffd91b9928e7cd8c156956b46941c5f2f6d91015a8f94d43aeaa29618eaec",
+      "reread_reasons": [
+        null
+      ],
+      "stage_id": "maker_002"
+    },
+    {
+      "source_handle": "P0413",
+      "need_ids": [
+        "N2"
+      ],
+      "questions": [
+        "确认肌苷人体 TME 实测浓度或空间代谢组学新证据，以决定 Ch3 是否仍将其作为核心浓度缺口案例。"
+      ],
+      "packet_sha256": "b1eaa8b81e8dd059a614e2db7093abacbb7c2e9e25cb907836dc7dd4105dc3ed",
+      "reread_reasons": [
+        null
+      ],
+      "stage_id": "maker_002"
+    },
+    {
+      "source_handle": "P0600",
+      "need_ids": [
+        "N3"
+      ],
+      "questions": [
+        "确认非结肠炎 irAEs（尤其心肌炎、神经毒性）是否有新的大样本微生物组研究，以校准 Ch6 的证据限制表述。"
+      ],
+      "packet_sha256": "230180fb1dc32b33c04d14a4d575c66d2396db54e9dd081ea4fb02183d63afa0",
+      "reread_reasons": [
+        null
+      ],
+      "stage_id": "maker_002"
+    },
+    {
+      "source_handle": "P0049",
+      "need_ids": [
+        "N3"
+      ],
+      "questions": [
+        "确认非结肠炎 irAEs（尤其心肌炎、神经毒性）是否有新的大样本微生物组研究，以校准 Ch6 的证据限制表述。"
+      ],
+      "packet_sha256": "f35c72f7340b1af17d8e93f8bd1e56441f7dfa41914e145e4f40e7ecd397e749",
+      "reread_reasons": [
+        null
+      ],
+      "stage_id": "maker_002"
+    },
+    {
+      "source_handle": "P0312",
+      "need_ids": [
+        "N3"
+      ],
+      "questions": [
+        "确认非结肠炎 irAEs（尤其心肌炎、神经毒性）是否有新的大样本微生物组研究，以校准 Ch6 的证据限制表述。"
+      ],
+      "packet_sha256": "d28637126710ca6b487075373eaadd97623a6809c2e44f35b0bb8aee2bc70032",
+      "reread_reasons": [
+        null
+      ],
+      "stage_id": "maker_002"
+    }
+  ],
+  "read_trace": [
+    {
+      "stage_id": "maker_001",
+      "guide_before_sha256": null,
+      "guide_after_sha256": "b78b2d6e4c1f30ec05490f884e682ba97565ac0e95200f786bcefd2caf49f894",
+      "changed_chapter_ids": [
+        "Ch1",
+        "Ch2",
+        "Ch3",
+        "Ch4",
+        "Ch5",
+        "Ch6",
+        "Ch7"
+      ],
+      "manuscript_guide_changed": true,
+      "reads": [],
+      "reading_needs": [
+        {
+          "need_id": "N1",
+          "question": "确认是否存在已完成大型 Phase III RCT 或新的随机证据，以避免 Ch1/Ch5/Ch7 将“Phase III 缺失”写成过时结论。",
+          "source_handles": [
+            "P0212",
+            "P0573",
+            "P0387",
+            "P0333"
+          ]
+        },
+        {
+          "need_id": "N2",
+          "question": "确认肌苷人体 TME 实测浓度或空间代谢组学新证据，以决定 Ch3 是否仍将其作为核心浓度缺口案例。",
+          "source_handles": [
+            "P0582",
+            "P0588",
+            "P0593",
+            "P0413"
+          ]
+        },
+        {
+          "need_id": "N3",
+          "question": "确认非结肠炎 irAEs（尤其心肌炎、神经毒性）是否有新的大样本微生物组研究，以校准 Ch6 的证据限制表述。",
+          "source_handles": [
+            "P0600",
+            "P0049",
+            "P0312"
+          ]
+        }
+      ],
+      "changes": [
+        "建立全文主讲位置：Ch1 关联与证据阶梯，Ch2 免疫机制，Ch3 代谢物，Ch4 外部干扰，Ch5 干预转化，Ch6 毒性，Ch7 方法学。",
+        "将每章细纲重组为连续写作单元，并明确单元之间的承接与增量。",
+        "处理重复案例：FMT-LUMINate、MITRIC、JCOG2007、PPI/抗生素证据按章节分配不同功能。",
+        "保留阴性结果、条件限定、样本量限制与证据等级标注。",
+        "设置三项补读需求以确认 Phase III、肌苷 TME 浓度与非结肠炎 irAE 证据状态。"
+      ],
+      "assembly_warnings": []
+    },
+    {
+      "stage_id": "maker_002",
+      "guide_before_sha256": "b78b2d6e4c1f30ec05490f884e682ba97565ac0e95200f786bcefd2caf49f894",
+      "guide_after_sha256": "7b978cedc39489416cea353fa0fab0b435212d6326ad080ad18ab24f9a19b2fb",
+      "changed_chapter_ids": [
+        "Ch4"
+      ],
+      "manuscript_guide_changed": false,
+      "reads": [
+        {
+          "source_handle": "P0212",
+          "need_ids": [
+            "N1"
+          ],
+          "questions": [
+            "确认是否存在已完成大型 Phase III RCT 或新的随机证据，以避免 Ch1/Ch5/Ch7 将“Phase III 缺失”写成过时结论。"
+          ],
+          "packet_sha256": "3d493d330b5f0891bcd83ba28d5ed0a8a8879e661f4e04918fa4d5116b9497cf",
+          "reread_reasons": [
+            null
+          ],
+          "stage_id": "maker_002",
+          "archive_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\reads\\3d493d330b5f0891bcd83ba28d5ed0a8a8879e661f4e04918fa4d5116b9497cf\\SOURCE_PACKET.json"
+        },
+        {
+          "source_handle": "P0573",
+          "need_ids": [
+            "N1"
+          ],
+          "questions": [
+            "确认是否存在已完成大型 Phase III RCT 或新的随机证据，以避免 Ch1/Ch5/Ch7 将“Phase III 缺失”写成过时结论。"
+          ],
+          "packet_sha256": "eb2f3b0bb650404fbba382da0c3ff780de0a9b8b2c0a2124c079c575ac4c0272",
+          "reread_reasons": [
+            null
+          ],
+          "stage_id": "maker_002",
+          "archive_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\reads\\eb2f3b0bb650404fbba382da0c3ff780de0a9b8b2c0a2124c079c575ac4c0272\\SOURCE_PACKET.json"
+        },
+        {
+          "source_handle": "P0387",
+          "need_ids": [
+            "N1"
+          ],
+          "questions": [
+            "确认是否存在已完成大型 Phase III RCT 或新的随机证据，以避免 Ch1/Ch5/Ch7 将“Phase III 缺失”写成过时结论。"
+          ],
+          "packet_sha256": "c421cb12927dfb323b8e2db1cff429c1c3155baf7de3ff50201e02309ae3f6a4",
+          "reread_reasons": [
+            null
+          ],
+          "stage_id": "maker_002",
+          "archive_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\reads\\c421cb12927dfb323b8e2db1cff429c1c3155baf7de3ff50201e02309ae3f6a4\\SOURCE_PACKET.json"
+        },
+        {
+          "source_handle": "P0333",
+          "need_ids": [
+            "N1"
+          ],
+          "questions": [
+            "确认是否存在已完成大型 Phase III RCT 或新的随机证据，以避免 Ch1/Ch5/Ch7 将“Phase III 缺失”写成过时结论。"
+          ],
+          "packet_sha256": "0648393c078235230ffe8a499a39dfeb00891da991a9b719351ac9ee5b2d4255",
+          "reread_reasons": [
+            null
+          ],
+          "stage_id": "maker_002",
+          "archive_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\reads\\0648393c078235230ffe8a499a39dfeb00891da991a9b719351ac9ee5b2d4255\\SOURCE_PACKET.json"
+        },
+        {
+          "source_handle": "P0582",
+          "need_ids": [
+            "N2"
+          ],
+          "questions": [
+            "确认肌苷人体 TME 实测浓度或空间代谢组学新证据，以决定 Ch3 是否仍将其作为核心浓度缺口案例。"
+          ],
+          "packet_sha256": "14d49065cc0df9aa923591eb603d6aa3e8f69c1cace9914cfb12dc4f1042316c",
+          "reread_reasons": [
+            null
+          ],
+          "stage_id": "maker_002",
+          "archive_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\reads\\14d49065cc0df9aa923591eb603d6aa3e8f69c1cace9914cfb12dc4f1042316c\\SOURCE_PACKET.json"
+        },
+        {
+          "source_handle": "P0588",
+          "need_ids": [
+            "N2"
+          ],
+          "questions": [
+            "确认肌苷人体 TME 实测浓度或空间代谢组学新证据，以决定 Ch3 是否仍将其作为核心浓度缺口案例。"
+          ],
+          "packet_sha256": "fc25c7f58a437781172685103458aab5f8f9650cbf97f5fb0ad0697ce6370054",
+          "reread_reasons": [
+            null
+          ],
+          "stage_id": "maker_002",
+          "archive_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\reads\\fc25c7f58a437781172685103458aab5f8f9650cbf97f5fb0ad0697ce6370054\\SOURCE_PACKET.json"
+        },
+        {
+          "source_handle": "P0593",
+          "need_ids": [
+            "N2"
+          ],
+          "questions": [
+            "确认肌苷人体 TME 实测浓度或空间代谢组学新证据，以决定 Ch3 是否仍将其作为核心浓度缺口案例。"
+          ],
+          "packet_sha256": "69dffd91b9928e7cd8c156956b46941c5f2f6d91015a8f94d43aeaa29618eaec",
+          "reread_reasons": [
+            null
+          ],
+          "stage_id": "maker_002",
+          "archive_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\reads\\69dffd91b9928e7cd8c156956b46941c5f2f6d91015a8f94d43aeaa29618eaec\\SOURCE_PACKET.json"
+        },
+        {
+          "source_handle": "P0413",
+          "need_ids": [
+            "N2"
+          ],
+          "questions": [
+            "确认肌苷人体 TME 实测浓度或空间代谢组学新证据，以决定 Ch3 是否仍将其作为核心浓度缺口案例。"
+          ],
+          "packet_sha256": "b1eaa8b81e8dd059a614e2db7093abacbb7c2e9e25cb907836dc7dd4105dc3ed",
+          "reread_reasons": [
+            null
+          ],
+          "stage_id": "maker_002",
+          "archive_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\reads\\b1eaa8b81e8dd059a614e2db7093abacbb7c2e9e25cb907836dc7dd4105dc3ed\\SOURCE_PACKET.json"
+        },
+        {
+          "source_handle": "P0600",
+          "need_ids": [
+            "N3"
+          ],
+          "questions": [
+            "确认非结肠炎 irAEs（尤其心肌炎、神经毒性）是否有新的大样本微生物组研究，以校准 Ch6 的证据限制表述。"
+          ],
+          "packet_sha256": "230180fb1dc32b33c04d14a4d575c66d2396db54e9dd081ea4fb02183d63afa0",
+          "reread_reasons": [
+            null
+          ],
+          "stage_id": "maker_002",
+          "archive_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\reads\\230180fb1dc32b33c04d14a4d575c66d2396db54e9dd081ea4fb02183d63afa0\\SOURCE_PACKET.json"
+        },
+        {
+          "source_handle": "P0049",
+          "need_ids": [
+            "N3"
+          ],
+          "questions": [
+            "确认非结肠炎 irAEs（尤其心肌炎、神经毒性）是否有新的大样本微生物组研究，以校准 Ch6 的证据限制表述。"
+          ],
+          "packet_sha256": "f35c72f7340b1af17d8e93f8bd1e56441f7dfa41914e145e4f40e7ecd397e749",
+          "reread_reasons": [
+            null
+          ],
+          "stage_id": "maker_002",
+          "archive_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\reads\\f35c72f7340b1af17d8e93f8bd1e56441f7dfa41914e145e4f40e7ecd397e749\\SOURCE_PACKET.json"
+        },
+        {
+          "source_handle": "P0312",
+          "need_ids": [
+            "N3"
+          ],
+          "questions": [
+            "确认非结肠炎 irAEs（尤其心肌炎、神经毒性）是否有新的大样本微生物组研究，以校准 Ch6 的证据限制表述。"
+          ],
+          "packet_sha256": "d28637126710ca6b487075373eaadd97623a6809c2e44f35b0bb8aee2bc70032",
+          "reread_reasons": [
+            null
+          ],
+          "stage_id": "maker_002",
+          "archive_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\reads\\d28637126710ca6b487075373eaadd97623a6809c2e44f35b0bb8aee2bc70032\\SOURCE_PACKET.json"
+        }
+      ],
+      "reading_needs": [
+        {
+          "need_id": "N1",
+          "question": "确认是否存在已完成大型 Phase III RCT 或新的随机证据，以避免 Ch1/Ch5/Ch7 将“Phase III 缺失”写成过时结论。",
+          "source_handles": [
+            "P0212",
+            "P0573",
+            "P0387",
+            "P0333"
+          ]
+        },
+        {
+          "need_id": "N2",
+          "question": "确认肌苷人体 TME 实测浓度或空间代谢组学新证据，以决定 Ch3 是否仍将其作为核心浓度缺口案例。",
+          "source_handles": [
+            "P0582",
+            "P0588",
+            "P0593",
+            "P0413"
+          ]
+        },
+        {
+          "need_id": "N3",
+          "question": "确认非结肠炎 irAEs（尤其心肌炎、神经毒性）是否有新的大样本微生物组研究，以校准 Ch6 的证据限制表述。",
+          "source_handles": [
+            "P0600",
+            "P0049",
+            "P0312"
+          ]
+        }
+      ],
+      "changes": [
+        "保留原有章节顺序、主讲分配与单元划分，未改变 content_task_ids 归属。",
+        "将 manuscript_guide 与章级安排统一为“分层复用重复案例、保留阴性/反例、标注证据等级”的写作原则。",
+        "保留三项补读需求：Phase III 证据状态、肌苷 TME 浓度、非结肠炎 irAE 样本量。"
+      ],
+      "assembly_warnings": []
+    }
+  ],
+  "model_calls": 1,
+  "client_invocations": 1,
+  "paid_dispatch_count": 1,
+  "execution_mode": "live",
+  "cost_summary": {
+    "candidate_stage_known_cost_cny": 7.942883999999999,
+    "candidate_stage_cost_complete": true,
+    "unknown_cost_attempts": [],
+    "all_attempts_including_retries": [
+      {
+        "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\stages\\maker_001\\8733b3130e4e6ab4562c3305453570bf7cc5c89d7f9d0510495f29e610bb5520\\attempt_001",
+        "estimated_actual_cost_cny": 3.028248,
+        "usage_known": true
+      },
+      {
+        "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\stages\\maker_002\\e16b91defb1adba4825c0e1fed3235b4fee8a48e17dfc4c8493b4627d059868b\\attempt_001",
+        "estimated_actual_cost_cny": 4.914636,
+        "usage_known": true
+      }
+    ],
+    "base_cost_attribution": null,
+    "base_reuse_charged_again": false,
+    "total_known_cost_including_base_cny": 7.942883999999999,
+    "total_cost_complete": true,
+    "accounting_note": "Known costs are provider-usage estimates. Missing usage is unknown, never zero; shared-ledger uncertain reservations remain retained. Reused base cost is attributable but is not dispatched or charged again."
+  },
+  "requested_route": "guide_maker",
+  "effective_route": "guide_maker",
+  "material_preserved": true,
+  "semantic_quality_unreviewed": true,
+  "assembly_warnings": [],
+  "stages": [
+    {
+      "stage_id": "maker_001",
+      "role": "maker",
+      "effective_profile": {
+        "model": "qwen3.8-max",
+        "thinking": true,
+        "thinking_budget": 32768,
+        "max_output_tokens": 32768,
+        "json_mode": true,
+        "timeout_seconds": 1800.0,
+        "stream": true,
+        "stream_overall_timeout_seconds": 3600.0,
+        "prompt_token_multiplier": 1.12,
+        "prompt_token_framing_margin": 8192
+      },
+      "estimate": {
+        "prompt_tokens": 258967,
+        "measured_tokens": 223906,
+        "method": "provided_token_counter",
+        "multiplier": 1.12,
+        "framing_margin": 8192,
+        "reserved_input_tokens": 258967,
+        "input_limit_tokens": 934464,
+        "completion_allowance_tokens": 65536,
+        "context_window": 1000000,
+        "fits": true,
+        "estimated_max_cost_cny": 5.4669,
+        "wire_request_sha256": "fa6eec4c9e1a9b6afa8e33bfa1a1f8257dc63f380d42f992d2d504f77344ca96",
+        "wire_parameters": {
+          "model": "qwen3.8-max",
+          "max_completion_tokens": 65536,
+          "temperature": 0.1,
+          "enable_thinking": true,
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "response_format": {
+            "type": "json_object"
+          },
+          "thinking_budget": 32768
+        }
+      },
+      "status": "complete",
+      "guide_before_sha256": null,
+      "material_preserved": true,
+      "cache_key": "8733b3130e4e6ab4562c3305453570bf7cc5c89d7f9d0510495f29e610bb5520",
+      "dependencies": [],
+      "messages_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\runs\\20261009T170901Z-7a347c0447\\plans\\maker_001\\MESSAGES.json",
+      "model_calls": 0,
+      "client_invocations": 0,
+      "paid_dispatch_count": 0,
+      "cache_hit": true,
+      "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\stages\\maker_001\\8733b3130e4e6ab4562c3305453570bf7cc5c89d7f9d0510495f29e610bb5520\\attempt_001",
+      "result_sha256": "d879897c3a1cb5ffb7487c9807e4b2c793545139eed4e2bee1b767186e3e9666",
+      "usage": {
+        "usage": {
+          "completion_tokens": 9466,
+          "completion_tokens_details": {
+            "reasoning_tokens": 2390,
+            "text_tokens": 9466
+          },
+          "prompt_tokens": 223956,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 223956
+          },
+          "total_tokens": 233422
+        },
+        "usage_known": true,
+        "model": "qwen3.8-max",
+        "provider_request_id": "chatcmpl-eed245f4-b6c9-99d7-b145-9af73c7630ca",
+        "effective_request": {
+          "model": "qwen3.8-max",
+          "enable_thinking": true,
+          "thinking_budget": 32768,
+          "answer_tokens": 32768,
+          "total_output_tokens": 65536,
+          "max_completion_tokens": 65536,
+          "max_tokens": null,
+          "response_format": {
+            "type": "json_object"
+          },
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "stream_inactivity_timeout_seconds": 1800.0,
+          "stream_overall_timeout_seconds": 3600.0,
+          "mapped_reasoning_effort": "xhigh"
+        },
+        "estimated_actual_cost_cny": 3.028248
+      }
+    },
+    {
+      "stage_id": "maker_002",
+      "role": "maker",
+      "effective_profile": {
+        "model": "qwen3.8-max",
+        "thinking": true,
+        "thinking_budget": 32768,
+        "max_output_tokens": 32768,
+        "json_mode": true,
+        "timeout_seconds": 1800.0,
+        "stream": true,
+        "stream_overall_timeout_seconds": 3600.0,
+        "prompt_token_multiplier": 1.12,
+        "prompt_token_framing_margin": 8192
+      },
+      "estimate": {
+        "prompt_tokens": 439012,
+        "measured_tokens": 384660,
+        "method": "provided_token_counter",
+        "multiplier": 1.12,
+        "framing_margin": 8192,
+        "reserved_input_tokens": 439012,
+        "input_limit_tokens": 934464,
+        "completion_allowance_tokens": 65536,
+        "context_window": 1000000,
+        "fits": true,
+        "estimated_max_cost_cny": 7.62744,
+        "wire_request_sha256": "1edbe717db1a3721ae3c8cfcaaf6818428de427f98cc43cfd420c0910fd33ff5",
+        "wire_parameters": {
+          "model": "qwen3.8-max",
+          "max_completion_tokens": 65536,
+          "temperature": 0.1,
+          "enable_thinking": true,
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "response_format": {
+            "type": "json_object"
+          },
+          "thinking_budget": 32768
+        }
+      },
+      "status": "repeated_read_request",
+      "guide_before_sha256": "b78b2d6e4c1f30ec05490f884e682ba97565ac0e95200f786bcefd2caf49f894",
+      "material_preserved": true,
+      "cache_key": "e16b91defb1adba4825c0e1fed3235b4fee8a48e17dfc4c8493b4627d059868b",
+      "dependencies": [
+        {
+          "stage_id": "maker_001",
+          "cache_key": "8733b3130e4e6ab4562c3305453570bf7cc5c89d7f9d0510495f29e610bb5520",
+          "result_sha256": "d879897c3a1cb5ffb7487c9807e4b2c793545139eed4e2bee1b767186e3e9666"
+        }
+      ],
+      "messages_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\runs\\20261009T170901Z-7a347c0447\\plans\\maker_002\\MESSAGES.json",
+      "model_calls": 1,
+      "client_invocations": 1,
+      "paid_dispatch_count": 1,
+      "cache_hit": false,
+      "attempt_dir": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\stages\\maker_002\\e16b91defb1adba4825c0e1fed3235b4fee8a48e17dfc4c8493b4627d059868b\\attempt_001",
+      "result_sha256": "815d693eeda2a56d8f6e45df66e38a4955be3ac58d83a58f1f990269a6422148",
+      "call_error": null,
+      "usage": {
+        "usage": {
+          "completion_tokens": 8281,
+          "completion_tokens_details": {
+            "reasoning_tokens": 943,
+            "text_tokens": 8281
+          },
+          "prompt_tokens": 384710,
+          "prompt_tokens_details": {
+            "cached_tokens": 223232,
+            "text_tokens": 384710
+          },
+          "total_tokens": 392991
+        },
+        "usage_known": true,
+        "model": "qwen3.8-max",
+        "provider_request_id": "chatcmpl-f2580a83-43de-98e0-a0ef-ae34207335ff",
+        "effective_request": {
+          "model": "qwen3.8-max",
+          "enable_thinking": true,
+          "thinking_budget": 32768,
+          "answer_tokens": 32768,
+          "total_output_tokens": 65536,
+          "max_completion_tokens": 65536,
+          "max_tokens": null,
+          "response_format": {
+            "type": "json_object"
+          },
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "stream_inactivity_timeout_seconds": 1800.0,
+          "stream_overall_timeout_seconds": 3600.0,
+          "mapped_reasoning_effort": "xhigh"
+        },
+        "estimated_actual_cost_cny": 4.914636
+      },
+      "required_action": "repeated_read_request:P0212:explicit_new_reread_reason_required"
+    }
+  ],
+  "selected_version": "20261009T170901Z-7a347c0447",
+  "selected_result_path": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\runs\\20261009T170901Z-7a347c0447\\GUIDE_RESULT.json",
+  "selected_input_matches_current": true,
+  "input_mode": "live_source_manifest",
+  "meter": {
+    "mode": "local_tokenizer_estimate",
+    "tokenizer_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "tokenizer_implementation_version": "0.23.2",
+    "actual_provider_token_count": false
+  },
+  "cli_invocation": "F:\\OptoMind-Review-2\\outputs\\guide_content_units_acceptance_20261010\\alias_recovered_live\\cli_invocations\\218dd10114b04436b57beb7e002e835a.json",
+  "source_manifest_sha256": "37242cc51bc9b6b96a7e92543a6092c17bfdbd0d8f8ab068a2e3d9c1e3db58e7",
+  "writing_tested": false,
+  "generation_complete": false,
+  "expected_chapter_ids": [
+    "Ch1",
+    "Ch2",
+    "Ch3",
+    "Ch4",
+    "Ch5",
+    "Ch6",
+    "Ch7"
+  ],
+  "actual_chapter_ids": [
+    "Ch1",
+    "Ch2",
+    "Ch3",
+    "Ch4",
+    "Ch5",
+    "Ch6",
+    "Ch7"
+  ],
+  "budget_before": {
+    "ledger_path": "F:\\OptoMind-Review-2\\outputs\\guide_maker_acceptance_20261008_30cny\\guide_budget.sqlite",
+    "limit_cny": 30.0,
+    "actual_cny": 10.284682,
+    "reserved_cny": 0.0,
+    "remaining_cny": 19.715318,
+    "reservation_count": 5,
+    "marker_sha256": "117e9e313090bfd8ebc935c3b82230ce25adc544f5743121554b1feacc426292",
+    "budget_policy": "dedicated_guide_lifetime_cap"
+  },
+  "budget_after": {
+    "ledger_path": "F:\\OptoMind-Review-2\\outputs\\guide_maker_acceptance_20261008_30cny\\guide_budget.sqlite",
+    "limit_cny": 30.0,
+    "actual_cny": 15.199318,
+    "reserved_cny": 0.0,
+    "remaining_cny": 14.800682,
+    "reservation_count": 6,
+    "marker_sha256": "117e9e313090bfd8ebc935c3b82230ce25adc544f5743121554b1feacc426292",
+    "budget_policy": "dedicated_guide_lifetime_cap"
+  },
+  "budget": {
+    "limit_cny": 30.0,
+    "reserved_cny": 0.0,
+    "actual_cny": 15.199318,
+    "ledger_path": "F:\\OptoMind-Review-2\\outputs\\guide_maker_acceptance_20261008_30cny\\guide_budget.sqlite",
+    "reservations": [
+      {
+        "reservation_id": "res-fa22351923534eb1",
+        "call_id": "maker_001-d4f695314ce8-attempt_001:key0:attempt0",
+        "amount_cny": 2.167656,
+        "actual_cny": 0.51703,
+        "status": "settled",
+        "telemetry": {
+          "usage": {
+            "completion_tokens": 7547,
+            "completion_tokens_details": {
+              "reasoning_tokens": 5736,
+              "text_tokens": 7547
+            },
+            "prompt_tokens": 213233,
+            "prompt_tokens_details": {
+              "text_tokens": 213233
+            },
+            "total_tokens": 220780
+          },
+          "returned_model": "qwen3.5-plus",
+          "finish_reason": "stop",
+          "request_id": "chatcmpl-dc8729a2-6f74-9f41-afcd-232178137bf2",
+          "raw_response_sha256": "4d052c940114c7a78d4ee1f917c9a14b8a37ba7407caf6aff6dbb188467d5dbe",
+          "status_code": 200,
+          "provider_error_code": null,
+          "key_index": null,
+          "attempt": null,
+          "cap_pressure": {
+            "answer_tokens": 1811,
+            "completion_tokens": 7547,
+            "diagnostic_only": true,
+            "finish_reason_length": false,
+            "near_limit": false,
+            "near_limits": [],
+            "reasoning_tokens": 5736
+          },
+          "effective_request": {
+            "answer_tokens": 32768,
+            "enable_thinking": true,
+            "max_completion_tokens": 49152,
+            "max_tokens": null,
+            "model": "qwen3.5-plus",
+            "response_format": null,
+            "stream": true,
+            "stream_inactivity_timeout_seconds": 1800.0,
+            "stream_options": {
+              "include_usage": true
+            },
+            "stream_overall_timeout_seconds": 3600.0,
+            "thinking_budget": 16384,
+            "total_output_tokens": 49152
+          },
+          "stream": true,
+          "transport_events": [
+            {
+              "elapsed_seconds": 0.0,
+              "epoch": 1791446746.137295,
+              "overall_timeout_seconds": 3600.0,
+              "request_body_bytes": 852813,
+              "request_body_sha256": "854e67e0e8edeb094949cdcd00f02eb02821828bd8c54be3c82af728328dee48",
+              "sequence": 1,
+              "stage": "request_open_start",
+              "stream": true,
+              "timeout_seconds": 1800.0
+            },
+            {
+              "elapsed_seconds": 10.031999999890104,
+              "epoch": 1791446756.164919,
+              "headers": {
+                "connection": "close",
+                "content-type": "text/event-stream;charset=utf-8",
+                "date": "Thu, 08 Oct 2026 08:05:58 GMT",
+                "server": "istio-envoy",
+                "transfer-encoding": "chunked",
+                "x-request-id": "dc8729a2-6f74-9f41-afcd-232178137bf2"
+              },
+              "sequence": 2,
+              "stage": "response_opened",
+              "status_code": 200
+            },
+            {
+              "elapsed_seconds": 10.031999999890104,
+              "epoch": 1791446756.165912,
+              "event_count": 0,
+              "overall_remaining_seconds": 3589.96800000011,
+              "read_timeout_seconds": 1800.0,
+              "sequence": 3,
+              "stage": "stream_read_start"
+            },
+            {
+              "bytes": 308,
+              "elapsed_seconds": 10.031999999890104,
+              "epoch": 1791446756.165912,
+              "sequence": 4,
+              "stage": "stream_first_byte"
+            },
+            {
+              "elapsed_seconds": 10.031999999890104,
+              "epoch": 1791446756.165912,
+              "event_count": 0,
+              "overall_remaining_seconds": 3589.96800000011,
+              "read_timeout_seconds": 1800.0,
+              "sequence": 5,
+              "stage": "stream_read_start"
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.031999999890104,
+              "epoch": 1791446756.165912,
+              "event_count": 1,
+              "reasoning_bytes": 3,
+              "sequence": 6,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.109999999869615,
+              "epoch": 1791446756.2500265,
+              "event_count": 2,
+              "reasoning_bytes": 14,
+              "sequence": 7,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.171999999787658,
+              "epoch": 1791446756.3178334,
+              "event_count": 3,
+              "reasoning_bytes": 34,
+              "sequence": 8,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.202999999979511,
+              "epoch": 1791446756.335912,
+              "event_count": 4,
+              "reasoning_bytes": 36,
+              "sequence": 9,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.265999999828637,
+              "epoch": 1791446756.4036775,
+              "event_count": 5,
+              "reasoning_bytes": 58,
+              "sequence": 10,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.327999999979511,
+              "epoch": 1791446756.4598424,
+              "event_count": 6,
+              "reasoning_bytes": 73,
+              "sequence": 11,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.390999999828637,
+              "epoch": 1791446756.524196,
+              "event_count": 7,
+              "reasoning_bytes": 106,
+              "sequence": 12,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 10.421999999787658,
+              "epoch": 1791446756.5549052,
+              "event_count": 8,
+              "reasoning_bytes": 110,
+              "sequence": 13,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 17.359999999869615,
+              "epoch": 1791446763.4905927,
+              "event_count": 128,
+              "reasoning_bytes": 1791,
+              "sequence": 14,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 24.656999999890104,
+              "epoch": 1791446770.801135,
+              "event_count": 256,
+              "reasoning_bytes": 3478,
+              "sequence": 15,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 31.609999999869615,
+              "epoch": 1791446777.754719,
+              "event_count": 384,
+              "reasoning_bytes": 5269,
+              "sequence": 16,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 38.71899999980815,
+              "epoch": 1791446784.861046,
+              "event_count": 512,
+              "reasoning_bytes": 7026,
+              "sequence": 17,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 45.781999999890104,
+              "epoch": 1791446791.915807,
+              "event_count": 640,
+              "reasoning_bytes": 8664,
+              "sequence": 18,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 52.79699999978766,
+              "epoch": 1791446798.9349039,
+              "event_count": 768,
+              "reasoning_bytes": 10315,
+              "sequence": 19,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 59.734999999869615,
+              "epoch": 1791446805.869037,
+              "event_count": 896,
+              "reasoning_bytes": 12056,
+              "sequence": 20,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 66.93799999984913,
+              "epoch": 1791446813.076833,
+              "event_count": 1024,
+              "reasoning_bytes": 13733,
+              "sequence": 21,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 74.0,
+              "epoch": 1791446820.1353855,
+              "event_count": 1152,
+              "reasoning_bytes": 15295,
+              "sequence": 22,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 80.96899999980815,
+              "epoch": 1791446827.1028974,
+              "event_count": 1280,
+              "reasoning_bytes": 16894,
+              "sequence": 23,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 88.04699999978766,
+              "epoch": 1791446834.1907592,
+              "event_count": 1408,
+              "reasoning_bytes": 18427,
+              "sequence": 24,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 95.17199999978766,
+              "epoch": 1791446841.3132539,
+              "event_count": 1536,
+              "reasoning_bytes": 19943,
+              "sequence": 25,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 102.375,
+              "epoch": 1791446848.514642,
+              "event_count": 1664,
+              "reasoning_bytes": 21671,
+              "sequence": 26,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 426,
+              "elapsed_seconds": 109.59399999980815,
+              "epoch": 1791446855.7286677,
+              "event_count": 1792,
+              "reasoning_bytes": 22888,
+              "sequence": 27,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 1930,
+              "elapsed_seconds": 116.51599999982864,
+              "epoch": 1791446862.648886,
+              "event_count": 1920,
+              "reasoning_bytes": 22888,
+              "sequence": 28,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 3663,
+              "elapsed_seconds": 124.0,
+              "epoch": 1791446870.1440454,
+              "event_count": 2048,
+              "reasoning_bytes": 22888,
+              "sequence": 29,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 5297,
+              "elapsed_seconds": 131.31299999984913,
+              "epoch": 1791446877.455296,
+              "event_count": 2176,
+              "reasoning_bytes": 22888,
+              "sequence": 30,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "elapsed_seconds": 138.3279999999795,
+              "epoch": 1791446884.459916,
+              "event_count": 2302,
+              "raw_bytes": 691170,
+              "sequence": 32,
+              "stage": "stream_done"
+            },
+            {
+              "content_bytes": 6906,
+              "elapsed_seconds": 138.3279999999795,
+              "epoch": 1791446884.4609168,
+              "event_count": 2302,
+              "reasoning_bytes": 22888,
+              "sequence": 33,
+              "stage": "stream_complete",
+              "usage_present": true
+            }
+          ]
+        }
+      },
+      {
+        "reservation_id": "res-0bf92f0113a04e6f",
+        "call_id": "maker_001-6338b8688189-attempt_001:key0:attempt0",
+        "amount_cny": 2.169732,
+        "actual_cny": 0.49974,
+        "status": "settled",
+        "telemetry": {
+          "usage": {
+            "completion_tokens": 6029,
+            "completion_tokens_details": {
+              "reasoning_tokens": 3197,
+              "text_tokens": 6029
+            },
+            "prompt_tokens": 213696,
+            "prompt_tokens_details": {
+              "text_tokens": 213696
+            },
+            "total_tokens": 219725
+          },
+          "returned_model": "qwen3.5-plus",
+          "finish_reason": "stop",
+          "request_id": "chatcmpl-36f92518-5554-9d83-aa62-aa3a9c8a806c",
+          "raw_response_sha256": "6827cc8395899f2e1996e9cfb80c71861b787bc2026348027094ff8ab7d9b205",
+          "status_code": 200,
+          "provider_error_code": null,
+          "key_index": null,
+          "attempt": null,
+          "cap_pressure": {
+            "answer_tokens": 2832,
+            "completion_tokens": 6029,
+            "diagnostic_only": true,
+            "finish_reason_length": false,
+            "near_limit": false,
+            "near_limits": [],
+            "reasoning_tokens": 3197
+          },
+          "effective_request": {
+            "answer_tokens": 32768,
+            "enable_thinking": true,
+            "max_completion_tokens": 49152,
+            "max_tokens": null,
+            "model": "qwen3.5-plus",
+            "response_format": null,
+            "stream": true,
+            "stream_inactivity_timeout_seconds": 1800.0,
+            "stream_options": {
+              "include_usage": true
+            },
+            "stream_overall_timeout_seconds": 3600.0,
+            "thinking_budget": 16384,
+            "total_output_tokens": 49152
+          },
+          "stream": true,
+          "transport_events": [
+            {
+              "elapsed_seconds": 0.0,
+              "epoch": 1791482093.6043088,
+              "overall_timeout_seconds": 3600.0,
+              "request_body_bytes": 855090,
+              "request_body_sha256": "fd5ec81b30cbdeb2052235c983ea75fc14b0e57f670bc3acdb1aa299493da68e",
+              "sequence": 1,
+              "stage": "request_open_start",
+              "stream": true,
+              "timeout_seconds": 1800.0
+            },
+            {
+              "elapsed_seconds": 9.390000000130385,
+              "epoch": 1791482102.9996982,
+              "headers": {
+                "connection": "close",
+                "content-type": "text/event-stream;charset=utf-8",
+                "date": "Thu, 08 Oct 2026 17:55:03 GMT",
+                "server": "istio-envoy",
+                "transfer-encoding": "chunked",
+                "x-request-id": "36f92518-5554-9d83-aa62-aa3a9c8a806c"
+              },
+              "sequence": 2,
+              "stage": "response_opened",
+              "status_code": 200
+            },
+            {
+              "elapsed_seconds": 9.390000000130385,
+              "epoch": 1791482103.0006976,
+              "event_count": 0,
+              "overall_remaining_seconds": 3590.6099999998696,
+              "read_timeout_seconds": 1800.0,
+              "sequence": 3,
+              "stage": "stream_read_start"
+            },
+            {
+              "bytes": 308,
+              "elapsed_seconds": 9.390000000130385,
+              "epoch": 1791482103.0006976,
+              "sequence": 4,
+              "stage": "stream_first_byte"
+            },
+            {
+              "elapsed_seconds": 9.390000000130385,
+              "epoch": 1791482103.0006976,
+              "event_count": 0,
+              "overall_remaining_seconds": 3590.6099999998696,
+              "read_timeout_seconds": 1800.0,
+              "sequence": 5,
+              "stage": "stream_read_start"
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 9.390000000130385,
+              "epoch": 1791482103.0006976,
+              "event_count": 1,
+              "reasoning_bytes": 3,
+              "sequence": 6,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 9.483999999938533,
+              "epoch": 1791482103.0852077,
+              "event_count": 2,
+              "reasoning_bytes": 14,
+              "sequence": 7,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 9.547000000020489,
+              "epoch": 1791482103.1532075,
+              "event_count": 3,
+              "reasoning_bytes": 30,
+              "sequence": 8,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 9.594000000040978,
+              "epoch": 1791482103.2055624,
+              "event_count": 4,
+              "reasoning_bytes": 51,
+              "sequence": 9,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 9.672000000020489,
+              "epoch": 1791482103.2735624,
+              "event_count": 5,
+              "reasoning_bytes": 79,
+              "sequence": 10,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 9.733999999938533,
+              "epoch": 1791482103.3413703,
+              "event_count": 6,
+              "reasoning_bytes": 101,
+              "sequence": 11,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 9.797000000020489,
+              "epoch": 1791482103.4075668,
+              "event_count": 7,
+              "reasoning_bytes": 114,
+              "sequence": 12,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 9.812000000150874,
+              "epoch": 1791482103.4245667,
+              "event_count": 8,
+              "reasoning_bytes": 118,
+              "sequence": 13,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 16.344000000040978,
+              "epoch": 1791482109.9538658,
+              "event_count": 128,
+              "reasoning_bytes": 1869,
+              "sequence": 14,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 23.515000000130385,
+              "epoch": 1791482117.116259,
+              "event_count": 256,
+              "reasoning_bytes": 3501,
+              "sequence": 15,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 30.625,
+              "epoch": 1791482124.2315426,
+              "event_count": 384,
+              "reasoning_bytes": 5011,
+              "sequence": 16,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 38.187000000150874,
+              "epoch": 1791482131.7975178,
+              "event_count": 512,
+              "reasoning_bytes": 6517,
+              "sequence": 17,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 45.015000000130385,
+              "epoch": 1791482138.6173925,
+              "event_count": 640,
+              "reasoning_bytes": 8261,
+              "sequence": 18,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 51.95299999997951,
+              "epoch": 1791482145.5506268,
+              "event_count": 768,
+              "reasoning_bytes": 9865,
+              "sequence": 19,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 58.937000000150874,
+              "epoch": 1791482152.5366278,
+              "event_count": 896,
+              "reasoning_bytes": 11523,
+              "sequence": 20,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 461,
+              "elapsed_seconds": 66.10899999993853,
+              "epoch": 1791482159.7114086,
+              "event_count": 1024,
+              "reasoning_bytes": 12582,
+              "sequence": 21,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 1986,
+              "elapsed_seconds": 73.0,
+              "epoch": 1791482166.6104658,
+              "event_count": 1152,
+              "reasoning_bytes": 12582,
+              "sequence": 22,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 3535,
+              "elapsed_seconds": 80.28099999995902,
+              "epoch": 1791482173.8869846,
+              "event_count": 1280,
+              "reasoning_bytes": 12582,
+              "sequence": 23,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 5124,
+              "elapsed_seconds": 87.76500000013039,
+              "epoch": 1791482181.3658059,
+              "event_count": 1408,
+              "reasoning_bytes": 12582,
+              "sequence": 24,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 6650,
+              "elapsed_seconds": 95.18700000015087,
+              "epoch": 1791482188.7943003,
+              "event_count": 1536,
+              "reasoning_bytes": 12582,
+              "sequence": 25,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 8239,
+              "elapsed_seconds": 102.84400000004098,
+              "epoch": 1791482196.4438782,
+              "event_count": 1664,
+              "reasoning_bytes": 12582,
+              "sequence": 26,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 9792,
+              "elapsed_seconds": 110.29700000002049,
+              "epoch": 1791482203.9082143,
+              "event_count": 1792,
+              "reasoning_bytes": 12582,
+              "sequence": 27,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "elapsed_seconds": 111.89000000013039,
+              "epoch": 1791482205.488876,
+              "event_count": 1824,
+              "raw_bytes": 546793,
+              "sequence": 29,
+              "stage": "stream_done"
+            },
+            {
+              "content_bytes": 10129,
+              "elapsed_seconds": 111.89000000013039,
+              "epoch": 1791482205.4898782,
+              "event_count": 1824,
+              "reasoning_bytes": 12582,
+              "sequence": 30,
+              "stage": "stream_complete",
+              "usage_present": true
+            }
+          ]
+        }
+      },
+      {
+        "reservation_id": "res-5db2d2b06288430d",
+        "call_id": "maker_001-286804c99016-attempt_001:key0:attempt0",
+        "amount_cny": 5.338968,
+        "actual_cny": 3.121104,
+        "status": "settled",
+        "telemetry": {
+          "usage": {
+            "completion_tokens": 15219,
+            "completion_tokens_details": {
+              "reasoning_tokens": 11412,
+              "text_tokens": 15219
+            },
+            "prompt_tokens": 214435,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "text_tokens": 214435
+            },
+            "total_tokens": 229654
+          },
+          "returned_model": "qwen3.8-max",
+          "finish_reason": "stop",
+          "request_id": "chatcmpl-1d7b95a1-7d54-9288-b1d1-75a7ad35389b",
+          "raw_response_sha256": "dce31317c2df07692637739d5088fe6574cf3d5c7336310557941b20077fd3dd",
+          "status_code": 200,
+          "provider_error_code": null,
+          "key_index": null,
+          "attempt": null,
+          "cap_pressure": {
+            "answer_tokens": 3807,
+            "completion_tokens": 15219,
+            "diagnostic_only": true,
+            "finish_reason_length": false,
+            "near_limit": false,
+            "near_limits": [],
+            "reasoning_tokens": 11412
+          },
+          "effective_request": {
+            "answer_tokens": 32768,
+            "enable_thinking": true,
+            "mapped_reasoning_effort": "xhigh",
+            "max_completion_tokens": 65536,
+            "max_tokens": null,
+            "model": "qwen3.8-max",
+            "response_format": null,
+            "stream": true,
+            "stream_inactivity_timeout_seconds": 1800.0,
+            "stream_options": {
+              "include_usage": true
+            },
+            "stream_overall_timeout_seconds": 3600.0,
+            "thinking_budget": 32768,
+            "total_output_tokens": 65536
+          },
+          "stream": true,
+          "transport_events": [
+            {
+              "elapsed_seconds": 0.0,
+              "epoch": 1791531983.4144123,
+              "overall_timeout_seconds": 3600.0,
+              "request_body_bytes": 858538,
+              "request_body_sha256": "52b24200e2739b5ead2e86991899e39d3b0f0f2cf2adcab58761ea76095db788",
+              "sequence": 1,
+              "stage": "request_open_start",
+              "stream": true,
+              "timeout_seconds": 1800.0
+            },
+            {
+              "elapsed_seconds": 15.234999999869615,
+              "epoch": 1791531998.644975,
+              "headers": {
+                "connection": "close",
+                "content-type": "text/event-stream;charset=utf-8",
+                "date": "Fri, 09 Oct 2026 07:46:41 GMT",
+                "server": "istio-envoy",
+                "transfer-encoding": "chunked",
+                "x-request-id": "1d7b95a1-7d54-9288-b1d1-75a7ad35389b"
+              },
+              "sequence": 2,
+              "stage": "response_opened",
+              "status_code": 200
+            },
+            {
+              "elapsed_seconds": 15.406999999890104,
+              "epoch": 1791531998.8230155,
+              "event_count": 0,
+              "overall_remaining_seconds": 3584.59300000011,
+              "read_timeout_seconds": 1800.0,
+              "sequence": 3,
+              "stage": "stream_read_start"
+            },
+            {
+              "bytes": 276,
+              "elapsed_seconds": 15.406999999890104,
+              "epoch": 1791531998.8230155,
+              "sequence": 4,
+              "stage": "stream_first_byte"
+            },
+            {
+              "elapsed_seconds": 15.406999999890104,
+              "epoch": 1791531998.8230155,
+              "event_count": 0,
+              "overall_remaining_seconds": 3584.59300000011,
+              "read_timeout_seconds": 1800.0,
+              "sequence": 5,
+              "stage": "stream_read_start"
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 15.406999999890104,
+              "epoch": 1791531998.8230155,
+              "event_count": 1,
+              "reasoning_bytes": 0,
+              "sequence": 6,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 15.468999999808148,
+              "epoch": 1791531998.8809412,
+              "event_count": 2,
+              "reasoning_bytes": 2,
+              "sequence": 7,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 15.468999999808148,
+              "epoch": 1791531998.8809412,
+              "event_count": 3,
+              "reasoning_bytes": 19,
+              "sequence": 8,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 15.468999999808148,
+              "epoch": 1791531998.8809412,
+              "event_count": 4,
+              "reasoning_bytes": 35,
+              "sequence": 9,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 15.468999999808148,
+              "epoch": 1791531998.8809412,
+              "event_count": 5,
+              "reasoning_bytes": 55,
+              "sequence": 10,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 15.468999999808148,
+              "epoch": 1791531998.8809412,
+              "event_count": 6,
+              "reasoning_bytes": 75,
+              "sequence": 11,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 15.468999999808148,
+              "epoch": 1791531998.8809412,
+              "event_count": 7,
+              "reasoning_bytes": 82,
+              "sequence": 12,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 15.546999999787658,
+              "epoch": 1791531998.9581544,
+              "event_count": 8,
+              "reasoning_bytes": 101,
+              "sequence": 13,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 23.609999999869615,
+              "epoch": 1791532007.019496,
+              "event_count": 128,
+              "reasoning_bytes": 2032,
+              "sequence": 14,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 34.34399999980815,
+              "epoch": 1791532017.7584918,
+              "event_count": 256,
+              "reasoning_bytes": 3626,
+              "sequence": 15,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 43.17199999978766,
+              "epoch": 1791532026.5924356,
+              "event_count": 384,
+              "reasoning_bytes": 5140,
+              "sequence": 16,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 51.625,
+              "epoch": 1791532035.044348,
+              "event_count": 512,
+              "reasoning_bytes": 6799,
+              "sequence": 17,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 59.84399999980815,
+              "epoch": 1791532043.2579453,
+              "event_count": 640,
+              "reasoning_bytes": 8099,
+              "sequence": 18,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 72.81299999984913,
+              "epoch": 1791532056.2320974,
+              "event_count": 768,
+              "reasoning_bytes": 9514,
+              "sequence": 19,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 74.43799999984913,
+              "epoch": 1791532057.8514197,
+              "event_count": 896,
+              "reasoning_bytes": 10344,
+              "sequence": 20,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 82.48499999986961,
+              "epoch": 1791532065.8959615,
+              "event_count": 1024,
+              "reasoning_bytes": 11428,
+              "sequence": 21,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 90.04699999978766,
+              "epoch": 1791532073.4632545,
+              "event_count": 1152,
+              "reasoning_bytes": 12895,
+              "sequence": 22,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 100.39099999982864,
+              "epoch": 1791532083.8040695,
+              "event_count": 1280,
+              "reasoning_bytes": 14754,
+              "sequence": 23,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 108.625,
+              "epoch": 1791532092.034925,
+              "event_count": 1408,
+              "reasoning_bytes": 16452,
+              "sequence": 24,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 117.18799999984913,
+              "epoch": 1791532100.603042,
+              "event_count": 1536,
+              "reasoning_bytes": 18281,
+              "sequence": 25,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 126.625,
+              "epoch": 1791532110.0456307,
+              "event_count": 1664,
+              "reasoning_bytes": 19994,
+              "sequence": 26,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 135.04699999978766,
+              "epoch": 1791532118.4700673,
+              "event_count": 1792,
+              "reasoning_bytes": 21610,
+              "sequence": 27,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 143.375,
+              "epoch": 1791532126.7873933,
+              "event_count": 1920,
+              "reasoning_bytes": 23233,
+              "sequence": 28,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 151.17199999978766,
+              "epoch": 1791532134.587355,
+              "event_count": 2048,
+              "reasoning_bytes": 24703,
+              "sequence": 29,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 160.75,
+              "epoch": 1791532144.1748755,
+              "event_count": 2176,
+              "reasoning_bytes": 26348,
+              "sequence": 30,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 169.375,
+              "epoch": 1791532152.791935,
+              "event_count": 2304,
+              "reasoning_bytes": 28139,
+              "sequence": 31,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 178.17199999978766,
+              "epoch": 1791532161.5912511,
+              "event_count": 2432,
+              "reasoning_bytes": 29824,
+              "sequence": 32,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 187.0779999999795,
+              "epoch": 1791532170.4906433,
+              "event_count": 2560,
+              "reasoning_bytes": 31569,
+              "sequence": 33,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 195.09399999980815,
+              "epoch": 1791532178.5139444,
+              "event_count": 2688,
+              "reasoning_bytes": 33140,
+              "sequence": 34,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 202.89099999982864,
+              "epoch": 1791532186.3104393,
+              "event_count": 2816,
+              "reasoning_bytes": 34626,
+              "sequence": 35,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 211.5319999998901,
+              "epoch": 1791532194.9465184,
+              "event_count": 2944,
+              "reasoning_bytes": 36309,
+              "sequence": 36,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 221.375,
+              "epoch": 1791532204.7930496,
+              "event_count": 3072,
+              "reasoning_bytes": 37923,
+              "sequence": 37,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 230.17199999978766,
+              "epoch": 1791532213.5908847,
+              "event_count": 3200,
+              "reasoning_bytes": 39665,
+              "sequence": 38,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 238.7819999998901,
+              "epoch": 1791532222.1980684,
+              "event_count": 3328,
+              "reasoning_bytes": 41380,
+              "sequence": 39,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 1773,
+              "elapsed_seconds": 246.92199999978766,
+              "epoch": 1791532230.3372035,
+              "event_count": 3456,
+              "reasoning_bytes": 41454,
+              "sequence": 40,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 3638,
+              "elapsed_seconds": 271.4529999999795,
+              "epoch": 1791532254.8649209,
+              "event_count": 3584,
+              "reasoning_bytes": 41454,
+              "sequence": 41,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 5444,
+              "elapsed_seconds": 279.5,
+              "epoch": 1791532262.9152982,
+              "event_count": 3712,
+              "reasoning_bytes": 41454,
+              "sequence": 42,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 7323,
+              "elapsed_seconds": 279.51599999982864,
+              "epoch": 1791532262.9293075,
+              "event_count": 3840,
+              "reasoning_bytes": 41454,
+              "sequence": 43,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 9315,
+              "elapsed_seconds": 279.5319999998901,
+              "epoch": 1791532262.9424024,
+              "event_count": 3968,
+              "reasoning_bytes": 41454,
+              "sequence": 44,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 11271,
+              "elapsed_seconds": 284.96899999980815,
+              "epoch": 1791532268.3854525,
+              "event_count": 4096,
+              "reasoning_bytes": 41454,
+              "sequence": 45,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 13277,
+              "elapsed_seconds": 292.26599999982864,
+              "epoch": 1791532275.6823905,
+              "event_count": 4224,
+              "reasoning_bytes": 41454,
+              "sequence": 46,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 15093,
+              "elapsed_seconds": 306.3279999999795,
+              "epoch": 1791532289.7410724,
+              "event_count": 4352,
+              "reasoning_bytes": 41454,
+              "sequence": 47,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "elapsed_seconds": 306.3279999999795,
+              "epoch": 1791532289.7455785,
+              "event_count": 4390,
+              "raw_bytes": 1190441,
+              "sequence": 49,
+              "stage": "stream_done"
+            },
+            {
+              "content_bytes": 15482,
+              "elapsed_seconds": 306.875,
+              "epoch": 1791532290.2999818,
+              "event_count": 4390,
+              "reasoning_bytes": 41454,
+              "sequence": 50,
+              "stage": "stream_complete",
+              "usage_present": true
+            }
+          ]
+        }
+      },
+      {
+        "reservation_id": "res-4bb30a4af1fd403a",
+        "call_id": "maker_002-f51721878765-attempt_001:key0:attempt0",
+        "amount_cny": 5.740572,
+        "actual_cny": 3.11856,
+        "status": "settled",
+        "telemetry": {
+          "usage": {
+            "completion_tokens": 5188,
+            "completion_tokens_details": {
+              "reasoning_tokens": 890,
+              "text_tokens": 5188
+            },
+            "prompt_tokens": 244316,
+            "prompt_tokens_details": {
+              "cached_tokens": 214016,
+              "text_tokens": 244316
+            },
+            "total_tokens": 249504
+          },
+          "returned_model": "qwen3.8-max",
+          "finish_reason": "stop",
+          "request_id": "chatcmpl-ca8297a6-b9b9-97c9-9cf3-2649bd99e84b",
+          "raw_response_sha256": "882e9f49a50814d77870ba78d325889a941f3dc609185a8e9fe305f50b0f8c52",
+          "status_code": 200,
+          "provider_error_code": null,
+          "key_index": null,
+          "attempt": null,
+          "cap_pressure": {
+            "answer_tokens": 4298,
+            "completion_tokens": 5188,
+            "diagnostic_only": true,
+            "finish_reason_length": false,
+            "near_limit": false,
+            "near_limits": [],
+            "reasoning_tokens": 890
+          },
+          "effective_request": {
+            "answer_tokens": 32768,
+            "enable_thinking": true,
+            "mapped_reasoning_effort": "xhigh",
+            "max_completion_tokens": 65536,
+            "max_tokens": null,
+            "model": "qwen3.8-max",
+            "response_format": null,
+            "stream": true,
+            "stream_inactivity_timeout_seconds": 1800.0,
+            "stream_options": {
+              "include_usage": true
+            },
+            "stream_overall_timeout_seconds": 3600.0,
+            "thinking_budget": 32768,
+            "total_output_tokens": 65536
+          },
+          "stream": true,
+          "transport_events": [
+            {
+              "elapsed_seconds": 0.0,
+              "epoch": 1791532326.509786,
+              "overall_timeout_seconds": 3600.0,
+              "request_body_bytes": 953925,
+              "request_body_sha256": "6411c9795868aadc4312fc18f6b266ea21d0d4451437aba5b375bdf7b47eec79",
+              "sequence": 1,
+              "stage": "request_open_start",
+              "stream": true,
+              "timeout_seconds": 1800.0
+            },
+            {
+              "elapsed_seconds": 6.219000000040978,
+              "epoch": 1791532332.7369392,
+              "headers": {
+                "connection": "close",
+                "content-type": "text/event-stream;charset=utf-8",
+                "date": "Fri, 09 Oct 2026 07:52:15 GMT",
+                "server": "istio-envoy",
+                "transfer-encoding": "chunked",
+                "x-request-id": "ca8297a6-b9b9-97c9-9cf3-2649bd99e84b"
+              },
+              "sequence": 2,
+              "stage": "response_opened",
+              "status_code": 200
+            },
+            {
+              "elapsed_seconds": 6.5,
+              "epoch": 1791532333.003802,
+              "event_count": 0,
+              "overall_remaining_seconds": 3593.5,
+              "read_timeout_seconds": 1800.0,
+              "sequence": 3,
+              "stage": "stream_read_start"
+            },
+            {
+              "bytes": 276,
+              "elapsed_seconds": 6.5,
+              "epoch": 1791532333.003802,
+              "sequence": 4,
+              "stage": "stream_first_byte"
+            },
+            {
+              "elapsed_seconds": 6.5,
+              "epoch": 1791532333.003802,
+              "event_count": 0,
+              "overall_remaining_seconds": 3593.5,
+              "read_timeout_seconds": 1800.0,
+              "sequence": 5,
+              "stage": "stream_read_start"
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 6.5,
+              "epoch": 1791532333.003802,
+              "event_count": 1,
+              "reasoning_bytes": 0,
+              "sequence": 6,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 6.6560000001918525,
+              "epoch": 1791532333.1663556,
+              "event_count": 2,
+              "reasoning_bytes": 3,
+              "sequence": 7,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 6.6560000001918525,
+              "epoch": 1791532333.1663556,
+              "event_count": 3,
+              "reasoning_bytes": 18,
+              "sequence": 8,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 6.6560000001918525,
+              "epoch": 1791532333.1663556,
+              "event_count": 4,
+              "reasoning_bytes": 35,
+              "sequence": 9,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 6.6560000001918525,
+              "epoch": 1791532333.1663556,
+              "event_count": 5,
+              "reasoning_bytes": 39,
+              "sequence": 10,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 6.6560000001918525,
+              "epoch": 1791532333.1663556,
+              "event_count": 6,
+              "reasoning_bytes": 61,
+              "sequence": 11,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 6.6560000001918525,
+              "epoch": 1791532333.1663556,
+              "event_count": 7,
+              "reasoning_bytes": 73,
+              "sequence": 12,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 6.6560000001918525,
+              "epoch": 1791532333.1663556,
+              "event_count": 8,
+              "reasoning_bytes": 79,
+              "sequence": 13,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 13.547000000020489,
+              "epoch": 1791532340.063127,
+              "event_count": 128,
+              "reasoning_bytes": 1546,
+              "sequence": 14,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 20,
+              "elapsed_seconds": 21.07799999997951,
+              "epoch": 1791532347.5907123,
+              "event_count": 256,
+              "reasoning_bytes": 3135,
+              "sequence": 15,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 2217,
+              "elapsed_seconds": 27.781000000191852,
+              "epoch": 1791532354.2967546,
+              "event_count": 384,
+              "reasoning_bytes": 3135,
+              "sequence": 16,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 4019,
+              "elapsed_seconds": 34.45299999997951,
+              "epoch": 1791532360.9640763,
+              "event_count": 512,
+              "reasoning_bytes": 3135,
+              "sequence": 17,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 6052,
+              "elapsed_seconds": 41.063000000081956,
+              "epoch": 1791532367.5674715,
+              "event_count": 640,
+              "reasoning_bytes": 3135,
+              "sequence": 18,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 8065,
+              "elapsed_seconds": 48.01600000006147,
+              "epoch": 1791532374.524967,
+              "event_count": 768,
+              "reasoning_bytes": 3135,
+              "sequence": 19,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 10134,
+              "elapsed_seconds": 54.79700000002049,
+              "epoch": 1791532381.3122559,
+              "event_count": 896,
+              "reasoning_bytes": 3135,
+              "sequence": 20,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 12036,
+              "elapsed_seconds": 61.64100000006147,
+              "epoch": 1791532388.1595583,
+              "event_count": 1024,
+              "reasoning_bytes": 3135,
+              "sequence": 21,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 13868,
+              "elapsed_seconds": 70.28100000019185,
+              "epoch": 1791532396.7902782,
+              "event_count": 1152,
+              "reasoning_bytes": 3135,
+              "sequence": 22,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 16075,
+              "elapsed_seconds": 77.28100000019185,
+              "epoch": 1791532403.7886176,
+              "event_count": 1280,
+              "reasoning_bytes": 3135,
+              "sequence": 23,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "elapsed_seconds": 81.81300000008196,
+              "epoch": 1791532408.316594,
+              "event_count": 1360,
+              "raw_bytes": 371620,
+              "sequence": 25,
+              "stage": "stream_done"
+            },
+            {
+              "content_bytes": 17084,
+              "elapsed_seconds": 82.15600000019185,
+              "epoch": 1791532408.6639006,
+              "event_count": 1360,
+              "reasoning_bytes": 3135,
+              "sequence": 26,
+              "stage": "stream_complete",
+              "usage_present": true
+            }
+          ]
+        }
+      },
+      {
+        "reservation_id": "res-e006fb7db38e4d49",
+        "call_id": "maker_001-9c1e15192ab0-attempt_001:key0:attempt0",
+        "amount_cny": 5.4669,
+        "actual_cny": 3.028248,
+        "status": "settled",
+        "telemetry": {
+          "usage": {
+            "completion_tokens": 9466,
+            "completion_tokens_details": {
+              "reasoning_tokens": 2390,
+              "text_tokens": 9466
+            },
+            "prompt_tokens": 223956,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "text_tokens": 223956
+            },
+            "total_tokens": 233422
+          },
+          "returned_model": "qwen3.8-max",
+          "finish_reason": "stop",
+          "request_id": "chatcmpl-eed245f4-b6c9-99d7-b145-9af73c7630ca",
+          "raw_response_sha256": "aeed2c40214336428f40640808937ede0819c59a65d5883fbf6e5bf93518bb4f",
+          "status_code": 200,
+          "provider_error_code": null,
+          "key_index": null,
+          "attempt": null,
+          "cap_pressure": {
+            "answer_tokens": 7076,
+            "completion_tokens": 9466,
+            "diagnostic_only": true,
+            "finish_reason_length": false,
+            "near_limit": false,
+            "near_limits": [],
+            "reasoning_tokens": 2390
+          },
+          "effective_request": {
+            "answer_tokens": 32768,
+            "enable_thinking": true,
+            "mapped_reasoning_effort": "xhigh",
+            "max_completion_tokens": 65536,
+            "max_tokens": null,
+            "model": "qwen3.8-max",
+            "response_format": {
+              "type": "json_object"
+            },
+            "stream": true,
+            "stream_inactivity_timeout_seconds": 1800.0,
+            "stream_options": {
+              "include_usage": true
+            },
+            "stream_overall_timeout_seconds": 3600.0,
+            "thinking_budget": 32768,
+            "total_output_tokens": 65536
+          },
+          "stream": true,
+          "transport_events": [
+            {
+              "elapsed_seconds": 0.0,
+              "epoch": 1791565084.8823478,
+              "overall_timeout_seconds": 3600.0,
+              "request_body_bytes": 882583,
+              "request_body_sha256": "fa6eec4c9e1a9b6afa8e33bfa1a1f8257dc63f380d42f992d2d504f77344ca96",
+              "sequence": 1,
+              "stage": "request_open_start",
+              "stream": true,
+              "timeout_seconds": 1800.0
+            },
+            {
+              "elapsed_seconds": 16.686999999918044,
+              "epoch": 1791565101.5784066,
+              "headers": {
+                "connection": "close",
+                "content-type": "text/event-stream;charset=utf-8",
+                "date": "Fri, 09 Oct 2026 16:58:21 GMT",
+                "server": "istio-envoy",
+                "transfer-encoding": "chunked",
+                "x-request-id": "eed245f4-b6c9-99d7-b145-9af73c7630ca"
+              },
+              "sequence": 2,
+              "stage": "response_opened",
+              "status_code": 200
+            },
+            {
+              "elapsed_seconds": 16.686999999918044,
+              "epoch": 1791565101.5794072,
+              "event_count": 0,
+              "overall_remaining_seconds": 3583.313000000082,
+              "read_timeout_seconds": 1800.0,
+              "sequence": 3,
+              "stage": "stream_read_start"
+            },
+            {
+              "bytes": 276,
+              "elapsed_seconds": 16.686999999918044,
+              "epoch": 1791565101.5794072,
+              "sequence": 4,
+              "stage": "stream_first_byte"
+            },
+            {
+              "elapsed_seconds": 16.686999999918044,
+              "epoch": 1791565101.5794072,
+              "event_count": 0,
+              "overall_remaining_seconds": 3583.313000000082,
+              "read_timeout_seconds": 1800.0,
+              "sequence": 5,
+              "stage": "stream_read_start"
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 16.686999999918044,
+              "epoch": 1791565101.5794072,
+              "event_count": 1,
+              "reasoning_bytes": 0,
+              "sequence": 6,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 16.686999999918044,
+              "epoch": 1791565101.5794072,
+              "event_count": 2,
+              "reasoning_bytes": 3,
+              "sequence": 7,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 16.718000000109896,
+              "epoch": 1791565101.6132169,
+              "event_count": 3,
+              "reasoning_bytes": 27,
+              "sequence": 8,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 16.764999999897555,
+              "epoch": 1791565101.6539247,
+              "event_count": 4,
+              "reasoning_bytes": 33,
+              "sequence": 9,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 16.811999999918044,
+              "epoch": 1791565101.6927576,
+              "event_count": 5,
+              "reasoning_bytes": 50,
+              "sequence": 10,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 16.843000000109896,
+              "epoch": 1791565101.7323127,
+              "event_count": 6,
+              "reasoning_bytes": 70,
+              "sequence": 11,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 16.921000000089407,
+              "epoch": 1791565101.814723,
+              "event_count": 7,
+              "reasoning_bytes": 86,
+              "sequence": 12,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 16.921000000089407,
+              "epoch": 1791565101.8152044,
+              "event_count": 8,
+              "reasoning_bytes": 95,
+              "sequence": 13,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 21.82799999997951,
+              "epoch": 1791565106.7211862,
+              "event_count": 128,
+              "reasoning_bytes": 1452,
+              "sequence": 14,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 27.014999999897555,
+              "epoch": 1791565111.8980224,
+              "event_count": 256,
+              "reasoning_bytes": 2756,
+              "sequence": 15,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 32.28099999995902,
+              "epoch": 1791565117.1693392,
+              "event_count": 384,
+              "reasoning_bytes": 3618,
+              "sequence": 16,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 38.264999999897555,
+              "epoch": 1791565123.1522777,
+              "event_count": 512,
+              "reasoning_bytes": 4828,
+              "sequence": 17,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 44.15599999995902,
+              "epoch": 1791565129.041554,
+              "event_count": 640,
+              "reasoning_bytes": 6909,
+              "sequence": 18,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 1652,
+              "elapsed_seconds": 52.54600000008941,
+              "epoch": 1791565137.4315982,
+              "event_count": 768,
+              "reasoning_bytes": 6943,
+              "sequence": 19,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 3447,
+              "elapsed_seconds": 59.061999999918044,
+              "epoch": 1791565143.9467933,
+              "event_count": 896,
+              "reasoning_bytes": 6943,
+              "sequence": 20,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 5285,
+              "elapsed_seconds": 65.43699999991804,
+              "epoch": 1791565150.320469,
+              "event_count": 1024,
+              "reasoning_bytes": 6943,
+              "sequence": 21,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 7051,
+              "elapsed_seconds": 73.70299999997951,
+              "epoch": 1791565158.5942173,
+              "event_count": 1152,
+              "reasoning_bytes": 6943,
+              "sequence": 22,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 8734,
+              "elapsed_seconds": 79.51499999989755,
+              "epoch": 1791565164.4024894,
+              "event_count": 1280,
+              "reasoning_bytes": 6943,
+              "sequence": 23,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 10438,
+              "elapsed_seconds": 85.70299999997951,
+              "epoch": 1791565170.594688,
+              "event_count": 1408,
+              "reasoning_bytes": 6943,
+              "sequence": 24,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 12085,
+              "elapsed_seconds": 91.13999999989755,
+              "epoch": 1791565176.0203059,
+              "event_count": 1536,
+              "reasoning_bytes": 6943,
+              "sequence": 25,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 13908,
+              "elapsed_seconds": 97.1710000000894,
+              "epoch": 1791565182.0552921,
+              "event_count": 1664,
+              "reasoning_bytes": 6943,
+              "sequence": 26,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 15653,
+              "elapsed_seconds": 102.85899999993853,
+              "epoch": 1791565187.743403,
+              "event_count": 1792,
+              "reasoning_bytes": 6943,
+              "sequence": 27,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 17345,
+              "elapsed_seconds": 108.8430000001099,
+              "epoch": 1791565193.7237313,
+              "event_count": 1920,
+              "reasoning_bytes": 6943,
+              "sequence": 28,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 19050,
+              "elapsed_seconds": 114.57799999997951,
+              "epoch": 1791565199.4671698,
+              "event_count": 2048,
+              "reasoning_bytes": 6943,
+              "sequence": 29,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 20875,
+              "elapsed_seconds": 122.8430000001099,
+              "epoch": 1791565207.7274623,
+              "event_count": 2176,
+              "reasoning_bytes": 6943,
+              "sequence": 30,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 22558,
+              "elapsed_seconds": 128.8430000001099,
+              "epoch": 1791565213.7333865,
+              "event_count": 2304,
+              "reasoning_bytes": 6943,
+              "sequence": 31,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 24388,
+              "elapsed_seconds": 134.85899999993853,
+              "epoch": 1791565219.7447264,
+              "event_count": 2432,
+              "reasoning_bytes": 6943,
+              "sequence": 32,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 25821,
+              "elapsed_seconds": 140.73399999993853,
+              "epoch": 1791565225.6203916,
+              "event_count": 2560,
+              "reasoning_bytes": 6943,
+              "sequence": 33,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "elapsed_seconds": 143.2029999999795,
+              "epoch": 1791565228.0900428,
+              "event_count": 2612,
+              "raw_bytes": 708777,
+              "sequence": 35,
+              "stage": "stream_done"
+            },
+            {
+              "content_bytes": 26424,
+              "elapsed_seconds": 143.2029999999795,
+              "epoch": 1791565228.0900428,
+              "event_count": 2612,
+              "reasoning_bytes": 6943,
+              "sequence": 36,
+              "stage": "stream_complete",
+              "usage_present": true
+            }
+          ]
+        }
+      },
+      {
+        "reservation_id": "res-4d154a378d2e4744",
+        "call_id": "maker_002-e16b91defb1a-attempt_001:key0:attempt0",
+        "amount_cny": 7.62744,
+        "actual_cny": 4.914636,
+        "status": "settled",
+        "telemetry": {
+          "usage": {
+            "completion_tokens": 8281,
+            "completion_tokens_details": {
+              "reasoning_tokens": 943,
+              "text_tokens": 8281
+            },
+            "prompt_tokens": 384710,
+            "prompt_tokens_details": {
+              "cached_tokens": 223232,
+              "text_tokens": 384710
+            },
+            "total_tokens": 392991
+          },
+          "returned_model": "qwen3.8-max",
+          "finish_reason": "stop",
+          "request_id": "chatcmpl-f2580a83-43de-98e0-a0ef-ae34207335ff",
+          "raw_response_sha256": "9d1a11dc318f5cece67d11baf59fc3c974278fe70c20b2fef75707e86cd6b7c5",
+          "status_code": 200,
+          "provider_error_code": null,
+          "key_index": null,
+          "attempt": null,
+          "cap_pressure": {
+            "answer_tokens": 7338,
+            "completion_tokens": 8281,
+            "diagnostic_only": true,
+            "finish_reason_length": false,
+            "near_limit": false,
+            "near_limits": [],
+            "reasoning_tokens": 943
+          },
+          "effective_request": {
+            "answer_tokens": 32768,
+            "enable_thinking": true,
+            "mapped_reasoning_effort": "xhigh",
+            "max_completion_tokens": 65536,
+            "max_tokens": null,
+            "model": "qwen3.8-max",
+            "response_format": {
+              "type": "json_object"
+            },
+            "stream": true,
+            "stream_inactivity_timeout_seconds": 1800.0,
+            "stream_options": {
+              "include_usage": true
+            },
+            "stream_overall_timeout_seconds": 3600.0,
+            "thinking_budget": 32768,
+            "total_output_tokens": 65536
+          },
+          "stream": true,
+          "transport_events": [
+            {
+              "elapsed_seconds": 0.0,
+              "epoch": 1791565749.2720032,
+              "overall_timeout_seconds": 3600.0,
+              "request_body_bytes": 1405703,
+              "request_body_sha256": "1edbe717db1a3721ae3c8cfcaaf6818428de427f98cc43cfd420c0910fd33ff5",
+              "sequence": 1,
+              "stage": "request_open_start",
+              "stream": true,
+              "timeout_seconds": 1800.0
+            },
+            {
+              "elapsed_seconds": 64.23500000010245,
+              "epoch": 1791565813.5115972,
+              "headers": {
+                "connection": "close",
+                "content-type": "text/event-stream;charset=utf-8",
+                "date": "Fri, 09 Oct 2026 17:10:13 GMT",
+                "server": "istio-envoy",
+                "transfer-encoding": "chunked",
+                "x-request-id": "f2580a83-43de-98e0-a0ef-ae34207335ff"
+              },
+              "sequence": 2,
+              "stage": "response_opened",
+              "status_code": 200
+            },
+            {
+              "elapsed_seconds": 64.23500000010245,
+              "epoch": 1791565813.512597,
+              "event_count": 0,
+              "overall_remaining_seconds": 3535.7649999998976,
+              "read_timeout_seconds": 1800.0,
+              "sequence": 3,
+              "stage": "stream_read_start"
+            },
+            {
+              "bytes": 276,
+              "elapsed_seconds": 64.23500000010245,
+              "epoch": 1791565813.512597,
+              "sequence": 4,
+              "stage": "stream_first_byte"
+            },
+            {
+              "elapsed_seconds": 64.23500000010245,
+              "epoch": 1791565813.512597,
+              "event_count": 0,
+              "overall_remaining_seconds": 3535.7649999998976,
+              "read_timeout_seconds": 1800.0,
+              "sequence": 5,
+              "stage": "stream_read_start"
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 64.23500000010245,
+              "epoch": 1791565813.512597,
+              "event_count": 1,
+              "reasoning_bytes": 0,
+              "sequence": 6,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 64.23500000010245,
+              "epoch": 1791565813.513597,
+              "event_count": 2,
+              "reasoning_bytes": 3,
+              "sequence": 7,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 64.28100000019185,
+              "epoch": 1791565813.5559654,
+              "event_count": 3,
+              "reasoning_bytes": 14,
+              "sequence": 8,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 64.32800000021234,
+              "epoch": 1791565813.606727,
+              "event_count": 4,
+              "reasoning_bytes": 32,
+              "sequence": 9,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 64.375,
+              "epoch": 1791565813.6588864,
+              "event_count": 5,
+              "reasoning_bytes": 37,
+              "sequence": 10,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 64.53100000019185,
+              "epoch": 1791565813.8105743,
+              "event_count": 6,
+              "reasoning_bytes": 58,
+              "sequence": 11,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 64.53100000019185,
+              "epoch": 1791565813.812579,
+              "event_count": 7,
+              "reasoning_bytes": 76,
+              "sequence": 12,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 64.73500000010245,
+              "epoch": 1791565814.019636,
+              "event_count": 8,
+              "reasoning_bytes": 97,
+              "sequence": 13,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 71.53100000019185,
+              "epoch": 1791565820.8047388,
+              "event_count": 128,
+              "reasoning_bytes": 1556,
+              "sequence": 14,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 0,
+              "elapsed_seconds": 79.18800000008196,
+              "epoch": 1791565828.4668791,
+              "event_count": 256,
+              "reasoning_bytes": 3430,
+              "sequence": 15,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 1874,
+              "elapsed_seconds": 87.59400000004098,
+              "epoch": 1791565836.8679197,
+              "event_count": 384,
+              "reasoning_bytes": 3576,
+              "sequence": 16,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 3921,
+              "elapsed_seconds": 94.23500000010245,
+              "epoch": 1791565843.5188274,
+              "event_count": 512,
+              "reasoning_bytes": 3576,
+              "sequence": 17,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 5953,
+              "elapsed_seconds": 100.96900000004098,
+              "epoch": 1791565850.2498112,
+              "event_count": 640,
+              "reasoning_bytes": 3576,
+              "sequence": 18,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 7921,
+              "elapsed_seconds": 107.71900000004098,
+              "epoch": 1791565857.0012581,
+              "event_count": 768,
+              "reasoning_bytes": 3576,
+              "sequence": 19,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 9874,
+              "elapsed_seconds": 116.73500000010245,
+              "epoch": 1791565866.0120525,
+              "event_count": 896,
+              "reasoning_bytes": 3576,
+              "sequence": 20,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 11736,
+              "elapsed_seconds": 123.61000000010245,
+              "epoch": 1791565872.8927956,
+              "event_count": 1024,
+              "reasoning_bytes": 3576,
+              "sequence": 21,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 13662,
+              "elapsed_seconds": 130.4220000000205,
+              "epoch": 1791565879.6918519,
+              "event_count": 1152,
+              "reasoning_bytes": 3576,
+              "sequence": 22,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 15672,
+              "elapsed_seconds": 137.31300000008196,
+              "epoch": 1791565886.5839357,
+              "event_count": 1280,
+              "reasoning_bytes": 3576,
+              "sequence": 23,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 17711,
+              "elapsed_seconds": 144.15600000019185,
+              "epoch": 1791565893.4280572,
+              "event_count": 1408,
+              "reasoning_bytes": 3576,
+              "sequence": 24,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 19551,
+              "elapsed_seconds": 150.65600000019185,
+              "epoch": 1791565899.9306726,
+              "event_count": 1536,
+              "reasoning_bytes": 3576,
+              "sequence": 25,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 21667,
+              "elapsed_seconds": 157.5,
+              "epoch": 1791565906.7846644,
+              "event_count": 1664,
+              "reasoning_bytes": 3576,
+              "sequence": 26,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 23551,
+              "elapsed_seconds": 164.36000000010245,
+              "epoch": 1791565913.637693,
+              "event_count": 1792,
+              "reasoning_bytes": 3576,
+              "sequence": 27,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 25600,
+              "elapsed_seconds": 171.26600000006147,
+              "epoch": 1791565920.5369136,
+              "event_count": 1920,
+              "reasoning_bytes": 3576,
+              "sequence": 28,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "choices": 1,
+              "content_bytes": 27353,
+              "elapsed_seconds": 178.09400000004098,
+              "epoch": 1791565927.377594,
+              "event_count": 2048,
+              "reasoning_bytes": 3576,
+              "sequence": 29,
+              "stage": "stream_chunk",
+              "usage_present": false
+            },
+            {
+              "elapsed_seconds": 183.7970000000205,
+              "epoch": 1791565933.0721738,
+              "event_count": 2106,
+              "raw_bytes": 576536,
+              "sequence": 31,
+              "stage": "stream_done"
+            },
+            {
+              "content_bytes": 28055,
+              "elapsed_seconds": 183.7970000000205,
+              "epoch": 1791565933.073174,
+              "event_count": 2106,
+              "reasoning_bytes": 3576,
+              "sequence": 32,
+              "stage": "stream_complete",
+              "usage_present": true
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

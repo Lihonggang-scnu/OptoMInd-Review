@@ -1,0 +1,1365 @@
+抗生素治疗或未能提供基线样本的患者，可能存在选择偏倚。",
+              "irAEs的定义和分级依据CTCAE v4.03，需注意与其他研究使用的标准可能存在的细微差异。"
+            ],
+            "topic_handles": [
+              "Gastrointestinal cancers (Esophageal, Gastric, Colorectal)",
+              "Immune-related adverse events (irAEs) severity and organ specificity",
+              "Baseline gut microbiome composition (Species level)",
+              "Microbial metabolic pathways (Urea cycle, Citrulline/Arginine biosynthesis)",
+              "Probiotic-associated taxa (Lactobacillus, Bifidobacterium, Ruminococcus)"
+            ]
+          },
+          "locator": {
+            "writer_packet": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch6.json",
+            "source_handle": "P0011",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\042544f408b07e2d51c57f40f4df614d0c0960a7\\744aa1560618c1f5e01bef359713a1d9\\attempt-01\\PAPER_READING_CARD.json"
+          },
+          "card_material": {
+            "known_gaps": [
+              {
+                "asset_id": "asset-4dcc7c19ae5301df5638",
+                "kind": "asset",
+                "reason": "caption_or_locator_without_readable_image",
+                "status": "caption_only"
+              },
+              {
+                "asset_id": "asset-5c752c0f8036d5742e42",
+                "kind": "asset",
+                "reason": "caption_or_locator_without_readable_image",
+                "status": "caption_only"
+              },
+              {
+                "asset_id": "asset-76494e52e6aac1a4278f",
+                "kind": "asset",
+                "reason": "caption_or_locator_without_readable_image",
+                "status": "caption_only"
+              },
+              {
+                "asset_id": "asset-a7194a689f46f19f0fc9",
+                "kind": "asset",
+                "reason": "caption_or_locator_without_readable_image",
+                "status": "caption_only"
+              },
+              {
+                "asset_id": "asset-5f82ba52a99d38e52a55",
+                "kind": "asset",
+                "reason": "caption_or_locator_without_readable_image",
+                "status": "caption_only"
+              },
+              {
+                "kind": "assets",
+                "reason": "supplementaryFiles_fetch_transport_TimeoutError",
+                "status": "missing"
+              }
+            ],
+            "material_scope": "fulltext"
+          },
+          "material_read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\042544f408b07e2d51c57f40f4df614d0c0960a7\\744aa1560618c1f5e01bef359713a1d9\\attempt-01\\PAPER_READING_CARD.json"
+        },
+        {
+          "source_handle": "P0308",
+          "title": "Gut microbiome for predicting immune checkpoint blockade-associated adverse events",
+          "year": "2024",
+          "doi": "10.1186/s13073-024-01285-9",
+          "paper_id": "8524fbf4592e1ca625332b35344ad1a5d37aad93",
+          "material_depth": "fulltext",
+          "material_status": "resolved",
+          "aliases": [],
+          "study_summary_A": {
+            "approach": "采用多阶段混合方法：1) 数据整合与预处理：从公共数据库提取7项研究的16S数据，结合内部收集的16S和宏基因组数据；使用MMUPHin算法对“研究”这一主要混杂因素进行批次校正。2) 差异分析与特征筛选：使用阻塞Wilcoxon秩和检验识别差异物种，排除与疗效（response）重叠的特征，保留irAEs特异性特征。3) 机器学习建模：使用随机森林（Random Forest）算法，通过迭代特征消除（IFE）优化，筛选出最具判别力的14个微生物特征构建RF14分类器。4) 模型评估：通过分层十折交叉验证、留一法验证（LOSO）及两个独立外部队列（SH和JS队列）评估模型性能（AUC、敏感性、特异性等）。5) 机制探索：利用PICRUSt2预测功能，结合宏基因组数据验证关键基因（menH, menC）表达，并通过qRT-PCR和HPLC-MS/MS定量粪便样本中的基因丰度和血清中的甲萘醌水平；最后结合结肠组织转录组数据进行GSEA分析以推断炎症通路机制。",
+            "contribution_and_limits": [
+              {
+                "contribution": "提供了一个经过严格外部验证的、基于14种微生物的irAEs预测模型（RF14），解决了既往研究结果不一致的问题，并指出了特定微生物（如乳酸杆菌）作为潜在生物标志物的价值。",
+                "limits": "机制部分主要基于观察性数据的关联分析和文献推导，缺乏直接的体内或体外实验证实甲萘醌对irAEs的具体因果作用；样本量虽经整合但仍有限，且未完全控制所有临床混杂因素（如抗生素使用细节、具体肿瘤类型差异等）。"
+              }
+            ],
+            "key_findings": [
+              {
+                "conditions": "整合3项大规模anti-PD-1/PD-L1队列（n=190）进行训练",
+                "finding": "识别出14种微生物特征构成的RF14分类器，区分irAEs与非irAEs的平均AUC为0.88；其中Lactobacillus salivarius为排名最高的生物标志物。"
+              },
+              {
+                "conditions": "两个独立外部队列验证（SH队列N=65，JS队列N=50）",
+                "finding": "RF14分类器在两个独立队列中均显示出显著的判别能力，证明了模型的跨队列泛化性和稳健性。"
+              },
+              {
+                "conditions": "功能分析与代谢物检测",
+                "finding": "非irAEs患者肠道微生物中甲萘醌（Menaquinone/Vitamin K2）生物合成途径显著富集，关键限速酶menH和menC表达升高；血清中甲萘醌水平在非irAEs患者中显著高于irAEs患者。"
+              },
+              {
+                "conditions": "机制推断（结合转录组数据）",
+                "finding": "低RF评分（高风险irAEs）组患者结肠组织中促炎通路（如NF-κB信号通路）显著激活；文献支持甲萘醌可抑制NF-κB通路，提示微生物来源的甲萘醌可能通过抗炎机制保护宿主免受irAEs损伤。"
+              }
+            ],
+            "paper_kind": "empirical",
+            "problem_or_question": "尽管已知肠道微生物组影响ICIs引发的irAEs，但不同研究报道的微生物关联存在不一致性，缺乏高鲁棒性的预测生物标志物及明确的机制解释。本研究试图回答：能否从整合数据中识别出稳定预测anti-PD-1/PD-L1治疗相关irAEs的微生物特征？这些微生物特征背后的功能机制是什么？",
+            "research_scope": "接受抗PD-1/PD-L1免疫检查点抑制剂（ICIs）治疗的实体瘤患者；研究聚焦于基线肠道微生物组与免疫相关不良事件（irAEs）发生风险之间的关联，以及潜在的代谢机制。",
+            "work_summary": "本研究旨在解决现有研究中肠道微生物组与irAEs关联不一致的问题，通过整合公开数据与内部队列，构建基于机器学习的微生物预测模型并探索其生物学机制。研究团队收集了来自7项已发表研究的317名患者的16S rRNA测序数据，以及来自上海和徐州两家医院的115名患者的内部队列数据（包括16S和宏基因组）。首先，通过元分析校正“研究”带来的批次效应，识别出区分irAEs与非irAEs的特异性微生物特征。随后，利用随机森林算法筛选出14种关键微生物物种，构建了RF14分类器，在训练集上达到0.88的AUC，并在两个独立外部队列中验证了其稳健性。此外，研究结合转录组与宏基因组数据，发现非irAEs患者肠道中维生素K2（甲萘醌/menaquinone）的生物合成途径及关键酶（menH, menC）表达显著升高，且血清中甲萘醌水平更高。机制推测表明，微生物来源的甲萘醌可能通过抑制NF-κB等促炎信号通路来减轻irAEs的发生。"
+          },
+          "review_planning_B": {
+            "planning_summary": "该论文为综述提供了关于肠道微生物组如何调节ICIs疗效副作用（irAEs）的重要实证素材。它不仅贡献了一个具有较高预测性能的微生物特征面板（RF14），还深入探讨了具体的代谢机制（甲萘醌/NF-κB通路），这有助于在综述中解释微生物组影响免疫毒性的潜在分子路径，并为讨论预防策略提供依据。",
+            "facet_contributions": [
+              {
+                "boundaries": "该模型主要针对anti-PD-1/PD-L1治疗，对于anti-CTLA-4或其他联合疗法的适用性需参考文中提到的其他数据集或保持谨慎外推。",
+                "contribution": "提供了基于14种微生物特征的irAEs预测模型（RF14），显示非irAEs患者中特定菌属（如Lactobacillus, Parabacteroides）富集。这直接回应了微生物组如何影响ICIs安全性（毒性）的问题，表明特定的微生物组成可以作为风险分层工具。",
+                "facet_id": "F1",
+                "possible_uses": "用于综述中讨论微生物组作为irAEs预测生物标志物的可行性，列举具体的预测模型及其性能指标（AUC 0.88），并对比不同研究间的异质性。"
+              },
+              {
+                "boundaries": "机制证据主要为相关性（微生物丰度、基因表达、血清代谢物与临床表型的关联）和文献支持的通路推断，尚未通过干预实验确证因果关系。",
+                "contribution": "揭示了微生物组影响irAEs的潜在机制：非irAEs患者中甲萘醌（Vitamin K2）生物合成增强，且血清中甲萘醌水平更高；关联分析提示甲萘醌可能通过抑制NF-κB促炎通路发挥作用。",
+                "facet_id": "F2",
+                "possible_uses": "用于综述中阐述微生物组调节宿主免疫反应的代谢机制，特别是维生素K类物质在维持肠道免疫稳态中的作用。可作为解释为何某些益生菌或代谢物补充可能缓解irAEs的理论基础。"
+              }
+            ],
+            "broader_review_uses": [
+              {
+                "connection_to_review": "可用于综述引言或讨论部分，说明当前领域面临的挑战（异质性）以及整合分析的重要性。",
+                "material": "文中指出既往研究因样本量小、治疗策略差异导致微生物关联结果不一致，本研究通过大样本整合和批次校正解决了这一问题。",
+                "purpose": "背景与争议说明"
+              },
+              {
+                "connection_to_review": "可用于综述中讨论平衡ICIs疗效与毒性的临床困境，以及微生物组导向的精准干预（如益生元、代谢物补充）的前景。",
+                "material": "文中提到irAEs患者往往有更好的生存获益，因此预防irAEs而不影响疗效是临床难题；提出补充甲萘醌可能是一种选择性治疗策略。",
+                "purpose": "临床悖论与治疗策略探讨"
+              }
+            ],
+            "scope_interpretation_cautions": [
+              "该研究重点在于irAEs（毒性）而非肿瘤疗效（efficacy），虽然提到了排除与疗效重叠的特征，但其核心贡献是预测毒性风险。",
+              "机制部分（甲萘醌-NF-κB）是基于观察性数据和文献引用的推断，不能直接视为已证实的因果机制，需在综述中明确其假设性质。",
+              "模型验证使用了独立的16S和宏基因组队列，但未包含所有类型的ICI药物（如单药抗CTLA-4仅用于初步比较，模型主要针对PD-1/PD-L1）。"
+            ],
+            "topic_handles": [
+              "immune-related adverse events (irAEs)",
+              "gut microbiome composition",
+              "machine learning prediction models",
+              "menaquinone biosynthesis",
+              "NF-κB signaling pathway",
+              "Lactobacillus salivarius",
+              "Parabacteroides merdae"
+            ]
+          },
+          "locator": {
+            "writer_packet": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch6.json",
+            "source_handle": "P0308",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\8524fbf4592e1ca625332b35344ad1a5d37aad93\\a7d73d52ee2de75a512990925c2135d9\\attempt-01\\PAPER_READING_CARD.json"
+          },
+          "card_material": {
+            "material_scope": "fulltext"
+          },
+          "material_read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\8524fbf4592e1ca625332b35344ad1a5d37aad93\\a7d73d52ee2de75a512990925c2135d9\\attempt-01\\PAPER_READING_CARD.json"
+        },
+        {
+          "source_handle": "P0312",
+          "title": "Biomarkers for immune-related adverse events in cancer patients treated with immune checkpoint inhibitors",
+          "year": "2024",
+          "doi": "10.1093/jjco/hyad184",
+          "paper_id": "85e23d9e543859acdb7e57cd52f3d28495c0162e",
+          "material_depth": "structured_partial",
+          "material_status": "resolved",
+          "aliases": [],
+          "study_summary_A": {
+            "approach": "作为一篇综述，本研究采用文献综述的方法，对已发表的关于ICIs诱导的irAEs预测生物标志物的研究进行系统性整理和归纳。具体路线包括：1. 将潜在生物标志物按类别进行分类（血液细胞计数/表面标记、血清蛋白、自身抗体、细胞因子/趋化因子、遗传变异/基因表达、HLA基因型、microRNAs、肠道微生物组及其他如BMI）。2. 针对每一类，提取并总结代表性研究的设计类型（回顾性或前瞻性）、样本量、肿瘤类型、具体的生物标志物指标、观察到的关联方向（正相关或负相关）以及统计学显著性。3. 对比不同研究间结果的异同，特别关注矛盾发现。4. 综合讨论各类标志物的临床可行性、特异性问题（如受癌症本身炎症影响）及机制解释。5. 基于现有证据的整体质量，评估其向临床转化所需的条件（如需要更多前瞻性验证）。",
+            "contribution_and_limits": [
+              {
+                "contribution": "提供了关于ICIs诱导irAEs预测生物标志物的全面分类综述，涵盖了从常规实验室检测到前沿分子特征的广泛领域。",
+                "limits": "所给摘要未交代具体的文献检索策略、纳入排除标准及偏倚风险评估方法，仅呈现了作者的归纳观点。"
+              },
+              {
+                "contribution": "明确指出了当前生物标志物研究的主要局限性：结果不一致、缺乏特异性（受肿瘤炎症干扰）、多为回顾性研究、以及缺乏临床实用性的验证。",
+                "limits": "作为综述，其结论依赖于所引用的原始研究的质量和设计，无法提供新的实证数据。"
+              },
+              {
+                "contribution": "提出了生物标志物可能同时预测irAE风险和抗肿瘤疗效的假设，为未来研究方向提供了思路。",
+                "limits": "该假设尚需更多研究证实，目前仅是基于个别研究的推测。"
+              }
+            ],
+            "key_findings": [
+              {
+                "conditions": "血液细胞计数与比率（回顾性为主，多肿瘤类型）",
+                "finding": "多项回顾性研究显示基线或治疗期间的白细胞、中性粒细胞、淋巴细胞、嗜酸性粒细胞、单核细胞及其比值（如NLR, PLR）与irAEs风险存在关联，但结果高度不一致。例如，部分研究发现低基线淋巴细胞计数预示高风险，而其他研究则发现高计数或治疗后升高与风险相关。"
+              },
+              {
+                "conditions": "血清蛋白（CRP, LDH, Albumin等）",
+                "finding": "C反应蛋白（CRP）的研究结果矛盾：有的显示irAE发作时短暂升高，有的显示基线低水平与irAE发生独立相关。其他蛋白如LDH和白蛋白也显示出不一致的结果。器官特异性蛋白（如心肌酶谱、甲状腺激素）在特定irAEs中显示出较好的相关性。"
+              },
+              {
+                "conditions": "自身抗体（ANA, 甲状腺抗体等）",
+                "finding": "基线存在自身抗体（如ANA、抗甲状腺抗体）可能与某些irAEs（如内分泌功能障碍）的风险增加有关，但也有一些研究未发现这种关联，甚至发现基线抗体滴度较低者反而风险更高。自身抗体可能更多反映预先存在的自身免疫倾向而非直接预测新发irAEs。"
+              },
+              {
+                "conditions": "细胞因子/趋化因子（IL-1, IL-6, IL-10, CXCL9等）",
+                "finding": "多种促炎和抗炎细胞因子与irAEs相关，但方向不一。例如，IL-6基线高水平在某些研究中是风险因素，而在另一项黑色素瘤研究中低风险与高irAE发生率相关。CXCL9/CXCL10等趋化因子在治疗后升高与irAEs发生相关。"
+              },
+              {
+                "conditions": "基因变异与表达（SNPs, HLA, miRNAs）",
+                "finding": "特定基因多态性（如PDCD1, SYK, IL7）和HLA基因型（如HLA-DRB1*11:01与瘙痒，HLA-DQB1*03:01与结肠炎）与特定irAEs风险相关，但不同研究间存在冲突（如HLA-DQB1*03:01对结肠炎的保护或易感作用）。miRNA（如miR-146a）在严重irAEs中表达降低，但研究数量较少。"
+              },
+              {
+                "conditions": "肠道微生物组",
+                "finding": "肠道菌群组成与irAEs有关联，但结果不一致且难以复现。例如，Agathobacter丰度降低在某些研究中与irAEs相关，而在另一些研究中与更严重的irAEs相关。粪便样本采集困难限制了其广泛应用。"
+              }
+            ],
+            "paper_kind": "review",
+            "problem_or_question": "当前ICIs治疗中，由于irAEs的发生具有多样性、不可预测性和严重性，且可能影响治疗连续性和患者生活质量，临床急需有效的预测生物标志物以实现早期识别和干预。然而，现有研究中提出的众多潜在生物标志物结果不一致，且缺乏临床实用性。因此，本研究旨在回答：目前有哪些潜在的生物标志物被提出用于预测irAEs？它们的证据强度如何？存在哪些主要局限性和不一致性？",
+            "research_scope": "接受免疫检查点抑制剂（ICIs）治疗的癌症患者，重点关注预测和管理免疫相关不良事件（irAEs）的生物标志物。涵盖多种肿瘤类型（如黑色素瘤、非小细胞肺癌、肾细胞癌等），涉及血液学指标、血清蛋白、自身抗体、细胞因子/趋化因子、基因变异、基因表达谱、HLA基因型、microRNAs及肠道微生物组等多个维度的潜在生物标志物。",
+            "work_summary": "本文是一篇综述，旨在系统梳理和评估目前用于预测和管理ICIs治疗期间发生的irAEs的各种潜在生物标志物。文章首先介绍了irAEs的临床背景及其对治疗的影响，随后分类详细讨论了各类生物标志物的研究现状、关联发现及局限性。作者指出，尽管已有大量研究探索了从常规血液检测到复杂分子特征的多种标志物，但由于研究结果的不一致性、缺乏特异性以及多为回顾性研究的局限，目前尚无经过充分验证并可用于常规临床实践的单一或组合生物标志物。文章最后强调了未来需要大规模前瞻性研究来验证这些标志物的效力，并探讨了生物标志物在同时预测irAE风险和抗肿瘤疗效方面的潜力。"
+          },
+          "review_planning_B": {
+            "planning_summary": "该综述为理解ICIs治疗中irAEs的生物标志物提供了广泛的背景知识和分类框架。虽然它不直接回答肠道微生物组如何调节实体瘤中ICIs疗效的具体机制（这是Facet F1/F2的核心），但它提供了关键的对照信息：即除了微生物组外，宿主免疫状态（血液细胞、细胞因子、基因型）也被广泛研究用于预测irAEs。这有助于在综述中构建一个更全面的“宿主-药物-微生物”互作模型，或者用于比较微生物组标志物与其他类型标志物在预测能力、特异性和临床可行性上的差异。此外，文中提到的微生物组研究结果的不一致性和可重复性问题，可作为讨论微生物组作为生物标志物挑战性的有力论据。",
+            "facet_contributions": [
+              {
+                "boundaries": "该综述并未深入探讨微生物组调节ICIs疗效的具体分子机制，也未专门聚焦于实体瘤中微生物组与药物疗效的直接因果链条，而是将其置于irAEs预测的 broader context 中。",
+                "contribution": "提供了肠道微生物组作为irAEs预测生物标志物的现状概述，包括具体菌属（如Agathobacter）与irAEs关联的矛盾发现，以及粪便样本采集的挑战。",
+                "facet_id": "F1",
+                "possible_uses": "可用于支持或反驳肠道微生物组在预测irAEs中的价值，特别是在讨论其临床可行性和结果一致性方面。"
+              },
+              {
+                "boundaries": "不能直接从本综述中提取微生物组调节免疫的具体机制细节，只能获得宏观层面的免疫参与线索。",
+                "contribution": "虽然没有直接阐述微生物组的机制，但综述中提到的其他生物标志物（如T细胞受体多样性、细胞因子网络、HLA基因型）揭示了宿主免疫系统在irAEs发生中的核心作用。这间接提示，如果微生物组要影响irAEs，很可能也是通过调制宿主免疫反应（如T细胞激活、细胞因子释放）来实现的。",
+                "facet_id": "F2",
+                "possible_uses": "可作为构建微生物组影响免疫反应的机制假说的背景参考。例如，可以推断微生物组可能通过类似途径（如改变T细胞库或细胞因子谱）来影响irAEs，从而引导对具体机制的搜索。"
+              }
+            ],
+            "broader_review_uses": [
+              {
+                "connection_to_review": "在讨论肠道微生物组作为生物标志物的潜力时，可以引用此综述的观点，说明微生物组研究也面临类似的挑战（如结果不一致、可重复性差），从而强调需要大规模前瞻性研究的重要性。",
+                "material": "综述指出目前无确立的生物标志物，原因包括结果不一致、回顾性研究为主、缺乏特异性等。",
+                "purpose": "提供生物标志物研究的整体背景和局限性讨论"
+              },
+              {
+                "connection_to_review": "可用于评估肠道微生物组检测相对于传统血液标志物在成本、便利性、特异性等方面的相对优势或劣势，为选择最佳监测策略提供参考。",
+                "material": "综述比较了血液检测（简便但特异性低）、分子特征（昂贵但可能更特异）等不同类别标志物的特点。",
+                "purpose": "对比不同类别生物标志物的优劣"
+              },
+              {
+                "connection_to_review": "在探讨微生物组是否既能预测irAEs又能预测疗效时，此背景信息至关重要，有助于理解为何寻找能同时预测两者的标志物是有价值的。",
+                "material": "综述提到irAEs的发生通常与更好的治疗效果相关，且某些生物标志物可能同时预测两者。",
+                "purpose": "引入irAEs与抗肿瘤疗效关联的背景"
+              }
+            ],
+            "scope_interpretation_cautions": [
+              "该综述主要关注irAEs的预测，而非ICIs疗效的直接预测，尽管二者有联系。",
+              "文中关于微生物组的描述较为简略，且强调结果不一致，不应将其视为对微生物组作用的定论。",
+              "综述中的许多发现来自回顾性研究，因果推断需谨慎。",
+              "不同肿瘤类型和ICI药物可能导致生物标志物表现不同，应用时需考虑情境依赖性。"
+            ],
+            "topic_handles": [
+              "immune checkpoint inhibitors (ICIs)",
+              "immune-related adverse events (irAEs)",
+              "gut microbiome as a biomarker for irAEs",
+              "biomarker inconsistency and reproducibility issues",
+              "host immune factors (blood cells, cytokines, genetics) vs. microbiome",
+              "solid tumors treated with ICIs",
+              "clinical utility and validation of predictive biomarkers"
+            ]
+          },
+          "locator": {
+            "writer_packet": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch6.json",
+            "source_handle": "P0312",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\85e23d9e543859acdb7e57cd52f3d28495c0162e\\65ef0e5520c1328b790d581bc72634b3\\attempt-01\\PAPER_READING_CARD.json"
+          },
+          "card_material": {
+            "known_gaps": [
+              {
+                "kind": "html",
+                "reason": "html_challenge_or_login",
+                "status": "partial"
+              },
+              {
+                "kind": "html",
+                "known_losses": [
+                  "headings/tables/math/image pixels are not preserved by this plain HTML projection"
+                ],
+                "reason": "body converted to structured material; headings/tables/math/image pixels may be lost",
+                "status": "derived"
+              }
+            ],
+            "material_scope": "structured_partial"
+          },
+          "material_read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\85e23d9e543859acdb7e57cd52f3d28495c0162e\\65ef0e5520c1328b790d581bc72634b3\\attempt-01\\PAPER_READING_CARD.json"
+        },
+        {
+          "source_handle": "P0049",
+          "title": "Gut microbiome and immune checkpoint inhibitor toxicity.",
+          "year": "2025",
+          "doi": "10.1016/j.ejca.2025.115221",
+          "paper_id": "1607ffdb79bd5dbb1f94932e27410c55f0aa8290",
+          "material_depth": "fulltext",
+          "material_status": "resolved",
+          "aliases": [
+            "P0605"
+          ],
+          "study_summary_A": {
+            "approach": "采用前瞻性队列设计。收集接受ICI治疗的癌症患者粪便样本。使用16S rRNA测序和MGS进行微生物组分析。定义七个基于文献的预设细菌组（包括致病菌组和Ruminococcaceae等）。使用多种统计工具（ANCOM-BC, LinDA, MaAsLin2, ALDEx2）进行差异丰度分析，以寻找跨工具一致的结果。通过逻辑回归和线性混合效应模型评估细菌组与严重irAE的关联，并校正ICI类型。比较有/无严重irAE患者在基线、治疗早期、irAE发作时及免疫抑制后的微生物组特征。",
+            "contribution_and_limits": [
+              {
+                "contribution": "提供了大样本（195例）前瞻性数据，证实了Ruminococcaceae科的动态减少与严重irAE的相关性，特别是在irAE发作时的显著降低。",
+                "limits": "基线致病菌组的高RA关联在多重检验校正后不显著；部分低丰度菌群的差异结果需谨慎解读；无法区分菌株特异性效应；样本量对于解析复杂的多重交互作用仍显不足。"
+              }
+            ],
+            "key_findings": [
+              {
+                "conditions": "基线（ICI治疗前）",
+                "finding": "发生严重irAE的患者中，预设的致病菌组（pathobionts）平均RA显著高于未发生者（8.2% vs 4.8%; OR 1.40; 95%CI 1.07-1.87），但该关联在多重检验校正后失去统计学显著性（校正p=0.059）。Ruminococcaceae科在两组间基线RA无显著差异。"
+              },
+              {
+                "conditions": "治疗早期（从基线到第2周期）",
+                "finding": "发生严重irAE的患者中，Ruminococcaceae科的RA下降幅度显著大于未发生者（交互作用粗p=0.018，校正p=0.123）。然而，发生组内的下降本身未达到统计学显著性（粗p=0.078）。"
+              },
+              {
+                "conditions": "严重irAE发作时",
+                "finding": "与所有其他时间点相比，发生严重irAE的患者中Ruminococcaceae科、Ruminococcus属以及R. bromii和R. callidus物种的RA显著降低。Haemophilus属及其种H. parainfluenzae在irAE发作时的RA显著升高。"
+              }
+            ],
+            "paper_kind": "empirical",
+            "problem_or_question": "尽管已知肠道微生物组可能影响ICI疗效，但其与严重irAEs的关联尚不明确，且既往研究结果存在冲突。本研究试图确定基线微生物特征或治疗期间的动态变化是否能预测严重irAEs，并探索潜在的病理生理机制。",
+            "research_scope": "荷兰乌得勒支大学医学中心进行的UNI-CIT前瞻性生物库研究中的癌症患者。研究对象为接受一线抗PD-1单药或抗PD-1联合抗CTLA-4治疗的实体瘤患者（主要为黑色素瘤和非小细胞肺癌）。样本包括治疗前基线、治疗早期（第2-3周期）、严重irAE发作时及免疫抑制治疗后的粪便样本。",
+            "work_summary": "本研究旨在评估肠道微生物组在免疫检查点抑制剂（ICI）治疗开始时的组成及其在治疗过程中的变化，是否与随后发生的严重免疫相关不良事件（irAEs，≥3级）相关。通过对195名患者的497个粪便样本进行16S rRNA基因测序和宏基因组鸟枪法测序（MGS），分析α/β多样性、特定分类群相对丰度（RA）及预设细菌组的差异。研究发现，虽然基线时致病菌组（pathobionts）的RA较高与严重irAE风险增加有关（但在多重检验校正后不再显著），但Ruminococcaceae科在发生严重irAE的患者中表现出更显著的下降趋势，且在irAE发作时其RA显著低于其他时间点。这表明以Ruminococcaceae减少为特征的微生物组失调可能预示严重irAE的发生。"
+          },
+          "review_planning_B": {
+            "planning_summary": "该论文提供了关于肠道微生物组动态变化（特别是Ruminococcaceae科的减少）与ICI诱导的严重毒性（irAEs）之间关联的直接实证证据。它强调了微生物组在irAE发病机制中的潜在角色，并指出了单一物种（如F. prausnitzii）研究的局限性，支持从群落水平（如科/属）或功能失衡角度理解irAEs。",
+            "facet_contributions": [
+              {
+                "boundaries": "仅观察性关联，非因果证明；主要关注毒性而非直接疗效指标（如ORR/PFS）；结果受多重检验校正影响。",
+                "contribution": "提供了肠道微生物组组成变化与ICI疗效/毒性关联的观察性证据。具体发现Ruminococcaceae科的减少与严重irAEs相关，提示微生物组状态可能调节宿主对ICI的反应谱（不仅限于抗肿瘤疗效，还包括毒性）。",
+                "facet_id": "F1",
+                "possible_uses": "用于综述中讨论微生物组如何影响ICI的整体临床结局（疗效与毒性并存），作为微生物组介导ICI反应性的证据之一。"
+              },
+              {
+                "boundaries": "机制推断为主，缺乏直接的分子机制验证（如代谢物测量或动物实验验证）；F. prausnitzii的具体作用在该研究中未得到明确支持（基线无差异）。",
+                "contribution": "探讨了可能的机制线索：致病菌组富集和有益菌（Ruminococcaceae）减少导致的菌群失调（dysbiosis）可能促进炎症反应，从而引发irAEs。特别讨论了F. prausnitzii（产丁酸菌）在不同研究中的矛盾结果，暗示菌株特异性的重要性。",
+                "facet_id": "F2",
+                "possible_uses": "用于综述中解释微生物组介导irAEs的潜在机制假说，特别是短链脂肪酸（如丁酸）产生菌的作用及菌株特异性差异。"
+              }
+            ],
+            "broader_review_uses": [
+              {
+                "connection_to_review": "帮助综述构建“微生物组失衡导致irAEs”的理论框架，同时提醒读者注意低丰度菌群结果的可靠性问题。",
+                "material": "基线致病菌组高RA与irAE风险的初步关联（虽校正后不显著，但趋势一致），以及H. parainfluenzae在irAE发作时的升高。",
+                "purpose": "作为背景材料，说明微生物组中不同菌群（促炎vs抗炎）平衡的重要性，以及单一标志物预测的复杂性。"
+              },
+              {
+                "connection_to_review": "用于综述的方法学讨论部分，强调当前微生物组研究在标准化、菌株分辨率方面的挑战。",
+                "material": "对F. prausnitzii在既往研究中矛盾结果的详细讨论。",
+                "purpose": "提供领域内争议实例，说明为什么需要更精细的菌株水平分析或标准化方法。"
+              }
+            ],
+            "scope_interpretation_cautions": [
+              "基线致病菌组与irAE的关联在多重检验校正后不显著，不能视为确证的保护/风险因素，仅为趋势。",
+              "Ruminococcaceae的减少是观察到的关联，不等于因果关系；可能是irAE的前驱标志或伴随现象。",
+              "低丰度菌群（如Marvinbryantia, Haemophilus）的差异结果可能存在技术噪音，需谨慎引用。",
+              "研究未直接测量ICI疗效（如肿瘤缩小），因此不能直接推断微生物组对疗效的影响，仅能推断对毒性的影响。"
+            ],
+            "topic_handles": [
+              "Ruminococcaceae科动态变化",
+              "致病菌组（Pathobionts）基线丰度",
+              "严重irAEs（≥3级）预测因子",
+              "16S rRNA与MGS联合分析",
+              "多工具差异丰度验证（ANCOM-BC, LinDA, MaAsLin2, ALDEx2）",
+              "F. prausnitzii争议性结果对比"
+            ]
+          },
+          "supplement_material": {
+            "auxiliary_material": "The study employed a robust methodological framework useful for review methodology discussions, including longitudinal sampling (baseline, during treatment, at irAE onset, post-immunosuppression), both 16S rRNA and metagenomic shotgun sequencing, and multiple differential abundance tools (ANCOM-BC, LinDA, MaAsLin2, ALDEx2) to ensure consistency. The authors discuss limitations regarding sample size for specific taxa and the need for correction for multiple testing, which resulted in some baseline associations (e.g., pathobionts) losing significance after correction.",
+            "evidence": [],
+            "gap_id": "Ch6_gap_5",
+            "judgment_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N4452dfb25f491e9335fe-5a6b848383c152a3\\round_3\\supplements\\Ch6_gap_5\\attempt-hpbnytrx\\source_units\\SU01_search_candidate_4736138316\\FULFILLMENT_JUDGMENT.json",
+            "limitations": [],
+            "material_ready": true,
+            "material_usefulness": "supporting",
+            "outline_action": "Use this study in the review to illustrate the current state of evidence: even recent prospective cohorts (2025) with nearly 200 patients must aggregate irAE types due to low incidence of specific non-colitis toxicities. Cite the specific sample counts for myocarditis and meningitis from Table 1 and Section 3.6 to substantiate the claim that large-scale specific data is still lacking. Leverage the methodological details (longitudinal design, multi-tool analysis) as a benchmark for future study recommendations.",
+            "outline_action_recovered_by_policy": false,
+            "remaining_gap": "The gap question asks for large-scale microbiome association studies specifically targeting non-colitis irAEs (e.g., myocarditis, neurotoxicity) to verify evidence insufficiency. This study does not fulfill that requirement because it aggregates all severe irAEs into one group; the specific counts for non-colitis irAEs like myocarditis (n=2) and meningitis (n=2) are too small for independent large-scale association analysis. Thus, the existence of a dedicated large-scale study for non-colitis irAE microbiome signatures remains unconfirmed by this material.",
+            "remaining_gap_recovered_by_policy": false,
+            "status": "unmet",
+            "useful_material": "This prospective cohort study (Verheijden et al., 2025) analyzed 497 stool samples from 195 cancer patients treated with immune checkpoint inhibitors (ICI) to assess gut microbiome associations with severe immune-related adverse events (irAEs). The study included various irAE types listed in Table 1, such as myocarditis (n=2 total), meningitis (n=2 total), pneumonitis (n=4 total), and colitis (n=6 total), but aggregated them into a single 'severe irAE' endpoint for analysis due to low incidence of individual types. Key findings indicated that a higher baseline relative abundance of a prespecified pathobiont group and a stronger decrease in Ruminococcaceae during treatment were associated with developing severe irAEs. At irAE onset, Ruminococcaceae and specific species (R. bromii, R. callidus) were significantly lower, while Haemophilus parainfluenzae was higher compared to other time points. The authors explicitly note in Section 3.6 that only 17 patients provided samples at severe irAE onset, with diverse irAE types (8 colitis, 3 pancreatitis/diabetes, 2 meningitis, 4 others), limiting subtype-specific analysis."
+          },
+          "locator": {
+            "writer_packet": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch6.json",
+            "source_handle": "P0049",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\1607ffdb79bd5dbb1f94932e27410c55f0aa8290\\e9a69606b703c06cd1c1d609fc8e8730\\attempt-01\\PAPER_READING_CARD.json"
+          },
+          "card_material": {
+            "known_gaps": [
+              {
+                "asset_id": "asset-b5c2e925a4132b88eff6",
+                "kind": "asset",
+                "reason": "caption_or_locator_without_readable_image",
+                "status": "caption_only"
+              },
+              {
+                "asset_id": "asset-7f937d5566b4c12030ce",
+                "kind": "asset",
+                "reason": "caption_or_locator_without_readable_image",
+                "status": "caption_only"
+              },
+              {
+                "asset_id": "asset-a96686bee2f7be7a8dd8",
+                "kind": "asset",
+                "reason": "caption_or_locator_without_readable_image",
+                "status": "caption_only"
+              },
+              {
+                "asset_id": "asset-724817b1ad2fa81c8182",
+                "kind": "asset",
+                "reason": "caption_or_locator_without_readable_image",
+                "status": "caption_only"
+              },
+              {
+                "asset_id": "asset-ba354d40740f64366cbf",
+                "kind": "asset",
+                "reason": "caption_or_locator_without_readable_image",
+                "status": "missing"
+              },
+              {
+                "asset_id": "asset-403bce67afb0fdb07c1f",
+                "kind": "asset",
+                "reason": "caption_or_locator_without_readable_image",
+                "status": "caption_only"
+              }
+            ],
+            "material_scope": "fulltext"
+          },
+          "material_read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\1607ffdb79bd5dbb1f94932e27410c55f0aa8290\\e9a69606b703c06cd1c1d609fc8e8730\\attempt-01\\PAPER_READING_CARD.json"
+        },
+        {
+          "source_handle": "P0601",
+          "title": "Whole genomic sequence analysis of Bacillus infantis: defining the genetic blueprint of strain NRRL B-14911, an emerging cardiopathogenic microbe",
+          "year": "2016",
+          "doi": "10.1186/s12864-016-2900-2",
+          "paper_id": "CorpusId:9951952",
+          "material_depth": "",
+          "material_status": "resolved",
+          "aliases": [],
+          "locator": {
+            "writer_packet": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch6.json",
+            "source_handle": "P0601",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_2\\supplements\\Ch6_gap_4\\attempt-x8duln8o\\source_units\\SU02_search_candidate_d1274441e4\\card\\PAPER_READING_CARD.json"
+          },
+          "study_summary_A": {
+            "approach": "采用多组学与表型相结合的研究设计：1) 使用 PacBio SMRT 技术进行全基因组从头组装；2) 通过 16S rRNA 系统发育树、16S-23S ITS 区域 PCR 测序比对、Biolog 表型微阵列和 MALDI-TOF MS 质谱进行物种鉴定；3) 利用 VFDB 数据库进行 BLASTP 搜索以识别毒力因子，并与已知致病菌株和非致病菌株进行基因组比较；4) 通过 KEGG 通路映射和特定基因（如 AAH）的 PCR 验证来解析代谢与分子模拟机制。",
+            "contribution_and_limits": [
+              {
+                "contribution": "提供了 B. infantis NRRL B-14911 的高质量参考基因组序列，确立了其物种分类地位，并详细描绘了其毒力因子谱和独特的遗传元件（如特定的甲基转移酶和 IS 元件）。",
+                "limits": "研究主要基于生物信息学预测和体外生化表型，未提供体内感染模型或免疫学实验数据来直接证实这些毒力因子在宿主中的实际致病功能或分子模拟引发的具体免疫反应机制。基因组比较仅限于有限的几个芽孢杆菌属物种，可能无法代表更广泛的微生物环境背景。"
+              }
+            ],
+            "key_findings": [
+              {
+                "conditions": "基于 PacBio 长读长测序与多源数据整合",
+                "finding": "成功获得 4,884,713 bp 的完整环状基因组，包含一个染色体和一个大质粒；GC 含量为 46%，高于部分近缘菌种。"
+              },
+              {
+                "conditions": "结合系统发育、ITS 序列（相似度 96.7%-100%）、生化表型及质谱分析",
+                "finding": "确认该菌株属于 Bacillus infantis 物种，命名为 B. infantis NRRL B-14911，代表了该物种内的菌株变异。"
+              },
+              {
+                "conditions": "基因组注释与 VFDB 比对",
+                "finding": "鉴定出 623 个潜在毒力因子基因，其中 18 个为该菌株特有（包括粘附素、侵袭素等），225 个与致病菌株共有。"
+              },
+              {
+                "conditions": "特定基因功能与序列分析",
+                "finding": "发现编码尿素酰胺水解酶（AAH）的基因，其产物包含与小鼠心脏肌球蛋白重链 α 亚基高度同源的表位（BAC 25-40），且该表位在另一 B. infantis 菌株中保守存在。"
+              }
+            ],
+            "paper_kind": "empirical",
+            "problem_or_question": "鉴于 Bacillus sp. NRRL B-14911 被发现能诱导心脏自身免疫，但其作为病原体的生物学意义和致病机制尚不明确，本研究试图通过全基因组测序和表型分析来确定其物种身份、毒力潜力及遗传蓝图，以评估其作为自身免疫性心肌炎疾病模型的适用性。",
+            "research_scope": "研究对象为海洋来源的细菌菌株 Bacillus sp. NRRL B-14911（后鉴定为 Bacillus infantis）。研究范围涵盖该菌株的全基因组测序、物种分类鉴定、毒力因子分析、生化代谢通路比较以及与近缘芽孢杆菌属物种的系统发育和基因组学对比。",
+            "work_summary": "本研究旨在解析一种此前被报道能通过分子模拟诱导心脏自身免疫反应的海洋细菌 Bacillus sp. NRRL B-14911 的生物学特征。作者利用 PacBio RSII 长读长测序技术完成了该菌株的全基因组组装，并结合 16S rRNA 系统发育、ITS 序列分析、表型微阵列及 MALDI-TOF MS 等多维度手段将其确认为 Bacillus infantis 的一个新菌株。基因组分析揭示了其携带多种毒力因子、独特的甲基转移酶、转运蛋白及插入序列元件，并确认了其与心脏肌球蛋白重链 α 亚基具有分子模拟关系的尿素酰胺水解酶（AAH）基因的存在。"
+          },
+          "review_planning_B": {
+            "broader_review_uses": [
+              {
+                "connection_to_review": "提供微生物诱导自身免疫的理论基础实例",
+                "material": "论文指出分子模拟假说是导致自身免疫病（如心肌炎）的主要机制之一，并通过基因组数据证实了 B. infantis 携带相关模拟表位。",
+                "purpose": "在综述中讨论微生物群对免疫系统的广泛影响时，可引用此例说明微生物抗原如何打破免疫耐受。这对于理解 ICI 治疗期间可能出现的免疫相关不良反应（irAEs）具有参考价值，因为 irAEs 本质上也是自身免疫反应。"
+              },
+              {
+                "connection_to_review": "展示基因组学在挖掘微生物-宿主互作潜力中的应用",
+                "material": "通过比较基因组学识别出独特的甲基转移酶、IS 元件和毒力因子。",
+                "purpose": "作为方法论参考，说明如何利用基因组数据预测微生物的免疫调节潜力。在综述中可提及，未来研究可能需要对 ICI 响应者的微生物组进行类似的深度功能注释，以寻找潜在的免疫调节标志物。"
+              }
+            ],
+            "facet_contributions": [
+              {
+                "boundaries": "该机制针对的是器官特异性自身免疫（心肌炎），而非肿瘤免疫监视的直接增强或抑制。不能直接外推为 ICI 疗效的促进或阻碍机制，仅作为微生物-宿主免疫互作的理论模型支持。",
+                "contribution": "提供了分子模拟作为微生物调节宿主免疫反应的具体分子机制案例。论文详细描述了细菌来源的 AAH 蛋白中包含与宿主心脏肌球蛋白高度同源的表位，这解释了微生物抗原如何可能被免疫系统误认为自身抗原，从而引发交叉反应性 T 细胞激活。",
+                "facet_id": "F2",
+                "possible_uses": "可用于解释微生物成分如何通过结构相似性干扰或调节宿主的免疫耐受状态。在讨论 ICI 疗效时，可作为极端案例或机制参照，说明某些微生物抗原可能通过分子模拟诱发自身免疫样反应，进而影响整体免疫环境。"
+              },
+              {
+                "boundaries": "该细菌来源于海洋，非人体常驻菌群，其在人体内的定植能力和对 ICI 治疗的直接影响未知。此贡献主要用于概念上的扩展，而非直接证据。",
+                "contribution": "展示了非肠道来源的细菌（海洋芽孢杆菌）携带完整的毒力因子谱（如粘附素、侵袭素、转运蛋白），表明即使是环境或非典型共生菌也可能具备复杂的宿主互作能力。",
+                "facet_id": "F1",
+                "possible_uses": "用于拓宽综述中对“微生物群”定义的视野，提示除了肠道菌群外，其他部位的微生物或环境微生物也可能通过其毒力因子影响全身免疫状态，进而间接影响抗肿瘤免疫治疗的环境。"
+              }
+            ],
+            "planning_summary": "该论文提供了关于非肠道共生菌（海洋来源的 B. infantis）如何通过分子模拟机制潜在影响宿主免疫系统的基因组证据。虽然研究对象并非典型的肠道菌群，但其揭示的“微生物抗原与宿主自身抗原相似性”机制，以及细菌毒力因子（如粘附素、侵袭素）的表达，可为综述中讨论“微生物群如何调节免疫检查点抑制剂疗效”提供关于微生物-宿主互作机制的背景素材，特别是当涉及非典型微生物触发或调节免疫反应时。",
+            "scope_interpretation_cautions": [
+              "该研究对象为海洋细菌，非肠道菌群，其结论不能直接用于推断肠道微生物对 ICI 疗效的影响。",
+              "论文强调的是微生物诱导自身免疫（负面效应或病理机制），而 ICI 旨在激活抗肿瘤免疫（正面效应），两者在临床结局上可能相反，需注意机制与结果的区分。",
+              "毒力因子的鉴定基于序列同源性，其实际生物学功能需在活体中验证，综述中引用时应注明这是预测性数据。"
+            ],
+            "topic_handles": [
+              "molecular mimicry (分子模拟)",
+              "autoimmune myocarditis (自身免疫性心肌炎)",
+              "cardiac myosin heavy chain alpha epitope (心脏肌球蛋白重链α表位)",
+              "virulence factors in non-pathogenic/commensal-like bacteria (非致病菌中的毒力因子)",
+              "bacterial-host immune cross-reactivity (细菌-宿主免疫交叉反应)"
+            ]
+          },
+          "card_material": {
+            "material_scope": "fulltext"
+          },
+          "material_read_from_disk": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_2\\supplements\\Ch6_gap_4\\attempt-x8duln8o\\source_units\\SU02_search_candidate_d1274441e4\\card\\PAPER_READING_CARD.json"
+        },
+        {
+          "source_handle": "P0595",
+          "title": "Abstract 4136727: The role of immune mechanism in Immune Checkpoint Inhibitor-Associated Myocarditis: seeking key genes",
+          "year": "2024",
+          "doi": "10.1161/circ.150.suppl_1.4136727",
+          "paper_id": "167d738780c05d96b68041fb0211da97bb53b857",
+          "material_depth": "",
+          "material_status": "resolved",
+          "aliases": [],
+          "locator": {
+            "writer_packet": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch6.json",
+            "source_handle": "P0595",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU01_search_candidate_9277696331\\card\\PAPER_READING_CARD.json"
+          },
+          "study_summary_A": {
+            "approach": "采用计算生物学/生物信息学分析路线。具体步骤包括：1. 数据获取与分组：从GEO数据库获取GSE180045（含三组临床表型）和GSE4172数据集；2. 差异分析与筛选：计算ICI-MC组相对于对照组的DEGs，并与已知免疫基因库交叉筛选得到IR-DEGs；3. 网络构建与核心基因识别：通过GO/KEGG/GSEA进行功能注释，构建PPI网络寻找Hub genes；4. 独立验证：在GSE4172中重复差异分析，与Hub genes取交集确定最优特征基因（OFGs）；5. 调控网络预测：构建miRNA-lncRNA-circRNA ceRNA网络；6. 药物预测：利用cMAP数据库进行小分子药物反向匹配。",
+            "contribution_and_limits": [
+              {
+                "contribution": "通过多数据集交叉验证，提出了NKG7、GZMH和KLRB1作为ICI-MC的关键候选免疫基因，并为理解ICI-MC中细胞毒性T细胞和NK细胞的激活提供了分子层面的证据。",
+                "limits": "所给摘要未交代实验验证部分（如qPCR或Western Blot的具体条件及结果统计显著性）；仅基于公共转录组数据进行推断，缺乏体内或体外功能实验证实这些基因在心肌炎发生中的因果作用；药物预测仅为计算机模拟，未提供临床前或临床疗效验证。"
+              }
+            ],
+            "key_findings": [
+              {
+                "conditions": "基于GSE180045数据集的比较分析",
+                "finding": "鉴定出58个DEGs，其中32个为免疫相关基因（IR-DEGs）。功能富集显示这些基因主要参与细胞裂解、CD8+ T细胞受体信号通路、自然杀伤细胞介导的细胞毒性以及RAGE信号通路。上调的Hub基因包括IL7R, PRF1, GNLY, CD3G, NKG7, GZMH, GZMB, KLRB1, KLRK1, CD247。"
+              },
+              {
+                "conditions": "基于GSE4172数据集的独立验证",
+                "finding": "发现407个DEGs，与前述Hub基因的交集最终锁定3个最优特征基因（OFGs）：KLRB1, NKG7, GZMH。"
+              },
+              {
+                "conditions": "ceRNA网络与药物预测分析",
+                "finding": "构建了包含靶miRNAs、lincRNAs和circRNAs的综合ceRNA网络。药物预测显示乙酰羟肟酸（acetohydroxamic-acid）具有最高的连接评分，提示在使用ICI治疗时应谨慎使用该类药物。"
+              }
+            ],
+            "paper_kind": "empirical",
+            "problem_or_question": "ICI-MC的发生机制复杂且致命，目前其具体的分子病理机制尚未完全阐明。本研究旨在解决的核心问题是：在ICI诱导的心肌炎中，哪些关键的免疫相关基因发挥了核心作用？这些基因参与的信号通路是什么？是否存在潜在的ceRNA调控网络及可干预的药物靶点？",
+            "research_scope": "本研究聚焦于免疫检查点抑制剂（ICIs）治疗过程中引发的罕见但严重的并发症——ICI相关心肌炎（ICI-MC）。研究对象为接受ICI治疗的癌症患者，具体通过生物信息学方法分析来自GSE180045和GSE4172数据集的转录组数据，旨在识别与ICI-MC发病机制关键相关的免疫基因。",
+            "work_summary": "该研究针对ICI-MC病理生理机制尚不明确的问题，利用生物信息学手段挖掘潜在的关键免疫基因及治疗靶点。研究团队首先基于GSE180045数据集，对比ICI无免疫不良反应患者、有非心肌炎免疫不良反应患者与ICI-MC患者的基因表达差异，筛选出差异表达基因（DEGs），并与ImmPort数据库中的1796个免疫相关基因（IRGs）取交集获得IR-DEGs。随后进行功能富集分析（GO, KEGG, GSEA）、构建蛋白质互作（PPI）网络以识别枢纽基因。为确保结果稳健性，使用GSE4172独立数据集进行验证，并进一步预测靶miRNA、lincRNA和circRNA构建ceRNA调控网络，最后利用cMAP数据库预测潜在靶向药物。最终确定了NKG7、GZMH和KLRB1为核心基因，并提示需警惕乙酰羟肟酸等药物在ICI治疗中的潜在风险。"
+          },
+          "review_planning_B": {
+            "broader_review_uses": [
+              {
+                "connection_to_review": "ICI-MC是ICI治疗中最致命的免疫相关不良事件之一，理解其机制对于评估ICI在实体瘤治疗中的整体获益-风险比至关重要。",
+                "material": "NKG7, GZMH, KLRB1作为关键致病基因；ceRNA调控网络；乙酰羟肟酸的潜在禁忌。",
+                "purpose": "提供ICI安全性管理的分子依据，特别是在讨论如何监测和预防严重心脏毒性时，这些生物标志物可能具有临床转化潜力。"
+              },
+              {
+                "connection_to_review": "实体瘤患者常合并多种基础疾病，药物相互作用（如acetohydroxamic-acid）可能加剧ICI毒性。",
+                "material": "cMAP药物预测结果。",
+                "purpose": "提醒综述作者注意临床实践中药物-药物-免疫治疗相互作用的重要性，特别是在老年或多病共存人群中。"
+              }
+            ],
+            "facet_contributions": [
+              {
+                "boundaries": "仅限于心肌炎这一特定器官毒性，不能直接外推至其他ICI相关免疫不良反应（如结肠炎、肺炎）的机制，尽管共享部分免疫通路。",
+                "contribution": "提供了ICI-MC的具体分子机制细节：揭示了细胞毒性颗粒酶（GZMH, GZMB）和穿孔素相关蛋白（PRF1）、以及NK/T细胞表面受体（NKG7, KLRB1）的上调是ICI-MC的特征性改变。这有助于解释ICI如何通过增强效应细胞的细胞毒性功能导致心肌组织损伤。",
+                "facet_id": "F2",
+                "possible_uses": "可用于综述中讨论ICI诱导的组织损伤机制，特别是区分肿瘤杀伤机制与自身免疫损伤机制的重叠部分。可作为“效应T细胞/NK细胞过度激活导致器官损伤”这一子话题的证据。"
+              },
+              {
+                "boundaries": "RAGE通路的具体上下游关系在摘要中未详细展开，需结合全文确认其在心肌炎中的具体角色。",
+                "contribution": "指出了RAGE信号通路和炎症反应在ICI-MC中的作用，提示了除了直接的细胞毒性外，炎症信号传导也是重要机制。",
+                "facet_id": "F2",
+                "possible_uses": "支持综述中关于“炎症微环境重塑”或“损伤相关分子模式（DAMPs）介导的免疫反应”的论述。"
+              },
+              {
+                "boundaries": "本文未涉及肠道菌群数据，因此不能直接回答菌群如何调节ICI疗效的问题，只能作为机制研究的延伸背景。",
+                "contribution": "虽然主要关注宿主免疫机制，但其发现的ceRNA网络和潜在药物靶点（如避免使用acetohydroxamic-acid）暗示了肠道菌群代谢产物可能通过影响宿主免疫基因表达进而影响ICI疗效或毒性的间接联系（尽管本文未直接研究菌群）。",
+                "facet_id": "F1",
+                "possible_uses": "可作为背景材料，说明ICI毒性机制的复杂性，引出后续需要探讨宿主-微生物互作的必要性。或者作为反面/补充案例，说明仅关注宿主免疫基因可能忽略的其他调节层面。"
+              }
+            ],
+            "planning_summary": "该论文提供了ICI-MC这一特定严重不良事件（SAE）的分子机制线索，特别是强调了细胞毒性淋巴细胞（CD8+ T细胞和NK细胞）相关基因（如GZMH, NKG7, KLRB1）的核心地位。对于综述而言，它填补了ICI安全性机制中关于心脏特异性免疫反应的细节，可作为解释ICI如何引发非肿瘤组织自身免疫损伤的典型案例，特别是用于阐述“免疫过度激活”导致器官损伤的机制路径。",
+            "scope_interpretation_cautions": [
+              "该研究为纯生物信息学分析，发现的基因关联仅为统计学相关性，未经过湿实验验证其因果功能，引用时需明确其预测性质。",
+              "样本量相对较小（GSE180045中ICI-MC组样本有限），且为回顾性队列，可能存在选择偏倚。",
+              "结论主要针对心肌炎，不可泛化为所有ICI相关免疫不良反应的共同机制。",
+              "药物预测仅为计算机模拟，不代表临床实际效果，需谨慎解读其临床指导意义。"
+            ],
+            "topic_handles": [
+              "ICI-associated myocarditis (ICI-MC)",
+              "Key immune genes: NKG7, GZMH, KLRB1",
+              "Cellular mechanisms: CD8+ T cell receptor pathway, NK cell-mediated cytotoxicity",
+              "Signaling pathways: RAGE signaling, Cell lysis",
+              "Regulatory networks: ceRNA network in ICI-MC",
+              "Drug safety signals: Acetohydroxamic-acid interaction with ICI"
+            ]
+          },
+          "card_material": {
+            "known_gaps": [
+              {
+                "kind": "identity",
+                "reason": "source identity was not independently verified",
+                "status": "input_attributed"
+              },
+              {
+                "kind": "coverage",
+                "reason": "no complete research body was indexed",
+                "status": "partial"
+              },
+              {
+                "kind": "coverage",
+                "reason": "only abstract or non-title snippets were available",
+                "status": "partial"
+              }
+            ],
+            "material_scope": "abstract_only"
+          },
+          "material_read_from_disk": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU01_search_candidate_9277696331\\card\\PAPER_READING_CARD.json"
+        },
+        {
+          "source_handle": "P0597",
+          "title": "Human Leukocyte Antigen Determinants in Myocarditis and Dilated Cardiomyopathy",
+          "year": "2026",
+          "doi": "10.1007/s11897-026-00761-0",
+          "paper_id": "CorpusId:287796055",
+          "material_depth": "fulltext",
+          "material_status": "resolved",
+          "aliases": [],
+          "study_summary_A": {
+            "approach": "作为一篇综述，本研究未进行新的实验数据采集。其综合路线为：1. 文献回顾：汇总关于HLA与心肌炎/DCM关联的候选基因研究、GWAS信号、动物模型及转基因模型证据；2. 机制整合：将观察到的遗传关联与免疫学机制（如抗原呈递、T细胞激活、分子模拟、微生物组交叉反应）相结合，构建病理生理框架；3. 批判性评估：分析现有研究在效应大小、人群多样性和临床转化方面的不足；4. 提出建议：基于上述分析，提出未来研究优先事项（如多民族队列、免疫基因组整合）。",
+            "contribution_and_limits": [
+              {
+                "contribution": "系统整合了HLA在心肌炎/DCM中的遗传关联与免疫机制，特别是强调了HLA-II类分子在打破免疫耐受和驱动自身免疫中的核心作用，以及微生物组作为潜在分子模拟源的新兴证据。",
+                "limits": "所给摘要未交代具体的文献检索策略、纳入排除标准及质量评价方法；主要依赖已发表的研究结果进行叙述性综合，缺乏定量荟萃分析数据；对具体HLA等位基因与特定病毒表位的精确对应关系尚不明确。"
+              }
+            ],
+            "key_findings": [
+              {
+                "conditions": "特定HLA等位基因存在时",
+                "finding": "HLA-DR4、HLA-B27等风险等位基因与特发性DCM及心肌炎易感性增加相关；HLA-DR3可能具有保护作用。"
+              },
+              {
+                "conditions": "病毒感染背景下",
+                "finding": "HLA多态性影响病毒清除效率；低效呈递可能导致病毒持续存在，而高效呈递可能引发旁观者损伤或分子模拟，触发针对心脏自身抗原（如肌球蛋白）的自身免疫反应。"
+              },
+              {
+                "conditions": "转基因小鼠模型中",
+                "finding": "表达人类HLA-DQ8的转基因小鼠在无感染情况下自发产生自身免疫性心肌炎，证明特定HLA等位基因可直接降低自身免疫阈值。"
+              },
+              {
+                "conditions": "微生物组交互中",
+                "finding": "肠道共生菌（如拟杆菌属）产生的肽段可能与心脏肌球蛋白表位发生分子模拟，激活自体反应性CD4+ T细胞，且抗生素干预可预防该过程。"
+              }
+            ],
+            "paper_kind": "review",
+            "problem_or_question": "明确HLA多态性如何决定心肌炎患者是清除病毒自愈，还是发展为持续性自身免疫损伤进而导致DCM；识别当前研究中的知识空白以指导临床转化。",
+            "research_scope": "心肌炎（Myocarditis）和扩张型心肌病（DCM）；人类白细胞抗原（HLA）系统多态性；适应性免疫、分子模拟、自身免疫机制。",
+            "work_summary": "本文是一篇综述，旨在阐明HLA多态性在心肌炎进展、抵抗及结局中的作用。文章梳理了HLA通过抗原呈递影响适应性免疫的机制，包括HLA-I类分子介导的抗病毒反应和HLA-II类分子驱动的自身免疫过程。重点讨论了分子模拟、病毒持续感染、微生物组相互作用等机制如何导致从急性炎症向慢性自身免疫性DCM的转变。同时，文章评估了现有遗传关联研究的局限性（如样本量小、人群单一），并提出了未来研究方向，包括多民族基因组研究、病毒表位映射及基于HLA分层的临床试验。"
+          },
+          "review_planning_B": {
+            "planning_summary": "该综述提供了HLA介导的自身免疫机制的详细背景，特别是“分子模拟”概念不仅限于病毒-心脏抗原，还扩展到了“微生物组-心脏抗原”。这为理解宿主遗传背景（HLA）如何通过环境因素（微生物组）调节免疫反应提供了理论框架。虽然不直接涉及实体瘤或ICIs，但其关于HLA限制性的抗原呈递机制、T细胞克隆扩增及耐受失败的描述，可作为理解肿瘤微环境中免疫逃逸或免疫治疗响应差异的类比素材。",
+            "facet_contributions": [
+              {
+                "boundaries": "研究对象为心脏组织而非肿瘤组织；机制侧重于感染后自身免疫，而非肿瘤抗原识别。不能直接外推至ICI疗效预测。",
+                "contribution": "提供了HLA限制性抗原呈递导致特异性T细胞激活的详细机制，包括HLA-I/II类分子在病毒清除与自身免疫启动中的不同角色。",
+                "facet_id": "F1",
+                "possible_uses": "可用于解释宿主遗传变异如何决定对特定病原体或治疗诱导的免疫反应的敏感性。虽然对象不同，但“HLA-抗原-T细胞”互作的基本原理相通。"
+              },
+              {
+                "boundaries": "直接因果链条是“微生物-心脏自身免疫”，而非“微生物-ICI疗效”。需明确这是跨体系的借鉴，而非直接回答ICI相关问题。",
+                "contribution": "详细阐述了微生物组来源的肽段如何通过分子模拟激活自体反应性T细胞，并指出抗生素干预可阻断这一过程。",
+                "facet_id": "F2",
+                "possible_uses": "为“微生物组调节免疫反应”提供机制层面的支持证据。可类比用于讨论肠道菌群如何通过代谢产物或抗原模拟影响全身免疫状态，进而可能间接影响肿瘤免疫微环境或ICI疗效。"
+              }
+            ],
+            "broader_review_uses": [
+              {
+                "connection_to_review": "提供免疫耐受失败和自体反应性T细胞扩增的通用免疫学机制背景。",
+                "material": "HLA多态性影响胸腺阴性选择，导致自体反应性T细胞克隆逃逸；这些克隆在遇到抗原后被激活，释放穿孔素/颗粒酶或激活巨噬细胞，导致组织损伤。",
+                "purpose": "作为理解任何自身免疫性或过度免疫反应性疾病（包括可能的ICI相关不良反应）的基础机制参考。"
+              },
+              {
+                "connection_to_review": "提供“分子模拟”作为连接外部刺激（病毒/微生物）与自身免疫的桥梁的概念框架。",
+                "material": "病毒或微生物肽段与宿主自身蛋白结构相似，导致交叉反应性T细胞或抗体产生。",
+                "purpose": "帮助构建宿主-环境互作影响免疫结局的理论模型，尽管在ICI语境下，这种模拟可能不是主要机制，但概念上有助于理解免疫系统的交叉反应性。"
+              }
+            ],
+            "scope_interpretation_cautions": [
+              "本文是综述而非原始研究，其结论基于对已有文献的综合，需注意引用文献的质量和一致性。",
+              "HLA与心肌炎的关联多为中等效应值，且存在显著的人群异质性，不能简单推广到所有人群或疾病类型。",
+              "微生物组与自身免疫的联系主要在动物模型和部分人类研究中证实，其在ICI疗效中的具体作用仍需独立验证，不可混淆两者。"
+            ],
+            "topic_handles": [
+              "HLA多态性与疾病易感性",
+              "分子模拟（Molecular Mimicry）",
+              "微生物组衍生的抗原模拟",
+              "T细胞耐受失败与克隆扩增",
+              "自身免疫性心肌病的病理生理"
+            ]
+          },
+          "supplement_material": {
+            "auxiliary_material": "文中总结了 HLA 类 I 和类 II 分子在心肌炎中的不同功能（类 I 呈递病毒肽给 CD8+ T 细胞，类 II 呈递外源肽给 CD4+ T 细胞），并列出了与心肌炎或扩张型心肌病（DCM）相关的具体 HLA 等位基因（如 HLA-DR4, HLA-B27, HLA-DR15 等）。此外，文章提出了心肌炎的三相模型（触发、免疫反应、慢性炎症），并指出 HLA 多态性影响胸腺阴性选择和 T 细胞克隆扩增，这些背景信息有助于构建宿主遗传与环境互作的整体病理生理图景。",
+            "evidence": [],
+            "gap_id": "Ch6_gap_4",
+            "judgment_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU03_search_candidate_caa7d3faf8\\FULFILLMENT_JUDGMENT.json",
+            "limitations": [],
+            "material_ready": true,
+            "material_usefulness": "supporting",
+            "outline_action": "利用本材料中关于“微生物组 - 分子模拟 -HLA 限制性 T 细胞激活”的机制框架，作为假设 Prevotella 作用机制的理论基础。在撰写时，需明确区分文中已证实的 Bacteroides 案例与 Gap 关注的 Prevotella 案例，避免混淆。后续行动应侧重于检索专门针对 Prevotella 与心肌炎关联的原始研究，特别是查找 FMT-LUMINate 研究的后续出版物或引用该研究的文献，以寻找关于具体抗原、代谢物及信号通路的实验数据。",
+            "outline_action_recovered_by_policy": false,
+            "remaining_gap": "本材料未提及 Prevotella spp. 具体诱导心肌炎的分子机制，也未涉及 FMT-LUMINate 研究或其后续跟进研究。文中关于微生物组诱导心肌炎的实证例子主要集中在拟杆菌属（Bacteroides）而非 Prevotella 属。关于具体的下游信号通路、特定的 Prevotella 抗原或代谢物、以及其激活的特定 T 细胞亚群（除了一般性的 CD4+ T 细胞外）的细节，在本综述中均未解析。因此，针对 Gap 中询问的 Prevotella 特异性机制及 FMT-LUMINate 后续研究证据，本材料无法直接提供。",
+            "remaining_gap_recovered_by_policy": false,
+            "status": "unmet",
+            "useful_material": "本综述提供了微生物组诱导自身免疫性心肌炎的通用机制框架，特别是“分子模拟”（molecular mimicry）概念。作者引用了 Gil-Cruz 等人的研究，指出共生细菌（如拟杆菌属 Bacteroides）可产生与心脏肌球蛋白表位结构相似的肽段模拟物，在肠道内激活自体反应性 CD4+ T 细胞，进而导致心肌炎。该材料详细描述了 HLA 限制性抗原呈递（HLA 类分子向 CD4+ T 细胞呈递外源性肽段）在打破免疫耐受中的核心作用，以及微生物抗原如何通过交叉反应激活针对心脏自身抗原的免疫应答。这为理解肠道菌群（包括潜在的 Prevotella spp.）如何通过抗原模拟激活特定 T 细胞亚群提供了理论模型和机制参考。"
+          },
+          "supplement_materials": [
+            {
+              "auxiliary_material": "文中总结了 HLA 类 I 和类 II 分子在心肌炎中的不同功能（类 I 呈递病毒肽给 CD8+ T 细胞，类 II 呈递外源肽给 CD4+ T 细胞），并列出了与心肌炎或扩张型心肌病（DCM）相关的具体 HLA 等位基因（如 HLA-DR4, HLA-B27, HLA-DR15 等）。此外，文章提出了心肌炎的三相模型（触发、免疫反应、慢性炎症），并指出 HLA 多态性影响胸腺阴性选择和 T 细胞克隆扩增，这些背景信息有助于构建宿主遗传与环境互作的整体病理生理图景。",
+              "evidence": [],
+              "gap_id": "Ch6_gap_4",
+              "judgment_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU03_search_candidate_caa7d3faf8\\FULFILLMENT_JUDGMENT.json",
+              "limitations": [],
+              "material_ready": true,
+              "material_usefulness": "supporting",
+              "outline_action": "利用本材料中关于“微生物组 - 分子模拟 -HLA 限制性 T 细胞激活”的机制框架，作为假设 Prevotella 作用机制的理论基础。在撰写时，需明确区分文中已证实的 Bacteroides 案例与 Gap 关注的 Prevotella 案例，避免混淆。后续行动应侧重于检索专门针对 Prevotella 与心肌炎关联的原始研究，特别是查找 FMT-LUMINate 研究的后续出版物或引用该研究的文献，以寻找关于具体抗原、代谢物及信号通路的实验数据。",
+              "outline_action_recovered_by_policy": false,
+              "remaining_gap": "本材料未提及 Prevotella spp. 具体诱导心肌炎的分子机制，也未涉及 FMT-LUMINate 研究或其后续跟进研究。文中关于微生物组诱导心肌炎的实证例子主要集中在拟杆菌属（Bacteroides）而非 Prevotella 属。关于具体的下游信号通路、特定的 Prevotella 抗原或代谢物、以及其激活的特定 T 细胞亚群（除了一般性的 CD4+ T 细胞外）的细节，在本综述中均未解析。因此，针对 Gap 中询问的 Prevotella 特异性机制及 FMT-LUMINate 后续研究证据，本材料无法直接提供。",
+              "remaining_gap_recovered_by_policy": false,
+              "status": "unmet",
+              "useful_material": "本综述提供了微生物组诱导自身免疫性心肌炎的通用机制框架，特别是“分子模拟”（molecular mimicry）概念。作者引用了 Gil-Cruz 等人的研究，指出共生细菌（如拟杆菌属 Bacteroides）可产生与心脏肌球蛋白表位结构相似的肽段模拟物，在肠道内激活自体反应性 CD4+ T 细胞，进而导致心肌炎。该材料详细描述了 HLA 限制性抗原呈递（HLA 类分子向 CD4+ T 细胞呈递外源性肽段）在打破免疫耐受中的核心作用，以及微生物抗原如何通过交叉反应激活针对心脏自身抗原的免疫应答。这为理解肠道菌群（包括潜在的 Prevotella spp.）如何通过抗原模拟激活特定 T 细胞亚群提供了理论模型和机制参考。"
+            },
+            {
+              "auxiliary_material": "文中提供了 HLA I 类和 II 类分子在心肌炎中的功能对比，包括抗原呈递对象（CD8+ vs CD4+ T 细胞）、表达细胞类型及在自身免疫中的具体角色。还涉及病毒持续感染与自身免疫的复杂关系，以及抗肌球蛋白自身抗体与β1-肾上腺素能受体的交叉反应机制。这些内容虽不直接针对 Prevotella，但构成了心肌炎免疫病理的基础背景。",
+              "evidence": [],
+              "gap_id": "Ch6_gap_4",
+              "judgment_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_2\\supplements\\Ch6_gap_4\\attempt-x8duln8o\\source_units\\SU01_search_candidate_caa7d3faf8\\FULFILLMENT_JUDGMENT.json",
+              "limitations": [],
+              "material_ready": true,
+              "material_usefulness": "supporting",
+              "outline_action": "需专门检索针对 Prevotella 属与心肌炎或心肌病关联的原始研究，特别是寻找是否有关于 Prevotella 特定抗原表位或代谢产物（如短链脂肪酸、TMAO 等）的研究。同时，应查阅 FMT-LUMINate 研究的后续出版物或引用该研究的文献，确认是否有针对该相关性的机制解析。可进一步追踪本综述引用的 Gil-Cruz 等人研究 [39] 的全文，确认其微生物谱系是否包含 Prevotella 或是否有后续研究扩展了该发现。",
+              "outline_action_recovered_by_policy": false,
+              "remaining_gap": "该材料未提及 Prevotella spp. 的具体分子机制，也未涉及 FMT-LUMINate 研究或其后续分析。文中引用的微生物组相关证据主要集中在拟杆菌属（Bacteroides）与心脏肌球蛋白的分子模拟，而非 Prevotella 特有的抗原或代谢物。关于 Prevotella 激活特定 T 细胞亚群的具体下游信号通路（如特定受体、转录因子或代谢途径）在此文中完全缺失。",
+              "remaining_gap_recovered_by_policy": false,
+              "status": "unmet",
+              "useful_material": "该综述阐述了微生物组通过分子模拟（molecular mimicry）诱导自身免疫性心肌炎的通用机制。文中指出，共生细菌（引用 Gil-Cruz 等人的研究，具体为拟杆菌属 Bacteroides species）可产生与心脏肌球蛋白表位结构相似的肽段模拟物，在肠道内启动自体反应性 CD4+ T 细胞，进而导致心肌炎。该研究还提到抗生素治疗可阻断这一过程，证实了微生物组衍生抗原模拟在疾病启动中的因果作用。此外，文中详细描述了 HLA 限制性抗原呈递如何决定特定 T 细胞亚群（CD4+ 或 CD8+）的激活，以及下游的细胞因子放大和免疫细胞浸润机制，为理解微生物 - 宿主互作提供了理论框架。"
+            }
+          ],
+          "locator": {
+            "writer_packet": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch6.json",
+            "source_handle": "P0597",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU03_search_candidate_caa7d3faf8\\card\\PAPER_READING_CARD.json"
+          },
+          "card_material": {
+            "material_scope": "fulltext"
+          },
+          "material_read_from_disk": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU03_search_candidate_caa7d3faf8\\card\\PAPER_READING_CARD.json"
+        },
+        {
+          "source_handle": "P0596",
+          "title": "Key immune related genes and potential therapeutic targets in immune checkpoint inhibitor associated myocarditis: a new fing",
+          "year": "2025",
+          "doi": "10.1093/eurheartj/ehaf784.4157",
+          "paper_id": "38f13e3a33ed5233b0a792fdb8143168a4264099",
+          "material_depth": "",
+          "material_status": "resolved",
+          "aliases": [],
+          "locator": {
+            "writer_packet": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch6.json",
+            "source_handle": "P0596",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU02_search_candidate_1ade57df76\\card\\PAPER_READING_CARD.json"
+          },
+          "study_summary_A": {
+            "approach": "采用生物信息学综合分析路线：1. 数据获取与分组：使用GSE180045数据集，分为三组（A: ICI无不良事件；B: ICI非心肌炎免疫不良事件；C: ICI心肌炎），以C组为病例组，A/B组为对照组。2. 基因筛选：计算C组与对照组的差异表达基因（DEGs），并与immPort数据库中的1,796个免疫相关基因（IRGs）取交集，获得IR-DEGs。3. 网络与功能分析：对IR-DEGs进行GO、KEGG、GSEA功能富集分析，构建PPI网络识别hub genes。4. 验证与特征提取：使用GSE4172数据集进行验证，从hub genes与DEGs的重叠部分中确定最优特征基因（OFGs）。5. 调控网络与药物预测：预测靶miRNAs并构建ceRNA网络；利用cMAP数据库预测靶向hub genes的药物。",
+            "contribution_and_limits": [
+              {
+                "contribution": "提供了ICI-MC潜在的分子机制假说，特别是强调了细胞毒性T细胞和NK细胞相关通路（如CD8+ TCR、细胞裂解）的作用。",
+                "limits": "所给摘要未交代临床样本的具体来源医院、患者基线特征（如肿瘤类型、分期）、测序平台细节及统计分析的具体阈值。结论基于生物信息学预测，缺乏湿实验（如qPCR、Western Blot或组织染色）的直接验证，因果链条尚未在生物学层面确证。"
+              },
+              {
+                "contribution": "识别了KLRB1, NKG7, GZMH作为ICI-MC的关键候选标志物，并提出了避免使用乙酰羟肟酸的临床警示。",
+                "limits": "药物预测仅基于cMAP数据库的连接评分，未评估药物在心肌炎模型中的实际疗效或安全性，仅为潜在线索而非临床建议。"
+              }
+            ],
+            "key_findings": [
+              {
+                "conditions": "基于GSE180045数据集的比较分析",
+                "finding": "在ICI-MC样本与对照组之间鉴定出58个DEGs，经与免疫基因库交集后得到32个IR-DEGs。功能富集显示这些基因主要涉及细胞裂解、CD8+ T细胞受体信号通路、自然杀伤细胞介导的细胞毒性以及RAGE信号通路。"
+              },
+              {
+                "conditions": "PPI网络分析与枢纽基因识别",
+                "finding": "鉴定出显著上调的枢纽基因，包括IL7R, PRF1, GNLY, CD3G, NKG7, GZMH, GZMB, KLRB1, KLRK1和CD247。"
+              },
+              {
+                "conditions": "基于GSE4172数据集的验证",
+                "finding": "在验证数据集中发现407个DEGs，最终确定3个最优特征基因（OFGs）：KLRB1, NKG7, GZMH。"
+              },
+              {
+                "conditions": "药物预测结果",
+                "finding": "通过cMAP数据库预测，乙酰羟肟酸（acetohydroxamic acid）具有最高的连接评分，提示在ICI治疗中需对该类药物保持警惕。"
+              }
+            ],
+            "paper_kind": "empirical",
+            "problem_or_question": "ICI相关心肌炎（ICI-MC）是一种严重且可能致命的并发症，其具体的病理生理机制尚不清楚。本研究旨在识别ICI-MC中的关键免疫相关基因，发现潜在的治疗靶点，并为临床用药提供警示。",
+            "research_scope": "本研究聚焦于免疫检查点抑制剂（ICIs）治疗过程中出现的罕见且严重的并发症——ICI相关心肌炎（ICI-MC）。研究对象为接受ICI治疗的实体瘤患者群体，通过生物信息学方法分析基因表达数据，旨在揭示该并发症的潜在病理生理机制及治疗靶点。",
+            "work_summary": "针对ICI相关心肌炎（ICI-MC）发病机制不明的问题，本研究利用GSE180045数据集，对比了ICI治疗无免疫不良反应患者、有非心肌炎免疫不良反应患者与发生心肌炎患者之间的差异。研究通过筛选差异表达基因并与免疫相关基因库交集，结合功能富集分析、蛋白互作网络构建及独立数据集验证，识别出关键枢纽基因和潜在的治疗药物靶点，并构建了ceRNA调控网络以阐明分子机制。"
+          },
+          "review_planning_B": {
+            "broader_review_uses": [
+              {
+                "connection_to_review": "有助于综述中更精细地分类irAEs，强调不同器官毒性可能有不同的分子驱动机制，这可能受到局部微环境（包括微生物组）的影响。",
+                "material": "区分了ICI引起的不同免疫不良反应亚型（无事件、非心肌炎免疫事件、心肌炎），并指出心肌炎具有独特的基因表达谱（如RAGE信号、细胞裂解）。",
+                "purpose": "概念澄清与分类"
+              },
+              {
+                "connection_to_review": "作为ICI联合用药安全性的案例，提醒综述在讨论干预措施时需考虑药物-药物相互作用及额外免疫刺激的风险。",
+                "material": "预测乙酰羟肟酸可能在ICI治疗中产生不良相互作用或加重风险。",
+                "purpose": "临床警示与安全性管理"
+              }
+            ],
+            "facet_contributions": [
+              {
+                "boundaries": "仅针对心肌炎这一特定irAE，不能直接外推至其他irAEs（如结肠炎、肺炎）或ICI抗肿瘤疗效本身。未涉及微生物组因素。",
+                "contribution": "提供了ICI诱导心肌炎的具体免疫机制细节，即通过上调细胞裂解相关基因（PRF1, GNLY, GZM系列）和激活CD8+ T细胞/NK细胞通路导致心肌损伤。",
+                "facet_id": "F2",
+                "possible_uses": "用于解释ICI治疗中“过度免疫激活”如何转化为特定器官毒性。若综述讨论微生物组如何通过调节全身免疫稳态来影响irAEs的发生，此材料可作为“效应器机制”部分的支撑，说明免疫激活后的下游病理后果。"
+              },
+              {
+                "boundaries": "无法回答微生物组如何*调节*疗效的问题。仅能说明ICI治疗后的免疫状态特征，不能建立因果关系。",
+                "contribution": "提供了ICI治疗安全性维度的分子证据，表明部分患者存在强烈的细胞毒性免疫反应背景。",
+                "facet_id": "F1",
+                "possible_uses": "作为背景材料，说明ICI治疗不仅关乎疗效，还伴随特定的免疫病理风险。如果综述需要讨论“为什么有些患者对ICI耐受性好而另一些出现严重毒性”，此基因签名可作为宿主免疫反应强度的一个潜在生物标志物维度。"
+              }
+            ],
+            "planning_summary": "该论文虽未直接研究肠道微生物组，但深入探讨了ICI治疗的一个关键安全性终点——心肌炎的免疫机制。对于综述而言，它提供了ICI免疫相关不良事件（irAEs）中特定器官损伤的分子图谱，特别是揭示了细胞毒性淋巴细胞在ICI毒性中的作用。这有助于解释为何某些患者会出现严重的系统性免疫反应，从而间接关联到全身免疫状态（可能受微生物组调节）对ICI疗效和毒性的影响。",
+            "scope_interpretation_cautions": [
+              "该研究为纯生物信息学分析，发现的基因关联仅为统计学相关，非因果证据。",
+              "结果来自公共数据集，可能存在批次效应或人群异质性，需在综述中注明其为“预测性”或“假设生成性”证据。",
+              "不直接涉及肠道微生物组，将其纳入综述时需明确其作为“下游效应机制”或“安全性背景”的角色，而非直接解释微生物组调节作用的中间变量。"
+            ],
+            "topic_handles": [
+              "ICI相关心肌炎 (ICI-MC)",
+              "细胞毒性T细胞/NK细胞通路 (CD8+ TCR, NK cytotoxicity)",
+              "关键枢纽基因 (KLRB1, NKG7, GZMH)",
+              "ceRNA调控网络",
+              "药物重定位/警示 (Acetohydroxamic acid)"
+            ]
+          },
+          "card_material": {
+            "known_gaps": [
+              {
+                "kind": "identity",
+                "reason": "source identity was not independently verified",
+                "status": "input_attributed"
+              },
+              {
+                "kind": "coverage",
+                "reason": "no complete research body was indexed",
+                "status": "partial"
+              },
+              {
+                "kind": "coverage",
+                "reason": "only abstract or non-title snippets were available",
+                "status": "partial"
+              }
+            ],
+            "material_scope": "abstract_only"
+          },
+          "material_read_from_disk": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\chapters\\external\\N64e929a3f9de2888bd6a-5a6b848383c152a3\\round_1\\supplements\\Ch6_gap_4\\attempt-adnnjw8w\\source_units\\SU02_search_candidate_1ade57df76\\card\\PAPER_READING_CARD.json"
+        },
+        {
+          "source_handle": "P0261",
+          "title": "Facts and Hopes for Gut Microbiota Interventions in Cancer Immunotherapy",
+          "year": "2022",
+          "doi": "10.1158/1078-0432.ccr-21-1129",
+          "paper_id": "6f9060daa22a7c9efcd4a92919035c5e5c24367a",
+          "material_depth": "",
+          "material_status": "resolved",
+          "aliases": [],
+          "locator": {
+            "writer_packet": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch6.json",
+            "source_handle": "P0261",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\6f9060daa22a7c9efcd4a92919035c5e5c24367a\\cc59b1602065d8843b6a0ee6c2797d9c\\attempt-01\\PAPER_READING_CARD.json"
+          },
+          "study_summary_A": {
+            "approach": "As a narrative review, the authors systematically summarize and categorize existing literature rather than conducting a new systematic meta-analysis. The approach involves: (1) reviewing preclinical mouse models to establish causal links between specific bacteria and ICI response; (2) analyzing human observational cohort studies to identify associations between microbiota composition (taxa and diversity) and clinical outcomes (response vs. non-response); (3) synthesizing proposed biological mechanisms (T-cell activation, mimicry, metabolites); and (4) evaluating early-phase clinical trial data for microbiome interventions (FMT, consortia, diet). The review explicitly compares findings across different studies to highlight inconsistencies in biomarker discovery and emphasizes the need for standardized methodologies.",
+            "contribution_and_limits": [
+              {
+                "contribution": "Provides a comprehensive synthesis of preclinical and clinical evidence linking the gut microbiome to ICI efficacy and toxicity, categorizing mechanisms into three distinct themes.",
+                "limits": "As a narrative review, it does not perform a quantitative meta-analysis; it highlights the lack of consensus in human biomarker studies rather than resolving it."
+              },
+              {
+                "contribution": "Critically evaluates the limitations of current human studies, including small sample sizes, geographic biases, and analytical pipeline differences, advocating for standardized large-scale datasets.",
+                "limits": "Does not provide definitive answers on which specific microbial signatures are universally predictive across all solid tumor types."
+              },
+              {
+                "contribution": "Summarizes early-phase clinical trial data for various microbiome interventions (FMT, consortia, diet), offering a landscape of current therapeutic developments.",
+                "limits": "Most clinical trial data reported are from early-phase (I/II) studies with small sample sizes; long-term efficacy and safety profiles are not yet established."
+              }
+            ],
+            "key_findings": [
+              {
+                "conditions": "Preclinical mouse models",
+                "finding": "Specific commensals (e.g., Bifidobacterium spp., Akkermansia muciniphila, Bacteroides fragilis) enhance anti-PD-1 or anti-CTLA-4 efficacy via dendritic cell activation, STING pathway signaling, and modulation of T-cell subsets."
+              },
+              {
+                "conditions": "Human observational studies (Melanoma, NSCLC, RCC)",
+                "finding": "Responders to ICIs often show higher abundance of specific taxa (e.g., Faecalibacterium, Ruminococcaceae, A. muciniphila), but there is no consensus on a universal predictive signature due to cohort-specific variations, geographic differences, and methodological heterogeneity."
+              },
+              {
+                "conditions": "Antibiotic use during ICI therapy",
+                "finding": "Broad-spectrum antibiotic use is consistently associated with reduced progression-free survival and overall survival in ICI-treated patients, likely due to depletion of beneficial microbes."
+              },
+              {
+                "conditions": "Mechanistic pathways",
+                "finding": "Three primary mechanisms are identified: (1) direct stimulation of antitumor T-cells; (2) molecular mimicry between bacterial and tumor antigens; (3) production of immunomodulatory metabolites like short-chain fatty acids (SCFAs), secondary bile acids, and inosine."
+              },
+              {
+                "conditions": "Immune-related adverse events (irAEs)",
+                "finding": "Specific microbiota profiles are linked to irAEs, particularly colitis. For example, certain Firmicutes are associated with anti-CTLA-4 colitis, and Streptococcus abundance correlates with arthritis and poor prognosis."
+              },
+              {
+                "conditions": "Clinical trials of FMT",
+                "finding": "FMT from responders to PD-1 refractory melanoma patients can restore sensitivity to PD-1 inhibitors, with some patients achieving objective responses, though engraftment stability varies."
+              }
+            ],
+            "paper_kind": "review",
+            "problem_or_question": "The review addresses the question of how the gut microbiome impacts the efficacy and toxicity of cancer immunotherapies, aiming to consolidate preclinical and clinical evidence to understand the rationale for microbiome-targeted therapies and identify gaps in current knowledge regarding predictive biomarkers and mechanistic pathways.",
+            "research_scope": "The review focuses on the role of the gut microbiome in modulating responses to immune checkpoint inhibitors (ICIs) targeting PD-1/PD-L1 and CTLA-4 in patients with advanced solid tumors (melanoma, NSCLC, RCC, GI cancers). It covers preclinical evidence from mouse models, observational human data linking microbiota composition to clinical outcomes and adverse events, potential biological mechanisms, and early-phase clinical trials of microbiome-based interventions.",
+            "work_summary": "This review synthesizes current knowledge on how the gut microbiome influences cancer immunotherapy. It begins by summarizing preclinical studies demonstrating that specific commensal bacteria enhance ICI efficacy through T-cell stimulation and metabolite production. It then reviews human observational studies, highlighting the inconsistent identification of predictive microbial signatures across different cohorts and cancer types, while noting the negative impact of broad-spectrum antibiotics. The paper outlines three main mechanistic themes: direct T-cell stimulation, molecular mimicry, and immunomodulatory metabolites (e.g., SCFAs, bile acids, inosine). It also discusses the microbiome's role in immune-related adverse events (irAEs), particularly colitis. Finally, it evaluates emerging therapeutic strategies, including fecal microbiota transplantation (FMT), defined bacterial consortia, probiotics, and dietary interventions, based on results from early-phase clinical trials."
+          },
+          "review_planning_B": {
+            "broader_review_uses": [
+              {
+                "connection_to_review": "Contextualizes the field by highlighting the discrepancy between preclinical success and human biomarker inconsistency.",
+                "material": "Discussion of cohort-specific microbial signatures, geographic effects (enterotypes), and methodological heterogeneity (sequencing pipelines, response definitions).",
+                "purpose": "To explain why identifying a universal microbiome biomarker for ICI response remains difficult, providing context for future research directions."
+              },
+              {
+                "connection_to_review": "Provides background on dietary interventions as a non-invasive way to modulate the microbiome.",
+                "material": "Details on high-fiber diets, ketogenic diets, and fasting-mimicking diets affecting microbiota composition and ICI outcomes.",
+                "purpose": "To include lifestyle/dietary factors as part of the broader strategy for microbiome modulation in cancer therapy."
+              },
+              {
+                "connection_to_review": "Offers a classification of current clinical trials involving microbiome therapeutics.",
+                "material": "Table 2 listing various trials (FMT, consortia, probiotics, prebiotics) with their phases, indications, and products.",
+                "purpose": "To map the current landscape of clinical development for microbiome-based adjuncts to immunotherapy."
+              }
+            ],
+            "facet_contributions": [
+              {
+                "boundaries": "The association is correlational in humans; causality is primarily established in mouse models. Predictive signatures are not consistent across all studies or cancer types.",
+                "contribution": "Provides evidence that specific gut bacteria (e.g., Bifidobacterium, Akkermansia, Faecalibacterium) are associated with improved response to PD-1/CTLA-4 inhibitors in melanoma, NSCLC, and RCC. It details how broad-spectrum antibiotics negatively impact ICI efficacy.",
+                "facet_id": "F1",
+                "possible_uses": "Use to support the argument that the gut microbiome modulates ICI efficacy. Can be used to list specific taxa associated with better outcomes and to cite the negative impact of antibiotics as evidence of microbiome importance."
+              },
+              {
+                "boundaries": "Many mechanisms are derived from preclinical mouse models; human validation is ongoing. The relative contribution of each mechanism in humans is not fully quantified.",
+                "contribution": "Outlines three mechanistic categories: (1) Direct T-cell stimulation (e.g., via DC activation or TLR signaling); (2) Molecular mimicry (cross-reactive T-cells); (3) Metabolite production (SCFAs, bile acids, inosine) influencing the tumor microenvironment and systemic immunity.",
+                "facet_id": "F2",
+                "possible_uses": "Use to answer 'what mechanisms mediate that effect'. Provides specific biological pathways and molecules (e.g., STING pathway, NOD2, adenosine receptors, GPRs) that link microbial presence to immune function."
+              },
+              {
+                "boundaries": "Links are largely observational; causal relationships for non-colitis irAEs are less established.",
+                "contribution": "Discusses the role of the microbiome in irAEs, specifically colitis and arthritis, linking specific taxa (e.g., Firmicutes, Streptococcus) to these toxicities.",
+                "facet_id": "F1",
+                "possible_uses": "Use to discuss the dual role of the microbiome in both efficacy and toxicity. Highlights the complexity of microbiome modulation, as enhancing immunity may increase adverse events."
+              },
+              {
+                "boundaries": "Data are from small, early-phase trials; long-term durability and optimal donor selection criteria are not yet resolved.",
+                "contribution": "Reports early clinical trial results for FMT and defined consortia (e.g., CBM588, SER-401) showing potential to restore ICI sensitivity in refractory patients.",
+                "facet_id": "F1",
+                "possible_uses": "Use to illustrate the translational potential of microbiome interventions. Provides concrete examples of successful re-challenge strategies."
+              }
+            ],
+            "planning_summary": "This review serves as a foundational resource for understanding the biological plausibility and clinical status of microbiome-immunotherapy interactions. It provides detailed mechanistic hypotheses (direct T-cell stimulation, mimicry, metabolites) and a critical assessment of why human biomarker discovery has been challenging (cohort heterogeneity). It also offers concrete examples of intervention strategies (FMT, consortia) and their preliminary clinical outcomes, which are essential for discussing the transition from association to causation and therapy.",
+            "scope_interpretation_cautions": [
+              "The review covers multiple solid tumor types (melanoma, NSCLC, RCC, GI cancers); findings may not be generalizable to hematologic malignancies or other cancer types not discussed.",
+              "Human data are primarily observational associations; causal claims should be attributed to preclinical models unless supported by interventional trial data.",
+              "Biomarker findings are inconsistent across studies; do not present any single taxon as a definitive universal predictor without noting the cohort-specific nature of the evidence.",
+              "Clinical trial results are from early phases; avoid overstating efficacy or safety based on small sample sizes."
+            ],
+            "topic_handles": [
+              "Gut microbiome composition and ICI response",
+              "Mechanisms of microbiome-mediated immunotherapy enhancement",
+              "Microbiome and immune-related adverse events (irAEs)",
+              "Fecal microbiota transplantation (FMT) in cancer",
+              "Defined bacterial consortia and probiotics",
+              "Dietary interventions (fiber, ketogenic diet)",
+              "Methodological challenges in microbiome biomarker discovery"
+            ]
+          },
+          "card_material": {
+            "material_scope": "fulltext"
+          },
+          "material_read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\6f9060daa22a7c9efcd4a92919035c5e5c24367a\\cc59b1602065d8843b6a0ee6c2797d9c\\attempt-01\\PAPER_READING_CARD.json"
+        },
+        {
+          "source_handle": "P0319",
+          "title": "Interplay between Gut Microbiome, Metabolites, and Tumor Immunity: Mechanisms and Clinical Translation",
+          "year": "2026",
+          "doi": "10.53941/hm.2026.100010",
+          "paper_id": "896aa96e6dbaae9b8dbaa7d183f459500ad70834",
+          "material_depth": "",
+          "material_status": "resolved",
+          "aliases": [],
+          "locator": {
+            "writer_packet": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch6.json",
+            "source_handle": "P0319",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\896aa96e6dbaae9b8dbaa7d183f459500ad70834\\0a3462ca68e00befd1fc57bcd3fddfc4\\attempt-01\\PAPER_READING_CARD.json"
+          },
+          "study_summary_A": {
+            "approach": "采用系统性文献综述方法，按免疫细胞类型（树突状细胞、巨噬细胞、NK细胞、MDSCs、CD8+ T细胞、CD4+ T细胞亚群）和免疫过程分类，梳理不同代谢物的作用机制；随后按干预手段（益生菌/益生元、工程菌、FMT）总结临床转化进展；最后讨论双向效应、递送效率及个体异质性等挑战。",
+            "contribution_and_limits": [
+              {
+                "contribution": "提供了关于肠道微生物代谢物调节肿瘤免疫的详细机制图谱，涵盖了从分子通路到临床干预的多层次信息。",
+                "limits": "作为综述，其结论依赖于所引用的原始研究，未提供新的实验数据；对代谢物浓度的精确阈值和最佳给药方案缺乏统一标准，且存在个体异质性带来的外推风险。"
+              }
+            ],
+            "key_findings": [
+              {
+                "conditions": "在结直肠癌模型中，乳酸杆菌产生的吲哚-3-乳酸（ILA）通过表观遗传机制促进DCs产生IL-12，激活CD8+ T细胞。",
+                "finding": "ILA增强抗肿瘤免疫，抑制肿瘤生长。"
+              },
+              {
+                "conditions": "高浓度丁酸盐在原发性胆汁性胆管炎患者中或特定条件下。",
+                "finding": "丁酸盐通过HDAC抑制和脂肪酸β氧化重编程MDSCs，增强其免疫抑制功能，具有双重作用。"
+              },
+              {
+                "conditions": "在黑色素瘤和肾细胞癌临床试验中。",
+                "finding": "粪菌移植（FMT）联合抗PD-1治疗可显著提高客观缓解率，伴随有益菌群富集和代谢物谱改变。"
+              },
+              {
+                "conditions": "不同癌症类型及代谢物浓度下。",
+                "finding": "部分代谢物如丁酸盐、多胺、琥珀酸具有情境依赖的双向功能，既可能促进也可能抑制抗肿瘤免疫。"
+              }
+            ],
+            "paper_kind": "review",
+            "problem_or_question": "旨在解决肿瘤免疫治疗（特别是ICIs）响应率低、异质性大及耐药性问题，通过解析微生物-代谢物-免疫轴的复杂互作，为阐明个体差异和克服耐药提供理论框架。",
+            "research_scope": "肠道微生物群及其代谢产物与肿瘤免疫微环境（TME）的相互作用，重点聚焦于免疫检查点抑制剂（ICIs）在实体瘤治疗中的疗效调节机制及临床转化策略。",
+            "work_summary": "这是一篇综述文章，系统总结了肠道微生物代谢物如何通过调节先天免疫、适应性免疫和肿瘤免疫原性来影响肿瘤免疫治疗的疗效。文章详细阐述了短链脂肪酸、胆汁酸、色氨酸代谢物等关键代谢物的具体分子机制，并评估了益生菌、工程菌、粪菌移植（FMT）及饮食干预等临床转化策略的现状与挑战。"
+          },
+          "review_planning_B": {
+            "broader_review_uses": [
+              {
+                "connection_to_review": "提供背景信息和概念框架，解释为何肠道微生物是ICIs疗效的关键决定因素。",
+                "material": "介绍了肠道微生物作为“第二基因组”的角色，及其通过代谢产物、免疫信号调节和药物生物转化影响宿主健康的总体概念。",
+                "purpose": "用于综述的背景部分，确立微生物组在肿瘤免疫治疗中的重要地位。"
+              },
+              {
+                "connection_to_review": "提供关于临床转化挑战和未来方向的讨论素材。",
+                "material": "讨论了代谢物的双向效应、递送效率问题、个体异质性、FMT标准化缺失及多组学整合的挑战。",
+                "purpose": "用于综述的讨论或局限性部分，分析当前研究的瓶颈和未来发展方向。"
+              },
+              {
+                "connection_to_review": "提供具体的干预策略实例，如益生菌、益生元、工程菌和FMT的具体应用案例。",
+                "material": "列举了CBM588、Akkermansia muciniphila、工程菌EcN 1917等在临床试验或模型中的具体表现和机制。",
+                "purpose": "用于综述中关于“如何通过调节微生物组增强ICIs疗效”的策略部分，提供具体的候选疗法和证据。"
+              }
+            ],
+            "facet_contributions": [
+              {
+                "boundaries": "主要基于已发表的临床试验和动物模型综述，具体效果受癌症类型、患者基线菌群状态和治疗方案的显著影响，不能直接推广至所有实体瘤或所有患者。",
+                "contribution": "提供了肠道微生物代谢物改善ICIs疗效的具体临床证据和潜在机制，包括FMT联合治疗提高黑色素瘤和肾细胞癌缓解率的案例，以及特定菌株（如Akkermansia muciniphila, Clostridium butyricum）与ICI响应的正相关性。",
+                "facet_id": "F1",
+                "possible_uses": "可用于回答“肠道微生物组如何调节实体瘤中ICIs疗效”的问题，提供具体的临床转化实例和正面效应的证据。"
+              },
+              {
+                "boundaries": "机制描述多为体外或动物模型结果，部分机制在人体内的确切效力尚需验证；某些代谢物具有双向作用（如丁酸盐），需结合具体情境（浓度、癌症类型）解读。",
+                "contribution": "详细描述了多种代谢物（如丁酸盐、ILA、TMAO、异石胆酸isoLCA、肌苷Inosine等）通过特定受体（如GPR109A, AhR, A2AR, FFAR2）和信号通路（如HDAC抑制, STING, NFAT2）调节免疫细胞功能的分子机制。",
+                "facet_id": "F2",
+                "possible_uses": "用于回答“哪些机制介导了这种效应”，提供详细的分子生物学路径，解释代谢物如何影响抗原呈递、T细胞耗竭、巨噬细胞极化等关键免疫过程。"
+              }
+            ],
+            "planning_summary": "该综述为理解肠道微生物如何调节ICIs疗效提供了全面的机制背景和临床转化视角。它详细列出了多种代谢物（如SCFAs、胆汁酸、色氨酸衍生物）对特定免疫细胞（DCs、T细胞、巨噬细胞等）的作用路径，并总结了FMT、工程菌等干预策略的临床证据。这对于构建“微生物组-免疫检查点抑制剂”关联的综述至关重要，尤其是用于解释机制异质性和临床转化障碍。",
+            "scope_interpretation_cautions": [
+              "该综述涵盖多种癌症类型（黑色素瘤、结直肠癌、肾细胞癌等），不同癌症类型的微生物-免疫互作可能存在显著差异，需谨慎区分适用情境。",
+              "代谢物的作用具有浓度依赖性和双向性（如丁酸盐），在引用时需明确具体条件和上下文，避免过度简化。",
+              "临床转化策略（如FMT、益生菌）的证据等级不一，部分来自小样本临床试验或动物模型，外推到广泛人群时需考虑异质性。",
+              "综述中提到的机制多为作者综合现有文献的结果，并非本研究原创实验发现，引用时应注明为综述性观点。"
+            ],
+            "topic_handles": [
+              "Gut microbiota-derived metabolites (SCFAs, bile acids, tryptophan metabolites)",
+              "Immune checkpoint inhibitors (ICIs) efficacy modulation",
+              "Tumor immune microenvironment (TME) remodeling",
+              "Mechanisms of innate immunity regulation (DCs, macrophages, NK cells)",
+              "Mechanisms of adaptive immunity regulation (CD8+ T cell exhaustion, CD4+ T cell differentiation)",
+              "Clinical translation strategies (Probiotics, Engineered bacteria, FMT, Dietary interventions)",
+              "Bidirectional effects and concentration-dependent activity of metabolites",
+              "Inter-individual heterogeneity in immunotherapy response"
+            ]
+          },
+          "card_material": {
+            "known_gaps": [
+              {
+                "kind": "identity",
+                "reason": "source identity was not independently verified",
+                "status": "input_attributed"
+              },
+              {
+                "kind": "pdf",
+                "reason": "full-page text extracted; page positions retained",
+                "status": "fitz"
+              },
+              {
+                "kind": "fitz",
+                "reason": "layout, table relations, formulas, figure pixels, and scanned text may be lost",
+                "status": "known_gap"
+              }
+            ],
+            "material_scope": "fulltext"
+          },
+          "material_read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\896aa96e6dbaae9b8dbaa7d183f459500ad70834\\0a3462ca68e00befd1fc57bcd3fddfc4\\attempt-01\\PAPER_READING_CARD.json"
+        },
+        {
+          "source_handle": "P0447",
+          "title": "Microbial metabolites and their influence on the tumor microenvironment",
+          "year": "2025",
+          "doi": "10.3389/fimmu.2025.1675677",
+          "paper_id": "c59738fb3db453360d9f86e97ad338176abe8eb6",
+          "material_depth": "",
+          "material_status": "resolved",
+          "aliases": [],
+          "locator": {
+            "writer_packet": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch6.json",
+            "source_handle": "P0447",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\c59738fb3db453360d9f86e97ad338176abe8eb6\\42993142a6b2e557adda307d103ec858\\attempt-01\\PAPER_READING_CARD.json"
+          },
+          "study_summary_A": {
+            "approach": "本综述采用系统性文献回顾和综合的方法。首先，梳理肿瘤免疫治疗面临的挑战，特别是TME中的代谢障碍。其次，整合关于免疫细胞代谢重编程（包括能量代谢、生物合成前体供应、表观遗传调控等）的基础研究，建立代谢与免疫功能联系的框架。然后，分类汇总微生物代谢物（SCFAs, 胆汁酸, 色氨酸代谢物, LPS）的临床和实验证据，分析其来源、转运机制及其对特定免疫细胞亚群（如T细胞、巨噬细胞、DCs等）代谢通路的具体调控机制。最后，综合讨论这些代谢物如何协同或拮抗地影响免疫治疗响应，并提出未来研究方向。",
+            "contribution_and_limits": [
+              {
+                "contribution": "提供了一个将微生物代谢物与肿瘤免疫细胞代谢重编程联系起来的综合理论框架，强调了代谢物作为“第二基因组”产物在调节TME中的核心地位。",
+                "limits": "作为综述，其结论依赖于所引用的原始研究，本身不提供新的实验数据。对于不同代谢物之间的复杂相互作用、剂量依赖性效应以及在人体内的具体临床转化效果，尚需更多前瞻性临床试验验证。"
+              }
+            ],
+            "key_findings": [
+              {
+                "conditions": "在黑色素瘤和肺癌患者中，对PD-1抑制剂有响应的个体通常具有更高的肠道微生物多样性和产SCFA细菌丰度。",
+                "finding": "SCFAs（如丁酸盐）可通过促进CD8+ T细胞激活、M1型巨噬细胞极化等机制，增强免疫检查点抑制剂的疗效，将“冷”肿瘤转化为“热”肿瘤。"
+              },
+              {
+                "conditions": "在结直肠癌肝转移模型中，肠道菌群产生的次级胆汁酸通过TGR5信号通路招募髓源性抑制细胞（MDSCs）。",
+                "finding": "胆汁酸具有双重作用：一方面可能通过抑制CD8+ T细胞功能促进肿瘤进展；另一方面，通过TGR5/mTOR/OXPHOS通路可激活CD8+ T细胞，增强抗肿瘤免疫。"
+              },
+              {
+                "conditions": "肠道菌群（如双歧杆菌、Akkermansia）代谢色氨酸产生吲哚衍生物（如ILA, IPA）。",
+                "finding": "这些代谢物通过激活芳香烃受体（AhR）信号通路，调节Treg分化、巨噬细胞极化和CD8+ T细胞功能，从而增强免疫治疗疗效或维持免疫稳态。"
+              },
+              {
+                "conditions": "革兰氏阴性菌释放的LPS通过TLR4/MyD88/NF-κB通路。",
+                "finding": "LPS可诱导慢性炎症，促进肿瘤侵袭和转移，但也可能通过激活特定免疫细胞亚群增强抗肿瘤免疫反应。"
+              }
+            ],
+            "paper_kind": "review",
+            "problem_or_question": "尽管免疫治疗在血液系统恶性肿瘤中取得进展，但在实体瘤中仍面临免疫抑制微环境和代谢异常导致的疗效有限及耐药问题。微生物组被称为“第二基因组”，其代谢物如何作为关键信使，通过调节免疫细胞的代谢重编程来影响肿瘤免疫逃逸和免疫治疗抵抗？",
+            "research_scope": "肿瘤免疫微环境（TME）中的免疫细胞代谢重编程，以及肠道和肿瘤相关微生物群产生的代谢物（短链脂肪酸、胆汁酸、色氨酸代谢物、LPS等）对这一过程的调控作用。",
+            "work_summary": "本文是一篇综述，旨在阐明微生物代谢物如何通过调节免疫细胞的代谢途径来影响肿瘤免疫反应和免疫治疗疗效。文章首先概述了肿瘤免疫治疗的现状与挑战，特别是实体瘤中由代谢异常和免疫抑制微环境导致的耐药性。随后，详细阐述了免疫细胞代谢（如糖酵解、OXPHOS、脂质代谢等）在决定免疫细胞命运和功能中的核心作用。在此基础上，重点分析了四类主要微生物代谢物——短链脂肪酸（SCFAs）、胆汁酸、色氨酸代谢物和脂多糖（LPS）——作为连接微生物组与宿主免疫系统的“信使”，通过受体依赖或非依赖机制，重塑TME中的免疫细胞代谢状态，进而调节抗肿瘤免疫应答和免疫检查点抑制剂（ICIs）的疗效。最后，讨论了这些发现对开发基于微生物代谢的精准干预策略的理论意义和未来方向。"
+          },
+          "review_planning_B": {
+            "broader_review_uses": [
+              {
+                "connection_to_review": "为理解为何需要探索微生物组-代谢轴作为克服ICI耐药的新策略提供背景。",
+                "material": "介绍了肿瘤免疫治疗在实体瘤中面临的挑战，包括TME的物理屏障、免疫抑制细胞（TAMs, MDSCs）的作用以及代谢压力（缺氧、乳酸、葡萄糖剥夺）导致的T细胞耗竭。",
+                "purpose": "背景介绍"
+              },
+              {
+                "connection_to_review": "有助于构建微生物组影响宿主免疫系统的整体理论框架，超越单纯的菌群组成分析。",
+                "material": "提出了“第二基因组”概念，强调微生物代谢物作为连接宿主生理、微生物群落和恶性细胞的三元信号轴的关键角色。",
+                "purpose": "概念框架"
+              },
+              {
+                "connection_to_review": "提醒在评估微生物代谢物靶点时需考虑其多效性和网络复杂性，避免过度简化机制。",
+                "material": "提到IDO1抑制剂epacadostat联合pembrolizumab在黑色素瘤III期临床试验中未显著改善生存，提示单一抑制色氨酸代谢途径可能不足，需考虑更复杂的代谢网络。",
+                "purpose": "实例与反例"
+              }
+            ],
+            "facet_contributions": [
+              {
+                "boundaries": "多数证据来自回顾性队列或动物模型，直接证明特定代谢物在人体中改善ICI疗效的因果链条仍需更多RCT支持。不同癌症类型（如黑色素瘤 vs. 肺癌）的结果可能存在差异。",
+                "contribution": "提供了多种微生物代谢物（SCFAs, 胆汁酸, 色氨酸代谢物）与免疫检查点抑制剂（如PD-1/PD-L1抗体）疗效之间关联的证据。例如，产SCFA细菌丰度与黑色素瘤患者对PD-1治疗的响应正相关；Akkermansia补充剂通过色氨酸代谢物增强CAR-T细胞疗效（虽非ICI，但属免疫治疗范畴）；色氨酸代谢物被报道可增强ICI疗效。",
+                "facet_id": "F1",
+                "possible_uses": "可用于回答肠道微生物组如何调节实体瘤中ICI疗效的问题，提供具体的代谢物类别和临床/临床前关联证据。"
+              },
+              {
+                "boundaries": "许多机制细节基于体外或小鼠模型研究，其在人类TME中的确切适用性需结合具体情境判断。部分机制（如AhR在不同细胞类型中的特异性作用）仍存在争议或复杂性。",
+                "contribution": "详细阐述了微生物代谢物调节免疫细胞代谢的具体分子机制。例如：SCFAs通过HDAC抑制、GPCR激活和作为代谢底物调节T细胞和巨噬细胞的糖酵解、脂肪酸氧化（FAO）和线粒体功能；色氨酸代谢物通过AhR通路调节Treg分化和巨噬细胞极化；胆汁酸通过TGR5/FXR等受体影响CD8+ T细胞的Ca2+-NFAT信号和mTOR/OXPHOS通路。",
+                "facet_id": "F2",
+                "possible_uses": "用于解释微生物组调节ICI疗效的中介机制，特别是代谢重编程在其中的作用。可提供具体的信号通路和代谢酶作为机制层面的素材。"
+              }
+            ],
+            "planning_summary": "该综述为理解肠道微生物组如何通过代谢介导调节实体瘤中对免疫检查点抑制剂（ICIs）的反应提供了详细的机制背景。它特别适用于解释微生物代谢物（如SCFAs、胆汁酸、色氨酸代谢物）如何作为关键信使，通过重塑免疫细胞（特别是T细胞和巨噬细胞）的代谢状态来影响免疫治疗疗效。",
+            "scope_interpretation_cautions": [
+              "该综述涵盖多种微生物代谢物，但其对ICI疗效的影响因癌症类型、代谢物种类、浓度及宿主免疫状态而异，不可一概而论。",
+              "文中提到的机制多为相关性或基于模型的研究，因果关系的确认需谨慎，特别是在人体临床环境中。",
+              "不同代谢物之间可能存在协同或拮抗作用，单独看待某一代谢物的效果可能忽略整体微环境的复杂性。"
+            ],
+            "topic_handles": [
+              "short-chain fatty acids (SCFAs)",
+              "bile acids",
+              "tryptophan metabolites",
+              "lipopolysaccharides (LPS)",
+              "immune cell metabolic reprogramming",
+              "tumor microenvironment (TME)",
+              "immune checkpoint inhibitors (ICIs)",
+              "solid tumors",
+              "gut microbiome",
+              "aryl hydrocarbon receptor (AhR)",
+              "G protein-coupled receptors (GPCRs)"
+            ]
+          },
+          "card_material": {
+            "material_scope": "fulltext"
+          },
+          "material_read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\c59738fb3db453360d9f86e97ad338176abe8eb6\\42993142a6b2e557adda307d103ec858\\attempt-01\\PAPER_READING_CARD.json"
+        },
+        {
+          "source_handle": "P0297",
+          "title": "The gut microbiome in lung cancer: from pathogenesis to precision therapy",
+          "year": "2025",
+          "doi": "10.3389/fmicb.2025.1606684",
+          "paper_id": "8211fc48bb00f738157c8859ad0748cc7d220f09",
+          "material_depth": "",
+          "material_status": "resolved",
+          "aliases": [],
+          "locator": {
+            "writer_packet": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch6.json",
+            "source_handle": "P0297",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\8211fc48bb00f738157c8859ad0748cc7d220f09\\5faefb771e9af4b8f1b5bd10a8bf9492\\attempt-01\\PAPER_READING_CARD.json"
+          },
+          "study_summary_A": {
+            "approach": "The authors conducted a narrative synthesis of literature from microbiology, immunology, and oncology. They organized the content into thematic sections: introduction to the gut-lung axis, alterations in microbiota composition and metabolism in lung cancer patients, microbial biomarkers for early detection, prediction of immunotherapy response, modulation of drug efficacy, microbiota-targeted therapeutic interventions, and mechanistic insights. The review integrates findings from clinical studies, animal models, and multi-omics analyses to construct a cohesive understanding of the gut-lung axis in lung cancer.",
+            "contribution_and_limits": [
+              {
+                "contribution": "Provides a comprehensive overview of the gut-lung axis in lung cancer, linking specific microbial taxa and metabolites to clinical outcomes in diagnosis and immunotherapy.",
+                "limits": "As a narrative review, it does not present new primary data or perform a systematic meta-analysis. The causal relationships described are largely inferred from correlative clinical studies and preclinical models, which may vary across populations."
+              },
+              {
+                "contribution": "Identifies specific microbial signatures (e.g., A. muciniphila, SCFA producers) and metabolic profiles as potential biomarkers for predicting ICI response.",
+                "limits": "The generalizability of these biomarkers depends on the heterogeneity of patient cohorts and sequencing methodologies used in the cited studies, which are not standardized in this review."
+              },
+              {
+                "contribution": "Discusses therapeutic interventions like FMT and probiotics as adjuncts to cancer therapy, highlighting their potential to overcome resistance.",
+                "limits": "Clinical translation faces challenges including interindividual variability, lack of standardized protocols for FMT/probiotics, and long-term safety concerns, which are noted but not resolved."
+              }
+            ],
+            "key_findings": [
+              {
+                "conditions": "In lung cancer patients compared to healthy controls",
+                "finding": "Patients exhibit dysbiosis characterized by increased abundance of Ruminococcus, Enterobacteriaceae, Lachnospiraceae, and decreased levels of Faecalibacterium, Bifidobacterium, and Veillonella. Metabolic profiles show reduced SCFA production and increased lactate."
+              },
+              {
+                "conditions": "For early detection of lung cancer",
+                "finding": "A panel of 13 microbial biomarkers was identified with high diagnostic potential, achieving an AUC of 92.4% in discovery and 67.7% in validation cohorts using a Patient Discrimination Index (PDI)."
+              },
+              {
+                "conditions": "Predicting response to Immune Checkpoint Inhibitors (ICIs)",
+                "finding": "Baseline presence of Akkermansia muciniphila, Faecalibacterium spp., and Clostridiales correlates with improved ICI outcomes. Higher levels of acetate, propionate, and butyrate are associated with prolonged progression-free survival. A TOPOSCORE integrating species interaction groups and A. muciniphila abundance predicts individual responses."
+              },
+              {
+                "conditions": "Impact of antibiotics and probiotics on ICI efficacy",
+                "finding": "Antibiotic use prior to ICI therapy is associated with reduced overall survival and impaired efficacy. Probiotic supplementation (e.g., Bifidobacterium, Clostridium butyricum) may enhance ICI efficacy and improve survival outcomes in NSCLC patients."
+              },
+              {
+                "conditions": "Mechanisms of action",
+                "finding": "Gut microbes modulate lung immunity via metabolites (SCFAs), antigen presentation, and immune cell trafficking. Specific bacteria like A. muciniphila can translocate to tumor tissues, restructure the intratumoral ecosystem, and restore exhausted CD8+ T cells, enhancing anti-PD-1 therapy efficacy."
+              }
+            ],
+            "paper_kind": "review",
+            "problem_or_question": "To synthesize existing evidence regarding how the gut microbiome influences lung cancer pathogenesis and treatment efficacy, particularly in the context of immune checkpoint inhibitors (ICIs), and to identify potential therapeutic strategies and biomarkers derived from this interaction.",
+            "research_scope": "The review focuses on the gut-lung axis in the context of lung cancer, specifically examining non-small cell lung carcinoma (NSCLC) and small cell lung carcinoma. It covers pathogenesis, early detection biomarkers, mechanisms of immune modulation, and therapeutic interventions including immunotherapy response prediction and microbiota-targeted treatments.",
+            "work_summary": "This is a narrative review synthesizing current knowledge on the role of the gut microbiome in lung cancer development, diagnosis, and treatment. It outlines the bidirectional communication between intestinal microbiota and pulmonary health via immune, neural, and metabolic pathways. The paper highlights microbial signatures predictive of disease and therapy response, discusses microbiota-targeted interventions such as probiotics and fecal microbiota transplantation (FMT), and elucidates mechanistic insights into microbial-immune crosstalk. It aims to provide a comprehensive framework for leveraging the gut microbiome in personalized lung cancer management."
+          },
+          "review_planning_B": {
+            "broader_review_uses": [
+              {
+                "connection_to_review": "Establishes the theoretical framework for why gut microbiome matters in lung cancer, relevant to any discussion of extraintestinal effects of gut microbes.",
+                "material": "Description of the bidirectional network connecting intestinal microbiota with pulmonary health via immune, neural, and metabolic pathways.",
+                "purpose": "Background context on the gut-lung axis concept"
+              },
+              {
+                "connection_to_review": "Provides practical examples of how microbiome modulation is being explored clinically, useful for discussing future directions or intervention strategies.",
+                "material": "Discussion of probiotics, prebiotics, FMT, and dietary interventions as adjuncts to immunotherapy.",
+                "purpose": "Examples of therapeutic interventions"
+              },
+              {
+                "connection_to_review": "Allows for comparison of microbiome-Ici interactions across different solid tumors, though the primary focus remains lung cancer.",
+                "material": "Brief mentions of melanoma, renal, and bladder carcinomas regarding antibiotic impact on ICIs.",
+                "purpose": "Contrast with other cancer types"
+              }
+            ],
+            "facet_contributions": [
+              {
+                "boundaries": "Focuses primarily on lung cancer; while it mentions other cancers briefly, the detailed evidence is lung-specific. Causal inference is limited to observational associations and preclinical models.",
+                "contribution": "Details the correlation between specific gut microbiota compositions (e.g., A. muciniphila, SCFA-producing bacteria) and improved clinical outcomes in solid tumors treated with ICIs. It also notes that antibiotic use negatively impacts ICI efficacy.",
+                "facet_id": "F1",
+                "possible_uses": "Can be used to support arguments about the positive or negative influence of specific microbial taxa on ICI efficacy in solid tumors. Provides examples of predictive biomarkers."
+              },
+              {
+                "boundaries": "Mechanisms are often derived from mouse models or inferred from human correlative data. The review acknowledges complexity and multiple interacting pathways rather than a single linear mechanism.",
+                "contribution": "Elaborates on mechanisms including: 1) Metabolite-mediated regulation (SCFAs, acetate, butyrate influencing immune cell function); 2) Immune cell priming and trafficking (dendritic cells, T-cell activation, CD8+ T cell infiltration); 3) Direct translocation of bacteria to tumor sites; 4) Modulation of bile acid metabolism affecting Treg migration.",
+                "facet_id": "F2",
+                "possible_uses": "Provides specific mechanistic pathways to explain how gut microbes affect tumor immunity and drug response. Useful for detailing the biological basis of microbiome-immunotherapy interactions."
+              }
+            ],
+            "planning_summary": "This review serves as a foundational resource for understanding the gut-lung axis in lung cancer, particularly its impact on immunotherapy efficacy. It provides detailed descriptions of microbial signatures associated with ICI response, mechanistic pathways involving metabolites and immune cells, and emerging therapeutic strategies. It is highly relevant for facets concerning how the microbiome modulates ICI efficacy and the underlying mechanisms.",
+            "scope_interpretation_cautions": [
+              "The review is a narrative synthesis, not a systematic review or meta-analysis; therefore, it does not provide pooled effect sizes or rigorous statistical aggregation of all available evidence.",
+              "Many mechanistic claims are based on preclinical (mouse) models or correlative clinical studies; causal relationships in humans are not definitively proven within this text.",
+              "The term 'solid tumours' in the user's plan is broader than the paper's primary focus on lung cancer; users must extrapolate carefully when applying lung-specific findings to other solid tumors."
+            ],
+            "topic_handles": [
+              "gut-lung axis",
+              "immune checkpoint inhibitors (ICIs)",
+              "non-small cell lung carcinoma (NSCLC)",
+              "microbial biomarkers (Akkermansia muciniphila, Faecalibacterium)",
+              "short-chain fatty acids (SCFAs)",
+              "fecal microbiota transplantation (FMT)",
+              "probiotics",
+              "antibiotic-induced dysbiosis",
+              "tumor microenvironment modulation"
+            ]
+          },
+          "card_material": {
+            "material_scope": "fulltext"
+          },
+          "material_read_from_disk": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\8211fc48bb00f738157c8859ad0748cc7d220f09\\5faefb771e9af4b8f1b5bd10a8bf9492\\attempt-01\\PAPER_READING_CARD.json"
+        },
+        {
+          "source_handle": "P0146",
+          "title": "Gut microbiota shapes cancer immunotherapy responses",
+          "year": "2025",
+          "doi": "10.1038/s41522-025-00786-8",
+          "paper_id": "4171288ecca93c6bca3eee61295418d704bb00fd",
+          "material_depth": "",
+          "material_status": "resolved",
+          "aliases": [],
+          "locator": {
+            "writer_packet": "F:\\OptoMind-Review-2\\outputs\\body_full_staged_acceptance_20261004_40cny\\planning\\writer_packets\\Ch6.json",
+            "source_handle": "P0146",
+            "card_path": "F:\\OptoMind-Review-2\\outputs\\paper_cards\\20260922_microbiome_batch\\reading\\cards\\4171288ecca93c6bca3eee61295418d704bb00fd\\92125422c10f28cdb7938d2658870c58\\attempt-01\\PAPER_READING_CARD.json"
+          },
+          "study_summary_A": {
+            "approach": "As a narrative review, this paper does not employ a systematic search protocol described in the text. Instead, it synthesizes findings from a broad range of sources including: 1) Historical timeline analysis of key advancements; 2) Summary of clinical trial data (Tables 1-5) linking specific microbial taxa to ICI/ACT outcomes; 3) Mechanistic discussion based on preclinical models (mouse studies) and human cohort analyses regarding immune cell activation, metabolite pathways (SCFAs, bile acids, etc.), and intratumoral interactions; 4) Evaluation of intervention strategies (antibiotics, FMT, probiotics, diet, engineered microbes) by summarizing results from ongoing and completed clinical trials.",
+            "contribution_and_limits": [
+              {
+                "contribution": "Provides a structured synthesis of clinical and preclinical evidence linking specific gut microbial taxa to ICI and ACT outcomes across multiple cancer types. It categorizes mechanisms into innate/adaptive immunity modulation, metabolite effects, and intratumoral interactions. It also catalogs numerous ongoing clinical trials for FMT, probiotics, and dietary interventions.",
+                "limits": "As a narrative review, it lacks a systematic methodology for study selection, potentially introducing selection bias. Many findings are derived from small-scale clinical studies or animal models, limiting generalizability. The field faces significant heterogeneity in sequencing methods, sample handling, and lack of standardized protocols, making cross-study comparisons difficult. Causal relationships between specific microbes and clinical outcomes are often correlational rather than proven causal."
+              }
+            ],
+            "key_findings": [
+              {
+                "conditions": "ICI therapy (anti-PD-1/PD-L1/CTLA-4)",
+                "finding": "Specific gut microbial compositions correlate with ICI response. Beneficial taxa include Bifidobacterium, Akkermansia muciniphila, Ruminococcaceae, and Faecalibacterium prausnitzii, which are associated with improved survival and tumor regression in melanoma, NSCLC, and RCC. Conversely, antibiotic use generally reduces ICI efficacy."
+              },
+              {
+     

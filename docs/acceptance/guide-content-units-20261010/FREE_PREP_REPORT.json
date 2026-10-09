@@ -1,0 +1,90 @@
+{
+  "schema_version": "optomind.guide_content_units_free_prep.v1",
+  "status": "free_prepared",
+  "worktree": {
+    "path": "F:/OptoMind-Review-2/outputs/guide_content_units_acceptance_20261010/worktree",
+    "commit": "742bef4a9134da9cbccc4e407ee7a2e36d5eab5f",
+    "git_status_clean": true,
+    "production_source_edited": false
+  },
+  "tests": {
+    "command": "C:/Anaconda/python.exe -X utf8 -m pytest -q tests/upgrade3/test_guide_maker.py tests/upgrade3/test_guide_maker_contracts.py tests/upgrade3/test_guided_content_units.py tests/upgrade3/test_guided_continuous_units.py tests/upgrade3/test_guided_metadata_recovery.py",
+    "result": "100 passed in 17.32s",
+    "exit_code": 0,
+    "receipt": "F:/OptoMind-Review-2/outputs/guide_content_units_acceptance_20261010/free_tests/FOCUSED_PYTEST.txt"
+  },
+  "preview": {
+    "output": "F:/OptoMind-Review-2/outputs/guide_content_units_acceptance_20261010/message_preview",
+    "command": "C:/Anaconda/python.exe -X utf8 scripts/upgrade3/guide_maker.py --manifest F:/OptoMind-Review-2/outputs/evidence_body_round2_20261008_60cny/PREPARED_MANIFEST.json --feedback F:/OptoMind-Review-2/outputs/guide_content_units_acceptance_20261010/message_preview/USER_FEEDBACK.txt --config config/guide_maker/explicit_max.json --allow-max --tokenizer F:/OptoMind-Review-2/data/tokenizers/qwen3_5_9b/tokenizer.json --output F:/OptoMind-Review-2/outputs/guide_content_units_acceptance_20261010/message_preview",
+    "run_flag_present": false,
+    "execution_mode": "preview",
+    "model_calls": 0,
+    "paid_dispatch_count": 0,
+    "known_cost_cny": 0.0,
+    "generation_complete": false,
+    "cli_run": "F:/OptoMind-Review-2/outputs/guide_content_units_acceptance_20261010/message_preview/CLI_RUN.json",
+    "messages": "F:/OptoMind-Review-2/outputs/guide_content_units_acceptance_20261010/message_preview/runs/20261009T165524Z-f7e0db7803/plans/maker_001/MESSAGES.json",
+    "request_preview": "F:/OptoMind-Review-2/outputs/guide_content_units_acceptance_20261010/message_preview/runs/20261009T165524Z-f7e0db7803/plans/maker_001/REQUEST_PREVIEW.json"
+  },
+  "initial_request_checks": {
+    "complete_frozen_outline": true,
+    "expected_chapters": ["Ch1", "Ch2", "Ch3", "Ch4", "Ch5", "Ch6", "Ch7"],
+    "actual_chapters": ["Ch1", "Ch2", "Ch3", "Ch4", "Ch5", "Ch6", "Ch7"],
+    "content_task_catalog_count": 95,
+    "content_task_ids_unique": true,
+    "content_task_id_examples": ["C0001", "C0002", "C0003"],
+    "content_task_id_max_length": 5,
+    "content_task_chapter_counts": {"Ch1": 13, "Ch2": 12, "Ch3": 17, "Ch4": 9, "Ch5": 15, "Ch6": 13, "Ch7": 16},
+    "light_source_catalog_count": 221,
+    "tool_catalog_count": 15,
+    "prior_guide": null,
+    "materials_count": 0,
+    "read_history_count": 0,
+    "feedback_file": "F:/OptoMind-Review-2/outputs/guide_content_units_acceptance_20261010/message_preview/USER_FEEDBACK.txt",
+    "feedback_sha256": "c4401b7d83f416244ad6fec7b66b703f691fad87e743cfea7e09a54822f658fd",
+    "forbidden_prior_guide_value_absent": true
+  },
+  "manifest_and_dependencies": {
+    "prepared_manifest": "F:/OptoMind-Review-2/outputs/evidence_body_round2_20261008_60cny/PREPARED_MANIFEST.json",
+    "source_manifest_sha256": "37242cc51bc9b6b96a7e92543a6092c17bfdbd0d8f8ab068a2e3d9c1e3db58e7",
+    "source_files_declared": 241,
+    "source_file_hash_mismatches": 0,
+    "missing_declared_source_files": ["F:/OptoMind-Review-2/outputs/on_demand_promotion_local_20261007_10cny/formal_complete_plan/revisions/03912c907286ec6fbd55/chapter_arrangement/ID_MAP.json"],
+    "stage_dependencies": [],
+    "implementation_hash_count": 17,
+    "tokenizer": {
+      "path": "F:/OptoMind-Review-2/data/tokenizers/qwen3_5_9b/tokenizer.json",
+      "sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+      "implementation_version": "0.23.2"
+    }
+  },
+  "capacity_and_actual_parameters": {
+    "prompt_tokens_measured": 223906,
+    "reserved_input_tokens": 258967,
+    "input_limit_tokens": 934464,
+    "completion_allowance_tokens": 65536,
+    "context_window": 1000000,
+    "fits": true,
+    "estimated_max_cost_cny": 5.4669,
+    "model": "qwen3.8-max",
+    "thinking": true,
+    "thinking_budget": 32768,
+    "max_output_tokens": 32768,
+    "json_mode": true,
+    "temperature": 0.1,
+    "stream": true,
+    "response_format": {"type": "json_object"},
+    "wire_request_sha256": "fa6eec4c9e1a9b6afa8e33bfa1a1f8257dc63f380d42f992d2d504f77344ca96"
+  },
+  "blockers_and_limits": [
+    "The requested verification/CONTENT_UNITS_VALIDATION_20261009.md shorthand path is absent; the authoritative document is docs/guide_maker/verification/CONTENT_UNITS_VALIDATION_20261009.md.",
+    "The prepared manifest declares one missing ID_MAP.json dependency; all 240 existing declared source files matched their hashes.",
+    "No GUIDE.json exists in this free preview because no --run was supplied; this report therefore does not claim guide quality or writing continuity."
+  ],
+  "evidence": {
+    "full_input": "F:/OptoMind-Review-2/outputs/guide_content_units_acceptance_20261010/message_preview/inputs/98ca59ba83d5c83781b15c05b7cdc83e243d7c30a7382abcdfa293919544a52c/FULL_BODY_INPUT.json",
+    "source_manifest_snapshot": "F:/OptoMind-Review-2/outputs/guide_content_units_acceptance_20261010/message_preview/SOURCE_MANIFEST.json",
+    "effective_config": "F:/OptoMind-Review-2/outputs/guide_content_units_acceptance_20261010/message_preview/EFFECTIVE_CONFIG.json",
+    "implementation_report": "F:/OptoMind-Review-2/outputs/guide_content_units_acceptance_20261010/message_preview/IMPLEMENTATION_REPORT.json"
+  }
+}
