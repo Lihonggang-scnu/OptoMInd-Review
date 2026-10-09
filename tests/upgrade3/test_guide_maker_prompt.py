@@ -87,13 +87,22 @@ def test_prompt_json_example_keeps_existing_wire_shape():
     assert example['guide']['schema_version'] == 'optomind.guided_body_guide.v1'
     assert len(example['guide']['chapters']) == 1
     assert set(example['guide']['chapters'][0]) == {
-        'chapter_id', 'title', 'writing_arrangement', 'required_content'}
+        'chapter_id', 'title', 'writing_arrangement', 'required_content', 'source_handles'}
     assert isinstance(example['guide']['chapters'][0]['required_content'], list)
+    assert isinstance(example['guide']['chapters'][0]['source_handles'], list)
     assert len(example['reading_needs']) == 1
     assert set(example['reading_needs'][0]) == {'need_id', 'question', 'source_handles'}
     assert isinstance(example['reading_needs'][0]['source_handles'], list)
     assert example['complete'] is False
     assert isinstance(example['changes'], list)
+
+
+def test_local_source_declaration_and_deferred_roles_are_explicit():
+    # Instruction presence is not evidence of model compliance or role coverage.
+    text = PROMPT.read_text(encoding='utf-8')
+    assert '在该章 source_handles 中声明精确句柄' in text
+    assert '须在接收章的 writing_arrangement 或 required_content 中实际安排' in text
+    assert '某来源不足以支持某主张，不等于主张已被证伪' in text
 
 
 def test_offline_maker_stage_loads_current_prompt_content(tmp_path, book, config):

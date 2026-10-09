@@ -119,6 +119,22 @@ def _science_ids(pack: Mapping[str, Any], handles: Sequence[str]) -> list[str]:
     return [aid for h in chosen for aid in pack["source_atom_ids"][h] if _is_scientific_atom(pack["atoms"][aid])]
 
 
+def _chapter_mentioned_sources(pack: Mapping[str, Any], assignment: Mapping[str, Any]) -> list[str]:
+    """Supply known material, not citation validity or proof of a source's role.
+
+    Scan only this chapter's content instructions. Even negative mentions may
+    warrant material; global arrangements must not load every chapter's pool.
+    """
+    texts = [assignment["writing_arrangement"], *assignment.get("required_content", [])]
+    known = dict.fromkeys([*pack["source_identities"], *pack["source_aliases"]])
+    # Literal, case-sensitive addresses, never substrings of longer identifiers.
+    # Chinese prose and punctuation may directly adjoin an address; an internal
+    # dot remains part of an identifier, unlike sentence-final punctuation.
+    return [handle for handle in known if any(re.search(
+        r"(?<![A-Za-z0-9_:/-])(?<![A-Za-z0-9_]\.)" + re.escape(handle)
+        + r"(?![A-Za-z0-9_:/-]|\.[A-Za-z0-9_])", text) for text in texts)]
+
+
 def resolve_read_request(pack: Mapping[str, Any], request: Mapping[str, Any]) -> list[str]:
     atoms = _strings(request.get("read_atom_ids", []), "guided_read_atom_ids")
     handles = _strings(request.get("read_source_handles", []), "guided_read_source_handles")
@@ -173,7 +189,8 @@ def build_author_payload(pack: Mapping[str, Any], guide: Mapping[str, Any],
         raise CandidateError("guided_chapter_unknown:" + str(cid))
     if not isinstance(accepted_body_markdown, str):
         raise CandidateError("guided_prefix_not_string")
-    chosen = _science_ids(pack, [*pack["chapter_source_handles"][cid], *assignment.get("source_handles", [])])
+    chosen = _science_ids(pack, [*pack["chapter_source_handles"][cid], *assignment.get("source_handles", []),
+        *_chapter_mentioned_sources(pack, assignment)])
     if reread_atoms:
         chosen += resolve_read_request(pack, {"read_atom_ids": list(reread_atoms)})
     chosen = list(dict.fromkeys(chosen))
