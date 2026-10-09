@@ -1,0 +1,900 @@
+{
+  "scope": "post-run root evaluation only; never sent to models",
+  "checks": [
+    {
+      "chapter": "Ch2",
+      "handle": "P0270",
+      "observation": "mCRPC 材料在 NSCLC 表格行使用",
+      "message_path": "LIVE/stages/author_002/8cdca166b687216b85522104a991969adc505b0e4a71ebee77e7b34bbe3c0c51/attempt_001/MESSAGES.json",
+      "message_byte_sha256": "4eea4932b6518125bb3bfecf606eb5c90ee3a80010a56179a5d761e20b22b54d",
+      "body_path": "LIVE/stages/author_002/8cdca166b687216b85522104a991969adc505b0e4a71ebee77e7b34bbe3c0c51/attempt_001/BODY.md",
+      "body_byte_sha256": "41465887684dbf94a5c9d547f551ca0573c57e56fd71d7333a99bebf25a54bb8",
+      "actual_input_atom_count": 25,
+      "actual_input_semantic_atoms": [
+        {
+          "atom_id": "atom::6ec3f9ffb629d6a51133142e",
+          "source_handle": "P0270",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "First Timepoint cohort (n=23), 16S sequencing & qPCR",
+            "finding": "整体α和β多样性在反应者与非反应者间无显著差异；个体间变异占主导（~50%）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::936d6b010edab5e9feddf7a0",
+            "snapshot::153a59be1d09157a4ef3f708"
+          ]
+        },
+        {
+          "atom_id": "atom::9d2025bfc4afb44a959e7a39",
+          "source_handle": "P0270",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "First Timepoint cohort, GLM analysis of multiple hypervariable regions",
+            "finding": "Streptococcus salivarius在反应者粪便中显著富集（p=0.004），且qPCR证实该趋势；但该菌在口腔漱口水中的水平与反应无关，且口腔与粪便水平不相关。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::936d6b010edab5e9feddf7a0",
+            "snapshot::153a59be1d09157a4ef3f708"
+          ]
+        },
+        {
+          "atom_id": "atom::fc83d59bc85334f3faa9c2cb",
+          "source_handle": "P0270",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "First Timepoint cohort, 16S sequencing (V6-7 region) & qPCR",
+            "finding": "Akkermansia muciniphila在反应者中显著降低（与黑色素瘤等其他癌症报道相反），qPCR确认了这一减少趋势。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::936d6b010edab5e9feddf7a0",
+            "snapshot::153a59be1d09157a4ef3f708"
+          ]
+        },
+        {
+          "atom_id": "atom::bda9398beeaca0e40b1be14c",
+          "source_handle": "P0270",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "Longitudinal analysis (n=9 patients across treatment cycles)",
+            "finding": "帕博利珠单抗治疗未引起全局微生物组成的显著变化；个体内样本聚类紧密，时间点对变异贡献极小（<3%）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::936d6b010edab5e9feddf7a0",
+            "snapshot::153a59be1d09157a4ef3f708"
+          ]
+        },
+        {
+          "atom_id": "atom::e4f1b0368c2482cbe4cd9f10",
+          "source_handle": "P0270",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "Application of Shaikh et al. integrated index",
+            "finding": "该综合指数未能区分本队列中的反应者与非反应者，表明不同癌症类型或治疗史可能导致微生物信号的特异性。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::936d6b010edab5e9feddf7a0",
+            "snapshot::153a59be1d09157a4ef3f708"
+          ]
+        }
+      ],
+      "actual_output_paragraphs": [
+        "| 肿瘤类型 | 关键微生物特征 | 主要机制或通路 | 证据类型 | 来源 |\n| :--- | :--- | :--- | :--- | :--- |\n| 黑色素瘤 | 六酰化 LPS 基因 (*lpxM*) 富集 | TLR4/NF-κB 激活，CD8+ T 细胞浸润增强 | 人类宏基因组关联 + 小鼠因果验证 | [P0080] |\n| 黑色素瘤 | *Ruminococcaceae* 菌株 | IRF8 驱动 CD103+ DC 分化，T 细胞启动 | 小鼠模型（源自人类粪便菌株） | [P0114] |\n| 黑色素瘤 | SFB 特异性 T 细胞 | 分子模拟，肠道 T_H17 迁移至肿瘤转化为 ex-T_H17 | 小鼠合成抗原模型 | [P0388] |\n| 非小细胞肺癌 | *Akkermansia muciniphila* (低丰度获益) | 情境依赖性，可能与既往内分泌治疗背景有关 | 人类观察性队列 (mCRPC 背景) | [P0270] |\n| 非小细胞肺癌 | 下呼吸道 *Bacillus* 富集 | 局部代谢物重塑免疫微环境，招募 CD8+ T 细胞 | 人类 BALF 多组学关联 | [P0352] |\n| 肾细胞癌 | 响应者供体 FMT | 基线有害菌丢失，色氨酸代谢抑制 | 人类 Phase 2 试验 + 小鼠验证 | [P0583] |\n| 胰腺癌 | 肠道菌群清除 | 减少 Th17/IL-17 轴，增加 CD8+ T 细胞浸润 | 小鼠模型 + 人类回顾性关联 | [P0084] |\n| 结直肠癌 | *Fusobacterium nucleatum* | 抑制 cGAS-IFN-β通路，M2 型 TAM 极化 | 人类组织测序 + 小鼠模型 | [P0028][P0560] |\n| 泛癌种 | 肿瘤内微生物 | 抗原呈递激活 vs Treg 募集抑制 (空间结构依赖) | 系统综述 (17 项研究定性综合) | [P0457] |",
+        "在黑色素瘤中，机制研究最为深入，涵盖了从 LPS 结构到 T 细胞克隆迁移的多层级证据，且多有小鼠模型因果验证支持 [P0080][P0114][P0388]。相比之下，肺癌和肾细胞癌的证据更多来自人类队列的观察性关联或早期干预试验，机制细节常借用黑色素瘤或小鼠模型推导 [P0270][P0352][P0583]。胰腺癌和结直肠癌则显示出独特的免疫抑制机制，如 PDAC 中 Th17 轴的促癌作用和 CRC 中*Fn*的免疫逃逸作用，提示在“冷肿瘤”或免疫抑制性微环境中，微生物干预的策略可能不同于黑色素瘤等“热肿瘤”[P0084][P0560]。此外，肿瘤内微生物群（intratumoral microbiota）作为独立于肠道微生物的生态位，其免疫调节效应具有空间结构特征且高度依赖于具体的肿瘤背景，不能简单等同于肠道菌群的外周效应 [P0457][P0535]。"
+      ],
+      "source_identity": {
+        "source_handle": "P0270",
+        "source_id": "source::P0270",
+        "aliases": [],
+        "title": "Composition of gastrointestinal microbiota in association with treatment response in individuals with metastatic castrate resistant prostate cancer progressing on enzalutamide and initiating treatment with anti-PD-1 (pembrolizumab)",
+        "doi": "10.1016/j.neo.2022.100822",
+        "paper_id": "74786f8df0c7648840756833a4b4bc49ace34be6"
+      }
+    },
+    {
+      "chapter": "Ch2",
+      "handle": "P0583",
+      "observation": "FMT-LUMINate 人群在 RCC 表格行使用",
+      "message_path": "LIVE/stages/author_002/8cdca166b687216b85522104a991969adc505b0e4a71ebee77e7b34bbe3c0c51/attempt_001/MESSAGES.json",
+      "message_byte_sha256": "4eea4932b6518125bb3bfecf606eb5c90ee3a80010a56179a5d761e20b22b54d",
+      "body_path": "LIVE/stages/author_002/8cdca166b687216b85522104a991969adc505b0e4a71ebee77e7b34bbe3c0c51/attempt_001/BODY.md",
+      "body_byte_sha256": "41465887684dbf94a5c9d547f551ca0573c57e56fd71d7333a99bebf25a54bb8",
+      "actual_input_atom_count": 35,
+      "actual_input_semantic_atoms": [
+        {
+          "atom_id": "atom::999c7dbb4eb04f853f51ce68",
+          "source_handle": "P0583",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "NSCLC患者接受FMT+抗PD-1",
+            "finding": "ORR达到80%（16/20），满足主要终点；1年OS为100%；未观察到3级及以上与治疗相关的不良事件。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::3f08daede868f51719f44f75",
+            "snapshot::cc9c61313270bf8ed21449cd",
+            "snapshot::858e2e285637cdae2d18e8b5",
+            "snapshot::e0ab03ae8f4e8669b7c7052e",
+            "snapshot::ceff59cf10840ae2fa4f87a4"
+          ]
+        },
+        {
+          "atom_id": "atom::ef45091c05d3c80087467567",
+          "source_handle": "P0583",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "黑色素瘤患者接受FMT+抗PD-1+抗CTLA-4",
+            "finding": "ORR为75%（15/20）；观察到较文献报道更早发生的严重免疫相关不良反应（irAEs），包括心肌炎；部分严重AEs与富含Prevotella的供体有关。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::3f08daede868f51719f44f75",
+            "snapshot::cc9c61313270bf8ed21449cd",
+            "snapshot::858e2e285637cdae2d18e8b5",
+            "snapshot::e0ab03ae8f4e8669b7c7052e",
+            "snapshot::ceff59cf10840ae2fa4f87a4"
+          ]
+        },
+        {
+          "atom_id": "atom::0c4539dfe7511b5ee26afddc",
+          "source_handle": "P0583",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "微生物组分析与临床响应关联",
+            "finding": "响应者（R）与非响应者（NR）相比，在FMT后表现出显著更高的基线细菌物种丢失幅度。这种丢失主要由有害菌（如Enterocloster, Clostridium, Streptococcus）构成，而非供体菌株的定植。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::3f08daede868f51719f44f75",
+            "snapshot::cc9c61313270bf8ed21449cd",
+            "snapshot::858e2e285637cdae2d18e8b5",
+            "snapshot::e0ab03ae8f4e8669b7c7052e",
+            "snapshot::ceff59cf10840ae2fa4f87a4"
+          ]
+        },
+        {
+          "atom_id": "atom::f77d7a57b1c5af196e7ec273",
+          "source_handle": "P0583",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "机制验证（动物实验）",
+            "finding": "在抗生素处理的小鼠中，将FMT响应者基线样本中丢失的有害细菌混合物重新引入，抵消了FMT联合ICI的抗肿瘤效应，证实消除有害菌是治疗获益的必要条件。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::3f08daede868f51719f44f75",
+            "snapshot::cc9c61313270bf8ed21449cd",
+            "snapshot::858e2e285637cdae2d18e8b5",
+            "snapshot::e0ab03ae8f4e8669b7c7052e",
+            "snapshot::ceff59cf10840ae2fa4f87a4"
+          ]
+        }
+      ],
+      "actual_output_paragraphs": [
+        "| 肿瘤类型 | 关键微生物特征 | 主要机制或通路 | 证据类型 | 来源 |\n| :--- | :--- | :--- | :--- | :--- |\n| 黑色素瘤 | 六酰化 LPS 基因 (*lpxM*) 富集 | TLR4/NF-κB 激活，CD8+ T 细胞浸润增强 | 人类宏基因组关联 + 小鼠因果验证 | [P0080] |\n| 黑色素瘤 | *Ruminococcaceae* 菌株 | IRF8 驱动 CD103+ DC 分化，T 细胞启动 | 小鼠模型（源自人类粪便菌株） | [P0114] |\n| 黑色素瘤 | SFB 特异性 T 细胞 | 分子模拟，肠道 T_H17 迁移至肿瘤转化为 ex-T_H17 | 小鼠合成抗原模型 | [P0388] |\n| 非小细胞肺癌 | *Akkermansia muciniphila* (低丰度获益) | 情境依赖性，可能与既往内分泌治疗背景有关 | 人类观察性队列 (mCRPC 背景) | [P0270] |\n| 非小细胞肺癌 | 下呼吸道 *Bacillus* 富集 | 局部代谢物重塑免疫微环境，招募 CD8+ T 细胞 | 人类 BALF 多组学关联 | [P0352] |\n| 肾细胞癌 | 响应者供体 FMT | 基线有害菌丢失，色氨酸代谢抑制 | 人类 Phase 2 试验 + 小鼠验证 | [P0583] |\n| 胰腺癌 | 肠道菌群清除 | 减少 Th17/IL-17 轴，增加 CD8+ T 细胞浸润 | 小鼠模型 + 人类回顾性关联 | [P0084] |\n| 结直肠癌 | *Fusobacterium nucleatum* | 抑制 cGAS-IFN-β通路，M2 型 TAM 极化 | 人类组织测序 + 小鼠模型 | [P0028][P0560] |\n| 泛癌种 | 肿瘤内微生物 | 抗原呈递激活 vs Treg 募集抑制 (空间结构依赖) | 系统综述 (17 项研究定性综合) | [P0457] |",
+        "在黑色素瘤中，机制研究最为深入，涵盖了从 LPS 结构到 T 细胞克隆迁移的多层级证据，且多有小鼠模型因果验证支持 [P0080][P0114][P0388]。相比之下，肺癌和肾细胞癌的证据更多来自人类队列的观察性关联或早期干预试验，机制细节常借用黑色素瘤或小鼠模型推导 [P0270][P0352][P0583]。胰腺癌和结直肠癌则显示出独特的免疫抑制机制，如 PDAC 中 Th17 轴的促癌作用和 CRC 中*Fn*的免疫逃逸作用，提示在“冷肿瘤”或免疫抑制性微环境中，微生物干预的策略可能不同于黑色素瘤等“热肿瘤”[P0084][P0560]。此外，肿瘤内微生物群（intratumoral microbiota）作为独立于肠道微生物的生态位，其免疫调节效应具有空间结构特征且高度依赖于具体的肿瘤背景，不能简单等同于肠道菌群的外周效应 [P0457][P0535]。"
+      ],
+      "source_identity": {
+        "source_handle": "P0583",
+        "source_id": "source::P0583",
+        "aliases": [],
+        "title": "Fecal microbiota transplantation plus immunotherapy in non-small cell lung cancer and melanoma: the phase 2 FMT-LUMINate trial",
+        "doi": "10.1038/s41591-025-04186-5",
+        "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a"
+      }
+    },
+    {
+      "chapter": "Ch3",
+      "handle": "P0588",
+      "observation": "PFS 阳性与 ORR/OS 阴性同时保留",
+      "message_path": "LIVE/stages/author_003/84db2babd8fd4026cfc1a6d1e82a80a7e8d664018288d0b7428832204ad255e3/attempt_001/MESSAGES.json",
+      "message_byte_sha256": "1b10b600781720ceacdb7848d12759cd229d10f51f92c28a690a4e6b2486ce0e",
+      "body_path": "LIVE/stages/author_003/84db2babd8fd4026cfc1a6d1e82a80a7e8d664018288d0b7428832204ad255e3/attempt_001/BODY.md",
+      "body_byte_sha256": "40c450c924473c3c1d5edfd8d7a53a96ebf709e246fdb59a92f562b2239d9715",
+      "actual_input_atom_count": 24,
+      "actual_input_semantic_atoms": [
+        {
+          "atom_id": "atom::44fd7d0fece39e6e515ee6c0",
+          "source_handle": "P0588",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "全队列（N=172）",
+            "finding": "肌苷组中位PFS显著长于对照组（7.00 vs 4.40个月，HR=0.63, p=0.011）；ORR为26.7% vs 15.1%（p=0.061，未显著）；中位OS两组无显著差异（HR=1.05, p=0.874）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::93c6a2bc5ca1c43be2fd189f"
+          ]
+        },
+        {
+          "atom_id": "atom::d691120d6413e21d59a3ebbf",
+          "source_handle": "P0588",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "肺癌亚组（N=57）",
+            "finding": "肌苷组mPFS显著延长（13.80 vs 4.10个月，HR=0.45, p=0.018）；mOS趋势向好但未达显著（HR=0.46, p=0.100）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::93c6a2bc5ca1c43be2fd189f"
+          ]
+        },
+        {
+          "atom_id": "atom::7efc4f3f1c27bfe2d678132b",
+          "source_handle": "P0588",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "消化道恶性肿瘤亚组（N=55）",
+            "finding": "肌苷组mPFS有延长趋势但未达显著（5.77 vs 3.50个月，HR=0.63, p=0.121）；mOS无显著差异。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::93c6a2bc5ca1c43be2fd189f"
+          ]
+        },
+        {
+          "atom_id": "atom::2dffc3c3672a37974c931734",
+          "source_handle": "P0588",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "实验室指标亚组（PLR<229, NLR<4, LDH≥216, ENR≤0.012）",
+            "finding": "在这些特定炎症/代谢标志物背景下，肌苷组PFS均显著优于对照组。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::93c6a2bc5ca1c43be2fd189f"
+          ]
+        },
+        {
+          "atom_id": "atom::e163eddf36fc1e7cc27c2513",
+          "source_handle": "P0588",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "安全性评估",
+            "finding": "肌苷组3-4级不良事件发生率为29%，对照组为36%（p=0.329），提示肌苷可能不增加且略有降低严重不良反应的风险。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::93c6a2bc5ca1c43be2fd189f"
+          ]
+        }
+      ],
+      "actual_output_paragraphs": [
+        "**T 细胞外在通路：A2AR 信号与代谢支持。** 肌苷还可结合 T 细胞表面的腺苷 A2A 受体（A2AR），在存在外源性 IFN-γ时促进 Th1 分化，增强抗肿瘤免疫 [P0220][P0503]。在葡萄糖受限的 TME 中，肌苷可作为替代碳源支持效应 T 细胞的生存和细胞毒性功能 [P0587][P0588]。一项随机、对照、II 期临床试验显示，在晚期实体瘤患者中，口服肌苷（0.2g tid）联合 PD-1/PD-L1 抑制剂显著延长了中位 PFS（7.00 vs 4.40 个月，HR=0.63, p=0.011），且在肺癌亚组中获益更显著（HR=0.45）[P0588]。该试验证实了外源性肌苷补充在人体中的安全性及增效潜力，但客观缓解率（ORR）未达到统计学显著性（26.7% vs 15.1%, p=0.061），且总生存期（OS）无显著差异，提示单药代谢干预的局限性 [P0588]。",
+        "**TME 浓度缺口。** 尽管血浆肌苷水平与生存期存在统计关联，且小鼠模型中外源性补充有效，但人体 TME 内肌苷的具体局部浓度及其动态变化尚未量化 [P0582]。由于腺苷在体内可迅速降解为肌苷（约 10 秒）并在血浆中快速清除，而肌苷生物半衰期较长（约 15 小时），目前缺乏直接在人类肿瘤组织或间质液中测量肌苷绝对浓度（如μM 或 ng/mL）并与 ICI 疗效（ORR/PFS/OS）直接挂钩的实证数据 [P0582][P0588]。现有证据多依赖血浆水平或下游靶点（如 UBA6 表达）作为代理指标，这阻碍了基于 TME 实际暴露量的剂量优化与因果推断 [P0582]。",
+        "现有研究多依赖粪便、血浆或血清样本间接推断 TME 暴露水平，但循环浓度不等同于组织浓度。例如，肌苷在血浆中为低微摩尔范围，而在坏死/缺氧微环境中理论推测可积累至数百微摩尔，但这并非针对接受 ICI 治疗的人类患者的实测数据 [P0582][P0588]。SCFAs 在粪便中的浓度与 TME 内的实际暴露量之间缺乏定量关联，且受饮食、宿主代谢等多重混杂因素影响 [P0363][P0587]。胆汁酸与色氨酸代谢物同样面临组织特异性分布与局部代谢动力学不明的问题 [P0424][P0209]。",
+        "这一浓度缺口导致三大转化障碍：第一，无法确定达到免疫调节效应所需的 TME 阈值浓度，使得外源性补充（如口服肌苷、SCFAs）的剂量设计缺乏依据；第二，难以区分代谢物是因果驱动因子还是疾病状态的反应性标志物，阻碍了因果推断；第三，无法评估代谢物在 TME 内的稳定性与生物利用度，增加了临床干预的不确定性 [P0582][P0588][P0363]。未来的研究需结合微透析、质谱成像等技术，直接在人类肿瘤组织或间质液中定量代谢物，并建立浓度 - 疗效的定量关系，方能实现从“关联发现”到“精准给药”的跨越。"
+      ],
+      "source_identity": {
+        "source_handle": "P0588",
+        "source_id": "source::P0588",
+        "aliases": [],
+        "title": "Inosine enhances the efficacy of immune‐checkpoint inhibitors in advanced solid tumors: A randomized, controlled, Phase 2 study",
+        "doi": "10.1002/cam4.70143",
+        "paper_id": "CorpusId:272644866"
+      }
+    },
+    {
+      "chapter": "Ch4",
+      "handle": "P0517",
+      "observation": "PD-L1 高低分层与总体区别",
+      "message_path": "LIVE/stages/author_004/5d330af0b3652bb9d838f9f8321e5195ae152e33dde1f1ccb93a3bce99b99c16/attempt_001/MESSAGES.json",
+      "message_byte_sha256": "c85b8731c97cbbda5737c1f0860d962acaa850e22f24d6632a44b45d01e8d1c4",
+      "body_path": "LIVE/stages/author_004/5d330af0b3652bb9d838f9f8321e5195ae152e33dde1f1ccb93a3bce99b99c16/attempt_001/BODY.md",
+      "body_byte_sha256": "997d783d77b2d380b3d980f4b880ccd8ccade172539e20c01fd8713529ea00b5",
+      "actual_input_atom_count": 21,
+      "actual_input_semantic_atoms": [
+        {
+          "atom_id": "atom::ad1720dc1737d5dd196bcf87",
+          "source_handle": "P0517",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "整体NSCLC人群 (N=531)",
+            "finding": "抗生素使用与较短的中位OS显著相关（11.7个月 vs 16.1个月, p=0.028），但与PFS无显著关联（3.5个月 vs 3.5个月, p=0.287）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::66a75b407fbfabec9a6931d8",
+            "snapshot::8e39696d5d023f2a0efe55a9"
+          ]
+        },
+        {
+          "atom_id": "atom::1b9a2a07689df46a86ac600c",
+          "source_handle": "P0517",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "PD-L1表达 <50% 的亚组 (N=部分, 具体人数未明确给出但包含在265名有PD-L1数据的患者中)",
+            "finding": "抗生素使用与未使用者相比，中位PFS（3.3 vs 2.8个月, p=0.88）和中位OS（9.5 vs 17.1个月, p=0.24）均无显著差异。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::66a75b407fbfabec9a6931d8",
+            "snapshot::8e39696d5d023f2a0efe55a9"
+          ]
+        },
+        {
+          "atom_id": "atom::a45c49dc91d86e47439985d6",
+          "source_handle": "P0517",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "PD-L1表达 ≥50% 的亚组 (N=部分, 具体人数未明确给出但包含在265名有PD-L1数据的患者中)",
+            "finding": "抗生素使用者显示出显著更短的中位PFS（4.2 vs 9.4个月, p=0.012）和中位OS（11.9 vs 28.4个月, p=0.011）。该亚组中抗生素的负面影响比整体人群更为显著。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::66a75b407fbfabec9a6931d8",
+            "snapshot::8e39696d5d023f2a0efe55a9"
+          ]
+        }
+      ],
+      "actual_output_paragraphs": [
+        "肿瘤分子特征也修饰抗生素效应。在非小细胞肺癌（NSCLC）队列中，抗生素使用对 ICI 疗效的负面影响主要集中在 PD-L1 高表达（≥50%）亚组 [P0517]。该亚组中抗生素使用者中位 PFS（4.2 vs. 9.4 个月，p=0.012）和 OS（11.9 vs. 28.4 个月，p=0.011）均显著缩短，而在 PD-L1 低表达亚组中未见显著差异 [P0517]。这暗示高 PD-L1 表达可能与特定的肠道菌群组成或免疫微环境状态相关联，使得这些患者对菌群扰动更为敏感 [P0517]。综合来看，抗生素的干扰效应受时机、疗程、肿瘤类型及分子分层的共同调节，不能简单概括为“所有实体瘤均一致受损”。"
+      ],
+      "source_identity": {
+        "source_handle": "P0517",
+        "source_id": "source::P0517",
+        "aliases": [],
+        "title": "The effects of antibiotics on the efficacy of immune checkpoint inhibitors in patients with non-small-cell lung cancer differ based on PD-L1 expression.",
+        "doi": "10.1016/j.ejca.2021.02.040",
+        "paper_id": "e8fb88935a5c5757dc683f56d1ff0c0f356b20ae"
+      }
+    },
+    {
+      "chapter": "Ch4",
+      "handle": "P0575",
+      "observation": "ICI 时间锚点与部分卡片术前术后表述冲突",
+      "message_path": "LIVE/stages/author_004/5d330af0b3652bb9d838f9f8321e5195ae152e33dde1f1ccb93a3bce99b99c16/attempt_001/MESSAGES.json",
+      "message_byte_sha256": "c85b8731c97cbbda5737c1f0860d962acaa850e22f24d6632a44b45d01e8d1c4",
+      "body_path": "LIVE/stages/author_004/5d330af0b3652bb9d838f9f8321e5195ae152e33dde1f1ccb93a3bce99b99c16/attempt_001/BODY.md",
+      "body_byte_sha256": "997d783d77b2d380b3d980f4b880ccd8ccade172539e20c01fd8713529ea00b5",
+      "actual_input_atom_count": 25,
+      "actual_input_semantic_atoms": [
+        {
+          "atom_id": "atom::380df1336060f3e1a5c6f438",
+          "source_handle": "P0575",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "全队列多变量调整后",
+            "finding": "仅术后暴露（Post-only）与死亡风险增加27%相关（HR 1.27; 95% CI 1.20–1.35）；双窗口暴露风险更高（HR 1.31）。仅术前暴露（Pre-only）未显示显著长期生存关联（HR 1.04; 95% CI 0.99–1.10）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::abfcf11587495686a3fdc908"
+          ]
+        },
+        {
+          "atom_id": "atom::2f1e7215b2068539f27e6faa",
+          "source_handle": "P0575",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "头颈部癌症亚组",
+            "finding": "仅术后暴露显著增加死亡风险（HR 1.46; 95% CI 1.20–1.77）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::abfcf11587495686a3fdc908"
+          ]
+        },
+        {
+          "atom_id": "atom::703de6e139f19e7cfa1b1a62",
+          "source_handle": "P0575",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "肾细胞癌亚组",
+            "finding": "仅术后暴露显著增加死亡风险（HR 1.26; 95% CI 1.03–1.54）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::abfcf11587495686a3fdc908"
+          ]
+        },
+        {
+          "atom_id": "atom::cf3a40b8f10424f7690d960d",
+          "source_handle": "P0575",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "乳腺癌亚组",
+            "finding": "仅术后暴露显著增加死亡风险（HR 1.24; 95% CI 1.01–1.54）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::abfcf11587495686a3fdc908"
+          ]
+        },
+        {
+          "atom_id": "atom::9d7dfd44cb8674d50d423b0b",
+          "source_handle": "P0575",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "肺癌亚组",
+            "finding": "仅术后暴露未达统计学显著性（HR 1.09; 95% CI 0.97–1.23），尽管该组样本量最大。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::abfcf11587495686a3fdc908"
+          ]
+        },
+        {
+          "atom_id": "atom::da6b53d942c67a861774684c",
+          "source_handle": "P0575",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "黑色素瘤亚组",
+            "finding": "仅术后暴露未达统计学显著性（HR 1.07; 95% CI 0.85–1.34）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::abfcf11587495686a3fdc908"
+          ]
+        }
+      ],
+      "actual_output_paragraphs": [
+        "抗生素作为最强的微生物组干扰因素，其对 ICI 疗效的负面影响并非均质，而是高度依赖于暴露时机、疗程长度及肿瘤类型。传统观点多关注 ICI 启动前的基线暴露，但大规模真实世界数据显示，治疗早期的微生物组完整性可能更为关键。一项纳入 21,108 名泛癌种患者的回顾性队列研究将抗生素暴露严格划分为“仅术前”（ICI 前 60 天）、“仅术后”（ICI 后 60 天）及双窗口暴露 [P0575]。多变量调整后，仅术后暴露与死亡风险增加 27% 相关（HR 1.27, 95% CI 1.20–1.35），而仅术前暴露未显示显著的长期生存关联（HR 1.04, 95% CI 0.99–1.10）[P0575]。亚组分析显示，头颈部癌、肾细胞癌和乳腺癌患者中术后暴露风险显著，而在肺癌和黑色素瘤大样本亚组中未达统计学显著性，提示肿瘤生物学背景修饰了抗生素的干扰效应 [P0575]。这一发现挑战了仅关注基线筛查的传统观点，提示 ICI 启动后前 60 天是微生物群介导免疫激活的关键脆弱窗口 [P0575]。",
+        "最后，微生物组数据的缺失限制了机制解释。多数大型队列研究仅通过药物使用作为菌群扰动的代理指标，未直接测量肠道微生物组的具体组成变化 [P0575][P0537]。这使得我们难以区分是药物直接杀灭了有益菌，还是改变了菌群结构或代谢产物，亦或是药物本身的免疫调节作用（如抗生素的抗炎特性）在起作用 [P0575]。因此，当前证据主要支持“关联存在但不可普适”，主动干预（如 FMT、定义菌群）能否跨越这些观察性关联并实现因果性疗效提升，需在后续章节结合干预性试验证据进一步评估。"
+      ],
+      "source_identity": {
+        "source_handle": "P0575",
+        "source_id": "source::P0575",
+        "aliases": [],
+        "title": "Antibiotic Timing and Survival After Immune Checkpoint Inhibitor Initiation in Patients With Cancer",
+        "doi": "10.64898/2026.05.27.26354193",
+        "paper_id": "82ebda249f3476e1948f523a9219bd678f5165c3"
+      }
+    },
+    {
+      "chapter": "Ch5",
+      "handle": "P0090",
+      "observation": "实际输入含 mRCC 数值；试验名另待原发表核验",
+      "message_path": "LIVE/stages/author_005/e8c67413ebca56fd5d48f6286624d3f6eedbc12e269c9186f970cf1e0c66d339/attempt_001/MESSAGES.json",
+      "message_byte_sha256": "7e045843d0ec1358049b2713ecfa5faf3acaab2dea8aeb26134337dfbd677722",
+      "body_path": "LIVE/stages/author_005/e8c67413ebca56fd5d48f6286624d3f6eedbc12e269c9186f970cf1e0c66d339/attempt_001/BODY.md",
+      "body_byte_sha256": "7be2fa0f79c8a05ce6d94e4676cc03224f7b4302daf35cb1bc3c63df6abd4546",
+      "actual_input_atom_count": 23,
+      "actual_input_semantic_atoms": [
+        {
+          "atom_id": "atom::6a3d928b5a7bb7e7256aa430",
+          "source_handle": "P0090",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "mRCC患者接受ICI治疗，围治疗期（ICI开始前8周至开始后4周或30天内）使用广谱抗生素",
+            "finding": "抗生素暴露导致肠道菌群失调，显著降低ORR（12.9%-34.8% vs 更高比例），缩短PFS（HR 1.96-3.10）和OS（HR 3.5），增加疾病进展风险。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::8b10bf15f5c5bded90fc2550"
+          ]
+        },
+        {
+          "atom_id": "atom::9dd8c9da2bda33ccfed831a4",
+          "source_handle": "P0090",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "mRCC患者接受VEGF-TKI治疗期间补充含动物双歧杆菌的酸奶",
+            "finding": "益生菌实现100%定植，富集Akkermansia muciniphila和Barnesiella intestinihominis等有益菌属，观察到PFS延长的趋势，但未达到统计学显著差异（小样本n=20）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::8b10bf15f5c5bded90fc2550"
+          ]
+        },
+        {
+          "atom_id": "atom::4f13d094ffea1dd368bb1748",
+          "source_handle": "P0090",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "mRCC患者接受pembrolizumab + axitinib治疗，接受来自长期ICI反应者的FMT",
+            "finding": "FMT组1年PFS显著高于对照组（66.7% vs 35.0%, p=0.036），ORR提高（54% vs 28%），且未增加≥3级不良事件（基于Phase II RCT摘要，n=50）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::8b10bf15f5c5bded90fc2550"
+          ]
+        },
+        {
+          "atom_id": "atom::a6c7883bc90d2043e3b56081",
+          "source_handle": "P0090",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "mRCC患者接受cabozantinib + nivolumab治疗，补充CBM588益生菌",
+            "finding": "益生菌组ORR显著高于对照组（74% vs 20%），6个月PFS改善（84% vs 60%），伴随Ruminococcaceae富集和维生素K2合成通路增加，但双歧杆菌丰度本身无显著变化。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::8b10bf15f5c5bded90fc2550"
+          ]
+        }
+      ],
+      "actual_output_paragraphs": [
+        "相比之下，在转移性肾细胞癌（mRCC）一线治疗背景下，FMT 联合 ICI 的随机证据显示出积极信号。一项系统综述汇总了 Phase II RCT 数据（会议摘要级别），显示 FMT 联合帕博利珠单抗 + 阿昔替尼治疗初治 mRCC 患者，1 年 PFS 率为 66.7%，显著高于假 FMT 对照组的 35.0%（p=0.036）；ORR 为 54% vs. 28%，且未增加≥3 级不良事件 [P0090]。该数据来自小样本随机试验，虽未达到 III 期确证标准，但提示在特定癌种和一线治疗背景下，FMT 可能具有增效潜力 [P0090]。综合 MITRIC 的阴性结果与 mRCC RCT 的阳性信号，FMT 在耐药人群中的疗效高度依赖于癌症类型、治疗线数及宿主免疫背景，不能简单外推为普适性挽救疗法 [P0578][P0090]。",
+        "相较于 FMT 的复杂性，定义菌群和 LBPs 具有成分明确、质量可控的标准化优势，但临床疗效确证仍不足。丁酸梭菌 CBM588 是一种单菌株活体生物药，在 mRCC 一线 ICI 联合治疗中显示出探索性信号。两项 I 期随机试验的汇总分析显示，CBM588 联合组 ORR 显著高于对照组（74% vs. 20%），6 个月 PFS 率为 84% vs. 60% [P0090][P0357]。微生物组机制分析表明，CBM588 能防止有益菌*Eubacterium siraeum*的耗竭，并纠正厚壁菌门/拟杆菌门（Firmicutes/Bacteroidetes）比率失衡，提示其可能通过维持菌群稳态介导临床获益 [P0006][P0143]。然而，该证据主要来自小样本 I 期试验，且双歧杆菌丰度本身无显著变化，机制路径尚需进一步验证 [P0006]。",
+        "综上，微生物干预策略的临床证据等级呈现金字塔结构：底层为大量观察性队列研究，中层为早期干预性试验（I/II 期），顶层缺乏大型随机对照 III 期试验（Phase III RCT）[P0212][P0590]。FMT 在初治人群中显示出较高的 ORR 信号，但在耐药人群中疗效受限；LBPs 具有标准化优势，但疗效确证不足。当前所有阳性信号均来自小样本、早期阶段试验，存在选择偏倚和统计效力不足的问题，不能作为确证性证据 [P0090][P0387]。多篇综述明确指出，目前缺乏已完成的大型随机对照 III 期试验证实微生物干预在 ICI 治疗实体瘤中的确切疗效，亟需大规模、多中心、标准化的 III 期 RCT 来确证疗效并建立预测模型 [P0212][P0590][P0387]。未来的研究设计需聚焦于供体筛选标准化、生物标志物驱动的人群分层及长期安全性监测，方能实现从“概念验证”到“临床常规”的跨越。"
+      ],
+      "source_identity": {
+        "source_handle": "P0090",
+        "source_id": "source::P0090",
+        "aliases": [],
+        "title": "Gut microbiome impact on systemic therapy outcomes in metastatic renal cell carcinoma: a systematic review",
+        "doi": "10.1007/s00345-026-06386-1",
+        "paper_id": "2253f6b8b722c18cd3ea17b12f5a944ac838b73c"
+      }
+    },
+    {
+      "chapter": "Ch6",
+      "handle": "P0239",
+      "observation": "E. siraeum 的无 irAE 响应者被正文反转",
+      "message_path": "LIVE/stages/author_006/f4dbfd7ce1b7ddb5c110caf680571e7f106320c5ec46905d65ac76c2cbf67f28/attempt_001/MESSAGES.json",
+      "message_byte_sha256": "f20bcf32e9557fea4e801f476477d7404ac3edf2447403d6299b8e770ab378e8",
+      "body_path": "LIVE/stages/author_006/f4dbfd7ce1b7ddb5c110caf680571e7f106320c5ec46905d65ac76c2cbf67f28/attempt_001/BODY.md",
+      "body_byte_sha256": "00fdc7191a991a9318dcf0194875afee8b7427e816ceaf6bdeaf348e8ad5c4cf",
+      "actual_input_atom_count": 20,
+      "actual_input_semantic_atoms": [
+        {
+          "atom_id": "atom::dfac6126f2e15d75dc95ae48",
+          "source_handle": "P0239",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "总体响应 vs 非响应（基于ORR）",
+            "finding": "响应者中富集Bacteroides dorei (FDR p=9.5E-07) 和 Blautia species CAG:257 (padj=0.001)；非响应者中富集 Prevotella Stercorea (padj=1.1E-07) 和一种靶向沙门氏菌的噬菌体 (padj=8.3E-09)。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::752df8ff448a789477de82ce"
+          ]
+        },
+        {
+          "atom_id": "atom::7211c1c99a88d8c48939669c",
+          "source_handle": "P0239",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "有irAE的响应者 vs 无irAE的响应者",
+            "finding": "有irAE的响应者富集 Bacteroides plebeius (padj=4.2E-13) 和 Bacteroides coprophilus (padj=0.0002)；无irAE的响应者富集 Eubacterium siraeum (padj=7.2E-05)。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::752df8ff448a789477de82ce"
+          ]
+        },
+        {
+          "atom_id": "atom::b9a6a65235d29e1700adcfc1",
+          "source_handle": "P0239",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "整体微生物组特征与毒性/响应的关联",
+            "finding": "未发现真菌与响应或毒性显著相关。Bacteroides属的高丰度与irAEs显著相关，也与ICI响应一致。富含Bacteroides且缺乏Prevotella的微生物组特征与ICI响应相关。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::752df8ff448a789477de82ce"
+          ]
+        }
+      ],
+      "actual_output_paragraphs": [
+        "**耦合模式：** 某些微生物特征同时关联更好的疗效和更高的毒性风险。*Akkermansia muciniphila*在非小细胞肺癌患者中高丰度与延长 OS 相关，但也可能增加 irAE 风险，体现为“双刃剑”效应 [P0260]。在黑色素瘤队列中，发生 irAEs 的患者进展无病生存期（PFS）显著长于未发生 irAEs 的患者（中位 PFS 1412 天 vs. 106 天，p=0.026），且产 SCFA 菌（如*F. prausnitzii*）在响应者中丰度显著更高，但在未发生 irAEs 的患者中丰度也更高，提示 irAEs 与疗效可能存在共享的免疫激活机制 [P0428]。拟杆菌属（*Bacteroides*）高丰度与 Tregs 减少程度及严重 irAEs 风险正相关，而 Tregs 减少主要在应答者中观察到，进一步支持了疗效与毒性的耦合 [P0098][P0239]。",
+        "**解耦模式：** 另一些微生物特征则关联有效且低毒性的状态，为干预提供了理想靶点。*Eubacterium siraeum*在黑色素瘤患者中富集于“有 irAE 的响应者”组，而在“无 irAE 的响应者”组中未富集，提示其可能介导疗效但不必然驱动毒性 [P0239]。更明确的解耦信号来自*Lachnospiraceae*家族成员：*Blautia luti*及其他*Lachnospiraceae*成员与“既有反应又无 irAE\"的状态相关（反应 q=0.02，无 irAE q=0.02）[P0314]。在另一项研究中，其他 SCFA 产生菌（如*Coprococcus comes*, *Dorea longicatena*）在响应者中丰度显著更高，且在未发生 irAEs 的患者中丰度也更高，表明 SCFAs 可能在介导 ICI 疗效和保护免受 irAEs 方面发挥双重保护作用 [P0428]。*Paraclostridium bifermentans*的代谢物介导疗效而活菌介导毒性的机制，也为通过纯化代谢物实现解耦提供了实验依据 [P0284]。"
+      ],
+      "source_identity": {
+        "source_handle": "P0239",
+        "source_id": "source::P0239",
+        "aliases": [],
+        "title": "De-correlating immune checkpoint inhibitor toxicity and response in melanoma via the microbiome.",
+        "doi": "10.1200/jco.2023.41.16_suppl.9569",
+        "paper_id": "645b681b7557677d115a714d338b0565b4118b06"
+      }
+    },
+    {
+      "chapter": "Ch6",
+      "handle": "P0314",
+      "observation": "菌的分开关联与响应/irAE 相互关联不同",
+      "message_path": "LIVE/stages/author_006/f4dbfd7ce1b7ddb5c110caf680571e7f106320c5ec46905d65ac76c2cbf67f28/attempt_001/MESSAGES.json",
+      "message_byte_sha256": "f20bcf32e9557fea4e801f476477d7404ac3edf2447403d6299b8e770ab378e8",
+      "body_path": "LIVE/stages/author_006/f4dbfd7ce1b7ddb5c110caf680571e7f106320c5ec46905d65ac76c2cbf67f28/attempt_001/BODY.md",
+      "body_byte_sha256": "00fdc7191a991a9318dcf0194875afee8b7427e816ceaf6bdeaf348e8ad5c4cf",
+      "actual_input_atom_count": 23,
+      "actual_input_semantic_atoms": [
+        {
+          "atom_id": "atom::8c7b4bbbb48579d13f510dc7",
+          "source_handle": "P0314",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "基线微生物组，转移性黑色素瘤患者（n=41可评估），ICI治疗",
+            "finding": "响应者（R）中Intestinimonas butyriciproducens (q=0.002)和Longicatena caecimuris (q=0.003)富集；非响应者（NR）中Tenericutes (q=0.001)和Lachnospira sp.NSJ 43 (q=0.002)富集。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::ed51308a119087567f15d8b4"
+          ]
+        },
+        {
+          "atom_id": "atom::617e0a79c10627a1d064c820",
+          "source_handle": "P0314",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "基线微生物组，ICI治疗反应与irAEs关联",
+            "finding": "Blautia luti及其他Lachnospiraceae成员与“既有反应又无irAE”的状态相关（反应q=0.02，无irAE q=0.02）。在该队列中，治疗反应与irAEs之间未观察到统计学关系（P=0.368）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::ed51308a119087567f15d8b4"
+          ]
+        },
+        {
+          "atom_id": "atom::bf625e1cc90095b79b75f482",
+          "source_handle": "P0314",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "irAEs发生情况，基线微生物组",
+            "finding": "未发生irAEs组中Lachnospiraceae（包括Anaerotignum和Enterocloster物种）较多；发生irAEs组中Bifidobacterium较多。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::ed51308a119087567f15d8b4"
+          ]
+        }
+      ],
+      "actual_output_paragraphs": [
+        "**解耦模式：** 另一些微生物特征则关联有效且低毒性的状态，为干预提供了理想靶点。*Eubacterium siraeum*在黑色素瘤患者中富集于“有 irAE 的响应者”组，而在“无 irAE 的响应者”组中未富集，提示其可能介导疗效但不必然驱动毒性 [P0239]。更明确的解耦信号来自*Lachnospiraceae*家族成员：*Blautia luti*及其他*Lachnospiraceae*成员与“既有反应又无 irAE\"的状态相关（反应 q=0.02，无 irAE q=0.02）[P0314]。在另一项研究中，其他 SCFA 产生菌（如*Coprococcus comes*, *Dorea longicatena*）在响应者中丰度显著更高，且在未发生 irAEs 的患者中丰度也更高，表明 SCFAs 可能在介导 ICI 疗效和保护免受 irAEs 方面发挥双重保护作用 [P0428]。*Paraclostridium bifermentans*的代谢物介导疗效而活菌介导毒性的机制，也为通过纯化代谢物实现解耦提供了实验依据 [P0284]。"
+      ],
+      "source_identity": {
+        "source_handle": "P0314",
+        "source_id": "source::P0314",
+        "aliases": [],
+        "title": "The Association of the Microbiome with Melanoma Tumor Response to Immune Checkpoint Inhibitor Treatment and Immune-Related Adverse Events (NCT05102773)",
+        "doi": "10.1101/2025.01.30.25321413",
+        "paper_id": "873fa8f3f156b691e03d1431a71f79cf1fa30374"
+      }
+    },
+    {
+      "chapter": "Ch6",
+      "handle": "P0017",
+      "observation": "结肠炎会议/发表关系需与 P0600 一起核验",
+      "message_path": "LIVE/stages/author_006/f4dbfd7ce1b7ddb5c110caf680571e7f106320c5ec46905d65ac76c2cbf67f28/attempt_001/MESSAGES.json",
+      "message_byte_sha256": "f20bcf32e9557fea4e801f476477d7404ac3edf2447403d6299b8e770ab378e8",
+      "body_path": "LIVE/stages/author_006/f4dbfd7ce1b7ddb5c110caf680571e7f106320c5ec46905d65ac76c2cbf67f28/attempt_001/BODY.md",
+      "body_byte_sha256": "00fdc7191a991a9318dcf0194875afee8b7427e816ceaf6bdeaf348e8ad5c4cf",
+      "actual_input_atom_count": 19,
+      "actual_input_semantic_atoms": [
+        {
+          "atom_id": "atom::768a0afe5a7442dbc6d309fa",
+          "source_handle": "P0017",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "人类队列比较：8例结肠炎型irAE vs 24例非结肠炎型irAE患者",
+            "finding": "菌群组成存在显著差异（Adonis P=0.003）。结肠炎型患者中拟杆菌门（Bacteroidota）和双歧杆菌属（Bifidobacterium）丰度较低，而变形菌门（Proteobacteria）和肠球菌属（Enterococcus）丰度较高。主要产丁酸菌总丰度在结肠炎型患者中显著降低（P=0.018）。功能预测显示环境信息处理、遗传信息处理及代谢通路存在差异。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::8b8d965f22f748d8aea31126"
+          ]
+        },
+        {
+          "atom_id": "atom::bff31da88cca7e46ed16f5f7",
+          "source_handle": "P0017",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "小鼠FMT实验：抗生素预处理小鼠接受结肠炎型（Colitic-irAE-FMT）或非结肠炎型（Non-irAE-FMT）患者菌群移植，随后联合抗PD-1/抗CTLA-4治疗",
+            "finding": "9只Colitic-irAE-FMT小鼠中有3只发展为致命性严重结肠炎，而9只Non-irAE-FMT小鼠全部存活且无结肠炎（P=0.052）。死亡小鼠表现出更快的体重下降和更高的DAI评分。组织学评分显示，死亡小鼠（14分）显著高于非结肠炎组（3.89 ± 1.17）和存活结肠炎组（3.67 ± 1.03）。免疫组化显示死亡小鼠CD8+、CD4+和CD20+细胞浸润较高，支持免疫介导的结肠炎发生。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::8b8d965f22f748d8aea31126"
+          ]
+        }
+      ],
+      "actual_output_paragraphs": [
+        "免疫性结肠炎是目前微生物组—毒性关联中证据等级最高的表型，兼具人类队列的统计关联与动物模型的因果验证。在多项跨癌种队列中，发生结肠炎的患者基线或发作时微生物组呈现出一致的特征：产丁酸菌（butyrate producers）总丰度显著降低，而条件致病菌如肠球菌属（*Enterococcus*）和变形菌门（*Proteobacteria*）显著富集 [P0017][P0600]。一项纳入 32 名 irAE 患者（8 例结肠炎型 vs 24 例非结肠炎型）的研究显示，结肠炎型患者粪便中拟杆菌门（*Bacteroidota*）和双歧杆菌属（*Bifidobacterium*）丰度较低，主要产丁酸菌总丰度降低（P=0.018）[P0017]。另一项针对晚期胸廓肿瘤患者的队列（n=37）也证实，irAE 患者中粪杆菌属（*Faecalibacterium*）和阿加索细菌属（*Agathobacter*）丰度较低，而红球菌属（*Erysipelatoclostridium*）丰度较高 [P0600]。",
+        "这种关联在动物模型中得到了因果验证。将结肠炎型 irAE 患者的粪便微生物移植（FMT）给抗生素预处理的小鼠，随后给予联合免疫检查点阻断（抗 PD-1 + 抗 CTLA-4），9 只受体小鼠中有 3 只发展为致命性严重结肠炎，而接受非结肠炎型患者 FMT 的小鼠全部存活且无结肠炎（P=0.052）[P0017]。死亡小鼠表现出更快的体重下降、更高的疾病活动指数及结肠组织中 Il6 和 Tnf mRNA 水平升高 [P0600]。这一实验确立了特定人类菌群具有致结肠炎潜力，且该效应可跨宿主传递。"
+      ],
+      "source_identity": {
+        "source_handle": "P0017",
+        "source_id": "source::P0017",
+        "aliases": [],
+        "title": "DOP47 Gut microbiome contributes to the development of immune checkpoint inhibitor-related colitis",
+        "doi": "10.1093/ecco-jcc/jjac190.0087",
+        "paper_id": "08d60ce7ff453c5ae2b4c3a47581b79e02b2b5a0"
+      }
+    },
+    {
+      "chapter": "Ch6",
+      "handle": "P0600",
+      "observation": "输入也有结肠炎 FMT 实验，不凭句柄切换断言错引",
+      "message_path": "LIVE/stages/author_006/f4dbfd7ce1b7ddb5c110caf680571e7f106320c5ec46905d65ac76c2cbf67f28/attempt_001/MESSAGES.json",
+      "message_byte_sha256": "f20bcf32e9557fea4e801f476477d7404ac3edf2447403d6299b8e770ab378e8",
+      "body_path": "LIVE/stages/author_006/f4dbfd7ce1b7ddb5c110caf680571e7f106320c5ec46905d65ac76c2cbf67f28/attempt_001/BODY.md",
+      "body_byte_sha256": "00fdc7191a991a9318dcf0194875afee8b7427e816ceaf6bdeaf348e8ad5c4cf",
+      "actual_input_atom_count": 23,
+      "actual_input_semantic_atoms": [
+        {
+          "atom_id": "atom::370e1997ec04811460303373",
+          "source_handle": "P0600",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "抗PD-1治疗后出现irAEs的患者 vs 未出现irAEs的患者",
+            "finding": "微生物组成显著不同（P=0.001）。irAE患者中双歧杆菌（Bifidobacterium）、粪杆菌属（Faecalibacterium）和阿加索细菌属（Agathobacter）丰度较低，而红球菌属（Erysipelatoclostridium）丰度较高。主要丁酸产生菌总丰度在irAE患者中更低（P=0.007）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::764ddb58c7d47204119c72b5",
+            "snapshot::715592e26e584e7d4af212b0"
+          ]
+        },
+        {
+          "atom_id": "atom::f62b887d1b251fb36e63bda9",
+          "source_handle": "P0600",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "结肠炎型irAE患者 vs 非结肠炎型irAE患者",
+            "finding": "微生物组成显著不同（P=0.003）。结肠炎型患者中拟杆菌属（Bacteroides）和双歧杆菌丰度较低，肠球菌属（Enterococcus）丰度较高。主要丁酸产生菌丰度也较低（P=0.018）。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::764ddb58c7d47204119c72b5",
+            "snapshot::715592e26e584e7d4af212b0"
+          ]
+        },
+        {
+          "atom_id": "atom::5d30a37ab62a73ee8b4c7454",
+          "source_handle": "P0600",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "小鼠FMT实验（结肠炎型irAE供体 vs 无irAE供体）+ 抗PD-1/CTLA-4治疗",
+            "finding": "结肠炎型irAE-FMT组小鼠中3/9发展为致命性严重结肠炎，而非irAE-FMT组0/9发病。结肠炎小鼠表现为体重下降更快、DAI评分更高、结肠缩短、组织损伤更重，且结肠组织中Il6和Tnf mRNA水平升高。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::764ddb58c7d47204119c72b5",
+            "snapshot::715592e26e584e7d4af212b0"
+          ]
+        },
+        {
+          "atom_id": "atom::10c3dff98fb8682a1dccf79f",
+          "source_handle": "P0600",
+          "field_path": [
+            "study_summary_A",
+            "key_findings"
+          ],
+          "value": {
+            "conditions": "irAE预测模型构建",
+            "finding": "基于10个主要差异菌属（以Gemella, Dubosiella, Atopobium为主）的随机森林模型在训练集AUC为86.4%，测试集AUC为91.7%。"
+          },
+          "role": "evidence",
+          "snapshot_ids": [
+            "snapshot::764ddb58c7d47204119c72b5",
+            "snapshot::715592e26e584e7d4af212b0"
+          ]
+        }
+      ],
+      "actual_output_paragraphs": [
+        "免疫性结肠炎是目前微生物组—毒性关联中证据等级最高的表型，兼具人类队列的统计关联与动物模型的因果验证。在多项跨癌种队列中，发生结肠炎的患者基线或发作时微生物组呈现出一致的特征：产丁酸菌（butyrate producers）总丰度显著降低，而条件致病菌如肠球菌属（*Enterococcus*）和变形菌门（*Proteobacteria*）显著富集 [P0017][P0600]。一项纳入 32 名 irAE 患者（8 例结肠炎型 vs 24 例非结肠炎型）的研究显示，结肠炎型患者粪便中拟杆菌门（*Bacteroidota*）和双歧杆菌属（*Bifidobacterium*）丰度较低，主要产丁酸菌总丰度降低（P=0.018）[P0017]。另一项针对晚期胸廓肿瘤患者的队列（n=37）也证实，irAE 患者中粪杆菌属（*Faecalibacterium*）和阿加索细菌属（*Agathobacter*）丰度较低，而红球菌属（*Erysipelatoclostridium*）丰度较高 [P0600]。",
+        "这种关联在动物模型中得到了因果验证。将结肠炎型 irAE 患者的粪便微生物移植（FMT）给抗生素预处理的小鼠，随后给予联合免疫检查点阻断（抗 PD-1 + 抗 CTLA-4），9 只受体小鼠中有 3 只发展为致命性严重结肠炎，而接受非结肠炎型患者 FMT 的小鼠全部存活且无结肠炎（P=0.052）[P0017]。死亡小鼠表现出更快的体重下降、更高的疾病活动指数及结肠组织中 Il6 和 Tnf mRNA 水平升高 [P0600]。这一实验确立了特定人类菌群具有致结肠炎潜力，且该效应可跨宿主传递。",
+        "相较于结肠炎，非结肠炎 irAEs（如心肌炎、神经毒性、肺炎）的微生物组证据受限于样本量小和事件发生率低。多项研究将非结肠炎 irAEs 合并为一组进行分析，或因特定类型病例数过少而无法得出具有统计效力的结论。例如，一项纳入 32 名发生 irAEs 患者的研究中，仅包含 3 例心肌炎患者，作者明确指出由于样本量小且 irAE 发生率总体较低，亚组分析（如比较不同类型 irAE 患者的微生物组）可能缺乏统计效力或无法进行 [P0600]。另一项前瞻性队列（宏基因组 n=54）的严重 irAE 组（n=13）中包含 2 例心血管毒性和 1 例肌肉毒性，同样未针对特定非结肠炎亚型进行大规模独立分析 [P0462]。",
+        "尽管存在样本量限制，部分研究仍提示了器官特异性的微生物特征。在胃肠道癌症患者中，不同器官毒性（皮肤、血液、内分泌、肝脏）表现出不同的微生物特征：皮肤毒性与甘油降解和尿素循环通路富集于无毒性组相关；肝脏毒性与精氨酸生物合成通路在低毒性组富集相关 [P0011]。基于多队列整合（n=190）构建的随机森林分类器（RF14）在训练集和独立测试集中均显示出对广义 irAEs 的预测能力（AUC 0.88–0.92），其中*Lactobacillus salivarius*为排名最高的生物标志物 [P0308]。然而，这类模型主要针对广义 irAE 发生，未针对特定器官毒性进行验证，且不同研究间结果存在不一致性（如*Agathobacter*在不同研究中与 irAEs 的关联方向相反）[P0312]。因此，当前缺乏针对特定非结肠炎 irAEs（如心肌炎、神经毒性）的大规模、独立分析的微生物组关联研究，预测模型的泛化能力仍待确认 [P0600][P0462]。"
+      ],
+      "source_identity": {
+        "source_handle": "P0600",
+        "source_id": "source::P0600",
+        "aliases": [],
+        "title": "Gut microbiota composition in patients with advanced malignancies experiencing immune-related adverse events",
+        "doi": "10.3389/fimmu.2023.1109281",
+        "paper_id": "CorpusId:257062954"
+      }
+    }
+  ]
+}

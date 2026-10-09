@@ -1,0 +1,48 @@
+usage: run_guided_body_frozen_max_plus.py [-h]
+                                          (--manifest MANIFEST | --book BOOK)
+                                          --guide GUIDE --output OUTPUT
+                                          [--config CONFIG]
+                                          [--run | --responses RESPONSES]
+                                          [--allow-max | --plus-only]
+                                          [--retry-failed]
+                                          [--metadata-declarations METADATA_DECLARATIONS]
+                                          [--budget-ledger BUDGET_LEDGER]
+                                          [--budget-limit BUDGET_LIMIT]
+                                          [--key-file KEY_FILE]
+                                          [--tokenizer TOKENIZER]
+
+Guide-first BODY writer: explicit guide, frozen source inputs, offline by
+default. Live execution reuses the existing marked round-two CNY 60 lifetime
+ledger. This entry point never creates a budget ledger or grants a fresh
+allowance.
+
+options:
+  -h, --help            show this help message and exit
+  --manifest MANIFEST   Genuine source manifest; source versions are verified
+                        and frozen
+  --book BOOK           Sealed FULL_BODY_INPUT.json; offline archive/replay
+                        only
+  --guide GUIDE         Explicit manuscript guide and per-chapter writing
+                        arrangements JSON
+  --output OUTPUT
+  --config CONFIG
+  --run                 Explicit paid execution using the original remaining
+                        budget
+  --responses RESPONSES
+                        Offline recorded-response fixture
+  --allow-max           Explicit permission only; never automatically selects
+                        Max
+  --plus-only           Restrict this test entry and every author/completer
+                        dispatch to qwen3.5-plus; no Max fallback
+  --retry-failed
+  --metadata-declarations METADATA_DECLARATIONS
+                        JSON list of explicit human completion declarations
+                        bound to saved stage/response/body hashes; no rewrite
+  --budget-ledger BUDGET_LEDGER
+                        Existing original round-two SQLite ledger, with its
+                        original marker
+  --budget-limit BUDGET_LIMIT
+                        Original lifetime ceiling, exactly 60 CNY, not a new
+                        allowance
+  --key-file KEY_FILE
+  --tokenizer TOKENIZER

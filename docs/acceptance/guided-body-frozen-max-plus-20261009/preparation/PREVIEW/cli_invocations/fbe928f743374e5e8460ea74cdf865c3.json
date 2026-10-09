@@ -1,0 +1,43 @@
+{
+  "schema_version": "optomind.guided_body_cli.v1",
+  "execution_mode": "preview",
+  "input_mode": "live_source_manifest",
+  "input_sha256": "98e1ee62c4bf239fc54ed133d57c8c6c666b7231fd86c6e2065e79fcddf777a7",
+  "book_sha256": "3662038f6f241a48979bc8f9e30c8382776def734fcaa4cdddb82858d6cb6322",
+  "guide_sha256": "161a88c8c35e0dfa04cbb1550185a8a1574a481851a3fa60d2efad5688c80dec",
+  "guide_file_sha256": "1a8624373328c7011a920c72affd165104d7304eb7c5e9fb1b3d4fb2efc60591",
+  "source_manifest_sha256": "37242cc51bc9b6b96a7e92543a6092c17bfdbd0d8f8ab068a2e3d9c1e3db58e7",
+  "config": {
+    "schema_version": "optomind.guided_body_writer_config.v1",
+    "purpose": "Guide-first continuous author. Reuse the existing lifetime CNY 60 ledger and its remaining balance. No automatic Max or paid retry. No task-by-task coverage map or automatic critic.",
+    "writer": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 16384,
+      "max_output_tokens": 49152,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192
+    },
+    "max_rereads_per_chapter": 3,
+    "max_author_calls": 64,
+    "completion_on_missing": true
+  },
+  "meter": {
+    "mode": "local_tokenizer_estimate",
+    "tokenizer_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "tokenizer_implementation_version": "0.23.2",
+    "actual_provider_token_count": false
+  },
+  "cli_source_sha256": "e8a06fcd18a73a224f535cc4fb506efda9ff279f2ce372c346da7626ed536b88",
+  "plus_only": true,
+  "semantic_quality_unreviewed": true,
+  "started_at": "2026-10-09T12:19:58.334817+00:00",
+  "allow_max": false,
+  "retry_failed": false,
+  "fixture_sha256": null,
+  "budget_before": null
+}
