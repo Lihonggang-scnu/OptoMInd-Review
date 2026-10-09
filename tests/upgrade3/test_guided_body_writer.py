@@ -39,7 +39,7 @@ def guide(book):
 
 @pytest.fixture
 def config():
-    return {"writer": {"model": "qwen3.5-plus", "thinking": True, "thinking_budget": 1024,
+    return {"automatic_metadata_recovery": False, "writer": {"model": "qwen3.5-plus", "thinking": True, "thinking_budget": 1024,
         "max_output_tokens": 4096, "stream": True, "json_mode": False, "timeout_seconds": 15,
         "stream_overall_timeout_seconds": 30, "prompt_token_multiplier": 1.0, "prompt_token_framing_margin": 0}}
 

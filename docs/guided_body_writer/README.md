@@ -87,3 +87,5 @@ python -X utf8 scripts/upgrade3/guided_body_writer.py --manifest "<真实 PREPAR
 另用第二轮七章真实归档，对 A/B 各作免费录制回放：实际前文逐章一致、四字段输入检查通过、原七章文本重现，随后恢复均零新调用。回放计数器为测试替身，不代表真实 tokenizer 容量；重现旧正文也不意味着新指南已产生质量提升。详见 `verification/ARCHIVED_REPLAY.json`。
 
 最终回归数字与版本见 `verification/VALIDATION.md`。
+
+- [紧凑提示词、自动状态恢复与194→108来源审计](COMPACT_PROMPTS_AUTO_METADATA_20261009.md)

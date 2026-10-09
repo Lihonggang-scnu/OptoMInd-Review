@@ -18,7 +18,7 @@ from .fullbody_writer import (_cost_summary, _dependency, _execute_stage, _messa
 from .writer_candidates import ROOT, _git_commit, _hash, _output_lock, _profile, _read, _safe_error, _write
 from .writer_candidates_contracts import CandidateError
 from .guided_body_contracts import (validate_guide, compile_guided_materials, build_author_payload,
-    resolve_read_request, parse_guided_response, parse_completion_response, apply_insertions, normalize_citation_handles,
+    resolve_read_request, parse_guided_response, parse_completion_response, parse_metadata_response, apply_insertions, normalize_citation_handles,
     adapt_delivery_chapter)
 
 SCHEMA_VERSION = "optomind.guided_body_writer.v1"
@@ -29,7 +29,7 @@ def validate_config(config: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(config, Mapping):
         raise CandidateError("config_must_be_object")
     allowed = {"schema_version", "purpose", "writer", "max_input_tokens", "max_rereads_per_chapter",
-               "max_author_calls", "completion_on_missing"}
+               "max_author_calls", "completion_on_missing", "automatic_metadata_recovery"}
     if set(config) - allowed:
         raise CandidateError("unknown_config_keys:" + ",".join(sorted(set(config) - allowed)))
     result = deepcopy(dict(config))
@@ -46,7 +46,21 @@ def validate_config(config: Mapping[str, Any]) -> dict[str, Any]:
     result["completion_on_missing"] = config.get("completion_on_missing", True)
     if not isinstance(result["completion_on_missing"], bool):
         raise CandidateError("completion_on_missing_must_be_boolean")
+    result["automatic_metadata_recovery"] = config.get("automatic_metadata_recovery", True)
+    if not isinstance(result["automatic_metadata_recovery"], bool):
+        raise CandidateError("automatic_metadata_recovery_must_be_boolean")
     return result
+
+
+def _metadata_profile(config):
+    # Same shared factory/ledger and input accounting, never an upgrade to Max.
+    return _profile({**config["writer"], "model": "qwen3.5-plus", "thinking": False,
+        "thinking_budget": 0, "max_output_tokens": min(2048, config["writer"]["max_output_tokens"]),
+        "json_mode": True}, "metadata")
+
+
+def _automatic_metadata_eligible(parsed):
+    return _metadata_unresolved(parsed) and not parsed.get("call_error")
 
 
 def _source_file_hashes():
@@ -62,15 +76,15 @@ def _author_parser(response):
     # A successfully delivered declared gap is reusable author work. Completion
     # belongs to the chapter, independently of this transport/cache operation.
     parsed["chapter_complete"] = parsed.get("complete", False)
-    parsed["complete"] = bool(parsed.get("kind") == "reread_request" or
-                               (parsed.get("body_markdown") and not parsed.get("errors")))
+    parsed["complete"] = bool(parsed.get("transport_complete") and (parsed.get("kind") == "reread_request" or
+                               (parsed.get("body_markdown") and not parsed.get("errors"))))
     return parsed
 
 
 def _completion_parser(response, original):
     parsed = parse_completion_response(response, original)
     parsed["chapter_complete"] = parsed.get("complete", False)
-    parsed["complete"] = bool(parsed.get("body_markdown") and not parsed.get("errors"))
+    parsed["complete"] = bool(parsed.get("transport_complete") and parsed.get("body_markdown") and not parsed.get("errors"))
     return parsed
 
 
@@ -150,40 +164,45 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
         _write(run_dir / "RUN_MANIFEST.json", manifest)
         _write(output / "RUN_MANIFEST.json", manifest)
 
-    def execute(payload, stage_id, parser, chapter_id, completion=False):
+    def execute(payload, stage_id, parser, chapter_id, completion=False, metadata=False):
         nonlocal status, action
         if len(manifest["stages"]) >= config["max_author_calls"]:
             status, action = "author_call_limit", "Increase max_author_calls to continue the intact guide."
             return None
-        prompt = (PROMPT_ROOT / ("completion.md" if completion else "writer.md")).read_text(encoding="utf-8")
-        stage = _stage(stage_id, "writer", _messages(prompt, payload), config["writer"], config, counter,
+        prompt = (PROMPT_ROOT / ("metadata.md" if metadata else "completion.md" if completion else "writer.md")).read_text(encoding="utf-8")
+        profile = _metadata_profile(config) if metadata else config["writer"]
+        stage = _stage(stage_id, "metadata" if metadata else "writer", _messages(prompt, payload), profile, config, counter,
             chapter_id=chapter_id, guide_sha256=guide_hash, full_prefix_sha256=_text_hash(body),
             material_preserved=True)
         if not stage["estimate"]["fits"]:
             stage["required_action"] = ("The whole guide, intact chapter evidence and full actual prefix exceed input capacity. "
                 "Increase available context capacity. Natural within-chapter guide subdivision is not implemented in this route; frozen chapter identities cannot be split here. No truncation or legacy task subdivision was performed.")
         declaration = next((row for row in declarations if row["stage_id"] == stage_id), None)
-        outcome = _execute_stage(stage, output=output, run_dir=run_dir, route="guided_body",
+        def dispatch(retry):
+            return _execute_stage(stage, output=output, run_dir=run_dir, route="guided_body",
             code_hash=manifest["code_hash"], input_hash=input_hash, dependencies=deepcopy(dependencies),
             client_factory=client_factory, run=run and declaration is None,
-            retry_failed=retry_failed and declaration is None, config=config, counter=counter, parser=parser)
-        # The shared transport wrapper predates direct guide JSON and treats
-        # every top-level complete:false as a transport failure. A direct body
-        # or insertion object instead declares a semantic gap. Reparse only
-        # that shape from the already-saved raw response; provider envelopes
-        # and recorded transport exceptions retain their original stop state.
+            retry_failed=retry, config=config, counter=counter, parser=parser)
+        outcome = dispatch(False)
+        # A saved delivered author draft is reusable work, even under an explicit
+        # retry. Retry the metadata decision, not the whole chapter's prose.
+        if (retry_failed and declaration is None
+                and (outcome.get("status") == "uncertain_attempt" or
+                     (outcome.get("cache_hit") and not outcome.get("result", {}).get("complete")
+                      and not _metadata_unresolved(outcome.get("result", {}))))):
+            outcome = dispatch(True)
+        # Reconcile the shared wrapper's coarse transport flag with the guided
+        # parser. Nested truncation is unsafe; direct semantic false is valid.
         saved = outcome.get("result", {})
-        if (saved.get("kind") in ("author", "completion") and not saved.get("transport_complete") and not saved.get("call_error")
+        if (saved.get("kind") in ("author", "completion", "metadata") and not saved.get("call_error")
                 and outcome.get("attempt_dir")):
-            raw_path = Path(outcome["attempt_dir"]) / "RAW_RESPONSE.json"
-            raw = _read(raw_path) if raw_path.exists() else None
-            if isinstance(raw, Mapping) and "content" not in raw and ("body_markdown" in raw or "insertions" in raw):
-                reparsed = parser(raw)
-                if reparsed.get("transport_complete"):
-                    outcome.update(result=reparsed, result_sha256=_hash(reparsed),
-                                   status="complete" if reparsed.get("complete") else "pending")
-                    _write(Path(outcome["attempt_dir"]) / "RESULT.json", reparsed)
-                    _write(Path(outcome["attempt_dir"]) / "BODY.md", reparsed.get("body_markdown", ""), text=True)
+            raw = _read(Path(outcome["attempt_dir"]) / "RAW_RESPONSE.json")
+            reparsed = parser(raw)
+            if reparsed.get("transport_complete") != saved.get("transport_complete"):
+                outcome.update(result=reparsed, result_sha256=_hash(reparsed),
+                               status="complete" if reparsed.get("complete") else "pending")
+                _write(Path(outcome["attempt_dir"]) / "RESULT.json", reparsed)
+                _write(Path(outcome["attempt_dir"]) / "BODY.md", reparsed.get("body_markdown", ""), text=True)
         if declaration is not None:
             outcome = _recover_metadata(outcome, declaration)
             used_declarations.add(stage_id)
@@ -196,6 +215,41 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
             return None
         dependencies.append(_dependency(outcome))
         return outcome
+
+    def recover_automatically(outcome, payload, chapter_id):
+        nonlocal action
+        parsed = outcome["result"]
+        if config["automatic_metadata_recovery"] and _automatic_metadata_eligible(parsed):
+            original_body = parsed["body_markdown"]
+            decision_payload = {"manuscript_guide": payload["manuscript_guide"],
+                "chapter_assignment": deepcopy(payload["chapter_assignment"]),
+                "draft_body_markdown": original_body,
+                "prior_metadata": {"complete": parsed.get("declared_complete"),
+                    "remaining_content": deepcopy(parsed.get("remaining_content", []))}}
+            decision = execute(decision_payload, "metadata_" + outcome["stage_id"],
+                lambda response: parse_metadata_response(response, original_body), chapter_id, metadata=True)
+            if decision and decision["result"].get("complete") and decision["result"].get("transport_complete"):
+                declaration = {"stage_id": outcome["stage_id"], "cache_key": outcome["cache_key"],
+                    "raw_response_sha256": hashlib.sha256((Path(outcome["attempt_dir"]) / "RAW_RESPONSE.json").read_bytes()).hexdigest(),
+                    "body_sha256": _text_hash(original_body), "complete": decision["result"]["chapter_complete"] and parsed.get("declared_complete") is not False and not parsed.get("remaining_content"),
+                    "remaining_content": list(dict.fromkeys([*parsed.get("remaining_content", []), *decision["result"]["remaining_content"]]))}
+                recovered = _recover_metadata(outcome, declaration)
+                parsed = {**parsed, **recovered["result"], "kind": parsed["kind"]}
+                parsed["metadata_recovery"].update(source="bounded_plus_metadata_decision",
+                    decision_stage_id=decision["stage_id"], decision_result_sha256=decision["result_sha256"])
+                _write(run_dir / "metadata_recovery" / (outcome["stage_id"] + ".json"), parsed["metadata_recovery"])
+            else:
+                parsed = {**parsed, "automatic_recovery": {"stage_id": "metadata_" + outcome["stage_id"],
+                    "status": decision["status"] if decision else status,
+                    "required_action": (decision.get("required_action") or decision.get("error") or
+                        decision["result"].get("call_error") or decision["result"].get("issues")) if decision else action}}
+                if parsed.get("kind") == "completion":
+                    action = {"instruction": "The saved insertion response is unchanged. Resolve the metadata recovery blocker, then explicitly retry with retry_failed; the completer will not be called again for this saved response.",
+                        "automatic_recovery": parsed["automatic_recovery"]}
+            if decision and not decision["result"].get("complete"):
+                issues.append({"chapter_id": chapter_id, "code": "metadata_decision_pending",
+                    "errors": decision["result"].get("errors", decision["result"].get("issues", []))})
+        return parsed
 
     checkpoint()
     try:
@@ -261,7 +315,7 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
                 reads += 1
             if outcome is None:
                 break
-            parsed = outcome["result"]
+            parsed = recover_automatically(outcome, payload, chapter_id)
             draft = parsed.get("body_markdown", "")
             healthy = bool(parsed.get("transport_complete") and not parsed.get("errors") and draft)
             chapter_complete = bool(healthy and parsed.get("chapter_complete") and not parsed.get("remaining_content"))
@@ -275,7 +329,7 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
                 supplement = execute(payload, f"complete_{index:03d}",
                     lambda response: _completion_parser(response, original), chapter_id, completion=True)
                 if supplement is not None:
-                    patch = supplement["result"]
+                    patch = recover_automatically(supplement, payload, chapter_id)
                     if patch.get("transport_complete") and patch.get("complete") and not patch.get("errors"):
                         draft = apply_insertions(original, patch.get("insertions", []))
                         remaining = deepcopy(patch.get("remaining_content", []))
@@ -298,7 +352,10 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
                 if _metadata_unresolved(parsed):
                     status = "metadata_unresolved"
                     raw_path = Path(outcome["attempt_dir"]) / "RAW_RESPONSE.json"
-                    action = {"instruction": "Review this exact saved body and explicitly declare complete and remaining_content; resume with metadata_declarations. No author rewrite is needed.",
+                    action = {"instruction": ("The saved body is unchanged. Automatic metadata recovery did not finish. Resolve the recorded blocker, then explicitly retry the metadata stage with retry_failed; no author rewrite is needed. A manual metadata declaration remains optional."
+                            if parsed.get("automatic_recovery") else
+                            "Review this exact saved body and explicitly declare complete and remaining_content; resume with metadata_declarations. No author rewrite is needed."),
+                        "automatic_recovery": parsed.get("automatic_recovery"),
                         "declaration_binding": {"stage_id": outcome["stage_id"], "cache_key": outcome["cache_key"],
                             "raw_response_sha256": hashlib.sha256(raw_path.read_bytes()).hexdigest(),
                             "body_sha256": _text_hash(draft)}}

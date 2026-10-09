@@ -282,7 +282,7 @@ def _decode(response: Any) -> tuple[dict[str, Any], list[str]]:
         obj = None
     if isinstance(obj, Mapping):
         return dict(obj), []
-    marker = re.search(r"(?:^|\n)(`{3,}|~{3,})guide_writer_metadata[ \t]*\r?\n", value)
+    marker = re.search(r"(?:^|\n)[ \t]*(`{3,}|~{3,})[ \t]*guide_writer_metadata[ \t]*\r?\n", value, re.I)
     if marker:
         body, rest = value[:marker.start()], value[marker.end():]
         closing = re.search(r"\r?\n" + re.escape(marker.group(1)) + r"[ \t]*\s*$", rest)
@@ -290,9 +290,20 @@ def _decode(response: Any) -> tuple[dict[str, Any], list[str]]:
             meta = json.loads(rest[:closing.start()] if closing else rest)
         except ValueError:
             meta = None
-        if closing and isinstance(meta, Mapping):
+        if isinstance(meta, Mapping):
             return {**meta, "body_markdown": body}, []
         return {"body_markdown": body}, ["guided_metadata_incomplete_or_invalid"]
+    # A terminal JSON fence with exactly the metadata fields is an unambiguous
+    # spelling variant. Never reinterpret arbitrary prose/code examples as status.
+    trailing = re.search(r"(?:^|\n)[ \t]*(`{3,}|~{3,})[ \t]*json[ \t]*\r?\n(.*?)\r?\n[ \t]*\1[ \t]*$", value, re.S | re.I)
+    if trailing:
+        try:
+            meta = json.loads(trailing.group(2))
+        except ValueError:
+            meta = None
+        if (isinstance(meta, Mapping) and set(meta) == {"complete", "remaining_content"}
+                and isinstance(meta["complete"], bool) and isinstance(meta["remaining_content"], list)):
+            return {**meta, "body_markdown": value[:trailing.start()]}, []
     if text.startswith("{"):
         match = re.search(r'"body_markdown"\s*:\s*"', text)
         body = _string_prefix(text, match.end() - 1)[0] if match else ""
@@ -300,9 +311,14 @@ def _decode(response: Any) -> tuple[dict[str, Any], list[str]]:
     return {"body_markdown": value}, ["guided_metadata_missing"]
 
 
+def _guided_transport_complete(response):
+    reasons, incomplete = _transport_status(response)
+    return not incomplete and "timeout" not in reasons
+
+
 def parse_guided_response(response: Any) -> dict[str, Any]:
     obj, errors = _decode(response)
-    transport = not _transport_status(response)[1]
+    transport = _guided_transport_complete(response)
     if "read_atom_ids" in obj or "read_source_handles" in obj:
         if obj.get("body_markdown") or obj.get("insertions"):
             raise CandidateError("guided_read_mixed_with_prose")
@@ -328,7 +344,23 @@ def parse_guided_response(response: Any) -> dict[str, Any]:
         errors.append("guided_complete_with_remaining_content")
     return {"kind": "author", "body_markdown": body, "complete": obj.get("complete") is True and not errors and transport,
             "remaining_content": remaining, "errors": errors, "issues": [{"code": e} for e in errors],
-            "transport_complete": transport}
+            "transport_complete": transport, "completion_declared": isinstance(obj.get("complete"), bool),
+            "declared_complete": obj.get("complete") if isinstance(obj.get("complete"), bool) else None}
+
+
+def parse_metadata_response(response: Any, original: str) -> dict[str, Any]:
+    """Validate a metadata-only decision, preserving the exact immutable draft."""
+    obj, errors = _decode(response)
+    if errors or set(obj) != {"complete", "remaining_content"}:
+        raise CandidateError("guided_metadata_decision_fields_invalid")
+    status_input = {**response, "body_markdown": original} if isinstance(response, Mapping) and "complete" in response and "content" not in response else response
+    parsed = parse_guided_response({**obj, "body_markdown": original})
+    transport = _guided_transport_complete(status_input)
+    if obj.get("complete") is False and not parsed["remaining_content"]:
+        parsed["errors"].append("guided_metadata_decision_requires_specific_gaps")
+    return {**parsed, "kind": "metadata", "transport_complete": transport,
+            "chapter_complete": parsed["complete"],
+            "complete": transport and not parsed["errors"]}
 
 
 def apply_insertions(original: str, insertions: Any) -> str:
@@ -362,6 +394,6 @@ def parse_completion_response(response: Any, original: str) -> dict[str, Any]:
     # A direct insertion envelope's complete flag describes the manuscript,
     # just as a direct body envelope does; it is not a transport failure.
     status_input = {**response, "body_markdown": body} if isinstance(response, Mapping) and "insertions" in response else response
-    transport = not _transport_status(status_input)[1]
+    transport = _guided_transport_complete(status_input)
     return {**parsed, "kind": "completion", "insertions": deepcopy(obj["insertions"]),
         "complete": parsed["complete"] and transport, "transport_complete": transport, "untouched_prose_preserved": True}
