@@ -1,0 +1,164 @@
+--- F:\OptoMind-Review-2\outputs\guide_maker_retest_20261009_10cny\run_retest.py
++++ run_max_retest.py
+@@ -24,20 +24,22 @@
+ 
+ 
+ RETEST_ROOT = Path(__file__).resolve().parent
+-WORKTREE = RETEST_ROOT / "worktree"
++WORKTREE = Path(r"F:\OptoMind-Review-2\outputs\guide_maker_max_retest_20261009")
+ PROJECT_ROOT = WORKTREE
+-LEDGER = (PROJECT_ROOT.parent.parent / "guide_maker_acceptance_20261008_30cny" / "guide_budget.sqlite").resolve()
++LEDGER = Path(r"F:\OptoMind-Review-2\outputs\guide_maker_acceptance_20261008_30cny\guide_budget.sqlite")
+ MARKER = Path(str(LEDGER) + ".guide_maker.json")
+-MANIFEST = (PROJECT_ROOT.parent.parent / "evidence_body_round2_20261008_60cny" / "PREPARED_MANIFEST.json").resolve()
+-TOKENIZER = (PROJECT_ROOT.parent.parent.parent / "data" / "tokenizers" / "qwen3_5_9b" / "tokenizer.json").resolve()
+-KEY_FILE = (PROJECT_ROOT.parent.parent.parent / "api_keys" / "qwen-api-key.txt").resolve()
+-CONFIG = PROJECT_ROOT / "config" / "guide_maker" / "plus_first.json"
+-S0_PATH = RETEST_ROOT / "S0_BASELINE.json"
++MANIFEST = Path(r"F:\OptoMind-Review-2\outputs\evidence_body_round2_20261008_60cny\PREPARED_MANIFEST.json")
++TOKENIZER = Path(r"F:\OptoMind-Review-2\data\tokenizers\qwen3_5_9b\tokenizer.json")
++KEY_FILE = Path(r"F:\OptoMind-Review-2\api_keys\qwen-api-key.txt")
++CONFIG = WORKTREE / "config" / "guide_maker" / "explicit_max.json"
++S0_PATH = Path(r"F:\OptoMind-Review-2\outputs\guide_maker_retest_20261009_10cny\S0_BASELINE.json")
+ LOCK_PATH = Path(str(LEDGER) + ".guide_retest.lock")
++FEEDBACK_PATH = RETEST_ROOT / "USER_FEEDBACK.txt"
++FEEDBACK_TEXT = "最终正文连同引言应实际引用至少150篇去重文献。当前只生成正文写作指南，请保留这一全文目标并安排有实质用途的来源；不要机械平分章节指标，不堆列未实际讨论的引用，也不要把尚未生成的引言视为已完成引用。允许局部写法仍有缺陷，选择相对更好的可用安排。"
+ FREE_ROOT = RETEST_ROOT / "free_tests"
+ PREVIEW_ROOT = RETEST_ROOT / "message_preview"
+ LIVE_ROOT = RETEST_ROOT / "cold_start_live"
+-MODEL = "qwen3.5-plus"
++MODEL = "qwen3.8-max"
+ ORIGINAL_LIMIT = 30.0
+ MARKER_SCHEMA = "optomind.guide_maker_budget.v1"
+ 
+@@ -122,13 +124,18 @@
+     if missing:
+         raise RuntimeError("missing_retest_input:" + ",".join(missing))
+     head = os.popen("git -C " + _quote(WORKTREE) + " rev-parse HEAD").read().strip()
+-    if head != "145d68788037b4aa31295253d0b0d06f7de88685":
++    if head != "d834d79461591e1c3dc1ba00f6084314d5aa0d3b":
+         raise RuntimeError("fixed_source_sha_mismatch:" + head)
+     config = json.loads(CONFIG.read_text(encoding="utf-8"))
+     if config.get("maker", {}).get("model") != MODEL:
+-        raise RuntimeError("config_model_must_be_qwen3.5-plus")
+-    if any("-max" in str(value).lower() for value in config.get("maker", {}).values() if isinstance(value, str)):
+-        raise RuntimeError("config_contains_max_model")
++        raise RuntimeError("config_model_must_be_qwen3.8-max")
++    if not S0_PATH.is_file():
++        raise RuntimeError("original_fixed_s0_missing")
++    s0 = json.loads(S0_PATH.read_text(encoding="utf-8"))
++    if s0.get("s0_actual_cny") != 0.517030 or s0.get("cap_cny") != 10.517030:
++        raise RuntimeError("original_fixed_s0_mismatch")
++    if FEEDBACK_PATH.read_text(encoding="utf-8") != FEEDBACK_TEXT:
++        raise RuntimeError("feedback_not_exact_user_requirement")
+ 
+ 
+ def _quote(path: Path) -> str:
+@@ -310,10 +317,10 @@
+     payload = payloads[0]
+     if payload.get("prior_guide") is not None or payload.get("materials") not in ([], None):
+         raise RuntimeError("first_message_contains_prior_guide_or_materials")
+-    if payload.get("feedback") not in (None, ""):
++    if payload.get("feedback") != FEEDBACK_TEXT:
+         raise RuntimeError("first_message_contains_feedback")
+     target = output / "FIRST_MESSAGE_PREVIEW.json"
+-    _write_json(target, {"request_preview": str(plans[-1]), "messages_path": str(messages_path), "messages": messages, "payload_checks": {"prior_guide": None, "materials": [], "feedback": None}})
++    _write_json(target, {"request_preview": str(plans[-1]), "messages_path": str(messages_path), "messages": messages, "payload_checks": {"prior_guide": None, "materials": [], "feedback": FEEDBACK_TEXT}})
+     return target
+ 
+ 
+@@ -337,7 +344,7 @@
+             self.limit_cny = min(float(self.limit_cny or ORIGINAL_LIMIT), cap)
+             return super().reserve(amount_cny, call_id)
+ 
+-    class PlusOnlyClient(real_client):
++    class MaxOnlyClient(real_client):
+         def __init__(self, *args, **kwargs):
+             model = kwargs.get("model", MODEL)
+             if model != MODEL:
+@@ -365,10 +372,10 @@
+         if getattr(loaded, "GlobalBudgetLedger", None) is real_ledger:
+             setattr(loaded, "GlobalBudgetLedger", CappedLedger)
+         if getattr(loaded, "QwenDirectClient", None) is real_client:
+-            setattr(loaded, "QwenDirectClient", PlusOnlyClient)
++            setattr(loaded, "QwenDirectClient", MaxOnlyClient)
+     module4.GlobalBudgetLedger = CappedLedger
+-    module4.QwenDirectClient = PlusOnlyClient
+-    return CappedLedger, PlusOnlyClient
++    module4.QwenDirectClient = MaxOnlyClient
++    return CappedLedger, MaxOnlyClient
+ 
+ 
+ def _assert_live_evidence(output: Path, before: Mapping[str, Any], s0: Mapping[str, Any]) -> None:
+@@ -380,11 +387,11 @@
+     for path in output.glob("stages/**/attempt_*/ACTUAL_REQUEST.json"):
+         value = json.loads(path.read_text(encoding="utf-8"))
+         if value.get("profile", {}).get("model") != MODEL:
+-            raise RuntimeError("actual_request_non_plus_model:" + str(path))
++            raise RuntimeError("actual_request_non_max_model:" + str(path))
+     for path in output.glob("stages/**/attempt_*/USAGE.json"):
+         value = json.loads(path.read_text(encoding="utf-8"))
+         if value.get("model") != MODEL:
+-            raise RuntimeError("usage_non_plus_model:" + str(path))
++            raise RuntimeError("usage_non_max_model:" + str(path))
+     _write_json(output / "BUDGET_CAP_CHECK.json", {"before": before, "after": after, "s0": s0, "cap_cny": s0["cap_cny"], "db_limit_unchanged": True, "marker_unchanged": True, "all_wire_models": MODEL})
+ 
+ 
+@@ -426,10 +433,10 @@
+         resumed = TestCapped(limit_cny=30.0, path=test_db)
+         assert resumed.as_dict()["actual_cny"] == 1.4, "synthetic resume reset actual spend"
+         marker_hash = _sha256(MARKER)
+-        capped_cls, plus_client_cls = _patch_live_factory(float(s0["cap_cny"]), block_network=True)
++        capped_cls, max_client_cls = _patch_live_factory(float(s0["cap_cny"]), block_network=True)
+         original_ledger = capped_cls(limit_cny=ORIGINAL_LIMIT, path=LEDGER)
+         try:
+-            plus_client_cls(model="qwen3.5-max", key_file="missing", budget_ledger=original_ledger, max_retries=0, max_keys=1)
++            max_client_cls(model="qwen3.5-plus", key_file="missing", budget_ledger=original_ledger, max_retries=0, max_keys=1)
+         except Exception as exc:
+             assert "live_wire_model_rejected" in str(exc), "Max rejection did not happen at wrapper boundary"
+         else:
+@@ -439,13 +446,13 @@
+         # this free test.
+         import argparse
+         from scripts.upgrade3 import writer_candidates as shared
+-        args = argparse.Namespace(run=True, responses=None, budget_ledger=str(LEDGER), budget_limit=ORIGINAL_LIMIT, key_file=str(KEY_FILE), allow_max=False)
++        args = argparse.Namespace(run=True, responses=None, budget_ledger=str(LEDGER), budget_limit=ORIGINAL_LIMIT, key_file=str(KEY_FILE), allow_max=True)
+         factory = shared.make_live_factory(args, token_counter=None)
+         stage_dir = FREE_ROOT / "factory_stage"
+         stage_dir.mkdir(parents=True, exist_ok=True)
+         call = factory("maker", stage_dir, json.loads(CONFIG.read_text(encoding="utf-8"))["maker"])
+         assert getattr(call, "model", None) == MODEL, "factory selected a non-Plus model"
+-        providers = [cell.cell_contents for cell in (call.__closure__ or ()) if isinstance(cell.cell_contents, plus_client_cls)]
++        providers = [cell.cell_contents for cell in (call.__closure__ or ()) if isinstance(cell.cell_contents, max_client_cls)]
+         assert len(providers) == 1 and providers[0].max_retries == 0 and providers[0].max_keys == 1, "factory enabled retries or key rotation"
+         try:
+             call([{"role": "user", "content": "free network boundary probe"}], model=MODEL)
+@@ -457,8 +464,9 @@
+         assert before == after, "free selftest changed original ledger"
+         assert marker_hash == _sha256(MARKER), "free selftest changed marker"
+         assert original_db_hash == _sha256(LEDGER), "free selftest changed original database bytes"
+-        _write_json(FREE_ROOT / "SELFTEST_RESULT.json", {"status": "passed", "checks": ["over_cap_blocked", "resume_preserves_spend", "s0_recovery_does_not_rebase", "max_rejected", "authoritative_factory_capped", "network_boundary_blocked", "original_db_and_marker_unchanged"], "s0_sidecar": str(S0_PATH), "s0": s0})
++        _write_json(FREE_ROOT / "SELFTEST_RESULT.json", {"status": "passed", "checks": ["over_cap_blocked", "resume_preserves_spend", "s0_recovery_does_not_rebase", "other_model_rejected", "authoritative_factory_capped", "network_boundary_blocked", "original_db_and_marker_unchanged"], "s0_sidecar": str(S0_PATH), "s0": s0})
+     finally:
++        temp.resolve().relative_to(FREE_ROOT.resolve())
+         shutil.rmtree(temp, ignore_errors=True)
+     return 0
+ 
+@@ -468,7 +476,7 @@
+         before = _ledger_snapshot()
+         s0 = _ensure_s0(before)
+         output = _inside_retest(PREVIEW_ROOT)
+-        argv = ["--manifest", str(MANIFEST), "--config", str(CONFIG), "--tokenizer", str(TOKENIZER), "--output", str(output)]
++        argv = ["--manifest", str(MANIFEST), "--config", str(CONFIG), "--allow-max", "--feedback", str(FEEDBACK_PATH), "--tokenizer", str(TOKENIZER), "--output", str(output)]
+         code = _run_cli(argv, output)
+         if code != 0:
+             raise RuntimeError("free_message_preview_failed:" + str(code))
+@@ -489,7 +497,7 @@
+         output = _inside_retest(LIVE_ROOT)
+         from optomind_research.runtime.upgrade3.module4 import runtime as module4
+         _patch_live_factory(float(s0["cap_cny"]))
+-        argv = ["--manifest", str(MANIFEST), "--config", str(CONFIG), "--tokenizer", str(TOKENIZER), "--output", str(output), "--run", "--budget-mode", "dedicated", "--budget-ledger", str(LEDGER), "--budget-limit", str(ORIGINAL_LIMIT), "--key-file", str(KEY_FILE)]
++        argv = ["--manifest", str(MANIFEST), "--config", str(CONFIG), "--allow-max", "--feedback", str(FEEDBACK_PATH), "--tokenizer", str(TOKENIZER), "--output", str(output), "--run", "--budget-mode", "dedicated", "--budget-ledger", str(LEDGER), "--budget-limit", str(ORIGINAL_LIMIT), "--key-file", str(KEY_FILE)]
+         code = _run_cli(argv, output)
+         if code not in (0, 3):
+             raise RuntimeError("cold_start_live_failed:" + str(code))

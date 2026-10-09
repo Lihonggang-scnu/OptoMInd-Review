@@ -1,0 +1,44 @@
+........................................................................ [ 40%]
+..............F.............................................F........... [ 80%]
+....................................                                     [100%]
+================================== FAILURES ===================================
+__________ test_missing_previously_marked_ledger_cannot_reset_spend ___________
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-1393/test_missing_previously_marked0')
+
+    def test_missing_previously_marked_ledger_cannot_reset_spend(tmp_path):
+        path = tmp_path / 'guide.sqlite'
+        cli._execution_budget_guard(args(path))
+>       path.unlink()
+
+tests\upgrade3\test_guide_maker_dedicated_budget.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-1393/test_missing_previously_marked0/guide.sqlite')
+missing_ok = False
+
+    def unlink(self, missing_ok=False):
+        """
+        Remove this file or link.
+        If the path is a directory, use rmdir() instead.
+        """
+        try:
+>           os.unlink(self)
+E           PermissionError: [WinError 32] 另一个程序正在使用此文件，进程无法访问。: 'C:\\Users\\Administrator\\AppData\\Local\\Temp\\pytest-of-Administrator\\pytest-1393\\test_missing_previously_marked0\\guide.sqlite'
+
+C:\Anaconda\Lib\pathlib.py:1342: PermissionError
+_______________ test_archived_b6_metadata_and_delivery_consumer _______________
+
+    def test_archived_b6_metadata_and_delivery_consumer():
+        from pathlib import Path
+        from optomind_research.runtime.upgrade3.guided_body_contracts import normalize_citation_handles
+        from optomind_research.runtime.upgrade3.delivery_citations import build_delivery_citation_map
+        archive = Path(__file__).resolve().parents[2] / 'docs/acceptance/guided-body-20261008/routes/B/stages/author_006'
+>       attempt = next(archive.glob('*/attempt_001'))
+E       StopIteration
+
+tests\upgrade3\test_guided_body_contracts.py:260: StopIteration
+=========================== short test summary info ===========================
+FAILED tests/upgrade3/test_guide_maker_dedicated_budget.py::test_missing_previously_marked_ledger_cannot_reset_spend
+FAILED tests/upgrade3/test_guided_body_contracts.py::test_archived_b6_metadata_and_delivery_consumer
+2 failed, 178 passed in 46.06s
