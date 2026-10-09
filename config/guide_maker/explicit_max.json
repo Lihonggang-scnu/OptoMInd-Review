@@ -1,0 +1,17 @@
+{
+  "schema_version": "optomind.guide_maker_config.v1",
+  "purpose": "Explicit local comparison candidate using the repository-supported qwen3.8-max profile. Paid execution requires both --run and --allow-max; preview is free. Never selected automatically; Plus remains the default. One guide run may request relevant materials within the existing stage and budget bounds. No writer launch or quality reroll loop. Provider identity, current capacity, pricing, tokenizer and the user's finite budget must be checked locally before a paid call.",
+  "maker": {
+    "model": "qwen3.8-max",
+    "thinking": true,
+    "thinking_budget": 32768,
+    "max_output_tokens": 32768,
+    "json_mode": false,
+    "timeout_seconds": 1800,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "max_model_calls": 8
+}

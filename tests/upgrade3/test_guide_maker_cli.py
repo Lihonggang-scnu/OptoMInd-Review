@@ -62,6 +62,34 @@ def test_preview_no_credentials_budget_or_writer(tmp_path, case, monkeypatch):
     assert '/must-never-read-secret' not in (out / 'CLI_CONTEXT.json').read_text()
 
 
+@pytest.mark.parametrize('permission', [[], ['--allow-max']])
+def test_explicit_max_config_preview_is_free_and_does_not_change_default(tmp_path, case, monkeypatch, permission):
+    fail = forbid(monkeypatch)
+    monkeypatch.setattr(cli, '_execution_budget_guard', fail)
+    explicit = cli.DEFAULT_CONFIG.with_name('explicit_max.json')
+    assert cli.read_json(cli.DEFAULT_CONFIG)['maker']['model'] == 'qwen3.5-plus'
+    out = tmp_path / 'max-preview'
+    assert cli.main(command(case, out, '--config', str(explicit), *permission)) == 0
+    result = cli.read_json(out / 'CLI_RUN.json')
+    effective = cli.read_json(out / 'EFFECTIVE_CONFIG.json')
+    assert effective['maker']['model'] == 'qwen3.8-max'
+    assert effective['max_model_calls'] == 8
+    assert result['execution_mode'] == 'preview'
+    assert result['model_calls'] == 0 and result['paid_dispatch_count'] == 0
+    assert result['writing_tested'] is False
+
+
+def test_explicit_max_config_live_requires_permission_before_budget_or_client(tmp_path, case, monkeypatch):
+    fail = forbid(monkeypatch)
+    monkeypatch.setattr(cli, '_execution_budget_guard', fail)
+    explicit = cli.DEFAULT_CONFIG.with_name('explicit_max.json')
+    out = tmp_path / 'max-denied'
+    assert cli.main(command(case, out, '--config', str(explicit), '--run')) == 2
+    error = cli.read_json(out / 'CLI_EXCEPTION.json')
+    assert error['message'].startswith('max_execution_requires_allow_max:maker:')
+    assert not (out / 'CLI_RUN.json').exists()
+
+
 def test_offline_replay_exact_guide_contract_and_resume(tmp_path, case, monkeypatch):
     forbid(monkeypatch)
     from optomind_research.runtime.upgrade3.guided_body_contracts import validate_guide
