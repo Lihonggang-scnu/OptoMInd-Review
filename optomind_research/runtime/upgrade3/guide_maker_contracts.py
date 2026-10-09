@@ -12,6 +12,7 @@ from typing import Any, Mapping, Sequence
 from .guided_body_contracts import (validate_guide, compile_guided_materials,
     _canonical_source, _is_scientific_atom, _scientific_tool, _strings)
 from .json_format_recovery import recover_json_format
+from .guided_content_units import content_task_catalog, assembly_warnings, guide_with_task_aliases
 from .writing_evidence import _digest
 from .writer_candidates_contracts import CandidateError
 
@@ -128,9 +129,10 @@ def build_maker_payload(bundle: Mapping[str, Any], prior_guide: Any = None,
                         read_history: Sequence[Any] = (), feedback: Any = None) -> dict[str, Any]:
     result = {"schema_version": PAYLOAD_SCHEMA,
         "full_outline": deepcopy(bundle["full_outline"]),
+        "content_task_catalog": content_task_catalog(bundle["science_archive"]),
         "source_catalog": deepcopy(bundle["source_catalog"]),
         "tool_catalog": deepcopy(bundle.get("tool_catalog", [])),
-        "prior_guide": deepcopy(prior_guide), "reading_needs": deepcopy(list(needs)),
+        "prior_guide": guide_with_task_aliases(prior_guide, bundle["science_archive"]), "reading_needs": deepcopy(list(needs)),
         "materials": deepcopy(list(materials)), "read_history": deepcopy(list(read_history))}
     feedback = bundle.get("feedback") if feedback is None else feedback
     if feedback is not None:
@@ -206,10 +208,16 @@ def parse_maker_response(response: Any, book: Mapping[str, Any], bundle: Mapping
     value, transport, format_recovery = decode_maker_response(response)
     if not isinstance(value, Mapping) or set(value) != {"guide", "reading_needs", "complete", "changes"}:
         raise CandidateError("maker_response_invalid_keys")
-    guide = validate_guide(value["guide"], book)
+    candidate = deepcopy(value["guide"])
+    if isinstance(candidate, Mapping) and isinstance(candidate.get("chapters"), list):
+        for chapter in candidate["chapters"]:
+            if isinstance(chapter, dict):
+                chapter.setdefault("writing_units", [])
+    guide = validate_guide(candidate, book)
     for chapter in guide["chapters"]:
-        for handle in chapter.get("source_handles", []):
-            _canonical_source(bundle["science_archive"], handle)
+        for scope in [chapter, *chapter.get("writing_units", [])]:
+            for handle in scope.get("source_handles", []):
+                _canonical_source(bundle["science_archive"], handle)
     errors = []
     try:
         needs = _needs(bundle, value["reading_needs"])
@@ -225,6 +233,7 @@ def parse_maker_response(response: Any, book: Mapping[str, Any], bundle: Mapping
     changes = _strings(value["changes"], "maker_changes")
     result = {"guide": guide, "reading_needs": needs, "complete": value["complete"] and transport and not errors,
         "changes": changes, "transport_complete": transport,
+        "assembly_warnings": assembly_warnings(guide),
         "errors": errors + ([] if transport else ["maker_transport_incomplete"])}
     if format_recovery is not None:
         result["format_recovery"] = format_recovery

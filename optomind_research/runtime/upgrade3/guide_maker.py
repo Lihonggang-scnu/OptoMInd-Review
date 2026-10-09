@@ -17,6 +17,7 @@ from .fullbody_writer import (_cost_summary, _dependency, _execute_stage, _messa
 from .writer_candidates import ROOT, _git_commit, _hash, _output_lock, _profile, _read, _safe_error, _write
 from .writer_candidates_contracts import CandidateError
 from .guided_body_contracts import validate_guide
+from .guided_content_units import assembly_warnings
 from .guide_maker_contracts import (compile_guide_input, build_maker_payload, parse_maker_response,
                                     resolve_material_requests, decode_maker_response)
 
@@ -47,7 +48,7 @@ def validate_config(config):
 
 
 def _source_file_hashes():
-    names = ("guide_maker.py", "guide_maker_contracts.py", "json_format_recovery.py", "chapter_arrangement.py", "guided_body_contracts.py", "writing_evidence.py",
+    names = ("guide_maker.py", "guide_maker_contracts.py", "guided_content_units.py", "json_format_recovery.py", "chapter_arrangement.py", "guided_body_contracts.py", "writing_evidence.py",
              "fullbody_writer.py", "writer_candidates.py", "writer_candidates_contracts.py", "module4/runtime.py")
     paths = [Path(__file__).parent / name for name in names]
     return {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
@@ -61,6 +62,15 @@ def render_guide(guide):
             parts.append("\n".join("- " + value for value in chapter["required_content"]))
         if chapter.get("source_handles"):
             parts.append("Sources: " + ", ".join(chapter["source_handles"]))
+        for unit in chapter.get("writing_units", []):
+            parts.extend(["### " + unit["title"], unit["writing_arrangement"],
+                          "Content connections: " + ", ".join(unit["content_task_ids"])])
+            if unit.get("required_content"):
+                parts.append("\n".join("- " + value for value in unit["required_content"]))
+            if unit.get("source_handles"):
+                parts.append("Sources: " + ", ".join(unit["source_handles"]))
+            if unit.get("assembly_note"):
+                parts.append("Assembly warning: " + unit["assembly_note"])
     return "\n\n".join(parts) + "\n"
 
 
@@ -231,7 +241,7 @@ def _run(book, output, config, client_factory, run, retry_failed, counter, feedb
                     if c != next((old for old in (prior or {}).get("chapters", []) if old["chapter_id"] == c["chapter_id"]), None)],
                 manuscript_guide_changed=(prior or {}).get("manuscript_guide") != guide["manuscript_guide"],
                 reads=records, reading_needs=deepcopy(parsed["reading_needs"]),
-                changes=deepcopy(parsed["changes"])))
+                changes=deepcopy(parsed["changes"]), assembly_warnings=deepcopy(parsed.get("assembly_warnings", []))))
             checkpoint()
             requested = resolve_material_requests(bundle, parsed["reading_needs"])
             queued = {unit["source_handle"] for unit in queue}
@@ -287,7 +297,8 @@ def _run(book, output, config, client_factory, run, retry_failed, counter, feedb
         read_history=history, read_trace=trace, model_calls=calls, client_invocations=calls,
         paid_dispatch_count=paid, execution_mode=mode, cost_summary=cost,
         requested_route="guide_maker", effective_route="guide_maker", material_preserved=True,
-        semantic_quality_unreviewed=True)
+        semantic_quality_unreviewed=True,
+        assembly_warnings=assembly_warnings(guide) if guide else [])
     _write(run_dir / "GUIDE_RESULT.json", result)
     if complete:
         _write(run_dir / "GUIDE.json", guide)

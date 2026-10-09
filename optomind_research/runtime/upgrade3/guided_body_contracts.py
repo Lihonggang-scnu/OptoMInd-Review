@@ -45,10 +45,11 @@ def validate_guide(guide: Mapping[str, Any], book: Mapping[str, Any]) -> dict[st
     if not isinstance(chapters, list) or not chapters:
         raise CandidateError("guide_chapters_missing")
     normalized = []
+    unit_pack = compile_guided_materials(book) if any(isinstance(ch, Mapping) and "writing_units" in ch for ch in chapters) else None
     for chapter in chapters:
         if not isinstance(chapter, Mapping):
             raise CandidateError("guide_chapter_not_object")
-        if set(chapter) - {"chapter_id", "title", "writing_arrangement", "required_content", "source_handles"}:
+        if set(chapter) - {"chapter_id", "title", "writing_arrangement", "required_content", "source_handles", "writing_units"}:
             raise CandidateError("guide_chapter_unknown_keys")
         for key in ("chapter_id", "title", "writing_arrangement"):
             if not isinstance(chapter.get(key), str) or not chapter[key].strip():
@@ -57,6 +58,13 @@ def validate_guide(guide: Mapping[str, Any], book: Mapping[str, Any]) -> dict[st
         for key in ("required_content", "source_handles"):
             if key in row:
                 row[key] = _strings(row[key], "guide_" + key)
+        if "writing_units" in row:
+            from .guided_content_units import normalize_writing_units
+            row["writing_units"] = normalize_writing_units(row["writing_units"], row["chapter_id"], unit_pack)
+        if unit_pack is not None:
+            for handle in [*row.get("source_handles", []),
+                    *(h for unit in row.get("writing_units", []) for h in unit.get("source_handles", []))]:
+                _canonical_source(unit_pack, handle)
         normalized.append(row)
     ids = [row["chapter_id"] for row in normalized]
     if len(set(ids)) != len(ids):
@@ -228,7 +236,21 @@ def build_author_payload(pack: Mapping[str, Any], guide: Mapping[str, Any],
         raise CandidateError("guided_chapter_unknown:" + str(cid))
     if not isinstance(accepted_body_markdown, str):
         raise CandidateError("guided_prefix_not_string")
-    chosen = _science_ids(pack, [*pack["chapter_source_handles"][cid], *assignment.get("source_handles", []),
+    source_handles = pack["chapter_source_handles"][cid]
+    if isinstance(chapter, Mapping) and "content_task_ids" in chapter:
+        from .guided_content_units import resolve_content_basis, resolve_content_contexts
+        parent = assignment
+        assignment = {"chapter_id": cid, "title": parent["title"],
+            "chapter_writing_arrangement": parent["writing_arrangement"],
+            "chapter_required_content": deepcopy(parent.get("required_content", [])),
+            **deepcopy(dict(chapter)), "content_basis": resolve_content_basis(chapter, pack),
+            "content_unit_contexts": resolve_content_contexts(chapter, pack)}
+        source_handles = list(dict.fromkeys(h for tid in chapter["content_task_ids"]
+            for h in pack["task_source_handles"][tid]))
+        source_handles += [*parent.get("source_handles", []), *_chapter_mentioned_sources(pack, parent),
+            *_chapter_mentioned_sources(pack, {"writing_arrangement": json.dumps(
+                assignment["content_unit_contexts"], ensure_ascii=False)})]
+    chosen = _science_ids(pack, [*source_handles, *assignment.get("source_handles", []),
         *_chapter_mentioned_sources(pack, assignment)])
     if reread_atoms:
         chosen += resolve_read_request(pack, {"read_atom_ids": list(reread_atoms)})

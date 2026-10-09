@@ -64,7 +64,7 @@ def _automatic_metadata_eligible(parsed):
 
 
 def _source_file_hashes():
-    paths = [Path(__file__), Path(__file__).with_name("guided_body_contracts.py"),
+    paths = [Path(__file__), Path(__file__).with_name("guided_body_contracts.py"), Path(__file__).with_name("guided_content_units.py"),
         Path(__file__).with_name("fullbody_writer.py"), Path(__file__).with_name("fullbody_contracts.py"),
         Path(__file__).with_name("writing_evidence.py"), Path(__file__).with_name("writer_candidates.py"),
         Path(__file__).with_name("writer_candidates_contracts.py"), Path(__file__).parent / "module4/runtime.py"]
@@ -126,8 +126,8 @@ def run_guided_body(book, guide, output_dir, config, client_factory=None, run=Fa
                     retry_failed=False, token_counter=None, counter=None, metadata_declarations=None):
     """Preview or run the frozen guide, retaining full evidence and actual prose.
 
-    Preview stops at the first unknown author output. An oversized chapter is
-    blocked intact; this route never invents subdivisions or shortens materials.
+    Preview stops at the first unknown author output. Guide-defined units run
+    continuously; oversized jobs are blocked intact without truncating materials.
     """
     output = Path(output_dir).resolve()
     with _output_lock(output):
@@ -176,7 +176,7 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
             material_preserved=True)
         if not stage["estimate"]["fits"]:
             stage["required_action"] = ("The whole guide, intact chapter evidence and full actual prefix exceed input capacity. "
-                "Increase available context capacity. Natural within-chapter guide subdivision is not implemented in this route; frozen chapter identities cannot be split here. No truncation or legacy task subdivision was performed.")
+                "Increase available context capacity. Guide-defined writing units are honored; this intact writing job needs more capacity. No truncation or automatic task subdivision was performed.")
         declaration = next((row for row in declarations if row["stage_id"] == stage_id), None)
         def dispatch(retry):
             return _execute_stage(stage, output=output, run_dir=run_dir, route="guided_body",
@@ -231,8 +231,8 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
             if decision and decision["result"].get("complete") and decision["result"].get("transport_complete"):
                 declaration = {"stage_id": outcome["stage_id"], "cache_key": outcome["cache_key"],
                     "raw_response_sha256": hashlib.sha256((Path(outcome["attempt_dir"]) / "RAW_RESPONSE.json").read_bytes()).hexdigest(),
-                    "body_sha256": _text_hash(original_body), "complete": decision["result"]["chapter_complete"] and parsed.get("declared_complete") is not False and not parsed.get("remaining_content"),
-                    "remaining_content": list(dict.fromkeys([*parsed.get("remaining_content", []), *decision["result"]["remaining_content"]]))}
+                    "body_sha256": _text_hash(original_body), "complete": decision["result"]["chapter_complete"],
+                    "remaining_content": deepcopy(decision["result"]["remaining_content"])}
                 recovered = _recover_metadata(outcome, declaration)
                 parsed = {**parsed, **recovered["result"], "kind": parsed["kind"]}
                 parsed["metadata_recovery"].update(source="bounded_plus_metadata_decision",
@@ -261,12 +261,31 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
         config = validate_config(config)
         manifest["config"] = config
         normalized = validate_guide(guide, book)
+        from .guided_content_units import assembly_warnings
+        manifest["writing_unit_assembly_warnings"] = assembly_warnings(normalized)
+        _write(run_dir / "NORMALIZED_GUIDE.json", normalized)
+        jobs = []
+        for chapter_index, chapter in enumerate(normalized["chapters"], 1):
+            units = chapter.get("writing_units")
+            for unit_index, unit in enumerate(units or [chapter], 1):
+                assignment = deepcopy(unit)
+                assignment["chapter_id"] = chapter["chapter_id"]
+                suffix = f"{chapter_index:03d}"
+                if units:
+                    suffix += f"_unit_{unit_index:03d}"
+                    assignment.update(chapter_title=chapter["title"],
+                        unit_position={"index": unit_index, "count": len(units)},
+                        sibling_units=[{"unit_id": u["unit_id"], "title": u["title"],
+                            "writing_arrangement": u["writing_arrangement"]} for u in units])
+                jobs.append((chapter_index, chapter, assignment, suffix))
+        expected_author_stages = {"author_" + job[3] for job in jobs}
+        completed_jobs = set()
         # Fail stale/typo declarations before ANY stage can dispatch. Do not
         # migrate old-code or another guide's saved attempt into this run.
         for declaration in declarations:
             stage_id, key = declaration["stage_id"], declaration.get("cache_key", "")
-            match = re.fullmatch(r"author_([0-9]{3})(?:_reread_[0-9]{2})?", stage_id)
-            if (not match or not 1 <= int(match.group(1)) <= len(normalized["chapters"])
+            match = re.fullmatch(r"(author_[0-9]{3}(?:_unit_[0-9]{3})?)(?:_reread_[0-9]{2})?", stage_id)
+            if (not match or match.group(1) not in expected_author_stages
                     or not isinstance(key, str) or not re.fullmatch(r"[0-9a-f]{64}", key)):
                 raise CandidateError("guided_metadata_declaration_stage_invalid")
             attempts = sorted((output / "stages" / stage_id / key).glob("attempt_*"))
@@ -288,19 +307,20 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
                 "attempt_dir": str(attempt), "result": _read(attempt / "RESULT.json")}, declaration)
         pack = compile_guided_materials(book)
         known_handles = list(dict.fromkeys([*pack["source_identities"], *pack["source_aliases"]]))
-        for index, chapter in enumerate(normalized["chapters"], 1):
+        chapter_read_counts = {}
+        for index, parent_chapter, chapter, stage_suffix in jobs:
             chapter_id = chapter["chapter_id"]
             atoms, reads = [], 0
             outcome = None
             while True:
                 payload = build_author_payload(pack, normalized, chapter, body, reread_atoms=atoms)
-                outcome = execute(payload, f"author_{index:03d}" + (f"_reread_{reads:02d}" if reads else ""), _author_parser, chapter_id)
+                outcome = execute(payload, f"author_{stage_suffix}" + (f"_reread_{reads:02d}" if reads else ""), _author_parser, chapter_id)
                 if outcome is None:
                     break
                 parsed = outcome["result"]
                 if not parsed.get("transport_complete") or parsed.get("kind") != "reread_request":
                     break
-                if reads >= config["max_rereads_per_chapter"]:
+                if chapter_read_counts.get(chapter_id, 0) >= config["max_rereads_per_chapter"]:
                     status, action = "reread_limit", "The chapter exhausted its bounded evidence reads."
                     outcome = None
                     break
@@ -313,6 +333,7 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
                     break
                 atoms.extend(fresh)
                 reads += 1
+                chapter_read_counts[chapter_id] = chapter_read_counts.get(chapter_id, 0) + 1
             if outcome is None:
                 break
             parsed = recover_automatically(outcome, payload, chapter_id)
@@ -326,7 +347,7 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
                 payload = build_author_payload(pack, normalized, chapter, body, reread_atoms=atoms)
                 assignment = payload["chapter_assignment"]
                 assignment.update(draft_body_markdown=draft, remaining_content=remaining)
-                supplement = execute(payload, f"complete_{index:03d}",
+                supplement = execute(payload, f"complete_{stage_suffix}",
                     lambda response: _completion_parser(response, original), chapter_id, completion=True)
                 if supplement is not None:
                     patch = recover_automatically(supplement, payload, chapter_id)
@@ -339,14 +360,24 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
                         # A failed transport is a stop, even with a useful draft.
                         healthy = healthy and bool(patch.get("transport_complete"))
             if draft:
-                path = output / "manuscript" / _text_hash(draft) / f"chapter_{index:03d}.md"
+                raw_draft = draft
+                # Only an exact repeated chapter heading is presentation noise.
+                # The immutable stage response remains available for inspection.
+                if "content_task_ids" in chapter and chapter["unit_position"]["index"] > 1:
+                    draft = re.sub(r"\A[ \t\r\n]*#{1,2}[ \t]+" + re.escape(parent_chapter["title"])
+                        + r"[ \t]*(?:\r?\n|$)", "", draft, count=1).lstrip("\r\n")
+                path = output / "manuscript" / _text_hash(draft) / f"chapter_{stage_suffix}.md"
                 _write(path, draft, text=True)
-                segments.append(dict(chapter_id=chapter_id, body_markdown=draft, sha256=_text_hash(draft),
+                segments.append(dict(chapter_id=chapter_id, unit_id=chapter.get("unit_id"),
+                    raw_unit_body_sha256=_text_hash(raw_draft), repeated_chapter_heading_removed=draft != raw_draft,
+                    body_markdown=draft, sha256=_text_hash(draft),
                     full_text_path=str(path), complete=chapter_complete, remaining_content=remaining,
                     original_draft_sha256=_text_hash(original), stage_id=outcome["stage_id"]))
                 body = "\n\n".join(row["body_markdown"] for row in segments)
             if chapter_complete:
-                completed.append(chapter_id)
+                completed_jobs.add(stage_suffix)
+                if all(suffix in completed_jobs for _, parent, _, suffix in jobs if parent["chapter_id"] == chapter_id):
+                    completed.append(chapter_id)
             if not healthy:
                 status = "transport_failed" if not parsed.get("transport_complete") or (supplement and not supplement["result"].get("transport_complete")) else "response_invalid"
                 if _metadata_unresolved(parsed):

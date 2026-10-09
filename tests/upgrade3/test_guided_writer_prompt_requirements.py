@@ -33,14 +33,15 @@ def test_both_author_and_completion_check_facts_and_preserve_explanation():
         assert 'ICI' not in prompt
     author = (PROMPTS / 'writer.md').read_text(encoding='utf-8')
     assert '材料自身有分歧' in author
-    assert '精炼篇幅' in author
+    assert '精炼篇幅' not in author
+    assert '按论证需要充分展开' in author
     assert '共同问题' in author
 
 
 def test_metadata_decision_handles_actual_gaps_without_rewriting():
     prompt = (PROMPTS / 'metadata.md').read_text(encoding='utf-8')
     assert '原正文逐字保留' in prompt
-    assert '有效的未完成声明及已有缺口继续保留' in prompt
+    assert '保留仍然存在的本次缺口' in prompt
     assert '合理的组织、标题和表述变化' in prompt
     assert '"complete":true' in prompt
     assert '"remaining_content":[]' in prompt

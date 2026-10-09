@@ -120,7 +120,7 @@ def test_provisional_and_final_guides_use_existing_writer_schema():
     draft = parse_maker_response(response(reading_needs=[need()]), raw, bundle)
     assert not draft["complete"] and draft["transport_complete"]
     final = parse_maker_response(json.dumps(response(complete=True, changes=["Clarified comparison limits"])), raw, bundle)
-    assert final["complete"] and final["guide"] == validate_guide(guide(), raw)
+    assert final["complete"] and final["guide"] == validate_guide({**guide(), "chapters": [{**c, "writing_units": []} for c in guide()["chapters"]]}, raw)
     pending = parse_maker_response(response(), raw, bundle)
     assert not pending["complete"] and not pending["reading_needs"]
 
@@ -134,7 +134,7 @@ def test_invalid_needs_fail_without_fuzzy_repair(bad):
     raw = book(); bundle = compile_guide_input(raw)
     parsed = parse_maker_response(response(reading_needs=[bad]), raw, bundle)
     assert parsed["errors"] and not parsed["complete"] and parsed["reading_needs"] == []
-    assert parsed["guide"] == validate_guide(guide(), raw)
+    assert parsed["guide"] == validate_guide({**guide(), "chapters": [{**c, "writing_units": []} for c in guide()["chapters"]]}, raw)
     assert parsed["transport_complete"]
     with pytest.raises(CandidateError):
         resolve_material_requests(bundle, [bad])
@@ -181,7 +181,7 @@ def test_invalid_reading_array_preserves_valid_provisional_guide():
     raw = book(); bundle = compile_guide_input(raw)
     for malformed in ("wrong", [need(), need()], [{"need_id": "N1"}]):
         parsed = parse_maker_response(response(reading_needs=malformed, complete=True), raw, bundle)
-        assert parsed["guide"] == validate_guide(guide(), raw)
+        assert parsed["guide"] == validate_guide({**guide(), "chapters": [{**c, "writing_units": []} for c in guide()["chapters"]]}, raw)
         assert parsed["errors"] and not parsed["complete"] and parsed["reading_needs"] == []
 
 

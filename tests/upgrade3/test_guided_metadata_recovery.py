@@ -94,15 +94,16 @@ def test_truncation_never_gets_metadata_recovery(tmp_path, book, guide, config, 
     assert result['status'] == 'transport_failed' and len(factory.calls) == 1, result
 
 
-def test_explicit_false_is_preserved_even_with_bad_remaining_field(tmp_path, book, guide, config):
+def test_invalid_remaining_field_uses_validated_decision(tmp_path, book, guide, config):
     factory = RecoveryFactory({'body_markdown': 'Prose.', 'complete': False, 'remaining_content': 5})
     result = execute(tmp_path, book, guide, auto_config(config), factory)
-    assert not result['complete'] and result['segments'][0]['complete'] is False
+    assert result['complete'] and result['segments'][0]['complete'] is True
     assert len(factory.calls) == 4
 
 
-def test_existing_gaps_cannot_be_erased_by_decision(tmp_path, book, guide, config):
-    factory = RecoveryFactory({'body_markdown': 'Prose.', 'complete': 'invalid', 'remaining_content': ['Missing table']})
+def test_actual_missing_table_preserved_by_validated_decision(tmp_path, book, guide, config):
+    factory = RecoveryFactory({'body_markdown': 'Prose.', 'complete': 'invalid', 'remaining_content': ['Missing table']},
+        decision={'complete': False, 'remaining_content': ['Missing table']})
     result = execute(tmp_path, book, guide, auto_config(config, completion_on_missing=False), factory)
     assert not result['complete'] and result['segments'][0]['remaining_content'] == ['Missing table']
 
@@ -243,3 +244,14 @@ def test_completion_metadata_explicit_retry_reuses_saved_insertions(tmp_path, bo
     resumed = execute(tmp_path, book, guide, auto_config(config), factory, retry_failed=True)
     assert resumed['complete'] and resumed['body_markdown'].count('Boundary.') == 1
     assert sum(role == 'writer' and 'draft_body_markdown' in payload['chapter_assignment'] for role, payload in factory.calls) == 1
+
+
+def test_contradictory_future_chapter_gaps_are_replaced_not_unioned(tmp_path, book, guide, config):
+    factory = RecoveryFactory({'body_markdown': 'Prose.', 'complete': True,
+        'remaining_content': ['Future chapter C2 explanation', 'Future chapter C3 table']})
+    result = execute(tmp_path, book, guide, auto_config(config), factory)
+    assert result['complete'], result
+    assert len(factory.calls) == 4
+    assert result['segments'][0]['body_markdown'] == 'Prose.'
+    assert result['segments'][0]['remaining_content'] == []
+    assert not any(stage['stage_id'].startswith('complete_') for stage in result['stages'])
