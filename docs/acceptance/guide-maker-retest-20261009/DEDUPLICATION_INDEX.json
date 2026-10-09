@@ -1,0 +1,40 @@
+{
+  "schema_version": "optomind.public.deduplication_index.v1",
+  "canonical_artifacts": {
+    "initial_messages": {
+      "public_parts": "cold_start_live/stages/maker_001/6338b8688189cb3d0cd04235a323a4ff62c9a14503842b3c2b2cba672bbab466/attempt_001/MESSAGES.json.parts",
+      "sha256": "6736afc27ce49c1c04e7d907bc7a3ffa1b432c7612627c4e19710b58d9ca0a64",
+      "duplicate_source_paths": [
+        "cold_start_live/runs/20261008T175451Z-e8f9b6d45a/plans/maker_001/MESSAGES.json"
+      ]
+    },
+    "guide": "cold_start_live/GUIDE.json",
+    "old_guide": "comparison/OLD_GUIDE.json"
+  },
+  "omitted_duplicates": [
+    {
+      "path": "cold_start_live/runs/20261008T175451Z-e8f9b6d45a/plans/maker_001/MESSAGES.json",
+      "reason": "byte-identical to canonical actual initial messages",
+      "sha256": "6736afc27ce49c1c04e7d907bc7a3ffa1b432c7612627c4e19710b58d9ca0a64"
+    },
+    {
+      "path": "writer_preview/runs/20261008T175722Z-64691994dc/plans/author_001/MESSAGES.json",
+      "reason": "full science author payload; replaced by AUTHOR_PAYLOAD_PROJECTION.json"
+    },
+    {
+      "path": "message_preview/runs/20261008T175248Z-062652ca96/plans/maker_001/MESSAGES.json",
+      "reason": "byte-identical to canonical actual initial messages; free preview duplicate omitted by de-duplication"
+    },
+    {
+      "path": "message_preview/runs/20261008T175330Z-2834c4e0ba/plans/maker_001/MESSAGES.json",
+      "reason": "byte-identical to canonical actual initial messages; free preview duplicate omitted by de-duplication"
+    },
+    {
+      "path": "message_preview/FIRST_MESSAGE_PREVIEW.json",
+      "reason": "free preview wrapper duplicates the canonical actual initial messages; omitted by de-duplication; PREVIEW_CHECK and CLI metadata retained",
+      "bytes": 855428,
+      "sha256": "a95800bd22f3f2a47860ea6e915c13c89b32199b5f7a39cc20a5bbcb55bcdf9c",
+      "replacement": "cold_start_live/stages/maker_001/6338b8688189cb3d0cd04235a323a4ff62c9a14503842b3c2b2cba672bbab466/attempt_001/MESSAGES.json.parts"
+    }
+  ]
+}

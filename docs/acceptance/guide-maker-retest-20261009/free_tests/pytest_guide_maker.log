@@ -1,0 +1,31 @@
+........................................................................ [ 79%]
+...........F.......                                                      [100%]
+================================== FAILURES ===================================
+__________ test_missing_previously_marked_ledger_cannot_reset_spend ___________
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-1389/test_missing_previously_marked0')
+
+    def test_missing_previously_marked_ledger_cannot_reset_spend(tmp_path):
+        path = tmp_path / 'guide.sqlite'
+        cli._execution_budget_guard(args(path))
+>       path.unlink()
+
+tests\upgrade3\test_guide_maker_dedicated_budget.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-1389/test_missing_previously_marked0/guide.sqlite')
+missing_ok = False
+
+    def unlink(self, missing_ok=False):
+        """
+        Remove this file or link.
+        If the path is a directory, use rmdir() instead.
+        """
+        try:
+>           os.unlink(self)
+E           PermissionError: [WinError 32] 另一个程序正在使用此文件，进程无法访问。: 'C:\\Users\\Administrator\\AppData\\Local\\Temp\\pytest-of-Administrator\\pytest-1389\\test_missing_previously_marked0\\guide.sqlite'
+
+C:\Anaconda\Lib\pathlib.py:1342: PermissionError
+=========================== short test summary info ===========================
+FAILED tests/upgrade3/test_guide_maker_dedicated_budget.py::test_missing_previously_marked_ledger_cannot_reset_spend
+1 failed, 90 passed in 13.38s
