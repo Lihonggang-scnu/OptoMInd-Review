@@ -44,3 +44,11 @@ def test_metadata_decision_handles_actual_gaps_without_rewriting():
     assert '合理的组织、标题和表述变化' in prompt
     assert '"complete":true' in prompt
     assert '"remaining_content":[]' in prompt
+
+
+def test_related_citations_survive_compression_and_background_use():
+    for name in ('writer.md', 'completion.md'):
+        prompt = (PROMPTS / name).read_text(encoding='utf-8')
+        for requirement in ('尽量保留', '背景', '定义', '方法', '合引多篇', '确实无关', '超出主题范围', '指南的全文引用要求'):
+            assert requirement in prompt, (name, requirement)
+    assert '压缩或合并论述时保留相应引文' in (PROMPTS / 'writer.md').read_text(encoding='utf-8')

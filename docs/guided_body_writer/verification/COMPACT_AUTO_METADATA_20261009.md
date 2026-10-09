@@ -10,7 +10,7 @@
 python -m pytest tests/upgrade3/test_guided* tests/upgrade3/test_fullbody* tests/upgrade3/test_writer_candidates* tests/upgrade3/test_writing_evidence* -q
 ```
 
-结果：**526 passed in 73.44s**。其中 guided 专项 **166 passed**。另通过两份变更生产文件的 compileall 与 git diff --check。
+结果：**527 passed in 73.82s**。其中 guided 专项 **167 passed**。另通过两份变更生产文件的 compileall 与 git diff --check。
 
 未运行整个仓库测试套件，以上通过范围为指定写作链测试。未调用付费模型，未声称真实新正文质量已通过。
 
@@ -29,3 +29,5 @@ python -m pytest tests/upgrade3/test_guided* tests/upgrade3/test_fullbody* tests
 ## 仍需真实验证
 
 精简提示词对解释深度、语感和引用覆盖的效果；低成本 Plus 对实际内容缺口的判定质量。自动恢复成功也不代表事实已经由独立模型审查。
+
+引用保留补充已包含在最终回归：压缩保留引文、同处多引、背景/定义/方法支撑、相关性边界及从指南读取全文目标。
