@@ -1,12 +1,12 @@
 {
   "schema_version": "optomind.guide_maker_config.v1",
-  "purpose": "Explicit local comparison candidate using the repository-supported qwen3.8-max profile. Paid execution requires both --run and --allow-max; preview is free. Never selected automatically; Plus remains the default. One guide run may request relevant materials within the existing stage and budget bounds. No writer launch or quality reroll loop. Provider identity, current capacity, pricing, tokenizer and the user's finite budget must be checked locally before a paid call.",
+  "purpose": "Explicit local comparison candidate using qwen3.8-max with provider JSON Object mode plus local contract validation and bounded format recovery. JSON mode is not strict JSON Schema or a scientific-quality guarantee. Paid execution requires both --run and --allow-max; preview is free. Never selected automatically; Plus remains the default. No writer launch or quality reroll loop; existing stage and finite budget bounds apply.",
   "maker": {
     "model": "qwen3.8-max",
     "thinking": true,
     "thinking_budget": 32768,
     "max_output_tokens": 32768,
-    "json_mode": false,
+    "json_mode": true,
     "timeout_seconds": 1800,
     "stream": true,
     "stream_overall_timeout_seconds": 3600,

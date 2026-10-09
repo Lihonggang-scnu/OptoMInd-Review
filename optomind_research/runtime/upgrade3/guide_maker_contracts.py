@@ -6,12 +6,12 @@ On-demand reading sends whole source packets, with all conditions and variants.
 from __future__ import annotations
 
 from copy import deepcopy
-import json
 import re
 from typing import Any, Mapping, Sequence
 
 from .guided_body_contracts import (validate_guide, compile_guided_materials,
     _canonical_source, _is_scientific_atom, _scientific_tool, _strings)
+from .json_format_recovery import recover_json_format
 from .writing_evidence import _digest
 from .writer_candidates_contracts import CandidateError
 
@@ -180,10 +180,12 @@ def _needs(bundle: Mapping[str, Any], needs: Any) -> list[dict[str, Any]]:
     return result
 
 
-def parse_maker_response(response: Any, book: Mapping[str, Any], bundle: Mapping[str, Any]) -> dict[str, Any]:
+def decode_maker_response(response: Any) -> tuple[Any, bool, dict[str, Any] | None]:
+    """Decode immutable model text without schema validation or promotion."""
     value, transport = response, True
+    format_recovery = None
     while isinstance(value, Mapping) and "guide" not in value:
-        if value.get("finish_reason") in {"length", "max_tokens", "max_output_tokens", "content_filter", "error", "cancelled"} or value.get("error") or value.get("complete") is False:
+        if value.get("finish_reason") in {"length", "max_tokens", "max_output_tokens", "content_filter", "error", "cancelled", "timeout"} or value.get("error") or value.get("complete") is False:
             transport = False
         if isinstance(value.get("choices"), list) and value["choices"]:
             value = value["choices"][0]
@@ -193,11 +195,15 @@ def parse_maker_response(response: Any, book: Mapping[str, Any], bundle: Mapping
                 break
             value = nested
     if isinstance(value, str):
-        text = re.sub(r"^```(?:json)?\s*\n(.*?)\n```\s*$", r"\1", value.strip(), flags=re.S)
         try:
-            value = json.loads(text)
+            value, format_recovery = recover_json_format(value)
         except ValueError as exc:
             raise CandidateError("maker_response_invalid_json") from exc
+    return value, transport, format_recovery
+
+
+def parse_maker_response(response: Any, book: Mapping[str, Any], bundle: Mapping[str, Any]) -> dict[str, Any]:
+    value, transport, format_recovery = decode_maker_response(response)
     if not isinstance(value, Mapping) or set(value) != {"guide", "reading_needs", "complete", "changes"}:
         raise CandidateError("maker_response_invalid_keys")
     guide = validate_guide(value["guide"], book)
@@ -217,9 +223,12 @@ def parse_maker_response(response: Any, book: Mapping[str, Any], bundle: Mapping
     if value["complete"] and needs:
         raise CandidateError("maker_complete_has_pending_needs")
     changes = _strings(value["changes"], "maker_changes")
-    return {"guide": guide, "reading_needs": needs, "complete": value["complete"] and transport and not errors,
+    result = {"guide": guide, "reading_needs": needs, "complete": value["complete"] and transport and not errors,
         "changes": changes, "transport_complete": transport,
         "errors": errors + ([] if transport else ["maker_transport_incomplete"])}
+    if format_recovery is not None:
+        result["format_recovery"] = format_recovery
+    return result
 
 
 def resolve_material_requests(bundle: Mapping[str, Any], needs: Sequence[Any]) -> list[dict[str, Any]]:

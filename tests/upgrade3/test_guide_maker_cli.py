@@ -73,6 +73,9 @@ def test_explicit_max_config_preview_is_free_and_does_not_change_default(tmp_pat
     result = cli.read_json(out / 'CLI_RUN.json')
     effective = cli.read_json(out / 'EFFECTIVE_CONFIG.json')
     assert effective['maker']['model'] == 'qwen3.8-max'
+    assert effective['maker']['json_mode'] is True
+    stage = result['stages'][0]
+    assert stage['estimate']['wire_parameters']['response_format'] == {'type': 'json_object'}
     assert effective['max_model_calls'] == 8
     assert result['execution_mode'] == 'preview'
     assert result['model_calls'] == 0 and result['paid_dispatch_count'] == 0

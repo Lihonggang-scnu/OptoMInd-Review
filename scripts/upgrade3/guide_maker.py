@@ -109,7 +109,7 @@ def _implementation_hashes():
     root = PROJECT_ROOT / 'optomind_research/runtime/upgrade3'
     paths = [Path(__file__), Path(evidence.__file__), Path(shared.__file__),
              Path(guided.__file__), PROJECT_ROOT / 'scripts/upgrade3/fullbody_writer.py']
-    paths += [root / name for name in ('guide_maker.py', 'guide_maker_contracts.py',
+    paths += [root / name for name in ('guide_maker.py', 'guide_maker_contracts.py', 'json_format_recovery.py', 'chapter_arrangement.py',
         'guided_body_contracts.py', 'writing_evidence.py', 'fullbody_contracts.py',
         'fullbody_writer.py', 'writer_candidates.py', 'writer_candidates_contracts.py', 'module4/runtime.py')]
     paths += sorted((PROJECT_ROOT / 'prompts/guide_maker').rglob('*.md'))

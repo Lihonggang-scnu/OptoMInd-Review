@@ -13,12 +13,12 @@ from typing import Mapping
 import uuid
 
 from .fullbody_writer import (_cost_summary, _dependency, _execute_stage, _messages, _stage, _text_hash,
-                              _object, _transport_complete, _reject_outcome)
+                              _reject_outcome)
 from .writer_candidates import ROOT, _git_commit, _hash, _output_lock, _profile, _read, _safe_error, _write
 from .writer_candidates_contracts import CandidateError
 from .guided_body_contracts import validate_guide
 from .guide_maker_contracts import (compile_guide_input, build_maker_payload, parse_maker_response,
-                                    resolve_material_requests)
+                                    resolve_material_requests, decode_maker_response)
 
 SCHEMA_VERSION = "optomind.guide_maker.v1"
 PROMPT_ROOT = ROOT / "prompts" / "guide_maker"
@@ -47,7 +47,7 @@ def validate_config(config):
 
 
 def _source_file_hashes():
-    names = ("guide_maker.py", "guide_maker_contracts.py", "guided_body_contracts.py", "writing_evidence.py",
+    names = ("guide_maker.py", "guide_maker_contracts.py", "json_format_recovery.py", "chapter_arrangement.py", "guided_body_contracts.py", "writing_evidence.py",
              "fullbody_writer.py", "writer_candidates.py", "writer_candidates_contracts.py", "module4/runtime.py")
     paths = [Path(__file__).parent / name for name in names]
     return {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
@@ -62,6 +62,26 @@ def render_guide(guide):
         if chapter.get("source_handles"):
             parts.append("Sources: " + ", ".join(chapter["source_handles"]))
     return "\n\n".join(parts) + "\n"
+
+
+def persist_format_recovery(directory, parsed, raw_path=None):
+    """Write derived syntax evidence only; never change the provider response."""
+    audit = parsed.get("format_recovery")
+    if not audit:
+        return None
+    directory = Path(directory)
+    record = deepcopy(audit)
+    normalized = record.pop("normalized_text")
+    candidate = directory / "NORMALIZED_RESPONSE.json"
+    _write(candidate, normalized, text=True)
+    record.update(schema_version="optomind.guide_format_recovery.v1",
+        normalized_candidate_path=str(candidate), semantic_quality_unreviewed=True,
+        scientific_review_performed=False, provider_response_modified=False)
+    if raw_path is not None and Path(raw_path).is_file():
+        record.update(raw_response_path=str(raw_path),
+            raw_response_file_sha256=hashlib.sha256(Path(raw_path).read_bytes()).hexdigest())
+    _write(directory / "FORMAT_RECOVERY.json", record)
+    return str(directory / "FORMAT_RECOVERY.json")
 
 
 def run_guide_maker(book, output_dir, config, client_factory=None, run=False,
@@ -113,12 +133,16 @@ def _run(book, output, config, client_factory, run, retry_failed, counter, feedb
             except Exception as exc:
                 # Invalid requests cannot discard an otherwise valid full draft,
                 # but are never repaired into a successful cache entry or final.
-                obj = _object(response)
-                provisional = validate_guide(obj.get("guide"), book)
-                transport = (_transport_complete(response) if not (isinstance(response, Mapping)
-                    and "guide" in response and "content" not in response) else True)
+                obj, transport, audit = decode_maker_response(response)
+                try:
+                    provisional = validate_guide(obj.get("guide"), book)
+                except (ValueError, TypeError, AttributeError):
+                    provisional = None
                 parsed = dict(guide=provisional, reading_needs=[], changes=[], complete=False,
                               errors=[str(exc)], transport_complete=transport)
+                if audit:
+                    parsed["format_recovery"] = audit
+            parsed["maker_transport_complete"] = parsed.get("transport_complete", True)
             parsed["guide_complete"] = parsed.get("complete", False)
             parsed["complete"] = bool(parsed.get("guide") and not parsed.get("errors")
                                       and parsed.get("transport_complete", True))
@@ -160,6 +184,18 @@ def _run(book, output, config, client_factory, run, retry_failed, counter, feedb
                         outcome.update(result=repaired, result_sha256=_hash(repaired),
                                        status="complete" if repaired.get("complete") else "pending")
                         _write(Path(outcome["attempt_dir"]) / "RESULT.json", repaired)
+            # The shared stage wrapper has a shallow transport check. Retain
+            # the guide parser's nested-envelope decision without changing it.
+            parsed = outcome.get("result", {})
+            if parsed.get("maker_transport_complete") is False:
+                parsed.update(transport_complete=False, complete=False)
+                outcome.update(status="pending", result_sha256=_hash(parsed))
+                if outcome.get("attempt_dir"):
+                    _write(Path(outcome["attempt_dir"]) / "RESULT.json", parsed)
+            if outcome.get("attempt_dir") and parsed.get("format_recovery"):
+                attempt = Path(outcome["attempt_dir"])
+                outcome["format_recovery_path"] = persist_format_recovery(
+                    attempt, parsed, attempt / "RAW_RESPONSE.json")
             manifest["stages"].append(outcome)
             checkpoint()
             if "result" not in outcome:
