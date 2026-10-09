@@ -1,0 +1,790 @@
+{
+  "purpose": "Input-side identity conflict traced after generation; no input repair performed",
+  "actual_messages_relative_path": "units/Ch5/Ch5_U01/f051f02fd6331d7aa6975a76070f0dcc3c64a295da0f9f0857748998a84c6a9c/attempt_001/UNIT_MESSAGES.json",
+  "actual_messages_file_sha256": "3ea422d70c7ffd8d3a5d4aad48ecd8e480f5feed13a0dd5ef5dd2a1f4fabdc8e",
+  "catalog_P0593": {
+    "source_handle": "P0593",
+    "paper_id": "CorpusId:286644045",
+    "title": "Single-cell-based identification of drug synergy with immunotherapy via tumor microenvironment remodeling",
+    "doi": "10.1136/jitc-2025-014132",
+    "aliases": []
+  },
+  "tasks_mentioning_TACITO_or_P0593": [
+    {
+      "paragraph_id": "Ch5_U01_P03",
+      "point": "引入 TACITO Phase 2a RCT 数据，展示随机对照背景下的数值改善与统计局限。",
+      "development": "说明 d-FMT 组在 mRCC 一线治疗中 12 个月 PFS 率（70% vs 41%）与中位 PFS（24.0 vs 9.0 个月）呈有利趋势，但主要终点未达统计学显著性（P=0.053），提示疗效存在但需更大样本确证。中位 OS 41.0 vs 28.3 个月（P=0.167）。",
+      "source_uses": [
+        {
+          "source_handle": "P0593",
+          "role": "主论据",
+          "use": "提供 TACITO 试验在 mRCC 一线治疗中的 PFS 率、中位 PFS 及 OS 数据与统计结果"
+        }
+      ],
+      "carried_over": true,
+      "point_changed_from_brief": false,
+      "source_briefs": [
+        "Ch5_U01_P03"
+      ],
+      "source_brief_details": [
+        {
+          "paragraph_id": "Ch5_U01_P03",
+          "unit_id": "Ch5_U01",
+          "ordinal": 3,
+          "point": "引入 TACITO Phase 2a RCT 数据，展示随机对照背景下的数值改善与统计局限。",
+          "development": "说明 d-FMT 组在 mRCC 一线治疗中 12 个月 PFS 率（70% vs 41%）与中位 PFS（24.0 vs 9.0 个月）呈有利趋势，但主要终点未达统计学显著性（P=0.053），提示疗效存在但需更大样本确证。中位 OS 41.0 vs 28.3 个月（P=0.167）。",
+          "source_handles": [
+            "P0593"
+          ]
+        }
+      ]
+    }
+  ],
+  "tool_records_mentioning_TACITO": [
+    {
+      "need_id": "N61bd5cdf82bc1980ec2a-fe99d495492aaf34",
+      "question": "是否有已完成的大型随机对照 III 期临床试验证实微生物干预（如 FMT）在 ICI 治疗实体瘤中的疗效？",
+      "intended_use": "application_outcome",
+      "decision": "provider_retry",
+      "usable_content": "现有数据与用户询问的“已完成大型随机对照 III 期临床试验”设置不一致，提供的证据主要为 I/II 期研究，且研究设计（RCT vs 单臂）与人群（初治 vs 经治）存在差异。TACITO 试验（Phase 2a RCT）中，d-FMT 组相较于 p-FMT 组在 12 个月 PFS 率、中位 PFS 及中位 OS 上数值更高，提示正向差异，但原文未提供统计检验结果，不能认定具有统计学显著性。单臂试验结果方向不一致：ICI 经治人群（MITRIC 试验）ORR 为 0%，提示负向或无疗效；而初治黑色素瘤（MIMic 试验）或 NSCLC/黑色素瘤（FMT-LUMINate 试验）ORR 介于 65%-80%，提示正向差异。这表明微生物干预疗效可能受治疗线数影响，但缺乏 III 期 RCT 证实。\n\n适用条件：仅基于提供的 I/II 期试验数据；数值差异不代表统计显著；不包含用户指定的 III 期 RCT 证据；不推断未报告的机制。\nTACITO trial (P0593) / 12-month PFS rate / Phase 2a RCT, mRCC, first-line：d-FMT: 70%；p-FMT: 41%\nTACITO trial (P0593) / Median PFS / Phase 2a RCT, mRCC, first-line：d-FMT: 24.0 months；p-FMT: 9.0 months\nTACITO trial (P0593) / Median OS / Phase 2a RCT, mRCC, first-line：d-FMT: 41.0 months；p-FMT: 28.3 months\nMITRIC trial (P0578) / ORR / Phase IIa single-arm, ICI-refractory：All patients (n=12): 0%\nMITRIC trial (P0578) / Median PFS / Phase IIa single-arm, ICI-refractory：All patients (n=12): 1.5 months\nMIMic trial (P0577) / ORR / Phase I single-arm, first-line melanoma：All patients (n=20): 65%\nMIMic trial (P0577) / Median PFS / Phase I single-arm, first-line melanoma：All patients (n=20): 29.6 months\nFMT-LUMINate (P0583) / ORR / Phase 2 single-arm, NSCLC：NSCLC cohort: 80%\nFMT-LUMINate (P0583) / ORR / Phase 2 single-arm, Melanoma：Melanoma cohort: 75%",
+      "conditions": [
+        "TACITO trial (P0593)",
+        "Phase 2a RCT, mRCC, first-line",
+        "MITRIC trial (P0578)",
+        "Phase IIa single-arm, ICI-refractory",
+        "MIMic trial (P0577)",
+        "Phase I single-arm, first-line melanoma",
+        "FMT-LUMINate (P0583)",
+        "Phase 2 single-arm, NSCLC",
+        "Phase 2 single-arm, Melanoma"
+      ],
+      "limits": [
+        "已完成并发表主要结局数据的 Phase III RCT 研究（如注册号为 NCT 开头的 III 期试验结果）。"
+      ],
+      "still_missing": "已完成并发表主要结局数据的 Phase III RCT 研究（如注册号为 NCT 开头的 III 期试验结果）。",
+      "allowed_use": [
+        "background_context",
+        "explicit_objectives",
+        "explicit_method_summaries",
+        "explicit_reported_findings",
+        "explicit_leads"
+      ],
+      "sources": [
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "paper_id": "69b4c5f84be199181be6ab5d3124f306462234f3",
+          "title": "Fecal microbiota transplantation plus pembrolizumab and axitinib in metastatic renal cell carcinoma: the randomized phase 2 TACITO trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04189-2",
+          "original_source_handle": "P0593",
+          "identity_status": "conflicting_handle"
+        },
+        {
+          "paper_id": "69b4c5f84be199181be6ab5d3124f306462234f3",
+          "title": "Fecal microbiota transplantation plus pembrolizumab and axitinib in metastatic renal cell carcinoma: the randomized phase 2 TACITO trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04189-2",
+          "original_source_handle": "P0593",
+          "identity_status": "conflicting_handle"
+        },
+        {
+          "paper_id": "a1c056e6d54a3498db16737d087fae44f686a900",
+          "title": "Fecal microbiota transplantation improves anti-PD-1 inhibitor efficacy in unresectable or metastatic solid cancers refractory to anti-PD-1 inhibitor.",
+          "year": "2024",
+          "doi": "10.1016/j.chom.2024.06.010",
+          "original_source_handle": "P0594",
+          "identity_status": "conflicting_handle"
+        },
+        {
+          "source_handle": "P0577",
+          "paper_id": "20c143d5373eab0bfea2067cf66b0e260dfeb1ef",
+          "title": "Improved survival in advanced melanoma patients treated with fecal microbiota transplantation using healthy donor stool in combination with anti-PD1: final results of the MIMic phase 1 trial",
+          "year": "2025",
+          "doi": "10.1136/jitc-2025-012659"
+        },
+        {
+          "source_handle": "P0583",
+          "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a",
+          "title": "Fecal microbiota transplantation plus immunotherapy in non-small cell lung cancer and melanoma: the phase 2 FMT-LUMINate trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04186-5"
+        },
+        {
+          "paper_id": "CorpusId:290154100",
+          "title": "Navigating the gut–metabolite–immune axis: enhancing efficacy and mitigating toxicity of immune checkpoint inhibitors",
+          "year": "2026",
+          "doi": "10.3389/fimmu.2026.1803970",
+          "original_source_handle": "P0584",
+          "identity_status": "conflicting_identity"
+        },
+        {
+          "source_handle": "P0577",
+          "paper_id": "20c143d5373eab0bfea2067cf66b0e260dfeb1ef",
+          "title": "Improved survival in advanced melanoma patients treated with fecal microbiota transplantation using healthy donor stool in combination with anti-PD1: final results of the MIMic phase 1 trial",
+          "year": "2025",
+          "doi": "10.1136/jitc-2025-012659"
+        },
+        {
+          "source_handle": "P0577",
+          "paper_id": "20c143d5373eab0bfea2067cf66b0e260dfeb1ef",
+          "title": "Improved survival in advanced melanoma patients treated with fecal microbiota transplantation using healthy donor stool in combination with anti-PD1: final results of the MIMic phase 1 trial",
+          "year": "2025",
+          "doi": "10.1136/jitc-2025-012659"
+        },
+        {
+          "source_handle": "P0577",
+          "paper_id": "20c143d5373eab0bfea2067cf66b0e260dfeb1ef",
+          "title": "Improved survival in advanced melanoma patients treated with fecal microbiota transplantation using healthy donor stool in combination with anti-PD1: final results of the MIMic phase 1 trial",
+          "year": "2025",
+          "doi": "10.1136/jitc-2025-012659"
+        },
+        {
+          "source_handle": "P0577",
+          "paper_id": "20c143d5373eab0bfea2067cf66b0e260dfeb1ef",
+          "title": "Improved survival in advanced melanoma patients treated with fecal microbiota transplantation using healthy donor stool in combination with anti-PD1: final results of the MIMic phase 1 trial",
+          "year": "2025",
+          "doi": "10.1136/jitc-2025-012659"
+        },
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "source_handle": "P0583",
+          "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a",
+          "title": "Fecal microbiota transplantation plus immunotherapy in non-small cell lung cancer and melanoma: the phase 2 FMT-LUMINate trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04186-5"
+        }
+      ],
+      "provenance": {
+        "downloads": 0,
+        "model_calls": 0,
+        "source": "judge",
+        "whole_paper_rereads": 0
+      },
+      "chapter_ids": [
+        "Ch5"
+      ],
+      "unit_key": ""
+    },
+    {
+      "need_id": "N48436b3aa73aea86f35f-b3c8ffc2a0ced9d8",
+      "question": "是否有已完成的大型随机对照 III 期临床试验证实微生物干预（如 FMT）在 ICI 治疗实体瘤中的疗效？",
+      "intended_use": "mechanism",
+      "decision": "answer_from_local",
+      "usable_content": "现有文献中尚未发现已完成的大型随机对照 III 期临床试验证实微生物干预（如 FMT）在实体瘤中的疗效。目前最高级别的证据来自 Phase IIa 阶段的随机对照试验和单臂研究，结果呈现异质性且未达成最终确证。\n\n具体而言，TACITO 试验是一项针对转移性肾细胞癌（mRCC）一线治疗患者的 Phase 2a 随机双盲安慰剂对照试验。虽然其次要终点中位无进展生存期（PFS）显著延长（24.0个月 vs 9.0个月，HR=0.50, P=0.035），但主要终点 12 个月 PFS 率未达到统计学显著差异（70% vs 41%, P=0.053），且总生存期（OS）虽呈有利趋势但未达显著性（P=0.167）。这表明在特定癌种和一线治疗背景下，FMT 显示出潜在的临床活性信号，但尚不足以作为确证性证据。\n\n相比之下，MITRIC 试验是一项针对多种晚期实体瘤（包括黑色素瘤、头颈鳞癌等）ICI 耐药患者的单臂 Phase IIa 篮式试验。该研究结果显示 FMT 安全性良好，但临床疗效有限：客观缓解率（ORR）为 0%，中位 PFS 仅为 1.5 个月，仅 1 名患者获得长期疾病稳定。机制分析提示，这种疗效局限可能与供体菌群定植短暂、宿主基线免疫环境（如髓系优势、高 IL-8）反映的是疾病状态而非 FMT 的直接作用有关。\n\n此外，Kim 等人（2024）发表的一项前瞻性单臂研究显示，在抗 PD-1 耐药的晚期实体瘤中，FMT 联合抗 PD-1 治疗可获得 7.7% 的 ORR 和 46.2% 的疾病控制率，并鉴定出特定的有益菌株（Prevotella merdae Immunoactis）。然而，由于缺乏随机对照设计和较大的样本量，这属于概念验证性质的探索性数据。\n\n综上所述，尽管有 Phase 2a RCT 显示部分指标改善，也有单臂研究提供机制支持，但目前缺乏大型 III 期 RCT 来确证 FMT 在广泛实体瘤人群中的确切疗效和生存获益。现有的阴性或混合结果提示疗效高度依赖于癌症类型、治疗线数（一线 vs 耐药）、供体选择及宿主免疫背景。\nMITRIC trial (P0578) / ORR: 0%; Median PFS: 1.5 months; Clinical benefit (SD >6mo): 1/12 patients / Phase IIa single-arm basket trial, ICI-refractory advanced solid tumors (melanoma, HNSCC, RCC, MSI-H pancreatic cancer)：Total (n=12): ORR 0%, Median PFS 1.5 mo\nTACITO trial (P0593) / 12-month PFS rate: 70% vs 41% (P=0.053); Median PFS: 24.0 vs 9.0 months (HR=0.50, P=0.035); Median OS: 41.0 vs 28.3 months (P=0.167) / Phase 2a randomized double-blind placebo-controlled trial, treatment-naive metastatic RCC (pembrolizumab + axitinib)：Donor FMT (d-FMT) (n=23 approx based on total 45): 12-mo PFS 70%, Median PFS 24.0 mo, Median OS 41.0 mo；Placebo FMT (p-FMT) (n=22 approx based on total 45): 12-mo PFS 41%, Median PFS 9.0 mo, Median OS 28.3 mo\nKim et al. (P0594) / ORR: 7.7%; DCR: 46.2% / Prospective single-arm single-center study, anti-PD-1 refractory advanced solid cancers (gastric, esophageal, HCC)：Total (n=13): ORR 7.7%, DCR 46.2%\n\n截至当前材料覆盖的时间范围（主要文献发表于2024-2025年，系统综述更新至2026年中），尚无已完成的、大规模随机对照 III 期临床试验证实微生物干预（如 FMT）在 ICI 治疗实体瘤中的确切疗效。现有最高级别的临床证据为 II 期随机对照试验（RCT）。例如，TACITO 试验是一项针对转移性肾细胞癌（mRCC）患者的双盲、安慰剂对照 Phase 2a RCT，结果显示虽然中位无进展生存期（PFS）显著延长（24.0个月 vs 9.0个月，HR=0.50, P=0.035），但主要终点（12个月 PFS 率）未达到统计学显著性（70% vs 41%, P=0.053），且总生存期（OS）未显示显著差异。此外，多项单臂 II 期研究（如 MITRIC 试验在 ICI 耐药患者中 ORR 为 0%，FMT-LUMINate 试验在黑色素瘤中 ORR 为 70% 但伴随高比例严重免疫相关不良事件）提供了初步信号，但缺乏对照组验证。多篇综述明确指出，目前证据主要来自回顾性队列或早期（I/II 期）试验，亟需大规模、多中心、标准化的 III 期 RCT 来确证疗效并建立预测模型。\n\n[\"This study is a systematic review and meta-analysis (search up to September 30, 2024) that included 10 studies involving 164 patients with solid tumors treated with FMT combined with ICIs. The authors report that the included studies comprised 5 phase I trials, 4 phase II–III trials, and 3 randomized controlled trials (RCTs), but note that most were early-phase clinical trials with small sample sizes. The pooled objective response rate (ORR) was 43%, with subgroup analysis showing higher ORR (60%) for anti-PD-1 combined with anti-CTLA-4 therapy compared to monotherapy (37%). Crucially, the authors conclude in both the Abstract and Discussion that 'larger-scale randomized controlled trials with long-term follow-up are required to confirm and optimize treatment protocols' and highlight the 'absence of randomized controlled trials' (referring to large-scale/definitive ones) as a limitation. This material directly addresses the gap question by confirming that while preliminary RCT data exists, completed large-scale Phase III evidence is currently lacking and identified as a necessary future step.\", \"This review explicitly addresses the current clinical evidence level for microbiome interventions in cancer immunotherapy. The authors report that for Fecal Microbiota Transplantation (FMT), the most developed clinical evidence comes from Phase 1 studies in melanoma patients showing recovery of anti–PD-1 response in some cases. For colorectal cancer (CRC), the authors cite a Phase 2 study evaluating FMT with immunotherapy and targeted therapy that reported improvement signals but was designed without a control group, making effectiveness determination difficult. The authors conclude that large-scale prospective studies and well-designed randomized controlled trials are still needed before routine clinical use, and frame FMT in CRC as an investigational intervention rather than an established treatment.\", \"This study is a clinical review analyzing 10 studies (total n=467 patients) regarding the gut microbiome and immune checkpoint inhibitor (ICI) outcomes in solid tumors (melanoma, HCC, NSCLC, RCC). It reports that baseline microbiome diversity and composition (e.g., enrichment of Faecalibacterium, Akkermansia, Bifidobacterium) are associated with improved progression-free survival (PFS) and overall survival (OS), while Bacteroidales abundance often correlates with non-response. Crucially for the gap, the authors highlight two FMT clinical studies (Baruch et al., n=10; Davar et al., n=15) in anti-PD-1 refractory metastatic melanoma. These studies demonstrated safety and potential efficacy (30-40% response rate) when combining FMT from responders with ICI re-challenge. However, the authors explicitly state that 'further well-designed RCTs are required to explore the causal effects' and that 'future international multicentre trials will be required to provide comprehensive and reliable data.' They note that up-to-date practice guidelines based on clinical evidence are not yet available.\"]\n\n[\"The study provides detailed safety data (42% grade 1–2 adverse events, 37% grade 3–4 adverse events) and mechanistic hypotheses (e.g., increasing beneficial bacteria like Akkermansia muciniphila, modulating tumor microenvironment) which, while not validating the Phase III gap, offer context on why such trials are being pursued. It also notes heterogeneity in FMT protocols (donor sources, administration routes) as a barrier that large-scale trials need to standardize.\", \"The review details mechanistic pathways linking specific gut microbes to immune checkpoint inhibitor (ICI) response, which provides biological rationale for ongoing trials. For example, Fusobacterium nucleatum (Fn) is described as promoting immune evasion via Fap2-TIGIT binding and chemotherapy resistance, while Peptostreptococcus anaerobius (Pa) is linked to anti–PD-1 resistance via MDSC activation. Conversely, beneficial bacteria like Bifidobacterium are noted in preclinical models to enhance antitumor efficacy of PD-1 blockade. The authors also discuss confounding factors in microbiome research (e.g., stool transit time, BMI) that complicate biomarker and intervention standardization, relevant for designing future rigorous trials.\", \"The review details methodological heterogeneity across the included studies, such as variations in sequencing regions (V3-V4, V4, V4-V5), sample collection times, and cancer types, which complicates direct comparison. It also notes that only two studies examined gastrointestinal toxicity (colitis), finding low Bacteroidetes abundance associated with higher risk. The authors mention that while FMT response rates in these small studies are comparable to RCTs for Clostridioides difficile infection, the cancer FMT studies themselves are described as 'breakthrough clinical studies' rather than large-scale Phase III trials. The review excludes animal models to focus on clinical applicability but acknowledges that most included studies are observational (retrospective or prospective cohorts) rather than randomized interventions.\"]\n\n现有材料未提供已完成的大型随机对照 III 期临床试验证实微生物干预（如 FMT）在 ICI 治疗实体瘤中的疗效。相反，多项研究明确指出该领域仍处于早期阶段：MITRIC 试验是一项单臂 IIa 期篮子试验，结果显示在 ICI 难治性晚期癌症患者中 FMT 无客观缓解（ORR 0%），仅个别患者获得临床获益；TACITO 试验虽为随机双盲安慰剂对照试验，但仅为 IIa 期，且主要终点（12个月无进展生存率）未达到统计学显著差异（70% vs 41%, P=0.053），尽管次要终点中位 PFS 有显著改善（24.0 vs 9.0 个月, P=0.035）。此外，一项涵盖 10 项研究（164 名患者）的系统综述与荟萃分析指出，目前证据主要来自早期 Phase I/II 试验和小样本 RCT，作者明确强调“缺乏大型随机对照试验”，并呼吁进行大规模、多中心的 III 期 RCT 以确认疗效和优化方案。因此，截至这些来源的时间点，尚无完成的 III 期 RCT 确证其疗效，这一证据缺口被反复提及为当前研究的局限性及未来方向。\n\n现有材料未提供已完成的大型随机对照 III 期临床试验证实微生物干预（如 FMT）在 ICI 治疗实体瘤中的疗效。相反，多项研究明确指出该领域仍处于早期阶段：MITRIC 试验是一项单臂 IIa 期篮子试验，结果显示在 ICI 难治性晚期癌症患者中 FMT 无客观缓解（ORR 0%），仅个别患者获得临床获益；TACITO 试验虽为随机双盲安慰剂对照试验，但仅为 IIa 期，且主要终点（12个月无进展生存率）未达到统计学显著差异（70% vs 41%, P=0.053），尽管次要终点中位 PFS 有显著改善（24.0 vs 9.0 个月, P=0.035）。此外，一项涵盖 10 项研究（164 名患者）的系统综述与荟萃分析指出，目前证据主要来自早期 Phase I/II 试验和小样本 RCT，作者明确强调“缺乏大型随机对照试验”，并呼吁进行大规模、多中心的 III 期 RCT 以确认疗效和优化方案。因此，截至这些来源的时间点，尚无完成的 III 期 RCT 确证其疗效，这一证据缺口被反复提及为当前研究的局限性及未来方向。",
+      "conditions": [],
+      "limits": [],
+      "still_missing": "",
+      "allowed_use": [
+        "background_context",
+        "explicit_objectives",
+        "explicit_method_summaries",
+        "explicit_reported_findings",
+        "explicit_leads"
+      ],
+      "sources": [
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "source_handle": "P0212",
+          "paper_id": "5af3aee4ca5f3778325d44c8432c8b71b95ca531",
+          "title": "Microbiota boost immunotherapy? A meta-analysis dives into fecal microbiota transplantation and immune checkpoint inhibitors",
+          "year": "2025",
+          "doi": "10.1186/s12916-025-04183-y"
+        },
+        {
+          "source_handle": "P0212",
+          "paper_id": "5af3aee4ca5f3778325d44c8432c8b71b95ca531",
+          "title": "Microbiota boost immunotherapy? A meta-analysis dives into fecal microbiota transplantation and immune checkpoint inhibitors",
+          "year": "2025",
+          "doi": "10.1186/s12916-025-04183-y"
+        },
+        {
+          "paper_id": "69b4c5f84be199181be6ab5d3124f306462234f3",
+          "title": "Fecal microbiota transplantation plus pembrolizumab and axitinib in metastatic renal cell carcinoma: the randomized phase 2 TACITO trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04189-2",
+          "original_source_handle": "P0593",
+          "identity_status": "conflicting_handle"
+        },
+        {
+          "canonical_paper_id": "OpenAlex:W4411127845",
+          "title": "Microbiota boost immunotherapy? A meta-analysis dives into fecal microbiota transplantation and immune checkpoint inhibitors",
+          "year": "2025",
+          "doi": "10.1186/s12916-025-04183-y",
+          "identity_status": "conflicting_identity"
+        },
+        {
+          "source_handle": "P0590",
+          "paper_id": "CorpusId:286044272",
+          "canonical_paper_id": "CorpusId:286044272",
+          "title": "Gut microbiome in colorectal cancer: recent advances and clinical implications",
+          "year": "2026",
+          "doi": "10.3393/ac.2026.00010.0001"
+        },
+        {
+          "canonical_paper_id": "OpenAlex:W3203589616",
+          "title": "The Gut Microbiome and Cancer Immunotherapy: Can We Use the Gut Microbiome as a Predictive Biomarker for Clinical Response in Cancer Immunotherapy?",
+          "year": "2021",
+          "doi": "10.3390/cancers13194824",
+          "identity_status": "conflicting_identity"
+        }
+      ],
+      "provenance": {
+        "downloads": 0,
+        "model_calls": 0,
+        "source": "judge",
+        "whole_paper_rereads": 0
+      },
+      "chapter_ids": [
+        "Ch5"
+      ],
+      "unit_key": ""
+    },
+    {
+      "need_id": "N48436b3aa73aea86f35f-128da42822ca7b8e",
+      "question": "是否有已完成的大型随机对照 III 期临床试验证实微生物干预（如 FMT）在 ICI 治疗实体瘤中的疗效？",
+      "intended_use": "mechanism",
+      "decision": "answer_from_local",
+      "usable_content": "现有文献中尚未发现已完成的大型随机对照 III 期临床试验证实微生物干预（如 FMT）在实体瘤中的疗效。目前最高级别的证据来自 Phase IIa 阶段的随机对照试验和单臂研究，结果呈现异质性且未达成最终确证。\n\n具体而言，TACITO 试验是一项针对转移性肾细胞癌（mRCC）一线治疗患者的 Phase 2a 随机双盲安慰剂对照试验。虽然其次要终点中位无进展生存期（PFS）显著延长（24.0个月 vs 9.0个月，HR=0.50, P=0.035），但主要终点 12 个月 PFS 率未达到统计学显著差异（70% vs 41%, P=0.053），且总生存期（OS）虽呈有利趋势但未达显著性（P=0.167）。这表明在特定癌种和一线治疗背景下，FMT 显示出潜在的临床活性信号，但尚不足以作为确证性证据。\n\n相比之下，MITRIC 试验是一项针对多种晚期实体瘤（包括黑色素瘤、头颈鳞癌等）ICI 耐药患者的单臂 Phase IIa 篮式试验。该研究结果显示 FMT 安全性良好，但临床疗效有限：客观缓解率（ORR）为 0%，中位 PFS 仅为 1.5 个月，仅 1 名患者获得长期疾病稳定。机制分析提示，这种疗效局限可能与供体菌群定植短暂、宿主基线免疫环境（如髓系优势、高 IL-8）反映的是疾病状态而非 FMT 的直接作用有关。\n\n此外，Kim 等人（2024）发表的一项前瞻性单臂研究显示，在抗 PD-1 耐药的晚期实体瘤中，FMT 联合抗 PD-1 治疗可获得 7.7% 的 ORR 和 46.2% 的疾病控制率，并鉴定出特定的有益菌株（Prevotella merdae Immunoactis）。然而，由于缺乏随机对照设计和较大的样本量，这属于概念验证性质的探索性数据。\n\n综上所述，尽管有 Phase 2a RCT 显示部分指标改善，也有单臂研究提供机制支持，但目前缺乏大型 III 期 RCT 来确证 FMT 在广泛实体瘤人群中的确切疗效和生存获益。现有的阴性或混合结果提示疗效高度依赖于癌症类型、治疗线数（一线 vs 耐药）、供体选择及宿主免疫背景。\nMITRIC trial (P0578) / ORR: 0%; Median PFS: 1.5 months; Clinical benefit (SD >6mo): 1/12 patients / Phase IIa single-arm basket trial, ICI-refractory advanced solid tumors (melanoma, HNSCC, RCC, MSI-H pancreatic cancer)：Total (n=12): ORR 0%, Median PFS 1.5 mo\nTACITO trial (P0593) / 12-month PFS rate: 70% vs 41% (P=0.053); Median PFS: 24.0 vs 9.0 months (HR=0.50, P=0.035); Median OS: 41.0 vs 28.3 months (P=0.167) / Phase 2a randomized double-blind placebo-controlled trial, treatment-naive metastatic RCC (pembrolizumab + axitinib)：Donor FMT (d-FMT) (n=23 approx based on total 45): 12-mo PFS 70%, Median PFS 24.0 mo, Median OS 41.0 mo；Placebo FMT (p-FMT) (n=22 approx based on total 45): 12-mo PFS 41%, Median PFS 9.0 mo, Median OS 28.3 mo\nKim et al. (P0594) / ORR: 7.7%; DCR: 46.2% / Prospective single-arm single-center study, anti-PD-1 refractory advanced solid cancers (gastric, esophageal, HCC)：Total (n=13): ORR 7.7%, DCR 46.2%\n\n截至当前材料覆盖的时间范围（主要文献发表于2024-2025年，系统综述更新至2026年中），尚无已完成的、大规模随机对照 III 期临床试验证实微生物干预（如 FMT）在 ICI 治疗实体瘤中的确切疗效。现有最高级别的临床证据为 II 期随机对照试验（RCT）。例如，TACITO 试验是一项针对转移性肾细胞癌（mRCC）患者的双盲、安慰剂对照 Phase 2a RCT，结果显示虽然中位无进展生存期（PFS）显著延长（24.0个月 vs 9.0个月，HR=0.50, P=0.035），但主要终点（12个月 PFS 率）未达到统计学显著性（70% vs 41%, P=0.053），且总生存期（OS）未显示显著差异。此外，多项单臂 II 期研究（如 MITRIC 试验在 ICI 耐药患者中 ORR 为 0%，FMT-LUMINate 试验在黑色素瘤中 ORR 为 70% 但伴随高比例严重免疫相关不良事件）提供了初步信号，但缺乏对照组验证。多篇综述明确指出，目前证据主要来自回顾性队列或早期（I/II 期）试验，亟需大规模、多中心、标准化的 III 期 RCT 来确证疗效并建立预测模型。\n\n[\"This study is a systematic review and meta-analysis (search up to September 30, 2024) that included 10 studies involving 164 patients with solid tumors treated with FMT combined with ICIs. The authors report that the included studies comprised 5 phase I trials, 4 phase II–III trials, and 3 randomized controlled trials (RCTs), but note that most were early-phase clinical trials with small sample sizes. The pooled objective response rate (ORR) was 43%, with subgroup analysis showing higher ORR (60%) for anti-PD-1 combined with anti-CTLA-4 therapy compared to monotherapy (37%). Crucially, the authors conclude in both the Abstract and Discussion that 'larger-scale randomized controlled trials with long-term follow-up are required to confirm and optimize treatment protocols' and highlight the 'absence of randomized controlled trials' (referring to large-scale/definitive ones) as a limitation. This material directly addresses the gap question by confirming that while preliminary RCT data exists, completed large-scale Phase III evidence is currently lacking and identified as a necessary future step.\", \"This review explicitly addresses the current clinical evidence level for microbiome interventions in cancer immunotherapy. The authors report that for Fecal Microbiota Transplantation (FMT), the most developed clinical evidence comes from Phase 1 studies in melanoma patients showing recovery of anti–PD-1 response in some cases. For colorectal cancer (CRC), the authors cite a Phase 2 study evaluating FMT with immunotherapy and targeted therapy that reported improvement signals but was designed without a control group, making effectiveness determination difficult. The authors conclude that large-scale prospective studies and well-designed randomized controlled trials are still needed before routine clinical use, and frame FMT in CRC as an investigational intervention rather than an established treatment.\", \"This study is a clinical review analyzing 10 studies (total n=467 patients) regarding the gut microbiome and immune checkpoint inhibitor (ICI) outcomes in solid tumors (melanoma, HCC, NSCLC, RCC). It reports that baseline microbiome diversity and composition (e.g., enrichment of Faecalibacterium, Akkermansia, Bifidobacterium) are associated with improved progression-free survival (PFS) and overall survival (OS), while Bacteroidales abundance often correlates with non-response. Crucially for the gap, the authors highlight two FMT clinical studies (Baruch et al., n=10; Davar et al., n=15) in anti-PD-1 refractory metastatic melanoma. These studies demonstrated safety and potential efficacy (30-40% response rate) when combining FMT from responders with ICI re-challenge. However, the authors explicitly state that 'further well-designed RCTs are required to explore the causal effects' and that 'future international multicentre trials will be required to provide comprehensive and reliable data.' They note that up-to-date practice guidelines based on clinical evidence are not yet available.\"]\n\n[\"The study provides detailed safety data (42% grade 1–2 adverse events, 37% grade 3–4 adverse events) and mechanistic hypotheses (e.g., increasing beneficial bacteria like Akkermansia muciniphila, modulating tumor microenvironment) which, while not validating the Phase III gap, offer context on why such trials are being pursued. It also notes heterogeneity in FMT protocols (donor sources, administration routes) as a barrier that large-scale trials need to standardize.\", \"The review details mechanistic pathways linking specific gut microbes to immune checkpoint inhibitor (ICI) response, which provides biological rationale for ongoing trials. For example, Fusobacterium nucleatum (Fn) is described as promoting immune evasion via Fap2-TIGIT binding and chemotherapy resistance, while Peptostreptococcus anaerobius (Pa) is linked to anti–PD-1 resistance via MDSC activation. Conversely, beneficial bacteria like Bifidobacterium are noted in preclinical models to enhance antitumor efficacy of PD-1 blockade. The authors also discuss confounding factors in microbiome research (e.g., stool transit time, BMI) that complicate biomarker and intervention standardization, relevant for designing future rigorous trials.\", \"The review details methodological heterogeneity across the included studies, such as variations in sequencing regions (V3-V4, V4, V4-V5), sample collection times, and cancer types, which complicates direct comparison. It also notes that only two studies examined gastrointestinal toxicity (colitis), finding low Bacteroidetes abundance associated with higher risk. The authors mention that while FMT response rates in these small studies are comparable to RCTs for Clostridioides difficile infection, the cancer FMT studies themselves are described as 'breakthrough clinical studies' rather than large-scale Phase III trials. The review excludes animal models to focus on clinical applicability but acknowledges that most included studies are observational (retrospective or prospective cohorts) rather than randomized interventions.\"]\n\n现有材料未提供已完成的大型随机对照 III 期临床试验证实微生物干预（如 FMT）在 ICI 治疗实体瘤中的疗效。相反，多项研究明确指出该领域仍处于早期阶段：MITRIC 试验是一项单臂 IIa 期篮子试验，结果显示在 ICI 难治性晚期癌症患者中 FMT 无客观缓解（ORR 0%），仅个别患者获得临床获益；TACITO 试验虽为随机双盲安慰剂对照试验，但仅为 IIa 期，且主要终点（12个月无进展生存率）未达到统计学显著差异（70% vs 41%, P=0.053），尽管次要终点中位 PFS 有显著改善（24.0 vs 9.0 个月, P=0.035）。此外，一项涵盖 10 项研究（164 名患者）的系统综述与荟萃分析指出，目前证据主要来自早期 Phase I/II 试验和小样本 RCT，作者明确强调“缺乏大型随机对照试验”，并呼吁进行大规模、多中心的 III 期 RCT 以确认疗效和优化方案。因此，截至这些来源的时间点，尚无完成的 III 期 RCT 确证其疗效，这一证据缺口被反复提及为当前研究的局限性及未来方向。\n\n现有材料未提供已完成的大型随机对照 III 期临床试验证实微生物干预（如 FMT）在 ICI 治疗实体瘤中的疗效。相反，多项研究明确指出该领域仍处于早期阶段：MITRIC 试验是一项单臂 IIa 期篮子试验，结果显示在 ICI 难治性晚期癌症患者中 FMT 无客观缓解（ORR 0%），仅个别患者获得临床获益；TACITO 试验虽为随机双盲安慰剂对照试验，但仅为 IIa 期，且主要终点（12个月无进展生存率）未达到统计学显著差异（70% vs 41%, P=0.053），尽管次要终点中位 PFS 有显著改善（24.0 vs 9.0 个月, P=0.035）。此外，一项涵盖 10 项研究（164 名患者）的系统综述与荟萃分析指出，目前证据主要来自早期 Phase I/II 试验和小样本 RCT，作者明确强调“缺乏大型随机对照试验”，并呼吁进行大规模、多中心的 III 期 RCT 以确认疗效和优化方案。因此，截至这些来源的时间点，尚无完成的 III 期 RCT 确证其疗效，这一证据缺口被反复提及为当前研究的局限性及未来方向。\n\n现有证据尚未证实已完成的大型随机对照 III 期临床试验能确认微生物干预在实体瘤中的疗效。目前最高级别的证据仍局限于早期阶段：MITRIC 试验是一项单臂 IIa 期篮子试验，显示在 ICI 耐药人群中 FMT 无客观缓解（ORR 0%），且微生物定植多为暂时性；一项纳入 10 项研究（164 例患者）的荟萃分析指出，尽管初步数据显示联合治疗可能有效（ pooled ORR 43%），但缺乏长期随访和大样本 RCT 数据，明确呼吁需要大型 III 期试验来验证疗效。TACITO 试验是近期发表的随机双盲安慰剂对照 IIa 期试验，虽在次要终点中位 PFS 上显示出显著获益（d-FMT 组 24.0 个月 vs p-FMT 组 9.0 个月，HR=0.50, P=0.035），但其主要终点（12 个月 PFS 率）未达到统计学显著性（70% vs 41%, P=0.053），且总生存期（OS）差异无统计学意义。因此，尽管有机制探索和 II 期阳性信号，尚无可用的 III 期确证性数据。\nMedian Progression-Free Survival (mPFS) / TACITO trial, metastatic renal cell carcinoma (mRCC), first-line pembrolizumab + axitinib：d-FMT: 24.0 months；p-FMT: 9.0 months",
+      "conditions": [
+        "TACITO trial, metastatic renal cell carcinoma (mRCC), first-line pembrolizumab + axitinib"
+      ],
+      "limits": [],
+      "still_missing": "",
+      "allowed_use": [
+        "background_context",
+        "explicit_objectives",
+        "explicit_method_summaries",
+        "explicit_reported_findings",
+        "explicit_leads"
+      ],
+      "sources": [
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "source_handle": "P0212",
+          "paper_id": "5af3aee4ca5f3778325d44c8432c8b71b95ca531",
+          "title": "Microbiota boost immunotherapy? A meta-analysis dives into fecal microbiota transplantation and immune checkpoint inhibitors",
+          "year": "2025",
+          "doi": "10.1186/s12916-025-04183-y"
+        },
+        {
+          "source_handle": "P0212",
+          "paper_id": "5af3aee4ca5f3778325d44c8432c8b71b95ca531",
+          "title": "Microbiota boost immunotherapy? A meta-analysis dives into fecal microbiota transplantation and immune checkpoint inhibitors",
+          "year": "2025",
+          "doi": "10.1186/s12916-025-04183-y"
+        },
+        {
+          "paper_id": "69b4c5f84be199181be6ab5d3124f306462234f3",
+          "title": "Fecal microbiota transplantation plus pembrolizumab and axitinib in metastatic renal cell carcinoma: the randomized phase 2 TACITO trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04189-2",
+          "original_source_handle": "P0593",
+          "identity_status": "conflicting_handle"
+        },
+        {
+          "paper_id": "69b4c5f84be199181be6ab5d3124f306462234f3",
+          "title": "Fecal microbiota transplantation plus pembrolizumab and axitinib in metastatic renal cell carcinoma: the randomized phase 2 TACITO trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04189-2",
+          "original_source_handle": "69b4c5f84be199181be6ab5d3124f306462234f3",
+          "identity_status": "unresolved_identity"
+        },
+        {
+          "canonical_paper_id": "OpenAlex:W4411127845",
+          "title": "Microbiota boost immunotherapy? A meta-analysis dives into fecal microbiota transplantation and immune checkpoint inhibitors",
+          "year": "2025",
+          "doi": "10.1186/s12916-025-04183-y",
+          "identity_status": "conflicting_identity"
+        },
+        {
+          "source_handle": "P0590",
+          "paper_id": "CorpusId:286044272",
+          "canonical_paper_id": "CorpusId:286044272",
+          "title": "Gut microbiome in colorectal cancer: recent advances and clinical implications",
+          "year": "2026",
+          "doi": "10.3393/ac.2026.00010.0001"
+        },
+        {
+          "canonical_paper_id": "OpenAlex:W3203589616",
+          "title": "The Gut Microbiome and Cancer Immunotherapy: Can We Use the Gut Microbiome as a Predictive Biomarker for Clinical Response in Cancer Immunotherapy?",
+          "year": "2021",
+          "doi": "10.3390/cancers13194824",
+          "identity_status": "conflicting_identity"
+        }
+      ],
+      "provenance": {
+        "downloads": 0,
+        "model_calls": 1,
+        "source": "judge",
+        "whole_paper_rereads": 0
+      },
+      "chapter_ids": [
+        "Ch5"
+      ],
+      "unit_key": ""
+    },
+    {
+      "need_id": "N83dc9b0b1022c7adee69-6671aee87d6d5629",
+      "question": "JCOG2007 III 期试验中肠道微生物组与 NSCLC 患者 ICI 疗效及毒性的具体关联数据是什么？",
+      "intended_use": "mechanism",
+      "decision": "answer_from_local",
+      "usable_content": "现有材料中未包含 JCOG2007 III 期试验的数据。提供的文献主要涉及 FMT-LUMINate II 期试验（P0583）以及关于肠道微生物组与 ICI 疗效关联的综述（P0273, P0584）。P0583 报告了 FMT 联合 ICI 在 NSCLC 患者中的 ORR 为 80%，并指出响应者基线有害菌种丢失，而非供体菌株定植；P0273 和 P0584 总结了多项观察性研究和早期临床试验，强调微生物组特征（如 Akkermansia、Bifidobacterium 丰度）与 ICI 疗效及毒性的关联，但明确指出目前缺乏大型随机对照 III 期试验的证据。因此，无法从当前材料中提取 JCOG2007 试验的具体关联数据。\n\n在JCOG2007 III期试验的辅助生物标志物研究中，针对接受一线化疗联合免疫检查点抑制剂（ICI）治疗的晚期非小细胞肺癌（NSCLC）患者，肠道微生物组组成与总生存期（OS）及严重不良事件（AEs）存在显著关联，且表现出方案特异性效应。具体而言，在尼莫鲁单抗+伊匹木单抗联合铂类双药化疗（NIC）组中，基线粪便中Fusicatenibacter和Butyricicoccus丰度较高的患者显示出更好的OS获益（相较于PC组，HR分别为0.56和0.52），且这些菌属的低丰度与发生≥4级严重不良事件的风险增加相关。相反，Prevotellaceae NK3B31的高丰度在NIC组中与更高的死亡风险相关（HR = 2.33）。该研究还发现，整体队列中OS超过12或18个月的亚群具有独特的微生物结构，富集了Fusicatenibacter、Butyricicoccus和Blautia。这些数据表明，特定细菌属的丰度可作为预测chemo-immunotherapy疗效和毒性的潜在生物标志物，但其效应依赖于具体的治疗 regimen（如NIC vs PC）。\nJCOG2007 trial (ancillary biomarker study) / Hazard Ratio (HR) for Overall Survival (OS) = 0.56 / NIC arm (Nivolumab-ipilimumab + platinum doublet chemotherapy) vs PC arm, patients with higher abundance of Fusicatenibacter：Higher Fusicatenibacter abundance in NIC arm: HR 0.56\nJCOG2007 trial (ancillary biomarker study) / Hazard Ratio (HR) for Overall Survival (OS) = 0.52 / NIC arm (Nivolumab-ipilimumab + platinum doublet chemotherapy) vs PC arm, patients with higher abundance of Butyricicoccus：Higher Butyricicoccus abundance in NIC arm: HR 0.52\nJCOG2007 trial (ancillary biomarker study) / Hazard Ratio (HR) for Overall Survival (OS) = 2.33 / NIC arm (Nivolumab-ipilimumab + platinum doublet chemotherapy), patients with higher abundance of Prevotellaceae NK3B31：Higher Prevotellaceae NK3B31 abundance in NIC arm: HR 2.33",
+      "conditions": [
+        "JCOG2007 trial (ancillary biomarker study)",
+        "NIC arm (Nivolumab-ipilimumab + platinum doublet chemotherapy) vs PC arm, patients with higher abundance of Fusicatenibacter",
+        "NIC arm (Nivolumab-ipilimumab + platinum doublet chemotherapy) vs PC arm, patients with higher abundance of Butyricicoccus",
+        "NIC arm (Nivolumab-ipilimumab + platinum doublet chemotherapy), patients with higher abundance of Prevotellaceae NK3B31"
+      ],
+      "limits": [],
+      "still_missing": "",
+      "allowed_use": [
+        "background_context",
+        "explicit_objectives",
+        "explicit_method_summaries",
+        "explicit_reported_findings",
+        "explicit_leads"
+      ],
+      "sources": [
+        {
+          "source_handle": "P0583",
+          "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a",
+          "title": "Fecal microbiota transplantation plus immunotherapy in non-small cell lung cancer and melanoma: the phase 2 FMT-LUMINate trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04186-5"
+        },
+        {
+          "source_handle": "P0583",
+          "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a",
+          "title": "Fecal microbiota transplantation plus immunotherapy in non-small cell lung cancer and melanoma: the phase 2 FMT-LUMINate trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04186-5"
+        },
+        {
+          "source_handle": "P0273",
+          "paper_id": "759b176490dcac135bff0b645dc106c3df8f4059",
+          "title": "The Gut Microbiome and Cancer Immunotherapy: Can We Use the Gut Microbiome as a Predictive Biomarker for Clinical Response in Cancer Immunotherapy?",
+          "year": "2021",
+          "doi": "10.3390/cancers13194824"
+        },
+        {
+          "source_handle": "P0273",
+          "paper_id": "759b176490dcac135bff0b645dc106c3df8f4059",
+          "title": "The Gut Microbiome and Cancer Immunotherapy: Can We Use the Gut Microbiome as a Predictive Biomarker for Clinical Response in Cancer Immunotherapy?",
+          "year": "2021",
+          "doi": "10.3390/cancers13194824"
+        },
+        {
+          "paper_id": "CorpusId:290154100",
+          "title": "Navigating the gut–metabolite–immune axis: enhancing efficacy and mitigating toxicity of immune checkpoint inhibitors",
+          "year": "2026",
+          "doi": "10.3389/fimmu.2026.1803970",
+          "original_source_handle": "P0584",
+          "identity_status": "conflicting_identity"
+        },
+        {
+          "source_handle": "P0585",
+          "paper_id": "8016df1aa5a8160b7ccd412fa6851a6a508e2731",
+          "title": "Gut Microbiota in Advanced Non-small-cell Lung Cancer Receiving Chemo-immunotherapy: An Ancillary Biomarker Study from the Phase III trial JCOG2007 (NIPPON).",
+          "year": "2025",
+          "doi": "10.1016/j.jtho.2025.02.026"
+        },
+        {
+          "source_handle": "P0417",
+          "paper_id": "b6efedbc1ffd0d54c8ed8ce3eb0a38c148e45450",
+          "title": "Impact of the gut microbiome on immune checkpoint inhibitor efficacy-a systematic review.",
+          "year": "2019",
+          "doi": "10.3747/co.26.5177"
+        },
+        {
+          "paper_id": "CorpusId:285298099",
+          "title": "Engineering microbial metabolites to modulate tumor immunity and advance cancer immunotherapy",
+          "year": "2026",
+          "doi": "10.1007/s44368-026-00019-w",
+          "original_source_handle": "P0600",
+          "identity_status": "conflicting_handle"
+        },
+        {
+          "paper_id": "69b4c5f84be199181be6ab5d3124f306462234f3",
+          "title": "Fecal microbiota transplantation plus pembrolizumab and axitinib in metastatic renal cell carcinoma: the randomized phase 2 TACITO trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04189-2",
+          "original_source_handle": "P0593",
+          "identity_status": "conflicting_handle"
+        },
+        {
+          "source_handle": "P0096",
+          "paper_id": "261e0a3618ae7acf6e831646379929eff88857d5",
+          "title": "The Gut Microbiome from a Biomarker to a Novel Therapeutic Strategy for Immunotherapy Response in Patients with Lung Cancer",
+          "year": "2023",
+          "doi": "10.3390/curroncol30110681"
+        },
+        {
+          "source_handle": "P0148",
+          "paper_id": "42b8755a18f7ff2ebb90765b502a37b6f6e868e5",
+          "title": "Response to immune checkpoint inhibition is associated with the gut microbiome in advanced KRAS-mutated non-small cell lung cancer",
+          "year": "2023",
+          "doi": "10.1101/2023.10.30.23297712"
+        },
+        {
+          "paper_id": "c6b4401a8c45912fee23845cfc64d0fcec9315b7",
+          "title": "Interaction of bacterial genera associated with therapeutic response to immune checkpoint PD-1 blockade in a United States cohort",
+          "year": "2022",
+          "doi": "10.1186/s13073-022-01037-7",
+          "original_source_handle": "P0604",
+          "identity_status": "conflicting_handle"
+        },
+        {
+          "source_handle": "P0474",
+          "paper_id": "d227bde3dc62e02cfe87a58fa5173e149048ed4e",
+          "title": "Tumor microenvironment-mediated resistance to immune checkpoint inhibitors in non-small cell lung cancer: Mechanisms, combination strategies and clinical perspectives (Review)",
+          "year": "2026",
+          "doi": "10.3892/mco.2026.2971"
+        },
+        {
+          "source_handle": "P0271",
+          "paper_id": "753e796b9f6fe2fe78f1b4c6074d39441710eda7",
+          "title": "The role of the gut microbiome on the efficacy of immune checkpoint inhibitors in Japanese responder patients with advanced non-small cell lung cancer.",
+          "year": "2019",
+          "doi": "10.21037/tlcr.2019.10.23"
+        },
+        {
+          "source_handle": "P0583",
+          "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a",
+          "title": "Fecal microbiota transplantation plus immunotherapy in non-small cell lung cancer and melanoma: the phase 2 FMT-LUMINate trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04186-5"
+        },
+        {
+          "paper_id": "CorpusId:290154100",
+          "title": "Navigating the gut–metabolite–immune axis: enhancing efficacy and mitigating toxicity of immune checkpoint inhibitors",
+          "year": "2026",
+          "doi": "10.3389/fimmu.2026.1803970",
+          "original_source_handle": "P0584",
+          "identity_status": "conflicting_identity"
+        },
+        {
+          "source_handle": "P0585",
+          "paper_id": "8016df1aa5a8160b7ccd412fa6851a6a508e2731",
+          "title": "Gut Microbiota in Advanced Non-small-cell Lung Cancer Receiving Chemo-immunotherapy: An Ancillary Biomarker Study from the Phase III trial JCOG2007 (NIPPON).",
+          "year": "2025",
+          "doi": "10.1016/j.jtho.2025.02.026"
+        },
+        {
+          "paper_id": "CorpusId:285298099",
+          "title": "Engineering microbial metabolites to modulate tumor immunity and advance cancer immunotherapy",
+          "year": "2026",
+          "doi": "10.1007/s44368-026-00019-w",
+          "original_source_handle": "P0600",
+          "identity_status": "conflicting_handle"
+        },
+        {
+          "paper_id": "69b4c5f84be199181be6ab5d3124f306462234f3",
+          "title": "Fecal microbiota transplantation plus pembrolizumab and axitinib in metastatic renal cell carcinoma: the randomized phase 2 TACITO trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04189-2",
+          "original_source_handle": "P0593",
+          "identity_status": "conflicting_handle"
+        },
+        {
+          "source_handle": "P0096",
+          "paper_id": "261e0a3618ae7acf6e831646379929eff88857d5",
+          "title": "The Gut Microbiome from a Biomarker to a Novel Therapeutic Strategy for Immunotherapy Response in Patients with Lung Cancer",
+          "year": "2023",
+          "doi": "10.3390/curroncol30110681"
+        }
+      ],
+      "chapter_ids": [],
+      "unit_key": ""
+    },
+    {
+      "need_id": "N48436b3aa73aea86f35f-b3c8ffc2a0ced9d8",
+      "question": "是否有已完成的大型随机对照 III 期临床试验证实微生物干预（如 FMT）在 ICI 治疗实体瘤中的疗效？",
+      "intended_use": "mechanism",
+      "decision": "answer_from_local",
+      "usable_content": "现有文献中尚未发现已完成的大型随机对照 III 期临床试验证实微生物干预（如 FMT）在实体瘤中的疗效。目前最高级别的证据来自 Phase IIa 阶段的随机对照试验和单臂研究，结果呈现异质性且未达成最终确证。\n\n具体而言，TACITO 试验是一项针对转移性肾细胞癌（mRCC）一线治疗患者的 Phase 2a 随机双盲安慰剂对照试验。虽然其次要终点中位无进展生存期（PFS）显著延长（24.0个月 vs 9.0个月，HR=0.50, P=0.035），但主要终点 12 个月 PFS 率未达到统计学显著差异（70% vs 41%, P=0.053），且总生存期（OS）虽呈有利趋势但未达显著性（P=0.167）。这表明在特定癌种和一线治疗背景下，FMT 显示出潜在的临床活性信号，但尚不足以作为确证性证据。\n\n相比之下，MITRIC 试验是一项针对多种晚期实体瘤（包括黑色素瘤、头颈鳞癌等）ICI 耐药患者的单臂 Phase IIa 篮式试验。该研究结果显示 FMT 安全性良好，但临床疗效有限：客观缓解率（ORR）为 0%，中位 PFS 仅为 1.5 个月，仅 1 名患者获得长期疾病稳定。机制分析提示，这种疗效局限可能与供体菌群定植短暂、宿主基线免疫环境（如髓系优势、高 IL-8）反映的是疾病状态而非 FMT 的直接作用有关。\n\n此外，Kim 等人（2024）发表的一项前瞻性单臂研究显示，在抗 PD-1 耐药的晚期实体瘤中，FMT 联合抗 PD-1 治疗可获得 7.7% 的 ORR 和 46.2% 的疾病控制率，并鉴定出特定的有益菌株（Prevotella merdae Immunoactis）。然而，由于缺乏随机对照设计和较大的样本量，这属于概念验证性质的探索性数据。\n\n综上所述，尽管有 Phase 2a RCT 显示部分指标改善，也有单臂研究提供机制支持，但目前缺乏大型 III 期 RCT 来确证 FMT 在广泛实体瘤人群中的确切疗效和生存获益。现有的阴性或混合结果提示疗效高度依赖于癌症类型、治疗线数（一线 vs 耐药）、供体选择及宿主免疫背景。\nMITRIC trial (P0578) / ORR: 0%; Median PFS: 1.5 months; Clinical benefit (SD >6mo): 1/12 patients / Phase IIa single-arm basket trial, ICI-refractory advanced solid tumors (melanoma, HNSCC, RCC, MSI-H pancreatic cancer)：Total (n=12): ORR 0%, Median PFS 1.5 mo\nTACITO trial (P0593) / 12-month PFS rate: 70% vs 41% (P=0.053); Median PFS: 24.0 vs 9.0 months (HR=0.50, P=0.035); Median OS: 41.0 vs 28.3 months (P=0.167) / Phase 2a randomized double-blind placebo-controlled trial, treatment-naive metastatic RCC (pembrolizumab + axitinib)：Donor FMT (d-FMT) (n=23 approx based on total 45): 12-mo PFS 70%, Median PFS 24.0 mo, Median OS 41.0 mo；Placebo FMT (p-FMT) (n=22 approx based on total 45): 12-mo PFS 41%, Median PFS 9.0 mo, Median OS 28.3 mo\nKim et al. (P0594) / ORR: 7.7%; DCR: 46.2% / Prospective single-arm single-center study, anti-PD-1 refractory advanced solid cancers (gastric, esophageal, HCC)：Total (n=13): ORR 7.7%, DCR 46.2%\n\n截至当前材料覆盖的时间范围（主要文献发表于2024-2025年，系统综述更新至2026年中），尚无已完成的、大规模随机对照 III 期临床试验证实微生物干预（如 FMT）在 ICI 治疗实体瘤中的确切疗效。现有最高级别的临床证据为 II 期随机对照试验（RCT）。例如，TACITO 试验是一项针对转移性肾细胞癌（mRCC）患者的双盲、安慰剂对照 Phase 2a RCT，结果显示虽然中位无进展生存期（PFS）显著延长（24.0个月 vs 9.0个月，HR=0.50, P=0.035），但主要终点（12个月 PFS 率）未达到统计学显著性（70% vs 41%, P=0.053），且总生存期（OS）未显示显著差异。此外，多项单臂 II 期研究（如 MITRIC 试验在 ICI 耐药患者中 ORR 为 0%，FMT-LUMINate 试验在黑色素瘤中 ORR 为 70% 但伴随高比例严重免疫相关不良事件）提供了初步信号，但缺乏对照组验证。多篇综述明确指出，目前证据主要来自回顾性队列或早期（I/II 期）试验，亟需大规模、多中心、标准化的 III 期 RCT 来确证疗效并建立预测模型。\n\n[\"This study is a systematic review and meta-analysis (search up to September 30, 2024) that included 10 studies involving 164 patients with solid tumors treated with FMT combined with ICIs. The authors report that the included studies comprised 5 phase I trials, 4 phase II–III trials, and 3 randomized controlled trials (RCTs), but note that most were early-phase clinical trials with small sample sizes. The pooled objective response rate (ORR) was 43%, with subgroup analysis showing higher ORR (60%) for anti-PD-1 combined with anti-CTLA-4 therapy compared to monotherapy (37%). Crucially, the authors conclude in both the Abstract and Discussion that 'larger-scale randomized controlled trials with long-term follow-up are required to confirm and optimize treatment protocols' and highlight the 'absence of randomized controlled trials' (referring to large-scale/definitive ones) as a limitation. This material directly addresses the gap question by confirming that while preliminary RCT data exists, completed large-scale Phase III evidence is currently lacking and identified as a necessary future step.\", \"This review explicitly addresses the current clinical evidence level for microbiome interventions in cancer immunotherapy. The authors report that for Fecal Microbiota Transplantation (FMT), the most developed clinical evidence comes from Phase 1 studies in melanoma patients showing recovery of anti–PD-1 response in some cases. For colorectal cancer (CRC), the authors cite a Phase 2 study evaluating FMT with immunotherapy and targeted therapy that reported improvement signals but was designed without a control group, making effectiveness determination difficult. The authors conclude that large-scale prospective studies and well-designed randomized controlled trials are still needed before routine clinical use, and frame FMT in CRC as an investigational intervention rather than an established treatment.\", \"This study is a clinical review analyzing 10 studies (total n=467 patients) regarding the gut microbiome and immune checkpoint inhibitor (ICI) outcomes in solid tumors (melanoma, HCC, NSCLC, RCC). It reports that baseline microbiome diversity and composition (e.g., enrichment of Faecalibacterium, Akkermansia, Bifidobacterium) are associated with improved progression-free survival (PFS) and overall survival (OS), while Bacteroidales abundance often correlates with non-response. Crucially for the gap, the authors highlight two FMT clinical studies (Baruch et al., n=10; Davar et al., n=15) in anti-PD-1 refractory metastatic melanoma. These studies demonstrated safety and potential efficacy (30-40% response rate) when combining FMT from responders with ICI re-challenge. However, the authors explicitly state that 'further well-designed RCTs are required to explore the causal effects' and that 'future international multicentre trials will be required to provide comprehensive and reliable data.' They note that up-to-date practice guidelines based on clinical evidence are not yet available.\"]\n\n[\"The study provides detailed safety data (42% grade 1–2 adverse events, 37% grade 3–4 adverse events) and mechanistic hypotheses (e.g., increasing beneficial bacteria like Akkermansia muciniphila, modulating tumor microenvironment) which, while not validating the Phase III gap, offer context on why such trials are being pursued. It also notes heterogeneity in FMT protocols (donor sources, administration routes) as a barrier that large-scale trials need to standardize.\", \"The review details mechanistic pathways linking specific gut microbes to immune checkpoint inhibitor (ICI) response, which provides biological rationale for ongoing trials. For example, Fusobacterium nucleatum (Fn) is described as promoting immune evasion via Fap2-TIGIT binding and chemotherapy resistance, while Peptostreptococcus anaerobius (Pa) is linked to anti–PD-1 resistance via MDSC activation. Conversely, beneficial bacteria like Bifidobacterium are noted in preclinical models to enhance antitumor efficacy of PD-1 blockade. The authors also discuss confounding factors in microbiome research (e.g., stool transit time, BMI) that complicate biomarker and intervention standardization, relevant for designing future rigorous trials.\", \"The review details methodological heterogeneity across the included studies, such as variations in sequencing regions (V3-V4, V4, V4-V5), sample collection times, and cancer types, which complicates direct comparison. It also notes that only two studies examined gastrointestinal toxicity (colitis), finding low Bacteroidetes abundance associated with higher risk. The authors mention that while FMT response rates in these small studies are comparable to RCTs for Clostridioides difficile infection, the cancer FMT studies themselves are described as 'breakthrough clinical studies' rather than large-scale Phase III trials. The review excludes animal models to focus on clinical applicability but acknowledges that most included studies are observational (retrospective or prospective cohorts) rather than randomized interventions.\"]\n\n现有材料未提供已完成的大型随机对照 III 期临床试验证实微生物干预（如 FMT）在 ICI 治疗实体瘤中的疗效。相反，多项研究明确指出该领域仍处于早期阶段：MITRIC 试验是一项单臂 IIa 期篮子试验，结果显示在 ICI 难治性晚期癌症患者中 FMT 无客观缓解（ORR 0%），仅个别患者获得临床获益；TACITO 试验虽为随机双盲安慰剂对照试验，但仅为 IIa 期，且主要终点（12个月无进展生存率）未达到统计学显著差异（70% vs 41%, P=0.053），尽管次要终点中位 PFS 有显著改善（24.0 vs 9.0 个月, P=0.035）。此外，一项涵盖 10 项研究（164 名患者）的系统综述与荟萃分析指出，目前证据主要来自早期 Phase I/II 试验和小样本 RCT，作者明确强调“缺乏大型随机对照试验”，并呼吁进行大规模、多中心的 III 期 RCT 以确认疗效和优化方案。因此，截至这些来源的时间点，尚无完成的 III 期 RCT 确证其疗效，这一证据缺口被反复提及为当前研究的局限性及未来方向。\n\n现有材料未提供已完成的大型随机对照 III 期临床试验证实微生物干预（如 FMT）在 ICI 治疗实体瘤中的疗效。相反，多项研究明确指出该领域仍处于早期阶段：MITRIC 试验是一项单臂 IIa 期篮子试验，结果显示在 ICI 难治性晚期癌症患者中 FMT 无客观缓解（ORR 0%），仅个别患者获得临床获益；TACITO 试验虽为随机双盲安慰剂对照试验，但仅为 IIa 期，且主要终点（12个月无进展生存率）未达到统计学显著差异（70% vs 41%, P=0.053），尽管次要终点中位 PFS 有显著改善（24.0 vs 9.0 个月, P=0.035）。此外，一项涵盖 10 项研究（164 名患者）的系统综述与荟萃分析指出，目前证据主要来自早期 Phase I/II 试验和小样本 RCT，作者明确强调“缺乏大型随机对照试验”，并呼吁进行大规模、多中心的 III 期 RCT 以确认疗效和优化方案。因此，截至这些来源的时间点，尚无完成的 III 期 RCT 确证其疗效，这一证据缺口被反复提及为当前研究的局限性及未来方向。",
+      "conditions": [],
+      "limits": [],
+      "still_missing": "",
+      "allowed_use": [
+        "background_context",
+        "explicit_objectives",
+        "explicit_method_summaries",
+        "explicit_reported_findings",
+        "explicit_leads"
+      ],
+      "sources": [
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "source_handle": "P0212",
+          "paper_id": "5af3aee4ca5f3778325d44c8432c8b71b95ca531",
+          "title": "Microbiota boost immunotherapy? A meta-analysis dives into fecal microbiota transplantation and immune checkpoint inhibitors",
+          "year": "2025",
+          "doi": "10.1186/s12916-025-04183-y"
+        },
+        {
+          "source_handle": "P0212",
+          "paper_id": "5af3aee4ca5f3778325d44c8432c8b71b95ca531",
+          "title": "Microbiota boost immunotherapy? A meta-analysis dives into fecal microbiota transplantation and immune checkpoint inhibitors",
+          "year": "2025",
+          "doi": "10.1186/s12916-025-04183-y"
+        },
+        {
+          "paper_id": "69b4c5f84be199181be6ab5d3124f306462234f3",
+          "title": "Fecal microbiota transplantation plus pembrolizumab and axitinib in metastatic renal cell carcinoma: the randomized phase 2 TACITO trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04189-2",
+          "original_source_handle": "P0593",
+          "identity_status": "conflicting_handle"
+        },
+        {
+          "canonical_paper_id": "OpenAlex:W4411127845",
+          "title": "Microbiota boost immunotherapy? A meta-analysis dives into fecal microbiota transplantation and immune checkpoint inhibitors",
+          "year": "2025",
+          "doi": "10.1186/s12916-025-04183-y",
+          "identity_status": "conflicting_identity"
+        },
+        {
+          "source_handle": "P0590",
+          "paper_id": "CorpusId:286044272",
+          "canonical_paper_id": "CorpusId:286044272",
+          "title": "Gut microbiome in colorectal cancer: recent advances and clinical implications",
+          "year": "2026",
+          "doi": "10.3393/ac.2026.00010.0001"
+        },
+        {
+          "canonical_paper_id": "OpenAlex:W3203589616",
+          "title": "The Gut Microbiome and Cancer Immunotherapy: Can We Use the Gut Microbiome as a Predictive Biomarker for Clinical Response in Cancer Immunotherapy?",
+          "year": "2021",
+          "doi": "10.3390/cancers13194824",
+          "identity_status": "unresolved_identity"
+        }
+      ],
+      "chapter_ids": [],
+      "unit_key": ""
+    },
+    {
+      "need_id": "N61bd5cdf82bc1980ec2a-fe99d495492aaf34",
+      "question": "是否有已完成的大型随机对照 III 期临床试验证实微生物干预（如 FMT）在 ICI 治疗实体瘤中的疗效？",
+      "intended_use": "application_outcome",
+      "decision": "provider_retry",
+      "usable_content": "现有数据与用户询问的“已完成大型随机对照 III 期临床试验”设置不一致，提供的证据主要为 I/II 期研究，且研究设计（RCT vs 单臂）与人群（初治 vs 经治）存在差异。TACITO 试验（Phase 2a RCT）中，d-FMT 组相较于 p-FMT 组在 12 个月 PFS 率、中位 PFS 及中位 OS 上数值更高，提示正向差异，但原文未提供统计检验结果，不能认定具有统计学显著性。单臂试验结果方向不一致：ICI 经治人群（MITRIC 试验）ORR 为 0%，提示负向或无疗效；而初治黑色素瘤（MIMic 试验）或 NSCLC/黑色素瘤（FMT-LUMINate 试验）ORR 介于 65%-80%，提示正向差异。这表明微生物干预疗效可能受治疗线数影响，但缺乏 III 期 RCT 证实。\n\n适用条件：仅基于提供的 I/II 期试验数据；数值差异不代表统计显著；不包含用户指定的 III 期 RCT 证据；不推断未报告的机制。\nTACITO trial (P0593) / 12-month PFS rate / Phase 2a RCT, mRCC, first-line：d-FMT: 70%；p-FMT: 41%\nTACITO trial (P0593) / Median PFS / Phase 2a RCT, mRCC, first-line：d-FMT: 24.0 months；p-FMT: 9.0 months\nTACITO trial (P0593) / Median OS / Phase 2a RCT, mRCC, first-line：d-FMT: 41.0 months；p-FMT: 28.3 months\nMITRIC trial (P0578) / ORR / Phase IIa single-arm, ICI-refractory：All patients (n=12): 0%\nMITRIC trial (P0578) / Median PFS / Phase IIa single-arm, ICI-refractory：All patients (n=12): 1.5 months\nMIMic trial (P0577) / ORR / Phase I single-arm, first-line melanoma：All patients (n=20): 65%\nMIMic trial (P0577) / Median PFS / Phase I single-arm, first-line melanoma：All patients (n=20): 29.6 months\nFMT-LUMINate (P0583) / ORR / Phase 2 single-arm, NSCLC：NSCLC cohort: 80%\nFMT-LUMINate (P0583) / ORR / Phase 2 single-arm, Melanoma：Melanoma cohort: 75%",
+      "conditions": [
+        "TACITO trial (P0593)",
+        "Phase 2a RCT, mRCC, first-line",
+        "MITRIC trial (P0578)",
+        "Phase IIa single-arm, ICI-refractory",
+        "MIMic trial (P0577)",
+        "Phase I single-arm, first-line melanoma",
+        "FMT-LUMINate (P0583)",
+        "Phase 2 single-arm, NSCLC",
+        "Phase 2 single-arm, Melanoma"
+      ],
+      "limits": [
+        "已完成并发表主要结局数据的 Phase III RCT 研究（如注册号为 NCT 开头的 III 期试验结果）。"
+      ],
+      "still_missing": "已完成并发表主要结局数据的 Phase III RCT 研究（如注册号为 NCT 开头的 III 期试验结果）。",
+      "allowed_use": [
+        "background_context",
+        "explicit_objectives",
+        "explicit_method_summaries",
+        "explicit_reported_findings",
+        "explicit_leads"
+      ],
+      "sources": [
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "paper_id": "69b4c5f84be199181be6ab5d3124f306462234f3",
+          "title": "Fecal microbiota transplantation plus pembrolizumab and axitinib in metastatic renal cell carcinoma: the randomized phase 2 TACITO trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04189-2",
+          "original_source_handle": "P0593",
+          "identity_status": "conflicting_handle"
+        },
+        {
+          "paper_id": "69b4c5f84be199181be6ab5d3124f306462234f3",
+          "title": "Fecal microbiota transplantation plus pembrolizumab and axitinib in metastatic renal cell carcinoma: the randomized phase 2 TACITO trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04189-2",
+          "original_source_handle": "P0593",
+          "identity_status": "conflicting_handle"
+        },
+        {
+          "paper_id": "a1c056e6d54a3498db16737d087fae44f686a900",
+          "title": "Fecal microbiota transplantation improves anti-PD-1 inhibitor efficacy in unresectable or metastatic solid cancers refractory to anti-PD-1 inhibitor.",
+          "year": "2024",
+          "doi": "10.1016/j.chom.2024.06.010",
+          "original_source_handle": "P0594",
+          "identity_status": "conflicting_handle"
+        },
+        {
+          "source_handle": "P0577",
+          "paper_id": "20c143d5373eab0bfea2067cf66b0e260dfeb1ef",
+          "title": "Improved survival in advanced melanoma patients treated with fecal microbiota transplantation using healthy donor stool in combination with anti-PD1: final results of the MIMic phase 1 trial",
+          "year": "2025",
+          "doi": "10.1136/jitc-2025-012659"
+        },
+        {
+          "source_handle": "P0583",
+          "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a",
+          "title": "Fecal microbiota transplantation plus immunotherapy in non-small cell lung cancer and melanoma: the phase 2 FMT-LUMINate trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04186-5"
+        },
+        {
+          "paper_id": "CorpusId:290154100",
+          "title": "Navigating the gut–metabolite–immune axis: enhancing efficacy and mitigating toxicity of immune checkpoint inhibitors",
+          "year": "2026",
+          "doi": "10.3389/fimmu.2026.1803970",
+          "original_source_handle": "P0584",
+          "identity_status": "conflicting_identity"
+        },
+        {
+          "source_handle": "P0577",
+          "paper_id": "20c143d5373eab0bfea2067cf66b0e260dfeb1ef",
+          "title": "Improved survival in advanced melanoma patients treated with fecal microbiota transplantation using healthy donor stool in combination with anti-PD1: final results of the MIMic phase 1 trial",
+          "year": "2025",
+          "doi": "10.1136/jitc-2025-012659"
+        },
+        {
+          "source_handle": "P0577",
+          "paper_id": "20c143d5373eab0bfea2067cf66b0e260dfeb1ef",
+          "title": "Improved survival in advanced melanoma patients treated with fecal microbiota transplantation using healthy donor stool in combination with anti-PD1: final results of the MIMic phase 1 trial",
+          "year": "2025",
+          "doi": "10.1136/jitc-2025-012659"
+        },
+        {
+          "source_handle": "P0577",
+          "paper_id": "20c143d5373eab0bfea2067cf66b0e260dfeb1ef",
+          "title": "Improved survival in advanced melanoma patients treated with fecal microbiota transplantation using healthy donor stool in combination with anti-PD1: final results of the MIMic phase 1 trial",
+          "year": "2025",
+          "doi": "10.1136/jitc-2025-012659"
+        },
+        {
+          "source_handle": "P0577",
+          "paper_id": "20c143d5373eab0bfea2067cf66b0e260dfeb1ef",
+          "title": "Improved survival in advanced melanoma patients treated with fecal microbiota transplantation using healthy donor stool in combination with anti-PD1: final results of the MIMic phase 1 trial",
+          "year": "2025",
+          "doi": "10.1136/jitc-2025-012659"
+        },
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "source_handle": "P0578",
+          "paper_id": "d9577b3a29bd8aec60c9e27c6a56a63faf3f4a27",
+          "title": "Safety and efficacy of fecal microbiota transplantation in solid cancers resistant to immune checkpoint inhibitors: results of the MITRIC trial",
+          "year": "2026",
+          "doi": "10.1136/jitc-2026-015122"
+        },
+        {
+          "source_handle": "P0583",
+          "paper_id": "071823eff68d7dbea395490dd4643170131b5f6a",
+          "title": "Fecal microbiota transplantation plus immunotherapy in non-small cell lung cancer and melanoma: the phase 2 FMT-LUMINate trial",
+          "year": "2026",
+          "doi": "10.1038/s41591-025-04186-5"
+        }
+      ],
+      "chapter_ids": [],
+      "unit_key": ""
+    }
+  ],
+  "body_relative_path": "units/Ch5/Ch5_U01/f051f02fd6331d7aa6975a76070f0dcc3c64a295da0f9f0857748998a84c6a9c/attempt_001/UNIT_BODY.md",
+  "body_sha256": "d1e70db9931d283333f623694c2878df44a3045b440b357952288df892a76a9f",
+  "root_observation": "Task uses P0593 for TACITO while source catalog P0593 belongs to allopurinol paper DOI 10.1136/jitc-2025-014132. TACITO tool record carries DOI 10.1038/s41591-025-04189-2 and conflict marker, but repeats P0593 in usable content. New author accepts task P token, creating a semantic identity error although the token resolves. Recent guide Plus notices this same-input conflict. This is not a new fabricated P identity and unknown-token count cannot certify correctness."
+}

@@ -1,0 +1,318 @@
+146, P0573) for the general statement and the specific studies (P0090, P0113, etc.) for comparison. P0080/P0388 are assigned to the Table. I will follow this distribution: Text P01/P02 uses the reviews and specific cohort studies assigned; Table uses the mechanistic papers (P0080, P0388) to fill the \\\"Mechanism\\\" column. This ensures every source is used exactly once across the unit (Text + Table).\\n    -   Wait, I need to check if P0080/P0388 are used in the table *only*. The instruction says \\\"每篇只出现一次\\\" (each source appears only once). If I cite them in the table, I shouldn't cite them in the text. I will follow this strictly.\\n    -   So, Text P01: Use P0535, P0146, P0573, P0057, P0090, P0113, P0270, P0352, P0457.\\n    -   Text P02: Use P0535, P0573, P0146 (Wait, these are already used in P01). The instruction says \\\"同一篇可以跨段使用，但用途必须不同\\\" (The same paper can be used across paragraphs, but the usage must be different). So I can reuse P0535/P0146/P0573 in P02 if the *usage* (role) is different. In P01 they are \\\"Example/Comparison\\\" for tumor types. In P02 they are \\\"Background\\\" for model systems. This is allowed.\\n    -   Table: Use P0080, P0388, P0269, P0438 (these are not in P01/P02 text source_uses). And P0352, P0090, P0146, P0113, P0270, P0057, P0457 (these are in text). I need to be careful not to double cite in a way that violates \\\"once per unit\\\" if interpreted strictly as \\\"one citation per source in the entire output\\\". But the instruction says \\\"同一篇可以跨段使用\\\" (Same paper can be used across paragraphs). This implies citation count > 1 is okay if the *argumentative role* changes. However, \\\"每篇只出现一次\\\" in the `sources` description usually means \\\"don't list the same source metadata twice\\\". In terms of citation markers `[Pxxxx]`, reusing is allowed if the content differs. I will aim to minimize repetition but prioritize logical flow.\\n    -   Actually, looking at `sources` list in the prompt: It lists P0057, P0080, P0090... P0573.\\n    -   I will write P01 focusing on tumor heterogeneity using the specific cohort/review sources assigned.\\n    -   I will write P02 focusing on model differences (mouse vs human) using the review sources (P0535, P0146, P0573) to discuss the evidence gap.\\n    -   I will create the Table using the remaining sources (P0080, P0388, P0269, P0438) for the rows where they are assigned, and reuse the others where assigned in `table_tasks`.\\n\\n2.  **Draft Paragraph 2:** Focus on the evidence hierarchy. Mouse models (causal) vs Human (observational). Use P0535, P0146, P0573 to discuss the limitations of extrapolation.\\n\\n3.  **Draft Table:** Follow the `table_tasks` structure. Ensure columns match. Fill cells with specific findings from the assigned sources.\\n\\n**Refining P01:**\\n-   Start with the thesis: Mechanisms are not universal; they depend on tumor type.\\n-   Melanoma: High immunogenicity, T-cell cross-reactivity dominates (P0146, P0573).\\n-   NSCLC: Lung microbiome independent of gut, metabolic microenvironment (adenosine) (P0352).\\n-   GI Tumors (HCC/CRC): Barrier integrity, etiology (viral vs metabolic) matters (P0113, P0457).\\n-   Counter-examples/Heterogeneity: RCC (antibiotics impact) (P0090), Prostate (A. muciniphila negative correlation) (P0270), TNBC (chemo vs ICI difference) (P0057).\\n-   Synthesis: Intratumoral vs Gut (P0535).\\n\\n**Refining P02:**\\n-   Transition: This heterogeneity is compounded by the evidence source (model vs human).\\n-   Mouse: Causal (FMT, KO) (P0146, P0573).\\n-   Human: Observational (cohorts, markers) (P0535).\\n-   Risk: Over-extrapolation.\\n\\n**Refining Table:**\\n-   Columns: 肿瘤类型，关键微生物特征，主要机制/通路，证据类型，来源.\\n-   Rows: As per `table_tasks`.\\n-   Ensure specific numbers/findings from sources are accurate (e.g., P0270 A. muciniphila negative, P0090 Antibiotics HR).\\n\\n**Check Constraints:**\\n-   JSON output.\\n-   No author/year in text.\\n-   Citations `[Pxxxx]`.\\n-   Chinese language.\\n-   Issues list if any (e.g., if material is missing for a table cell).\\n\\n**Material Check:**\\n-   P0080: Melanoma, LPS hexa-acylated, TLR4.\\n-   P0388: Melanoma, SFB, T cell plasticity.\\n-   P0269: Review, host factors, adenosine/metabolites mentioned? P0269 `study_summary_A` mentions \\\"metabolic modulation (short-chain fatty acids, inosine)\\\". `table_tasks` asks for \\\"Adenosine metabolic microenvironment\\\" for NSCLC. P0269 is a general review. P0352 is specific to NSCLC lung microbiome. P0269 might not have specific NSCLC adenosine data. I need to check `table_tasks` row 2: \\\"NSCLC... Adenosine...\\\". Source uses: P0352, P0269. P0352 `study_summary_A` mentions \\\"metabolic profiles favoring lipid metabolism and essential amino acid degradation\\\". It doesn't explicitly say \\\"adenosine\\\". P0269 `study_summary_A` mentions \\\"inosine\\\". I need to be careful not to hallucinate \\\"adenosine\\\" if the material says \\\"inosine\\\" or \\\"lipid/amino acid\\\". The `table_tasks` *prompt* says \\\"Adenosine\\\". I must check if the *source* supports \\\"Adenosine\\\". P0269 mentions \\\"inosine\\\". P0352 mentions \\\"lipid/amino acid\\\". I should write what the source says, not what the task prompt implies if it contradicts. I will write \\\"Metabolic modulation (lipid/amino acid/inosine)\\\" to be accurate to the source.\\n-   P0438: GI cancer, barrier, F. nucleatum.\\n-   P0057: TNBC, TMAO, pyroptosis.\\n-   P0270: Prostate, A. muciniphila negative.\\n-   P0113: HCC, etiology (HBV vs NASH).\\n-   P0090: RCC, Antibiotics HR 1.96-3.10.\\n-   P0146: Review, general mechanisms.\\n-   P0535: Intratumoral vs Gut.\\n\\n**Issues:**\\n-   Table Row 2 (NSCLC) asks for \\\"Adenosine\\\". P0352 mentions \\\"lipid/amino acid\\\". P0269 mentions \\\"inosine\\\". I will note this nuance in the table cell to remain faithful to the material.\\n-   Table Row 1 (Melanoma) asks for \\\"Hexa-acylated LPS\\\". P0080 supports this. \\\"T cell cross-reactivity\\\". P0388 supports this (SFB molecular mimicry).\\n\\nLet's assemble the text.\\n\\n**Paragraph 1:**\\nStart with the variability. Melanoma has strong evidence for T-cell cross-reactivity and LPS structure [P0146][P0573]. NSCLC shows independent lung microbiome effects [P0352]. GI tumors depend on etiology [P0113]. RCC sensitive to antibiotics [P0090]. Prostate shows reverse correlation for Akkermansia [P0270]. TNBC shows chemo vs ICI difference [P0057]. Intratumoral bacteria also play a role [P0535][P0457].\\n\\n**Paragraph 2:**\\nDistinguish evidence. Mouse models allow causal inference (FMT, KO) [P0146][P0573]. Human data is largely observational (cohorts, sequencing) [P0535]. Extrapolation risk [P0146].\\n\\n**Table:**\\nFill rows based on `table_tasks` and source content.\\n\\n**JSON Structure:**\\n`{\\\"body_markdown\\\": \\\"...\\\", \\\"issues\\\": []}`\\n\\n**Self-Correction on Citation Reuse:**\\nThe instruction says \\\"同一篇可以跨段使用，但用途必须不同\\\" (Same paper can be used across paragraphs, but usage must be different).\\nP0535, P0146, P0573 are in P01 and P02.\\nIn P01: Used for tumor type examples.\\nIn P02: Used for model system evidence levels.\\nThis is acceptable.\\nP0080, P0388, P0269, P0438 are *only* in Table tasks. I will cite them in the table cells.\\nP0057, P0090, P0113, P0270, P0352, P0457 are in P01 and Table. I will cite them in P01 text, and can cite them again in the table if needed for specific data points, but to avoid clutter, I might rely on the text for the general claim and table for the specific comparison. However, the Table Task says \\\"Source\\\" column. I must put the citation in the table cell. So `[P0090]` will appear in P01 text and Table Row 3. This is allowed as long as the *content* isn't mechanically repeated (Text: narrative; Table: structured comparison).\\n\\nLet's write.\"}}],\"id\":\"chatcmpl-d4fe4baf-6672-936f-86e1-0741696c26bb\",\"model\":\"qwen3.5-plus\",\"usage\":{\"completion_tokens\":5718,\"completion_tokens_details\":{\"reasoning_tokens\":4453,\"text_tokens\":5718},\"prompt_tokens\":45115,\"prompt_tokens_details\":{\"text_tokens\":45115},\"total_tokens\":50833}}",
+  "raw_stream_sha256": "7fa4d5f688df1a1527c8e9e890852b5f3fcb3a2f12a1e512ef7af9fea2af9512",
+  "reasoning_content": "The user wants me to write a unit (Ch2_U04) for a literature review chapter (Ch2) about the immunological mechanisms by which the gut microbiome modulates ICI efficacy.\n\n**Unit Focus:** Tumor type specificity and model system differences: from preclinical causality to human observational evidence.\n\n**Key Tasks:**\n1.  **Paragraph 1 (Ch2_U04_P01):** Tumor type specificity (Melanoma, NSCLC, GI tumors). Contrast mechanisms (cross-reactive T cells in melanoma, metabolic microenvironment in NSCLC, barrier integrity in GI). Use sources P0535, P0146, P0573, P0057, P0090, P0113, P0270, P0352, P0457.\n2.  **Paragraph 2 (Ch2_U04_P02):** Model system differences (Preclinical causality vs. Human observational). Distinguish mouse models (CRISPR, FMT) from human cohorts (single-cell, serum markers). Use sources P0535, P0573, P0146.\n3.  **Table 1 (Ch2_U04_T01):** Compare key features, mechanisms, and evidence levels across different solid tumor types. Rows: Melanoma, NSCLC, RCC, HCC, Prostate (mCRPC), TNBC, GI tumors.\n\n**Constraints:**\n-   Do not write like a task list. Write natural review prose.\n-   Use `[Pxxxx]` for citations.\n-   Do not output author/year/journal info in text.\n-   Respect material boundaries (do not overclaim causality in human data).\n-   Ensure table is formatted in Markdown within the JSON body.\n-   Language: Chinese.\n\n**Plan:**\n1.  **Draft Paragraph 1:** Start with the core argument that mechanisms are tumor-type specific.\n    -   Melanoma: Focus on cross-reactive T cells and LPS structure (P0080, P0388 - wait, P0080/P0388 are in sources list for table but P01 is assigned P0535, P0146, P0573, P0057, P0090, P0113, P0270, P0352, P0457. I need to check the `source_uses` in `paragraph_tasks`.\n    -   Actually, looking at `paragraph_tasks` for P01, it lists P0535, P0146, P0573, P0057, P0090, P0113, P0270, P0352, P0457.\n    -   Wait, the `table_tasks` lists P0080 and P0388 for Melanoma row. I should ensure I use the sources assigned to the paragraph tasks for the text, and the table sources for the table.\n    -   Wait, P0080 and P0388 are in the `sources` list provided in the prompt. I can use them in the text if relevant to the paragraph point, but the `source_uses` in `paragraph_tasks` dictates the primary sources for that paragraph. However, the instruction says \"sources: 本单元任务用到的每一篇来源... 每篇只出现一次\". This implies I have access to all sources listed in the `sources` array for this unit. The `source_uses` in `paragraph_tasks` are suggestions for *that specific paragraph*. I should prioritize those but can use others if they fit the flow, as long as I don't repeat the same usage unnecessarily.\n    -   Actually, looking closely at `paragraph_tasks` -> `source_uses`:\n        -   P01 uses: P0535, P0146, P0573, P0057, P0090, P0113, P0270, P0352, P0457.\n        -   P02 uses: P0535, P0573, P0146.\n    -   The Table uses: P0080, P0388, P0352, P0269, P0090, P0146, P0113, P0270, P0057, P0438, P0457.\n    -   I need to make sure I cover the sources listed in `sources` array appropriately. The `sources` array includes P0080 and P0388 which are not in P01/P02 `source_uses` but are in `table_tasks`. I should probably mention them in the text if they support the \"Tumor type specificity\" point, or rely on the table to capture them. The instruction says \"每篇只出现一次\" (each source appears only once). This usually means in the *text* citations. If a source is used in the table, does it count? Usually, table citations count. I need to distribute the sources.\n    -   Let's check the `sources` list provided in the prompt input. It includes P0057, P0080, P0090, P0113, P0146, P0269, P0270, P0352, P0388, P0438, P0457, P0535, P0573.\n    -   P01 `source_uses` covers most of them except P0080, P0269, P0388, P0438.\n    -   P02 `source_uses` covers P0535, P0573, P0146 (already in P01).\n    -   Table `source_uses` covers P0080, P0388, P0269, P0438.\n    -   Strategy: I will write P01 focusing on tumor heterogeneity using the assigned sources (P0352 for NSCLC lung microbiome, P0113 for HCC etiology, P0270 for Prostate counter-example, P0090 for RCC, P0057 for TNBC). I will integrate P0080/P0388 (Melanoma specific mechanisms) into P01 text if possible to ensure they are cited in text, or rely on the table. The instruction \"每篇只出现一次\" usually applies to the text body. If I put them in the table, that counts as usage. But to make the text rich, I should try to cite the key mechanistic papers (P0080, P0388) in the text if they support the \"Melanoma\" point in P01. However, P01 `source_uses` doesn't list them. I should follow the `paragraph_tasks` `source_uses` for the text to ensure alignment with the plan, and use the table for the rest. Wait, the instruction says \"sources: 本单元任务用到的每一篇来源... 每篇只出现一次\". This implies I should use all sources provided in the `sources` array across the unit. If P0080/P0388 are in `sources` but not in P01/P02 `source_uses`, I should find a place for them in the text or ensure they are used in the table. The table task explicitly assigns them to rows. I will ensure they are cited in the table cells. For the text, I will stick primarily to the `paragraph_tasks` `source_uses` to avoid overloading, but if I need to support a claim about Melanoma mechanisms in P01, I might need to bring them in. Actually, P01 `source_uses` lists P0535, P0146, P0573 as \"Example\" and others as \"Comparison\". P0080/P0388 are key for Melanoma mechanisms. I will try to incorporate them into P01 text to make the Melanoma point stronger, as P01's point is \"Tumor type specificity... Melanoma...\". The `source_uses` in `paragraph_tasks` might be a minimum or a guide. I will prioritize the `paragraph_tasks` list but if I need P0080/P0388 to make the Melanoma point specific (as per `point`), I will use them. Wait, looking at `source_uses` for P01, it *does not* include P0080/P0388. It includes P0535, P0146, P0573. This suggests the plan expects P01 to rely on the reviews (P0535, P0146, P0573) for the general statement and the specific studies (P0090, P0113, etc.) for comparison. P0080/P0388 are assigned to the Table. I will follow this distribution: Text P01/P02 uses the reviews and specific cohort studies assigned; Table uses the mechanistic papers (P0080, P0388) to fill the \"Mechanism\" column. This ensures every source is used exactly once across the unit (Text + Table).\n    -   Wait, I need to check if P0080/P0388 are used in the table *only*. The instruction says \"每篇只出现一次\" (each source appears only once). If I cite them in the table, I shouldn't cite them in the text. I will follow this strictly.\n    -   So, Text P01: Use P0535, P0146, P0573, P0057, P0090, P0113, P0270, P0352, P0457.\n    -   Text P02: Use P0535, P0573, P0146 (Wait, these are already used in P01). The instruction says \"同一篇可以跨段使用，但用途必须不同\" (The same paper can be used across paragraphs, but the usage must be different). So I can reuse P0535/P0146/P0573 in P02 if the *usage* (role) is different. In P01 they are \"Example/Comparison\" for tumor types. In P02 they are \"Background\" for model systems. This is allowed.\n    -   Table: Use P0080, P0388, P0269, P0438 (these are not in P01/P02 text source_uses). And P0352, P0090, P0146, P0113, P0270, P0057, P0457 (these are in text). I need to be careful not to double cite in a way that violates \"once per unit\" if interpreted strictly as \"one citation per source in the entire output\". But the instruction says \"同一篇可以跨段使用\" (Same paper can be used across paragraphs). This implies citation count > 1 is okay if the *argumentative role* changes. However, \"每篇只出现一次\" in the `sources` description usually means \"don't list the same source metadata twice\". In terms of citation markers `[Pxxxx]`, reusing is allowed if the content differs. I will aim to minimize repetition but prioritize logical flow.\n    -   Actually, looking at `sources` list in the prompt: It lists P0057, P0080, P0090... P0573.\n    -   I will write P01 focusing on tumor heterogeneity using the specific cohort/review sources assigned.\n    -   I will write P02 focusing on model differences (mouse vs human) using the review sources (P0535, P0146, P0573) to discuss the evidence gap.\n    -   I will create the Table using the remaining sources (P0080, P0388, P0269, P0438) for the rows where they are assigned, and reuse the others where assigned in `table_tasks`.\n\n2.  **Draft Paragraph 2:** Focus on the evidence hierarchy. Mouse models (causal) vs Human (observational). Use P0535, P0146, P0573 to discuss the limitations of extrapolation.\n\n3.  **Draft Table:** Follow the `table_tasks` structure. Ensure columns match. Fill cells with specific findings from the assigned sources.\n\n**Refining P01:**\n-   Start with the thesis: Mechanisms are not universal; they depend on tumor type.\n-   Melanoma: High immunogenicity, T-cell cross-reactivity dominates (P0146, P0573).\n-   NSCLC: Lung microbiome independent of gut, metabolic microenvironment (adenosine) (P0352).\n-   GI Tumors (HCC/CRC): Barrier integrity, etiology (viral vs metabolic) matters (P0113, P0457).\n-   Counter-examples/Heterogeneity: RCC (antibiotics impact) (P0090), Prostate (A. muciniphila negative correlation) (P0270), TNBC (chemo vs ICI difference) (P0057).\n-   Synthesis: Intratumoral vs Gut (P0535).\n\n**Refining P02:**\n-   Transition: This heterogeneity is compounded by the evidence source (model vs human).\n-   Mouse: Causal (FMT, KO) (P0146, P0573).\n-   Human: Observational (cohorts, markers) (P0535).\n-   Risk: Over-extrapolation.\n\n**Refining Table:**\n-   Columns: 肿瘤类型，关键微生物特征，主要机制/通路，证据类型，来源.\n-   Rows: As per `table_tasks`.\n-   Ensure specific numbers/findings from sources are accurate (e.g., P0270 A. muciniphila negative, P0090 Antibiotics HR).\n\n**Check Constraints:**\n-   JSON output.\n-   No author/year in text.\n-   Citations `[Pxxxx]`.\n-   Chinese language.\n-   Issues list if any (e.g., if material is missing for a table cell).\n\n**Material Check:**\n-   P0080: Melanoma, LPS hexa-acylated, TLR4.\n-   P0388: Melanoma, SFB, T cell plasticity.\n-   P0269: Review, host factors, adenosine/metabolites mentioned? P0269 `study_summary_A` mentions \"metabolic modulation (short-chain fatty acids, inosine)\". `table_tasks` asks for \"Adenosine metabolic microenvironment\" for NSCLC. P0269 is a general review. P0352 is specific to NSCLC lung microbiome. P0269 might not have specific NSCLC adenosine data. I need to check `table_tasks` row 2: \"NSCLC... Adenosine...\". Source uses: P0352, P0269. P0352 `study_summary_A` mentions \"metabolic profiles favoring lipid metabolism and essential amino acid degradation\". It doesn't explicitly say \"adenosine\". P0269 `study_summary_A` mentions \"inosine\". I need to be careful not to hallucinate \"adenosine\" if the material says \"inosine\" or \"lipid/amino acid\". The `table_tasks` *prompt* says \"Adenosine\". I must check if the *source* supports \"Adenosine\". P0269 mentions \"inosine\". P0352 mentions \"lipid/amino acid\". I should write what the source says, not what the task prompt implies if it contradicts. I will write \"Metabolic modulation (lipid/amino acid/inosine)\" to be accurate to the source.\n-   P0438: GI cancer, barrier, F. nucleatum.\n-   P0057: TNBC, TMAO, pyroptosis.\n-   P0270: Prostate, A. muciniphila negative.\n-   P0113: HCC, etiology (HBV vs NASH).\n-   P0090: RCC, Antibiotics HR 1.96-3.10.\n-   P0146: Review, general mechanisms.\n-   P0535: Intratumoral vs Gut.\n\n**Issues:**\n-   Table Row 2 (NSCLC) asks for \"Adenosine\". P0352 mentions \"lipid/amino acid\". P0269 mentions \"inosine\". I will note this nuance in the table cell to remain faithful to the material.\n-   Table Row 1 (Melanoma) asks for \"Hexa-acylated LPS\". P0080 supports this. \"T cell cross-reactivity\". P0388 supports this (SFB molecular mimicry).\n\nLet's assemble the text.\n\n**Paragraph 1:**\nStart with the variability. Melanoma has strong evidence for T-cell cross-reactivity and LPS structure [P0146][P0573]. NSCLC shows independent lung microbiome effects [P0352]. GI tumors depend on etiology [P0113]. RCC sensitive to antibiotics [P0090]. Prostate shows reverse correlation for Akkermansia [P0270]. TNBC shows chemo vs ICI difference [P0057]. Intratumoral bacteria also play a role [P0535][P0457].\n\n**Paragraph 2:**\nDistinguish evidence. Mouse models allow causal inference (FMT, KO) [P0146][P0573]. Human data is largely observational (cohorts, sequencing) [P0535]. Extrapolation risk [P0146].\n\n**Table:**\nFill rows based on `table_tasks` and source content.\n\n**JSON Structure:**\n`{\"body_markdown\": \"...\", \"issues\": []}`\n\n**Self-Correction on Citation Reuse:**\nThe instruction says \"同一篇可以跨段使用，但用途必须不同\" (Same paper can be used across paragraphs, but usage must be different).\nP0535, P0146, P0573 are in P01 and P02.\nIn P01: Used for tumor type examples.\nIn P02: Used for model system evidence levels.\nThis is acceptable.\nP0080, P0388, P0269, P0438 are *only* in Table tasks. I will cite them in the table cells.\nP0057, P0090, P0113, P0270, P0352, P0457 are in P01 and Table. I will cite them in P01 text, and can cite them again in the table if needed for specific data points, but to avoid clutter, I might rely on the text for the general claim and table for the specific comparison. However, the Table Task says \"Source\" column. I must put the citation in the table cell. So `[P0090]` will appear in P01 text and Table Row 3. This is allowed as long as the *content* isn't mechanically repeated (Text: narrative; Table: structured comparison).\n\nLet's write.",
+  "raw_stream_path": "F:\\OptoMind-Review-2\\outputs\\legacy_unit_plus_acceptance_20261010_30cny\\units\\Ch2\\Ch2_U04\\a60c30535820b1680ea03f1bfaaa18a1678cdbc1ce5ef7c30206b17c01255153\\attempt_001\\transport\\a60c30535820b168-attempt_001-key0-attempt0.sse.raw",
+  "stream_event_count": 1690,
+  "transport_events": [
+    {
+      "stage": "request_open_start",
+      "epoch": 1791573417.2918296,
+      "elapsed_seconds": 0.0,
+      "stream": true,
+      "timeout_seconds": 1800.0,
+      "overall_timeout_seconds": 3600.0,
+      "request_body_bytes": 189290,
+      "request_body_sha256": "52cc868d7096fd6db224190bcf293e8a4d01c446903043a1acb5de8069a8cdb0",
+      "sequence": 1
+    },
+    {
+      "stage": "response_opened",
+      "epoch": 1791573419.3719466,
+      "elapsed_seconds": 2.077999999979511,
+      "status_code": 200,
+      "headers": {
+        "content-type": "text/event-stream;charset=utf-8",
+        "x-request-id": "d4fe4baf-6672-936f-86e1-0741696c26bb",
+        "date": "Fri, 09 Oct 2026 19:16:59 GMT",
+        "server": "istio-envoy",
+        "connection": "close",
+        "transfer-encoding": "chunked"
+      },
+      "sequence": 2
+    },
+    {
+      "stage": "stream_read_start",
+      "epoch": 1791573419.3729467,
+      "elapsed_seconds": 2.077999999979511,
+      "event_count": 0,
+      "read_timeout_seconds": 1800.0,
+      "overall_remaining_seconds": 3597.9220000000205,
+      "sequence": 3
+    },
+    {
+      "stage": "stream_first_byte",
+      "epoch": 1791573419.3729467,
+      "elapsed_seconds": 2.077999999979511,
+      "bytes": 308,
+      "sequence": 4
+    },
+    {
+      "stage": "stream_read_start",
+      "epoch": 1791573419.3729467,
+      "elapsed_seconds": 2.077999999979511,
+      "event_count": 0,
+      "read_timeout_seconds": 1800.0,
+      "overall_remaining_seconds": 3597.9220000000205,
+      "sequence": 5
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573419.3729467,
+      "elapsed_seconds": 2.077999999979511,
+      "event_count": 1,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 3,
+      "usage_present": false,
+      "sequence": 6
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573419.4955087,
+      "elapsed_seconds": 2.202999999979511,
+      "event_count": 2,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 20,
+      "usage_present": false,
+      "sequence": 7
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573419.5609396,
+      "elapsed_seconds": 2.265000000130385,
+      "event_count": 3,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 35,
+      "usage_present": false,
+      "sequence": 8
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573419.577948,
+      "elapsed_seconds": 2.280999999959022,
+      "event_count": 4,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 37,
+      "usage_present": false,
+      "sequence": 9
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573419.645309,
+      "elapsed_seconds": 2.3589999999385327,
+      "event_count": 5,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 42,
+      "usage_present": false,
+      "sequence": 10
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573419.7152376,
+      "elapsed_seconds": 2.422000000020489,
+      "event_count": 6,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 49,
+      "usage_present": false,
+      "sequence": 11
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573419.763915,
+      "elapsed_seconds": 2.469000000040978,
+      "event_count": 7,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 77,
+      "usage_present": false,
+      "sequence": 12
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573419.8164282,
+      "elapsed_seconds": 2.515000000130385,
+      "event_count": 8,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 81,
+      "usage_present": false,
+      "sequence": 13
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573426.976974,
+      "elapsed_seconds": 9.687000000150874,
+      "event_count": 128,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 1507,
+      "usage_present": false,
+      "sequence": 14
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573434.6057966,
+      "elapsed_seconds": 17.312000000150874,
+      "event_count": 256,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 2815,
+      "usage_present": false,
+      "sequence": 15
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573442.27087,
+      "elapsed_seconds": 24.983999999938533,
+      "event_count": 384,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 3912,
+      "usage_present": false,
+      "sequence": 16
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573449.4098856,
+      "elapsed_seconds": 32.10899999993853,
+      "event_count": 512,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 5378,
+      "usage_present": false,
+      "sequence": 17
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573456.6851275,
+      "elapsed_seconds": 39.390000000130385,
+      "event_count": 640,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 6716,
+      "usage_present": false,
+      "sequence": 18
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573464.0650232,
+      "elapsed_seconds": 46.765000000130385,
+      "event_count": 768,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 8044,
+      "usage_present": false,
+      "sequence": 19
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573471.4408906,
+      "elapsed_seconds": 54.140000000130385,
+      "event_count": 896,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 9414,
+      "usage_present": false,
+      "sequence": 20
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573478.54688,
+      "elapsed_seconds": 61.25,
+      "event_count": 1024,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 10672,
+      "usage_present": false,
+      "sequence": 21
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573485.8918295,
+      "elapsed_seconds": 68.59400000004098,
+      "event_count": 1152,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 11972,
+      "usage_present": false,
+      "sequence": 22
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573493.4546971,
+      "elapsed_seconds": 76.15599999995902,
+      "event_count": 1280,
+      "choices": 1,
+      "content_bytes": 0,
+      "reasoning_bytes": 13303,
+      "usage_present": false,
+      "sequence": 23
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573500.4956813,
+      "elapsed_seconds": 83.20299999997951,
+      "event_count": 1408,
+      "choices": 1,
+      "content_bytes": 1210,
+      "reasoning_bytes": 13699,
+      "usage_present": false,
+      "sequence": 24
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573507.5469928,
+      "elapsed_seconds": 90.25,
+      "event_count": 1536,
+      "choices": 1,
+      "content_bytes": 2878,
+      "reasoning_bytes": 13699,
+      "usage_present": false,
+      "sequence": 25
+    },
+    {
+      "stage": "stream_chunk",
+      "epoch": 1791573515.1970177,
+      "elapsed_seconds": 97.90599999995902,
+      "event_count": 1664,
+      "choices": 1,
+      "content_bytes": 4179,
+      "reasoning_bytes": 13699,
+      "usage_present": false,
+      "sequence": 26
+    },
+    {
+      "stage": "stream_done",
+      "epoch": 1791573516.5775058,
+      "elapsed_seconds": 99.28099999995902,
+      "event_count": 1690,
+      "raw_bytes": 503484,
+      "sequence": 28
+    },
+    {
+      "stage": "stream_complete",
+      "epoch": 1791573516.5785058,
+      "elapsed_seconds": 99.28099999995902,
+      "event_count": 1690,
+      "content_bytes": 4414,
+      "reasoning_bytes": 13699,
+      "usage_present": true,
+      "sequence": 29
+    }
+  ],
+  "cap_pressure": {
+    "near_limit": false,
+    "near_limits": [],
+    "completion_tokens": 5718,
+    "reasoning_tokens": 4453,
+    "answer_tokens": 1265,
+    "finish_reason_length": false,
+    "diagnostic_only": true
+  },
+  "execution_mode": "live"
+}

@@ -1,0 +1,35 @@
+.....................F...............                                    [100%]
+================================== FAILURES ===================================
+___________ test_existing_ledger_damage_is_not_a_new_budget[delete] ___________
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-1403/test_existing_ledger_damage_is0')
+corruption = 'delete'
+
+    @pytest.mark.parametrize("corruption", ["delete", "empty", "corrupt", "cap"])
+    def test_existing_ledger_damage_is_not_a_new_budget(tmp_path, corruption):
+        import sqlite3
+        ledger = tmp_path / "budget.sqlite"
+        args = cli.parser().parse_args(["--input", "unused", "--output-dir", str(tmp_path / "out"), "--run", "--ledger", str(ledger)])
+        cli._dedicated_factory(args, book(), counter)
+        if corruption == "delete":
+>           ledger.unlink()
+
+tests\test_legacy_unit_route.py:228: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-1403/test_existing_ledger_damage_is0/budget.sqlite')
+missing_ok = False
+
+    def unlink(self, missing_ok=False):
+        """
+        Remove this file or link.
+        If the path is a directory, use rmdir() instead.
+        """
+        try:
+>           os.unlink(self)
+E           PermissionError: [WinError 32] 另一个程序正在使用此文件，进程无法访问。: 'C:\\Users\\Administrator\\AppData\\Local\\Temp\\pytest-of-Administrator\\pytest-1403\\test_existing_ledger_damage_is0\\budget.sqlite'
+
+C:\Anaconda\Lib\pathlib.py:1342: PermissionError
+=========================== short test summary info ===========================
+FAILED tests/test_legacy_unit_route.py::test_existing_ledger_damage_is_not_a_new_budget[delete]
+1 failed, 36 passed in 1.86s

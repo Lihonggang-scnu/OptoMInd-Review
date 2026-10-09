@@ -1,0 +1,185 @@
+{
+  "schema_version": "optomind.review_unit_writer.result.v1",
+  "generated_at": "2026-10-10T03:09:52",
+  "mode": "run",
+  "simulated": false,
+  "chapter_id": "Ch1",
+  "unit_id": "U1_跨癌种关联图谱",
+  "model": "qwen3.5-plus",
+  "language": "zh",
+  "body_markdown": "跨癌种观察性队列研究一致表明，特定肠道微生物特征与免疫检查点抑制剂（ICI）的临床结局存在显著关联，但这种关联的强度与方向呈现出明显的癌种特异性分布。在黑色素瘤、非小细胞肺癌（NSCLC）和肾细胞癌（RCC）中，基线高α多样性及特定菌属（如*Akkermansia muciniphila*、*Faecalibacterium prausnitzii*、*Bifidobacterium*）的富集通常与更长的总生存期（OS）和无进展生存期（PFS）相关 [P0298][P0096][P0146]。系统综述与荟萃分析定量证实，在 NSCLC 和黑色素瘤患者中，高α多样性显著改善 OS（pooled HR 0.52）和 PFS（pooled HR 0.58），且*Akkermansia*的存在显著增加客观缓解率（ORR）（pooled OR 2.15）[P0298]。然而，这一“有益菌”图谱并非普适。在转移性去势抵抗性前列腺癌（mCRPC）队列中，*A. muciniphila*在响应者中反而显著降低，挑战了跨癌种通用正相关假设 [P0270]。类似地，波兰黑色素瘤队列显示响应者中*Faecalibacterium prausnitzii*显著富集于非响应者，而*Prevotella copri*和*Bacteroides uniformis*与响应正相关，这与部分其他队列结果相反 [P0545]。肝细胞癌（HCC）的多组学研究进一步揭示，虽然细菌和代谢物在持久获益组与非获益组间差异显著，但真菌群落的差异较小，提示不同微生物界别的调节作用具有癌种异质性 [P0204]。这些证据共同表明，虽然微生物信号与 ICI 疗效的生物学关联具有合理性，但不存在单一的普适性分类学标志物，证据强度严格依赖于肿瘤类型及人群背景。\n\n跨队列异质性的统计根源在于“队列”本身是解释微生物群落变异的最大因素，而非临床参数，这直接导致了机器学习模型在跨人群泛化时的失效。一项整合 5 个新测序队列（n=165）和 4 个公开数据集（n=147）的跨队列黑色素瘤研究显示，PERMANOVA 分析中“队列”因素对微生物群落组成的解释方差是其他任何临床变量的近十倍 [P0478]。基于物种丰度的机器学习模型在留一法交叉验证中的平均 AUC-ROC 仅为 0.59-0.60，仅约 31.4% 的情况超过 0.6，表明基于特定队列训练的微生物特征无法可靠预测其他队列的反应 [P0478]。肠型分层分析进一步解释了这种不一致性：例如*Collinsella*仅在 E2 肠型（富含肠杆菌科）中作为响应标志物，而在 E1 肠型中*Bacteroides*更具预测力，说明单一物种的作用依赖于群落背景 [P0170]。SCRUM-Japan 大规模队列（n=333）数据也证实，整体α多样性与 ICI 疗效无普遍关联，仅在特定癌种亚组中呈现异质性 [P0289]。鉴于分类学层面的高度变异，研究视角正转向功能趋同：尽管响应相关的菌种不同，但其代谢通路（如维生素 B 代谢、短链脂肪酸产生）在跨队列中呈现一致性 [P0364][P0511]。此外，菌株级签名在联合免疫治疗（CICB）中具有泛癌种预测力（AUC 0.73），但在单药队列中失效（AUC < 0.60），进一步证实了缺乏通用标志物的统计依据 [P0015]。\n\n治疗方案与给药时序严格修饰微生物效应的方向，使得同一微生物特征在不同免疫方案下可能产生截然相反的临床关联。JCOG2007 III 期试验的辅助生物标志物研究提供了关键证据：在纳武利尤单抗 + 伊匹木单抗联合铂类化疗（NIC）组中，基线*Fusicatenibacter*和*Butyricicoccus*高丰度与更好的 OS 相关（HR 分别为 0.56 和 0.52），且与较低的严重不良事件风险相关 [P0585]。然而，同一研究中*Prevotellaceae NK3B31*的高丰度在 NIC 组中却与更高的死亡风险相关（HR = 2.33）[P0585]。这种方案特异性效应在跨癌种分析中同样存在：菌株级微生物签名在 CICB 背景下展现出跨队列泛化能力，但在抗 PD-1 单药背景下预测能力丧失（AUC 0.51）[P0015]。这表明微生物组对 ICI 疗效的调节并非独立于治疗背景，而是受到具体给药方案（如双免疫阻断 vs 单药、联合化疗 vs 不联合）的严格调控。因此，在评估微生物标志物时，必须将治疗方案作为核心分层变量，避免将特定方案下的关联错误外推至所有 ICI 治疗场景。",
+  "body_path": "F:\\OptoMind-Review-2\\outputs\\legacy_unit_plus_acceptance_20261010_30cny\\units\\Ch1\\U1_跨癌种关联图谱\\87e2d62c359b83ea8539a8559f524f88ee16641c084faf8cd00f393a418df506\\attempt_001\\UNIT_BODY.md",
+  "used_source_handles": [
+    "P0298",
+    "P0096",
+    "P0146",
+    "P0270",
+    "P0545",
+    "P0204",
+    "P0478",
+    "P0170",
+    "P0289",
+    "P0364",
+    "P0511",
+    "P0015",
+    "P0585"
+  ],
+  "unused_source_handles": [
+    "P0393",
+    "P0565",
+    "P0437",
+    "P0583",
+    "P0273",
+    "P0417",
+    "P0148",
+    "P0474",
+    "P0271",
+    "P0578",
+    "P0577"
+  ],
+  "unknown_citations": [],
+  "source_count": 24,
+  "material_summary": {
+    "sources": 24,
+    "with_study_summary_A": 24,
+    "with_review_planning_B": 24,
+    "with_deep_read_material": [
+      "P0478",
+      "P0577",
+      "P0578",
+      "P0583"
+    ],
+    "with_supplement_material": 4,
+    "with_supplement_materials": [
+      "P0273",
+      "P0577",
+      "P0578",
+      "P0583",
+      "P0585"
+    ],
+    "with_local_passages": [
+      "P0364"
+    ],
+    "with_tool_supplement_materials": [
+      "P0478"
+    ],
+    "chapter_tool_materials": 3,
+    "read_from_disk": [
+      "P0015",
+      "P0096",
+      "P0146",
+      "P0148",
+      "P0170",
+      "P0204",
+      "P0270",
+      "P0271",
+      "P0273",
+      "P0289",
+      "P0298",
+      "P0364",
+      "P0393",
+      "P0417",
+      "P0437",
+      "P0474",
+      "P0478",
+      "P0511",
+      "P0545",
+      "P0565",
+      "P0577",
+      "P0578",
+      "P0583",
+      "P0585"
+    ],
+    "capacity_threshold_exceeded": [],
+    "truncated": []
+  },
+  "material_notes": [],
+  "warnings": [],
+  "estimate": {
+    "prompt_tokens_estimate": 115664,
+    "reserved_input_tokens": 137736,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192,
+    "output_tokens": 32768,
+    "thinking_budget": 8192,
+    "total_context_tokens": 178696,
+    "input_capacity": {
+      "material_preserved": true,
+      "max_input_tokens": 991808,
+      "context_window": 1000000,
+      "exceeds_capacity": false,
+      "action": "within_capacity"
+    },
+    "estimated_cost_cny": 1.533984,
+    "model": "qwen3.5-plus",
+    "tokenizer": "provided_token_counter"
+  },
+  "usage": {
+    "prompt_tokens": 115674,
+    "completion_tokens": 2838,
+    "total_tokens": 118512,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1646,
+      "text_tokens": 2838
+    },
+    "prompt_tokens_details": {
+      "text_tokens": 115674
+    }
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "answer_tokens": 32768,
+    "total_output_tokens": 40960,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "response_format": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0
+  },
+  "cap_pressure": {
+    "near_limit": false,
+    "near_limits": [],
+    "completion_tokens": 2838,
+    "reasoning_tokens": 1646,
+    "answer_tokens": 1192,
+    "finish_reason_length": false,
+    "diagnostic_only": true
+  },
+  "finish_reason": "stop",
+  "complete": true,
+  "completion_status": "complete",
+  "partial_error": "",
+  "issues": [],
+  "known_tool_identifiers": [
+    "Q01"
+  ],
+  "non_source_identifier_citations": [],
+  "unresolved_numeric_citations": [],
+  "citation_problems": [],
+  "fence_report": {
+    "remaining_fenced_lines": []
+  },
+  "content_review_status": "not_reviewed",
+  "numeric_citation_repairs": [],
+  "bibliography_title_citation_map": {},
+  "citation_number_map_origin": "generated_local_aliases",
+  "citation_mapping_diagnostics": [],
+  "table_check": {
+    "valid": null
+  },
+  "output_consumption_status": "consumed",
+  "arrangement_path": "",
+  "view_path": "",
+  "input_path": "F:\\OptoMind-Review-2\\outputs\\legacy_unit_plus_acceptance_20261010_30cny\\units\\Ch1\\U1_跨癌种关联图谱\\87e2d62c359b83ea8539a8559f524f88ee16641c084faf8cd00f393a418df506\\attempt_001\\UNIT_INPUT.json",
+  "messages_path": "F:\\OptoMind-Review-2\\outputs\\legacy_unit_plus_acceptance_20261010_30cny\\units\\Ch1\\U1_跨癌种关联图谱\\87e2d62c359b83ea8539a8559f524f88ee16641c084faf8cd00f393a418df506\\attempt_001\\UNIT_MESSAGES.json",
+  "raw_response": "F:\\OptoMind-Review-2\\outputs\\legacy_unit_plus_acceptance_20261010_30cny\\units\\Ch1\\U1_跨癌种关联图谱\\87e2d62c359b83ea8539a8559f524f88ee16641c084faf8cd00f393a418df506\\attempt_001\\RAW_RESPONSE.json",
+  "simulated_from": "",
+  "note": "真实模型输出；未做全章合稿、未做审稿循环、未做事实核查。",
+  "execution_mode": "live"
+}
