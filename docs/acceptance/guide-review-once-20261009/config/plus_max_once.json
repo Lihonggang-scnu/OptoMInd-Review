@@ -1,0 +1,28 @@
+{
+  "schema_version": "optomind.guide_review_config.v1",
+  "purpose": "Optional, preview by default. Exactly one Plus review then one Max revision per frozen experiment; no retries or extra model reads. Separate baseline/revised artifacts. Dedicated lifetime budget <= CNY 30. Structural completion is not scientific validation.",
+  "reviewer": {
+    "model": "qwen3.5-plus",
+    "thinking": true,
+    "thinking_budget": 8192,
+    "max_output_tokens": 12288,
+    "json_mode": false,
+    "timeout_seconds": 1800,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  },
+  "reviser": {
+    "model": "qwen3.8-max",
+    "thinking": true,
+    "thinking_budget": 32768,
+    "max_output_tokens": 32768,
+    "json_mode": true,
+    "timeout_seconds": 1800,
+    "stream": true,
+    "stream_overall_timeout_seconds": 3600,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192
+  }
+}
