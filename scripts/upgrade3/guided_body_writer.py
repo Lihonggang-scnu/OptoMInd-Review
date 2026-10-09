@@ -39,7 +39,9 @@ def parser():
     mode = p.add_mutually_exclusive_group()
     mode.add_argument('--run', action='store_true', help='Explicit paid execution using the original remaining budget')
     mode.add_argument('--responses', help='Offline recorded-response fixture')
-    p.add_argument('--allow-max', action='store_true', help='Explicit permission only; never automatically selects Max')
+    models = p.add_mutually_exclusive_group()
+    models.add_argument('--allow-max', action='store_true', help='Explicit permission only; never automatically selects Max')
+    models.add_argument('--plus-only', action='store_true', help='Restrict this test entry and every author/completer dispatch to qwen3.5-plus; no Max fallback')
     p.add_argument('--retry-failed', action='store_true')
     p.add_argument('--metadata-declarations', help='JSON list of explicit human completion declarations bound to saved stage/response/body hashes; no rewrite')
     p.add_argument('--budget-ledger', help='Existing original round-two SQLite ledger, with its original marker')
@@ -47,6 +49,27 @@ def parser():
     p.add_argument('--key-file')
     p.add_argument('--tokenizer')
     return p
+
+
+def _require_plus_profiles(profiles):
+    """Exact allowlist for an explicitly Plus-only run, including late stages."""
+    rejected = [role for role, profile in profiles.items()
+                if profile.get('model') != 'qwen3.5-plus']
+    if rejected:
+        raise ValueError('plus_only_requires_qwen3.5_plus:' + ','.join(rejected))
+
+
+class _PlusOnlyFactory:
+    """Check before the underlying factory can construct a ledger or client."""
+    def __init__(self, factory):
+        self._factory = factory
+
+    def __getattr__(self, name):
+        return getattr(self._factory, name)
+
+    def __call__(self, role, stage_dir, profile):
+        _require_plus_profiles({role: profile})
+        return self._factory(role, stage_dir, profile)
 
 
 def _ledger_guard(args):
@@ -90,7 +113,7 @@ def _check_context(output, context):
     if path.is_file():
         prior = read_json(path)
         for field in ('guide_sha256', 'guide_file_sha256', 'input_sha256', 'book_sha256',
-                      'source_manifest_sha256', 'config', 'meter', 'cli_source_sha256'):
+                      'source_manifest_sha256', 'config', 'meter', 'cli_source_sha256', 'plus_only'):
             if prior.get(field) != context.get(field):
                 raise ValueError('guided_input_or_configuration_changed_use_new_output_directory:' + field)
     shared._execution_context(output, context)
@@ -110,6 +133,8 @@ def main(argv=None):
         shared._no_secrets(config)
         config = validate_config(config)
         profiles = {role: value for role, value in config.items() if isinstance(value, dict) and 'model' in value}
+        if args.plus_only:
+            _require_plus_profiles(profiles)
         shared._require_max_permission(args, profiles)
         counter, meter = tokenizer_counter(args.tokenizer)
         mode = 'live' if args.run else 'recording' if args.responses else 'preview'
@@ -118,7 +143,8 @@ def main(argv=None):
                    'input_sha256': sha256_file(args.book or args.manifest), 'book_sha256': book['book_sha256'],
                    'guide_sha256': _hash(guide), 'guide_file_sha256': sha256_file(args.guide),
                    'source_manifest_sha256': _hash(prepared), 'config': config, 'meter': meter,
-                   'cli_source_sha256': sha256_file(__file__), 'semantic_quality_unreviewed': True}
+                   'cli_source_sha256': sha256_file(__file__), 'plus_only': args.plus_only,
+                   'semantic_quality_unreviewed': True}
         snapshot = output / 'SOURCE_MANIFEST.json'
         if snapshot.is_file() and _hash(read_json(snapshot)) != _hash(prepared):
             raise ValueError('input_source_versions_changed_use_new_output_directory')
@@ -128,12 +154,13 @@ def main(argv=None):
         write_json(output / 'GUIDE.json', guide)
         write_json(output / 'EFFECTIVE_CONFIG.json', config)
         factory = make_live_factory(args, token_counter=counter) if args.run else RecordingFactory(args.responses) if args.responses else None
+        dispatch_factory = _PlusOnlyFactory(factory) if args.plus_only and factory is not None else factory
         invocation = output / 'cli_invocations' / (uuid.uuid4().hex + '.json')
         write_json(invocation, {**context, 'started_at': datetime.now(timezone.utc).isoformat(),
                                'allow_max': args.allow_max, 'retry_failed': args.retry_failed,
                                'fixture_sha256': getattr(factory, 'fixture_sha256', None), 'budget_before': budget})
         declarations = read_json(args.metadata_declarations) if args.metadata_declarations else None
-        result = run_guided_body(book, guide, output, config, client_factory=factory,
+        result = run_guided_body(book, guide, output, config, client_factory=dispatch_factory,
                                  run=bool(args.run or args.responses), retry_failed=args.retry_failed, token_counter=counter, metadata_declarations=declarations)
         result = {**result, 'execution_mode': mode, 'input_mode': context['input_mode'], 'meter': meter,
                   'cli_invocation': str(invocation), 'guide_sha256': context['guide_sha256'],

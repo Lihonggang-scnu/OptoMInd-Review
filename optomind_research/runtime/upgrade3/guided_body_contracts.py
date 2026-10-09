@@ -180,6 +180,45 @@ def normalize_citation_handles(body: str, known_handles: Sequence[str]) -> str:
     return "".join(piece if index % 2 else token.sub(replace, piece) for index, piece in enumerate(pieces))
 
 
+def adapt_delivery_chapter(body: str, chapter_title: str) -> tuple[str, dict[str, Any]]:
+    """Remove a confidently identified presentation wrapper from a COPY only.
+
+    Require an entire fenced Markdown chapter, its exact assigned title, and
+    narrative prose. Never infer chapter boundaries in an assembled manuscript.
+    Nested/malformed fences and short Markdown examples remain unchanged. This
+    conservative check is formatting detection, not a review of the science.
+    """
+    audit: dict[str, Any] = {"outer_markdown_fence_removed": False, "diagnostics": []}
+    opening = re.match(r"\A(?P<prefix>(?:[ \t]*\r?\n)*) {0,3}```(?:markdown|md)[ \t]*\r?\n", body)
+    if not opening:
+        return body, audit
+    closing = re.search(r"(?m)^ {0,3}```[ \t]*(?:\r?\n)?[ \t\r\n]*\Z", body)
+    if closing is None or closing.start() < opening.end():
+        audit["diagnostics"].append("outer_markdown_fence_unclosed_or_ambiguous")
+        return body, audit
+    interior = body[opening.end():closing.start()]
+    heading = re.match(r"\A[ \t\r\n]*#{1,2}[ \t]+([^\r\n]+)\r?\n", interior)
+    # An internal fence could close the apparent wrapper, or be a literal
+    # example; do not guess at its interpretation or alter its protection.
+    if (not heading or heading.group(1).strip() != chapter_title.strip()
+            or re.search(r"(?m)^[ \t]*(?:`{3,}|~{3,})", interior)):
+        audit["diagnostics"].append("outer_markdown_fence_not_confident_chapter")
+        return body, audit
+    paragraphs = re.split(r"\r?\n[ \t]*\r?\n", interior[heading.end():])
+    narrative = any(len(p.strip()) >= 40 and not re.match(r"[ \t]*(?:#|\||>|[-*+]\s|\d+[.)]\s)", p.strip())
+                    and re.search(r"[。！？.!?](?:\s|$|[\[（(])", p) for p in paragraphs)
+    if not narrative:
+        audit["diagnostics"].append("outer_markdown_fence_not_confident_narrative")
+        return body, audit
+    # Delete only the two fence lines. All surrounding/interior whitespace and
+    # every prose/citation byte survive this step exactly.
+    closing_line_end = body.find("\n", closing.start())
+    closing_line_end = len(body) if closing_line_end < 0 else closing_line_end + 1
+    adapted = opening.group("prefix") + interior + body[closing_line_end:]
+    audit["outer_markdown_fence_removed"] = True
+    return adapted, audit
+
+
 def build_author_payload(pack: Mapping[str, Any], guide: Mapping[str, Any],
                          chapter: str | Mapping[str, Any], accepted_body_markdown: str,
                          reread_atoms: Sequence[str] = ()) -> dict[str, Any]:

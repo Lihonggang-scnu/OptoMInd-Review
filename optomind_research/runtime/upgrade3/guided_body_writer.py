@@ -18,7 +18,8 @@ from .fullbody_writer import (_cost_summary, _dependency, _execute_stage, _messa
 from .writer_candidates import ROOT, _git_commit, _hash, _output_lock, _profile, _read, _safe_error, _write
 from .writer_candidates_contracts import CandidateError
 from .guided_body_contracts import (validate_guide, compile_guided_materials, build_author_payload,
-    resolve_read_request, parse_guided_response, parse_completion_response, apply_insertions, normalize_citation_handles)
+    resolve_read_request, parse_guided_response, parse_completion_response, apply_insertions, normalize_citation_handles,
+    adapt_delivery_chapter)
 
 SCHEMA_VERSION = "optomind.guided_body_writer.v1"
 PROMPT_ROOT = ROOT / "prompts" / "guided_body_writer"
@@ -326,11 +327,27 @@ def _run(book, guide, output, config, client_factory, run, retry_failed, counter
             record["estimated_actual_cost_cny"] = 0
     manifest.update(status=status, model_calls=calls, client_invocations=calls, paid_dispatch_count=paid, cost_summary=cost)
     order = [row["chapter_id"] for row in guide.get("chapters", [])] if isinstance(guide, Mapping) else []
-    delivery_body = normalize_citation_handles(body, known_handles)
+    delivery_segments, delivery_audit = [], []
+    chapter_titles = {row["chapter_id"]: row.get("title", "") for row in guide.get("chapters", [])
+                      if isinstance(row, Mapping) and "chapter_id" in row} if isinstance(guide, Mapping) else {}
+    for segment in segments:
+        adapted, adaptation = adapt_delivery_chapter(segment["body_markdown"], chapter_titles.get(segment["chapter_id"], ""))
+        delivery_segments.append(adapted)
+        delivery_audit.append({"chapter_id": segment["chapter_id"], **adaptation,
+            "raw_body_sha256": segment["sha256"], "adapted_body_sha256": _text_hash(adapted)})
+    formatted_body = "\n\n".join(delivery_segments)
+    delivery_body = normalize_citation_handles(formatted_body, known_handles)
+    citation_tokens = r"(?<![A-Za-z0-9_])P[0-9]{4}(?![A-Za-z0-9_])"
+    format_audit = {"chapters": delivery_audit,
+        "outer_markdown_fences_removed": sum(row["outer_markdown_fence_removed"] for row in delivery_audit),
+        "citation_normalization_changed": delivery_body != formatted_body,
+        "citation_token_sequence_unchanged": re.findall(citation_tokens, body) == re.findall(citation_tokens, delivery_body),
+        "raw_body_preserved": True}
     delivery_path = run_dir / "DELIVERY_BODY.md"
     _write(delivery_path, delivery_body, text=True)
     result = dict(delivery_body_path=str(delivery_path), delivery_body_sha256=_text_hash(delivery_body),
-        delivery_citation_format_only=True,
+        delivery_citation_format_only=not bool(format_audit["outer_markdown_fences_removed"]),
+        delivery_format_only=True, delivery_format_adaptation=format_audit,
         unknown_citation_handles=sorted(set(re.findall(r"(?<![A-Za-z0-9_])P[0-9]{4}(?![A-Za-z0-9_])", body)) - set(known_handles)),
         schema_version=SCHEMA_VERSION + ".result", run_id=run_id, complete=complete, body_complete=complete,
         body_markdown=body, body_sha256=_text_hash(body), segments=segments,
