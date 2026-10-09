@@ -168,13 +168,34 @@ def test_truncated_transport_cannot_claim_final():
     assert not parsed["complete"] and not parsed["transport_complete"]
 
 
-def test_canonical_alias_preserved_and_duplicate_alias_requests_rejected():
+def test_canonical_alias_is_normalized_and_raw_request_is_preserved():
     raw = book(); raw["chapters"][0]["sources"][0]["aliases"] = ["old-P1"]
     bundle = compile_guide_input(raw)
     assert bundle["source_catalog"][0]["source_handle"] == "P1"
     assert resolve_material_requests(bundle, [need(source_handles=["old-P1"])])[0]["source_handle"] == "P1"
+    request = need(source_handles=["P1", "old-P1"])
+    original_request = deepcopy(request)
+    parsed = parse_maker_response(response(reading_needs=[request]), raw, bundle)
+    assert parsed["reading_needs"][0]["source_handles"] == ["P1"]
+    assert request == original_request
+    assert resolve_material_requests(bundle, [request])[0]["source_handle"] == "P1"
+
+
+def test_exact_duplicate_different_papers_and_conflicting_aliases_keep_fail_closed():
+    raw = book(); raw["chapters"][0]["sources"][0]["aliases"] = ["old-P1"]
+    bundle = compile_guide_input(raw)
     with pytest.raises(CandidateError):
-        resolve_material_requests(bundle, [need(source_handles=["P1", "old-P1"])])
+        resolve_material_requests(bundle, [need(source_handles=["P1", "P1"])])
+    assert [packet["source_handle"] for packet in resolve_material_requests(
+        bundle, [need(source_handles=["P1", "P2"])])] == ["P1", "P2"]
+    forged = deepcopy(bundle)
+    forged["science_archive"]["source_aliases"]["P2"] = "P1"
+    with pytest.raises(CandidateError):
+        resolve_material_requests(forged, [need(source_handles=["P1", "P2"])])
+    with pytest.raises(CandidateError):
+        resolve_material_requests(bundle, [need(source_handles=["UNKNOWN"])])
+    with pytest.raises(CandidateError):
+        resolve_material_requests(bundle, [need(atom_ids=["atom::absent"])])
 
 
 def test_invalid_reading_array_preserves_valid_provisional_guide():

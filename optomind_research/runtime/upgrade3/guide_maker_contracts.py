@@ -140,6 +140,45 @@ def build_maker_payload(bundle: Mapping[str, Any], prior_guide: Any = None,
     return result
 
 
+def _stable_source_read_address(pack: Mapping[str, Any], handle: str,
+                                canonical: str) -> bool:
+    """Return whether an alias is an explicitly reconciled source address.
+
+    ``_canonical_source`` validates that the destination exists, but a caller
+    can still supply a hand-built bundle with a forged alias map.  Reading
+    needs may collapse only aliases recorded on the destination identity; this
+    keeps source identity conflicts and unknown addresses fail-closed.
+    """
+    if handle == canonical:
+        return True
+    if pack.get("source_aliases", {}).get(handle) != canonical:
+        return False
+    identity = pack.get("source_identities", {}).get(canonical)
+    return isinstance(identity, Mapping) and handle in identity.get("aliases", [])
+
+
+def _normalize_need_source_handles(pack: Mapping[str, Any],
+                                   handles: Sequence[str]) -> list[str]:
+    """Canonicalize stable aliases while rejecting exact/conflicting repeats."""
+    normalized: list[str] = []
+    raw_by_canonical: dict[str, str] = {}
+    seen_raw: set[str] = set()
+    for raw in handles:
+        if raw in seen_raw:
+            raise CandidateError("maker_need_sources_duplicated")
+        seen_raw.add(raw)
+        canonical = _canonical_source(pack, raw)
+        prior = raw_by_canonical.get(canonical)
+        if prior is not None:
+            if (not _stable_source_read_address(pack, prior, canonical)
+                    or not _stable_source_read_address(pack, raw, canonical)):
+                raise CandidateError("maker_need_source_alias_conflict:" + raw)
+            continue
+        raw_by_canonical[canonical] = raw
+        normalized.append(canonical)
+    return normalized
+
+
 def _needs(bundle: Mapping[str, Any], needs: Any) -> list[dict[str, Any]]:
     if not isinstance(needs, list):
         raise CandidateError("maker_reading_needs_not_list")
@@ -156,9 +195,7 @@ def _needs(bundle: Mapping[str, Any], needs: Any) -> list[dict[str, Any]]:
         if "reread_reason" in need and (not isinstance(need["reread_reason"], str) or not need["reread_reason"].strip()):
             raise CandidateError("maker_reread_reason_invalid")
         handles = _strings(need.get("source_handles", []), "maker_need_source_handles")
-        canonical = [_canonical_source(pack, h) for h in handles]
-        if len(set(canonical)) != len(canonical):
-            raise CandidateError("maker_need_sources_duplicated")
+        canonical = _normalize_need_source_handles(pack, handles)
         atoms = _strings(need.get("atom_ids", []), "maker_need_atom_ids")
         tools = _strings(need.get("tool_handles", []), "maker_need_tool_handles")
         if len(set(tools)) != len(tools):
@@ -178,7 +215,10 @@ def _needs(bundle: Mapping[str, Any], needs: Any) -> list[dict[str, Any]]:
                 raise CandidateError("maker_atom_not_scientific:" + aid)
             if canonical and atom["source_handle"] not in canonical:
                 raise CandidateError("maker_atom_source_mismatch:" + aid)
-        result.append(deepcopy(dict(need)))
+        normalized_need = deepcopy(dict(need))
+        if handles:
+            normalized_need["source_handles"] = canonical
+        result.append(normalized_need)
     return result
 
 
