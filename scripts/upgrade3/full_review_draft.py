@@ -661,7 +661,7 @@ def normalize_tables(
 
 def clean_unit_body(body: str) -> str:
     lines = body.strip().splitlines()
-    if lines and re.match(r"^\s*#{1,6}\s+", lines[0]):
+    if lines and author_unit_title(body):
         lines = lines[1:]
         while lines and not lines[0].strip():
             lines.pop(0)
@@ -680,6 +680,18 @@ def clean_unit_body(body: str) -> str:
             line = "#" * level + match.group(2)
         cleaned.append(line)
     return "\n".join(cleaned).strip()
+
+
+def author_unit_title(body: str) -> str:
+    """Use a suitable initial author heading as the visible unit title."""
+    lines = str(body or "").strip().splitlines()
+    match = re.match(r"^\s*#{1,6}\s+(.+?)\s*#*\s*$", lines[0]) if lines else None
+    if not match:
+        return ""
+    title = match.group(1).strip()
+    if re.match(r"^(?:表|Table)\s*\d", title, re.IGNORECASE):
+        return ""
+    return _valid_unit_title(title)
 
 
 def concise_unit_title(focus: str, override: str = "") -> str:
@@ -737,9 +749,7 @@ def assemble_documents(
         override = (title_overrides or {}).get(document.job.unit_id, "")
         if str(override or "").strip():
             return concise_unit_title(document.focus, override)
-        # A real unit-title field from the arrangement beats a truncated
-        # focus sentence; the concise fallback stays for units without one.
-        return document.unit_title or concise_unit_title(document.focus, "")
+        return author_unit_title(document.body) or document.unit_title or concise_unit_title(document.focus, "")
 
     table_handle_replacements = 0
     unknown_table_handles: list[str] = []
@@ -747,8 +757,6 @@ def assemble_documents(
         chapter_title = chapter_docs[0].chapter_title
         argument = chapter_docs[0].chapter_argument
         handle_parts = [f"## 第{chapter_index}章 {chapter_title}"]
-        if argument:
-            handle_parts.extend(["", f"> 本章论断：{argument}"])
         for unit_index, document in enumerate(chapter_docs, start=1):
             clean = clean_unit_body(document.body)
             title = resolved_title(document)

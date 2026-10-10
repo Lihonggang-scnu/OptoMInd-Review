@@ -38,6 +38,10 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--reconcile-receipt", help="Audit and settle an existing open hold from a local JSON receipt; no provider calls")
     p.add_argument("--run", action="store_true", help="Explicitly allow live provider calls")
     p.add_argument("--retry-failed", action="store_true", help="Permit a new charged attempt for pending units")
+    p.add_argument("--quality-control", action="store_true",
+                   help="Independent Plus actual-body assessment, at most one bounded correction/completion and post-check; original writer output retained")
+    p.add_argument("--only-unit", action="append", default=[], metavar="CHAPTER:UNIT",
+                   help="Repeatable pilot selection; retains full book/material context and reusable writer request identities")
     p.add_argument("--key-file", help="Local credential file; not read in preview, never copied")
     p.add_argument("--tokenizer", help="Existing local tokenizer.json, no downloads")
     return p
@@ -169,7 +173,8 @@ def main(argv=None) -> int:
         book, output_dir=args.output_dir, model=args.model,
         output_tokens=args.output_tokens, thinking_budget=args.thinking_budget,
         budget_limit=args.budget_limit, run=args.run, retry_failed=args.retry_failed,
-        client_factory=factory, token_counter=counter)
+        client_factory=factory, token_counter=counter, quality_control=args.quality_control,
+        only_units=args.only_unit)
     _write(Path(args.output_dir).expanduser().resolve() / "TOKENIZER.json", tokenizer)
     print(json.dumps({key: report[key] for key in
           ("status", "model", "original_units", "complete_units", "model_calls",

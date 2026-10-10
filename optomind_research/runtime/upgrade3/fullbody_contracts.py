@@ -239,6 +239,96 @@ def _source_records(chapters: Sequence[Mapping[str, Any]]) -> tuple[list[dict[st
     return records, identities, aliases
 
 
+def register_tool_source_identities(book: Mapping[str, Any]) -> dict[str, Any]:
+    """Register explicit tool-only stable identities in an independent copy.
+
+    A tool answer stays at its original multi-source scope. Only bibliographic
+    identities enter the source catalog; an old conflicting handle is retained
+    as provenance, never rebound in the original tasks or other records.
+    """
+    result = deepcopy(dict(book))
+    chapters = _chapter_rows(result)
+    _, identities, aliases = _source_records(chapters)
+    used = set(identities) | set(aliases)
+    navigation = []
+    prior_navigation = {(row.get("chapter_id"), row.get("tool_index"), row.get("source_index")): row
+                        for row in result.get("tool_source_identity_navigation") or [] if isinstance(row, Mapping)}
+
+    def matches(left, right):
+        ld, rd = normalize_doi(left.get("doi")), normalize_doi(right.get("doi"))
+        if ld and rd:
+            return ld == rd
+        a = left.get("canonical_paper_id") or left.get("paper_id")
+        b = right.get("canonical_paper_id") or right.get("paper_id")
+        return bool(a and a == b)
+
+    def fresh_handle():
+        number = 1
+        while f"P{number:04d}" in used:
+            number += 1
+        handle = f"P{number:04d}"
+        used.add(handle)
+        return handle
+
+    for chapter in chapters:
+        for tool_index, tool in enumerate(chapter.get("chapter_tool_materials") or []):
+            if not isinstance(tool, dict):
+                continue
+            for source_index, source in enumerate(tool.get("sources") or []):
+                if not isinstance(source, dict):
+                    continue
+                original = deepcopy(source)
+                old = str(source.get("source_handle") or "")
+                stable = normalize_doi(source.get("doi")) or source.get("canonical_paper_id") or source.get("paper_id")
+                prior = prior_navigation.get((chapter["chapter_id"], tool_index, source_index))
+                if prior and ((old == prior.get("source_handle") and old in identities
+                               and matches(source, identities[old])) or
+                              (not stable and not old and prior.get("status") == "identity_unresolved")):
+                    navigation.append(deepcopy(prior))
+                    continue
+                row = {"chapter_id": chapter["chapter_id"], "tool_index": tool_index,
+                       "source_index": source_index, "original_source_handle": old}
+                if not stable:
+                    # Known handles can navigate existing evidence. Unknown
+                    # identities keep their content but cannot become citations.
+                    if old and aliases.get(old, old) not in identities:
+                        source.pop("source_handle", None)
+                        source["original_source_handle"] = old
+                    row.update(status="identity_unresolved", explanation="No explicit DOI or stable paper identity; content retained.")
+                    tool.setdefault("source_identity_diagnostics", []).append(deepcopy(row))
+                    navigation.append(row)
+                    continue
+                candidates = sorted(h for h, identity in identities.items() if matches(source, identity))
+                existing = aliases.get(old, old)
+                handle = existing if existing in candidates else candidates[0] if candidates else fresh_handle()
+                source["source_handle"] = handle
+                if old and old != handle:
+                    source["original_source_handle"] = old
+                    source["conflicting_handle"] = old
+                    source["original_source"] = original
+                if handle not in identities:
+                    record = {key: deepcopy(source[key]) for key in
+                              ("title", "doi", "canonical_paper_id", "paper_id") if key in source}
+                    record.update(source_handle=handle, aliases=[], evidence_origin="chapter_tool_material",
+                                  evidence_location={"chapter_id": chapter["chapter_id"],
+                                                     "tool_index": tool_index, "source_index": source_index},
+                                  original_source=original)
+                    identities[handle] = deepcopy(record)
+                    chapter["sources"].append(record)
+                elif not any(aliases.get(item["source_handle"], item["source_handle"]) == handle
+                             for item in chapter["sources"]):
+                    # The local writer needs the same identity in its catalog.
+                    identity = identities[handle]
+                    chapter["sources"].append({key: deepcopy(identity[key]) for key in
+                        ("source_handle", "aliases", "title", "doi", "canonical_paper_id", "paper_id") if key in identity})
+                row.update(source_handle=handle, status="reused_stable_identity" if candidates else "registered_tool_identity")
+                navigation.append(row)
+    if navigation:
+        result["tool_source_identity_navigation"] = navigation
+    _source_records(chapters)
+    return result
+
+
 def _shared_requirement(chapters: Sequence[Mapping[str, Any]], field: str, supplied: Any) -> Any:
     if supplied is not None:
         return deepcopy(supplied)

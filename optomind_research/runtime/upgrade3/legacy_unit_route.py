@@ -15,7 +15,8 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from . import review_unit_writer as writer
-from .fullbody_contracts import _chapter_rows, _source_records, fullbody_task_catalog
+from .fullbody_contracts import (_chapter_rows, _source_records, fullbody_task_catalog,
+                                 register_tool_source_identities)
 from .module4.runtime import invoke_client, model_pricing, recover_qwen_stream
 from .portable_paths import portable_component
 from .writer_candidates import _output_lock
@@ -47,6 +48,7 @@ def build_unit_views(book: Mapping[str, Any]) -> list[writer.UnitWritingView]:
     by a book-level merged record. Only explicitly corroborated aliases from
     the existing fullbody identity validator are accepted.
     """
+    book = register_tool_source_identities(book)
     chapters = _chapter_rows(book)
     if book.get("expected_chapter_ids") is not None and book["expected_chapter_ids"] != [c["chapter_id"] for c in chapters]:
         raise CandidateError("legacy_expected_chapter_sequence_mismatch")
@@ -81,6 +83,7 @@ def build_unit_views(book: Mapping[str, Any]) -> list[writer.UnitWritingView]:
         for position, unit in enumerate(units, 1):
             tools = deepcopy(writer._unit_relevant_chapter_tool_materials(
                 chapter.get("chapter_tool_materials") or [], unit["unit_id"]))
+            task_handles = set(_handles(unit))
             pending = deque(_handles([unit, tools]))
             selected = []
             seen = set()
@@ -90,6 +93,10 @@ def build_unit_views(book: Mapping[str, Any]) -> list[writer.UnitWritingView]:
                 if handle in seen:
                     continue
                 if handle not in catalog:
+                    if supplied not in task_handles and any(tool.get("source_identity_diagnostics") for tool in tools):
+                        # Unidentified tool records retain their full text and
+                        # diagnostics, but cannot borrow an unrelated catalog ID.
+                        continue
                     raise CandidateError("legacy_unit_source_missing:" + chapter["chapter_id"]
                                          + ":" + unit["unit_id"] + ":" + supplied)
                 seen.add(handle)
@@ -153,6 +160,7 @@ class _CaptureClient:
 
     def __call__(self, messages, **kwargs):
         self.invocations += 1
+        kwargs.pop("call_id", None)  # Capture owns the persistent request ID.
         try:
             response = invoke_client(self.client, messages, call_id=self.call_id, **kwargs)
         except Exception as exc:
@@ -206,7 +214,8 @@ def run_legacy_units(book: Mapping[str, Any], *, output_dir: str | Path,
                      model: str = "qwen3.5-plus", output_tokens: int = 32768,
                      thinking_budget: int = 8192, budget_limit: float = 30.0,
                      run: bool = False, retry_failed: bool = False,
-                     client_factory=None, token_counter=None) -> dict[str, Any]:
+                     client_factory=None, token_counter=None, quality_control: bool = False,
+                     only_units: list[str] | None = None) -> dict[str, Any]:
     """Preview all units or resume exact requests; never silently re-charge.
 
     An injected factory is an offline testing seam. Production callers must use
@@ -217,15 +226,19 @@ def run_legacy_units(book: Mapping[str, Any], *, output_dir: str | Path,
         return _run(book, output=output, model=model, output_tokens=output_tokens,
                     thinking_budget=thinking_budget, budget_limit=budget_limit, run=run,
                     retry_failed=retry_failed, client_factory=client_factory,
-                    token_counter=token_counter)
+                    token_counter=token_counter, quality_control=quality_control, only_units=only_units)
 
 
 def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
-         run, retry_failed, client_factory, token_counter):
+         run, retry_failed, client_factory, token_counter, quality_control=False, only_units=None):
     if isinstance(budget_limit, bool) or not math.isfinite(budget_limit) or budget_limit <= 0:
         raise CandidateError("legacy_budget_must_be_finite_positive")
     profile = _profile(model, output_tokens, thinking_budget)
     views = build_unit_views(book)
+    full_keys = [f"{view.chapter_id}:{view.unit_id}" for view in views]
+    requested_keys = list(dict.fromkeys(only_units)) if only_units else full_keys
+    if any(key not in full_keys for key in requested_keys):
+        raise CandidateError("legacy_selected_unit_not_found:" + ",".join(key for key in requested_keys if key not in full_keys))
     identity = {"schema_version": SCHEMA, "book_sha256": _hash(book), "profile": profile,
                 "budget_limit": budget_limit,
                 "prompt_sha256": _hash(writer.load_writer_prompt(planning_revision=True))}
@@ -246,6 +259,9 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
             "generation_code_sha256": original_code,
             "generation_identity_sha256": _hash(identity)})
     _write(output / "FULL_BODY_INPUT.json", book)
+    registered_book = register_tool_source_identities(book)
+    if registered_book != book:
+        _write(output / "REGISTERED_FULL_BODY_INPUT.json", registered_book)
     mode = getattr(client_factory, "execution_mode", "injected" if client_factory else "preview")
     execution_path = output / "EXECUTION_MODE.json"
     if not run and execution_path.exists():
@@ -276,6 +292,10 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
               "estimated_all_units_cny": sum(row[3]["estimated_cost_cny"] for row in prepared),
               "material_preserved": True, "previous_body_context": False,
               "model_calls": 0, "units": [], "assembly": {}, "scientific_review_status": "not_run"}
+    report.update(quality_control=bool(quality_control), requested_units=requested_keys,
+                  requested_unit_count=len(requested_keys), full_unit_count=len(views),
+                  estimated_requested_units_cny=sum(e["estimated_cost_cny"] for v, p, m, e, s, l in prepared
+                      if f"{v.chapter_id}:{v.unit_id}" in requested_keys))
     report["estimated_all_units_within_budget"] = report["estimated_all_units_cny"] <= budget_limit
     report["capacity_blocked_units"] = [f"{v.chapter_id}:{v.unit_id}" for v, p, m, e, s, l in prepared
                                        if e["input_capacity"]["exceeds_capacity"]]
@@ -287,6 +307,9 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
                "messages_path": str(stage / "UNIT_MESSAGES.json"), "estimate": estimate,
                "status": "planned", "cache_hit": False}
         report["units"].append(row)
+        if f"{view.chapter_id}:{view.unit_id}" not in requested_keys:
+            row["status"] = "not_selected"
+            continue
         if estimate["input_capacity"]["exceeds_capacity"]:
             row["status"] = "capacity_blocked"
             continue
@@ -368,9 +391,48 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
             attempt, result = chosen
             row["attempt_dir"] = str(attempt)
             row["pending_problems"] = [*result.get("issues", []), *result.get("citation_problems", [])]
+            assembly_attempt = attempt
+            if quality_control and result.get("complete"):
+                from .unit_realization import run_unit_quality
+                quality = run_unit_quality(view, payload=payload, existing_body=result["body_markdown"],
+                    output_dir=attempt / "quality", client_factory=client_factory, run=run,
+                    token_counter=token_counter, language=language, writer_profile=profile)
+                row["quality"] = quality
+                report["model_calls"] += quality["model_calls"]
+                row["pending_problems"].extend(quality["pending_problems"])
+                report["scientific_review_status"] = "model_assessed_pending_human_review"
+                if quality["status"] != "planned":
+                    derivative = Path(quality["output_dir"]) / "assembly_derivative"
+                    if (derivative / "UNIT_RESULT.json").exists():
+                        derived = _read(derivative / "UNIT_RESULT.json")
+                        seal = _read(derivative / "RESULT_SEAL.json")
+                        body_path = derivative / derived["body_path"]
+                        if (seal["sha256"] != _hash(derived) or
+                                seal["body_file_sha256"] != hashlib.sha256(body_path.read_bytes()).hexdigest()):
+                            raise CandidateError("legacy_quality_derivative_integrity_failure")
+                    else:
+                        derived = writer.write_unit_output(view, quality["body_markdown"], derivative,
+                            model=model, language=language, mode="fake" if mode == "injected" else "run",
+                            used_messages=messages, estimate=estimate, complete=result["complete"],
+                            finish_reason=result["finish_reason"],
+                            issues=[*result.get("issues", []), *quality["pending_problems"]])
+                        body_path = Path(derived["body_path"])
+                        derived.update(body_path=body_path.name, generation_kind="quality_derivative",
+                            original_writer_result=str(attempt / "UNIT_RESULT.json"),
+                            original_writer_result_sha256=_hash(result),
+                            original_writer_citation_provenance={key: deepcopy(result[key]) for key in
+                                ("numeric_citation_repairs", "citation_mapping_diagnostics", "citation_number_map_origin") if key in result},
+                            quality_result=str(Path(quality["output_dir"]) / "QUALITY_RESULT.json"),
+                            scientific_acceptance=False)
+                        _write(derivative / "UNIT_RESULT.json", derived)
+                        _write(derivative / "RESULT_SEAL.json", {"sha256": _hash(derived),
+                            "body_file_sha256": hashlib.sha256(body_path.read_bytes()).hexdigest()})
+                    assembly_attempt = derivative
+            elif quality_control:
+                row["quality"] = {"status": "skipped_incomplete_original", "model_calls": 0}
             if result.get("body_markdown", "").strip():
                 jobs.append({"chapter_id": view.chapter_id, "unit_id": view.unit_id,
-                             "output": str(attempt), "arrangement": ""})
+                             "output": str(assembly_attempt), "arrangement": ""})
         _write(output / "RUN_REPORT.json", report)
     recorded_ids = {(row["chapter_id"], row["unit_id"]) for row in report["units"]}
     for view in views:
@@ -452,6 +514,7 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
                           + " planned units. Missing: " + ", ".join(report["missing_units"]) + ".\n\n")
                 path.write_text(banner + content, encoding="utf-8")
     report["generation_complete"] = report["complete_units"] == len(views)
+    report["requested_generation_complete"] = report["complete_units"] == len(requested_keys)
     report["assembly_complete"] = bool(report["assembly"] and
         report["assembly"].get("loaded_units") == len(views) and
         not report["assembly"].get("pending_problems"))

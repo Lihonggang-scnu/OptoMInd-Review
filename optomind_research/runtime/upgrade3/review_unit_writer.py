@@ -1093,6 +1093,8 @@ body_markdown、status（appended、already_covered 或 pending）、covered_tas
 证明任务已经完成。若任务已在现有正文中充分完成，返回空 body_markdown 和
 already_covered，不要杜撰内容；若材料不足或无法完成，返回 pending 并说明问题。
 只使用本次给出的任务和来源材料，不新检索、不调用未给出的资料。
+若有 gap_feedback，这是独立正文审查的待核实诊断；对照原始任务、完整材料和只读
+正文确认缺口，仅补充指定任务尚未充分展开的内容，不能把诊断当作新的事实来源。
 
 若指定任务是表格任务，必须在 body_markdown 中写出真正的 Markdown 表格：有表头、
 分隔行和至少一行数据；不能返回 table_tasks、row_tasks 或任务描述来冒充已完成
@@ -1208,10 +1210,13 @@ def build_completion_payload(
     task_ids: Sequence[str],
     *,
     language: str = "zh",
+    gap_feedback: Sequence[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Build a narrow, read-only payload for explicit task completion."""
 
+    from .writer_candidates_contracts import _handles
     paragraph_tasks, table_tasks, handles = _completion_task_parts(view, task_ids)
+    handles = list(dict.fromkeys([*handles, *_handles([paragraph_tasks, table_tasks])]))
     by_handle = {
         str(item.get("source_handle") or ""): item
         for item in view.materials
@@ -1224,11 +1229,18 @@ def build_completion_payload(
         view.chapter_tool_materials, unit_id=view.unit_id,
         handles=list(dict.fromkeys([*handles, *selected_canonical, *equivalent_handles])))
     for item in tools:
-        if not str(item.get("usable_content") or "").strip():
-            continue
-        for handle in _source_handles_from_value(item):
+        for handle in _handles(item):
             if (handle in by_handle or handle in aliases) and handle not in handles:
                 handles.append(handle)
+    # Review-mediated evidence and nested source records are part of the
+    # selected materials' dependency closure, even without their own A/B.
+    position = 0
+    while position < len(handles):
+        handle = aliases.get(handles[position], handles[position])
+        position += 1
+        for dependency in _handles(by_handle.get(handle, {})):
+            if dependency not in handles:
+                handles.append(dependency)
     missing = [
         handle for handle in handles
         if aliases.get(handle, handle) not in by_handle
@@ -1238,7 +1250,7 @@ def build_completion_payload(
         raise UnitWritingError("completion_source_missing:" + ",".join(missing))
     sources = [deepcopy(by_handle[handle]) for handle in
                dict.fromkeys(aliases.get(handle, handle) for handle in handles)]
-    return {
+    payload = {
         "completion_mode": True,
         "chapter_id": view.chapter_id,
         "unit_id": view.unit_id,
@@ -1262,6 +1274,12 @@ def build_completion_payload(
         "requested_task_ids": [str(item) for item in task_ids],
         "requested_source_handles": handles,
     }
+    if gap_feedback is not None:
+        feedback = list(gap_feedback)
+        if any(not isinstance(row, Mapping) or row.get("task_id") not in task_ids for row in feedback):
+            raise UnitWritingError("completion_gap_feedback_task_invalid")
+        payload["gap_feedback"] = deepcopy(feedback)
+    return payload
 
 
 def completion_messages(
@@ -1273,8 +1291,9 @@ def completion_messages(
     language: str = "zh",
     planning_revision: bool = False,
     citation_number_map: Mapping[Any, Any] | None = None,
+    gap_feedback: Sequence[Mapping[str, Any]] | None = None,
 ) -> list[dict[str, str]]:
-    payload = build_completion_payload(view, existing_body, task_ids, language=language)
+    payload = build_completion_payload(view, existing_body, task_ids, language=language, gap_feedback=gap_feedback)
     if citation_number_map is not None:
         payload["citation_number_map"] = dict(citation_number_map)
         payload["citation_number_map_origin"] = "caller_explicit"
@@ -1408,6 +1427,7 @@ def run_unit_completion(
     planning_revision: bool = False,
     simulated: bool = False,
     citation_number_map: Mapping[Any, Any] | None = None,
+    gap_feedback: Sequence[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Make at most one explicit completion call and preserve a pending result."""
 
@@ -1415,7 +1435,8 @@ def run_unit_completion(
 
     messages = completion_messages(
         view, existing_body, task_ids, prompt=prompt, language=language,
-        planning_revision=planning_revision, citation_number_map=citation_number_map)
+        planning_revision=planning_revision, citation_number_map=citation_number_map,
+        gap_feedback=gap_feedback)
     call_id = f"unit_completion_{view.chapter_id}_{view.unit_id}_{int(time.time())}"
     response: Any = None
     call_error = ""
@@ -1527,6 +1548,9 @@ def run_unit_completion(
         result["covered_task_ids"] = [
             str(item) for item in covered
         ] if isinstance(covered, Sequence) and not isinstance(covered, (str, bytes, bytearray)) else []
+        if (len(set(result["covered_task_ids"])) != len(result["covered_task_ids"])
+                or set(result["covered_task_ids"]) - set(result["task_ids"])):
+            raise UnitWritingError("completion_covered_task_ids_invalid")
         raw_issues = envelope.get("issues")
         result["issues"] = list(raw_issues) if isinstance(raw_issues, list) else ([raw_issues] if raw_issues else [])
         result["issues"].extend(item for item in normalization if item.get("code") == "table_markdown_missing_or_invalid")
