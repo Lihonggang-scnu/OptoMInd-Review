@@ -215,7 +215,8 @@ def run_legacy_units(book: Mapping[str, Any], *, output_dir: str | Path,
                      thinking_budget: int = 8192, budget_limit: float = 30.0,
                      run: bool = False, retry_failed: bool = False,
                      client_factory=None, token_counter=None, quality_control: bool = False,
-                     only_units: list[str] | None = None, article_edit: bool = False) -> dict[str, Any]:
+                     only_units: list[str] | None = None, article_edit: bool = False,
+                     reparse_saved: bool = False) -> dict[str, Any]:
     """Preview all units or resume exact requests; never silently re-charge.
 
     An injected factory is an offline testing seam. Production callers must use
@@ -227,12 +228,12 @@ def run_legacy_units(book: Mapping[str, Any], *, output_dir: str | Path,
                     thinking_budget=thinking_budget, budget_limit=budget_limit, run=run,
                     retry_failed=retry_failed, client_factory=client_factory,
                     token_counter=token_counter, quality_control=quality_control, only_units=only_units,
-                    article_edit=article_edit)
+                    article_edit=article_edit, reparse_saved=reparse_saved)
 
 
 def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
          run, retry_failed, client_factory, token_counter, quality_control=False, only_units=None,
-         article_edit=False):
+         article_edit=False, reparse_saved=False):
     if isinstance(budget_limit, bool) or not math.isfinite(budget_limit) or budget_limit <= 0:
         raise CandidateError("legacy_budget_must_be_finite_positive")
     profile = _profile(model, output_tokens, thinking_budget)
@@ -294,7 +295,7 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
               "estimated_all_units_cny": sum(row[3]["estimated_cost_cny"] for row in prepared),
               "material_preserved": True, "previous_body_context": False,
               "model_calls": 0, "units": [], "assembly": {}, "scientific_review_status": "not_run"}
-    report.update(quality_control=bool(quality_control), requested_units=requested_keys,
+    report.update(quality_control=bool(quality_control), reparse_saved=bool(reparse_saved), requested_units=requested_keys,
                   requested_unit_count=len(requested_keys), full_unit_count=len(views),
                   estimated_requested_units_cny=sum(e["estimated_cost_cny"] for v, p, m, e, s, l in prepared
                       if f"{v.chapter_id}:{v.unit_id}" in requested_keys))
@@ -398,13 +399,35 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
                 from .unit_realization import run_unit_quality
                 quality = run_unit_quality(view, payload=payload, existing_body=result["body_markdown"],
                     output_dir=attempt / "quality", client_factory=client_factory, run=run,
-                    token_counter=token_counter, language=language, writer_profile=profile)
+                    token_counter=token_counter, language=language, writer_profile=profile,
+                    reparse_saved=reparse_saved)
                 row["quality"] = quality
                 report["model_calls"] += quality["model_calls"]
                 row["pending_problems"].extend(quality["pending_problems"])
                 report["scientific_review_status"] = "model_assessed_pending_human_review"
                 if quality["status"] != "planned":
-                    derivative = Path(quality["output_dir"]) / "assembly_derivative"
+                    from .unit_realization import retained_original_issues
+                    retained, resolved = retained_original_issues(view, result.get("issues", []), quality)
+                    effective_issues = [*retained, *quality["pending_problems"]]
+                    expected_issues = deepcopy(effective_issues)
+                    for issue in writer._table_consumption_report(quality["body_markdown"], bool(view.table_tasks))["issues"]:
+                        if issue not in expected_issues:
+                            expected_issues.append(issue)
+                    quality_root = Path(quality["output_dir"])
+                    derivative = quality_root / "assembly_derivative"
+                    if (derivative / "UNIT_RESULT.json").exists():
+                        previous = _read(derivative / "UNIT_RESULT.json")
+                        previous_seal = _read(derivative / "RESULT_SEAL.json")
+                        if (previous_seal["sha256"] != _hash(previous) or previous_seal["body_file_sha256"] !=
+                                hashlib.sha256((derivative / previous["body_path"]).read_bytes()).hexdigest()):
+                            raise CandidateError("legacy_quality_derivative_integrity_failure")
+                        if (previous.get("body_markdown") != quality["body_markdown"] or
+                                previous.get("issues") != expected_issues):
+                            # Keep the old sealed derivative; choose a new
+                            # current-body/result version after local reparse.
+                            derivative = quality_root / "assembly_derivatives" / _hash({
+                                "original_result_sha256": _hash(result),
+                                "body_markdown": quality["body_markdown"], "issues": expected_issues})
                     if (derivative / "UNIT_RESULT.json").exists():
                         derived = _read(derivative / "UNIT_RESULT.json")
                         seal = _read(derivative / "RESULT_SEAL.json")
@@ -417,11 +440,12 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
                             model=model, language=language, mode="fake" if mode == "injected" else "run",
                             used_messages=messages, estimate=estimate, complete=result["complete"],
                             finish_reason=result["finish_reason"],
-                            issues=[*result.get("issues", []), *quality["pending_problems"]])
+                            issues=effective_issues)
                         body_path = Path(derived["body_path"])
                         derived.update(body_path=body_path.name, generation_kind="quality_derivative",
                             original_writer_result=str(attempt / "UNIT_RESULT.json"),
                             original_writer_result_sha256=_hash(result),
+                            resolved_original_issues=resolved,
                             original_writer_citation_provenance={key: deepcopy(result[key]) for key in
                                 ("numeric_citation_repairs", "citation_mapping_diagnostics", "citation_number_map_origin") if key in result},
                             quality_result=str(Path(quality["output_dir"]) / "QUALITY_RESULT.json"),
@@ -430,6 +454,8 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
                         _write(derivative / "RESULT_SEAL.json", {"sha256": _hash(derived),
                             "body_file_sha256": hashlib.sha256(body_path.read_bytes()).hexdigest()})
                     assembly_attempt = derivative
+                    row["resolved_original_issues"] = resolved
+                    row["pending_problems"] = [*derived.get("issues", []), *derived.get("citation_problems", [])]
             elif quality_control:
                 row["quality"] = {"status": "skipped_incomplete_original", "model_calls": 0}
             if result.get("body_markdown", "").strip():

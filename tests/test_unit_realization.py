@@ -1,6 +1,7 @@
 """Labeled synthetic fixtures only: bounded production wiring, no network."""
 from copy import deepcopy
 import json
+import os
 from pathlib import Path
 import pytest
 
@@ -66,11 +67,11 @@ class Factory:
         return call
 
 
-def run_stage(tmp_path, factory, body="SYNTHETIC A [P0001].", run=True):
+def run_stage(tmp_path, factory, body="SYNTHETIC A [P0001].", run=True, reparse_saved=False):
     view = route.build_unit_views(book())[0]
     return quality.run_unit_quality(view, payload=route.build_legacy_payload(view, language="en"),
         existing_body=body, output_dir=tmp_path, client_factory=factory, run=run, token_counter=counter,
-        language="en", experiment_label="offline_synthetic_fixture")
+        language="en", experiment_label="offline_synthetic_fixture", reparse_saved=reparse_saved)
 
 
 def test_omitted_task_old_response_completed_once_and_prefix_preserved(tmp_path):
@@ -145,6 +146,133 @@ def test_quotes_task_ids_and_handles_are_checked():
         data["tasks"][0][field] = value
         with pytest.raises(ValueError, match="quality_"):
             quality.validate_assessment(response(data), messages, view, body)
+
+
+def test_ordered_omission_quotes_strictly_anchor_all_fragments():
+    body = "SYNTHETIC A first [P0001]. Middle omitted. Last fragment. SYNTHETIC B."
+    view = route.build_unit_views(book())[0]
+    messages = quality.assessment_messages(view, route.build_legacy_payload(view), body)
+    data = json.loads(assessment(body)["content"])
+    data["tasks"][0]["body_quote"] = "SYNTHETIC A first [P0001]. ... Last fragment."
+    parsed = quality.validate_assessment(response(data), messages, view, body)
+    row = parsed["tasks"][0]
+    assert row["body_quote"] == data["tasks"][0]["body_quote"]
+    assert row["body_quote_match"] == "ordered_omission_excerpt"
+    assert [body[span["start"]:span["end"]] for span in row["body_quote_spans"]] == [
+        "SYNTHETIC A first [P0001].", "Last fragment."]
+    for invalid in ("Last fragment. ... SYNTHETIC A first [P0001].",
+                    "SYNTHETIC A changed [P0001]. ... Last fragment.", "...", "... Last fragment."):
+        data["tasks"][0]["body_quote"] = invalid
+        with pytest.raises(ValueError, match="quality_body_quote_invalid"):
+            quality.validate_assessment(response(data), messages, view, body)
+    spans, match = quality._body_quote_spans("Literal ... source text", "Literal ... source text")
+    assert match == "exact" and len(spans) == 1
+
+
+def test_reparse_preview_then_run_reuses_raw_and_only_continues_missing_steps(tmp_path, monkeypatch):
+    factory = Factory()
+    validator = quality.validate_assessment
+    with monkeypatch.context() as previous_parser:
+        previous_parser.setattr(quality, "validate_assessment", lambda *a: (_ for _ in ()).throw(
+            ValueError("quality_body_quote_invalid:old_parser")))
+        failed = run_stage(tmp_path, factory)
+    assert len(factory.calls) == 1 and failed["status"] == "pending"
+    target = Path(failed["output_dir"])
+    originals = {name: (target / name).read_bytes() for name in
+                 ("QUALITY_RESULT.json", "RESULT_SEAL.json", "QUALITY_BODY.md", "assessment/RAW_RESPONSE.json", "assessment/REQUEST.json")}
+    ordinary = run_stage(tmp_path, factory)
+    assert ordinary["model_calls"] == 0 and ordinary["status"] == "pending"
+    planned = run_stage(tmp_path, factory, run=False, reparse_saved=True)
+    assert planned["model_calls"] == 0 and planned["status"] == "planned"
+    assert len(factory.calls) == 1 and planned["assessments"]
+    history = Path(planned["reparse_saved"]["history_dir"])
+    for name in ("QUALITY_RESULT.json", "RESULT_SEAL.json", "QUALITY_BODY.md"):
+        assert (history / name).read_bytes() == originals[name]
+    completed = run_stage(tmp_path, factory, reparse_saved=True)
+    assert completed["model_calls"] == 2
+    assert [call[0] for call in factory.calls] == ["assessment", "completion", "post_assessment"]
+    assert completed["body_markdown"].startswith("SYNTHETIC A [P0001].\n\n")
+    for name in ("assessment/RAW_RESPONSE.json", "assessment/REQUEST.json"):
+        assert (target / name).read_bytes() == originals[name]
+    feedback = json.loads(factory.calls[1][1][-1]["content"])["gap_feedback"]
+    assert "body_quote_spans" not in feedback[0] and "body_quote_match" not in feedback[0]
+    assert quality.validate_assessment is validator
+
+
+@pytest.mark.parametrize("step", ["assessment", "completion", "post_assessment"])
+def test_explicit_reparse_does_not_rebuy_partial_stage(tmp_path, step):
+    factory = Factory(partial_step=step)
+    first = run_stage(tmp_path, factory)
+    calls = len(factory.calls)
+    replayed = run_stage(tmp_path, factory, reparse_saved=True)
+    assert replayed["model_calls"] == 0 and len(factory.calls) == calls
+    assert replayed["body_markdown"] == first["body_markdown"]
+    assert replayed["pending_problems"]
+
+
+def test_reparse_completed_request_retains_exact_completion_identity(tmp_path):
+    factory = Factory()
+    first = run_stage(tmp_path, factory)
+    target = Path(first["output_dir"])
+    request = (target / "completion/REQUEST.json").read_bytes()
+    replayed = run_stage(tmp_path, factory, reparse_saved=True)
+    assert replayed["model_calls"] == 0 and len(factory.calls) == 3
+    assert replayed["body_markdown"] == first["body_markdown"]
+    assert (target / "completion/REQUEST.json").read_bytes() == request
+
+
+def test_budget_refusal_keeps_request_and_cannot_be_rebought_on_reparse(tmp_path):
+    calls = []
+    def refused(role, path, profile):
+        calls.append(role)
+        raise ValueError("synthetic_budget_reservation_refused")
+    first = run_stage(tmp_path, refused)
+    target = Path(first["output_dir"])
+    request = (target / "assessment/REQUEST.json").read_bytes()
+    replayed = run_stage(tmp_path, refused, reparse_saved=True)
+    assert first["model_calls"] == replayed["model_calls"] == 0 and len(calls) == 1
+    assert (target / "assessment/REQUEST.json").read_bytes() == request
+    assert any(row["code"] == "quality_assessment_pending_existing_attempt" for row in replayed["pending_problems"])
+
+
+def test_post_assessment_changes_stay_unapplied_and_explicitly_pending(tmp_path):
+    factory = Factory()
+    def with_post_changes(role, path, profile):
+        base = factory(role, path, profile)
+        def client(messages, **kwargs):
+            returned = base(messages, **kwargs)
+            if role == "post_assessment":
+                data = json.loads(returned["content"])
+                data["changes"] = [{"operation": "replace", "original_text": "SYNTHETIC B", "replacement_text": "Must not apply"}]
+                returned["content"] = json.dumps(data)
+            return returned
+        client.prompt_token_counter = counter
+        return client
+    result = run_stage(tmp_path, with_post_changes)
+    assert len(factory.calls) == 3 and "SYNTHETIC B" in result["body_markdown"]
+    assert "Must not apply" not in result["body_markdown"]
+    assert result["status"] == "assessed_with_pending"
+    assert any(row["code"] == "quality_postcheck_edits_not_applied" for row in result["pending_problems"])
+
+
+def test_only_verified_missing_table_structure_resolves_other_issues_remain():
+    view = route.build_unit_views(book())[0]
+    view.table_tasks = [{"table_id": "t1"}, {"table_id": "t2"}]
+    original = [{"code": "markdown_table_missing_or_invalid"}, {"code": "table_markdown_missing_or_invalid"},
+                {"problem": "Unresolved scientific attribution", "source_handles": ["P0001"]}]
+    result = {"body_markdown": "|Combined task|Result|\n|---|---|\n|t1 and t2|SYNTHETIC evidence|",
+              "assessments": [{"report": {"tasks": [{"task_id": "t1", "status": "covered"}, {"task_id": "t2", "status": "covered"}]}}]}
+    retained, resolved = quality.retained_original_issues(view, original, result)
+    assert retained == original[2:] and resolved == original[:2]
+    result["assessments"][0]["report"]["tasks"][1]["status"] = "partial"
+    assert quality.retained_original_issues(view, original, result) == (original, [])
+    result["assessments"][0]["report"]["tasks"][1]["status"] = "covered"
+    result["changed"] = True
+    assert quality.retained_original_issues(view, original, result) == (original, [])
+    result["assessments"][0]["step"] = "post_assessment"
+    assert quality.retained_original_issues(view, original, result) == (original[2:], original[:2])
+    result["body_markdown"] = "Claimed table without actual Markdown"
+    assert quality.retained_original_issues(view, original, result) == (original, [])
 
 
 def test_evidence_edit_unique_anchor_preserves_other_bytes():
@@ -264,6 +392,127 @@ def test_integrated_quality_derivative_assembly_and_selection_resume(tmp_path):
     assert third["model_calls"] == 0
 
 
+def test_route_reparse_preserves_old_sealed_derivative_and_selects_new_body(tmp_path, monkeypatch):
+    factory = Factory()
+    factory.execution_mode = "live"  # Offline synthetic assembler control only.
+    with monkeypatch.context() as old_parser:
+        old_parser.setattr(quality, "validate_assessment", lambda *a: (_ for _ in ()).throw(
+            ValueError("quality_body_quote_invalid:old_parser")))
+        first = route.run_legacy_units(book(), output_dir=tmp_path, run=True,
+            client_factory=factory, token_counter=counter, quality_control=True)
+    original = Path(first["units"][0]["attempt_dir"])
+    quality_root = Path(first["units"][0]["quality"]["output_dir"])
+    old_derivative = quality_root / "assembly_derivative"
+    preserved = {path: path.read_bytes() for path in [original / "UNIT_RESULT.json", original / "UNIT_BODY.md",
+                 old_derivative / "UNIT_RESULT.json", old_derivative / "RESULT_SEAL.json", old_derivative / "UNIT_BODY.md"]}
+    replayed = route.run_legacy_units(book(), output_dir=tmp_path, run=True, client_factory=factory,
+        token_counter=counter, quality_control=True, reparse_saved=True)
+    assert replayed["model_calls"] == 2 and len(factory.calls) == 4
+    for path, content in preserved.items():
+        assert path.read_bytes() == content
+    job = json.loads((tmp_path / "batch/BATCH_JOBS.json").read_text(encoding="utf-8"))[0]
+    assert Path(job["output"]).parent == quality_root / "assembly_derivatives"
+    assert "SYNTHETIC B" in (tmp_path / "assembled/REVIEW_DRAFT_HANDLES.md").read_text(encoding="utf-8")
+
+
+def test_route_clears_repaired_table_code_and_keeps_scientific_issue(tmp_path):
+    data = book()
+    data["chapters"][0]["units"][0]["table_tasks"] = [{"table_id": "t1", "purpose": "Synthetic task table",
+        "columns": ["Dimension", "Result"], "row_tasks": [{"content": "Synthetic row", "source_uses": [{"source_handle": "P0001"}]}]}]
+    scientific = {"problem": "Synthetic unresolved scientific attribution", "source_handles": ["P0001"], "action": "chapter_owner"}
+    calls = []
+    def factory(role, path, profile):
+        def client(messages, **kwargs):
+            calls.append(role)
+            payload = json.loads(messages[-1]["content"])
+            if role == "writer":
+                return response({"body_markdown": "SYNTHETIC A and SYNTHETIC B [P0001].", "issues": [scientific]})
+            if role == "completion":
+                assert payload["requested_task_ids"] == ["t1"]
+                return response({"body_markdown": "|Dimension|Result|\n|---|---|\n|SYNTHETIC T|Supported [P0001]|",
+                                 "status": "appended", "covered_task_ids": ["t1"], "issues": []})
+            assessed = json.loads(assessment(payload["actual_body_markdown"])["content"])
+            assessed["tasks"].append({"task_id": "t1", "status": "missing" if role == "assessment" else "covered",
+                "body_quote": "" if role == "assessment" else "SYNTHETIC T",
+                "explanation": "Synthetic table is absent" if role == "assessment" else "Synthetic table is present",
+                "material_handles": ["P0001"]})
+            return response(assessed)
+        client.prompt_token_counter = counter
+        return client
+    factory.execution_mode = "live"
+    result = route.run_legacy_units(data, output_dir=tmp_path, run=True, client_factory=factory,
+                                     token_counter=counter, quality_control=True)
+    assert calls == ["writer", "assessment", "completion", "post_assessment"]
+    row = result["units"][0]
+    original = json.loads((Path(row["attempt_dir"]) / "UNIT_RESULT.json").read_text(encoding="utf-8"))
+    assert {"code": "markdown_table_missing_or_invalid"} in original["issues"]
+    derivative = Path(row["quality"]["output_dir"]) / "assembly_derivative"
+    final = json.loads((derivative / "UNIT_RESULT.json").read_text(encoding="utf-8"))
+    assert final["table_check"]["valid"] is True
+    assert final["issues"] == [scientific] and row["pending_problems"] == [scientific]
+    assert final["resolved_original_issues"] == [{"code": "markdown_table_missing_or_invalid"}]
+    assert result["status"] == "restricted_draft"
+
+
+def test_explicit_real_saved_response_free_reparse_then_offline_missing_steps(tmp_path):
+    """Optional read-only paid RAW fixture; all continuation calls are synthetic."""
+    supplied = os.environ.get("OPTO_QUALITY_REPLAY_FIXTURE")
+    if not supplied:
+        pytest.skip("Set OPTO_QUALITY_REPLAY_FIXTURE to a labeled read-only saved quality stage")
+    source = Path(supplied)
+    names = ("IDENTITY.json", "ORIGINAL_PAYLOAD.json", "ORIGINAL_BODY.md", "QUALITY_BODY.md",
+             "QUALITY_RESULT.json", "RESULT_SEAL.json", "assessment/RAW_RESPONSE.json",
+             "assessment/REQUEST.json", "assessment/MESSAGES.json", "assessment/PROFILE.json")
+    original_files = {name: (source / name).read_bytes() for name in names}
+    identity = json.loads(original_files["IDENTITY.json"].decode("utf-8"))
+    payload = json.loads(original_files["ORIGINAL_PAYLOAD.json"].decode("utf-8"))
+    body = original_files["ORIGINAL_BODY.md"].decode("utf-8")
+    view = writer.UnitWritingView(chapter_id=payload["chapter_id"], unit_id=payload["unit_id"],
+        focus=payload["unit_focus"], unit_index=payload["unit_position"]["index"],
+        unit_count=payload["unit_position"]["of"], sibling_units=payload.get("sibling_units", []),
+        chapter_frame=payload.get("chapter_frame", {}), other_chapters=payload.get("other_chapters", []),
+        paragraph_tasks=payload["paragraph_tasks"], table_tasks=payload["table_tasks"],
+        materials=payload["sources"], sources={row["source_handle"]: row for row in payload["sources"]},
+        chapter_tool_materials=payload.get("chapter_tool_materials", []), unit_notes=payload.get("unit_notes", ""),
+        owner_unit_context=payload.get("owner_unit_context", {}))
+    output = tmp_path / "explicit_real_raw_offline_replay_only"
+    clone = output / source.name
+    for name, content in original_files.items():
+        target = clone / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(content)
+    roles = []
+    def offline_factory(role, path, profile):
+        def client(messages, **kwargs):
+            roles.append(role)
+            request = json.loads(messages[-1]["content"])
+            if role == "completion":
+                return response({"body_markdown": "OFFLINE SYNTHETIC REPLAY CONTROL ONLY: completion marker.",
+                    "status": "appended", "covered_task_ids": request["requested_task_ids"], "issues": []})
+            assert role == "post_assessment"
+            return response({"tasks": [{"task_id": row["task_id"], "status": "covered",
+                "body_quote": "OFFLINE SYNTHETIC REPLAY CONTROL ONLY", "explanation": "Offline wiring control only",
+                "material_handles": []} for row in request["task_catalog"]], "changes": [], "issues": []})
+        client.prompt_token_counter = counter
+        return client
+    options = dict(payload=payload, existing_body=body, output_dir=output,
+        client_factory=offline_factory, token_counter=counter, language=payload["language"],
+        writer_profile=identity["author_profile"], experiment_label=identity["experiment_label"], reparse_saved=True)
+    planned = quality.run_unit_quality(view, run=False, **options)
+    assert planned["status"] == "planned" and planned["model_calls"] == 0 and not roles
+    assert Path(planned["output_dir"]) == clone
+    assert planned["identity"] == identity
+    assert any(row["body_quote_match"] == "ordered_omission_excerpt"
+               for row in planned["assessments"][0]["report"]["tasks"])
+    completed = quality.run_unit_quality(view, run=True, **options)
+    assert roles == ["completion", "post_assessment"] and completed["model_calls"] == 2
+    assert completed["body_markdown"].startswith(body) and completed["scientific_acceptance"] is False
+    assert (clone / "assessment/RAW_RESPONSE.json").read_bytes() == original_files["assessment/RAW_RESPONSE.json"]
+    assert (clone / "assessment/REQUEST.json").read_bytes() == original_files["assessment/REQUEST.json"]
+    for name, content in original_files.items():
+        assert (source / name).read_bytes() == content
+
+
 def test_display_heading_precedence_and_plain_body_preserved():
     from scripts.upgrade3 import full_review_draft as draft
     assert draft.author_unit_title("## Author title\n\nPlain [P0001].") == "Author title"
@@ -274,5 +523,5 @@ def test_display_heading_precedence_and_plain_body_preserved():
 
 def test_cli_matching_flags():
     from scripts.upgrade3.legacy_unit_writer import parser
-    args = parser().parse_args(["--quality-control", "--only-unit", "CH:U0", "--only-unit", "CH:U1"])
-    assert args.quality_control and args.only_unit == ["CH:U0", "CH:U1"]
+    args = parser().parse_args(["--quality-control", "--reparse-saved", "--only-unit", "CH:U0", "--only-unit", "CH:U1"])
+    assert args.quality_control and args.reparse_saved and args.only_unit == ["CH:U0", "CH:U1"]

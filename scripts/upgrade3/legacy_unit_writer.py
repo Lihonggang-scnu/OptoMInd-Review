@@ -40,6 +40,8 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--retry-failed", action="store_true", help="Permit a new charged attempt for pending units")
     p.add_argument("--quality-control", action="store_true",
                    help="Independent Plus actual-body assessment, at most one bounded correction/completion and post-check; original writer output retained")
+    p.add_argument("--reparse-saved", action="store_true",
+                   help="Explicitly reparse saved quality RAW without rebuying attempted stages; unfinished stages require --run and the same owned ledger")
     p.add_argument("--article-edit", action="store_true",
                    help="One resumable Plus whole-article local edit after full-book writing/quality completes; selected subsets explicitly skip")
     p.add_argument("--only-unit", action="append", default=[], metavar="CHAPTER:UNIT",
@@ -166,6 +168,8 @@ def main(argv=None) -> int:
         return 0
     if not args.input or not args.output_dir:
         argument_parser.error("--input and --output-dir are required for preview/run/resume")
+    if args.reparse_saved and not args.quality_control:
+        argument_parser.error("--reparse-saved requires --quality-control")
     book = _read(Path(args.input).expanduser().resolve())
     counter, tokenizer = tokenizer_counter(args.tokenizer)
     # make_live_factory is lazy. Even --run does not read credentials until a
@@ -176,7 +180,7 @@ def main(argv=None) -> int:
         output_tokens=args.output_tokens, thinking_budget=args.thinking_budget,
         budget_limit=args.budget_limit, run=args.run, retry_failed=args.retry_failed,
         client_factory=factory, token_counter=counter, quality_control=args.quality_control,
-        only_units=args.only_unit, article_edit=args.article_edit)
+        only_units=args.only_unit, article_edit=args.article_edit, reparse_saved=args.reparse_saved)
     _write(Path(args.output_dir).expanduser().resolve() / "TOKENIZER.json", tokenizer)
     print(json.dumps({key: report[key] for key in
           ("status", "model", "original_units", "complete_units", "model_calls",

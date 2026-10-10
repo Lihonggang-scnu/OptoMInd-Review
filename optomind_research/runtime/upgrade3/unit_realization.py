@@ -10,6 +10,7 @@ from copy import deepcopy
 import hashlib
 import json
 from pathlib import Path
+import re
 from typing import Any, Mapping
 
 from . import review_unit_writer as writer
@@ -68,6 +69,28 @@ def assessment_messages(view, payload, body):
             }, ensure_ascii=False, indent=2)}]
 
 
+def _body_quote_spans(body, quote):
+    """Locate exact text, permitting explicit ordered omission excerpts only."""
+    if not quote:
+        return [], "empty"
+    start = body.find(quote)
+    if start >= 0:
+        return [{"start": start, "end": start + len(quote), "text": quote}], "exact"
+    if not re.search(r"\.{3,}|…+", quote):
+        return [], "unmatched"
+    fragments = [part.strip() for part in re.split(r"\.{3,}|…+", quote) if part.strip()]
+    if len(fragments) < 2:
+        return [], "unmatched"
+    spans, cursor = [], 0
+    for fragment in fragments:
+        start = body.find(fragment, cursor)
+        if start < 0:
+            return [], "unmatched"
+        cursor = start + len(fragment)
+        spans.append({"start": start, "end": cursor, "text": fragment})
+    return spans, "ordered_omission_excerpt"
+
+
 def validate_assessment(response, messages, view, body):
     if not isinstance(response, Mapping):
         raise CandidateError("quality_response_not_object")
@@ -97,9 +120,13 @@ def validate_assessment(response, messages, view, body):
         if row.get("status") not in {"covered", "partial", "missing", "material_limited"}:
             raise CandidateError("quality_task_status_invalid:" + str(task_id))
         quote = row.get("body_quote") or ""
-        if (not isinstance(quote, str) or (quote and quote not in body)
-                or (row["status"] in {"covered", "partial"} and not quote.strip())):
+        if not isinstance(quote, str):
             raise CandidateError("quality_body_quote_invalid:" + str(task_id))
+        spans, match = _body_quote_spans(body, quote)
+        if ((quote and not spans) or (row["status"] in {"covered", "partial"} and not quote.strip())):
+            raise CandidateError("quality_body_quote_invalid:" + str(task_id))
+        row["body_quote_spans"] = spans
+        row["body_quote_match"] = match
         if not isinstance(row.get("explanation"), str) or not row["explanation"].strip():
             raise CandidateError("quality_task_explanation_missing:" + str(task_id))
         handles = row.get("material_handles")
@@ -209,7 +236,7 @@ def _cached_call(step, messages, profile, client_factory, run, token_counter, ex
 
 def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory=None,
                      run=False, token_counter=None, language="zh", writer_profile=None,
-                     experiment_label="production_actual_body"):
+                     experiment_label="production_actual_body", reparse_saved=False):
     """Callable production quality stage, also usable for labeled repair studies."""
     from .legacy_unit_route import _profile
     author = writer_profile or _profile("qwen3.5-plus", 32768, 8192)
@@ -223,6 +250,7 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
     target = Path(output_dir).resolve() / _hash(identity)
     result_path = target / "QUALITY_RESULT.json"
     seal_path = target / "RESULT_SEAL.json"
+    prior_snapshot = None
     if result_path.exists() and seal_path.exists():
         saved = _read(result_path)
         body_path = target / "QUALITY_BODY.md"
@@ -231,8 +259,24 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
             raise CandidateError("quality_cached_result_integrity_failure")
         # A preview may be followed by a run, but a terminal paid-stage failure
         # is retained. Raw recovery only re-parses, never dispatches again.
-        if saved["status"] != "planned" or not run:
+        if not reparse_saved and (saved["status"] != "planned" or not run):
             return {**saved, "model_calls": 0, "cache_hit": True}
+        if reparse_saved:
+            history = target / "reparse_history" / _hash(saved)
+            # Keep the exact prior summary, seal, body and parsed diagnostics.
+            # Saved RAW and request identities remain in their original steps.
+            for relative in ("QUALITY_RESULT.json", "RESULT_SEAL.json", "QUALITY_BODY.md",
+                             "assessment/ASSESSMENT.json", "post_assessment/ASSESSMENT.json"):
+                source = target / relative
+                if source.is_file():
+                    destination = history / relative
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    original = source.read_bytes()
+                    if destination.exists() and destination.read_bytes() != original:
+                        raise CandidateError("quality_reparse_history_integrity_failure")
+                    if not destination.exists():
+                        destination.write_bytes(original)
+            prior_snapshot = {"prior_result_sha256": _hash(saved), "history_dir": str(history)}
     target.mkdir(parents=True, exist_ok=True)
     _write(target / "IDENTITY.json", identity)
     _write(target / "ORIGINAL_PAYLOAD.json", payload)
@@ -241,12 +285,17 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
                "body_markdown": existing_body, "model_calls": 0, "cache_hit": False,
                "status": "planned", "pending_problems": [], "assessments": [],
                "changed": False, "scientific_acceptance": False, "applied_edits": []}
+    if prior_snapshot:
+        summary["reparse_saved"] = prior_snapshot
+    waiting_to_run = False
 
     def assess(body, name):
+        nonlocal waiting_to_run
         messages = assessment_messages(view, payload, body)
         raw, calls, state = _cached_call(target / name, messages, reviewer, client_factory, run, token_counter)
         summary["model_calls"] += calls
         if raw is None:
+            waiting_to_run = waiting_to_run or state == "planned"
             summary["status"] = "planned" if state == "planned" else "pending"
             summary["pending_problems"].append({"code": "quality_assessment_" + state, "step": name})
             return None
@@ -266,7 +315,11 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
                     summary["pending_problems"].append({"code": "quality_edit_rejected", "error": str(exc)})
             requested = [row["task_id"] for row in assessment["tasks"] if row["status"] in {"partial", "missing"}]
             if requested:
-                feedback = [deepcopy(row) for row in assessment["tasks"] if row["task_id"] in requested]
+                # Parser-added span diagnostics must not change a saved
+                # completion request's original model-feedback identity.
+                feedback = [{key: deepcopy(value) for key, value in row.items()
+                             if key not in {"body_quote_spans", "body_quote_match"}}
+                            for row in assessment["tasks"] if row["task_id"] in requested]
                 messages = writer.completion_messages(view, body, requested, language=language,
                                                       planning_revision=True, gap_feedback=feedback)
                 def complete(client):
@@ -287,11 +340,16 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
                     else:
                         summary["pending_problems"].append({"code": "quality_completion_pending", "issues": result["issues"]})
                 else:
+                    waiting_to_run = waiting_to_run or state == "planned"
                     summary["pending_problems"].append({"code": "quality_completion_" + state})
             summary["body_markdown"] = body
             summary["changed"] = body != existing_body
             if summary["changed"]:
                 assessment = assess(body, "post_assessment")
+                if assessment is not None and assessment["changes"]:
+                    summary["pending_problems"].append({"code": "quality_postcheck_edits_not_applied",
+                        "changes": deepcopy(assessment["changes"]),
+                        "note": "The one bounded correction pass is finished; proposals retained for review."})
             if assessment is not None:
                 summary["pending_problems"].extend({"code": "quality_task_" + row["status"], **row}
                     for row in assessment["tasks"] if row["status"] != "covered")
@@ -301,8 +359,37 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
     except Exception as exc:
         summary["status"] = "pending"
         summary["pending_problems"].append({"code": "quality_stage_failed", "error": type(exc).__name__ + ":" + str(exc)})
+    if waiting_to_run and not run and summary["status"] != "pending":
+        summary["status"] = "planned"
     (target / "QUALITY_BODY.md").write_bytes(summary["body_markdown"].encode("utf-8"))
     _write(result_path, summary)
     _write(seal_path, {"result_sha256": _hash(summary),
         "body_sha256": hashlib.sha256((target / "QUALITY_BODY.md").read_bytes()).hexdigest()})
     return summary
+
+
+def retained_original_issues(view, original_issues, quality_result):
+    """Resolve only old missing-table syntax flags verified on the current body.
+
+    Task coverage remains the independently reported task status. Multiple
+    table tasks may be realized by one valid table; no table-count rule exists.
+    Scientific and other unresolved original issues are retained verbatim.
+    """
+    retained, resolved = [], []
+    reports = quality_result.get("assessments") or []
+    final = reports[-1].get("report", {}) if reports else {}
+    statuses = {row.get("task_id"): row.get("status") for row in final.get("tasks") or []}
+    table_ids = [task.get("table_id") for task in view.table_tasks]
+    table_check = writer._table_consumption_report(quality_result["body_markdown"], bool(view.table_tasks))
+    current_assessment = (not quality_result.get("changed") or
+                          bool(reports and reports[-1].get("step") == "post_assessment"))
+    verified = (current_assessment and bool(table_ids) and
+                all(task_id and statuses.get(task_id) == "covered" for task_id in table_ids)
+                and table_check["table_check"].get("valid") is True)
+    for issue in original_issues:
+        if (verified and isinstance(issue, Mapping) and issue.get("code") in
+                {"markdown_table_missing_or_invalid", "table_markdown_missing_or_invalid"}):
+            resolved.append(deepcopy(issue))
+        else:
+            retained.append(deepcopy(issue))
+    return retained, resolved
