@@ -41,6 +41,26 @@ def _write(path: Path, value: Any) -> None:
     temporary.replace(path)
 
 
+def _quality_body_ready_for_article(row: Mapping[str, Any]) -> bool:
+    """A finalized diagnostic may retain problems while its body is usable."""
+    quality = row.get("quality") or {}
+    if (quality.get("status") not in {"pending", "assessed_pending_human_review", "assessed_with_pending"}
+            or not isinstance(quality.get("body_markdown"), str) or not quality["body_markdown"].strip()
+            or not quality.get("output_dir")):
+        return False
+    target = Path(quality["output_dir"])
+    try:
+        saved = _read(target / "QUALITY_RESULT.json")
+        seal = _read(target / "RESULT_SEAL.json")
+        body = (target / "QUALITY_BODY.md").read_bytes()
+        return (saved.get("status") == quality["status"] and saved.get("body_markdown") == quality["body_markdown"]
+                and body == quality["body_markdown"].encode("utf-8")
+                and seal.get("result_sha256") == _hash(saved)
+                and seal.get("body_sha256") == hashlib.sha256(body).hexdigest())
+    except (OSError, ValueError, TypeError):
+        return False
+
+
 def build_unit_views(book: Mapping[str, Any]) -> list[writer.UnitWritingView]:
     """Keep chapter snapshots verbatim, with canonical identity and closure.
 
@@ -554,10 +574,12 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
     if article_edit:
         if set(requested_keys) != set(full_keys):
             report["article_edit"] = {"status": "skipped_selected_subset", "model_calls": 0}
-        elif not report["generation_complete"] or not report["assembly"]:
+        elif (not report["generation_complete"] or not report["assembly"] or
+                report["assembly"].get("status") != "complete" or
+                report["assembly"].get("loaded_units") != len(views) or
+                report["assembly"].get("missing_units") or report["assembly"].get("errors")):
             report["article_edit"] = {"status": "skipped_incomplete_book", "model_calls": 0}
-        elif quality_control and any(row.get("quality", {}).get("status") not in
-                {"assessed_pending_human_review", "assessed_with_pending"} for row in report["units"]):
+        elif quality_control and any(not _quality_body_ready_for_article(row) for row in report["units"]):
             report["article_edit"] = {"status": "skipped_quality_pending", "model_calls": 0}
         else:
             from .article_text_editor import run_text_edit_stage, load_editor_prompt, TextEditError

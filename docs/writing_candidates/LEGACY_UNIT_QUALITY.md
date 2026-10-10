@@ -22,6 +22,8 @@ Use `--quality-control --reparse-saved` without `--run` to explicitly reparse ex
 
 The derived issue list resolves only the known original `markdown_table_missing_or_invalid`/`table_markdown_missing_or_invalid` syntax flags when the existing Markdown syntax check succeeds on the final body and all corresponding table task IDs are reported covered. One table may cover multiple tasks; no task-to-table count rule exists. Original artifacts keep the original issue, the derivative records it in `resolved_original_issues`, and unresolved scientific issues remain pending.
 
+When `--article-edit` is enabled, a terminal saved quality diagnostic may remain `pending` while its sealed body/derivative is usable for the one local whole-article pass. The gate requires complete full-book author generation, complete assembly scope and a valid quality result/body seal for every unit. Planned or missing quality results, empty bodies, incomplete generation and selected subsets still skip the editor. Its execution does not clear scientific issues, existing pending diagnostics or the restricted-draft status.
+
 For an explicitly labeled old-response repair experiment, use the same callable stage:
 
 ```python
@@ -62,6 +64,8 @@ On 2026-10-10 the focused command passed 69 tests. Offline previews of the full 
 The subsequent parser/resume controls passed 81 tests, including a read-only clone of an explicitly supplied real saved RAW stage (`OPTO_QUALITY_REPLAY_FIXTURE`). Free `reparse_saved=True, run=False` parsed the saved omission quotes and returned planned; same-directory `run=True` used two synthetic offline calls for only the missing completion and post-assessment. The real fixture files remained unchanged. The production author prompt, reviewer prompt, writer profile and request identities remained unchanged.
 
 Whitespace/syntax/evidence recovery controls passed 86 tests with three explicitly supplied read-only real RAW fixtures. Ch1's whitespace-only quotes parsed with zero continuation calls because its saved assessment reported every task covered. The climate fixture parsed its inner-quote typo and two evidence excerpts from one record; a free preview followed by two labeled synthetic continuation calls verified the missing completion/post-check route. Changed numeric/negation text, fabricated excerpts, cross-record evidence and truncated responses remain rejected. Saved RAW, assessment requests and existing completion-feedback identities remain unchanged.
+
+Article-editor and adjacent route controls passed 66 tests. The real route with labeled offline responses retained an exact quality correction after a partial post-check, supplied that same corrected body to the editor, kept scientific issues/restricted status and reused every saved stage on resume. Planned quality and incomplete author controls made no editor call.
 
 Bare-handle projection and adjacent focused controls passed 65 tests, with one historical fixture byte assertion deselected because its checked-in body has CRLF while the test expects LF. The new end-to-end control verifies unchanged source files and matching numbered references. A read-only real Ch1/U3 preview found 17 known bare handles, originally zero bracketed citations; all 17 entered the projected citation index with zero provider calls.
 

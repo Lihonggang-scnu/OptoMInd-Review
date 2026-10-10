@@ -1,4 +1,5 @@
 """Offline whole-article edit, strict recovery and final citation tests."""
+import hashlib
 import json
 from pathlib import Path
 
@@ -146,13 +147,29 @@ def test_route_subset_skips_article_and_full_book_runs_one_edit(tmp_path):
     assert resumed["model_calls"] == 0 and edit.calls == 1
 
 
-@pytest.mark.parametrize("quality_status,expected_edit", [("pending", False), ("assessed_with_pending", True)])
-def test_article_gate_distinguishes_unfinished_quality_from_retained_pending(tmp_path, monkeypatch, quality_status, expected_edit):
+def sealed_quality(result):
+    """Offline fixture of the production diagnostic seal, not an API response."""
+    target = Path(result["output_dir"])
+    target.mkdir(parents=True, exist_ok=True)
+    body = result["body_markdown"].encode("utf-8")
+    (target / "QUALITY_BODY.md").write_bytes(body)
+    route._write(target / "QUALITY_RESULT.json", result)
+    route._write(target / "RESULT_SEAL.json", {"result_sha256": route._hash(result),
+        "body_sha256": hashlib.sha256(body).hexdigest()})
+    return result
+
+
+@pytest.mark.parametrize("quality_status,sealed,expected_edit", [
+    ("pending", True, True), ("pending", False, False),
+    ("assessed_with_pending", True, True), ("planned", True, False),
+])
+def test_article_gate_distinguishes_unfinished_quality_from_retained_pending(tmp_path, monkeypatch, quality_status, sealed, expected_edit):
     from optomind_research.runtime.upgrade3 import unit_realization
     def quality(view, **kwargs):
-        return {"status": quality_status, "model_calls": 0, "body_markdown": "Evidence [P0001].",
+        result = {"status": quality_status, "model_calls": 0, "body_markdown": "Evidence [P0001].",
             "output_dir": str(kwargs["output_dir"]),
             "pending_problems": [{"code": "retained_quality_question"}]}
+        return sealed_quality(result) if sealed else result
     monkeypatch.setattr(unit_realization, "run_unit_quality", quality)
     author, edit = Factory(), EditFactory()
     def factory(role, path, profile):
@@ -170,8 +187,8 @@ def test_changed_quality_body_creates_new_editor_cache_without_rebuying_author(t
     from optomind_research.runtime.upgrade3 import unit_realization
     body = ["First quality body [P0001]."]
     def quality(view, **kwargs):
-        return {"status": "assessed_pending_human_review", "model_calls": 0, "body_markdown": body[0],
-            "output_dir": str(Path(kwargs["output_dir"]) / route._hash(body[0])), "pending_problems": []}
+        return sealed_quality({"status": "assessed_pending_human_review", "model_calls": 0, "body_markdown": body[0],
+            "output_dir": str(Path(kwargs["output_dir"]) / route._hash(body[0])), "pending_problems": []})
     monkeypatch.setattr(unit_realization, "run_unit_quality", quality)
     author, edit = Factory(), EditFactory()
     def factory(role, path, profile):
@@ -188,3 +205,61 @@ def test_changed_quality_body_creates_new_editor_cache_without_rebuying_author(t
     assert Path(first["article_edit"]["edited_draft"]).is_file()
     third = run()
     assert third["model_calls"] == 0 and author.calls == 1 and edit.calls == 2
+
+
+def test_real_route_terminal_quality_pending_edits_same_corrected_body_and_retains_science(tmp_path):
+    edit = EditFactory()
+    roles = []
+    scientific = {"problem": "OFFLINE unresolved scientific attribution"}
+    def factory(role, path, profile):
+        if path.name == "full":
+            return edit(role, path, profile)
+        def call(messages, **kwargs):
+            roles.append(role)
+            if role == "writer":
+                content = {"body_markdown": "Evidence [P0001].", "issues": [scientific]}
+            elif role == "assessment":
+                content = {"tasks": [{"task_id": "p0", "status": "covered", "body_quote": "Evidence",
+                    "explanation": "Offline task coverage control", "material_handles": ["P0001"]}],
+                    "changes": [{"operation": "replace", "original_text": "Evidence",
+                        "replacement_text": "Evidence retained", "reason": "Offline exact edit control",
+                        "material_handles": ["P0001"], "material_quote": "Evidence"}], "issues": []}
+            else:
+                assert role == "post_assessment"
+                return {"content": "{", "complete": False, "finish_reason": "length", "returned_model": "qwen3.5-plus"}
+            return {"content": json.dumps(content), "complete": True, "finish_reason": "stop",
+                    "returned_model": "qwen3.5-plus", "usage": {}}
+        call.prompt_token_counter = counter
+        return call
+    factory.execution_mode = "live"
+    options = dict(output_dir=tmp_path, run=True, client_factory=factory, token_counter=counter,
+                   quality_control=True, article_edit=True)
+    result = route.run_legacy_units(book(1), **options)
+    assert roles == ["writer", "assessment", "post_assessment"] and edit.calls == 1
+    row = result["units"][0]
+    assert row["quality"]["status"] == "pending" and result["article_edit"]["status"] == "no_change"
+    assert "Evidence retained [P0001]." in Path(result["article_edit"]["original_snapshot"]).read_text(encoding="utf-8")
+    assert scientific in row["pending_problems"] and result["status"] == "restricted_draft"
+    assert result["assembly"]["status"] == "complete" and result["assembly"]["problems_resolved"] is False
+    original_result = Path(row["attempt_dir"]) / "UNIT_RESULT.json"
+    before = original_result.read_bytes()
+    assert route._read(original_result)["body_markdown"] == "Evidence [P0001]."
+    resumed = route.run_legacy_units(book(1), **options)
+    assert resumed["model_calls"] == 0 and edit.calls == 1 and len(roles) == 3
+    assert resumed["status"] == "restricted_draft" and original_result.read_bytes() == before
+
+
+@pytest.mark.parametrize("author_complete", [True, False])
+def test_real_route_planned_quality_or_incomplete_author_cannot_enter_editor(tmp_path, author_complete):
+    author = Factory(finish="stop" if author_complete else "length")
+    edit = EditFactory()
+    def factory(role, path, profile):
+        return edit(role, path, profile) if path.name == "full" else author(role, path, profile)
+    factory.execution_mode = "live"
+    route.run_legacy_units(book(1), output_dir=tmp_path, run=True, client_factory=factory, token_counter=counter)
+    result = route.run_legacy_units(book(1), output_dir=tmp_path, run=False, client_factory=factory,
+        token_counter=counter, quality_control=True, article_edit=True)
+    assert edit.calls == 0 and author.calls == 1 and result["model_calls"] == 0
+    assert result["article_edit"]["status"] == ("skipped_quality_pending" if author_complete else "skipped_incomplete_book")
+    if author_complete:
+        assert result["units"][0]["quality"]["status"] == "planned"
