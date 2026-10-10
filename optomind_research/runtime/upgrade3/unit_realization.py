@@ -69,26 +69,62 @@ def assessment_messages(view, payload, body):
             }, ensure_ascii=False, indent=2)}]
 
 
+def _find_quote_span(body, quote, cursor=0):
+    start = body.find(quote, cursor)
+    if start >= 0:
+        return {"start": start, "end": start + len(quote), "text": quote}, False
+    positions = [index for index in range(cursor, len(body)) if not body[index].isspace()]
+    compact = "".join(body[index] for index in positions)
+    target = "".join(char for char in quote if not char.isspace())
+    start = compact.find(target) if target else -1
+    if start < 0:
+        return None, False
+    left, right = positions[start], positions[start + len(target) - 1] + 1
+    return {"start": left, "end": right, "text": body[left:right]}, True
+
+
 def _body_quote_spans(body, quote):
-    """Locate exact text, permitting explicit ordered omission excerpts only."""
+    """Match original characters; only whitespace and explicit omissions vary."""
     if not quote:
         return [], "empty"
-    start = body.find(quote)
-    if start >= 0:
-        return [{"start": start, "end": start + len(quote), "text": quote}], "exact"
+    span, normalized = _find_quote_span(body, quote)
+    if span:
+        return [span], "whitespace_normalized" if normalized else "exact"
     if not re.search(r"\.{3,}|…+", quote):
         return [], "unmatched"
     fragments = [part.strip() for part in re.split(r"\.{3,}|…+", quote) if part.strip()]
     if len(fragments) < 2:
         return [], "unmatched"
-    spans, cursor = [], 0
+    spans, cursor, normalized = [], 0, False
     for fragment in fragments:
-        start = body.find(fragment, cursor)
-        if start < 0:
+        span, changed = _find_quote_span(body, fragment, cursor)
+        if span is None:
             return [], "unmatched"
-        cursor = start + len(fragment)
-        spans.append({"start": start, "end": cursor, "text": fragment})
-    return spans, "ordered_omission_excerpt"
+        cursor = span["end"]
+        normalized = normalized or changed
+        spans.append(span)
+    return spans, "ordered_omission_excerpt_whitespace_normalized" if normalized else "ordered_omission_excerpt"
+
+
+def _assessment_content(raw, complete):
+    data = writer._decode_json_content(raw)
+    if data is not None:
+        return data, "writer_json_decoder"
+    text = writer._strip_fences(raw, json_envelope=True).strip()
+    if complete is True and text.startswith("{") and text.endswith("}"):
+        # Do not let syntax recovery supply missing structure or content. The
+        # existing helper inserts escapes only; its parsed content must agree
+        # with the existing library's independent candidate.
+        from .chapter_arrangement import _escape_inner_json_quotes
+        from json_repair import repair_json
+        try:
+            mechanical = json.loads(_escape_inner_json_quotes(text), strict=False)
+            candidate = repair_json(text, return_objects=True, strict=True)
+            if candidate == mechanical:
+                return candidate, "json_repair_quote_escape_crosschecked"
+        except (ValueError, RecursionError):
+            pass
+    return None, "unparsed"
 
 
 def validate_assessment(response, messages, view, body):
@@ -102,7 +138,7 @@ def validate_assessment(response, messages, view, body):
     raw = response.get("content")
     if not isinstance(raw, str):
         raise CandidateError("quality_content_not_text")
-    data = writer._decode_json_content(raw)
+    data, parsed_via = _assessment_content(raw, response.get("complete"))
     if not isinstance(data, Mapping) or not isinstance(data.get("tasks"), list):
         raise CandidateError("quality_assessment_not_json_tasks")
     expected = {row["task_id"] for row in json.loads(messages[-1]["content"])["task_catalog"]}
@@ -136,7 +172,45 @@ def validate_assessment(response, messages, view, body):
     if seen != expected:
         raise CandidateError("quality_task_report_incomplete")
     return {"tasks": rows, "changes": deepcopy(data.get("changes") or []),
-            "issues": deepcopy(data.get("issues") or []), "scientific_acceptance": False}
+            "issues": deepcopy(data.get("issues") or []), "parsed_via": parsed_via,
+            "scientific_acceptance": False}
+
+
+def _material_quote_spans(record, quote):
+    """Locate all excerpts inside one selected record, retaining field paths."""
+    strings = []
+    def collect(node, path):
+        if isinstance(node, str):
+            strings.append((path, node))
+        elif isinstance(node, Mapping):
+            for key, value in node.items():
+                collect(value, [*path, key])
+        elif isinstance(node, (list, tuple)):
+            for index, value in enumerate(node):
+                collect(value, [*path, index])
+    collect(record, [])
+    for path, text in strings:
+        spans, match = _body_quote_spans(text, quote)
+        if spans:
+            return [{"path": path, **span} for span in spans], match
+    fragments = [part.strip() for part in re.split(r"\.{3,}|…+", quote) if part.strip()]
+    if len(fragments) < 2:
+        return [], "unmatched"
+    spans, record_cursor, text_cursor, normalized = [], 0, 0, False
+    for fragment in fragments:
+        found = False
+        for index in range(record_cursor, len(strings)):
+            path, text = strings[index]
+            span, changed = _find_quote_span(text, fragment, text_cursor if index == record_cursor else 0)
+            if span:
+                spans.append({"path": path, **span})
+                record_cursor, text_cursor = index, span["end"]
+                normalized = normalized or changed
+                found = True
+                break
+        if not found:
+            return [], "unmatched"
+    return spans, "ordered_omission_excerpt_whitespace_normalized" if normalized else "ordered_omission_excerpt"
 
 
 def apply_evidence_edits(body, changes, view):
@@ -144,15 +218,7 @@ def apply_evidence_edits(body, changes, view):
     parsed = parse_edit_proposals({"changes": changes})
     ranges = []
     known = set(writer._known_unit_handles(view))
-
-    def contains_quote(node, quote):
-        if isinstance(node, str):
-            return quote in node
-        if isinstance(node, Mapping):
-            return any(contains_quote(value, quote) for value in node.values())
-        if isinstance(node, (list, tuple)):
-            return any(contains_quote(value, quote) for value in node)
-        return False
+    evidence_by_anchor = {}
     for change in parsed["changes"]:
         anchor = change["original_text"]
         handles = change.get("material_handles")
@@ -162,11 +228,22 @@ def apply_evidence_edits(body, changes, view):
                 or any(handle not in known for handle in handles)
                 or not str(change.get("reason") or "").strip()):
             raise CandidateError("quality_edit_anchor_or_evidence_invalid")
-        evidence = [item for item in view.materials if set(_handles(item)).intersection(handles)]
-        evidence.extend(item for item in view.chapter_tool_materials if set(_handles(item)).intersection(handles))
-        if not isinstance(quote, str) or not quote.strip() or not any(
-                contains_quote(item, quote) for item in evidence):
+        match = None
+        if isinstance(quote, str) and quote.strip():
+            for container in ("materials", "chapter_tool_materials"):
+                for index, record in enumerate(getattr(view, container)):
+                    if not set(_handles(record)).intersection(handles):
+                        continue
+                    spans, kind = _material_quote_spans(record, quote)
+                    if spans:
+                        match = {"container": container, "record_index": index,
+                                 "material_handles": handles, "match": kind, "spans": spans}
+                        break
+                if match:
+                    break
+        if match is None:
             raise CandidateError("quality_edit_material_quote_invalid")
+        evidence_by_anchor[anchor] = match
         start = body.index(anchor)
         end = start + len(anchor)
         if any(start < prior_end and prior_start < end for prior_start, prior_end in ranges):
@@ -178,6 +255,8 @@ def apply_evidence_edits(body, changes, view):
     text, applied, skipped = apply_text_edits(body, ordered)
     if skipped:
         raise CandidateError("quality_edit_skipped_after_snapshot_validation")
+    for item, change in zip(applied, ordered):
+        item["material_quote_evidence"] = evidence_by_anchor[change["original_text"]]
     return text, applied
 
 

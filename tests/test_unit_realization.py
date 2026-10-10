@@ -169,6 +169,72 @@ def test_ordered_omission_quotes_strictly_anchor_all_fragments():
     assert match == "exact" and len(spans) == 1
 
 
+def test_whitespace_quote_mapping_preserves_original_characters_and_order():
+    body = "整合5个队列，AUC=0.75。 变化未显示增加。 Middle omitted. 尾段ABC。"
+    quote = "整合 5 个队列，AUC = 0.75。"
+    spans, kind = quality._body_quote_spans(body, quote)
+    assert kind == "whitespace_normalized" and spans[0]["text"] == "整合5个队列，AUC=0.75。"
+    assert body[spans[0]["start"]:spans[0]["end"]] == spans[0]["text"]
+    spans, kind = quality._body_quote_spans(body, quote + " ... 尾段 A B C。")
+    assert kind == "ordered_omission_excerpt_whitespace_normalized"
+    assert [s["text"] for s in spans] == ["整合5个队列，AUC=0.75。", "尾段ABC。"]
+    for invalid in ("整合6个队列，AUC=0.75。", "整合5个队列，AUC=0.76。",
+                    "变化显示增加。", "尾段ABC。 ... 整合5个队列，AUC=0.75。"):
+        assert quality._body_quote_spans(body, invalid)[0] == []
+
+
+def test_complete_quote_typo_json_recovery_retains_content_and_validation():
+    view = route.build_unit_views(book())[0]
+    body = "SYNTHETIC A and SYNTHETIC B"
+    messages = quality.assessment_messages(view, route.build_legacy_payload(view), body)
+    data = json.loads(assessment(body)["content"])
+    data["tasks"][0]["explanation"] = 'Explains "A“ without changing content'
+    raw = json.dumps(data).replace('\\"A', '"A')
+    malformed = {**response(data), "content": raw}
+    parsed = quality.validate_assessment(malformed, messages, view, body)
+    assert parsed["parsed_via"] == "json_repair_quote_escape_crosschecked"
+    assert parsed["tasks"][0]["explanation"] == data["tasks"][0]["explanation"]
+    assert malformed["content"] == raw
+    for invalid in ({**malformed, "finish_reason": "length", "complete": False},
+                    {**malformed, "complete": False},
+                    {**malformed, "content": raw[:-2]},
+                    {**malformed, "content": raw[:-3] + "}"},
+                    {**malformed, "content": raw.replace("SYNTHETIC A", "Invented A", 1)}):
+        with pytest.raises(ValueError, match="quality_"):
+            quality.validate_assessment(invalid, messages, view, body)
+
+
+def test_material_excerpt_same_record_paths_and_strict_body_anchor():
+    view = route.build_unit_views(book())[0]
+    view.materials[0]["study_summary_A"] = {"findings": [
+        {"text": "SYNTHETIC value 39 cm, no increase."}, {"text": "SYNTHETIC value 18 cm and 47 cm."}]}
+    edit = {"operation": "replace", "original_text": "WRONG value", "replacement_text": "Supported value",
+            "reason": "Synthetic diagnostic", "material_handles": ["P0001"],
+            "material_quote": "SYNTHETIC value39 cm, no increase. ... SYNTHETIC value18 cm and47 cm."}
+    body = "Prefix WRONG value. Untouched suffix."
+    changed, applied = quality.apply_evidence_edits(body, [edit], view)
+    assert changed == "Prefix Supported value. Untouched suffix."
+    evidence = applied[0]["material_quote_evidence"]
+    assert evidence["match"] == "ordered_omission_excerpt_whitespace_normalized"
+    assert [s["path"] for s in evidence["spans"]] == [
+        ["study_summary_A", "findings", 0, "text"], ["study_summary_A", "findings", 1, "text"]]
+    assert [s["text"] for s in evidence["spans"]] == [
+        "SYNTHETIC value 39 cm, no increase.", "SYNTHETIC value 18 cm and 47 cm."]
+    for quote in (edit["material_quote"].replace("39", "40"),
+                  edit["material_quote"].replace("no increase", "increase"),
+                  "Invented claim ... SYNTHETIC value 18 cm and 47 cm."):
+        with pytest.raises(ValueError, match="material_quote"):
+            quality.apply_evidence_edits(body, [{**edit, "material_quote": quote}], view)
+    with pytest.raises(ValueError, match="anchor"):
+        quality.apply_evidence_edits(body, [{**edit, "original_text": "WRONGvalue"}], view)
+    first, second = deepcopy(view.materials[0]), deepcopy(view.materials[0])
+    first["study_summary_A"]["findings"] = first["study_summary_A"]["findings"][:1]
+    second["study_summary_A"]["findings"] = second["study_summary_A"]["findings"][1:]
+    view.materials = [first, second]
+    with pytest.raises(ValueError, match="material_quote"):
+        quality.apply_evidence_edits(body, [edit], view)
+
+
 def test_reparse_preview_then_run_reuses_raw_and_only_continues_missing_steps(tmp_path, monkeypatch):
     factory = Factory()
     validator = quality.validate_assessment
@@ -519,6 +585,87 @@ def test_display_heading_precedence_and_plain_body_preserved():
     assert draft.clean_unit_body("## Author title\n\nPlain [P0001].\n\n### Internal heading\nText") == "Plain [P0001].\n\n##### Internal heading\nText"
     assert draft.clean_unit_body("Plain [P0001].") == "Plain [P0001]."
     assert draft.author_unit_title("## Table 1. Evidence\n|A|B|") == ""
+
+
+@pytest.mark.parametrize("fixture_env, category", [
+    ("OPTO_QUALITY_WHITESPACE_FIXTURE", "whitespace"),
+    ("OPTO_QUALITY_JSON_QUOTE_FIXTURE", "json_quote_and_material_excerpts"),
+])
+def test_explicit_real_quote_recovery_free_then_offline_continuation(tmp_path, fixture_env, category):
+    """Read-only real RAW fixtures; subsequent responses are labeled controls."""
+    supplied = os.environ.get(fixture_env)
+    if not supplied:
+        pytest.skip("Set " + fixture_env + " to a labeled saved quality stage")
+    source = Path(supplied)
+    names = ("IDENTITY.json", "ORIGINAL_PAYLOAD.json", "ORIGINAL_BODY.md", "QUALITY_BODY.md",
+             "QUALITY_RESULT.json", "RESULT_SEAL.json", "assessment/RAW_RESPONSE.json",
+             "assessment/REQUEST.json", "assessment/MESSAGES.json", "assessment/PROFILE.json")
+    originals = {name: (source / name).read_bytes() for name in names}
+    identity = json.loads(originals["IDENTITY.json"])
+    payload = json.loads(originals["ORIGINAL_PAYLOAD.json"])
+    body = originals["ORIGINAL_BODY.md"].decode("utf-8")
+    view = writer.UnitWritingView(chapter_id=payload["chapter_id"], unit_id=payload["unit_id"],
+        focus=payload["unit_focus"], unit_index=payload["unit_position"]["index"],
+        unit_count=payload["unit_position"]["of"], sibling_units=payload.get("sibling_units", []),
+        chapter_frame=payload.get("chapter_frame", {}), other_chapters=payload.get("other_chapters", []),
+        paragraph_tasks=payload["paragraph_tasks"], table_tasks=payload["table_tasks"],
+        materials=payload["sources"], sources={row["source_handle"]: row for row in payload["sources"]},
+        chapter_tool_materials=payload.get("chapter_tool_materials", []), unit_notes=payload.get("unit_notes", ""),
+        owner_unit_context=payload.get("owner_unit_context", {}))
+    clone_root = tmp_path / "explicit_paid_raw_offline_control"
+    clone = clone_root / source.name
+    for name, content in originals.items():
+        target = clone / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(content)
+    calls = []
+    def offline_factory(role, path, profile):
+        def client(messages, **kwargs):
+            calls.append((role, deepcopy(messages)))
+            request = json.loads(messages[-1]["content"])
+            if role == "completion":
+                return response({"body_markdown": "OFFLINE SYNTHETIC QUOTE REPLAY CONTROL ONLY.",
+                    "status": "appended", "covered_task_ids": request["requested_task_ids"], "issues": []})
+            assert role == "post_assessment"
+            return response({"tasks": [{"task_id": row["task_id"], "status": "covered",
+                "body_quote": "OFFLINE SYNTHETIC QUOTE REPLAY CONTROL ONLY.",
+                "explanation": "Offline parser wiring control only", "material_handles": []}
+                for row in request["task_catalog"]], "changes": [], "issues": []})
+        client.prompt_token_counter = counter
+        return client
+    options = dict(payload=payload, existing_body=body, output_dir=clone_root,
+        client_factory=offline_factory, token_counter=counter, language=payload["language"],
+        writer_profile=identity["author_profile"], experiment_label=identity["experiment_label"], reparse_saved=True)
+    planned = quality.run_unit_quality(view, run=False, **options)
+    assert planned["status"] in {"planned", "assessed_pending_human_review"} and planned["model_calls"] == 0 and not calls
+    assert planned["identity"] == identity and Path(planned["output_dir"]) == clone
+    report = planned["assessments"][0]["report"]
+    if category == "whitespace":
+        assert any("whitespace_normalized" in row["body_quote_match"] for row in report["tasks"])
+    else:
+        assert report["parsed_via"] == "json_repair_quote_escape_crosschecked"
+        assert len(planned["applied_edits"]) == 1
+        evidence = planned["applied_edits"][0]["material_quote_evidence"]
+        assert evidence["match"] == "ordered_omission_excerpt_whitespace_normalized"
+        assert len(evidence["spans"]) == 2 and evidence["spans"][0]["path"] != evidence["spans"][1]["path"]
+    completed = quality.run_unit_quality(view, run=True, **options)
+    expected_roles = ["completion", "post_assessment"] if category != "whitespace" else []
+    assert [row[0] for row in calls] == expected_roles and completed["model_calls"] == len(expected_roles)
+    assert completed["body_markdown"].startswith(planned["body_markdown"])
+    if calls:
+        feedback = json.loads(calls[0][1][-1]["content"])["gap_feedback"]
+        expected_feedback = [{key: value for key, value in row.items()
+            if key not in {"body_quote_spans", "body_quote_match"}}
+            for row in report["tasks"] if row["status"] in {"partial", "missing"}]
+        assert feedback == expected_feedback
+    completion_request = (clone / "completion/REQUEST.json").read_bytes() if calls else None
+    again = quality.run_unit_quality(view, run=True, **options)
+    assert again["model_calls"] == 0 and len(calls) == len(expected_roles)
+    if completion_request:
+        assert (clone / "completion/REQUEST.json").read_bytes() == completion_request
+    assert (clone / "assessment/RAW_RESPONSE.json").read_bytes() == originals["assessment/RAW_RESPONSE.json"]
+    assert (clone / "assessment/REQUEST.json").read_bytes() == originals["assessment/REQUEST.json"]
+    assert all((source / name).read_bytes() == value for name, value in originals.items())
 
 
 def test_cli_matching_flags():
