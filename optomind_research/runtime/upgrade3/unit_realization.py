@@ -318,47 +318,98 @@ def _consume_post_edits(target, body, changes, view):
         "before_path": str(directory / "BEFORE.md"), "after_path": str(directory / "AFTER.md")}
 
 
-def _cached_call(step, messages, profile, client_factory, run, token_counter, execute=None):
+def _stage_attempts(step):
+    return [step, *sorted((step / "retries").glob("attempt_*"))]
+
+
+def _has_replay_content(raw):
+    if isinstance(raw, Mapping):
+        return any(isinstance(raw.get(key), str) and raw[key].strip()
+                   for key in ("content", "body_markdown", "table_markdown"))
+    return isinstance(raw, str) and bool(raw.strip())
+
+
+def _retryable_failure(attempt):
+    """A recorded stopped exception without replayable output; never infer fees."""
+    if not (attempt / "REQUEST.json").is_file() or list((attempt / "transport").glob("*.sse.*")):
+        return False
+    raw_path = attempt / "RAW_RESPONSE.json"
+    if raw_path.is_file() and _has_replay_content(_read(raw_path)):
+        return False
+    errors = [_read(attempt / name) for name in ("ERROR.json", "STAGE_ERROR.json") if (attempt / name).is_file()]
+    if any(isinstance(error, Mapping) and _has_replay_content(error.get("record")) for error in errors):
+        return False
+    return any(isinstance(error, Mapping) and isinstance(error.get("error"), str)
+               and error["error"].strip() for error in errors)
+
+
+def _cached_call(step, messages, profile, client_factory, run, token_counter, execute=None,
+                 retry_failed=False, attempt_log=None):
     from .legacy_unit_route import _CaptureClient
     step.mkdir(parents=True, exist_ok=True)
     request = {"profile": profile, "messages_sha256": _hash(messages)}
-    request_path = step / "REQUEST.json"
-    existed = request_path.exists()
-    if existed and _read(request_path) != request:
+    attempts = _stage_attempts(step)
+    if any((attempt / "REQUEST.json").exists() and _read(attempt / "REQUEST.json") != request for attempt in attempts):
         raise CandidateError("quality_cached_request_identity_changed")
-    _write(step / "MESSAGES.json", messages)
-    _write(step / "PROFILE.json", profile)
+    active, raw = attempts[-1], None
+    for attempt in reversed(attempts):
+        request_path = attempt / "REQUEST.json"
+        raw_path = attempt / "RAW_RESPONSE.json"
+        if not raw_path.exists() and request_path.exists():
+            streams = sorted((attempt / "transport").glob("*.sse.*"))
+            if len(streams) == 1:
+                _write(raw_path, recover_qwen_stream(streams[0]))
+        candidate = _read(raw_path) if raw_path.exists() else None
+        if _has_replay_content(candidate):
+            active, raw = attempt, candidate
+            break
+        if attempt == active:
+            raw = candidate
     estimate = writer.estimate_unit_cost(messages, model=profile["model"],
         output_tokens=profile["max_output_tokens"], thinking_budget=profile["thinking_budget"],
         token_counter=token_counter)
-    _write(step / "ESTIMATE.json", estimate)
-    raw_path = step / "RAW_RESPONSE.json"
-    if not raw_path.exists() and existed:
-        streams = sorted((step / "transport").glob("*.sse.*"))
-        if len(streams) == 1:
-            _write(raw_path, recover_qwen_stream(streams[0]))
-    raw = _read(raw_path) if raw_path.exists() else None
+    new_retry = bool(run and retry_failed and not _has_replay_content(raw)
+                     and _retryable_failure(active) and not estimate["input_capacity"]["exceeds_capacity"])
+    if new_retry:
+        indices = [int(path.name.split("_")[-1]) for path in attempts[1:]]
+        active = step / "retries" / f"attempt_{max([1, *indices]) + 1:03d}"
+        active.mkdir(parents=True, exist_ok=False)
+        raw = None
+    request_path, raw_path = active / "REQUEST.json", active / "RAW_RESPONSE.json"
+    existed = (request_path.exists() or (active != step and not new_retry)
+               or (active / "ERROR.json").exists() or (active / "STAGE_ERROR.json").exists())
+    for name, value in (("MESSAGES.json", messages), ("PROFILE.json", profile), ("ESTIMATE.json", estimate)):
+        if not (active / name).exists():
+            _write(active / name, value)
+    call_id = _hash(request)[:16] + "-" + step.name + ("-retry-" + active.name if active != step else "")
+    audit = {"step": step.name, "attempt_dir": str(active), "call_id": call_id, "new_retry": new_retry}
+    if attempt_log is not None:
+        attempt_log.append(audit)
     if raw is None and (existed or not run or estimate["input_capacity"]["exceeds_capacity"]):
-        return None, 0, "pending_existing_attempt" if existed else "capacity_blocked" if estimate["input_capacity"]["exceeds_capacity"] else "planned"
+        state = "pending_existing_attempt" if existed else "capacity_blocked" if estimate["input_capacity"]["exceeds_capacity"] else "planned"
+        audit["state"] = state
+        return None, 0, state
     calls = 0
     if raw is None:
         _write(request_path, request)  # Persist before factory/key/provider access.
-        client = client_factory(step.name, step, deepcopy(profile))
-        if getattr(client, "max_retries", 0) != 0:
-            raise CandidateError("quality_automatic_paid_retries_forbidden")
-        capture = _CaptureClient(client, step, _hash(request)[:16] + "-" + step.name)
+        capture = None
         try:
+            client = client_factory(step.name, active, deepcopy(profile))
+            if getattr(client, "max_retries", 0) != 0:
+                raise CandidateError("quality_automatic_paid_retries_forbidden")
+            capture = _CaptureClient(client, active, call_id)
             if execute is None:
                 raw = invoke_client(capture, messages, model=profile["model"],
                     max_output_tokens=profile["max_output_tokens"], thinking=profile["thinking"],
                     thinking_budget=profile["thinking_budget"])
                 value = raw
             else:
-                value = execute(capture)
+                value = execute(capture, active)
                 raw = _read(raw_path) if raw_path.exists() else None
         except Exception as exc:
-            _write(step / "STAGE_ERROR.json", {"error": type(exc).__name__ + ":" + str(exc)})
-            return None, capture.invocations, "failed_saved_attempt"
+            _write(active / "STAGE_ERROR.json", {"error": type(exc).__name__ + ":" + str(exc)})
+            audit["state"] = "failed_saved_attempt"
+            return None, capture.invocations if capture is not None else 0, "failed_saved_attempt"
         calls = capture.invocations
     else:
         if execute is None:
@@ -367,13 +418,14 @@ def _cached_call(step, messages, profile, client_factory, run, token_counter, ex
             def replay(messages, **kwargs):
                 return deepcopy(raw)
             replay.prompt_token_counter = token_counter
-            value = execute(replay)
-    return value, calls, "returned" if calls else "cache_hit"
+            value = execute(replay, active)
+    audit["state"] = "returned" if calls else "cache_hit"
+    return value, calls, audit["state"]
 
 
 def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory=None,
                      run=False, token_counter=None, language="zh", writer_profile=None,
-                     experiment_label="production_actual_body", reparse_saved=False):
+                     experiment_label="production_actual_body", reparse_saved=False, retry_failed=False):
     """Callable production quality stage, also usable for labeled repair studies."""
     from .legacy_unit_route import _profile
     author = writer_profile or _profile("qwen3.5-plus", 32768, 8192)
@@ -388,22 +440,25 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
     result_path = target / "QUALITY_RESULT.json"
     seal_path = target / "RESULT_SEAL.json"
     prior_snapshot = None
+    retry_recovery = bool(run and retry_failed and any(
+        _retryable_failure(_stage_attempts(target / name)[-1])
+        for name in ("assessment", "completion", "post_assessment")))
     if result_path.exists() and seal_path.exists():
         saved = _read(result_path)
         body_path = target / "QUALITY_BODY.md"
         if (_read(seal_path).get("result_sha256") != _hash(saved) or not body_path.exists()
                 or _read(seal_path).get("body_sha256") != hashlib.sha256(body_path.read_bytes()).hexdigest()):
             raise CandidateError("quality_cached_result_integrity_failure")
-        # A preview may be followed by a run, but a terminal paid-stage failure
-        # is retained. Raw recovery only re-parses, never dispatches again.
-        if not reparse_saved and (saved["status"] != "planned" or not run):
+        # Free RAW reparse never dispatches an attempted stage again. Only an
+        # explicit run+retry may reopen a recorded no-output failure.
+        if not reparse_saved and not retry_recovery and (saved["status"] != "planned" or not run):
             return {**saved, "model_calls": 0, "cache_hit": True}
-        if reparse_saved:
+        if reparse_saved or retry_recovery:
             history = target / "reparse_history" / _hash(saved)
             # Keep the exact prior summary, seal, body and parsed diagnostics.
             # Saved RAW and request identities remain in their original steps.
             for relative in ("QUALITY_RESULT.json", "RESULT_SEAL.json", "QUALITY_BODY.md",
-                             "assessment/ASSESSMENT.json", "post_assessment/ASSESSMENT.json"):
+                             "assessment/ASSESSMENT.json", "post_assessment/ASSESSMENT.json", "completion/COMPLETION_RESULT.json"):
                 source = target / relative
                 if source.is_file():
                     destination = history / relative
@@ -421,15 +476,18 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
     summary = {"schema_version": SCHEMA, "identity": identity, "output_dir": str(target),
                "body_markdown": existing_body, "model_calls": 0, "cache_hit": False,
                "status": "planned", "pending_problems": [], "assessments": [],
-               "changed": False, "scientific_acceptance": False, "applied_edits": []}
+               "changed": False, "scientific_acceptance": False, "applied_edits": [], "stage_attempts": []}
     if prior_snapshot:
         summary["reparse_saved"] = prior_snapshot
     waiting_to_run = False
+    retry_remaining = bool(run and retry_failed)
 
     def assess(body, name):
-        nonlocal waiting_to_run
+        nonlocal waiting_to_run, retry_remaining
         messages = assessment_messages(view, payload, body)
-        raw, calls, state = _cached_call(target / name, messages, reviewer, client_factory, run, token_counter)
+        raw, calls, state = _cached_call(target / name, messages, reviewer, client_factory, run, token_counter,
+            retry_failed=retry_remaining, attempt_log=summary["stage_attempts"])
+        retry_remaining = retry_remaining and not summary["stage_attempts"][-1]["new_retry"]
         summary["model_calls"] += calls
         if raw is None:
             waiting_to_run = waiting_to_run or state == "planned"
@@ -437,7 +495,7 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
             summary["pending_problems"].append({"code": "quality_assessment_" + state, "step": name})
             return None
         assessment = validate_assessment(raw, messages, view, body)
-        _write(target / name / "ASSESSMENT.json", assessment)
+        _write(Path(summary["stage_attempts"][-1]["attempt_dir"]) / "ASSESSMENT.json", assessment)
         summary["assessments"].append({"step": name, "report": assessment})
         return assessment
 
@@ -460,18 +518,21 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
                             for row in assessment["tasks"] if row["task_id"] in requested]
                 messages = writer.completion_messages(view, body, requested, language=language,
                                                       planning_revision=True, gap_feedback=feedback)
-                def complete(client):
+                def complete(client, active_step):
                     return writer.run_unit_completion(view, existing_body=body, task_ids=requested,
                         client=client, model=author["model"], language=language, planning_revision=True,
                         output_tokens=author["max_output_tokens"], thinking_budget=author["thinking_budget"],
-                        thinking=author["thinking"], raw_response_dir=target / "completion" / "raw",
+                        thinking=author["thinking"], raw_response_dir=active_step / "raw",
                         gap_feedback=feedback)
                 result, calls, state = _cached_call(target / "completion", messages, author, client_factory,
-                                                   run, token_counter, execute=complete)
+                                                   run, token_counter, execute=complete, retry_failed=retry_remaining,
+                                                   attempt_log=summary["stage_attempts"])
+                retry_remaining = retry_remaining and not summary["stage_attempts"][-1]["new_retry"]
                 summary["model_calls"] += calls
                 if result is not None:
-                    estimate = _read(target / "completion" / "ESTIMATE.json")
-                    report = writer.write_unit_completion(view, result, target / "completion", estimate=estimate, language=language)
+                    estimate = _read(Path(summary["stage_attempts"][-1]["attempt_dir"]) / "ESTIMATE.json")
+                    report = writer.write_unit_completion(view, result,
+                        Path(summary["stage_attempts"][-1]["attempt_dir"]), estimate=estimate, language=language)
                     summary["completion"] = report
                     if not result["pending"]:
                         body = result["body_markdown"]

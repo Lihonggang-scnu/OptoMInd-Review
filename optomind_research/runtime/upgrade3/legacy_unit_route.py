@@ -420,7 +420,7 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
                 quality = run_unit_quality(view, payload=payload, existing_body=result["body_markdown"],
                     output_dir=attempt / "quality", client_factory=client_factory, run=run,
                     token_counter=token_counter, language=language, writer_profile=profile,
-                    reparse_saved=reparse_saved)
+                    reparse_saved=reparse_saved, retry_failed=retry_failed)
                 row["quality"] = quality
                 report["model_calls"] += quality["model_calls"]
                 row["pending_problems"].extend(quality["pending_problems"])

@@ -69,11 +69,11 @@ class Factory:
         return call
 
 
-def run_stage(tmp_path, factory, body="SYNTHETIC A [P0001].", run=True, reparse_saved=False):
+def run_stage(tmp_path, factory, body="SYNTHETIC A [P0001].", run=True, reparse_saved=False, retry_failed=False):
     view = route.build_unit_views(book())[0]
     return quality.run_unit_quality(view, payload=route.build_legacy_payload(view, language="en"),
         existing_body=body, output_dir=tmp_path, client_factory=factory, run=run, token_counter=counter,
-        language="en", experiment_label="offline_synthetic_fixture", reparse_saved=reparse_saved)
+        language="en", experiment_label="offline_synthetic_fixture", reparse_saved=reparse_saved, retry_failed=retry_failed)
 
 
 def test_omitted_task_old_response_completed_once_and_prefix_preserved(tmp_path):
@@ -215,6 +215,153 @@ def test_preview_then_run_and_raw_recovery_do_not_rebuy(tmp_path):
     (target / "RESULT_SEAL.json").unlink()
     recovered = run_stage(tmp_path, factory, body)
     assert len(factory.calls) == 1 and recovered["model_calls"] == 0
+
+
+class RetryFactory(Factory):
+    """Explicit offline stopped exceptions with no returned content."""
+    def __init__(self, role="assessment", failures=1, first_status="missing"):
+        super().__init__(first_status=first_status)
+        self.failed_role, self.failures = role, failures
+        self.paths = []
+
+    def __call__(self, role, path, profile):
+        self.paths.append((role, Path(path)))
+        base = super().__call__(role, path, profile)
+        def call(messages, **kwargs):
+            if role == self.failed_role and self.failures:
+                self.failures -= 1
+                self.calls.append((role, deepcopy(messages), deepcopy(kwargs)))
+                failure = RuntimeError("SYNTHETIC terminal account rejection; no content")
+                failure.record = {"content": "", "complete": False}
+                raise failure
+            return base(messages, **kwargs)
+        call.prompt_token_counter = counter
+        return call
+
+
+@pytest.mark.parametrize("failed_role", ["assessment", "completion", "post_assessment"])
+def test_explicit_quality_retry_keeps_failed_attempt_and_reuses_successful_steps(tmp_path, failed_role):
+    factory = RetryFactory(failed_role)
+    failed = run_stage(tmp_path, factory)
+    stage = Path(failed["output_dir"]) / failed_role
+    old = {path.relative_to(stage): path.read_bytes() for path in stage.rglob("*") if path.is_file()}
+    assert Path("REQUEST.json") in old and Path("ERROR.json") in old and Path("RAW_RESPONSE.json") not in old
+    count = len(factory.calls)
+    no_flag = run_stage(tmp_path, factory)
+    assert no_flag["model_calls"] == 0 and len(factory.calls) == count
+    free = run_stage(tmp_path, factory, run=False, retry_failed=True, reparse_saved=True)
+    assert free["model_calls"] == 0 and len(factory.calls) == count and not (stage / "retries").exists()
+    retried = run_stage(tmp_path, factory, retry_failed=True)
+    expected = {"assessment": ["assessment", "completion", "post_assessment"],
+                "completion": ["completion", "post_assessment"], "post_assessment": ["post_assessment"]}[failed_role]
+    assert [row[0] for row in factory.calls[count:]] == expected
+    assert retried["model_calls"] == len(expected) and retried["changed"]
+    assert retried["scientific_acceptance"] is False
+    attempt = stage / "retries" / "attempt_002"
+    assert (attempt / "RAW_RESPONSE.json").is_file()
+    assert (attempt / "REQUEST.json").read_bytes() == old[Path("REQUEST.json")]
+    assert any(role == failed_role and path == attempt for role, path in factory.paths)
+    initial_id = next(row[2]["call_id"] for row in factory.calls if row[0] == failed_role)
+    retry_id = next(row[2]["call_id"] for row in factory.calls[count:] if row[0] == failed_role)
+    assert initial_id != retry_id and retry_id.endswith("retry-attempt_002")
+    assert sum(row["new_retry"] for row in retried["stage_attempts"]) == 1
+    assert all((stage / name).read_bytes() == content for name, content in old.items())
+    assert Path(retried["reparse_saved"]["history_dir"]).is_dir()
+    calls = len(factory.calls)
+    resumed = run_stage(tmp_path, factory, retry_failed=True, reparse_saved=True)
+    assert resumed["model_calls"] == 0 and len(factory.calls) == calls
+    assert resumed["body_markdown"] == retried["body_markdown"]
+
+
+def test_failed_explicit_quality_retry_stops_once_until_another_explicit_flag(tmp_path):
+    factory = RetryFactory(failures=3)
+    first = run_stage(tmp_path, factory)
+    stage = Path(first["output_dir"]) / "assessment"
+    second = run_stage(tmp_path, factory, retry_failed=True)
+    assert second["model_calls"] == 1 and len(factory.calls) == 2 and second["status"] == "pending"
+    assert (stage / "retries/attempt_002/ERROR.json").is_file()
+    assert not (stage / "retries/attempt_003").exists()
+    ordinary = run_stage(tmp_path, factory, reparse_saved=True)
+    assert ordinary["model_calls"] == 0 and len(factory.calls) == 2
+    third = run_stage(tmp_path, factory, retry_failed=True)
+    assert third["model_calls"] == 1 and len(factory.calls) == 3
+    assert (stage / "retries/attempt_003/ERROR.json").is_file()
+    assert len({row[2]["call_id"] for row in factory.calls}) == 3
+
+
+@pytest.mark.parametrize("case", ["unknown_request", "partial_raw", "error_record_has_body", "request_mismatch"])
+def test_quality_retry_never_rebuys_unknown_or_replayable_or_changed_requests(tmp_path, case):
+    view = route.build_unit_views(book())[0]
+    messages = quality.assessment_messages(view, route.build_legacy_payload(view), "SYNTHETIC A")
+    profile = route._profile("qwen3.5-plus", 24576, 16384)
+    stage = tmp_path / "assessment"
+    stage.mkdir()
+    request = {"profile": profile, "messages_sha256": quality._hash(messages)}
+    if case == "request_mismatch":
+        request["messages_sha256"] = "invented"
+    quality._write(stage / "REQUEST.json", request)
+    if case != "unknown_request":
+        quality._write(stage / "ERROR.json", {"error": "SYNTHETIC stopped exception",
+            "record": {"content": "SYNTHETIC returned body"} if case == "error_record_has_body" else None})
+        quality._write(stage / "STAGE_ERROR.json", {"error": "SYNTHETIC stopped exception"})
+    if case == "partial_raw":
+        quality._write(stage / "RAW_RESPONSE.json", response({"tasks": []}, finish="length"))
+    originals = {path: path.read_bytes() for path in stage.glob("*.json")}
+    def no_provider(*args):
+        pytest.fail("Explicit retry must not dispatch this stage")
+    options = dict(step=stage, messages=messages, profile=profile, client_factory=no_provider,
+                   run=True, token_counter=counter, retry_failed=True)
+    if case == "request_mismatch":
+        with pytest.raises(ValueError, match="quality_cached_request_identity_changed"):
+            quality._cached_call(**options)
+    else:
+        _, calls, state = quality._cached_call(**options)
+        assert calls == 0 and state in {"pending_existing_attempt", "cache_hit"}
+    assert not (stage / "retries").exists()
+    assert all(path.read_bytes() == content for path, content in originals.items())
+
+
+def test_real_route_retry_flag_recovers_quality_only_preserves_author(tmp_path):
+    factory = RetryFactory("assessment")
+    factory.execution_mode = "live"  # Offline seam exercises actual assembler.
+    first = route.run_legacy_units(book(), output_dir=tmp_path, run=True, client_factory=factory,
+                                   token_counter=counter, quality_control=True)
+    author = Path(first["units"][0]["attempt_dir"])
+    preserved = {name: (author / name).read_bytes() for name in
+                 ("UNIT_BODY.md", "UNIT_RESULT.json", "RESULT_SEAL.json", "RAW_RESPONSE.json", "REQUEST.json")}
+    count = len(factory.calls)
+    retried = route.run_legacy_units(book(), output_dir=tmp_path, run=True, retry_failed=True,
+        client_factory=factory, token_counter=counter, quality_control=True)
+    assert retried["model_calls"] == 3 and [row[0] for row in factory.calls[count:]] == ["assessment", "completion", "post_assessment"]
+    assert retried["units"][0]["cache_hit"] and "SYNTHETIC B" in retried["units"][0]["quality"]["body_markdown"]
+    assert all((author / name).read_bytes() == content for name, content in preserved.items())
+
+
+def test_quality_retry_preserves_durable_settled_spend_and_unsettled_hold(tmp_path):
+    from optomind_research.runtime.upgrade3.module4.runtime import GlobalBudgetLedger
+    ledger = GlobalBudgetLedger(limit_cny=2.0, path=tmp_path / "same_owned_ledger.sqlite")
+    paid = ledger.reserve(0.4, "prior_paid_call")
+    ledger.settle(paid["reservation_id"], 0.4)
+    hold = ledger.reserve(0.8, "prior_unknown_call")
+    ledger.settle(hold["reservation_id"], None, uncertain=True)
+    before = deepcopy(ledger.reservations)
+    failed = run_stage(tmp_path / "quality", RetryFactory(first_status="covered"))
+    attempts = []
+    def same_ledger_factory(role, path, profile):
+        def client(messages, **kwargs):
+            attempts.append(kwargs["call_id"])
+            ledger.reserve(0.9, kwargs["call_id"])  # Existing spend/hold must refuse this amount.
+            pytest.fail("Budget-refused request cannot reach even the synthetic provider")
+        client.prompt_token_counter = counter
+        return client
+    result = run_stage(tmp_path / "quality", same_ledger_factory, retry_failed=True)
+    assert len(attempts) == 1 and attempts[0].endswith("retry-attempt_002")
+    assert result["status"] == "pending" and Path(failed["output_dir"]) == Path(result["output_dir"])
+    assert ledger.reservations == before and ledger.limit_cny == 2.0
+    reloaded = GlobalBudgetLedger(path=ledger.path)
+    reloaded._refresh_from_db()
+    assert reloaded.actual_cny == pytest.approx(0.4) and reloaded.reserved_cny == pytest.approx(0.8)
+    assert reloaded.limit_cny == 2.0
 
 
 def test_quotes_task_ids_and_handles_are_checked():
@@ -739,8 +886,10 @@ def test_explicit_real_saved_completion_recovery_only_offline_post_no_source_mut
         options = dict(payload=payload, existing_body=body, output_dir=output,
             client_factory=offline_factory, token_counter=counter, language=payload["language"],
             writer_profile=identity["author_profile"], experiment_label=identity["experiment_label"], reparse_saved=True)
+        post_failed = (clone / "post_assessment/REQUEST.json").is_file()
         planned = quality.run_unit_quality(view, run=False, **options)
-        assert planned["status"] == "planned" and planned["model_calls"] == 0 and not calls
+        assert planned["status"] == ("pending" if post_failed else "planned")
+        assert planned["model_calls"] == 0 and not calls
         assert planned["identity"] == identity
         completion = planned["completion"]
         if completion["candidate_eligible"]:
@@ -752,7 +901,7 @@ def test_explicit_real_saved_completion_recovery_only_offline_post_no_source_mut
             assert not completion["pending"] and completion["model_status"] == "appended"
             assert completion["parsed_via"] == "json_repair_quote_escape_crosschecked"
             expected = planned["body_markdown"]
-        completed = quality.run_unit_quality(view, run=True, **options)
+        completed = quality.run_unit_quality(view, run=True, retry_failed=post_failed, **options)
         assert calls == ["post_assessment"] and completed["model_calls"] == 1
         assert completed["body_markdown"] == expected
         assert completed["body_markdown"].startswith(completion_input["existing_body_markdown"] + "\n\n")
@@ -764,6 +913,56 @@ def test_explicit_real_saved_completion_recovery_only_offline_post_no_source_mut
         assert resumed["model_calls"] == 0 and calls == ["post_assessment"]
         assert resumed["body_markdown"] == expected
         assert all(path.read_bytes() == before[path.relative_to(source)] for path in source.rglob("*") if path.is_file())
+
+
+def test_explicit_real_failed_quality_attempt_only_retries_with_flag_offline(tmp_path):
+    supplied = os.environ.get("OPTO_QUALITY_FAILED_FIXTURE")
+    if not supplied:
+        pytest.skip("Set OPTO_QUALITY_FAILED_FIXTURE to an explicit read-only saved failed stage")
+    source = Path(supplied)
+    originals = {path.relative_to(source): path.read_bytes() for path in source.rglob("*") if path.is_file()}
+    payload = json.loads(originals[Path("ORIGINAL_PAYLOAD.json")].decode("utf-8"))
+    identity = json.loads(originals[Path("IDENTITY.json")].decode("utf-8"))
+    body = originals[Path("ORIGINAL_BODY.md")].decode("utf-8")
+    view = writer.UnitWritingView(chapter_id=payload["chapter_id"], unit_id=payload["unit_id"],
+        focus=payload["unit_focus"], unit_index=payload["unit_position"]["index"], unit_count=payload["unit_position"]["of"],
+        sibling_units=payload.get("sibling_units", []), chapter_frame=payload.get("chapter_frame", {}),
+        other_chapters=payload.get("other_chapters", []), paragraph_tasks=payload["paragraph_tasks"], table_tasks=payload["table_tasks"],
+        materials=payload["sources"], sources={row["source_handle"]: row for row in payload["sources"]},
+        chapter_tool_materials=payload.get("chapter_tool_materials", []), unit_notes=payload.get("unit_notes", ""),
+        owner_unit_context=payload.get("owner_unit_context", {}))
+    output = tmp_path / "explicit_failed_quality_offline_control"
+    clone = output / source.name
+    shutil.copytree(source, clone)
+    calls = []
+    def offline_factory(role, path, profile):
+        assert role == "assessment" and path == clone / "assessment/retries/attempt_002"
+        assert profile == identity["reviewer_profile"]
+        def client(messages, **kwargs):
+            calls.append(kwargs["call_id"])
+            request = json.loads(messages[-1]["content"])
+            return response({"tasks": [{"task_id": row["task_id"], "status": "material_limited",
+                "body_quote": "", "explanation": "OFFLINE SYNTHETIC retry wiring only; not a scientific assessment",
+                "material_handles": []} for row in request["task_catalog"]], "changes": [], "issues": []})
+        client.prompt_token_counter = counter
+        return client
+    options = dict(payload=payload, existing_body=body, output_dir=output, client_factory=offline_factory,
+        token_counter=counter, language=payload["language"], writer_profile=identity["author_profile"],
+        experiment_label=identity["experiment_label"], reparse_saved=True)
+    ordinary = quality.run_unit_quality(view, run=True, **options)
+    assert ordinary["model_calls"] == 0 and not calls
+    free = quality.run_unit_quality(view, run=False, retry_failed=True, **options)
+    assert free["model_calls"] == 0 and not calls and not (clone / "assessment/retries").exists()
+    result = quality.run_unit_quality(view, run=True, retry_failed=True, **options)
+    assert result["model_calls"] == 1 and len(calls) == 1 and calls[0].endswith("retry-attempt_002")
+    assert result["identity"] == identity and result["body_markdown"] == body
+    assert result["scientific_acceptance"] is False and result["status"] == "assessed_with_pending"
+    for name in originals:
+        if name.parts[0] == "assessment":
+            assert (clone / name).read_bytes() == originals[name]
+    resumed = quality.run_unit_quality(view, run=True, retry_failed=True, **options)
+    assert resumed["model_calls"] == 0 and len(calls) == 1
+    assert all(path.read_bytes() == originals[path.relative_to(source)] for path in source.rglob("*") if path.is_file())
 
 
 def test_explicit_real_saved_response_free_reparse_then_offline_missing_steps(tmp_path):

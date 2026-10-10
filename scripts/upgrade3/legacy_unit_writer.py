@@ -37,7 +37,8 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--budget-scope", help="Explicit experiment identity shared across input subsets and holdout books; immutable for this ledger")
     p.add_argument("--reconcile-receipt", help="Audit and settle an existing open hold from a local JSON receipt; no provider calls")
     p.add_argument("--run", action="store_true", help="Explicitly allow live provider calls")
-    p.add_argument("--retry-failed", action="store_true", help="Permit a new charged attempt for pending units")
+    p.add_argument("--retry-failed", action="store_true",
+                   help="With --run, permit an explicit new writer attempt or one recorded quality failure retry without replayable output; retain prior attempts and ledger holds")
     p.add_argument("--quality-control", action="store_true",
                    help="Independent Plus actual-body assessment, at most one bounded correction/completion and post-check; original writer output retained")
     p.add_argument("--reparse-saved", action="store_true",
