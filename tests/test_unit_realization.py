@@ -1,8 +1,10 @@
 """Labeled synthetic fixtures only: bounded production wiring, no network."""
 from copy import deepcopy
+import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import pytest
 
 from optomind_research.runtime.upgrade3 import legacy_unit_route as route
@@ -161,12 +163,28 @@ def test_ordered_omission_quotes_strictly_anchor_all_fragments():
     assert [body[span["start"]:span["end"]] for span in row["body_quote_spans"]] == [
         "SYNTHETIC A first [P0001].", "Last fragment."]
     for invalid in ("Last fragment. ... SYNTHETIC A first [P0001].",
-                    "SYNTHETIC A changed [P0001]. ... Last fragment.", "...", "... Last fragment."):
+                    "SYNTHETIC A changed [P0001]. ... Last fragment.", "..."):
         data["tasks"][0]["body_quote"] = invalid
         with pytest.raises(ValueError, match="quality_body_quote_invalid"):
             quality.validate_assessment(response(data), messages, view, body)
     spans, match = quality._body_quote_spans("Literal ... source text", "Literal ... source text")
     assert match == "exact" and len(spans) == 1
+
+
+def test_boundary_omission_quotes_match_one_nonempty_original_fragment():
+    body = "Prefix SYNTHETIC value 39 cm, no increase. Suffix ... literal."
+    excerpt = "SYNTHETIC value 39 cm, no increase"
+    record = {"evidence": body}
+    for quote in (excerpt + "...", "… " + excerpt, "... " + excerpt + " …"):
+        spans, match = quality._body_quote_spans(body, quote)
+        assert match == "ordered_omission_excerpt" and len(spans) == 1
+        assert body[spans[0]["start"]:spans[0]["end"]] == excerpt
+        material_spans, material_match = quality._material_quote_spans(record, quote)
+        assert material_match == match and material_spans == [{"path": ["evidence"], **spans[0]}]
+    for quote in ("...", "…", " ... … ", excerpt.replace("39", "40") + "...",
+                  excerpt.replace("no increase", "increase") + "..."):
+        assert quality._body_quote_spans(body, quote)[0] == []
+        assert quality._material_quote_spans(record, quote)[0] == []
 
 
 def test_whitespace_quote_mapping_preserves_original_characters_and_order():
@@ -301,7 +319,7 @@ def test_budget_refusal_keeps_request_and_cannot_be_rebought_on_reparse(tmp_path
     assert any(row["code"] == "quality_assessment_pending_existing_attempt" for row in replayed["pending_problems"])
 
 
-def test_post_assessment_changes_stay_unapplied_and_explicitly_pending(tmp_path):
+def test_invalid_post_assessment_changes_preserve_body_and_explicit_pending(tmp_path):
     factory = Factory()
     def with_post_changes(role, path, profile):
         base = factory(role, path, profile)
@@ -319,6 +337,86 @@ def test_post_assessment_changes_stay_unapplied_and_explicitly_pending(tmp_path)
     assert "Must not apply" not in result["body_markdown"]
     assert result["status"] == "assessed_with_pending"
     assert any(row["code"] == "quality_postcheck_edits_not_applied" for row in result["pending_problems"])
+    edits = result["post_edits"]
+    assert edits["status"] == "rejected" and not edits["applied"]
+    assert Path(edits["before_path"]).read_bytes() == Path(edits["after_path"]).read_bytes()
+
+
+def test_valid_post_edits_apply_once_free_reparse_preserves_paid_requests_and_diagnostics(tmp_path):
+    factory = Factory()
+    def with_post_edits(role, path, profile):
+        base = factory(role, path, profile)
+        def client(messages, **kwargs):
+            returned = base(messages, **kwargs)
+            if role == "post_assessment":
+                data = json.loads(returned["content"])
+                data["tasks"][1].update(status="partial", explanation="Offline residual gap remains")
+                data["issues"] = ["OFFLINE scientific uncertainty remains"]
+                data["changes"] = [{"operation": "replace", "original_text": anchor,
+                    "replacement_text": anchor + " corrected", "reason": "Offline exact replacement control",
+                    "material_handles": ["P0001"], "material_quote": "Synthetic material supports A and B only."}
+                    for anchor in ("SYNTHETIC A", "SYNTHETIC B")]
+                data["changes"].append({"operation": "replace", "original_text": "[P0001]",
+                    "replacement_text": "Invalid ambiguity", "reason": "Offline rejection control",
+                    "material_handles": ["P0001"], "material_quote": "Fabricated material quote"})
+                returned["content"] = json.dumps(data)
+            return returned
+        client.prompt_token_counter = counter
+        return client
+    first = run_stage(tmp_path, with_post_edits)
+    assert len(factory.calls) == 3 and first["scientific_acceptance"] is False
+    edits = first["post_edits"]
+    assert edits["status"] == "partially_applied_pending_human_review" and len(edits["applied"]) == 2
+    assert len(edits["rejected"]) == 1 and edits["rejected"][0]["proposal_index"] == 2
+    before = Path(edits["before_path"]).read_text(encoding="utf-8")
+    assert first["body_markdown"] == before.replace("SYNTHETIC A", "SYNTHETIC A corrected").replace("SYNTHETIC B", "SYNTHETIC B corrected")
+    assert Path(edits["after_path"]).read_text(encoding="utf-8") == first["body_markdown"]
+    assert first["assessments"][-1]["report"]["tasks"][1]["status"] == "partial"
+    assert any(row["code"] == "quality_task_partial" for row in first["pending_problems"])
+    assert any(row["code"] == "quality_assessor_issue" for row in first["pending_problems"])
+    assert edits["assessment_task_status_basis"] == "before_post_edits"
+    target = Path(first["output_dir"])
+    paid_files = {name: (target / name).read_bytes() for step in ("assessment", "completion", "post_assessment")
+        for name in (step + "/RAW_RESPONSE.json", step + "/REQUEST.json", step + "/MESSAGES.json")}
+    # Labeled fixture of the old sealed result before local post-edit consumption.
+    old = {key: deepcopy(value) for key, value in first.items() if key != "post_edits"}
+    old["body_markdown"] = before
+    old["pending_problems"] = [row for row in old["pending_problems"]
+        if row["code"] != "quality_postcheck_edits_applied_pending_review"]
+    old["pending_problems"].append({"code": "quality_postcheck_edits_not_applied", "note": "Labeled old local parser control"})
+    quality._write(target / "QUALITY_RESULT.json", old)
+    (target / "QUALITY_BODY.md").write_bytes(before.encode("utf-8"))
+    quality._write(target / "RESULT_SEAL.json", {"result_sha256": quality._hash(old),
+        "body_sha256": hashlib.sha256(before.encode("utf-8")).hexdigest()})
+    prior = {name: (target / name).read_bytes() for name in ("QUALITY_RESULT.json", "RESULT_SEAL.json", "QUALITY_BODY.md")}
+    ordinary = run_stage(tmp_path, with_post_edits)
+    assert ordinary["body_markdown"] == before and ordinary["model_calls"] == 0
+    recovered = run_stage(tmp_path, with_post_edits, run=False, reparse_saved=True)
+    assert recovered["body_markdown"] == first["body_markdown"] and recovered["model_calls"] == 0
+    assert len(factory.calls) == 3 and recovered["status"] == "assessed_with_pending"
+    history = Path(recovered["reparse_saved"]["history_dir"])
+    assert all((history / name).read_bytes() == value for name, value in prior.items())
+    assert all((target / name).read_bytes() == value for name, value in paid_files.items())
+    again = run_stage(tmp_path, with_post_edits, reparse_saved=True)
+    assert again["body_markdown"] == recovered["body_markdown"] and again["model_calls"] == 0
+    assert len(factory.calls) == 3
+
+
+def test_post_conflict_group_all_rejected_and_independent_valid_edit_survives(tmp_path):
+    view = route.build_unit_views(book())[0]
+    body = "AAA BBB CCC. Independent DDD. Untouched suffix."
+    changes = [{"operation": "replace", "original_text": anchor, "replacement_text": "Changed " + str(index),
+        "reason": "Offline conflict control", "material_handles": ["P0001"],
+        "material_quote": "Synthetic material supports A and B only."}
+        for index, anchor in enumerate(("AAA BBB", "BBB CCC", "BBB", "DDD"))]
+    output, edits = quality._consume_post_edits(tmp_path, body, changes, view)
+    assert output == "AAA BBB CCC. Independent Changed 3. Untouched suffix."
+    assert [row["proposal_index"] for row in edits["applied"]] == [3]
+    assert [row["proposal_index"] for row in edits["rejected"]] == [0, 1, 2]
+    assert all(row["error"] == "quality_edit_anchors_overlap" for row in edits["rejected"])
+    assert all(row["conflicting_proposal_indices"] for row in edits["rejected"])
+    assert Path(edits["before_path"]).read_text(encoding="utf-8") == body
+    assert Path(edits["after_path"]).read_text(encoding="utf-8") == output
 
 
 def test_only_verified_missing_table_structure_resolves_other_issues_remain():
@@ -672,3 +770,57 @@ def test_cli_matching_flags():
     from scripts.upgrade3.legacy_unit_writer import parser
     args = parser().parse_args(["--quality-control", "--reparse-saved", "--only-unit", "CH:U0", "--only-unit", "CH:U1"])
     assert args.quality_control and args.reparse_saved and args.only_unit == ["CH:U0", "CH:U1"]
+
+
+def test_explicit_real_paid_post_edits_free_reparse_no_calls_or_source_mutation(tmp_path):
+    supplied = os.environ.get("OPTO_QUALITY_POST_EDIT_FIXTURE")
+    if not supplied:
+        pytest.skip("Set OPTO_QUALITY_POST_EDIT_FIXTURE to a labeled read-only completed quality stage")
+    source = Path(supplied)
+    originals = {path.relative_to(source): path.read_bytes() for path in source.rglob("*") if path.is_file()}
+    payload = json.loads(originals[Path("ORIGINAL_PAYLOAD.json")])
+    identity = json.loads(originals[Path("IDENTITY.json")])
+    body = originals[Path("ORIGINAL_BODY.md")].decode("utf-8")
+    view = writer.UnitWritingView(chapter_id=payload["chapter_id"], unit_id=payload["unit_id"],
+        focus=payload["unit_focus"], unit_index=payload["unit_position"]["index"],
+        unit_count=payload["unit_position"]["of"], sibling_units=payload.get("sibling_units", []),
+        chapter_frame=payload.get("chapter_frame", {}), other_chapters=payload.get("other_chapters", []),
+        paragraph_tasks=payload["paragraph_tasks"], table_tasks=payload["table_tasks"],
+        materials=payload["sources"], sources={row["source_handle"]: row for row in payload["sources"]},
+        chapter_tool_materials=payload.get("chapter_tool_materials", []), unit_notes=payload.get("unit_notes", ""),
+        owner_unit_context=payload.get("owner_unit_context", {}))
+    clone_root = tmp_path / "explicit_paid_post_replay_control"
+    clone = clone_root / source.name
+    shutil.copytree(source, clone)
+    def no_provider(*args, **kwargs):
+        pytest.fail("Free paid-post replay attempted a provider call")
+    options = dict(payload=payload, existing_body=body, output_dir=clone_root,
+        client_factory=no_provider, token_counter=counter, language=payload["language"],
+        writer_profile=identity["author_profile"], experiment_label=identity["experiment_label"], reparse_saved=True)
+    result = quality.run_unit_quality(view, run=False, **options)
+    assert result["model_calls"] == 0 and result["identity"] == identity
+    edits = result["post_edits"]
+    assert edits["status"] == "partially_applied_pending_human_review"
+    assert len(edits["applied"]) == 1 and len(edits["rejected"]) == 1
+    assert result["scientific_acceptance"] is False and result["status"] == "assessed_with_pending"
+    before = Path(edits["before_path"]).read_text(encoding="utf-8")
+    post_messages = json.loads(originals[Path("post_assessment/MESSAGES.json")])
+    assert before == json.loads(post_messages[-1]["content"])["actual_body_markdown"]
+    proposals = result["assessments"][-1]["report"]["changes"]
+    applied_indices = {row["proposal_index"] for row in edits["applied"]}
+    changes = [row for index, row in enumerate(proposals) if index in applied_indices]
+    expected = before
+    for change in sorted(changes, key=lambda row: before.index(row["original_text"]), reverse=True):
+        start = before.index(change["original_text"])
+        expected = expected[:start] + change["replacement_text"] + expected[start + len(change["original_text"]):]
+    assert result["body_markdown"] == expected == Path(edits["after_path"]).read_text(encoding="utf-8")
+    assert edits["assessment_task_status_basis"] == "before_post_edits"
+    assert any(row["code"] == "quality_task_partial" for row in result["pending_problems"])
+    history = Path(result["reparse_saved"]["history_dir"])
+    assert (history / "QUALITY_BODY.md").read_bytes() == originals[Path("QUALITY_BODY.md")]
+    again = quality.run_unit_quality(view, run=True, **options)
+    assert again["model_calls"] == 0 and again["body_markdown"] == expected
+    for path, content in originals.items():
+        assert (source / path).read_bytes() == content
+        if path.name in {"REQUEST.json", "RAW_RESPONSE.json", "MESSAGES.json"}:
+            assert (clone / path).read_bytes() == content

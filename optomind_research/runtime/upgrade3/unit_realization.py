@@ -87,13 +87,13 @@ def _body_quote_spans(body, quote):
     """Match original characters; only whitespace and explicit omissions vary."""
     if not quote:
         return [], "empty"
+    fragments = [part.strip() for part in re.split(r"\.{3,}|…+", quote) if part.strip()]
+    if not fragments:
+        return [], "unmatched"
     span, normalized = _find_quote_span(body, quote)
     if span:
         return [span], "whitespace_normalized" if normalized else "exact"
     if not re.search(r"\.{3,}|…+", quote):
-        return [], "unmatched"
-    fragments = [part.strip() for part in re.split(r"\.{3,}|…+", quote) if part.strip()]
-    if len(fragments) < 2:
         return [], "unmatched"
     spans, cursor, normalized = [], 0, False
     for fragment in fragments:
@@ -194,7 +194,7 @@ def _material_quote_spans(record, quote):
         if spans:
             return [{"path": path, **span} for span in spans], match
     fragments = [part.strip() for part in re.split(r"\.{3,}|…+", quote) if part.strip()]
-    if len(fragments) < 2:
+    if not fragments:
         return [], "unmatched"
     spans, record_cursor, text_cursor, normalized = [], 0, 0, False
     for fragment in fragments:
@@ -258,6 +258,64 @@ def apply_evidence_edits(body, changes, view):
     for item, change in zip(applied, ordered):
         item["material_quote_evidence"] = evidence_by_anchor[change["original_text"]]
     return text, applied
+
+
+def _consume_post_edits(target, body, changes, view):
+    """Consume a paid post-check once locally; no further assessment loop."""
+    before, accepted, applied, rejected = body, [], [], []
+    for index, change in enumerate(changes if isinstance(changes, list) else [changes]):
+        try:
+            apply_evidence_edits(before, [change], view)
+            start = before.index(change["original_text"])
+            accepted.append({"index": index, "change": change, "start": start,
+                             "end": start + len(change["original_text"])})
+        except Exception as exc:
+            rejected.append({"proposal_index": index, "change": deepcopy(change),
+                             "error": type(exc).__name__ + ":" + str(exc)})
+    conflicts = {}
+    for left_index, left in enumerate(accepted):
+        for right in accepted[left_index + 1:]:
+            if left["start"] < right["end"] and right["start"] < left["end"]:
+                conflicts.setdefault(left["index"], []).append(right["index"])
+                conflicts.setdefault(right["index"], []).append(left["index"])
+    for item in accepted:
+        if item["index"] in conflicts:
+            rejected.append({"proposal_index": item["index"], "change": deepcopy(item["change"]),
+                "error": "quality_edit_anchors_overlap", "conflicting_proposal_indices": conflicts[item["index"]]})
+    accepted = [item for item in accepted if item["index"] not in conflicts]
+    if accepted:
+        try:
+            body, applied = apply_evidence_edits(before, [item["change"] for item in accepted], view)
+            for result, item in zip(applied, sorted(accepted, key=lambda row: row["start"], reverse=True)):
+                result["proposal_index"] = item["index"]
+        except Exception as exc:
+            body, applied = before, []
+            rejected.extend({"proposal_index": item["index"], "change": deepcopy(item["change"]),
+                "error": type(exc).__name__ + ":" + str(exc)} for item in accepted)
+    status = ("partially_applied_pending_human_review" if applied and rejected else
+              "applied_pending_human_review" if applied else "rejected")
+    audit = {"status": status, "changes": deepcopy(changes), "applied": applied,
+        "rejected": sorted(rejected, key=lambda row: row["proposal_index"]),
+        "error": str(len(rejected)) + " post proposal(s) rejected" if rejected else "",
+        "assessment_task_status_basis": "before_post_edits",
+        "before_body_sha256": hashlib.sha256(before.encode("utf-8")).hexdigest(),
+        "after_body_sha256": hashlib.sha256(body.encode("utf-8")).hexdigest(),
+        "scientific_acceptance": False, "model_calls": 0}
+    directory = target / "post_edits" / _hash(audit)
+    directory.mkdir(parents=True, exist_ok=True)
+    for name, text in (("BEFORE.md", before), ("AFTER.md", body)):
+        path, content = directory / name, text.encode("utf-8")
+        if path.exists() and path.read_bytes() != content:
+            raise CandidateError("quality_post_edit_snapshot_integrity_failure")
+        if not path.exists():
+            path.write_bytes(content)
+    path = directory / "POST_EDIT_LOG.json"
+    if path.exists() and _read(path) != audit:
+        raise CandidateError("quality_post_edit_log_integrity_failure")
+    if not path.exists():
+        _write(path, audit)
+    return body, {**audit, "output_dir": str(directory), "log_path": str(path),
+        "before_path": str(directory / "BEFORE.md"), "after_path": str(directory / "AFTER.md")}
 
 
 def _cached_call(step, messages, profile, client_factory, run, token_counter, execute=None):
@@ -426,9 +484,19 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
             if summary["changed"]:
                 assessment = assess(body, "post_assessment")
                 if assessment is not None and assessment["changes"]:
-                    summary["pending_problems"].append({"code": "quality_postcheck_edits_not_applied",
-                        "changes": deepcopy(assessment["changes"]),
-                        "note": "The one bounded correction pass is finished; proposals retained for review."})
+                    body, post_edits = _consume_post_edits(target, body, assessment["changes"], view)
+                    summary["post_edits"] = post_edits
+                    summary["body_markdown"] = body
+                    summary["changed"] = body != existing_body
+                    details = {"log_path": post_edits["log_path"],
+                        "assessment_task_status_basis": "before_post_edits",
+                        "note": "Pre-edit task/issue diagnostics retained; no further model call or scientific acceptance."}
+                    if post_edits["applied"]:
+                        summary["pending_problems"].append({**details,
+                            "code": "quality_postcheck_edits_applied_pending_review", "count": len(post_edits["applied"])})
+                    if post_edits["rejected"]:
+                        summary["pending_problems"].append({**details,
+                            "code": "quality_postcheck_edits_not_applied", "rejected": post_edits["rejected"]})
             if assessment is not None:
                 summary["pending_problems"].extend({"code": "quality_task_" + row["status"], **row}
                     for row in assessment["tasks"] if row["status"] != "covered")
