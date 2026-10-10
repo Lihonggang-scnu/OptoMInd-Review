@@ -249,7 +249,9 @@ def register_tool_source_identities(book: Mapping[str, Any]) -> dict[str, Any]:
     result = deepcopy(dict(book))
     chapters = _chapter_rows(result)
     _, identities, aliases = _source_records(chapters)
-    used = set(identities) | set(aliases)
+    # An uncatalogued task/tool reference is still occupied. Allocating its
+    # spelling to a new identity would silently rebind the untouched old task.
+    used = set(identities) | set(aliases) | set(_handles(result))
     navigation = []
     prior_navigation = {(row.get("chapter_id"), row.get("tool_index"), row.get("source_index")): row
                         for row in result.get("tool_source_identity_navigation") or [] if isinstance(row, Mapping)}

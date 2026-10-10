@@ -223,6 +223,21 @@ def test_tool_same_identity_reuse_new_identity_conflict_and_unknown_retained():
     assert register_tool_source_identities(registered) == registered
 
 
+def test_tool_identity_allocation_does_not_rebind_uncatalogued_task_handle():
+    data = book()
+    task = data["chapters"][0]["units"][0]["paragraph_tasks"][1]
+    task["source_uses"] = [{"source_handle": "P0002"}]
+    data["chapters"][0]["chapter_tool_materials"] = [{"unit_key": "CH:U0", "usable_content": "Synthetic new identity evidence",
+        "sources": [{"doi": "10.1234/fixture-new", "source_handle": "P0001", "title": "Different new source"}]}]
+    registered = register_tool_source_identities(data)
+    source = registered["chapters"][0]["chapter_tool_materials"][0]["sources"][0]
+    assert source["source_handle"] == "P0003"
+    assert registered["chapters"][0]["units"][0]["paragraph_tasks"][1] == task
+    assert not any(row["source_handle"] == "P0002" for row in registered["chapters"][0]["sources"])
+    with pytest.raises(ValueError, match="legacy_unit_source_missing:CH:U0:P0002"):
+        route.build_unit_views(registered)
+
+
 def test_integrated_quality_derivative_assembly_and_selection_resume(tmp_path):
     factory = Factory()
     factory.execution_mode = "live"  # Synthetic offline seam exercises actual assembler.
