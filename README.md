@@ -4,6 +4,8 @@
 
 **先读 [当前链路与状态](docs/current/PIPELINE.md)，再读 [给 AI 助手的阅读顺序](docs/current/AI_READING_GUIDE.md)。** 不必从几十个历史工单猜当前实现。
 
+当前“细纲→正文”正式入口为 `run_review_harness.py --delivery-start body`：完整细纲及材料 → baseline 分单元作者 → 任务落实核查与有界补写 → 装配 → 一次全文局部编辑 → 选用正文及统一引用编号。默认使用 qwen3.5-plus；[运行与恢复](docs/writing_candidates/LEGACY_UNIT_QUALITY.md)。本轮跨章提示候选未显示清楚净收益，继续采用现版，具体对照和实际接入证据见 [采用记录](docs/acceptance/outline-to-body-coherence-20261010/README.md)。
+
 开发宗旨：[严格拒绝过度防御，以产品质量和实际帮助为先](docs/current/PRODUCT_PRINCIPLES.md)。最新预算与材料交接更新、下一轮本地开工入口：[QUALITY_CAPACITY_HANDOFF.md](docs/current/QUALITY_CAPACITY_HANDOFF.md)。
 
 ## 三个分支的职责
