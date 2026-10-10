@@ -4,9 +4,9 @@
 
 **先读 [当前链路与状态](docs/current/PIPELINE.md)，再读 [给 AI 助手的阅读顺序](docs/current/AI_READING_GUIDE.md)。** 不必从几十个历史工单猜当前实现。
 
-当前“细纲→正文”正式入口为 `run_review_harness.py --delivery-start body`：完整细纲及材料 → baseline 分单元作者 → 任务落实核查与有界补写 → 装配 → 一次全文局部编辑 → 选用正文及统一引用编号。默认使用 qwen3.5-plus；[运行与恢复](docs/writing_candidates/LEGACY_UNIT_QUALITY.md)。本轮跨章提示候选未显示清楚净收益，继续采用现版，具体对照和实际接入证据见 [采用记录](docs/acceptance/outline-to-body-coherence-20261010/README.md)。
+当前“细纲→正文”正式入口为 `run_review_harness.py --delivery-start body`：完整细纲及材料 → baseline 分单元作者 → 任务落实核查与有界补写 → 装配 → 一次全文局部编辑 → 选用正文及统一引用编号。默认使用 qwen3.5-plus；[可照用的命令、状态与恢复](docs/current/RUN_GUIDE.md)、[输入合同与角色细节](docs/writing_candidates/LEGACY_UNIT_QUALITY.md)。跨章提示候选未显示清楚净收益，继续采用baseline，具体对照和实际接入证据见 [采用记录](docs/acceptance/outline-to-body-coherence-20261010/README.md)。
 
-开发宗旨：[严格拒绝过度防御，以产品质量和实际帮助为先](docs/current/PRODUCT_PRINCIPLES.md)。最新预算与材料交接更新、下一轮本地开工入口：[QUALITY_CAPACITY_HANDOFF.md](docs/current/QUALITY_CAPACITY_HANDOFF.md)。
+开发宗旨：[严格拒绝过度防御，以产品质量和实际帮助为先](docs/current/PRODUCT_PRINCIPLES.md)。容量改造历史：[QUALITY_CAPACITY_HANDOFF.md](docs/current/QUALITY_CAPACITY_HANDOFF.md)。历史开工预算不自动授权新运行。
 
 ## 三个分支的职责
 
@@ -23,12 +23,14 @@
 研究问题与检索计划 → 候选文献 → 学术关系骨架 → 本地材料获取/解析 → 单篇理解及 A/B 卡片 → 逐级 BODY 规划与补充阅读 → 全局协调和负责人修订 → 案例正式附加 → 编排 → 单元写作 → 全文装配。
 
 另保留以下**显式启用**的下游模块：
-- 全文写作候选：四条高级路线与普通全文、独立章节拼接、独立章节后全文统稿三条朴素基线；完整 BODY 为交付单位，见 [说明](docs/fullbody_writer/README.md) 与 [本轮合计40元的本地开工指令](docs/fullbody_writer/PLAIN_BASELINES_40_CNY.md)
+- 历史全文写作候选与“细纲→指南→正文”：保留作实验对照，不进入当前默认；见 [说明](docs/fullbody_writer/README.md) 与 [当时40元实验指令](docs/fullbody_writer/PLAIN_BASELINES_40_CNY.md)
 - 细纲加强：第一层自主选择同章任务簇，按需 Max 完整回读并局部加强，合回完整章节后交给既有编排/写作；入口与恢复见 [按需正式接入](docs/verification/on-demand-promotion-20261007/README.md)
 - 独立首尾模块：正文后构思、结语、引言、摘要/题名，保留原 BODY；目前不代表首尾写作质量已通过
 - A/B/C 局部修订实验：固定正文、按材料提出和核验局部补丁；仍是实验候选，不能自动替代正式稿或宣称质量胜出
 
-当前源码来自 `02c018bdd440cc061ddedbb5aef07b115e7de081`，包含已验收的 BODY40 身份/引用/alias 修复及下游修订实验。独立首尾代码从 `dc661cf47bdb8ec70a348c02bc8f15a0b40253f4` 有界接回，保留当前装配未决阻断；没有合入早期并行 `manuscript_parts_plan` 对 BODY 的改造。
+历史整合基线来自 `02c018bdd440cc061ddedbb5aef07b115e7de081`，包含 BODY40 身份/引用/alias 修复。独立首尾从 `dc661cf47bdb8ec70a348c02bc8f15a0b40253f4` 有界接回；没有合入早期并行 `manuscript_parts_plan` 对 BODY 的改造。正式baseline接入受测源码为 `638eb93cdb37fc95cb917130f69a5b16df3549b7`，采用归档为 `2618319e3fe2a085acf11a66e6f6c66c73a9c135`；后续收尾在其上维护。
+
+正常消费者读取 `DELIVERY_REPORT.json.selected_body`。完整稿附终结科学诊断可交付；未完成生成、缺文件或要求步骤未完成继续阻断。独立首尾/出版需显式配置：BODY默认不会隐式生成它们，也不会再次全文编辑。
 
 在上述整合基线之上，当前已加入质量优先预算、实际请求参数记录、条件与论证关系交接修复；具体源码变化和验证见 [QUALITY_CAPACITY_VERIFICATION.md](docs/current/QUALITY_CAPACITY_VERIFICATION.md)。`CORE_SOURCE_INVARIANTS.json` 是分支整理当时的历史校验，不是后续源码永远不变的约束。
 

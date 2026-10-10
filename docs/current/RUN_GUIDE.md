@@ -2,6 +2,110 @@
 
 本文件记录已实际踩过的参数与数据交接问题。每次运行先核对当前源码、实际入口和最终发送消息，避免“配置看似正确，模型收到另一份输入”。已结合2026-10-06提供的新版67,286行本地对话记录更新；原39,518行记录不再作为最新背景。事件定位和当前落实状态见 [记录对照](RUN_GUIDE_EVIDENCE.md)。
 
+## 正式操作入口（2026-10-10 收尾）
+
+全链路输入输出统一见 [PIPELINE](PIPELINE.md)。本节是当前操作说明；后文保留旧事故、实验和预算教训，日期较早的“当前候选/本轮预算”不覆盖本节。
+
+正式版本是 **baseline**：Plus分单元写作 → 任务核查及必要的一次有界补写 → 装配 → 一次全文局部编辑 → 实际选用稿编号。`chapter_coherence` 是默认关闭的实验；指南作者、全文候选不进入默认流程。已认可的完整稿为7章29单元、187个规范化论文身份；它是此前生成、选择及免费恢复的结果，本次没有重新生成正文。
+
+### 准备与免费预览
+
+以下命令从仓库根执行；大写文件名/`<…>`替换为本轮实际路径和数值。`FULL_BODY_INPUT.json`与manifest二选一。manifest必须绑定完整已批准章包和对应有效编排，而非单组加强结果；格式见 [输入合同](../writing_candidates/LEGACY_UNIT_QUALITY.md)。
+
+```powershell
+# 可选：固定既有manifest版本及输入哈希；不启动全文候选作者。
+python -X utf8 scripts/upgrade3/fullbody_writer.py --manifest BODY_MANIFEST.json --prepare-manifest PREPARED_BODY_MANIFEST.json
+
+# 默认免费，导出全部实际请求；不读密钥、不创建付费账本。
+python -X utf8 run_review_harness.py --delivery-start body --delivery-input FULL_BODY_INPUT.json --delivery-out outputs/my_delivery --tokenizer TOKENIZER.json
+
+# 另一正式输入路径，使用同一manifest loader。
+python -X utf8 run_review_harness.py --delivery-start body --delivery-manifest PREPARED_BODY_MANIFEST.json --delivery-out outputs/my_delivery --tokenizer TOKENIZER.json
+```
+
+预览不能代替生成；检查 `<delivery-out>/body/FULL_BODY_INPUT.json`、`RUN_REPORT.json`（status=preview）及各单元 `UNIT_INPUT.json`/`UNIT_MESSAGES.json`中的任务、用途、条件和完整材料。manifest模式还保存 `SOURCE_MANIFEST.json`。主作者使用章节框架和其他单元职责，不带实际已写前文；不能把指南连续写作的前文合同套到此处。
+
+### 正式运行和同目录恢复
+
+```powershell
+python -X utf8 run_review_harness.py --delivery-start body --delivery-input FULL_BODY_INPUT.json --delivery-out outputs/my_delivery --tokenizer TOKENIZER.json --run --ledger PROJECT_BUDGET.sqlite --budget-limit <absolute_CNY_cap> --budget-scope <persistent_scope> --key-file LOCAL_KEY_FILE.txt --key-index 1
+```
+
+密钥只通过既有本地配置读取，不复制进输出或文档。可在同一命令上加 `--account-ledger ACCOUNT_BUDGET.sqlite --account-budget-limit <account_lifetime_cap> --account-mapping-dir ACCOUNT_RECEIPTS_DIR`，作为跨项目账户总账；与项目账本重复的物理调用不能相加算两次费用。
+
+恢复时重复**同一**命令、输入、目录、模型参数、项目/账户账本、scope及累计封顶。兼容成功响应和质量/编辑结果复用，不重买成功单元。无 `--run` 的同目录执行只能预览或免费重放已有响应；缺失步骤不会自行联网。
+
+```powershell
+# 保存质量RAW重新解析：不调用模型。正式入口缺省quality_control=True。
+python -X utf8 run_review_harness.py --delivery-start body --delivery-input FULL_BODY_INPUT.json --delivery-out outputs/my_delivery --tokenizer TOKENIZER.json --reparse-saved
+
+# 只有确认需付费重试时，在原正式运行命令上添加：
+# --retry-failed
+# 保留原尝试/占额；仅合格的无可回放输出失败允许新尝试，不自动反复重抽。
+
+# 显式关闭质量步骤；不会把残余诊断判成“科学问题已解决”。
+python -X utf8 run_review_harness.py --delivery-start body --delivery-input FULL_BODY_INPUT.json --delivery-out outputs/author_only --no-quality-control --no-article-edit
+
+# 显式实验，必须独立目录；回退用baseline和原baseline目录。
+python -X utf8 run_review_harness.py --delivery-start body --delivery-input FULL_BODY_INPUT.json --delivery-out outputs/coherence_experiment --body-version chapter_coherence
+```
+
+`--reparse-saved`只处理质量RAW，不等于任意writer截断响应都能恢复。新补写/核查/编辑仍需原账本下的 `--run`。`--only-unit CHAPTER:UNIT`为局部测试，保留全文输入语境，但不生成完整稿或运行全篇编辑。
+
+### 默认参数与配置优先级
+
+| 入口/角色 | 默认值 | 有效覆盖方式 |
+|---|---|---|
+| 正式harness BODY | baseline，quality_control=True，article_edit=True | `BODY_DELIVERY_DEFAULTS`集中设定；明确CLI开关覆盖 |
+| 历史独立 `legacy_unit_writer.py` | baseline，两质量开关False | 用 `--quality-control --article-edit`才等同正式质量步骤 |
+| 作者/补写 | qwen3.5-plus，8192思考＋32768回答 | 作者CLI `--thinking-budget/--output-tokens`；质量阶段容量按其运行库角色profile，不随作者值一起变 |
+| 核查/全文局部编辑 | qwen3.5-plus，16384思考＋24576回答 | `unit_realization.py`、`legacy_unit_route.py`角色profile |
+| downstream首尾 | 不构造隐式live模型 | config明确fixture/严格recordings；live使用受预算约束的provider注入 |
+
+`max_output_tokens`是回答空间，实际思考请求的总 `max_completion_tokens`为思考＋回答。正式BODY不是把 `quality.json` 中其他实验的Flash writer默认搬进来；也不需要研究路径的premium开关来启用Plus。最终核对实际 `profile/effective_request`，不用配置名字代替wire参数。预算CLI缺省值是30，但接手已有账本时必须显式传其原累计封顶；它不是本轮新增额度。
+
+### 选用稿、状态和退出码
+
+- 输出根是 `<delivery-out>/body`。`RUN_REPORT.json`保留作者/质量/编辑全过程；`DELIVERY_REPORT.json.selected_body`是唯一选用声明，含 `source`、`handles_draft`、`reader_draft`、`references_path` 和编号报告。
+- 有效全文编辑后 `source=article_edit`；编辑关闭时用装配稿。首尾读所选**句柄稿**，BODY读者稿/目录直接可用；有首尾和图注新增后，04对最终全文重新编号，05只消费04产物。
+- `body_delivery.ready=true`、`status=complete_with_diagnostics`表示正文完整可交付且附诊断。原 `pending_problems`、`problems_resolved=False` 和 `scientific_acceptance=False`继续保留；不再由这些已终结诊断误挡BODY消费者。
+- 未写全、选中子集、装配失败、所选文件缺失、编号未完成、要求的核查或全文编辑没有完成，`body_delivery.ready=false`并记录 `blocking_reasons`。history/plan受限导入与缺录制仍用原严格装配门槛。
+- 两个BODY CLI：免费preview为0；完整BODY（含诊断）为0；生成/所需阶段不完整为2；显式下游配置未完成也为2。非法参数/配置可能由argparse或异常返回非零；按报告定位，不能把所有非零都当模型内容失败。
+
+### 显式首尾与出版
+
+不传 `--delivery-config` 时，BODY交付选用正文及编号，不自动生成首尾/PDF。下例为离线fixture/严格录制接线，文件路径相对于config；fixture协议见 [首尾说明](../POST_BODY_MANUSCRIPT_PARTS.md)。
+
+```json
+{
+  "schema": "review_v2_delivery.config.v1",
+  "research_question": "本篇原研究问题",
+  "language": "zh",
+  "front_back": {"mode": "post_body", "fixture": "parts_fixture.json"},
+  "post_body_context": {"path": "context.json"},
+  "figure_assets": [],
+  "compile_pdf": false
+}
+```
+
+```powershell
+# 首次显式接入下游；已有正文缓存可复用，03首尾目录必须尚未生成。
+python -X utf8 run_review_harness.py --delivery-start body --delivery-input FULL_BODY_INPUT.json --delivery-out outputs/my_delivery --tokenizer TOKENIZER.json --run --ledger PROJECT_BUDGET.sqlite --budget-limit <absolute_CNY_cap> --budget-scope <persistent_scope> --key-file LOCAL_KEY_FILE.txt --key-index 1 --delivery-config DELIVERY_CONFIG.json
+
+# 独立消费已选句柄稿，不重跑BODY；首尾必须使用新输出目录。
+python -X utf8 scripts/upgrade3/manuscript_parts.py --draft SELECTED_HANDLES.md --research-question "原研究问题" --context context.json --fixture parts_fixture.json --output outputs/parts_run01
+```
+
+BODY的02阶段记录 `body_selected`，不会再全文编辑一次；03读取其实际路径，04读取03返回的final稿，05读取04 reader/REFERENCES/图映射/assets。BODY模式未显式指定 `identity_catalogs` 时使用本次selected_body的 REFERENCES；显式目录优先（显式空列表也不会偷偷补目录），扩增背景文献需明确材料身份。不能拿另一个run的裸P号目录顶替。
+
+03的owned首尾块保持原样；BODY+post_body到04的投影只移除旧的未受管理书目，防止引用列表替换吞掉结语标记。03原稿及投影哈希单独保存。`compile_pdf=true`才请求TeX/PDF，本机需Pandoc/TeX与可用字体；Markdown出版不需要LLM。出版默认关闭Crossref/S2 enrich。
+
+**恢复边界：**BODY同目录支持缓存恢复；现有 `post_body` 首尾仍要求新输出目录，同一config重复进入非空03会明确停止。恢复BODY时先不传config；需要再次生成首尾时独立CLI用新目录及当前selected句柄稿，或由受控provider驱动显式运行。不能宣称整个02–05都已有同目录恢复。CLI/config目前没有live首尾适配器；fixture接通证明接口，不是新的真实首尾质量验收。
+
+### 费用与本次验证范围
+
+账本按累计已结算实际费用＋reserved/uncertain约束原封顶；超时不能当免费，换目录/恢复不重新起算预算。本次只离线控制、实际请求预览与原29单元免费恢复，新增API费用0。原60元项目账本结算17.5659408、占额0、剩余42.4340592元；这个余额是状态记录，不自动授权新实验。已有29单元及187身份来自此前认可稿，详见 [历史对照归档](../acceptance/outline-to-body-coherence-20261010/README.md)。本次验收命令与结果追加到 [RUN_GUIDE_EVIDENCE](RUN_GUIDE_EVIDENCE.md)。
+
 ## 产品目标
 
 质量与解决问题优先，严格拒绝过度防御。不要靠缩减有效材料、压低思考额度或隐藏失败让程序表面运行成功。修通用链路，不向生产请求注入本题人工科学修法。综述转述的原始研究，只要内容可用且身份明确，可以正常、同权参与。
@@ -146,7 +250,7 @@
 - 格式/导出故障先用已付费原响应离线解析或重放，保留可恢复对象，只重试缺失部分。明确区分重放、重导出和新模型生成。
 - 身份或材料污染发生时，定位最早受影响消费者，使其依赖产物失效；保留未受影响的材料和昂贵结果。既不全盘重跑，也不因文件存在就承诺复用。
 - 缓存验证包括同目录恢复：同输入零调用、单处变化只重做受影响任务、材料实质变化确实失效。记录实际调用与账本，不只相信“cache hit”日志。
-- 按需模块的正式 CLI 阶段 checkpoint 接缝属于另项待处理工作；本轮没有把它包装为已修好。测试可使用本地已核实的阶段保存驱动，不能盲目重付费。
+- 按需模块已有阶段checkpoint、完整材料回读及合回完整章包，见 [正式接入](../verification/on-demand-promotion-20261007/README.md)；旧实验阶段仅在结束时写RESULT的限制是历史事故，不再当作当前运行方式。恢复仍需校验实际请求/材料/模型兼容，不能盲目重付费。
 - 公开删节视图、脱敏路径、历史汇总文件不能直接作为生产缓存。
 
 ## 费用与发布
@@ -204,7 +308,7 @@
 - 精确保留完整任务及相关科研材料，去重不截尾。初稿、编辑稿和最后采用版本可追溯；失败不抹掉此前有效稿
 
 
-## 当前全文写作候选（2026-10-07）
+## 历史全文写作候选（2026-10-07，默认地位已被baseline替代）
 
 新的比较与交付单位是已批准细纲中的**完整 BODY**。入口为 `scripts/upgrade3/fullbody_writer.py`，具体接口与本地指令见 [全文候选说明](../fullbody_writer/README.md) 和 [本地100元测试安排](../fullbody_writer/LOCAL_AGENT_HANDOFF_100_CNY.md)。
 
@@ -219,7 +323,7 @@
 - 输出同时保留整篇正文、阶段原始返回、实际请求、任务/材料来源、选用版本与恢复信息。正文可用性和局部问题分别记录；小措辞误差不自动触发昂贵重写
 
 
-## 朴素全文基线与40元预算更新（2026-10-07）
+## 历史朴素全文基线与40元预算更新（2026-10-07，保留记录）
 
 当前增加 `plain_whole`（普通提示词全文一次写）、`chapter_concat`（独立写完全部章节后直接拼合的基线）、`hierarchical_full`（复用上述全篇初稿后真正全文统稿）。全部使用完整批准BODY输入，不能以单章结果代替全文评价。见 [补测指令](../fullbody_writer/PLAIN_BASELINES_40_CNY.md)。
 

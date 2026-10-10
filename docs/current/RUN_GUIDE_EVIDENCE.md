@@ -1,5 +1,29 @@
 # 运行须知的历史记录对照
 
+## 2026-10-10决定／10-11收尾：当前全链路对齐与免费验收
+
+原全链路记录为本目录 `PIPELINE.md`、`RUN_GUIDE.md`、`AI_READING_GUIDE.md`，以及本地 `临时文件夹/OPTOMIND_LIHONGGANG_INPUT_OUTPUT_MAP_20261007 (2).md`。该独立地图在 `git ls-files` 与全refs路径历史中未找到提交记录，保留在本地；这次在原current体系更新，不另建平行“最新版”。`BRANCH_CONSOLIDATION.md`保留10月5日历史并加替代说明。
+
+已选baseline的正式接入源码为 `638eb93cdb37fc95cb917130f69a5b16df3549b7`，固定对照归档为 `2618319e3fe2a085acf11a66e6f6c66c73a9c135`。本次接缝修复源码为 **`4e1e97c517440cdc11623fda56977f7528df396f`**；后续文档/验收提交不改变这三份生产源码。详细源码指纹、输入及选稿哈希、默认设置、费用和缺资产记录在 [FORMAL_CLOSEOUT_VERIFICATION.json](FORMAL_CLOSEOUT_VERIFICATION.json)。
+
+| 核对 | 实际结果与证据类型 |
+|---|---|
+| 用户问题到交付全链 | 逐个源码/CLI/配置核对M1–M3、获取解析、普通阅读/A-B/独立M4、补读、逐级规划、协调/负责人、案例、编排及下游。确认协调/负责人修订在正式案例附加之前；没有新模型/检索重跑 |
+| 正式默认与两种输入 | 原生normal harness使用 `delivery-input` 免费预览完整29单元，实际默认baseline、核查True、全文编辑True；input/manifest两路在正常入口模拟执行实际消费者并检查供材。完整输入未改，0真实调用 |
+| 完整稿免费恢复 | 原生独立BODY CLI走同一正式运行库，复用原29单元/187身份认可稿；退出0、`complete_with_diagnostics`、readyTrue，所选全文编辑稿和RAW字节不变，0新增调用/预留。不是重新生成或新质量竞赛 |
+| 正式消费者 | 有标签的模拟Plus响应经真实normal入口、legacy/post_body首尾fixture、04引用与05出版。读取selected handles，02无第二次编辑；缺省目录承接本次REFERENCES，显式目录优先；owned首尾及旧目录投影正确落盘 |
+| 完成/诊断/缺失 | 科学诊断原样保留；完整稿exit0。缺单元、核查/编辑未完成、编号/file缺失、03 partial、04 pending或05失败继续非零。history/plan旧受限门不放宽 |
+| 恢复与开关 | 同目录BODY0调用恢复；独立核查和全文编辑开关、实验版本显式选用。post_body非空目录仍停止，未伪装为已支持首尾resume |
+| 文档命令 | 9个命令按实际argparse免费解析；delivery配置按实际loader检查，current入口及关联说明的相对链接检查通过 |
+
+本次Windows聚焦回归 **268 passed、8 skipped、4 deselected**。完整可复跑命令见JSON记录；主要新增控制是 `tests/test_body_delivery_closeout.py`。8个skip涉及未配置的可选fixture/历史外部资产；4个排除分成两项既有完整模拟链依赖与两项缺9月27日外部历史产物（worktree内没有对应正文/REFERENCES）。首次扩大检查保留了后两项缺资产失败记录，未补造资产或将其计成通过。修改文件编译、diff-check通过。
+
+原60元项目账本只读核对：settled **17.5659408**、reserved/uncertain **0**、剩余 **42.4340592**元；本次新增费用 **0**。公开记录不包含账本数据库、密钥或论文全文。本地详细验证日志在 `outputs/outline_to_body_astra_20261010_60cny/closeout_20261010/`；此前对照包仍在原归档位置，没有改写成这次新实验。
+
+下一位Agent从 [PIPELINE](PIPELINE.md) → [RUN_GUIDE当前操作节](RUN_GUIDE.md) 进入。首尾真实调用需显式受控provider，现有CLI/config为fixture/严格录制；PDF须显式compile及本机工具，本次未新增首尾或PDF质量测试。上游A/B池card_path、M3旁件和历史材料索引需显式绑定，详细边界列在PIPELINE。
+
+## 2026-10-06历史记录（保留）
+
 本轮依据用户2026-10-06提供的新版《本地对话记录.md》，替代此前39,518行版本。原文件为67,286行、5,721,335字节，SHA256：`bc127a444dc75a46ae144026bb7697c93c5d849b9ec7dd6669d87639400abc2f`。原始聊天保留在用户交付空间，没有提交本仓库；本文件只记录通用运行教训与定位。
 
 阅读方式：按早期材料层、规划恢复、近期质量实验三个区段建立索引，亲读相关设计、事故、结果和用户后续裁决，并针对重要实现查当前源码。大型重复代码围栏和工具日志仅按需定位核对，不把这种审阅表述为逐字穷尽全部历史代码。

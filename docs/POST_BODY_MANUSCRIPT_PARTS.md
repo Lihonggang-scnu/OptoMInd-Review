@@ -68,7 +68,11 @@ fixture 顶层为 `conception`、`conclusion`、`introduction`、`abstract`，�
 }
 ```
 
-这是接线片段；完整 delivery 仍需原有正文装配与编辑配置。独立 CLI 不要求重跑它们。省略 mode 时维持 legacy 行为，不自动切换历史流程。
+这是接线片段。当前正式BODY入口已负责作者、核查、装配、一次全文编辑和选择；BODY模式不需要再配置02编辑，首尾读取 `DELIVERY_REPORT.selected_body.handles_draft`。未配置身份目录时承接本次selected BODY的REFERENCES；显式目录优先。history/plan旧路径仍需其原有正文与编辑输入。独立CLI不要求重跑BODY。省略mode时维持legacy行为，不自动切换历史流程。统一命令与输入合同见 [RUN_GUIDE](current/RUN_GUIDE.md)、[PIPELINE](current/PIPELINE.md)。
+
+2026-10-10收尾区分“完整BODY附科学诊断”和“缺生成/文件/步骤”：前者可进入首尾，诊断原样保留；后者继续阻断。03返回的实际final稿用于04编号，04 reader与目录用于05出版，不再读取原作者稿。旧书目在单独编号投影中移除，owned首尾保持，03源稿与哈希保存。
+
+首尾自身的输出目录仍须全新，不能将BODY支持同目录恢复表述为首尾也支持。重复同一post_body配置进入非空03会明确停止；已有BODY可不带config免费恢复。再次首尾运行用本节独立CLI的新目录及所选句柄稿，不重新写正文。
 
 ## 后续真实调用
 

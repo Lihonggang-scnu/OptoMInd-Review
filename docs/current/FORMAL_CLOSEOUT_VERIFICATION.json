@@ -1,0 +1,124 @@
+{
+  "task": "formal pipeline closeout; offline only; baseline already selected",
+  "decision_date": "2026-10-10",
+  "closeout_date": "2026-10-11",
+  "branch": "lihonggang-dev",
+  "tested_source_commit": "4e1e97c517440cdc11623fda56977f7528df396f",
+  "prior_integration_source": "638eb93cdb37fc95cb917130f69a5b16df3549b7",
+  "prior_comparison_archive": "2618319e3fe2a085acf11a66e6f6c66c73a9c135",
+  "fingerprint_kind": "SHA-256 of actual native Windows checkout bytes; Git-normalized blob line endings may differ",
+  "code_sha256": {
+    "optomind_research/runtime/upgrade3/review_delivery.py": "3df2304f7792b5f67acf8e882aae50a4b958104ecc620d39641c0da55372754f",
+    "run_review_harness.py": "777ddbbdf18607ea7b13c3f739ffc41e9ed5de8d71bb2e89bdf4134b4b8e4bd3",
+    "scripts/upgrade3/legacy_unit_writer.py": "b4d91676fdeb6e5c79b7fdc56f4b5ede247ea35a0d6a5a0376f7d47ccbf71ab5",
+    "tests/test_chapter_coherence.py": "8579a56463fda367f53096b26daf25c6b464d3579204fb92f8e56bf6146032ea",
+    "tests/test_body_delivery_closeout.py": "ecfc1c30dd914660a0780350888b075d2d11ca4d4d5784c3b3534a92cc33757e"
+  },
+  "actual_input_sha256": "6d6ae867ceae5c88f25d36f88087925341af5cf82f1672680157a3588d14e5f7",
+  "effective_settings": {
+    "body_version": "baseline",
+    "quality_control": true,
+    "article_edit": true,
+    "model": "qwen3.5-plus",
+    "thinking_budget": 8192,
+    "output_tokens": 32768
+  },
+  "native_default_preview": {
+    "passed": true,
+    "exit_code": 0,
+    "original_units": 29,
+    "model_calls": 0,
+    "input_unchanged": true,
+    "credential_file_exists": false
+  },
+  "existing_accepted_body_cache_recovery": {
+    "passed": true,
+    "cli": "scripts/upgrade3/legacy_unit_writer.py; shared official delivery runtime",
+    "exit_code": 0,
+    "complete_units": 29,
+    "model_calls": 0,
+    "new_reservations": [],
+    "raw_and_selected_manuscripts_unchanged": true,
+    "body_delivery": {
+      "status": "complete_with_diagnostics",
+      "ready": true,
+      "blocking_reasons": [],
+      "diagnostics_pending": true,
+      "scientific_acceptance": false
+    },
+    "selected_body_source": "article_edit",
+    "selected_body_status": "complete",
+    "selected_body_sha256": {
+      "handles_draft": "8ef37120cc8842cb06d5a583a135e136676e4d778221d14f7c068cc1d26a8245",
+      "reader_draft": "9cb3b579c197e5ad550097b520a0fbdd7a436b9e2e922a69aa83ceb4db0ceaf6",
+      "references_path": "4c4a4d921722d67e46469bdd31b93f2d7d3062a52e8b877459cecf534a83c29e"
+    },
+    "reference_count": 187,
+    "unknown_citation_tokens": [],
+    "evidence_kind": "saved real generated BODY free reuse; not new generation or new quality evaluation"
+  },
+  "documentation": {
+    "command_count": 9,
+    "relative_links_checked": 49,
+    "broken_links": [],
+    "offline_config_checked": {
+      "mode": "post_body",
+      "compile_pdf": false,
+      "identity_catalogs_explicit": false
+    },
+    "passed": true
+  },
+  "focused_test_command": "python -X utf8 -m pytest tests/test_body_delivery_closeout.py tests/test_chapter_coherence.py tests/test_dual_budget_cli.py tests/test_legacy_unit_route.py tests/test_legacy_unit_route_review.py tests/test_unit_realization.py tests/upgrade3/test_review_unit_writer_completion.py tests/upgrade3/test_review_delivery_entry.py tests/upgrade3/test_review_delivery_integration.py tests/upgrade3/test_body07_delivery_pending_gate.py tests/upgrade3/test_serial_parts_delivery_integration.py tests/upgrade3/test_review_delivery_figures_citations.py tests/upgrade3/test_fullbody_cli.py::test_normal_body_entry_loads_existing_manifest_export_without_another_writer -k \"not history_full_chain_via_cli_subprocess and not plan_restricted_chain_via_entry and not test_real_draft_map_and_reader_rendering and not test_stage_cross_refs_captions_and_map_all_agree\" -q --show-capture=no",
+  "focused_test_log_tail": [
+    "........................................................................ [ 52%]",
+    "............sss.ss.sss.................................................. [ 78%]",
+    "............................................................             [100%]",
+    "268 passed, 8 skipped, 4 deselected in 35.83s",
+    "exit_code=0"
+  ],
+  "fixture_limits": {
+    "previous_run": "2 failed, 268 passed, 8 skipped, 2 deselected in 35.50s",
+    "missing_asset_failures": [
+      "tests/upgrade3/test_review_delivery_figures_citations.py::test_real_draft_map_and_reader_rendering",
+      "tests/upgrade3/test_review_delivery_figures_citations.py::test_stage_cross_refs_captions_and_map_all_agree"
+    ],
+    "absent_assets": [
+      "outputs/full_review_draft/20260927_run01/REVIEW_DRAFT_HANDLES.md",
+      "outputs/full_review_draft/20260927_run01/REFERENCES.json"
+    ],
+    "prior_exclusions": [
+      "history_full_chain_via_cli_subprocess",
+      "plan_restricted_chain_via_entry"
+    ],
+    "final_exclusions": [
+      "history_full_chain_via_cli_subprocess",
+      "plan_restricted_chain_via_entry",
+      "test_real_draft_map_and_reader_rendering",
+      "test_stage_cross_refs_captions_and_map_all_agree"
+    ],
+    "skip_count": 8,
+    "reason": "Existing historical output fixtures are not present in this worktree. No historical asset was fabricated or model call used."
+  },
+  "fees": {
+    "original_project_limit_cny": 60.0,
+    "settled_actual_cny": 17.5659408,
+    "reserved_and_uncertain_cny": 0,
+    "remaining_cny": 42.4340592,
+    "new_closeout_paid_calls": 0,
+    "new_closeout_cost_cny": 0
+  },
+  "upstream_audit": "Source IO/entry/config audit; no new M1-to-publication real model run. Coordinator/owner revisions precede case append; A/B card_path and M3 sidecars require explicit bindings.",
+  "downstream_verification": "Native normal entry, both input sources, actual selected-body-to-legacy/post_body/citations/publication consumers with labeled synthetic responses and network forbidden. Not newly generated front/back text or PDF quality review.",
+  "remaining_boundaries": [
+    "live serial parts require explicit budget-controlled provider; CLI/config use fixture or strict recordings",
+    "standalone post_body requires a fresh parts directory; repeating config stops without rebuying BODY",
+    "PDF requires local publishing tools/fonts and explicit compile_pdf; no new PDF render this round"
+  ],
+  "local_verification_root": "F:\\OptoMind-Review-2\\outputs\\outline_to_body_astra_20261010_60cny\\closeout_20261010",
+  "excluded_from_publication": [
+    "credential files",
+    "ledger databases",
+    "copyright-restricted article full texts",
+    "unrelated private files"
+  ]
+}
