@@ -13,6 +13,7 @@
 | BODY 逐级规划 | 问题、PLAN、A/B、精读/补充 → 章级任务与细纲 | `runtime/upgrade3/progressive_review_plan.py`；`scripts/upgrade3/progressive_review_plan.py` |
 | 编排 | 已形成的知识任务与来源 → 顺序、拆合及 writer 输入 | `runtime/upgrade3/chapter_arrangement.py`；同名 CLI |
 | 写作/补写 | 实际任务与材料 → 单元正文、引用与未决报告 | `runtime/upgrade3/review_unit_writer.py`；同名 CLI |
+| 当前分单元正文入口及可选质量步骤 | 完整细纲和材料 → 原单元作者 → 可选实际正文核查/一次补写 → 装配 → 可选一次全文局部编辑 | `scripts/upgrade3/legacy_unit_writer.py`；`legacy_unit_route.py`、`unit_realization.py`、`article_text_editor.py`；见 [运行和恢复](../writing_candidates/LEGACY_UNIT_QUALITY.md) |
 | 可选全文写作候选 | 完整批准细纲、全部章节编排与材料 → 一次成文/连续作者/长文工作台/读者修订的完整 BODY | `runtime/upgrade3/fullbody_writer.py`、`fullbody_contracts.py`；`scripts/upgrade3/fullbody_writer.py`，见 [说明](../fullbody_writer/README.md) |
 | 全文装配 | 选定批次和单元结果 → BODY 与交付状态 | `scripts/upgrade3/full_review_draft.py`、`runtime/upgrade3/review_delivery.py` |
 | 独立首尾 | 已完成 BODY、上下文/材料 → 后置职责构思、首尾与题名 | `serial_manuscript_parts.py`、`serial_parts_application.py`；`scripts/upgrade3/manuscript_parts.py` |
