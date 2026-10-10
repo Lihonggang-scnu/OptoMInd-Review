@@ -1553,7 +1553,10 @@ def _execution_profile(args: argparse.Namespace) -> dict[str, object]:
 def main() -> int:
     args = build_parser().parse_args()
     previous_ceiling = os.environ.get(ECONOMY_TEXT_CEILING_ENV)
-    set_economy_text_ceiling_enabled(not args.allow_premium_text_models)
+    # The BODY route explicitly fixes Plus and enforces its owned lifetime
+    # ledgers. The legacy research ceiling must not downgrade that model.
+    # Its parser/runtime still reject Max; other entry policies are unchanged.
+    set_economy_text_ceiling_enabled(args.delivery_start != "body" and not args.allow_premium_text_models)
     try:
         return _main_with_args(args)
     finally:

@@ -2,9 +2,12 @@
 from copy import deepcopy
 import io
 import json
+import os
 from pathlib import Path
 import runpy
 import socket
+import subprocess
+import sys
 
 import pytest
 
@@ -223,7 +226,8 @@ def test_normal_harness_uses_actual_factory_dual_budget_and_delivers_selected_ed
         "--body-version", "chapter_coherence", "--quality-control", "--article-edit", "--run",
         "--ledger", str(project), "--budget-limit", "60", "--budget-scope", "synthetic-round",
         "--account-ledger", str(account), "--account-budget-limit", "300", "--key-file", str(key), "--key-index", "1"]
-    assert harness._main_with_args(harness.build_parser().parse_args(argv)) == 0
+    monkeypatch.setattr(sys, "argv", ["run_review_harness.py", *argv])
+    assert harness.main() == 0
     report = route._read(tmp_path / "out" / "body" / "DELIVERY_REPORT.json")
     assert report["model_calls"] == len(opener.calls) == 5
     assert report["effective_settings"] == {"body_version": "chapter_coherence", "quality_control": True,
@@ -303,3 +307,96 @@ def test_normal_body_preview_keeps_entire_book_and_explicit_off_flags(tmp_path, 
     messages = route._read(Path(report["units"][0]["messages_path"]))
     assert len(json.loads(messages[1]["content"])["chapter_responsibilities"]["chapter_outline"]) == 2
     assert report["selected_body"]["status"] == "not_generated"
+
+
+@pytest.mark.parametrize("entry, expected", [("body", "0"), ("history", "1"), ("plan", "1"), (None, "1")])
+@pytest.mark.parametrize("prior", [None, "1"])
+def test_main_scopes_body_plus_independently_and_restores_outer_ceiling(monkeypatch, entry, expected, prior):
+    import run_review_harness as harness
+    name = harness.ECONOMY_TEXT_CEILING_ENV
+    if prior is None:
+        monkeypatch.delenv(name, raising=False)
+    else:
+        monkeypatch.setenv(name, prior)
+    argv = (["run_review_harness.py", "--delivery-start", entry] if entry else
+            ["run_review_harness.py", "--question", "Synthetic policy control"])
+    monkeypatch.setattr(sys, "argv", argv)
+    observed = []
+    monkeypatch.setattr(harness, "_main_with_args", lambda args: observed.append(os.environ.get(name)) or 7)
+    assert harness.main() == 7
+    assert observed == [expected] and os.environ.get(name) == prior
+
+
+def test_script_main_subprocess_fixed_plus_real_factory_budget_and_free_resume(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    source, key = tmp_path / "book.json", tmp_path / "synthetic-keys.txt"
+    route._write(source, book())
+    key.write_text("synthetic-first\nsynthetic-second\n", encoding="utf-8")
+    project, account = tmp_path / "project.sqlite", tmp_path / "account.sqlite"
+    argv = ["--delivery-start", "body", "--delivery-input", str(source), "--delivery-out", str(tmp_path / "out"),
+        "--body-version", "chapter_coherence", "--run", "--no-quality-control", "--no-article-edit",
+        "--ledger", str(project), "--budget-limit", "60", "--budget-scope", "synthetic-subprocess",
+        "--account-ledger", str(account), "--account-budget-limit", "300", "--key-file", str(key), "--key-index", "1"]
+    # Test-only transport setup; run the actual script __main__ in its fresh
+    # process, with the outer research ceiling deliberately enabled.
+    bootstrap = """
+import os, runpy, socket, sys
+from pathlib import Path
+from optomind_research.runtime.upgrade3.module4 import runtime
+from scripts.upgrade3 import legacy_unit_writer as cli
+fixtures = runpy.run_path('tests/test_chapter_coherence.py')
+argv = sys.argv[1:]
+opener = fixtures['BodyOpener'](Path(argv[argv.index('--ledger') + 1]), Path(argv[argv.index('--account-ledger') + 1]))
+runtime.urllib.request.build_opener = lambda *_: opener
+cli.tokenizer_counter = lambda *_: (fixtures['counter'], {'synthetic_subprocess': True})
+def forbidden(*args, **kwargs):
+    raise AssertionError('unexpected network or key read during cached replay')
+socket.create_connection = forbidden
+socket.socket.connect = forbidden
+if os.environ.get('OPTO_SYNTHETIC_FORBID_KEYS'):
+    runtime.QwenDirectClient._keys = forbidden
+if os.environ.get('OPTO_SYNTHETIC_OLD_CEILING'):
+    from config import qwen_config
+    qwen_config.set_economy_text_ceiling_enabled = lambda *_: os.environ.__setitem__('OPTOMIND_ECONOMY_TEXT_CEILING', '1')
+sys.argv = ['run_review_harness.py', *argv]
+runpy.run_path('run_review_harness.py', run_name='__main__')
+"""
+    env = {**os.environ, "OPTOMIND_ECONOMY_TEXT_CEILING": "1"}
+    command = [sys.executable, "-X", "utf8", "-c", bootstrap, *argv]
+    failed = subprocess.run(command, cwd=root, env={**env, "OPTO_SYNTHETIC_OLD_CEILING": "1"},
+        text=True, encoding="utf-8", capture_output=True, timeout=60)
+    assert failed.returncode == 2
+    out = tmp_path / "out" / "body"
+    failure = route._read(out / "DELIVERY_REPORT.json")
+    assert failure["model_calls"] == 0
+    assert "economy_text_ceiling_would_downgrade_explicit_model" in failure["units"][0]["error"]
+    original_attempt = Path(failure["units"][0]["failed_attempt_dir"])
+    original_files = {name: (original_attempt / name).read_bytes() for name in
+                      ("REQUEST.json", "UNIT_MESSAGES.json", "RUN_ERROR.json")}
+    for path in (project, account):
+        assert runtime.GlobalBudgetLedger(path=path).as_dict()["actual_cny"] == 0
+    # Explicit retry after the no-provider startup failure uses the same input,
+    # output and budgets, retaining the failed attempt's exact artifacts.
+    command += ["--retry-failed"]
+    first = subprocess.run(command, cwd=root, env=env, text=True, encoding="utf-8", capture_output=True, timeout=60)
+    assert first.returncode == 0, first.stderr + first.stdout[-2000:]
+    assert all((original_attempt / name).read_bytes() == content for name, content in original_files.items())
+    report = route._read(out / "DELIVERY_REPORT.json")
+    assert report["model_calls"] == 2 and report["requested_generation_complete"]
+    assert report["model"] == "qwen3.5-plus"
+    for row in report["units"]:
+        saved = route._read(Path(row["attempt_dir"]) / "UNIT_RESULT.json")
+        assert saved["effective_request"]["model"] == "qwen3.5-plus"
+        assert saved["effective_request"]["thinking_budget"] == 8192
+    snapshots = [runtime.GlobalBudgetLedger(path=path).as_dict() for path in (project, account)]
+    assert snapshots[0]["actual_cny"] == snapshots[1]["actual_cny"] > 0
+    assert len(snapshots[0]["reservations"]) == len(snapshots[1]["reservations"]) == 2
+    again = subprocess.run(command, cwd=root, env={**env, "OPTO_SYNTHETIC_FORBID_KEYS": "1"},
+        text=True, encoding="utf-8", capture_output=True, timeout=60)
+    assert again.returncode == 0, again.stderr + again.stdout[-2000:]
+    assert route._read(out / "DELIVERY_REPORT.json")["model_calls"] == 0
+    assert [runtime.GlobalBudgetLedger(path=path).as_dict() for path in (project, account)] == snapshots
+    rejected = subprocess.run(command + ["--model", "qwen3.8-max"], cwd=root, env=env,
+        text=True, encoding="utf-8", capture_output=True, timeout=60)
+    assert rejected.returncode == 2 and "invalid choice" in rejected.stderr
+    assert [runtime.GlobalBudgetLedger(path=path).as_dict() for path in (project, account)] == snapshots
