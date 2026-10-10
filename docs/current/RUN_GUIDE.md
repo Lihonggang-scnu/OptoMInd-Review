@@ -8,6 +8,50 @@
 
 正式版本是 **baseline**：Plus分单元写作 → 任务核查及必要的一次有界补写 → 装配 → 一次全文局部编辑 → 实际选用稿编号。`chapter_coherence` 是默认关闭的实验；指南作者、全文候选不进入默认流程。已认可的完整稿为7章29单元、187个规范化论文身份；它是此前生成、选择及免费恢复的结果，本次没有重新生成正文。
 
+### 完整规划默认细纲加强（2026-10-11）
+
+`scripts/upgrade3/progressive_review_plan.py --run` 完成原全量规划、负责人修订与案例附加后，默认复用正式细纲加强入口：第一层自主选择同章任务簇 → ACCESS 完整回读 → OWNER 局部加强 → 合回完整章节。选择 none 合法且直接完成，不需要人工科学意见或手填状态。原规划 API、科学提示词、加强模型/容量和 baseline BODY 算法保持原实现。
+
+启动准备是本轮真实 `PLAN.json`、已明确绑定采用卡片 `card_path` 的完整 `PLANNING_POOL.jsonl`、对应材料与 tokenizer，以及已授权的本地密钥路径、**同一共享账本和累计封顶**。索引/prior-reading及编辑意见可按现有参数供给；编辑意见是可选输入。模型/材料未准备完整时不能靠历史删节文件或空材料替代。
+
+```powershell
+# 默认免费预检；不进入规划/加强模型调用，也不读取密钥。
+python -X utf8 scripts/upgrade3/progressive_review_plan.py --plan PLAN.json --pool PLANNING_POOL.jsonl --output-dir outputs/my_planning --tokenizer TOKENIZER.json
+
+# 规划与默认后置加强共用本轮原账本/预算，不另加加强额度。
+python -X utf8 scripts/upgrade3/progressive_review_plan.py --plan PLAN.json --pool PLANNING_POOL.jsonl --output-dir outputs/my_planning --tokenizer TOKENIZER.json --run --key-file LOCAL_KEY_FILE.txt --budget-ledger PROJECT_BUDGET.sqlite --budget-limit-cny <absolute_CNY_cap>
+
+# 同一命令、输入、目录、账本和有效参数恢复；复用原规划及加强兼容缓存。
+python -X utf8 scripts/upgrade3/progressive_review_plan.py --plan PLAN.json --pool PLANNING_POOL.jsonl --output-dir outputs/my_planning --tokenizer TOKENIZER.json --run --key-file LOCAL_KEY_FILE.txt --budget-ledger PROJECT_BUDGET.sqlite --budget-limit-cny <absolute_CNY_cap> --resume
+
+# 原运行命令可加 --no-outline-strengthening 关闭后置阶段；再次启用时移除该参数。
+# --stop-after level1 或 --stop-after level2 仅执行到规划停点，不意外进入加强。
+# 已保存的无效结构回答需明确 --retry-unresolved 才重试一次。
+```
+
+加强默认目录为规划输出同级的 `outputs/my_planning.outline_strengthening`；可用 `--outline-strengthening-output` 指定原章包根之外的独立目录。同目录恢复时保留它。关闭加强也免费导出完整原计划的不可变 revision 至同级 `outputs/my_planning.unstrengthened`，指针不会指回自身；关闭后重新启用可恢复先前兼容的加强结果。
+
+`outputs/my_planning/PLANNING_RUN_REPORT.json` 保存 `planning_status`、`outline_strengthening.status`、实际采用 `packet_root` 和合计预算前后快照；`CURRENT_PLAN.json` 指向该完整 revision。selection 前就保存完整原快照；selector/ACCESS/OWNER失败或余额不足时保存未完成报告并停止本次执行，保留原有效计划、成功前缀、先前采用快照、实际费用及不确定占额，不自动循环付费重试。完整上游章包即使附科学 `partial` 仍可进入加强；上游状态继续保留。真正缺章或空任务在选择模型之前阻断。
+
+完整规划/加强成功返回0；加强未完成或上游仍 `partial/initial_draft` 返回2，报告分别说明原因。预检与合法阶段停点返回0；非法输入/缺失章包等执行错误返回1并保存 `RUN_FAILURE.json`。返回2不等于可用章包已丢失，也不能把加强 complete 改写为上游科学问题全部解决。
+
+后续接缝是规划指针 → 正式编排 → BODY manifest。编排仍单独启动；全章实际成功后 `ARRANGEMENT_RUN.json` 的 `body_ready=true`、`body_manifest` 与 `body_manifest_sha256` 固定实际版本。预览、缺章和失败不产生可宣称可用的manifest。
+
+```powershell
+python -X utf8 scripts/upgrade3/chapter_arrangement.py --packet-root outputs/my_planning/CURRENT_PLAN.json --output-root outputs/my_arrangement --all-chapters --planning-revision --run --key-file LOCAL_KEY_FILE.txt --budget-ledger PROJECT_BUDGET.sqlite
+
+# BODY_MANIFEST.json 替换为 ARRANGEMENT_RUN.json.body_manifest 的实际路径。
+python -X utf8 run_review_harness.py --delivery-start body --delivery-manifest BODY_MANIFEST.json --delivery-out outputs/my_delivery --tokenizer TOKENIZER.json --run --ledger PROJECT_BUDGET.sqlite --budget-limit <absolute_CNY_cap> --budget-scope <persistent_scope> --key-file LOCAL_KEY_FILE.txt --key-index 1
+```
+
+编排沿用既有单轮最多10元的封顶，同时受原共享账本累计余额约束；这不是新增额度。其 CLI 没有 tokenizer 参数，规划与 BODY 的 tokenizer 不会隐式传给编排。预算不足时按编排报告保存/停止，不临时放宽预算或另起账本。
+
+本轮未真实调用模型。免费验证使用正式 CLI 分发、原规划/stage缓存、selection/on-demand、完整合回、编排和BODY消费者，只替换模型/工具客户端；模拟费用写入测试临时 SQLite 账本，验证恢复不重复调用/占费、失败占额保留。合并回归216项通过，另2项原有Windows长路径测试排除；命令与覆盖范围见 [本轮接线证据](RUN_GUIDE_EVIDENCE.md#2026-10-11默认细纲加强与无人值守接线)。项目费用账本未改，本轮费用0。
+
+正常执行不需要人工填写质量通过或完成标记。启动器依次调用规划、编排、BODY三个正式入口：规划成功后读 `CURRENT_PLAN.json`；编排成功且 `body_ready=true` 后读 `body_manifest`；BODY交付后读 `DELIVERY_REPORT.json.selected_body`。编排采用内容决定的不可变快照，同输入再次运行保持BODY输入指纹一致；材料或任务变化则刷新相关输入。失败、预算不足和真正缺件保存状态并停止，恢复复用已成功步骤。全文编辑也接收正式 `--retry-failed`，保存RAW可免费重解析，有效成功结果不重复购买。
+
+这段接续覆盖准备好的规划输入到BODY交付。独立首尾及出版仍按下文显式启用；三个阶段CLI没有合并为“用户问题到PDF”的单命令入口。
+
 ### 准备与免费预览
 
 以下命令从仓库根执行；大写文件名/`<…>`替换为本轮实际路径和数值。`FULL_BODY_INPUT.json`与manifest二选一。manifest必须绑定完整已批准章包和对应有效编排，而非单组加强结果；格式见 [输入合同](../writing_candidates/LEGACY_UNIT_QUALITY.md)。
@@ -140,7 +184,7 @@ BODY的02阶段记录 `body_selected`，不会再全文编辑一次；03读取�
 
 每个消费者应绑定本轮明确选定的上游产物路径与 SHA。历史上第二次编排已经修好，writer却误读第一次编排；不要按目录更新时间、默认路径或“第一个文件”猜哪份该用。选择可以由运行器自动记录，不要求生产每一步都有人签字。
 
-当前正文顺序继续保持：全局协调及负责人修订 → 正式案例附加 → 编排 → 写作 → 装配。函数名 `_post_case_review` 不能作为调整执行顺序的依据。独立细纲加强属于显式可选路径，首尾模块不属于 BODY 实验。
+当前正文顺序继续保持：全局协调及负责人修订 → 正式案例附加 → 默认后置细纲加强并合回完整章包 → 编排 → 写作 → 装配。函数名 `_post_case_review` 不能作为调整执行顺序的依据。细纲加强可显式关闭，首尾模块不属于 BODY 实验。
 
 ## 思考与输出预算
 
@@ -284,9 +328,9 @@ BODY的02阶段记录 `body_selected`，不会再全文编辑一次；03读取�
 6. 恢复时不跳过任务变化后的重要阶段；费用和未决调用完整保留。
 7. 科学质量由实际产物亲读评价，不把离线接线测试当作成稿质量分数。
 
-## 可选按需加强的正式接入（2026-10-07）
+## 按需加强的正式接入（2026-10-07历史实现，2026-10-11默认接入）
 
-使用 `scripts/upgrade3/outline_strengthening_pipeline.py` 从完整规划的 writer_packets 清单启动。它串接已有第一层与按需引擎，合回完整章节后导出既有编排所需目录；不要把单组 `ARRANGEMENT_PACKET.json` 当整章。具体命令与验收见 [正式接入说明](../verification/on-demand-promotion-20261007/README.md)。
+当前完整规划 CLI 默认复用 `scripts/upgrade3/outline_strengthening_pipeline.py::run_pipeline`，也保留从完整规划 writer_packets 清单单独准备/运行的入口。它串接已有第一层与按需引擎，合回完整章节后导出既有编排所需目录；不要把单组 `ARRANGEMENT_PACKET.json` 当整章。本页开头给出当前命令与恢复；历史实现与验收见 [正式接入说明](../verification/on-demand-promotion-20261007/README.md)。
 
 - 下一消费者明确读取 `CURRENT_PLAN.json` 指向的 `packet_root`；保留未选单元，拆合使用新 ID → 原 ID 列表
 - 按需正式调用默认 SSE，单请求 1800 秒、流总时限 3600 秒，思考/回答额度沿用 profile；核对实际执行记录

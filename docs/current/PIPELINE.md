@@ -4,6 +4,8 @@
 
 接缝修复受测源码：`4e1e97c517440cdc11623fda56977f7528df396f`。完整BODY附终结诊断的状态、所选目录承接与首尾编号投影已免费验证；[收尾记录](RUN_GUIDE_EVIDENCE.md)保留确切测试范围、原稿哈希和费用。
 
+**2026-10-11 接线更新：完整规划 CLI 默认后置细纲加强。** 复用正式 selector → ACCESS → OWNER → 完整章包合回与恢复入口；`--no-outline-strengthening` 显式关闭，预检及两级阶段停点不运行。原规划顺序、科研提示词、Max 加强模型/容量和 baseline BODY 算法保持原实现。本轮仅免费模拟验证；上游科学 `partial` 和加强执行状态分别保存，不用接线结果替代科学质量验收。
+
 本文件是全链路统一阅读入口；可照用的命令、默认值、恢复及状态见 [RUN_GUIDE.md](RUN_GUIDE.md)。图中的箭头表示明确的产物交接，**不是一个缺省命令会自动运行所有模块**。当前专门的正式 BODY 入口从已批准细纲/编排及材料开始；其他 harness 路径保留原研究编排器，不能拿它们代替本表的新分阶段入口。
 
 ```text
@@ -11,7 +13,7 @@
   → 材料获取/解析 → A/B卡片及明确绑定的规划池
   → 逐级规划（各阶段可按需补读）
   → 全局协调/负责人修订 → 正式案例附加 → 完整章包
-  → [可选：同章任务簇按需加强并合回完整章包]
+  → 默认：同章任务簇按需加强并合回完整章包（可显式关闭）
   → 编排/单元写作包 → 正式 baseline BODY 作者
   → 任务核查/必要的一次补写 → 装配 → 一次全文局部编辑
   → selected_body（句柄稿＋编号读者稿＋引用目录）
@@ -30,9 +32,9 @@
 | A/B卡片主路 | snapshot＋原PLAN → 一次带题目语境的联合提炼 → `PAPER_READING_CARD.json`、输入/消息/RAW；批量 `BATCH_STATE.json`、`BATCH_CARDS_INDEX.jsonl`、`BATCH_PLANNING_VIEWS.jsonl` → 明确采用的规划池 | `paper_reading_card.py`；`paper_reading_batch.py --manifest … --output-root …`。A为论文一般理解、B为本题规划用途，但 `general_understanding_topic_independent=false`；A不是已验证的无条件跨题缓存 |
 | 独立M4档案（可选） | `READING_INPUT`绑定题目/PLAN、候选身份、M3导航卡与snapshot → 理解、anchors、coverage与verification → `PAPER_READING_DOSSIER`、`COVERAGE_REPORT`、`CALL_LEDGER`；单独handoff生成 `WRITING_HANDOFF` | `scripts/upgrade3/module4.py prepare-input/read/handoff`、`module4/reader.py`。read必须显式 `--dry-run` 或 `--real`；不是A/B规划池的自动前置步骤 |
 | 按需补充/精读 | 当前questions/required_outputs＋身份＋池/索引/snapshot → 本地先查、必要时外搜获取、任务化提炼 → `DIRECTED_READING.json`、回答/partial/remaining_points、`SOURCE_UNIT`、`SUPPLEMENT_INDEX`/`SUPPLEMENT_MATERIALS`及增量池 → 当前规划或负责人实际输入 | `planning_supplement.py`、`directed_reading.py`、`planning_material_search.py` 与同名CLI；规划runner在各材料窗口调用，不是计划结束后才统一补读 |
-| BODY逐级规划 | `--plan`＋有准确card_path的 `--pool`＋可选索引/prior-reading → 构思、一级纲要、路由/章提案/协调、二级备料/定案、章节工具/细化、全文协调/负责人修订、案例附加 → `RUN_STATE.json`、`DETAILED_REVIEW_PLAN.json`、`writer_packets/`及manifest → 编排 | `progressive_review_plan.py::run/_write_final_outputs`；`scripts/upgrade3/progressive_review_plan.py`。默认预检，`--run`真实执行，恢复显式 `--resume`。最终章包不能用早期level1/章节cache替代 |
-| 细纲加强（显式可选） | 完整规划及packet清单 → 第一层选同章任务簇 → ACCESS完整回读/OWNER局部加强 → 合回完整章节 → revisions章包、`HANDOFF_MANIFEST`、`CURRENT_PLAN.json` → 编排读取其 `packet_root` | `scripts/upgrade3/outline_strengthening_pipeline.py` 与 selection/on_demand/strengthening运行库；默认不重写正文。单组 `ARRANGEMENT_PACKET`不能冒充完整章包 |
-| 编排/单元写作包 | 最终完整章包、全文主线、原任务、材料/条件/案例 → 顺序、拆合、来源用途 → `ARRANGEMENT_INPUT.json`、`CHAPTER_ARRANGEMENT.json`、source_catalog/usage、`ARRANGEMENT_RUN` → BODY输入导出 | `chapter_arrangement.py::build_chapter_view/validate_arrangement`；同名CLI。独立CLI须显式 `--planning-revision`；不会从planner默认值自动继承 |
+| BODY逐级规划 | `--plan`＋有准确card_path的 `--pool`＋可选索引/prior-reading → 构思、一级纲要、路由/章提案/协调、二级备料/定案、章节工具/细化、全文协调/负责人修订、案例附加 → `RUN_STATE.json`、`DETAILED_REVIEW_PLAN.json`、完整 `writer_packets/` → 默认后置加强 | `progressive_review_plan.py::run/_write_final_outputs`；同名CLI默认预检，`--run`执行，恢复显式 `--resume`。`--stop-after level1/level2` 不进入加强。最终章包不能用早期level1/章节cache替代 |
+| 细纲加强（完整规划 CLI 默认） | 完整规划及packet清单 → 第一层选同章任务簇 → ACCESS完整回读/OWNER局部加强 → 合回完整章节 → revisions章包、`HANDOFF_MANIFEST`、规划根 `CURRENT_PLAN.json`、`PLANNING_RUN_REPORT.json.packet_root` → 编排 | 规划CLI `post_planning_handoff` 复用 `scripts/upgrade3/outline_strengthening_pipeline.py::run_pipeline`；独立入口仍可直接准备/运行。`--no-outline-strengthening` 免费导出完整原计划 revision。单组 `ARRANGEMENT_PACKET`不能冒充完整章包 |
+| 编排/单元写作包 | `--packet-root CURRENT_PLAN.json` 或最终完整章包目录、主线、原任务、材料/条件/案例 → 顺序、拆合、来源用途 → `ARRANGEMENT_INPUT.json`、`CHAPTER_ARRANGEMENT.json`、source_catalog/usage、`ARRANGEMENT_RUN.body_ready/body_manifest` → BODY manifest loader | `chapter_arrangement.py::build_chapter_view/validate_arrangement`；同名CLI全章成功后导出绑定实际文件/哈希的manifest，缺章或失败不宣布可用。须显式 `--planning-revision`；不会从planner默认值自动继承 |
 | 正式BODY输入 | 完整 `FULL_BODY_INPUT.json`，或 `optomind.fullbody_manifest.v1` 绑定最终plan/packet_root、各章有效arrangement/view → 同一manifest loader导出任务与完整材料 → baseline运行库 | `run_review_harness.py --delivery-start body --delivery-input …` 或 `--delivery-manifest …`；共用 `scripts/upgrade3/fullbody_writer.py::load_body_manifest`。`fullbody_writer.py --prepare-manifest`只离线固定输入，不启用历史全文作者 |
 | 正式作者/核查/补写 | 每单元完整任务、用途、章节框架和实际材料 → Plus作者；核查实际正文，必要时一次有界补写/后核查 → `UNIT_MESSAGES`、RAW、`UNIT_RESULT`、原始及采用正文、诊断 → 装配 | `legacy_unit_route.py`、`review_unit_writer.py`、`unit_realization.py`；`scripts/upgrade3/legacy_unit_writer.py`与正常入口共用。主作者不带实际前文；不经过指南转换 |
 | 装配/一次全文编辑/选择与编号 | 明确采用单元结果 → 装配句柄稿、references/summary；一次全文局部编辑 → 实际编辑稿或装配稿 → `DELIVERY_REPORT.json.selected_body` 的句柄稿/编号稿/引用目录 | 原 `full_review_draft.py` 汇编器、`article_text_editor.py`、`review_delivery.py::_body_delivery_artifacts`、`delivery_citations.py`。下游读选择，不按文件时间猜稿；BODY编辑已处理，delivery不再执行第二次02编辑 |
@@ -51,7 +53,7 @@
 | 独立M4 | Flash/Plus须显式选择，whole_text；thinking缺省关闭，开启额度8192、回答32768，module4 CLI/runtime | 历史档案/有界测试，未作为本轮A/B生产输入自动运行 |
 | 补充/精读 | directed默认Flash 8192/20000；helper Flash/Plus及容量在 `planning_helper_runtime_config`。外搜开关不关闭已知论文本地精读 | 既有任务复用/partial/材料交接测试、历史真实补读；本轮保留合同 |
 | 规划/负责人 | Plus；chapter_details/case_groups为Flash，`_planner_call_settings`。主规划16384/32768，读者8192/20000；CLI与runtime实际设置 | BODY40历史585池真实规划及其partial状态；条件/论证交接修复局部控制，不冒称全新上游端到端测试 |
-| 可选细纲加强 | `config/outline_revision/quality.json` 的 selection/strong/owner Max及ACCESS Plus；正式SSE与容量在按需运行库/入口 | 两单元真实加强＋正式入口离线回放/短链；不会自动买Max写正文 |
+| 默认细纲加强 | `config/outline_revision/quality.json` 的 selection/strong/owner Max及ACCESS Plus；正式SSE与容量在按需运行库/入口；共享规划原账本及封顶 | 两单元历史真实加强＋正式入口离线回放/短链；新增免费CLI默认/关闭/停止/none/失败/恢复验收，不新增真实模型测试 |
 | 编排 | 独立CLI默认Plus、16384/32768，max_source_chars=0；必须显式模式、材料和账本 | 历史完整编排及消息交接；正常BODY manifest导出免费验证 |
 | 正式BODY作者/补写 | 固定Plus 8192思考＋32768回答；正常入口 `BODY_DELIVERY_DEFAULTS` 是 baseline＋核查True＋全文编辑True | 已认可7章29单元；既有完整稿187身份的正式选择及免费恢复；固定五单元真实比较后选择baseline |
 | 核查/全文编辑 | 固定Plus 16384/24576，`unit_realization.py`、`legacy_unit_route.py` 的角色profile；不由旧quality.json的Flash writer字段替代 | 真实任务检查/一次补写/严格编辑与一次全文编辑；本轮不追修已接受局部科学问题 |
@@ -63,10 +65,12 @@
 
 - BODY 保持实际顺序：`progressive_review_plan.run` 先调用 `_post_case_review` 做全文协调/负责人修订（case_record为空），再生成case_groups并正式附加案例，最后导出章包；然后独立编排与写作。不能按函数名称加入案例后整章重写。
 - 正式规划默认开启 `planning_revision`；`--planning-revision` 仍兼容，`--no-planning-revision` 显式选择历史编排模式。两种模式的章节细化都保留完整 A/B，路由说明不能替代科研材料。运行前先读 [运行须知](RUN_GUIDE.md)。
+- 完整规划 CLI 的细纲加强默认开启，与 `planning_revision` 是两个独立开关。选择 none 可自主正常完成，无需人工科学意见或填写阶段状态。selection 前已保存完整有效快照；失败/预算不足保留原计划、成功前缀与先前采用版本，返回未完成状态。同目录 `--resume` 沿用原规划/选择/ACCESS/OWNER兼容缓存；无效结构回答仅显式 `--retry-unresolved` 重试一次。
+- `ProgressiveReviewPlanner.run` API 继续负责原规划，不隐式买 Max；正常 CLI 通过共享 `run_pipeline` 组合后置加强。程序调用方可以复用同一入口。规划命令不会隐式启动编排或 BODY，后续两个正式 CLI 按 `CURRENT_PLAN` → `ARRANGEMENT_RUN.body_manifest` → `--delivery-manifest` 接续。
 - 深度背景、理论、机制、方法比较和实质 Outlook 属于 BODY；独立首尾负责文章入口、范围宣告及收束。没有重新导入早期并行 PartsPlan 流水线。
 - 独立首尾仅显式 `post_body` 方式启用；CLI 采用 fixture/recordings，真实 provider 需本地另行注入与预算管理。普通交付的缺省路径不自动改成该模式。
 - 单元/装配 pending 保留原有状态和记录；正常 BODY 入口仍交付已有可读编号稿，不因已接受初稿的科学残余另行阻断。缺失正文、未完成生成或质量记录继续受原有门槛约束；首尾接回不能绕过这些门槛。
-- A/B/C 是早期后置正文局部修订实验，不修改细纲。其有限小修结论只针对当时实验；后来的独立细纲加强已按上表接入为显式选项，二者不能混同。
+- A/B/C 是早期后置正文局部修订实验，不修改细纲。其有限小修结论只针对当时实验；细纲加强当前按上表默认接在完整规划 CLI 后，二者不能混同。
 - 综述转述原始研究可以凭可用内容与明确引用身份正常参与，不强制自身 A/B 或全文。多个任务可以共用实质充分的一张表。
 - BODY 正常入口正式选择 `baseline`，默认 `quality_control=True`、`article_edit=True`；默认作者 Plus 8192 思考＋32768 输出，核查/全文局部编辑 Plus 16384 思考＋24576 输出。`chapter_coherence` 仅通过 `--body-version chapter_coherence` 显式选择作实验；原任务和材料保留。`--no-quality-control`、`--no-article-edit` 可显式关闭对应步骤。旧独立 CLI 仍默认 baseline 且两步骤关闭。真实请求、恢复、项目/账户账本共用；正式默认集中于 `review_delivery.BODY_DELIVERY_DEFAULTS`。
 - `DELIVERY_REPORT.json.selected_body` 指向实际选中正文；成功全文编辑后使用其编辑稿和已有编号结果。BODY 只交付当前正文、可读编号稿和引用目录；首尾/出版由 `--delivery-config` 显式请求，消费者不会再运行第二次 02 编辑。

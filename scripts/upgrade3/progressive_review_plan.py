@@ -12,6 +12,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from optomind_research.runtime.upgrade3 import progressive_review_plan as planning
+from scripts.upgrade3 import outline_strengthening_pipeline as strengthening_pipeline
 
 
 def parser():
@@ -45,6 +46,12 @@ def parser():
                    help="Triage locally and only emit external requests; never contact a provider")
     p.add_argument("--stop-after", choices=["level1", "level2"], default="")
     p.add_argument("--resume", action="store_true")
+    p.add_argument("--outline-strengthening", action=argparse.BooleanOptionalAction, default=True,
+                   help="完整规划默认后置任务簇加强；--no-outline-strengthening 显式关闭，阶段停点与预检不会运行")
+    p.add_argument("--outline-strengthening-output", type=Path,
+                   help="加强恢复目录；默认是规划输出同级的 <output-dir>.outline_strengthening")
+    p.add_argument("--retry-unresolved", action="store_true",
+                   help="明确重试加强阶段保存的无效回答一次；保留已成功阶段、原尝试与预算记录")
     p.add_argument("--editorial-feedback", type=Path,
                    help="可选的内容编辑意见 JSON，交给已有审阅与章节返修环节")
     p.add_argument(
@@ -108,6 +115,49 @@ def preflight(cfg, args):
             "notes": ["本地分词估算，真实用量以服务返回为准。", "首次调用成本不是完整流程费用。", "各级与章内按具体问题补充，先查本地、再小批外部检索；所有章节共享精读额度。"]}
 
 
+def post_planning_handoff(cfg, args, plan_result):
+    """Reuse the formal strengthening entry and publish a complete-plan pointer.
+
+    ProgressiveReviewPlanner.run remains the planning API. This CLI composes its
+    complete packets with run_pipeline; both keep their original stage caches.
+    """
+    enabled = bool(args.outline_strengthening)
+    if args.stop_after:
+        return {"outline_strengthening_enabled": enabled,
+                "outline_strengthening": {"status": "not_run_stage_stop"}}
+    if enabled:
+        output = (args.outline_strengthening_output.resolve() if args.outline_strengthening_output else
+                  cfg.output_dir.with_name(cfg.output_dir.name + ".outline_strengthening"))
+        report = strengthening_pipeline.run_pipeline(argparse.Namespace(
+            packet_root=str(cfg.output_dir), output=str(output), run=True,
+            profile=strengthening_pipeline.cli.DEFAULT_PROFILE,
+            access_profile=strengthening_pipeline.cli.DEFAULT_ACCESS_PROFILE,
+            selection_profile=strengthening_pipeline.cli.DEFAULT_SELECTION_PROFILE,
+            include_selection_material_index=False,
+            on_demand_stream=True, on_demand_request_timeout=1800.0,
+            on_demand_stream_overall_timeout=3600.0,
+            tokenizer=str(cfg.tokenizer_path), budget_ledger=str(args.budget_ledger.resolve()),
+            budget_limit=args.budget_limit_cny, key_file=str(args.key_file.resolve()),
+            retry_unresolved=bool(args.retry_unresolved),
+        ))
+        pointer = strengthening_pipeline._load(Path(report["current_plan"]))
+    else:
+        # A partial scientific revision can still supply every valid chapter;
+        # genuinely missing chapters/tasks must not become a usable handoff.
+        base_plan, packets = strengthening_pipeline.load_complete_packets(cfg.output_dir)
+        output = cfg.output_dir.with_name(cfg.output_dir.name + ".unstrengthened")
+        target = strengthening_pipeline.export_complete_plan(base_plan, packets, output,
+            provenance={"status": "original_valid_plan", "groups": [], "outline_strengthening_enabled": False})
+        report = {"status": "disabled", "packet_root": str(target.resolve()),
+                  "arrangement_not_run": True}
+        pointer = strengthening_pipeline._load(output / "CURRENT_PLAN.json")
+    pointer.update(planning_status=plan_result.get("status"), outline_strengthening_status=report["status"])
+    pointer_path = cfg.output_dir / "CURRENT_PLAN.json"
+    strengthening_pipeline._dump(pointer_path, pointer)
+    return {"outline_strengthening_enabled": enabled, "outline_strengthening": report,
+            "packet_root": pointer["packet_root"], "current_plan": str(pointer_path)}
+
+
 def main(argv=None):
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
@@ -131,6 +181,8 @@ def main(argv=None):
     try:
         if not args.run:
             result = preflight(cfg, args)
+            result.update(outline_strengthening_enabled=bool(args.outline_strengthening),
+                          outline_strengthening={"status": "not_run_preflight"})
             out = cfg.output_dir.parent / (cfg.output_dir.name + ".PREFLIGHT.json")
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -175,17 +227,24 @@ def main(argv=None):
                                   if args.editorial_feedback else None)
             result = flow.run(resume=args.resume, stop_after=args.stop_after,
                               editorial_feedback=editorial_feedback)
+            handoff = post_planning_handoff(cfg, args, result)
             after = budget_snapshot(args.budget_ledger)
             usage = {"budget_before": before, "budget_after": after, "increment_cny": after["actual_cny"] - before["actual_cny"] if before and after else None}
             usage_path = cfg.output_dir / ("CALL_COST" + ("_" + args.stop_after if args.stop_after else "") + ".json")
             usage_path.write_text(json.dumps(usage, ensure_ascii=False, indent=2), encoding="utf-8")
-            result = {"status": result.get("status"), "completed_through": result.get("completed_through", "chapter_details" if result.get("status") == "initial_draft" else "complete"),
+            planning_status = result.get("status")
+            strengthening_incomplete = (args.outline_strengthening and not args.stop_after and
+                                        handoff["outline_strengthening"]["status"] != "complete")
+            result = {"status": "outline_strengthening_partial" if strengthening_incomplete else planning_status,
+                      "planning_status": planning_status,
+                      "completed_through": result.get("completed_through", "chapter_details" if planning_status == "initial_draft" else "complete"),
                       "planning_revision_enabled": cfg.planning_revision_enabled, "chapter_material_view": "full_A_B",
                       "output_dir": str(cfg.output_dir), "chapter_count": len(result.get("chapters") or []),
                       "candidate_screening": {k: v for k, v in (result.get("candidate_screening") or {}).items() if k != "candidate_rows"},
-                      "deep_read_budget": result.get("deep_read_budget"), **usage}
+                      "deep_read_budget": result.get("deep_read_budget"), **handoff, **usage}
+            strengthening_pipeline._dump(cfg.output_dir / "PLANNING_RUN_REPORT.json", result)
         print(json.dumps(result, ensure_ascii=False, indent=2))
-        return 0
+        return 2 if args.run and not args.stop_after and result.get("status") != "complete" else 0
     except Exception as exc:
         error = {"status": "failed", "error_type": type(exc).__name__, "error": str(exc)}
         if cfg.output_dir.is_dir():

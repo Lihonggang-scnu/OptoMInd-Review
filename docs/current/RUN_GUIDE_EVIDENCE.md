@@ -1,5 +1,28 @@
 # 运行须知的历史记录对照
 
+## 2026-10-11默认细纲加强与无人值守接线
+
+本轮以 `ce996ffa9bfd2a83ba747e69c3d3764b75c7f62c` 为父版本。用户要求默认开启已有细纲加强，检查无人值守时的程序衔接，不开展真实模型测试。历史认可稿、人工质量停点记录及原项目账本保持不变。
+
+| 接线 | 修改及验证 |
+|---|---|
+| 完整规划→加强 | 正式规划CLI默认复用已有同章自主selector→Plus ACCESS→Max OWNER→完整合回；none合法，预检/level1/level2停点不加强，可显式关闭。共用原账本，selection前保存完整有效原计划；保留原规划API、算法、科学提示词及加强容量 |
+| 完整计划指针 | 启用与关闭均导出完整不可变revision；`CURRENT_PLAN.json`不会指向自身。缺章、空任务先阻断，partial状态与加强状态分列。失败保留先前有效版本和成功前缀 |
+| 指针→编排→BODY | 编排复用BODY既有指针解析与manifest合同；全章实际成功自动写`body_ready/body_manifest/sha256`。部分失败不再退出0或留下当前ready状态；此前成功章节与manifest保留 |
+| 同输入恢复 | 编排缓存目录稳定，接受快照按内容标识，不以随机attempt路径改变BODY指纹。两次同输入的manifest和正文输入一致；真实任务/条件/材料变化仍更新依赖 |
+| 正式全文编辑重试 | BODY的`retry_failed`传到现有编辑缓存层；默认不循环购买失败请求，显式重试一次，有效缓存复用、RAW免费重解析。作者提示词和baseline质量步骤不变 |
+| 下游选择 | 两种正式BODY输入路径、质量开关、complete附诊断、真正未完成、selected_body、首尾/编号/出版消费者继续覆盖。没有新生成正文、首尾或PDF |
+
+合并命令（Windows、模拟客户端、临时测试账本）：
+
+```powershell
+python -X utf8 -m pytest -q tests/upgrade3/test_progressive_review_plan_outline_strengthening.py tests/upgrade3/test_outline_promotion_pipeline.py tests/upgrade3/test_progressive_review_plan_stage_cache_contract.py tests/upgrade3/test_arrangement_body_handoff.py tests/upgrade3/test_body_preflight_f1_arrangement_cache_consumer.py tests/upgrade3/test_arrangement_writer_quality_budgets.py tests/upgrade3/test_fullbody_cli.py tests/upgrade3/test_article_edit_retry_handoff.py tests/test_article_edit_live.py tests/test_legacy_unit_route.py tests/test_body_delivery_closeout.py -k "not optional_foreign_long_locator_roundtrips_without_losing_inline_material and not required_unreadable_file_is_clear_error_not_optional_material"
+```
+
+结果：**216 passed、2 deselected**。两项排除已在父版本原`_Files`实现上复现相同Windows长路径错误。第一次组合运行因测试`--basetemp`父目录未建立产生setup错误，建立测试目录后执行上述命令全部通过；不是产品失败或新增调用。本地XML在 `outputs/verification/default_outline_unattended_20261011/integrated.xml`。本轮未读密钥、未联网调用模型、未改变真实预算账本；费用**0元**。
+
+正常程序路径没有强制人工质量审批。初始PLAN、材料池与身份绑定、模型/密钥、tokenizer和获授权预算由调用者准备；规划、编排、BODY按报告接续。失败状态保存/停止和显式恢复是基础运行行为，不能以手填完成状态跳过真实缺件。独立首尾及出版仍显式配置，不把本轮接线检查写成新整篇论文质量结果。操作入口沿用 [RUN_GUIDE](RUN_GUIDE.md)。
+
 ## 2026-10-10决定／10-11收尾：当前全链路对齐与免费验收
 
 原全链路记录为本目录 `PIPELINE.md`、`RUN_GUIDE.md`、`AI_READING_GUIDE.md`，以及本地 `临时文件夹/OPTOMIND_LIHONGGANG_INPUT_OUTPUT_MAP_20261007 (2).md`。该独立地图在 `git ls-files` 与全refs路径历史中未找到提交记录，保留在本地；这次在原current体系更新，不另建平行“最新版”。`BRANCH_CONSOLIDATION.md`保留10月5日历史并加替代说明。

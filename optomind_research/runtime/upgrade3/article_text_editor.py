@@ -175,6 +175,7 @@ def run_text_edit_stage(
     client_factory=None, run: bool = False, token_counter=None,
     profile: Mapping[str, Any] | None = None,
     identity_catalogs: Sequence[Mapping[str, Any]] | None = None,
+    retry_failed: bool = False,
 ) -> dict[str, Any]:
     """One coordination pass over the real draft, then deterministic apply.
 
@@ -195,7 +196,7 @@ def run_text_edit_stage(
         return _run_live_edit(draft_path=draft_path, draft_text=draft_text,
             chapter_roles=chapter_roles, out_dir=out_dir, client_factory=client_factory,
             run=run, token_counter=token_counter, profile=profile,
-            identity_catalogs=identity_catalogs)
+            identity_catalogs=identity_catalogs, retry_failed=retry_failed)
     passes = build_edit_passes(draft_text=draft_text, chapter_roles=chapter_roles)
     messages_dir = out_dir / "messages"
     messages_dir.mkdir(parents=True, exist_ok=True)
@@ -260,7 +261,8 @@ def run_text_edit_stage(
 
 
 def _run_live_edit(*, draft_path, draft_text, chapter_roles, out_dir,
-                   client_factory, run, token_counter, profile, identity_catalogs):
+                   client_factory, run, token_counter, profile, identity_catalogs,
+                   retry_failed=False):
     # Imports stay local: unit_realization imports this module's parser/applier.
     from .legacy_unit_route import _hash, _read, _write, _profile
     from .unit_realization import _cached_call
@@ -300,7 +302,8 @@ def _run_live_edit(*, draft_path, draft_text, chapter_roles, out_dir,
         step = out_dir / "full"
         if (step / "RAW_RESPONSE.json").exists() and not (step / "REQUEST.json").exists():
             raise TextEditError("edit_raw_without_request_identity")
-        raw, calls, state = _cached_call(step, messages, effective, client_factory, run, token_counter)
+        raw, calls, state = _cached_call(step, messages, effective, client_factory, run,
+                                         token_counter, retry_failed=retry_failed)
         report = {"stage": "text_edit", "status": "pending", "proposals_source": "live_saved_response",
             "source_draft": str(draft_path), "original_snapshot": str(original_path),
             "output_dir": str(out_dir), "profile": effective, "model_calls": calls,

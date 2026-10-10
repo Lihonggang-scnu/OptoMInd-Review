@@ -141,6 +141,23 @@ def _resolve_root(path: Path, files: _Files) -> Path:
         path = _path(target, pointer.parent, "current_plan_packet_root")
 
 
+def resolve_packet_root(path: str | Path) -> tuple[Path, list[dict[str, Any]]]:
+    """Resolve the BODY packet pointer contract and retain its file versions."""
+    files = _Files()
+    root = _resolve_root(Path(path).expanduser().resolve(), files)
+    files.verify()
+    return root, [{key: value for key, value in row.items() if key != "roles"}
+                  for row in files.rows.values()]
+
+
+def approved_body_chapter_ids(plan: Mapping[str, Any]) -> list[str]:
+    """Return the same explicit chapter scope/order accepted by the BODY loader."""
+    ids = _plan_ids(plan)
+    if ids is None:
+        raise ValueError("approved_plan_chapters_required")
+    return ids
+
+
 def _locator_files(arrangement: Mapping[str, Any], files: _Files) -> None:
     # These are the exact local locator fields consumed by build_unit_view.
     # Relative embedded locators use the legacy builder's CWD semantics;

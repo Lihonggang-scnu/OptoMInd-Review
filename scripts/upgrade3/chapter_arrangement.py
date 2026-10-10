@@ -15,8 +15,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import shutil
 import sys
 import time
+import uuid
 from pathlib import Path
 from typing import Mapping
 
@@ -45,6 +47,7 @@ from optomind_research.runtime.upgrade3.chapter_arrangement import (
     validate_arrangement,
     write_view,
 )
+from scripts.upgrade3 import fullbody_writer as body_manifest
 
 DEFAULT_PACKET_ROOT = PROJECT_ROOT / "outputs/progressive_review_plan/20260926_astra_repair/run585"
 DEFAULT_OUTPUT_ROOT = PROJECT_ROOT / "outputs/chapter_arrangement/20260926_deepseek"
@@ -93,18 +96,24 @@ def _parser() -> argparse.ArgumentParser:
 
 def _chapter_ids(args: argparse.Namespace, plan: dict) -> list[str]:
     if args.all_chapters:
-        return [str(row.get("chapter_id")) for row in plan.get("shared_outline") or [] if row.get("chapter_id")]
+        return body_manifest.approved_body_chapter_ids(plan)
     requested = [item for item in [args.chapter, *args.chapters.split(",")] if str(item or "").strip()]
     if not requested:
         raise ChapterArrangementError("chapter_required")
-    return [item.strip() for item in requested]
+    ids = [item.strip() for item in requested]
+    if len(set(ids)) != len(ids):
+        raise ChapterArrangementError("requested_chapters_duplicates")
+    return ids
 
 
 def _load_plan(packet_root: Path) -> dict:
     plan_path = packet_root / "DETAILED_REVIEW_PLAN.json"
     if not plan_path.is_file():
         raise ChapterArrangementError("plan_missing:" + str(plan_path))
-    return json.loads(plan_path.read_text(encoding="utf-8"))
+    plan = json.loads(plan_path.read_text(encoding="utf-8"))
+    if not isinstance(plan, dict):
+        raise ChapterArrangementError("plan_must_be_object")
+    return plan
 
 
 def _signature(payload: dict, config: dict) -> str:
@@ -261,20 +270,102 @@ def _status_for(arrangement: dict, *, prefix: str = "") -> str:
     return prefix + "contract_failed" if prefix else "contract_failed"
 
 
+def _write_report(output_root: Path, report: dict) -> None:
+    pending = output_root / "ARRANGEMENT_RUN.json.tmp"
+    pending.write_text(json.dumps(report, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    pending.replace(output_root / "ARRANGEMENT_RUN.json")
+
+
+def _product_identity(chapter_dir: Path) -> str:
+    products = {name: body_manifest.read_json(chapter_dir / name) for name in
+                ("ARRANGEMENT_INPUT.json", "INPUT_SOURCE_USAGE.json", "CHAPTER_ARRANGEMENT.json", "SOURCE_USAGE.json")}
+    # Restore/re-export bookkeeping describes this invocation, not new BODY
+    # content. Everything consumed by BODY, including the original call
+    # receipt, validation, task relations and actual materials, remains pinned.
+    products["CHAPTER_ARRANGEMENT.json"].pop("provenance", None)
+    return hashlib.sha256(json.dumps(products, ensure_ascii=False, sort_keys=True, default=str).encode()).hexdigest()
+
+
+def _export_attempt(chapter_dir: Path, canonical_dir: Path, view, arrangement: dict) -> Path:
+    """Keep failed retries from replacing an earlier accepted chapter."""
+    _export(chapter_dir, view, arrangement)
+    if arrangement["validation"].get("ok") is True or not (canonical_dir / "CHAPTER_ARRANGEMENT.json").exists():
+        for name in ("ARRANGEMENT_INPUT.json", "INPUT_SOURCE_USAGE.json", "CHAPTER_ARRANGEMENT.json",
+                     "CHAPTER_ARRANGEMENT.md", "SOURCE_USAGE.json"):
+            shutil.copyfile(chapter_dir / name, canonical_dir / name)
+    if arrangement["validation"].get("ok") is not True:
+        return chapter_dir
+    identity = _product_identity(chapter_dir)
+    accepted = canonical_dir.parent / "_accepted" / canonical_dir.name / identity
+    if accepted.exists():
+        if _product_identity(accepted) != identity:
+            raise ChapterArrangementError("accepted_arrangement_snapshot_changed:" + str(accepted))
+    else:
+        accepted.mkdir(parents=True)
+        for path in chapter_dir.iterdir():
+            shutil.copyfile(path, accepted / path.name)
+    return accepted
+
+
+def _prepare_body_manifest(report: dict, attempt_root: Path, input_files: list[dict]) -> None:
+    expected = report["expected_chapter_ids"]
+    accepted = [row for row in report["chapters"] if (row.get("validation") or {}).get("ok") is True]
+    report["successful_chapter_ids"] = [row["chapter_id"] for row in accepted]
+    report["pending_chapter_ids"] = [item for item in expected if item not in report["successful_chapter_ids"]]
+    report["complete"] = len(accepted) == len(report["requested_chapter_ids"])
+    if report["mode"] == "preview" or report["successful_chapter_ids"] != expected:
+        return
+    # This is the existing manifest format. The existing loader supplies all
+    # file hashes, scope/order, identity, material and source dependency checks.
+    candidate = attempt_root / "BODY_MANIFEST_INPUT.json"
+    body_manifest.write_json(candidate, {
+        "schema_version": body_manifest.MANIFEST_SCHEMA,
+        "plan_path": report["plan_path"], "plan_sha256": report["plan_sha256"],
+        "packet_root": report["packet_root"], "expected_chapter_ids": expected,
+        "source_files": input_files,
+        "chapters": [{"chapter_id": row["chapter_id"], "arrangement_path": row["arrangement"],
+                      "view_path": row["view"]} for row in accepted],
+    })
+    _, prepared = body_manifest.load_body_manifest(candidate)
+    digest = hashlib.sha256(json.dumps(prepared, ensure_ascii=False, sort_keys=True, default=str).encode()).hexdigest()
+    selected = attempt_root.parent.parent / "_accepted" / "manifests" / digest / "BODY_MANIFEST.json"
+    if selected.exists():
+        if body_manifest.read_json(selected) != prepared:
+            raise ChapterArrangementError("accepted_body_manifest_changed:" + str(selected))
+    else:
+        body_manifest.write_json(selected, prepared)
+    body_manifest.load_body_manifest(selected)
+    report.update(body_ready=True, body_manifest=str(selected),
+                  body_manifest_sha256=body_manifest.sha256_file(selected))
+
+
 def main(argv: list[str] | None = None) -> int:
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8")
     args = _parser().parse_args(argv)
-    packet_root = Path(args.packet_root).resolve()
     output_root = Path(args.output_root).resolve()
     output_root.mkdir(parents=True, exist_ok=True)
+    attempt_root = output_root / "_attempts" / uuid.uuid4().hex
+    report = {
+        "mode": "reexport" if args.reexport_from else ("run" if args.run else "preview"),
+        "model": args.model, "round_cap_cny": args.round_cap_cny, "model_calls": 0,
+        "status": "in_progress", "body_ready": False, "body_manifest": None,
+        "body_manifest_sha256": None, "chapters": [], "complete": False,
+    }
+    # A scheduler must consume the current run's readiness/path, including
+    # during an unsuccessful retry; immutable prior manifests remain usable.
+    _write_report(output_root, report)
     try:
         if args.round_cap_cny > 10.0:
             raise ChapterArrangementError(
                 "round_cap_above_authorised_ceiling:%.2f>10.00" % args.round_cap_cny)
         if args.run and args.reexport_from:
             raise ChapterArrangementError("choose_either_run_or_reexport_from")
+        packet_root, input_files = body_manifest.resolve_packet_root(args.packet_root)
+        plan_path = packet_root / "DETAILED_REVIEW_PLAN.json"
+        plan_sha256 = body_manifest.sha256_file(plan_path)
+        input_files.append({"path": str(plan_path), "sha256": plan_sha256, "exists": True})
         plan = _load_plan(packet_root)
         shared_outline = plan.get("shared_outline") or []
         # The final coordinator's argument and the review's coverage are
@@ -284,6 +375,12 @@ def main(argv: list[str] | None = None) -> int:
         prompt = load_editor_prompt(planning_revision=args.planning_revision)
         reexport_mode = bool(args.reexport_from)
         chapter_ids = _chapter_ids(args, plan)
+        expected_ids = body_manifest.approved_body_chapter_ids(plan)
+        if any(item not in expected_ids for item in chapter_ids):
+            raise ChapterArrangementError("requested_chapter_not_in_plan")
+        report.update(packet_root=str(packet_root), packet_root_selector=str(Path(args.packet_root).resolve()),
+                      plan_path=str(plan_path), plan_sha256=plan_sha256,
+                      requested_chapter_ids=chapter_ids, expected_chapter_ids=expected_ids)
         if reexport_mode and len(args.reexport_from) != len(chapter_ids):
             raise ChapterArrangementError(
                 "reexport_needs_one_source_per_chapter:%d!=%d" % (len(args.reexport_from), len(chapter_ids)))
@@ -292,16 +389,10 @@ def main(argv: list[str] | None = None) -> int:
         ledger = None
         if args.run:
             ledger = RoundCappedLedger(args.budget_ledger, round_cap_cny=args.round_cap_cny)
-        report = {
-            "mode": "reexport" if reexport_mode else ("run" if args.run else "preview"),
-            "model": args.model,
-            "round_cap_cny": args.round_cap_cny,
-            "round_before": ledger.round_state() if ledger else None,
-            "model_calls": 0,
-            "chapters": [],
-        }
+        report["round_before"] = ledger.round_state() if ledger else None
         for index, chapter_id in enumerate(chapter_ids):
             packet_path = packet_root / "writer_packets" / (chapter_id + ".json")
+            input_files.append({"path": str(packet_path), "sha256": body_manifest.sha256_file(packet_path), "exists": True})
             view = build_chapter_view(
                 packet_path,
                 shared_outline=shared_outline,
@@ -315,7 +406,9 @@ def main(argv: list[str] | None = None) -> int:
             payload = view.arrangement_payload(max_source_chars=args.max_source_chars)
             if args.planning_revision:
                 payload["planning_revision_mode"] = True
-            chapter_dir = output_root / chapter_id
+            canonical_dir = output_root / chapter_id
+            canonical_dir.mkdir(parents=True, exist_ok=True)
+            chapter_dir = attempt_root / chapter_id
             chapter_dir.mkdir(parents=True, exist_ok=True)
             write_view(view, chapter_dir / "ARRANGEMENT_INPUT.json")
             usage = source_usage_summary(view)
@@ -331,7 +424,7 @@ def main(argv: list[str] | None = None) -> int:
                 "planning_revision": bool(args.planning_revision),
             }
             signature = _signature(payload, config)
-            cache_dir = chapter_dir / "_cache"
+            cache_dir = canonical_dir / "_cache"
             estimate = estimate_arrangement_cost(
                 arrangement_messages(payload, prompt=prompt, planning_revision=args.planning_revision),
                 model=args.model,
@@ -360,7 +453,8 @@ def main(argv: list[str] | None = None) -> int:
                 entry["revalidated_from"] = str(source)
                 entry["legacy_cache"] = bool(meta.get("legacy_cache"))
                 entry["validation"] = arrangement["validation"]
-                _export(chapter_dir, view, arrangement)
+                chapter_dir = _export_attempt(chapter_dir, canonical_dir, view, arrangement)
+                entry["view"] = str(chapter_dir / "ARRANGEMENT_INPUT.json")
                 entry["arrangement"] = str(chapter_dir / "CHAPTER_ARRANGEMENT.json")
                 entry["markdown"] = str(chapter_dir / "CHAPTER_ARRANGEMENT.md")
                 entry["source_usage"] = str(chapter_dir / "SOURCE_USAGE.json")
@@ -369,6 +463,9 @@ def main(argv: list[str] | None = None) -> int:
 
             if not args.run:
                 entry["status"] = "preview_only"
+                if not (canonical_dir / "CHAPTER_ARRANGEMENT.json").exists():
+                    for name in ("ARRANGEMENT_INPUT.json", "INPUT_SOURCE_USAGE.json"):
+                        shutil.copyfile(chapter_dir / name, canonical_dir / name)
                 report["chapters"].append(entry)
                 continue
 
@@ -394,10 +491,11 @@ def main(argv: list[str] | None = None) -> int:
                 entry["restored_from_cache"] = True
                 entry["legacy_cache"] = bool(meta.get("legacy_cache"))
                 entry["validation"] = arrangement["validation"]
+                chapter_dir = _export_attempt(chapter_dir, canonical_dir, view, arrangement)
+                entry["view"] = str(chapter_dir / "ARRANGEMENT_INPUT.json")
                 entry["arrangement"] = str(chapter_dir / "CHAPTER_ARRANGEMENT.json")
                 entry["markdown"] = str(chapter_dir / "CHAPTER_ARRANGEMENT.md")
                 entry["source_usage"] = str(chapter_dir / "SOURCE_USAGE.json")
-                _export(chapter_dir, view, arrangement)
                 report["chapters"].append(entry)
                 continue
 
@@ -414,7 +512,7 @@ def main(argv: list[str] | None = None) -> int:
                 thinking_budget=args.thinking_budget,
                 json_mode=False,
                 budget_ledger=ledger,
-                raw_response_dir=chapter_dir / "raw_responses",
+                raw_response_dir=canonical_dir / "raw_responses",
             )
             try:
                 arrangement = run_arrangement(
@@ -424,7 +522,7 @@ def main(argv: list[str] | None = None) -> int:
                     prompt=prompt,
                     view_payload=payload,
                     call_id=f"{ROUND_CALL_PREFIX}{chapter_id}",
-                    raw_response_dir=chapter_dir / "raw_responses",
+                    raw_response_dir=canonical_dir / "raw_responses",
                     planning_revision=args.planning_revision,
                     output_tokens=args.output_tokens,
                     thinking_budget=args.thinking_budget,
@@ -446,7 +544,7 @@ def main(argv: list[str] | None = None) -> int:
             entry["validation"] = arrangement["validation"]
             if arrangement["validation"]["ok"]:
                 # Only a finished arrangement is cached as a success.
-                raw_files = sorted((chapter_dir / "raw_responses").glob("*.raw"))
+                raw_files = sorted((canonical_dir / "raw_responses").glob("*.raw"))
                 _save_payload_cache(
                     cache_dir, signature, saved_payload_from(arrangement),
                     model=args.model,
@@ -454,7 +552,8 @@ def main(argv: list[str] | None = None) -> int:
                     call=arrangement.get("call"),
                 )
             entry["round_state"] = ledger.round_state()
-            _export(chapter_dir, view, arrangement)
+            chapter_dir = _export_attempt(chapter_dir, canonical_dir, view, arrangement)
+            entry["view"] = str(chapter_dir / "ARRANGEMENT_INPUT.json")
             entry["arrangement"] = str(chapter_dir / "CHAPTER_ARRANGEMENT.json")
             entry["markdown"] = str(chapter_dir / "CHAPTER_ARRANGEMENT.md")
             entry["source_usage"] = str(chapter_dir / "SOURCE_USAGE.json")
@@ -462,11 +561,20 @@ def main(argv: list[str] | None = None) -> int:
 
         if ledger:
             report["round_after"] = ledger.round_state()
-        (output_root / "ARRANGEMENT_RUN.json").write_text(
-            json.dumps(report, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+        _prepare_body_manifest(report, attempt_root, input_files)
+        failed = report["mode"] != "preview" and not report["complete"]
+        report["status"] = "failed" if failed else "preview_only" if report["mode"] == "preview" else \
+            "body_ready" if report["body_ready"] else "partial_arranged"
+        _write_report(output_root, report)
         print(json.dumps(report, ensure_ascii=False, indent=2, default=str))
-        return 0
-    except ChapterArrangementError as exc:
+        return 2 if failed else 0
+    except (ChapterArrangementError, ValueError, OSError, RuntimeError) as exc:
+        report.update(status="failed", complete=False, body_ready=False, body_manifest=None,
+                      body_manifest_sha256=None, error=type(exc).__name__ + ":" + str(exc))
+        successful = [row["chapter_id"] for row in report["chapters"] if (row.get("validation") or {}).get("ok") is True]
+        report["successful_chapter_ids"] = successful
+        report["pending_chapter_ids"] = [item for item in report.get("expected_chapter_ids", []) if item not in successful]
+        _write_report(output_root, report)
         print(json.dumps({"error": type(exc).__name__, "message": str(exc)}, ensure_ascii=False), file=sys.stderr)
         return 2
 

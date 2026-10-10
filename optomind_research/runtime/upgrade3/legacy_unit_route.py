@@ -653,7 +653,7 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
                 article = run_text_edit_stage(draft_path=article_draft,
                     chapter_roles=roles, out_dir=output / "article_edit" / article_key, client_factory=client_factory,
                     run=run, token_counter=token_counter, profile=article_profile,
-                    identity_catalogs=catalogs)
+                    identity_catalogs=catalogs, retry_failed=retry_failed)
             except TextEditError as exc:
                 article = {"status": "pending", "model_calls": 0,
                            "pending_problems": [{"code": "article_edit_failed", "error": str(exc)}]}

@@ -172,7 +172,9 @@ def test_recorded_owner_return_through_formal_pipeline_and_arranger_writer(tmp_p
     response = pipeline._load(archive / 'integration_handoff/OWNER_RESPONSE.json')['model_output']['parsed_output']
     untouched = {'unit_id': 'Ch2_CONTROL', 'substantive_point': 'Synthetic retention control',
                  'paragraph_briefs': [{'paragraph_id': 'CONTROL_P1', 'point': 'Keep fixture control',
-                                       'development': 'Structural fixture only', 'source_handles': []}]}
+                                       'development': 'Structural fixture only',
+                                       # A complete BODY manifest requires a source-bound task.
+                                       'source_handles': [recorded['source_materials'][0]['source_handle']]}]}
     packet = strengthening.build_strengthening_payload(
         research_question=recorded['research_question'], chapter_id='Ch2', chapter=recorded['chapter'],
         chapter_plan={**copy.deepcopy(original), 'units': [original['units'][0], untouched, original['units'][1]]},

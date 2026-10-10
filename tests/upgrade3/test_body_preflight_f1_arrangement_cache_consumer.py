@@ -342,7 +342,7 @@ def test_old_lossy_cache_cannot_fabricate_missing_merge_or_split_relationships(t
 
     monkeypatch.setattr(arrangement_cli, "RoundCappedLedger", OfflineLedger)
     monkeypatch.setattr(transport, "QwenDirectClient", unexpected_provider)
-    assert arrangement_cli.main([*argv, "--run"]) == 0
+    assert arrangement_cli.main([*argv, "--run"]) == 2
     report = _read(output / "ARRANGEMENT_RUN.json")
     assert report["model_calls"] == 0
     assert report["chapters"][0]["status"] == "reused_contract_failed"

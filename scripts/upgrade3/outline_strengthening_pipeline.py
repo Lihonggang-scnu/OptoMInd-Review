@@ -1,4 +1,4 @@
-"""Explicit optional selector → on-demand owner → complete-plan handoff.
+"""Reusable selector → on-demand owner → complete-plan handoff.
 
 This is orchestration of the existing modules, not another planner. Default
 execution prepares the selector offline. --run uses the existing metered clients;
@@ -77,6 +77,8 @@ def load_complete_packets(packet_root: Path) -> tuple[dict, dict[str, dict]]:
                 raw[key] = copy.deepcopy(plan[key])
         # Keep all packet metadata as well as the explicit strengthening contract.
         envelope = cli._payload(raw)
+        if not (envelope.get('chapter_plan') or {}).get('units'):
+            raise ValueError('complete_plan_chapter_tasks_required:' + chapter_id)
         packets[chapter_id] = {**copy.deepcopy(raw), **envelope}
         packets[chapter_id]['input_integrity'] = strengthening._input_integrity(packets[chapter_id])
     declared = [str(row.get('chapter_id')) for row in plan.get('shared_outline') or [] if row.get('chapter_id')]
@@ -152,26 +154,45 @@ def run_pipeline(args: argparse.Namespace) -> dict:
     _dump(input_path, packets)
     selector_dir = output / 'selection'
     selector_args = _stage_args(args, input_path=input_path, output=selector_dir, mode='select')
-    cli.prepare_selection(selector_args)
     if not args.run:
+        cli.prepare_selection(selector_args)
         return {'status': 'prepared_no_paid_calls', 'selector_prepare': str(selector_dir / 'PREPARE_REPORT.json'),
                 'input_sha256': baseline_hash, 'next': 'Repeat this command with --run and authorized budget/key paths'}
-    cli.run_selection_cli(selector_args)
-    result = _load(selector_dir / 'SELECTION_RESULT.json')
-    selector_payload = _load(selector_dir / 'SELECTION_REQUEST.json')['payload']
-    validated = selection.validate_selection_response(selector_payload, result)
-    if validated.get('validation_errors'):
-        report = {'status': 'selection_unresolved', 'validation_errors': validated['validation_errors']}
-        _dump(output / 'PIPELINE_REPORT.json', report)
-        return report
-    # Validate the full selection before spending on any owner. Projection is
-    # rebuilt from the current complete plan at each iteration for fresh roles.
-    selection.selection_to_on_demand_payloads(packets, validated)
     previous_pointer = _load(output / 'CURRENT_PLAN.json') if (output / 'CURRENT_PLAN.json').exists() else None
     group_reports = []
     current = copy.deepcopy(packets)
     target = export_complete_plan(base_plan, current, output, provenance={
         'input_sha256': baseline_hash, 'status': 'original_valid_plan', 'groups': []}, publish=previous_pointer is None)
+
+    def save_report(status: str, **extra: Any) -> dict:
+        adopted = _load(output / 'CURRENT_PLAN.json')['packet_root']
+        report = {'status': status, 'groups': group_reports, 'packet_root': adopted,
+                  'candidate_packet_root': str(target.resolve()),
+                  'current_plan': str(output / 'CURRENT_PLAN.json'), 'input_sha256': baseline_hash,
+                  'previous_valid_plan_preserved': bool(previous_pointer and status != 'complete'),
+                  'adopted_packet_root': adopted, 'chapter_count': len(current),
+                  'arrangement_not_run': True, 'source': source,
+                  'resume': 'Repeat the same command to reuse valid stages; inspect unresolved responses before explicit --retry-unresolved',
+                  **extra}
+        _dump(output / 'PIPELINE_REPORT.json', report)
+        return report
+
+    # Publish the complete baseline before the selector's first paid boundary.
+    # A refused reservation, invalid selection or preparation failure must have
+    # the same usable-plan and recovery guarantees as an interrupted owner.
+    try:
+        cli.prepare_selection(selector_args)
+        cli.run_selection_cli(selector_args)
+        result = _load(selector_dir / 'SELECTION_RESULT.json')
+        selector_payload = _load(selector_dir / 'SELECTION_REQUEST.json')['payload']
+        validated = selection.validate_selection_response(selector_payload, result)
+        if validated.get('validation_errors'):
+            return save_report('selection_unresolved', validation_errors=validated['validation_errors'])
+        # Validate the full selection before spending on any owner. Projection is
+        # rebuilt from the current complete plan at each iteration for fresh roles.
+        selection.selection_to_on_demand_payloads(packets, validated)
+    except (Exception, SystemExit) as exc:
+        return save_report('selection_paused', reason=str(exc), checkpoint_dir=str(selector_dir / 'stages'))
     for group in validated.get('groups') or []:
         group_id = group['group_id']
         stage_dir = output / 'groups' / group_id
@@ -202,16 +223,7 @@ def run_pipeline(args: argparse.Namespace) -> dict:
     status = 'complete' if complete else 'partial'
     target = export_complete_plan(base_plan, current, output, provenance={
         'input_sha256': baseline_hash, 'status': status, 'groups': group_reports}, publish=complete or previous_pointer is None)
-    report = {'status': status, 'groups': group_reports,
-              'packet_root': _load(output / 'CURRENT_PLAN.json')['packet_root'],
-              'candidate_packet_root': str(target.resolve()),
-              'current_plan': str(output / 'CURRENT_PLAN.json'), 'input_sha256': baseline_hash,
-              'previous_valid_plan_preserved': bool(previous_pointer and not complete),
-              'adopted_packet_root': _load(output / 'CURRENT_PLAN.json')['packet_root'],
-              'chapter_count': len(current), 'arrangement_not_run': True, 'source': source,
-              'resume': 'Repeat the same command to reuse valid stages; inspect unresolved responses before explicit --retry-unresolved'}
-    _dump(output / 'PIPELINE_REPORT.json', report)
-    return report
+    return save_report(status)
 
 
 def main(argv: list[str] | None = None) -> int:
