@@ -180,6 +180,154 @@ def test_missing_completion_metadata_failed_post_retains_original_and_candidate(
     assert resumed["body_markdown"] == result["body_markdown"]
 
 
+@pytest.mark.parametrize("status", ["covered", "partial", "missing"])
+def test_unlocated_task_diagnostic_preserved_without_automatic_completion(tmp_path, status):
+    factory = Factory(first_status=status)
+    def unlocated(role, path, profile):
+        base = factory(role, path, profile)
+        def client(messages, **kwargs):
+            raw = base(messages, **kwargs)
+            data = json.loads(raw["content"])
+            data["tasks"][1]["body_quote"] = "Invented task quote"
+            return response(data)
+        client.prompt_token_counter = counter
+        return client
+    result = run_stage(tmp_path, unlocated)
+    assert [row[0] for row in factory.calls] == ["assessment"]
+    assert result["body_markdown"] == "SYNTHETIC A [P0001]." and not result["changed"]
+    valid, invalid = result["assessments"][0]["report"]["tasks"]
+    assert valid["body_quote_verified"] and valid["effective_status"] == "covered"
+    assert invalid["status"] == status and invalid["body_quote"] == "Invented task quote"
+    assert invalid["effective_status"] == "unverified" and not invalid["body_quote_verified"]
+    assert invalid["body_quote_error"] == "quality_body_quote_invalid:p2"
+    assert result["status"] == "assessed_with_pending" and result["scientific_acceptance"] is False
+    assert any(row["code"] == "quality_task_unverified" for row in result["pending_problems"])
+    replayed = run_stage(tmp_path, unlocated, reparse_saved=True)
+    assert replayed["model_calls"] == 0 and len(factory.calls) == 1
+
+
+def test_unlocated_quote_never_bypasses_assessment_structure_or_model_checks():
+    view = route.build_unit_views(book())[0]
+    body = "SYNTHETIC A [P0001]."
+    messages = quality.assessment_messages(view, route.build_legacy_payload(view), body)
+    data = json.loads(assessment(body)["content"])
+    data["tasks"][1]["body_quote"] = "Invented quote"
+    for key, invalid in (("task_id", "p1"), ("status", "unknown"), ("explanation", ""),
+                         ("material_handles", ["P9999"]), ("body_quote", None)):
+        changed = deepcopy(data)
+        changed["tasks"][1][key] = invalid
+        with pytest.raises(quality.CandidateError):
+            quality.validate_assessment(response(changed), messages, view, body)
+    with pytest.raises(quality.CandidateError, match="report_incomplete"):
+        quality.validate_assessment(response({**data, "tasks": data["tasks"][:1]}), messages, view, body)
+    for raw, error in ((response(data, finish="length"), "response_incomplete"),
+                       ({**response(data), "model": "other-model"}, "returned_model_mismatch")):
+        with pytest.raises(quality.CandidateError, match=error):
+            quality.validate_assessment(raw, messages, view, body)
+    # Effective parser fields cannot be supplied by the model to authorize use.
+    data["tasks"][1].update(body_quote_verified=True, effective_status="covered")
+    parsed = quality.validate_assessment(response(data), messages, view, body)
+    assert parsed["tasks"][1]["effective_status"] == "unverified"
+
+
+@pytest.mark.parametrize("domain", ["battery", "climate"])
+def test_other_domain_synthetic_quote_failure_is_pending_in_ordinary_quality_path(tmp_path, domain):
+    fixture = book()
+    unit = fixture["chapters"][0]["units"][0]
+    unit["focus"] = "OFFLINE " + domain + " parser wiring fixture; no scientific conclusion"
+    for index, task in enumerate(unit["paragraph_tasks"]):
+        task["paragraph_id"] = domain + "_task_" + str(index + 1)
+        task["point"] = "Explain offline " + domain + " fixture marker " + str(index + 1)
+    view = route.build_unit_views(fixture)[0]
+    body = "OFFLINE " + domain + " fixture value 1 [P0001]."
+    calls = []
+    def offline_factory(role, path, profile):
+        assert role == "assessment", "Unverified missing status must not request completion"
+        def client(messages, **kwargs):
+            calls.append(role)
+            tasks = json.loads(messages[-1]["content"])["task_catalog"]
+            return response({"tasks": [
+                {"task_id": tasks[0]["task_id"], "status": "covered", "body_quote": body,
+                 "explanation": "Fixture marker locates actual text", "material_handles": ["P0001"]},
+                {"task_id": tasks[1]["task_id"], "status": "missing", "body_quote": body.replace("value 1", "value 2"),
+                 "explanation": "Offline changed-number control, not a domain conclusion", "material_handles": ["P0001"]}],
+                "changes": [], "issues": []})
+        client.prompt_token_counter = counter
+        return client
+    result = quality.run_unit_quality(view, payload=route.build_legacy_payload(view, language="en"),
+        existing_body=body, output_dir=tmp_path, client_factory=offline_factory, run=True,
+        token_counter=counter, language="en", experiment_label="offline_cross_domain_parser_control")
+    assert calls == ["assessment"] and result["body_markdown"] == body
+    assert result["status"] == "assessed_with_pending" and not result["scientific_acceptance"]
+    row = result["assessments"][0]["report"]["tasks"][1]
+    assert row["status"] == "missing" and row["effective_status"] == "unverified"
+
+
+def test_one_unlocated_post_task_does_not_discard_valid_diagnostics_or_exact_edit(tmp_path):
+    factory = Factory()
+    edit = {"operation": "replace", "original_text": "SYNTHETIC B", "replacement_text": "SYNTHETIC B revised",
+            "reason": "Synthetic edit consumption control only", "material_handles": ["P0001"],
+            "material_quote": "Synthetic material supports A and B only."}
+    def post_quote(role, path, profile):
+        base = factory(role, path, profile)
+        def client(messages, **kwargs):
+            raw = base(messages, **kwargs)
+            if role == "post_assessment":
+                data = json.loads(raw["content"])
+                data["tasks"][1]["body_quote"] = "A paraphrase absent from actual text"
+                data["changes"] = [edit]
+                data["issues"] = ["Synthetic unresolved scientific issue"]
+                return response(data)
+            return raw
+        client.prompt_token_counter = counter
+        return client
+    result = run_stage(tmp_path, post_quote)
+    assert [row[0] for row in factory.calls] == ["assessment", "completion", "post_assessment"]
+    assert result["body_markdown"] == "SYNTHETIC A [P0001].\n\nSYNTHETIC B revised [P0001]."
+    rows = result["assessments"][-1]["report"]["tasks"]
+    assert rows[0]["body_quote_verified"] and rows[1]["effective_status"] == "unverified"
+    assert rows[1]["status"] == "covered" and rows[1]["body_quote"] == "A paraphrase absent from actual text"
+    assert len(result["post_edits"]["applied"]) == 1 and not result["post_edits"]["rejected"]
+    assert {row["code"] for row in result["pending_problems"]} >= {"quality_task_unverified", "quality_assessor_issue"}
+    assert not result["scientific_acceptance"]
+
+
+@pytest.mark.parametrize("diagnostic", ["unlocated", "empty_noncoverage"])
+def test_missing_metadata_candidate_without_located_task_retains_base_and_only_base_edits(tmp_path, diagnostic):
+    factory = CandidateFactory()
+    base_edit = {"operation": "replace", "original_text": "SYNTHETIC A", "replacement_text": "SYNTHETIC A revised",
+                 "reason": "Synthetic base edit control", "material_handles": ["P0001"],
+                 "material_quote": "Synthetic material supports A and B only."}
+    candidate_edit = {**base_edit, "original_text": "SYNTHETIC B", "replacement_text": "Must not enter retained body"}
+    def no_located_post(role, path, profile):
+        base = factory(role, path, profile)
+        def client(messages, **kwargs):
+            raw = base(messages, **kwargs)
+            if role == "post_assessment":
+                data = json.loads(raw["content"])
+                for row in data["tasks"]:
+                    row.update(body_quote="Invented quote" if diagnostic == "unlocated" else "")
+                    if diagnostic == "empty_noncoverage":
+                        row["status"] = "material_limited"
+                data["changes"] = [base_edit, candidate_edit]
+                return response(data)
+            return raw
+        client.prompt_token_counter = counter
+        return client
+    result = run_stage(tmp_path, no_located_post)
+    assert [row[0] for row in factory.calls] == ["assessment", "completion", "post_assessment"]
+    assert result["body_markdown"] == "SYNTHETIC A revised [P0001]."
+    assert result["completion_candidate"]["status"] == "post_assessment_has_no_located_diagnostic"
+    assert "SYNTHETIC B" in Path(result["completion"]["candidate_body_path"]).read_text(encoding="utf-8")
+    assert len(result["post_edits"]["applied"]) == len(result["post_edits"]["rejected"]) == 1
+    assert "anchor" in result["post_edits"]["rejected"][0]["error"]
+    assert any(row["code"] == "quality_completion_candidate_unverified" for row in result["pending_problems"])
+    assert not result["scientific_acceptance"]
+    replayed = run_stage(tmp_path, no_located_post, reparse_saved=True)
+    assert replayed["model_calls"] == 0 and len(factory.calls) == 3
+    assert replayed["body_markdown"] == result["body_markdown"]
+
+
 def test_material_limited_does_not_force_completion(tmp_path):
     factory = Factory(first_status="material_limited")
     result = run_stage(tmp_path, factory)
@@ -368,7 +516,7 @@ def test_quotes_task_ids_and_handles_are_checked():
     view = route.build_unit_views(book())[0]
     body = "SYNTHETIC A and SYNTHETIC B"
     messages = quality.assessment_messages(view, route.build_legacy_payload(view), body)
-    for field, value in [("task_id", "invented"), ("body_quote", "invented quote"), ("material_handles", ["P9999"]), ("status", "covered_elsewhere")]:
+    for field, value in [("task_id", "invented"), ("body_quote", 123), ("material_handles", ["P9999"]), ("status", "covered_elsewhere")]:
         data = json.loads(assessment(body)["content"])
         data["tasks"][0][field] = value
         with pytest.raises(ValueError, match="quality_"):
@@ -390,8 +538,10 @@ def test_ordered_omission_quotes_strictly_anchor_all_fragments():
     for invalid in ("Last fragment. ... SYNTHETIC A first [P0001].",
                     "SYNTHETIC A changed [P0001]. ... Last fragment.", "..."):
         data["tasks"][0]["body_quote"] = invalid
-        with pytest.raises(ValueError, match="quality_body_quote_invalid"):
-            quality.validate_assessment(response(data), messages, view, body)
+        unverified = quality.validate_assessment(response(data), messages, view, body)["tasks"][0]
+        assert unverified["effective_status"] == "unverified" and unverified["status"] == "covered"
+        assert not unverified["body_quote_verified"] and unverified["body_quote"] == invalid
+        assert unverified["body_quote_error"].startswith("quality_body_quote_invalid:")
     spans, match = quality._body_quote_spans("Literal ... source text", "Literal ... source text")
     assert match == "exact" and len(spans) == 1
 
@@ -441,10 +591,12 @@ def test_complete_quote_typo_json_recovery_retains_content_and_validation():
     for invalid in ({**malformed, "finish_reason": "length", "complete": False},
                     {**malformed, "complete": False},
                     {**malformed, "content": raw[:-2]},
-                    {**malformed, "content": raw[:-3] + "}"},
-                    {**malformed, "content": raw.replace("SYNTHETIC A", "Invented A", 1)}):
+                    {**malformed, "content": raw[:-3] + "}"}):
         with pytest.raises(ValueError, match="quality_"):
             quality.validate_assessment(invalid, messages, view, body)
+    changed = quality.validate_assessment({**malformed, "content": raw.replace("SYNTHETIC A", "Invented A", 1)}, messages, view, body)
+    assert changed["tasks"][0]["effective_status"] == "unverified"
+    assert changed["tasks"][1]["body_quote_verified"]
 
 
 def test_material_excerpt_same_record_paths_and_strict_body_anchor():
@@ -504,7 +656,8 @@ def test_reparse_preview_then_run_reuses_raw_and_only_continues_missing_steps(tm
     for name in ("assessment/RAW_RESPONSE.json", "assessment/REQUEST.json"):
         assert (target / name).read_bytes() == originals[name]
     feedback = json.loads(factory.calls[1][1][-1]["content"])["gap_feedback"]
-    assert "body_quote_spans" not in feedback[0] and "body_quote_match" not in feedback[0]
+    assert not {"body_quote_spans", "body_quote_match", "body_quote_verified", "body_quote_error",
+                "effective_status"}.intersection(feedback[0])
     assert quality.validate_assessment is validator
 
 
@@ -524,10 +677,15 @@ def test_reparse_completed_request_retains_exact_completion_identity(tmp_path):
     first = run_stage(tmp_path, factory)
     target = Path(first["output_dir"])
     request = (target / "completion/REQUEST.json").read_bytes()
+    messages = (target / "completion/MESSAGES.json").read_bytes()
+    feedback = json.loads(messages)[-1]["content"]
+    assert json.loads(feedback)["gap_feedback"] == [{"task_id": "p2", "status": "missing", "body_quote": "",
+        "explanation": "B has not been explained", "material_handles": ["P0001"]}]
     replayed = run_stage(tmp_path, factory, reparse_saved=True)
     assert replayed["model_calls"] == 0 and len(factory.calls) == 3
     assert replayed["body_markdown"] == first["body_markdown"]
     assert (target / "completion/REQUEST.json").read_bytes() == request
+    assert (target / "completion/MESSAGES.json").read_bytes() == messages
 
 
 def test_budget_refusal_keeps_request_and_cannot_be_rebought_on_reparse(tmp_path):
@@ -659,6 +817,13 @@ def test_only_verified_missing_table_structure_resolves_other_issues_remain():
     result["changed"] = True
     assert quality.retained_original_issues(view, original, result) == (original, [])
     result["assessments"][0]["step"] = "post_assessment"
+    assert quality.retained_original_issues(view, original, result) == (original[2:], original[:2])
+    # New unverified rows cannot clear structural issues; old strict reports
+    # without the new flag remain compatible above.
+    task = result["assessments"][0]["report"]["tasks"][1]
+    task.update(body_quote_verified=False, effective_status="unverified")
+    assert quality.retained_original_issues(view, original, result) == (original, [])
+    task["body_quote_verified"] = True
     assert quality.retained_original_issues(view, original, result) == (original[2:], original[:2])
     result["body_markdown"] = "Claimed table without actual Markdown"
     assert quality.retained_original_issues(view, original, result) == (original, [])
@@ -1100,8 +1265,8 @@ def test_explicit_real_quote_recovery_free_then_offline_continuation(tmp_path, f
     if calls:
         feedback = json.loads(calls[0][1][-1]["content"])["gap_feedback"]
         expected_feedback = [{key: value for key, value in row.items()
-            if key not in {"body_quote_spans", "body_quote_match"}}
-            for row in report["tasks"] if row["status"] in {"partial", "missing"}]
+            if key not in {"body_quote_spans", "body_quote_match", "body_quote_verified", "body_quote_error", "effective_status"}}
+            for row in report["tasks"] if quality._effective_task_status(row) in {"partial", "missing"}]
         assert feedback == expected_feedback
     completion_request = (clone / "completion/REQUEST.json").read_bytes() if calls else None
     again = quality.run_unit_quality(view, run=True, **options)
@@ -1170,4 +1335,72 @@ def test_explicit_real_paid_post_edits_free_reparse_no_calls_or_source_mutation(
     for path, content in originals.items():
         assert (source / path).read_bytes() == content
         if path.name in {"REQUEST.json", "RAW_RESPONSE.json", "MESSAGES.json"}:
+            assert (clone / path).read_bytes() == content
+
+
+@pytest.mark.parametrize("label, valid_count, edit_count", [("new_ch2", 2, 2), ("old_ch3", 3, 0)])
+def test_explicit_frozen_paid_post_partial_quote_diagnostics_free_replay(tmp_path, label, valid_count, edit_count):
+    """Frozen paid RAW only: no provider or scientific answer is supplied."""
+    supplied = os.environ.get("OPTO_POST_QUOTE_PARTIAL_FIXTURES")
+    if not supplied:
+        pytest.skip("Set OPTO_POST_QUOTE_PARTIAL_FIXTURES to the explicitly frozen offline copies")
+    candidates = list((Path(supplied) / label / "quality").glob("*/ORIGINAL_PAYLOAD.json"))
+    assert len(candidates) == 1
+    source = candidates[0].parent
+    originals = {path.relative_to(source): path.read_bytes() for path in source.rglob("*") if path.is_file()}
+    payload = json.loads(originals[Path("ORIGINAL_PAYLOAD.json")])
+    identity = json.loads(originals[Path("IDENTITY.json")])
+    body = originals[Path("ORIGINAL_BODY.md")].decode("utf-8")
+    view = writer.UnitWritingView(chapter_id=payload["chapter_id"], unit_id=payload["unit_id"],
+        focus=payload["unit_focus"], unit_index=payload["unit_position"]["index"],
+        unit_count=payload["unit_position"]["of"], sibling_units=payload.get("sibling_units", []),
+        chapter_frame=payload.get("chapter_frame", {}), other_chapters=payload.get("other_chapters", []),
+        paragraph_tasks=payload["paragraph_tasks"], table_tasks=payload["table_tasks"],
+        materials=payload["sources"], sources={row["source_handle"]: row for row in payload["sources"]},
+        chapter_tool_materials=payload.get("chapter_tool_materials", []), unit_notes=payload.get("unit_notes", ""),
+        owner_unit_context=payload.get("owner_unit_context", {}))
+    post = [step for step in quality._stage_attempts(source / "post_assessment")
+            if (step / "RAW_RESPONSE.json").is_file()][-1]
+    post_relative = post.relative_to(source)
+    raw = json.loads(originals[post_relative / "RAW_RESPONSE.json"])
+    original_post, _ = quality._assessment_content(raw["content"], raw.get("complete"))
+    post_messages = json.loads(originals[post_relative / "MESSAGES.json"])
+    assessed_body = json.loads(post_messages[-1]["content"])["actual_body_markdown"]
+    clone_root = tmp_path / label
+    clone = clone_root / source.name
+    shutil.copytree(source, clone)
+    def no_provider(*args, **kwargs):
+        pytest.fail("Paid partial-quote replay must use saved RAW only")
+    options = dict(payload=payload, existing_body=body, output_dir=clone_root,
+        client_factory=no_provider, token_counter=counter, language=payload["language"],
+        writer_profile=identity["author_profile"], experiment_label=identity["experiment_label"], reparse_saved=True)
+    result = quality.run_unit_quality(view, run=False, **options)
+    assert result["model_calls"] == 0 and result["identity"] == identity
+    assert result["status"] == "assessed_with_pending" and not result["scientific_acceptance"]
+    report = result["assessments"][-1]["report"]
+    assert result["assessments"][-1]["step"] == "post_assessment"
+    assert sum(row["body_quote_verified"] for row in report["tasks"]) == valid_count
+    unverified = [row for row in report["tasks"] if row["effective_status"] == "unverified"]
+    assert len(unverified) == 1 and not unverified[0]["body_quote_spans"]
+    assert unverified[0]["body_quote_error"] == "quality_body_quote_invalid:" + unverified[0]["task_id"]
+    for parsed, original in zip(report["tasks"], original_post["tasks"]):
+        assert {key: parsed[key] for key in original} == original
+    assert any(row["code"] == "quality_task_unverified" for row in result["pending_problems"])
+    assert not any(row["code"] == "quality_stage_failed" for row in result["pending_problems"])
+    if edit_count:
+        assert len(result["post_edits"]["applied"]) == edit_count and not result["post_edits"]["rejected"]
+        assert Path(result["post_edits"]["before_path"]).read_bytes().decode("utf-8") == assessed_body
+        expected, _ = quality.apply_evidence_edits(assessed_body, original_post["changes"], view)
+        assert result["body_markdown"] == expected
+    else:
+        assert result["body_markdown"] == assessed_body and not result.get("post_edits")
+    history = Path(result["reparse_saved"]["history_dir"])
+    assert (history / "QUALITY_RESULT.json").read_bytes() == originals[Path("QUALITY_RESULT.json")]
+    assert (history / "RESULT_SEAL.json").read_bytes() == originals[Path("RESULT_SEAL.json")]
+    assert (history / "QUALITY_BODY.md").read_bytes() == originals[Path("QUALITY_BODY.md")]
+    again = quality.run_unit_quality(view, run=True, **options)
+    assert again["model_calls"] == 0 and again["body_markdown"] == result["body_markdown"]
+    for path, content in originals.items():
+        assert (source / path).read_bytes() == content
+        if path.name in {"REQUEST.json", "RAW_RESPONSE.json", "MESSAGES.json", "PROFILE.json"}:
             assert (clone / path).read_bytes() == content

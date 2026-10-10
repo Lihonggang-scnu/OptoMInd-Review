@@ -155,14 +155,16 @@ def validate_assessment(response, messages, view, body):
         seen.add(task_id)
         if row.get("status") not in {"covered", "partial", "missing", "material_limited"}:
             raise CandidateError("quality_task_status_invalid:" + str(task_id))
-        quote = row.get("body_quote") or ""
+        quote = row.get("body_quote", "")
         if not isinstance(quote, str):
             raise CandidateError("quality_body_quote_invalid:" + str(task_id))
         spans, match = _body_quote_spans(body, quote)
-        if ((quote and not spans) or (row["status"] in {"covered", "partial"} and not quote.strip())):
-            raise CandidateError("quality_body_quote_invalid:" + str(task_id))
+        verified = not ((quote and not spans) or (row["status"] in {"covered", "partial"} and not quote.strip()))
         row["body_quote_spans"] = spans
         row["body_quote_match"] = match
+        row["body_quote_verified"] = verified
+        row["body_quote_error"] = "" if verified else "quality_body_quote_invalid:" + str(task_id)
+        row["effective_status"] = row["status"] if verified else "unverified"
         if not isinstance(row.get("explanation"), str) or not row["explanation"].strip():
             raise CandidateError("quality_task_explanation_missing:" + str(task_id))
         handles = row.get("material_handles")
@@ -174,6 +176,11 @@ def validate_assessment(response, messages, view, body):
     return {"tasks": rows, "changes": deepcopy(data.get("changes") or []),
             "issues": deepcopy(data.get("issues") or []), "parsed_via": parsed_via,
             "scientific_acceptance": False}
+
+
+def _effective_task_status(row):
+    # Older reports passed the original strict all-row quote validator.
+    return "unverified" if row.get("body_quote_verified") is False else row.get("status")
 
 
 def _material_quote_spans(record, quote):
@@ -509,12 +516,13 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
                     body, summary["applied_edits"] = apply_evidence_edits(body, assessment["changes"], view)
                 except Exception as exc:
                     summary["pending_problems"].append({"code": "quality_edit_rejected", "error": str(exc)})
-            requested = [row["task_id"] for row in assessment["tasks"] if row["status"] in {"partial", "missing"}]
+            requested = [row["task_id"] for row in assessment["tasks"] if _effective_task_status(row) in {"partial", "missing"}]
             if requested:
                 # Parser-added span diagnostics must not change a saved
                 # completion request's original model-feedback identity.
                 feedback = [{key: deepcopy(value) for key, value in row.items()
-                             if key not in {"body_quote_spans", "body_quote_match"}}
+                             if key not in {"body_quote_spans", "body_quote_match", "body_quote_verified",
+                                            "body_quote_error", "effective_status"}}
                             for row in assessment["tasks"] if row["task_id"] in requested]
                 messages = writer.completion_messages(view, body, requested, language=language,
                                                       planning_revision=True, gap_feedback=feedback)
@@ -562,10 +570,16 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
                         summary["completion_candidate"]["status"] = "post_assessment_failed"
                     raise
                 if candidate_base is not None:
-                    if assessment is None:
+                    located = bool(assessment and any(_effective_task_status(row) in {"covered", "partial"}
+                        and row.get("body_quote_spans") for row in assessment["tasks"]))
+                    if not located:
                         body = candidate_base
                         summary["body_markdown"] = body
                         summary["changed"] = body != existing_body
+                        if assessment is not None:
+                            summary["completion_candidate"]["status"] = "post_assessment_has_no_located_diagnostic"
+                            summary["pending_problems"].append({"code": "quality_completion_candidate_unverified",
+                                "note": "No covered/partial post task quote locates actual text; prior body retained."})
                     else:
                         summary["completion_candidate"]["status"] = "adopted_pending_human_review"
                 if assessment is not None and assessment["changes"]:
@@ -583,8 +597,8 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
                         summary["pending_problems"].append({**details,
                             "code": "quality_postcheck_edits_not_applied", "rejected": post_edits["rejected"]})
             if assessment is not None:
-                summary["pending_problems"].extend({"code": "quality_task_" + row["status"], **row}
-                    for row in assessment["tasks"] if row["status"] != "covered")
+                summary["pending_problems"].extend({"code": "quality_task_" + _effective_task_status(row), **row}
+                    for row in assessment["tasks"] if _effective_task_status(row) != "covered")
                 summary["pending_problems"].extend({"code": "quality_assessor_issue", "detail": issue}
                     for issue in assessment["issues"])
                 summary["status"] = "assessed_with_pending" if summary["pending_problems"] else "assessed_pending_human_review"
@@ -610,7 +624,7 @@ def retained_original_issues(view, original_issues, quality_result):
     retained, resolved = [], []
     reports = quality_result.get("assessments") or []
     final = reports[-1].get("report", {}) if reports else {}
-    statuses = {row.get("task_id"): row.get("status") for row in final.get("tasks") or []}
+    statuses = {row.get("task_id"): _effective_task_status(row) for row in final.get("tasks") or []}
     table_ids = [task.get("table_id") for task in view.table_tasks]
     table_check = writer._table_consumption_report(quality_result["body_markdown"], bool(view.table_tasks))
     current_assessment = (not quality_result.get("changed") or
