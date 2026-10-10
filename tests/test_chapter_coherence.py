@@ -282,16 +282,12 @@ def test_normal_harness_uses_actual_factory_dual_budget_and_delivers_selected_ed
         "replacement_text": "# UNREQUESTED_SECOND_EDIT", "reason": "Must not execute."}], "unresolved_questions": []})
     config = tmp_path / "delivery_config.json"
     route._write(config, {"schema": delivery.DELIVERY_CONFIG_SCHEMA, "text_edit": {"fixture": str(second_edit)}})
-    assert harness._main_with_args(harness.build_parser().parse_args(argv + ["--delivery-config", str(config)])) == 0
+    assert harness._main_with_args(harness.build_parser().parse_args(argv + ["--delivery-config", str(config)])) == 2
     configured = route._read(tmp_path / "out" / "body" / "DELIVERY_REPORT.json")
-    if pending_issue:
-        # Available BODY stays delivered; optional later stages retain the
-        # existing unresolved-assembly gate without clearing the diagnostic.
-        assert configured["stages"] == {} and configured["halt_reasons"] == ["assembly_pending"]
-        assert configured["selected_body"]["handles_draft"] == selected["handles_draft"]
-    else:
-        assert configured["stages"]["02_text_edit"]["source"] == "article_edit"
-        assert configured["stages"]["02_text_edit"]["edited_draft"] == selected["handles_draft"]
+    assert configured["stages"]["02_text_edit"]["source"] == "article_edit"
+    assert configured["stages"]["02_text_edit"]["edited_draft"] == selected["handles_draft"]
+    assert configured["halt_reasons"] == ["03_front_back"]  # Explicit config still lacks an actual parts stage.
+    assert configured["body_delivery"]["status"] == ("complete_with_diagnostics" if pending_issue else "complete")
     assert not (tmp_path / "out" / "body" / "02_text_edit").exists()
     assert "UNREQUESTED_SECOND_EDIT" not in Path(configured["selected_body"]["reader_draft"]).read_text(encoding="utf-8")
     assert len(opener.calls) == 5

@@ -272,7 +272,8 @@ def main(argv=None) -> int:
           ("status", "model", "original_units", "complete_units", "model_calls",
            "estimated_all_units_cny", "estimated_all_units_within_budget", "capacity_blocked_units")},
           ensure_ascii=False, indent=2))
-    return 0 if report["status"] in {"preview", "written_pending_review"} else 2
+    from optomind_research.runtime.upgrade3.review_delivery import body_delivery_exit_code
+    return body_delivery_exit_code(report)
 
 
 if __name__ == "__main__":

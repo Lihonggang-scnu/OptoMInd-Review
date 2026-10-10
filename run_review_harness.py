@@ -1085,7 +1085,8 @@ def build_parser() -> argparse.ArgumentParser:
                             "language, chapter roles, edit/front-back fixture or "
                             "recording paths, identity catalogs, figure assets, "
                             "cross-reference moves, compile_pdf.  Without it the "
-                            "delivery stops after assembly (assembly_only); with "
+                            "history/plan stop after assembly (assembly_only), "
+                            "body after selected BODY editing/numbering; with "
                             "it the unified downstream 02→03→04→05 runs. Paths "
                             "resolve relative to the config file."
                         ))
@@ -1579,13 +1580,14 @@ def _main_with_args(args: argparse.Namespace) -> int:
             if (args.delivery_input is None) == (args.delivery_manifest is None):
                 raise ValueError("body_start_requires_one_delivery_input_or_manifest")
             from scripts.upgrade3.legacy_unit_writer import run_from_args
+            from optomind_research.runtime.upgrade3.review_delivery import body_delivery_exit_code
             body_args = argparse.Namespace(**vars(args))
             body_args.input = args.delivery_input
             body_args.output_dir = (args.delivery_out / "body").resolve()
             report = run_from_args(body_args, delivery_config_path=args.delivery_config,
                                    body_manifest_path=args.delivery_manifest)
             print(json.dumps(report, ensure_ascii=False, indent=2, default=str))
-            return 0 if report["status"] in {"preview", "written_pending_review", "restricted_draft"} else 2
+            return body_delivery_exit_code(report)
         report = run_review_delivery(
             start=args.delivery_start,
             out_dir=(args.delivery_out / args.delivery_start).resolve(),

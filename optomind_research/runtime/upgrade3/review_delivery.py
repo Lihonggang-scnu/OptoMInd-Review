@@ -682,6 +682,7 @@ def load_delivery_config(path: str | Path) -> dict[str, Any]:
         "post_body_context": post_body_context,
         "identity_catalogs": _resolve_list(
             data.get("identity_catalogs"), "identity_catalogs") or [],
+        "identity_catalogs_explicit": "identity_catalogs" in data,
         "figure_assets": resolved_assets,
         "table_moves": _int_map(data.get("table_moves")),
         "figure_moves": _int_map(data.get("figure_moves")),
@@ -821,11 +822,12 @@ def run_downstream_delivery(
     stages: dict[str, Any] = {}
     halt: list[str] = []
 
-    # A readable draft can be a deliberately restricted/pending export.  The
+    # History/plan readable drafts can be restricted/pending exports. Their
     # assembler's "complete" only means all selected units were loaded; its
     # separate unresolved/problem fields must also permit downstream work.
     # Check before looking for a file, so a stale prior draft cannot bypass a
-    # failed arrangement or missing recording in the current invocation.
+    # failed arrangement or missing recording in the current invocation. BODY
+    # has its own complete-generation/stage gate and retains science diagnostics.
     assembly = assembly_report.get("assembly")
     # Identity-only gaps have an existing downstream resolver using the
     # explicitly supplied catalogs.  Do not turn that normal path into a
@@ -836,7 +838,11 @@ def run_downstream_delivery(
         and not assembly.get("pending_problems")
         and not assembly.get("unknown_table_handles")
     )
-    if (not isinstance(assembly, Mapping)
+    body_state = body_delivery_state(assembly_report, selected_body) if selected_body is not None else None
+    if body_state is not None:
+        assembly_blocked = not body_state["ready"]
+    else:
+        assembly_blocked = (not isinstance(assembly, Mapping)
             or assembly.get("status") != "complete"
             or (assembly.get("problems_resolved") is not True and not identity_only)
             or assembly.get("pending_problems")
@@ -844,14 +850,17 @@ def run_downstream_delivery(
             or assembly.get("errors")
             or assembly_report.get("pending")
             or assembly_report.get("missing_units")
-            or assembly_report.get("restricted_import")):
+            or assembly_report.get("restricted_import"))
+    if assembly_blocked:
         report = _downstream_report(config, {}, ["assembly_pending"])
         report["assembly_gate"] = {
             "status": "pending",
             "assembly_status": assembly.get("status") if isinstance(assembly, Mapping) else None,
             "problems_resolved": assembly.get("problems_resolved") if isinstance(assembly, Mapping) else None,
-            "reason": "assembly_incomplete_or_unresolved",
+            "reason": "body_delivery_incomplete" if body_state is not None else "assembly_incomplete_or_unresolved",
         }
+        if body_state is not None:
+            report["assembly_gate"]["blocking_reasons"] = body_state["blocking_reasons"]
         return report
 
     # The assembler writes BOTH drafts; downstream starts from the HANDLE
@@ -859,7 +868,7 @@ def run_downstream_delivery(
     # delivery root with the assembly one level below — resolve from the
     # report's own field instead of assuming either shape.
     output_root = Path(str(assembly_report.get("output_root") or ""))
-    handle_draft = next(
+    handle_draft = Path(selected_body["handles_draft"]) if selected_body is not None else next(
         (candidate for candidate in (
             output_root / "REVIEW_DRAFT_HANDLES.md",
             output_root / "assembled" / "REVIEW_DRAFT_HANDLES.md")
@@ -870,6 +879,13 @@ def run_downstream_delivery(
                 "stages": {},
                 "halt_reasons": [f"handle_draft_missing:{output_root}"],
                 "downstream_status": "pending"}
+
+    # The selected BODY already owns a validated references catalog. Keep an
+    # explicit configured inventory authoritative; otherwise carry this run's
+    # actual catalog to both independent parts and the final citation pass.
+    if selected_body is not None and not config.get("identity_catalogs_explicit", "identity_catalogs" in config):
+        catalog = json.loads(Path(selected_body["references_path"]).read_text(encoding="utf-8"))
+        config = {**config, "identity_catalogs": [catalog]}
 
     # ---- 02: full-text editing over the handle draft -----------------------
     if selected_body is not None:
@@ -934,7 +950,7 @@ def run_downstream_delivery(
                                        "model_calls": 0, "external_requests": 0}
     r3 = stages["03_front_back"]
     final_md = Path(str(r3.get("final_manuscript") or ""))
-    if (config.get("front_back_mode") == "post_body" and r3.get("status") != "generated") \
+    if ((selected_body is not None or config.get("front_back_mode") == "post_body") and r3.get("status") != "generated") \
             or r3.get("status") in ("pending", "no_parts_generated", "failed") \
             or not str(r3.get("final_manuscript") or "") or not final_md.is_file():
         halt.append("03_front_back")
@@ -953,16 +969,23 @@ def run_downstream_delivery(
                 "error": str(exc), "model_calls": 0, "external_requests": 0,
             }
             return _downstream_report(config, stages, ["04_figures_citations"])
+    numbering_input = final_md
+    projection = None
+    if selected_body is not None and config.get("front_back_mode") == "post_body":
+        numbering_input, projection = _post_body_numbering_input(final_md, out_dir, config.get("chapter_roles") or [])
     stages["04_figures_citations"] = run_figures_citations_stage(
-        final_draft_path=final_md,
+        final_draft_path=numbering_input,
         identity_catalogs=identity_catalogs,
         out_dir=out_dir / "04_figures_citations",
         figure_assets=config.get("figure_assets") or [],
         table_moves=config.get("table_moves") or None,
         figure_moves=config.get("figure_moves") or None)
     r4 = stages["04_figures_citations"]
+    if projection is not None:
+        r4["input_projection"] = projection
+        _write_json(out_dir / "04_figures_citations" / "STAGE_REPORT.json", r4)
     reader_draft = Path(str(r4.get("reader_draft") or ""))
-    if (config.get("front_back_mode") == "post_body" and r4.get("status") != "complete") \
+    if ((selected_body is not None or config.get("front_back_mode") == "post_body") and r4.get("status") != "complete") \
             or not str(r4.get("reader_draft") or "") or not reader_draft.is_file():
         halt.append("04_figures_citations")
         return _downstream_report(config, stages, halt)
@@ -1004,6 +1027,32 @@ def _downstream_report(config: Mapping[str, Any], stages: Mapping[str, Any],
             "downstream_status": overall}
 
 
+def _post_body_numbering_input(source: Path, out_dir: Path, chapter_roles: Sequence[Mapping[str, Any]]) -> tuple[Path, dict[str, Any] | None]:
+    """Remove only old unowned bibliography; preserve owned parts verbatim.
+
+    The citation renderer otherwise treats a following owned-part start marker
+    as old bibliography content before its next heading. Keep the actual 03
+    manuscript and record this local numbering projection separately.
+    """
+    from .serial_parts_application import _structure
+    from .article_text_editor import _numbering_projection
+    text = source.read_text(encoding="utf-8")
+    spans, _, _ = _structure(text, chapter_roles)
+    chunks, cursor = [], 0
+    for span in sorted(spans, key=lambda row: row.start):
+        chunks.extend((_numbering_projection(text[cursor:span.start]), text[span.start:span.end]))
+        cursor = span.end
+    chunks.append(_numbering_projection(text[cursor:]))
+    projected = "".join(chunks)
+    if projected == text:
+        return source, None
+    target = out_dir / "04_NUMBERING_INPUT_HANDLES.md"
+    target.write_text(projected, encoding="utf-8", newline="\n")
+    return target, {"source_draft": str(source), "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+        "numbering_input": str(target), "numbering_input_sha256": hashlib.sha256(target.read_bytes()).hexdigest(),
+        "reason": "exclude_old_unowned_bibliography_preserve_owned_parts"}
+
+
 def _body_delivery_artifacts(report: Mapping[str, Any], out_dir: Path) -> dict[str, Any]:
     """Select the actual edited BODY and reuse the single citation renderer."""
     if not report.get("assembly"):
@@ -1031,6 +1080,63 @@ def _body_delivery_artifacts(report: Mapping[str, Any], out_dir: Path) -> dict[s
     return {"status": numbering["status"], "source": source,
         "handles_draft": str(selected.resolve()), "reader_draft": numbering["reader_draft"],
         "references_path": numbering["references_path"], "numbering": numbering}
+
+
+def body_delivery_state(report: Mapping[str, Any], selected_body: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    """Separate finished BODY diagnostics from missing generation/stages."""
+    selected = selected_body if selected_body is not None else report.get("selected_body") or {}
+    assembly = report.get("assembly") or {}
+    settings = report.get("effective_settings") or {}
+    units = report.get("units") or []
+    blockers = []
+    full_count = report.get("full_unit_count") or 0
+    if (not full_count or not report.get("generation_complete") or report.get("missing_units")
+            or len(units) != full_count or report.get("complete_units") != full_count):
+        blockers.append("body_generation_incomplete")
+    if (assembly.get("status") != "complete" or assembly.get("missing_units") or assembly.get("errors")
+            or assembly.get("loaded_units") != report.get("full_unit_count")
+            or report.get("pending") or report.get("restricted_import")):
+        blockers.append("body_assembly_incomplete")
+    if selected.get("status") != "complete":
+        blockers.append("body_numbering_incomplete")
+    for field in ("handles_draft", "reader_draft", "references_path"):
+        path = Path(str(selected.get(field) or ""))
+        if not path.is_file() or path.stat().st_size == 0:
+            blockers.append("body_artifact_missing:" + field)
+    if settings.get("quality_control"):
+        from .legacy_unit_route import _quality_body_ready_for_article
+        for row in units:
+            quality = row.get("quality") or {}
+            if (quality.get("status") not in {"assessed_pending_human_review", "assessed_with_pending"}
+                    or not quality.get("assessments") or not _quality_body_ready_for_article(row)
+                    or any(attempt.get("state") not in {"returned", "cache_hit"}
+                           for attempt in quality.get("stage_attempts", []))):
+                blockers.append("body_quality_incomplete:" + str(row.get("chapter_id")) + ":" + str(row.get("unit_id")))
+    if settings.get("article_edit"):
+        article = report.get("article_edit") or {}
+        if (article.get("status") not in {"edited", "no_change"} or selected.get("source") != "article_edit"
+                or Path(str(article.get("edited_draft") or "")).resolve()
+                   != Path(str(selected.get("handles_draft") or "")).resolve()):
+            blockers.append("body_article_edit_incomplete")
+    diagnostics = bool(assembly.get("pending_problems") or assembly.get("problems_resolved") is False
+                       or any(row.get("pending_problems") for row in units))
+    ready = not blockers
+    return {"status": "complete_with_diagnostics" if ready and diagnostics else "complete" if ready else
+            "preview" if report.get("status") == "preview" else "incomplete",
+            "ready": ready, "blocking_reasons": blockers, "diagnostics_pending": diagnostics,
+            "scientific_acceptance": False}
+
+
+def body_delivery_exit_code(report: Mapping[str, Any]) -> int:
+    """Both BODY CLIs share artifact/stage success, independent of science."""
+    state = report.get("body_delivery") or body_delivery_state(report)
+    if state["status"] == "preview":
+        return 0
+    if not state["ready"]:
+        return 2
+    if report.get("delivery_mode") == "full_downstream" and report.get("downstream_status") != "complete":
+        return 2
+    return 0
 
 
 def run_review_delivery(
@@ -1077,6 +1183,7 @@ def run_review_delivery(
 
     if start == "body":
         report["selected_body"] = _body_delivery_artifacts(report, out_dir)
+        report["body_delivery"] = body_delivery_state(report)
     if config_path is None:
         if start == "body":
             report = {**report, "delivery_mode": "body_only"}
