@@ -34,6 +34,29 @@ explanation 必须具体说明覆盖或缺口，material_handles 只能指向本
 返回 JSON：{"tasks":[{"task_id":"...","status":"...","body_quote":"...",
 "explanation":"...","material_handles":[]}],"changes":[],"issues":[]}。
 该报告只是供人工复核的诊断，不能自行宣称科学质量通过。"""
+SUBSTANTIVE_ASSESSMENT_INSTRUCTIONS = """
+
+【实质缺口】按原任务要建立的知识检查实际正文，不要求逐字复述任务、逐篇摘要或重复已有例证。
+已用自然合并的段落或充分表格建立了同一判断，且关键解释、结果与条件已交代时，判为 covered；
+更长的转述、更多重复数字或换一种组织方式不是 partial/missing 的理由。
+若知识已充分展开、只欠局部引用，判为 covered，并优先用严格 replace 在该处补引；
+补引仍须唯一 original_text、正式 material_handles 和所给材料内的逐字 material_quote。
+不能定位或证明的补引写入 issues，不要求作者追加重复正文。
+原任务的独立论点、改变结论的关键条件、必要机制解释或表格内容确实缺失，仍判 partial/missing，
+explanation 指明现有正文没有建立的具体知识及材料依据，不把知识缺失缩减成引用不足。
+chapter_responsibilities 仅解释章节分工与共享案例的不同用途；未给出的其他章节正文不证明覆盖。
+""".strip()
+
+
+def load_assessment_prompt(body_version="baseline"):
+    if body_version not in writer.BODY_VERSIONS:
+        raise CandidateError("quality_unknown_body_version:" + str(body_version))
+    if body_version == "baseline":
+        return ASSESSMENT_PROMPT
+    prompt = ASSESSMENT_PROMPT.replace(
+        "只在现有正文出现明确材料支持的实质错误时提出少量定点 replace；不作文风润色或整体重写。",
+        "现有正文出现明确材料支持的实质错误或局部引用缺口时，可提出少量定点 replace；不作文风润色或整体重写。")
+    return prompt + "\n\n" + SUBSTANTIVE_ASSESSMENT_INSTRUCTIONS
 
 
 def _hash(value):
@@ -61,7 +84,7 @@ def assessment_messages(view, payload, body):
             if not task_id:
                 raise CandidateError("quality_explicit_task_identity_required")
             tasks.append({"task_id": task_id, "kind": field, "task": deepcopy(task)})
-    return [{"role": "system", "content": ASSESSMENT_PROMPT},
+    return [{"role": "system", "content": load_assessment_prompt(view.body_version)},
             {"role": "user", "content": json.dumps({
                 "schema_version": SCHEMA, "original_writer_payload": deepcopy(payload),
                 "task_catalog": tasks, "actual_body_markdown": body,
@@ -439,10 +462,15 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
     reviewer = _profile("qwen3.5-plus", 24576, 16384)
     identity = {"schema_version": SCHEMA, "payload_sha256": _hash(payload),
                 "original_body_sha256": _hash(existing_body), "author_profile": author,
-                "reviewer_profile": reviewer, "prompt_sha256": _hash(ASSESSMENT_PROMPT),
+                "reviewer_profile": reviewer, "prompt_sha256": _hash(load_assessment_prompt(view.body_version)),
                 "completion_prompt_sha256": _hash(writer.load_writer_prompt(planning_revision=True)
                                                   + writer._COMPLETION_INSTRUCTIONS),
                 "experiment_label": experiment_label}
+    if view.body_version != "baseline":
+        identity.update(body_version=view.body_version,
+            completion_prompt_sha256=_hash(writer.load_writer_prompt(planning_revision=True)
+                + writer._COMPLETION_INSTRUCTIONS + writer.CHAPTER_COHERENCE_INSTRUCTIONS
+                + writer.SUBSTANTIVE_COMPLETION_INSTRUCTIONS))
     target = Path(output_dir).resolve() / _hash(identity)
     result_path = target / "QUALITY_RESULT.json"
     seal_path = target / "RESULT_SEAL.json"

@@ -21,13 +21,17 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from optomind_research.runtime.upgrade3.legacy_unit_route import run_legacy_units, _hash, _read, _write
+from optomind_research.runtime.upgrade3.review_unit_writer import BODY_VERSIONS
 from scripts.upgrade3.writer_candidates import make_live_factory, tokenizer_counter
 
 
-def parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--input", help="Current lossless FULL_BODY_INPUT.json")
-    p.add_argument("--output-dir", help="Dedicated preview/run/resume directory")
+def add_arguments(p: argparse.ArgumentParser, *, include_io: bool = True) -> argparse.ArgumentParser:
+    """Use the same author/quality/budget flags in standalone and normal CLI."""
+    if include_io:
+        p.add_argument("--input", help="Current lossless FULL_BODY_INPUT.json")
+        p.add_argument("--output-dir", help="Dedicated preview/run/resume directory")
+    p.add_argument("--body-version", choices=BODY_VERSIONS, default="baseline",
+                   help="baseline preserves saved requests; chapter_coherence adds actual full-outline duties and substantive-gap checks")
     p.add_argument("--model", choices=("qwen3.5-plus",), default="qwen3.5-plus")
     p.add_argument("--output-tokens", type=int, default=32768)
     p.add_argument("--thinking-budget", type=int, default=8192)
@@ -42,11 +46,11 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--run", action="store_true", help="Explicitly allow live provider calls")
     p.add_argument("--retry-failed", action="store_true",
                    help="With --run, permit an explicit new writer attempt or one recorded quality failure retry without replayable output; retain prior attempts and ledger holds")
-    p.add_argument("--quality-control", action="store_true",
+    p.add_argument("--quality-control", action=argparse.BooleanOptionalAction, default=False,
                    help="Independent Plus actual-body assessment, at most one bounded correction/completion and post-check; original writer output retained")
     p.add_argument("--reparse-saved", action="store_true",
                    help="Explicitly reparse saved quality RAW without rebuying attempted stages; unfinished stages require --run and the same owned ledger")
-    p.add_argument("--article-edit", action="store_true",
+    p.add_argument("--article-edit", action=argparse.BooleanOptionalAction, default=False,
                    help="One resumable Plus whole-article local edit after full-book writing/quality completes; selected subsets explicitly skip")
     p.add_argument("--only-unit", action="append", default=[], metavar="CHAPTER:UNIT",
                    help="Repeatable pilot selection; retains full book/material context and reusable writer request identities")
@@ -54,6 +58,10 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--key-index", type=int, help="Select exactly this 1-based candidate in --key-file, without environment priority or key fallback")
     p.add_argument("--tokenizer", help="Existing local tokenizer.json, no downloads")
     return p
+
+
+def parser() -> argparse.ArgumentParser:
+    return add_arguments(argparse.ArgumentParser(description=__doc__))
 
 
 def _ledger_snapshot(ledger: Path, marker: Path, scope: dict) -> dict:
@@ -187,6 +195,48 @@ def _bind_account(args, output, project_path):
     return account
 
 
+def run_from_args(args, *, delivery_config_path=None, body_manifest_path=None) -> dict:
+    """Build the owned existing factory once, then run the common delivery API."""
+    if args.key_index is not None and (args.key_index < 1 or not args.key_file):
+        raise ValueError("--key-index is 1-based and requires --key-file")
+    if not args.account_ledger and (args.account_budget_limit is not None or args.account_mapping_dir):
+        raise ValueError("account options require --account-ledger")
+    if args.reparse_saved and not args.quality_control:
+        raise ValueError("--reparse-saved requires --quality-control")
+    if (not args.input and not body_manifest_path) or not args.output_dir:
+        raise ValueError("--input and --output-dir are required for preview/run/resume")
+    if args.input and body_manifest_path:
+        raise ValueError("body_input_and_manifest_are_alternative_sources")
+    if args.reconcile_receipt:
+        raise ValueError("use the standalone ledger reconciliation command")
+    prepared = None
+    if body_manifest_path:
+        from scripts.upgrade3.fullbody_writer import load_body_manifest
+        book, prepared = load_body_manifest(body_manifest_path)
+    else:
+        book = _read(Path(args.input).expanduser().resolve())
+    counter, tokenizer = tokenizer_counter(args.tokenizer)
+    # The existing live factory remains lazy: cached/preflight requests do not
+    # read credentials, and all physical calls share its project/account ledger.
+    factory = _dedicated_factory(args, book, counter) if args.run else None
+    from optomind_research.runtime.upgrade3.review_delivery import run_review_delivery
+    report = run_review_delivery(start="body", out_dir=args.output_dir, body_input=book,
+        body_options={"model": args.model, "output_tokens": args.output_tokens,
+            "thinking_budget": args.thinking_budget, "budget_limit": args.budget_limit,
+            "run": args.run, "retry_failed": args.retry_failed, "client_factory": factory,
+            "token_counter": counter, "quality_control": args.quality_control,
+            "only_units": args.only_unit, "article_edit": args.article_edit,
+            "reparse_saved": args.reparse_saved, "body_version": args.body_version},
+        config_path=delivery_config_path)
+    _write(Path(args.output_dir).expanduser().resolve() / "TOKENIZER.json", tokenizer)
+    if prepared is not None:
+        _write(Path(args.output_dir).expanduser().resolve() / "SOURCE_MANIFEST.json", prepared)
+    if factory is not None and hasattr(factory, "account_ledger_snapshot"):
+        _write(Path(args.output_dir).expanduser().resolve() / "ACCOUNT_BUDGET_SNAPSHOT.json",
+               factory.account_ledger_snapshot())
+    return report
+
+
 def main(argv=None) -> int:
     argument_parser = parser()
     args = argument_parser.parse_args(argv)
@@ -217,21 +267,7 @@ def main(argv=None) -> int:
         argument_parser.error("--input and --output-dir are required for preview/run/resume")
     if args.reparse_saved and not args.quality_control:
         argument_parser.error("--reparse-saved requires --quality-control")
-    book = _read(Path(args.input).expanduser().resolve())
-    counter, tokenizer = tokenizer_counter(args.tokenizer)
-    # make_live_factory is lazy. Even --run does not read credentials until a
-    # non-cached, capacity-safe request actually needs to be dispatched.
-    factory = _dedicated_factory(args, book, counter) if args.run else None
-    report = run_legacy_units(
-        book, output_dir=args.output_dir, model=args.model,
-        output_tokens=args.output_tokens, thinking_budget=args.thinking_budget,
-        budget_limit=args.budget_limit, run=args.run, retry_failed=args.retry_failed,
-        client_factory=factory, token_counter=counter, quality_control=args.quality_control,
-        only_units=args.only_unit, article_edit=args.article_edit, reparse_saved=args.reparse_saved)
-    _write(Path(args.output_dir).expanduser().resolve() / "TOKENIZER.json", tokenizer)
-    if factory is not None and hasattr(factory, "account_ledger_snapshot"):
-        _write(Path(args.output_dir).expanduser().resolve() / "ACCOUNT_BUDGET_SNAPSHOT.json",
-               factory.account_ledger_snapshot())
+    report = run_from_args(args)
     print(json.dumps({key: report[key] for key in
           ("status", "model", "original_units", "complete_units", "model_calls",
            "estimated_all_units_cny", "estimated_all_units_within_budget", "capacity_blocked_units")},

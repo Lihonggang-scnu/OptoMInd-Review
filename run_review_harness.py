@@ -1055,22 +1055,29 @@ def build_parser() -> argparse.ArgumentParser:
     entry.add_argument("--query-plan", type=Path)
     entry.add_argument(
         "--delivery-start",
-        choices=("history", "plan"),
+        choices=("history", "plan", "body"),
         help=(
-            "Offline delivery branch: import an existing written manuscript "
+            "Delivery branch: import an existing written manuscript "
             "(history) or run the frozen planning_revision chain with "
-            "recorded responses (plan). Splits away before any research "
-            "orchestration; zero model/external calls."
+            "recorded responses (plan), or write the current complete outline/material "
+            "input (body) through the resumable unit route. body preview is offline; "
+            "--run uses the explicit owned ledger."
         ),
     )
     parser.add_argument("--delivery-manifest", type=Path,
-                        help="history start: DELIVERY_MANIFEST.json of the written run")
+                        help="history: written-run manifest; body: current fullbody manifest of ordered arrangements and packet roots")
     parser.add_argument("--delivery-batch-root", type=Path,
                         help="history start: batch root with BATCH_JOBS/front/back matter")
     parser.add_argument("--delivery-packet", type=Path,
                         help="plan start: writer packet to deliver")
     parser.add_argument("--delivery-recordings", type=Path,
                         help="plan start: recorded responses JSON for offline replay")
+    parser.add_argument("--delivery-input", type=Path,
+                        help="body start: current complete lossless FULL_BODY_INPUT.json")
+    from scripts.upgrade3.legacy_unit_writer import add_arguments as add_body_arguments
+    from optomind_research.runtime.upgrade3.review_delivery import BODY_DELIVERY_DEFAULTS
+    add_body_arguments(parser, include_io=False)
+    parser.set_defaults(**BODY_DELIVERY_DEFAULTS)
     parser.add_argument("--delivery-config", type=Path,
                         help=(
                             "Offline delivery config JSON (schema "
@@ -1565,6 +1572,17 @@ def _main_with_args(args: argparse.Namespace) -> int:
             run_review_delivery,
         )
 
+        if args.delivery_start == "body":
+            if (args.delivery_input is None) == (args.delivery_manifest is None):
+                raise ValueError("body_start_requires_one_delivery_input_or_manifest")
+            from scripts.upgrade3.legacy_unit_writer import run_from_args
+            body_args = argparse.Namespace(**vars(args))
+            body_args.input = args.delivery_input
+            body_args.output_dir = (args.delivery_out / "body").resolve()
+            report = run_from_args(body_args, delivery_config_path=args.delivery_config,
+                                   body_manifest_path=args.delivery_manifest)
+            print(json.dumps(report, ensure_ascii=False, indent=2, default=str))
+            return 0 if report["status"] in {"preview", "written_pending_review", "restricted_draft"} else 2
         report = run_review_delivery(
             start=args.delivery_start,
             out_dir=(args.delivery_out / args.delivery_start).resolve(),

@@ -108,6 +108,26 @@ def test_manifest_reads_complete_scope_and_original_requirements(case):
         assert paths[row["view_path"]]["sha256"]
 
 
+def test_normal_body_entry_loads_existing_manifest_export_without_another_writer(case, tmp_path, monkeypatch):
+    import run_review_harness as harness
+    from scripts.upgrade3 import legacy_unit_writer as unit_cli
+    monkeypatch.setattr(unit_cli, "_dedicated_factory", lambda *_: pytest.fail("Live factory in manifest preview"))
+    args = harness.build_parser().parse_args(["--delivery-start", "body", "--delivery-manifest", str(case["manifest"]),
+        "--delivery-out", str(tmp_path / "normal_body"), "--body-version", "chapter_coherence",
+        "--no-quality-control", "--no-article-edit"])
+    assert harness._main_with_args(args) == 0
+    out = tmp_path / "normal_body" / "body"
+    book, prepared = cli.load_body_manifest(case["manifest"])
+    assert cli.read_json(out / "FULL_BODY_INPUT.json") == book
+    assert cli.read_json(out / "SOURCE_MANIFEST.json") == prepared
+    report = cli.read_json(out / "DELIVERY_REPORT.json")
+    assert report["model_calls"] == 0 and report["full_unit_count"] == 2
+    messages = cli.read_json(report["units"][0]["messages_path"])
+    payload = json.loads(messages[1]["content"])
+    assert [row["chapter_id"] for row in payload["chapter_responsibilities"]["chapter_outline"]] == ["CH01", "CH02"]
+    assert "Complete useful observation" in messages[1]["content"]
+
+
 def test_partial_or_reordered_manifest_is_not_complete_body(case):
     manifest = cli.read_json(case["manifest"])
     manifest["chapters"] = manifest["chapters"][:1]

@@ -31,6 +31,23 @@ RESULT_SCHEMA = "optomind.review_unit_writer.result.v1"
 DEFAULT_OUTPUT_TOKENS = 32768
 DEFAULT_THINKING_BUDGET = 8192
 PROMPT_PATH = Path("prompts/review_unit_writer.md")
+BODY_VERSIONS = ("baseline", "chapter_coherence")
+DEFAULT_BODY_VERSION = "baseline"
+CHAPTER_COHERENCE_INSTRUCTIONS = (
+    "\n\n【跨章衔接】chapter_responsibilities 来自本次完整细纲的实际章框架、单元任务和来源用途，"
+    "用于理解本章主讲什么、前后章各增加什么认识。以本单元原任务为写作职责，按全篇顺序形成自然衔接，"
+    "不要提前包办后章的具体展开，也不要因后章有相关任务而省略本单元应建立的知识。"
+    "共享案例可以跨章使用；依据各任务的 point、role 和 use 讲清本处用途与新增认识，"
+    "避免重复同一组结果及解释。其他章节的任务仅是职责上下文，不是已经写出的正文或新的科学材料。"
+    "重要结果及决定解释的条件随判断出现；按材料区分直接比较、不同设置下的间接对照和解释综合，"
+    "不把不可直接比较的研究排成统一优劣。"
+)
+SUBSTANTIVE_COMPLETION_INSTRUCTIONS = (
+    "\n\n【补写增量】先核对现有正文已建立的知识。换一种说法、增加重复案例或重述已有条件"
+    "不构成补写增量；若指定任务已有充分的实质内容，返回 already_covered 和空 body_markdown。"
+    "仅欠局部引用时在 issues 说明需要补引，不为此追加重复正文。若确实遗漏独立论点、关键条件、"
+    "必要解释或表格内容，仍以原任务和完整材料补足具体缺项，不把它判为已经覆盖。"
+)
 PLANNING_REVISION_INSTRUCTIONS = (
     "\n\n【章节论证模式】写作者以更新后的 paragraph_tasks/table_tasks 与 chapter_frame 为主，"
     "材料明确支持的局部准确修正可以直接落实；若问题会改变章节核心任务，完成现有材料支持的正文部分，并在响应"
@@ -288,6 +305,8 @@ class UnitWritingView:
     # The chapter owner's unit-level conditions/synthesis/transition, carried
     # through the arrangement so paragraph tasks are not their only carrier.
     owner_unit_context: dict[str, Any] = field(default_factory=dict)
+    body_version: str = DEFAULT_BODY_VERSION
+    chapter_responsibilities: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -310,6 +329,9 @@ class UnitWritingView:
             "view_path": self.view_path,
             "unit_notes": self.unit_notes,
             "chapter_tool_materials": self.chapter_tool_materials,
+            **({"body_version": self.body_version,
+                "chapter_responsibilities": self.chapter_responsibilities}
+               if self.body_version != "baseline" else {}),
         }
 
     def material_summary(self) -> dict[str, Any]:
@@ -1066,6 +1088,9 @@ def unit_payload(
             for table in view.table_tasks
         ],
         "sources": view.materials,
+        **({"body_version": view.body_version,
+            "chapter_responsibilities": deepcopy(view.chapter_responsibilities)}
+           if view.body_version != "baseline" else {}),
     }
     if planning_revision:
         payload["planning_revision_mode"] = True
@@ -1273,6 +1298,9 @@ def build_completion_payload(
         "existing_body_markdown": existing_body,
         "requested_task_ids": [str(item) for item in task_ids],
         "requested_source_handles": handles,
+        **({"body_version": view.body_version,
+            "chapter_responsibilities": deepcopy(view.chapter_responsibilities)}
+           if view.body_version != "baseline" else {}),
     }
     if gap_feedback is not None:
         feedback = list(gap_feedback)
@@ -1306,6 +1334,8 @@ def completion_messages(
     if planning_revision:
         system = _with_revision_output(system)
     system = system.rstrip() + "\n\n" + _COMPLETION_INSTRUCTIONS
+    if view.body_version == "chapter_coherence":
+        system += CHAPTER_COHERENCE_INSTRUCTIONS + SUBSTANTIVE_COMPLETION_INSTRUCTIONS
     return [
         {"role": "system", "content": system},
         {"role": "user", "content": json.dumps(payload, ensure_ascii=False, indent=2)},
@@ -1770,6 +1800,8 @@ def unit_messages(
     system = prompt if prompt is not None else load_writer_prompt(planning_revision=planning_revision)
     if planning_revision:
         system = _with_revision_output(system)
+    if body.get("body_version", view.body_version) == "chapter_coherence":
+        system += CHAPTER_COHERENCE_INSTRUCTIONS
     return [
         {"role": "system", "content": system},
         {"role": "user", "content": json.dumps(body, ensure_ascii=False, indent=2)},

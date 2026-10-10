@@ -1,6 +1,6 @@
 """Unified offline delivery entry for review-v2.
 
-Two start points, one assembly backend (the deterministic assembler in
+Three start points, one assembly backend (the deterministic assembler in
 ``scripts/upgrade3/full_review_draft.py``):
 
 - ``history``: import an existing written manuscript from its delivery
@@ -13,7 +13,9 @@ Two start points, one assembly backend (the deterministic assembler in
   recording leaves that step ``pending`` — never a live fallback.  This
   module never constructs or imports a live model client.
 
-Budget: zero model/external calls by construction.
+``body`` consumes the current complete FULL_BODY_INPUT through the existing
+resumable unit route. Its caller supplies the same owned live factory; preview
+and the history/plan branches remain offline.
 """
 
 from __future__ import annotations
@@ -51,6 +53,7 @@ from .review_unit_writer import (
 )
 
 LIVE_CLIENT_FACTORY = None  # documented unused seam: live is out of scope here
+BODY_DELIVERY_DEFAULTS = {"body_version": "baseline", "quality_control": False, "article_edit": False}
 
 REPLAY_EXACT = "exact"
 REPLAY_COMPATIBILITY = "compatibility_replay"
@@ -802,6 +805,7 @@ def run_downstream_delivery(
     config: Mapping[str, Any],
     assembly_report: Mapping[str, Any],
     out_dir: str | Path,
+    selected_body: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """The ONE downstream coordinator: 02→03→04→05 over the assembled draft.
 
@@ -868,7 +872,13 @@ def run_downstream_delivery(
                 "downstream_status": "pending"}
 
     # ---- 02: full-text editing over the handle draft -----------------------
-    if config.get("text_edit_fixture") is None and \
+    if selected_body is not None:
+        # BODY already made its one optional edit through the owned factory.
+        # Configured front/back work consumes that exact selected body.
+        stages["02_text_edit"] = {"stage": "text_edit", "status": "body_selected",
+            "edited_draft": selected_body["handles_draft"], "model_calls": 0,
+            "external_requests": 0, "source": selected_body["source"]}
+    elif config.get("text_edit_fixture") is None and \
             config.get("text_edit_recordings") is None:
         stages["02_text_edit"] = _stage_pending(
             "text_edit", "no_fixture_or_recordings_in_config")
@@ -994,6 +1004,35 @@ def _downstream_report(config: Mapping[str, Any], stages: Mapping[str, Any],
             "downstream_status": overall}
 
 
+def _body_delivery_artifacts(report: Mapping[str, Any], out_dir: Path) -> dict[str, Any]:
+    """Select the actual edited BODY and reuse the single citation renderer."""
+    if not report.get("assembly"):
+        return {"status": "not_generated", "source": "none", "handles_draft": None,
+                "reader_draft": None, "references_path": None}
+    article = report.get("article_edit") or {}
+    selected = out_dir / "assembled" / "REVIEW_DRAFT_HANDLES.md"
+    source = "assembly"
+    numbering = None
+    if article.get("status") in {"edited", "no_change"} and article.get("edited_draft"):
+        selected = Path(article["edited_draft"])
+        source = "article_edit"
+        numbering = article.get("numbering")
+    if not selected.is_file():
+        raise ValueError("body_selected_draft_missing:" + str(selected))
+    if not numbering:
+        from .article_text_editor import _numbering_projection
+        from .delivery_citations import run_figures_citations_stage
+        catalog = json.loads((out_dir / "assembled" / "REFERENCES.json").read_text(encoding="utf-8"))
+        projection = out_dir / "BODY_NUMBERING_INPUT_HANDLES.md"
+        projection.write_text(_numbering_projection(selected.read_text(encoding="utf-8")),
+                              encoding="utf-8", newline="\n")
+        numbering = run_figures_citations_stage(final_draft_path=projection,
+            identity_catalogs=[catalog], out_dir=out_dir / "body_numbered")
+    return {"status": numbering["status"], "source": source,
+        "handles_draft": str(selected.resolve()), "reader_draft": numbering["reader_draft"],
+        "references_path": numbering["references_path"], "numbering": numbering}
+
+
 def run_review_delivery(
     *,
     start: str,
@@ -1004,11 +1043,14 @@ def run_review_delivery(
     packet_path: str | Path | None = None,
     recordings_path: str | Path | None = None,
     config_path: str | Path | None = None,
+    body_input: Mapping[str, Any] | None = None,
+    body_options: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Official delivery entry.
 
-    Without ``config_path`` the run stops after assembly and is reported as
-    ``assembly_only``.  With a config the SAME assembled result enters the
+    The body branch selects its actual optional edited BODY and numbered reader
+    draft. Other branches without ``config_path`` stop after assembly. With a
+    config the selected result enters the
     unified downstream (02 edit → 03 front/back → 04 figures/citations → 05
     publication); missing inputs surface as explicit pending stages.
     """
@@ -1023,18 +1065,34 @@ def run_review_delivery(
             raise ValueError("plan_start_requires_packet_and_recordings")
         report = run_plan_delivery(packet_path=packet_path, recordings_path=recordings_path,
                                    out_dir=out_dir, language=language)
+    elif start == "body":
+        if not isinstance(body_input, Mapping):
+            raise ValueError("body_start_requires_full_body_input")
+        from .legacy_unit_route import run_legacy_units
+        options = {**BODY_DELIVERY_DEFAULTS, **dict(body_options or {})}
+        report = run_legacy_units(body_input, output_dir=out_dir, **options)
+        report = {**report, "start": "body", "output_root": str(out_dir.resolve())}
     else:
         raise ValueError(f"unknown_delivery_start:{start}")
 
+    if start == "body":
+        report["selected_body"] = _body_delivery_artifacts(report, out_dir)
     if config_path is None:
+        if start == "body":
+            report = {**report, "delivery_mode": "body_only"}
+            _write_json(out_dir / "DELIVERY_REPORT.json", report)
+            return report
         report = {**report, "delivery_mode": "assembly_only",
                   "note": "no delivery config: assembly only, downstream not run"}
         _write_json(out_dir / "DELIVERY_REPORT.json", report)
         return report
     config = load_delivery_config(config_path)
     downstream = run_downstream_delivery(config=config, assembly_report=report,
-                                         out_dir=out_dir)
+                                         out_dir=out_dir,
+                                         **({"selected_body": report["selected_body"]} if start == "body" else {}))
     merged = {**report, **downstream}
+    if start == "body":
+        merged["model_calls"] = report["model_calls"] + downstream.get("model_calls", 0)
     _write_json(out_dir / "DELIVERY_REPORT.json", merged)
     return merged
 

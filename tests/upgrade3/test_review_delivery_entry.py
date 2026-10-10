@@ -541,8 +541,8 @@ def test_plan_delivery_makes_no_network_calls(tmp_path, monkeypatch):
 def test_harness_parser_has_delivery_branch_and_help_is_offline():
     import subprocess
     result = subprocess.run(
-        [sys.executable, "run_review_harness.py", "--help"],
-        capture_output=True, text=True, cwd="F:/OptoMind-Review-2", timeout=120)
+        [sys.executable, "-X", "utf8", "run_review_harness.py", "--help"],
+        capture_output=True, text=True, encoding="utf-8", cwd=Path(__file__).resolve().parents[2], timeout=120)
     assert result.returncode == 0
     assert "--delivery-start" in result.stdout
     assert "--delivery-recordings" in result.stdout

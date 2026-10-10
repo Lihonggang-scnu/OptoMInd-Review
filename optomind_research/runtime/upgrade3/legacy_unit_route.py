@@ -61,13 +61,60 @@ def _quality_body_ready_for_article(row: Mapping[str, Any]) -> bool:
         return False
 
 
-def build_unit_views(book: Mapping[str, Any]) -> list[writer.UnitWritingView]:
+def _chapter_responsibilities(chapters, aliases, chapter_id, unit_id):
+    """Project actual outline duties and task uses, never the material pool."""
+    outline, uses = [], defaultdict(list)
+    current_handles = set()
+    for position, chapter in enumerate(chapters, 1):
+        frame = chapter.get("chapter_frame") or {}
+        chapter_row = {"chapter_id": chapter["chapter_id"], "position": position,
+            "chapter_frame": {key: deepcopy(frame[key]) for key in (
+                "chapter_title", "title", "chapter_purpose", "chapter_scope", "chapter_argument",
+                "chapter_thesis", "reader_objective") if key in frame}, "units": []}
+        for unit in chapter["units"]:
+            paragraphs, tables = unit.get("paragraph_tasks") or [], unit.get("table_tasks") or []
+            if chapter["chapter_id"] == chapter_id and unit["unit_id"] == unit_id:
+                current_handles = {aliases.get(handle, handle) for handle in _handles([paragraphs, tables])}
+            chapter_row["units"].append({"unit_id": unit["unit_id"], "focus": deepcopy(unit.get("focus", "")),
+                "paragraph_tasks": [{"paragraph_id": task.get("paragraph_id"), "point": deepcopy(task.get("point", "")),
+                    **({"source_brief_points": [deepcopy(detail.get("point", ""))
+                       for detail in task["source_brief_details"]]} if task.get("source_brief_details") else {})}
+                    for task in paragraphs],
+                "table_tasks": [{"table_id": task.get("table_id"), "purpose": deepcopy(task.get("purpose", ""))}
+                    for task in tables]})
+            for kind, tasks, id_field in (("paragraph", paragraphs, "paragraph_id"), ("table", tables, "table_id")):
+                for task in tasks:
+                    parts = [task] if kind == "paragraph" else task.get("row_tasks") or []
+                    for part in parts:
+                        actual_uses = part.get("source_uses") or []
+                        # Older explicit source lists still establish a task use,
+                        # without inventing a role or an interpretation for it.
+                        if not actual_uses:
+                            actual_uses = [{"source_handle": handle} for handle in _handles(part)]
+                        for use in actual_uses:
+                            for handle in _handles(use):
+                                canonical = aliases.get(handle, handle)
+                                uses[canonical].append({"chapter_id": chapter["chapter_id"], "unit_id": unit["unit_id"],
+                                    "task_id": task.get(id_field), "kind": kind,
+                                    "point": deepcopy(task.get("point") if kind == "paragraph" else task.get("purpose")),
+                                    **({"row_content": deepcopy(part.get("content", ""))} if kind == "table" else {}),
+                                    "source_use": deepcopy(use)})
+        outline.append(chapter_row)
+    return {"schema_version": "optomind.chapter_responsibilities.v1", "current_chapter_id": chapter_id,
+        "current_unit_id": unit_id, "chapter_outline": outline,
+        "shared_source_uses": [{"source_handle": handle, "uses": uses[handle]} for handle in sorted(current_handles)
+            if any(row["chapter_id"] != chapter_id for row in uses[handle])]}
+
+
+def build_unit_views(book: Mapping[str, Any], *, body_version: str = writer.DEFAULT_BODY_VERSION) -> list[writer.UnitWritingView]:
     """Keep chapter snapshots verbatim, with canonical identity and closure.
 
     Multiple snapshots of one source are retained in full, never overwritten
     by a book-level merged record. Only explicitly corroborated aliases from
     the existing fullbody identity validator are accepted.
     """
+    if body_version not in writer.BODY_VERSIONS:
+        raise CandidateError("legacy_unknown_body_version:" + str(body_version))
     book = register_tool_source_identities(book)
     chapters = _chapter_rows(book)
     if book.get("expected_chapter_ids") is not None and book["expected_chapter_ids"] != [c["chapter_id"] for c in chapters]:
@@ -136,6 +183,9 @@ def build_unit_views(book: Mapping[str, Any]) -> list[writer.UnitWritingView]:
                 unit_notes=deepcopy(unit.get("unit_notes") or ""),
                 owner_unit_context=deepcopy(unit.get("owner_unit_context") or {}),
                 chapter_tool_materials=tools,
+                body_version=body_version,
+                chapter_responsibilities=(_chapter_responsibilities(chapters, aliases, chapter["chapter_id"], unit["unit_id"])
+                    if body_version == "chapter_coherence" else {}),
             ))
     return views
 
@@ -236,7 +286,7 @@ def run_legacy_units(book: Mapping[str, Any], *, output_dir: str | Path,
                      run: bool = False, retry_failed: bool = False,
                      client_factory=None, token_counter=None, quality_control: bool = False,
                      only_units: list[str] | None = None, article_edit: bool = False,
-                     reparse_saved: bool = False) -> dict[str, Any]:
+                     reparse_saved: bool = False, body_version: str = writer.DEFAULT_BODY_VERSION) -> dict[str, Any]:
     """Preview all units or resume exact requests; never silently re-charge.
 
     An injected factory is an offline testing seam. Production callers must use
@@ -248,16 +298,16 @@ def run_legacy_units(book: Mapping[str, Any], *, output_dir: str | Path,
                     thinking_budget=thinking_budget, budget_limit=budget_limit, run=run,
                     retry_failed=retry_failed, client_factory=client_factory,
                     token_counter=token_counter, quality_control=quality_control, only_units=only_units,
-                    article_edit=article_edit, reparse_saved=reparse_saved)
+                    article_edit=article_edit, reparse_saved=reparse_saved, body_version=body_version)
 
 
 def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
          run, retry_failed, client_factory, token_counter, quality_control=False, only_units=None,
-         article_edit=False, reparse_saved=False):
+         article_edit=False, reparse_saved=False, body_version=writer.DEFAULT_BODY_VERSION):
     if isinstance(budget_limit, bool) or not math.isfinite(budget_limit) or budget_limit <= 0:
         raise CandidateError("legacy_budget_must_be_finite_positive")
     profile = _profile(model, output_tokens, thinking_budget)
-    views = build_unit_views(book)
+    views = build_unit_views(book, body_version=body_version)
     full_keys = [f"{view.chapter_id}:{view.unit_id}" for view in views]
     requested_keys = list(dict.fromkeys(only_units)) if only_units else full_keys
     if any(key not in full_keys for key in requested_keys):
@@ -265,6 +315,9 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
     identity = {"schema_version": SCHEMA, "book_sha256": _hash(book), "profile": profile,
                 "budget_limit": budget_limit,
                 "prompt_sha256": _hash(writer.load_writer_prompt(planning_revision=True))}
+    if body_version != "baseline":
+        identity.update(body_version=body_version,
+            prompt_sha256=_hash(writer.load_writer_prompt(planning_revision=True) + writer.CHAPTER_COHERENCE_INSTRUCTIONS))
     binding = output / "RUN_IDENTITY.json"
     if binding.exists():
         existing_identity = _read(binding)
@@ -315,7 +368,10 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
               "estimated_all_units_cny": sum(row[3]["estimated_cost_cny"] for row in prepared),
               "material_preserved": True, "previous_body_context": False,
               "model_calls": 0, "units": [], "assembly": {}, "scientific_review_status": "not_run"}
-    report.update(quality_control=bool(quality_control), reparse_saved=bool(reparse_saved), requested_units=requested_keys,
+    report.update(body_version=body_version, effective_settings={"body_version": body_version,
+                  "quality_control": bool(quality_control), "article_edit": bool(article_edit),
+                  "model": model, "thinking_budget": thinking_budget, "output_tokens": output_tokens},
+                  quality_control=bool(quality_control), reparse_saved=bool(reparse_saved), requested_units=requested_keys,
                   requested_unit_count=len(requested_keys), full_unit_count=len(views),
                   estimated_requested_units_cny=sum(e["estimated_cost_cny"] for v, p, m, e, s, l in prepared
                       if f"{v.chapter_id}:{v.unit_id}" in requested_keys))
