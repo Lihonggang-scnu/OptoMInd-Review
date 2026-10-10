@@ -1352,6 +1352,43 @@ def _completion_envelope(response: Any) -> Mapping[str, Any]:
     raise UnitWritingError("completion_response_unreadable")
 
 
+def _completion_envelope_details(response: Any) -> tuple[Mapping[str, Any], str]:
+    """Preserve completion metadata when recovering a complete JSON envelope."""
+    if isinstance(response, Mapping):
+        if any(key in response for key in ("body_markdown", "table_markdown", "status", "covered_task_ids", "issues")):
+            return response, "object"
+        content = response.get("content")
+        if isinstance(content, str):
+            text = _strip_fences(content, json_envelope=True).strip()
+            if text.startswith("{"):
+                try:
+                    data = json.loads(text)
+                    if isinstance(data, Mapping):
+                        return data, "json"
+                except (TypeError, ValueError):
+                    pass
+                if response.get("complete") is True and response.get("finish_reason") == "stop" and text.endswith("}"):
+                    try:
+                        data = json.loads(text, strict=False)
+                        if isinstance(data, Mapping):
+                            return data, "json_literal_controls"
+                    except (TypeError, ValueError):
+                        pass
+                    from .chapter_arrangement import _escape_inner_json_quotes
+                    from json_repair import repair_json
+                    try:
+                        mechanical = json.loads(_escape_inner_json_quotes(text), strict=False)
+                        candidate = repair_json(text, return_objects=True, strict=True)
+                        if isinstance(candidate, Mapping) and candidate == mechanical:
+                            return candidate, "json_repair_quote_escape_crosschecked"
+                    except (ValueError, RecursionError):
+                        pass
+                # The old decoder may retain a useful body, but a partial JSON
+                # recovery must not invent an appended status or missing fields.
+                return _completion_envelope(response), "unverified_json_envelope"
+    return _completion_envelope(response), "legacy_completion_envelope"
+
+
 def _fenced_line_indices(text: str) -> set[int]:
     """Identify fenced code (including an unfinished fence), without unwrapping it."""
     hidden: set[int] = set()
@@ -1490,6 +1527,10 @@ def run_unit_completion(
         "pending": True,
         "model_status": "pending",
         "covered_task_ids": [],
+        "model_status_present": False,
+        "candidate_eligible": False,
+        "candidate_body_markdown": "",
+        "parsed_via": "unparsed",
         "content_review_status": "not_reviewed",
         "citation_scope": "completion_fragment",
         "issues": [],
@@ -1507,7 +1548,8 @@ def run_unit_completion(
         "call_error": call_error,
     }
     try:
-        envelope = _completion_envelope(response)
+        envelope, parsed_via = _completion_envelope_details(response)
+        result["parsed_via"] = parsed_via
         if any(isinstance(envelope.get(key), str) and envelope[key].strip()
                for key in ("body_markdown", "table_markdown")):
             fragment, normalization = _consume_unit_output(envelope)
@@ -1544,7 +1586,11 @@ def run_unit_completion(
         result["output_normalization"] = normalization
         result["completion_fragment"] = fragment
         status = str(envelope.get("status") or "").strip() or "pending"
+        result["model_status_present"] = "status" in envelope
         covered = envelope.get("covered_task_ids")
+        if ("covered_task_ids" in envelope and
+                (not isinstance(covered, Sequence) or isinstance(covered, (str, bytes, bytearray)))):
+            raise UnitWritingError("completion_covered_task_ids_invalid")
         result["covered_task_ids"] = [
             str(item) for item in covered
         ] if isinstance(covered, Sequence) and not isinstance(covered, (str, bytes, bytearray)) else []
@@ -1554,8 +1600,13 @@ def run_unit_completion(
         raw_issues = envelope.get("issues")
         result["issues"] = list(raw_issues) if isinstance(raw_issues, list) else ([raw_issues] if raw_issues else [])
         result["issues"].extend(item for item in normalization if item.get("code") == "table_markdown_missing_or_invalid")
-        result["model_status"] = status
+        result["model_status"] = status if result["model_status_present"] else ""
         result["response_envelope"] = dict(envelope)
+        if parsed_via in {"json_literal_controls", "json_repair_quote_escape_crosschecked"}:
+            result["issues"].append({"code": "completion_json_syntax_recovered", "parsed_via": parsed_via})
+        missing_metadata = [key for key in ("status", "covered_task_ids") if key not in envelope]
+        if missing_metadata:
+            result["issues"].append({"code": "completion_metadata_missing", "fields": missing_metadata})
         table_requested = bool(payload.get("table_tasks"))
         table_check = _markdown_table_check(fragment) if table_requested else {"valid": None}
         result["table_check"] = table_check
@@ -1568,6 +1619,8 @@ def run_unit_completion(
                 "finish_reason": result["finish_reason"],
                 "complete": result["complete"],
             })
+        elif parsed_via == "unverified_json_envelope":
+            result["issues"].append({"code": "completion_json_envelope_unverified"})
         elif status == "already_covered" and not fragment.strip():
             result["issues"].append({
                 "code": "model_already_covered",
@@ -1580,6 +1633,13 @@ def run_unit_completion(
                 "code": "completion_status_not_appended",
                 "status": status,
             })
+            if (not result["model_status_present"] and fragment.strip()
+                    and isinstance(response, Mapping) and response.get("complete") is True
+                    and response.get("finish_reason") == "stop"
+                    and parsed_via in {"object", "json", "json_literal_controls", "json_repair_quote_escape_crosschecked"}
+                    and (not table_requested or table_check["valid"])):
+                result["candidate_eligible"] = True
+                result["candidate_body_markdown"] = existing_body + ("" if not existing_body else "\n\n") + fragment
         elif not fragment.strip():
             result["issues"].append({"code": "completion_fragment_empty"})
         elif table_requested and not table_check["valid"]:
@@ -1619,6 +1679,10 @@ def write_unit_completion(
     (target / "ORIGINAL_BODY.md").write_bytes(original.encode("utf-8"))
     (target / "COMPLETION_FRAGMENT.md").write_text(fragment, encoding="utf-8")
     (target / "COMPLETED_BODY.md").write_bytes(completed.encode("utf-8"))
+    candidate_path = ""
+    if result.get("candidate_eligible"):
+        candidate_path = str(target / "CANDIDATE_BODY.md")
+        Path(candidate_path).write_bytes(str(result["candidate_body_markdown"]).encode("utf-8"))
     (target / "COMPLETION_MESSAGES.json").write_text(
         json.dumps(result.get("messages") or [], ensure_ascii=False, indent=2), encoding="utf-8")
     payload = result.get("payload") or {}
@@ -1642,7 +1706,11 @@ def write_unit_completion(
         "model": result.get("model") or "",
         "simulated": bool(result.get("simulated")),
         "pending": bool(result.get("pending", True)),
-        "model_status": result.get("model_status") or "pending",
+        "model_status": result.get("model_status", "pending"),
+        "model_status_present": bool(result.get("model_status_present")),
+        "candidate_eligible": bool(result.get("candidate_eligible")),
+        "candidate_body_path": candidate_path,
+        "parsed_via": result.get("parsed_via") or "unparsed",
         "covered_task_ids": list(result.get("covered_task_ids") or []),
         "table_check": result.get("table_check") or {},
         "content_review_status": "not_reviewed",

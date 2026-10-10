@@ -8,6 +8,7 @@ from optomind_research.runtime.upgrade3.review_unit_writer import (
     build_completion_payload,
     completion_messages,
     run_unit_completion,
+    write_unit_completion,
 )
 
 
@@ -157,6 +158,64 @@ def test_pending_status_fragment_is_candidate_only():
     assert result["body_markdown"] == "original"
     assert result["completion_fragment"] == "a useful candidate"
     assert any(item["code"] == "completion_status_not_appended" for item in result["issues"])
+
+
+def test_complete_completion_json_syntax_recovery_preserves_all_metadata():
+    data = {"body_markdown": 'SYNTHETIC "quoted" finding.\nSecond line.', "issues": [],
+            "status": "appended", "covered_task_ids": ["CH03_U01_P01"]}
+    raw = json.dumps(data).replace('\\"quoted\\"', '"quoted"').replace("\\n", "\n")
+    supplied = {"content": raw, "complete": True, "finish_reason": "stop"}
+    result = run_unit_completion(_view(), existing_body="original\r\nexact", task_ids=["CH03_U01_P01"],
+                                 client=FakeClient(supplied))
+    assert not result["pending"] and not result["candidate_eligible"]
+    assert result["body_markdown"] == "original\r\nexact\n\n" + data["body_markdown"]
+    assert result["model_status"] == "appended" and result["model_status_present"]
+    assert result["covered_task_ids"] == data["covered_task_ids"]
+    assert result["parsed_via"] == "json_repair_quote_escape_crosschecked"
+    assert any(item["code"] == "completion_json_syntax_recovered" for item in result["issues"])
+    assert supplied["content"] == raw
+
+
+def test_missing_metadata_valid_table_retained_for_post_assessment_only(tmp_path):
+    fragment = "| study | result |\n|---|---|\n| [P002] | SYNTHETIC supported |"
+    result = run_unit_completion(_view(), existing_body="original\r\nexact", task_ids=["CH03_U01_T01"],
+        client=FakeClient({"content": json.dumps({"body_markdown": fragment, "issues": []}),
+                           "complete": True, "finish_reason": "stop"}))
+    assert result["pending"] and result["candidate_eligible"]
+    assert result["body_markdown"] == "original\r\nexact"
+    assert result["candidate_body_markdown"] == "original\r\nexact\n\n" + fragment
+    assert result["covered_task_ids"] == [] and result["model_status"] == ""
+    assert not result["model_status_present"] and result["table_check"]["valid"] is True
+    report = write_unit_completion(_view(), result, tmp_path, estimate={}, language="en")
+    assert report["candidate_eligible"] and report["model_status"] == ""
+    assert (tmp_path / "CANDIDATE_BODY.md").read_bytes() == result["candidate_body_markdown"].encode("utf-8")
+    assert (tmp_path / "COMPLETED_BODY.md").read_bytes() == b"original\r\nexact"
+
+
+@pytest.mark.parametrize("case", ["pending", "blocked", "already_covered", "null_status", "length",
+                                  "incomplete", "empty", "invalid_ids", "invalid_id_type", "truncated_json"])
+def test_missing_metadata_candidate_gates_reject_explicit_or_incomplete_failures(case):
+    data = {"body_markdown": "SYNTHETIC useful candidate", "issues": []}
+    complete, finish = True, "stop"
+    if case in {"pending", "blocked", "already_covered"}:
+        data["status"] = case
+    elif case == "null_status":
+        data["status"] = None
+    elif case in {"length", "incomplete"}:
+        complete, finish = False, "length" if case == "length" else "stop"
+    elif case == "empty":
+        data["body_markdown"] = ""
+    elif case == "invalid_ids":
+        data["covered_task_ids"] = ["invented"]
+    elif case == "invalid_id_type":
+        data["covered_task_ids"] = "CH03_U01_P01"
+    raw = json.dumps(data)
+    if case == "truncated_json":
+        raw = raw[:-1]
+    result = run_unit_completion(_view(), existing_body="original", task_ids=["CH03_U01_P01"],
+        client=FakeClient({"content": raw, "complete": complete, "finish_reason": finish}))
+    assert result["pending"] and not result["candidate_eligible"]
+    assert result["body_markdown"] == "original" and not result["candidate_body_markdown"]
 
 
 def test_table_data_column_count_must_match_header():

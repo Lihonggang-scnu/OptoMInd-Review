@@ -102,6 +102,84 @@ def test_naturally_combined_tasks_no_forced_extra_paragraph(tmp_path):
     assert not result["changed"] and not result["pending_problems"]
 
 
+class CandidateFactory(Factory):
+    """Synthetic missing-envelope controls; no scientific acceptance claims."""
+    def __init__(self, post_finish="stop"):
+        super().__init__()
+        self.post_finish = post_finish
+
+    def __call__(self, role, path, profile):
+        original = super().__call__(role, path, profile)
+        def call(messages, **kwargs):
+            result = original(messages, **kwargs)
+            if role == "completion":
+                data = json.loads(result["content"])
+                data.pop("status")
+                data.pop("covered_task_ids")
+                data["issues"] = [{"code": "synthetic_scientific_issue_retained"}]
+                return response(data)
+            if role == "post_assessment":
+                data = json.loads(result["content"])
+                data["tasks"][1].update(status="partial", explanation="Synthetic remaining detail; not scientific acceptance")
+                data["issues"] = ["Synthetic post-check issue retained"]
+                return response(data, finish=self.post_finish)
+            return result
+        call.prompt_token_counter = counter
+        return call
+
+
+def test_missing_completion_metadata_adopted_only_after_existing_post_preserves_partial(tmp_path):
+    factory = CandidateFactory()
+    original = "SYNTHETIC A [P0001].\r\nexact prefix"
+    result = run_stage(tmp_path, factory, original)
+    assert [row[0] for row in factory.calls] == ["assessment", "completion", "post_assessment"]
+    assert result["body_markdown"] == original + "\n\nSYNTHETIC B [P0001]."
+    assert result["completion"]["pending"] and result["completion"]["candidate_eligible"]
+    assert result["completion"]["covered_task_ids"] == [] and result["completion"]["model_status"] == ""
+    assert result["completion_candidate"]["status"] == "adopted_pending_human_review"
+    assert result["status"] == "assessed_with_pending" and result["scientific_acceptance"] is False
+    assert {"code": "synthetic_scientific_issue_retained"} in result["completion"]["issues"]
+    assert any(row["code"] == "quality_task_partial" for row in result["pending_problems"])
+    assert any(row["code"] == "quality_assessor_issue" for row in result["pending_problems"])
+    resumed = run_stage(tmp_path, factory, original, reparse_saved=True)
+    assert resumed["model_calls"] == 0 and len(factory.calls) == 3
+    assert resumed["body_markdown"] == result["body_markdown"]
+
+
+def test_missing_completion_metadata_free_preview_then_only_post_missing(tmp_path):
+    seeded = run_stage(tmp_path / "seed", CandidateFactory())
+    output = tmp_path / "replay"
+    target = output / Path(seeded["output_dir"]).name
+    for name in ("assessment", "completion"):
+        shutil.copytree(Path(seeded["output_dir"]) / name, target / name)
+    paid = {path: path.read_bytes() for name in ("assessment", "completion")
+            for path in (target / name).glob("*.json") if path.name in {"RAW_RESPONSE.json", "REQUEST.json", "MESSAGES.json"}}
+    factory = CandidateFactory()
+    planned = run_stage(output, factory, run=False, reparse_saved=True)
+    assert planned["status"] == "planned" and planned["model_calls"] == 0 and not factory.calls
+    assert planned["body_markdown"] == "SYNTHETIC A [P0001]."
+    assert planned["completion_candidate"]["status"] == "awaiting_post_assessment"
+    assert Path(planned["completion"]["candidate_body_path"]).is_file()
+    completed = run_stage(output, factory, reparse_saved=True)
+    assert completed["model_calls"] == 1 and [row[0] for row in factory.calls] == ["post_assessment"]
+    assert completed["body_markdown"].endswith("SYNTHETIC B [P0001].")
+    assert all(path.read_bytes() == before for path, before in paid.items())
+    resumed = run_stage(output, factory, reparse_saved=True)
+    assert resumed["model_calls"] == 0 and len(factory.calls) == 1
+
+
+def test_missing_completion_metadata_failed_post_retains_original_and_candidate(tmp_path):
+    factory = CandidateFactory(post_finish="length")
+    result = run_stage(tmp_path, factory)
+    assert result["status"] == "pending"
+    assert result["body_markdown"] == "SYNTHETIC A [P0001]." and not result["changed"]
+    assert result["completion_candidate"]["status"] == "post_assessment_failed"
+    assert Path(result["completion"]["candidate_body_path"]).read_text(encoding="utf-8").endswith("SYNTHETIC B [P0001].")
+    resumed = run_stage(tmp_path, factory, reparse_saved=True)
+    assert resumed["model_calls"] == 0 and len(factory.calls) == 3
+    assert resumed["body_markdown"] == result["body_markdown"]
+
+
 def test_material_limited_does_not_force_completion(tmp_path):
     factory = Factory(first_status="material_limited")
     result = run_stage(tmp_path, factory)
@@ -616,6 +694,76 @@ def test_route_clears_repaired_table_code_and_keeps_scientific_issue(tmp_path):
     assert final["issues"] == [scientific] and row["pending_problems"] == [scientific]
     assert final["resolved_original_issues"] == [{"code": "markdown_table_missing_or_invalid"}]
     assert result["status"] == "restricted_draft"
+
+
+def test_explicit_real_saved_completion_recovery_only_offline_post_no_source_mutation(tmp_path):
+    """Optional paid RAW clones; only missing post uses labeled synthetic output."""
+    supplied = os.environ.get("OPTO_QUALITY_COMPLETION_FIXTURES")
+    if not supplied:
+        pytest.skip("Set OPTO_QUALITY_COMPLETION_FIXTURES to explicitly supplied read-only unit fixtures")
+    root = Path(supplied)
+    stages = sorted({path.parents[1] for path in root.glob("*/**/completion/RAW_RESPONSE.json")})
+    assert stages
+    for index, source in enumerate(stages):
+        before = {path.relative_to(source): path.read_bytes() for path in source.rglob("*") if path.is_file()}
+        payload = json.loads(before[Path("ORIGINAL_PAYLOAD.json")].decode("utf-8"))
+        identity = json.loads(before[Path("IDENTITY.json")].decode("utf-8"))
+        body = before[Path("ORIGINAL_BODY.md")].decode("utf-8")
+        completion_input = json.loads(json.loads(before[Path("completion/MESSAGES.json")].decode("utf-8"))[-1]["content"])
+        view = writer.UnitWritingView(chapter_id=payload["chapter_id"], unit_id=payload["unit_id"],
+            focus=payload["unit_focus"], unit_index=payload["unit_position"]["index"],
+            unit_count=payload["unit_position"]["of"], sibling_units=payload.get("sibling_units", []),
+            chapter_frame=payload.get("chapter_frame", {}), other_chapters=payload.get("other_chapters", []),
+            paragraph_tasks=payload["paragraph_tasks"], table_tasks=payload["table_tasks"],
+            materials=payload["sources"], sources={row["source_handle"]: row for row in payload["sources"]},
+            chapter_tool_materials=payload.get("chapter_tool_materials", []), unit_notes=payload.get("unit_notes", ""),
+            owner_unit_context=payload.get("owner_unit_context", {}))
+        output = tmp_path / f"explicit_saved_completion_offline_control_{index}"
+        clone = output / source.name
+        shutil.copytree(source, clone)
+        paid_names = [name for name in before if name.parent.name in {"assessment", "completion"}
+                      and name.name in {"RAW_RESPONSE.json", "REQUEST.json", "MESSAGES.json", "PROFILE.json"}]
+        calls = []
+        def offline_factory(role, path, profile):
+            assert role == "post_assessment", "Saved completion/assessment must not be called again"
+            def client(messages, **kwargs):
+                calls.append(role)
+                request = json.loads(messages[-1]["content"])
+                return response({"tasks": [{"task_id": row["task_id"], "status": "partial",
+                    "body_quote": request["actual_body_markdown"][:16], "material_handles": [],
+                    "explanation": "OFFLINE SYNTHETIC continuation wiring only; no scientific acceptance"}
+                    for row in request["task_catalog"]], "changes": [],
+                    "issues": ["OFFLINE SYNTHETIC post-check diagnostic retained"]})
+            client.prompt_token_counter = counter
+            return client
+        options = dict(payload=payload, existing_body=body, output_dir=output,
+            client_factory=offline_factory, token_counter=counter, language=payload["language"],
+            writer_profile=identity["author_profile"], experiment_label=identity["experiment_label"], reparse_saved=True)
+        planned = quality.run_unit_quality(view, run=False, **options)
+        assert planned["status"] == "planned" and planned["model_calls"] == 0 and not calls
+        assert planned["identity"] == identity
+        completion = planned["completion"]
+        if completion["candidate_eligible"]:
+            assert completion["pending"] and completion["covered_task_ids"] == []
+            assert planned["body_markdown"] == completion_input["existing_body_markdown"]
+            expected = Path(completion["candidate_body_path"]).read_bytes().decode("utf-8")
+            assert planned["completion_candidate"]["status"] == "awaiting_post_assessment"
+        else:
+            assert not completion["pending"] and completion["model_status"] == "appended"
+            assert completion["parsed_via"] == "json_repair_quote_escape_crosschecked"
+            expected = planned["body_markdown"]
+        completed = quality.run_unit_quality(view, run=True, **options)
+        assert calls == ["post_assessment"] and completed["model_calls"] == 1
+        assert completed["body_markdown"] == expected
+        assert completed["body_markdown"].startswith(completion_input["existing_body_markdown"] + "\n\n")
+        assert completed["scientific_acceptance"] is False and completed["status"] == "assessed_with_pending"
+        assert all(row["status"] == "partial" for row in completed["assessments"][-1]["report"]["tasks"])
+        assert all((clone / name).read_bytes() == before[name] for name in paid_names)
+        assert completed["reparse_saved"]["history_dir"]
+        resumed = quality.run_unit_quality(view, run=True, **options)
+        assert resumed["model_calls"] == 0 and calls == ["post_assessment"]
+        assert resumed["body_markdown"] == expected
+        assert all(path.read_bytes() == before[path.relative_to(source)] for path in source.rglob("*") if path.is_file())
 
 
 def test_explicit_real_saved_response_free_reparse_then_offline_missing_steps(tmp_path):

@@ -445,6 +445,7 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
         assessment = assess(existing_body, "assessment")
         if assessment is not None:
             body = existing_body
+            candidate_base = None
             if assessment["changes"]:
                 try:
                     body, summary["applied_edits"] = apply_evidence_edits(body, assessment["changes"], view)
@@ -474,6 +475,15 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
                     summary["completion"] = report
                     if not result["pending"]:
                         body = result["body_markdown"]
+                    elif result.get("candidate_eligible"):
+                        candidate_base, body = body, result["candidate_body_markdown"]
+                        summary["completion_candidate"] = {"status": "awaiting_post_assessment",
+                            "body_path": report["candidate_body_path"], "parsed_via": report["parsed_via"],
+                            "body_sha256": hashlib.sha256(body.encode("utf-8")).hexdigest(),
+                            "model_status_present": report["model_status_present"],
+                            "scientific_acceptance": False}
+                        summary["pending_problems"].append({"code": "quality_completion_candidate_metadata_missing",
+                            "issues": result["issues"], "note": "Candidate requires the existing post-assessment; no coverage inferred."})
                     else:
                         summary["pending_problems"].append({"code": "quality_completion_pending", "issues": result["issues"]})
                 else:
@@ -482,7 +492,21 @@ def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory
             summary["body_markdown"] = body
             summary["changed"] = body != existing_body
             if summary["changed"]:
-                assessment = assess(body, "post_assessment")
+                try:
+                    assessment = assess(body, "post_assessment")
+                except Exception:
+                    if candidate_base is not None:
+                        summary["body_markdown"] = candidate_base
+                        summary["changed"] = candidate_base != existing_body
+                        summary["completion_candidate"]["status"] = "post_assessment_failed"
+                    raise
+                if candidate_base is not None:
+                    if assessment is None:
+                        body = candidate_base
+                        summary["body_markdown"] = body
+                        summary["changed"] = body != existing_body
+                    else:
+                        summary["completion_candidate"]["status"] = "adopted_pending_human_review"
                 if assessment is not None and assessment["changes"]:
                     body, post_edits = _consume_post_edits(target, body, assessment["changes"], view)
                     summary["post_edits"] = post_edits
