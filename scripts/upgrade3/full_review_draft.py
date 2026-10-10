@@ -476,6 +476,55 @@ def scan_citations(text: str, identity: IdentityIndex) -> tuple[list[str], list[
     return canonical_order, unknown
 
 
+def normalize_bare_paper_handles(text: str, identity: IdentityIndex) -> tuple[str, list[dict[str, Any]]]:
+    """Bracket known explicit paper handles in the display projection only.
+
+    Positions refer to the unchanged input body, in Unicode characters. Code,
+    links, URLs, existing brackets and real Markdown tables stay untouched;
+    tables retain their separate source-column rendering path.
+    """
+    from optomind_research.runtime.upgrade3.review_unit_writer import _prose_segments
+
+    protected = [(match.start(), match.end()) for match in re.finditer(r"\[[^\]\n]*\]", text)]
+    protected.extend((match.start(), match.end()) for match in re.finditer(
+        r"(?:[A-Za-z][A-Za-z0-9+.-]*://|www\.)[^\s<>()]+", text))
+    lines = text.splitlines(keepends=True)
+    offset, table = 0, False
+    for index, line in enumerate(lines):
+        if index + 1 < len(lines) and "|" in line and _is_table_separator(lines[index + 1]):
+            table = True
+        elif table and "|" not in line:
+            table = False
+        if table:
+            protected.append((offset, offset + len(line)))
+        offset += len(line)
+
+    repairs: list[dict[str, Any]] = []
+    output: list[str] = []
+    offset = 0
+    for segment, prose in _prose_segments(text):
+        cursor = 0
+        if prose:
+            for match in HANDLE_RE.finditer(segment):
+                start, end = offset + match.start(), offset + match.end()
+                handle = match.group(0)
+                canonical = identity.reference_key(handle)
+                if (canonical is None or (start and text[start - 1] == "\\") or
+                        any(start < right and end > left for left, right in protected)):
+                    continue
+                replacement = f"[{handle}]"
+                output.extend((segment[cursor:match.start()], replacement))
+                cursor = match.end()
+                repairs.append({"start": start, "end": end,
+                    "line": text.count("\n", 0, start) + 1,
+                    "column": start - text.rfind("\n", 0, start),
+                    "original": handle, "replacement": replacement, "canonical_handle": canonical,
+                    "offset_basis": "input_body_unicode_characters"})
+        output.append(segment[cursor:])
+        offset += len(segment)
+    return "".join(output), repairs
+
+
 def replace_citations_numbered(
     text: str, identity: IdentityIndex, number_by_canonical: Mapping[str, int]
 ) -> str:
@@ -753,12 +802,16 @@ def assemble_documents(
 
     table_handle_replacements = 0
     unknown_table_handles: list[str] = []
+    bare_handle_repairs: list[dict[str, Any]] = []
     for chapter_index, (chapter_id, chapter_docs) in enumerate(by_chapter.items(), start=1):
         chapter_title = chapter_docs[0].chapter_title
         argument = chapter_docs[0].chapter_argument
         handle_parts = [f"## 第{chapter_index}章 {chapter_title}"]
         for unit_index, document in enumerate(chapter_docs, start=1):
-            clean = clean_unit_body(document.body)
+            projected, repairs = normalize_bare_paper_handles(document.body, identity)
+            bare_handle_repairs.extend({"chapter_id": chapter_id, "unit_id": document.job.unit_id,
+                "result_path": str(document.result_path), **repair} for repair in repairs)
+            clean = clean_unit_body(projected)
             title = resolved_title(document)
             normalized_handle, next_table_number = normalize_tables(
                 clean, table_number, title, document.table_purposes
@@ -777,6 +830,8 @@ def assemble_documents(
                 "pending_problem": document.pending_problem,
                 "completion_status": str(document.result.get("completion_status") or ""),
                 "issues": _issue_details(document.result.get("issues")),
+                "bare_handle_replacements": len(repairs),
+                "bare_handle_repairs": repairs,
                 **_citation_diagnostics(document.result),
             })
         handle_chapters[chapter_id] = "\n".join(handle_parts).strip() + "\n"
@@ -822,10 +877,10 @@ def assemble_documents(
         numeric_chapters[chapter_id] = "\n".join(numeric_parts).strip() + "\n"
     references: list[dict[str, Any]] = []
     used_by_reference: dict[str, list[str]] = {}
-    citation_texts = [document.body for document in documents]
+    citation_texts = [text for _, _, text, _ in prepared]
     citation_texts.extend(item for item in (front_matter, back_matter) if item)
     for citation_text in citation_texts:
-        for handle in citation_handles(citation_text):
+        for handle in [*citation_handles(citation_text), *_table_source_handles(citation_text)]:
             canonical = identity.reference_key(handle)
             if canonical:
                 used_by_reference.setdefault(canonical, [])
@@ -857,6 +912,8 @@ def assemble_documents(
         "unknown_citations": unknown_citations,
         "table_count": table_number - 1,
         "table_handle_replacements": table_handle_replacements,
+        "bare_handle_replacements": len(bare_handle_repairs),
+        "bare_handle_repairs": bare_handle_repairs,
         "unknown_table_handles": unknown_table_handles,
         "unit_rows": unit_rows,
     }
@@ -1038,6 +1095,7 @@ def _report_markdown(summary: Mapping[str, Any]) -> str:
         f"- 全文统一表号：{summary.get('table_count', 0)} 张",
         f"- 未能映射的原始引用 handle：{', '.join(summary.get('unknown_citations') or []) or '无'}",
         f"- 表格来源栏已换正式编号：{summary.get('table_handle_replacements', 0)} 处；未能映射表格句柄：{', '.join(summary.get('unknown_table_handles') or []) or '无'}",
+        f"- 展示正文已规范已知裸论文句柄：{summary.get('bare_handle_replacements', 0)} 处；原文字符位置记录在 ASSEMBLY_SUMMARY.json",
         "",
         "## 单元状态",
         "",
@@ -1169,6 +1227,8 @@ def run(args: argparse.Namespace) -> int:
         "catalog_papers": len(all_canonicals),
         "table_count": assembled["table_count"],
         "table_handle_replacements": assembled.get("table_handle_replacements", 0),
+        "bare_handle_replacements": assembled.get("bare_handle_replacements", 0),
+        "bare_handle_repairs": assembled.get("bare_handle_repairs", []),
         "unknown_table_handles": unknown_table_handles,
         "unknown_citations": assembled["unknown_citations"],
         "planning_status": planning_status,
