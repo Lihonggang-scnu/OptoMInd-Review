@@ -108,7 +108,7 @@ def test_network_free_production_assembly_preserves_title_and_alias_identity(tmp
     result = route.run_legacy_units(data, output_dir=tmp_path, run=True, client_factory=factory, output_tokens=256, thinking_budget=0)
     assert result["assembly"]
     files = list((tmp_path / "assembled").glob("*.md"))
-    rendered = "\n".join(p.read_text() for p in files)
+    rendered = "\n".join(p.read_text(encoding="utf-8") for p in files)
     assert "Title" in rendered
     assert "SYNTHETIC TEST ONLY" in rendered
     references = __import__("json").loads((tmp_path / "assembled" / "REFERENCES.json").read_text())

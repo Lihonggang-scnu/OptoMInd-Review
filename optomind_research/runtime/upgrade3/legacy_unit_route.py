@@ -16,7 +16,7 @@ from typing import Any, Mapping
 
 from . import review_unit_writer as writer
 from .fullbody_contracts import _chapter_rows, _source_records, fullbody_task_catalog
-from .module4.runtime import invoke_client, model_pricing
+from .module4.runtime import invoke_client, model_pricing, recover_qwen_stream
 from .portable_paths import portable_component
 from .writer_candidates import _output_lock
 from .writer_candidates_contracts import CandidateError, _handles
@@ -157,10 +157,13 @@ class _CaptureClient:
             response = invoke_client(self.client, messages, call_id=self.call_id, **kwargs)
         except Exception as exc:
             record = getattr(exc, "record", None)
+            if isinstance(record, Mapping):
+                record = {**record, "complete": False}
+                exc.record = record
             _write(self.attempt / "ERROR.json", {"type": type(exc).__name__,
                    "error": str(exc), "record": record})
             if isinstance(record, Mapping) and record.get("content"):
-                _write(self.attempt / "RAW_RESPONSE.json", {**record, "complete": False})
+                _write(self.attempt / "RAW_RESPONSE.json", record)
             raise
         _write(self.attempt / "RAW_RESPONSE.json", response)
         return response
@@ -169,6 +172,9 @@ class _CaptureClient:
 def _parse_raw(view, payload, profile, attempt, language, estimate, client=None, *, token_counter=None, mode="live"):
     if client is None:
         raw = _read(attempt / "RAW_RESPONSE.json")
+        returned_model = raw.get("returned_model") or raw.get("model")
+        if returned_model and returned_model != profile["model"]:
+            raise CandidateError("legacy_recovered_model_mismatch")
         client = lambda messages, **kwargs: deepcopy(raw)
         client.prompt_token_counter = token_counter
     result = writer.run_unit_writing(
@@ -186,9 +192,13 @@ def _parse_raw(view, payload, profile, attempt, language, estimate, client=None,
         citation_diagnostics=result, effective_request=result.get("effective_request"),
         cap_pressure=result.get("cap_pressure"))
     saved["execution_mode"] = mode
+    # Keep the seal and assembler local to this attempt after moving a tree.
+    body_path = Path(saved["body_path"])
+    saved["body_path"] = body_path.name
+    saved["raw_response"] = "RAW_RESPONSE.json"
     _write(attempt / "UNIT_RESULT.json", saved)
     _write(attempt / "RESULT_SEAL.json", {"sha256": _hash(saved),
-           "body_file_sha256": hashlib.sha256(Path(saved["body_path"]).read_bytes()).hexdigest()})
+           "body_file_sha256": hashlib.sha256(body_path.read_bytes()).hexdigest()})
     return saved
 
 
@@ -212,17 +222,29 @@ def run_legacy_units(book: Mapping[str, Any], *, output_dir: str | Path,
 
 def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
          run, retry_failed, client_factory, token_counter):
-    if isinstance(budget_limit, bool) or not math.isfinite(budget_limit) or budget_limit <= 0 or budget_limit > 30:
-        raise CandidateError("legacy_budget_must_be_finite_positive_and_at_most_30_cny")
+    if isinstance(budget_limit, bool) or not math.isfinite(budget_limit) or budget_limit <= 0:
+        raise CandidateError("legacy_budget_must_be_finite_positive")
     profile = _profile(model, output_tokens, thinking_budget)
     views = build_unit_views(book)
     identity = {"schema_version": SCHEMA, "book_sha256": _hash(book), "profile": profile,
-                "budget_limit": budget_limit, "code_sha256": _code_hash(),
+                "budget_limit": budget_limit,
                 "prompt_sha256": _hash(writer.load_writer_prompt(planning_revision=True))}
     binding = output / "RUN_IDENTITY.json"
-    if binding.exists() and _read(binding) != identity:
-        raise CandidateError("legacy_output_identity_changed:use_a_new_output_directory")
-    _write(binding, identity)
+    if binding.exists():
+        existing_identity = _read(binding)
+        if {key: value for key, value in existing_identity.items() if key != "code_sha256"} != identity:
+            raise CandidateError("legacy_output_identity_changed:use_a_new_output_directory")
+        # Preserve historical stage keys, whose original identity included code.
+        identity = existing_identity
+    else:
+        _write(binding, identity)
+    provenance = output / "CODE_PROVENANCE.json"
+    current_code = _code_hash()
+    original_code = (_read(provenance).get("generation_code_sha256") if provenance.is_file()
+                     else identity.get("code_sha256") or current_code)
+    _write(provenance, {"current_code_sha256": current_code,
+            "generation_code_sha256": original_code,
+            "generation_identity_sha256": _hash(identity)})
     _write(output / "FULL_BODY_INPUT.json", book)
     mode = getattr(client_factory, "execution_mode", "injected" if client_factory else "preview")
     execution_path = output / "EXECUTION_MODE.json"
@@ -273,6 +295,15 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
         latest_partial = None
         for attempt in reversed(attempts):
             result_path = attempt / "UNIT_RESULT.json"
+            if not (attempt / "RAW_RESPONSE.json").exists() and (not result_path.exists() or not (attempt / "RESULT_SEAL.json").exists()):
+                streams = sorted((attempt / "transport").glob("*.sse.*"))
+                if streams:
+                    if len(streams) != 1:
+                        raise CandidateError("legacy_ambiguous_raw_stream:" + str(attempt))
+                    request = _read(attempt / "REQUEST.json")
+                    if request != {"profile": profile, "messages_sha256": _hash(messages)}:
+                        raise CandidateError("legacy_raw_request_identity_mismatch")
+                    _write(attempt / "RAW_RESPONSE.json", recover_qwen_stream(streams[0]))
             if (not result_path.exists() or not (attempt / "RESULT_SEAL.json").exists()) and (attempt / "RAW_RESPONSE.json").exists():
                 try:
                     _parse_raw(view, payload, profile, attempt, language, estimate, token_counter=token_counter, mode=mode)
@@ -281,9 +312,14 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
             if result_path.exists():
                 result = _read(result_path)
                 seal = attempt / "RESULT_SEAL.json"
+                # Old seals store absolute paths. Resolve only the known local
+                # body filename so migration cannot import another run's body.
+                body_name = "UNIT_BODY.simulated.md" if result.get("simulated") else "UNIT_BODY.md"
+                stored_body = Path(result.get("body_path", ""))
+                body_path = attempt / body_name
                 if (not seal.exists() or _read(seal).get("sha256") != _hash(result)
-                        or not Path(result["body_path"]).is_file()
-                        or _read(seal).get("body_file_sha256") != hashlib.sha256(Path(result["body_path"]).read_bytes()).hexdigest()):
+                        or stored_body.name != body_name or not body_path.is_file()
+                        or _read(seal).get("body_file_sha256") != hashlib.sha256(body_path.read_bytes()).hexdigest()):
                     raise CandidateError("legacy_cached_result_integrity_failure:" + str(attempt))
                 if latest_partial is None:
                     latest_partial = (attempt, result)

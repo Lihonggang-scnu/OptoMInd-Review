@@ -8,6 +8,7 @@ previous-body prefix is used by this route.
 """
 from __future__ import annotations
 
+from contextlib import closing
 import argparse
 import json
 import math
@@ -25,14 +26,16 @@ from scripts.upgrade3.writer_candidates import make_live_factory, tokenizer_coun
 
 def parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--input", required=True, help="Current lossless FULL_BODY_INPUT.json")
-    p.add_argument("--output-dir", required=True, help="Dedicated preview/run/resume directory")
+    p.add_argument("--input", help="Current lossless FULL_BODY_INPUT.json")
+    p.add_argument("--output-dir", help="Dedicated preview/run/resume directory")
     p.add_argument("--model", choices=("qwen3.5-plus",), default="qwen3.5-plus")
     p.add_argument("--output-tokens", type=int, default=32768)
     p.add_argument("--thinking-budget", type=int, default=8192)
     p.add_argument("--budget-limit", type=float, default=30.0,
                    help="Absolute lifetime CNY cap of this separate experiment, never an increment")
     p.add_argument("--ledger", help="Explicit dedicated SQLite ledger, required with --run; reuse for all resumes")
+    p.add_argument("--budget-scope", help="Explicit experiment identity shared across input subsets and holdout books; immutable for this ledger")
+    p.add_argument("--reconcile-receipt", help="Audit and settle an existing open hold from a local JSON receipt; no provider calls")
     p.add_argument("--run", action="store_true", help="Explicitly allow live provider calls")
     p.add_argument("--retry-failed", action="store_true", help="Permit a new charged attempt for pending units")
     p.add_argument("--key-file", help="Local credential file; not read in preview, never copied")
@@ -47,7 +50,7 @@ def _ledger_snapshot(ledger: Path, marker: Path, scope: dict) -> dict:
     if not marker.is_file() or _read(marker) != scope:
         raise ValueError("legacy_ledger_scope_conflict:retain_existing_budget_and_reconcile")
     try:
-        with sqlite3.connect(ledger.as_uri() + "?mode=ro", uri=True) as db:
+        with closing(sqlite3.connect(ledger.as_uri() + "?mode=ro", uri=True)) as db:
             row = db.execute("SELECT value FROM budget_meta WHERE key='limit_cny'").fetchone()
             if row is None or not math.isfinite(float(row[0])) or float(row[0]) != scope["budget_limit_cny"]:
                 raise ValueError("legacy_stored_budget_limit_changed")
@@ -75,14 +78,31 @@ def _ledger_snapshot(ledger: Path, marker: Path, scope: dict) -> dict:
 
 
 def _dedicated_factory(args, book, counter):
-    if not math.isfinite(args.budget_limit) or args.budget_limit <= 0 or args.budget_limit > 30:
-        raise ValueError("legacy_budget_must_be_finite_positive_and_at_most_30_cny")
+    if not math.isfinite(args.budget_limit) or args.budget_limit <= 0:
+        raise ValueError("legacy_budget_must_be_finite_positive")
     if not args.ledger:
         raise ValueError("legacy_run_requires_explicit_dedicated_ledger:reuse_for_every_resume")
     ledger = Path(args.ledger).expanduser().resolve()
     marker = ledger.with_name(ledger.name + ".legacy-route.json")
     scope = {"route": "legacy_unit_writer", "ledger_path": str(ledger),
-             "book_sha256": _hash(book), "budget_limit_cny": args.budget_limit}
+             "budget_limit_cny": args.budget_limit}
+    if args.budget_scope is not None:
+        if not args.budget_scope.strip():
+            raise ValueError("legacy_budget_scope_must_be_nonempty")
+        scope["experiment_scope"] = args.budget_scope
+    else:
+        scope["book_sha256"] = _hash(book)
+    output = Path(args.output_dir).expanduser().resolve()
+    binding = output / "BUDGET_BINDING.json"
+    if binding.exists() and _read(binding) != scope:
+        raise ValueError("legacy_output_ledger_changed:legacy_ledger_scope_conflict:no_budget_reset")
+    # Upgrade old output directories only when the existing run receipt names
+    # the same ledger. A new ledger must never turn a resume into a new budget.
+    report_path = output / "RUN_REPORT.json"
+    if not binding.exists() and report_path.is_file():
+        old_ledger = (_read(report_path).get("ledger") or {}).get("ledger_path")
+        if old_ledger and Path(old_ledger).resolve() != ledger:
+            raise ValueError("legacy_output_ledger_changed:no_budget_reset")
     # The same ledger remains valid when code fixes require a new output root.
     # Never adopt, reset, migrate or raise an earlier experiment's budget.
     if ledger.exists() and not marker.exists():
@@ -98,6 +118,7 @@ def _dedicated_factory(args, book, counter):
         GlobalBudgetLedger(limit_cny=args.budget_limit, path=ledger)
         _write(marker, scope)
     _ledger_snapshot(ledger, marker, scope)
+    _write(binding, scope)
     args.budget_ledger = str(ledger)
     args.responses = None
     args.allow_max = False
@@ -107,13 +128,7 @@ def _dedicated_factory(args, book, counter):
         return _ledger_snapshot(ledger, marker, scope)
 
     def guarded_factory(role, attempt, profile):
-        prior = snapshot()
-        if any(row["status"] in {"reserved", "uncertain"} or row["actual_cny"] is None
-               for row in prior["reservations"]):
-            from optomind_research.runtime.upgrade3.module4.runtime import QwenTransportError
-            raise QwenTransportError("legacy_unsettled_budget_requires_receipt_reconciliation",
-                                     record={"actual_cny": prior["actual_cny"],
-                                             "reserved_cny": prior["reserved_cny"]})
+        snapshot()  # Validate durable ownership; reserve atomically enforces cap.
         return base_factory(role, attempt, profile)
 
     guarded_factory.execution_mode = "live"
@@ -122,7 +137,29 @@ def _dedicated_factory(args, book, counter):
 
 
 def main(argv=None) -> int:
-    args = parser().parse_args(argv)
+    argument_parser = parser()
+    args = argument_parser.parse_args(argv)
+    if args.reconcile_receipt:
+        if not args.ledger or args.run or args.retry_failed:
+            argument_parser.error("--reconcile-receipt requires --ledger and forbids live/retry flags")
+        ledger = Path(args.ledger).expanduser().resolve()
+        marker = ledger.with_name(ledger.name + ".legacy-route.json")
+        if not marker.is_file():
+            raise ValueError("legacy_reconciliation_requires_owned_ledger")
+        scope = _read(marker)
+        if scope.get("route") != "legacy_unit_writer" or scope.get("ledger_path") != str(ledger):
+            raise ValueError("legacy_ledger_scope_conflict")
+        _ledger_snapshot(ledger, marker, scope)
+        from optomind_research.runtime.upgrade3.module4.runtime import GlobalBudgetLedger
+        receipt = _read(Path(args.reconcile_receipt).expanduser().resolve())
+        audit = GlobalBudgetLedger(path=ledger).reconcile(
+            receipt["reservation_id"], receipt["actual_cny"], evidence=receipt["evidence"],
+            actor=receipt["actor"], reason=receipt["reason"])
+        print(json.dumps({"reconciliation": audit, "ledger": _ledger_snapshot(ledger, marker, scope)},
+                         ensure_ascii=False, indent=2))
+        return 0
+    if not args.input or not args.output_dir:
+        argument_parser.error("--input and --output-dir are required for preview/run/resume")
     book = _read(Path(args.input).expanduser().resolve())
     counter, tokenizer = tokenizer_counter(args.tokenizer)
     # make_live_factory is lazy. Even --run does not read credentials until a

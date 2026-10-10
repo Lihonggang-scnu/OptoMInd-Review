@@ -287,7 +287,12 @@ def load_unit_document(job: Job, result_path: Path, arrangement: Mapping[str, An
     body_path_value = str(result.get("body_path") or "").strip()
     if body_path_value:
         body_path = Path(body_path_value)
-        if not body_path.is_absolute():
+        # A moved run can retain sealed historical absolute metadata. Prefer
+        # its same-attempt body rather than another tree at the old address.
+        local_body = result_path.parent / "UNIT_BODY.md"
+        if body_path.name == local_body.name and local_body.is_file():
+            body_path = local_body
+        elif not body_path.is_absolute():
             body_path = result_path.parent / body_path
         if body_path.is_file():
             body = body_path.read_text(encoding="utf-8", errors="replace")

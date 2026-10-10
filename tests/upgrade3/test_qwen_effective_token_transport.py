@@ -260,9 +260,60 @@ class EffectiveTokenTransportTests(unittest.TestCase):
                 self.invoke(client, opener=opener, stream=True, call_id="stream-error")
             self.assertEqual(caught.exception.record["transport_phase"], "stream_event")
             self.assertGreater(caught.exception.record["partial_content_bytes"], 0)
+            self.assertEqual(caught.exception.record["content"], "partial")
+            self.assertEqual(caught.exception.record["request_id"], "stream-error")
+            self.assertFalse(caught.exception.record["complete"])
+            self.assertFalse(caught.exception.record["stream_done"])
+            self.assertTrue(caught.exception.record["raw_stream_sha256"])
             row = ledger.as_dict()["reservations"][0]
             self.assertEqual(row["status"], "uncertain")
             self.assertTrue(list(Path(temp).glob("*.sse.partial")))
+
+    def test_stop_done_without_usage_keeps_complete_text_and_full_billing_hold(self):
+        lines = [
+            b'data: {"id":"unknown-bill","model":"qwen3.5-plus","choices":[{"delta":{"content":"Complete text","reasoning_content":"reason"},"finish_reason":"stop"}]}\n\n',
+            b"data: [DONE]\n\n",
+        ]
+        with tempfile.TemporaryDirectory() as temp:
+            ledger = runtime.GlobalBudgetLedger(limit_cny=60)
+            client = runtime.QwenDirectClient(model="qwen3.5-plus", json_mode=False,
+                raw_response_dir=Path(temp), budget_ledger=ledger, max_retries=0,
+                prompt_token_counter=lambda *_: 100)
+            opener = StreamOpener(lines)
+            _, result = self.invoke(client, opener=opener, stream=True, call_id="no-usage")
+            self.assertEqual(len(opener.bodies), 1)
+            self.assertTrue(result["complete"])
+            self.assertTrue(result["stream_done"])
+            self.assertEqual(result["usage"], {})
+            self.assertEqual(result["reasoning_content"], "reason")
+            row = ledger.as_dict()["reservations"][0]
+            self.assertEqual(row["status"], "uncertain")
+            self.assertIsNone(row["actual_cny"])
+            self.assertEqual(ledger.reserved_cny, row["amount_cny"])
+            recovered = runtime.recover_qwen_stream(result["raw_stream_path"])
+            self.assertTrue(recovered["complete"])
+            self.assertEqual(recovered["content"], result["content"])
+            self.assertEqual(recovered["raw_response_sha256"], result["raw_response_sha256"])
+
+    def test_reconcile_requires_evidence_and_matches_original_request(self):
+        ledger = runtime.GlobalBudgetLedger(limit_cny=60)
+        hold = ledger.reserve(10, "unknown")
+        ledger.settle(hold["reservation_id"], None, uncertain=True,
+                      telemetry={"request_id": "original"})
+        with self.assertRaisesRegex(runtime.QwenTransportError, "evidence_required"):
+            ledger.reconcile(hold["reservation_id"], 0, evidence={}, actor="operator", reason="unknown")
+        evidence = {"source": "provider-receipt", "receipt_id": "receipt", "request_id": "wrong"}
+        with self.assertRaisesRegex(runtime.QwenTransportError, "identity_mismatch"):
+            ledger.reconcile(hold["reservation_id"], 1, evidence=evidence, actor="operator", reason="verified")
+        self.assertEqual(ledger.reserved_cny, 10)
+        evidence["request_id"] = "original"
+        audit = ledger.reconcile(hold["reservation_id"], 1, evidence=evidence, actor="operator", reason="verified")
+        self.assertEqual(audit, ledger.reconcile(hold["reservation_id"], 1,
+            evidence=evidence, actor="operator", reason="verified"))
+        self.assertEqual(ledger.actual_cny, 1)
+        self.assertEqual(ledger.reserved_cny, 0)
+        with self.assertRaisesRegex(runtime.QwenTransportError, "reconciliation_conflict"):
+            ledger.reconcile(hold["reservation_id"], 2, evidence=evidence, actor="operator", reason="verified")
 
     def test_stream_socket_timeout_records_read_phase(self):
         class TimeoutResponse(FakeStreamResponse):

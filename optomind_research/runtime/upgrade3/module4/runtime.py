@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import sqlite3
 import socket
@@ -18,6 +19,7 @@ import time
 import urllib.error
 import urllib.request
 import uuid
+from contextlib import closing
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
@@ -287,7 +289,8 @@ def _uncertain_telemetry(error: QwenTransportError, *, key_index: int, attempt: 
         "attempt": attempt + 1,
         "effective_request": dict(effective_request or {}),
     }
-    for key in ("stream", "transport_events", "transport_phase", "partial_raw_path", "raw_stream_path"):
+    for key in ("usage", "returned_model", "finish_reason", "request_id", "raw_response_sha256",
+                "stream_done", "stream_event_count", "stream", "transport_events", "transport_phase", "partial_raw_path", "raw_stream_path"):
         if key in error.record:
             telemetry[key] = error.record[key]
     return telemetry
@@ -378,6 +381,7 @@ def _stream_event_record(
 def _stream_response(
     response: Any, *, started: float, observer: Any, raw_path: Path,
     overall_timeout_seconds: float, inactivity_timeout_seconds: float | None = None,
+    persist_raw: bool = True,
 ) -> dict[str, Any]:
     """Read Qwen SSE without treating partial content as a completed answer."""
 
@@ -394,7 +398,7 @@ def _stream_response(
     content_bytes = 0
     reasoning_bytes = 0
     raw_path.parent.mkdir(parents=True, exist_ok=True)
-    raw_handle = raw_path.open("wb")
+    raw_handle = raw_path.open("wb") if persist_raw else None
     inactivity_timeout = (
         max(0.1, float(inactivity_timeout_seconds))
         if inactivity_timeout_seconds is not None
@@ -430,19 +434,39 @@ def _stream_response(
                 except (OSError, ValueError):
                     continue
 
+    def snapshot() -> dict[str, Any]:
+        content, reasoning = "".join(content_parts), "".join(reasoning_parts)
+        normalized = {
+            "id": request_id or None, "model": returned_model or None,
+            "choices": [{"message": {"content": content,
+                **({"reasoning_content": reasoning} if reasoning else {})},
+                "finish_reason": finish_reason}], "usage": dict(usage),
+        }
+        return {
+            "content": content, "reasoning_content": reasoning,
+            "finish_reason": finish_reason, "usage": dict(usage),
+            "returned_model": returned_model, "request_id": request_id,
+            "complete": done and finish_reason == "stop" and bool(content),
+            "stream_done": done, "stream_event_count": event_count,
+            "event_count": event_count, "normalized": normalized,
+            "normalized_response": normalized,
+            "raw_response": bytes(raw_bytes).decode("utf-8", errors="replace"),
+            "raw_response_sha256": hashlib.sha256(raw_bytes).hexdigest(),
+            "raw_stream_sha256": hashlib.sha256(raw_bytes).hexdigest(),
+            "raw_stream_path": str(raw_path), "partial_raw_path": str(raw_path),
+            "partial_raw_bytes": len(raw_bytes),
+            "partial_content_bytes": content_bytes,
+            "partial_reasoning_bytes": reasoning_bytes,
+        }
+
     def fail(reason: str, *, stage: str, **fields: Any) -> None:
         emit("stream_error", reason=reason, phase=stage, **fields)
         raise QwenTransportError(
             reason,
             transient=False,
             record={
+                **snapshot(), "complete": False, "partial_error": reason,
                 "transport_phase": stage,
-                "stream_event_count": event_count,
-                "stream_done": done,
-                "partial_raw_path": str(raw_path),
-                "partial_raw_bytes": len(raw_bytes),
-                "partial_content_bytes": content_bytes,
-                "partial_reasoning_bytes": reasoning_bytes,
             },
         )
 
@@ -525,8 +549,9 @@ def _stream_response(
                 break
             first_wire_byte = not raw_bytes
             raw_bytes.extend(line)
-            raw_handle.write(line)
-            raw_handle.flush()
+            if raw_handle is not None:
+                raw_handle.write(line)
+                raw_handle.flush()
             if first_wire_byte:
                 emit("stream_first_byte", bytes=len(line))
             stripped = line.rstrip(b"\r\n")
@@ -543,35 +568,28 @@ def _stream_response(
         if not done:
             fail("qwen_stream_incomplete", stage="stream_eof", event_count=event_count)
     finally:
-        raw_handle.close()
+        if raw_handle is not None:
+            raw_handle.close()
     if finish_reason != "stop" or not content_parts:
         fail("qwen_stream_incomplete", stage="stream_terminal", finish_reason=finish_reason, event_count=event_count)
-    if not usage or not any(usage.get(key) is not None for key in ("completion_tokens", "output_tokens")):
-        fail("qwen_stream_usage_missing", stage="stream_terminal", event_count=event_count)
-    normalized = {
-        "id": request_id or None,
-        "model": returned_model or None,
-        "choices": [{
-            "message": {
-                "content": "".join(content_parts),
-                **({"reasoning_content": "".join(reasoning_parts)} if reasoning_parts else {}),
-            },
-            "finish_reason": finish_reason,
-        }],
-        "usage": usage,
-    }
-    emit("stream_complete", event_count=event_count, content_bytes=content_bytes, reasoning_bytes=reasoning_bytes, usage_present=True)
-    return {
-        "raw_bytes": bytes(raw_bytes),
-        "normalized": normalized,
-        "content": "".join(content_parts),
-        "reasoning_content": "".join(reasoning_parts),
-        "usage": usage,
-        "finish_reason": finish_reason,
-        "returned_model": returned_model,
-        "request_id": request_id,
-        "event_count": event_count,
-    }
+    # Text completion and billing evidence are independent. The caller keeps
+    # the entire reservation held when the provider omits usage.
+    emit("stream_complete", event_count=event_count, content_bytes=content_bytes,
+         reasoning_bytes=reasoning_bytes, usage_present=bool(usage))
+    return {**snapshot(), "raw_bytes": bytes(raw_bytes)}
+
+
+def recover_qwen_stream(raw_path: str | Path) -> dict[str, Any]:
+    """Reparse local SSE through the live parser without modifying evidence."""
+    path = Path(raw_path)
+    with path.open("rb") as response:
+        try:
+            result = _stream_response(response, started=time.monotonic(), observer=None,
+                raw_path=path, overall_timeout_seconds=3600, persist_raw=False)
+            result.pop("raw_bytes", None)
+            return result
+        except QwenTransportError as exc:
+            return dict(exc.record)
 
 
 class MissingCredentialError(QwenTransportError):
@@ -589,11 +607,15 @@ class GlobalBudgetLedger:
     path: Path | None = None
 
     def __post_init__(self) -> None:
+        if self.limit_cny is not None and (isinstance(self.limit_cny, bool)
+                or not math.isfinite(float(self.limit_cny)) or float(self.limit_cny) <= 0):
+            raise QwenTransportError("finite_positive_budget_limit_required")
         if self.path:
             self.path = Path(self.path)
             self.path.parent.mkdir(parents=True, exist_ok=True)
-            with sqlite3.connect(self.path) as db:
+            with closing(sqlite3.connect(self.path)) as db:
                 db.execute("CREATE TABLE IF NOT EXISTS budget_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+                db.execute("CREATE TABLE IF NOT EXISTS budget_reconciliations (reservation_id TEXT PRIMARY KEY, evidence_sha256 TEXT NOT NULL, audit_json TEXT NOT NULL, reconciled_at REAL NOT NULL)")
                 db.execute("CREATE TABLE IF NOT EXISTS reservations (reservation_id TEXT PRIMARY KEY, call_id TEXT NOT NULL, amount_cny REAL NOT NULL, actual_cny REAL, status TEXT NOT NULL, created_at REAL NOT NULL, usage_json TEXT, returned_model TEXT, finish_reason TEXT, request_id TEXT, raw_response_sha256 TEXT, status_code INTEGER)")
                 columns = {row[1] for row in db.execute("PRAGMA table_info(reservations)").fetchall()}
                 for name, sql_type in (("usage_json", "TEXT"), ("returned_model", "TEXT"), ("finish_reason", "TEXT"), ("request_id", "TEXT"), ("raw_response_sha256", "TEXT"), ("status_code", "INTEGER"), ("provider_error_code", "TEXT"), ("key_index", "INTEGER"), ("attempt", "INTEGER"), ("request_metadata_json", "TEXT")):
@@ -609,7 +631,7 @@ class GlobalBudgetLedger:
     def _refresh_from_db(self) -> None:
         if not self.path:
             return
-        with sqlite3.connect(self.path) as db:
+        with closing(sqlite3.connect(self.path)) as db:
             row = db.execute("SELECT value FROM budget_meta WHERE key='limit_cny'").fetchone()
             if row:
                 stored_limit = float(row[0])
@@ -621,10 +643,12 @@ class GlobalBudgetLedger:
             self.actual_cny = float(row[0] or 0.0)
 
     def reserve(self, amount_cny: float, call_id: str) -> dict[str, Any]:
-        amount = max(0.0, float(amount_cny))
+        amount = float(amount_cny)
+        if isinstance(amount_cny, bool) or not math.isfinite(amount) or amount < 0:
+            raise QwenTransportError("invalid_budget_reservation_amount")
         if self.path:
             reservation_id = "res-" + uuid.uuid4().hex[:16]
-            with sqlite3.connect(self.path, timeout=30.0) as db:
+            with closing(sqlite3.connect(self.path, timeout=30.0)) as db:
                 db.execute("BEGIN IMMEDIATE")
                 row = db.execute("SELECT value FROM budget_meta WHERE key='limit_cny'").fetchone()
                 stored_limit = float(row[0]) if row else None
@@ -653,10 +677,16 @@ class GlobalBudgetLedger:
 
     def settle(self, reservation_id: str, actual_cny: float | None, *, uncertain: bool = False, telemetry: Mapping[str, Any] | None = None) -> None:
         amount = max(0.0, float(actual_cny or 0.0))
+        if actual_cny is not None and (isinstance(actual_cny, bool)
+                or not math.isfinite(float(actual_cny)) or float(actual_cny) < 0):
+            raise QwenTransportError("invalid_budget_actual_amount")
+        if actual_cny is None and not uncertain:
+            raise QwenTransportError("budget_actual_amount_required")
         telemetry = dict(telemetry or {})
         if self.path:
             status = "uncertain" if uncertain else "settled"
-            with sqlite3.connect(self.path, timeout=30.0) as db:
+            with closing(sqlite3.connect(self.path, timeout=30.0)) as db:
+                db.execute("BEGIN IMMEDIATE")
                 row = db.execute("SELECT status FROM reservations WHERE reservation_id=?", (reservation_id,)).fetchone()
                 if row is None:
                     raise QwenTransportError("unknown_budget_reservation", transient=False, record={"reservation_id": reservation_id})
@@ -701,11 +731,72 @@ class GlobalBudgetLedger:
                 return
         raise QwenTransportError("unknown_budget_reservation", transient=False, record={"reservation_id": reservation_id})
 
+    def reconcile(self, reservation_id: str, actual_cny: float, *,
+                  evidence: Mapping[str, Any], actor: str, reason: str) -> dict[str, Any]:
+        """Settle an open hold only with an explicit, identity-bound receipt.
+
+        The audit is immutable and repeats of the same receipt are harmless.
+        This is never a waiver: even an explicit zero needs receipt evidence.
+        """
+        amount = float(actual_cny)
+        if isinstance(actual_cny, bool) or not math.isfinite(amount) or amount < 0:
+            raise QwenTransportError("invalid_budget_actual_amount")
+        evidence = dict(evidence)
+        if (not _text(actor) or not _text(reason)
+                or not _text(evidence.get("source")) or not _text(evidence.get("receipt_id"))
+                or not any(_text(evidence.get(key)) for key in ("request_id", "raw_response_sha256"))):
+            raise QwenTransportError("budget_reconciliation_evidence_required")
+        audit = {"reservation_id": reservation_id, "actual_cny": amount,
+                 "evidence": evidence, "actor": _text(actor), "reason": _text(reason)}
+        serialized = json.dumps(audit, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        digest = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+        def validate(status, telemetry, previous):
+            if previous is not None:
+                if previous != digest:
+                    raise QwenTransportError("budget_reconciliation_conflict")
+                return False
+            if status not in {"reserved", "uncertain"}:
+                raise QwenTransportError("budget_reconciliation_requires_open_hold")
+            known = {key: _text(telemetry.get(key)) for key in ("request_id", "raw_response_sha256")
+                     if _text(telemetry.get(key))}
+            if known and not any(_text(evidence.get(key)) == value for key, value in known.items()):
+                raise QwenTransportError("budget_reconciliation_receipt_identity_mismatch")
+            if any(_text(evidence.get(key)) and _text(evidence.get(key)) != value for key, value in known.items()):
+                raise QwenTransportError("budget_reconciliation_receipt_identity_mismatch")
+            return True
+
+        if self.path:
+            with closing(sqlite3.connect(self.path, timeout=30.0)) as db:
+                db.execute("BEGIN IMMEDIATE")
+                row = db.execute("SELECT status,request_id,raw_response_sha256 FROM reservations WHERE reservation_id=?", (reservation_id,)).fetchone()
+                if row is None:
+                    raise QwenTransportError("unknown_budget_reservation")
+                prior = db.execute("SELECT evidence_sha256 FROM budget_reconciliations WHERE reservation_id=?", (reservation_id,)).fetchone()
+                if validate(row[0], {"request_id": row[1], "raw_response_sha256": row[2]}, prior[0] if prior else None):
+                    db.execute("INSERT INTO budget_reconciliations VALUES (?,?,?,?)", (reservation_id, digest, serialized, time.time()))
+                    db.execute("UPDATE reservations SET actual_cny=?,status='settled' WHERE reservation_id=?", (amount, reservation_id))
+                db.commit()
+            self._refresh_from_db()
+            return {**audit, "evidence_sha256": digest}
+        row = next((row for row in self.reservations if row["reservation_id"] == reservation_id), None)
+        if row is None:
+            raise QwenTransportError("unknown_budget_reservation")
+        previous = row.get("reconciliation", {}).get("evidence_sha256")
+        if validate(row["status"], row.get("telemetry", {}), previous):
+            self.reserved_cny = max(0.0, self.reserved_cny - row["amount_cny"])
+            self.actual_cny += amount
+            row.update(status="settled", actual_cny=amount,
+                       reconciliation={**audit, "evidence_sha256": digest, "reconciled_at": time.time()})
+        return {**audit, "evidence_sha256": digest}
+
     def as_dict(self) -> dict[str, Any]:
         self._refresh_from_db()
         if self.path:
-            with sqlite3.connect(self.path) as db:
+            with closing(sqlite3.connect(self.path)) as db:
                 rows = db.execute("SELECT reservation_id,call_id,amount_cny,actual_cny,status,usage_json,returned_model,finish_reason,request_id,raw_response_sha256,status_code,provider_error_code,key_index,attempt,request_metadata_json FROM reservations ORDER BY created_at,reservation_id").fetchall()
+                audits = {row[0]: {**json.loads(row[2]), "evidence_sha256": row[1], "reconciled_at": row[3]}
+                          for row in db.execute("SELECT reservation_id,evidence_sha256,audit_json,reconciled_at FROM budget_reconciliations")}
             reservations = []
             for row in rows:
                 item = {"reservation_id": row[0], "call_id": row[1], "amount_cny": row[2], "actual_cny": row[3], "status": row[4]}
@@ -714,6 +805,8 @@ class GlobalBudgetLedger:
                     telemetry.update(json.loads(row[14]))
                 if any(value is not None for value in telemetry.values()):
                     item["telemetry"] = telemetry
+                if row[0] in audits:
+                    item["reconciliation"] = audits[row[0]]
                 reservations.append(item)
         else:
             reservations = list(self.reservations)
@@ -1048,6 +1141,7 @@ class QwenDirectClient:
                         result["reasoning_content"] = stream_result.get("reasoning_content", "")
                         result["raw_stream_path"] = str(partial_path) if partial_path else None
                         result["stream_event_count"] = stream_result.get("event_count", 0)
+                        result["stream_done"] = stream_result.get("stream_done", False)
                     if audit_events:
                         result["transport_events"] = list(audit_events)
                     result["cap_pressure"] = _cap_pressure(result["usage"], effective_request, finish_reason)
@@ -1068,6 +1162,8 @@ class QwenDirectClient:
                         raise QwenTransportError("qwen_incomplete_response", transient=False, status_code=status_code, record=result)
                     return result
                 except QwenTransportError as exc:
+                    exc.record.setdefault("requested_model", model)
+                    exc.record.setdefault("call_id", call_id)
                     exc.record.setdefault("effective_request", dict(effective_request))
                     exc.record.setdefault("stream", stream)
                     if audit_events:
