@@ -12,6 +12,7 @@ skipped instead of guessed at.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -92,18 +93,20 @@ def parse_edit_proposals(response: Any) -> dict[str, Any]:
         raise TextEditError("edit_proposals_unreadable")
     if not isinstance(data, Mapping):
         raise TextEditError("edit_proposals_not_object")
-    changes = [dict(item) for item in (data.get("changes") or [])
-               if isinstance(item, Mapping)]
-    unresolved = [dict(item) for item in (data.get("unresolved_questions") or [])
-                  if isinstance(item, Mapping)]
+    for name in ("changes", "unresolved_questions"):
+        rows = data.get(name, [])
+        if not isinstance(rows, list) or any(not isinstance(row, Mapping) for row in rows):
+            raise TextEditError(f"edit_proposals_invalid_rows:{name}")
+    changes = [dict(item) for item in data.get("changes", [])]
+    unresolved = [dict(item) for item in data.get("unresolved_questions", [])]
     for index, change in enumerate(changes):
         missing = [field for field in ("operation", "original_text")
-                   if not str(change.get(field) or "").strip()]
+                   if not isinstance(change.get(field), str) or not change[field].strip()]
         if missing:
             raise TextEditError(f"edit_change_missing_fields:{index}:{','.join(missing)}")
         if change["operation"] not in {"replace", "remove"}:
             raise TextEditError(f"edit_operation_unknown:{index}:{change['operation']}")
-        if change["operation"] == "replace" and not str(change.get("replacement_text") or "").strip():
+        if change["operation"] == "replace" and (not isinstance(change.get("replacement_text"), str) or not change["replacement_text"].strip()):
             raise TextEditError(f"edit_replace_without_replacement:{index}")
     return {"changes": changes, "unresolved_questions": unresolved,
             "no_change": not changes}
@@ -115,60 +118,49 @@ def apply_text_edits(
 ) -> tuple[str, list[dict[str, Any]], list[dict[str, Any]]]:
     """Apply parsed edits deterministically; report every skipped target.
 
-    A change applies only when ``original_text`` occurs exactly once in the
-    current text.  Applying twice is a no-op because the first application
-    removes the target.  The already-applied check is decided by the TARGET
-    text itself: only when the original target is gone and this edit's own
-    addition sits where the target used to be is the edit considered applied.
-    The addition appearing elsewhere in the document never counts — the same
-    phrase can legitimately exist in untouched paragraphs.
+    All targets are located on one immutable original snapshot. Overlapping
+    targets are reported and additions cannot become later targets. Missing
+    targets are no-ops, without claiming an unrelated replacement proves an
+    earlier application. Append-style edits verify their addition at the target.
     """
 
-    text = draft_text
     applied: list[dict[str, Any]] = []
     skipped: list[dict[str, Any]] = []
+    intervals: list[tuple[int, int, str, Mapping[str, Any]]] = []
     for change in changes:
         original = str(change.get("original_text") or "")
         operation = str(change.get("operation") or "")
-        replacement = str(change.get("replacement_text") or "")             if operation == "replace" else ""
-        count = text.count(original)
+        replacement = str(change.get("replacement_text") or "") if operation == "replace" else ""
 
         def skip(reason: str) -> None:
-            skipped.append({
-                "operation": operation,
-                "original_text": original[:120],
-                "reason": reason,
-                "target_block_id": str(change.get("target_block_id") or ""),
-            })
+            skipped.append({"operation": operation, "original_text": original[:120],
+                "reason": reason, "target_block_id": str(change.get("target_block_id") or "")})
 
-        # Already-applied check, decided AT THE TARGET:
-        # - append-style replacement (keeps the original as a prefix): the
-        #   edit is applied when the original's single occurrence is directly
-        #   followed by this edit's own addition;
-        # - independent replacement/removal: applied when the original is gone
-        #   and the replacement sits in the text.
-        # The same phrase appearing elsewhere never counts.
-        if count == 1 and operation == "replace" and replacement.startswith(original):
-            addition = replacement[len(original):]
-            if addition.strip():
-                pos = text.index(original)
-                if text[pos + len(original):].startswith(addition):
-                    skip("already_applied")
-                    continue
-        elif count == 0 and replacement.strip() and replacement in text:
-            skip("already_applied")
-            continue
+        count = draft_text.count(original) if original else 0
         if count != 1:
+            # An addition elsewhere cannot prove this missing target was edited.
+            # Missing targets remain no-ops, so reruns are still idempotent.
             skip(f"target_occurs_{count}_times")
             continue
-        text = text.replace(original, replacement, 1)
-        applied.append({
-            "operation": operation,
-            "original_text": original[:120],
-            "replacement_text": (replacement[:120] if replacement else ""),
+        start = draft_text.index(original)
+        end = start + len(original)
+        if operation == "replace" and replacement.startswith(original):
+            addition = replacement[len(original):]
+            if addition.strip() and draft_text[end:].startswith(addition):
+                skip("already_applied")
+                continue
+        if any(start < previous_end and previous_start < end
+               for previous_start, previous_end, _, _ in intervals):
+            skip("overlapping_target")
+            continue
+        intervals.append((start, end, replacement, change))
+    text = draft_text
+    for start, end, replacement, change in sorted(intervals, reverse=True, key=lambda row: row[0]):
+        text = text[:start] + replacement + text[end:]
+        applied.append({"operation": change["operation"],
+            "original_text": change["original_text"][:120], "replacement_text": replacement[:120],
             "reason": str(change.get("reason") or ""),
-            "target_block_id": str(change.get("target_block_id") or ""),
-        })
+            "target_block_id": str(change.get("target_block_id") or "")})
     return text, applied, skipped
 
 
@@ -180,6 +172,9 @@ def run_text_edit_stage(
     proposals_fixture_path: str | Path | None = None,
     recordings: Mapping[str, Mapping[str, Any]] | None = None,
     language: str = "zh",
+    client_factory=None, run: bool = False, token_counter=None,
+    profile: Mapping[str, Any] | None = None,
+    identity_catalogs: Sequence[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """One coordination pass over the real draft, then deterministic apply.
 
@@ -194,6 +189,13 @@ def run_text_edit_stage(
     draft_path = Path(draft_path).resolve()
     out_dir = Path(out_dir).resolve()
     draft_text = draft_path.read_text(encoding="utf-8")
+    if client_factory is not None or run or profile is not None:
+        if proposals_fixture_path or recordings is not None:
+            raise TextEditError("edit_live_and_replay_inputs_conflict")
+        return _run_live_edit(draft_path=draft_path, draft_text=draft_text,
+            chapter_roles=chapter_roles, out_dir=out_dir, client_factory=client_factory,
+            run=run, token_counter=token_counter, profile=profile,
+            identity_catalogs=identity_catalogs)
     passes = build_edit_passes(draft_text=draft_text, chapter_roles=chapter_roles)
     messages_dir = out_dir / "messages"
     messages_dir.mkdir(parents=True, exist_ok=True)
@@ -255,6 +257,121 @@ def run_text_edit_stage(
     }
     _write_json(out_dir / "TEXT_EDIT_REPORT.json", report)
     return report
+
+
+def _run_live_edit(*, draft_path, draft_text, chapter_roles, out_dir,
+                   client_factory, run, token_counter, profile, identity_catalogs):
+    # Imports stay local: unit_realization imports this module's parser/applier.
+    from .legacy_unit_route import _hash, _read, _write, _profile
+    from .unit_realization import _cached_call
+    from .writer_candidates import _output_lock
+    effective = dict(profile or _profile("qwen3.5-plus", 24576, 16384))
+    expected = _profile("qwen3.5-plus", 24576, 16384)
+    if effective != expected:
+        raise TextEditError("edit_requires_bounded_plus_profile")
+    passes = build_edit_passes(draft_text=draft_text, chapter_roles=chapter_roles)
+    messages = passes[0]["messages"]
+    source_bytes = draft_path.read_bytes()
+    identity = {"schema_version": "optomind.article_edit.live.v1",
+        "draft_sha256": hashlib.sha256(source_bytes).hexdigest(),
+        "messages_sha256": _hash(messages), "profile": effective,
+        "identity_catalogs_sha256": _hash(identity_catalogs or [])}
+    with _output_lock(out_dir):
+        identity_path = out_dir / "EDIT_IDENTITY.json"
+        if identity_path.exists() and _read(identity_path) != identity:
+            raise TextEditError("edit_input_identity_changed:use_new_output_directory")
+        _write(identity_path, identity)
+        original_path = out_dir / "ORIGINAL_HANDLES.md"
+        if original_path.exists() and original_path.read_bytes() != source_bytes:
+            raise TextEditError("edit_original_snapshot_integrity_failure")
+        if not original_path.exists():
+            original_path.write_bytes(source_bytes)
+        report_path = out_dir / "TEXT_EDIT_REPORT.json"
+        seal_path = out_dir / "EDIT_RESULT_SEAL.json"
+        if report_path.exists() and seal_path.exists():
+            saved, seal = _read(report_path), _read(seal_path)
+            if _hash(saved) != seal.get("report_sha256"):
+                raise TextEditError("edit_cached_report_integrity_failure")
+            for name, digest in seal.get("files", {}).items():
+                if hashlib.sha256((out_dir / name).read_bytes()).hexdigest() != digest:
+                    raise TextEditError("edit_cached_artifact_integrity_failure")
+            saved.update(model_calls=0, cache_hit=True)
+            return saved
+        step = out_dir / "full"
+        if (step / "RAW_RESPONSE.json").exists() and not (step / "REQUEST.json").exists():
+            raise TextEditError("edit_raw_without_request_identity")
+        raw, calls, state = _cached_call(step, messages, effective, client_factory, run, token_counter)
+        report = {"stage": "text_edit", "status": "pending", "proposals_source": "live_saved_response",
+            "source_draft": str(draft_path), "original_snapshot": str(original_path),
+            "output_dir": str(out_dir), "profile": effective, "model_calls": calls,
+            "external_requests": calls, "cache_hit": state == "cache_hit", "call_state": state,
+            "raw_response": str(step / "RAW_RESPONSE.json"), "passes": ["full"],
+            "pending_problems": [], "scientific_acceptance": False}
+        if raw is None:
+            report["pending_problems"].append({"code": "article_edit_" + state})
+            _write(report_path, report)
+            return report
+        if raw.get("fixture") is True:
+            report["proposals_source"] = "labeled_manual_fixture_saved_response"
+        elif raw.get("execution_mode") == "injected":
+            report["proposals_source"] = "injected_saved_response"
+        returned_model = raw.get("returned_model") or raw.get("model")
+        if (not raw.get("complete") or raw.get("finish_reason") != "stop"
+                or (returned_model and returned_model != effective["model"])):
+            report["pending_problems"].append({"code": "article_edit_incomplete_or_model_mismatch"})
+            _write(report_path, report)
+            return report
+        try:
+            parsed = parse_edit_proposals(raw)
+            edited, applied, skipped = apply_text_edits(draft_text, parsed["changes"])
+        except TextEditError as exc:
+            report["pending_problems"].append({"code": "article_edit_invalid_proposals", "error": str(exc)})
+            _write(report_path, report)
+            return report
+        _write(out_dir / "EDIT_PROPOSALS.json", parsed)
+        candidate = out_dir / "CANDIDATE_HANDLES.md"
+        candidate.write_bytes(source_bytes if edited == draft_text else edited.encode("utf-8"))
+        report.update(edited_draft=str(candidate), applied=applied, skipped=skipped,
+            changes_proposed=len(parsed["changes"]), unresolved_questions=parsed["unresolved_questions"],
+            draft_chars_before=len(draft_text), draft_chars_after=len(edited))
+        if skipped:
+            report["pending_problems"].append({"code": "article_edit_targets_skipped", "details": skipped})
+        else:
+            report["status"] = "no_change" if parsed["no_change"] else "edited"
+        if identity_catalogs is not None:
+            from .delivery_citations import build_delivery_citation_map, run_figures_citations_stage
+            before = _numbering_projection(draft_text)
+            after = _numbering_projection(edited)
+            old_map = build_delivery_citation_map(final_handle_draft=before, identity_catalogs=identity_catalogs)
+            new_map = build_delivery_citation_map(final_handle_draft=after, identity_catalogs=identity_catalogs)
+            old_ids, new_ids = set(old_map["references_order"]), set(new_map["references_order"])
+            report["source_identity_changes"] = {"removed": sorted(old_ids - new_ids),
+                "added": sorted(new_ids - old_ids), "before_count": len(old_ids), "after_count": len(new_ids)}
+            projection = out_dir / "NUMBERING_INPUT_HANDLES.md"
+            projection.write_text(after, encoding="utf-8", newline="\n")
+            numbered = run_figures_citations_stage(final_draft_path=projection,
+                identity_catalogs=identity_catalogs, out_dir=out_dir / "numbered")
+            report["numbering"] = numbered
+            if numbered["status"] != "complete":
+                report["status"] = "pending"
+                report["pending_problems"].append({"code": "article_edit_citations_pending"})
+        _write(report_path, report)
+        files = {path.relative_to(out_dir).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in (original_path, candidate, out_dir / "EDIT_PROPOSALS.json",
+                         step / "RAW_RESPONSE.json", step / "REQUEST.json") if path.is_file()}
+        if "numbering" in report:
+            for key in ("reader_draft", "handles_draft", "references_path", "mapping_path"):
+                path = Path(report["numbering"][key])
+                files[path.relative_to(out_dir).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
+        _write(seal_path, {"report_sha256": _hash(report), "files": files})
+        return report
+
+
+def _numbering_projection(text: str) -> str:
+    """Exclude the old bibliography from the new final citation inventory."""
+    import re
+    return re.sub(r"^#{1,3}\s+(?:参考文献|References\b|Bibliography\b)[^\n]*\n(?:(?!^#{1,3}\s).)*",
+                  "", text, flags=re.MULTILINE | re.DOTALL | re.IGNORECASE).rstrip() + "\n"
 
 
 def _write_json(path: Path, value: Any) -> None:

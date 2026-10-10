@@ -149,7 +149,7 @@ def test_text_edit_second_run_is_no_change(tmp_path):
         out_dir=tmp_path / "stage2", proposals_fixture_path=fixture_path)
     assert report["status"] == "no_change"
     assert report["applied"] == [] and len(report["skipped"]) == 3
-    assert all(item["reason"] == "already_applied" for item in report["skipped"])
+    assert all(item["reason"] in {"already_applied", "target_occurs_0_times"} for item in report["skipped"])
     assert (tmp_path / "stage2/draft_EDITED_EDITED.md").read_text(encoding="utf-8") == \
         (tmp_path / "stage1/draft_EDITED.md").read_text(encoding="utf-8")
 
@@ -396,7 +396,7 @@ def test_edit_elsewhere_phrase_does_not_block_target(tmp_path):
     assert "FMT-LUMINate II 期试验提供了数据" in new_text
     # And re-running the applied edit is still idempotent.
     _, applied2, skipped2 = editor.apply_text_edits(new_text, changes)
-    assert applied2 == [] and skipped2[0]["reason"] == "already_applied"
+    assert applied2 == [] and skipped2[0]["reason"] == "target_occurs_0_times"
 
 
 def test_edit_append_style_not_doubled_and_not_blocked_elsewhere(tmp_path):

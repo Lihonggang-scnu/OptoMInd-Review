@@ -215,7 +215,7 @@ def run_legacy_units(book: Mapping[str, Any], *, output_dir: str | Path,
                      thinking_budget: int = 8192, budget_limit: float = 30.0,
                      run: bool = False, retry_failed: bool = False,
                      client_factory=None, token_counter=None, quality_control: bool = False,
-                     only_units: list[str] | None = None) -> dict[str, Any]:
+                     only_units: list[str] | None = None, article_edit: bool = False) -> dict[str, Any]:
     """Preview all units or resume exact requests; never silently re-charge.
 
     An injected factory is an offline testing seam. Production callers must use
@@ -226,11 +226,13 @@ def run_legacy_units(book: Mapping[str, Any], *, output_dir: str | Path,
         return _run(book, output=output, model=model, output_tokens=output_tokens,
                     thinking_budget=thinking_budget, budget_limit=budget_limit, run=run,
                     retry_failed=retry_failed, client_factory=client_factory,
-                    token_counter=token_counter, quality_control=quality_control, only_units=only_units)
+                    token_counter=token_counter, quality_control=quality_control, only_units=only_units,
+                    article_edit=article_edit)
 
 
 def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
-         run, retry_failed, client_factory, token_counter, quality_control=False, only_units=None):
+         run, retry_failed, client_factory, token_counter, quality_control=False, only_units=None,
+         article_edit=False):
     if isinstance(budget_limit, bool) or not math.isfinite(budget_limit) or budget_limit <= 0:
         raise CandidateError("legacy_budget_must_be_finite_positive")
     profile = _profile(model, output_tokens, thinking_budget)
@@ -523,6 +525,38 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
                         "restricted_draft" if report["generation_complete"] and structural_pending else
                         "written_pending_review" if report["generation_complete"] else
                         "preview" if not run else "pending")
+    if article_edit:
+        if set(requested_keys) != set(full_keys):
+            report["article_edit"] = {"status": "skipped_selected_subset", "model_calls": 0}
+        elif not report["generation_complete"] or not report["assembly"]:
+            report["article_edit"] = {"status": "skipped_incomplete_book", "model_calls": 0}
+        elif quality_control and any(row.get("quality", {}).get("status") not in
+                {"assessed_pending_human_review", "assessed_with_pending"} for row in report["units"]):
+            report["article_edit"] = {"status": "skipped_quality_pending", "model_calls": 0}
+        else:
+            from .article_text_editor import run_text_edit_stage, load_editor_prompt, TextEditError
+            roles = [{"chapter_id": chapter["chapter_id"],
+                      "title": (chapter.get("chapter_frame") or {}).get("chapter_title") or chapter["chapter_id"],
+                      "role": (chapter.get("chapter_frame") or {}).get("chapter_argument", "")}
+                     for chapter in book["chapters"]]
+            try:
+                article_draft = output / "assembled" / "REVIEW_DRAFT_HANDLES.md"
+                article_profile = _profile("qwen3.5-plus", 24576, 16384)
+                catalogs = [_read(output / "assembled" / "REFERENCES.json")]
+                article_key = _hash({"draft_sha256": hashlib.sha256(article_draft.read_bytes()).hexdigest(),
+                    "roles": roles, "profile": article_profile, "catalogs": catalogs,
+                    "prompt": load_editor_prompt()})
+                article = run_text_edit_stage(draft_path=article_draft,
+                    chapter_roles=roles, out_dir=output / "article_edit" / article_key, client_factory=client_factory,
+                    run=run, token_counter=token_counter, profile=article_profile,
+                    identity_catalogs=catalogs)
+            except TextEditError as exc:
+                article = {"status": "pending", "model_calls": 0,
+                           "pending_problems": [{"code": "article_edit_failed", "error": str(exc)}]}
+            report["article_edit"] = article
+            report["model_calls"] += article["model_calls"]
+            if article["status"] == "pending" and report["status"] == "written_pending_review":
+                report["status"] = "restricted_draft"
     if hasattr(client_factory, "ledger_snapshot"):
         report["ledger"] = client_factory.ledger_snapshot()
         if report["ledger"]:
