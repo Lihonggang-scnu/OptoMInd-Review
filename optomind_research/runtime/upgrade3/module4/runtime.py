@@ -821,6 +821,7 @@ class QwenDirectClient:
         *,
         model: str = "qwen3.7-flash",
         key_file: str | Path | None = None,
+        key_index: int | None = None,
         base_url: str | None = None,
         max_retries: int = 2,
         timeout_seconds: float = 300.0,
@@ -842,6 +843,10 @@ class QwenDirectClient:
         if _economy_enabled() and self.model != "qwen3.7-flash":
             raise QwenTransportError("economy_text_ceiling_would_downgrade_explicit_model", transient=False)
         self.key_file = Path(key_file) if key_file else None
+        if key_index is not None and (isinstance(key_index, bool) or not isinstance(key_index, int)
+                                      or key_index < 1 or self.key_file is None):
+            raise ValueError("key_index_requires_positive_1_based_file_candidate")
+        self.key_index = key_index
         self.base_url = str(base_url or "https://dashscope.aliyuncs.com/compatible-mode/v1")
         self.max_retries = max(0, int(max_retries))
         self.timeout_seconds = max(5.0, float(timeout_seconds))
@@ -903,9 +908,17 @@ class QwenDirectClient:
 
     def _keys(self) -> list[str]:
         try:
+            if self.key_index is not None:
+                from config.secret_pool import read_secret_file_candidates
+                candidates = read_secret_file_candidates(self.key_file)
+                if self.key_index > len(candidates):
+                    raise MissingCredentialError("qwen_key_index_out_of_range")
+                return [candidates[self.key_index - 1].value]
             from config.qwen_config import get_qwen_api_key_candidates_ordered
             rows = get_qwen_api_key_candidates_ordered(self.key_file)
             keys = [_text(row.get("api_key")) for row in rows if isinstance(row, Mapping) and _text(row.get("api_key"))]
+        except MissingCredentialError:
+            raise
         except Exception as exc:
             raise MissingCredentialError("qwen_key_resolution_failed", record={"error": type(exc).__name__}) from exc
         if not keys:

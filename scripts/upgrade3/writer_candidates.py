@@ -187,10 +187,18 @@ def make_live_factory(args: argparse.Namespace, *, token_counter=None):
             ledger._refresh_from_db()
             if ledger.limit_cny is None or not math.isfinite(ledger.limit_cny) or ledger.limit_cny <= 0:
                 raise ValueError("existing_ledger_requires_finite_positive_limit")
+            if getattr(args, "account_ledger", None):
+                from optomind_research.runtime.upgrade3.dual_budget import (
+                    DualBudgetLedger, account_mapping_dir, open_account_ledger)
+                account = open_account_ledger(args.account_ledger, getattr(args, "account_budget_limit", None))
+                mappings = getattr(args, "account_mapping_dir", None) or account_mapping_dir(args.account_ledger)
+                ledger = DualBudgetLedger(ledger, account, mappings)
+                ledger.recover_settlements()
         effective = {key: profile[key] for key in PROFILE_FIELDS if key in profile}
         constructor = {key: value for key, value in effective.items() if key != "stream"}
         provider = QwenDirectClient(
             **constructor, key_file=args.key_file, max_retries=0, max_keys=1,
+            key_index=getattr(args, "key_index", None),
             budget_ledger=ledger, prompt_token_counter=token_counter,
             raw_response_dir=Path(stage_dir) / "transport",
         )
@@ -214,7 +222,7 @@ def make_live_factory(args: argparse.Namespace, *, token_counter=None):
         return call
 
     factory.execution_mode = "live"
-    factory.ledger_snapshot = lambda: ledger.as_dict() if ledger is not None else None
+    factory.ledger_snapshot = lambda: (ledger.project if hasattr(ledger, "project") else ledger).as_dict() if ledger is not None else None
     return factory
 
 

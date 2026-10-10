@@ -34,6 +34,9 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--budget-limit", type=float, default=30.0,
                    help="Absolute lifetime CNY cap of this separate experiment, never an increment")
     p.add_argument("--ledger", help="Explicit dedicated SQLite ledger, required with --run; reuse for all resumes")
+    p.add_argument("--account-ledger", help="Optional second SQLite ledger shared by physical calls across projects; reuse its path")
+    p.add_argument("--account-budget-limit", type=float, help="Immutable account lifetime CNY cap; required only for a new account ledger")
+    p.add_argument("--account-mapping-dir", help="Persistent dual-reservation receipt directory; defaults beside the account ledger; reuse on resume")
     p.add_argument("--budget-scope", help="Explicit experiment identity shared across input subsets and holdout books; immutable for this ledger")
     p.add_argument("--reconcile-receipt", help="Audit and settle an existing open hold from a local JSON receipt; no provider calls")
     p.add_argument("--run", action="store_true", help="Explicitly allow live provider calls")
@@ -48,6 +51,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--only-unit", action="append", default=[], metavar="CHAPTER:UNIT",
                    help="Repeatable pilot selection; retains full book/material context and reusable writer request identities")
     p.add_argument("--key-file", help="Local credential file; not read in preview, never copied")
+    p.add_argument("--key-index", type=int, help="Select exactly this 1-based candidate in --key-file, without environment priority or key fallback")
     p.add_argument("--tokenizer", help="Existing local tokenizer.json, no downloads")
     return p
 
@@ -127,6 +131,7 @@ def _dedicated_factory(args, book, counter):
         GlobalBudgetLedger(limit_cny=args.budget_limit, path=ledger)
         _write(marker, scope)
     _ledger_snapshot(ledger, marker, scope)
+    account = _bind_account(args, output, ledger)
     _write(binding, scope)
     args.budget_ledger = str(ledger)
     args.responses = None
@@ -142,12 +147,53 @@ def _dedicated_factory(args, book, counter):
 
     guarded_factory.execution_mode = "live"
     guarded_factory.ledger_snapshot = snapshot
+    if account is not None:
+        guarded_factory.account_ledger_snapshot = account.as_dict
     return guarded_factory
+
+
+def _bind_account(args, output, project_path):
+    """Keep account accounting optional, but immutable once this output uses it."""
+    from optomind_research.runtime.upgrade3.dual_budget import (
+        DualBudgetLedger, account_mapping_dir, bind_json, open_account_ledger, read_json)
+    binding = output / "ACCOUNT_BUDGET_BINDING.json"
+    prior = read_json(binding) if binding.is_file() else None
+    if not args.account_ledger:
+        if prior is not None:
+            raise ValueError("account_ledger_required_for_bound_output:no_budget_reset")
+        if args.account_budget_limit is not None or args.account_mapping_dir:
+            raise ValueError("account_options_require_account_ledger")
+        return None
+    path = Path(args.account_ledger).expanduser().resolve()
+    mappings = (Path(args.account_mapping_dir).expanduser().resolve() if args.account_mapping_dir
+                else account_mapping_dir(path))
+    if path == project_path:
+        raise ValueError("dual_budget_requires_distinct_persistent_ledgers")
+    if prior is not None:
+        if prior["ledger_path"] != str(path) or prior["mapping_dir"] != str(mappings):
+            raise ValueError("account_budget_binding_conflict:no_budget_reset")
+        if not path.is_file():
+            raise ValueError("account_ledger_missing:no_budget_reset")
+    account = open_account_ledger(path, args.account_budget_limit)
+    scope = {"schema_version": "dual_budget.output.v1", "ledger_path": str(path),
+             "limit_cny": account.limit_cny, "mapping_dir": str(mappings)}
+    bind_json(binding, scope)
+    args.account_ledger = str(path)
+    args.account_budget_limit = account.limit_cny
+    args.account_mapping_dir = str(mappings)
+    # Receipt-only recovery also runs when every model stage is already cached.
+    from optomind_research.runtime.upgrade3.module4.runtime import GlobalBudgetLedger
+    DualBudgetLedger(GlobalBudgetLedger(path=project_path), account, mappings).recover_settlements()
+    return account
 
 
 def main(argv=None) -> int:
     argument_parser = parser()
     args = argument_parser.parse_args(argv)
+    if args.key_index is not None and (args.key_index < 1 or not args.key_file):
+        argument_parser.error("--key-index is 1-based and requires --key-file")
+    if not args.account_ledger and (args.account_budget_limit is not None or args.account_mapping_dir):
+        argument_parser.error("account options require --account-ledger")
     if args.reconcile_receipt:
         if not args.ledger or args.run or args.retry_failed:
             argument_parser.error("--reconcile-receipt requires --ledger and forbids live/retry flags")
@@ -183,6 +229,9 @@ def main(argv=None) -> int:
         client_factory=factory, token_counter=counter, quality_control=args.quality_control,
         only_units=args.only_unit, article_edit=args.article_edit, reparse_saved=args.reparse_saved)
     _write(Path(args.output_dir).expanduser().resolve() / "TOKENIZER.json", tokenizer)
+    if factory is not None and hasattr(factory, "account_ledger_snapshot"):
+        _write(Path(args.output_dir).expanduser().resolve() / "ACCOUNT_BUDGET_SNAPSHOT.json",
+               factory.account_ledger_snapshot())
     print(json.dumps({key: report[key] for key in
           ("status", "model", "original_units", "complete_units", "model_calls",
            "estimated_all_units_cny", "estimated_all_units_within_budget", "capacity_blocked_units")},
