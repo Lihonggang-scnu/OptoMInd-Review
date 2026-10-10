@@ -1,0 +1,179 @@
+{
+  "record_type": "post_generation_root_review_not_model_input",
+  "messages": {
+    "path": "units/Ch6/Ch6_U3/1c2a3a8f630bbc36f0e1d1d6781ee1402acec167e920ff926784c4060f6858b9/UNIT_MESSAGES.json",
+    "sha256": "c9d5e66d5fa077f8b017ae708369e82d03284859692ee83793433d4a13b2f981"
+  },
+  "body": {
+    "path": "units/Ch6/Ch6_U3/1c2a3a8f630bbc36f0e1d1d6781ee1402acec167e920ff926784c4060f6858b9/attempt_001/UNIT_BODY.md",
+    "sha256": "1cb5871190b8961b609d206691b3f35175c417fdb54f1e822bd8b294b0676900"
+  },
+  "cohort_task": {
+    "paragraph_id": "Ch6_U3_P01",
+    "point": "FMT-LUMINate 试验的疗效分化与毒性起病时间提前",
+    "development": "报告 NSCLC 队列（抗 PD-1 单药，n=20）ORR 达 80% 且无≥3 级 AEs；而黑色素瘤队列（抗 PD-1+ 抗 CTLA-4 双免，n=20）ORR 为 75%，但 65% 患者经历≥3 级 AEs，其中腹泻/结肠炎占 20%，心肌炎发生率高达 15%（文献报道通常<1%），且严重毒性中位起病时间提前至 40 天（P0583）。需明确这是 Phase II 单臂试验，非 Phase III RCT。",
+    "source_uses": [
+      {
+        "source_handle": "P0583",
+        "role": "主论据",
+        "use": "报告 FMT-LUMINate 试验中双免背景下 ORR 75% 但 65% 患者经历≥3 级 AEs 及心肌炎发生率高达 15% 的数据"
+      },
+      {
+        "source_handle": "P0578",
+        "role": "比较",
+        "use": "提供 MITRIC 试验在难治人群中 ORR 0% 的结果，对比显示干预效果在初治与难治人群中的异质性"
+      },
+      {
+        "source_handle": "P0212",
+        "role": "背景",
+        "use": "荟萃分析量化 FMT 联合 ICI 的总体 ORR 及 3-4 级 AE 发生率，为安全性边界提供定量基准"
+      }
+    ],
+    "carried_over": true,
+    "point_changed_from_brief": false,
+    "source_briefs": [
+      "Ch6_U3_P01"
+    ],
+    "source_brief_details": [
+      {
+        "paragraph_id": "Ch6_U3_P01",
+        "unit_id": "Ch6_U3",
+        "ordinal": 1,
+        "point": "FMT-LUMINate 试验的疗效分化与毒性起病时间提前",
+        "development": "报告 NSCLC 队列（抗 PD-1 单药，n=20）ORR 达 80% 且无≥3 级 AEs；而黑色素瘤队列（抗 PD-1+ 抗 CTLA-4 双免，n=20）ORR 为 75%，但 65% 患者经历≥3 级 AEs，其中腹泻/结肠炎占 20%，心肌炎发生率高达 15%（文献报道通常<1%），且严重毒性中位起病时间提前至 40 天（P0583）。需明确这是 Phase II 单臂试验，非 Phase III RCT。",
+        "source_handles": [
+          "P0583"
+        ]
+      }
+    ]
+  },
+  "table_tasks": [
+    {
+      "table_id": "Ch6_U3_T01",
+      "purpose": "比较 FMT 供体聚类特征与 ICI 方案交互下的毒性风险",
+      "columns": [
+        "供体聚类",
+        "特征菌属",
+        "ICI 方案背景",
+        "主要毒性事件",
+        "发生率/关联强度"
+      ],
+      "row_tasks": [
+        {
+          "content": "Cluster A (非 Prevotella 富集)",
+          "source_uses": [
+            {
+              "source_handle": "P0583",
+              "role": "比较",
+              "use": "提供 Cluster A 供体在双免背景下的安全性基线数据"
+            }
+          ]
+        },
+        {
+          "content": "Cluster B (Prevotella/Segatella 富集)",
+          "source_uses": [
+            {
+              "source_handle": "P0583",
+              "role": "比较",
+              "use": "提供 Cluster B 供体与加速发作心肌炎及≥3 级 AEs 的强关联数据"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actual_table": "| 供体聚类 | 特征菌属 | ICI 方案背景 | 主要毒性事件 | 发生率/关联强度 |\n| :--- | :--- | :--- | :--- | :--- |\n| Cluster A (非 Prevotella 富集) | 所给材料未提供具体优势菌属 | 抗 PD-1 + 抗 CTLA-4 (双免) | 3 级及以上 AEs 基线风险 | 相对较低 (作为 Cluster B 的对照基线) [P0583] |\n| Cluster B (Prevotella/Segatella 富集) | *Segatella copri*, *Prevotella sp.* Marseille-P4119 等 | 抗 PD-1 + 抗 CTLA-4 (双免) | 3 级及以上 AEs, 心肌炎 | 供体 5 导致 100% 接受者出现 3 级 + AEs; 心肌炎发生率 15% [P0583] |",
+  "actual_material_excerpts": [
+    {
+      "json_path": "$.sources[0].deep_read_material.current_question_material[0].examples[0].finding",
+      "term": "15%",
+      "excerpt": "在黑色素瘤队列中，19名患者（95%）出现任何级别的与治疗相关的不良事件（AEs），其中12名（60%）出现3级或更高级别的AEs，1名出现4级AEs。最常见的3级或以上AE是腹泻或结肠炎（20%的患者）。有3名患者（15%）发生心肌炎，这高于文献报道的<1%的发生率。严重毒性的中位发作时间为开始抗PD-1和抗CTLA-4治疗后的40天，早于文献报告的60天。独立数据和安全监测委员会（DSMC）认为这些严重AEs比既往文献报道的发作更早。在NSCLC队列中，没有患者出现3级或更高级别的AEs。通过非监督聚类分析，健康供体的肠道微生物组被分为两个截然不同的簇（P = 0.001）。B簇（包含供体5和供体11）以高丰度的Prevotella spp.为特征。差异丰度分析证实，P. sp. Marseille-P4119、P. stercorea和Prevotellaceae GGB1146 SGB1472在接受"
+    },
+    {
+      "json_path": "$.sources[0].deep_read_material.current_question_material[0].examples[0].finding",
+      "term": "供体5",
+      "excerpt": "LA-4治疗后的40天，早于文献报告的60天。独立数据和安全监测委员会（DSMC）认为这些严重AEs比既往文献报道的发作更早。在NSCLC队列中，没有患者出现3级或更高级别的AEs。通过非监督聚类分析，健康供体的肠道微生物组被分为两个截然不同的簇（P = 0.001）。B簇（包含供体5和供体11）以高丰度的Prevotella spp.为特征。差异丰度分析证实，P. sp. Marseille-P4119、P. stercorea和Prevotellaceae GGB1146 SGB1472在接受双免疫检查点抑制剂治疗的黑色素瘤患者中，若发生3级或以上AEs则显著富集。后FMT定植的P. sp. Marseille-P4119、P. stercorea和Prevotellaceae SGB1472与3级或以上AEs显著相关（P < 0.001, P = 0.023, P < 0.001）。供体5提供的粪便在所有接受双ICI治疗的黑色素瘤患者中均导致3级或以上AEs，且"
+    },
+    {
+      "json_path": "$.sources[0].deep_read_material.current_question_material[0].explanation",
+      "term": "供体5",
+      "excerpt": "接受，但出现了加速发作的严重免疫相关不良事件（irAEs），特别是心肌炎和中位发作时间提前至40天。其次，供体微生物组的组成决定了这种毒性风险。通过非监督聚类，供体被分为富含Prevotella spp.的Cluster B和其他Cluster A。Cluster B供体（特别是供体5）与严重的irAEs（包括心肌炎）密切相关，但这种关联具有严格的上下文依赖性：它仅在抗CTLA-4存在的情况下显现，而在抗PD-1单药治疗背景下不引发毒性。这表明特定的微生物类群（如Prevotella spp.）与ICI骨架之间存在情境依赖性的相互作用，可能驱动了双重阻断下的过度免疫反应。因此，供体选择对于未来FMT试验的安全性至关重要，特别是当联合使用抗CTLA-4时。"
+    },
+    {
+      "json_path": "$.sources[0].deep_read_material.prior_question_material[0].examples[0].finding",
+      "term": "15%",
+      "excerpt": "T联合抗PD-1加抗CTLA-4（双ICI）治疗的ORR为75%（15/20）。关于毒性信号，在黑色素瘤双ICI组中观察到严重不良事件（AEs）的发生率较高且起病更早：13名患者（65%）经历了3级或更高级别的AEs，其中腹泻或结肠炎是最常见的3级及以上AE（20%的患者），另有15%的患者出现心肌炎。严重毒性的中位起病时间为开始抗PD-1和抗CTLA-4治疗后40天，早于文献报道的60天。相比之下，NSCLC单药抗PD-1组无3级或以上AEs发生。"
+    },
+    {
+      "json_path": "$.sources[0].deep_read_material.prior_question_material[1].examples[0].finding",
+      "term": "15%",
+      "excerpt": "在NSCLC队列中，接受FMT联合抗PD-1治疗的患者未出现3级或更高不良事件（AEs），仅15%患者因2级AE使用皮质类固醇；而在黑色素瘤队列中，65%患者经历3级或更高AEs，其中腹泻/结肠炎占20%，心肌炎发生率为15%（3例），显著高于文献报道的<1%。独立数据和安全监测委员会（DSMC）判定该组合总体安全，但指出黑色素瘤队列中的严重AEs起病更早（中位40天 vs 文献60天）。聚类分析显示，来自富含普雷沃菌属（Prevotella spp.）的供体（特别是供体5）与3级及以上AEs的发生密切相关：所有由供体5提供的粪便导致黑色素瘤患者出现3级+ AEs，且2/3例心肌炎患者接受了供体5的FMT。这些毒性仅在双免疫检查点抑制剂（anti-PD-1 + anti-CTLA-4"
+    },
+    {
+      "json_path": "$.sources[0].deep_read_material.prior_question_material[1].examples[0].finding",
+      "term": "供体5",
+      "excerpt": "肠炎占20%，心肌炎发生率为15%（3例），显著高于文献报道的<1%。独立数据和安全监测委员会（DSMC）判定该组合总体安全，但指出黑色素瘤队列中的严重AEs起病更早（中位40天 vs 文献60天）。聚类分析显示，来自富含普雷沃菌属（Prevotella spp.）的供体（特别是供体5）与3级及以上AEs的发生密切相关：所有由供体5提供的粪便导致黑色素瘤患者出现3级+ AEs，且2/3例心肌炎患者接受了供体5的FMT。这些毒性仅在双免疫检查点抑制剂（anti-PD-1 + anti-CTLA-4）背景下观察到，而在单药抗PD-1治疗中未出现。"
+    },
+    {
+      "json_path": "$.sources[0].deep_read_material.prior_question_material[1].examples[1].finding",
+      "term": "供体5",
+      "excerpt": "通过无监督聚类分析，健康供体的肠道微生物组被分为两个 distinct clusters (P = 0.001)。Cluster B（包含供体5和11）以高丰度的普雷沃菌属（如 Segatella copri, Prevotella sp. Marseille-P4119, P. stercorea）为特征。在黑色素瘤患者中，接受 Cluster B 供体FMT后，出现3级+ AEs的患者中这些菌属显著富集（LDA score > 2, P < 0.05）。进一步分析显示，在接受双免疫检查点抑制剂治疗的患者中，S. copri 的定植与外周血中 CD4+ T细胞亚群比例增加相关（P = 0.026），而这种关联在单药抗PD-1治疗中不存在。这表明普雷沃菌属的定植是双免疫检查点抑制背景下毒性增加的驱动因素。"
+    },
+    {
+      "json_path": "$.sources[0].deep_read_material.question_material[0].examples[0].finding",
+      "term": "15%",
+      "excerpt": "T联合抗PD-1加抗CTLA-4（双ICI）治疗的ORR为75%（15/20）。关于毒性信号，在黑色素瘤双ICI组中观察到严重不良事件（AEs）的发生率较高且起病更早：13名患者（65%）经历了3级或更高级别的AEs，其中腹泻或结肠炎是最常见的3级及以上AE（20%的患者），另有15%的患者出现心肌炎。严重毒性的中位起病时间为开始抗PD-1和抗CTLA-4治疗后40天，早于文献报道的60天。相比之下，NSCLC单药抗PD-1组无3级或以上AEs发生。"
+    },
+    {
+      "json_path": "$.sources[0].deep_read_material.question_material[1].examples[0].finding",
+      "term": "15%",
+      "excerpt": "在NSCLC队列中，接受FMT联合抗PD-1治疗的患者未出现3级或更高不良事件（AEs），仅15%患者因2级AE使用皮质类固醇；而在黑色素瘤队列中，65%患者经历3级或更高AEs，其中腹泻/结肠炎占20%，心肌炎发生率为15%（3例），显著高于文献报道的<1%。独立数据和安全监测委员会（DSMC）判定该组合总体安全，但指出黑色素瘤队列中的严重AEs起病更早（中位40天 vs 文献60天）。聚类分析显示，来自富含普雷沃菌属（Prevotella spp.）的供体（特别是供体5）与3级及以上AEs的发生密切相关：所有由供体5提供的粪便导致黑色素瘤患者出现3级+ AEs，且2/3例心肌炎患者接受了供体5的FMT。这些毒性仅在双免疫检查点抑制剂（anti-PD-1 + anti-CTLA-4"
+    },
+    {
+      "json_path": "$.sources[0].deep_read_material.question_material[1].examples[0].finding",
+      "term": "供体5",
+      "excerpt": "肠炎占20%，心肌炎发生率为15%（3例），显著高于文献报道的<1%。独立数据和安全监测委员会（DSMC）判定该组合总体安全，但指出黑色素瘤队列中的严重AEs起病更早（中位40天 vs 文献60天）。聚类分析显示，来自富含普雷沃菌属（Prevotella spp.）的供体（特别是供体5）与3级及以上AEs的发生密切相关：所有由供体5提供的粪便导致黑色素瘤患者出现3级+ AEs，且2/3例心肌炎患者接受了供体5的FMT。这些毒性仅在双免疫检查点抑制剂（anti-PD-1 + anti-CTLA-4）背景下观察到，而在单药抗PD-1治疗中未出现。"
+    },
+    {
+      "json_path": "$.sources[0].deep_read_material.question_material[1].examples[1].finding",
+      "term": "供体5",
+      "excerpt": "通过无监督聚类分析，健康供体的肠道微生物组被分为两个 distinct clusters (P = 0.001)。Cluster B（包含供体5和11）以高丰度的普雷沃菌属（如 Segatella copri, Prevotella sp. Marseille-P4119, P. stercorea）为特征。在黑色素瘤患者中，接受 Cluster B 供体FMT后，出现3级+ AEs的患者中这些菌属显著富集（LDA score > 2, P < 0.05）。进一步分析显示，在接受双免疫检查点抑制剂治疗的患者中，S. copri 的定植与外周血中 CD4+ T细胞亚群比例增加相关（P = 0.026），而这种关联在单药抗PD-1治疗中不存在。这表明普雷沃菌属的定植是双免疫检查点抑制背景下毒性增加的驱动因素。"
+    },
+    {
+      "json_path": "$.sources[0].deep_read_material.question_material[2].examples[0].finding",
+      "term": "15%",
+      "excerpt": "在黑色素瘤队列中，19名患者（95%）出现任何级别的与治疗相关的不良事件（AEs），其中12名（60%）出现3级或更高级别的AEs，1名出现4级AEs。最常见的3级或以上AE是腹泻或结肠炎（20%的患者）。有3名患者（15%）发生心肌炎，这高于文献报道的<1%的发生率。严重毒性的中位发作时间为开始抗PD-1和抗CTLA-4治疗后的40天，早于文献报告的60天。独立数据和安全监测委员会（DSMC）认为这些严重AEs比既往文献报道的发作更早。在NSCLC队列中，没有患者出现3级或更高级别的AEs。通过非监督聚类分析，健康供体的肠道微生物组被分为两个截然不同的簇（P = 0.001）。B簇（包含供体5和供体11）以高丰度的Prevotella spp.为特征。差异丰度分析证实，P. sp. Marseille-P4119、P. stercorea和Prevotellaceae GGB1146 SGB1472在接受"
+    },
+    {
+      "json_path": "$.sources[0].deep_read_material.question_material[2].examples[0].finding",
+      "term": "供体5",
+      "excerpt": "LA-4治疗后的40天，早于文献报告的60天。独立数据和安全监测委员会（DSMC）认为这些严重AEs比既往文献报道的发作更早。在NSCLC队列中，没有患者出现3级或更高级别的AEs。通过非监督聚类分析，健康供体的肠道微生物组被分为两个截然不同的簇（P = 0.001）。B簇（包含供体5和供体11）以高丰度的Prevotella spp.为特征。差异丰度分析证实，P. sp. Marseille-P4119、P. stercorea和Prevotellaceae GGB1146 SGB1472在接受双免疫检查点抑制剂治疗的黑色素瘤患者中，若发生3级或以上AEs则显著富集。后FMT定植的P. sp. Marseille-P4119、P. stercorea和Prevotellaceae SGB1472与3级或以上AEs显著相关（P < 0.001, P = 0.023, P < 0.001）。供体5提供的粪便在所有接受双ICI治疗的黑色素瘤患者中均导致3级或以上AEs，且"
+    },
+    {
+      "json_path": "$.sources[0].deep_read_material.question_material[2].explanation",
+      "term": "供体5",
+      "excerpt": "接受，但出现了加速发作的严重免疫相关不良事件（irAEs），特别是心肌炎和中位发作时间提前至40天。其次，供体微生物组的组成决定了这种毒性风险。通过非监督聚类，供体被分为富含Prevotella spp.的Cluster B和其他Cluster A。Cluster B供体（特别是供体5）与严重的irAEs（包括心肌炎）密切相关，但这种关联具有严格的上下文依赖性：它仅在抗CTLA-4存在的情况下显现，而在抗PD-1单药治疗背景下不引发毒性。这表明特定的微生物类群（如Prevotella spp.）与ICI骨架之间存在情境依赖性的相互作用，可能驱动了双重阻断下的过度免疫反应。因此，供体选择对于未来FMT试验的安全性至关重要，特别是当联合使用抗CTLA-4时。"
+    },
+    {
+      "json_path": "$.sources[0].tool_supplement_materials[0].usable_content",
+      "term": "15%",
+      "excerpt": "pp.，如Segatella copri, Prevotella sp. Marseille-P4119, P. stercorea）为特征。在黑色素瘤队列中，接受Cluster B供体（特别是供体5）FMT的患者发生了严重的免疫相关不良事件（irAEs），包括3例心肌炎（发生率15%），且发病时间显著提前（中位40天，而文献报道通常为60天）。其中2例心肌炎患者均接受了供体5的FMT，发病迅速（分别为第22天和第25天）。统计分析显示，Cluster B供体的粪便仅在双PD-1和CTLA-4阻断背景下导致毒性（P=0.051），而在抗PD-1单药治疗背景下未观察到此类毒性。此外，S. copri的定植与这些严重AEs患者外周血中CD4+ T细胞亚群增加相关。\", \"conditions\": \"比较对象：接受不同供体FMT的患者；治疗背景对比：黑色素瘤队列（双ICI）vs NSCLC队列及既往MIMIC试验（均为抗PD-1单药）。供体5在MIMIC试验（抗PD-1单药"
+    },
+    {
+      "json_path": "$.sources[0].tool_supplement_materials[0].usable_content",
+      "term": "供体5",
+      "excerpt": "\": \"本研究\", \"use_in_review\": \"揭示供体菌群特征（Prevotella富集）与特定毒性（心肌炎、3级及以上AEs）的关联机制，强调治疗背景（双免疫抑制 vs 单药）的关键调节作用。\", \"finding\": \"供体微生物组聚类显示，Cluster B（包含供体5和11）以高丰度的普雷沃菌属（Prevotella spp.，如Segatella copri, Prevotella sp. Marseille-P4119, P. stercorea）为特征。在黑色素瘤队列中，接受Cluster B供体（特别是供体5）FMT的患者发生了严重的免疫相关不良事件（irAEs），包括3例心肌炎（发生率15%），且发病时间显著提前（中位40天，而文献报道通常为60天）。其中2例心肌炎患者均接受了供体5的FMT，发病迅速（分别为第22天和第25天）。统计分析显示，Cluster B供体的粪便仅在双PD-1和CTLA-4阻断背景下导致毒性（P=0.051），而在"
+    },
+    {
+      "json_path": "$.sources[0].tool_supplement_materials[1].usable_content",
+      "term": "15%",
+      "excerpt": "验中安全性数据的详细统计结果、毒性事件的具体临床特征（如心肌炎发生率、起病时间）以及与供体微生物组相关的因果关联分析，作为核心证据支持关于FMT安全性的讨论。\", \"finding\": \"在NSCLC队列中，接受FMT联合抗PD-1治疗的患者未出现3级或更高不良事件（AEs），仅15%患者因2级AE使用皮质类固醇；而在黑色素瘤队列中，65%患者经历3级或更高AEs，其中腹泻/结肠炎占20%，心肌炎发生率为15%（3例），显著高于文献报道的<1%。独立数据和安全监测委员会（DSMC）判定该组合总体安全，但指出黑色素瘤队列中的严重AEs起病更早（中位40天 vs 文献60天）。聚类分析显示，来自富含普雷沃菌属（Prevotella spp.）的供体（特别是供体5）与3级及以上AEs的发生密切相关：所有由供体5提供的粪便导致黑色素瘤患者出现3级+ AEs，且2/3例心肌炎患者接受了供体5的FMT。这些毒性仅在双免疫检查点抑制剂（anti-PD-1 + anti-CTLA-4"
+    },
+    {
+      "json_path": "$.sources[0].tool_supplement_materials[1].usable_content",
+      "term": "供体5",
+      "excerpt": "肠炎占20%，心肌炎发生率为15%（3例），显著高于文献报道的<1%。独立数据和安全监测委员会（DSMC）判定该组合总体安全，但指出黑色素瘤队列中的严重AEs起病更早（中位40天 vs 文献60天）。聚类分析显示，来自富含普雷沃菌属（Prevotella spp.）的供体（特别是供体5）与3级及以上AEs的发生密切相关：所有由供体5提供的粪便导致黑色素瘤患者出现3级+ AEs，且2/3例心肌炎患者接受了供体5的FMT。这些毒性仅在双免疫检查点抑制剂（anti-PD-1 + anti-CTLA-4）背景下观察到，而在单药抗PD-1治疗中未出现。\", \"conditions\": \"研究对象为FMT-LUMINate试验中的NSCLC（n=20）和黑色素瘤（n=20）患者。NSCLC组接受单药抗PD-1（pembrolizumab），黑色素瘤组接受双免疫检查点抑制剂（nivolumab + ipilimumab）。供体聚类基于 shotgun metagenomic seq"
+    }
+  ],
+  "root_observation": "正文先正确将心肌炎15%放在20例黑色素瘤总体；表格随后把同一15%放到Cluster B行，且与供体5的100%严重AE并列，读者容易将总体比例误读为该亚组发生率。原表任务只要求关联，不要求亚组15%。实际供材含总体/供体不同统计口径，且补充答案本身有3/13与15%并列的含糊表达，需分别记录输入混乱和作者表格分母未标明，不能声称数字凭空生成。"
+}

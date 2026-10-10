@@ -1,0 +1,20 @@
+{
+  "schema_version": "legacy_plus.recovery_free_guard_check.v1",
+  "network_calls": 0,
+  "production_source_changed": false,
+  "scratch_ledger_only": true,
+  "command": "Offline temporary SQLite copy: apply audited user_waived row; call unchanged _dedicated_factory guard with a newly inserted uncertain row; call GlobalBudgetLedger.reserve(29.0) under the same 30.0 cap.",
+  "results": {
+    "waived_actual_cny_remains_null": true,
+    "waived_row_excluded_from_reservations": true,
+    "waived_row_present_in_waived_reservations_with_waiver_id": true,
+    "new_uncertain_blocked_by_legacy_unsettled_budget_guard": true,
+    "reserve_over_30_blocked_by_global_budget_exceeded": true,
+    "provider_factory_called": false,
+    "live_ledger_mutated": false
+  },
+  "observed_exception_names": {
+    "new_uncertain": "QwenTransportError:legacy_unsettled_budget_requires_receipt_reconciliation",
+    "over_30": "QwenTransportError:global_budget_exceeded"
+  }
+}

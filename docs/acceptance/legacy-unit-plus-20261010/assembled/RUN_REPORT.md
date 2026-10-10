@@ -1,11 +1,11 @@
 # 全稿汇编运行报告
 
-- 状态：`partial_check`
-- 装配齐全：否；已接入结果中的问题已解决：否（不代表科学内容审校通过）
+- 状态：`complete`
+- 装配齐全：是；已接入结果中的问题已解决：否（不代表科学内容审校通过）
 - 规划状态：`not_checked`；编排状态：`not_checked`
-- 预计单元数：29；已载入：21；缺少：8
-- 实际使用论文数：132；未使用论文数：89
-- 全文统一表号：2 张
+- 预计单元数：29；已载入：29；缺少：0
+- 实际使用论文数：179；未使用论文数：42
+- 全文统一表号：3 张
 - 未能映射的原始引用 handle：无
 - 表格来源栏已换正式编号：0 处；未能映射表格句柄：无
 
@@ -34,30 +34,20 @@
 | Ch5 | Ch5_U03 | written | 1895 | 无 | `F:\OptoMind-Review-2\outputs\legacy_unit_plus_acceptance_20261010_30cny\units\Ch5\Ch5_U03\80ef438debcc72547fed58e80d749752443156771af1f3897416e30c421d75e1\attempt_001\UNIT_RESULT.json` |
 | Ch5 | Ch5_U04 | written | 1428 | 无 | `F:\OptoMind-Review-2\outputs\legacy_unit_plus_acceptance_20261010_30cny\units\Ch5\Ch5_U04\cb0757b8d928684582772af5bc8c289405b94d1fa1288c052cd3d3a5904f3306\attempt_001\UNIT_RESULT.json` |
 | Ch5 | Ch5_U05 | written | 1579 | 无 | `F:\OptoMind-Review-2\outputs\legacy_unit_plus_acceptance_20261010_30cny\units\Ch5\Ch5_U05\50be5825154900534602447f193e60666c4aeae3fd4442a81c8e2f17f896b089\attempt_001\UNIT_RESULT.json` |
-
-## 缺少单元
-
-- `Ch6:Ch6_U1`
-- `Ch6:Ch6_U2`
-- `Ch6:Ch6_U3`
-- `Ch6:Ch6_U4`
-- `Ch7:Ch7_U01`
-- `Ch7:Ch7_U02`
-- `Ch7:Ch7_U03`
-- `Ch7:Ch7_U04`
+| Ch6 | Ch6_U1 | written | 1408 | 无 | `F:\OptoMind-Review-2\outputs\legacy_unit_plus_acceptance_20261010_30cny\units\Ch6\Ch6_U1\17b84ac97c390c34f79ca965553ff149380db6b6fc430dccdabd78e27d8ed3a0\attempt_002\UNIT_RESULT.json` |
+| Ch6 | Ch6_U2 | written | 1496 | 无 | `F:\OptoMind-Review-2\outputs\legacy_unit_plus_acceptance_20261010_30cny\units\Ch6\Ch6_U2\beb274eaf1602fdcd75dd7aec3f86e2230c8ecf1fac6df795547fa93611728ab\attempt_001\UNIT_RESULT.json` |
+| Ch6 | Ch6_U3 | written | 2004 | writer_issues:3 | `F:\OptoMind-Review-2\outputs\legacy_unit_plus_acceptance_20261010_30cny\units\Ch6\Ch6_U3\1c2a3a8f630bbc36f0e1d1d6781ee1402acec167e920ff926784c4060f6858b9\attempt_001\UNIT_RESULT.json` |
+| Ch6 | Ch6_U4 | written | 1343 | 无 | `F:\OptoMind-Review-2\outputs\legacy_unit_plus_acceptance_20261010_30cny\units\Ch6\Ch6_U4\5eca7d63506abbdb4e18f733e24a2cb2d4b959a399d349520565733c11308ec6\attempt_001\UNIT_RESULT.json` |
+| Ch7 | Ch7_U01 | written | 401 | 无 | `F:\OptoMind-Review-2\outputs\legacy_unit_plus_acceptance_20261010_30cny\units\Ch7\Ch7_U01\4747c7c56a2a14eeb6750b859da28a25c782680ee6b7f4ab2229b0c1bf0837a4\attempt_001\UNIT_RESULT.json` |
+| Ch7 | Ch7_U02 | written | 1317 | 无 | `F:\OptoMind-Review-2\outputs\legacy_unit_plus_acceptance_20261010_30cny\units\Ch7\Ch7_U02\b08fd43be39e62b512d0f56eba936ff2a2f523f7deab2990776c230d2ed0d9a8\attempt_001\UNIT_RESULT.json` |
+| Ch7 | Ch7_U03 | written | 1918 | 无 | `F:\OptoMind-Review-2\outputs\legacy_unit_plus_acceptance_20261010_30cny\units\Ch7\Ch7_U03\c7f6963320054facdae976aec0211861f2a55d665034468789974fcebd9ded39\attempt_001\UNIT_RESULT.json` |
+| Ch7 | Ch7_U04 | written | 1294 | 无 | `F:\OptoMind-Review-2\outputs\legacy_unit_plus_acceptance_20261010_30cny\units\Ch7\Ch7_U04\8a91ef5b58cf971a768f58dc06764cd944e39c89b5218fc76af5b01c55dec76f\attempt_001\UNIT_RESULT.json` |
 
 ## 待处理问题（不因装配齐全而视为解决）
 
 - `U3_动态监测与纵向演变`：writer_issues:1；详情：[{"unit_id":"U3_动态监测与纵向演变","problem":"Paragraph Task P02 的 source_brief_details 中将 FMT-LUMINate 试验数据归因于 P0585，但实际材料中 P0585 为 JCOG2007 辅助生物标志物研究，FMT-LUMINate 试验对应来源为 P0583。","source_handles":["P0583","P0585"],"action":"chapter_owner"}]
 - `U3_4`：writer_issues:2；详情：[{"unit_id":"U3_4","problem":"P0587 明确指出缺乏人体肿瘤微环境内肌苷绝对浓度数据及人体 ICI 临床试验验证，虽在本单元作为机制局限性提及，但该证据缺口是本章核心论证之一（U3_5 主题）。","source_handles":["P0587","P0582"],"action":"chapter_owner"},{"unit_id":"U3_4","problem":"P0444 关于 HMBPP 的机制验证主要基于体外 PDTO 模型与间接证据（因 HMBPP 不稳定），人体体内直接因果证据有限。","source_handles":["P0444"],"action":"omit"}]
 - `Ch5_U01`：writer_issues:1；详情：[{"unit_id":"Ch5_U01","problem":"来源 P0593 在 `sources` 列表中的元数据（标题：Single-cell-based identification of drug synergy...）与 `chapter_tool_materials` 及 `paragraph_tasks` 中描述的内容（TACITO trial: Fecal microbiota transplantation plus pembrolizumab and axitinib...）不一致。正文写作依据 `chapter_tool_materials` 中的 TACITO 试验数据并引用为 [P0593]，以符合任务要求，但来源元数据存在冲突。","source_handles":["P0593"],"action":"chapter_owner"}]
-- `Ch6:Ch6_U1`：missing_unit
-- `Ch6:Ch6_U2`：missing_unit
-- `Ch6:Ch6_U3`：missing_unit
-- `Ch6:Ch6_U4`：missing_unit
-- `Ch7:Ch7_U01`：missing_unit
-- `Ch7:Ch7_U02`：missing_unit
-- `Ch7:Ch7_U03`：missing_unit
-- `Ch7:Ch7_U04`：missing_unit
+- `Ch6_U3`：writer_issues:3；详情：[{"unit_id":"Ch6_U3","problem":"材料中关于 Prevotella 诱导心肌炎的具体分子机制（抗原/代谢物及下游通路）明确标注为未解析（still_missing），正文中已如实陈述该局限，但建议后续章节（Ch6_U4）或未来研究计划中关注是否有针对 FMT-LUMINate 的后续机制出版物。","source_handles":["P0583","P0597"],"action":"omit"},{"unit_id":"Ch6_U3","problem":"关于非结肠炎 irAEs（如心肌炎）的大规模微生物组关联研究在材料中被确认为缺乏（still_missing），现有证据主要基于小样本队列（如 FMT-LUMINate n=20 中的 3 例心肌炎），正文中已强调样本量限制及二期试验性质，避免过度外推。","source_handles":["P0583","P0600","P0602"],"action":"omit"},{"unit_id":"Ch6_U3","problem":"确认无已完成的大型随机对照 III 期临床试验证实微生物干预疗效，材料中多次提及（P0578, P0212, P0590），正文中已明确标注 FMT-LUMINate 为 Phase II 且缺乏 Phase III RCT 证据。","source_handles":["P0578","P0212","P0590"],"action":"omit"}]
 
 摘要与结语由主代理在全稿亲审后补写。
