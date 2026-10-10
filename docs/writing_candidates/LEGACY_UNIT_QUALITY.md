@@ -1,8 +1,10 @@
-# Opt-in legacy unit quality stage
+# Legacy unit BODY delivery and quality
 
 ## Normal complete-BODY entry
 
-`run_review_harness.py --delivery-start body` now consumes the current complete outline and materials through the same `legacy_unit_route`, factory, project/account ledgers, unit quality, assembler and optional article editor. It accepts either `--delivery-input FULL_BODY_INPUT.json` or `--delivery-manifest BODY_MANIFEST.json`. No recorded responses or hand-assembled body are required.
+`run_review_harness.py --delivery-start body` consumes the current complete outline and materials through the same `legacy_unit_route`, factory, project/account ledgers, unit quality, assembler and article editor. The formal defaults are `body_version=baseline`, `quality_control=True`, `article_edit=True`, centralized in `review_delivery.BODY_DELIVERY_DEFAULTS`. The fixed real comparison selected baseline; `chapter_coherence` remains available only by explicit experimental selection. The entry accepts either `--delivery-input FULL_BODY_INPUT.json` or `--delivery-manifest BODY_MANIFEST.json`. No recorded responses or hand-assembled body are required.
+
+Default author requests use `qwen3.5-plus` with 8192 thinking tokens and 32768 output tokens. Actual-body assessment and the one whole-article local edit use Plus with 16384 thinking tokens and 24576 output tokens. The normal BODY entry uses its explicit Plus profile and owned budgets independently of the research-route economy ceiling; it does not require `--allow-premium-text-models`. Max remains unavailable in BODY.
 
 The manifest path uses the existing production `scripts.upgrade3.fullbody_writer.load_body_manifest` export. Its `optomind.fullbody_manifest.v1` object lists the approved ordered `expected_chapter_ids` and `chapters`, with each chapter's `chapter_id`, actual `arrangement_path`, corresponding `packet_root` (or a shared top-level `packet_root`), and optional actual `view_path`. A `plan_path` or packet root's `DETAILED_REVIEW_PLAN.json` supplies the approved order; `CURRENT_PLAN.json` is also supported. Paths resolve against the manifest; chapter identities, order and supplied hashes are checked. A generic two-chapter shape is:
 
@@ -21,18 +23,25 @@ The manifest path uses the existing production `scripts.upgrade3.fullbody_writer
 An existing accepted manifest can be pinned offline using `python scripts/upgrade3/fullbody_writer.py --manifest BODY_MANIFEST.json --prepare-manifest PREPARED_BODY_MANIFEST.json`. The normal BODY entry directly builds the sealed full input with the same loader, saves `SOURCE_MANIFEST.json` and `FULL_BODY_INPUT.json`, and then enters the selected writer; it does not run another fullbody writing candidate.
 
 ```powershell
-# Full offline preview, with the original author only.
-python -X utf8 run_review_harness.py --delivery-start body --delivery-manifest PREPARED_BODY_MANIFEST.json --delivery-out outputs/my_body --body-version baseline --no-quality-control --no-article-edit
+# Formal defaults, offline preview of the full book.
+python -X utf8 run_review_harness.py --delivery-start body --delivery-manifest PREPARED_BODY_MANIFEST.json --delivery-out outputs/my_body
 
 # Existing full input is an alternative to the manifest.
-python -X utf8 run_review_harness.py --delivery-start body --delivery-input FULL_BODY_INPUT.json --delivery-out outputs/my_body --body-version chapter_coherence --quality-control --article-edit
+python -X utf8 run_review_harness.py --delivery-start body --delivery-input FULL_BODY_INPUT.json --delivery-out outputs/my_body
+
+# Explicit original-author comparison, with both quality steps disabled.
+python -X utf8 run_review_harness.py --delivery-start body --delivery-input FULL_BODY_INPUT.json --delivery-out outputs/author_only --no-quality-control --no-article-edit
 ```
 
-The BODY files are under `<delivery-out>/body`. Add `--run --ledger <owned-project.sqlite> --budget-limit <absolute-lifetime-cap>`, and the existing `--budget-scope`, `--account-ledger`, `--account-budget-limit`, `--account-mapping-dir`, `--key-file`, `--key-index` and `--tokenizer` as applicable, to allow live calls. Both entries use the same lazy owned factory; preview does not create a ledger or read keys. Resumes keep the existing project/account ownership and cap. `--only-unit CHAPTER:UNIT` remains a pilot over the complete input, with restricted assembly accounting. A changed version needs a new output directory and keeps the same authorized lifetime budget.
+The BODY files are under `<delivery-out>/body`. Add `--run --ledger <owned-project.sqlite> --budget-limit <absolute-lifetime-cap>`, and the existing `--budget-scope`, `--account-ledger`, `--account-budget-limit`, `--account-mapping-dir`, `--key-file`, `--key-index` and `--tokenizer` as applicable, to allow live calls. Both entries use the same lazy owned factory; preview does not create a ledger or read keys. `--only-unit CHAPTER:UNIT` remains a pilot over the complete input, with restricted assembly accounting and no whole-article edit for a selected subset.
+
+Resume with the same input/version, output root, model capacities, project/account ledger paths, scope and lifetime caps. Exact successful requests and saved RAW are reused without another provider call. Interrupted, failed or partial attempts stay recorded; no automatic retry runs. `--run --retry-failed` explicitly permits an eligible recorded failure retry with the same budget ownership, while preserving prior attempts and holds. `--reparse-saved` without `--run` reparses saved quality RAW for free; it cannot buy a missing stage. An unfinished quality/editor step still needs the same live command and budget to continue.
+
+For an experiment, select `--body-version chapter_coherence` in a separate output directory. To return to the formal route, select `--body-version baseline` and the original baseline directory, or a new baseline directory with the same authorized ledgers/caps. A changed version cannot rebind an existing run directory. `--no-quality-control` and `--no-article-edit` explicitly restore an author-only path. The standalone `scripts/upgrade3/legacy_unit_writer.py` retains its historical defaults: baseline with both quality steps off; opt in with its existing flags. Baseline requests/cache identities remain compatible.
 
 `--body-version baseline` preserves the original writer, assessment and completion message bytes and cache identities. `chapter_coherence` adds a responsibilities projection generated from actual full-book chapter frames, unit tasks and explicit task source uses. Shared material-pool membership alone creates no shared-case assignment. All original tasks, conditions and material fields remain present. The new writer uses that context for chapter duties and distinct uses of shared cases. Its existing quality assessor distinguishes missing knowledge from repeated paraphrase or citation-only repair; strict local evidence-based edits handle citation gaps, while genuinely missing tasks still use the single bounded completion. No new reviewer, planning stage or scientific answer is added.
 
-`DELIVERY_REPORT.json` records `effective_settings` and `selected_body`: the actual selected handles draft, numbered reader draft and references file. Successful article editing selects its saved `edited_draft` and existing numbering result; otherwise the assembler's body is numbered through the same `delivery_citations` renderer. Partial scope and pending issues remain recorded. No front/back or publication stage runs without `--delivery-config`. With a config, downstream work consumes the selected BODY and reuses its completed/disabled BODY edit instead of starting another 02 edit. The standalone `legacy_unit_writer.py` defaults remain compatible; normal BODY defaults are centralized in `review_delivery.BODY_DELIVERY_DEFAULTS`.
+`DELIVERY_REPORT.json` records `effective_settings` and `selected_body`: the actual selected handles draft, numbered reader draft and references file. Successful article editing selects its saved `edited_draft` and existing numbering result; otherwise the assembler's body is numbered through the same `delivery_citations` renderer. Existing scientific residuals and pending issues remain recorded alongside the available readable BODY; delivery does not clear them or certify scientific acceptance. Planned/missing bodies and quality records still keep their existing gates. No front/back or publication stage runs without `--delivery-config`. When its existing assembly gate permits downstream work, a config consumes the selected BODY and reuses its completed/disabled BODY edit instead of starting another 02 edit.
 
 Focused offline controls, including the normal entry with the actual factory, synthetic SSE and real project/account SQLite accounting:
 
@@ -40,7 +49,9 @@ Focused offline controls, including the normal entry with the actual factory, sy
 python -X utf8 -m pytest tests/test_chapter_coherence.py tests/test_dual_budget_cli.py tests/test_legacy_unit_route.py tests/test_legacy_unit_route_review.py tests/test_unit_realization.py tests/upgrade3/test_review_unit_writer_completion.py tests/upgrade3/test_review_delivery_entry.py tests/upgrade3/test_fullbody_cli.py::test_normal_body_entry_loads_existing_manifest_export_without_another_writer -q
 ```
 
-The chapter-coherence real quality choice remains owned by the root comparison; synthetic wiring tests do not choose the product version.
+These controls exercise the formal baseline defaults through actual `main()` and a fresh subprocess, selected edited/numbered BODY, explicit experimental/off flags, standalone compatibility, budget enforcement and saved-RAW recovery. Synthetic transport does not assess scientific quality.
+
+## Standalone opt-in quality and saved results
 
 The original unit writer and its complete task/material payload remain the authoring path. `--quality-control` adds independent actual-body assessment with Plus, at most one bounded correction/completion, and one post-assessment when the body changed. Valid post-assessment proposals may then be consumed deterministically once, with no further assessment/completion loop. Assessment is a model diagnostic pending human review, not scientific acceptance.
 

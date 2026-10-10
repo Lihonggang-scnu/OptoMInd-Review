@@ -175,13 +175,15 @@ class StreamResponse:
 
 
 class BodyOpener:
-    def __init__(self, project, account):
+    def __init__(self, project, account, body_version="chapter_coherence", pending_issue=None):
         self.project, self.account, self.calls = project, account, []
+        self.body_version = body_version
+        self.pending_issue = pending_issue
     def open(self, request, timeout):
         wire = json.loads(request.data)
         self.calls.append(wire)
         assert request.get_header("Authorization") == "Bearer synthetic-first"
-        assert wire["stream"] is True
+        assert wire["stream"] is True and wire["model"] == "qwen3.5-plus"
         assert runtime.GlobalBudgetLedger(path=self.project).as_dict()["reserved_cny"] > 0
         assert runtime.GlobalBudgetLedger(path=self.account).as_dict()["reserved_cny"] > 0
         user_text = wire["messages"][1]["content"]
@@ -190,15 +192,22 @@ class BodyOpener:
         except ValueError:
             user = {"article_text": user_text}
         if "task_catalog" in user:
-            assert wire["thinking_budget"] == 16384
+            assert wire["thinking_budget"] == 16384 and wire["max_completion_tokens"] == 40960
+            assert wire["messages"][0]["content"] == quality.load_assessment_prompt(self.body_version)
             data = {"tasks": [{"task_id": task["task_id"], "status": "covered",
                 "body_quote": "SYNTHETIC A and SYNTHETIC B", "explanation": "Both knowledge tasks are substantive.",
-                "material_handles": ["P0001"]} for task in user["task_catalog"]], "changes": [], "issues": []}
+                "material_handles": ["P0001"]} for task in user["task_catalog"]], "changes": [],
+                "issues": [self.pending_issue] if self.pending_issue else []}
         elif "paragraph_tasks" in user:
             assert wire["thinking_budget"] == 8192 and wire["max_completion_tokens"] == 40960
-            assert user["body_version"] == "chapter_coherence"
+            if self.body_version == "baseline":
+                assert "body_version" not in user and "chapter_responsibilities" not in user
+                assert writer.CHAPTER_COHERENCE_INSTRUCTIONS not in wire["messages"][0]["content"]
+            else:
+                assert user["body_version"] == self.body_version
             data = {"body_markdown": "SYNTHETIC A and SYNTHETIC B [P0001].", "issues": []}
         else:
+            assert wire["thinking_budget"] == 16384 and wire["max_completion_tokens"] == 40960
             data = {"changes": [{"operation": "replace", "original_text": "SYNTHETIC A and SYNTHETIC B [P0001].",
                      "replacement_text": "Edited SYNTHETIC A and SYNTHETIC B [P0001].", "reason": "Synthetic local test."}],
                     "unresolved_questions": [], "no_change": False}
@@ -211,26 +220,33 @@ class BodyOpener:
         return StreamResponse(data)
 
 
-def test_normal_harness_uses_actual_factory_dual_budget_and_delivers_selected_edit(tmp_path, monkeypatch):
+@pytest.mark.parametrize("body_version", ["baseline", "chapter_coherence"])
+def test_normal_harness_uses_actual_factory_dual_budget_and_delivers_selected_edit(tmp_path, monkeypatch, body_version):
     import run_review_harness as harness
     source = tmp_path / "book.json"
     route._write(source, book())
     key = tmp_path / "synthetic-keys.txt"
     key.write_text("synthetic-first\nsynthetic-second\n", encoding="utf-8")
     project, account = tmp_path / "project.sqlite", tmp_path / "account.sqlite"
-    opener = BodyOpener(project, account)
+    pending_issue = {"code": "synthetic_recorded_residual", "detail": "Retain the existing unresolved diagnostic."} \
+        if body_version == "baseline" else None
+    opener = BodyOpener(project, account, body_version, pending_issue)
     monkeypatch.setattr(runtime.urllib.request, "build_opener", lambda *_: opener)
     monkeypatch.setattr(socket, "create_connection", lambda *_a, **_kw: pytest.fail("Network outside synthetic transport"))
     monkeypatch.setattr(cli, "tokenizer_counter", lambda *_: (counter, {"synthetic": True}))
     argv = ["--delivery-start", "body", "--delivery-input", str(source), "--delivery-out", str(tmp_path / "out"),
-        "--body-version", "chapter_coherence", "--quality-control", "--article-edit", "--run",
+        "--run",
         "--ledger", str(project), "--budget-limit", "60", "--budget-scope", "synthetic-round",
         "--account-ledger", str(account), "--account-budget-limit", "300", "--key-file", str(key), "--key-index", "1"]
+    # Baseline uses the product defaults through actual main/factory calls.
+    # The experimental version must be selected explicitly.
+    if body_version != "baseline":
+        argv += ["--body-version", body_version, "--quality-control", "--article-edit"]
     monkeypatch.setattr(sys, "argv", ["run_review_harness.py", *argv])
     assert harness.main() == 0
     report = route._read(tmp_path / "out" / "body" / "DELIVERY_REPORT.json")
     assert report["model_calls"] == len(opener.calls) == 5
-    assert report["effective_settings"] == {"body_version": "chapter_coherence", "quality_control": True,
+    assert report["effective_settings"] == {"body_version": body_version, "quality_control": True,
         "article_edit": True, "model": "qwen3.5-plus", "thinking_budget": 8192, "output_tokens": 32768}
     selected = report["selected_body"]
     assert selected["source"] == "article_edit"
@@ -239,13 +255,21 @@ def test_normal_harness_uses_actual_factory_dual_budget_and_delivers_selected_ed
     assert "edited" in Path(selected["reader_draft"]).read_text(encoding="utf-8")
     assert "[1]" in Path(selected["reader_draft"]).read_text(encoding="utf-8")
     assert route._read(Path(selected["references_path"]))["references"]
+    if pending_issue:
+        assert report["status"] == "restricted_draft"
+        for row in report["units"]:
+            assert {"code": "quality_assessor_issue", "detail": pending_issue} in row["pending_problems"]
+            assert row["quality"]["status"] == "assessed_with_pending"
+            assert row["quality"]["scientific_acceptance"] is False
     snapshots = [runtime.GlobalBudgetLedger(path=path).as_dict() for path in (project, account)]
     assert snapshots[0]["actual_cny"] == snapshots[1]["actual_cny"] > 0
     assert len(snapshots[0]["reservations"]) == len(snapshots[1]["reservations"]) == 5
     monkeypatch.setattr(runtime.QwenDirectClient, "_keys", lambda *_: pytest.fail("Key read on exact cache resume"))
     assert harness._main_with_args(harness.build_parser().parse_args(argv)) == 0
     assert len(opener.calls) == 5
-    assert route._read(tmp_path / "out" / "body" / "DELIVERY_REPORT.json")["model_calls"] == 0
+    resumed = route._read(tmp_path / "out" / "body" / "DELIVERY_REPORT.json")
+    assert resumed["model_calls"] == 0
+    assert [row["pending_problems"] for row in resumed["units"]] == [row["pending_problems"] for row in report["units"]]
     attempt = Path(report["units"][0]["attempt_dir"])
     (attempt / "UNIT_RESULT.json").unlink()
     (attempt / "RESULT_SEAL.json").unlink()
@@ -260,11 +284,29 @@ def test_normal_harness_uses_actual_factory_dual_budget_and_delivers_selected_ed
     route._write(config, {"schema": delivery.DELIVERY_CONFIG_SCHEMA, "text_edit": {"fixture": str(second_edit)}})
     assert harness._main_with_args(harness.build_parser().parse_args(argv + ["--delivery-config", str(config)])) == 0
     configured = route._read(tmp_path / "out" / "body" / "DELIVERY_REPORT.json")
-    assert configured["stages"]["02_text_edit"]["source"] == "article_edit"
-    assert configured["stages"]["02_text_edit"]["edited_draft"] == selected["handles_draft"]
+    if pending_issue:
+        # Available BODY stays delivered; optional later stages retain the
+        # existing unresolved-assembly gate without clearing the diagnostic.
+        assert configured["stages"] == {} and configured["halt_reasons"] == ["assembly_pending"]
+        assert configured["selected_body"]["handles_draft"] == selected["handles_draft"]
+    else:
+        assert configured["stages"]["02_text_edit"]["source"] == "article_edit"
+        assert configured["stages"]["02_text_edit"]["edited_draft"] == selected["handles_draft"]
     assert not (tmp_path / "out" / "body" / "02_text_edit").exists()
     assert "UNREQUESTED_SECOND_EDIT" not in Path(configured["selected_body"]["reader_draft"]).read_text(encoding="utf-8")
     assert len(opener.calls) == 5
+
+
+def test_formal_defaults_and_standalone_compatibility_are_separate():
+    import run_review_harness as harness
+    normal = harness.build_parser().parse_args(["--delivery-start", "body"])
+    standalone = cli.parser().parse_args([])
+    assert delivery.BODY_DELIVERY_DEFAULTS == {"body_version": "baseline", "quality_control": True, "article_edit": True}
+    assert (normal.body_version, normal.quality_control, normal.article_edit) == ("baseline", True, True)
+    assert (standalone.body_version, standalone.quality_control, standalone.article_edit) == ("baseline", False, False)
+    disabled = harness.build_parser().parse_args(["--delivery-start", "body", "--no-quality-control", "--no-article-edit"])
+    assert (disabled.body_version, disabled.quality_control, disabled.article_edit) == ("baseline", False, False)
+    assert (normal.model, normal.thinking_budget, normal.output_tokens) == ("qwen3.5-plus", 8192, 32768)
 
 
 @pytest.mark.parametrize("refused", ["project", "account"])
@@ -292,20 +334,26 @@ def test_normal_harness_enforces_each_real_factory_cap_before_http(tmp_path, mon
         assert snapshot["reserved_cny"] == snapshot["actual_cny"] == 0
 
 
-def test_normal_body_preview_keeps_entire_book_and_explicit_off_flags(tmp_path, monkeypatch):
+@pytest.mark.parametrize("body_version", ["baseline", "chapter_coherence"])
+def test_normal_body_preview_keeps_entire_book_and_explicit_off_flags(tmp_path, monkeypatch, body_version):
     import run_review_harness as harness
     source = tmp_path / "book.json"
     route._write(source, book())
     monkeypatch.setattr(cli, "_dedicated_factory", lambda *_: pytest.fail("Live factory during preview"))
     args = harness.build_parser().parse_args(["--delivery-start", "body", "--delivery-input", str(source),
-        "--delivery-out", str(tmp_path / "out"), "--body-version", "chapter_coherence", "--only-unit", "C1:C1_U1",
+        "--delivery-out", str(tmp_path / "out"), "--body-version", body_version, "--only-unit", "C1:C1_U1",
         "--no-quality-control", "--no-article-edit"])
     assert harness._main_with_args(args) == 0
     report = route._read(tmp_path / "out" / "body" / "DELIVERY_REPORT.json")
     assert report["model_calls"] == 0 and report["full_unit_count"] == 2
     assert not report["effective_settings"]["quality_control"] and not report["effective_settings"]["article_edit"]
     messages = route._read(Path(report["units"][0]["messages_path"]))
-    assert len(json.loads(messages[1]["content"])["chapter_responsibilities"]["chapter_outline"]) == 2
+    payload = json.loads(messages[1]["content"])
+    assert payload["paragraph_tasks"] == book()["chapters"][0]["units"][0]["paragraph_tasks"]
+    if body_version == "chapter_coherence":
+        assert len(payload["chapter_responsibilities"]["chapter_outline"]) == 2
+    else:
+        assert "body_version" not in payload and "chapter_responsibilities" not in payload
     assert report["selected_body"]["status"] == "not_generated"
 
 
@@ -327,16 +375,20 @@ def test_main_scopes_body_plus_independently_and_restores_outer_ceiling(monkeypa
     assert observed == [expected] and os.environ.get(name) == prior
 
 
-def test_script_main_subprocess_fixed_plus_real_factory_budget_and_free_resume(tmp_path):
+@pytest.mark.parametrize("body_version", ["baseline", "chapter_coherence"])
+def test_script_main_subprocess_fixed_plus_real_factory_budget_and_free_resume(tmp_path, body_version):
     root = Path(__file__).resolve().parents[1]
     source, key = tmp_path / "book.json", tmp_path / "synthetic-keys.txt"
     route._write(source, book())
     key.write_text("synthetic-first\nsynthetic-second\n", encoding="utf-8")
     project, account = tmp_path / "project.sqlite", tmp_path / "account.sqlite"
     argv = ["--delivery-start", "body", "--delivery-input", str(source), "--delivery-out", str(tmp_path / "out"),
-        "--body-version", "chapter_coherence", "--run", "--no-quality-control", "--no-article-edit",
+        "--run",
         "--ledger", str(project), "--budget-limit", "60", "--budget-scope", "synthetic-subprocess",
         "--account-ledger", str(account), "--account-budget-limit", "300", "--key-file", str(key), "--key-index", "1"]
+    if body_version == "chapter_coherence":
+        argv += ["--body-version", body_version, "--no-quality-control", "--no-article-edit"]
+    expected_calls = 5 if body_version == "baseline" else 2
     # Test-only transport setup; run the actual script __main__ in its fresh
     # process, with the outer research ceiling deliberately enabled.
     bootstrap = """
@@ -346,7 +398,8 @@ from optomind_research.runtime.upgrade3.module4 import runtime
 from scripts.upgrade3 import legacy_unit_writer as cli
 fixtures = runpy.run_path('tests/test_chapter_coherence.py')
 argv = sys.argv[1:]
-opener = fixtures['BodyOpener'](Path(argv[argv.index('--ledger') + 1]), Path(argv[argv.index('--account-ledger') + 1]))
+body_version = argv[argv.index('--body-version') + 1] if '--body-version' in argv else 'baseline'
+opener = fixtures['BodyOpener'](Path(argv[argv.index('--ledger') + 1]), Path(argv[argv.index('--account-ledger') + 1]), body_version)
 runtime.urllib.request.build_opener = lambda *_: opener
 cli.tokenizer_counter = lambda *_: (fixtures['counter'], {'synthetic_subprocess': True})
 def forbidden(*args, **kwargs):
@@ -382,15 +435,20 @@ runpy.run_path('run_review_harness.py', run_name='__main__')
     assert first.returncode == 0, first.stderr + first.stdout[-2000:]
     assert all((original_attempt / name).read_bytes() == content for name, content in original_files.items())
     report = route._read(out / "DELIVERY_REPORT.json")
-    assert report["model_calls"] == 2 and report["requested_generation_complete"]
+    assert report["model_calls"] == expected_calls and report["requested_generation_complete"]
     assert report["model"] == "qwen3.5-plus"
+    assert report["effective_settings"]["body_version"] == body_version
+    if body_version == "baseline":
+        assert report["effective_settings"]["quality_control"] and report["effective_settings"]["article_edit"]
+        assert report["selected_body"]["source"] == "article_edit"
+        assert "edited" in Path(report["selected_body"]["reader_draft"]).read_text(encoding="utf-8")
     for row in report["units"]:
         saved = route._read(Path(row["attempt_dir"]) / "UNIT_RESULT.json")
         assert saved["effective_request"]["model"] == "qwen3.5-plus"
         assert saved["effective_request"]["thinking_budget"] == 8192
     snapshots = [runtime.GlobalBudgetLedger(path=path).as_dict() for path in (project, account)]
     assert snapshots[0]["actual_cny"] == snapshots[1]["actual_cny"] > 0
-    assert len(snapshots[0]["reservations"]) == len(snapshots[1]["reservations"]) == 2
+    assert len(snapshots[0]["reservations"]) == len(snapshots[1]["reservations"]) == expected_calls
     again = subprocess.run(command, cwd=root, env={**env, "OPTO_SYNTHETIC_FORBID_KEYS": "1"},
         text=True, encoding="utf-8", capture_output=True, timeout=60)
     assert again.returncode == 0, again.stderr + again.stdout[-2000:]

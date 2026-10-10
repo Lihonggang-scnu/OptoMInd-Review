@@ -53,7 +53,7 @@ from .review_unit_writer import (
 )
 
 LIVE_CLIENT_FACTORY = None  # documented unused seam: live is out of scope here
-BODY_DELIVERY_DEFAULTS = {"body_version": "baseline", "quality_control": False, "article_edit": False}
+BODY_DELIVERY_DEFAULTS = {"body_version": "baseline", "quality_control": True, "article_edit": True}
 
 REPLAY_EXACT = "exact"
 REPLAY_COMPATIBILITY = "compatibility_replay"

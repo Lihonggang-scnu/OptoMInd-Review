@@ -13,7 +13,7 @@
 | BODY 逐级规划 | 问题、PLAN、A/B、精读/补充 → 章级任务与细纲 | `runtime/upgrade3/progressive_review_plan.py`；`scripts/upgrade3/progressive_review_plan.py` |
 | 编排 | 已形成的知识任务与来源 → 顺序、拆合及 writer 输入 | `runtime/upgrade3/chapter_arrangement.py`；同名 CLI |
 | 写作/补写 | 实际任务与材料 → 单元正文、引用与未决报告 | `runtime/upgrade3/review_unit_writer.py`；同名 CLI |
-| 当前分单元正文入口及可选质量步骤 | 完整细纲和材料 → 所选单元作者 → 实际正文核查/一次补写 → 装配 → 一次全文局部编辑 → 所选 BODY 编号稿和引用目录 | 正常 `run_review_harness.py --delivery-start body`，以 `--delivery-manifest` 复用生产 manifest/packet/arrangement 导出，或 `--delivery-input` 接完整 `FULL_BODY_INPUT.json`；兼容 CLI `scripts/upgrade3/legacy_unit_writer.py`，共用 `legacy_unit_route.py`、`unit_realization.py`、`article_text_editor.py` 和同一预算工厂；见 [运行和恢复](../writing_candidates/LEGACY_UNIT_QUALITY.md) |
+| 当前分单元正文入口及质量步骤 | 完整细纲和材料 → baseline 单元作者 → 实际正文核查/一次补写 → 装配 → 一次全文局部编辑 → 所选 BODY 编号稿和引用目录 | 正常 `run_review_harness.py --delivery-start body`，以 `--delivery-manifest` 复用生产 manifest/packet/arrangement 导出，或 `--delivery-input` 接完整 `FULL_BODY_INPUT.json`；兼容 CLI `scripts/upgrade3/legacy_unit_writer.py`，共用 `legacy_unit_route.py`、`unit_realization.py`、`article_text_editor.py` 和同一预算工厂；见 [运行和恢复](../writing_candidates/LEGACY_UNIT_QUALITY.md) |
 | 可选全文写作候选 | 完整批准细纲、全部章节编排与材料 → 一次成文/连续作者/长文工作台/读者修订的完整 BODY | `runtime/upgrade3/fullbody_writer.py`、`fullbody_contracts.py`；`scripts/upgrade3/fullbody_writer.py`，见 [说明](../fullbody_writer/README.md) |
 | 全文装配 | 选定批次和单元结果 → BODY 与交付状态 | `scripts/upgrade3/full_review_draft.py`、`runtime/upgrade3/review_delivery.py` |
 | 独立首尾 | 已完成 BODY、上下文/材料 → 后置职责构思、首尾与题名 | `serial_manuscript_parts.py`、`serial_parts_application.py`；`scripts/upgrade3/manuscript_parts.py` |
@@ -27,10 +27,10 @@
 - 正式规划默认开启 `planning_revision`；`--planning-revision` 仍兼容，`--no-planning-revision` 显式选择历史编排模式。两种模式的章节细化都保留完整 A/B，路由说明不能替代科研材料。运行前先读 [运行须知](RUN_GUIDE.md)。
 - 深度背景、理论、机制、方法比较和实质 Outlook 属于 BODY；独立首尾负责文章入口、范围宣告及收束。没有重新导入早期并行 PartsPlan 流水线。
 - 独立首尾仅显式 `post_body` 方式启用；CLI 采用 fixture/recordings，真实 provider 需本地另行注入与预算管理。普通交付的缺省路径不自动改成该模式。
-- 单元/装配 pending 继续阻止不当向后交付；已保存正文仍保留。首尾接回不能绕过这一门槛。
+- 单元/装配 pending 保留原有状态和记录；正常 BODY 入口仍交付已有可读编号稿，不因已接受初稿的科学残余另行阻断。缺失正文、未完成生成或质量记录继续受原有门槛约束；首尾接回不能绕过这些门槛。
 - A/B/C 是后置正文局部修订实验，不修改细纲；没有自动质量认证。真实三问题结果只显示有限小修，下一轮细纲实验尚未实施。
 - 综述转述原始研究可以凭可用内容与明确引用身份正常参与，不强制自身 A/B 或全文。多个任务可以共用实质充分的一张表。
-- BODY 正常入口有 `baseline` 与 `chapter_coherence` 版本选择，后者只增加由实际细纲/任务来源用途生成的跨章职责提示及实质缺口提示；原任务和材料保留。`--no-quality-control`、`--no-article-edit` 可显式关闭对应步骤。真实请求、恢复、项目/账户账本与独立 CLI 共用；默认选择记录在 `review_delivery.BODY_DELIVERY_DEFAULTS`。
+- BODY 正常入口正式选择 `baseline`，默认 `quality_control=True`、`article_edit=True`；默认作者 Plus 8192 思考＋32768 输出，核查/全文局部编辑 Plus 16384 思考＋24576 输出。`chapter_coherence` 仅通过 `--body-version chapter_coherence` 显式选择作实验；原任务和材料保留。`--no-quality-control`、`--no-article-edit` 可显式关闭对应步骤。旧独立 CLI 仍默认 baseline 且两步骤关闭。真实请求、恢复、项目/账户账本共用；正式默认集中于 `review_delivery.BODY_DELIVERY_DEFAULTS`。
 - `DELIVERY_REPORT.json.selected_body` 指向实际选中正文；成功全文编辑后使用其编辑稿和已有编号结果。BODY 只交付当前正文、可读编号稿和引用目录；首尾/出版由 `--delivery-config` 显式请求，消费者不会再运行第二次 02 编辑。
 
 ## 继续阅读
