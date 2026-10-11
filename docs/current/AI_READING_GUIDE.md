@@ -1,5 +1,7 @@
 # 给 AI 助手的阅读顺序
 
+**2026-10-12最新背景：** [当前BODY→真实首尾→编号/出版及下一步研究](../acceptance/serial-parts-live-20261011/CLOUD_READ_FIRST.md)。本地未上传的默认加强接线和首尾live源码现已纳入本分支；真实首尾请求、响应、完整稿及49页PDF一并提供。[研究与校验员准备](../acceptance/manuscript-checker-preparation-20261012/README.md)是设计资料，尚未实现新校验员或开展新跨领域调研；请区分用户方向、本地落实和真实测试事实。
+
 **先读 [产品工作宗旨](PRODUCT_PRINCIPLES.md)：严格拒绝过度防御，以实际产品质量和解决问题为先。** 当前统一链路入口是 [PIPELINE](PIPELINE.md)，操作入口是 [RUN_GUIDE](RUN_GUIDE.md) 的“正式操作入口”。`QUALITY_CAPACITY_HANDOFF.md`是10月6日容量改造的历史交接，不是默认下一轮开工指令。
 
 2026-10-10已决定baseline正式接入：Plus分单元作者→任务核查/必要的一次补写→装配→一次全文局部编辑→所选正文编号。`chapter_coherence`仅实验；指南路线不进入默认。采用事实和29单元/187身份的既有结果见 [固定归档](../acceptance/outline-to-body-coherence-20261010/README.md)。本轮收尾只做免费接线与恢复核对。

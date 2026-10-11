@@ -1,0 +1,768 @@
+diff --git a/docs/POST_BODY_MANUSCRIPT_PARTS.md b/docs/POST_BODY_MANUSCRIPT_PARTS.md
+index ad1a860a..a1e574dd 100644
+--- a/docs/POST_BODY_MANUSCRIPT_PARTS.md
++++ b/docs/POST_BODY_MANUSCRIPT_PARTS.md
+@@ -48,7 +48,7 @@ python scripts/upgrade3/manuscript_parts.py \
+   --output outputs/post_body_parts_run01
+ ```
+ 
+-`--context` 可省略。`--fixture` 与 `--recordings` 二选一。输出目录必须是新目录；失败后用新目录重新运行，不把旧成功文件当本轮成果。
++`--context` 可省略。离线运行在 `--fixture` 与 `--recordings` 中二选一。离线核心的输出目录必须是新目录；失败后用新目录重新运行，不把旧成功文件当本轮成果。下文显式 live 适配器另有同目录缓存恢复。
+ 
+ fixture 顶层为 `conception`、`conclusion`、`introduction`、`abstract`，分别提供对应阶段的响应。conception 返回 `{"manuscript_parts_plan": {...}}`；abstract 返回 `title`、`abstract`、`keywords`。fixture 是人为离线输入，不是模型质量证据。recordings 的键为 `serial_parts:conception` 等；每条 recording 必须带与本阶段实际 messages 完全匹配的 messages_sha256；缺失或不匹配会停止。未绑定消息的历史响应只能显式作为人工 fixture 做离线试验，不能称为新模型调用。
+ 
+@@ -74,11 +74,30 @@ fixture 顶层为 `conception`、`conclusion`、`introduction`、`abstract`，
+ 
+ 首尾自身的输出目录仍须全新，不能将BODY支持同目录恢复表述为首尾也支持。重复同一post_body配置进入非空03会明确停止；已有BODY可不带config免费恢复。再次首尾运行用本节独立CLI的新目录及所选句柄稿，不重新写正文。
+ 
+-## 后续真实调用
++## 预算受控的真实调用（2026-10-11）
+ 
+ 运行库 `run_serial_parts` 提供显式 `provider(stage, messages)` 注入接口。后续本地 Agent 可将已有预算管理与模型客户端接在这里；四个阶段都必须走同一运行库的真实消息构造和解析，不能手工拼接近似提示词另证链路。
+ 
+-本次 CLI 没有隐式实时客户端，不扫描凭证，不替用户批准预算。provider 的计费、重试和供应商请求数由外部受控驱动负责；报告的逻辑 provider 调用数不冒充供应商审计账单。必须先取得真实测试授权；不要从归档的历史剩余预算推导新授权。
++独立 CLI 现提供显式 `--live` 适配器，复用产品 Qwen 客户端、tokenizer、缓存和项目／账户双账本。`--live` 默认只预览；加 `--run` 才发生真实调用。不扫描凭证，不初始化或重置已有账本。必须使用本轮授权的预算；不要从历史剩余预算推导新授权。当前 live 入口固定使用 `qwen3.5-plus`，默认 16,384 思考、32,768 回答额度，流式直连；无模型回退或传输失败自动重试。
++
++```powershell
++python scripts/upgrade3/manuscript_parts.py `
++  --live --draft "<selected_body.handles_draft>" `
++  --body-report "<DELIVERY_REPORT.json>" --context "<context.json>" `
++  --output "<post_body_output>" `
++  --ledger "<existing_project_budget.sqlite>" --budget-limit <project_lifetime_cap> `
++  --account-ledger "<existing_account_budget.sqlite>" --account-budget-limit <account_lifetime_cap> `
++  --account-mapping-dir "<physical_calls_directory>" `
++  --tokenizer "<local_tokenizer.json>" --incremental-budget <authorized_increment>
++```
++
++先亲读 `CONCEPTION_MESSAGES.json`、`CONTEXT.json` 和 `LIVE_REPORT.json`。确认后在同一命令追加 `--run --key-file "<private_key_file>" --key-index 1`。凭证只由真实客户端读取，不进入模型消息。
++
++首次预览保存 `LIVE_BINDING.json`，固定源稿与上下文哈希、实际模型参数、tokenizer、账本及增量预算起点；恢复不能重新起算增量额度。每次请求先保存实际消息，返回后保存完整原始响应与传输记录，再将内容字段交给原解析器。成功调用在 `cache/<stage>/` 中复用；新装配写入 `attempts/attempt_NNN/`，保留此前尝试。沿用同一命令和输出目录即可免费重解析已有响应、续跑缺失阶段。已保存的失败或不确定请求不会自动重复购买。
++
++`--repair-invalid` 显式允许每阶段最多一次结构格式修复，复用原任务、模型原回答及机器校验错误，不加入人工科学修改意见；修复仍走原解析器、缓存和预算。未通过时停止，保留所有返回。不把缺生成内容或未知引用当作成功。
++
++`LIVE_REPORT.json` 记录物理调用数、阶段缓存／失败、预算快照、原 BODY 诊断及最终实际路径；`FRONT_BACK_REPORT.json` 仍由原串行核心生成。该独立 live 入口并不把 delivery 配置中的 fixture 自动变成 live；正常 BODY 可先完成选择，再用本节入口消费它，之后由既有 04／05 消费首尾最终稿。
+ 
+ ## 装配安全与 v1 限制
+ 
+diff --git a/docs/current/PIPELINE.md b/docs/current/PIPELINE.md
+index f2a70a67..1ca0833e 100644
+--- a/docs/current/PIPELINE.md
++++ b/docs/current/PIPELINE.md
+@@ -38,7 +38,7 @@
+ | 正式BODY输入 | 完整 `FULL_BODY_INPUT.json`，或 `optomind.fullbody_manifest.v1` 绑定最终plan/packet_root、各章有效arrangement/view → 同一manifest loader导出任务与完整材料 → baseline运行库 | `run_review_harness.py --delivery-start body --delivery-input …` 或 `--delivery-manifest …`；共用 `scripts/upgrade3/fullbody_writer.py::load_body_manifest`。`fullbody_writer.py --prepare-manifest`只离线固定输入，不启用历史全文作者 |
+ | 正式作者/核查/补写 | 每单元完整任务、用途、章节框架和实际材料 → Plus作者；核查实际正文，必要时一次有界补写/后核查 → `UNIT_MESSAGES`、RAW、`UNIT_RESULT`、原始及采用正文、诊断 → 装配 | `legacy_unit_route.py`、`review_unit_writer.py`、`unit_realization.py`；`scripts/upgrade3/legacy_unit_writer.py`与正常入口共用。主作者不带实际前文；不经过指南转换 |
+ | 装配/一次全文编辑/选择与编号 | 明确采用单元结果 → 装配句柄稿、references/summary；一次全文局部编辑 → 实际编辑稿或装配稿 → `DELIVERY_REPORT.json.selected_body` 的句柄稿/编号稿/引用目录 | 原 `full_review_draft.py` 汇编器、`article_text_editor.py`、`review_delivery.py::_body_delivery_artifacts`、`delivery_citations.py`。下游读选择，不按文件时间猜稿；BODY编辑已处理，delivery不再执行第二次02编辑 |
+-| 独立首尾/题名（显式） | **所选句柄BODY**＋原问题＋最终主张/范围/细纲＋可选材料与身份 → 后置构思职责卡 → 结语→引言→摘要/关键词/题名 → `MANUSCRIPT_FINAL.md`、实际消息/响应与报告 → 04编号 | `serial_manuscript_parts.py`、`serial_parts_application.py`、`scripts/upgrade3/manuscript_parts.py`；delivery配置 `front_back.mode=post_body`。CLI/config仅fixture或严格录制；真实provider需显式预算受控注入，只有standalone自动装配 |
++| 独立首尾/题名（显式） | **所选句柄BODY**＋原问题＋最终主张/范围/细纲＋可选材料与身份 → 后置构思职责卡 → 结语→引言→摘要/关键词/题名 → `MANUSCRIPT_FINAL.md`、实际消息/响应与报告 → 04编号 | `serial_manuscript_parts.py`、`serial_parts_application.py`、`scripts/upgrade3/manuscript_parts.py`；delivery配置 `front_back.mode=post_body` 维持fixture/严格录制。独立CLI新增 `--live` 预览、`--run` 显式双账本Plus生成及缓存恢复，只有standalone自动装配 |
+ | 最终图表/引用与出版（显式） | 03实际final稿＋同一身份目录/图资产 → 先挂图、再按阅读顺序统一编号 → 04 `MANUSCRIPT_READER.md`、`REFERENCES.json`、图映射、assets → 05只消费这些真实路径 | `delivery_citations.py`、`review_delivery.py::run_publication_delivery`、`latex_publication_renderer.py`。出版不再编号/挂图；Markdown默认，`compile_pdf=true`才TeX/PDF，Crossref/S2 enrich关闭 |
+ 
+ 表中的运行库位于 `optomind_research/runtime/upgrade3/`，脚本位于 `scripts/upgrade3/`，除已写完整路径者。每次选定输入保存路径、SHA及所属运行，不把不同题目的PLAN、P号或历史删节包混成生产输入。
+@@ -57,7 +57,7 @@
+ | 编排 | 独立CLI默认Plus、16384/32768，max_source_chars=0；必须显式模式、材料和账本 | 历史完整编排及消息交接；正常BODY manifest导出免费验证 |
+ | 正式BODY作者/补写 | 固定Plus 8192思考＋32768回答；正常入口 `BODY_DELIVERY_DEFAULTS` 是 baseline＋核查True＋全文编辑True | 已认可7章29单元；既有完整稿187身份的正式选择及免费恢复；固定五单元真实比较后选择baseline |
+ | 核查/全文编辑 | 固定Plus 16384/24576，`unit_realization.py`、`legacy_unit_route.py` 的角色profile；不由旧quality.json的Flash writer字段替代 | 真实任务检查/一次补写/严格编辑与一次全文编辑；本轮不追修已接受局部科学问题 |
+-| 首尾/最终编号/出版 | delivery显式config；首尾默认无live模型，provider自带角色/计费控制。出版无LLM，PDF需本机工具链 | 首尾接合、编号、出版的既有离线/fixture及历史产物；本轮只做免费消费者接线，不将BODY质量验收扩称新首尾/PDF质量验收 |
++| 首尾/最终编号/出版 | delivery显式config；独立live CLI为Plus 16384思考/32768回答、双账本及固定增量额度。出版无LLM，PDF需本机工具链 | 2026-10-11在已认可BODY上真实完成4逻辑阶段＋1次结构修复，0.356588元；BODY保持、最终187身份、49页PDF经视觉检查。题名可用，引言目录化和摘要/结语重复仍待改善；未重跑上游 |
+ 
+ 验证记录分别见 [RUN_GUIDE_EVIDENCE](RUN_GUIDE_EVIDENCE.md)、[容量/条件交接](QUALITY_CAPACITY_VERIFICATION.md)、[按需正式接入](../verification/on-demand-promotion-20261007/README.md) 及本轮BODY归档。不相加重叠测试数，也不把合成调用当真实科学质量证据。
+ 
+@@ -68,7 +68,7 @@
+ - 完整规划 CLI 的细纲加强默认开启，与 `planning_revision` 是两个独立开关。选择 none 可自主正常完成，无需人工科学意见或填写阶段状态。selection 前已保存完整有效快照；失败/预算不足保留原计划、成功前缀与先前采用版本，返回未完成状态。同目录 `--resume` 沿用原规划/选择/ACCESS/OWNER兼容缓存；无效结构回答仅显式 `--retry-unresolved` 重试一次。
+ - `ProgressiveReviewPlanner.run` API 继续负责原规划，不隐式买 Max；正常 CLI 通过共享 `run_pipeline` 组合后置加强。程序调用方可以复用同一入口。规划命令不会隐式启动编排或 BODY，后续两个正式 CLI 按 `CURRENT_PLAN` → `ARRANGEMENT_RUN.body_manifest` → `--delivery-manifest` 接续。
+ - 深度背景、理论、机制、方法比较和实质 Outlook 属于 BODY；独立首尾负责文章入口、范围宣告及收束。没有重新导入早期并行 PartsPlan 流水线。
+-- 独立首尾仅显式 `post_body` 方式启用；CLI 采用 fixture/recordings，真实 provider 需本地另行注入与预算管理。普通交付的缺省路径不自动改成该模式。
++- 独立首尾仅显式启用：delivery config采用 `post_body` fixture/recordings；独立CLI另提供 `--live` 预算受控Plus适配器。普通交付的缺省路径不自动改成该模式。实时输入、缓存恢复和预算绑定见 [首尾说明](../POST_BODY_MANUSCRIPT_PARTS.md)。
+ - 单元/装配 pending 保留原有状态和记录；正常 BODY 入口仍交付已有可读编号稿，不因已接受初稿的科学残余另行阻断。缺失正文、未完成生成或质量记录继续受原有门槛约束；首尾接回不能绕过这些门槛。
+ - A/B/C 是早期后置正文局部修订实验，不修改细纲。其有限小修结论只针对当时实验；细纲加强当前按上表默认接在完整规划 CLI 后，二者不能混同。
+ - 综述转述原始研究可以凭可用内容与明确引用身份正常参与，不强制自身 A/B 或全文。多个任务可以共用实质充分的一张表。
+diff --git a/docs/current/RUN_GUIDE.md b/docs/current/RUN_GUIDE.md
+index 0bb0b749..ba7f916f 100644
+--- a/docs/current/RUN_GUIDE.md
++++ b/docs/current/RUN_GUIDE.md
+@@ -104,7 +104,7 @@ python -X utf8 run_review_harness.py --delivery-start body --delivery-input FULL
+ | 历史独立 `legacy_unit_writer.py` | baseline，两质量开关False | 用 `--quality-control --article-edit`才等同正式质量步骤 |
+ | 作者/补写 | qwen3.5-plus，8192思考＋32768回答 | 作者CLI `--thinking-budget/--output-tokens`；质量阶段容量按其运行库角色profile，不随作者值一起变 |
+ | 核查/全文局部编辑 | qwen3.5-plus，16384思考＋24576回答 | `unit_realization.py`、`legacy_unit_route.py`角色profile |
+-| downstream首尾 | 不构造隐式live模型 | config明确fixture/严格recordings；live使用受预算约束的provider注入 |
++| downstream首尾 | 不构造隐式live模型 | config明确fixture/严格recordings；独立 `manuscript_parts.py --live` 提供显式双账本Plus客户端，详见首尾说明 |
+ 
+ `max_output_tokens`是回答空间，实际思考请求的总 `max_completion_tokens`为思考＋回答。正式BODY不是把 `quality.json` 中其他实验的Flash writer默认搬进来；也不需要研究路径的premium开关来启用Plus。最终核对实际 `profile/effective_request`，不用配置名字代替wire参数。预算CLI缺省值是30，但接手已有账本时必须显式传其原累计封顶；它不是本轮新增额度。
+ 
+@@ -144,7 +144,7 @@ BODY的02阶段记录 `body_selected`，不会再全文编辑一次；03读取
+ 
+ 03的owned首尾块保持原样；BODY+post_body到04的投影只移除旧的未受管理书目，防止引用列表替换吞掉结语标记。03原稿及投影哈希单独保存。`compile_pdf=true`才请求TeX/PDF，本机需Pandoc/TeX与可用字体；Markdown出版不需要LLM。出版默认关闭Crossref/S2 enrich。
+ 
+-**恢复边界：**BODY同目录支持缓存恢复；现有 `post_body` 首尾仍要求新输出目录，同一config重复进入非空03会明确停止。恢复BODY时先不传config；需要再次生成首尾时独立CLI用新目录及当前selected句柄稿，或由受控provider驱动显式运行。不能宣称整个02–05都已有同目录恢复。CLI/config目前没有live首尾适配器；fixture接通证明接口，不是新的真实首尾质量验收。
++**恢复边界：**BODY同目录支持缓存恢复；delivery config 的 `post_body` 原子首尾核心仍要求新输出目录，同一config重复进入非空03会明确停止。恢复BODY时先不传config。2026-10-11新增独立 `manuscript_parts.py --live`：先预览，加 `--run` 才购买四步Plus生成；同目录复用持久请求缓存，在新的attempt目录原子装配，增量预算起点不重置。格式错误仅显式 `--repair-invalid` 有界修复，未知来源或未完成生成继续停止。命令、双账本与准确恢复范围见 [首尾说明](../POST_BODY_MANUSCRIPT_PARTS.md)。这没有将delivery config自动改为live，也没有把整个02–05合并成一个可恢复命令。
+ 
+ ### 费用与本次验证范围
+ 
+diff --git a/optomind_research/runtime/latex_publication_renderer.py b/optomind_research/runtime/latex_publication_renderer.py
+index 08854845..548b9a8b 100644
+--- a/optomind_research/runtime/latex_publication_renderer.py
++++ b/optomind_research/runtime/latex_publication_renderer.py
+@@ -266,6 +266,7 @@ def _clean_unicode(value: Any) -> str:
+     text = unicodedata.normalize("NFC", text)
+     replacements = {
+         "\u00a0": " ",
++        "\u2005": " ",
+         "\u2010": "-",
+         "\u2011": "-",
+         "\u2012": "-",
+@@ -496,12 +497,22 @@ def _prepare_scientific_markdown(text: str) -> str:
+     return _prepare_scientific_markdown_with_integrity(text)[0]
+ 
+ 
+-def _strip_embedded_title_and_abstract(text: str) -> str:
++def _strip_embedded_title_and_abstract(text: str, *, confirmed_title: str | None = None) -> str:
+     """Avoid duplicating metadata when the complete review includes front matter."""
+ 
+     lines = str(text or "").splitlines()
+-    if lines and re.match(r"^#\s+[^#]", lines[0]):
+-        lines = lines[1:]
++    if confirmed_title is None:
++        if lines and re.match(r"^#\s+[^#]", lines[0]):
++            lines = lines[1:]
++    else:
++        # Owned post-BODY title markers and leading whitespace are transport
++        # structure. Only the confirmed metadata title may be projected out;
++        # a substantive H1 with another title must survive.
++        first = next((index for index, line in enumerate(lines)
++            if line.strip() and line.strip() != "<!-- manuscript-part:title:start -->"), None)
++        match = re.match(r"^#\s+([^#].*?)\s*$", lines[first]) if first is not None else None
++        if match and _clean_unicode(match.group(1)).strip() == _clean_unicode(confirmed_title).strip():
++            del lines[first]
+     abstract_start = next(
+         (
+             index
+@@ -2421,6 +2432,21 @@ def _blank_alt_before_bold_caption(markdown: str) -> str:
+     return "\n".join(lines) + ("\n" if markdown.endswith("\n") else "")
+ 
+ 
++def _wrap_plain_reference_dois_tex(body_tex: str) -> str:
++    """Give existing numbered bibliography DOIs safe TeX line breaks only."""
++    lines = body_tex.splitlines(keepends=True)
++    for index, line in enumerate(lines):
++        if not re.match(r"^\{\[\}\d+\{\]\}", line):
++            continue
++        def wrap(match):
++            doi = match.group(1)
++            for escaped, plain in ((r"\_", "_"), (r"\%", "%"), (r"\#", "#"), (r"\&", "&")):
++                doi = doi.replace(escaped, plain)
++            return "DOI: " + r"\url{" + doi + "}"
++        lines[index] = re.sub(r"DOI:\s*(10\.\d{4,9}/[^\s{}]+)", wrap, line)
++    return "".join(lines)
++
++
+ def _render_main_tex(
+     *,
+     metadata: dict[str, Any],
+@@ -2430,7 +2456,9 @@ def _render_main_tex(
+     include_bibliography: bool = True,
+ ) -> str:
+     author_parts = []
+-    for author in metadata["authors"]:
++    display_authors = [author for author in metadata["authors"]
++                       if author["name"] != "Author information pending"]
++    for author in display_authors:
+         rendered = _latex_escape(author["name"])
+         details = []
+         if author.get("affiliation"):
+@@ -2469,7 +2497,7 @@ def _render_main_tex(
+ \usepackage[unicode,hidelinks]{hyperref}
+ \usepackage[capitalise,noabbrev]{cleveref}
+ \usepackage{xcolor}
+-\usepackage{url}
++\usepackage{xurl}
+ \graphicspath{{figures/}}
+ \setlength{\emergencystretch}{3em}
+ \setlength{\parindent}{2em}
+@@ -2502,7 +2530,7 @@ def _render_main_tex(
+ \usepackage[unicode,hidelinks]{hyperref}
+ \usepackage[capitalise,noabbrev]{cleveref}
+ \usepackage{xcolor}
+-\usepackage{url}
++\usepackage{xurl}
+ \graphicspath{{figures/}}
+ \setlength{\emergencystretch}{3em}
+ \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+@@ -2533,7 +2561,7 @@ def _render_main_tex(
+ \usepackage[hidelinks]{hyperref}
+ \usepackage[capitalise,noabbrev]{cleveref}
+ \usepackage{xcolor}
+-\usepackage{url}
++\usepackage{xurl}
+ \graphicspath{{figures/}}
+ \setlength{\emergencystretch}{3em}
+ \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+@@ -2554,7 +2582,7 @@ def _render_main_tex(
+         + _latex_escape(metadata["title"])
+         + r"""},
+   pdfauthor={"""
+-        + _latex_escape(", ".join(a["name"] for a in metadata["authors"]))
++        + _latex_escape(", ".join(a["name"] for a in display_authors))
+         + r"""}
+ }
+ 
+@@ -2823,7 +2851,7 @@ class LatexPublicationRenderer:
+ 
+         markdown, integrity_before_figures = _prepare_scientific_markdown_with_integrity(
+             _strip_embedded_title_and_abstract(
+-                review_path.read_text(encoding="utf-8")
++                review_path.read_text(encoding="utf-8"), confirmed_title=metadata["title"]
+             ),
+             preserve_verification_labels=(
+                 self.document_type == "research_plan"
+@@ -3129,7 +3157,8 @@ class LatexPublicationRenderer:
+                 "Pandoc conversion failed: "
+                 + str(pandoc_result["stderr"] or pandoc_result["stdout"])[-1000:]
+             )
+-        body_tex = body_path.read_text(encoding="utf-8")
++        body_tex = _wrap_plain_reference_dois_tex(body_path.read_text(encoding="utf-8"))
++        _write_text(body_path, body_tex)
+         main_path = self.output_dir / "main.tex"
+         # Use a Unicode-native engine for both languages.  Scientific
+         # normalization handles known notation semantically; XeLaTeX keeps an
+diff --git a/optomind_research/runtime/upgrade3/serial_parts_live.py b/optomind_research/runtime/upgrade3/serial_parts_live.py
+new file mode 100644
+index 00000000..d3698b83
+--- /dev/null
++++ b/optomind_research/runtime/upgrade3/serial_parts_live.py
+@@ -0,0 +1,219 @@
++"""Budgeted live adapter for the unchanged atomic post-BODY parts runner."""
++from __future__ import annotations
++
++from contextlib import closing
++import hashlib
++import math
++from pathlib import Path
++import sqlite3
++from typing import Any
++
++from .dual_budget import bind_json, read_json, write_json
++from .serial_manuscript_parts import (
++    SerialPartsError, build_stage_messages, messages_sha256, normalize_context,
++    parse_stage_response, run_serial_parts,
++)
++from .serial_parts_application import extract_body, preflight_placement
++from .unit_realization import _cached_call
++from .writer_candidates import _estimate, _output_lock, _profile
++
++
++def ledger_snapshot(path: str | Path, expected_limit: float) -> dict[str, Any]:
++    """Read an existing ledger only; preview must never initialize a budget."""
++    path = Path(path).resolve()
++    with closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)) as db:
++        row = db.execute("SELECT value FROM budget_meta WHERE key='limit_cny'").fetchone()
++        if row is None or abs(float(row[0]) - expected_limit) > 1e-9:
++            raise ValueError("serial_parts_existing_budget_limit_conflict")
++        rows = db.execute("SELECT amount_cny,actual_cny,status FROM reservations").fetchall()
++    used = actual = held = 0.0
++    for amount, cost, status in rows:
++        if status not in {"settled", "reserved", "uncertain"}:
++            raise ValueError("serial_parts_invalid_budget_state")
++        if not math.isfinite(float(amount)) or float(amount) < 0 or (cost is not None and
++                (not math.isfinite(float(cost)) or float(cost) < 0)):
++            raise ValueError("serial_parts_invalid_budget_amount")
++        actual += float(cost or 0)
++        held += float(amount) if status != "settled" else 0
++        used += float(cost if cost is not None else amount) if status == "settled" else float(amount)
++    return {"path": str(path), "limit_cny": expected_limit, "used_cny": used,
++            "actual_cny": actual, "held_cny": held, "reservation_count": len(rows)}
++
++
++def run_live_parts(*, args, context, chapter_roles, token_counter, tokenizer_info,
++                   client_factory=None):
++    """One persistent request cache; each atomic assembly gets a fresh attempt.
++
++    Existing successful responses are parsed again for free. A saved failed or
++    uncertain physical attempt is never automatically purchased a second time.
++    The incremental ceiling is fixed at the first preview, across all resumes.
++    """
++    from scripts.upgrade3.writer_candidates import make_live_factory
++    from .review_delivery import _post_body_identity_context
++
++    output = Path(args.output).resolve()
++    profile = _profile({"model": "qwen3.5-plus", "thinking": True,
++        "thinking_budget": args.thinking_budget, "max_output_tokens": args.output_tokens,
++        "stream": True, "timeout_seconds": 900.0,
++        "stream_overall_timeout_seconds": 1800.0}, "serial_parts")
++    if not math.isfinite(args.incremental_budget) or args.incremental_budget <= 0:
++        raise ValueError("serial_parts_incremental_budget_must_be_positive")
++    project = ledger_snapshot(args.ledger, args.budget_limit)
++    account = ledger_snapshot(args.account_ledger, args.account_budget_limit)
++    draft = Path(args.draft).resolve()
++    original = draft.read_bytes()
++    manuscript = original.decode("utf-8")
++    conflicts, _ = preflight_placement(manuscript, chapter_roles)
++    if conflicts:
++        raise SerialPartsError("placement_conflict")
++    source_report = read_json(args.body_report) if args.body_report else None
++    catalogs = [read_json(path) for path in args.identity_catalog]
++    if source_report:
++        selected = source_report.get("selected_body") or {}
++        if Path(selected.get("handles_draft", "")).resolve() != draft:
++            raise ValueError("serial_parts_selected_body_path_mismatch")
++        if not (source_report.get("body_delivery") or {}).get("ready"):
++            raise ValueError("serial_parts_body_not_ready")
++        if not catalogs:
++            catalogs = [read_json(selected["references_path"])]
++    context = _post_body_identity_context(context, catalogs)
++    body = extract_body(manuscript, chapter_roles)
++    normalized = normalize_context(context, research_question=args.research_question,
++                                   body_text=body, chapter_roles=chapter_roles)
++    messages = build_stage_messages("conception", body_text=body,
++        research_question=args.research_question, chapter_roles=chapter_roles,
++        language=args.language, normalized_context=normalized)
++    estimate = _estimate(messages, profile, None, token_counter)
++    immutable = {"schema_version": "optomind.serial_parts.live.v1",
++        "draft_path": str(draft), "draft_sha256": hashlib.sha256(original).hexdigest(),
++        "conception_messages_sha256": messages_sha256(messages), "profile": profile,
++        "language": args.language, "project_path": project["path"],
++        "project_limit_cny": args.budget_limit, "account_path": account["path"],
++        "account_limit_cny": args.account_budget_limit,
++        "mapping_dir": str(Path(args.account_mapping_dir).resolve()),
++        "incremental_limit_cny": args.incremental_budget, "tokenizer": tokenizer_info}
++    with _output_lock(output):
++        binding_path = output / "LIVE_BINDING.json"
++        if binding_path.exists():
++            binding = read_json(binding_path)
++            if binding["inputs"] != immutable:
++                raise ValueError("serial_parts_live_binding_changed:retain_budget_and_cache")
++        else:
++            binding = {"inputs": immutable, "baseline_project": project,
++                "baseline_account": account,
++                "reservation_ceiling_cny": min(args.budget_limit,
++                    project["used_cny"] + args.incremental_budget)}
++            bind_json(binding_path, binding)
++        write_json(output / "CONCEPTION_MESSAGES.json", messages)
++        write_json(output / "CONTEXT.json", context)
++        write_json(output / "IDENTITY_CATALOGS.json", catalogs)
++        report = {"stage": "serial_parts_live", "status": "preview", "model_calls": 0,
++            "external_requests": 0, "profile": profile, "estimate": estimate,
++            "model_calls_scope": "this_invocation_only; cumulative budget deltas use fixed first-preview baseline",
++            "context_shape": {"body_chars": len(body), "allowed_handles": len(normalized["allowed_source_handles"]),
++                "identity_count": len(normalized["source_identity_map"]),
++                "material_records": len(normalized["material_records"]),
++                "final_outline_chapters": len(normalized.get("final_outline", []))},
++            "budget_binding": binding, "source_body_delivery":
++                (source_report or {}).get("body_delivery"), "stage_calls": [],
++            "final_manuscript": None, "scientific_acceptance": False}
++
++        def budget_deltas():
++            current = ledger_snapshot(args.ledger, args.budget_limit)
++            report.update(project_after=current,
++                project_actual_delta_cny=current["actual_cny"] - binding["baseline_project"]["actual_cny"],
++                project_held_delta_cny=current["held_cny"] - binding["baseline_project"]["held_cny"],
++                account_after=ledger_snapshot(args.account_ledger, args.account_budget_limit))
++
++        budget_deltas()
++        if args.run:
++            if not estimate["fits"]:
++                raise ValueError("serial_parts_input_capacity_exceeded")
++            args.responses = None
++            args.allow_max = False
++            args.budget_ledger = args.ledger
++            factory = client_factory or make_live_factory(args, token_counter=token_counter,
++                reservation_ceiling_cny=binding["reservation_ceiling_cny"])
++
++            report["status"] = "running"
++            write_json(output / "LIVE_REPORT.json", report)
++
++            def fetch(stage, actual_messages):
++                audit = []
++                raw, calls, state = _cached_call(output / "cache" / stage, actual_messages,
++                    profile, factory, True, token_counter, attempt_log=audit)
++                report["model_calls"] += calls
++                report["external_requests"] += calls
++                report["stage_calls"].append({"stage": stage, "calls": calls, "state": state,
++                    "messages_sha256": messages_sha256(actual_messages), "attempts": audit})
++                budget_deltas()
++                write_json(output / "LIVE_REPORT.json", report)
++                if raw is None:
++                    raise SerialPartsError("live_stage_" + state + ":" + stage)
++                if not raw.get("complete") or raw.get("finish_reason") != "stop" or (
++                        raw.get("returned_model") or raw.get("model")) != profile["model"]:
++                    raise SerialPartsError("live_response_incomplete_or_model_mismatch:" + stage)
++                # The core validates the manuscript response, not transport
++                # audit events/raw wire data. Full provider evidence stays in
++                # cache/RAW_RESPONSE.json and its transport directory.
++                (output / "cache" / stage / "MODEL_CONTENT.txt").write_text(raw["content"], encoding="utf-8")
++                return {"content": raw["content"], "finish_reason": raw["finish_reason"]}
++
++            def provider(stage, actual_messages):
++                response = fetch(stage, actual_messages)
++                try:
++                    parsed = parse_stage_response(stage, response,
++                        allowed_source_handles=normalized["allowed_source_handles"])
++                except SerialPartsError as exc:
++                    error = str(exc)
++                    write_json(output / "cache" / stage / "VALIDATION_ERROR.json", {"error": error})
++                    # A format repair never supplies a scientific answer or
++                    # resolves an unowned citation/unsupported placement.
++                    structural = error.startswith(("nonempty_array_required:", "invalid_part_plan_shape:",
++                        "invalid_manuscript_parts_plan_shape", "response_not_", "response_wrong_keys:",
++                        "duplicate_response_key:", "keywords_must_be_nonempty_array"))
++                    if not getattr(args, "repair_invalid", False) or not structural:
++                        raise
++                    repair_messages = [*actual_messages,
++                        {"role": "assistant", "content": response["content"]},
++                        {"role": "user", "content": "机器结构校验失败：" + error +
++                         "。仅修复上次响应的 JSON 字段结构，使其严格符合原任务 schema；"
++                         "保留原响应的科学内容、措辞与范围，不新增事实、主张或来源。"
++                         "数组字段必须使用非空字符串数组，不能用单个字符串。"
++                         "返回完整 JSON 对象，不返回补丁、说明或代码围栏。"}]
++                    repair_stage = stage + "_format_repair"
++                    response = fetch(repair_stage, repair_messages)
++                    try:
++                        parsed = parse_stage_response(stage, response,
++                            allowed_source_handles=normalized["allowed_source_handles"])
++                    except SerialPartsError as repair_error:
++                        write_json(output / "cache" / repair_stage / "VALIDATION_ERROR.json",
++                            {"error": str(repair_error)})
++                        raise
++                    write_json(output / "cache" / repair_stage / "PARSED_RESPONSE.json", parsed)
++                else:
++                    write_json(output / "cache" / stage / "PARSED_RESPONSE.json", parsed)
++                return response
++
++            attempts = output / "attempts"
++            attempts.mkdir(exist_ok=True)
++            attempt = attempts / f"attempt_{len(list(attempts.iterdir())) + 1:03d}"
++            result = run_serial_parts(draft_path=draft, research_question=args.research_question,
++                chapter_roles=chapter_roles, out_dir=attempt, context=context,
++                language=args.language, provider=provider)
++            result.update(model_calls=report["model_calls"], external_requests=report["external_requests"],
++                call_accounting="production_client_dual_persistent_ledgers",
++                source_body_delivery=report["source_body_delivery"], scientific_acceptance=False)
++            write_json(attempt / "FRONT_BACK_REPORT.json", result)
++            report.update(status=result["status"], final_manuscript=result["final_manuscript"],
++                runtime_report=result, attempt_dir=str(attempt),
++                project_after=ledger_snapshot(args.ledger, args.budget_limit),
++                account_after=ledger_snapshot(args.account_ledger, args.account_budget_limit))
++            failures = result.get("failures") or []
++            report.update(failed_stage=failures[0]["stage"] if failures else None,
++                          error=failures[0]["error"] if failures else None)
++            budget_deltas()
++        if draft.read_bytes() != original:
++            raise ValueError("serial_parts_source_changed_during_run")
++        write_json(output / "LIVE_REPORT.json", report)
++        return report
+diff --git a/scripts/upgrade3/manuscript_parts.py b/scripts/upgrade3/manuscript_parts.py
+index 21ed0460..0c572f1e 100644
+--- a/scripts/upgrade3/manuscript_parts.py
++++ b/scripts/upgrade3/manuscript_parts.py
+@@ -1,10 +1,10 @@
+-"""Generate independent manuscript parts after the completed BODY, offline.
++"""Generate independent manuscript parts after the completed BODY.
+ 
+ This entry does not run or modify BODY planning, arrangement, or writing.
+-It uses a labeled fixture or recorded responses for the real serial chain:
+-conception -> conclusion -> introduction -> abstract/title.  The runtime's
+-``provider`` callable is an explicit injection seam for a separately budgeted
+-driver; this CLI never constructs one and never falls back to a live model.
++It uses a labeled fixture, exact recordings, or the explicit --live production
++adapter for conception -> conclusion -> introduction -> abstract/title.
++--live previews exact inputs; --live --run enables budgeted physical requests.
++The core provider seam and atomic assembly remain unchanged.
+ 
+ Example::
+ 
+@@ -40,11 +40,30 @@ def build_parser() -> argparse.ArgumentParser:
+     parser.add_argument("--output", type=Path, required=True,
+                         help="Fresh directory for prompts, plan, parts, report and final manuscript")
+     source = parser.add_mutually_exclusive_group(required=True)
++    source.add_argument("--live", action="store_true",
++                        help="Budgeted production adapter; preview unless --run is also set")
+     source.add_argument("--fixture", type=Path,
+                         help="Labeled JSON fixture with conception/conclusion/introduction/abstract")
+     source.add_argument("--recordings", type=Path,
+                         help="Replay JSON with serial_parts:<stage> keys; no live fallback")
+     parser.add_argument("--language", default="zh")
++    parser.add_argument("--run", action="store_true", help="Allow live physical calls; requires --live")
++    parser.add_argument("--repair-invalid", action="store_true",
++                        help="Explicitly allow one cached model format repair per invalid stage")
++    parser.add_argument("--body-report", type=Path, help="Accepted DELIVERY_REPORT.json; validates selected draft and carries diagnostics")
++    parser.add_argument("--identity-catalog", type=Path, action="append", default=[])
++    parser.add_argument("--ledger", type=Path, help="Existing project ledger; never reset or initialized")
++    parser.add_argument("--budget-limit", type=float, help="Original project lifetime cap")
++    parser.add_argument("--account-ledger", type=Path, help="Existing shared account ledger")
++    parser.add_argument("--account-budget-limit", type=float, help="Original account lifetime cap")
++    parser.add_argument("--account-mapping-dir", type=Path, help="Existing shared dual receipt directory")
++    parser.add_argument("--incremental-budget", type=float, default=5.0,
++                        help="Additional cap fixed against the first preview's project balance")
++    parser.add_argument("--thinking-budget", type=int, default=16384)
++    parser.add_argument("--output-tokens", type=int, default=32768)
++    parser.add_argument("--tokenizer", type=Path, help="Existing local tokenizer, no download")
++    parser.add_argument("--key-file", type=Path, help="Private credential path; never read in preview")
++    parser.add_argument("--key-index", type=int, default=1)
+     return parser
+ 
+ 
+@@ -66,6 +85,22 @@ def main(argv: list[str] | None = None) -> int:
+         if args.research_question:
+             context["research_question"] = question
+         chapter_roles = context.pop("chapter_roles", [])
++        args.research_question = question
++        if args.run and not args.live:
++            parser.error("--run requires --live")
++        if args.live:
++            required = ("ledger", "budget_limit", "account_ledger", "account_budget_limit", "account_mapping_dir", "tokenizer")
++            if any(getattr(args, field) is None for field in required):
++                parser.error("--live requires existing project/account ledgers and caps, mapping directory and local tokenizer")
++            if args.key_index < 1 or (args.run and not args.key_file):
++                parser.error("live --run requires --key-file and a positive --key-index")
++            from scripts.upgrade3.writer_candidates import tokenizer_counter
++            from optomind_research.runtime.upgrade3.serial_parts_live import run_live_parts
++            counter, tokenizer_info = tokenizer_counter(args.tokenizer)
++            report = run_live_parts(args=args, context=context, chapter_roles=chapter_roles,
++                                    token_counter=counter, tokenizer_info=tokenizer_info)
++            print(json.dumps(report, ensure_ascii=False, indent=2, default=str))
++            return 0 if report.get("status") in {"preview", "generated"} else 1
+         from optomind_research.runtime.upgrade3.serial_manuscript_parts import run_serial_parts
+ 
+         report = run_serial_parts(
+diff --git a/scripts/upgrade3/writer_candidates.py b/scripts/upgrade3/writer_candidates.py
+index 659957b5..23cd08bf 100644
+--- a/scripts/upgrade3/writer_candidates.py
++++ b/scripts/upgrade3/writer_candidates.py
+@@ -164,13 +164,16 @@ def _require_max_permission(args: argparse.Namespace, profiles: Mapping[str, Map
+                          + ":pass --allow-max only for an explicitly approved Max run")
+ 
+ 
+-def make_live_factory(args: argparse.Namespace, *, token_counter=None):
++def make_live_factory(args: argparse.Namespace, *, token_counter=None, reservation_ceiling_cny=None):
+     """Create one lazy shared-ledger factory; no keys are read here."""
+     if not args.run or args.responses:
+         raise ValueError("live_execution_requires_run_without_responses")
+     if not args.budget_ledger:
+         raise ValueError("live_execution_requires_shared_budget_ledger")
+     limit = args.budget_limit
++    if reservation_ceiling_cny is not None and (isinstance(reservation_ceiling_cny, bool)
++            or not math.isfinite(reservation_ceiling_cny) or reservation_ceiling_cny <= 0):
++        raise ValueError("finite_positive_reservation_ceiling_required")
+     if limit is not None and (isinstance(limit, bool) or not math.isfinite(limit) or limit <= 0):
+         raise ValueError("finite_positive_budget_limit_required")
+     ledger_path = Path(args.budget_ledger).expanduser().resolve()
+@@ -187,6 +190,10 @@ def make_live_factory(args: argparse.Namespace, *, token_counter=None):
+             ledger._refresh_from_db()
+             if ledger.limit_cny is None or not math.isfinite(ledger.limit_cny) or ledger.limit_cny <= 0:
+                 raise ValueError("existing_ledger_requires_finite_positive_limit")
++            if reservation_ceiling_cny is not None:
++                # reserve() combines this in-memory ceiling with the stored cap
++                # inside BEGIN IMMEDIATE; the lifetime metadata is unchanged.
++                ledger.limit_cny = min(ledger.limit_cny, reservation_ceiling_cny)
+             if getattr(args, "account_ledger", None):
+                 from optomind_research.runtime.upgrade3.dual_budget import (
+                     DualBudgetLedger, account_mapping_dir, open_account_ledger)
+diff --git a/tests/test_latex_delivery_projection.py b/tests/test_latex_delivery_projection.py
+new file mode 100644
+index 00000000..6cd23ed2
+--- /dev/null
++++ b/tests/test_latex_delivery_projection.py
+@@ -0,0 +1,35 @@
++from optomind_research.runtime.latex_publication_renderer import (
++    _clean_unicode, _render_main_tex, _strip_embedded_title_and_abstract,
++    _wrap_plain_reference_dois_tex,
++)
++
++
++def test_owned_leading_title_requires_exact_confirmed_metadata_match():
++    source = "\n<!-- manuscript-part:title:start -->\n\n# 当前题名\n\n<!-- manuscript-part:title:end -->\n\n## 引言\n入口\n\n# 正文知识章\n实质正文"
++    projected = _strip_embedded_title_and_abstract(source, confirmed_title="当前题名")
++    assert "# 当前题名" not in projected
++    assert "# 正文知识章\n实质正文" in projected
++    other = _strip_embedded_title_and_abstract(source, confirmed_title="另一题名")
++    assert "# 当前题名" in other and "# 正文知识章" in other
++    assert "# 当前题名" in source
++
++
++def test_pending_author_is_diagnostic_metadata_but_never_rendered_placeholder():
++    metadata = {"title": "Current title", "authors": [{"name": "Author information pending"}],
++                "abstract": "Current abstract", "keywords": ["keyword"]}
++    rendered = _render_main_tex(metadata=metadata, body_tex="Body", include_bibliography=False)
++    assert r"\author{}" in rendered and "Author information pending" not in rendered
++    assert metadata["authors"][0]["name"] == "Author information pending"
++    metadata["authors"] = [{"name": "Actual Author", "affiliation": "University"}]
++    rendered = _render_main_tex(metadata=metadata, body_tex="Body", include_bibliography=False)
++    assert "Actual Author" in rendered and "University" in rendered
++
++
++def test_numbered_reference_dois_wrap_without_changing_content_or_other_prose():
++    doi = r"10.1200/jco.2026.44.16\_suppl.e20602"
++    source = "DOI: " + doi + "\n" + r"{[}24{]} Title. DOI: " + doi + "\n"
++    projected = _wrap_plain_reference_dois_tex(source)
++    assert projected.startswith("DOI: " + doi + "\n")
++    assert r"DOI: \url{10.1200/jco.2026.44.16_suppl.e20602}" in projected
++    assert _wrap_plain_reference_dois_tex(projected) == projected
++    assert _clean_unicode("1255\u2005Longitudinal") == "1255 Longitudinal"
+diff --git a/tests/upgrade3/test_serial_parts_live.py b/tests/upgrade3/test_serial_parts_live.py
+new file mode 100644
+index 00000000..98809b84
+--- /dev/null
++++ b/tests/upgrade3/test_serial_parts_live.py
+@@ -0,0 +1,164 @@
++import json
++from argparse import Namespace
++from pathlib import Path
++
++import pytest
++
++from optomind_research.runtime.upgrade3.module4.runtime import GlobalBudgetLedger, QwenTransportError
++from optomind_research.runtime.upgrade3.serial_parts_live import run_live_parts
++from scripts.upgrade3.writer_candidates import make_live_factory
++
++
++def inputs(tmp_path):
++    draft = tmp_path / "body.md"
++    draft.write_text("# 原题\n\n## 实质正文\n\n条件限定关系 [P0001]。\n", encoding="utf8")
++    project, account = tmp_path / "project.sqlite", tmp_path / "account.sqlite"
++    GlobalBudgetLedger(path=project, limit_cny=60)
++    GlobalBudgetLedger(path=account, limit_cny=300)
++    args = Namespace(output=tmp_path / "out", draft=draft, body_report=None,
++        identity_catalog=[], thinking_budget=16384, output_tokens=32768,
++        incremental_budget=5, ledger=project, budget_limit=60,
++        account_ledger=account, account_budget_limit=300,
++        account_mapping_dir=tmp_path / "mappings", research_question="什么限定关系？",
++        language="zh", run=True)
++    return args
++
++
++def responses():
++    part = {"purpose": "读者任务", "focus": ["条件与关系"], "boundary": ["实际正文范围"],
++        "placement": {"mode": "standalone", "anchor": "manuscript_start"},
++        "finalize_from": ["实际正文"]}
++    return {"conception": {"manuscript_parts_plan": {"context": "普通综述读者",
++        **{key: part for key in ("abstract", "introduction", "conclusion")}}},
++        "conclusion": {"conclusion": "关系受到条件限定 [P0001]。"},
++        "introduction": {"introduction": "本篇解释条件与关系 [P0001]。"},
++        "abstract": {"title": "条件与关系", "abstract": "本文解释有条件关系。", "keywords": ["条件"]}}
++
++
++def test_live_adapter_four_exact_stages_then_free_cache_reassembly(tmp_path):
++    args = inputs(tmp_path)
++    calls = []
++    def factory(role, attempt, profile):
++        def client(messages, **kwargs):
++            calls.append(role)
++            return {"content": json.dumps(responses()[role], ensure_ascii=False),
++                "complete": True, "finish_reason": "stop", "returned_model": "qwen3.5-plus",
++                "transport_events": "audit" * 45000}
++        return client
++    context = {"source_identity_map": {"P0001": {"title": "来源", "doi": "10.1/a"}}}
++    original = args.draft.read_bytes()
++    first = run_live_parts(args=args, context=context, chapter_roles=[],
++        token_counter=lambda raw, messages: 100, tokenizer_info={"mode": "test"}, client_factory=factory)
++    assert first["status"] == "generated"
++    assert first["model_calls"] == 4
++    assert "transport_events" in json.loads((args.output / "cache/conception/RAW_RESPONSE.json").read_text())
++    assert "transport_events" not in json.loads((Path(first["attempt_dir"]) / "responses/conception.json").read_text())
++    assert calls == ["conception", "conclusion", "introduction", "abstract"]
++    second = run_live_parts(args=args, context=context, chapter_roles=[],
++        token_counter=lambda raw, messages: 100, tokenizer_info={"mode": "test"}, client_factory=factory)
++    assert second["status"] == "generated"
++    assert second["model_calls"] == 0 and len(calls) == 4
++    assert first["budget_binding"] == second["budget_binding"]
++    assert Path(first["final_manuscript"]).read_bytes() == Path(second["final_manuscript"]).read_bytes()
++    assert args.draft.read_bytes() == original
++    args.incremental_budget = 6
++    with pytest.raises(ValueError, match="binding_changed"):
++        run_live_parts(args=args, context=context, chapter_roles=[], token_counter=None,
++            tokenizer_info={"mode": "test"}, client_factory=factory)
++
++
++def test_factory_incremental_ceiling_is_atomic_and_does_not_change_stored_cap(tmp_path, monkeypatch):
++    import optomind_research.runtime.upgrade3.module4.runtime as runtime
++    args = inputs(tmp_path)
++    args.responses = None
++    args.allow_max = False
++    args.budget_ledger = args.ledger
++    args.key_file = tmp_path / "absent-private-key"
++    args.key_index = 1
++    args.account_ledger = None
++    captured = []
++    class Client:
++        def __init__(self, **kwargs):
++            captured.append(kwargs["budget_ledger"])
++            self.__dict__.update(kwargs)
++            self.prompt_token_multiplier = 1.1
++            self.prompt_token_framing_margin = 512
++        def __call__(self, messages, **kwargs):
++            return {}
++    monkeypatch.setattr(runtime, "QwenDirectClient", Client)
++    from optomind_research.runtime.upgrade3.writer_candidates import _profile
++    factory = make_live_factory(args, reservation_ceiling_cny=5)
++    factory("conception", tmp_path / "attempt", _profile({}, "test"))
++    ledger = captured[0]
++    ledger.reserve(4.9, "first")
++    with pytest.raises(QwenTransportError, match="global_budget_exceeded"):
++        ledger.reserve(0.2, "refused")
++    assert GlobalBudgetLedger(path=args.ledger).as_dict()["limit_cny"] == 60
++    assert not args.key_file.exists()
++
++
++def test_explicit_format_repair_preserves_invalid_raw_and_resumes_for_free(tmp_path):
++    args = inputs(tmp_path)
++    calls = []
++    def factory(role, attempt, profile):
++        def client(messages, **kwargs):
++            calls.append(role)
++            data = responses()[role.replace("_format_repair", "")]
++            if role == "conception":
++                data["manuscript_parts_plan"]["abstract"]["boundary"] = "实际正文范围"
++            return {"content": json.dumps(data, ensure_ascii=False), "complete": True,
++                "finish_reason": "stop", "returned_model": "qwen3.5-plus"}
++        return client
++    opts = dict(args=args, context={}, chapter_roles=[],
++        token_counter=lambda raw, messages: 100, tokenizer_info={"mode": "test"}, client_factory=factory)
++    failed = run_live_parts(**opts)
++    assert failed["status"] == "failed" and failed["failed_stage"] == "conception"
++    assert "nonempty_array_required" in failed["error"] and calls == ["conception"]
++    args.repair_invalid = True
++    repaired = run_live_parts(**opts)
++    assert repaired["status"] == "generated" and repaired["model_calls"] == 4
++    original = json.loads((args.output / "cache/conception/RAW_RESPONSE.json").read_text())
++    assert isinstance(json.loads(original["content"])["manuscript_parts_plan"]["abstract"]["boundary"], str)
++    assert (args.output / "cache/conception_format_repair/PARSED_RESPONSE.json").is_file()
++    replayed = run_live_parts(**opts)
++    assert replayed["status"] == "generated" and replayed["model_calls"] == 0
++    assert len(calls) == 5 and repaired["budget_binding"] == failed["budget_binding"]
++
++
++@pytest.mark.parametrize("problem", ["unknown_handle", "unsupported_placement"])
++def test_scientific_identity_and_placement_failures_never_trigger_format_repair(tmp_path, problem):
++    args = inputs(tmp_path)
++    args.repair_invalid = True
++    calls = []
++    def factory(role, attempt, profile):
++        def client(messages, **kwargs):
++            calls.append(role)
++            data = responses()[role]
++            part = data["manuscript_parts_plan"]["abstract"]
++            if problem == "unknown_handle":
++                part["focus"] = ["无法归属的引用 [P9999]"]
++            else:
++                part["placement"]["mode"] = "embedded"
++            return {"content": json.dumps(data, ensure_ascii=False), "complete": True,
++                "finish_reason": "stop", "returned_model": "qwen3.5-plus"}
++        return client
++    result = run_live_parts(args=args, context={}, chapter_roles=[],
++        token_counter=lambda raw, messages: 100, tokenizer_info={}, client_factory=factory)
++    assert result["status"] in {"failed", "unsupported_placement"}
++    assert calls == ["conception"]
++    assert not (args.output / "cache/conception_format_repair").exists()
++
++
++def test_preview_never_reads_key_or_constructs_client_or_writes_ledgers(tmp_path, monkeypatch):
++    args = inputs(tmp_path)
++    args.run = False
++    args.key_file = tmp_path / "not-a-real-credential"
++    before = {p: p.read_bytes() for p in (args.ledger, args.account_ledger)}
++    def forbidden(*a, **kw):
++        raise AssertionError("preview must not construct a live client")
++    monkeypatch.setattr("scripts.upgrade3.writer_candidates.make_live_factory", forbidden)
++    result = run_live_parts(args=args, context={}, chapter_roles=[],
++        token_counter=lambda raw, messages: 100, tokenizer_info={})
++    assert result["status"] == "preview" and result["model_calls"] == 0
++    assert not args.key_file.exists()
++    assert all(p.read_bytes() == original for p, original in before.items())

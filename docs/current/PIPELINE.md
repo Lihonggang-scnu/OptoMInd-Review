@@ -1,5 +1,7 @@
 # 当前完整链路与正式接线
 
+**2026-10-12实跑资料补齐：** 已认可BODY后的独立首尾、统一编号和出版已完成本地真实运行，源码`508cf724e5c6896fa1994d2bb7c83214ffe82959`及实际输入输出见[云端背景入口](../acceptance/serial-parts-live-20261011/CLOUD_READ_FIRST.md)。新增全文成稿校验员仍在[准备设计阶段](../acceptance/manuscript-checker-preparation-20261012/README.md)，尚未进入下方正式链路；先开展跨领域首尾研究，再讨论首尾质量改造。
+
 **2026-10-10 决定：正式 BODY 采用 baseline。** 作者、任务核查/必要的一次有界补写、装配、一次全文局部编辑、实际选用稿编号已接入正常入口。作者仅 `qwen3.5-plus`。`chapter_coherence` 默认关闭；“细纲→指南→正文”及全文候选保留为历史实验。采用依据与原始结果见 [固定对照归档](../acceptance/outline-to-body-coherence-20261010/README.md)。基线源码 `638eb93cdb37fc95cb917130f69a5b16df3549b7`，验收归档 `2618319e3fe2a085acf11a66e6f6c66c73a9c135`；本次只核对接线、统一文档并修剩余状态接缝，未重写有效提示词。
 
 接缝修复受测源码：`4e1e97c517440cdc11623fda56977f7528df396f`。完整BODY附终结诊断的状态、所选目录承接与首尾编号投影已免费验证；[收尾记录](RUN_GUIDE_EVIDENCE.md)保留确切测试范围、原稿哈希和费用。

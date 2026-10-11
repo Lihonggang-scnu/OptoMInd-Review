@@ -1,0 +1,105 @@
+diff --git a/scripts/upgrade3/manuscript_parts.py b/scripts/upgrade3/manuscript_parts.py
+index 21ed0460..6875bacd 100644
+--- a/scripts/upgrade3/manuscript_parts.py
++++ b/scripts/upgrade3/manuscript_parts.py
+@@ -1,10 +1,10 @@
+-"""Generate independent manuscript parts after the completed BODY, offline.
++"""Generate independent manuscript parts after the completed BODY.
+ 
+ This entry does not run or modify BODY planning, arrangement, or writing.
+-It uses a labeled fixture or recorded responses for the real serial chain:
+-conception -> conclusion -> introduction -> abstract/title.  The runtime's
+-``provider`` callable is an explicit injection seam for a separately budgeted
+-driver; this CLI never constructs one and never falls back to a live model.
++It uses a labeled fixture, exact recordings, or the explicit --live production
++adapter for conception -> conclusion -> introduction -> abstract/title.
++--live previews exact inputs; --live --run enables budgeted physical requests.
++The core provider seam and atomic assembly remain unchanged.
+ 
+ Example::
+ 
+@@ -40,11 +40,28 @@ def build_parser() -> argparse.ArgumentParser:
+     parser.add_argument("--output", type=Path, required=True,
+                         help="Fresh directory for prompts, plan, parts, report and final manuscript")
+     source = parser.add_mutually_exclusive_group(required=True)
++    source.add_argument("--live", action="store_true",
++                        help="Budgeted production adapter; preview unless --run is also set")
+     source.add_argument("--fixture", type=Path,
+                         help="Labeled JSON fixture with conception/conclusion/introduction/abstract")
+     source.add_argument("--recordings", type=Path,
+                         help="Replay JSON with serial_parts:<stage> keys; no live fallback")
+     parser.add_argument("--language", default="zh")
++    parser.add_argument("--run", action="store_true", help="Allow live physical calls; requires --live")
++    parser.add_argument("--body-report", type=Path, help="Accepted DELIVERY_REPORT.json; validates selected draft and carries diagnostics")
++    parser.add_argument("--identity-catalog", type=Path, action="append", default=[])
++    parser.add_argument("--ledger", type=Path, help="Existing project ledger; never reset or initialized")
++    parser.add_argument("--budget-limit", type=float, help="Original project lifetime cap")
++    parser.add_argument("--account-ledger", type=Path, help="Existing shared account ledger")
++    parser.add_argument("--account-budget-limit", type=float, help="Original account lifetime cap")
++    parser.add_argument("--account-mapping-dir", type=Path, help="Existing shared dual receipt directory")
++    parser.add_argument("--incremental-budget", type=float, default=5.0,
++                        help="Additional cap fixed against the first preview's project balance")
++    parser.add_argument("--thinking-budget", type=int, default=16384)
++    parser.add_argument("--output-tokens", type=int, default=32768)
++    parser.add_argument("--tokenizer", type=Path, help="Existing local tokenizer, no download")
++    parser.add_argument("--key-file", type=Path, help="Private credential path; never read in preview")
++    parser.add_argument("--key-index", type=int, default=1)
+     return parser
+ 
+ 
+@@ -66,6 +83,22 @@ def main(argv: list[str] | None = None) -> int:
+         if args.research_question:
+             context["research_question"] = question
+         chapter_roles = context.pop("chapter_roles", [])
++        args.research_question = question
++        if args.run and not args.live:
++            parser.error("--run requires --live")
++        if args.live:
++            required = ("ledger", "budget_limit", "account_ledger", "account_budget_limit", "account_mapping_dir", "tokenizer")
++            if any(getattr(args, field) is None for field in required):
++                parser.error("--live requires existing project/account ledgers and caps, mapping directory and local tokenizer")
++            if args.key_index < 1 or (args.run and not args.key_file):
++                parser.error("live --run requires --key-file and a positive --key-index")
++            from scripts.upgrade3.writer_candidates import tokenizer_counter
++            from optomind_research.runtime.upgrade3.serial_parts_live import run_live_parts
++            counter, tokenizer_info = tokenizer_counter(args.tokenizer)
++            report = run_live_parts(args=args, context=context, chapter_roles=chapter_roles,
++                                    token_counter=counter, tokenizer_info=tokenizer_info)
++            print(json.dumps(report, ensure_ascii=False, indent=2, default=str))
++            return 0 if report.get("status") in {"preview", "generated"} else 1
+         from optomind_research.runtime.upgrade3.serial_manuscript_parts import run_serial_parts
+ 
+         report = run_serial_parts(
+diff --git a/scripts/upgrade3/writer_candidates.py b/scripts/upgrade3/writer_candidates.py
+index 659957b5..23cd08bf 100644
+--- a/scripts/upgrade3/writer_candidates.py
++++ b/scripts/upgrade3/writer_candidates.py
+@@ -164,13 +164,16 @@ def _require_max_permission(args: argparse.Namespace, profiles: Mapping[str, Map
+                          + ":pass --allow-max only for an explicitly approved Max run")
+ 
+ 
+-def make_live_factory(args: argparse.Namespace, *, token_counter=None):
++def make_live_factory(args: argparse.Namespace, *, token_counter=None, reservation_ceiling_cny=None):
+     """Create one lazy shared-ledger factory; no keys are read here."""
+     if not args.run or args.responses:
+         raise ValueError("live_execution_requires_run_without_responses")
+     if not args.budget_ledger:
+         raise ValueError("live_execution_requires_shared_budget_ledger")
+     limit = args.budget_limit
++    if reservation_ceiling_cny is not None and (isinstance(reservation_ceiling_cny, bool)
++            or not math.isfinite(reservation_ceiling_cny) or reservation_ceiling_cny <= 0):
++        raise ValueError("finite_positive_reservation_ceiling_required")
+     if limit is not None and (isinstance(limit, bool) or not math.isfinite(limit) or limit <= 0):
+         raise ValueError("finite_positive_budget_limit_required")
+     ledger_path = Path(args.budget_ledger).expanduser().resolve()
+@@ -187,6 +190,10 @@ def make_live_factory(args: argparse.Namespace, *, token_counter=None):
+             ledger._refresh_from_db()
+             if ledger.limit_cny is None or not math.isfinite(ledger.limit_cny) or ledger.limit_cny <= 0:
+                 raise ValueError("existing_ledger_requires_finite_positive_limit")
++            if reservation_ceiling_cny is not None:
++                # reserve() combines this in-memory ceiling with the stored cap
++                # inside BEGIN IMMEDIATE; the lifetime metadata is unchanged.
++                ledger.limit_cny = min(ledger.limit_cny, reservation_ceiling_cny)
+             if getattr(args, "account_ledger", None):
+                 from optomind_research.runtime.upgrade3.dual_budget import (
+                     DualBudgetLedger, account_mapping_dir, open_account_ledger)
