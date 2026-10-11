@@ -38,7 +38,7 @@
 | 正式BODY输入 | 完整 `FULL_BODY_INPUT.json`，或 `optomind.fullbody_manifest.v1` 绑定最终plan/packet_root、各章有效arrangement/view → 同一manifest loader导出任务与完整材料 → baseline运行库 | `run_review_harness.py --delivery-start body --delivery-input …` 或 `--delivery-manifest …`；共用 `scripts/upgrade3/fullbody_writer.py::load_body_manifest`。`fullbody_writer.py --prepare-manifest`只离线固定输入，不启用历史全文作者 |
 | 正式作者/核查/补写 | 每单元完整任务、用途、章节框架和实际材料 → Plus作者；核查实际正文，必要时一次有界补写/后核查 → `UNIT_MESSAGES`、RAW、`UNIT_RESULT`、原始及采用正文、诊断 → 装配 | `legacy_unit_route.py`、`review_unit_writer.py`、`unit_realization.py`；`scripts/upgrade3/legacy_unit_writer.py`与正常入口共用。主作者不带实际前文；不经过指南转换 |
 | 装配/一次全文编辑/选择与编号 | 明确采用单元结果 → 装配句柄稿、references/summary；一次全文局部编辑 → 实际编辑稿或装配稿 → `DELIVERY_REPORT.json.selected_body` 的句柄稿/编号稿/引用目录 | 原 `full_review_draft.py` 汇编器、`article_text_editor.py`、`review_delivery.py::_body_delivery_artifacts`、`delivery_citations.py`。下游读选择，不按文件时间猜稿；BODY编辑已处理，delivery不再执行第二次02编辑 |
-| 独立首尾/题名（显式） | **所选句柄BODY**＋原问题＋最终主张/范围/细纲＋可选材料与身份 → 后置构思职责卡 → 结语→引言→摘要/关键词/题名 → `MANUSCRIPT_FINAL.md`、实际消息/响应与报告 → 04编号 | `serial_manuscript_parts.py`、`serial_parts_application.py`、`scripts/upgrade3/manuscript_parts.py`；delivery配置 `front_back.mode=post_body`。CLI/config仅fixture或严格录制；真实provider需显式预算受控注入，只有standalone自动装配 |
+| 独立首尾/题名（显式） | **所选句柄BODY**＋原问题＋最终主张/范围/细纲＋可选材料与身份 → 后置构思职责卡 → 结语→引言→摘要/关键词/题名 → `MANUSCRIPT_FINAL.md`、实际消息/响应与报告 → 04编号 | `serial_manuscript_parts.py`、`serial_parts_application.py`、`scripts/upgrade3/manuscript_parts.py`；delivery配置 `front_back.mode=post_body` 维持fixture/严格录制。独立CLI新增 `--live` 预览、`--run` 显式双账本Plus生成及缓存恢复，只有standalone自动装配 |
 | 最终图表/引用与出版（显式） | 03实际final稿＋同一身份目录/图资产 → 先挂图、再按阅读顺序统一编号 → 04 `MANUSCRIPT_READER.md`、`REFERENCES.json`、图映射、assets → 05只消费这些真实路径 | `delivery_citations.py`、`review_delivery.py::run_publication_delivery`、`latex_publication_renderer.py`。出版不再编号/挂图；Markdown默认，`compile_pdf=true`才TeX/PDF，Crossref/S2 enrich关闭 |
 
 表中的运行库位于 `optomind_research/runtime/upgrade3/`，脚本位于 `scripts/upgrade3/`，除已写完整路径者。每次选定输入保存路径、SHA及所属运行，不把不同题目的PLAN、P号或历史删节包混成生产输入。
@@ -57,7 +57,7 @@
 | 编排 | 独立CLI默认Plus、16384/32768，max_source_chars=0；必须显式模式、材料和账本 | 历史完整编排及消息交接；正常BODY manifest导出免费验证 |
 | 正式BODY作者/补写 | 固定Plus 8192思考＋32768回答；正常入口 `BODY_DELIVERY_DEFAULTS` 是 baseline＋核查True＋全文编辑True | 已认可7章29单元；既有完整稿187身份的正式选择及免费恢复；固定五单元真实比较后选择baseline |
 | 核查/全文编辑 | 固定Plus 16384/24576，`unit_realization.py`、`legacy_unit_route.py` 的角色profile；不由旧quality.json的Flash writer字段替代 | 真实任务检查/一次补写/严格编辑与一次全文编辑；本轮不追修已接受局部科学问题 |
-| 首尾/最终编号/出版 | delivery显式config；首尾默认无live模型，provider自带角色/计费控制。出版无LLM，PDF需本机工具链 | 首尾接合、编号、出版的既有离线/fixture及历史产物；本轮只做免费消费者接线，不将BODY质量验收扩称新首尾/PDF质量验收 |
+| 首尾/最终编号/出版 | delivery显式config；独立live CLI为Plus 16384思考/32768回答、双账本及固定增量额度。出版无LLM，PDF需本机工具链 | 2026-10-11在已认可BODY上真实完成4逻辑阶段＋1次结构修复，0.356588元；BODY保持、最终187身份、49页PDF经视觉检查。题名可用，引言目录化和摘要/结语重复仍待改善；未重跑上游 |
 
 验证记录分别见 [RUN_GUIDE_EVIDENCE](RUN_GUIDE_EVIDENCE.md)、[容量/条件交接](QUALITY_CAPACITY_VERIFICATION.md)、[按需正式接入](../verification/on-demand-promotion-20261007/README.md) 及本轮BODY归档。不相加重叠测试数，也不把合成调用当真实科学质量证据。
 
@@ -68,7 +68,7 @@
 - 完整规划 CLI 的细纲加强默认开启，与 `planning_revision` 是两个独立开关。选择 none 可自主正常完成，无需人工科学意见或填写阶段状态。selection 前已保存完整有效快照；失败/预算不足保留原计划、成功前缀与先前采用版本，返回未完成状态。同目录 `--resume` 沿用原规划/选择/ACCESS/OWNER兼容缓存；无效结构回答仅显式 `--retry-unresolved` 重试一次。
 - `ProgressiveReviewPlanner.run` API 继续负责原规划，不隐式买 Max；正常 CLI 通过共享 `run_pipeline` 组合后置加强。程序调用方可以复用同一入口。规划命令不会隐式启动编排或 BODY，后续两个正式 CLI 按 `CURRENT_PLAN` → `ARRANGEMENT_RUN.body_manifest` → `--delivery-manifest` 接续。
 - 深度背景、理论、机制、方法比较和实质 Outlook 属于 BODY；独立首尾负责文章入口、范围宣告及收束。没有重新导入早期并行 PartsPlan 流水线。
-- 独立首尾仅显式 `post_body` 方式启用；CLI 采用 fixture/recordings，真实 provider 需本地另行注入与预算管理。普通交付的缺省路径不自动改成该模式。
+- 独立首尾仅显式启用：delivery config采用 `post_body` fixture/recordings；独立CLI另提供 `--live` 预算受控Plus适配器。普通交付的缺省路径不自动改成该模式。实时输入、缓存恢复和预算绑定见 [首尾说明](../POST_BODY_MANUSCRIPT_PARTS.md)。
 - 单元/装配 pending 保留原有状态和记录；正常 BODY 入口仍交付已有可读编号稿，不因已接受初稿的科学残余另行阻断。缺失正文、未完成生成或质量记录继续受原有门槛约束；首尾接回不能绕过这些门槛。
 - A/B/C 是早期后置正文局部修订实验，不修改细纲。其有限小修结论只针对当时实验；细纲加强当前按上表默认接在完整规划 CLI 后，二者不能混同。
 - 综述转述原始研究可以凭可用内容与明确引用身份正常参与，不强制自身 A/B 或全文。多个任务可以共用实质充分的一张表。

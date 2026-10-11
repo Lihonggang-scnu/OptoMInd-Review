@@ -164,13 +164,16 @@ def _require_max_permission(args: argparse.Namespace, profiles: Mapping[str, Map
                          + ":pass --allow-max only for an explicitly approved Max run")
 
 
-def make_live_factory(args: argparse.Namespace, *, token_counter=None):
+def make_live_factory(args: argparse.Namespace, *, token_counter=None, reservation_ceiling_cny=None):
     """Create one lazy shared-ledger factory; no keys are read here."""
     if not args.run or args.responses:
         raise ValueError("live_execution_requires_run_without_responses")
     if not args.budget_ledger:
         raise ValueError("live_execution_requires_shared_budget_ledger")
     limit = args.budget_limit
+    if reservation_ceiling_cny is not None and (isinstance(reservation_ceiling_cny, bool)
+            or not math.isfinite(reservation_ceiling_cny) or reservation_ceiling_cny <= 0):
+        raise ValueError("finite_positive_reservation_ceiling_required")
     if limit is not None and (isinstance(limit, bool) or not math.isfinite(limit) or limit <= 0):
         raise ValueError("finite_positive_budget_limit_required")
     ledger_path = Path(args.budget_ledger).expanduser().resolve()
@@ -187,6 +190,10 @@ def make_live_factory(args: argparse.Namespace, *, token_counter=None):
             ledger._refresh_from_db()
             if ledger.limit_cny is None or not math.isfinite(ledger.limit_cny) or ledger.limit_cny <= 0:
                 raise ValueError("existing_ledger_requires_finite_positive_limit")
+            if reservation_ceiling_cny is not None:
+                # reserve() combines this in-memory ceiling with the stored cap
+                # inside BEGIN IMMEDIATE; the lifetime metadata is unchanged.
+                ledger.limit_cny = min(ledger.limit_cny, reservation_ceiling_cny)
             if getattr(args, "account_ledger", None):
                 from optomind_research.runtime.upgrade3.dual_budget import (
                     DualBudgetLedger, account_mapping_dir, open_account_ledger)

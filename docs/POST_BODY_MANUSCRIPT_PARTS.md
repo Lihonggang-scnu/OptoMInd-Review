@@ -48,7 +48,7 @@ python scripts/upgrade3/manuscript_parts.py \
   --output outputs/post_body_parts_run01
 ```
 
-`--context` 可省略。`--fixture` 与 `--recordings` 二选一。输出目录必须是新目录；失败后用新目录重新运行，不把旧成功文件当本轮成果。
+`--context` 可省略。离线运行在 `--fixture` 与 `--recordings` 中二选一。离线核心的输出目录必须是新目录；失败后用新目录重新运行，不把旧成功文件当本轮成果。下文显式 live 适配器另有同目录缓存恢复。
 
 fixture 顶层为 `conception`、`conclusion`、`introduction`、`abstract`，分别提供对应阶段的响应。conception 返回 `{"manuscript_parts_plan": {...}}`；abstract 返回 `title`、`abstract`、`keywords`。fixture 是人为离线输入，不是模型质量证据。recordings 的键为 `serial_parts:conception` 等；每条 recording 必须带与本阶段实际 messages 完全匹配的 messages_sha256；缺失或不匹配会停止。未绑定消息的历史响应只能显式作为人工 fixture 做离线试验，不能称为新模型调用。
 
@@ -74,11 +74,30 @@ fixture 顶层为 `conception`、`conclusion`、`introduction`、`abstract`，�
 
 首尾自身的输出目录仍须全新，不能将BODY支持同目录恢复表述为首尾也支持。重复同一post_body配置进入非空03会明确停止；已有BODY可不带config免费恢复。再次首尾运行用本节独立CLI的新目录及所选句柄稿，不重新写正文。
 
-## 后续真实调用
+## 预算受控的真实调用（2026-10-11）
 
 运行库 `run_serial_parts` 提供显式 `provider(stage, messages)` 注入接口。后续本地 Agent 可将已有预算管理与模型客户端接在这里；四个阶段都必须走同一运行库的真实消息构造和解析，不能手工拼接近似提示词另证链路。
 
-本次 CLI 没有隐式实时客户端，不扫描凭证，不替用户批准预算。provider 的计费、重试和供应商请求数由外部受控驱动负责；报告的逻辑 provider 调用数不冒充供应商审计账单。必须先取得真实测试授权；不要从归档的历史剩余预算推导新授权。
+独立 CLI 现提供显式 `--live` 适配器，复用产品 Qwen 客户端、tokenizer、缓存和项目／账户双账本。`--live` 默认只预览；加 `--run` 才发生真实调用。不扫描凭证，不初始化或重置已有账本。必须使用本轮授权的预算；不要从历史剩余预算推导新授权。当前 live 入口固定使用 `qwen3.5-plus`，默认 16,384 思考、32,768 回答额度，流式直连；无模型回退或传输失败自动重试。
+
+```powershell
+python scripts/upgrade3/manuscript_parts.py `
+  --live --draft "<selected_body.handles_draft>" `
+  --body-report "<DELIVERY_REPORT.json>" --context "<context.json>" `
+  --output "<post_body_output>" `
+  --ledger "<existing_project_budget.sqlite>" --budget-limit <project_lifetime_cap> `
+  --account-ledger "<existing_account_budget.sqlite>" --account-budget-limit <account_lifetime_cap> `
+  --account-mapping-dir "<physical_calls_directory>" `
+  --tokenizer "<local_tokenizer.json>" --incremental-budget <authorized_increment>
+```
+
+先亲读 `CONCEPTION_MESSAGES.json`、`CONTEXT.json` 和 `LIVE_REPORT.json`。确认后在同一命令追加 `--run --key-file "<private_key_file>" --key-index 1`。凭证只由真实客户端读取，不进入模型消息。
+
+首次预览保存 `LIVE_BINDING.json`，固定源稿与上下文哈希、实际模型参数、tokenizer、账本及增量预算起点；恢复不能重新起算增量额度。每次请求先保存实际消息，返回后保存完整原始响应与传输记录，再将内容字段交给原解析器。成功调用在 `cache/<stage>/` 中复用；新装配写入 `attempts/attempt_NNN/`，保留此前尝试。沿用同一命令和输出目录即可免费重解析已有响应、续跑缺失阶段。已保存的失败或不确定请求不会自动重复购买。
+
+`--repair-invalid` 显式允许每阶段最多一次结构格式修复，复用原任务、模型原回答及机器校验错误，不加入人工科学修改意见；修复仍走原解析器、缓存和预算。未通过时停止，保留所有返回。不把缺生成内容或未知引用当作成功。
+
+`LIVE_REPORT.json` 记录物理调用数、阶段缓存／失败、预算快照、原 BODY 诊断及最终实际路径；`FRONT_BACK_REPORT.json` 仍由原串行核心生成。该独立 live 入口并不把 delivery 配置中的 fixture 自动变成 live；正常 BODY 可先完成选择，再用本节入口消费它，之后由既有 04／05 消费首尾最终稿。
 
 ## 装配安全与 v1 限制
 

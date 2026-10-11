@@ -104,7 +104,7 @@ python -X utf8 run_review_harness.py --delivery-start body --delivery-input FULL
 | 历史独立 `legacy_unit_writer.py` | baseline，两质量开关False | 用 `--quality-control --article-edit`才等同正式质量步骤 |
 | 作者/补写 | qwen3.5-plus，8192思考＋32768回答 | 作者CLI `--thinking-budget/--output-tokens`；质量阶段容量按其运行库角色profile，不随作者值一起变 |
 | 核查/全文局部编辑 | qwen3.5-plus，16384思考＋24576回答 | `unit_realization.py`、`legacy_unit_route.py`角色profile |
-| downstream首尾 | 不构造隐式live模型 | config明确fixture/严格recordings；live使用受预算约束的provider注入 |
+| downstream首尾 | 不构造隐式live模型 | config明确fixture/严格recordings；独立 `manuscript_parts.py --live` 提供显式双账本Plus客户端，详见首尾说明 |
 
 `max_output_tokens`是回答空间，实际思考请求的总 `max_completion_tokens`为思考＋回答。正式BODY不是把 `quality.json` 中其他实验的Flash writer默认搬进来；也不需要研究路径的premium开关来启用Plus。最终核对实际 `profile/effective_request`，不用配置名字代替wire参数。预算CLI缺省值是30，但接手已有账本时必须显式传其原累计封顶；它不是本轮新增额度。
 
@@ -144,7 +144,7 @@ BODY的02阶段记录 `body_selected`，不会再全文编辑一次；03读取�
 
 03的owned首尾块保持原样；BODY+post_body到04的投影只移除旧的未受管理书目，防止引用列表替换吞掉结语标记。03原稿及投影哈希单独保存。`compile_pdf=true`才请求TeX/PDF，本机需Pandoc/TeX与可用字体；Markdown出版不需要LLM。出版默认关闭Crossref/S2 enrich。
 
-**恢复边界：**BODY同目录支持缓存恢复；现有 `post_body` 首尾仍要求新输出目录，同一config重复进入非空03会明确停止。恢复BODY时先不传config；需要再次生成首尾时独立CLI用新目录及当前selected句柄稿，或由受控provider驱动显式运行。不能宣称整个02–05都已有同目录恢复。CLI/config目前没有live首尾适配器；fixture接通证明接口，不是新的真实首尾质量验收。
+**恢复边界：**BODY同目录支持缓存恢复；delivery config 的 `post_body` 原子首尾核心仍要求新输出目录，同一config重复进入非空03会明确停止。恢复BODY时先不传config。2026-10-11新增独立 `manuscript_parts.py --live`：先预览，加 `--run` 才购买四步Plus生成；同目录复用持久请求缓存，在新的attempt目录原子装配，增量预算起点不重置。格式错误仅显式 `--repair-invalid` 有界修复，未知来源或未完成生成继续停止。命令、双账本与准确恢复范围见 [首尾说明](../POST_BODY_MANUSCRIPT_PARTS.md)。这没有将delivery config自动改为live，也没有把整个02–05合并成一个可恢复命令。
 
 ### 费用与本次验证范围
 

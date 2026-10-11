@@ -266,6 +266,7 @@ def _clean_unicode(value: Any) -> str:
     text = unicodedata.normalize("NFC", text)
     replacements = {
         "\u00a0": " ",
+        "\u2005": " ",
         "\u2010": "-",
         "\u2011": "-",
         "\u2012": "-",
@@ -496,12 +497,22 @@ def _prepare_scientific_markdown(text: str) -> str:
     return _prepare_scientific_markdown_with_integrity(text)[0]
 
 
-def _strip_embedded_title_and_abstract(text: str) -> str:
+def _strip_embedded_title_and_abstract(text: str, *, confirmed_title: str | None = None) -> str:
     """Avoid duplicating metadata when the complete review includes front matter."""
 
     lines = str(text or "").splitlines()
-    if lines and re.match(r"^#\s+[^#]", lines[0]):
-        lines = lines[1:]
+    if confirmed_title is None:
+        if lines and re.match(r"^#\s+[^#]", lines[0]):
+            lines = lines[1:]
+    else:
+        # Owned post-BODY title markers and leading whitespace are transport
+        # structure. Only the confirmed metadata title may be projected out;
+        # a substantive H1 with another title must survive.
+        first = next((index for index, line in enumerate(lines)
+            if line.strip() and line.strip() != "<!-- manuscript-part:title:start -->"), None)
+        match = re.match(r"^#\s+([^#].*?)\s*$", lines[first]) if first is not None else None
+        if match and _clean_unicode(match.group(1)).strip() == _clean_unicode(confirmed_title).strip():
+            del lines[first]
     abstract_start = next(
         (
             index
@@ -2421,6 +2432,21 @@ def _blank_alt_before_bold_caption(markdown: str) -> str:
     return "\n".join(lines) + ("\n" if markdown.endswith("\n") else "")
 
 
+def _wrap_plain_reference_dois_tex(body_tex: str) -> str:
+    """Give existing numbered bibliography DOIs safe TeX line breaks only."""
+    lines = body_tex.splitlines(keepends=True)
+    for index, line in enumerate(lines):
+        if not re.match(r"^\{\[\}\d+\{\]\}", line):
+            continue
+        def wrap(match):
+            doi = match.group(1)
+            for escaped, plain in ((r"\_", "_"), (r"\%", "%"), (r"\#", "#"), (r"\&", "&")):
+                doi = doi.replace(escaped, plain)
+            return "DOI: " + r"\url{" + doi + "}"
+        lines[index] = re.sub(r"DOI:\s*(10\.\d{4,9}/[^\s{}]+)", wrap, line)
+    return "".join(lines)
+
+
 def _render_main_tex(
     *,
     metadata: dict[str, Any],
@@ -2430,7 +2456,9 @@ def _render_main_tex(
     include_bibliography: bool = True,
 ) -> str:
     author_parts = []
-    for author in metadata["authors"]:
+    display_authors = [author for author in metadata["authors"]
+                       if author["name"] != "Author information pending"]
+    for author in display_authors:
         rendered = _latex_escape(author["name"])
         details = []
         if author.get("affiliation"):
@@ -2469,7 +2497,7 @@ def _render_main_tex(
 \usepackage[unicode,hidelinks]{hyperref}
 \usepackage[capitalise,noabbrev]{cleveref}
 \usepackage{xcolor}
-\usepackage{url}
+\usepackage{xurl}
 \graphicspath{{figures/}}
 \setlength{\emergencystretch}{3em}
 \setlength{\parindent}{2em}
@@ -2502,7 +2530,7 @@ def _render_main_tex(
 \usepackage[unicode,hidelinks]{hyperref}
 \usepackage[capitalise,noabbrev]{cleveref}
 \usepackage{xcolor}
-\usepackage{url}
+\usepackage{xurl}
 \graphicspath{{figures/}}
 \setlength{\emergencystretch}{3em}
 \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
@@ -2533,7 +2561,7 @@ def _render_main_tex(
 \usepackage[hidelinks]{hyperref}
 \usepackage[capitalise,noabbrev]{cleveref}
 \usepackage{xcolor}
-\usepackage{url}
+\usepackage{xurl}
 \graphicspath{{figures/}}
 \setlength{\emergencystretch}{3em}
 \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
@@ -2554,7 +2582,7 @@ def _render_main_tex(
         + _latex_escape(metadata["title"])
         + r"""},
   pdfauthor={"""
-        + _latex_escape(", ".join(a["name"] for a in metadata["authors"]))
+        + _latex_escape(", ".join(a["name"] for a in display_authors))
         + r"""}
 }
 
@@ -2823,7 +2851,7 @@ class LatexPublicationRenderer:
 
         markdown, integrity_before_figures = _prepare_scientific_markdown_with_integrity(
             _strip_embedded_title_and_abstract(
-                review_path.read_text(encoding="utf-8")
+                review_path.read_text(encoding="utf-8"), confirmed_title=metadata["title"]
             ),
             preserve_verification_labels=(
                 self.document_type == "research_plan"
@@ -3129,7 +3157,8 @@ class LatexPublicationRenderer:
                 "Pandoc conversion failed: "
                 + str(pandoc_result["stderr"] or pandoc_result["stdout"])[-1000:]
             )
-        body_tex = body_path.read_text(encoding="utf-8")
+        body_tex = _wrap_plain_reference_dois_tex(body_path.read_text(encoding="utf-8"))
+        _write_text(body_path, body_tex)
         main_path = self.output_dir / "main.tex"
         # Use a Unicode-native engine for both languages.  Scientific
         # normalization handles known notation semantically; XeLaTeX keeps an
