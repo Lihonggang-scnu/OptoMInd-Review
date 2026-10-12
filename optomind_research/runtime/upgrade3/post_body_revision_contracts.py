@@ -11,7 +11,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 from .review_unit_writer import citations_in
 
@@ -213,7 +213,8 @@ def _supported_handles(case: Mapping[str, Any], evidence: Mapping[str, Any]) -> 
 
 
 def validate_patch(case: Mapping[str, Any], issue: Mapping[str, Any],
-                   proposal: Mapping[str, Any]) -> dict[str, Any]:
+                   proposal: Mapping[str, Any], *,
+                   editorial_number_signature: Callable | None = None) -> dict[str, Any]:
     case = normalize_case(case)
     if not isinstance(issue, Mapping) or not isinstance(proposal, Mapping):
         _fail("issue_or_proposal_not_object")
@@ -261,13 +262,18 @@ def validate_patch(case: Mapping[str, Any], issue: Mapping[str, Any],
     if issue["kind"] == "editorial":
         if introduced:
             _fail("editorial_introduces_citation")
-        if set(_NUMBER.findall(replacement)) - set(_NUMBER.findall(original)):
+        # An executor may compare the full affected block with its own numeric
+        # policy. Ordinary callers retain the original anchor-level check.
+        old_numbers, new_numbers = (editorial_number_signature(case, target, final)
+            if editorial_number_signature is not None else (_NUMBER.findall(original), _NUMBER.findall(replacement)))
+        if set(new_numbers) - set(old_numbers):
             _fail("editorial_introduces_number")
     return {**bound, "replacement_text": replacement, "kind": issue["kind"],
             "evidence_ids": list(evidence), "preserve": list(preserve)}
 
 
-def apply_patches(case: Mapping[str, Any], patches: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+def apply_patches(case: Mapping[str, Any], patches: Sequence[Mapping[str, Any]], *,
+                  editorial_number_signature: Callable | None = None) -> dict[str, Any]:
     """Validate an entire batch before applying any patch; conflicts abort it.
 
     No mutable state is kept. Reusing a patch on a changed draft fails its base
@@ -285,7 +291,7 @@ def apply_patches(case: Mapping[str, Any], patches: Sequence[Mapping[str, Any]])
         for required in ("base_sha256", "block_sha256", "original_sha256", "start", "end"):
             if required not in patch:
                 _fail(f"unbound_patch:{required}")
-        item = validate_patch(case, patch, patch)
+        item = validate_patch(case, patch, patch, editorial_number_signature=editorial_number_signature)
         if item["issue_id"] in seen:
             _fail("duplicate_patch_issue")
         seen.add(item["issue_id"])

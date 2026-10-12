@@ -173,6 +173,14 @@ def _bare_title(title: str) -> str:
     return _PREFIX.sub("", title, count=1).strip()
 
 
+def _is_reference_heading(title: str) -> bool:
+    """Recognize bibliography labels with a parenthetical format annotation."""
+    bare = _bare_title(title).casefold()
+    return any(bare == name or re.fullmatch(
+        re.escape(name) + r"[ \t]*(?:\([^\r\n]*\)|（[^\r\n]*）)", bare
+    ) for name in _REFERENCE_NAMES)
+
+
 def _chapter_number(title: str) -> int | None:
     match = _PREFIX.match(title)
     if match is None:
@@ -420,15 +428,22 @@ def apply_serial_parts(
         block = _block(part, content, newline)
         spans, headings, title = _structure(result, chapter_roles)
         existing = next((span for span in spans if span.part == part), None)
+        references = [heading for heading in headings
+                      if heading.level <= 2 and _is_reference_heading(heading.title)]
         if existing:
-            start, end = existing.start, existing.end
-            position = "owned_part_replaced"
+            if part == "conclusion" and references and existing.start > references[0].start:
+                # Relocate only this module's owned region, preserving every
+                # unowned BODY/reference byte and its relative order.
+                result = result[:existing.start] + result[existing.end:]
+                start = end = references[0].start
+                position = "owned_part_moved_before_references"
+            else:
+                start, end = existing.start, existing.end
+                position = "owned_part_replaced"
         elif part == "title":
             start, end = (title.start, title.end) if title else (0, 0)
             position = "document_title_replaced" if title else "owned_title_inserted"
         elif part == "conclusion":
-            references = [heading for heading in headings
-                          if heading.level <= 2 and _bare_title(heading.title).casefold() in _REFERENCE_NAMES]
             start = end = references[0].start if references else len(result)
             position = "standalone_before_references" if references else "standalone_at_end"
         else:

@@ -340,3 +340,39 @@ def test_unclosed_inline_code_with_ownership_tokens_is_ambiguous():
     source = "# Article\n\n## Methods\nAn unmatched ` with " + owned("abstract", "Example")
     with pytest.raises(app.SerialPartsApplicationError, match="ambiguous_inline_code"):
         app.extract_body(source)
+
+
+@pytest.mark.parametrize("heading", [
+    "参考文献（原始 handle）", "参考文献 (编号)",
+    "References (original handles)", "Bibliography（numbered）",
+])
+@pytest.mark.parametrize("newline", ["\n", "\r\n"])
+def test_annotated_bibliography_stays_after_generated_conclusion(heading, newline):
+    source = newline.join(["# Article", "", "## Methods", "Exact BODY.", "",
+                           "## " + heading, "[P0001] Exact reference."])
+    result, log = app.apply_serial_parts(source, PARTS)
+    assert result.index("Actual conclusion.") < result.index("## " + heading)
+    assert app.extract_body(result) == app.extract_body(source)
+    assert log[-1]["position"] == "standalone_before_references"
+    repeated, _ = app.apply_serial_parts(result, PARTS)
+    assert repeated == result
+
+
+def test_reapplication_relocates_only_owned_conclusion_after_bibliography():
+    source = ("# Article\n\n## Results\nOriginal BODY.\n\n"
+              "## 参考文献（原始 handle）\n[P0001] Original reference.\n"
+              + owned("conclusion", "## 结语\nOld generated conclusion."))
+    result, log = app.apply_serial_parts(source, {"conclusion": "New conclusion."})
+    assert log[-1]["position"] == "owned_part_moved_before_references"
+    assert result.index("New conclusion.") < result.index("## 参考文献")
+    assert app.extract_body(result) == app.extract_body(source)
+    repeated, _ = app.apply_serial_parts(result, {"conclusion": "New conclusion."})
+    assert repeated == result
+
+
+def test_reference_words_in_code_or_technical_headings_do_not_anchor_conclusion():
+    source = ("# Article\n\n## References in molecular design\nActual analysis.\n\n"
+              "```md\n## References (examples)\n```\n\n### References (local example)\nKept BODY.\n")
+    result, log = app.apply_serial_parts(source, {"conclusion": "Closing content."})
+    assert log[-1]["position"] == "standalone_at_end"
+    assert app.extract_body(result) == app.extract_body(source)

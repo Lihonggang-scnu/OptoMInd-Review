@@ -20,6 +20,7 @@ from .post_body_revision_contracts import (
     sha256_text, validate_patch,
 )
 from .delivery_citations import BRACKET_RE, HANDLE_TOKEN_RE, build_delivery_citation_map
+from .review_unit_writer import _fenced_line_indices
 from .writer_candidates import DEFAULT_PROFILE, _output_lock
 
 SCHEMA = "optomind.manuscript_checker.v1"
@@ -140,7 +141,35 @@ def _decode(raw):
 def _numeric_signature(text):
     # Citation identities have their own stronger, namespace-aware comparison.
     text = BRACKET_RE.sub(lambda m: "" if HANDLE_TOKEN_RE.search(m.group(1)) else m.group(0), text)
+    # A hyphen/en dash between numeric endpoints is range typography. Unary
+    # minus signs and exponent signs keep their original spelling and value.
+    text = re.sub(r"(?<=\d)(?:[-–]|[ \t]+[-–][ \t]+)(?=[+\-−]?\d)", "-", text)
     return [re.sub(r"\s+", "", n) for n in re.findall(r"[+\-−–]?\s*\d+(?:[,.]\d+)*(?:[eE][+\-−]?\d+)?(?:\s*(?:%|‰|[A-Za-zµμ]+))?", text)]
+
+
+def _numeric_signatures(before, after):
+    old_lines, new_lines = before.splitlines(keepends=True), after.splitlines(keepends=True)
+    if len(old_lines) == len(new_lines):
+        code_lines = _fenced_line_indices(before) | _fenced_line_indices(after)
+        for index, (old, new) in enumerate(zip(old_lines, new_lines)):
+            if index in code_lines:
+                continue
+            heading = r" {0,3}#{1,6}[ \t]+([^\r\n]*)(\r?\n)?"
+            old_heading, new_heading = re.fullmatch(heading, old), re.fullmatch(heading, new)
+            if old_heading and new_heading:
+                numbered = re.fullmatch(r"\d+(?:\.\d+)+\.?[ \t]+(.+)", new_heading[1])
+                # Only an added dotted section prefix may disappear from the
+                # comparison; every character of the actual title must remain.
+                if numbered and numbered[1] == old_heading[1]:
+                    new_lines[index] = new[:new_heading.start(1)] + numbered[1] + (new_heading[2] or "")
+        after = "".join(new_lines)
+    return _numeric_signature(before), _numeric_signature(after)
+
+
+def _editorial_number_signature(case, target, replacement):
+    block = next(b for b in case["blocks"] if b["block_id"] == target["block_id"])
+    start, end = target["start"] - block["start"], target["end"] - block["start"]
+    return _numeric_signatures(block["text"], block["text"][:start] + replacement + block["text"][end:])
 
 
 def _math_signature(text):
@@ -249,7 +278,8 @@ def _validate_change(case, row, edit_id, catalogs):
     strip_math_delimiters = lambda value: re.sub(r"(?<!\\)\$|\\[\[\]() ]", "", value)
     math_changed = (_math_signature(block["text"]) != _math_signature(affected)
                     and strip_math_delimiters(block["text"]) != strip_math_delimiters(affected))
-    sensitive = (_numeric_signature(block["text"]) != _numeric_signature(affected)
+    numeric_before, numeric_after = _numeric_signatures(block["text"], affected)
+    sensitive = (numeric_before != numeric_after
                  or math_changed
                  or _tokens(block["text"]) != _tokens(affected))
     if sensitive and kind != "scientific":
@@ -294,7 +324,8 @@ def _validate_change(case, row, edit_id, catalogs):
             authorized_aliases = [token for token in introduced_tokens
                 if evidence_identity(token, new_map["token_details"][token]) in material_identities]
             material["source_handles"] = sorted({h.split("::")[-1] for h in exact_handles + authorized_aliases})
-    patch = validate_patch(adapted, issue, {"replacement_text": replacement})
+    patch = validate_patch(adapted, issue, {"replacement_text": replacement},
+        editorial_number_signature=_editorial_number_signature)
     # apply_patches revalidates against this same adapted material view.
     return patch, adapted, {"reason": row["reason"], "kind": kind, "evidence_ids": ids,
                            "citation_before": old_map["token_details"], "citation_after": new_map["token_details"]}
@@ -357,7 +388,7 @@ def execute_checker_response(*, draft_text, response, identity_catalogs=None,
             current_handles = material.get("source_handles", [])
             validated_handles = adapters[patch["issue_id"]]["materials"][ident]["source_handles"]
             material["source_handles"] = sorted(set(current_handles) | set(validated_handles))
-    result = apply_patches(adapted, accepted)
+    result = apply_patches(adapted, accepted, editorial_number_signature=_editorial_number_signature)
     _guard(draft_text, result["draft_text"])
     receipts = [{**patch, "edit_id": patch["issue_id"], **extras[patch["issue_id"]],
                  "input_sha256": case["base_sha256"], "output_sha256": sha256_text(result["draft_text"])} for patch in accepted]

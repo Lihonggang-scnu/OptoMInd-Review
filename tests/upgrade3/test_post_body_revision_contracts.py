@@ -88,6 +88,26 @@ class PostBodyRevisionContractTests(unittest.TestCase):
             validate_patch(c, issue(c, evidence_ids=["M1"]), {"replacement_text": "Alpha result [P0001]."})
 
 
+    def test_default_editorial_number_policy_remains_strict(self):
+        for old, replacement in [("### Cohort", "### 7.2.1 Cohort"),
+                                 ("Cohort n=23", "Cohort n=24"),
+                                 ("Temperature 37 °C", "Temperature 38 °C")]:
+            c = case(old + "\n")
+            with self.assertRaisesRegex(RevisionContractError, "introduces_number"):
+                validate_patch(c, issue(c, old), {"replacement_text": replacement})
+
+
+    def test_explicit_number_policy_is_reused_during_apply_revalidation(self):
+        from optomind_research.runtime.upgrade3.manuscript_checker import _editorial_number_signature
+        c = case("### Cohort n=23\n")
+        p = validate_patch(c, issue(c, "Cohort"), {"replacement_text": "7.2.1 Cohort"},
+                           editorial_number_signature=_editorial_number_signature)
+        assert p["kind"] == "editorial"
+        with self.assertRaisesRegex(RevisionContractError, "introduces_number"):
+            apply_patches(c, [p])
+        assert apply_patches(c, [p], editorial_number_signature=_editorial_number_signature)["draft_text"] == "### 7.2.1 Cohort n=23\n"
+
+
     def test_removal_can_remove_citation_when_not_explicitly_preserved(self):
         c = case("Overclaim [P0001].\n")
         p = validate_patch(c, issue(c, "Overclaim [P0001].", operation="remove"), {})

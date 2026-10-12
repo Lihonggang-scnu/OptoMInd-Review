@@ -448,6 +448,78 @@ def test_number_sign_order_and_exponent_cannot_be_editorial(text, old, new):
     assert result['pending'][0]['code'] == 'meaning_change_requires_scientific_evidence'
 
 
+@pytest.mark.parametrize('old,new', [
+    ('95% CI 0.51-0.76; 0.55-0.83', '95% CI 0.51–0.76; 0.55–0.83'),
+    ('Interval 10 - 20', 'Interval 10 – 20'),
+    ('Interval -5--3', 'Interval -5–-3'),
+])
+def test_numeric_range_separator_typography_is_editorial(old, new):
+    text = old + '.\n'
+    result = execute(text, change(old, new, kind='editorial'))
+    assert not result['pending'] and len(result['applied']) == 1
+    assert result['draft_text'] == new + '.\n'
+    assert result['applied'][0]['kind'] == 'editorial'
+
+
+@pytest.mark.parametrize('old,new', [
+    ('Interval 0.51-0.76', 'Interval 0.51–0.77'),
+    ('Interval -5--3', 'Interval 5–-3'),
+    ('Offset -5', 'Offset –5'),
+    ('Values 1 -2', 'Values 1 –2'),
+    ('Threshold −5', 'Threshold -5'),
+    ('Interval 1e-3-2e-3', 'Interval 1e+3–2e-3'),
+    ('Expression $10-20$', 'Expression $10–20$'),
+])
+def test_range_normalization_preserves_value_sign_exponent_and_math_boundaries(old, new):
+    result = execute(old + '.\n', change(old, new, kind='editorial'))
+    assert not result['applied']
+    assert result['pending'][0]['code'] == 'meaning_change_requires_scientific_evidence'
+
+
+@pytest.mark.parametrize('old,new,anchor,replacement', [
+    ('##### Confounding factors', '#### 7.2.1 Confounding factors',
+     '##### Confounding factors', '#### 7.2.1 Confounding factors'),
+    ('### Cohort n=23 at 37 °C', '### 2.3 Cohort n=23 at 37 °C',
+     'Cohort', '2.3 Cohort'),
+])
+@pytest.mark.parametrize('newline', ['\n', '\r\n'])
+def test_only_added_heading_prefix_is_editorial_and_preserves_title_numbers(old, new, anchor, replacement, newline):
+    text = old + newline + 'Attached paragraph.' + newline
+    result = execute(text, change(anchor, replacement, kind='editorial'))
+    assert not result['pending'] and len(result['applied']) == 1
+    assert result['draft_text'] == new + newline + 'Attached paragraph.' + newline
+
+
+@pytest.mark.parametrize('old,new', [
+    ('### Cohort n=23', '### 7.2.1 Cohort n=24'),
+    ('### Cohort n=23', '### 7.2.1 Cohort'),
+    ('### Temperature 37 °C', '### 7.2.1 Temperature 38 °C'),
+    ('### Effect 0.51', '### 7.2.1 Effect 0.76'),
+    ('### Cohort n=23', '### 7.2.1 Cohort n=-23'),
+    ('### 7.2.1 Cohort', '### 7.2.2 Cohort'),
+    ('Plain title', '7.2.1 Plain title'),
+    ('```text\n### Cohort\n```', '```text\n### 7.2.1 Cohort\n```'),
+])
+def test_heading_number_exception_does_not_hide_scientific_or_nonheading_changes(old, new):
+    result = execute(old + '\n', change(old, new, kind='editorial'))
+    assert not result['applied']
+    assert result['pending'][0]['code'] == 'meaning_change_requires_scientific_evidence'
+
+
+@pytest.mark.parametrize('text,old,new', [
+    ('Study cohort (n=23) showed a result.\n', 'cohort (n=23)', 'cohort'),
+    ('P0402, P0576. A source. DOI: 10.1000/123\n', 'P0402, P0576.', 'P0402.'),
+])
+def test_same_editorial_proposal_stays_pending_in_second_round(text, old, new):
+    row = change(old, new, kind='editorial')
+    first = execute(text, row)
+    second = execute_checker_response(draft_text=text, response=response(text, {**row, 'edit_id': 'E0001'}),
+        pending_ids=['E0001'], round_number=2)
+    for result in (first, second):
+        assert not result['applied'] and result['draft_text'] == text
+        assert result['pending'][0]['code'] == 'meaning_change_requires_scientific_evidence'
+
+
 @pytest.mark.parametrize('identity', [{}, {'paper_id': 'same-paper'}, {'doi': '10.1000/same'}])
 def test_explicit_same_source_alias_is_executable_with_original_material(identity):
     text = 'Finding [source::P0001].\n\nIndependent context.\n'
