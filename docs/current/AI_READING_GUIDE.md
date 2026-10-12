@@ -1,6 +1,6 @@
 # 给 AI 助手的阅读顺序
 
-**2026-10-12最新背景：** [当前BODY→真实首尾→编号/出版及下一步研究](../acceptance/serial-parts-live-20261011/CLOUD_READ_FIRST.md)。本地未上传的默认加强接线和首尾live源码现已纳入本分支；真实首尾请求、响应、完整稿及49页PDF一并提供。[研究与校验员准备](../acceptance/manuscript-checker-preparation-20261012/README.md)是设计资料，尚未实现新校验员或开展新跨领域调研；请区分用户方向、本地落实和真实测试事实。
+**2026-10-12最新交付：** 先读[用户已验收的首尾＋校验结果及输入输出](../acceptance/parts-checker-delivery-20261012/README.md)，再读[正式校验/出版运行说明](MANUSCRIPT_CHECKER_RUN_GUIDE.md)。受测源码`b98771f2cc1548c301f6621d0b87414d858d9f43`；首尾、校验、所选稿编号与Markdown出版真实走通，用户已亲读接受。先前准备资料和技术亲审保留原样，不能用历史“未实现/待验收”覆盖本次采用决定；也不能把恢复的0调用当成从未做真实调用。
 
 **先读 [产品工作宗旨](PRODUCT_PRINCIPLES.md)：严格拒绝过度防御，以实际产品质量和解决问题为先。** 当前统一链路入口是 [PIPELINE](PIPELINE.md)，操作入口是 [RUN_GUIDE](RUN_GUIDE.md) 的“正式操作入口”。`QUALITY_CAPACITY_HANDOFF.md`是10月6日容量改造的历史交接，不是默认下一轮开工指令。
 

@@ -2,6 +2,12 @@
 
 本文件记录已实际踩过的参数与数据交接问题。每次运行先核对当前源码、实际入口和最终发送消息，避免“配置看似正确，模型收到另一份输入”。已结合2026-10-06提供的新版67,286行本地对话记录更新；原39,518行记录不再作为最新背景。事件定位和当前落实状态见 [记录对照](RUN_GUIDE_EVIDENCE.md)。
 
+## 2026-10-12已验收的首尾、校验与最终交付
+
+用户已亲读新稿并接受交付。BODY正式baseline不变；新下游为独立首尾→快照约束局部校验→selected_manuscript→最终编号→出版。统一命令、阶段文件接缝和恢复见[MANUSCRIPT_CHECKER_RUN_GUIDE](MANUSCRIPT_CHECKER_RUN_GUIDE.md)，真实输入输出和费用见[采用记录](../acceptance/parts-checker-delivery-20261012/README.md)。下文早期“04直接读03”“校验尚未实现”的说法由本节及新运行指南替代；历史事件和预算记录保留。
+
+首尾仍需显式生成，post_body配置默认启用校验。独立首尾live成功后可直接将LIVE_REPORT交给manuscript_delivery.py，不重跑BODY；普通delivery路径与独立CLI共享后半段消费者。不要假定普通config自动创建live首尾或校验provider。最终稿附诊断可交付，真正未完成或选用SHA不符继续停止。本轮没有新增PDF编译。
+
 ## 正式操作入口（2026-10-10 收尾）
 
 全链路输入输出统一见 [PIPELINE](PIPELINE.md)。本节是当前操作说明；后文保留旧事故、实验和预算教训，日期较早的“当前候选/本轮预算”不覆盖本节。

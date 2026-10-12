@@ -1,6 +1,6 @@
 # 当前完整链路与正式接线
 
-**2026-10-12实跑资料补齐：** 已认可BODY后的独立首尾、统一编号和出版已完成本地真实运行，源码`508cf724e5c6896fa1994d2bb7c83214ffe82959`及实际输入输出见[云端背景入口](../acceptance/serial-parts-live-20261011/CLOUD_READ_FIRST.md)。新增全文成稿校验员仍在[准备设计阶段](../acceptance/manuscript-checker-preparation-20261012/README.md)，尚未进入下方正式链路；先开展跨领域首尾研究，再讨论首尾质量改造。
+**2026-10-12交付采用决定：** 用户已亲读新首尾及校验后的稿件，判定合格，允许交付。受测源码`b98771f2cc1548c301f6621d0b87414d858d9f43`；[本地真实采用记录](../acceptance/parts-checker-delivery-20261012/README.md)保存输入、请求、返回、选用稿、费用和恢复。post_body下游现为03首尾→校验selected_manuscript→04最终编号→05出版。此前[首尾实跑](../acceptance/serial-parts-live-20261011/CLOUD_READ_FIRST.md)及[研究/校验准备](../acceptance/manuscript-checker-preparation-20261012/README.md)继续保留为历史，不能再据其“未实现”状态判断当前代码。
 
 **2026-10-10 决定：正式 BODY 采用 baseline。** 作者、任务核查/必要的一次有界补写、装配、一次全文局部编辑、实际选用稿编号已接入正常入口。作者仅 `qwen3.5-plus`。`chapter_coherence` 默认关闭；“细纲→指南→正文”及全文候选保留为历史实验。采用依据与原始结果见 [固定对照归档](../acceptance/outline-to-body-coherence-20261010/README.md)。基线源码 `638eb93cdb37fc95cb917130f69a5b16df3549b7`，验收归档 `2618319e3fe2a085acf11a66e6f6c66c73a9c135`；本次只核对接线、统一文档并修剩余状态接缝，未重写有效提示词。
 
@@ -19,7 +19,7 @@
   → 编排/单元写作包 → 正式 baseline BODY 作者
   → 任务核查/必要的一次补写 → 装配 → 一次全文局部编辑
   → selected_body（句柄稿＋编号读者稿＋引用目录）
-  → [显式：独立首尾/题名 → 最终稿图表与统一编号 → 出版Markdown/TeX/PDF]
+  → [显式：独立首尾/题名 → 全文精确局部校验/selected_manuscript → 最终稿图表与统一编号 → 出版]
 ```
 
 ## 输入输出及代码入口
@@ -41,7 +41,8 @@
 | 正式作者/核查/补写 | 每单元完整任务、用途、章节框架和实际材料 → Plus作者；核查实际正文，必要时一次有界补写/后核查 → `UNIT_MESSAGES`、RAW、`UNIT_RESULT`、原始及采用正文、诊断 → 装配 | `legacy_unit_route.py`、`review_unit_writer.py`、`unit_realization.py`；`scripts/upgrade3/legacy_unit_writer.py`与正常入口共用。主作者不带实际前文；不经过指南转换 |
 | 装配/一次全文编辑/选择与编号 | 明确采用单元结果 → 装配句柄稿、references/summary；一次全文局部编辑 → 实际编辑稿或装配稿 → `DELIVERY_REPORT.json.selected_body` 的句柄稿/编号稿/引用目录 | 原 `full_review_draft.py` 汇编器、`article_text_editor.py`、`review_delivery.py::_body_delivery_artifacts`、`delivery_citations.py`。下游读选择，不按文件时间猜稿；BODY编辑已处理，delivery不再执行第二次02编辑 |
 | 独立首尾/题名（显式） | **所选句柄BODY**＋原问题＋最终主张/范围/细纲＋可选材料与身份 → 后置构思职责卡 → 结语→引言→摘要/关键词/题名 → `MANUSCRIPT_FINAL.md`、实际消息/响应与报告 → 04编号 | `serial_manuscript_parts.py`、`serial_parts_application.py`、`scripts/upgrade3/manuscript_parts.py`；delivery配置 `front_back.mode=post_body` 维持fixture/严格录制。独立CLI新增 `--live` 预览、`--run` 显式双账本Plus生成及缓存恢复，只有standalone自动装配 |
-| 最终图表/引用与出版（显式） | 03实际final稿＋同一身份目录/图资产 → 先挂图、再按阅读顺序统一编号 → 04 `MANUSCRIPT_READER.md`、`REFERENCES.json`、图映射、assets → 05只消费这些真实路径 | `delivery_citations.py`、`review_delivery.py::run_publication_delivery`、`latex_publication_renderer.py`。出版不再编号/挂图；Markdown默认，`compile_pdf=true`才TeX/PDF，Crossref/S2 enrich关闭 |
+| 全文精确局部校验（post_body默认） | 03实际完整句柄稿、同一身份目录和显式材料 → 最多两轮快照/块约束JSON提案 → 严格应用、逐项收据/待办 → `CHECKER_REPORT.selected_manuscript` 的路径/SHA/来源 → 04消费该选择 | `manuscript_checker.py`复用`post_body_revision_contracts.py`；独立`manuscript_delivery.py`与正常`run_downstream_delivery`共用消费者。`--no-manuscript-checker`可关闭；普通入口的live provider须显式注入，不能靠开关假定已建真实客户端 |
+| 最终图表/引用与出版（显式） | 校验后selected_manuscript（关闭时为03）＋同一身份目录/图资产 → 先挂图、再按阅读顺序统一编号 → 04 `MANUSCRIPT_READER.md`、`REFERENCES.json`、图映射、assets → 05只消费这些真实路径 | `delivery_citations.py`、`review_delivery.py::run_publication_delivery`、`latex_publication_renderer.py`。出版不再编号/挂图；Markdown默认，`compile_pdf=true`才TeX/PDF，Crossref/S2 enrich关闭 |
 
 表中的运行库位于 `optomind_research/runtime/upgrade3/`，脚本位于 `scripts/upgrade3/`，除已写完整路径者。每次选定输入保存路径、SHA及所属运行，不把不同题目的PLAN、P号或历史删节包混成生产输入。
 
@@ -59,7 +60,7 @@
 | 编排 | 独立CLI默认Plus、16384/32768，max_source_chars=0；必须显式模式、材料和账本 | 历史完整编排及消息交接；正常BODY manifest导出免费验证 |
 | 正式BODY作者/补写 | 固定Plus 8192思考＋32768回答；正常入口 `BODY_DELIVERY_DEFAULTS` 是 baseline＋核查True＋全文编辑True | 已认可7章29单元；既有完整稿187身份的正式选择及免费恢复；固定五单元真实比较后选择baseline |
 | 核查/全文编辑 | 固定Plus 16384/24576，`unit_realization.py`、`legacy_unit_route.py` 的角色profile；不由旧quality.json的Flash writer字段替代 | 真实任务检查/一次补写/严格编辑与一次全文编辑；本轮不追修已接受局部科学问题 |
-| 首尾/最终编号/出版 | delivery显式config；独立live CLI为Plus 16384思考/32768回答、双账本及固定增量额度。出版无LLM，PDF需本机工具链 | 2026-10-11在已认可BODY上真实完成4逻辑阶段＋1次结构修复，0.356588元；BODY保持、最终187身份、49页PDF经视觉检查。题名可用，引言目录化和摘要/结语重复仍待改善；未重跑上游 |
+| 首尾/最终编号/出版 | delivery显式config；独立live CLI为Plus 16384思考/32768回答、双账本及固定增量额度。出版无LLM，PDF需本机工具链 | 历史：2026-10-11首尾5调用0.356588元及49页PDF经视觉检查。当前采用以2026-10-12补充为准：新首尾及两次校验共9调用1.4544032元，187身份，Markdown接通，用户亲读接受；本轮未重跑BODY或PDF |
 
 验证记录分别见 [RUN_GUIDE_EVIDENCE](RUN_GUIDE_EVIDENCE.md)、[容量/条件交接](QUALITY_CAPACITY_VERIFICATION.md)、[按需正式接入](../verification/on-demand-promotion-20261007/README.md) 及本轮BODY归档。不相加重叠测试数，也不把合成调用当真实科学质量证据。
 
@@ -99,3 +100,9 @@
 当前全文候选以全部批准 BODY 章节为交付范围；历史单章 `writer_candidates.py` 保留作局部工具与对照。连续路线每次消费真实已写正文，所需调用与恢复均显式记录；全文独立首尾仍在 BODY 完成之后。
 
 2026-10-07补充：同一全文入口还提供 `plain_whole`、`chapter_concat`、`hierarchical_full` 三条朴素基线。分层方案可复用独立章节的完整拼接稿，只新增一次真正全文编辑。四条高级路线与三条朴素路线合计测试预算已下调为40元；执行与旧账本降额见 `docs/fullbody_writer/PLAIN_BASELINES_40_CNY.md`。
+
+## 2026-10-12正式交付补充
+
+独立首尾CLI的LIVE_REPORT.runtime_report包裹原FRONT_BACK_REPORT；不要将外层费用累计delta当每阶段单独费用。校验严格执行后以selected_manuscript为准，complete_with_diagnostics可以交付并附带pending/unresolved；缺原稿、哈希不符或首轮没有有效结果仍停止。04书目投影、05 reader及MANUSCRIPT_SELECTION sidecar的实际路径和SHA逐段保存。恢复细则与正式命令以[MANUSCRIPT_CHECKER_RUN_GUIDE](MANUSCRIPT_CHECKER_RUN_GUIDE.md)为准。
+
+本轮真实首尾/校验共9次Plus调用1.4544032元，无占额；最终187身份，Markdown消费接通。448项相关回归通过；没有重跑BODY或本轮PDF。已知写作瑕疵保留在亲审记录，用户验收决定已采纳。

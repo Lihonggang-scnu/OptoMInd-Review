@@ -1,5 +1,7 @@
 # 正文后独立首尾模块：使用与验收
 
+**2026-10-12交付采用：** 新首尾与全文校验真实稿已由用户亲读接受，受测源码b98771f2cc1548c301f6621d0b87414d858d9f43。首尾LIVE_REPORT/FRONT_BACK_REPORT交给[正式校验→选用→编号→出版消费者](current/MANUSCRIPT_CHECKER_RUN_GUIDE.md)，不再默认从03原稿绕过校验直接编号。原始证据见[采用记录](acceptance/parts-checker-delivery-20261012/README.md)。下文保留原首尾API和历史恢复边界；当前live缓存、段落数组兼容、结语在书目前及下游状态以新运行指南为准。
+
 ## 使用范围
 
 本模块基于 lihonggang 的现有正文，独立完成一次文章首尾构思及串行生成。它不回调正文 planner，不增加正文规划字段，也不改变章节编排和单元写作。

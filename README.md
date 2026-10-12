@@ -26,7 +26,7 @@
 
 另保留以下**显式启用**的下游模块：
 - 历史全文写作候选与“细纲→指南→正文”：保留作实验对照，不进入当前默认；见 [说明](docs/fullbody_writer/README.md) 与 [当时40元实验指令](docs/fullbody_writer/PLAIN_BASELINES_40_CNY.md)
-- 独立首尾模块：正文后构思、结语、引言、摘要/题名，保留原 BODY；目前不代表首尾写作质量已通过
+- 独立首尾与完整稿校验：正文后构思→结语→引言→摘要/关键词/题名→精确局部校验→最终编号/出版；本地真实测试稿已由用户亲读并接受交付，见[采用记录与实际产物](docs/acceptance/parts-checker-delivery-20261012/README.md)。首尾装配保留原BODY，校验修改逐项留收据
 - A/B/C 局部修订实验：固定正文、按材料提出和核验局部补丁；仍是实验候选，不能自动替代正式稿或宣称质量胜出
 
 历史整合基线来自 `02c018bdd440cc061ddedbb5aef07b115e7de081`，包含 BODY40 身份/引用/alias 修复。独立首尾从 `dc661cf47bdb8ec70a348c02bc8f15a0b40253f4` 有界接回；没有合入早期并行 `manuscript_parts_plan` 对 BODY 的改造。正式baseline接入受测源码为 `638eb93cdb37fc95cb917130f69a5b16df3549b7`，采用归档为 `2618319e3fe2a085acf11a66e6f6c66c73a9c135`；后续收尾在其上维护。

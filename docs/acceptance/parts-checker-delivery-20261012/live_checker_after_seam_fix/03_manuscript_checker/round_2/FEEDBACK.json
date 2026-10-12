@@ -1,0 +1,54 @@
+{
+  "pending_edit_ids": [
+    "E0001",
+    "E0007"
+  ],
+  "failures": [
+    {
+      "edit_id": "E0001",
+      "code": "target_not_unique_in_block:B0018:0",
+      "proposal": {
+        "target_block_id": "B0018",
+        "operation": "replace",
+        "original_text": "在尼莫鲁单抗 + 伊匹木单抗联合铂类双药化疗（NIC）组中",
+        "replacement_text": "在纳武利尤单抗 + 伊匹木单抗联合铂类双药化疗（NIC）组中",
+        "reason": "统一药物译名，'纳武利尤单抗'为 Nivolumab 标准中文译名，与 B0021 块中用法保持一致，避免术语不一致。",
+        "kind": "editorial",
+        "evidence_ids": [
+          "snapshot:27d85daba6ef624cebab1293fa99787b7dcb953b61e1896eb3100b621aab8472:B0021"
+        ],
+        "edit_id": "E0001"
+      },
+      "match_count": 0,
+      "allowed_current_block_ids": [
+        "B0018"
+      ],
+      "current_target_block_id": "B0018",
+      "target_migration": "exact_untouched_interval"
+    },
+    {
+      "edit_id": "E0007",
+      "code": "citation_not_supported_by_selected_evidence:P0003",
+      "proposal": {
+        "target_block_id": "B0094",
+        "operation": "replace",
+        "original_text": "评估了供体 FMT（d-FMT）联合帕博利珠单抗和阿昔替尼的疗效 [P0593]。",
+        "replacement_text": "评估了供体 FMT（d-FMT）联合帕博利珠单抗和阿昔替尼的疗效 [P0003]。",
+        "reason": "修正引用错误，TACITO 试验对应文献为 P0003（标题含 TACITO trial），P0593 为其他研究，且 B0110 块中 TACITO 引用为 P0003，需保持一致。",
+        "kind": "scientific",
+        "evidence_ids": [
+          "snapshot:27d85daba6ef624cebab1293fa99787b7dcb953b61e1896eb3100b621aab8472:B0164"
+        ],
+        "edit_id": "E0007"
+      },
+      "match_count": 1,
+      "allowed_current_block_ids": [
+        "B0094"
+      ],
+      "current_target_block_id": "B0094",
+      "target_migration": "exact_untouched_interval"
+    }
+  ],
+  "applied_receipts": [],
+  "instruction": "Only pending IDs; successful edits must not be resent."
+}
