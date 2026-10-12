@@ -199,6 +199,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--recognition-run", action="store_true", help="enable budgeted regional provider calls")
     parser.add_argument("--recognition-cache-root", type=Path, help="immutable regional request/response cache")
     parser.add_argument("--recognition-concurrency", type=int, help="override regional JSON concurrency (initial default 4; 1 serial; maximum 32)")
+    parser.add_argument("--recognition-reviewed-failures", type=Path, help="explicit cache-key/attempt/RESULT hash allowlist; isolate only saved unknowns whose original dual holds remain consumed")
     parser.add_argument("--recognition-ceiling-cny", type=float, help="absolute cumulative project reservation ceiling for this execution")
     parser.add_argument("--budget-ledger", type=Path, help="existing shared project ledger for regional recognition")
     parser.add_argument("--budget-limit", type=float, help="existing project budget cap; never resets its history")
@@ -268,7 +269,7 @@ def main(argv: list[str] | None = None) -> int:
                 "account_ledger": str(args.account_ledger.resolve()) if args.account_ledger else "", "tokenizer": tokenizer_info,
                 "reservation_ceiling_cny": args.recognition_ceiling_cny})
             recognition_config = RegionalRecognitionConfig(cache_root=args.recognition_cache_root or args.cache_root / "regional_recognition", **recognition_options)
-            recognizer = RegionalRecognizer(recognition_config, provider_factory=factory)
+            recognizer = RegionalRecognizer(recognition_config, provider_factory=factory, reviewed_failures=args.recognition_reviewed_failures)
         providers["docling"] = DoclingCliAdapter(adapter_config, recognizer=recognizer)
         config.docling_enabled = True
         config.docling_config_sha256 = config_sha256({"parser_version": adapter_config.parser_version, **adapter_config.fingerprint(),
@@ -278,6 +279,8 @@ def main(argv: list[str] | None = None) -> int:
         _build_parser().error("regional recognition requires an explicit Docling configuration")
     if args.recognition_run and not args.recognition_config:
         _build_parser().error("--recognition-run requires --recognition-config")
+    if args.recognition_reviewed_failures and not args.recognition_run:
+        _build_parser().error("--recognition-reviewed-failures requires --recognition-run")
     reader = FirecrawlReader(timeout_seconds=min(config.request_timeout_seconds, 20.0)) if config.rescue_enabled and (config.rescue_max_search_calls or config.rescue_max_extract_calls) else None
     acquirer = MaterialAcquirer(args.output_root, config=config, providers=providers, reader=reader)
 

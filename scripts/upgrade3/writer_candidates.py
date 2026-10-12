@@ -271,10 +271,44 @@ def make_live_factory(args: argparse.Namespace, *, token_counter=None, reservati
         with shared_lock:
             return (ledger.project if hasattr(ledger, "project") else ledger).as_dict() if ledger is not None else None
 
+    def held_failure_receipt(call_id):
+        # Read existing native receipts only: never initialize, settle or waive.
+        import sqlite3
+        from contextlib import closing
+        from optomind_research.runtime.upgrade3.dual_budget import account_mapping_dir
+        if not thread_safe or not getattr(args, "account_ledger", None):
+            raise ValueError("reviewed_failure_requires_native_dual_ledgers")
+        account_path = Path(args.account_ledger).expanduser().resolve()
+        mappings = Path(getattr(args, "account_mapping_dir", None) or account_mapping_dir(account_path))
+        matches = []
+        for path in mappings.glob("dual-*.json"):
+            record = read_json(path)
+            if re.fullmatch(re.escape(call_id) + r":key\d+:attempt\d+", str(record.get("call_id", ""))):
+                matches.append((path, record))
+        if len(matches) != 1:
+            raise ValueError("reviewed_failure_dual_mapping_missing_or_ambiguous")
+        path, record = matches[0]
+        settlement = record.get("settlement") or {}
+        if (record.get("project_path") != str(ledger_path) or record.get("total_path") != str(account_path)
+                or record.get("pair_id") != path.stem or record.get("state") != "uncertain"
+                or settlement.get("uncertain") is not True or settlement.get("actual_cny") is not None
+                or not isinstance(record.get("amount_cny"), (int, float)) or not math.isfinite(record["amount_cny"]) or record["amount_cny"] <= 0):
+            raise ValueError("reviewed_failure_dual_hold_invalid")
+        proof = {"mapping_sha256": sha256_file(path), "mapping_path": str(path.resolve()), "pair_id": record["pair_id"], "amount_cny": record["amount_cny"]}
+        for name, ledger_file in (("project", ledger_path), ("total", account_path)):
+            with closing(sqlite3.connect(ledger_file.as_uri() + "?mode=ro", uri=True)) as db:
+                row = db.execute("SELECT call_id, amount_cny, actual_cny, status FROM reservations WHERE reservation_id=?", (record.get(name + "_reservation_id"),)).fetchone()
+            expected_call = f"{record['call_id']}:{record['pair_id']}:{name}"
+            if row is None or row[0] != expected_call or row[2] is not None or row[3] != "uncertain" or abs(row[1] - record["amount_cny"]) > 1e-9:
+                raise ValueError("reviewed_failure_dual_hold_not_retained:" + name)
+            proof[name] = {"ledger_path": str(ledger_file), "reservation_id": record[name + "_reservation_id"], "status": row[3], "amount_cny": row[1]}
+        return proof
+
     factory.execution_mode = "live"
     factory.ledger_snapshot = ledger_snapshot
     if thread_safe:
         factory.stop_event = stop_event
+        factory.held_failure_receipt = held_failure_receipt
     return factory
 
 

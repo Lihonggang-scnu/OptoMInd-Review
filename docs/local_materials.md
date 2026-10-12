@@ -335,6 +335,18 @@ automatically retried. The recognition deadline and region limit preserve all
 completed cache entries. Batch checkpoints with unfinished regional recognition
 are re-evaluated automatically; validated successful regions replay freely.
 
+An explicitly reviewed saved unknown can be isolated on a new execution with
+`--recognition-reviewed-failures reviewed.json`. The file contains
+`{"failures":[{"cache_key":"<64 hex>","attempt":1,"result_sha256":"<64 hex>"}]}`.
+Before any dispatch, the CLI validates those immutable cache receipts and the
+original project/account reservations, which must both remain uncertain and
+fully held. The failed region stays an error and is never called again; its
+original receipts and held spend are unchanged. Other unsent regions still
+require normal budget reservations, and any new unknown stops shared dispatch.
+The snapshot includes an immutable `REVIEWED_HELD_*.json` receipt with the
+allowlist/result hashes and retained-hold evidence. Successful caches replay
+freely. This option does not clear a running recognizer's stop event.
+
 ## Bounded Qwen background reading
 
 `PreparedSnapshot` exposes a small model-input boundary without starting a

@@ -185,7 +185,7 @@ def _validate_content(kind: str, content: Any) -> dict[str, Any]:
 
 
 class RegionalRecognizer:
-    def __init__(self, config: RegionalRecognitionConfig, *, provider_factory=None):
+    def __init__(self, config: RegionalRecognitionConfig, *, provider_factory=None, reviewed_failures=None):
         self.config = config
         self.provider_factory = provider_factory  # None is explicit preview, never a fake answer.
         self._provider_lock = threading.Lock()
@@ -196,9 +196,53 @@ class RegionalRecognizer:
         self._prepare_guard = threading.Lock()
         self._active_prepares = 0
         self._unknown_halt = False
+        self._reviewed_failures = self._load_reviewed_failures(reviewed_failures)
 
-    @staticmethod
-    def _stops_scheduling(result):
+    def _load_reviewed_failures(self, path):
+        """Validate an explicit old unknown without changing its receipt or hold."""
+        if path is None:
+            return {}
+        raw = Path(path).read_bytes()
+        entries = json.loads(raw)
+        verifier = getattr(self.provider_factory, "held_failure_receipt", None)
+        if not isinstance(entries, dict) or set(entries) != {"failures"} or not isinstance(entries["failures"], list) or not callable(verifier):
+            raise ValueError("reviewed_failures_require_entries_and_dual_hold_verifier")
+        verified = {}
+        for entry in entries["failures"]:
+            if (not isinstance(entry, dict) or set(entry) != {"cache_key", "attempt", "result_sha256"}
+                    or not all(isinstance(entry.get(key), str) and re.fullmatch(r"[0-9a-f]{64}", entry[key]) for key in ("cache_key", "result_sha256"))
+                    or isinstance(entry.get("attempt"), bool) or not isinstance(entry.get("attempt"), int) or entry["attempt"] < 1):
+                raise ValueError("reviewed_failure_entry_invalid")
+            identity = (entry["cache_key"], entry["attempt"])
+            if identity in verified:
+                raise ValueError("reviewed_failure_duplicate")
+            attempt = Path(self.config.cache_root) / entry["cache_key"] / f"attempt-{entry['attempt']}"
+            result_raw = (attempt / "RESULT.json").read_bytes()
+            if _sha(result_raw) != entry["result_sha256"]:
+                raise ValueError("reviewed_failure_result_hash_mismatch")
+            manifest = json.loads((attempt / "CACHE_MANIFEST.json").read_bytes())
+            for name, digest in manifest.get("files", {}).items():
+                if Path(name).name != name or _sha((attempt / name).read_bytes()) != digest:
+                    raise ValueError("reviewed_failure_cache_content_mismatch")
+            result = json.loads(result_raw)
+            request_raw = (attempt / "REQUEST.json").read_bytes()
+            request = json.loads(request_raw)
+            transport = result.get("transport_error") or {}
+            call_id = f"regional-{manifest.get('binding_sha256')}-attempt-{entry['attempt']}"
+            if (not {"REQUEST.json", "RESULT.json"}.issubset(manifest.get("files", {}))
+                    or result.get("request_sha256") != _sha(request_raw)
+                    or manifest.get("binding_sha256") != _sha(_json(request["binding"]))
+                    or result.get("status") != "error" or result.get("retry_allowed") is not False
+                    or result.get("not_sent") or result.get("response_sha256") or (attempt / "RESPONSE.json").exists()
+                    or transport.get("complete") is not False or transport.get("call_id") != call_id):
+                raise ValueError("reviewed_failure_is_not_saved_unknown_transport")
+            verified[identity] = {**entry, "allowlist_sha256": _sha(raw), "request_sha256": _sha(request_raw),
+                                  "dual_hold": verifier(call_id), "mode": "saved_unknown_isolated_no_retry_hold_retained", "paid_calls": 0}
+        return verified
+
+    def _stops_scheduling(self, result):
+        if result.get("reviewed_held_failure") in self._reviewed_failures.values():
+            return False  # Only added after exact cache and dual-hold validation.
         return result["status"] in {"budget_stopped", "pending_uncertain"} or (
             result["status"] == "error" and not result.get("retry_allowed"))
 
@@ -389,6 +433,12 @@ class RegionalRecognizer:
                     continue  # A stop during admission is safe to resume.
                 physical_attempts += 1
                 if not result.get("retry_allowed"):
+                    reviewed = self._reviewed_failures.get((root.name, int(attempt.name.split("-")[-1])))
+                    if reviewed is not None:
+                        if _sha(result_path.read_bytes()) != reviewed["result_sha256"]:
+                            raise ValueError("reviewed_failure_result_hash_mismatch")
+                        result = {**result, "reviewed_held_failure": reviewed}
+                        _once(attempt / ("REVIEWED_HELD_" + reviewed["allowlist_sha256"] + ".json"), reviewed)
                     return result, attempt
             else:
                 return {"status": "pending_uncertain", "reason": "prior attempt has no terminal receipt; review spend before retry"}, attempt
@@ -533,7 +583,7 @@ class RegionalRecognizer:
                           "source_sha256": source_sha, "crop_sha256": [_sha(crop["data"]) for crop in available],
                           "requested_model": self.config.model, "provided_to_multimodal": attempt is not None and (attempt / "RESPONSE.json").is_file(),
                           **({"uncertain_regions": result["content"]["uncertain_regions"]} if "content" in result else {}),
-                          **{key: result[key] for key in ("usage", "requested_profile", "effective_request", "returned_model", "request_id", "execution_mode", "provider_raw_response_sha256", "reason", "omissions", "reparse", "cache_replay", "response_content_parse") if key in result}}
+                          **{key: result[key] for key in ("usage", "requested_profile", "effective_request", "returned_model", "request_id", "execution_mode", "provider_raw_response_sha256", "reason", "omissions", "reparse", "cache_replay", "response_content_parse", "reviewed_held_failure") if key in result}}
             report = {"region_id": region["region_id"], "kind": kind, "recognition": provenance}
             reports.append(report)
             region["recognition"] = provenance
@@ -558,7 +608,7 @@ class RegionalRecognizer:
                     region["recognized_footnotes"] = content.get("footnotes", [])
             if attempt:
                 for path in sorted(attempt.parent.rglob("*")):
-                    if path.is_file() and (path.name in {"REQUEST.json", "RESPONSE.json", "RESULT.json", "CACHE_MANIFEST.json"} or path.name.startswith("REPARSED_") or path.parent.name == "transport") and path.suffix != ".tmp":
+                    if path.is_file() and (path.name in {"REQUEST.json", "RESPONSE.json", "RESULT.json", "CACHE_MANIFEST.json"} or path.name.startswith(("REPARSED_", "REVIEWED_HELD_")) or path.parent.name == "transport") and path.suffix != ".tmp":
                         data = path.read_bytes()
                         retained.append({"source_document_id": "recognition-" + _sha(data)[:24], "source_name": path.name,
                                          "role": "regional_recognition_receipt", "format": "json" if path.suffix == ".json" else "text", "mime_type": "application/json" if path.suffix == ".json" else "text/plain", "data": data,
