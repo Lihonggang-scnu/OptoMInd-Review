@@ -13,7 +13,8 @@ Example::
         --fixture parts.json --output outputs/post_body_parts
 
 The optional context is a JSON object with research_question, shared_scope,
-review_argument, final_outline, material_records, and/or source_identity_map.
+review_argument, final_outline, material_records, source_identity_map, and/or
+writing_requirements (audience/article_type/journal/confirmed_format strings).
 Its file references resolve relative to the context file.  It does not need
 an early PartPlan.  A fresh output directory is required for each run.
 """

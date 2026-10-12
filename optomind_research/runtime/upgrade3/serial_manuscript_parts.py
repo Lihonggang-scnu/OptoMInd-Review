@@ -23,7 +23,9 @@ RESPONSE_CHAR_LIMIT = 200_000
 PART_CHAR_LIMIT = 100_000
 PLAN_CHAR_LIMIT = 30_000
 _CONTEXT_KEYS = {"research_question", "shared_scope", "review_argument", "final_outline",
-                 "material_records", "source_identity_map"}
+                 "material_records", "source_identity_map", "writing_requirements"}
+_WRITING_REQUIREMENT_KEYS = {"audience", "article_type", "journal", "confirmed_format"}
+WRITING_REQUIREMENTS_CHAR_LIMIT = 10_000
 _PART_KEYS = {"purpose", "focus", "boundary", "placement", "finalize_from"}
 _BANNED_PLAN_KEYS = {"units", "cases", "paragraphs", "paragraph_briefs", "paragraph_tasks"}
 _OLD_CARD_KEYS = {"manuscript_parts_plan", "parts_plan", "part_plan", "responsibility_cards"}
@@ -203,6 +205,15 @@ def normalize_context(context: Mapping[str, Any] | None, *, research_question: s
             raise SerialPartsError("chapter_role_must_be_object")
         roles.append({k: row[k] for k in ("chapter_id", "title", "role", "purpose", "question") if k in row})
     normalized = {k: context[k] for k in ("shared_scope", "review_argument", "final_outline") if k in context}
+    if "writing_requirements" in context:
+        requirements = context["writing_requirements"]
+        if not isinstance(requirements, Mapping) or set(requirements) - _WRITING_REQUIREMENT_KEYS:
+            raise SerialPartsError("invalid_writing_requirements")
+        for key, value in requirements.items():
+            _text(value, "writing_requirements." + key, WRITING_REQUIREMENTS_CHAR_LIMIT)
+        if len(_dump(requirements)) > WRITING_REQUIREMENTS_CHAR_LIMIT:
+            raise SerialPartsError("writing_requirements_too_long")
+        normalized["writing_requirements"] = dict(requirements)
     normalized.update(research_question=research_question, chapter_roles=roles,
                       material_records=material_records,
                       source_identity_map={h: identities[h] for h in sorted(allowed) if h in identities},
@@ -258,10 +269,38 @@ _CONCEPTION = """阅读实际 BODY 后，重新构思摘要、引言与结语的
 只返回 {\"manuscript_parts_plan\": {\"context\": \"...\", \"abstract\": PartPlan, \"introduction\": PartPlan, \"conclusion\": PartPlan}}。PartPlan 必须且仅含 purpose:string、focus:string[]、boundary:string[]、placement:{mode:standalone|embedded|distributed,anchor:string}、finalize_from:string[]。所有字符串与数组非空，输出完整新卡，不返回补丁。"""
 
 _DUTIES = {
-    "conclusion": "依据本轮职责卡与实际 BODY，综合全文实际建立的认识和决定其含义的条件。限制与未来工作应有理由，不成为默认主线；不要逐章复述或强行选出唯一答案。只返回 {\"conclusion\": \"...\"}。",
-    "introduction": "依据本轮职责卡与实际 BODY，建立阅读理由、必要理解背景、问题与实际范围，说明组织方式为何有用。只承诺正文兑现的任务，不用已生成结语作证，不写成压缩结论。只返回 {\"introduction\": \"...\"}。",
-    "abstract": "依据本轮职责卡与实际 BODY，写自含摘要及题名、关键词。压缩主题、真实组织价值与核心有条件认识，不机械报目录或复读结语；题名不夸大范围、系统性或新颖性。格式仅遵循已确认要求，不强制单段或固定修辞次序。只返回 {\"title\":\"...\",\"abstract\":\"...\",\"keywords\":[\"...\"]}。",
+    "conclusion": """依据 manuscript_parts_plan.conclusion、actual_body 与许可材料，为已读完正文的读者写独立结语，不修改 BODY。
+先读实际末端：Discussion、Limitations、Outlook、Summary 和章节收束分别已经解释、限定或提出了什么；据此判断新结语还有什么整体任务。不要只找 Conclusion 标题。
+围绕正文实际回答的中心问题挑选能共同形成认识的材料，连同对象、条件、比较基准和证据强度保留。选材不按章配额，不由最醒目的数字或最长的未来清单接管全文。
+先找关系再写句子：材料是共同支持、互补、依赖、结果分化，还是分类层次？说清各自支持什么；同一来源重复出现不是独立验证，并置证据不能补成因果链。分类可以交付使用原则，不必选赢家；只有正文具备共同判准及可比证据时才给有条件的偏好。原因未明时保留分歧，不发明统一解释。
+起草时先回答“现在可以怎样理解中心问题”，用所选关系解释整体判断为何成立，再说明其使用边界或什么条件会改变判断。条件紧贴对应认识，不在末尾笼统补限制。不把各章摘要换连接词当综合，也不必先宣告本文综述了什么。
+仅当尚有重要且未被已有收尾充分承担的下一步时，沿“卡在哪里—哪个判断尚不能成立—需要哪类证据或验证—将判定什么”展开。正文未给出的实验参数、样本量和性能门槛不得自拟。已有充分 Outlook 或分布式议程时，写较短的整体认识或使用原则，不再列同一组未来工作。
+这些是可合并、调整的信息动作，不固定段数、句数或材料数量。Discussion 已完成综合时可短收束；系统综述保留结局间不同证据强度；分类型保留组织原则；待检验模型保留推测身份。摘要与结语可共享中心认识，按当前读者用途判断重复，不追求词汇互斥或强造新观点。
+允许由正文支持的跨节综合和更高层表述，但新事实、计算、数据与引用须有输入依据及许可句柄。依据不足就收窄判断，不把写作过程诊断塞进论文。只返回 {"conclusion":"..."}，值仅含结语正文，不含外层标题、选材记录或新增字段。""",
+    "introduction": """依据 manuscript_parts_plan.introduction、actual_body 和 context 中的可用材料建立阅读入口；已生成结语仅供表达协调，不能作证。
+先从正文开头及主要章节选择一条实际贯穿的问题线：读者要解释、预测、测量、比较或实现什么？已有知识能做到什么？什么关系或条件还需要连接？实际正文如何处理？细纲帮助定位，但未兑现的规划不能成为承诺，不从标题关键词分别扩写百科背景。
+从具体对象和任务进入，用最贴近任务的事实说明阅读理由。对象不足以使问题可懂时补必要定义；规模数字、历史年份和增长趋势只有改变理解时才保留，不靠泛称热点或重要性开篇。
+公允解释已有路径的价值及有效范围：它把什么观察、指标、模型或概念连到什么判断？需要例证时选能显示该关系的材料，保留对象和证据类型。随后说明正文支持的认识困难，如外推条件变化、测量与概念不可等同、比较尺度不一致或不同传统各答一部分。不能制造旧方法失效、无人研究或虚假的空白。
+接着解释本文实际如何组织知识，以及这种组织解决哪一步理解困难。分类、比较、证据分层、跨尺度连接或先概念后评价均须有正文落点。只有实际提供既有综述的覆盖比较，才声称补足其遗漏；否则直接说明本篇视角，不宣称首次。类比不能替框架背书。
+界定影响预期的范围，沿真实 BODY 说明相邻章节的功能关系：前一步澄清什么，后一步据此比较或评价什么。导航可以保留，但不能只把章名换成首先、其次、最后；独立专题用共同问题连接，不虚构推导顺序。核对“定义、比较、评价、验证、全面覆盖”等承诺都有正文落点。
+以上是可合并、展开或调整顺序的信息动作，不是固定段落模板。技术识别或教程型入口可保留必要定义、变量、简短公式及工具；BODY 已完成的教学不完整重讲。短综述可用紧凑开场；系统综述或路线图只按已确认文体安排，不凭题名猜测方法。
+交付前逐项核对事实、历史、数值、归属、效果和争议判断：回到 BODY 句段或许可材料的具体内容，将身份匹配的许可引用句柄放在对应主张旁。包含这些事实判断的引言不能以零引用交付。身份目录不是支持证据；一个段末引文不能包办无关判断。不设每段引文配额，本文自己的范围和组织选择无需装饰引文。只支持半句就拆开或收窄；无依据的非必要背景删去，不能加“可能”便留下。
+最后连读段间关系：后一信息是否解决前一信息留下的问题？补具体关系而非“复杂、重要、亟需”等形容词。只返回 {"introduction":"..."}，仅含引言正文及必要内部小标题，不含外层标题、起草步骤或新规划字段。""",
+    "abstract": """依据 actual_body、context 和 manuscript_parts_plan.abstract 写自含摘要、题名与关键词；职责卡的意图只有正文兑现才可进入摘要。
+先选择实际对象与范围、主要组织视角及已经建立的认识，不让局部醒目结果或末章展望接管全文。分类地图型应写出分类轴、关键分支或层次的区别与作用，不止说提供框架；判断型应写出判断及对象、比较尺度和条件，不把不可比案例拼成排名；混合型在分类帮助读懂判断时将二者连起来，不各写一套。假说或暂定模型保持原身份。
+用读者可独立理解的句群依次交代对象与问题、整理视角、核心认识及决定含义的限定；这些是信息任务，不固定句数、单段或修辞次序。相邻任务可合并，已确认文体要求先报判断时可前置。不逐章摘一句，不以“综述机制、方法与挑战”代替实际分类、关系或有条件取舍。
+对象、情境、范围、证据成熟度与不确定性紧贴对应判断；证据不足、未充分检验和被否定必须区分。必要的用途从已有认识推出，核心认识及边界已完整时不强加未来工作。压缩先删通用背景、重复任务宣告、目录和非必要例子，不先删改变科学含义的对象与条件，不把局部优势升级为普遍优势。
+优先遵循 context.writing_requirements（如提供）及其他上下文中已确认的读者、文体、刊规；未知要求不猜测。结构化摘要按已确认栏目名及顺序组织，叙述综述也可能结构化，不能据栏目虚构系统检索。只有 BODY 确实报告检索或定量合成才压缩其实际方法、范围、主要结果及不确定性。没有已确认栏目要求时以连续叙述为默认，不声称这是刊规。
+遵循已确认的长度与引文要求。明确禁引文时不显示句柄，但判断仍由BODY支持；允许或要求引文时仅用对应许可句柄；只禁止某种形式不能扩成全部禁引文。规则未知时不加装饰引文，也不宣称某刊禁止引用。
+题名诚实反映实际对象、范围和视角，不将选择性覆盖包装成全面、系统或定论。关键词选择有检索价值的中心对象、关系和组织维度，避免同义堆叠，数量遵循已确认要求。摘要与结语可共享中心认识，但须提供独立预览用途，不能按同一句序复读。
+只返回 {"title":"...","abstract":"...","keywords":["..."]}；abstract仅含摘要正文，可有必要结构化内部栏目，不含外层标题、类型标签、选材表或新增字段。""",
 }
+
+
+def prompt_contract_sha256() -> str:
+    """Bind all four writing instructions, even before downstream messages exist."""
+    return _sha(_dump({"common": _COMMON, "conception": _CONCEPTION, "duties": _DUTIES}))
+
 
 
 def build_stage_messages(stage: str, *, body_text: str, research_question: str,

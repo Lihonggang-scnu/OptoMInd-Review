@@ -11,7 +11,7 @@ from typing import Any
 from .dual_budget import bind_json, read_json, write_json
 from .serial_manuscript_parts import (
     SerialPartsError, build_stage_messages, messages_sha256, normalize_context,
-    parse_stage_response, run_serial_parts,
+    parse_stage_response, run_serial_parts, prompt_contract_sha256,
 )
 from .serial_parts_application import extract_body, preflight_placement
 from .unit_realization import _cached_call
@@ -86,7 +86,8 @@ def run_live_parts(*, args, context, chapter_roles, token_counter, tokenizer_inf
     estimate = _estimate(messages, profile, None, token_counter)
     immutable = {"schema_version": "optomind.serial_parts.live.v1",
         "draft_path": str(draft), "draft_sha256": hashlib.sha256(original).hexdigest(),
-        "conception_messages_sha256": messages_sha256(messages), "profile": profile,
+        "conception_messages_sha256": messages_sha256(messages),
+        "prompt_contract_sha256": prompt_contract_sha256(), "profile": profile,
         "language": args.language, "project_path": project["path"],
         "project_limit_cny": args.budget_limit, "account_path": account["path"],
         "account_limit_cny": args.account_budget_limit,

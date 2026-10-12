@@ -162,3 +162,22 @@ def test_preview_never_reads_key_or_constructs_client_or_writes_ledgers(tmp_path
     assert result["status"] == "preview" and result["model_calls"] == 0
     assert not args.key_file.exists()
     assert all(p.read_bytes() == original for p, original in before.items())
+
+
+def test_downstream_prompt_change_rejects_old_binding_before_any_call(tmp_path, monkeypatch):
+    from optomind_research.runtime.upgrade3 import serial_manuscript_parts as serial
+    args = inputs(tmp_path)
+    args.run = False
+    opts = dict(args=args, context={}, chapter_roles=[],
+        token_counter=lambda raw, messages: 100, tokenizer_info={})
+    first = run_live_parts(**opts)
+    binding = (args.output / "LIVE_BINDING.json").read_bytes()
+    assert first["budget_binding"]["inputs"]["prompt_contract_sha256"] == serial.prompt_contract_sha256()
+    monkeypatch.setitem(serial._DUTIES, "abstract", serial._DUTIES["abstract"] + " New requirement.")
+    args.run = True
+    def forbidden(*a, **kw):
+        pytest.fail("Changed binding must fail before constructing a client")
+    with pytest.raises(ValueError, match="binding_changed"):
+        run_live_parts(**opts, client_factory=forbidden)
+    assert (args.output / "LIVE_BINDING.json").read_bytes() == binding
+    assert not (args.output / "cache").exists()
