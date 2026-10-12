@@ -151,6 +151,7 @@ def _math_signature(text):
 def _structure_errors(text):
     errors = Counter()
     fences = []
+    prose_lines = []
     for line in text.splitlines():
         match = re.match(r"^ {0,3}(`{3,}|~{3,})", line)
         if match:
@@ -159,7 +160,11 @@ def _structure_errors(text):
                 fences.pop()
             elif not fences:
                 fences.append(token)
+        elif not fences and not line.startswith(("    ", "\t")):
+            prose_lines.append(line)
     errors["unclosed_fence"] = len(fences)
+    prose = re.sub(r"(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)", "", "\n".join(prose_lines))
+    errors["unbalanced_display_dollars"] = len(re.findall(r"(?<!\\)(?:\\\\)*\$\$", prose)) % 2
     errors["unbalanced_display_math"] = abs(text.count(r"\[") - text.count(r"\]"))
     errors["unbalanced_inline_math"] = abs(text.count(r"\(") - text.count(r"\)"))
     errors["unbalanced_dollars"] = len(re.findall(r"(?<!\\)\$", text)) % 2
@@ -209,7 +214,7 @@ def _validate_change(case, row, edit_id, catalogs):
     for field in ("target_block_id", "original_text", "reason"):
         if not isinstance(row.get(field), str) or not row[field].strip():
             raise ManuscriptCheckerError("missing_" + field)
-    if row.get("operation") not in {"replace", "remove"}:
+    if not isinstance(row.get("operation"), str) or row["operation"] not in {"replace", "remove"}:
         raise ManuscriptCheckerError("operation_not_allowed")
     if row.get("depends_on"):
         raise ManuscriptCheckerError("dependent_changes_not_supported")
@@ -221,7 +226,7 @@ def _validate_change(case, row, edit_id, catalogs):
     if row["operation"] == "replace" and not replacement.strip():
         raise ManuscriptCheckerError("empty_replacement")
     kind = row.get("kind", "editorial")
-    if kind not in {"editorial", "scientific"}:
+    if not isinstance(kind, str) or kind not in {"editorial", "scientific"}:
         raise ManuscriptCheckerError("unknown_kind")
     ids = row.get("evidence_ids", [])
     if not isinstance(ids, list) or any(not isinstance(i, str) for i in ids):
@@ -481,6 +486,17 @@ def run_manuscript_checker(*, draft_path, out_dir, identity_catalogs=None,
             "proposals_source": identity["response_source"], "rounds": []}
         current, selected_path, pending, feedback = text, source, [], None
         completed_response = False
+
+        def current_selection():
+            if source.read_bytes() != original_bytes:
+                raise ManuscriptCheckerError("source_changed_during_checker")
+            if selected_path.read_bytes() != current.encode("utf-8"):
+                raise ManuscriptCheckerError("selected_manuscript_integrity_failure")
+            return {"path": str(selected_path), "sha256": sha256_text(current),
+                "status": report["status"], "provenance": {"source_path": str(source), "source_sha256": digest,
+                    "checker_report": str(report_path), "applied_edit_ids": [p["edit_id"] for p in report["applied"]],
+                    "body_preservation_scope": "03 assembly only; checker local changes are separately receipted"}}
+
         if enabled:
             for number in range(1, max_model_rounds + 1):
                 messages = first_messages if number == 1 else build_checker_messages(
@@ -527,6 +543,8 @@ def run_manuscript_checker(*, draft_path, out_dir, identity_catalogs=None,
                     report["preview_messages_path"] = str(step / "MESSAGES.json")
                     report["diagnostics"].append({"code": state, "round": number})
                     report["pending"] = pending
+                    if completed_response:
+                        report["selected_manuscript"] = current_selection()
                     _write(report_path, report)
                     return report
                 report["logical_rounds"] = number
@@ -534,6 +552,8 @@ def run_manuscript_checker(*, draft_path, out_dir, identity_catalogs=None,
                         or raw.get("complete") is not True or raw.get("finish_reason") != "stop"):
                     report["diagnostics"].append({"code": "incomplete_provider_response", "round": number})
                     report["pending"] = pending
+                    if completed_response:
+                        report["selected_manuscript"] = current_selection()
                     _write(report_path, report)
                     return report
                 previous = current
@@ -591,10 +611,7 @@ def run_manuscript_checker(*, draft_path, out_dir, identity_catalogs=None,
             "removed_tokens": sorted(set(_tokens(text)) - set(_tokens(current))),
             "added_tokens": sorted(set(_tokens(current)) - set(_tokens(text))),
             "unknown_handles": after_citations["unknown_handles"]}
-        report["selected_manuscript"] = {"path": str(selected_path), "sha256": sha256_text(current),
-            "status": report["status"], "provenance": {"source_path": str(source), "source_sha256": digest,
-                "checker_report": str(report_path), "applied_edit_ids": [p["edit_id"] for p in report["applied"]],
-                "body_preservation_scope": "03 assembly only; checker local changes are separately receipted"}}
+        report["selected_manuscript"] = current_selection()
         report["diagnostics"].extend({"code": "pending_edit", "edit_id": p["edit_id"], "reason": p["code"]} for p in pending)
         _write(report_path, report)
         files = {p.relative_to(output).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from contextlib import closing
 import hashlib
+import json
 import math
 from pathlib import Path
 import sqlite3
@@ -11,11 +12,45 @@ from typing import Any
 from .dual_budget import bind_json, read_json, write_json
 from .serial_manuscript_parts import (
     SerialPartsError, build_stage_messages, messages_sha256, normalize_context,
-    parse_stage_response, run_serial_parts, prompt_contract_sha256,
+    parse_stage_response, run_serial_parts, prompt_contract_sha256, _decode_response,
 )
 from .serial_parts_application import extract_body, preflight_placement
 from .unit_realization import _cached_call
 from .writer_candidates import _estimate, _output_lock, _profile
+
+
+def _normalize_paragraph_response(stage, response):
+    """Accept lossless paragraph arrays only at the live representation boundary."""
+    if stage not in {"introduction", "conclusion", "abstract"}:
+        return response, None
+    data = _decode_response(response, stage)
+    paragraphs = data.get(stage)
+    if not (isinstance(paragraphs, list) and paragraphs
+            and all(isinstance(p, str) and p.strip() for p in paragraphs)):
+        return response, None
+    data[stage] = "\n\n".join(paragraphs)
+    content = json.dumps(data, ensure_ascii=False)
+    receipt = {"stage": stage, "field": stage, "original_type": "array",
+        "normalized_type": "string", "paragraph_count": len(paragraphs),
+        "source_content_sha256": hashlib.sha256(response["content"].encode("utf-8")).hexdigest(),
+        "normalized_content_sha256": hashlib.sha256(content.encode("utf-8")).hexdigest()}
+    return {**response, "content": content}, receipt
+
+
+def _format_repair_messages(stage, actual_messages, content, error, *, legacy=False):
+    if legacy:
+        schema_hint = "数组字段必须使用非空字符串数组，不能用单个字符串。"
+    elif stage == "conception":
+        schema_hint = "本阶段返回manuscript_parts_plan对象；职责卡中的focus、boundary、finalize_from为非空字符串数组，其他字段类型严格沿用原任务schema。"
+    elif stage == "abstract":
+        schema_hint = "本阶段title和abstract必须是单个非空字符串；keywords必须是非空字符串数组。abstract段落在字符串内用双换行分隔，不使用数组。"
+    else:
+        schema_hint = f"本阶段{stage}必须是单个非空字符串，段落在字符串内用双换行分隔，不使用数组。"
+    return [*actual_messages, {"role": "assistant", "content": content},
+        {"role": "user", "content": "机器结构校验失败：" + error +
+         "。仅修复上次响应的 JSON 字段结构，使其严格符合原任务 schema；"
+         "保留原响应的科学内容、措辞与范围，不新增事实、主张或来源。" + schema_hint +
+         "返回完整 JSON 对象，不返回补丁、说明或代码围栏。"}]
 
 
 def ledger_snapshot(path: str | Path, expected_limit: float) -> dict[str, Any]:
@@ -157,14 +192,26 @@ def run_live_parts(*, args, context, chapter_roles, token_counter, tokenizer_inf
                 # The core validates the manuscript response, not transport
                 # audit events/raw wire data. Full provider evidence stays in
                 # cache/RAW_RESPONSE.json and its transport directory.
-                (output / "cache" / stage / "MODEL_CONTENT.txt").write_text(raw["content"], encoding="utf-8")
+                model_content = output / "cache" / stage / "MODEL_CONTENT.txt"
+                if not model_content.exists():
+                    model_content.write_text(raw["content"], encoding="utf-8")
                 return {"content": raw["content"], "finish_reason": raw["finish_reason"]}
+
+            def parse(stage, response, cache_stage):
+                response, receipt = _normalize_paragraph_response(stage, response)
+                if receipt:
+                    content_path = output / "cache" / cache_stage / "MODEL_CONTENT.txt"
+                    receipt.update(source_cache_stage=cache_stage, source_model_content_path=str(content_path),
+                        source_model_content_sha256=hashlib.sha256(content_path.read_bytes()).hexdigest())
+                    write_json(output / "cache" / cache_stage / "NORMALIZATION_RECEIPT.json", receipt)
+                parsed = parse_stage_response(stage, response,
+                    allowed_source_handles=normalized["allowed_source_handles"])
+                return response, parsed
 
             def provider(stage, actual_messages):
                 response = fetch(stage, actual_messages)
                 try:
-                    parsed = parse_stage_response(stage, response,
-                        allowed_source_handles=normalized["allowed_source_handles"])
+                    response, parsed = parse(stage, response, stage)
                 except SerialPartsError as exc:
                     error = str(exc)
                     write_json(output / "cache" / stage / "VALIDATION_ERROR.json", {"error": error})
@@ -175,18 +222,23 @@ def run_live_parts(*, args, context, chapter_roles, token_counter, tokenizer_inf
                         "duplicate_response_key:", "keywords_must_be_nonempty_array"))
                     if not getattr(args, "repair_invalid", False) or not structural:
                         raise
-                    repair_messages = [*actual_messages,
-                        {"role": "assistant", "content": response["content"]},
-                        {"role": "user", "content": "机器结构校验失败：" + error +
-                         "。仅修复上次响应的 JSON 字段结构，使其严格符合原任务 schema；"
-                         "保留原响应的科学内容、措辞与范围，不新增事实、主张或来源。"
-                         "数组字段必须使用非空字符串数组，不能用单个字符串。"
-                         "返回完整 JSON 对象，不返回补丁、说明或代码围栏。"}]
+                    repair_messages = _format_repair_messages(stage, actual_messages, response["content"], error)
                     repair_stage = stage + "_format_repair"
+                    repair_dir = output / "cache" / repair_stage
+                    if (repair_dir / "RAW_RESPONSE.json").is_file() and (repair_dir / "MESSAGES.json").is_file():
+                        saved_raw = read_json(repair_dir / "RAW_RESPONSE.json")
+                        if isinstance(saved_raw, dict) and saved_raw.get("complete") is True and saved_raw.get("finish_reason") == "stop":
+                            if not (repair_dir / "REQUEST.json").is_file():
+                                raise SerialPartsError("format_repair_cached_request_missing:" + stage)
+                            saved_messages = read_json(repair_dir / "MESSAGES.json")
+                            legacy_messages = _format_repair_messages(stage, actual_messages, response["content"], error, legacy=True)
+                            if saved_messages not in (repair_messages, legacy_messages):
+                                raise SerialPartsError("format_repair_cached_stage_messages_mismatch:" + stage)
+                            # _cached_call still validates the original request/profile hash.
+                            repair_messages = saved_messages
                     response = fetch(repair_stage, repair_messages)
                     try:
-                        parsed = parse_stage_response(stage, response,
-                            allowed_source_handles=normalized["allowed_source_handles"])
+                        response, parsed = parse(stage, response, repair_stage)
                     except SerialPartsError as repair_error:
                         write_json(output / "cache" / repair_stage / "VALIDATION_ERROR.json",
                             {"error": str(repair_error)})

@@ -1,4 +1,5 @@
 import json
+import hashlib
 from argparse import Namespace
 from pathlib import Path
 
@@ -7,6 +8,8 @@ import pytest
 from optomind_research.runtime.upgrade3.module4.runtime import GlobalBudgetLedger, QwenTransportError
 from optomind_research.runtime.upgrade3.serial_parts_live import run_live_parts
 from scripts.upgrade3.writer_candidates import make_live_factory
+from optomind_research.runtime.upgrade3 import serial_parts_live as live
+from optomind_research.runtime.upgrade3.serial_manuscript_parts import SerialPartsError, parse_stage_response
 
 
 def inputs(tmp_path):
@@ -181,3 +184,117 @@ def test_downstream_prompt_change_rejects_old_binding_before_any_call(tmp_path, 
         run_live_parts(**opts, client_factory=forbidden)
     assert (args.output / "LIVE_BINDING.json").read_bytes() == binding
     assert not (args.output / "cache").exists()
+
+
+@pytest.mark.parametrize('stage', ['introduction', 'conclusion', 'abstract'])
+def test_paragraph_array_normalization_is_lossless_and_keeps_other_fields(stage):
+    data = responses()[stage]
+    paragraphs = ['  First paragraph [P0001].\r\nKeep this line. ', '\tSecond paragraph.  ']
+    data[stage] = paragraphs
+    original = {'content': json.dumps(data, ensure_ascii=False), 'finish_reason': 'stop'}
+    response, receipt = live._normalize_paragraph_response(stage, original)
+    parsed = parse_stage_response(stage, response, allowed_source_handles=['P0001'])
+    assert parsed[stage] == '\n\n'.join(paragraphs)
+    assert json.loads(original['content'])[stage] == paragraphs
+    assert receipt['source_content_sha256'] == hashlib.sha256(original['content'].encode('utf-8')).hexdigest()
+    assert receipt['field'] == stage and receipt['original_type'] == 'array' and receipt['normalized_type'] == 'string'
+    if stage == 'abstract':
+        assert parsed['title'] == data['title'] and parsed['keywords'] == data['keywords']
+
+
+@pytest.mark.parametrize('paragraphs', [[], ['First.', ''], ['First.', '  '], ['First.', {}], ['First.', 1]])
+def test_mixed_or_empty_paragraph_arrays_keep_core_rejection(paragraphs):
+    original = {'content': json.dumps({'introduction': paragraphs}), 'finish_reason': 'stop'}
+    response, receipt = live._normalize_paragraph_response('introduction', original)
+    assert response == original and receipt is None
+    with pytest.raises(SerialPartsError, match='nonempty_string_required:introduction'):
+        parse_stage_response('introduction', response)
+
+
+@pytest.mark.parametrize('content,error', [
+    ('{"introduction":["First."],"extra":"Unexpected"}', 'response_wrong_keys'),
+    ('{"introduction":["First [P9999]."]}', 'unsupported_source_handles'),
+    ('{"introduction":["First."],"introduction":["Second."]}', 'duplicate_response_key'),
+])
+def test_normalization_preserves_core_key_handle_and_duplicate_validation(content, error):
+    with pytest.raises(SerialPartsError, match=error):
+        response, _ = live._normalize_paragraph_response('introduction', {'content': content, 'finish_reason': 'stop'})
+        parse_stage_response('introduction', response, allowed_source_handles=['P0001'])
+
+
+def _seed_legacy_array_repair(tmp_path, monkeypatch):
+    args = inputs(tmp_path)
+    args.repair_invalid = True
+    calls = []
+    paragraphs = ['  First paragraph [P0001]. ', 'Second paragraph.\r\nKeep this line.']
+    def factory(role, attempt, profile):
+        def client(messages, **kwargs):
+            calls.append(role)
+            content = '{"introduction":"First." "Second."}' if role == 'introduction' else json.dumps(
+                {'introduction': paragraphs} if role == 'introduction_format_repair' else responses()[role], ensure_ascii=False)
+            return {'content': content, 'complete': True, 'finish_reason': 'stop', 'returned_model': 'qwen3.5-plus'}
+        return client
+    opts = dict(args=args, context={}, chapter_roles=[], token_counter=lambda raw, messages: 100,
+                tokenizer_info={'mode': 'test'}, client_factory=factory)
+    original_builder = live._format_repair_messages
+    with monkeypatch.context() as patch:
+        patch.setattr(live, '_normalize_paragraph_response', lambda stage, response: (response, None))
+        patch.setattr(live, '_format_repair_messages', lambda stage, messages, content, error, **kw:
+                      original_builder(stage, messages, content, error, legacy=True))
+        failed = run_live_parts(**opts)
+    assert failed['status'] == 'failed' and failed['failed_stage'] == 'introduction'
+    assert 'nonempty_string_required:introduction' in failed['error']
+    assert calls == ['conception', 'conclusion', 'introduction', 'introduction_format_repair']
+    return opts, failed, calls, paragraphs
+
+
+def test_legacy_repair_cache_is_normalized_for_free_and_only_missing_abstract_calls(tmp_path, monkeypatch):
+    opts, failed, calls, paragraphs = _seed_legacy_array_repair(tmp_path, monkeypatch)
+    output = opts['args'].output
+    protected = {path: path.read_bytes() for path in (output / 'cache').rglob('*')
+                 if path.name in {'RAW_RESPONSE.json', 'MODEL_CONTENT.txt', 'MESSAGES.json', 'REQUEST.json'}}
+    ledgers = {path: path.read_bytes() for path in (opts['args'].ledger, opts['args'].account_ledger)}
+    resumed = run_live_parts(**opts)
+    assert resumed['status'] == 'generated' and resumed['model_calls'] == 1
+    assert calls[-1] == 'abstract' and len(calls) == 5
+    assert resumed['budget_binding'] == failed['budget_binding']
+    generated = json.loads((Path(resumed['attempt_dir']) / 'GENERATED_PARTS.json').read_text(encoding='utf-8'))
+    assert generated['introduction'] == '\n\n'.join(paragraphs)
+    receipt = json.loads((output / 'cache/introduction_format_repair/NORMALIZATION_RECEIPT.json').read_text(encoding='utf-8'))
+    assert receipt['source_cache_stage'] == 'introduction_format_repair'
+    assert receipt['source_model_content_sha256'] == hashlib.sha256(protected[output / 'cache/introduction_format_repair/MODEL_CONTENT.txt']).hexdigest()
+    assert all(path.read_bytes() == before for path, before in protected.items())
+    assert all(path.read_bytes() == before for path, before in ledgers.items())
+    replayed = run_live_parts(**opts)
+    assert replayed['status'] == 'generated' and replayed['model_calls'] == 0 and len(calls) == 5
+
+
+@pytest.mark.parametrize('tamper', ['messages', 'request', 'missing_request'])
+def test_legacy_repair_keeps_stage_messages_and_request_binding(tmp_path, monkeypatch, tamper):
+    opts, _, calls, _ = _seed_legacy_array_repair(tmp_path, monkeypatch)
+    repair = opts['args'].output / 'cache/introduction_format_repair'
+    path = repair / ('MESSAGES.json' if tamper == 'messages' else 'REQUEST.json')
+    if tamper == 'missing_request':
+        path.unlink()
+    else:
+        data = json.loads(path.read_text(encoding='utf-8'))
+        if tamper == 'messages':
+            data[-1]['content'] += ' unrelated task'
+        else:
+            data['messages_sha256'] = 'wrong'
+        path.write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
+    result = run_live_parts(**opts)
+    assert result['status'] == 'failed' and result['failed_stage'] == 'introduction'
+    assert result['model_calls'] == 0 and len(calls) == 4
+    assert 'mismatch' in result['error'] or 'identity_changed' in result['error'] or 'request_missing' in result['error']
+
+
+@pytest.mark.parametrize('stage,hint', [
+    ('conception', 'focus、boundary、finalize_from为非空字符串数组'),
+    ('introduction', 'introduction必须是单个非空字符串'),
+    ('conclusion', 'conclusion必须是单个非空字符串'),
+    ('abstract', 'title和abstract必须是单个非空字符串；keywords必须是非空字符串数组'),
+])
+def test_format_repair_schema_hint_matches_stage(stage, hint):
+    messages = live._format_repair_messages(stage, [], 'bad', 'response_not_json:' + stage)
+    assert hint in messages[-1]['content']

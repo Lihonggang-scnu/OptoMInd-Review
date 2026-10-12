@@ -135,6 +135,50 @@ def test_real_checker_replay_changes_abstract_and_free_same_directory_resume(tmp
     assert first["external_requests"] == second["external_requests"] == 0
 
 
+def test_interrupted_repair_publishes_checked_selection_with_pending_diagnostics(tmp_path):
+    original, config, parts = source(tmp_path)
+    original_bytes = original.read_bytes()
+    calls = []
+    def factory(role, stage_dir, profile):
+        def client(messages, **kwargs):
+            payload = json.loads(messages[1]["content"])
+            calls.append(payload["round"])
+            if payload["round"] == 2:
+                return {"content": '{"snapshot_id":', "complete": False, "finish_reason": "length",
+                        "returned_model": profile["model"], "execution_mode": "injected"}
+            abstract = next(b for b in payload["blocks"] if "原始摘要。" in b["text"])
+            body = next(b for b in payload["blocks"] if "支持条件 [P0001]。" in b["text"])
+            rows = [{"target_block_id": abstract["block_id"], "operation": "replace",
+                     "original_text": "原始摘要。", "replacement_text": "保留首轮的精确摘要。", "reason": "Local wording correction"},
+                    {"target_block_id": body["block_id"], "operation": "replace",
+                     "original_text": "Absent text", "replacement_text": "Repaired text", "reason": "Invalid anchor"}]
+            return {"content": json.dumps({"snapshot_id": payload["snapshot_id"], "changes": rows,
+                                           "unresolved_questions": []}),
+                    "complete": True, "finish_reason": "stop", "returned_model": profile["model"],
+                    "execution_mode": "injected"}
+        return client
+    factory.execution_mode = "injected"
+    kwargs = dict(config=config, front_back_report=parts, out_dir=tmp_path / "out",
+                  client_factory=factory, run=True, token_counter=lambda *args, **kw: 100)
+    first = delivery.run_manuscript_delivery(**kwargs)
+    second = delivery.run_manuscript_delivery(**kwargs)
+    assert first["downstream_status"] == second["downstream_status"] == "complete"
+    assert calls == [1, 2] and second["stages"]["03_manuscript_checker"]["provider_calls"] == 0
+    checker = first["stages"]["03_manuscript_checker"]
+    assert checker["status"] == checker["selected_manuscript"]["status"] == "pending"
+    assert len(checker["applied"]) == len(checker["pending"]) == 1
+    r4, r5 = first["stages"]["04_figures_citations"], first["stages"]["05_publication"]
+    assert "保留首轮的精确摘要。" in Path(r4["reader_draft"]).read_text(encoding="utf-8")
+    assert "原始摘要。" not in Path(r5["published_markdown"]).read_text(encoding="utf-8")
+    assert r5["publication_metadata"]["abstract"] == "保留首轮的精确摘要。"
+    sidecar = json.loads(Path(r5["manuscript_selection_path"]).read_text(encoding="utf-8"))
+    assert sidecar["checker_status"] == "pending" and sidecar["pending"][0]["edit_id"] == "E0002"
+    assert sidecar["diagnostics"] == [{"code": "incomplete_provider_response", "round": 2}]
+    assert sidecar["selected_manuscript"] == checker["selected_manuscript"]
+    assert not (tmp_path / "out/03_manuscript_checker/CHECKER_RESULT_SEAL.json").exists()
+    assert original.read_bytes() == original_bytes
+
+
 def test_normal_coordinator_default_checker_preview_then_explicit_fixture(tmp_path, monkeypatch):
     import runpy
     from optomind_research.runtime.upgrade3 import review_delivery as coordinator

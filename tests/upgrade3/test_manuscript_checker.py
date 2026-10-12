@@ -57,6 +57,33 @@ def test_one_bad_proposal_does_not_discard_good_sibling():
     assert len(result['pending']) == 1
 
 
+@pytest.mark.parametrize('field,value,code', [
+    ('operation', [], 'operation_not_allowed'), ('operation', {}, 'operation_not_allowed'),
+    ('kind', [], 'unknown_kind'), ('kind', {}, 'unknown_kind'),
+])
+def test_malformed_enum_field_preserves_sibling_and_uses_pending_repair(tmp_path, field, value, code):
+    source = tmp_path / 'source.md'
+    source.write_bytes(b'Alpha.\n\nBeta.\n')
+    seen = []
+    def fixture(payload, number):
+        seen.append(number)
+        if number == 1:
+            invalid = change('Beta.', 'Better.', 'B0002')
+            invalid[field] = value
+            rows = [change('Alpha.', 'Clear.'), invalid]
+        else:
+            assert payload['feedback']['pending_edit_ids'] == ['E0002']
+            assert payload['feedback']['failures'][0]['code'] == code
+            assert payload['blocks'][0]['text'] == 'Clear.\n'
+            rows = [change('Beta.', 'Better.', 'B0002', edit_id='E0002')]
+        return {'snapshot_id': payload['snapshot_id'], 'changes': rows, 'unresolved_questions': []}
+    report = run_manuscript_checker(draft_path=source, out_dir=tmp_path / 'check', fixture_responses=fixture)
+    assert report['status'] == 'edited' and seen == [1, 2]
+    assert Path(report['selected_manuscript']['path']).read_bytes() == b'Clear.\n\nBetter.\n'
+    receipt = json.loads((tmp_path / 'check/round_1/EXECUTION_RECEIPT.json').read_text(encoding='utf-8'))
+    assert len(receipt['applied']) == len(receipt['pending']) == 1
+
+
 def test_stale_snapshot_and_wrong_round_ids():
     with pytest.raises(ManuscriptCheckerError, match='stale_snapshot'):
         execute_checker_response(draft_text='Other.', response=response('Alpha.'))
@@ -146,8 +173,8 @@ def test_two_round_s1_and_block_migration_and_restart(tmp_path):
 
 def test_raw_saved_recovery_without_repeated_prefix(tmp_path):
     source = tmp_path / 'source.md'
-    source.write_text('Alpha.\n\nBeta.\n')
-    fixture = response(source.read_text(), change('Alpha.', 'New Alpha.'))
+    source.write_bytes(b'Alpha.\n\nBeta.\n')
+    fixture = response(source.read_bytes().decode('utf-8'), change('Alpha.', 'New Alpha.'))
     out = tmp_path / 'check'
     report = run_manuscript_checker(draft_path=source, out_dir=out, fixture_responses=fixture)
     (out / 'CHECKER_RESULT_SEAL.json').unlink()  # crash before the terminal seal
@@ -192,8 +219,8 @@ def test_partial_success_preserved_after_repair_limit(tmp_path):
 
 def test_cached_artifact_tampering_blocks(tmp_path):
     source = tmp_path / 'source.md'
-    source.write_text('Alpha.\n')
-    fixture = response(source.read_text(), change('Alpha.', 'Clear.'))
+    source.write_bytes(b'Alpha.\n')
+    fixture = response(source.read_bytes().decode('utf-8'), change('Alpha.', 'Clear.'))
     report = run_manuscript_checker(draft_path=source, out_dir=tmp_path / 'check', fixture_responses=fixture)
     Path(report['selected_manuscript']['path']).write_text('Tampered.')
     with pytest.raises(ManuscriptCheckerError, match='integrity'):
@@ -223,6 +250,27 @@ def test_unit_spacing_and_math_delimiter_format_repairs():
     result = execute(text, change('10N', '10 N'), change('$F=ma$', r'\(F=ma\)', 'B0002'))
     assert not result['pending']
     assert result['draft_text'] == 'Force: 10 N.\n\nUse \\(F=ma\\).\n'
+
+
+def test_display_dollar_pair_guard_preserves_valid_formula_and_delimiter_edits():
+    text = '$$\nF=ma\n$$\n\nIndependent prose.\n'
+    result = execute(text, change('$$\nF=ma', '\nF=ma'))
+    assert not result['applied'] and result['draft_text'] == text
+    assert 'unbalanced_display_dollars' in result['pending'][0]['code']
+    result = execute(text, change('F=ma', 'F=mv', kind='scientific', evidence_ids=['M']),
+                     material_records=[{'material_id': 'M', 'text': 'The supplied formula is F=mv.'}])
+    assert not result['pending'] and result['draft_text'] == text.replace('F=ma', 'F=mv')
+    result = execute(text, change('$$\nF=ma\n$$', '\\[\nF=ma\n\\]'))
+    assert not result['pending'] and result['draft_text'] == text.replace('$$\nF=ma\n$$', '\\[\nF=ma\n\\]')
+
+
+def test_display_dollar_guard_ignores_inline_and_fenced_code():
+    text = 'Inline `token` example.\n\n~~~text\nliteral\n~~~\n\n$$\nF=ma\n$$\n'
+    result = execute(text,
+        change('token', '$$', kind='scientific', evidence_ids=[evidence_id(text)]),
+        change('literal', '$$', 'B0002', kind='scientific', evidence_ids=[evidence_id(text, 'B0002')]))
+    assert not result['pending'] and len(result['applied']) == 2
+    assert result['draft_text'] == text.replace('token', '$$').replace('literal', '$$')
 
 
 def test_orphan_citation_bracket_cannot_be_removed_even_scientific():
@@ -272,6 +320,76 @@ class InjectedFactory:
         return call
 
 
+class InterruptedRepairFactory:
+    execution_mode = 'injected'
+
+    def __init__(self, failure):
+        self.calls = 0
+        self.failure = failure
+
+    def __call__(self, role, path, profile):
+        def call(messages, **kwargs):
+            self.calls += 1
+            payload = json.loads(messages[1]['content'])
+            if payload['round'] == 1:
+                rows = [change('Alpha.', 'Clear.'), change('Missing Beta.', 'Better.', 'B0002')]
+            elif self.calls == 2:
+                if self.failure == 'transport':
+                    raise RuntimeError('controlled offline repair transport failure')
+                return {'content': '{"snapshot_id":', 'complete': False, 'finish_reason': 'length',
+                        'returned_model': profile['model'], 'execution_mode': 'injected'}
+            else:
+                rows = [change('Beta.', 'Better.', 'B0002', edit_id='E0002')]
+            raw = {'snapshot_id': payload['snapshot_id'], 'changes': rows, 'unresolved_questions': []}
+            return {'content': json.dumps(raw), 'complete': True, 'finish_reason': 'stop',
+                    'returned_model': profile['model'], 'execution_mode': 'injected'}
+        return call
+
+
+@pytest.mark.parametrize('failure', ['incomplete', 'transport'])
+def test_interrupted_second_round_retains_selection_and_resumes_without_rebuy(tmp_path, failure):
+    source = tmp_path / 'source.md'
+    source.write_bytes(b'Alpha.\n\nBeta.\n')
+    factory = InterruptedRepairFactory(failure)
+    out = tmp_path / 'check'
+    kwargs = dict(draft_path=source, out_dir=out, client_factory=factory,
+                  run=True, token_counter=lambda raw, messages: 100)
+    first = run_manuscript_checker(**kwargs)
+    assert first['status'] == first['selected_manuscript']['status'] == 'pending'
+    assert first['selected_manuscript']['path'] == str(out / 'round_1/CANDIDATE_HANDLES.md')
+    assert first['selected_manuscript']['sha256'] == sha256_text('Clear.\n\nBeta.\n')
+    assert first['selected_manuscript']['provenance']['applied_edit_ids'] == ['E0001']
+    assert Path(first['selected_manuscript']['path']).read_bytes() == b'Clear.\n\nBeta.\n'
+    assert [p['edit_id'] for p in first['pending']] == ['E0002']
+    expected_code = 'incomplete_provider_response' if failure == 'incomplete' else 'failed_saved_attempt'
+    assert first['diagnostics'] == [{'code': expected_code, 'round': 2}]
+    assert not (out / 'CHECKER_RESULT_SEAL.json').exists()
+    resumed = run_manuscript_checker(**kwargs)
+    assert resumed['selected_manuscript'] == first['selected_manuscript']
+    assert resumed['status'] == 'pending' and resumed['provider_calls'] == 0 and factory.calls == 2
+    assert not (out / 'CHECKER_RESULT_SEAL.json').exists()
+    retried = run_manuscript_checker(**kwargs, retry_failed=True)
+    if failure == 'incomplete':
+        assert retried['status'] == 'pending' and retried['provider_calls'] == 0 and factory.calls == 2
+        assert not (out / 'CHECKER_RESULT_SEAL.json').exists()
+    else:
+        assert retried['status'] == 'edited' and retried['logical_rounds'] == 2 and factory.calls == 3
+        assert Path(retried['selected_manuscript']['path']).read_bytes() == b'Clear.\n\nBetter.\n'
+        assert (out / 'round_2/retries/attempt_002/RAW_RESPONSE.json').exists()
+
+
+def test_incomplete_first_round_still_has_no_selection(tmp_path):
+    source = tmp_path / 'source.md'
+    source.write_bytes(b'Alpha.\n')
+    def incomplete_factory(role, path, profile):
+        return lambda messages, **kwargs: {'content': '{', 'complete': False, 'finish_reason': 'length',
+                                          'execution_mode': 'injected'}
+    result = run_manuscript_checker(draft_path=source, out_dir=tmp_path / 'check',
+        client_factory=incomplete_factory, run=True, token_counter=lambda raw, messages: 100)
+    assert result['status'] == 'pending' and result['selected_manuscript'] is None
+    assert not (tmp_path / 'check/CHECKER_RESULT_SEAL.json').exists()
+
+
 def test_real_cached_call_transport_failure_retry_and_raw_resume(tmp_path):
     source = tmp_path / 'source.md'
     source.write_bytes(b'Alpha.\r\n')
@@ -306,7 +424,7 @@ def test_uncertain_saved_request_never_dispatches_automatically(tmp_path):
     step = tmp_path / 'check/round_1'
     profile = json.loads((step / 'PROFILE.json').read_text())
     import optomind_research.runtime.upgrade3.manuscript_checker as module
-    messages = json.loads((step / 'MESSAGES.json').read_text())
+    messages = json.loads((step / 'MESSAGES.json').read_text(encoding='utf-8'))
     (step / 'REQUEST.json').write_text(json.dumps({'profile': profile, 'messages_sha256': module._hash(messages)}))
     resumed = run_manuscript_checker(**kwargs, run=True, retry_failed=True)
     assert resumed['status'] == 'pending' and factory.calls == 0
