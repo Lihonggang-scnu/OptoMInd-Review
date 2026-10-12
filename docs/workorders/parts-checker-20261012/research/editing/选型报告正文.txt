@@ -1,0 +1,260 @@
+OptoMind 局部编辑执行协议源码核对与选型建议
+2026-10-12｜研究与免费离线演示｜生产代码未改动
+结论
+优先复用本项目 post_body_revision_contracts.py 的严格定位与绑定应用函数，继续使用“旧片段／新片段／理由”的 JSON 外层。外部项目最值得借鉴的是 Aider 的失败反馈内容、OpenHands 的回读接口与原子写入思路。没有必要把任一完整 Agent 平台迁入，也不值得为了使用 diff 再造一套定位器。
+关键依据：本项目已有的块内唯一定位、全文／块／原文哈希绑定和批次重叠拒绝，比四个候选的默认宽松匹配更符合科学 Markdown 的精确执行要求。此次应新增的是薄协调层：可信快照与块目录、失败项反馈、执行收据、最终选用稿交接。新校验员负责通读装配后的全文并提出局部修改；执行层不负责重新写全文或判断全部科学问题。
+本报告中“现有行为”来自锁定源码及明确标注的离线验证；“建议”尚未进入生产。四个外部项目取 2026-10-12 读取时的默认分支提交，不泛指所有历史版本。
+1 先对齐项目现状
+基线：2a28854cf86a98f5afb4a6e5fbe1a925694fd138。
+1. article_text_editor 已在同一原稿快照上定位所有提案，最后逆序替换。它用全文 count/index；target_block_id 只进入日志，不限制搜索范围。重叠时保留先接受项、跳过后来项；旧／新片段日志截为120字符，完整提案另存。[1]
+2. 它并不普遍幂等。原函数实测“词。”→“新词。”重放一次得到“新新词。”。stage 层另有源稿／请求身份、缓存、锁和封存结果校验，可避免同一已完成请求再买一次模型；这与替换函数自身幂等是两回事。缺失目标不能仅凭 replacement 出现在别处就认定已执行。
+3. 现有 post_body_revision_contracts 已有段落块、块内唯一匹配（包括重叠出现计数）、原始区间和全文／块／原文哈希。整批预检通过才应用，任何重叠导致整批拒绝；它没有保存“已执行收据”。旧补丁用于新稿会拒绝版本绑定，而不会自动报成功。[2]
+4. B0001 等顺序 ID 只在当前快照有效。插段、删段会重排。scoped_body_revision 的 block_000001 是另一种分块，不能直接互换。scoped 已有 issue 多块原子组和保留独立成功组；reader_revision 又是全文唯一 anchor 路线。本次不合并这些历史路线。
+5. 已有 RAW／SSE 重放、显式失败请求重试、候选稿和 pending 记录。没有通用“定位失败 → 返回实际目标 → 模型重提失败补丁”的自动闭环。article 已封存的 pending 结果也不会因为传入 retry_failed 就自动修好目标。
+6. 当前链路为已选 BODY → 03 首尾装配 → 04 最终引用编号 → 05 出版。旧全文编辑器在首尾之前；新校验员未接入。真正接线要覆盖通用 review_delivery 和本次归档实际运行 driver，不能只改一处表面入口。[3]
+
+2 成熟实现简表
+完整 SHA、实际提示词／schema、解析／定位／应用／反馈／测试行链接见六份附录。这里列决策差异。
+项目／锁定提交
+编辑合同
+定位与应用
+失败反馈
+可复用范围
+许可证与依赖成本
+Aider 5dc9490bb35f
+diff 为 SEARCH/REPLACE；另有不同 udiff 路线
+diff 首处匹配，启用缩进／首空行／省略号容错；失败可尝试其他聊天文件；顺序写入。udiff 某底层路径 replace-all
+含失败块、相近实际原文、已成功无需重发提示；反思循环默认可超过本项目两轮预算
+失败反馈组织；find_similar_lines 只作候选展示
+Apache-2.0；小函数标准库即可，整平台引入 LiteLLM、Git、终端等大量依赖
+Cline 8eba11b2703f
+当前 editor 为 old_text/new_text；另有 apply_patch
+editor 要求一个非重叠命中、处理换行；patch 先 Unicode 规范化再相似度≥0.66首候选；数学减号等归一也可能 fuzz=0；任一 warning 在上层变为提交前失败
+明确未命中／多命中、回读及调整建议；超时不保证底层操作取消
+editor 小组件可参考，但本地现有 Python 合同更完整
+Apache-2.0；小组件需 TS／Node、换行工具；整 SDK 远超所需
+OpenHands SDK e3a26821f8f7
+默认 str_replace；不同 preset 另用 apply_patch 或 expected_replacements
+默认字面 regex 唯一非重叠命中，失败再 strip(old)；整文件原子写入，有历史 undo；Linux 测试 CRLF→LF
+未命中／多命中及实际内容回读；undo 不等于幂等
+回读／反馈；临时文件提交思路。502行 patch core 易抽取但匹配不合要求
+MIT；patch core 为标准库＋Pydantic，默认 editor 仍耦合 SDK 类型和文本检测；不迁整 SDK
+Codex a9b0815167c2
+apply_patch 上下文行块
+exact→尾空白→两端空白→Unicode 折叠，按档取首处；不验证唯一。当前 HEAD 保留原换行和 context 字节，但补末行终止符
+文件／期待上下文错误；正式 tool 先全量 verify，独立 CLI 入口可先写后失败
+协议、context 保真、变更记录、fixtures；不直接采用匹配器
+Apache-2.0；当前 Rust crate 依赖 codex-exec-server，直接接入不再是零依赖小库
+OptoMind 现有 contracts
+issue/patch，可由 changes JSON 薄适配
+指定块内严格唯一；区间、哈希、快照绑定；整批预检与逆序应用
+当前抛合同错误；需补面向模型的反馈载荷
+优先直接复用 normalize_case / resolve_target / validate_patch / apply_patches
+仓内既有模块；相关导入可离线加载，主要是标准库，不迁历史科学审稿平台
+
+
+不选外部执行器并非因其不成熟，而是默认目标不同：编程助手常用容错提高补丁成功率；本任务把“改中错误位置或误认数学符号”视为比拒绝一次更严重的失败。
+特别纠正三点：Aider 正文 edit-distance fuzzy 分支在本版本不可达，不能笼统说它在做模糊正文替换；Cline parser 的 warning 会被真正 executor 升级为错误，不能据 parser 声称部分提交；Codex 当前 HEAD 已有换行保真改进，不能沿用旧版“全部转 LF”的结论。[4–7]
+3 推荐协议及定位选择
+3 1 保留 JSON 直接适配现有严格执行函数
+JSON、SEARCH/REPLACE、上下文补丁是表达格式；唯一性、版本绑定、原子性来自执行器，换格式不会自动获得这些保证。长中文 Markdown 常一段一长行。为某个短语生成整行 diff 会扩大复制范围，增加误改面积，且与现有 changes 接口不合。
+保留 operation、original_text、replacement_text、target_block_id、reason 和 unresolved_questions；只新增根级 snapshot_id。首轮提案由程序按响应顺序分配 edit_id，反馈后模型必须回传程序发出的 ID。不要让模型自行制造 offset、block hash 或稳定 ID。程序再把提案适配成现有合同的 issue/patch；绑定字段均从可信原稿推导。
+适配有两个明确接缝：旧 parse_edit_proposals 的返回值会丢弃根级 snapshot_id，因此薄 wrapper 要先在完整 JSON 对象上校验并保存快照，再调用旧 parser 检查核心字段。首轮程序分配 edit_id；修复轮校验它属于当前 pending 集合。不能 parse 完才从缺失字段猜当前版本。
+现有 validate_patch 还要求 issue.kind。初版仅将允许范围内的表述／格式修改映射为 editorial、evidence_ids=[]，edit_id 映射为 issue_id；不能因为外层没有 kind 就把任何数字、因果或科学纠错默认降格为 editorial。疑似事实含义／来源身份改变应先 pending。确需科学改动时，现有 scientific/missing 合同要求真实材料，属于另行明确的能力范围，本次不为接上校验员搬入整套材料审稿链。规则只能筛出风险，不能凭 reason 自动证明是纯表述。
+初版只开放 replace/remove。空 original_text、新建文件、任意 path、全文替换、隐式 insert 均不在校验员接口内。remove 必须 replacement_text 为空；no-op 返回无须修改。没有必要复制外部工具的文件系统权限表面。
+3 2 先通读 失败时回读真实原文
+首轮输入：完整句柄稿、程序生成的快照 ID、块目录与块原文、章节／摘要等职责标签、已有引用身份目录、必要图表资料。块标签置于输入封装，不写进论文。模型从实际块原文复制旧片段；不要从细纲或记忆重构。
+同块重复时，扩展旧片段到包含足够左右上下文的唯一原文；不同块重复时用真实 target_block_id 限定。行号只供导航，程序生成且绑定快照。无需同时加行号、偏移、三层 hash 到模型输出。
+第一次失配时，反馈当前实际块全文或必要的完整候选区间，标注首尾上下文、候选块 ID 和命中数。相似搜索可挑回读候选，但必须再次由模型返回逐字旧锚点，最后仍由严格匹配器判定。这样多一次有限回读／复制，能避免直接用相似度改错科学内容；真实 token 成本需下一轮模型小测，当前无虚构成本结论。
+3 3 重复 跨段 重叠和部分成功
+同一句不同块：块内匹配，指定块才可写。同一块多处或重叠出现：拒绝歧义，不取第一处。
+跨段：现有 contracts 的目标限制在单块，不能把文章级原文串直接塞进去并声称已支持。可拆成互不依赖的单块编辑；需要合并两段、删除段间分隔符或多处联动才能成立的修改，初版留待办。若以后确需支持，再设计明确的多块原子组，复用现有 scoped 的组思想，避免悄悄退化为全局搜索。
+批内：所有提案绑定同一 S0 快照，先定位再逆序应用。禁止后一提案搜索前一提案新生成的文本。
+重叠：建议将所有冲突成员一起挂起，反馈其 edit_id 和相交区间，不采用“列表先到先得”。其他独立且通过检查的提案形成 accepted 子集，再调用现有 apply_patches 原子应用。分组筛选是待新增的薄协调逻辑；现有 apply_patches 本身整批拒绝。
+部分成功：accepted 子集生成 S1 并保存收据，重新索引 S1。失败项反馈必须引用 S1 的实际块和新快照。旧 S0 的块号、offset、hash 全部失效，不能只把 snapshot_id 换个值继续用旧绑定。程序保存 pending 项的 S0 块及原始区间；只有未被 accepted 修改触及、可按已提交区间位移确定性迁移的目标，才生成 S1 目标候选及块对应关系。目标已删除、拆分或映射不唯一时继续 pending，返回实际候选供回读；禁止把旧 B0002 直接当作新 B0002。
+再执行：同 request/edit/base 已提交且输出哈希核对成功，返回保存收据；没有收据就不能因新词存在而猜测 already_applied。旧绑定拒绝是版本保护，不等于有状态幂等。第二轮只能处理 pending ID，成功 ID 重发应拒绝并附原收据。
+独立子集不应包括明显互相依赖的改动。首版要求每项提案能单独成立；明显成组或依赖关系不明的改动整体挂起。机械不重叠不能证明语义独立，reason 也不能让程序可靠推断依赖。缩写在摘要与 BODY 首次分别定义可以保留；执行器不做全局机械去重。通读模型应在局部 reason 中说明上下文理由，不能把字符串重复直接当作冗余。
+4 字符保真和轻量保护
+输入 输出保真
+用 read_bytes 解码 UTF-8，按原始字节计算 snapshot。现有 contracts 的 start/end 是 Python 字符位置，不是 UTF-8 字节偏移；只在同一个未规范化字符串上应用，再编码，未触及文字即可保持原字节。文件写入使用候选临时文件＋原子替换，不走会统一换行的 read_text/write_text 路径。
+CRLF→LF 的只读视图可以维护显式边界映射再映回原区间，但这是需要测试的扩展，不建议首版为命中率加上。严格原文及 JSON 转义换行已能工作。空格涉及 Markdown 缩进、硬换行、表格和公式；全半角、数学减号、NFKC 或标点折叠不能自动当作等价。NFC 也要处理组合字符边界，字符可映回不代表科学含义可替换。数字、否定、单位、标点差异均应显式回读后修正。
+程序检查什么
+1. 快照／块／原文绑定、唯一命中、重叠、操作白名单、no-op、编辑范围上限。这些是执行保证。
+2. 引用使用现有完整 namespaced token 与 source_identity_map，在整稿或完整受影响结构单元上比较前后身份、顺序和次数；不要只比 bare P001 集合，也不要只解析 original_text/replacement_text。编辑可能落在引用 token 内部，两段短片段都识别不出引用，完整稿的前后解析才看得见破坏。引用身份目录不由校验员改写。初版出现新增、删除或换引文身份时先 pending，除非后续另订有材料支持的例外规则。最终编号仍由既有映射完成。
+3. 提取数字的符号、顺序、次数、单位邻接，变化时明确提示或挂起；不能只用“没有新增数字集合”。现有 editorial guard 实测允许 +10→-10、10/20交换、删数字和删引用，必须承认其边界。
+4. 表格列／行边界、围栏、公式界定符、标题／部件所有权标记和图表目标引用，对完整受影响段／表／公式单元做低成本前后结构比较，不能只检查替换字符串内部的分隔符。它们只能捕获结构变化；单元格意义、公式等价性或指代是否正确仍需模型判断。
+5. 数字格式／单位写法修复本就是校验员的一类任务，不能把所有字符变化永久封死。首版只对确定的格式变换允许通过，涉及值、对象归属或单位换算的提案保留待办，不新增科学自动裁判。
+事实含义、否定、因果、适用条件、文献支持关系和无效重复需模型结合全文判断。程序不能证明零科学错误；无依据的修改应留 unresolved_questions。一次局部替换不能因结构检查通过就被包装成事实已核验。
+5 最小 JSON 和交互示例
+以下是合成语言样例，不使用实际论文的科学错误作为提示答案。S0、S1 是示意别名；生产必须替换为程序提供的完整 sha256。反馈与请求的候选原文不能截成120字符后用于恢复。
+一次成功
+程序输入快照 S0，B0001 为“甲段的说明。”，B0002 为“乙段的说明。”。
+JSON 示例
+{
+  "snapshot_id": "S0",
+  "changes": [
+    {
+      "target_block_id": "B0001",
+      "operation": "replace",
+      "original_text": "甲段的说明。",
+      "replacement_text": "甲段的简要说明。",
+      "reason": "明确这段文字承担简要说明的作用。"
+    }
+  ],
+  "unresolved_questions": []
+}
+
+程序赋 E6，验证并提交 S1；收据包含 E6、输入／输出完整哈希、真实块与区间、旧／新片段、状态 applied。示例中的措辞变化只演示执行，不代表产品应鼓励无价值润色。
+一次失败反馈与修复
+若同批 E7 把 B0002 原文错误复制为“乙段  的说明。”，保留 E6 成功结果并反馈：
+JSON 示例
+{
+  "snapshot_id": "S1",
+  "round": 2,
+  "applied_edit_ids": ["E6"],
+  "pending_edit_ids": ["E7"],
+  "failures": [
+    {
+      "edit_id": "E7",
+      "error": "TARGET_NOT_FOUND",
+      "match_count": 0,
+      "target_block_id": "B0002",
+      "proposed_original_text": "乙段  的说明。",
+      "actual_block_text": "乙段的说明。",
+      "context_before": "甲段的简要说明。",
+      "context_after": "",
+      "instruction": "从当前实际块复制逐字旧片段；仅修复E7，或将其转为未解决项。"
+    }
+  ]
+}
+
+模型的修复响应为：
+JSON 示例
+{
+  "snapshot_id": "S1",
+  "changes": [
+    {
+      "edit_id": "E7",
+      "target_block_id": "B0002",
+      "operation": "replace",
+      "original_text": "乙段的说明。",
+      "replacement_text": "乙段的简要说明。",
+      "reason": "沿用原提案，仅按当前实际原文修正定位锚点。"
+    }
+  ],
+  "unresolved_questions": []
+}
+
+程序重新在 S1 定位并派生全部绑定，成功才生成 S2。完整实际哈希和机器运行输出在证据包 offline_demo 中。
+最少错误类型：INVALID_JSON/INVALID_PROPOSAL、STALE_SNAPSHOT、UNKNOWN_BLOCK、TARGET_NOT_FOUND、TARGET_AMBIGUOUS、OVERLAP、PROTECTED_CONTENT_CHANGED。歧义反馈提供有上限的真实候选与上下文；过长块可按程序区间裁出完整候选窗口，必须表明被裁剪。不要混用诊断预览与可执行 anchor。
+轮次预算的建议解释
+建议配置为总计最多2次校验模型逻辑调用＝首次通读1次＋失败反馈修正最多1次。没有失败就只调用1次；第二次仍失败则留下 pending，不要求全文重输，不增加隐形第三次。格式错误的模型修复也占这一次修正机会。
+用户“最多两轮”也可能理解为首次之外允许两轮反馈；本地草案采用前一种。本报告推荐前一种以便明确成本和停止条件，但它尚非已确认的产品事实。实施前把 max_model_rounds=2 / max_repair_rounds=1 明示为待确认配置。网络超时重试是同一逻辑轮次的 transport attempt，另记次数与实际费用；有可重放 RAW 时先免费恢复。超时不等于未执行，重试前核对缓存与提交收据。
+6 流程与最小接线
+执行流程
+已选 BODY + 03首尾装配句柄稿 + 引用身份目录 + 必要图表材料
+  → 原字节快照 S0 + 程序块目录
+  → 第1次模型通读：changes JSON / unresolved_questions
+  → 既有解析 + 合同适配 + 严格定位 + 轻量保护 + 冲突筛选
+  → accepted子集由既有apply_patches原子应用 → 候选S1 + 执行收据
+  → 有失败：以S1重新索引，反馈失败ID与实际原文
+  → 第2次仅修失败项 → 严格应用 → 候选S2；剩余项pending
+  → 选用清单：selected稿路径+哈希+诊断+身份目录来源
+  → 既有_post_body_numbering_input投影
+  → 04唯一最终引用映射/图表装配
+  → 05出版消费04实际reader_draft + 诊断边车
+
+“唯一最终映射”不代表历史从未预览编号：BODY 阶段已有预览。新校验员优先修改句柄稿；不要编辑最终数字编号再反推引用身份。
+现有消费者核对：04按 DOI、paper ID、handle 等合并身份，完整 namespace 的 token_details 是权威关系，不能只看 bare handle_to_reference。05使用04的实际 reader_draft，并从该稿提取题名／摘要／关键词，没有必要回填旧03文本 metadata。新增 checker 诊断不会自动进入05，必须显式传递。归档重建的188个句柄映成187个文献身份，04读者稿重建完全一致，05与04字节一致，这是本次既有样稿的观测，不是未来全流程质量保证。[8]
+03的 BODY-preserved 只描述首尾装配阶段；若新校验员随后改了 BODY，不得继续把该标记当作全流程 BODY 没变。04新增的图注若此前没提供给模型，也不能声称校验员读过；可提前作为材料输入，并在04后只做确定性的编号／引用结构检查。
+五张最小实施工单 本轮未实施
+工单
+输入 → 输出
+复用／新增
+验收要点
+1. 可信快照与读视图
+03句柄稿＋身份目录 → S0、块目录、完整读视图
+复用normalize_case／现有读取；补原字节I/O封装
+CRLF不漂移；块ID只在快照有效；标签不写入论文
+2. JSON到严格补丁
+changes → 程序edit_id、绑定patch、失败诊断
+复用parse及resolve/validate/apply；补字段校验、冲突筛选、轻量保护
+重复指定块正确；同块歧义拒绝；无全局模糊兜底
+3. 一次失败修正
+S1＋pending ID＋实际原文 → 修复提案／待办
+复用现有请求缓存／RAW恢复；补反馈编排及轮次预算
+成功项不重发；旧锚点重新绑定；总调用2次配置可审计
+4. 提交与恢复收据
+accepted patches → 候选稿、manifest、收据
+复用封存／哈希思路；补明确提交点
+临时稿不等于选用稿；崩溃后按manifest/hash恢复，不按最新文件猜测
+5. 成稿交接
+selected句柄稿＋诊断 → 04 → 05
+接通用协调器与真实driver，保留编号/出版消费者
+04收到选用稿；引用身份不丢；05附带pending且不静默换回03
+
+选用政策必须明确：完整结构验证失败则不进入04；只有部分措辞修改未解决时，建议默认“保留已通过独立检查的成功候选并带诊断”，把未解决项明确交给下一阶段；若项目要求全部提案解决才出版，可切换为停在待处理。该默认是本报告建议，不是现有行为。不应让 pending 自动变成无诊断的 complete。候选文件先原子写入，再以经过哈希验证的选用 manifest 为提交点；孤立候选无 manifest 时不能被出版消费者自行拾取。
+7 免费验证 结果和证据边界
+最有判别力的9个本地演示均调用未修改的 OptoMind 原函数，没有另写匹配器：
+样例
+实际观察
+唯一英文片段
+仅目标片段变更
+相同中文句子位于两块
+B0002限定后只改第二处
+LF提案对CRLF原稿
+首次拒绝；回读精确CRLF后成功，其他换行保留
+空格漂移
+错误双空格原文不命中；返回实际块后成功
+重叠提案
+现有合同整批拒绝，无字符串部分变更
+部分成功后恢复
+演示协调层先提交独立成功项S1，失败项绑定S1后得到S2
+第二轮旧绑定／重放
+S0补丁不能用于S1；article旧函数另实测重复前缀问题
+引用／表格／公式混合Markdown
+仅普通措辞局部变更，其余字节不变
+保护边界反例
+现有editorial集合检查允许数字重排、否定删去、引用删去；作为不足记录
+
+“部分成功后恢复”是小型适配演示，证明能以既有严格函数编排，不是已实现的生产闭环。保护边界反例的断言通过表示危险行为得到复现，不能写成“科学保护测试通过”。
+其他证据：
+OptoMind：原合同12项 unittest 通过；其余恢复测试仅源码审阅。20份编辑源码、31份交接源码／归档文件分别校验 Git blob。归档真实稿件不随证据包再发布。
+Aider：26个原测试方法体经 AST 隔离运行，另27个原函数案例；不是完整安装后的测试套件。
+Cline：18项真实 TS 函数离线演示，原测试也作源码定位；未跑整个 SDK。
+OpenHands：33个原测试函数体＋28个小案例；隔离 SDK 输出壳、默认编辑器编码检测等依赖，原匹配／写入逻辑保留；不是完整 pytest/SDK 集成测试。
+Codex：当前锁定 HEAD 的 Rust tests 没跑，环境没有 cargo/rustc。已安装 codex-cli 0.159.2 的专用离线 patch 入口另重放25个fixtures并做10个案例，版本与二进制hash有记录；它没有绑定本次HEAD，只作为次级证据。
+这些是定位机制的少量判别输入与上游已有用例，未做模型质量benchmark。无付费模型调用、无生产算法变更、无真实稿件科学改写。
+8 尚未解决的边界与下一次小额验证
+真实边界：跨块原子联动未在建议初版开放；复杂 LaTeX／表格结构检查只能有限覆盖；全文模型能否稳定复制短原文、是否发现有价值问题、是否过度润色，离线执行测试无法回答；多请求并发／故障注入不在本次验证范围。少量格式规范化可以日后逐项加入，不应以提高匹配率为名开启默认语义近似替换。
+下一轮预算优先花在三件事，需另行授权付费：
+1. 对一篇真实装配句柄稿运行1次独立通读，观察逐字锚点正确率、块选择、提案价值和无依据改写；本地开发者不给科学错误清单或答案。
+2. 有自然失配时只给程序生成的反馈，再运行最多1次修正；测失败项修复、成功项不重提、新快照绑定和实际tokens／费用。不为凑轮次人工要求重写全文。
+3. 比较最终选用稿与S0的局部差异，核对条件／数字单位／引用身份／表格结构，以及04/05是否消费正确稿件。把精确执行成功与内容判断正确分开计数。
+最终建议：先实现这五张薄工单，再讨论更强的科学核验。当前最缺的是闭环接缝和真实交接，不缺另一个宽松字符串匹配器。
+核心源码证据
+[1] article解析／应用与live恢复：
+Lihonggang-scnu/OptoMInd-Review  article_text_editor.py  第 69–165 行
+Lihonggang-scnu/OptoMInd-Review  article_text_editor.py  第 266–369 行
+[2] 严格定位／绑定／整批应用：
+Lihonggang-scnu/OptoMInd-Review  post_body_revision_contracts.py  第 144–161 行
+Lihonggang-scnu/OptoMInd-Review  post_body_revision_contracts.py  第 215–303 行
+[3] 真实协调与归档driver：
+Lihonggang-scnu/OptoMInd-Review  review_delivery.py  第 951–982 行
+Lihonggang-scnu/OptoMInd-Review  run_final_delivery.py  第 19–45 行
+[4] Aider匹配与部分成功反馈：
+Aider-AI/aider  editblock_coder.py  第 41–187 行
+Aider-AI/aider  search_replace.py  第 434–445 行
+[5] Cline规范化／相似匹配与warnings拦截：
+cline/cline  apply-patch-parser.ts  第 347–430 行
+cline/cline  apply-patch.ts  第 374–394 行
+[6] OpenHands默认matcher与写入：
+OpenHands/software-agent-sdk  editor.py  第 177–248 行
+OpenHands/software-agent-sdk  editor.py  第 462–529 行
+[7] Codex匹配与换行保真：
+openai/codex  seek_sequence.rs  第 12–110 行
+openai/codex  text_file.rs  第 30–119 行
+[8] 编号与最终消费者：
+Lihonggang-scnu/OptoMInd-Review  delivery_citations.py  第 87–204 行
+Lihonggang-scnu/OptoMInd-Review  review_delivery.py  第 1212–1271 行
+附录包含各项目完整锁定SHA、许可证与依赖文件、提示／schema／parser／executor／测试的逐行入口，以及免费验证的命令、原始结果和限制。

@@ -1,0 +1,41 @@
+{
+  "basis_commit": "2a28854cf86a98f5afb4a6e5fbe1a925694fd138",
+  "source_paths": [
+    "docs/acceptance/serial-parts-live-20261011/GENERATED_PARTS_READABLE.md",
+    "docs/acceptance/serial-parts-live-20261011/INPUT_CONTEXT.json",
+    "docs/acceptance/serial-parts-live-20261011/GENERATION_REPORT.json",
+    "optomind_research/runtime/upgrade3/serial_manuscript_parts.py"
+  ],
+  "observation_not_causal_explanation": [
+    {
+      "location": "GENERATED_PARTS_READABLE 引言第1段",
+      "observation": "同时包含临床背景、已有证据判断、中心问题和范围声明，但没有引文；其中前几类与最后的自我范围声明需要不同引用处理。",
+      "implication": "逐项区分可从BODY回溯的事实、需要另外取得的背景和不需外部引文的作者组织意图。"
+    },
+    {
+      "location": "GENERATED_PARTS_READABLE 引言第2段",
+      "observation": "大部分篇幅依次预告临床证据、机制、干预与方法学章节；最后说明条件依赖的理解价值。",
+      "implication": "已有视角表述，问题是阅读理由与前述事实关系展开不足，不能简单删除全部组织说明。"
+    },
+    {
+      "location": "GENERATED_PARTS_READABLE 摘要与结语",
+      "observation": "两者沿异质性、药物修饰、代谢机制、干预转化和未来研究相似序列推进；结语增加数字和案例，但相当部分关系与抽象层次相近。",
+      "implication": "检查具体增量是否是跨章权衡或适用边界，而不是仅比较字词或数字多少。"
+    },
+    {
+      "location": "INPUT_CONTEXT.material_records；GENERATION_REPORT.context_shape",
+      "observation": "此轮额外material_records为0；输入有实际BODY、身份目录、范围、review_argument和最终细纲。",
+      "implication": "身份目录不是段落证据；但BODY本身已含大量引文，所以不能将无引用简单归因于完全没有来源。"
+    },
+    {
+      "location": "serial_manuscript_parts.py _COMMON/_CONCEPTION/_DUTIES与build_stage_messages",
+      "observation": "现有说明已要求功能差异、BODY依据、条件保持，并明确先前首尾不是证据；后续阶段仍收到此前生成部件作协调。",
+      "implication": "单轮输出不能识别是供材、任务落实、前序表达影响、模型能力或生成顺序导致；追加同义原则未必能改善。"
+    }
+  ],
+  "not_done": [
+    "未修改任何BODY或首尾文本",
+    "未执行付费模型比较",
+    "未对这些生物医学主张做临床事实认证"
+  ]
+}
