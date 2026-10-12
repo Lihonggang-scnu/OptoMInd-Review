@@ -21,7 +21,13 @@ _REFERENCE_HEADING = re.compile(r"^#{1,6}\s+(?:\[block-[^\]]+\]\s*)?References\s
 
 
 def load_practical_material(snapshot_dir: str | Path) -> dict[str, Any]:
-    """Read the ordinary snapshot view and bibliography without hash checks."""
+    """Read the ordinary view plus the shared source-bound structures.
+
+    The markdown view remains the writing-friendly surface.  When the
+    directory is a validated prepared snapshot, the same material-reading
+    projection used by cards is exposed separately so tables and formulas do
+    not depend on lossy markdown formatting.
+    """
 
     root = Path(snapshot_dir)
     reading_view = (root / "READING_VIEW.md").read_text(encoding="utf-8")
@@ -39,9 +45,34 @@ def load_practical_material(snapshot_dir: str | Path) -> dict[str, Any]:
             "source_marker": marker,
             "citation": citation,
         })
+    structured_assets: list[dict[str, Any]] = []
+    try:
+        # Import lazily to keep this small helper usable with legacy material
+        # directories that do not contain a complete prepared snapshot.
+        from .local_materials import PreparedSnapshotProvider
+
+        snapshot = PreparedSnapshotProvider(root).load()
+        packet = snapshot.build_reading_packet()
+        structured_assets = [
+            dict(item)
+            for item in packet.get("observations") or ()
+            if isinstance(item, Mapping)
+            and item.get("source_kind") in {"article_formula", "article_table"}
+        ]
+    except (OSError, ValueError, TypeError, KeyError):
+        # The original reading view remains available for older directories;
+        # callers can inspect the absence of this optional projection.
+        structured_assets = []
+    structured_material = "\n\n".join(
+        str(item.get("text") or "").strip()
+        for item in structured_assets
+        if str(item.get("text") or "").strip()
+    )
     return {
         "body": _clean_reading_view(reading_view),
         "references": normalized_references,
+        "structured_assets": structured_assets,
+        "structured_material": structured_material,
     }
 
 
@@ -160,6 +191,7 @@ def build_practical_reader_messages(
         "questions": [dict(row) for row in questions],
         "required_outputs": [dict(row) for row in required_outputs],
         "source_material": str(material.get("body") or ""),
+        "structured_source_material": str(material.get("structured_material") or ""),
         "optional_bibliography": [dict(row) for row in material.get("references") or ()],
     }
     return [

@@ -14,6 +14,7 @@ import json
 import os
 import re
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -23,7 +24,7 @@ if str(REPO) not in sys.path:
 
 from optomind_research.runtime.upgrade3.document_snapshot import NORMALIZER_VERSION
 from optomind_research.runtime.upgrade3.local_materials import PreparedSnapshotProvider
-from optomind_research.runtime.upgrade3.material_acquisition import ACQUISITION_SCHEMA_VERSION, AcquisitionConfig, MaterialAcquirer
+from optomind_research.runtime.upgrade3.material_acquisition import ACQUISITION_SCHEMA_VERSION, AcquisitionConfig, AcquisitionResult, MaterialAcquirer
 from optomind_research.runtime.upgrade3.public_reader import FirecrawlReader
 
 
@@ -73,6 +74,9 @@ def _implementation_fingerprint() -> dict[str, str]:
         REPO / "optomind_research/runtime/upgrade3/public_fulltext_rescue.py",
         REPO / "optomind_research/runtime/upgrade3/public_reader.py",
         REPO / "optomind_research/runtime/upgrade3/document_snapshot.py",
+        REPO / "optomind_research/runtime/upgrade3/docling_adapter.py",
+        REPO / "optomind_research/runtime/upgrade3/regional_recognition.py",
+        REPO / "scripts/upgrade3/parse_docling_pdf.py",
         REPO / "optomind_research/runtime/upgrade3/local_materials.py",
         REPO / "tools/academic_backends/grobid_backend.py",
         REPO / "tools/academic_backends/core_backend.py",
@@ -112,6 +116,15 @@ def _checkpoint_path(root: Path, paper_id: Any) -> Path:
     return root / "_batch_checkpoints" / f"{_safe_slug(paper_id)}.json"
 
 
+def _regional_completion(snapshot: Any) -> tuple[bool, dict[str, int]]:
+    statuses: dict[str, int] = {}
+    for asset in snapshot.assets:
+        if asset.get("parser") == "docling" and asset.get("type") in {"formula", "table"}:
+            status = str(asset.get("recognition_status") or "parser_candidate")
+            statuses[status] = statuses.get(status, 0) + 1
+    return all(status in {"recognized", "uncertain"} for status in statuses), statuses
+
+
 def _load_resume(root: Path, paper_id: Any, fingerprint: str, *, refresh: bool) -> dict[str, Any] | None:
     if refresh:
         return None
@@ -123,7 +136,9 @@ def _load_resume(root: Path, paper_id: Any, fingerprint: str, *, refresh: bool) 
         snapshot_path = Path(str(payload.get("snapshot_path") or ""))
         if payload.get("fingerprint") != fingerprint or not snapshot_path.is_dir():
             return None
-        PreparedSnapshotProvider(snapshot_path).load()
+        snapshot = PreparedSnapshotProvider(snapshot_path).load()
+        if not _regional_completion(snapshot)[0]:
+            return None
         return payload
     except Exception:
         return None
@@ -135,6 +150,10 @@ def _save_checkpoint(root: Path, result: Any, fingerprint: str) -> None:
     path = _checkpoint_path(root, result.identity.canonical_paper_id)
     payload = result.to_dict()
     payload["fingerprint"] = fingerprint
+    snapshot = getattr(result, "snapshot", None)
+    complete, statuses = _regional_completion(snapshot) if snapshot is not None else (False, {})
+    payload["regional_recognition_complete"] = complete
+    payload["regional_recognition_status_counts"] = statuses
     temporary = path.with_suffix(f".tmp-{os.getpid()}")
     temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     os.replace(temporary, path)
@@ -170,6 +189,25 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--rescue-max-search-calls", type=int, default=2, help="bounded public search calls per paper")
     parser.add_argument("--rescue-max-extract-calls", type=int, default=4, help="bounded reader extraction calls per paper")
     parser.add_argument("--refresh", action="store_true", help="ignore validated cache entries and publish a new version")
+    parser.add_argument("--docling-document-json", type=Path, help="opt-in saved native DoclingDocument JSON")
+    parser.add_argument("--docling-run-json", type=Path, help="matching saved run.json with PDF hash, packages and pipeline options")
+    parser.add_argument("--docling-cli-config", type=Path, help="explicit CLI configuration JSON; command must emit document.json and run.json")
+    parser.add_argument("--docling-cache-root", type=Path, help="isolated Docling cache; defaults to acquisition cache/docling")
+    parser.add_argument("--docling-max-processes", type=int, help="shared adapter local process/cache construction bound (initial default 1; maximum 8)")
+    parser.add_argument("--docling-crop-scale", type=float, default=2.5, help="original-PDF crop render scale")
+    parser.add_argument("--recognition-config", type=Path, help="explicit bounded formula/table transcription JSON; requires Docling; defaults to preview")
+    parser.add_argument("--recognition-run", action="store_true", help="enable budgeted regional provider calls")
+    parser.add_argument("--recognition-cache-root", type=Path, help="immutable regional request/response cache")
+    parser.add_argument("--recognition-concurrency", type=int, help="override regional JSON concurrency (initial default 4; 1 serial; maximum 32)")
+    parser.add_argument("--recognition-ceiling-cny", type=float, help="absolute cumulative project reservation ceiling for this execution")
+    parser.add_argument("--budget-ledger", type=Path, help="existing shared project ledger for regional recognition")
+    parser.add_argument("--budget-limit", type=float, help="existing project budget cap; never resets its history")
+    parser.add_argument("--account-ledger", type=Path, help="paired shared account ledger")
+    parser.add_argument("--account-budget-limit", type=float)
+    parser.add_argument("--account-mapping-dir", type=Path)
+    parser.add_argument("--key-file", type=Path)
+    parser.add_argument("--key-index", type=int)
+    parser.add_argument("--tokenizer", type=Path, help="existing local tokenizer; no download")
     return parser
 
 
@@ -185,8 +223,63 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     config = AcquisitionConfig(deadline_seconds=args.deadline_seconds, network_workers=args.network_workers, request_timeout_seconds=args.request_timeout_seconds, max_retries=args.max_retries, cache_root=args.cache_root, refresh=args.refresh, rescue_enabled=not args.disable_rescue, rescue_max_candidates=args.rescue_max_candidates, rescue_max_search_calls=args.rescue_max_search_calls, rescue_max_extract_calls=args.rescue_max_extract_calls)
+    providers: dict[str, Any] = {}
+    if args.docling_document_json or args.docling_run_json or args.docling_cli_config:
+        from optomind_research.runtime.upgrade3.docling_adapter import DoclingAdapterConfig, DoclingCliAdapter, config_sha256
+
+        cache_root = args.docling_cache_root or args.cache_root / "docling"
+        if args.docling_cli_config:
+            if args.docling_document_json or args.docling_run_json:
+                _build_parser().error("choose saved Docling files or explicit CLI configuration")
+            value = _read_json(args.docling_cli_config)
+            adapter_config = DoclingAdapterConfig(parser_version=str(value["parser_version"]), cache_root=cache_root,
+                command=tuple(value["command"]), command_args=tuple(value.get("command_args") or ()),
+                config=dict(value["config"]), timeout_seconds=float(value.get("timeout_seconds", args.deadline_seconds)),
+                output_filename=str(value.get("output_filename") or "document.json"), crop_scale=args.docling_crop_scale,
+                max_processes=args.docling_max_processes if args.docling_max_processes is not None else value.get("max_processes", 1))
+        else:
+            if not (args.docling_document_json and args.docling_run_json):
+                _build_parser().error("saved Docling import requires both --docling-document-json and --docling-run-json")
+            adapter_config = DoclingAdapterConfig.from_saved_run(args.docling_document_json, args.docling_run_json,
+                cache_root=cache_root, crop_scale=args.docling_crop_scale,
+                max_processes=args.docling_max_processes if args.docling_max_processes is not None else 1)
+        recognizer = None
+        if args.recognition_config:
+            from optomind_research.runtime.upgrade3.regional_recognition import RegionalRecognitionConfig, RegionalRecognizer, vision_token_counter
+            from scripts.upgrade3.writer_candidates import make_live_factory, tokenizer_counter
+
+            recognition_options = _read_json(args.recognition_config)
+            if not isinstance(recognition_options, Mapping) or "cache_root" in recognition_options or "scope" in recognition_options:
+                raise ValueError("recognition_config_requires_bounded_options_object")
+            recognition_options = dict(recognition_options)
+            if args.recognition_concurrency is not None:
+                recognition_options["concurrency"] = args.recognition_concurrency
+            factory = None
+            tokenizer_info = {}
+            if args.recognition_run:
+                if not all((args.budget_ledger, args.account_ledger, args.tokenizer, args.key_file, args.recognition_ceiling_cny)) or args.key_index is None or args.key_index < 1:
+                    raise ValueError("regional_live_requires_project_account_ledgers_tokenizer_key_and_explicit_ceiling")
+                if not args.budget_ledger.is_file() or not args.account_ledger.is_file():
+                    raise ValueError("regional_live_requires_existing_ledgers")
+                counter, tokenizer_info = tokenizer_counter(args.tokenizer)
+                args.run, args.responses, args.allow_max = True, None, False
+                factory = make_live_factory(args, token_counter=vision_token_counter(counter), reservation_ceiling_cny=args.recognition_ceiling_cny, thread_safe=True)
+            recognition_options["scope"] = config_sha256({"project_ledger": str(args.budget_ledger.resolve()) if args.budget_ledger else "",
+                "account_ledger": str(args.account_ledger.resolve()) if args.account_ledger else "", "tokenizer": tokenizer_info,
+                "reservation_ceiling_cny": args.recognition_ceiling_cny})
+            recognition_config = RegionalRecognitionConfig(cache_root=args.recognition_cache_root or args.cache_root / "regional_recognition", **recognition_options)
+            recognizer = RegionalRecognizer(recognition_config, provider_factory=factory)
+        providers["docling"] = DoclingCliAdapter(adapter_config, recognizer=recognizer)
+        config.docling_enabled = True
+        config.docling_config_sha256 = config_sha256({"parser_version": adapter_config.parser_version, **adapter_config.fingerprint(),
+            "recognition": {"request": recognizer.config.fingerprint(), "policy": recognizer.config.policy()} if recognizer else None,
+            "local_scheduling": {"max_processes": adapter_config.max_processes}, "recognition_run": args.recognition_run})
+    elif args.recognition_config or args.recognition_run:
+        _build_parser().error("regional recognition requires an explicit Docling configuration")
+    if args.recognition_run and not args.recognition_config:
+        _build_parser().error("--recognition-run requires --recognition-config")
     reader = FirecrawlReader(timeout_seconds=min(config.request_timeout_seconds, 20.0)) if config.rescue_enabled and (config.rescue_max_search_calls or config.rescue_max_extract_calls) else None
-    acquirer = MaterialAcquirer(args.output_root, config=config, reader=reader)
+    acquirer = MaterialAcquirer(args.output_root, config=config, providers=providers, reader=reader)
 
     if args.batch_manifest:
         manifest_path = args.batch_manifest
@@ -205,6 +298,7 @@ def main(argv: list[str] | None = None) -> int:
             pdf_bytes = pdf_path.read_bytes() if pdf_path and pdf_path.is_file() else None
             prepared_records.append((row, xml_bytes, pdf_bytes, xml_path.name if xml_path else "source.xml"))
         network_records: list[Mapping[str, Any]] = []
+        local_records = []
         network_fingerprints: dict[str, str] = {}
         completed = 0
         for row, xml_bytes, pdf_bytes, source_name in prepared_records:
@@ -222,10 +316,27 @@ def main(argv: list[str] | None = None) -> int:
                     if alias:
                         network_fingerprints[_safe_slug(alias)] = fingerprint
                 continue
-            result = acquirer.acquire_local(row, xml_bytes=xml_bytes, pdf_bytes=pdf_bytes, source_name=source_name, source_document_id=args.source_document_id, source_role=args.source_role, source_uri=args.source_uri, publication_version=args.publication_version)
-            _save_checkpoint(args.output_root, result, fingerprint)
-            _print(_summary(result))
-            completed += 1
+            local_records.append((row, xml_bytes, pdf_bytes, source_name, fingerprint))
+
+        # Reuse the existing outer worker bound and one acquirer. Its shared
+        # Docling/recognizer instances enforce separate global inner bounds.
+        with ThreadPoolExecutor(max_workers=config.network_workers) as pool:
+            local_futures = {
+                pool.submit(acquirer.acquire_local, row, xml_bytes=xml_bytes, pdf_bytes=pdf_bytes,
+                    source_name=source_name, source_document_id=args.source_document_id, source_role=args.source_role,
+                    source_uri=args.source_uri, publication_version=args.publication_version): (row, fingerprint)
+                for row, xml_bytes, pdf_bytes, source_name, fingerprint in local_records
+            }
+            for future in as_completed(local_futures):
+                row, fingerprint = local_futures[future]
+                try:
+                    result = future.result()
+                except Exception as exc:
+                    result = AcquisitionResult(identity=acquirer._record_identity(row), status="failed", material_depth="unknown",
+                        errors=[f"{type(exc).__name__}:{exc}"])
+                _save_checkpoint(args.output_root, result, fingerprint)
+                _print(_summary(result))
+                completed += 1
 
         def on_result(result: Any) -> None:
             nonlocal completed

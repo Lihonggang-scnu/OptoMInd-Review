@@ -1,5 +1,7 @@
 # 当前完整链路与正式接线
 
+**2026-10-13 材料解析接线：** 原生 JATS/TEI 继续优先；PDF 可显式启用本地 Docling 全页布局、公式/表格自动区域识别和原图裁切。区域调用使用 qwen3.5-plus、项目与账户双账本，结果经不可变 snapshot 进入普通阅读、A/B、定向精读和独立 M4。Docling 本地进程与整个批次的区域 HTTP 请求分别限流，不将每篇并发相乘。运行、恢复及硬件实测见 [材料入口](../local_materials.md) 和 [2026-10-13 验收](../verification/pdf-parser-parallel-20261013/README.md)。图像只保留原区域和图注，本轮没有加入科研图像解释。
+
 **2026-10-12交付采用决定：** 用户已亲读新首尾及校验后的稿件，判定合格，允许交付。受测源码`b98771f2cc1548c301f6621d0b87414d858d9f43`；[本地真实采用记录](../acceptance/parts-checker-delivery-20261012/README.md)保存输入、请求、返回、选用稿、费用和恢复。post_body下游现为03首尾→校验selected_manuscript→04最终编号→05出版。此前[首尾实跑](../acceptance/serial-parts-live-20261011/CLOUD_READ_FIRST.md)及[研究/校验准备](../acceptance/manuscript-checker-preparation-20261012/README.md)继续保留为历史，不能再据其“未实现”状态判断当前代码。
 
 **2026-10-10 决定：正式 BODY 采用 baseline。** 作者、任务核查/必要的一次有界补写、装配、一次全文局部编辑、实际选用稿编号已接入正常入口。作者仅 `qwen3.5-plus`。`chapter_coherence` 默认关闭；“细纲→指南→正文”及全文候选保留为历史实验。采用依据与原始结果见 [固定对照归档](../acceptance/outline-to-body-coherence-20261010/README.md)。基线源码 `638eb93cdb37fc95cb917130f69a5b16df3549b7`，验收归档 `2618319e3fe2a085acf11a66e6f6c66c73a9c135`；本次只核对接线、统一文档并修剩余状态接缝，未重写有效提示词。

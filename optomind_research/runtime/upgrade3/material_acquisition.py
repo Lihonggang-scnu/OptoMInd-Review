@@ -293,6 +293,8 @@ class AcquisitionConfig:
     rescue_max_candidates: int = 8
     rescue_max_search_calls: int = 2
     rescue_max_extract_calls: int = 4
+    docling_enabled: bool = False
+    docling_config_sha256: str = ""
 
     def __post_init__(self) -> None:
         self.deadline_seconds = max(1.0, float(self.deadline_seconds))
@@ -371,7 +373,7 @@ class Artifact:
             "compression": "gzip" if self.metadata.get("compressed") else "",
             "legal_use_status": self.metadata.get("legal_use_status", "unknown"),
         }
-        for key in ("asset_href", "asset_member", "image_readable"):
+        for key in ("asset_href", "asset_member", "image_readable", "provenance"):
             if key in self.metadata:
                 spec[key] = self.metadata[key]
         return spec
@@ -1665,6 +1667,23 @@ class MaterialAcquirer:
         audit.update({"status": "rejected", "reason": "unrecognised_content"})
         return None, audit, []
 
+    def _attach_pdf_layout(self, artifact: Artifact, pdf_bytes: bytes, gaps: list[dict[str, Any]], deadline: float) -> tuple[Artifact, list[dict[str, Any]]]:
+        """Opt-in layout supplement before publication; native XML never enters here."""
+        if not self.config.docling_enabled:
+            return artifact, gaps
+        adapter = self.providers.get("docling")
+        if adapter is None:
+            return artifact, gaps + [{"kind": "docling", "status": "unavailable", "reason": "opt-in Docling provider was not configured"}]
+        try:
+            specs = adapter.prepare(pdf_bytes, source_document_id="pdf-content-" + _sha256(pdf_bytes)[:12], deadline=deadline)
+            artifact.metadata["pdf_layout_sources"] = specs
+            layout = next(json.loads(spec["data"]) for spec in specs if spec.get("role") == "pdf_layout_parser")
+            gaps = gaps + list(layout.get("known_gaps") or ()) + [{"kind": "docling", "status": "parser_candidate",
+                "reason": "source-bound layout supplement; structural parsing does not verify scientific fidelity"}]
+        except (ValueError, OSError, TypeError, KeyError) as exc:
+            gaps = gaps + [{"kind": "docling", "status": "failed", "reason": f"{type(exc).__name__}:{exc}"}]
+        return artifact, gaps
+
     def _parse_pdf(self, pdf_bytes: bytes, route: _Route, identity: IdentityResolution, deadline: float, headers: Mapping[str, str]) -> tuple[Artifact | None, list[dict[str, Any]]]:
         if not _pdf_is_readable(pdf_bytes):
             return None, [{"kind": "pdf", "status": "partial", "reason": "PDF format or page structure was unreadable"}]
@@ -1692,10 +1711,10 @@ class MaterialAcquirer:
                 if _xml_kind(tei_bytes) and _xml_has_research_body(tei_bytes):
                     tei = Artifact(kind="tei", data=tei_bytes, route="grobid", source_url=route.url, content_type="application/xml", derived_from=route.name, source_name="grobid-derived.tei.xml", metadata={"parser": "grobid", "parser_version": parsed.get("parser_version", ""), "legal_use_status": "oa", "identity_basis": "pdf_parser_observation", "source_role": "pdf_parser_observation"})
                     tei.metadata["pdf_artifact"] = pdf_artifact
-                    return tei, [
+                    return self._attach_pdf_layout(tei, pdf_bytes, [
                         {"kind": "pdf", "status": "grobid", "reason": "structured TEI derived from original PDF"},
                         {"kind": "grobid", "status": "known_gap", "reason": "TEI may flatten superscript notation, represent figures as captions/coordinates, and split or mislabel bibliography contributors; original PDF is retained"},
-                    ]
+                    ], deadline)
                 if _xml_kind(tei_bytes):
                     # A parseable header-only/empty TEI is not fulltext. Keep
                     # the PDF and continue to the local fitz fallback.
@@ -1734,7 +1753,7 @@ class MaterialAcquirer:
                     ]
                     if removed:
                         gaps.append({"kind": "xml_text_cleanup", "status": "normalized", "reason": f"removed {removed} XML 1.0 forbidden characters from derived PDF text; original PDF and page positions retained"})
-                    return tei, gaps
+                    return self._attach_pdf_layout(tei, pdf_bytes, gaps, deadline)
             except Exception:
                 pass
         gaps = [{"kind": "pdf", "status": "partial", "reason": "fulltext parser unavailable or unreadable"}]
@@ -1764,6 +1783,13 @@ class MaterialAcquirer:
             pdf_artifact = main.metadata["pdf_artifact"]
             sid = f"original-pdf-{_sha256(pdf_artifact.data)[:12]}"
             add_extra(pdf_artifact.source_spec(sid), pdf_artifact.data)
+        if main.metadata.get("pdf_layout_sources"):
+            from .docling_adapter import bind_pdf_source_specs
+
+            pdf_digest = _sha256(main.metadata["pdf_artifact"].data)
+            retained_pdf = next(spec for spec in extras if _sha256(bytes(spec["data"])) == pdf_digest)
+            for spec in bind_pdf_source_specs(main.metadata["pdf_layout_sources"], retained_pdf["source_document_id"], pdf_digest):
+                add_extra(spec, bytes(spec["data"]))
         if main.wire_bytes:
             sid = f"wire-{_sha256(main.wire_bytes)[:12]}"
             add_extra({"source_document_id": sid, "role": "wire_bytes", "source_uri": redact_url(main.source_url), "source_name": f"{main.route}.wire", "format": "wire", "mime_type": "application/octet-stream", "derived_from": main.route, "route": main.route, "compression": "gzip" if main.wire_bytes[:2] == b"\x1f\x8b" else ""}, main.wire_bytes)

@@ -1,0 +1,62 @@
+{
+  "status": "source_frozen_ready_for_parent_live_benchmark",
+  "created_utc": "2026-10-12T18:16:17.664198+00:00",
+  "source_freeze": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\parser_repair\\multipdf_automation_20261013\\regional_parallel_check\\SOURCE_FREEZE.json",
+  "review_diff": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\parser_repair\\multipdf_automation_20261013\\regional_parallel_check\\SOURCE_DIFF_FROM_CHECKPOINT.patch",
+  "changed_files": {
+    "optomind_research/runtime/upgrade3/regional_recognition.py": "b7ffd69c20db688cc60cbb4d3e0212238aac5f4a7218536f749e2e0a75accef0",
+    "optomind_research/runtime/upgrade3/docling_adapter.py": "8c9ba7638311faa7af03480d84f1c5c4d92d99a182da86e6b22dd8928f7ef793",
+    "scripts/upgrade3/build_local_materials.py": "d956f05747138d691ce40cd60275ed1608e0566f8123cab7897fbf2a9855fc66",
+    "scripts/upgrade3/writer_candidates.py": "c831cf6acbf507b3e2361fad88230a9d5125ab437b316dda2b76a92937a4ea21",
+    "docs/local_materials.md": "c43322328a946491988a10d71c6095de7522c273edacca1e8bccaa58b5726b63",
+    "tests/upgrade3/test_regional_recognition.py": "2a68bb11c51657258ce6bcc73610b7be327d68332e8dfe5f61d5c7c84c732569"
+  },
+  "tests": {
+    "passed": 151,
+    "optional_skipped": 4,
+    "command": "C:/Anaconda/python.exe -B -X utf8 -m pytest -q tests/upgrade3/test_regional_recognition.py tests/upgrade3/test_regional_flash_pricing.py tests/upgrade3/test_docling_native_bridge.py tests/upgrade3/test_material_reading_structured_assets.py tests/upgrade3/test_qwen_effective_token_transport.py tests/test_dual_budget_cli.py"
+  },
+  "focused_budget_resume": {
+    "command": "C:/Anaconda/python.exe -B -X utf8 -m pytest -q tests/upgrade3/test_regional_recognition.py -k 'budget_stop_preserves or parallel_native_dual or reenters_unfinished or unknown_spend'",
+    "passed": 7,
+    "first_red": "4 failed, 2 passed before production fix"
+  },
+  "formal_saved_response_replay": {
+    "report": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\parser_repair\\multipdf_automation_20261013\\regional_parallel_check\\FINAL_PLUS_REPLAY.json",
+    "pdfs": 5,
+    "runs": 10,
+    "provider_requests": 0,
+    "original_paid_receipts_unchanged": true,
+    "prior_snapshots_unchanged": true
+  },
+  "budget_resume": {
+    "known_not_sent": "new immutable attempt makes a real reserve on next drained execution, even same policy",
+    "unknown": "not retried; existing reservations remain held",
+    "successful_regions": "same-request cache replay; no new paid calls",
+    "unfinished_batch_checkpoint": "explicit incomplete/status counts; snapshot inspected on resume including old checkpoints"
+  },
+  "cli_batch": {
+    "entry_point": "scripts/upgrade3/build_local_materials.py --batch-manifest <frozen manifest>",
+    "scheduling_flags": "--network-workers 4 --docling-max-processes 2 --recognition-concurrency <4|8|12>",
+    "same_cache_and_output_resume": "no --refresh needed for unfinished recognition; old snapshots/attempt receipts remain",
+    "conservative_class_defaults": {
+      "docling_max_processes": 1,
+      "regional_concurrency": 4
+    },
+    "machine_profile": "parent chooses explicit bounds from measured frontier; 4 is not declared optimal"
+  },
+  "e2e_reuse": "one MaterialAcquirer with shared providers[docling] adapter and its recognizer enforces global instance bounds across acquire_batch PDFs",
+  "source_labels": {
+    "text_source": "fitz is the primary PDF body text route",
+    "structured_asset_parser": "Docling layout/crops/recognized formulas and tables are separate source-bound assets"
+  },
+  "worker_paid_calls": 0,
+  "real_keys_or_ledgers_modified": false,
+  "git_operations": "none",
+  "remaining_parent_work": [
+    "same-cache/output 12-region single-paper resume",
+    "8-region five-PDF batch throughput benchmark",
+    "choose explicit machine profile",
+    "independent review/push/E2E resume"
+  ]
+}

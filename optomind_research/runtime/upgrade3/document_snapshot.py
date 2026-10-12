@@ -30,7 +30,7 @@ SNAPSHOT_SCHEMA_VERSION = "optomind.document_snapshot.v1"
 # Bumped when auxiliary source exposure and derived-source provenance changed.
 # Existing snapshot directories remain available for inspection, but a batch
 # checkpoint must not resume one as if it had the new semantics.
-NORMALIZER_VERSION = "optomind.xml_material_normalizer.v4"
+NORMALIZER_VERSION = "optomind.xml_material_normalizer.v5"
 _XML_ID = "{http://www.w3.org/XML/1998/namespace}id"
 _XLINK_HREF = "{http://www.w3.org/1999/xlink}href"
 _WS_RE = re.compile(r"\s+")
@@ -372,6 +372,17 @@ def _ancestor_candidate(element: ET.Element, parents: Mapping[int, ET.Element], 
     return None
 
 
+def _nearest_table_owner(element: ET.Element, parents: Mapping[int, ET.Element]) -> ET.Element | None:
+    """Return the nearest table/table-wrap that owns an element."""
+
+    current: ET.Element | None = element
+    while current is not None:
+        if _local_name(current.tag) in {"table", "table-wrap"}:
+            return current
+        current = parents.get(id(current))
+    return None
+
+
 def _research_elements(root: ET.Element, parents: Mapping[int, ET.Element]) -> tuple[list[_BlockDraft], list[dict[str, Any]]]:
     candidates: set[int] = set()
     drafts: list[_BlockDraft] = []
@@ -390,10 +401,24 @@ def _research_elements(root: ET.Element, parents: Mapping[int, ET.Element]) -> t
         if block_type == "figure":
             # Figures become assets; their captions are separate blocks.
             continue
-        if block_type == "formula" and _ancestor_candidate(element, parents, candidates) is not None:
-            continue
         ancestor = _ancestor_candidate(element, parents, candidates)
-        if ancestor is not None:
+        # A nested table cell is a real source block of the inner table even
+        # when its outer cell was selected first.  Other nested known nodes
+        # remain covered by their enclosing block to avoid duplicate model
+        # projections.
+        nested_table_cell = (
+            block_type == "table_cell"
+            and ancestor is not None
+            and _nearest_table_owner(element, parents) is not None
+            and _nearest_table_owner(element, parents) is not _nearest_table_owner(ancestor, parents)
+        )
+        nested_table_context = (
+            block_type in {"table_caption", "figure_caption", "footnote"}
+            and ancestor is not None
+            and _nearest_table_owner(element, parents) is not None
+            and _nearest_table_owner(element, parents) is not _nearest_table_owner(ancestor, parents)
+        )
+        if ancestor is not None and not (nested_table_cell or nested_table_context):
             continue
         if block_type == "table_caption" and any(_local_name(parent.tag) in {"fig", "figure"} for parent in _ancestors(element, parents)):
             block_type = "figure_caption"
@@ -418,10 +443,26 @@ def _research_elements(root: ET.Element, parents: Mapping[int, ET.Element]) -> t
 
 
 def _table_geometry(table: ET.Element, parents: Mapping[int, ET.Element]) -> dict[int, dict[str, Any]]:
-    rows = [element for element in table.iter() if _local_name(element.tag) in {"tr", "row"} and _ancestor_candidate(element, parents, {id(table)}) is None]
-    # The parent map above is not suitable for checking table membership with a
-    # one-element candidate set, so use the direct ancestor test explicitly.
-    rows = [element for element in table.iter() if _local_name(element.tag) in {"tr", "row"}]
+    # A table may contain a nested table in one of its cells.  Walking all
+    # descendants here makes the inner rows consume outer row indexes and
+    # projects their cells into the outer table.  Use the nearest table owner
+    # so each row is assigned to exactly one geometry map.  ``table-wrap`` is
+    # retained for small TEI/HTML-like inputs that put rows directly under the
+    # wrapper; normal JATS rows are owned by the nested ``table`` element.
+    def nearest_table_owner(element: ET.Element) -> ET.Element | None:
+        current = element
+        while current is not None:
+            if _local_name(current.tag) in {"table", "table-wrap"}:
+                return current
+            current = parents.get(id(current))
+        return None
+
+    rows = [
+        element
+        for element in table.iter()
+        if _local_name(element.tag) in {"tr", "row"}
+        and nearest_table_owner(element) is table
+    ]
     occupancy: dict[tuple[int, int], bool] = {}
     result: dict[int, dict[str, Any]] = {}
     for row_index, row in enumerate(rows):
@@ -512,6 +553,7 @@ def _additional_source_specs(additional_sources: Sequence[Mapping[str, Any]] | N
             "asset_href": _text(raw.get("asset_href") or ""),
             "asset_member": _text(raw.get("asset_member") or ""),
             "image_readable": bool(raw.get("image_readable", False)),
+            "provenance": dict(raw.get("provenance") or {}) if isinstance(raw.get("provenance"), Mapping) else {},
         })
         seen.add(source_id)
     return specs
@@ -523,6 +565,273 @@ def _asset_id(source_document_id: str, kind: str, locator: str) -> str:
 
 def _block_id(source_document_id: str, block_type: str, locator: str) -> str:
     return f"block-{_sha256(_json_bytes([source_document_id, block_type, locator]))[:20]}"
+
+
+def _docling_layout_payloads(extra_specs: Sequence[Mapping[str, Any]]) -> list[tuple[Mapping[str, Any], Mapping[str, Any]]]:
+    """Read opt-in canonical Docling layout artifacts without trusting them as XML."""
+
+    payloads: list[tuple[Mapping[str, Any], Mapping[str, Any]]] = []
+    for spec in extra_specs:
+        role = _text(spec.get("role")).casefold()
+        if role not in {"pdf_layout_parser", "docling_layout", "layout_parser"}:
+            continue
+        if _text(spec.get("format")).casefold() not in {"json", "application/json"}:
+            continue
+        try:
+            value = json.loads(bytes(spec.get("data") or b"").decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(value, Mapping) or _text(value.get("schema_version")) != "optomind.docling_layout.v1":
+            continue
+        if not isinstance(value.get("regions"), Sequence) or isinstance(value.get("regions"), (str, bytes, bytearray)):
+            continue
+        payloads.append((spec, value))
+    return payloads
+
+
+def _docling_projection(
+    extra_specs: Sequence[Mapping[str, Any]],
+    extra_relpaths: Mapping[str, str],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Project source-bound Docling regions into the shared block/asset index.
+
+    This projection carries parser candidates as material with explicit parser
+    provenance.  It never rewrites the native XML source and never claims that
+    a parser-rendered formula/table is scientifically faithful.
+    """
+
+    assets: list[dict[str, Any]] = []
+    blocks: list[dict[str, Any]] = []
+    specs_by_id = {_text(item.get("source_document_id")): item for item in extra_specs}
+    for spec, payload in _docling_layout_payloads(extra_specs):
+        source_id = _text(spec.get("source_document_id"))
+        source_path = _text(extra_relpaths.get(source_id))
+        parser = payload.get("parser") if isinstance(payload.get("parser"), Mapping) else {}
+        parser_version = _text(parser.get("version"))
+        parser_name = _text(parser.get("name") or "docling")
+        regions = payload.get("regions") or ()
+        for region_index, raw_region in enumerate(regions, start=1):
+            if not isinstance(raw_region, Mapping):
+                continue
+            region = dict(raw_region)
+            region_id = _text(region.get("region_id") or region.get("id") or f"region-{region_index}")
+            kind = _text(region.get("type") or region.get("kind") or "region").casefold()
+            page = region.get("page")
+            bbox = list(region.get("bbox") or []) if isinstance(region.get("bbox"), Sequence) and not isinstance(region.get("bbox"), (str, bytes, bytearray)) else []
+            base_locator = {
+                "parser": parser_name,
+                "parser_version": parser_version,
+                "region_id": region_id,
+                "page": page,
+                "bbox": bbox,
+                "raw_path": source_path,
+                "source_json_pointer": f"/regions/{region_index - 1}",
+                "xml_path": f"/body[docling]/region[{region_index}]",
+                "bbox_origin": _text(region.get("bbox_origin") or "TOPLEFT"),
+                "docling_prov": list(region.get("docling_prov") or ()),
+                "raw_document_json_pointer": _text(region.get("source_json_pointer")),
+                "raw_document_source_document_id": _text(payload.get("raw_document_source_document_id") or source_id + "-pdf_layout_raw"),
+                "raw_document_raw_path": _text(extra_relpaths.get(_text(payload.get("raw_document_source_document_id") or source_id + "-pdf_layout_raw"))),
+                "fidelity_status": _text(region.get("fidelity_status") or "parser_candidate_requires_visual_or_source_review"),
+                "recognition_status": _text(region.get("recognition_status") or "parser_candidate"),
+            }
+            if kind in {"table", "table_candidate"}:
+                asset_type = "table"
+            elif kind in {"formula", "formula_candidate", "equation"}:
+                asset_type = "formula"
+            elif kind in {"figure", "figure_candidate", "picture"}:
+                asset_type = "figure"
+            else:
+                asset_type = ""
+
+            if asset_type:
+                asset_id = _asset_id(source_id, asset_type, f"docling:{region_id}")
+                parser_provenance = dict(spec.get("provenance") or {})
+                parser_provenance.update({
+                    "parser": parser_name,
+                    "parser_version": parser_version,
+                    "region_id": region_id,
+                    "source_json_pointer": base_locator["source_json_pointer"],
+                    "original_pdf_source_document_id": _text((payload.get("source") or {}).get("source_document_id")),
+                    "raw_document_sha256": _text(payload.get("raw_document_sha256")),
+                })
+                entry: dict[str, Any] = {
+                    "asset_id": asset_id,
+                    "type": asset_type,
+                    "source_document_id": source_id,
+                    "locator": dict(base_locator),
+                    "caption_block_ids": [],
+                    "content_ref": {
+                        "source_form": "docling-json",
+                        "raw_path": source_path,
+                        "json_pointer": base_locator["source_json_pointer"],
+                        "content_status": "available",
+                    },
+                    "content_status": "available",
+                    "image_readable": None,
+                    "provided_to_multimodal": bool((region.get("recognition") or {}).get("provided_to_multimodal")),
+                    "parsed_successfully": True,
+                    "parser": parser_name,
+                    "parser_version": parser_version,
+                    "parser_provenance": parser_provenance,
+                    "fidelity_status": base_locator["fidelity_status"],
+                    "recognition_status": base_locator["recognition_status"],
+                }
+                if region.get("recognition"):
+                    entry["recognition_provenance"] = dict(region["recognition"])
+                    entry["recognition_content"] = dict(region.get("recognition_content") or {})
+                    if base_locator["recognition_status"] != "recognized":
+                        entry["content_status"] = "recognition_" + base_locator["recognition_status"]
+                if asset_type == "formula":
+                    raw_source = _text(region.get("raw_source") or region.get("text"))
+                    entry["raw_source"] = raw_source
+                    entry["content_ref"]["raw_source"] = raw_source
+                    entry["content_ref"]["source_form"] = _text(region.get("representation") or "docling_parser_text")
+                    if region.get("recognition"):
+                        entry["normalized_latex"] = _text(region.get("text"))
+                        entry["equation_label"] = _text(region.get("label"))
+                    entry["recognition_status"] = base_locator["recognition_status"]
+                    if not raw_source:
+                        entry.update({"content_status": "recognition_required", "parsed_successfully": False,
+                                      "known_gap": "formula region has no recognized formula; flattened parser text is not faithful formula source"})
+                elif asset_type == "table":
+                    entry["table_structure"] = {"rows": [], "columns": [], "footnotes": []}
+                    if not region.get("cells"):
+                        entry.update({"content_status": "recognition_required", "parsed_successfully": False,
+                                      "known_gap": "table region has no recognized cells"})
+                crop_id = _text(region.get("crop_source_document_id"))
+                crop_spec = specs_by_id.get(crop_id)
+                crop_path = _text(extra_relpaths.get(crop_id)) if crop_spec else ""
+                if crop_path:
+                    crop_ref = {"raw_path": crop_path, "source_document_id": crop_id,
+                                "sha256": _sha256(bytes(crop_spec["data"])), "bytes": len(crop_spec["data"]),
+                                **dict((crop_spec.get("provenance") or {}).get("crop") or {})}
+                    entry["crop_ref"] = crop_ref
+                    entry["image_readable"] = bool(crop_spec.get("image_readable"))
+                    if asset_type == "figure":
+                        entry["content_ref"].update(crop_ref)
+                        entry["parsed_successfully"] = entry["image_readable"]
+                elif asset_type == "figure":
+                    entry.update({"content_status": "caption_only", "image_readable": False,
+                                  "parsed_successfully": False, "known_gap": "figure region has no retained readable crop"})
+                entry["content_ref"]["content_status"] = entry["content_status"]
+                assets.append(entry)
+            else:
+                asset_id = ""
+
+            def add_parser_block(
+                block_type: str,
+                text: Any,
+                locator: Mapping[str, Any],
+                refs: Sequence[str] = (),
+            ) -> str:
+                value = _text(text)
+                block_locator = dict(locator)
+                xml_path = _text(block_locator.get("xml_path"))
+                block_id = _block_id(source_id, block_type, xml_path)
+                blocks.append({
+                    "block_id": block_id,
+                    "source_document_id": source_id,
+                    "block_type": block_type,
+                    "section_path": [
+                        _text(item)
+                        for item in (region.get("section_path") or region.get("section") or ())
+                        if _text(item)
+                    ] if isinstance(region.get("section_path") or region.get("section") or (), Sequence) and not isinstance(region.get("section_path") or region.get("section") or (), (str, bytes, bytearray)) else [],
+                    "parent_id": None,
+                    "order_index": 0,
+                    "text_raw": value,
+                    "text_normalized": _normalized(value),
+                    "locator": block_locator,
+                    "inline_references": [],
+                    "cross_references": [],
+                    "asset_refs": [ref for ref in refs if ref],
+                    "text_hash": _sha256(_normalized(value).encode("utf-8")),
+                    "research_content": bool(_normalized(value)),
+                    "normalization_warnings": ["docling_parser_candidate"],
+                })
+                return block_id
+
+            def child_locator(item: Mapping[str, Any], suffix: str, pointer: str) -> dict[str, Any]:
+                locator = dict(base_locator)
+                for field in ("page", "bbox", "bbox_origin", "docling_prov"):
+                    if field in item:
+                        locator[field] = item[field]
+                locator.update({"xml_path": base_locator["xml_path"] + suffix,
+                                "source_json_pointer": base_locator["source_json_pointer"] + pointer,
+                                "raw_document_json_pointer": _text(item.get("source_json_pointer"))})
+                crop_id = _text(item.get("crop_source_document_id"))
+                crop_spec = specs_by_id.get(crop_id)
+                if crop_spec:
+                    locator.update({"crop_source_document_id": crop_id, "crop_raw_path": _text(extra_relpaths.get(crop_id)),
+                                    "crop_sha256": _sha256(bytes(crop_spec["data"])),
+                                    "crop_image_size": ((crop_spec.get("provenance") or {}).get("crop") or {}).get("image_size")})
+                return locator
+
+            captions = list(region.get("captions") or ())
+            if region.get("recognized_caption"):
+                captions = [dict(captions[0] if captions else {}, text=region["recognized_caption"])]
+            if not captions and region.get("caption"):
+                caption = region["caption"]
+                captions = [dict(caption) if isinstance(caption, Mapping) else {"text": _text(caption)}]
+            caption_text = "\n".join(_text(item.get("text")) for item in captions)
+            for caption_index, caption in enumerate(captions, start=1):
+                if asset_id and _text(caption.get("text")):
+                    caption_locator = child_locator(caption, f"/caption[{caption_index}]", f"/captions/{caption_index - 1}")
+                    add_parser_block("table_caption" if asset_type == "table" else "figure_caption", caption["text"], caption_locator, [asset_id])
+            footnotes = list(region.get("footnotes") or ())
+            if region.get("recognized_footnotes"):
+                footnotes = [dict(footnotes[index] if index < len(footnotes) else {}, text=text)
+                             for index, text in enumerate(region["recognized_footnotes"])]
+            for footnote_index, footnote in enumerate(footnotes, start=1):
+                footnote_locator = child_locator(footnote, f"/footnote[{footnote_index}]", f"/footnotes/{footnote_index - 1}")
+                add_parser_block("footnote", footnote.get("text"), footnote_locator, [asset_id])
+
+            if asset_type == "table":
+                cells = region.get("cells") if isinstance(region.get("cells"), Sequence) and not isinstance(region.get("cells"), (str, bytes, bytearray)) else ()
+                for cell_index, raw_cell in enumerate(cells, start=1):
+                    if not isinstance(raw_cell, Mapping):
+                        continue
+                    cell = dict(raw_cell)
+                    try:
+                        row_index = int(cell.get("row_index", cell.get("row", 0)) or 0)
+                        col_index = int(cell.get("col_index", cell.get("col", 0)) or 0)
+                    except (TypeError, ValueError):
+                        row_index, col_index = 0, cell_index - 1
+                    try:
+                        row_span = max(1, int(cell.get("row_span", cell.get("rowspan", 1)) or 1))
+                        col_span = max(1, int(cell.get("col_span", cell.get("colspan", 1)) or 1))
+                    except (TypeError, ValueError):
+                        row_span, col_span = 1, 1
+                    cell_locator = child_locator(cell, f"/table-cell[{cell_index}]", f"/cells/{cell_index - 1}")
+                    cell_locator.update({
+                        "xml_path": f"{base_locator['xml_path']}/table-cell[{cell_index}]",
+                        "row_index": row_index,
+                        "col_index": col_index,
+                        "row_span": row_span,
+                        "col_span": col_span,
+                        "is_header": bool(cell.get("is_header", cell.get("header", False))),
+                        "is_row_header": bool(cell.get("is_row_header", False)),
+                    })
+                    if cell.get("bbox") is not None:
+                        cell_locator["bbox"] = list(cell.get("bbox") or [])
+                    add_parser_block("table_cell", cell.get("text"), cell_locator, [asset_id])
+            elif asset_type == "formula":
+                formula_text = _text(region.get("text") or region.get("raw_source"))
+                formula_locator = dict(base_locator)
+                formula_locator["xml_path"] = f"{base_locator['xml_path']}/formula[1]"
+                if formula_text:
+                    add_parser_block("formula", formula_text, formula_locator, [asset_id])
+                else:
+                    add_parser_block("other", f"[parser gap: formula {region_id} on PDF page {page}; no recognized formula; recognition_required]", formula_locator, [asset_id])
+            elif asset_type == "figure" and not caption_text:
+                # Preserve a source-bound picture region even when the parser
+                # did not provide a caption; it remains a gap for scientific
+                # interpretation and is never emitted as a finding.
+                pass
+            elif not asset_type and _text(region.get("text")):
+                add_parser_block("other", region.get("text"), base_locator)
+    return assets, blocks
 
 
 def _source_fragment(element: ET.Element) -> str:
@@ -668,8 +977,17 @@ def build_snapshot_from_bytes(
             continue
         if name in {"fig", "figure"}:
             asset_elements.append((element, "figure"))
-        elif name in {"table-wrap", "table"} and not any(_is_inside(element, other, parents) for other in root.iter() if _local_name(other.tag) == "table-wrap"):
+        elif name == "table-wrap":
             asset_elements.append((element, "table"))
+        elif name == "table":
+            # A normal JATS table is represented by its table-wrap asset.  A
+            # genuinely nested table, however, owns distinct rows/cells and
+            # needs its own source-bound asset rather than being attached to
+            # the outer grid.
+            has_table_ancestor = any(_local_name(parent.tag) == "table" for parent in _ancestors(element, parents))
+            has_table_wrap_ancestor = any(_local_name(parent.tag) == "table-wrap" for parent in _ancestors(element, parents))
+            if has_table_ancestor or not has_table_wrap_ancestor:
+                asset_elements.append((element, "table"))
         elif name in {"formula", "disp-formula", "inline-formula"}:
             asset_elements.append((element, "formula"))
     for element, kind in asset_elements:
@@ -767,6 +1085,18 @@ def build_snapshot_from_bytes(
             for child in element.iter():
                 if id(child) in pending_asset_by_element and pending_asset_by_element[id(child)] not in block["asset_refs"]:
                     block["asset_refs"].append(pending_asset_by_element[id(child)])
+        if element is not None and draft.block_type in {"table_cell", "footnote"}:
+            # Inline/descendant formulas inside a cell or note do not get an
+            # independent block when the enclosing source node owns the text.
+            # Keep their immutable raw asset reachable from that same source
+            # handle, while leaving nested tables owned by their own cells.
+            for child in element.iter():
+                child_asset_id = pending_asset_by_element.get(id(child))
+                if not child_asset_id or child_asset_id in block["asset_refs"]:
+                    continue
+                child_asset = next((item for item in pending_assets if item["asset_id"] == child_asset_id), None)
+                if child_asset is not None and child_asset.get("type") == "formula":
+                    block["asset_refs"].append(child_asset_id)
         if element is not None and draft.block_type == "footnote":
             owner = next((parent for parent in _ancestors(element, parents) if id(parent) in pending_asset_by_element), None)
             if owner is not None:
@@ -775,6 +1105,16 @@ def build_snapshot_from_bytes(
             owner = next((parent for parent in _ancestors(element, parents) if _local_name(parent.tag) in {"table-wrap", "table", "fig", "figure"}), None)
             if owner is not None and id(owner) in pending_asset_by_element:
                 block["asset_refs"].append(pending_asset_by_element[id(owner)])
+            # Captions can contain inline/disp formulas (and, in some source
+            # dialects, a small nested structured node).  The formula is a
+            # first-class asset even though its formula block is suppressed by
+            # the enclosing caption candidate.  Link every contained known
+            # asset to the caption so downstream consumers can retain the raw
+            # source and provenance without inventing a second block.
+            for child in element.iter():
+                child_asset_id = pending_asset_by_element.get(id(child))
+                if child_asset_id and child_asset_id not in block["asset_refs"]:
+                    block["asset_refs"].append(child_asset_id)
         block_by_element[id(element)] = block_id if element is not None else block_id
         block_rows.append(block)
 
@@ -810,6 +1150,17 @@ def build_snapshot_from_bytes(
             if target:
                 ref_by_target[target.lstrip("#")] = reference_id
 
+    # Optional Docling layout artifacts are projected into the same immutable
+    # block/asset indexes as native XML.  The native source stays authoritative;
+    # parser regions carry their own source document, page/bbox, parser
+    # version/config provenance, and candidate-fidelity flag.
+    docling_assets, docling_blocks = _docling_projection(extra_specs, extra_relpaths)
+    if docling_assets or docling_blocks:
+        pending_assets.extend(docling_assets)
+        block_rows.extend(docling_blocks)
+        for order_index, block in enumerate(block_rows):
+            block["order_index"] = order_index
+
     # Attach resolved reference IDs and update asset captions/rows.
     block_id_set = {row["block_id"] for row in block_rows}
     for block in block_rows:
@@ -833,7 +1184,7 @@ def build_snapshot_from_bytes(
                 continue
             if block["block_type"] in {"table_caption", "figure_caption"}:
                 asset["caption_block_ids"].append(block["block_id"])
-            if block["block_type"] == "table_cell":
+            if block["block_type"] == "table_cell" and asset.get("type") == "table":
                 structure = asset.setdefault("table_structure", {"rows": [], "columns": [], "footnotes": []})
                 cell = {"block_id": block["block_id"], "locator": dict(block["locator"]), "text": block["text_normalized"]}
                 structure["rows"].append(cell)
@@ -877,6 +1228,8 @@ def build_snapshot_from_bytes(
     material_depth = _text(material_depth_override).strip() or inferred_material_depth
     known_gaps: list[dict[str, Any]] = []
     for asset in pending_assets:
+        if asset.get("parser") == "docling" and asset.get("known_gap"):
+            known_gaps.append({"kind": "asset", "asset_id": asset["asset_id"], "status": asset["content_status"], "reason": asset["known_gap"]})
         if asset["content_status"] in {"caption_only", "missing"}:
             known_gaps.append({"kind": "asset", "asset_id": asset["asset_id"], "status": asset["content_status"], "reason": "caption_or_locator_without_readable_image"})
     if identity_check["status"] != "verified":
@@ -1049,7 +1402,12 @@ def _reading_view(
     known_gaps: Sequence[Mapping[str, Any]] = (),
     auxiliary_sources: Sequence[Mapping[str, Any]] = (),
     source_root: Path | None = None,
+    normalizer_version: str = NORMALIZER_VERSION,
 ) -> str:
+    # v4 snapshots are immutable artifacts produced with the previous raw
+    # formula rendering. New v5 snapshots use the source-form-aware rendering
+    # below, while validation of old snapshots must reproduce v4 exactly.
+    legacy_formula_view = normalizer_version == "optomind.xml_material_normalizer.v4"
     lines = ["# Reading View", "", f"<!-- snapshot_id: {snapshot_id} -->", f"> Material depth: `{material_depth}`", "> This view is a structured material projection; asset captions do not prove image interpretation.", ""]
     if known_gaps:
         lines.extend(["> Known gaps:", *[f"> - {item.get('kind')}: {item.get('reason')} (status={item.get('status', 'unknown')})" for item in known_gaps], ""])
@@ -1099,6 +1457,11 @@ def _reading_view(
         if auxiliary_lines:
             lines.extend(["## Auxiliary evidence (separate from publisher body)", "", "> These are metadata abstracts and retrieved excerpts, not proof of complete body coverage. Their source files retain provenance. Publisher XML section labels may contain extraction errors; do not silently merge conflicting abstracts.", "", *auxiliary_lines])
     last_path: tuple[str, ...] = ()
+    assets_by_id = {
+        str(item.get("asset_id")): item
+        for item in assets
+        if isinstance(item, Mapping) and item.get("asset_id")
+    }
     for block in blocks:
         section = tuple(str(item) for item in block.get("section_path", []))
         if section != last_path:
@@ -1109,23 +1472,49 @@ def _reading_view(
         if not text and block.get("block_type") not in {"figure", "table"}:
             continue
         kind = block.get("block_type")
+        raw_formula_assets: list[Mapping[str, Any]] = []
+        if kind == "formula" and not legacy_formula_view:
+            raw_formula_assets = [
+                assets_by_id[str(aid)]
+                for aid in block.get("asset_refs") or ()
+                if str(aid) in assets_by_id
+                and assets_by_id[str(aid)].get("type") == "formula"
+                and assets_by_id[str(aid)].get("raw_source")
+            ]
         if kind == "heading":
             lines.extend(["## " + f"[{block['block_id']}] " + text, ""])
         elif kind == "table_cell":
             loc = block.get("locator") or {}
             lines.append(f"[table cell {block['block_id']} row={loc.get('row_index')} col={loc.get('col_index')} rowspan={loc.get('row_span', 1)} colspan={loc.get('col_span', 1)} header={loc.get('is_header', False)}] {text}")
         elif kind == "formula":
-            lines.extend([f"$$ <!-- {block['block_id']} -->", text, "$$", ""])
+            if raw_formula_assets:
+                for asset in raw_formula_assets:
+                    source_form = _text((asset.get("content_ref") or {}).get("source_form")) if isinstance(asset.get("content_ref"), Mapping) else ""
+                    lines.extend([
+                        f"> [raw formula asset {asset.get('asset_id')}; representation={source_form or 'preserved_source'}]",
+                        "> ```text",
+                        str(asset.get("raw_source")),
+                        "> ```",
+                        "",
+                    ])
+            else:
+                lines.extend([f"$$ <!-- {block['block_id']} -->", text, "$$", ""])
         elif kind == "reference":
             lines.append(f"[reference {block['block_id']}] {text}")
         else:
             lines.extend([f"[{block['block_id']}] {text}", ""])
+        if kind == "formula" and raw_formula_assets:
+            continue
         for aid in block.get("asset_refs", []):
-            asset = next((item for item in assets if item.get("asset_id") == aid), None)
+            asset = assets_by_id.get(str(aid))
             if asset and asset.get("content_status") in {"caption_only", "missing"}:
                 lines.extend([f"> [asset gap: {aid}; status={asset.get('content_status')} ]", ""])
             elif asset and asset.get("type") == "formula" and asset.get("raw_source"):
-                lines.extend([f"> [raw formula asset {aid}; representation=XML/MathML]", "> ```xml", str(asset["raw_source"]), "> ```", ""])
+                if legacy_formula_view:
+                    lines.extend([f"> [raw formula asset {aid}; representation=XML/MathML]", "> ```xml", str(asset["raw_source"]), "> ```", ""])
+                else:
+                    source_form = _text((asset.get("content_ref") or {}).get("source_form")) if isinstance(asset.get("content_ref"), Mapping) else ""
+                    lines.extend([f"> [raw formula asset {aid}; representation={source_form or 'preserved_source'}]", "> ```text", str(asset["raw_source"]), "> ```", ""])
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -1212,7 +1601,7 @@ def validate_snapshot(snapshot_dir: str | os.PathLike[str]) -> dict[str, Any]:
             # Manifest timestamps and legal status are operational fields on
             # the main source; additional artifact entries carry their full
             # immutable source specification in the identity seed.
-            keys = (("source_document_id", "role", "source_uri", "source_name", "format", "raw_sha256", "bytes") if index == 0 else ("source_document_id", "role", "source_uri", "source_name", "format", "raw_sha256", "bytes", "mime_type", "derived_from", "route", "compression", "legal_use_status", "asset_href", "asset_member", "image_readable"))
+            keys = (("source_document_id", "role", "source_uri", "source_name", "format", "raw_sha256", "bytes") if index == 0 else ("source_document_id", "role", "source_uri", "source_name", "format", "raw_sha256", "bytes", "mime_type", "derived_from", "route", "compression", "legal_use_status", "asset_href", "asset_member", "image_readable", "provenance"))
             source_artifacts.append({
                 key: item.get(key, "")
                 for key in keys
@@ -1220,7 +1609,11 @@ def validate_snapshot(snapshot_dir: str | os.PathLike[str]) -> dict[str, Any]:
             })
         seed = {
             "schema_version": SNAPSHOT_SCHEMA_VERSION,
-            "normalizer_version": NORMALIZER_VERSION,
+            # Validate an immutable snapshot against the normalizer recorded
+            # when it was published.  New snapshots use NORMALIZER_VERSION;
+            # old snapshots remain loadable for audit and are never rebound to
+            # the current parser semantics.
+            "normalizer_version": manifest.get("normalizer_version") or NORMALIZER_VERSION,
             "canonical_paper_id": manifest.get("canonical_paper_id", ""),
             "publication_version": manifest.get("publication_version", ""),
             "acquisition_revision": manifest.get("acquisition_revision", ""),
@@ -1333,9 +1726,10 @@ def validate_snapshot(snapshot_dir: str | os.PathLike[str]) -> dict[str, Any]:
         known_gaps=manifest.get("known_gaps") or (),
         auxiliary_sources=manifest.get("auxiliary_sources") or (),
         source_root=root,
+        normalizer_version=str(manifest.get("normalizer_version") or NORMALIZER_VERSION),
     )
     view_path = root / "READING_VIEW.md"
-    if not view_path.is_file() or view_path.read_text(encoding="utf-8") != expected_view:
+    if not view_path.is_file() or view_path.read_bytes() != expected_view.encode("utf-8"):
         failures.append("reading_view_not_reconstructable")
     if failures:
         raise SnapshotError("snapshot_validation_failed:" + ",".join(failures))

@@ -34,7 +34,52 @@ TRANSIENT_HTTP = {408, 409, 425, 429, 500, 502, 503, 504}
 # https://help.aliyun.com/en/model-studio/qwen3-5-plus
 # https://help.aliyun.com/en/model-studio/qwen3-8-max
 # https://help.aliyun.com/en/model-studio/qwen-api-via-openai-chat-completions
+# qwen3.5-flash Beijing tiers/capabilities checked 2026-10-13:
+# https://help.aliyun.com/zh/model-studio/qwen3-5-flash
+# Explicit regional vision/OCR candidates checked 2026-10-13:
+# https://help.aliyun.com/zh/model-studio/model-pricing
+# https://help.aliyun.com/zh/model-studio/qwen-vl-ocr-api-reference
 MODEL_PRICING_CNY: dict[str, dict[str, Any]] = {
+    "qwen3-vl-flash": {
+        # Conservative decimal 32K/128K price boundaries; the highest rate
+        # also covers the remainder through the documented input cap.
+        "tiers": ((32_000, 0.15, 1.5), (128_000, 0.3, 3.0), (258_048, 0.6, 6.0)),
+        "max_input_tokens": 258_048,
+        "max_output_tokens": 32_768,
+        "context_window": 262_144,
+        "completion_token_parameter": "max_tokens",
+        "thinking_json": False,
+    },
+    "qwen-vl-ocr-2025-11-20": {
+        "tiers": ((30_000, 0.3, 0.5),),
+        "max_input_tokens": 30_000,
+        "max_output_tokens": 8_192,
+        "context_window": 38_192,
+        "completion_token_parameter": "max_tokens",
+        "thinking_json": False,
+        "supports_thinking": False,
+        "supports_json_mode": False,
+        "single_user_message": True,
+    },
+    "qwen3.5-ocr": {
+        "tiers": ((49_152, 0.5, 2.0),),
+        "max_input_tokens": 49_152,
+        "max_output_tokens": 16_384,
+        "context_window": 65_536,
+        "completion_token_parameter": "max_tokens",
+        "thinking_json": False,
+        "supports_thinking": False,
+        "supports_json_mode": False,
+        "single_user_message": True,
+    },
+    "qwen3.5-flash": {
+        "tiers": ((128_000, 0.2, 2.0), (256_000, 0.8, 8.0), (1_000_000, 1.2, 12.0)),
+        "max_input_tokens": 991_808,
+        "max_output_tokens": 65_536,
+        "context_window": 1_000_000,
+        "completion_token_parameter": "max_completion_tokens",
+        "thinking_json": False,
+    },
     "qwen3.7-flash": {
         "tiers": ((32_000, 0.2, 0.8), (256_000, 0.6, 2.4), (991_808, 1.2, 4.8)),
         "max_input_tokens": 991_808,
@@ -162,6 +207,12 @@ def build_qwen_wire_body(
     """
 
     pricing = model_pricing(str(model))
+    if thinking and not pricing.get("supports_thinking", True):
+        raise QwenTransportError("thinking_unsupported_for_model", transient=False)
+    if json_mode and not pricing.get("supports_json_mode", True):
+        raise QwenTransportError("json_mode_unsupported_for_model", transient=False)
+    if pricing.get("single_user_message") and (len(messages) != 1 or messages[0].get("role") != "user"):
+        raise QwenTransportError("model_requires_single_user_message", transient=False)
     requested_output_tokens = max(64, int(max_output_tokens))
     budget = int(thinking_budget) if thinking else 0
     total_output_tokens = requested_output_tokens + budget
@@ -173,9 +224,10 @@ def build_qwen_wire_body(
         "messages": [dict(item) for item in messages],
         token_parameter: total_output_tokens if token_parameter == "max_completion_tokens" else requested_output_tokens,
         "temperature": float(temperature),
-        "enable_thinking": bool(thinking),
         "stream": bool(stream),
     }
+    if pricing.get("supports_thinking", True):
+        body["enable_thinking"] = bool(thinking)
     if stream:
         body["stream_options"] = {"include_usage": True}
     if json_mode:
@@ -855,6 +907,10 @@ class QwenDirectClient:
             raise QwenTransportError("model_max_output_exceeded", transient=False, record={"model": self.model, "requested": self.max_output_tokens, "max_output_tokens": pricing["max_output_tokens"]})
         self.thinking = bool(thinking)
         self.json_mode = bool(json_mode)
+        if self.thinking and not pricing.get("supports_thinking", True):
+            raise QwenTransportError("thinking_unsupported_for_model", transient=False)
+        if self.json_mode and not pricing.get("supports_json_mode", True):
+            raise QwenTransportError("json_mode_unsupported_for_model", transient=False)
         if self.thinking and self.json_mode and not bool(pricing["thinking_json"]):
             raise QwenTransportError("thinking_json_unsupported_for_model", transient=False, record={"model": self.model, "thinking": True, "response_format": {"type": "json_object"}})
         try:
@@ -1020,7 +1076,7 @@ class QwenDirectClient:
         )
         effective_request = {
             "model": model,
-            "enable_thinking": thinking,
+            "enable_thinking": body.get("enable_thinking"),
             "thinking_budget": thinking_budget,
             "answer_tokens": requested_output_tokens,
             "total_output_tokens": total_output_tokens,

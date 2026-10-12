@@ -147,7 +147,193 @@ Use `reading_view` for text and the block/asset/reference indexes for targeted
 reading and citations. A formula marked available means its source is indexed,
 not that PDF extraction preserved its mathematics. PDF-derived formulas,
 table structure, scans and figure interpretation may need the original assets.
-This layer performs no OCR or image interpretation and makes no Qwen calls.
+The default acquisition path performs no OCR or image interpretation and makes
+no Qwen calls. Explicit regional transcription is described below.
+
+## Optional local Docling and regional transcription
+
+`build_local_materials` can run an explicitly configured local Docling process
+and transcribe its detected formula/table crops through the ordinary Qwen
+transport and existing project/account ledgers. Native JATS/TEI inputs retain
+priority and bypass this PDF supplement, including provider calls. Figure
+interpretation remains disabled; figures and linked captions are retained.
+
+Use an existing isolated Docling installation and already cached model weights.
+The runner sets Hugging Face/Transformers offline mode. It neither installs nor
+downloads models. Generate a full configuration with that installation's SDK;
+ordinary base-class JSON dumps lose concrete options in Docling 2.138.0:
+
+```python
+import json
+from pathlib import Path
+from importlib.metadata import version
+from docling.datamodel.pipeline_options import PdfPipelineOptions
+
+options = PdfPipelineOptions(artifacts_path=Path("/absolute/cached/docling/models"),
+    do_ocr=False, do_formula_enrichment=False, do_code_enrichment=False,
+    do_picture_description=False, do_picture_classification=False,
+    do_chart_extraction=False, enable_remote_services=False,
+    allow_external_plugins=False)
+native = {"packages": {name: version(name) for name in
+    ("docling", "docling-core", "docling-ibm-models", "docling-parse")},
+    "pipeline_options": options.model_dump(mode="json", serialize_as_any=True),
+    "page_range": "all"}
+Path("native-docling.json").write_text(json.dumps(native, indent=2), encoding="utf-8")
+```
+
+`page_range` defaults to `all` and resolves against the original PDF. An explicit
+`[start, end]` selection records partial coverage. Full page coverage only means
+layout was run on every page; undetected or inline formula coverage remains
+unknown. Scanned body text stays a gap because this runner disables OCR.
+
+Create an explicit adapter file `docling-cli.json` with absolute paths:
+
+```json
+{
+  "parser_version": "2.138.0",
+  "command": ["/absolute/docling/python", "-B", "-X", "utf8",
+    "/absolute/repository/scripts/upgrade3/parse_docling_pdf.py",
+    "--input", "{input}", "--output", "{output}",
+    "--config", "/absolute/native-docling.json"],
+  "config": {"packages": {}, "pipeline_options": {}, "page_range": "all"},
+  "timeout_seconds": 1200
+}
+```
+
+Replace the `config` value with the complete object from `native-docling.json`.
+Preflight requires the installed package versions and resolved full native
+options to match. Old truncated configurations and failed run artifacts remain
+separate; they are not silently reinterpreted as the corrected configuration.
+
+The tested RTX3080 deployment uses `--docling-max-processes 2` and
+`--recognition-concurrency 8`; see [measured results](verification/pdf-parser-parallel-20261013/README.md).
+The reusable [Plus config](../config/regional_recognition/plus.json) enables
+that regional bound and permits at most two attempts only for complete replies
+with invalid JSON/schema. Transport failures and unknown spend are not retried
+automatically. The generic constructor defaults remain conservative (1 local
+process and 4 region requests); explicit deployment parameters take priority.
+
+Create `regional.json` to bound each paper's recognition stage independently
+of the acquisition deadline:
+
+```json
+{
+  "model": "qwen3.5-plus",
+  "max_regions": 30,
+  "concurrency": 4,
+  "max_attempts_per_region": 1,
+  "deadline_seconds": 600,
+  "timeout_seconds": 120,
+  "max_pixels": 4194304,
+  "formula_output_tokens": 2048,
+  "table_output_tokens": 8192
+}
+```
+
+The default is Plus. To compare a cheaper model on the same automatically
+selected crops, explicitly set `model` to `qwen3.5-flash` in another config.
+Its Beijing price/capability registration is separate; no automatic downgrade
+occurs. Shared crop caches keep local extraction identical while recognition
+caches separate the requested models.
+
+Regional requests initially default to four concurrent calls. Set `concurrency`
+in the JSON or override it with `--recognition-concurrency 1` for a serial
+comparison (supported range 1–32). This is an initial setting, not a measured
+optimum. Docling initially runs one subprocess at a time; override its local
+bound with `--docling-max-processes` (1–8). The shared adapter/recognizer enforce
+these bounds across all PDFs in `--batch-manifest`, even with multiple
+acquisition network workers. Local manifest entries also use the existing
+`--network-workers` outer pool; checkpoint publication remains on the main
+thread. Each local extraction slot is released before
+regional recognition starts. Tables dispatch first to reduce their long tail, while
+final regions/assets retain their original document order. Each request owns
+an independent provider and immutable attempt directory. Shared tokenizer,
+factory initialization and dual-ledger operations use a short lock; HTTP/SSE
+does not hold it. Both reservations precede every physical send.
+The same adapter and recognizer can be passed through `MaterialAcquirer`'s
+existing `providers["docling"]` entry for E2E acquisition; no separate batch
+driver or reduced network worker count is required.
+
+Other explicit lower-cost candidates are `qwen3-vl-flash`,
+`qwen-vl-ocr-2025-11-20` and `qwen3.5-ocr`. For either OCR model explicitly set
+`"json_mode": false` and use `"table_output_tokens": 4096` for the bounded
+trial. OCR receives all unchanged instructions and crops in one user message;
+unsupported thinking and structured-output parameters are omitted. Responses
+must be complete JSON or one complete outer `json` code fence, then pass the
+same strict formula/table validation. Arbitrary surrounding prose is rejected.
+The VL Flash price boundaries conservatively use 32000 and 128000 tokens;
+the highest tier covers the remaining supported input through 258048 tokens.
+
+Preview creates a source-bound snapshot with explicit pending regions and
+makes no provider calls:
+
+```powershell
+python -B -X utf8 -m scripts.upgrade3.build_local_materials `
+  --input paper.pdf --record-json paper-record.json --disable-rescue `
+  --output-root outputs/materials --cache-root data/material-cache `
+  --deadline-seconds 1200 --docling-cli-config docling-cli.json `
+  --recognition-config regional.json --recognition-cache-root data/regional-cache
+```
+
+Enable paid transcription only by adding the existing budget/account/key
+arguments and an explicit absolute cumulative project ceiling. For example,
+if settled project spend is 0.03 CNY and this execution may add at most 1 CNY,
+the cumulative ceiling is 1.03 CNY:
+
+```powershell
+  --recognition-run --recognition-ceiling-cny 1.03 `
+  --budget-ledger outputs/run/budget.sqlite --budget-limit 80 `
+  --account-ledger outputs/account/budget.sqlite --account-budget-limit 300 `
+  --account-mapping-dir outputs/run/account_mappings `
+  --key-file /absolute/existing/keys.txt --key-index 1 `
+  --tokenizer /absolute/existing/local/tokenizer.json
+```
+
+Both ledgers must already exist. Their history is preserved. The physical
+transport reserves in both ledgers before sending, uses one key and zero
+internal retries, requests streamed actual usage, and settles from that usage.
+Image reservations use the local text tokenizer plus a conservative bound for
+each image. Provider bytes, usage, effective request options, project receipts,
+source/config/crop hashes, and every attempt are retained. No provider failure
+is replaced with an invented transcription.
+
+Successful region caches bind PDF content, local layout content, crop bytes,
+model, pixel/output bounds, prompt and implementation. Moving snapshot output
+or raising scheduling/fee bounds reuses successful results. A local parser
+revision can replay saved responses only when source, crops, prompts, exact
+messages and model settings still match; changed request inputs require new
+recognition. Reparse publishes an immutable `REPARSED_*.json` receipt with the
+original response/result hashes and current parser hash, preserving the paid
+attempt. Missing optional formula labels become empty; missing uncertainty
+metadata becomes explicit `uncertainty_not_reported` and uncertain status.
+The original PDF, raw local layout, linked caption/footnote crops and earlier
+snapshots remain intact. Saved Docling input can replace the CLI options via
+`--docling-document-json document.json --docling-run-json run.json`.
+
+Detected tables are transcribed even when local cells exist; those cells can
+misread scientific units. Recognized cells replace the reading projection while
+the raw local candidate remains retained separately. Empty returned captions
+or notes fall back to the linked native text with explicit uncertainty. Tables
+with empty columns and fully rectangular rows can promote the first row
+verbatim to headers with explicit uncertainty. Decoded LaTeX control characters
+also mark uncertainty; their raw bytes are preserved without guessing commands.
+Formula raw LaTeX is retained alongside conservative escaping normalization, which
+preserves matrix row separators. Standard, economy, concise, practical and
+legacy reading inputs carry these source-bound structures and fidelity fields.
+
+Unfinished regions expose pending, uncertain, error or budget-stopped status.
+Only complete responses with invalid JSON/schema can use an explicitly bounded
+second attempt. Unknown spend freezes that region and stops new scheduling.
+Already sent calls finish and save their receipts; unsent work remains pending.
+Completed cached regions can still replay freely after a stop. The pool never
+queues more than the configured number of active region tasks, and scheduling
+concurrency is recorded as policy rather than changing paid request identity.
+A known reservation refusal before HTTP is retried through the real ledger on
+the next execution, including unchanged policy after outstanding reservations
+settle. Earlier refusal receipts remain immutable. Unknown spend is never
+automatically retried. The recognition deadline and region limit preserve all
+completed cache entries. Batch checkpoints with unfinished regional recognition
+are re-evaluated automatically; validated successful regions replay freely.
 
 ## Bounded Qwen background reading
 

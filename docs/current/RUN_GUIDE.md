@@ -394,3 +394,12 @@ python scripts/upgrade3/lower_budget_limit.py --ledger path/to/current_experimen
 ## 独立首尾与完整稿校验
 
 后置首尾写作方法、明确格式要求和新旧提示缓存隔离见 [首尾实施记录](../implementation/parts-checker-20261012/PARTS_IMPLEMENTATION.md)。已有03完整句柄稿进入 [校验与出版正式入口](MANUSCRIPT_CHECKER_RUN_GUIDE.md)，与正常下游共用 selected_manuscript → 最终编号 → 出版接缝。新post_body默认启用校验；无响应源只预览并停止，显式关闭则选03原稿。真实质量仍由本地预算受控试跑评估。
+
+
+## 2026-10-13 PDF 解析与区域识别
+
+原生 XML 优先。PDF 的全页 Docling 与区域 Plus 为显式配置入口，部署及正式命令见 [docs/local_materials.md](../local_materials.md#optional-local-docling-and-regional-transcription)。配置中的本地 Python、模型和缓存路径须与本机部署一致；CLI 不隐式下载模型或切换远端解析服务。
+
+--docling-max-processes 控制共享本地解析上限，--recognition-concurrency 控制整个批次的区域 HTTP 上限，--network-workers 控制外层材料任务。串行、并行和缓存恢复使用同一科学输入；成功区域复用不再次收费。项目 ledger 与账户 ledger 同时预留及结算，费用未知保留占额。免费预览不加 --recognition-run；真实识别须显式传入两账本、累计封顶、tokenizer 和密钥文件。
+
+实测配置、解析质量、双账本及恢复证据见 [统一验收入口](../verification/pdf-parser-parallel-20261013/README.md)。正文主线路及已有首尾/出版步骤不变，材料解析不会自动替代后续阅读。

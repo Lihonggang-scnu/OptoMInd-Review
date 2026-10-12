@@ -15,6 +15,8 @@ import os
 import re
 import sys
 import uuid
+import threading
+from types import SimpleNamespace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
@@ -164,7 +166,7 @@ def _require_max_permission(args: argparse.Namespace, profiles: Mapping[str, Map
                          + ":pass --allow-max only for an explicitly approved Max run")
 
 
-def make_live_factory(args: argparse.Namespace, *, token_counter=None, reservation_ceiling_cny=None):
+def make_live_factory(args: argparse.Namespace, *, token_counter=None, reservation_ceiling_cny=None, thread_safe=False):
     """Create one lazy shared-ledger factory; no keys are read here."""
     if not args.run or args.responses:
         raise ValueError("live_execution_requires_run_without_responses")
@@ -180,8 +182,35 @@ def make_live_factory(args: argparse.Namespace, *, token_counter=None, reservati
     if limit is None and not ledger_path.is_file():
         raise ValueError("new_ledger_requires_budget_limit")
     ledger = None
+    shared_lock = threading.RLock()
+    stop_event = threading.Event() if thread_safe else None
 
-    def factory(role: str, stage_dir: Path, profile: Mapping[str, Any]):
+    def ledger_call(method, *values, **options):
+        with shared_lock:
+            if method == "reserve" and stop_event.is_set():
+                from optomind_research.runtime.upgrade3.module4.runtime import QwenTransportError
+                raise QwenTransportError("regional_dispatch_stopped_before_reservation", transient=False)
+            try:
+                return getattr(ledger, method)(*values, **options)
+            except BaseException:
+                stop_event.set()
+                raise
+            finally:
+                if method == "settle" and options.get("uncertain"):
+                    stop_event.set()
+
+    # Regional callers opt in. Each Qwen client is independent; only shared
+    # mutable accounting/tokenizer state is serialized, never the HTTP stream.
+    budget_entry = SimpleNamespace(
+        reserve=lambda *values, **options: ledger_call("reserve", *values, **options),
+        settle=lambda *values, **options: ledger_call("settle", *values, **options))
+    original_counter = token_counter
+    if thread_safe and token_counter is not None:
+        def token_counter(*values, **options):
+            with shared_lock:
+                return original_counter(*values, **options)
+
+    def construct_provider(role: str, stage_dir: Path, profile: Mapping[str, Any]):
         nonlocal ledger
         _require_max_permission(args, {role: profile})
         from optomind_research.runtime.upgrade3.module4.runtime import GlobalBudgetLedger, QwenDirectClient
@@ -206,7 +235,7 @@ def make_live_factory(args: argparse.Namespace, *, token_counter=None, reservati
         provider = QwenDirectClient(
             **constructor, key_file=args.key_file, max_retries=0, max_keys=1,
             key_index=getattr(args, "key_index", None),
-            budget_ledger=ledger, prompt_token_counter=token_counter,
+            budget_ledger=budget_entry if thread_safe else ledger, prompt_token_counter=token_counter,
             raw_response_dir=Path(stage_dir) / "transport",
         )
 
@@ -228,8 +257,24 @@ def make_live_factory(args: argparse.Namespace, *, token_counter=None, reservati
             setattr(call, attribute, getattr(provider, attribute))
         return call
 
+    def factory(role: str, stage_dir: Path, profile: Mapping[str, Any]):
+        if thread_safe:
+            with shared_lock:
+                try:
+                    return construct_provider(role, stage_dir, profile)
+                except BaseException:
+                    stop_event.set()
+                    raise
+        return construct_provider(role, stage_dir, profile)
+
+    def ledger_snapshot():
+        with shared_lock:
+            return (ledger.project if hasattr(ledger, "project") else ledger).as_dict() if ledger is not None else None
+
     factory.execution_mode = "live"
-    factory.ledger_snapshot = lambda: (ledger.project if hasattr(ledger, "project") else ledger).as_dict() if ledger is not None else None
+    factory.ledger_snapshot = ledger_snapshot
+    if thread_safe:
+        factory.stop_event = stop_event
     return factory
 
 

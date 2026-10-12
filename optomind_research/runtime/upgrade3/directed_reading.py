@@ -32,6 +32,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping, Sequence
 
 from .local_materials import PreparedSnapshot, PreparedSnapshotProvider
+from .material_reading import project_docling_asset_for_reading
 from .module4.provenance import resolve_anchor
 from .module4.runtime import GlobalBudgetLedger, QwenDirectClient, estimated_cost_cny, invoke_client, model_pricing
 from .practical_materials import (
@@ -1020,7 +1021,7 @@ def build_source_index(snapshot: PreparedSnapshot) -> dict[str, Any]:
         if block_id in source_by_id:
             raise DirectedOutputError(f"duplicate_snapshot_block_id:{block_id}")
         handle = f"s{index:05d}"
-        item = {"source_handle": handle, "block_id": block_id, "snapshot_id": snapshot.snapshot_id, "source_document_id": _text(row.get("source_document_id")), "block_type": _text(row.get("block_type")), "section_path": list(row.get("section_path") or ()), "locator": dict(row.get("locator") or {}), "asset_refs": list(row.get("asset_refs") or ()), "text": _source_text(row), "inline_references": row.get("inline_references") or []}
+        item = {"source_handle": handle, "block_id": block_id, "snapshot_id": snapshot.snapshot_id, "source_document_id": _text(row.get("source_document_id")), "block_type": _text(row.get("block_type")), "section_path": list(row.get("section_path") or ()), "locator": dict(row.get("locator") or {}), "asset_refs": list(row.get("asset_refs") or ()), "text": _source_text(row), "raw_text": _text(row.get("text_raw") or row.get("text")), "inline_references": row.get("inline_references") or []}
         sources.append(item)
         source_by_handle[handle] = item
         source_by_id[block_id] = item
@@ -1086,13 +1087,91 @@ def build_prompt_source_packet(snapshot: PreparedSnapshot, index: Mapping[str, A
                 out.append(source["source_handle"])
         return out
 
-    assets = [dict(asset) for asset in snapshot.assets if isinstance(asset.get("table_structure"), Mapping)]
+    assets = [
+        dict(project_docling_asset_for_reading(asset))
+        for asset in snapshot.assets
+        if _text(asset.get("type")).casefold() == "table"
+        and isinstance(asset.get("table_structure"), Mapping)
+    ]
     asset_by_id = {_norm(asset.get("asset_id")): asset for asset in assets if _norm(asset.get("asset_id"))}
+    formula_by_id = {
+        _norm(asset.get("asset_id")): dict(project_docling_asset_for_reading(asset))
+        for asset in snapshot.assets
+        if isinstance(asset, Mapping)
+        and _text(asset.get("type")).casefold() == "formula"
+        and _norm(asset.get("asset_id"))
+    }
+
+    def formula_assets_for_source(source: Mapping[str, Any]) -> list[dict[str, Any]]:
+        """Attach immutable formula source to its existing source handle.
+
+        A formula nested in a caption or prose block may not have its own
+        block because the enclosing block owns the XML text.  Keeping the raw
+        formula here lets the legacy directed reader see it through the same
+        source handle without creating a duplicate block/handle.
+        """
+
+        output: list[dict[str, Any]] = []
+        source_id = _text(source.get("source_document_id"))
+        source_block_id = _norm(source.get("block_id"))
+        source_path = _text((source.get("locator") or {}).get("xml_path"))
+        referenced_ids = {_norm(value) for value in source.get("asset_refs") or () if _norm(value)}
+        for asset_id, asset in formula_by_id.items():
+            if source_id and _text(asset.get("source_document_id")) != source_id:
+                continue
+            asset_path = _text((asset.get("locator") or {}).get("xml_path"))
+            caption_ids = {_norm(item) for item in asset.get("caption_block_ids") or () if _norm(item)}
+            # Older snapshots may not have propagated asset_refs to captions,
+            # cells, or footnotes.  The immutable XML locator and caption IDs
+            # provide a deterministic compatibility path without guessing by
+            # visual proximity.
+            linked = (
+                asset_id in referenced_ids
+                or source_block_id in caption_ids
+                or bool(source_path and asset_path.startswith(source_path.rstrip("/") + "/"))
+            )
+            if not linked:
+                continue
+            raw_source = _text(asset.get("raw_source"))
+            if not raw_source and isinstance(asset.get("content_ref"), Mapping):
+                raw_source = _text(asset["content_ref"].get("raw_source"))
+            output.append({
+                "asset_id": asset_id,
+                "type": "formula",
+                "source_document_id": _text(asset.get("source_document_id")),
+                "locator": dict(asset.get("locator") or {}),
+                "caption_block_ids": [_text(item) for item in asset.get("caption_block_ids") or () if _text(item)],
+                "content_status": _text(asset.get("content_status")),
+                "parsed_successfully": asset.get("parsed_successfully"),
+                "raw_source": raw_source,
+                **({key: asset.get(key) for key in ("fidelity_status", "recognition_status", "recognition_provenance", "normalized_latex", "equation_label", "provided_to_multimodal")} if asset.get("parser") else {}),
+            })
+        return output
     table_cells_by_asset: dict[str, list[Mapping[str, Any]]] = {asset_id: [] for asset_id in asset_by_id}
     unlinked_cells: list[Mapping[str, Any]] = []
+    def source_belongs_to_asset(source: Mapping[str, Any], asset_id: str, asset: Mapping[str, Any]) -> bool:
+        source_document_id = _text(source.get("source_document_id"))
+        asset_document_id = _text(asset.get("source_document_id"))
+        if source_document_id and asset_document_id and source_document_id != asset_document_id:
+            return False
+        refs = {_norm(value) for value in source.get("asset_refs") or () if _norm(value)}
+        if asset_id in refs:
+            return True
+        source_path = _text((source.get("locator") or {}).get("xml_path"))
+        asset_path = _text((asset.get("locator") or {}).get("xml_path"))
+        return bool(asset_path and source_path.startswith(asset_path.rstrip("/") + "/"))
+
     for source in table_cell_sources:
         refs = [_norm(value) for value in source.get("asset_refs") or () if _norm(value)]
         asset_id = next((value for value in refs if value in asset_by_id), "")
+        if not asset_id:
+            candidates = [
+                (candidate_id, _text((candidate_asset.get("locator") or {}).get("xml_path")))
+                for candidate_id, candidate_asset in asset_by_id.items()
+                if source_belongs_to_asset(source, candidate_id, candidate_asset)
+            ]
+            candidates.sort(key=lambda item: len(item[1]), reverse=True)
+            asset_id = candidates[0][0] if candidates else ""
         if asset_id:
             table_cells_by_asset[asset_id].append(source)
         else:
@@ -1122,20 +1201,29 @@ def build_prompt_source_packet(snapshot: PreparedSnapshot, index: Mapping[str, A
             for source in row_cells:
                 represented.add(source["source_handle"])
                 locator = source.get("locator") or {}
-                cells_out.append({"source_handle": source["source_handle"], "block_id": source["block_id"], "col_index": locator.get("col_index"), "is_header": bool(locator.get("is_header")), "text": source["text"]})
+                cells_out.append({"source_handle": source["source_handle"], "block_id": source["block_id"], "col_index": locator.get("col_index"), "is_header": bool(locator.get("is_header")), "text": source["text"], "raw_text": source.get("raw_text", ""), "structured_assets": formula_assets_for_source(source)})
             row_label = next((cell for cell in cells_out if cell.get("col_index") == 0 and not cell.get("is_header")), None)
             rows.append({"row_index": row_index, "row_label_source_handle": row_label["source_handle"] if row_label else "", "cells": cells_out})
-        caption_blocks = [source for source in body_sources if _text(source.get("block_type")).casefold() in {"table_caption", "caption"} and asset_id in [_norm(value) for value in source.get("asset_refs") or ()]]
-        footnote_blocks = [source for source in body_sources if _text(source.get("block_type")).casefold() in {"footnote", "table_footnote"} and asset_id in [_norm(value) for value in source.get("asset_refs") or ()]]
+        caption_blocks = [
+            source for source in body_sources
+            if _text(source.get("block_type")).casefold() in {"table_caption", "caption"}
+            and source_belongs_to_asset(source, asset_id, asset)
+        ]
+        footnote_blocks = [
+            source for source in body_sources
+            if _text(source.get("block_type")).casefold() in {"footnote", "table_footnote"}
+            and source_belongs_to_asset(source, asset_id, asset)
+        ]
         for source in [*caption_blocks, *footnote_blocks]:
             represented.add(source["source_handle"])
         return {
             "table_asset_id": asset_id,
+            **({"parser_asset": {key: asset.get(key) for key in ("parser", "parser_version", "fidelity_status", "recognition_status", "recognition_provenance", "parsed_successfully", "provided_to_multimodal", "parser_provenance", "crop_ref")}} if asset.get("parser") else {}),
             "section_path": list(next(iter(cells), {}).get("section_path") or ()) if cells else [],
-            "caption": [{"source_handle": source["source_handle"], "text": source["text"]} for source in caption_blocks],
+            "caption": [{"source_handle": source["source_handle"], "text": source["text"], "structured_assets": formula_assets_for_source(source), **({"locator": dict(source.get("locator") or {})} if asset.get("parser") else {})} for source in caption_blocks],
             "column_headers": column_rows,
             "rows": rows,
-            "footnotes": [{"source_handle": source["source_handle"], "text": source["text"]} for source in footnote_blocks],
+            "footnotes": [{"source_handle": source["source_handle"], "text": source["text"], "raw_text": source.get("raw_text", ""), "structured_assets": formula_assets_for_source(source), **({"locator": dict(source.get("locator") or {})} if asset.get("parser") else {})} for source in footnote_blocks],
         }
 
     tables = []
@@ -1157,7 +1245,7 @@ def build_prompt_source_packet(snapshot: PreparedSnapshot, index: Mapping[str, A
             continue
         asset_refs = [_norm(value) for value in source.get("asset_refs") or ()]
         # Figure captions and other non-table contexts remain standalone.
-        standalone.append({"source_handle": handle, "block_id": source["block_id"], "block_type": source["block_type"], "section_path": list(source.get("section_path") or ()), "text": source["text"], "locator": dict(source.get("locator") or {}), "asset_refs": asset_refs, "inline_references": source.get("inline_references") or []})
+        standalone.append({"source_handle": handle, "block_id": source["block_id"], "block_type": source["block_type"], "section_path": list(source.get("section_path") or ()), "text": source["text"], "locator": dict(source.get("locator") or {}), "asset_refs": asset_refs, "structured_assets": formula_assets_for_source(source), "inline_references": source.get("inline_references") or []})
         represented.add(handle)
 
     expected = {row["source_handle"] for row in body_sources}
