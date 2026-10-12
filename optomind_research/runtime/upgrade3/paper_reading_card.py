@@ -39,7 +39,7 @@ from .paper_reading_card_prompt import PROMPT_VERSION, build_messages
 
 
 SCHEMA_VERSION = "optomind.paper_reading_card.v1"
-VALIDATOR_VERSION = "optomind.paper_reading_card.validator.v2"
+VALIDATOR_VERSION = "optomind.paper_reading_card.validator.v3"
 MODEL = "qwen3.7-flash"
 INPUT_PROFILES = {"standard", "economy"}
 DEFAULT_INPUT_PROFILE = "economy"
@@ -533,6 +533,29 @@ def validate_card_output(result: Any, card_input: Mapping[str, Any]) -> dict[str
     """Normalize and validate A/B content against known plan IDs and depth."""
 
     raw = _decode_content(result)
+    alias_diagnostics: list[dict[str, Any]] = []
+    for canonical_key, alias_key in (("general_understanding", "A"), ("review_planning", "B")):
+        if alias_key not in raw:
+            continue
+        alias_value = raw[alias_key]
+        if not isinstance(alias_value, Mapping):
+            raise CardOutputError(f"top_level_view_alias_not_object:{alias_key}")
+        canonical_present = canonical_key in raw
+        if canonical_present:
+            canonical_value = raw[canonical_key]
+            if not isinstance(canonical_value, Mapping) or _canonical(canonical_value) != _canonical(alias_value):
+                raise CardOutputError(f"top_level_view_alias_conflict:{canonical_key}:{alias_key}")
+        else:
+            raw[canonical_key] = alias_value
+        # The immutable RAW artifact holds the original object.  Record only
+        # its location and digest, avoiding duplicate scientific material in
+        # the published card and downstream planning inputs.
+        alias_diagnostics.append({
+            "reason": "top_level_view_alias", "source_key": alias_key,
+            "canonical_key": canonical_key, "canonical_present": canonical_present,
+            "raw_artifact": "RAW_RESPONSE.json", "decoded_content_path": f"$.{alias_key}",
+            "raw_value_sha256": _sha(alias_value),
+        })
     a = raw.get("general_understanding")
     b = raw.get("review_planning")
     if not isinstance(a, Mapping) or not isinstance(b, Mapping):
@@ -616,7 +639,7 @@ def validate_card_output(result: Any, card_input: Mapping[str, Any]) -> dict[str
     return {
         "general_understanding": normalized_a,
         "review_planning": normalized_b,
-        "normalization_diagnostics": diagnostics,
+        "normalization_diagnostics": alias_diagnostics + diagnostics,
     }
 
 

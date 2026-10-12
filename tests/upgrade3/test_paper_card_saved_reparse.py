@@ -250,3 +250,58 @@ def test_native_batch_cli_explicit_reparse_flag_is_forwarded(monkeypatch, capsys
     assert cli.main(["--manifest", "m", "--output-root", "o", "--run", "--reparse-saved-responses"]) == 0
     assert captured[0]["mode"] == "run" and captured[0]["reparse_saved_responses"] is True
     capsys.readouterr()
+
+
+@pytest.mark.parametrize("keep_canonical", [False, True])
+def test_top_level_AB_aliases_preserve_canonical_content_and_raw_reference(keep_canonical):
+    canonical = response()
+    card_input = {"review_plan": {"facets": [{"id": "F1"}]}}
+    expected = card.validate_card_output(canonical, card_input)
+    aliased = copy.deepcopy(canonical)
+    content = aliased["content"]
+    content["A"] = copy.deepcopy(content["general_understanding"])
+    content["B"] = copy.deepcopy(content["review_planning"])
+    if not keep_canonical:
+        del content["general_understanding"], content["review_planning"]
+    before = copy.deepcopy(aliased)
+    actual = card.validate_card_output(aliased, card_input)
+    assert aliased == before
+    assert actual["general_understanding"] == expected["general_understanding"]
+    assert actual["review_planning"] == expected["review_planning"]
+    aliases = actual["normalization_diagnostics"][:2]
+    assert [row["source_key"] for row in aliases] == ["A", "B"]
+    for row in aliases:
+        assert row["canonical_present"] is keep_canonical
+        assert row["raw_artifact"] == "RAW_RESPONSE.json"
+        assert row["decoded_content_path"] == "$." + row["source_key"]
+        assert row["raw_value_sha256"] == card._sha(content[row["source_key"]])
+        assert "raw_value" not in row and "raw_row" not in row
+    assert actual["normalization_diagnostics"][2:] == expected["normalization_diagnostics"]
+
+
+@pytest.mark.parametrize("case", ["conflicting_A", "conflicting_B", "invalid_canonical",
+                                  "invalid_A", "invalid_B", "missing_B", "missing_A_field", "missing_B_field", "unknown_alias"])
+def test_top_level_AB_alias_conflicts_missing_fields_and_wrong_types_fail(case):
+    content = response()["content"]
+    content["A"] = copy.deepcopy(content["general_understanding"])
+    content["B"] = copy.deepcopy(content["review_planning"])
+    if case == "conflicting_A":
+        content["A"]["work_summary"] = "Different content"
+    elif case == "conflicting_B":
+        content["B"]["planning_summary"] = "Different content"
+    elif case == "invalid_canonical":
+        content["general_understanding"] = None
+    elif case in {"invalid_A", "invalid_B"}:
+        content[case[-1]] = []
+    else:
+        del content["general_understanding"], content["review_planning"]
+        if case == "missing_B":
+            del content["B"]
+        elif case == "missing_A_field":
+            del content["A"]["approach"]
+        elif case == "missing_B_field":
+            del content["B"]["planning_summary"]
+        elif case == "unknown_alias":
+            content["a"] = content.pop("A")
+    with pytest.raises(card.CardOutputError):
+        card.validate_card_output({"content": content}, {"review_plan": {"facets": [{"id": "F1"}]}})
