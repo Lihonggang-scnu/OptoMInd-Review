@@ -305,3 +305,32 @@ def test_top_level_AB_alias_conflicts_missing_fields_and_wrong_types_fail(case):
             content["a"] = content.pop("A")
     with pytest.raises(card.CardOutputError):
         card.validate_card_output({"content": content}, {"review_plan": {"facets": [{"id": "F1"}]}})
+
+
+@pytest.mark.parametrize("keep_canonical", [False, True])
+def test_exact_approology_alias_keeps_content_and_raw_location(keep_canonical):
+    raw = response()
+    a = raw["content"]["general_understanding"]
+    original = a["approach"]
+    a["approology"] = original
+    if not keep_canonical:
+        del a["approach"]
+    before = copy.deepcopy(raw)
+    normalized = card.validate_card_output(raw, {"review_plan": {"facets": [{"id": "F1"}]}})
+    assert raw == before and normalized["general_understanding"]["approach"] == original
+    diagnostic = normalized["normalization_diagnostics"][0]
+    assert diagnostic["source_key"] == "approology"
+    assert diagnostic["raw_artifact"] == "RAW_RESPONSE.json" and "raw_value" not in diagnostic
+
+
+@pytest.mark.parametrize("changes", [
+    {"approology": []}, {"approology": ""}, {"approach": None},
+    {"approach": "Different substantive method"}, {"appro": "Different substantive method"},
+])
+def test_approology_wrong_type_or_conflicting_aliases_fail(changes):
+    raw = response()
+    a = raw["content"]["general_understanding"]
+    a["approology"] = a.pop("approach")
+    a.update(changes)
+    with pytest.raises(card.CardOutputError):
+        card.validate_card_output(raw, {"review_plan": {"facets": [{"id": "F1"}]}})

@@ -39,7 +39,7 @@ from .paper_reading_card_prompt import PROMPT_VERSION, build_messages
 
 
 SCHEMA_VERSION = "optomind.paper_reading_card.v1"
-VALIDATOR_VERSION = "optomind.paper_reading_card.validator.v3"
+VALIDATOR_VERSION = "optomind.paper_reading_card.validator.v4"
 MODEL = "qwen3.7-flash"
 INPUT_PROFILES = {"standard", "economy"}
 DEFAULT_INPUT_PROFILE = "economy"
@@ -574,6 +574,15 @@ def validate_card_output(result: Any, card_input: Mapping[str, Any]) -> dict[str
         alias_value = _norm(a.get("appro")) if isinstance(a.get("appro"), str) else ""
         if approach_value and alias_value and approach_value != alias_value:
             raise CardOutputError("general_understanding_approach_alias_conflict")
+    if "approology" in a:
+        alias_value = a["approology"]
+        if not isinstance(alias_value, str) or not _norm(alias_value):
+            raise CardOutputError("general_understanding_approology_alias_invalid")
+        canonical_present = "approach" in a
+        if canonical_present and (not isinstance(a["approach"], str) or _norm(a["approach"]) != _norm(alias_value)):
+            raise CardOutputError("general_understanding_approach_alias_conflict")
+        a["approach"] = _norm(alias_value)
+        alias_diagnostics.append({"reason": "general_understanding_field_alias", "source_key": "approology", "canonical_key": "approach", "canonical_present": canonical_present, "raw_artifact": "RAW_RESPONSE.json", "decoded_content_path": "$.general_understanding.approology" if "general_understanding" in _decode_content(result) else "$.A.approology", "raw_value_sha256": _sha(alias_value)})
     required_a = ("paper_kind", "research_scope", "work_summary", "problem_or_question", "approach", "key_findings", "contribution_and_limits")
     missing_a = [field for field in required_a if field not in a]
     if missing_a:

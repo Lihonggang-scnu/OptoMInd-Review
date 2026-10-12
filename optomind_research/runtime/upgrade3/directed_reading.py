@@ -1262,6 +1262,10 @@ def build_prompt_source_packet(snapshot: PreparedSnapshot, index: Mapping[str, A
         "tables_by_rows": tables,
         "reference_handles": index["references"],
     }
+    boundary = snapshot.reading_policy().get("material_boundary")
+    if boundary:
+        packet["material_boundary"] = boundary
+        packet["supplementary_source_handles"] = [row["source_handle"] for row in body_sources if row.get("source_document_id") in boundary["supplementary_source_ids"]]
     source_material_bytes = sum(len(_text(row.get("text")).encode("utf-8")) for row in body_sources) + sum(len(_text(row.get("text")).encode("utf-8")) for row in index["references"])
     audit = {
         "method": "standalone_body_blocks_plus_table_rows_plus_separate_references",
@@ -1485,6 +1489,9 @@ def build_source_selection_catalog(
             for row in index["references"]
         ],
     }
+    if full_packet.get("material_boundary"):
+        catalog["material_boundary"] = full_packet["material_boundary"]
+        catalog["supplementary_source_handles"] = full_packet["supplementary_source_handles"]
     audit = {
         "method": "distributed_long_prose_previews_and_table_row_previews_no_full_table_text",
         "snapshot_id": snapshot.snapshot_id,
@@ -1542,6 +1549,10 @@ def build_source_selection_messages(
             "p": row.get("preview", "") + (" …" if row.get("preview_truncated") and row.get("preview_strategy") != "distributed_4_windows" else ""),
         } for row in catalog["candidates"]],
     }
+    if catalog.get("material_boundary"):
+        selector_catalog["material_boundary"] = catalog["material_boundary"]
+        supplementary_handles = set(catalog["supplementary_source_handles"])
+        selector_catalog["supplementary_candidate_ids"] = [row["candidate_id"] for row in catalog["candidates"] if any(handle in supplementary_handles for handle in row.get("source_handles") or ())]
     outputs = {row["output_id"]: row for row in task.get("required_outputs") or () if isinstance(row, Mapping)}
     questions = []
     for row in task.get("questions") or ():
@@ -1878,6 +1889,9 @@ def build_selected_source_packet(
         "tables_by_rows": selected_tables,
         "reference_handles": references,
     }
+    if full_packet.get("material_boundary"):
+        packet["material_boundary"] = full_packet["material_boundary"]
+        packet["supplementary_source_handles"] = sorted(included_handles & set(full_packet["supplementary_source_handles"]))
     audit = {
         "method": "selected_body_blocks_plus_same_section_neighbors_and_complete_table_rows",
         "full_body_source_handle_count": len(body_handles),
@@ -4359,6 +4373,12 @@ def _practical_reading_plan(
     max_input_tokens: int,
 ) -> tuple[dict[str, Any], list[dict[str, str]], dict[str, Any], list[dict[str, Any]], list[dict[str, Any]], list[str]]:
     material = load_practical_material(snapshot_dir)
+    if (Path(snapshot_dir) / "DOCUMENT_MANIFEST.json").exists():
+        policy = PreparedSnapshotProvider(snapshot_dir).load().reading_policy()
+        if policy.get("material_boundary"):
+            # Add source metadata without changing or shortening publisher text.
+            boundary = {"material_scope": policy["material_scope"], "known_gaps": policy["known_gaps"], "material_boundary": policy["material_boundary"]}
+            material["body"] = "Material boundary (source metadata): " + json.dumps(boundary, ensure_ascii=False) + "\n\n" + material["body"]
     questions, outputs, gaps = _practical_task_rows(request, task)
     messages = build_practical_reader_messages(
         title=_norm(paper.get("title")) or _norm((request.get("topic") or {}).get("title")),

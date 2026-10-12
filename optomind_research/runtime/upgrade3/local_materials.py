@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from .document_snapshot import SnapshotError, build_snapshot, build_snapshot_from_bytes, load_blocks, validate_snapshot
+from .document_snapshot import SnapshotError, build_snapshot, build_snapshot_from_bytes, classify_source_material_roles, load_blocks, validate_snapshot
 
 
 @dataclass(frozen=True)
@@ -32,6 +32,8 @@ class PreparedSnapshot:
 
     @property
     def content_depth(self) -> str:
+        if classify_source_material_roles(self.manifest, self.blocks)["supplementary_only"]:
+            return str(self.reading_policy()["material_scope"])
         claim = self.manifest.get("producer_fulltext_claim") or {}
         return str(claim.get("content_depth") or ("fulltext" if claim.get("claimed") else "unknown"))
 

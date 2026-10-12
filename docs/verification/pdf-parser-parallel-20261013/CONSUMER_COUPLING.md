@@ -33,3 +33,8 @@ A/B 两份内容完整但格式拒收的响应，用显式 saved-response 接口
 ## A/B 顶层字段兼容补充
 
 阅读返回明确的 `A` / `B` 时，validator v3 分别映射到正式 `general_understanding` / `review_planning`；两者并存须逐值一致，否则拒绝。原 RAW、提示词、来源与科学内容不修改，诊断只保存映射、原始定位及哈希，不再次复制整份材料。已保存的完整格式失败沿同一严格免费重解析入口恢复；普通调用中的别名直接规范化。两份真实副本恢复与重复复用均为0次调用，原状态和双账不变。
+
+
+## Supplement-only boundary recovery (2026-10-13)
+
+See [source role and recovery contract](SUPPLEMENT_SCOPE_RECOVERY_20261013.md). Supplementary content stays available to A/B and directed readers, with an explicit main-article gap; original snapshots and successful messages stay immutable. Native saved-response reparsing also handles the exact guarded `approology` field alias without another model call.

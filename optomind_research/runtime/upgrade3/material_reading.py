@@ -16,6 +16,8 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from .document_snapshot import classify_source_material_roles
+
 
 MATERIAL_READING_SCHEMA_VERSION = "optomind.material_reading.v1"
 _WS_RE = re.compile(r"\s+")
@@ -263,7 +265,10 @@ def build_reading_policy(
     claim = manifest.get("producer_fulltext_claim") or {}
     has_abstract = bool(abstract_blocks or metadata_abstract_count)
     has_snippets = bool(snippet_blocks or snippet_count)
-    if has_abstract and has_snippets and not body_blocks:
+    material_roles = classify_source_material_roles(manifest, blocks)
+    if material_roles["supplementary_only"]:
+        material_scope = "supplementary_plus_abstract" if has_abstract else "supplementary_only"
+    elif has_abstract and has_snippets and not body_blocks:
         material_scope = "abstract_plus_snippets"
     elif has_abstract and not body_blocks:
         material_scope = "abstract_only"
@@ -274,14 +279,14 @@ def build_reading_policy(
     else:
         material_scope = "metadata_only"
     eligible = material_scope in {
-        "fulltext", "structured_partial", "abstract_only", "abstract_plus_snippets", "snippet_only"
+        "fulltext", "structured_partial", "abstract_only", "abstract_plus_snippets", "snippet_only", "supplementary_only", "supplementary_plus_abstract"
     }
-    return {
+    policy = {
         "schema_version": MATERIAL_READING_SCHEMA_VERSION,
         "snapshot_id": snapshot_id,
         "material_scope": material_scope,
         "declared_content_depth": declared_depth,
-        "fulltext_claimed": bool(claim.get("claimed")),
+        "fulltext_claimed": bool(claim.get("claimed")) and not material_roles["supplementary_only"],
         "paper_identity": _paper_identity(manifest),
         "identity_status": _text((manifest.get("identity_check") or {}).get("status") or "unknown"),
         "known_gaps": [dict(item) for item in manifest.get("known_gaps") or () if isinstance(item, Mapping)],
@@ -309,6 +314,15 @@ def build_reading_policy(
             ],
         },
     }
+    if material_roles["supplementary_source_ids"]:
+        policy["material_boundary"] = {**material_roles, "producer_declared_content_depth": declared_depth}
+        policy["usage_limits"]["prohibited"].append("treat_supplementary_material_as_main_article")
+        if material_roles["supplementary_only"]:
+            policy["declared_content_depth"] = "supplementary"
+            gap = {"kind": "material_scope", "status": "supplementary_only", "reason": "Supplied document is supporting/supplementary material; the main article is not supplied. Explicit methods, conditions and findings in the supplement remain usable.", "source_document_ids": material_roles["supplementary_source_ids"]}
+            if gap not in policy["known_gaps"]:
+                policy["known_gaps"].append(gap)
+    return policy
 
 
 def _asset_raw_source(asset: Mapping[str, Any]) -> str:
@@ -757,6 +771,7 @@ def build_reading_packet(
     """Build a compact packet containing text and trusted source provenance."""
 
     policy = build_reading_policy(manifest, blocks, root=root)
+    supplementary_ids = set((policy.get("material_boundary") or {}).get("supplementary_source_ids") or ())
     paper_identity = _paper_identity(manifest)
     observations: list[dict[str, Any]] = []
     # Structured formula/table observations are the canonical model projection
@@ -791,6 +806,7 @@ def build_reading_packet(
         source_kind = (
             "article_abstract" if is_abstract else
             "retrieved_snippet" if is_snippet else
+            "supplementary_body" if _text(block.get("source_document_id")) in supplementary_ids else
             "article_body"
         )
         observations.append(
@@ -820,7 +836,7 @@ def build_reading_packet(
     )
     observations.extend(auxiliary)
     identity_status = _text((manifest.get("identity_check") or {}).get("status") or "unknown")
-    known_gaps = [dict(item) for item in manifest.get("known_gaps") or () if isinstance(item, Mapping)]
+    known_gaps = policy["known_gaps"]
     source_by_path = {
         _text(item.get("raw_path")): item
         for item in manifest.get("source_documents") or ()
@@ -828,13 +844,15 @@ def build_reading_packet(
     }
     for item in observations:
         source = item.setdefault("source", {})
+        if _text(source.get("source_document_id")) in supplementary_ids:
+            source["document_role"] = "supplementary_material"
         source["identity_status"] = identity_status
         source["known_gap_kinds"] = sorted({_text(gap.get("kind")) for gap in known_gaps if gap.get("kind")})
         source["paper_identity"] = dict(paper_identity)
         source_record = source_by_path.get(_text(source.get("raw_path")))
         if source_record is not None:
             source["raw_sha256"] = _text(source_record.get("raw_sha256"))
-    return {
+    packet = {
         "schema_version": MATERIAL_READING_SCHEMA_VERSION,
         "snapshot_id": _text(manifest.get("snapshot_id")),
         "paper_identity": paper_identity,
@@ -846,6 +864,9 @@ def build_reading_packet(
         "usage_limits": policy["usage_limits"],
         "observations": observations,
     }
+    if policy.get("material_boundary"):
+        packet["material_boundary"] = policy["material_boundary"]
+    return packet
 
 
 def build_reading_messages(
