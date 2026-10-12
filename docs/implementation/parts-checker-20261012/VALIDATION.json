@@ -1,0 +1,41 @@
+{
+  "baseline": "1981c116faaf7f27ad0fd5bb6d849b1bf8b93975",
+  "parts_commit": "aadb629f3a6a9972cb511127a9d4393185dcd8f1",
+  "parts_isolated_tests": {
+    "passed": 191,
+    "log": "........................................................................ [ 37%]\n........................................................................ [ 75%]\n...............................................                          [100%]\n191 passed in 2.06s\n"
+  },
+  "final_available_tests": {
+    "passed": 375,
+    "deselected": 11,
+    "log": "........................................................................ [ 19%]\n........................................................................ [ 38%]\n........................................................................ [ 57%]\n........................................................................ [ 76%]\n........................................................................ [ 96%]\n...............                                                          [100%]\n375 passed, 11 deselected in 13.63s\n"
+  },
+  "independent_tests": {
+    "passed": 13,
+    "log": ".............                                                            [100%]\n13 passed in 0.84s\n"
+  },
+  "excluded_legacy_tests": [
+    "history_full_chain_via_cli_subprocess",
+    "plan_restricted_chain_via_entry",
+    "real_draft_map_and_reader_rendering",
+    "stage_cross_refs_captions_and_map_all_agree",
+    "text_edit_stage_applies_fixture_to_real_draft",
+    "text_edit_second_run_is_no_change",
+    "front_back_updates_existing_parts_and_inserts_missing",
+    "front_back_inserts_all_parts_into_plan_draft",
+    "intro_repeat_runs_do_not_accumulate",
+    "intro_changed_version_keeps_only_new",
+    "intro_located_by_role_when_title_lacks_the_word"
+  ],
+  "exclusion_reason": "Missing untracked historical outputs; observed FileNotFoundError before explicit deselection",
+  "external_project_requests": 0,
+  "paid_calls": 0,
+  "pdf_compile": {
+    "status": "restricted",
+    "reason": "Installed executable lacks xelatex.fmt, format configuration and TeX macro assets",
+    "tex_generated": true,
+    "pdf_generated": false,
+    "diagnostic": "Rc files read:\n  /etc/LatexMk\nLatexmk: This is Latexmk, John Collins, 11 Dec. 2024. Version 4.86.\nLatexmk: applying rule 'xelatex'...\nRule 'xelatex':  Reasons for rerun\nChanged files or newly in use/created:\n  main.aux\n  main.tex\nCategory 'changed_user':\n  main.tex\n\n------------\nRun number 1 of rule 'xelatex'\n------------\n------------\nRunning 'xelatex -no-pdf -interaction=nonstopmode -halt-on-error -recorder  \"main.tex\"'\n------------\nThis is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2025/dev/Debian) (preloaded format=xelatex)\n restricted \\write18 enabled.\n\nkpathsea: Running mktexfmt xelatex.fmt\nmktexfmt: mktexfmt is using the following fmtutil.cnf files (in precedence order):\nmktexfmt: mktexfmt is using the following fmtutil.cnf file for writing changes:\nmktexfmt:   /home/agent/.texlive2025/texmf-config/web2c/fmtutil.cnf\n/usr/bin/mktexfmt: mkdir(/home/agent/.texlive2025/) failed for tree /home/agent/.texlive2025/texmf-var/web2c: Read-only file system at /usr/share/texlive/tlpkg/TeXLive/TLUtils.pm line 1247.\nI can't find the format file `xelatex.fmt'!\nLatexmk: No log file was found, neither the expected one, 'main.log', nor one in '.'.\nLatexmk: fls file doesn't appear to have been made.\nLatexmk: Getting log file 'main.log'\nLatexmk: Couldn't read log file 'main.log':\n  No such file or directory\nLatexmk: Errors, so I did not complete making targets\nCollected error summary (may duplicate other messages):\n  xelatex: Run of rule 'xelatex' gave a non-zero error code\n----------------------\nThis message may duplicate earlier message.\nLatexmk: Failure in processing file 'main.tex':\n   *LaTeX didn't generate the expected log file 'main.log'\n----------------------\n\nLatexmk: Sometimes, the -f option can be used to get latexmk\n  to try to force complete processing.\n  But normally, you will need to correct the file(s) that caused the\n  error, and then rerun latexmk.\n  In some cases, it is best to clean out generated files before rerunning\n  latexmk after you've corrected the files.\n"
+  },
+  "scientific_quality_tested": false
+}

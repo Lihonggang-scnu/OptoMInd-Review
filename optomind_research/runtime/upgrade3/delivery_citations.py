@@ -112,10 +112,10 @@ def build_delivery_citation_map(
     by_canonical: "OrderedDict[str, dict[str, Any]]" = OrderedDict()
     unknown: list[str] = []
 
-    def _identity_key(row: Mapping[str, Any]) -> str:
+    def _identity_key(row: Mapping[str, Any], namespace: str) -> str:
         """Identity of the PAPER, independent of which run cited it.
 
-        Normalized DOI first, then paper_id, then the primary handle.  The
+        Normalized DOI first, then paper_id, then the namespace-owned handle. The
         same paper cited by two runs merges into ONE reference, while
         genuinely different papers stay distinct.
         """
@@ -125,8 +125,10 @@ def build_delivery_citation_map(
         paper_id = str(row.get("paper_id") or "").strip()
         if paper_id:
             return "pid:" + paper_id
-        handles = row.get("handles") or []
-        return "handle:" + (str(handles[0]) if handles else "unknown")
+        handles = row.get("handles") or [row.get("source_handle") or row.get("handle")
+                                       or row.get("source_key") or "unknown"]
+        handle = str(handles[0])
+        return "handle:" + (f"{namespace}::{handle}" if namespace else handle)
 
     def resolve(token: str) -> tuple[str, Mapping[str, Any]] | None:
         indexed = index_by_token.get(token)
@@ -142,7 +144,7 @@ def build_delivery_citation_map(
                     unknown.append(token)
                 continue
             namespace, row = resolved
-            key = _identity_key(row)
+            key = _identity_key(row, namespace)
             token_by_citation[token] = key
             if key not in by_canonical:
                 by_canonical[key] = {

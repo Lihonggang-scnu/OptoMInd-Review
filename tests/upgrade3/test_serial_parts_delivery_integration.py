@@ -145,7 +145,7 @@ def _mock_downstream(tmp_path, monkeypatch, *, status="generated", mode="post_bo
         return {"status": "complete"}
     monkeypatch.setattr(delivery, "run_publication_delivery", publication)
     context = {"shared_scope": "Bounded scope", "material_records": []}
-    config = {"text_edit_fixture": "edits.json", "front_back_fixture": "parts.json",
+    config = {"manuscript_checker": {"enabled": False}, "text_edit_fixture": "edits.json", "front_back_fixture": "parts.json",
               "front_back_mode": mode, "post_body_context": context,
               "research_question": "Question", "chapter_roles": []}
     return config, {"output_root": str(assembly),
@@ -281,7 +281,7 @@ def _actual_delivery(tmp_path, monkeypatch, *, conflict=False):
                                     "paper_identity": {"paper_id": "background-paper", "title": "Background"}}]}
     catalogs = [{"namespace": "body", "entries": [
         {"source_handle": "P0001", "paper_id": "body-paper", "title": "BODY source"}]}]
-    config = {"text_edit_fixture": "offline-edit.json", "front_back_fixture": fixture,
+    config = {"manuscript_checker": {"enabled": False}, "text_edit_fixture": "offline-edit.json", "front_back_fixture": fixture,
               "front_back_mode": "post_body", "research_question": "Which differences are supported?",
               "post_body_context": context, "identity_catalogs": catalogs}
     return delivery.run_downstream_delivery(config=config,

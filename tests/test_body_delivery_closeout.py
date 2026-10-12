@@ -66,7 +66,8 @@ def normal_run(tmp_path, monkeypatch, *, input_mode="input", parts_mode=None, qu
             "unresolved_questions": []})
         route._write(tmp_path / "config.json", {"schema": delivery.DELIVERY_CONFIG_SCHEMA, "language": "en",
             "research_question": book["research_question"], "front_back": {"mode": parts_mode, "fixture": "parts.json"},
-            "text_edit": {"fixture": "unrequested-edit.json"}})
+            "text_edit": {"fixture": "unrequested-edit.json"},
+            "manuscript_checker": {"enabled": False}})
         argv += ["--delivery-config", str(tmp_path / "config.json")]
     argv += list(extra)
     monkeypatch.setattr(sys, "argv", ["run_review_harness.py", *argv])

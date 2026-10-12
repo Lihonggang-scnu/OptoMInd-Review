@@ -31,7 +31,7 @@
 
 历史整合基线来自 `02c018bdd440cc061ddedbb5aef07b115e7de081`，包含 BODY40 身份/引用/alias 修复。独立首尾从 `dc661cf47bdb8ec70a348c02bc8f15a0b40253f4` 有界接回；没有合入早期并行 `manuscript_parts_plan` 对 BODY 的改造。正式baseline接入受测源码为 `638eb93cdb37fc95cb917130f69a5b16df3549b7`，采用归档为 `2618319e3fe2a085acf11a66e6f6c66c73a9c135`；后续收尾在其上维护。
 
-正常消费者读取 `DELIVERY_REPORT.json.selected_body`。完整稿附终结科学诊断可交付；未完成生成、缺文件或要求步骤未完成继续阻断。独立首尾/出版需显式配置：BODY默认不会隐式生成它们，也不会再次全文编辑。
+正常消费者读取 `DELIVERY_REPORT.json.selected_body`。完整稿附终结科学诊断可交付；未完成生成、缺文件或要求步骤未完成继续阻断。独立首尾/出版需显式配置：BODY默认不会隐式生成它们，也不会重复调用原 BODY 编辑器。新的 post_body 下游默认接入完整稿校验员：03首尾装配 → 精确局部校验 → 显式 selected_manuscript → 04最终编号 → 05出版；两次逻辑调用以内，支持关闭、免费预览/回放及同目录恢复。独立已有03产物也走同一消费者链，见 [校验与出版运行指南](docs/current/MANUSCRIPT_CHECKER_RUN_GUIDE.md) 和 [本轮实现与离线证据](docs/implementation/parts-checker-20261012/IMPLEMENTATION_HANDOFF.md)。
 
 在上述整合基线之上，当前已加入质量优先预算、实际请求参数记录、条件与论证关系交接修复；具体源码变化和验证见 [QUALITY_CAPACITY_VERIFICATION.md](docs/current/QUALITY_CAPACITY_VERIFICATION.md)。`CORE_SOURCE_INVARIANTS.json` 是分支整理当时的历史校验，不是后续源码永远不变的约束。
 

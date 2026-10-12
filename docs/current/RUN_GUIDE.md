@@ -383,3 +383,8 @@ python scripts/upgrade3/lower_budget_limit.py --ledger path/to/current_experimen
 此工具仅下调上限，保留所有调用和占额；不能取消已在途请求。如果实际占用已超过40元，余量记零并停止新调用，绝不抹账。新运行客户端在每次预留时重新遵守存储的较低上限。尚未建立本轮账本时才用统一的新40元账本。
 
 分层路线可通过 `--draft` 复用完整独立章节稿，避免为测试统稿重新支付所有章节写作。其真正全文编辑若因容量/预算未完成，原完整初稿保留，并明确统稿待完成；不要把拼接稿冒充已统稿，也不隐藏额外编辑费用。
+
+
+## 独立首尾与完整稿校验
+
+后置首尾写作方法、明确格式要求和新旧提示缓存隔离见 [首尾实施记录](../implementation/parts-checker-20261012/PARTS_IMPLEMENTATION.md)。已有03完整句柄稿进入 [校验与出版正式入口](MANUSCRIPT_CHECKER_RUN_GUIDE.md)，与正常下游共用 selected_manuscript → 最终编号 → 出版接缝。新post_body默认启用校验；无响应源只预览并停止，显式关闭则选03原稿。真实质量仍由本地预算受控试跑评估。

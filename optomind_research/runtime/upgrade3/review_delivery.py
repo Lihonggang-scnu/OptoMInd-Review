@@ -529,7 +529,7 @@ def load_post_body_context(
     if not isinstance(value, Mapping):
         raise DeliveryConfigError("post_body_context_not_object")
     context = dict(value)
-    for field in ("final_outline", "material_records", "source_identity_map"):
+    for field in ("final_outline", "material_records", "source_identity_map", "writing_requirements"):
         if field in context:
             context[field] = read_reference(context[field], field)
     if "material_records" in context and not isinstance(context["material_records"], list):
@@ -647,11 +647,30 @@ def load_delivery_config(path: str | Path) -> dict[str, Any]:
         # file or an earlier PartPlan; the actual BODY remains the main input.
         direct_context = {
             field: front_back_entry.get(field, data.get(field))
-            for field in ("material_records", "source_identity_map")
+            for field in ("material_records", "source_identity_map", "writing_requirements")
             if field in front_back_entry or field in data
         }
         if direct_context:
             post_body_context.update(load_post_body_context(direct_context, base_dir=cfg_dir))
+    checker_entry = data.get("manuscript_checker", {})
+    if not isinstance(checker_entry, Mapping):
+        raise DeliveryConfigError("delivery_config_stage_bad:manuscript_checker")
+    checker_entry = dict(checker_entry)
+    if not isinstance(checker_entry.get("enabled", True), bool):
+        raise DeliveryConfigError("delivery_config_checker_enabled_not_boolean")
+    checker = {"enabled": front_back_mode == "post_body", **checker_entry}
+    if isinstance(checker.get("max_model_rounds", 2), bool) or checker.get("max_model_rounds", 2) not in (1, 2):
+        raise DeliveryConfigError("delivery_config_checker_rounds_must_be_one_or_two")
+    if checker.get("fixture") and checker.get("recordings"):
+        raise DeliveryConfigError("delivery_config_checker_sources_conflict")
+    for key in ("fixture", "recordings"):
+        if checker.get(key):
+            source = Path(str(checker[key]))
+            if not source.is_absolute():
+                source = cfg_dir / source
+            if not source.is_file():
+                raise DeliveryConfigError(f"delivery_config_file_missing:manuscript_checker:{source}")
+            checker[key] = json.loads(source.read_text(encoding="utf-8"))
     figure_assets = _resolve_list(
         data.get("figure_assets"), "figure_assets") or []
     # Each asset's own file path also resolves relative to the config file.
@@ -679,6 +698,7 @@ def load_delivery_config(path: str | Path) -> dict[str, Any]:
         "front_back_fixture": front_back_fixture,
         "front_back_recordings": front_back_recordings,
         "front_back_mode": front_back_mode,
+        "manuscript_checker": checker,
         "post_body_context": post_body_context,
         "identity_catalogs": _resolve_list(
             data.get("identity_catalogs"), "identity_catalogs") or [],
@@ -807,6 +827,7 @@ def run_downstream_delivery(
     assembly_report: Mapping[str, Any],
     out_dir: str | Path,
     selected_body: Mapping[str, Any] | None = None,
+    client_factory=None, run: bool = False, token_counter=None, retry_failed: bool = False,
 ) -> dict[str, Any]:
     """The ONE downstream coordinator: 02→03→04→05 over the assembled draft.
 
@@ -956,52 +977,11 @@ def run_downstream_delivery(
         halt.append("03_front_back")
         return _downstream_report(config, stages, halt)
 
-    # ---- 04: figures + citations over the FINAL manuscript -----------------
-    from .delivery_citations import run_figures_citations_stage
-    identity_catalogs = config.get("identity_catalogs") or []
-    if config.get("front_back_mode") == "post_body":
-        try:
-            identity_catalogs = _post_body_delivery_catalogs(
-                identity_catalogs, r3.get("source_identity_map") or {})
-        except FrontBackError as exc:
-            stages["04_figures_citations"] = {
-                "stage": "figures_citations", "status": "failed",
-                "error": str(exc), "model_calls": 0, "external_requests": 0,
-            }
-            return _downstream_report(config, stages, ["04_figures_citations"])
-    numbering_input = final_md
-    projection = None
-    if selected_body is not None and config.get("front_back_mode") == "post_body":
-        numbering_input, projection = _post_body_numbering_input(final_md, out_dir, config.get("chapter_roles") or [])
-    stages["04_figures_citations"] = run_figures_citations_stage(
-        final_draft_path=numbering_input,
-        identity_catalogs=identity_catalogs,
-        out_dir=out_dir / "04_figures_citations",
-        figure_assets=config.get("figure_assets") or [],
-        table_moves=config.get("table_moves") or None,
-        figure_moves=config.get("figure_moves") or None)
-    r4 = stages["04_figures_citations"]
-    if projection is not None:
-        r4["input_projection"] = projection
-        _write_json(out_dir / "04_figures_citations" / "STAGE_REPORT.json", r4)
-    reader_draft = Path(str(r4.get("reader_draft") or ""))
-    if ((selected_body is not None or config.get("front_back_mode") == "post_body") and r4.get("status") != "complete") \
-            or not str(r4.get("reader_draft") or "") or not reader_draft.is_file():
-        halt.append("04_figures_citations")
-        return _downstream_report(config, stages, halt)
-
-    # ---- 05: publication consuming the 04 artifacts only -------------------
-    stages["05_publication"] = run_publication_delivery(
-        reader_draft_path=reader_draft,
-        references_path=Path(str(r4.get("references_path") or "")),
-        figure_map_path=Path(str(r4.get("mapping_path") or "")),
-        assets_dir=Path(str(r4.get("assets_dir") or "")),
-        out_dir=out_dir / "05_publication",
-        language=str(config.get("language") or "zh"),
-        compile_pdf=bool(config.get("compile_pdf")))
-    r5 = stages["05_publication"]
-
-    return _downstream_report(config, stages, halt)
+    from .manuscript_delivery import run_manuscript_delivery
+    return run_manuscript_delivery(config=config, front_back_report={**r3,
+        "source_body_delivery": assembly_report.get("body_delivery")},
+        out_dir=out_dir, stages=stages, client_factory=client_factory, run=run,
+        token_counter=token_counter, retry_failed=retry_failed)
 
 
 def _downstream_report(config: Mapping[str, Any], stages: Mapping[str, Any],
@@ -1024,7 +1004,9 @@ def _downstream_report(config: Mapping[str, Any], stages: Mapping[str, Any],
             "config": str(config.get("config_path") or ""),
             "stages": dict(stages),
             "halt_reasons": list(halt),
-            "downstream_status": overall}
+            "downstream_status": overall,
+            "model_calls": sum(int(stage.get("model_calls") or 0) for stage in stages.values() if isinstance(stage, Mapping)),
+            "external_requests": sum(int(stage.get("external_requests") or 0) for stage in stages.values() if isinstance(stage, Mapping))}
 
 
 def _post_body_numbering_input(source: Path, out_dir: Path, chapter_roles: Sequence[Mapping[str, Any]]) -> tuple[Path, dict[str, Any] | None]:
@@ -1196,7 +1178,9 @@ def run_review_delivery(
     config = load_delivery_config(config_path)
     downstream = run_downstream_delivery(config=config, assembly_report=report,
                                          out_dir=out_dir,
-                                         **({"selected_body": report["selected_body"]} if start == "body" else {}))
+                                         **({"selected_body": report["selected_body"],
+                                             **{key: options[key] for key in ("client_factory", "run", "token_counter", "retry_failed") if key in options}}
+                                            if start == "body" else {}))
     merged = {**report, **downstream}
     if start == "body":
         merged["model_calls"] = report["model_calls"] + downstream.get("model_calls", 0)
