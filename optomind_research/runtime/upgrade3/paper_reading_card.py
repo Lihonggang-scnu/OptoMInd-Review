@@ -39,6 +39,7 @@ from .paper_reading_card_prompt import PROMPT_VERSION, build_messages
 
 
 SCHEMA_VERSION = "optomind.paper_reading_card.v1"
+VALIDATOR_VERSION = "optomind.paper_reading_card.validator.v2"
 MODEL = "qwen3.7-flash"
 INPUT_PROFILES = {"standard", "economy"}
 DEFAULT_INPUT_PROFILE = "economy"
@@ -457,7 +458,9 @@ def _normalize_contributions(value: Any) -> list[dict[str, str]]:
     return normalized
 
 
-def _normalize_facet_contributions(value: Any, known_ids: set[str]) -> list[dict[str, Any]]:
+def _normalize_facet_contributions(
+    value: Any, known_ids: set[str], *, diagnostics: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     if value is None:
         return []
     if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
@@ -474,6 +477,24 @@ def _normalize_facet_contributions(value: Any, known_ids: set[str]) -> list[dict
         contribution = _norm(row.get("contribution") or row.get("summary") or row.get("text"))
         possible_uses = _norm(row.get("possible_uses") or row.get("uses") or row.get("review_use"))
         boundaries = _norm(row.get("boundaries") or row.get("boundary") or row.get("limitations"))
+        # An explicit negative answer is not positive evidence with a missing
+        # use.  Accept only the observed, unambiguous canonical string fields;
+        # absent/wrong-type uses and substantive contributions still fail.
+        explicit_negative_empty = (
+            isinstance(row.get("contribution"), str)
+            and re.fullmatch(r"无直接(?:相关)?贡献[。.]?", contribution)
+            and isinstance(row.get("possible_uses"), str)
+            and not row["possible_uses"].strip()
+        )
+        if explicit_negative_empty:
+            if any(_norm(row.get(key)) for key in ("uses", "review_use")):
+                raise CardOutputError(f"facet_contribution_negative_use_conflict:{facet_id}")
+            if diagnostics is not None:
+                diagnostics.append({
+                    "reason": "explicit_no_direct_contribution", "row_index": index,
+                    "facet_id": facet_id, "raw_row": dict(row), "boundaries": boundaries,
+                })
+            continue
         if not _meaningful(contribution) or not _meaningful(possible_uses):
             raise CardOutputError(f"facet_contribution_content_missing:{facet_id}")
         rows.append({"facet_id": facet_id, "contribution": contribution, "possible_uses": possible_uses, "boundaries": boundaries})
@@ -570,12 +591,18 @@ def validate_card_output(result: Any, card_input: Mapping[str, Any]) -> dict[str
     if not topic_handles or not all(_meaningful(v) for v in topic_handles):
         raise CardOutputError("topic_handles_empty_or_generic")
     known_ids = {_text(item.get("id")) for item in (card_input.get("review_plan") or {}).get("facets") or () if isinstance(item, Mapping)}
-    facet_contributions = _normalize_facet_contributions(b.get("facet_contributions", []), known_ids)
+    diagnostics: list[dict[str, Any]] = []
+    facet_contributions = _normalize_facet_contributions(b.get("facet_contributions", []), known_ids, diagnostics=diagnostics)
     broader = _normalize_broader_uses(b.get("broader_review_uses", []))
     cautions_raw = b.get("scope_interpretation_cautions", [])
     if not isinstance(cautions_raw, Sequence) or isinstance(cautions_raw, (str, bytes)):
         raise CardOutputError("scope_interpretation_cautions_must_be_array")
     cautions = [_norm(v) for v in cautions_raw if _norm(v)]
+    for diagnostic in diagnostics:
+        if diagnostic["boundaries"]:
+            caution = f"{diagnostic['facet_id']}: {diagnostic['boundaries']}"
+            if caution not in cautions:
+                cautions.append(caution)
     normalized_b = {
         "planning_summary": planning_summary,
         "topic_handles": topic_handles,
@@ -589,6 +616,7 @@ def validate_card_output(result: Any, card_input: Mapping[str, Any]) -> dict[str
     return {
         "general_understanding": normalized_a,
         "review_planning": normalized_b,
+        "normalization_diagnostics": diagnostics,
     }
 
 
@@ -728,6 +756,72 @@ def _estimate_reservation(messages: Sequence[Mapping[str, Any]], *, output_token
     return estimated_cost_cny({"prompt_tokens": input_tokens, "completion_tokens": output_tokens + thinking_budget}, model=MODEL, conservative=True)
 
 
+def _verify_saved_source(source: Path, hashes: Mapping[str, str]) -> None:
+    for name, digest in hashes.items():
+        path = source / name
+        if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            raise CardInputError(f"saved_response_source_changed:{name}")
+
+
+def _load_saved_response(
+    source: Path, *, input_artifact: Mapping[str, Any], prompt_artifact: Mapping[str, Any],
+    input_audit: Mapping[str, Any] | None,
+) -> tuple[dict[str, Any], dict[str, bytes], dict[str, Any]]:
+    """Read a complete validation-failed attempt without touching live resources."""
+
+    if (source / "COMMIT.json").exists():
+        raise CardInputError("saved_response_source_has_invalid_commit")
+    names = ["INPUT_PACKET.json", "PROMPT.json", "RAW_RESPONSE.json", "USAGE.json", "FAILURE.json"]
+    if input_audit is not None:
+        names.append("INPUT_AUDIT.json")
+    elif (source / "INPUT_AUDIT.json").exists():
+        raise CardInputError("saved_response_input_audit_mismatch")
+    payloads: dict[str, dict[str, Any]] = {}
+    source_bytes: dict[str, bytes] = {}
+    for name in names:
+        try:
+            data = (source / name).read_bytes()
+            value = json.loads(data.decode("utf-8"))
+        except (OSError, UnicodeError, ValueError) as exc:
+            raise CardInputError(f"saved_response_artifact_invalid:{name}") from exc
+        if not isinstance(value, Mapping):
+            raise CardInputError(f"saved_response_artifact_not_object:{name}")
+        source_bytes[name] = data
+        payloads[name] = dict(value)
+    if payloads["INPUT_PACKET.json"] != input_artifact:
+        raise CardInputError("saved_response_input_packet_mismatch")
+    if payloads["PROMPT.json"] != prompt_artifact:
+        raise CardInputError("saved_response_prompt_mismatch")
+    if input_audit is not None and payloads["INPUT_AUDIT.json"] != input_audit:
+        raise CardInputError("saved_response_input_audit_mismatch")
+    failure = payloads["FAILURE.json"]
+    if failure.get("status") != "failed" or failure.get("phase") != "validation" or failure.get("error") != "CardOutputError":
+        raise CardInputError("saved_response_requires_output_validation_failure")
+    if failure.get("model") != MODEL or failure.get("prompt_sha256") != prompt_artifact["prompt_sha256"]:
+        raise CardInputError("saved_response_failure_binding_mismatch")
+    result = payloads["RAW_RESPONSE.json"]
+    if result.get("complete") is not True or _text(result.get("finish_reason")).casefold() not in _STOP_REASONS:
+        raise CardTransportError("saved_response_requires_explicit_complete_transport")
+    _check_transport_result(result)
+    if result.get("requested_model") and result["requested_model"] != MODEL:
+        raise CardInputError("saved_response_model_mismatch")
+    telemetry = _extract_telemetry(result)
+    if payloads["USAGE.json"] != telemetry or ("telemetry" in failure and failure["telemetry"] != telemetry):
+        raise CardInputError("saved_response_usage_mismatch")
+    hashes = {name: hashlib.sha256(data).hexdigest() for name, data in source_bytes.items()}
+    binding = {
+        "source_dir": str(source.resolve()), "source_files": hashes,
+        "validator_version": VALIDATOR_VERSION, "input_sha256": _sha(input_artifact),
+        "prompt_sha256": prompt_artifact["prompt_sha256"],
+        "runtime_config": dict(input_artifact["runtime_config"]),
+        "response_sha256": hashes["RAW_RESPONSE.json"],
+    }
+    receipt = {"schema_version": "optomind.paper_card_saved_reparse.v1", **binding,
+               "cache_key": _sha(binding), "physical_calls": 0}
+    _verify_saved_source(source, hashes)
+    return result, source_bytes, receipt
+
+
 def run_paper_reading_card(
     *,
     snapshot_dir: str | Path,
@@ -746,8 +840,14 @@ def run_paper_reading_card(
     timeout_seconds: float = 300.0,
     max_retries: int = 0,
     call_id: str = "",
+    saved_response_dir: str | Path | None = None,
 ) -> dict[str, Any]:
-    """Run one card, persist immutable artifacts, and return the card."""
+    """Run one card, or explicitly reparse a failed saved attempt for free.
+
+    With ``saved_response_dir``, ``output_dir`` must name that same attempt.
+    Source artifacts remain immutable; derived artifacts use a bound cache
+    beneath it.  This branch never constructs a client or budget ledger.
+    """
 
     if model != MODEL:
         raise CardInputError("paper_reading_card_model_must_be_qwen3_7_flash")
@@ -756,13 +856,6 @@ def run_paper_reading_card(
         raise CardInputError("concise_output_requires_economy_profile")
     max_output_tokens = max(64, int(max_output_tokens))
     effective_thinking_budget = int(thinking_budget) if thinking else 0
-    if client is None:
-        if not key_file:
-            raise CardInputError("live_run_key_file_required")
-        if not budget_ledger_path:
-            raise CardInputError("live_run_shared_budget_ledger_required")
-        if budget_limit_cny is None or not math.isfinite(float(budget_limit_cny)) or float(budget_limit_cny) <= 0:
-            raise CardInputError("live_run_finite_positive_budget_required")
     snapshot = PreparedSnapshotProvider(snapshot_dir).load()
     plan = _load_plan(plan_path)
     card_input = build_card_input(snapshot, plan)
@@ -791,9 +884,6 @@ def run_paper_reading_card(
         "runtime_config": runtime_config,
         "input_audit_sha256": input_audit_sha256,
     }
-    reused = _ensure_output_dir(output, card_input, expected=expected_commit)
-    if reused is not None:
-        return reused
     input_artifact = {
         "schema_version": SCHEMA_VERSION,
         "prompt_version": PROMPT_VERSION,
@@ -808,62 +898,81 @@ def run_paper_reading_card(
         "model_reading_packet": card_input["model_reading_packet"],
         "runtime_config": runtime_config,
     }
-    _atomic_json(output / "INPUT_PACKET.json", input_artifact)
-    _atomic_json(
-        output / "PROMPT.json",
-        {
-            "prompt_version": PROMPT_VERSION,
-            "messages": messages,
-            "prompt_sha256": _sha(messages),
-            "input_profile": profile,
-            "concise_output": bool(concise_output),
-            "thinking": bool(thinking),
-        },
-    )
-    if input_audit is not None:
-        _atomic_json(output / "INPUT_AUDIT.json", input_audit)
-    ledger = GlobalBudgetLedger(limit_cny=budget_limit_cny, path=budget_ledger_path) if budget_ledger_path else None
-    if client is None:
-        client = QwenDirectClient(
-            model=MODEL,
-            key_file=key_file,
-            timeout_seconds=timeout_seconds,
-            max_output_tokens=max_output_tokens,
-            max_retries=max(0, int(max_retries)),
-            thinking=bool(thinking),
-            thinking_budget=effective_thinking_budget,
-            json_mode=True,
-            raw_response_dir=output / "raw_responses",
-            budget_ledger=ledger,
+    prompt_artifact = {
+        "prompt_version": PROMPT_VERSION, "messages": messages, "prompt_sha256": _sha(messages),
+        "input_profile": profile, "concise_output": bool(concise_output), "thinking": bool(thinking),
+    }
+    reparse_receipt = None
+    saved_binding: dict[str, Any] = {}
+    if saved_response_dir is not None:
+        source = Path(saved_response_dir).resolve()
+        if output.resolve() != source:
+            raise CardInputError("saved_response_output_dir_must_match_source_attempt")
+        reused = _existing_success(source, card_input, expected=expected_commit)
+        if reused is not None:
+            return reused
+        raw_result, source_bytes, reparse_receipt = _load_saved_response(
+            source, input_artifact=input_artifact, prompt_artifact=prompt_artifact, input_audit=input_audit,
         )
-    call_name = call_id or f"paper-card:{card_input['card_id']}"
-    try:
-        raw_result = invoke_client(
-            client,
-            messages,
-            model=MODEL,
-            max_output_tokens=max_output_tokens,
-            thinking=bool(thinking),
-            thinking_budget=effective_thinking_budget,
-            call_id=call_name,
-        )
-    except QwenTransportError as exc:
-        _atomic_json(output / "FAILURE.json", {"status": "failed", "phase": "transport", "error": type(exc).__name__, "message": str(exc), "record": dict(exc.record), "model": MODEL, "prompt_sha256": _sha(messages)})
-        raise
-    except Exception as exc:
-        _atomic_json(output / "FAILURE.json", {"status": "failed", "phase": "transport", "error": type(exc).__name__, "message": str(exc), "model": MODEL, "prompt_sha256": _sha(messages)})
-        raise CardTransportError(f"paper_card_client_failed:{type(exc).__name__}") from exc
-    if not isinstance(raw_result, Mapping):
-        raw_result = {"content": raw_result, "complete": True, "finish_reason": "stop"}
-    raw_result = dict(raw_result)
-    _atomic_json(output / "RAW_RESPONSE.json", raw_result)
-    _atomic_json(output / "USAGE.json", _extract_telemetry(raw_result))
-    try:
-        _check_transport_result(raw_result)
+        saved_binding = {"saved_reparse_cache_key": reparse_receipt["cache_key"], "validator_version": VALIDATOR_VERSION}
+        expected_commit = {**expected_commit, **saved_binding}
+        output = source / "derived" / reparse_receipt["cache_key"]
+        reused = _existing_success(output, card_input, expected=expected_commit)
+        if reused is not None:
+            return {**reused, "reparsed": True, "saved_response_dir": str(source)}
         normalized = validate_card_output(raw_result, card_input)
-    except (CardTransportError, CardOutputError) as exc:
-        _atomic_json(output / "FAILURE.json", {"status": "failed", "phase": "validation", "error": type(exc).__name__, "message": str(exc), "model": MODEL, "prompt_sha256": _sha(messages), "telemetry": _extract_telemetry(raw_result)})
-        raise
+        _verify_saved_source(source, reparse_receipt["source_files"])
+        _ensure_output_dir(output, card_input, expected=expected_commit)
+        for name, data in source_bytes.items():
+            (output / name).write_bytes(data)
+        reparse_receipt["normalization_diagnostics"] = normalized["normalization_diagnostics"]
+        _atomic_json(output / "REPARSE_RECEIPT.json", reparse_receipt)
+    else:
+        reused = _ensure_output_dir(output, card_input, expected=expected_commit)
+        if reused is not None:
+            return reused
+        if client is None:
+            if not key_file:
+                raise CardInputError("live_run_key_file_required")
+            if not budget_ledger_path:
+                raise CardInputError("live_run_shared_budget_ledger_required")
+            if budget_limit_cny is None or not math.isfinite(float(budget_limit_cny)) or float(budget_limit_cny) <= 0:
+                raise CardInputError("live_run_finite_positive_budget_required")
+        _atomic_json(output / "INPUT_PACKET.json", input_artifact)
+        _atomic_json(output / "PROMPT.json", prompt_artifact)
+        if input_audit is not None:
+            _atomic_json(output / "INPUT_AUDIT.json", input_audit)
+        ledger = GlobalBudgetLedger(limit_cny=budget_limit_cny, path=budget_ledger_path) if budget_ledger_path else None
+        if client is None:
+            client = QwenDirectClient(
+                model=MODEL, key_file=key_file, timeout_seconds=timeout_seconds,
+                max_output_tokens=max_output_tokens, max_retries=max(0, int(max_retries)),
+                thinking=bool(thinking), thinking_budget=effective_thinking_budget, json_mode=True,
+                raw_response_dir=output / "raw_responses", budget_ledger=ledger,
+            )
+        call_name = call_id or f"paper-card:{card_input['card_id']}"
+        try:
+            raw_result = invoke_client(
+                client, messages, model=MODEL, max_output_tokens=max_output_tokens,
+                thinking=bool(thinking), thinking_budget=effective_thinking_budget, call_id=call_name,
+            )
+        except QwenTransportError as exc:
+            _atomic_json(output / "FAILURE.json", {"status": "failed", "phase": "transport", "error": type(exc).__name__, "message": str(exc), "record": dict(exc.record), "model": MODEL, "prompt_sha256": _sha(messages)})
+            raise
+        except Exception as exc:
+            _atomic_json(output / "FAILURE.json", {"status": "failed", "phase": "transport", "error": type(exc).__name__, "message": str(exc), "model": MODEL, "prompt_sha256": _sha(messages)})
+            raise CardTransportError(f"paper_card_client_failed:{type(exc).__name__}") from exc
+        if not isinstance(raw_result, Mapping):
+            raw_result = {"content": raw_result, "complete": True, "finish_reason": "stop"}
+        raw_result = dict(raw_result)
+        _atomic_json(output / "RAW_RESPONSE.json", raw_result)
+        _atomic_json(output / "USAGE.json", _extract_telemetry(raw_result))
+        try:
+            _check_transport_result(raw_result)
+            normalized = validate_card_output(raw_result, card_input)
+        except (CardTransportError, CardOutputError) as exc:
+            _atomic_json(output / "FAILURE.json", {"status": "failed", "phase": "validation", "error": type(exc).__name__, "message": str(exc), "model": MODEL, "prompt_sha256": _sha(messages), "telemetry": _extract_telemetry(raw_result)})
+            raise
     material = dict(card_input["material"])
     card = {
         "schema_version": SCHEMA_VERSION,
@@ -894,6 +1003,8 @@ def run_paper_reading_card(
             "scope_interpretation_cautions": normalized["review_planning"]["scope_interpretation_cautions"],
         },
         "output_provenance": {
+            "validator_version": VALIDATOR_VERSION,
+            "normalization_diagnostics": normalized["normalization_diagnostics"],
             "joint_topic_aware_call": True,
             "general_understanding_topic_independent": False,
             "general_understanding_cache_reuse": "not_claimed",
@@ -919,6 +1030,7 @@ def run_paper_reading_card(
         "input_audit_sha256": input_audit_sha256,
         "runtime_config": expected_commit["runtime_config"],
         "model": MODEL,
+        **saved_binding,
         "files": {},
     }
     file_names = [
@@ -931,12 +1043,16 @@ def run_paper_reading_card(
     ]
     if input_audit is not None:
         file_names.insert(2, "INPUT_AUDIT.json")
+    if reparse_receipt is not None:
+        file_names.extend(["FAILURE.json", "REPARSE_RECEIPT.json"])
+        _verify_saved_source(source, reparse_receipt["source_files"])
     commit["files"] = {
         name: hashlib.sha256((output / name).read_bytes()).hexdigest()
         for name in file_names
     }
     _atomic_json(output / "COMMIT.json", commit)
-    return {"card": card, "reused": False, "output_dir": str(output)}
+    return {"card": card, "reused": reparse_receipt is not None, "output_dir": str(output),
+            **({"reparsed": True, "saved_response_dir": str(source)} if reparse_receipt is not None else {})}
 
 
 def preflight_card(

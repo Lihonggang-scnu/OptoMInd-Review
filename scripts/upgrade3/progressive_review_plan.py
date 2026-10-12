@@ -13,6 +13,7 @@ if __package__ in {None, ""}:
 
 from optomind_research.runtime.upgrade3 import progressive_review_plan as planning
 from scripts.upgrade3 import outline_strengthening_pipeline as strengthening_pipeline
+from scripts.upgrade3.build_local_materials import add_material_acquisition_arguments, make_material_acquirer_factory
 
 
 def parser():
@@ -71,6 +72,7 @@ def parser():
         default=[],
         help="限制恢复的章节 ID，可重复传入；省略则按兼容性逐章判断",
     )
+    add_material_acquisition_arguments(p, include_shared_budget_options=False)
     return p
 
 
@@ -158,7 +160,7 @@ def post_planning_handoff(cfg, args, plan_result):
             "packet_root": pointer["packet_root"], "current_plan": str(pointer_path)}
 
 
-def main(argv=None):
+def main(argv=None, *, regional_client_constructor=None):
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8")
@@ -190,6 +192,10 @@ def main(argv=None):
             if not args.key_file or not args.budget_ledger or args.budget_limit_cny is None:
                 raise planning.ProgressivePlanError("run_requires_key_file_and_shared_budget")
             before = budget_snapshot(args.budget_ledger)
+            acquirer_factory = None
+            if (args.docling_document_json or args.docling_run_json or args.docling_cli_config
+                    or args.recognition_config or args.recognition_run or args.recognition_reviewed_failures):
+                acquirer_factory = make_material_acquirer_factory(args, regional_client_constructor=regional_client_constructor)
             rows = planning.load_planning_pool(cfg.pool_path)
             prior = planning.load_prior_readings(args.prior_reading, rows)
             planner = planning.QwenProgressivePlanner(
@@ -206,6 +212,7 @@ def main(argv=None):
                 budget_limit_cny=args.budget_limit_cny,
                 local_index_path=(args.local_material_index.resolve() if args.local_material_index else None),
                 allow_external=not args.no_external_supplement,
+                acquirer_factory=acquirer_factory,
             )
             reader = planning.make_directed_reading_runner(cfg, key_file=args.key_file, budget_ledger_path=args.budget_ledger, budget_limit_cny=args.budget_limit_cny, prior_readings=prior)
             adaptive = planning.make_retrieval_loop_runner(

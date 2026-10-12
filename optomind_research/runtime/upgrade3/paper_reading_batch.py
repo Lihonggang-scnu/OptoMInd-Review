@@ -339,12 +339,30 @@ def _next_attempt(base: Path) -> int:
     return max(values, default=0) + 1
 
 
+def _saved_validation_dirs(base: Path) -> list[Path]:
+    candidates = []
+    for attempt_dir in _attempt_dirs(base):
+        if not (attempt_dir / "RAW_RESPONSE.json").is_file() or not (attempt_dir / "FAILURE.json").is_file():
+            continue
+        try:
+            failure = _read_json(attempt_dir / "FAILURE.json")
+        except Exception:
+            # Fail closed in the single-card recovery API, never fall through
+            # to a paid call because a saved failure receipt is malformed.
+            candidates.append(attempt_dir)
+            continue
+        if isinstance(failure, Mapping) and failure.get("phase") == "validation" and failure.get("error") == "CardOutputError":
+            candidates.append(attempt_dir)
+    return candidates
+
+
 def _call_one(
     item: Mapping[str, Any],
     *,
     config: Mapping[str, Any],
     output_root: Path,
     client_factory: Callable[..., Any] | None,
+    reparse_saved_responses: bool = False,
 ) -> dict[str, Any]:
     work_key = str(item["work_key"])
     base = output_root / "cards" / _safe_slug(item["paper_id"]) / work_key
@@ -371,7 +389,6 @@ def _call_one(
         except (IndexError, ValueError):
             continue
         try:
-            client = client_factory(item, attempt) if client_factory else None
             result = run_paper_reading_card(
                 snapshot_dir=item["snapshot_dir"],
                 plan_path=item["plan_path"],
@@ -379,7 +396,6 @@ def _call_one(
                 key_file=config.get("key_file") or None,
                 budget_ledger_path=config.get("budget_ledger_path") or None,
                 budget_limit_cny=config.get("budget_limit_cny"),
-                client=client,
                 input_profile=config["input_profile"],
                 thinking=bool(config["thinking"]),
                 concise_output=bool(config["concise_output"]),
@@ -389,8 +405,39 @@ def _call_one(
                 max_retries=0,
             )
             return {"ok": True, "result": result, "attempt": attempt, "output_dir": str(attempt_dir), "reused": bool(result.get("reused"))}
-        except Exception:
-            continue
+        except Exception as exc:
+            return {"ok": False, "attempt": attempt, "output_dir": str(attempt_dir), "error_type": type(exc).__name__, "error": str(exc), "retryable": False, "budget_failure": False, "operation": "commit_reuse"}
+
+    if reparse_saved_responses:
+        for attempt_dir in reversed(_saved_validation_dirs(base)):
+            attempt = int(attempt_dir.name.split("-", 1)[1])
+            try:
+                result = run_paper_reading_card(
+                    snapshot_dir=item["snapshot_dir"], plan_path=item["plan_path"],
+                    output_dir=attempt_dir, saved_response_dir=attempt_dir,
+                    input_profile=config["input_profile"], thinking=bool(config["thinking"]),
+                    concise_output=bool(config["concise_output"]),
+                    max_output_tokens=int(config["max_output_tokens"]),
+                    thinking_budget=int(config["thinking_budget"]),
+                    timeout_seconds=float(config["timeout_seconds"]), max_retries=0,
+                )
+                return {"ok": True, "result": result, "attempt": attempt,
+                        "output_dir": result["output_dir"], "reused": True,
+                        "reparsed": bool(result.get("reparsed")), "operation": "saved_reparse"}
+            except Exception as exc:
+                return {"ok": False, "attempt": attempt, "output_dir": str(attempt_dir),
+                        "error_type": type(exc).__name__, "error": str(exc),
+                        "retryable": False, "budget_failure": False, "operation": "saved_reparse"}
+
+    # Older batch versions left even nonretryable validation failures pending.
+    # Resuming without explicit recovery must not buy another response.
+    previous = (item.get("attempts") or [{}])[-1]
+    if previous.get("status") == "failed" and not previous.get("retryable") and not previous.get("budget_failure"):
+        return {"ok": False, "attempt": int(previous.get("attempt") or item.get("attempt") or 0),
+                "output_dir": previous.get("output_dir") or item.get("output_dir", ""),
+                "error_type": previous.get("error_type", "nonretryable_saved_failure"),
+                "error": previous.get("error", "nonretryable_saved_failure"),
+                "retryable": False, "budget_failure": False, "operation": "saved_failure"}
 
     attempt = _next_attempt(base)
     if attempt > MAX_ATTEMPTS_PER_PAPER:
@@ -534,8 +581,14 @@ def run_paper_reading_batch(
     retry_delay_seconds: float = 1.0,
     poll_seconds: float = 5.0,
     client_factory: Callable[..., Any] | None = None,
+    reparse_saved_responses: bool = False,
 ) -> dict[str, Any]:
-    """Run or preflight a resumable batch; live calls require mode='run'."""
+    """Run/preflight a resumable batch, optionally reparsing saved failures.
+
+    ``reparse_saved_responses`` is an explicit local recovery policy, not a
+    change to the physical request configuration or attempt limit.  New papers
+    still follow the normal live path in run mode.
+    """
 
     manifest = Path(manifest_path).resolve()
     output = Path(output_root).resolve()
@@ -584,6 +637,10 @@ def run_paper_reading_batch(
     pending = deque(newly_pending)
     pending_set = set(pending)
     for key, item in (state.get("items") or {}).items():
+        if mode == "run" and reparse_saved_responses and item.get("status") == "failed":
+            base = output / "cards" / _safe_slug(item["paper_id"]) / key
+            if _saved_validation_dirs(base):
+                item["status"] = "pending"
         if item.get("status") == "pending" and key not in pending_set:
             pending.append(key)
             pending_set.add(key)
@@ -610,7 +667,8 @@ def run_paper_reading_batch(
                     item["status"] = "waiting_material"
                 continue
             item["status"] = "running"
-            future = executor.submit(_call_one, item, config=config, output_root=output, client_factory=client_factory)
+            future = executor.submit(_call_one, item, config=config, output_root=output, client_factory=client_factory,
+                                     reparse_saved_responses=reparse_saved_responses)
             in_flight[future] = key
         state["target_workers"] = target_workers
         state["success_streak"] = success_streak
@@ -637,7 +695,9 @@ def run_paper_reading_batch(
                     if outcome.get("ok"):
                         item["status"] = "preflight" if mode == "preflight" else ("reused" if outcome.get("reused") else "success")
                         item["output_dir"] = outcome.get("output_dir", "")
-                        item["attempt"] = outcome.get("attempt", 0)
+                        item["attempt"] = max(int(item.get("attempt") or 0), int(outcome.get("attempt") or 0))
+                        if outcome.get("operation") == "saved_reparse":
+                            item.setdefault("reparse_history", []).append({"status": "success", "source_attempt": outcome["attempt"], "output_dir": outcome["output_dir"], "physical_calls": 0})
                         item["preflight"] = outcome.get("preflight")
                         item["last_error"] = ""
                         success_streak += 1
@@ -647,9 +707,13 @@ def run_paper_reading_batch(
                         _append_event(events_path, {"event": "paper_complete", "work_key": key, "paper_id": item.get("paper_id"), "status": item["status"], "attempt": item.get("attempt", 0), "target_workers": target_workers})
                     else:
                         attempt = int(outcome.get("attempt") or 0)
-                        item.setdefault("attempts", []).append({"attempt": attempt, "output_dir": outcome.get("output_dir", ""), "status": "failed", "error_type": outcome.get("error_type", ""), "error": outcome.get("error", ""), "retryable": bool(outcome.get("retryable")), "budget_failure": bool(outcome.get("budget_failure"))})
+                        failure_record = {"attempt": attempt, "output_dir": outcome.get("output_dir", ""), "status": "failed", "error_type": outcome.get("error_type", ""), "error": outcome.get("error", ""), "retryable": bool(outcome.get("retryable")), "budget_failure": bool(outcome.get("budget_failure"))}
+                        if outcome.get("operation") == "saved_reparse":
+                            item.setdefault("reparse_history", []).append({**failure_record, "physical_calls": 0})
+                        elif outcome.get("operation") not in {"saved_failure", "commit_reuse"}:
+                            item.setdefault("attempts", []).append(failure_record)
                         item["output_dir"] = outcome.get("output_dir", "")
-                        item["attempt"] = attempt
+                        item["attempt"] = max(int(item.get("attempt") or 0), attempt)
                         item["last_error"] = outcome.get("error", "")
                         item["status"] = "failed"
                         success_streak = 0
@@ -660,11 +724,10 @@ def run_paper_reading_batch(
                                 item["status"] = "pending"
                                 pending.append(key)
                                 pending_set.add(key)
-                        elif attempt < MAX_ATTEMPTS_PER_PAPER:
-                            if outcome.get("retryable"):
-                                target_workers = max(1, target_workers // 2)
-                                if retry_delay_seconds:
-                                    time.sleep(float(retry_delay_seconds))
+                        elif outcome.get("retryable") and attempt < MAX_ATTEMPTS_PER_PAPER:
+                            target_workers = max(1, target_workers // 2)
+                            if retry_delay_seconds:
+                                time.sleep(float(retry_delay_seconds))
                             item["status"] = "pending"
                             if key not in pending_set:
                                 pending.append(key)

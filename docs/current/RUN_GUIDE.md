@@ -403,3 +403,5 @@ python scripts/upgrade3/lower_budget_limit.py --ledger path/to/current_experimen
 --docling-max-processes 控制共享本地解析上限，--recognition-concurrency 控制整个批次的区域 HTTP 上限，--network-workers 控制外层材料任务。串行、并行和缓存恢复使用同一科学输入；成功区域复用不再次收费。项目 ledger 与账户 ledger 同时预留及结算，费用未知保留占额。免费预览不加 --recognition-run；真实识别须显式传入两账本、累计封顶、tokenizer 和密钥文件。
 
 实测配置、解析质量、双账本及恢复证据见 [统一验收入口](../verification/pdf-parser-parallel-20261013/README.md)。正文主线路及已有首尾/出版步骤不变，材料解析不会自动替代后续阅读。
+
+规划补材料启用相同路线时，向 `scripts/upgrade3/progressive_review_plan.py` 显式传入同组 Docling/recognition 参数；共享工厂复用解析器、识别器、缓存和全局并发限制。完整示例在 [local_materials](../local_materials.md)。A/B CLI 可显式加 `--reparse-saved-responses` 免费恢复兼容的已保存格式失败，不重买完整响应；新增论文仍计费。实际路径及严格恢复边界见 [衔接契约](../verification/pdf-parser-parallel-20261013/CONSUMER_COUPLING.md)。

@@ -1,8 +1,9 @@
 # Local material snapshots
 
 The upgrade-3 local material layer turns a local TEI or JATS XML document into
-an immutable snapshot for later reading. It does not choose a research facet,
-write claims, or call a model.
+an immutable snapshot for later reading. It does not choose a research facet or
+write claims. The default XML/acquisition path does not call a model; explicitly
+enabled regional transcription can call the configured vision model.
 
 Build a snapshot with:
 
@@ -42,12 +43,14 @@ overwrite a directory with an existing snapshot ID.
 Semantic Scholar/OpenAlex IDs, title, authors, year, abstract, and snippets.
 It resolves identity through the existing provider adapters, then tries
 structured JATS before TEI/HTML and finally an OA PDF through GROBID or the
-fitz text fallback. It stops after a usable structured source and does not
-call a model. Provider claims, filenames, redirects, login pages, and HTTP
+fitz text fallback. It stops after a usable structured source. Without explicit
+regional transcription it does not call a model. Provider claims, filenames, redirects, login pages, and HTTP
 headers are never treated as proof of article content.
 
 The default deadline is 180 seconds per paper. Network workers default to four
-and are capped at ten; PDF parsing is serialized at one. Cache blobs and
+and are capped at ten; the default PDF parser lane is serialized. Explicit
+Docling configuration has a separate shared process bound; the example runtime
+below uses two Docling processes and eight regional requests across papers. Cache blobs and
 metadata are hash validated before reuse. `--refresh` creates a new acquisition
 revision and leaves the prior snapshot intact; it does not invent a scientific
 publication version. Batch progress is written as
@@ -157,6 +160,42 @@ and transcribe its detected formula/table crops through the ordinary Qwen
 transport and existing project/account ledgers. Native JATS/TEI inputs retain
 priority and bypass this PDF supplement, including provider calls. Figure
 interpretation remains disabled; figures and linked captions are retained.
+
+PDF body text still follows the GROBID/fitz path. Docling adds layout, original
+PDF crops, and regional formula/table transcription to that body; it does not
+replace the body extractor.
+
+The initial acquisition CLI and the formal progressive planning CLI share
+`make_material_acquirer_factory(args, regional_client_constructor=None)` from
+`scripts.upgrade3.build_local_materials`. Build it once, then inject the returned
+callable as `make_planning_supplement_runner(..., acquirer_factory=factory)`.
+Each source unit gets its own output root while sharing the same Docling adapter,
+regional recognizer, concurrency bounds, cache, budget factory and unknown halt.
+New PDFs finish this parse/transcription path before their snapshots reach the
+reading card. Native XML still bypasses visual transcription. Omitting the
+optional factory retains the previous planning acquisition behavior.
+
+Planning requires the same explicit flags; it never discovers an R runtime JSON
+or inherits an earlier acquisition's settings implicitly. For example:
+
+```powershell
+python -B -X utf8 -m scripts.upgrade3.progressive_review_plan `
+  --pool PLANNING_POOL.jsonl --plan PLAN.json --output-dir outputs/planning `
+  --cache-root data/local_material_acquisition_cache --deadline-seconds 240 `
+  --docling-cli-config docling-cli.json --docling-cache-root cache/docling `
+  --docling-max-processes 2 --recognition-config config/regional_recognition/plus.json `
+  --recognition-concurrency 8 --recognition-cache-root cache/regional `
+  --recognition-run --recognition-ceiling-cny 80 `
+  --budget-ledger outputs/run/budget.sqlite --budget-limit-cny 80 `
+  --account-ledger outputs/account/budget.sqlite --account-budget-limit 300 `
+  --key-file existing-keys.txt --key-index 1 --tokenizer existing-tokenizer.json `
+  --run
+```
+
+These are explicit runtime choices, not changed generic defaults. A supervised
+caller can pass `regional_client_constructor` to the planning CLI's `main`;
+the native factory keeps its dual-ledger accounting and synchronized proxy while
+the injected constructor adds the caller's request/response gates.
 
 Use an existing isolated Docling installation and already cached model weights.
 The runner sets Hugging Face/Transformers offline mode. It neither installs nor

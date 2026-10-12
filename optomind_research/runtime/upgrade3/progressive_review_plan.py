@@ -7493,6 +7493,7 @@ def make_planning_supplement_runner(
     budget_limit_cny: float,
     local_index_path: str | Path | None = None,
     allow_external: bool = True,
+    acquirer_factory: Callable[[Path], Any] | None = None,
 ) -> Callable[..., Mapping[str, Any]]:
     """Build a callable adapter over the existing practical supplement path.
 
@@ -7620,7 +7621,7 @@ def make_planning_supplement_runner(
                 "material_depth": _text((candidate.get("_b_summary") or {}).get("declared_content_depth")) or "fulltext",
             }
 
-        def acquirer_factory(material_root: Path):
+        def default_acquirer_factory(material_root: Path):
             return MaterialAcquirer(material_root, config=AcquisitionConfig(cache_root=material_root / "cache"))
 
         gateway = CompositeS2OpenAlexGateway(S2IntelligenceGateway(), OpenAlexBackend())
@@ -7656,7 +7657,7 @@ def make_planning_supplement_runner(
                     request_path,
                     output_dir=output_dir,
                     gateway=gateway,
-                    acquirer_factory=acquirer_factory,
+                    acquirer_factory=acquirer_factory or default_acquirer_factory,
                     card_runner=run_paper_reading_card,
                     fulfillment_judge=judge,
                     card_options={

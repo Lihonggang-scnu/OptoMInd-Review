@@ -166,8 +166,12 @@ def _require_max_permission(args: argparse.Namespace, profiles: Mapping[str, Map
                          + ":pass --allow-max only for an explicitly approved Max run")
 
 
-def make_live_factory(args: argparse.Namespace, *, token_counter=None, reservation_ceiling_cny=None, thread_safe=False):
-    """Create one lazy shared-ledger factory; no keys are read here."""
+def make_live_factory(args: argparse.Namespace, *, token_counter=None, reservation_ceiling_cny=None, thread_safe=False, client_constructor=None):
+    """Create one lazy shared-ledger factory; no keys are read here.
+
+    An explicit client constructor can add caller-owned supervision. It receives
+    the original accounting proxy; reservation and settlement remain native.
+    """
     if not args.run or args.responses:
         raise ValueError("live_execution_requires_run_without_responses")
     if not args.budget_ledger:
@@ -232,7 +236,7 @@ def make_live_factory(args: argparse.Namespace, *, token_counter=None, reservati
                 ledger.recover_settlements()
         effective = {key: profile[key] for key in PROFILE_FIELDS if key in profile}
         constructor = {key: value for key, value in effective.items() if key != "stream"}
-        provider = QwenDirectClient(
+        provider = (client_constructor or QwenDirectClient)(
             **constructor, key_file=args.key_file, max_retries=0, max_keys=1,
             key_index=getattr(args, "key_index", None),
             budget_ledger=budget_entry if thread_safe else ledger, prompt_token_counter=token_counter,

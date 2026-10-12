@@ -108,3 +108,7 @@
 独立首尾CLI的LIVE_REPORT.runtime_report包裹原FRONT_BACK_REPORT；不要将外层费用累计delta当每阶段单独费用。校验严格执行后以selected_manuscript为准，complete_with_diagnostics可以交付并附带pending/unresolved；缺原稿、哈希不符或首轮没有有效结果仍停止。04书目投影、05 reader及MANUSCRIPT_SELECTION sidecar的实际路径和SHA逐段保存。恢复细则与正式命令以[MANUSCRIPT_CHECKER_RUN_GUIDE](MANUSCRIPT_CHECKER_RUN_GUIDE.md)为准。
 
 本轮真实首尾/校验共9次Plus调用1.4544032元，无占额；最终187身份，Markdown消费接通。448项相关回归通过；没有重跑BODY或本轮PDF。已知写作瑕疵保留在亲审记录，用户验收决定已采纳。
+
+## 2026-10-13 材料解析消费者接线
+
+首次获取与规划补读共用显式配置的 MaterialAcquirer 工厂，原生 XML 优先；PDF 正文提取配合 Docling 布局和区域 Plus 识别。快照中的公式、表格、脚注及缺口进入阅读输入。实际部署为本地2进程、区域全局8并发、外层4 worker。输入输出及恢复契约见 [消费者衔接](../verification/pdf-parser-parallel-20261013/CONSUMER_COUPLING.md)。本轮光学测试已完成270条材料获取，正恢复A/B阅读，尚非端到端论文完成记录。

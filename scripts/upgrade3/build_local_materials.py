@@ -16,7 +16,7 @@ import re
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 REPO = Path(__file__).resolve().parents[2]
 if str(REPO) not in sys.path:
@@ -166,19 +166,8 @@ def _resolve_local_path(value: Any, base: Path) -> Path | None:
     return path if path.is_absolute() else base / path
 
 
-def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Build immutable OptoMind local material snapshots")
-    parser.add_argument("--input", type=Path, help="local TEI/JATS XML or PDF")
-    parser.add_argument("--pdf", type=Path, help="PDF paired with --input XML")
-    parser.add_argument("--prepared", type=Path, help="existing prepared snapshot directory to validate and load")
-    parser.add_argument("--record-json", type=Path, help="metadata record JSON for one acquisition")
-    parser.add_argument("--batch-manifest", type=Path, help="frozen manifest JSON containing a records array")
-    parser.add_argument("--output-root", type=Path, default=Path("outputs/local_materials"))
-    parser.add_argument("--canonical-paper-id", default="")
-    parser.add_argument("--publication-version", default="")
-    parser.add_argument("--source-document-id", default="main")
-    parser.add_argument("--source-role", default="main")
-    parser.add_argument("--source-uri", default="")
+def add_material_acquisition_arguments(parser: argparse.ArgumentParser, *, include_shared_budget_options: bool = True) -> None:
+    """Add the same explicit acquisition/parser options to both formal CLIs."""
     parser.add_argument("--cache-root", type=Path, default=Path("data/local_material_acquisition_cache"))
     parser.add_argument("--deadline-seconds", type=float, default=180.0)
     parser.add_argument("--network-workers", type=int, default=4)
@@ -201,28 +190,45 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--recognition-concurrency", type=int, help="override regional JSON concurrency (initial default 4; 1 serial; maximum 32)")
     parser.add_argument("--recognition-reviewed-failures", type=Path, help="explicit cache-key/attempt/RESULT hash allowlist; isolate only saved unknowns whose original dual holds remain consumed")
     parser.add_argument("--recognition-ceiling-cny", type=float, help="absolute cumulative project reservation ceiling for this execution")
-    parser.add_argument("--budget-ledger", type=Path, help="existing shared project ledger for regional recognition")
-    parser.add_argument("--budget-limit", type=float, help="existing project budget cap; never resets its history")
+    if include_shared_budget_options:
+        parser.add_argument("--budget-ledger", type=Path, help="existing shared project ledger for regional recognition")
+        parser.add_argument("--budget-limit", type=float, help="existing project budget cap; never resets its history")
     parser.add_argument("--account-ledger", type=Path, help="paired shared account ledger")
     parser.add_argument("--account-budget-limit", type=float)
     parser.add_argument("--account-mapping-dir", type=Path)
-    parser.add_argument("--key-file", type=Path)
+    if include_shared_budget_options:
+        parser.add_argument("--key-file", type=Path)
     parser.add_argument("--key-index", type=int)
-    parser.add_argument("--tokenizer", type=Path, help="existing local tokenizer; no download")
+    if include_shared_budget_options:
+        parser.add_argument("--tokenizer", type=Path, help="existing local tokenizer; no download")
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Build immutable OptoMind local material snapshots")
+    parser.add_argument("--input", type=Path, help="local TEI/JATS XML or PDF")
+    parser.add_argument("--pdf", type=Path, help="PDF paired with --input XML")
+    parser.add_argument("--prepared", type=Path, help="existing prepared snapshot directory to validate and load")
+    parser.add_argument("--record-json", type=Path, help="metadata record JSON for one acquisition")
+    parser.add_argument("--batch-manifest", type=Path, help="frozen manifest JSON containing a records array")
+    parser.add_argument("--output-root", type=Path, default=Path("outputs/local_materials"))
+    parser.add_argument("--canonical-paper-id", default="")
+    parser.add_argument("--publication-version", default="")
+    parser.add_argument("--source-document-id", default="main")
+    parser.add_argument("--source-role", default="main")
+    parser.add_argument("--source-uri", default="")
+    add_material_acquisition_arguments(parser)
     return parser
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = _build_parser().parse_args(argv)
-    modes = sum(bool(item) for item in (args.input, args.prepared, args.batch_manifest)) + (1 if args.record_json and not args.input else 0)
-    if modes != 1:
-        _build_parser().error("choose exactly one of --input, --prepared, --record-json, or --batch-manifest")
+def make_material_acquirer_factory(args: argparse.Namespace, *, regional_client_constructor=None) -> Callable[[Path], MaterialAcquirer]:
+    """Build parser/provider instances once; per-source acquirers share their bounds.
 
-    if args.prepared:
-        snapshot = PreparedSnapshotProvider(args.prepared).load()
-        _print({"status": "loaded", "snapshot_id": snapshot.snapshot_id, "path": str(snapshot.root), "content_depth": snapshot.content_depth})
-        return 0
-
+    This is explicit configuration, not runtime-file discovery. Construction
+    never reads keys or sends requests. The optional constructor preserves the
+    native factory accounting while a caller adds its supervised transport.
+    """
+    args = argparse.Namespace(**vars(args))
+    args.budget_limit = getattr(args, "budget_limit", getattr(args, "budget_limit_cny", None))
     config = AcquisitionConfig(deadline_seconds=args.deadline_seconds, network_workers=args.network_workers, request_timeout_seconds=args.request_timeout_seconds, max_retries=args.max_retries, cache_root=args.cache_root, refresh=args.refresh, rescue_enabled=not args.disable_rescue, rescue_max_candidates=args.rescue_max_candidates, rescue_max_search_calls=args.rescue_max_search_calls, rescue_max_extract_calls=args.rescue_max_extract_calls)
     providers: dict[str, Any] = {}
     if args.docling_document_json or args.docling_run_json or args.docling_cli_config:
@@ -231,7 +237,7 @@ def main(argv: list[str] | None = None) -> int:
         cache_root = args.docling_cache_root or args.cache_root / "docling"
         if args.docling_cli_config:
             if args.docling_document_json or args.docling_run_json:
-                _build_parser().error("choose saved Docling files or explicit CLI configuration")
+                raise ValueError("choose saved Docling files or explicit CLI configuration")
             value = _read_json(args.docling_cli_config)
             adapter_config = DoclingAdapterConfig(parser_version=str(value["parser_version"]), cache_root=cache_root,
                 command=tuple(value["command"]), command_args=tuple(value.get("command_args") or ()),
@@ -240,7 +246,7 @@ def main(argv: list[str] | None = None) -> int:
                 max_processes=args.docling_max_processes if args.docling_max_processes is not None else value.get("max_processes", 1))
         else:
             if not (args.docling_document_json and args.docling_run_json):
-                _build_parser().error("saved Docling import requires both --docling-document-json and --docling-run-json")
+                raise ValueError("saved Docling import requires both --docling-document-json and --docling-run-json")
             adapter_config = DoclingAdapterConfig.from_saved_run(args.docling_document_json, args.docling_run_json,
                 cache_root=cache_root, crop_scale=args.docling_crop_scale,
                 max_processes=args.docling_max_processes if args.docling_max_processes is not None else 1)
@@ -264,7 +270,7 @@ def main(argv: list[str] | None = None) -> int:
                     raise ValueError("regional_live_requires_existing_ledgers")
                 counter, tokenizer_info = tokenizer_counter(args.tokenizer)
                 args.run, args.responses, args.allow_max = True, None, False
-                factory = make_live_factory(args, token_counter=vision_token_counter(counter), reservation_ceiling_cny=args.recognition_ceiling_cny, thread_safe=True)
+                factory = make_live_factory(args, token_counter=vision_token_counter(counter), reservation_ceiling_cny=args.recognition_ceiling_cny, thread_safe=True, client_constructor=regional_client_constructor)
             recognition_options["scope"] = config_sha256({"project_ledger": str(args.budget_ledger.resolve()) if args.budget_ledger else "",
                 "account_ledger": str(args.account_ledger.resolve()) if args.account_ledger else "", "tokenizer": tokenizer_info,
                 "reservation_ceiling_cny": args.recognition_ceiling_cny})
@@ -276,13 +282,35 @@ def main(argv: list[str] | None = None) -> int:
             "recognition": {"request": recognizer.config.fingerprint(), "policy": recognizer.config.policy()} if recognizer else None,
             "local_scheduling": {"max_processes": adapter_config.max_processes}, "recognition_run": args.recognition_run})
     elif args.recognition_config or args.recognition_run:
-        _build_parser().error("regional recognition requires an explicit Docling configuration")
+        raise ValueError("regional recognition requires an explicit Docling configuration")
     if args.recognition_run and not args.recognition_config:
-        _build_parser().error("--recognition-run requires --recognition-config")
+        raise ValueError("--recognition-run requires --recognition-config")
     if args.recognition_reviewed_failures and not args.recognition_run:
-        _build_parser().error("--recognition-reviewed-failures requires --recognition-run")
+        raise ValueError("--recognition-reviewed-failures requires --recognition-run")
     reader = FirecrawlReader(timeout_seconds=min(config.request_timeout_seconds, 20.0)) if config.rescue_enabled and (config.rescue_max_search_calls or config.rescue_max_extract_calls) else None
-    acquirer = MaterialAcquirer(args.output_root, config=config, providers=providers, reader=reader)
+
+    def factory(material_root: Path) -> MaterialAcquirer:
+        return MaterialAcquirer(material_root, config=config, providers=providers, reader=reader)
+    return factory
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = _build_parser()
+    args = parser.parse_args(argv)
+    modes = sum(bool(item) for item in (args.input, args.prepared, args.batch_manifest)) + (1 if args.record_json and not args.input else 0)
+    if modes != 1:
+        _build_parser().error("choose exactly one of --input, --prepared, --record-json, or --batch-manifest")
+
+    if args.prepared:
+        snapshot = PreparedSnapshotProvider(args.prepared).load()
+        _print({"status": "loaded", "snapshot_id": snapshot.snapshot_id, "path": str(snapshot.root), "content_depth": snapshot.content_depth})
+        return 0
+
+    try:
+        acquirer = make_material_acquirer_factory(args)(args.output_root)
+    except ValueError as exc:
+        parser.error(str(exc))
+    config = acquirer.config
 
     if args.batch_manifest:
         manifest_path = args.batch_manifest
