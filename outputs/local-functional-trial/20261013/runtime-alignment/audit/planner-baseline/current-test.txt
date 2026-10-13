@@ -1,0 +1,63 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_________ test_planner_compacts_large_research_and_feedback_payloads __________
+
+    def test_planner_compacts_large_research_and_feedback_payloads():
+        route = _route(evidence_ids=["ev_29"])
+        client = _FakeClient([_plan(route)])
+        evidence = [
+            {
+                "evidence_id": f"ev_{index}",
+                "paper_id": f"paper_{index}",
+                "title": f"Paper {index}",
+                "allowed_use": "method_guidance",
+                "content_depth": "fulltext",
+                "text": "x" * 5000,
+            }
+            for index in range(30)
+        ]
+        result = QwenTMMStrategyPlanner(client=client).plan(
+            {"problem_id": "p1", "primary_intent": "design"},
+            {
+                "evidence": evidence,
+                "method_findings": [
+                    {
+                        "method_name": "linked method",
+                        "evidence_ids": ["ev_29"],
+                    }
+                ],
+                "telemetry": {"large_internal_payload": "y" * 10000},
+            },
+            prior_iterations=[
+                {
+                    "iteration_id": "i1",
+                    "candidate_summaries": [
+                        {"candidate_id": "c1", "objective_report": {"large": "z" * 5000}}
+                    ],
+                }
+            ],
+            feedback_directives=["Preserve the verified principle."],
+        )
+    
+        assert result.status == "planned"
+        sent = json.loads(client.calls[0][1]["content"])
+        assert len(sent["method_research"]["evidence"]) <= 16
+        assert "ev_29" in {
+            item["evidence_id"] for item in sent["method_research"]["evidence"]
+        }
+>       assert max(len(item["text"]) for item in sent["method_research"]["evidence"]) <= 1200
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+D:\OptoMind-Article-3\repos\OptoMind-Article\code\tests\test_tmm_strategy_planner.py:267: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+.0 = <list_iterator object at 0x00000209A2DA66E0>
+
+>   assert max(len(item["text"]) for item in sent["method_research"]["evidence"]) <= 1200
+                   ^^^^^^^^^^^^
+E   KeyError: 'text'
+
+D:\OptoMind-Article-3\repos\OptoMind-Article\code\tests\test_tmm_strategy_planner.py:267: KeyError
+=========================== short test summary info ===========================
+FAILED D:\OptoMind-Article-3\repos\OptoMind-Article\code\tests\test_tmm_strategy_planner.py::test_planner_compacts_large_research_and_feedback_payloads
+1 failed in 0.68s

@@ -1,0 +1,63 @@
+{
+  "schema_version": "optomind-intent-equivalence.v1",
+  "semantic_status": "equivalent",
+  "certificate": {
+    "schema_version": "compilation-equivalence.v1",
+    "intent_id": "0e69673da90c751f",
+    "source_clause": "Execute a deterministic Transfer Matrix Method optimization for a planar stack with the following fixed topology: Incident Medium (Air, n=1.0) | Layer 1 (SiO2, n=1.46, lossless) | Layer 2 (TiO2, n=2.40, lossless) | Substrate (Glass, n=1.52, lossless). The stack must contain exactly these two finite layers. Optimize the thickness of Layer 1 and Layer 2, both constrained between 40 nm and 160 nm. Th",
+    "source_clause_hash": "25c05fd678a916aa203a259fc5cc5e6f32ae7d474c3756577740e1753577ad33",
+    "intent_fields": {
+      "schema_version": "veritmm-intent-spec-v1",
+      "intent_id": "0e69673da90c751f",
+      "source_clause": "Execute a deterministic Transfer Matrix Method optimization for a planar stack with the following fixed topology: Incident Medium (Air, n=1.0) | Layer 1 (SiO2, n=1.46, lossless) | Layer 2 (TiO2, n=2.40, lossless) | Substrate (Glass, n=1.52, lossless). The stack must contain exactly these two finite layers. Optimize the thickness of Layer 1 and Layer 2, both constrained between 40 nm and 160 nm. Th",
+      "observables": [
+        {
+          "quantity": "R",
+          "domain": {
+            "wavelength_min": {
+              "value": 450.0,
+              "unit": "nm"
+            },
+            "wavelength_max": {
+              "value": 700.0,
+              "unit": "nm"
+            },
+            "angle_deg": 0.0,
+            "polarization": "s"
+          },
+          "reducer": "mean",
+          "relation": "<=",
+          "target": 0.03,
+          "constraint_role": "soft",
+          "weight": 1.0
+        }
+      ],
+      "design_variables": [],
+      "hard_constraints": [],
+      "uncertainty": {},
+      "verification_requirement": {
+        "energy": "independent",
+        "cross_solver": true,
+        "reciprocity": false
+      }
+    },
+    "compiled_task_fields": [
+      {
+        "intent_path": "observables[0]",
+        "task_path": "targets[0]",
+        "value": "R at_most 0.03 over [450, 700] nm"
+      }
+    ],
+    "unit_conversions": [],
+    "defaults_inserted": [],
+    "ambiguities": [],
+    "verification_requirement": {
+      "energy": "independent",
+      "cross_solver": true,
+      "reciprocity": false
+    },
+    "notes": [],
+    "semantic_status": "equivalent",
+    "rejection": null
+  }
+}

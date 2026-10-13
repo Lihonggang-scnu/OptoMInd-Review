@@ -1,0 +1,47 @@
+{
+  "content": "{\n  \"metrics\": [\n    {\n      \"metric\": \"mean_reflectance\",\n      \"sense\": \"minimize\",\n      \"wavelength_unit\": \"nm\",\n      \"region\": {\n        \"wavelength_nm\": [450, 700],\n        \"angle_deg\": 0,\n        \"polarization\": \"s\"\n      },\n      \"target\": 0.03,\n      \"rationale\": \"The user explicitly requests to 'minimize the arithmetic mean power reflectance sampled from 450 to 700 nm' and states 'A mean reflectance below 0.03 is the stated target'. The metric uses 'minimize' for the optimization direction and includes the 'target' of 0.03 to score proximity to this specific goal. The region is restricted to normal incidence (0 degrees) and s-polarization as specified.\"\n    }\n  ],\n  \"rationale\": \"This single metric faithfully captures the entire optimization objective defined in the request: minimizing the average reflectance over the 450-700 nm band for s-polarized light at normal incidence. It incorporates the soft target of 0.03 via the 'match' capability inherent in providing a target value alongside a minimization sense (or strictly interpreting the target as the threshold for success). No other metrics are needed because the request does not specify competing goals (like maximizing transmission elsewhere) or worst-case constraints; it focuses solely on the arithmetic mean within the visible band. Adding extra metrics would dilute the ranking of designs that best meet the specific 'mean < 0.03' criterion.\"\n}",
+  "raw_response": "{\"choices\":[{\"message\":{\"content\":\"{\\n  \\\"metrics\\\": [\\n    {\\n      \\\"metric\\\": \\\"mean_reflectance\\\",\\n      \\\"sense\\\": \\\"minimize\\\",\\n      \\\"wavelength_unit\\\": \\\"nm\\\",\\n      \\\"region\\\": {\\n        \\\"wavelength_nm\\\": [450, 700],\\n        \\\"angle_deg\\\": 0,\\n        \\\"polarization\\\": \\\"s\\\"\\n      },\\n      \\\"target\\\": 0.03,\\n      \\\"rationale\\\": \\\"The user explicitly requests to 'minimize the arithmetic mean power reflectance sampled from 450 to 700 nm' and states 'A mean reflectance below 0.03 is the stated target'. The metric uses 'minimize' for the optimization direction and includes the 'target' of 0.03 to score proximity to this specific goal. The region is restricted to normal incidence (0 degrees) and s-polarization as specified.\\\"\\n    }\\n  ],\\n  \\\"rationale\\\": \\\"This single metric faithfully captures the entire optimization objective defined in the request: minimizing the average reflectance over the 450-700 nm band for s-polarized light at normal incidence. It incorporates the soft target of 0.03 via the 'match' capability inherent in providing a target value alongside a minimization sense (or strictly interpreting the target as the threshold for success). No other metrics are needed because the request does not specify competing goals (like maximizing transmission elsewhere) or worst-case constraints; it focuses solely on the arithmetic mean within the visible band. Adding extra metrics would dilute the ranking of designs that best meet the specific 'mean < 0.03' criterion.\\\"\\n}\",\"role\":\"assistant\"},\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null}],\"object\":\"chat.completion\",\"usage\":{\"prompt_tokens\":3552,\"completion_tokens\":356,\"total_tokens\":3908,\"completion_tokens_details\":{\"text_tokens\":356},\"prompt_tokens_details\":{\"text_tokens\":3552}},\"created\":1791870880,\"system_fingerprint\":null,\"model\":\"qwen3.5-plus\",\"id\":\"chatcmpl-639da294-a529-9f01-b086-4ba1d85e814a\"}",
+  "raw_response_sha256": "f07b81210d876b2bd2ed43d963e572ecf24806d6654ae6a575b97a0cf00e1085",
+  "requested_model": "qwen3.5-plus",
+  "returned_model": "qwen3.5-plus",
+  "finish_reason": "stop",
+  "complete": true,
+  "request_id": "chatcmpl-639da294-a529-9f01-b086-4ba1d85e814a",
+  "usage": {
+    "prompt_tokens": 3552,
+    "completion_tokens": 356,
+    "total_tokens": 3908,
+    "completion_tokens_details": {
+      "text_tokens": 356
+    },
+    "prompt_tokens_details": {
+      "text_tokens": 3552
+    }
+  },
+  "status_code": 200,
+  "call_id": "article-5457dbf8f82c44",
+  "attempt": 1,
+  "key_index": 0,
+  "elapsed_seconds": 7.312000000150874,
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "enable_thinking": false,
+    "thinking_budget": 0,
+    "answer_tokens": 4000,
+    "total_output_tokens": 4000,
+    "max_completion_tokens": 4000,
+    "max_tokens": null,
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "cap_pressure": {
+    "near_limit": false,
+    "near_limits": [],
+    "completion_tokens": 356,
+    "reasoning_tokens": 0,
+    "answer_tokens": 356,
+    "finish_reason_length": false,
+    "diagnostic_only": true
+  }
+}

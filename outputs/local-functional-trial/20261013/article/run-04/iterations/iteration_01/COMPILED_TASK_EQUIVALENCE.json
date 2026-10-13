@@ -1,0 +1,63 @@
+{
+  "schema_version": "optomind-intent-equivalence.v1",
+  "semantic_status": "equivalent",
+  "certificate": {
+    "schema_version": "compilation-equivalence.v1",
+    "intent_id": "5e0d1162af4ff068",
+    "source_clause": "Execute a deterministic TMM optimization for a planar stack: Incident Medium Air (n=1.0), Layer 1 TiO2 (n=2.40, lossless), Layer 2 SiO2 (n=1.46, lossless), Substrate Glass (n=1.52, lossless). Illumination: Normal incidence (0 deg), s-polarization. Wavelength range: 450 nm to 700 nm, sampled every 5 nm. Objective: Minimize the arithmetic mean of power reflectance across the sampled wavelengths. Des",
+    "source_clause_hash": "d30254d545cb2c0fb69f5bcb07f1950ce8a183e4b5fece907c7ffca1ba455b7b",
+    "intent_fields": {
+      "schema_version": "veritmm-intent-spec-v1",
+      "intent_id": "5e0d1162af4ff068",
+      "source_clause": "Execute a deterministic TMM optimization for a planar stack: Incident Medium Air (n=1.0), Layer 1 TiO2 (n=2.40, lossless), Layer 2 SiO2 (n=1.46, lossless), Substrate Glass (n=1.52, lossless). Illumination: Normal incidence (0 deg), s-polarization. Wavelength range: 450 nm to 700 nm, sampled every 5 nm. Objective: Minimize the arithmetic mean of power reflectance across the sampled wavelengths. Des",
+      "observables": [
+        {
+          "quantity": "R",
+          "domain": {
+            "wavelength_min": {
+              "value": 450.0,
+              "unit": "nm"
+            },
+            "wavelength_max": {
+              "value": 700.0,
+              "unit": "nm"
+            },
+            "angle_deg": 0.0,
+            "polarization": "s"
+          },
+          "reducer": "mean",
+          "relation": "<=",
+          "target": 0.0,
+          "constraint_role": "soft",
+          "weight": 1.0
+        }
+      ],
+      "design_variables": [],
+      "hard_constraints": [],
+      "uncertainty": {},
+      "verification_requirement": {
+        "energy": "independent",
+        "cross_solver": true,
+        "reciprocity": false
+      }
+    },
+    "compiled_task_fields": [
+      {
+        "intent_path": "observables[0]",
+        "task_path": "targets[0]",
+        "value": "R at_most 0.0 over [450, 700] nm"
+      }
+    ],
+    "unit_conversions": [],
+    "defaults_inserted": [],
+    "ambiguities": [],
+    "verification_requirement": {
+      "energy": "independent",
+      "cross_solver": true,
+      "reciprocity": false
+    },
+    "notes": [],
+    "semantic_status": "equivalent",
+    "rejection": null
+  }
+}

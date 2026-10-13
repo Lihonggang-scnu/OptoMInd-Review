@@ -1,0 +1,93 @@
+{
+  "status": "completed",
+  "optimizer_id": "gradient_thickness",
+  "best_thicknesses_nm": [
+    90.54254727031935,
+    109.5529574424896
+  ],
+  "best_loss": 0.00038758274735219297,
+  "candidate_designs": [
+    {
+      "candidate_id": "candidate_01",
+      "source": "optimized_best",
+      "thicknesses_nm": [
+        90.54254727031935,
+        109.5529574424896
+      ],
+      "objective_loss": 0.00038758274735219297,
+      "loss": 0.00038758274735219297,
+      "verification_status": "pending_independent_verification",
+      "physics_certified": false,
+      "optimizer_metrics": {
+        "min_mean_reflectance": 0.018799506604644536
+      }
+    },
+    {
+      "candidate_id": "candidate_02",
+      "source": "initial",
+      "thicknesses_nm": [
+        100.0,
+        100.0
+      ],
+      "objective_loss": 0.0015375230614904538,
+      "loss": 0.0015375230614904538,
+      "verification_status": "pending_independent_verification",
+      "physics_certified": false,
+      "optimizer_metrics": {
+        "min_mean_reflectance": 0.0380860978380969
+      }
+    }
+  ],
+  "evaluation_count": 12,
+  "stop_reason": "max_steps",
+  "wall_seconds": 4.426247099880129,
+  "audit": {
+    "capability_assessment": {
+      "optimizer_id": "gradient_thickness",
+      "supported": true,
+      "failures": [],
+      "warnings": []
+    },
+    "backend": "tmm_engine.DifferentiableThicknessOptimizer",
+    "device": "cpu",
+    "seed": 17,
+    "coherent_only": true,
+    "tmm_only": true,
+    "independent_verification_required": true,
+    "physics_self_certification": false,
+    "target_attainment_used_as_gate": false,
+    "raw_optimizer_audit": {
+      "best_step": 8,
+      "device": "cpu",
+      "dtype": "torch.float64",
+      "material_provenance": [
+        {
+          "provider": "constant",
+          "n": 1.0,
+          "k": 0.0
+        },
+        {
+          "provider": "constant",
+          "n": 1.46,
+          "k": 0.0,
+          "label": "layer_1"
+        },
+        {
+          "provider": "constant",
+          "n": 2.4,
+          "k": 0.0,
+          "label": "layer_2"
+        },
+        {
+          "provider": "constant",
+          "n": 1.52,
+          "k": 0.0
+        }
+      ],
+      "coherent_only": true,
+      "specformer_derived_backend": true,
+      "evaluation_count": 12,
+      "robust_training": null
+    }
+  }
+}

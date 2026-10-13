@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="31" time="0.997" timestamp="2026-10-13T13:48:23.142163+08:00" hostname="pkth"><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_accepts_only_traceable_evidence_ids" time="0.002" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_realizes_delegated_material_choice_as_fixed_sequence" time="0.152" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_removes_conflicting_material_sequence_instruction_after_realization" time="0.109" /><testcase classname="tests.test_tmm_strategy_planner" name="test_unknown_evidence_id_triggers_one_repair" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_theory_based_route_is_allowed_without_literature" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_route_with_no_evidence_or_theory_fails_closed" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_intermediate_plan_rejects_cjk" time="0.002" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_compacts_large_research_and_feedback_payloads" time="0.001"><failure message="KeyError: 'text'">def test_planner_compacts_large_research_and_feedback_payloads():
+        route = _route(evidence_ids=["ev_29"])
+        client = _FakeClient([_plan(route)])
+        evidence = [
+            {
+                "evidence_id": f"ev_{index}",
+                "paper_id": f"paper_{index}",
+                "title": f"Paper {index}",
+                "allowed_use": "method_guidance",
+                "content_depth": "fulltext",
+                "text": "x" * 5000,
+            }
+            for index in range(30)
+        ]
+        result = QwenTMMStrategyPlanner(client=client).plan(
+            {"problem_id": "p1", "primary_intent": "design"},
+            {
+                "evidence": evidence,
+                "method_findings": [
+                    {
+                        "method_name": "linked method",
+                        "evidence_ids": ["ev_29"],
+                    }
+                ],
+                "telemetry": {"large_internal_payload": "y" * 10000},
+            },
+            prior_iterations=[
+                {
+                    "iteration_id": "i1",
+                    "candidate_summaries": [
+                        {"candidate_id": "c1", "objective_report": {"large": "z" * 5000}}
+                    ],
+                }
+            ],
+            feedback_directives=["Preserve the verified principle."],
+        )
+    
+        assert result.status == "planned"
+        sent = json.loads(client.calls[0][1]["content"])
+        assert len(sent["method_research"]["evidence"]) &lt;= 16
+        assert "ev_29" in {
+            item["evidence_id"] for item in sent["method_research"]["evidence"]
+        }
+&gt;       assert max(len(item["text"]) for item in sent["method_research"]["evidence"]) &lt;= 1200
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+D:\OptoMind-Article-3\repos\OptoMind-Article\code\tests\test_tmm_strategy_planner.py:267: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+.0 = &lt;list_iterator object at 0x0000020634A69F00&gt;
+
+&gt;   assert max(len(item["text"]) for item in sent["method_research"]["evidence"]) &lt;= 1200
+                   ^^^^^^^^^^^^
+E   KeyError: 'text'
+
+D:\OptoMind-Article-3\repos\OptoMind-Article\code\tests\test_tmm_strategy_planner.py:267: KeyError</failure></testcase><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_repairs_latex_controls_and_replaces_performance_stop_gate" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_repairs_route_that_drops_explicit_user_constraints" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_repairs_only_unique_near_exact_evidence_id_copy_error" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_rejects_cross_route_reference_in_standalone_request" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_instantiates_pair_count_range_before_compilation" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_realizes_unresolved_ellipsis_topology_before_compilation" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_wavelength_grid_ellipsis_preserves_explicit_two_layer_topology" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_accepts_a_route_that_names_the_refractive_index" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_still_resolves_a_genuinely_unresolved_repeat_count" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_assigns_fixed_routes_across_requested_layer_count_range" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_understands_between_layer_range_and_keeps_suppression_direction" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_preserves_exact_explicit_targets_over_lossy_preferred" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_propagates_authoritative_uncertainty_with_separate_labels" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_does_not_invent_uncertainty_when_absent" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_preserves_long_005_uncertainty_sentence_and_compiles" time="0.008" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_long_sentence_without_uncertainty_yields_no_clauses" time="0.000" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_extracts_multiple_observable_explicit_targets" time="0.000" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_ignores_unrelated_percentages_and_tolerances" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_no_explicit_targets_keeps_preferred_only" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_preserves_target_after_earlier_tolerance_phrase" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_planner_does_not_treat_uncertainty_clause_as_optical_target" time="0.000" /><testcase classname="tests.test_tmm_strategy_planner" name="test_first_three_routes_span_boundaries_when_planner_returns_four" time="0.001" /><testcase classname="tests.test_tmm_strategy_planner" name="test_fixed_layer_portfolio_removes_stale_model_layer_counts" time="0.001" /></testsuite></testsuites>

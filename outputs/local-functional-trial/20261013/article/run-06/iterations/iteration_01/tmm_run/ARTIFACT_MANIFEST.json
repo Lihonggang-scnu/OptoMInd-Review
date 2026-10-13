@@ -1,0 +1,496 @@
+{
+  "schema_version": "tmm-artifact-manifest.v1",
+  "record_count": 27,
+  "head_hash": "c8b9b7ad0f4cbb90e177a0f8457bdea942a4ba5cd537ab7579af416ec288ba99",
+  "artifacts": [
+    {
+      "artifact_id": "TASK.json",
+      "relative_path": "TASK.json",
+      "sha256": "b446526460dc8367e250b7c44c623151813225192d1e8e1d6ffd306283bc7a9d",
+      "bytes": 7482,
+      "artifact_type": "task_contract",
+      "producing_action": "validate_task_contract",
+      "producing_node": null,
+      "input_artifact_ids": [],
+      "created_at": "2026-10-13T06:12:09.158158Z",
+      "scientific_provenance": {
+        "engine": "tmm",
+        "task_sha256": "b3b407ecf1461b30304711be6606668c814cb821b95054d2016f5d5b4923dcd9"
+      },
+      "path": "TASK.json",
+      "record_hash": "ae546b78320cef64fad627c5e8c145b931dd7913b5da400fcd83a239f04d86e8",
+      "previous_record_hash": null
+    },
+    {
+      "artifact_id": "ARTIFACT_PATH_INDEX.json",
+      "relative_path": "ARTIFACT_PATH_INDEX.json",
+      "sha256": "115bd9782c44a8a2139595fded96d461f51d68e45d6a2053667718c62013385e",
+      "bytes": 293,
+      "artifact_type": "artifact_path_index",
+      "producing_action": "map_logical_ids_to_safe_physical_paths",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T06:12:09.167158Z",
+      "path": "ARTIFACT_PATH_INDEX.json",
+      "record_hash": "7a90c5286da9c74850865a16b0d7c74639d05bbe9d7f43045d0400d36243c6f4",
+      "previous_record_hash": "ae546b78320cef64fad627c5e8c145b931dd7913b5da400fcd83a239f04d86e8"
+    },
+    {
+      "artifact_id": "HARNESS_CONFIG.json",
+      "relative_path": "HARNESS_CONFIG.json",
+      "sha256": "b6472fc1ca795f54998bbe6bf023080e7660116781f348f9780fa9b22e65027e",
+      "bytes": 276,
+      "artifact_type": "harness_configuration",
+      "producing_action": "freeze_harness_configuration",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T06:12:09.174157Z",
+      "scientific_provenance": {
+        "performance_targets_used_as_gates": false,
+        "qwen_policy_model": "qwen3.7-flash"
+      },
+      "path": "HARNESS_CONFIG.json",
+      "record_hash": "19eddd228a1cc70f807e88e866377aeae3c4fdcb6b6294e8342d0da58de59d47",
+      "previous_record_hash": "7a90c5286da9c74850865a16b0d7c74639d05bbe9d7f43045d0400d36243c6f4"
+    },
+    {
+      "artifact_id": "RUNTIME_LOCK.json",
+      "relative_path": "RUNTIME_LOCK.json",
+      "sha256": "2d1c552adfe50429b59f11cd0101d85f9362aac664c3b5f5ba30dffc95a64c66",
+      "bytes": 3781,
+      "artifact_type": "runtime_lock",
+      "producing_action": "freeze_runtime_dependencies",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "HARNESS_CONFIG.json"
+      ],
+      "created_at": "2026-10-13T06:12:09.221888Z",
+      "path": "RUNTIME_LOCK.json",
+      "record_hash": "0adb8c4188f4e85a62048c5b1d43e2a5dd02062347ff86e7fa77c655191e26ed",
+      "previous_record_hash": "19eddd228a1cc70f807e88e866377aeae3c4fdcb6b6294e8342d0da58de59d47"
+    },
+    {
+      "artifact_id": "MATERIAL_SCENARIOS.json",
+      "relative_path": "MATERIAL_SCENARIOS.json",
+      "sha256": "fc6e2cd3687e057c8c221c7cda0e6b8cf01a9cd623c92260fec8077683c722a7",
+      "bytes": 531,
+      "artifact_type": "material_scenario_plan",
+      "producing_action": "plan_material_dataset_uncertainty",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T06:12:09.232889Z",
+      "path": "MATERIAL_SCENARIOS.json",
+      "record_hash": "b34cb47d436821cdc0c825d2e2455bbfe4a9b2d72911ffef88ab2af5c5e1c309",
+      "previous_record_hash": "0adb8c4188f4e85a62048c5b1d43e2a5dd02062347ff86e7fa77c655191e26ed"
+    },
+    {
+      "artifact_id": "experiments/opt_min_r_mean_s_pol_450_700/MATERIAL_MANIFEST.json",
+      "relative_path": "experiments/opt_min_r_mean_s_pol_450_700/MATERIAL_MANIFEST.json",
+      "sha256": "20dcdb3b953631e51d591383957cd8c08f363dc74f184d0cf924447e5698a281",
+      "bytes": 14379,
+      "artifact_type": "material_manifest",
+      "producing_action": "resolve_materials",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T06:12:09.247889Z",
+      "scientific_provenance": {
+        "experiment_id": "opt_min_r_mean_s_pol_450_700",
+        "manifest_hash": "c091c4b605add133d484255a18c32df2a6517630cbf1a125d09e2aae6d3b41d7"
+      },
+      "path": "experiments/opt_min_r_mean_s_pol_450_700/MATERIAL_MANIFEST.json",
+      "record_hash": "708f0840b9515419fa8b260d1440d4ece09273b526dfda459e01922da7b694d6",
+      "previous_record_hash": "b34cb47d436821cdc0c825d2e2455bbfe4a9b2d72911ffef88ab2af5c5e1c309"
+    },
+    {
+      "artifact_id": "MATERIAL_MANIFESTS.json",
+      "relative_path": "MATERIAL_MANIFESTS.json",
+      "sha256": "a0750b54af4f59dfe7047e276287e1b2a79bd0c8a639f3e41370e27ff4fdb3b9",
+      "bytes": 19272,
+      "artifact_type": "material_manifest_collection",
+      "producing_action": "freeze_material_manifests",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "experiments/opt_min_r_mean_s_pol_450_700/MATERIAL_MANIFEST.json"
+      ],
+      "created_at": "2026-10-13T06:12:09.259168Z",
+      "path": "MATERIAL_MANIFESTS.json",
+      "record_hash": "b935ce8c1f6fa95eeb831701eb0f65a520270bc58d6140580a98337ba6492928",
+      "previous_record_hash": "708f0840b9515419fa8b260d1440d4ece09273b526dfda459e01922da7b694d6"
+    },
+    {
+      "artifact_id": "experiments/opt_min_r_mean_s_pol_450_700/baseline/SIMULATION_RESULT.json",
+      "relative_path": "experiments/opt_min_r_mean_s_pol_450_700/baseline/SIMULATION_RESULT.json",
+      "sha256": "02f0a8b5f3d4c0e791c40be5b4200f65186e7be460f93dd8eb934985a25ff464",
+      "bytes": 6752,
+      "artifact_type": "simulation_result",
+      "producing_action": "run_tmm_forward",
+      "producing_node": "226b271d257a4b97",
+      "input_artifact_ids": [
+        "experiments/opt_min_r_mean_s_pol_450_700/MATERIAL_MANIFEST.json"
+      ],
+      "created_at": "2026-10-13T06:12:09.467647Z",
+      "path": "experiments/opt_min_r_mean_s_pol_450_700/baseline/SIMULATION_RESULT.json",
+      "record_hash": "cd99fb814c3e885e9fa8db686356e745a3ef68e678f6ca59ec391d9734da7197",
+      "previous_record_hash": "b935ce8c1f6fa95eeb831701eb0f65a520270bc58d6140580a98337ba6492928"
+    },
+    {
+      "artifact_id": "experiments/opt_min_r_mean_s_pol_450_700/baseline/ANALYSIS_REPORT.json",
+      "relative_path": "experiments/opt_min_r_mean_s_pol_450_700/baseline/ANALYSIS_REPORT.json",
+      "sha256": "4341e6cc2eaab4a40888f24fa41b861512360a4591cc3f2d6fcebe0ae982a5e2",
+      "bytes": 2606,
+      "artifact_type": "analysis_report",
+      "producing_action": "analyze_tmm_result",
+      "producing_node": "226b271d257a4b97",
+      "input_artifact_ids": [
+        "experiments/opt_min_r_mean_s_pol_450_700/baseline/SIMULATION_RESULT.json"
+      ],
+      "created_at": "2026-10-13T06:12:09.481876Z",
+      "path": "experiments/opt_min_r_mean_s_pol_450_700/baseline/ANALYSIS_REPORT.json",
+      "record_hash": "ef847fefebe7a3a7b714c4f206e63ae3d8a3d6d8867a33a147f025d409b665fa",
+      "previous_record_hash": "cd99fb814c3e885e9fa8db686356e745a3ef68e678f6ca59ec391d9734da7197"
+    },
+    {
+      "artifact_id": "experiments/opt_min_r_mean_s_pol_450_700/baseline/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+      "relative_path": "experiments/opt_min_r_mean_s_pol_450_700/baseline/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+      "sha256": "2c6aa170d2fe25efeeec9598e97f5592e4384daa027c1424ebd11d8df1b23cbe",
+      "bytes": 7987,
+      "artifact_type": "physics_acceptance_certificate",
+      "producing_action": "verify_tmm_physics",
+      "producing_node": "226b271d257a4b97",
+      "input_artifact_ids": [
+        "experiments/opt_min_r_mean_s_pol_450_700/baseline/SIMULATION_RESULT.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/baseline/ANALYSIS_REPORT.json"
+      ],
+      "created_at": "2026-10-13T06:12:09.494509Z",
+      "path": "experiments/opt_min_r_mean_s_pol_450_700/baseline/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+      "record_hash": "31465ea5879a019c7a34edc54c0d2f961c55b3e7c6fc2d4276cd21bf4d02b338",
+      "previous_record_hash": "ef847fefebe7a3a7b714c4f206e63ae3d8a3d6d8867a33a147f025d409b665fa"
+    },
+    {
+      "artifact_id": "experiments/opt_min_r_mean_s_pol_450_700/OPTIMIZER_gradient_thickness.json",
+      "relative_path": "experiments/opt_min_r_mean_s_pol_450_700/OPTIMIZER_gradient_thickness.json",
+      "sha256": "e16bfd77ae7e7f0258e8df74987d2eda449952d83776a1f4373dc76d4b7a88e6",
+      "bytes": 2427,
+      "artifact_type": "optimizer_result",
+      "producing_action": "run_optimizer",
+      "producing_node": "db9215a6cea54d69",
+      "input_artifact_ids": [
+        "experiments/opt_min_r_mean_s_pol_450_700/baseline/PHYSICS_ACCEPTANCE_CERTIFICATE.json"
+      ],
+      "created_at": "2026-10-13T06:12:13.952042Z",
+      "scientific_provenance": {
+        "optimizer_id": "gradient_thickness"
+      },
+      "path": "experiments/opt_min_r_mean_s_pol_450_700/OPTIMIZER_gradient_thickness.json",
+      "record_hash": "b90ff844e5d628f6b59cf4b245cee8cc5cd7721b6443697bead73f3e9dbda689",
+      "previous_record_hash": "31465ea5879a019c7a34edc54c0d2f961c55b3e7c6fc2d4276cd21bf4d02b338"
+    },
+    {
+      "artifact_id": "experiments/opt_min_r_mean_s_pol_450_700/baseline/OBJECTIVE_REPORT.json",
+      "relative_path": "experiments/opt_min_r_mean_s_pol_450_700/baseline/OBJECTIVE_REPORT.json",
+      "sha256": "6cdfd78441d5a9110bf045c3092ac17ac5711d3a625c38747952222e4188ee2d",
+      "bytes": 1306,
+      "artifact_type": "objective_report",
+      "producing_action": "score_soft_objectives_with_declared_objectives",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "experiments/opt_min_r_mean_s_pol_450_700/baseline/SIMULATION_RESULT.json"
+      ],
+      "created_at": "2026-10-13T06:12:13.979041Z",
+      "path": "experiments/opt_min_r_mean_s_pol_450_700/baseline/OBJECTIVE_REPORT.json",
+      "record_hash": "bd8e64a14731afaf1956c66932e642a6b9aa51dc576204ed42e22da00357b183",
+      "previous_record_hash": "b90ff844e5d628f6b59cf4b245cee8cc5cd7721b6443697bead73f3e9dbda689"
+    },
+    {
+      "artifact_id": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/IDENTITY.json",
+      "relative_path": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/IDENTITY.json",
+      "sha256": "b955eb38505176cfad50d46eb3d47ede7e596da3bb52e878f89729a7decca0c0",
+      "bytes": 304,
+      "artifact_type": "candidate_identity",
+      "producing_action": "map_logical_candidate_to_safe_path",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "experiments/opt_min_r_mean_s_pol_450_700/MATERIAL_MANIFEST.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/OPTIMIZER_gradient_thickness.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.001815Z",
+      "path": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/IDENTITY.json",
+      "record_hash": "c35d5bc5737bbd80096bd18a8ee8e976b6f867f86ae3c466a36855e823390511",
+      "previous_record_hash": "bd8e64a14731afaf1956c66932e642a6b9aa51dc576204ed42e22da00357b183"
+    },
+    {
+      "artifact_id": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/SIMULATION_RESULT.json",
+      "relative_path": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/SIMULATION_RESULT.json",
+      "sha256": "beddc8667a3e4b909fdbd97180ba152d5b34de37dd9aa4ce3827b75fd50db90a",
+      "bytes": 6874,
+      "artifact_type": "simulation_result",
+      "producing_action": "run_tmm_forward",
+      "producing_node": "54a1d6d4e6524f1f",
+      "input_artifact_ids": [
+        "experiments/opt_min_r_mean_s_pol_450_700/MATERIAL_MANIFEST.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/OPTIMIZER_gradient_thickness.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/IDENTITY.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.050815Z",
+      "path": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/SIMULATION_RESULT.json",
+      "record_hash": "6582466a8eb79fa7088b887bee16ab4da48ff4da9ac9fe522dc426db8dfd369d",
+      "previous_record_hash": "c35d5bc5737bbd80096bd18a8ee8e976b6f867f86ae3c466a36855e823390511"
+    },
+    {
+      "artifact_id": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/ANALYSIS_REPORT.json",
+      "relative_path": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/ANALYSIS_REPORT.json",
+      "sha256": "a45f280edc2f44716bde5133f3476b83e21279dc1eb66fa8cc5414851f86a1f9",
+      "bytes": 2667,
+      "artifact_type": "analysis_report",
+      "producing_action": "analyze_tmm_result",
+      "producing_node": "54a1d6d4e6524f1f",
+      "input_artifact_ids": [
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/SIMULATION_RESULT.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.070807Z",
+      "path": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/ANALYSIS_REPORT.json",
+      "record_hash": "b87ae6b7c2208625062d48ff75013277a822d691c22f8939840271ef3ea7f39e",
+      "previous_record_hash": "6582466a8eb79fa7088b887bee16ab4da48ff4da9ac9fe522dc426db8dfd369d"
+    },
+    {
+      "artifact_id": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+      "relative_path": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+      "sha256": "2fe2014fc420f4bbd391a7b1b8f840a0db5f83e8fac71c7112815d57ee5004f0",
+      "bytes": 7988,
+      "artifact_type": "physics_acceptance_certificate",
+      "producing_action": "verify_tmm_physics",
+      "producing_node": "54a1d6d4e6524f1f",
+      "input_artifact_ids": [
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/SIMULATION_RESULT.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/ANALYSIS_REPORT.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.090807Z",
+      "path": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+      "record_hash": "2e10da18690f0809efb70304e1c170a7ece6a2641681869201a5d304fa0a8d29",
+      "previous_record_hash": "b87ae6b7c2208625062d48ff75013277a822d691c22f8939840271ef3ea7f39e"
+    },
+    {
+      "artifact_id": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/OBJECTIVE_REPORT.json",
+      "relative_path": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/OBJECTIVE_REPORT.json",
+      "sha256": "938b8e55d1d4c00098bc3318cec23ec0c4aef6227105e6078dea0daa99d2423b",
+      "bytes": 1311,
+      "artifact_type": "objective_report",
+      "producing_action": "score_soft_objectives_with_declared_objectives",
+      "producing_node": "54a1d6d4e6524f1f",
+      "input_artifact_ids": [
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/SIMULATION_RESULT.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.118812Z",
+      "path": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/OBJECTIVE_REPORT.json",
+      "record_hash": "fd8c24cac88b1d384ff9272e22be3b32dd1152e01662b0fab9f4e7c857a5ed22",
+      "previous_record_hash": "2e10da18690f0809efb70304e1c170a7ece6a2641681869201a5d304fa0a8d29"
+    },
+    {
+      "artifact_id": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/ROBUSTNESS.json",
+      "relative_path": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/ROBUSTNESS.json",
+      "sha256": "e9986adbfb3f3625c09fcea80ec0494ec1a3f2e84b99a5a2ef06fde5a32e1655",
+      "bytes": 2076,
+      "artifact_type": "robustness_report",
+      "producing_action": "evaluate_manufacturing_uncertainty",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/OBJECTIVE_REPORT.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.176812Z",
+      "path": "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/ROBUSTNESS.json",
+      "record_hash": "8138956bdfab9c168c55443289a94e9bc8cc46f89dc9741dffa2a8e528e823f0",
+      "previous_record_hash": "fd8c24cac88b1d384ff9272e22be3b32dd1152e01662b0fab9f4e7c857a5ed22"
+    },
+    {
+      "artifact_id": "experiments/opt_min_r_mean_s_pol_450_700/DESIGN_PORTFOLIO.json",
+      "relative_path": "experiments/opt_min_r_mean_s_pol_450_700/DESIGN_PORTFOLIO.json",
+      "sha256": "1cba7cf0249f027f7cee95e16ebd96e17cd07e074473b0ef4346bd2a748cc024",
+      "bytes": 9356,
+      "artifact_type": "design_portfolio",
+      "producing_action": "rank_verified_candidates",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "experiments/opt_min_r_mean_s_pol_450_700/baseline/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/baseline/OBJECTIVE_REPORT.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/OBJECTIVE_REPORT.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/ROBUSTNESS.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.202532Z",
+      "scientific_provenance": {
+        "performance_target_used_as_gate": false,
+        "selection_policy": "soft_objective_multi_candidate"
+      },
+      "path": "experiments/opt_min_r_mean_s_pol_450_700/DESIGN_PORTFOLIO.json",
+      "record_hash": "4fdcab43a9eb2bcf07afd0048bb229303e4635adf7d7b089eb2e202f9d6fbbf6",
+      "previous_record_hash": "8138956bdfab9c168c55443289a94e9bc8cc46f89dc9741dffa2a8e528e823f0"
+    },
+    {
+      "artifact_id": "DESIGN_PORTFOLIOS.json",
+      "relative_path": "DESIGN_PORTFOLIOS.json",
+      "sha256": "e199857744ee967c4275e94a9ba539acbc149400990e6ca23ca53f58aaf14c59",
+      "bytes": 11186,
+      "artifact_type": "design_portfolio_collection",
+      "producing_action": "assemble_design_portfolios",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "experiments/opt_min_r_mean_s_pol_450_700/DESIGN_PORTFOLIO.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.227533Z",
+      "path": "DESIGN_PORTFOLIOS.json",
+      "record_hash": "3280dfea7500674b3e04c97c8ba78a40dbcc975dc18f38c866a4a78877bec15b",
+      "previous_record_hash": "4fdcab43a9eb2bcf07afd0048bb229303e4635adf7d7b089eb2e202f9d6fbbf6"
+    },
+    {
+      "artifact_id": "EXPERIMENT_GRAPH.json",
+      "relative_path": "EXPERIMENT_GRAPH.json",
+      "sha256": "50e5686f52cf6b08a018e76c9e9ab2aba9c6be07da2e78106629d444ba9ccacf",
+      "bytes": 4142,
+      "artifact_type": "experiment_graph",
+      "producing_action": "finalize_tmm_run",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.258532Z",
+      "path": "EXPERIMENT_GRAPH.json",
+      "record_hash": "fbe76acbc6f1442fdf015725a645df9d71137de1b468e84c3a83cab0e69a1160",
+      "previous_record_hash": "3280dfea7500674b3e04c97c8ba78a40dbcc975dc18f38c866a4a78877bec15b"
+    },
+    {
+      "artifact_id": "RUN_STATE.json",
+      "relative_path": "RUN_STATE.json",
+      "sha256": "68c99c1f2d17d8a0cdc74e2e55a1e3da5fae3bd70a0d623a0726d4dcbf1d354d",
+      "bytes": 310,
+      "artifact_type": "run_state",
+      "producing_action": "finalize_tmm_run",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.284562Z",
+      "path": "RUN_STATE.json",
+      "record_hash": "4aeedff147b83d0419a75f202edf8ee593eafd7d6632cf09b0c54e6584b51148",
+      "previous_record_hash": "fbe76acbc6f1442fdf015725a645df9d71137de1b468e84c3a83cab0e69a1160"
+    },
+    {
+      "artifact_id": "STATE_HISTORY.json",
+      "relative_path": "STATE_HISTORY.json",
+      "sha256": "d2fb2942cfacd63f4bc28efa01e3c4b35e36492a2740ee152808ec537dcbb9f6",
+      "bytes": 4726,
+      "artifact_type": "state_history",
+      "producing_action": "finalize_tmm_run",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.312561Z",
+      "path": "STATE_HISTORY.json",
+      "record_hash": "43be0ab592fc3fe1e37673dd83c141cbf8a69d59079f4690082a592f0c3b6c4f",
+      "previous_record_hash": "4aeedff147b83d0419a75f202edf8ee593eafd7d6632cf09b0c54e6584b51148"
+    },
+    {
+      "artifact_id": "BUDGET.json",
+      "relative_path": "BUDGET.json",
+      "sha256": "bedbc078b6c2d8141c027168fbdb3d66b80ec942ee557912c1f6252db0b63286",
+      "bytes": 7521,
+      "artifact_type": "budget_ledger",
+      "producing_action": "finalize_tmm_run",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.338561Z",
+      "path": "BUDGET.json",
+      "record_hash": "c725bd95a1ad0542f745e5b65a4f609365c92e7c06c1d9aef114a31b134fb53b",
+      "previous_record_hash": "43be0ab592fc3fe1e37673dd83c141cbf8a69d59079f4690082a592f0c3b6c4f"
+    },
+    {
+      "artifact_id": "EVENTS.jsonl",
+      "relative_path": "EVENTS.jsonl",
+      "sha256": "f76847f9a6e6ef9d77b524519146946bff889de16b98359202f5d0e5f87460c9",
+      "bytes": 3718,
+      "artifact_type": "event_log",
+      "producing_action": "finalize_tmm_run",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.367561Z",
+      "path": "EVENTS.jsonl",
+      "record_hash": "b3d0e83080ac19d68ef4e66120976d337ac6fbcaff64ff78266bd3fa66bad344",
+      "previous_record_hash": "c725bd95a1ad0542f745e5b65a4f609365c92e7c06c1d9aef114a31b134fb53b"
+    },
+    {
+      "artifact_id": "COST.json",
+      "relative_path": "COST.json",
+      "sha256": "122eddffd0352679a88e3c883c90a14c6a064370ba36d4b81fb2b53bed6da6bb",
+      "bytes": 426,
+      "artifact_type": "cost_ledger",
+      "producing_action": "finalize_tmm_run",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.396454Z",
+      "path": "COST.json",
+      "record_hash": "d6b14a90f44e55faa6b98e45f6e8e5555be17b437ea5f2845a0991bf6c1c24eb",
+      "previous_record_hash": "b3d0e83080ac19d68ef4e66120976d337ac6fbcaff64ff78266bd3fa66bad344"
+    },
+    {
+      "artifact_id": "FINAL_RESULT.json",
+      "relative_path": "FINAL_RESULT.json",
+      "sha256": "d6ff6f78d008eef71e9b3f7785859473e803cb4f7d08a7a844594676f924e640",
+      "bytes": 31767,
+      "artifact_type": "final_result",
+      "producing_action": "complete_tmm_harness_run",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json",
+        "ARTIFACT_PATH_INDEX.json",
+        "HARNESS_CONFIG.json",
+        "RUNTIME_LOCK.json",
+        "MATERIAL_SCENARIOS.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/MATERIAL_MANIFEST.json",
+        "MATERIAL_MANIFESTS.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/baseline/SIMULATION_RESULT.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/baseline/ANALYSIS_REPORT.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/baseline/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/OPTIMIZER_gradient_thickness.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/baseline/OBJECTIVE_REPORT.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/IDENTITY.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/SIMULATION_RESULT.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/ANALYSIS_REPORT.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/OBJECTIVE_REPORT.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/ROBUSTNESS.json",
+        "experiments/opt_min_r_mean_s_pol_450_700/DESIGN_PORTFOLIO.json",
+        "DESIGN_PORTFOLIOS.json",
+        "EXPERIMENT_GRAPH.json",
+        "RUN_STATE.json",
+        "STATE_HISTORY.json",
+        "BUDGET.json",
+        "EVENTS.jsonl",
+        "COST.json"
+      ],
+      "created_at": "2026-10-13T06:12:14.442457Z",
+      "scientific_provenance": {
+        "performance_targets_used_as_gates": false,
+        "physics_verification_required": true,
+        "status": "completed"
+      },
+      "path": "FINAL_RESULT.json",
+      "record_hash": "c8b9b7ad0f4cbb90e177a0f8457bdea942a4ba5cd537ab7579af416ec288ba99",
+      "previous_record_hash": "d6b14a90f44e55faa6b98e45f6e8e5555be17b437ea5f2845a0991bf6c1c24eb"
+    }
+  ]
+}

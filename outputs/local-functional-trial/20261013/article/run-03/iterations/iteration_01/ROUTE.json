@@ -1,0 +1,41 @@
+{
+  "route_id": "route_01",
+  "title": "Optimization of SiO2-over-TiO2 Two-Layer AR Stack",
+  "route_kind": "optimize_existing_stack",
+  "scientific_hypothesis": "For a two-layer system with indices n_air=1.0, n_SiO2=1.46, n_TiO2=2.40, n_glass=1.52, placing the lower-index SiO2 layer adjacent to air and the higher-index TiO2 layer adjacent to the substrate will yield a broader spectral minimum or a lower mean reflectance in the 450-700 nm band compared to the reverse order, provided optimal thicknesses are found within the 40-160 nm constraints.",
+  "design_principle": "Impedance matching via stepped refractive index profile (1.0 -> 1.46 -> 2.40 -> 1.52) to minimize Fresnel reflections through destructive interference across the visible band.",
+  "proposed_materials": [
+    "SiO2 (n=1.46)",
+    "TiO2 (n=2.40)"
+  ],
+  "proposed_topology": "exactly 6 alternating SiO2 (n=1.46)/TiO2 (n=2.40) pairs (12 finite layers)",
+  "design_variables": [
+    "thickness_SiO2_nm (bounded 40-160)",
+    "thickness_TiO2_nm (bounded 40-160)"
+  ],
+  "soft_objectives": [
+    "Minimize arithmetic mean power reflectance (s-pol, normal incidence) over 450-700 nm",
+    "Achieve mean reflectance < 0.03"
+  ],
+  "manufacturing_considerations": [
+    "Thickness bounds strictly enforced between 40 nm and 160 nm"
+  ],
+  "evidence_ids": [],
+  "theory_basis": [
+    "Fresnel equations for normal incidence",
+    "Transfer Matrix Method for multilayer interference",
+    "Quarter-wave and modified quarter-wave antireflection conditions"
+  ],
+  "expected_advantages": [
+    "Smoother index transition from air to substrate may reduce sensitivity to wavelength variations",
+    "Standard high-low index pairing often yields robust broadband performance"
+  ],
+  "known_risks": [
+    "The specific thickness constraints (40-160 nm) may prevent reaching the theoretical quarter-wave optimum for both layers simultaneously",
+    "Local minima in the optimization landscape may trap the solver if the initial grid is too coarse"
+  ],
+  "execution_request_english": "Execute a deterministic optimization for a planar stack: Air | SiO2 (n=1.46) | TiO2 (n=2.40) | Glass (n=1.52). Variables: thickness of SiO2 and TiO2, both bounded [40, 160] nm. Objective: Minimize arithmetic mean s-polarized power reflectance at 0 degrees incidence over wavelengths 450, 455, ..., 700 nm. Method: Perform a coarse grid search (8x8 points) followed by Nelder-Mead simplex refinement, totaling max 64 function evaluations. Seed: 17. Output the optimal thickness pair, the full reflectance spectrum, and the calculated mean reflectance. Topology realization override: disregard any symbolic repeat count, range, or ellipsis above and use exactly 6 alternating SiO2 (n=1.46)/TiO2 (n=2.40) pairs (12 finite layers). Optimize only continuous physical thicknesses; the task compiler must fully expand every finite layer. Canonical user controls: incidence angles 0 degrees. polarization s. wavelength intervals 450-700 nm. soft objectives: minimized arithmetic mean power reflectance in the 450-700 nm band; mean reflectance below 0.03 as a soft scoring preference. behaviors to suppress or avoid: high reflection in the 450-700 nm band. manufacturing constraints: layer thickness bounds: 40 nm to 160 nm; exactly one layer of SiO2 and one layer of TiO2.",
+  "priority": 1,
+  "parent_route_id": null,
+  "revision_reason": null
+}

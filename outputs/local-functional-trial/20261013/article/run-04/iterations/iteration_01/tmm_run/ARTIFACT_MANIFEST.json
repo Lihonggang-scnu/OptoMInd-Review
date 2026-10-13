@@ -1,0 +1,382 @@
+{
+  "schema_version": "tmm-artifact-manifest.v1",
+  "record_count": 21,
+  "head_hash": "e052e9aaddbce96bf2c0bf80f57c4dc3b2aa36856c007bba9962acf1208aace6",
+  "artifacts": [
+    {
+      "artifact_id": "TASK.json",
+      "relative_path": "TASK.json",
+      "sha256": "82ada9a8576b83c4c75568d86dee542d784a4e586e545583feed853e981f64ed",
+      "bytes": 7405,
+      "artifact_type": "task_contract",
+      "producing_action": "validate_task_contract",
+      "producing_node": null,
+      "input_artifact_ids": [],
+      "created_at": "2026-10-13T05:55:43.111932Z",
+      "scientific_provenance": {
+        "engine": "tmm",
+        "task_sha256": "5e0d1162af4ff068cc5906f992b6681650d14415233edacf51f06ec2285fc764"
+      },
+      "path": "TASK.json",
+      "record_hash": "20baa56d8db5d63ec6c3d6730bbcd67fda83a1b3a0d0d5ef00868b0d7c9f1b6f",
+      "previous_record_hash": null
+    },
+    {
+      "artifact_id": "ARTIFACT_PATH_INDEX.json",
+      "relative_path": "ARTIFACT_PATH_INDEX.json",
+      "sha256": "572e11d2bbd8695a0c2f99c91ce58b63c841e58717511bd5dc9d7913ba926370",
+      "bytes": 265,
+      "artifact_type": "artifact_path_index",
+      "producing_action": "map_logical_ids_to_safe_physical_paths",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T05:55:43.118931Z",
+      "path": "ARTIFACT_PATH_INDEX.json",
+      "record_hash": "b4be39b6a96284dd79fc9f138f45c2fc3d94d20cd4d423ea8c6935d2f60b7cf3",
+      "previous_record_hash": "20baa56d8db5d63ec6c3d6730bbcd67fda83a1b3a0d0d5ef00868b0d7c9f1b6f"
+    },
+    {
+      "artifact_id": "HARNESS_CONFIG.json",
+      "relative_path": "HARNESS_CONFIG.json",
+      "sha256": "f8c3d2380add60686f31644f6e78b694e4b7c83e1be0f0f5683ba255946f59b6",
+      "bytes": 275,
+      "artifact_type": "harness_configuration",
+      "producing_action": "freeze_harness_configuration",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T05:55:43.125931Z",
+      "scientific_provenance": {
+        "performance_targets_used_as_gates": false,
+        "qwen_policy_model": "qwen3.7-flash"
+      },
+      "path": "HARNESS_CONFIG.json",
+      "record_hash": "2994c9ecb9e376d591fd860e6244a5a30948a582d804a0b2a11c8fe4ea7f7e8b",
+      "previous_record_hash": "b4be39b6a96284dd79fc9f138f45c2fc3d94d20cd4d423ea8c6935d2f60b7cf3"
+    },
+    {
+      "artifact_id": "RUNTIME_LOCK.json",
+      "relative_path": "RUNTIME_LOCK.json",
+      "sha256": "311fc04168b63506fe8236cdf3c98251d4c3e81061b96b89aa7c0b03c7af4f63",
+      "bytes": 3781,
+      "artifact_type": "runtime_lock",
+      "producing_action": "freeze_runtime_dependencies",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "HARNESS_CONFIG.json"
+      ],
+      "created_at": "2026-10-13T05:55:43.177935Z",
+      "path": "RUNTIME_LOCK.json",
+      "record_hash": "6391fb14d94890159d3378735ba643601e2d38d7a748e23266f5868f2a6880ee",
+      "previous_record_hash": "2994c9ecb9e376d591fd860e6244a5a30948a582d804a0b2a11c8fe4ea7f7e8b"
+    },
+    {
+      "artifact_id": "MATERIAL_SCENARIOS.json",
+      "relative_path": "MATERIAL_SCENARIOS.json",
+      "sha256": "b360559f490dbdc808b9fcf0c72072e54cca7d8eb4ec65d062f9d8277fe94b57",
+      "bytes": 517,
+      "artifact_type": "material_scenario_plan",
+      "producing_action": "plan_material_dataset_uncertainty",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T05:55:43.190443Z",
+      "path": "MATERIAL_SCENARIOS.json",
+      "record_hash": "42dee9c4d5c63f10d6f35cc68f9ab263674e0baa2e159060272dfff56f1af91f",
+      "previous_record_hash": "6391fb14d94890159d3378735ba643601e2d38d7a748e23266f5868f2a6880ee"
+    },
+    {
+      "artifact_id": "experiments/opt_mean_r_min/MATERIAL_MANIFEST.json",
+      "relative_path": "experiments/opt_mean_r_min/MATERIAL_MANIFEST.json",
+      "sha256": "779d7718b9516168af435707b5bb02d9875967c18fdb654dad9da49e1a7d2dad",
+      "bytes": 14379,
+      "artifact_type": "material_manifest",
+      "producing_action": "resolve_materials",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T05:55:43.205441Z",
+      "scientific_provenance": {
+        "experiment_id": "opt_mean_r_min",
+        "manifest_hash": "91a74f67fb3cc47de62f86ccd06f974f1de8acd04ebb02e7571cdaf8a6dbd549"
+      },
+      "path": "experiments/opt_mean_r_min/MATERIAL_MANIFEST.json",
+      "record_hash": "5e067bf38932d5f5471bf254adee2c9e674ed11aeca0a17f26ae9a7795c99135",
+      "previous_record_hash": "42dee9c4d5c63f10d6f35cc68f9ab263674e0baa2e159060272dfff56f1af91f"
+    },
+    {
+      "artifact_id": "MATERIAL_MANIFESTS.json",
+      "relative_path": "MATERIAL_MANIFESTS.json",
+      "sha256": "d9685b8e9d1b334516ee80bac37f02add3a52fcf3183c68bfcebad8b1af15461",
+      "bytes": 19258,
+      "artifact_type": "material_manifest_collection",
+      "producing_action": "freeze_material_manifests",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "experiments/opt_mean_r_min/MATERIAL_MANIFEST.json"
+      ],
+      "created_at": "2026-10-13T05:55:43.217443Z",
+      "path": "MATERIAL_MANIFESTS.json",
+      "record_hash": "2b5d19c2e3deb4b9fd4675a4b26a043fb9094c35d837cf74a5c3284021245050",
+      "previous_record_hash": "5e067bf38932d5f5471bf254adee2c9e674ed11aeca0a17f26ae9a7795c99135"
+    },
+    {
+      "artifact_id": "experiments/opt_mean_r_min/baseline/SIMULATION_RESULT.json",
+      "relative_path": "experiments/opt_mean_r_min/baseline/SIMULATION_RESULT.json",
+      "sha256": "0b333712a3b503596c09eab390243143f427ed3472f87f746477e92e22e229b0",
+      "bytes": 6777,
+      "artifact_type": "simulation_result",
+      "producing_action": "run_tmm_forward",
+      "producing_node": "591ecb6c9f934ddf",
+      "input_artifact_ids": [
+        "experiments/opt_mean_r_min/MATERIAL_MANIFEST.json"
+      ],
+      "created_at": "2026-10-13T05:55:43.426456Z",
+      "path": "experiments/opt_mean_r_min/baseline/SIMULATION_RESULT.json",
+      "record_hash": "d33d0a944ad4778a36e21e588bbcef7a568fbb2ebe84e5e361e7cdaff69d373f",
+      "previous_record_hash": "2b5d19c2e3deb4b9fd4675a4b26a043fb9094c35d837cf74a5c3284021245050"
+    },
+    {
+      "artifact_id": "experiments/opt_mean_r_min/baseline/ANALYSIS_REPORT.json",
+      "relative_path": "experiments/opt_mean_r_min/baseline/ANALYSIS_REPORT.json",
+      "sha256": "6251a33d7eeecc8ab8794d02684e901b44abff6e6f974b037764649cfbdd990d",
+      "bytes": 1487,
+      "artifact_type": "analysis_report",
+      "producing_action": "analyze_tmm_result",
+      "producing_node": "591ecb6c9f934ddf",
+      "input_artifact_ids": [
+        "experiments/opt_mean_r_min/baseline/SIMULATION_RESULT.json"
+      ],
+      "created_at": "2026-10-13T05:55:43.440457Z",
+      "path": "experiments/opt_mean_r_min/baseline/ANALYSIS_REPORT.json",
+      "record_hash": "81bd271dce081cfe59696e079bf290ab14c99ef308f656631e3e3ca71091f3f3",
+      "previous_record_hash": "d33d0a944ad4778a36e21e588bbcef7a568fbb2ebe84e5e361e7cdaff69d373f"
+    },
+    {
+      "artifact_id": "experiments/opt_mean_r_min/baseline/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+      "relative_path": "experiments/opt_mean_r_min/baseline/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+      "sha256": "9b43a9d59db2dd3ff10ac60a25e43c9404d642a77d8624e0ab40c3fa15b23ffc",
+      "bytes": 8014,
+      "artifact_type": "physics_acceptance_certificate",
+      "producing_action": "verify_tmm_physics",
+      "producing_node": "591ecb6c9f934ddf",
+      "input_artifact_ids": [
+        "experiments/opt_mean_r_min/baseline/SIMULATION_RESULT.json",
+        "experiments/opt_mean_r_min/baseline/ANALYSIS_REPORT.json"
+      ],
+      "created_at": "2026-10-13T05:55:43.455461Z",
+      "path": "experiments/opt_mean_r_min/baseline/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+      "record_hash": "21e6466e31954d59e92507b2f3d442b0dcc2b08c542895c7fb1d3fcc34852ad0",
+      "previous_record_hash": "81bd271dce081cfe59696e079bf290ab14c99ef308f656631e3e3ca71091f3f3"
+    },
+    {
+      "artifact_id": "experiments/opt_mean_r_min/OPTIMIZER_gradient_thickness.json",
+      "relative_path": "experiments/opt_mean_r_min/OPTIMIZER_gradient_thickness.json",
+      "sha256": "e2d87a1547b20b7093001833b9aadabbf1dc37ec16a266b81ef16de3a48e7e73",
+      "bytes": 4214,
+      "artifact_type": "optimizer_result",
+      "producing_action": "run_optimizer",
+      "producing_node": "4ed70118e9be4d39",
+      "input_artifact_ids": [
+        "experiments/opt_mean_r_min/baseline/PHYSICS_ACCEPTANCE_CERTIFICATE.json"
+      ],
+      "created_at": "2026-10-13T05:55:48.244697Z",
+      "scientific_provenance": {
+        "optimizer_id": "gradient_thickness"
+      },
+      "path": "experiments/opt_mean_r_min/OPTIMIZER_gradient_thickness.json",
+      "record_hash": "15590010e2bcf3da7a9581a9390e91d2a57fbbf5834fa322f8b563d2ec366e12",
+      "previous_record_hash": "21e6466e31954d59e92507b2f3d442b0dcc2b08c542895c7fb1d3fcc34852ad0"
+    },
+    {
+      "artifact_id": "experiments/opt_mean_r_min/baseline/OBJECTIVE_REPORT.json",
+      "relative_path": "experiments/opt_mean_r_min/baseline/OBJECTIVE_REPORT.json",
+      "sha256": "10cfd44dfc40be9694641271ff546d55fbef38c0ab629c43a810c70c92dd9115",
+      "bytes": 1304,
+      "artifact_type": "objective_report",
+      "producing_action": "score_soft_objectives_with_declared_objectives",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "experiments/opt_mean_r_min/baseline/SIMULATION_RESULT.json"
+      ],
+      "created_at": "2026-10-13T05:55:48.272697Z",
+      "path": "experiments/opt_mean_r_min/baseline/OBJECTIVE_REPORT.json",
+      "record_hash": "c29542b55272a7a078070a2ce7d5262dadbb8559fff14be14848bf8f6f1e7081",
+      "previous_record_hash": "15590010e2bcf3da7a9581a9390e91d2a57fbbf5834fa322f8b563d2ec366e12"
+    },
+    {
+      "artifact_id": "experiments/opt_mean_r_min/candidates/opt_mean_r_min__gradient_thickness__01/IDENTITY.json",
+      "relative_path": "experiments/opt_mean_r_min/candidates/opt_mean_r_min__gradient_thickness__01/IDENTITY.json",
+      "sha256": "b728f8d37d1badcb8deca32d7670e1caff7b1cd1bae0ff623d025fd3ed25c060",
+      "bytes": 256,
+      "artifact_type": "candidate_identity",
+      "producing_action": "map_logical_candidate_to_safe_path",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "experiments/opt_mean_r_min/MATERIAL_MANIFEST.json",
+        "experiments/opt_mean_r_min/OPTIMIZER_gradient_thickness.json"
+      ],
+      "created_at": "2026-10-13T05:55:48.296701Z",
+      "path": "experiments/opt_mean_r_min/candidates/opt_mean_r_min__gradient_thickness__01/IDENTITY.json",
+      "record_hash": "c70b97f70f3e7b397f2acc8b64d0ae4a7a640c39ab3f27b68256ffa98244e780",
+      "previous_record_hash": "c29542b55272a7a078070a2ce7d5262dadbb8559fff14be14848bf8f6f1e7081"
+    },
+    {
+      "artifact_id": "FAILURE_DIAGNOSES.json",
+      "relative_path": "FAILURE_DIAGNOSES.json",
+      "sha256": "9451962a7a10a96aff6e134d605946318eb188fde6f0162242aecb75abc460c3",
+      "bytes": 1892,
+      "artifact_type": "failure_diagnoses",
+      "producing_action": "diagnose_tmm_failures",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T05:55:48.325207Z",
+      "path": "FAILURE_DIAGNOSES.json",
+      "record_hash": "772bd4f8b2613f1d1962640eded90312165280f29ae8b341e1605f30b18c6472",
+      "previous_record_hash": "c70b97f70f3e7b397f2acc8b64d0ae4a7a640c39ab3f27b68256ffa98244e780"
+    },
+    {
+      "artifact_id": "EXPERIMENT_GRAPH.json",
+      "relative_path": "EXPERIMENT_GRAPH.json",
+      "sha256": "553c65f25313fd6d526b96cfbe14c6cc2c88689910d0a81fd00b729b2ceefb92",
+      "bytes": 3777,
+      "artifact_type": "experiment_graph",
+      "producing_action": "finalize_tmm_run",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T05:55:48.345206Z",
+      "path": "EXPERIMENT_GRAPH.json",
+      "record_hash": "a5e2d592c12bf5df94d187406af15a8354010dde8bf303dba5279756effbf533",
+      "previous_record_hash": "772bd4f8b2613f1d1962640eded90312165280f29ae8b341e1605f30b18c6472"
+    },
+    {
+      "artifact_id": "RUN_STATE.json",
+      "relative_path": "RUN_STATE.json",
+      "sha256": "8493f816d3e965470accdbd784ea36d0c7e9a40012bf895ef97e9ef6f4e74681",
+      "bytes": 306,
+      "artifact_type": "run_state",
+      "producing_action": "finalize_tmm_run",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T05:55:48.365206Z",
+      "path": "RUN_STATE.json",
+      "record_hash": "b183c47c646d6ded0a3f8fa1dc746a517a62840ecaa780d7705f70ac6d6f7688",
+      "previous_record_hash": "a5e2d592c12bf5df94d187406af15a8354010dde8bf303dba5279756effbf533"
+    },
+    {
+      "artifact_id": "STATE_HISTORY.json",
+      "relative_path": "STATE_HISTORY.json",
+      "sha256": "03ed60dc733033c1f08b49e11284488e64ce7bc7d834696965b3020cd7752bc3",
+      "bytes": 4329,
+      "artifact_type": "state_history",
+      "producing_action": "finalize_tmm_run",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T05:55:48.386207Z",
+      "path": "STATE_HISTORY.json",
+      "record_hash": "3e0d189c5e69ad8bbb0c2aa06540d8fc890a5c8fe2ed396116da899511e25f8b",
+      "previous_record_hash": "b183c47c646d6ded0a3f8fa1dc746a517a62840ecaa780d7705f70ac6d6f7688"
+    },
+    {
+      "artifact_id": "BUDGET.json",
+      "relative_path": "BUDGET.json",
+      "sha256": "0e1b0a65f520b8675af1efafe3d07406c945d9d7765d692fa930f94077182ba4",
+      "bytes": 3841,
+      "artifact_type": "budget_ledger",
+      "producing_action": "finalize_tmm_run",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T05:55:48.407714Z",
+      "path": "BUDGET.json",
+      "record_hash": "01953eac8d2e7ef61987574285eeecab1768293876f56b8ecc3b9cb12405daed",
+      "previous_record_hash": "3e0d189c5e69ad8bbb0c2aa06540d8fc890a5c8fe2ed396116da899511e25f8b"
+    },
+    {
+      "artifact_id": "EVENTS.jsonl",
+      "relative_path": "EVENTS.jsonl",
+      "sha256": "b11d5aa5f2505efdaa67268eb28c24a17ff5c38237244e1f8daf2d269c5eeb99",
+      "bytes": 3698,
+      "artifact_type": "event_log",
+      "producing_action": "finalize_tmm_run",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T05:55:48.431714Z",
+      "path": "EVENTS.jsonl",
+      "record_hash": "e8ad886f6b923cfa85f86b9346a01afd51c28f23cd919be1c6d53d0a7ff72952",
+      "previous_record_hash": "01953eac8d2e7ef61987574285eeecab1768293876f56b8ecc3b9cb12405daed"
+    },
+    {
+      "artifact_id": "COST.json",
+      "relative_path": "COST.json",
+      "sha256": "f03aec83fd8c8dce70540786c28da9f681e59d2eb225648aa048a75704fa483b",
+      "bytes": 464,
+      "artifact_type": "cost_ledger",
+      "producing_action": "finalize_tmm_run",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json"
+      ],
+      "created_at": "2026-10-13T05:55:48.456884Z",
+      "path": "COST.json",
+      "record_hash": "3a346dea1478162880610a5e2caa6e7b2c0c6925e22fbc689104fe514f4fbf37",
+      "previous_record_hash": "e8ad886f6b923cfa85f86b9346a01afd51c28f23cd919be1c6d53d0a7ff72952"
+    },
+    {
+      "artifact_id": "FINAL_RESULT.json",
+      "relative_path": "FINAL_RESULT.json",
+      "sha256": "5a1fd9a25c77ea802a6ba068f1942769646d50c708d9472998e7908a1a009634",
+      "bytes": 11755,
+      "artifact_type": "final_result",
+      "producing_action": "complete_tmm_harness_run",
+      "producing_node": null,
+      "input_artifact_ids": [
+        "TASK.json",
+        "ARTIFACT_PATH_INDEX.json",
+        "HARNESS_CONFIG.json",
+        "RUNTIME_LOCK.json",
+        "MATERIAL_SCENARIOS.json",
+        "experiments/opt_mean_r_min/MATERIAL_MANIFEST.json",
+        "MATERIAL_MANIFESTS.json",
+        "experiments/opt_mean_r_min/baseline/SIMULATION_RESULT.json",
+        "experiments/opt_mean_r_min/baseline/ANALYSIS_REPORT.json",
+        "experiments/opt_mean_r_min/baseline/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+        "experiments/opt_mean_r_min/OPTIMIZER_gradient_thickness.json",
+        "experiments/opt_mean_r_min/baseline/OBJECTIVE_REPORT.json",
+        "experiments/opt_mean_r_min/candidates/opt_mean_r_min__gradient_thickness__01/IDENTITY.json",
+        "FAILURE_DIAGNOSES.json",
+        "EXPERIMENT_GRAPH.json",
+        "RUN_STATE.json",
+        "STATE_HISTORY.json",
+        "BUDGET.json",
+        "EVENTS.jsonl",
+        "COST.json"
+      ],
+      "created_at": "2026-10-13T05:55:48.493245Z",
+      "scientific_provenance": {
+        "performance_targets_used_as_gates": false,
+        "physics_verification_required": true,
+        "status": "budget_exhausted"
+      },
+      "path": "FINAL_RESULT.json",
+      "record_hash": "e052e9aaddbce96bf2c0bf80f57c4dc3b2aa36856c007bba9962acf1208aace6",
+      "previous_record_hash": "3a346dea1478162880610a5e2caa6e7b2c0c6925e22fbc689104fe514f4fbf37"
+    }
+  ]
+}

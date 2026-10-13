@@ -1,0 +1,101 @@
+usage: build_local_materials.py [-h] [--input INPUT] [--pdf PDF]
+                                [--prepared PREPARED]
+                                [--record-json RECORD_JSON]
+                                [--batch-manifest BATCH_MANIFEST]
+                                [--output-root OUTPUT_ROOT]
+                                [--canonical-paper-id CANONICAL_PAPER_ID]
+                                [--publication-version PUBLICATION_VERSION]
+                                [--source-document-id SOURCE_DOCUMENT_ID]
+                                [--source-role SOURCE_ROLE]
+                                [--source-uri SOURCE_URI]
+                                [--material-parser-mode {fast_native,docling_basic}]
+                                [--cache-root CACHE_ROOT]
+                                [--deadline-seconds DEADLINE_SECONDS]
+                                [--network-workers NETWORK_WORKERS]
+                                [--request-timeout-seconds REQUEST_TIMEOUT_SECONDS]
+                                [--max-retries MAX_RETRIES] [--disable-rescue]
+                                [--rescue-max-candidates RESCUE_MAX_CANDIDATES]
+                                [--rescue-max-search-calls RESCUE_MAX_SEARCH_CALLS]
+                                [--rescue-max-extract-calls RESCUE_MAX_EXTRACT_CALLS]
+                                [--refresh]
+                                [--docling-document-json DOCLING_DOCUMENT_JSON]
+                                [--docling-run-json DOCLING_RUN_JSON]
+                                [--docling-cli-config DOCLING_CLI_CONFIG]
+                                [--docling-batch-index DOCLING_BATCH_INDEX]
+                                [--docling-cache-root DOCLING_CACHE_ROOT]
+                                [--docling-max-processes DOCLING_MAX_PROCESSES]
+                                [--docling-crop-scale DOCLING_CROP_SCALE]
+                                [--budget-ledger BUDGET_LEDGER]
+                                [--budget-limit BUDGET_LIMIT]
+                                [--account-ledger ACCOUNT_LEDGER]
+                                [--account-budget-limit ACCOUNT_BUDGET_LIMIT]
+                                [--account-mapping-dir ACCOUNT_MAPPING_DIR]
+                                [--key-file KEY_FILE] [--key-index KEY_INDEX]
+                                [--tokenizer TOKENIZER]
+
+Build immutable OptoMind local material snapshots
+
+options:
+  -h, --help            show this help message and exit
+  --input INPUT         local TEI/JATS XML or PDF
+  --pdf PDF             PDF paired with --input XML
+  --prepared PREPARED   existing prepared snapshot directory to validate and
+                        load
+  --record-json RECORD_JSON
+                        metadata record JSON for one acquisition
+  --batch-manifest BATCH_MANIFEST
+                        frozen manifest JSON containing a records array
+  --output-root OUTPUT_ROOT
+  --canonical-paper-id CANONICAL_PAPER_ID
+  --publication-version PUBLICATION_VERSION
+  --source-document-id SOURCE_DOCUMENT_ID
+  --source-role SOURCE_ROLE
+  --source-uri SOURCE_URI
+  --material-parser-mode {fast_native,docling_basic}
+                        Use resident Docling basic parsing only when
+                        explicitly configured
+  --cache-root CACHE_ROOT
+  --deadline-seconds DEADLINE_SECONDS
+  --network-workers NETWORK_WORKERS
+  --request-timeout-seconds REQUEST_TIMEOUT_SECONDS
+  --max-retries MAX_RETRIES
+  --disable-rescue      disable bounded public full-text rescue
+  --rescue-max-candidates RESCUE_MAX_CANDIDATES
+                        maximum exact public URLs considered per paper
+  --rescue-max-search-calls RESCUE_MAX_SEARCH_CALLS
+                        bounded public search calls per paper
+  --rescue-max-extract-calls RESCUE_MAX_EXTRACT_CALLS
+                        bounded reader extraction calls per paper
+  --refresh             ignore validated cache entries and publish a new
+                        version
+  --docling-document-json DOCLING_DOCUMENT_JSON
+                        opt-in saved native DoclingDocument JSON
+  --docling-run-json DOCLING_RUN_JSON
+                        matching saved run.json with PDF hash, packages and
+                        pipeline options
+  --docling-cli-config DOCLING_CLI_CONFIG
+                        explicit CLI configuration JSON; command must emit
+                        document.json and run.json
+  --docling-batch-index DOCLING_BATCH_INDEX
+                        completed resident batch index; import native
+                        document/run by PDF hash without a GPU process
+  --docling-cache-root DOCLING_CACHE_ROOT
+                        isolated Docling cache; defaults to acquisition
+                        cache/docling
+  --docling-max-processes DOCLING_MAX_PROCESSES
+                        shared adapter local process/cache construction bound
+                        (initial default 1; maximum 8)
+  --docling-crop-scale DOCLING_CROP_SCALE
+                        original-PDF crop render scale
+  --budget-ledger BUDGET_LEDGER
+                        existing shared project ledger
+  --budget-limit BUDGET_LIMIT
+                        existing project budget cap
+  --account-ledger ACCOUNT_LEDGER
+                        paired shared account ledger
+  --account-budget-limit ACCOUNT_BUDGET_LIMIT
+  --account-mapping-dir ACCOUNT_MAPPING_DIR
+  --key-file KEY_FILE
+  --key-index KEY_INDEX
+  --tokenizer TOKENIZER
+                        existing local tokenizer; no download

@@ -1,0 +1,30 @@
+{
+  "artifact": "iterations/iteration_01/ROUTE.json",
+  "artifact_kind": "pre_execution_plan",
+  "artifact_sha256": "de4988d92f093f65f571b9aef68f45a89e605beb532e7918472d780f94be77e5",
+  "recorded_at_utc": "2026-10-13T06:11:56.628312+00:00",
+  "elapsed_seconds": 79.10159310000017,
+  "run_id": "real-ar-two-layer-20261013",
+  "iteration_id": "iteration_01",
+  "route_id": "route_01",
+  "scientific_hypothesis": "A two-layer stack with the higher-index material (TiO2, n=2.40) adjacent to the glass substrate (n=1.52) and the lower-index material (SiO2, n=1.46) facing air will provide a smoother effective index transition than the reverse order, potentially yielding a lower mean reflectance across the visible spectrum when thicknesses are optimized.",
+  "expected_advantages": [
+    "The high-index layer next to the glass may reduce the reflection coefficient at the second interface compared to a direct SiO2-Glass interface.",
+    "Two degrees of freedom (thicknesses) allow tuning for broadband performance."
+  ],
+  "known_risks": [
+    "The index step from SiO2 (1.46) to TiO2 (2.40) is large and may cause significant internal reflection if not perfectly tuned.",
+    "Thickness constraints (40-160 nm) may prevent reaching the theoretical global minimum if it lies outside this box.",
+    "Two layers may be insufficient to achieve the <0.03 target over such a wide bandwidth."
+  ],
+  "expected_observations": [
+    "If the hypothesis holds, best_target_score should converge to a value corresponding to a mean reflectance significantly lower than a single-layer benchmark, potentially approaching but not guaranteed to reach the 0.03 soft target.",
+    "If the hypothesis fails (e.g., due to bandwidth limitations), best_target_score will plateau at a level corresponding to a mean reflectance > 0.03, and tightest_margin may indicate the solution is pushing against thickness bounds.",
+    "valid_candidates should remain > 0 throughout the search unless the bounds are mutually exclusive with physical resonance conditions (unlikely here)."
+  ],
+  "stop_conditions": [
+    "If best_target_score improvement relative to historical best is < 1e-3 for 2 consecutive rounds, judge search as stagnated -> stop and retain current best.",
+    "If valid_candidates = 0, judge constraint set infeasible -> relax total thickness budget or review bounds, do not re-run the same route.",
+    "If the final mean reflectance > 0.05, conclude that a two-layer system with these specific materials and bounds is insufficient for the target, and recommend stopping or changing material set (if allowed in future rounds)."
+  ]
+}

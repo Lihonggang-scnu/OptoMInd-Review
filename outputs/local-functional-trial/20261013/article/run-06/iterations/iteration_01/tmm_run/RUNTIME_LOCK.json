@@ -1,0 +1,132 @@
+{
+  "schema_version": "tmm-harness-runtime-lock.v1",
+  "runtime": {
+    "source_tree_sha256": "02d7e98b2eb9c98168565fbbe86956d29b5df59235c2fefd5103774a9d17ab87",
+    "source_file_count": 195,
+    "source_directories": [
+      "optomind_optics/harness",
+      "tmm_engine"
+    ],
+    "python_version": "3.12.13",
+    "python_implementation": "CPython",
+    "python_executable": "D:\\OptoMind-Article-3\\local-integration\\20261013\\envs\\tensor\\Scripts\\python.exe",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "dependency_versions": {
+      "numpy": "2.3.5",
+      "scipy": "1.17.0",
+      "pydantic": "2.13.4",
+      "tmm": "0.2.0"
+    }
+  },
+  "solver_adapters": [
+    {
+      "solver_id": "optomind_tmm",
+      "solver_family": "scalar_tmm",
+      "fidelity_rank": 10,
+      "supports_gradients": true,
+      "typical_cost": "very_low",
+      "geometry_classes": [
+        "layered_planar"
+      ],
+      "material_classes": [
+        "isotropic"
+      ],
+      "excitation_classes": [
+        "plane_wave"
+      ],
+      "supported_outputs": [
+        "R",
+        "T",
+        "A",
+        "amplitudes",
+        "ellipsometry",
+        "layer_absorption",
+        "system_emissivity",
+        "phase_dispersion"
+      ],
+      "supports_batch": true,
+      "execution_modes": [
+        "local_native"
+      ],
+      "convergence_dimensions": [
+        "wavelength"
+      ],
+      "independent_of": [
+        "byrnes_tmm"
+      ]
+    }
+  ],
+  "optimizer_adapters": [
+    {
+      "optimizer_id": "gradient_thickness",
+      "optimizer_family": "continuous_thickness_gradient",
+      "supports_gradients": true,
+      "variable_types": [
+        "thickness",
+        "continuous_thickness"
+      ],
+      "requires_gradients": true,
+      "supports_constraints": true,
+      "supports_multiobjective": false,
+      "supports_uncertainty": false,
+      "typical_dimension_range": [
+        1,
+        128
+      ],
+      "typical_cost": "low",
+      "selection_rank": 10,
+      "execution_modes": [
+        "local_cpu"
+      ],
+      "tmm_only": true
+    },
+    {
+      "optimizer_id": "differential_evolution_thickness",
+      "optimizer_family": "continuous_thickness_global",
+      "supports_gradients": false,
+      "variable_types": [
+        "thickness",
+        "continuous_thickness"
+      ],
+      "requires_gradients": false,
+      "supports_constraints": true,
+      "supports_multiobjective": false,
+      "supports_uncertainty": false,
+      "typical_dimension_range": [
+        1,
+        128
+      ],
+      "typical_cost": "moderate",
+      "selection_rank": 20,
+      "execution_modes": [
+        "local_cpu"
+      ],
+      "tmm_only": true
+    }
+  ],
+  "material_catalog": {
+    "local_csv": {
+      "provider": "local_csv",
+      "materials_dir": "D:\\OptoMind-Article-3\\repos\\OptoMind-Article\\veritmm\\tmm_engine\\materials",
+      "dataset_count": 14
+    },
+    "rii_sqlite": {
+      "provider": "rii_sqlite",
+      "database_path": "D:\\OptoMind-Article-3\\repos\\OptoMind-Article\\veritmm\\tmm_engine\\rii_cache.db",
+      "available": true,
+      "page_count": 2712,
+      "refractive_index_point_count": 252442,
+      "extinction_coefficient_point_count": 209839,
+      "database_size_bytes": 13070336,
+      "database_mtime_epoch": 1791856232.102106,
+      "database_sha256": "e4c1ec34cc4f765a8400ff87bb7dee8705b6da2cdb11a229cc57ad9bdd274989",
+      "upstream": "https://refractiveindex.info and https://github.com/polyanskiy/refractiveindex.info-database",
+      "license": "CC0-1.0"
+    }
+  },
+  "qwen_policy": {
+    "allowed_model": "qwen3.7-flash",
+    "model_fallback_allowed": false,
+    "enabled": false
+  }
+}

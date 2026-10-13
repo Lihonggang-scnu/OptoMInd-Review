@@ -1,0 +1,30 @@
+{
+  "artifact": "iterations/iteration_01/ROUTE.json",
+  "artifact_kind": "pre_execution_plan",
+  "artifact_sha256": "df70fd575fd99248e4a88b4d6546daabc49607c5f0144bb9cf2daafd38451c51",
+  "recorded_at_utc": "2026-10-13T05:55:27.759200+00:00",
+  "elapsed_seconds": 77.71495569986291,
+  "run_id": "real-ar-two-layer-20261013",
+  "iteration_id": "iteration_01",
+  "route_id": "route_01",
+  "scientific_hypothesis": "Placing the higher refractive index material (TiO2) adjacent to the air incident medium and the lower index material (SiO2) adjacent to the glass substrate will yield a lower arithmetic mean reflectance over the 450-700 nm band compared to the reverse order, given the specific thickness constraints of 40-160 nm.",
+  "expected_advantages": [
+    "Potentially smoother spectral response due to the gradual index transition from Air (1.0) to TiO2 (2.40) to SiO2 (1.46) to Glass (1.52).",
+    "TiO2 as the first layer may offer stronger phase control for the short wavelengths in the band."
+  ],
+  "known_risks": [
+    "The large index jump from Air to TiO2 might create a strong reflection peak that the second layer cannot fully suppress within the thickness limits.",
+    "The optimal solution might lie on the boundary of the thickness constraints (40 or 160 nm), limiting further improvement."
+  ],
+  "expected_observations": [
+    "If the hypothesis holds, route_01 should produce a best_target_score higher than or equal to route_02 (if route_02 were run independently) and a mean reflectance value approaching the theoretical limit for this topology.",
+    "If the hypothesis is false, route_01 may converge to a local minimum with a significantly higher mean reflectance than physically possible for the alternative ordering, or the optimizer may push one or both thicknesses to the constraint boundaries (40 or 160 nm) without achieving a smooth spectrum.",
+    "valid_candidates should be greater than 0 if the constraint space contains physically realizable solutions.",
+    "tightest_margin should indicate how far the optimal solution is from the thickness boundaries."
+  ],
+  "stop_conditions": [
+    "If best_target_score improvement relative to the historical best (initially 0) is < 1e-3 for 2 consecutive internal optimization steps, judge search as stagnated -> stop and retain current best parameters.",
+    "If valid_candidates = 0, judge constraint set infeasible -> should relax total thickness budget or check material definitions, not re-run the same route.",
+    "If the final mean reflectance is > 0.10, consider the topology fundamentally unsuitable for the broadband requirement under these constraints -> stop and proceed to analyze the alternative ordering in the next round."
+  ]
+}

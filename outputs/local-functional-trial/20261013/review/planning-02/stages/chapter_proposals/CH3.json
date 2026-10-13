@@ -1,0 +1,115 @@
+{
+  "cache_contract": "18e397cc08a2b41a106021035957d65b435b4a6f6698b17fcd21c1ccbad8c496",
+  "response": {
+    "chapter_proposals": [
+      {
+        "chapter_id": "CH3",
+        "directed_reads": [
+          {
+            "focus_area": "提取关于‘聚焦效率’与‘成像质量（MTF/旁瓣）’区别的详细论述逻辑，以及对 Kho16 等具体案例的批评要点，用于构建效率评估的新框架。",
+            "reason": "需要明确 P0001 如何论证高效率可能伴随低成像质量，以支撑本章的核心批判观点。",
+            "source_handle": "P0001"
+          },
+          {
+            "focus_area": "确认带宽上限曲线在不同 NA 值下的饱和趋势特征，以及大 FOV 下群延迟需求的具体变化形态，用于定性描述实验数据与理论界的相对位置。",
+            "reason": "需要利用 P0002 的数值趋势图作为基准，来定位当前实验技术的成熟度。",
+            "source_handle": "P0002"
+          }
+        ],
+        "excluded_source_handles": [],
+        "purpose": "基于现有理论边界与物理机制，批判性评估已报道可见光消色差超透镜的实际性能，揭示单一‘聚焦效率’指标的误导性，并建立包含成像质量（MTF、旁瓣）的综合评价框架。",
+        "scope": "本章严格限定于可见光波段（~400-700 nm）的消色差超透镜实验数据。重点不在于罗列所有已发表器件的参数表，而在于将 P0002 推导的理论带宽 -FOV 上限作为标尺，结合 P0001 提出的单界面像差限制与模式耦合机制，对现有实验结果进行定性定位与深度剖析。内容涵盖：(1) 重新审视‘效率’定义，区分能量集中度与成像对比度；(2) 对照理论极限分析当前器件在带宽、FOV 与 NA 三元组中的实际取舍策略；(3) 澄清单层超透镜与多片式商业镜头在性能维度上的不可比性。",
+        "substantive_threads": [
+          {
+            "argumentation_logic": "利用 P0001 的批判性视角，论证高‘聚焦效率’（如文献中常引用的 86%）并不等同于高成像质量。指出在缺乏高阶像差校正的单层结构中，为了追求特定波长的相位匹配，往往会导致严重的旁瓣效应或背景噪声，从而降低调制传递函数（MTF）。引用 P0001 中对早期工作（如 Kho16, Lal99）的评论逻辑，说明即便主焦点能量较高，若旁瓣能量过大，其实际分辨能力仍远低于衍射极限预期。本章将避免列出具体缺失的 MTF 数值曲线，转而阐述这一物理关联的普遍性：即在宽带消色差设计中，光谱相位的平滑度与空间频率响应之间存在内在张力。",
+            "conditions_and_limits": "由于 P0001 未提供具体的 MTF 对比数据图表，本部分论述将侧重于物理原理的定性推导，强调评估方法论的缺陷，而非量化特定器件的 MTF 衰退幅度。",
+            "evidence_base": [
+              "P0001"
+            ],
+            "theme": "效率指标的解构：从能量集中到成像质量"
+          },
+          {
+            "argumentation_logic": "引入 P0002 建立的带宽上限模型（$Δω ≤ κ/ΔT_{max}$）作为基准面。分析指出，当前实验报道的器件点均位于该理论曲面的下方深处，存在显著的性能赤字。解释造成这一差距的物理根源：材料本征损耗（特别是可见光波段的吸收）、纳米加工误差导致的相位失真、以及 P0001 所述的斜入射下共振模式耦合失效。特别强调在大 FOV 条件下，实验器件的带宽压缩程度往往比理论预测更为剧烈，这表明除了群延迟范围限制外，角度敏感性带来的额外损耗是主要瓶颈。",
+            "conditions_and_limits": "鉴于 P0002 仅提供了数值模拟趋势而无解析饱和点公式，本章将使用‘显著低于’、‘数量级差异’等定性描述来刻画实验点与理论界的距离，不强行拟合不存在的解析表达式。",
+            "evidence_base": [
+              "P0002",
+              "P0001"
+            ],
+            "theme": "理论饱和曲线下的实验坐标定位"
+          },
+          {
+            "argumentation_logic": "针对部分研究将单层超透镜与商用多片式物镜直接对比的现象，依据 P0001 的观点进行纠偏。阐明单界面元件受限于固有的几何像差（彗差、像散），其 FOV 物理上限极低（如 NA=0.5 时 FOV<5µm），而商业镜头通过多表面协同优化消除了这些低阶像差。因此，两者不在同一性能维度上竞争：前者是在物理极限边缘挣扎的‘原理验证’，后者是工程优化的成熟产品。任何忽略这一结构差异的效率或 FOV 对比都是误导性的。",
+            "conditions_and_limits": "此论点基于 P0001 对单界面几何限制的定性结论，不涉及对具体商业镜头型号的详细参数复现。",
+            "evidence_base": [
+              "P0001"
+            ],
+            "theme": "单层元件与复合系统的维度错位比较"
+          },
+          {
+            "argumentation_logic": "综合上述分析，总结当前技术在“高 NA + 宽 FOV + 宽带”三元组中的实际生存法则。指出目前的成功案例大多采取‘牺牲其一’的策略：要么牺牲 FOV 以换取高 NA 和宽带（小视场显微应用），要么牺牲带宽以换取较大 FOV（窄带成像），极少有能同时兼顾三者的实例。这种取舍并非工艺不精，而是 P0002 所述物理铁律与 P0001 所述机制约束共同作用的必然结果。",
+            "conditions_and_limits": "结论仅限于可见光波段及当前报道的平面超透镜架构，不排除未来多层堆叠或非局部设计可能改变这一格局，但不在本章讨论范围内。",
+            "evidence_base": [
+              "P0002",
+              "P0001"
+            ],
+            "theme": "三元组权衡的现实模式总结"
+          }
+        ],
+        "supplement_requests": [],
+        "title": "实证表现：效率权衡与性能基准的真实图景"
+      }
+    ]
+  },
+  "telemetry": {
+    "call_id": "review-ac8bb0f062ba4c",
+    "cap_pressure": {
+      "answer_tokens": 1425,
+      "completion_tokens": 1425,
+      "diagnostic_only": true,
+      "finish_reason_length": false,
+      "near_limit": false,
+      "near_limits": [],
+      "reasoning_tokens": 0
+    },
+    "complete": true,
+    "effective_request": {
+      "answer_tokens": 8192,
+      "enable_thinking": false,
+      "max_completion_tokens": 8192,
+      "max_tokens": null,
+      "model": "qwen3.5-plus",
+      "response_format": {
+        "type": "json_object"
+      },
+      "thinking_budget": 0,
+      "total_output_tokens": 8192
+    },
+    "elapsed_seconds": 30.859000000171363,
+    "finish_reason": "stop",
+    "prompt_estimation": {
+      "framing_margin": 8192,
+      "hosted_token_count_is_approximate": true,
+      "multiplier": 1.12,
+      "tokenizer": "data/tokenizers/qwen3_5_9b/tokenizer.json"
+    },
+    "requested_model": "qwen3.5-plus",
+    "returned_model": "qwen3.5-plus",
+    "runtime_config": {
+      "model": "qwen3.5-plus",
+      "output_tokens": 8192,
+      "thinking": false,
+      "thinking_budget": 0
+    },
+    "usage": {
+      "completion_tokens": 1425,
+      "completion_tokens_details": {
+        "text_tokens": 1425
+      },
+      "prompt_tokens": 4599,
+      "prompt_tokens_details": {
+        "text_tokens": 4599
+      },
+      "total_tokens": 6024
+    }
+  }
+}

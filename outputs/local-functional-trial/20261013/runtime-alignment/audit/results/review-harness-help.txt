@@ -1,0 +1,400 @@
+usage: run_review_harness.py [-h]
+                             (--question QUESTION | --question-file QUESTION_FILE | --query-plan QUERY_PLAN | --delivery-start {history,plan,body})
+                             [--delivery-manifest DELIVERY_MANIFEST]
+                             [--delivery-batch-root DELIVERY_BATCH_ROOT]
+                             [--delivery-packet DELIVERY_PACKET]
+                             [--delivery-recordings DELIVERY_RECORDINGS]
+                             [--delivery-input DELIVERY_INPUT]
+                             [--body-version {baseline,chapter_coherence}]
+                             [--model {qwen3.5-plus}]
+                             [--output-tokens OUTPUT_TOKENS]
+                             [--thinking-budget THINKING_BUDGET]
+                             [--budget-limit BUDGET_LIMIT] [--ledger LEDGER]
+                             [--account-ledger ACCOUNT_LEDGER]
+                             [--account-budget-limit ACCOUNT_BUDGET_LIMIT]
+                             [--account-mapping-dir ACCOUNT_MAPPING_DIR]
+                             [--budget-scope BUDGET_SCOPE]
+                             [--reconcile-receipt RECONCILE_RECEIPT] [--run]
+                             [--retry-failed]
+                             [--quality-control | --no-quality-control]
+                             [--reparse-saved]
+                             [--article-edit | --no-article-edit]
+                             [--only-unit CHAPTER:UNIT] [--key-file KEY_FILE]
+                             [--key-index KEY_INDEX] [--tokenizer TOKENIZER]
+                             [--delivery-config DELIVERY_CONFIG]
+                             [--delivery-out DELIVERY_OUT]
+                             [--execution-profile {library_offline,private_study,submission}]
+                             [--base-kb BASE_KB]
+                             [--long-term-material-cache-root LONG_TERM_MATERIAL_CACHE_ROOT]
+                             [--no-long-term-material-cache-writeback]
+                             [--allow-historical-test-assets]
+                             [--m1-library M1_LIBRARY]
+                             [--phase3-artifacts-root PHASE3_ARTIFACTS_ROOT]
+                             [--output-root OUTPUT_ROOT]
+                             [--qwen-key-file QWEN_KEY_FILE]
+                             [--run-dir RUN_DIR] [--rebuild-scoped-kb]
+                             [--rebuild-phase3-handoff]
+                             [--auto-confirm-query-plan]
+                             [--mock-query-planner]
+                             [--global-budget-cny GLOBAL_BUDGET_CNY]
+                             [--review-lead-budget-cny REVIEW_LEAD_BUDGET_CNY]
+                             [--coverage-budget-cny COVERAGE_BUDGET_CNY]
+                             [--portfolio-coverage-budget-cny PORTFOLIO_COVERAGE_BUDGET_CNY]
+                             [--feedback-coverage-budget-cny FEEDBACK_COVERAGE_BUDGET_CNY]
+                             [--authoring-budget-cny AUTHORING_BUDGET_CNY]
+                             [--article-completion-budget-cny ARTICLE_COMPLETION_BUDGET_CNY]
+                             [--no-publication-mainline]
+                             [--publication-mainline-commander-model-tier PUBLICATION_MAINLINE_COMMANDER_MODEL_TIER]
+                             [--publication-mainline-staged-model-tier PUBLICATION_MAINLINE_STAGED_MODEL_TIER]
+                             [--publication-mainline-staged-reviewer-tier PUBLICATION_MAINLINE_STAGED_REVIEWER_TIER]
+                             [--publication-mainline-staged-editorial-verifier-tier PUBLICATION_MAINLINE_STAGED_EDITORIAL_VERIFIER_TIER]
+                             [--publication-mainline-local-metadata-db PUBLICATION_MAINLINE_LOCAL_METADATA_DB]
+                             [--no-publication-mainline-representative-applications]
+                             [--publication-mainline-application-max-targets PUBLICATION_MAINLINE_APPLICATION_MAX_TARGETS]
+                             [--publication-mainline-application-soft-min-targets PUBLICATION_MAINLINE_APPLICATION_SOFT_MIN_TARGETS]
+                             [--publication-mainline-application-per-target-cap PUBLICATION_MAINLINE_APPLICATION_PER_TARGET_CAP]
+                             [--publication-mainline-application-local-max-results PUBLICATION_MAINLINE_APPLICATION_LOCAL_MAX_RESULTS]
+                             [--publication-mainline-application-writer-tier PUBLICATION_MAINLINE_APPLICATION_WRITER_TIER]
+                             [--no-publication-mainline-s2-metadata-fallback]
+                             [--publication-mainline-enhancement-workers PUBLICATION_MAINLINE_ENHANCEMENT_WORKERS]
+                             [--publication-mainline-staged-editorial-workers PUBLICATION_MAINLINE_STAGED_EDITORIAL_WORKERS]
+                             [--visual-workers VISUAL_WORKERS]
+                             [--visual-budget-cny VISUAL_BUDGET_CNY]
+                             [--no-real-visual-audit]
+                             [--no-real-image-generation]
+                             [--no-publication-metadata-online]
+                             [--visual-image-model VISUAL_IMAGE_MODEL]
+                             [--visual-max-generated-images VISUAL_MAX_GENERATED_IMAGES]
+                             [--visual-fulltext-processing | --no-visual-fulltext-processing]
+                             [--oa-fulltext-paper-cap OA_FULLTEXT_PAPER_CAP]
+                             [--llm-style-pipeline-enabled | --no-llm-style-pipeline-enabled]
+                             [--chapter-style-governance-enabled | --no-chapter-style-governance-enabled]
+                             [--chapter-style-governance-budget-cny CHAPTER_STYLE_GOVERNANCE_BUDGET_CNY]
+                             [--chapter-style-governance-workers CHAPTER_STYLE_GOVERNANCE_WORKERS]
+                             [--chapter-style-reviewer-model-tier CHAPTER_STYLE_REVIEWER_MODEL_TIER]
+                             [--chapter-style-reviser-model-tier CHAPTER_STYLE_REVISER_MODEL_TIER]
+                             [--visual-review-auto-accept-seconds VISUAL_REVIEW_AUTO_ACCEPT_SECONDS]
+                             [--research-plan-budget-cny RESEARCH_PLAN_BUDGET_CNY]
+                             [--no-research-plan]
+                             [--no-research-plan-publication]
+                             [--no-latex-publication]
+                             [--no-chinese-publication]
+                             [--publication-metadata PUBLICATION_METADATA]
+                             [--no-crossref-bibliography-enrichment]
+                             [--no-latex-previews] [--no-pdf] [--require-pdf]
+                             [--translation-model-tier TRANSLATION_MODEL_TIER]
+                             [--translation-fallback-model-tier TRANSLATION_FALLBACK_MODEL_TIER]
+                             [--translation-workers TRANSLATION_WORKERS]
+                             [--translation-cost-budget-cny TRANSLATION_COST_BUDGET_CNY]
+                             [--translation-fail-open] [--translation-strict]
+                             [--research-plan-translation-cost-budget-cny RESEARCH_PLAN_TRANSLATION_COST_BUDGET_CNY]
+                             [--review-lead-model-tier REVIEW_LEAD_MODEL_TIER]
+                             [--coverage-model-tier COVERAGE_MODEL_TIER]
+                             [--author-model-tier AUTHOR_MODEL_TIER]
+                             [--article-completion-model-tier ARTICLE_COMPLETION_MODEL_TIER]
+                             [--managing-editor-model-tier MANAGING_EDITOR_MODEL_TIER]
+                             [--visual-model-tier VISUAL_MODEL_TIER]
+                             [--no-llm-global-audit]
+                             [--allow-premium-text-models]
+                             [--phase3-execute-coverage | --no-phase3-execute-coverage]
+                             [--phase3-llm-dag | --no-phase3-llm-dag]
+                             [--preflight-only]
+
+Run the reusable, budgeted OptoMind Research Harness.
+
+options:
+  -h, --help            show this help message and exit
+  --question QUESTION
+  --question-file QUESTION_FILE
+                        Read one UTF-8 natural-language question from a file.
+  --query-plan QUERY_PLAN
+  --delivery-start {history,plan,body}
+                        Delivery branch: import an existing written manuscript
+                        (history) or run the frozen planning_revision chain
+                        with recorded responses (plan), or write the current
+                        complete outline/material input (body) through the
+                        resumable unit route. body preview is offline; --run
+                        uses the explicit owned ledger.
+  --delivery-manifest DELIVERY_MANIFEST
+                        history: written-run manifest; body: current fullbody
+                        manifest of ordered arrangements and packet roots
+  --delivery-batch-root DELIVERY_BATCH_ROOT
+                        history start: batch root with BATCH_JOBS/front/back
+                        matter
+  --delivery-packet DELIVERY_PACKET
+                        plan start: writer packet to deliver
+  --delivery-recordings DELIVERY_RECORDINGS
+                        plan start: recorded responses JSON for offline replay
+  --delivery-input DELIVERY_INPUT
+                        body start: current complete lossless
+                        FULL_BODY_INPUT.json
+  --body-version {baseline,chapter_coherence}
+                        baseline preserves saved requests; chapter_coherence
+                        adds actual full-outline duties and substantive-gap
+                        checks
+  --model {qwen3.5-plus}
+  --output-tokens OUTPUT_TOKENS
+  --thinking-budget THINKING_BUDGET
+  --budget-limit BUDGET_LIMIT
+                        Absolute lifetime CNY cap of this separate experiment,
+                        never an increment
+  --ledger LEDGER       Explicit dedicated SQLite ledger, required with --run;
+                        reuse for all resumes
+  --account-ledger ACCOUNT_LEDGER
+                        Optional second SQLite ledger shared by physical calls
+                        across projects; reuse its path
+  --account-budget-limit ACCOUNT_BUDGET_LIMIT
+                        Immutable account lifetime CNY cap; required only for
+                        a new account ledger
+  --account-mapping-dir ACCOUNT_MAPPING_DIR
+                        Persistent dual-reservation receipt directory;
+                        defaults beside the account ledger; reuse on resume
+  --budget-scope BUDGET_SCOPE
+                        Explicit experiment identity shared across input
+                        subsets and holdout books; immutable for this ledger
+  --reconcile-receipt RECONCILE_RECEIPT
+                        Audit and settle an existing open hold from a local
+                        JSON receipt; no provider calls
+  --run                 Explicitly allow live provider calls
+  --retry-failed        With --run, permit an explicit new writer attempt or
+                        one recorded quality failure retry without replayable
+                        output; retain prior attempts and ledger holds
+  --quality-control, --no-quality-control
+                        Independent Plus actual-body assessment, at most one
+                        bounded correction/completion and post-check; original
+                        writer output retained
+  --reparse-saved       Explicitly reparse saved quality RAW without rebuying
+                        attempted stages; unfinished stages require --run and
+                        the same owned ledger
+  --article-edit, --no-article-edit
+                        One resumable Plus whole-article local edit after
+                        full-book writing/quality completes; selected subsets
+                        explicitly skip
+  --only-unit CHAPTER:UNIT
+                        Repeatable pilot selection; retains full book/material
+                        context and reusable writer request identities
+  --key-file KEY_FILE   Local credential file; not read in preview, never
+                        copied
+  --key-index KEY_INDEX
+                        Select exactly this 1-based candidate in --key-file,
+                        without environment priority or key fallback
+  --tokenizer TOKENIZER
+                        Existing local tokenizer.json, no downloads
+  --delivery-config DELIVERY_CONFIG
+                        Offline delivery config JSON (schema
+                        review_v2_delivery.config.v1): research question,
+                        language, chapter roles, edit/front-back fixture or
+                        recording paths, identity catalogs, figure assets,
+                        cross-reference moves, compile_pdf. Without it the
+                        history/plan stop after assembly (assembly_only), body
+                        after selected BODY editing/numbering; with it the
+                        unified downstream 02��03��04��05 runs. Paths resolve
+                        relative to the config file.
+  --delivery-out DELIVERY_OUT
+                        delivery output root
+  --execution-profile {library_offline,private_study,submission}
+  --base-kb BASE_KB     Explicit test/recovery paper database override. Normal
+                        runs omit this option and project relevant material
+                        from the central long-term cache before external
+                        retrieval.
+  --long-term-material-cache-root LONG_TERM_MATERIAL_CACHE_ROOT
+                        Stable central MaterialUnit cache. Normal runs search
+                        its CURRENT snapshot before any external retrieval.
+  --no-long-term-material-cache-writeback
+                        Diagnostic/test-only: do not merge newly materialized
+                        text back into the central long-term cache.
+  --allow-historical-test-assets
+                        Permit an explicitly supplied core58 database for
+                        historical pipeline tests. It remains disabled for
+                        normal research.
+  --m1-library M1_LIBRARY
+  --phase3-artifacts-root PHASE3_ARTIFACTS_ROOT
+                        Phase-3 run directory whose audited material drives R4
+                        authoring.
+  --output-root OUTPUT_ROOT
+  --qwen-key-file QWEN_KEY_FILE
+                        Use only keys from this file for the run. Historical
+                        project, desktop, and environment key pools are
+                        excluded.
+  --run-dir RUN_DIR     Resume or continue an existing harness run directory.
+  --rebuild-scoped-kb   Explicit recovery only: archive validated topic-scoped
+                        KB/S2 artifacts and rebuild them. Production resume
+                        reuses validated manifests by default.
+  --rebuild-phase3-handoff
+                        Explicit recovery only: archive an existing Phase-3
+                        directory and regenerate the canonical R3 handoff.
+  --auto-confirm-query-plan
+                        Continue without the normal human review of a newly
+                        generated plan.
+  --mock-query-planner  Use the deterministic Query Planner fallback; for
+                        offline checks only.
+  --global-budget-cny GLOBAL_BUDGET_CNY
+  --review-lead-budget-cny REVIEW_LEAD_BUDGET_CNY
+  --coverage-budget-cny COVERAGE_BUDGET_CNY
+  --portfolio-coverage-budget-cny PORTFOLIO_COVERAGE_BUDGET_CNY
+  --feedback-coverage-budget-cny FEEDBACK_COVERAGE_BUDGET_CNY
+  --authoring-budget-cny AUTHORING_BUDGET_CNY
+  --article-completion-budget-cny ARTICLE_COMPLETION_BUDGET_CNY
+                        CNY cap for the publication mainline's enhancement
+                        admission; the legacy one-call article completion path
+                        is disabled by default and can be restored with --no-
+                        publication-mainline.
+  --no-publication-mainline
+                        Use the legacy article-completion path instead of the
+                        default per-section traceable-draft publication
+                        mainline.
+  --publication-mainline-commander-model-tier PUBLICATION_MAINLINE_COMMANDER_MODEL_TIER
+                        Model tier for the five-role global manuscript
+                        commander.
+  --publication-mainline-staged-model-tier PUBLICATION_MAINLINE_STAGED_MODEL_TIER
+                        Model tier for staged conclusion/introduction/abstract
+                        and bounded edits.
+  --publication-mainline-staged-reviewer-tier PUBLICATION_MAINLINE_STAGED_REVIEWER_TIER
+                        Model tier for the whole-manuscript multi-reviewer
+                        stage.
+  --publication-mainline-staged-editorial-verifier-tier PUBLICATION_MAINLINE_STAGED_EDITORIAL_VERIFIER_TIER
+                        Independent verifier tier for bounded editorial
+                        revisions.
+  --publication-mainline-local-metadata-db PUBLICATION_MAINLINE_LOCAL_METADATA_DB
+                        Optional long-term abstract/material SQLite for local-
+                        first explanatory citation search. When omitted, the
+                        current base KB is used read-only.
+  --no-publication-mainline-representative-applications
+                        Disable the enhancer's representative-application
+                        garnish in the publication mainline (default:
+                        enabled).
+  --publication-mainline-application-max-targets PUBLICATION_MAINLINE_APPLICATION_MAX_TARGETS
+                        Max representative-application targets per chapter
+                        (default: 5).
+  --publication-mainline-application-soft-min-targets PUBLICATION_MAINLINE_APPLICATION_SOFT_MIN_TARGETS
+                        Advisory soft minimum of representative-application
+                        targets; one bounded supplemental planner call may
+                        close a shortfall (default: 4).
+  --publication-mainline-application-per-target-cap PUBLICATION_MAINLINE_APPLICATION_PER_TARGET_CAP
+                        Max S2 results per representative-application target
+                        (default: 6).
+  --publication-mainline-application-local-max-results PUBLICATION_MAINLINE_APPLICATION_LOCAL_MAX_RESULTS
+                        Max local metadata results per target (clamped to
+                        <=6).
+  --publication-mainline-application-writer-tier PUBLICATION_MAINLINE_APPLICATION_WRITER_TIER
+                        Cheap Qwen tier for the batched application writer.
+  --no-publication-mainline-s2-metadata-fallback
+                        Disable the lazy S2 metadata/abstract fallback for
+                        representative applications (default: enabled).
+  --publication-mainline-enhancement-workers PUBLICATION_MAINLINE_ENHANCEMENT_WORKERS
+                        Bounded parallel chapter-enhancement workers (default:
+                        3).
+  --publication-mainline-staged-editorial-workers PUBLICATION_MAINLINE_STAGED_EDITORIAL_WORKERS
+                        Bounded editorial work-item workers; same-section
+                        items stay serial (default: 3).
+  --visual-workers VISUAL_WORKERS
+                        Bounded parallel visual-generation workers (default:
+                        2).
+  --visual-budget-cny VISUAL_BUDGET_CNY
+                        Shared CNY cap for visual planning, selected-source
+                        audit, and bounded image generation.
+  --no-real-visual-audit
+                        Skip real Qwen-VL audit of selected pending source
+                        figures.
+  --no-real-image-generation
+                        Do not materialize requested explanatory visuals with
+                        Qwen Image.
+  --no-publication-metadata-online
+                        Disable online provider calls (OpenAlex, Crossref,
+                        Semantic Scholar) during publication metadata
+                        resolution. Useful when the network is unavailable or
+                        during offline test runs without toggling
+                        visual_test_mode.
+  --visual-image-model VISUAL_IMAGE_MODEL
+                        Preferred Qwen image generation model with internal
+                        fallback.
+  --visual-max-generated-images VISUAL_MAX_GENERATED_IMAGES
+  --visual-fulltext-processing, --no-visual-fulltext-processing
+  --oa-fulltext-paper-cap OA_FULLTEXT_PAPER_CAP
+  --llm-style-pipeline-enabled, --no-llm-style-pipeline-enabled
+  --chapter-style-governance-enabled, --no-chapter-style-governance-enabled
+                        Enable the chapter-scoped Qwen reviewer/author pass.
+                        When omitted, it follows the live LLM style profile.
+  --chapter-style-governance-budget-cny CHAPTER_STYLE_GOVERNANCE_BUDGET_CNY
+                        Hard CNY cap for the chapter-scoped reviewer/author
+                        pass.
+  --chapter-style-governance-workers CHAPTER_STYLE_GOVERNANCE_WORKERS
+                        Maximum parallel chapter workers (default: 6).
+  --chapter-style-reviewer-model-tier CHAPTER_STYLE_REVIEWER_MODEL_TIER
+                        Reviewer tier; production default resolves to
+                        qwen3.5-plus.
+  --chapter-style-reviser-model-tier CHAPTER_STYLE_REVISER_MODEL_TIER
+                        Reviser tier; production default resolves to
+                        qwen3.7-flash.
+  --visual-review-auto-accept-seconds VISUAL_REVIEW_AUTO_ACCEPT_SECONDS
+                        Auto-accept approved-pending figures after N seconds
+                        via the human decision gate (P2-1). Omit to wait
+                        indefinitely outside pytest; under pytest visual
+                        reviews never block.
+  --research-plan-budget-cny RESEARCH_PLAN_BUDGET_CNY
+  --no-research-plan    Produce only the review and visual content package.
+  --no-research-plan-publication
+                        Skip English/Chinese PDF packaging for the research-
+                        plan branch.
+  --no-latex-publication
+                        Skip deterministic English and Chinese LaTeX/PDF
+                        packaging.
+  --no-chinese-publication
+                        Skip scientific Chinese translation and the Chinese
+                        PDF.
+  --publication-metadata PUBLICATION_METADATA
+                        Optional JSON containing title, authors, abstract,
+                        keywords, date, and acknowledgements.
+  --no-crossref-bibliography-enrichment
+                        Do not fill missing bibliographic fields through
+                        Crossref.
+  --no-latex-previews   Compile the PDF without rendering first/middle/last
+                        page previews.
+  --no-pdf              Skip PDF compilation entirely; still produce
+                        .tex/.md/.bib. Missing LaTeX toolchain then never
+                        interrupts the run.
+  --require-pdf         Strict mode: fail fast when the LaTeX toolchain is
+                        missing instead of degrading to a no-PDF run.
+  --translation-model-tier TRANSLATION_MODEL_TIER
+  --translation-fallback-model-tier TRANSLATION_FALLBACK_MODEL_TIER
+  --translation-workers TRANSLATION_WORKERS
+  --translation-cost-budget-cny TRANSLATION_COST_BUDGET_CNY
+                        Hard CNY budget for English-to-Chinese translation and
+                        audit.
+  --translation-fail-open
+                        Deprecated and now the default: validated units are
+                        always kept. Retained so existing commands keep
+                        working.
+  --translation-strict  Fail the Chinese stage when any translation unit fails
+                        instead of keeping the validated units as a degraded
+                        deliverable. (Config default is likewise fail-open;
+                        use this flag only when strict failure is required.)
+  --research-plan-translation-cost-budget-cny RESEARCH_PLAN_TRANSLATION_COST_BUDGET_CNY
+                        Hard CNY budget for bilingual research-plan
+                        translation and audit.
+  --review-lead-model-tier REVIEW_LEAD_MODEL_TIER
+  --coverage-model-tier COVERAGE_MODEL_TIER
+  --author-model-tier AUTHOR_MODEL_TIER
+  --article-completion-model-tier ARTICLE_COMPLETION_MODEL_TIER
+  --managing-editor-model-tier MANAGING_EDITOR_MODEL_TIER
+  --visual-model-tier VISUAL_MODEL_TIER
+  --no-llm-global-audit
+  --allow-premium-text-models
+                        Exceptional opt-in: do not enforce the default run-
+                        scoped economy ceiling that downgrades premium text
+                        models.
+  --phase3-execute-coverage, --no-phase3-execute-coverage
+                        Allow Phase 3 gap requests to invoke the bounded Phase
+                        2 OA coverage loop. The default enables it for live
+                        runs and disables it for offline/test runs.
+  --phase3-llm-dag      Opt in to the optional cross-section LLM relation/DAG
+                        pass. Fast mode defaults this OFF; enabling it may
+                        expand Phase 3 time to multi-hour/near-ten-hour levels
+                        for large reviews.
+  --no-phase3-llm-dag   Explicitly disable the optional cross-section LLM
+                        relation/DAG pass while keeping the central-cache
+                        claim pool and chapter evidence pipeline active. This
+                        is the fast default.
+  --preflight-only      Write and print a cost admission plan without calling
+                        any model.
+exit_code=0

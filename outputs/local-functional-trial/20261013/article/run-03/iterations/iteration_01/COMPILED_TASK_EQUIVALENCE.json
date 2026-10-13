@@ -1,0 +1,88 @@
+{
+  "schema_version": "optomind-intent-equivalence.v1",
+  "semantic_status": "equivalent",
+  "certificate": {
+    "schema_version": "compilation-equivalence.v1",
+    "intent_id": "d3b532916bff5427",
+    "source_clause": "Execute a deterministic optimization for a planar stack: Air | SiO2 (n=1.46) | TiO2 (n=2.40) | Glass (n=1.52). Variables: thickness of SiO2 and TiO2, both bounded [40, 160] nm. Objective: Minimize arithmetic mean s-polarized power reflectance at 0 degrees incidence over wavelengths 450, 455, ..., 700 nm. Method: Perform a coarse grid search (8x8 points) followed by Nelder-Mead simplex refinement, ",
+    "source_clause_hash": "d5e8e986ee1cb16c4707e8b0ca4bfd0b3d52a378843ebb23c9aaea439949e696",
+    "intent_fields": {
+      "schema_version": "veritmm-intent-spec-v1",
+      "intent_id": "d3b532916bff5427",
+      "source_clause": "Execute a deterministic optimization for a planar stack: Air | SiO2 (n=1.46) | TiO2 (n=2.40) | Glass (n=1.52). Variables: thickness of SiO2 and TiO2, both bounded [40, 160] nm. Objective: Minimize arithmetic mean s-polarized power reflectance at 0 degrees incidence over wavelengths 450, 455, ..., 700 nm. Method: Perform a coarse grid search (8x8 points) followed by Nelder-Mead simplex refinement, ",
+      "observables": [
+        {
+          "quantity": "R",
+          "domain": {
+            "wavelength_min": {
+              "value": 450.0,
+              "unit": "nm"
+            },
+            "wavelength_max": {
+              "value": 700.0,
+              "unit": "nm"
+            },
+            "angle_deg": 0.0,
+            "polarization": "s"
+          },
+          "reducer": "mean",
+          "relation": "<=",
+          "target": 0.0,
+          "constraint_role": "soft",
+          "weight": 1.0
+        },
+        {
+          "quantity": "R",
+          "domain": {
+            "wavelength_min": {
+              "value": 450.0,
+              "unit": "nm"
+            },
+            "wavelength_max": {
+              "value": 700.0,
+              "unit": "nm"
+            },
+            "angle_deg": 0.0,
+            "polarization": "s"
+          },
+          "reducer": "mean",
+          "relation": "<=",
+          "target": 0.03,
+          "constraint_role": "soft",
+          "weight": 0.5
+        }
+      ],
+      "design_variables": [],
+      "hard_constraints": [],
+      "uncertainty": {},
+      "verification_requirement": {
+        "energy": "independent",
+        "cross_solver": true,
+        "reciprocity": false
+      }
+    },
+    "compiled_task_fields": [
+      {
+        "intent_path": "observables[0]",
+        "task_path": "targets[0]",
+        "value": "R at_most 0.0 over [450, 700] nm"
+      },
+      {
+        "intent_path": "observables[1]",
+        "task_path": "targets[1]",
+        "value": "R at_most 0.03 over [450, 700] nm"
+      }
+    ],
+    "unit_conversions": [],
+    "defaults_inserted": [],
+    "ambiguities": [],
+    "verification_requirement": {
+      "energy": "independent",
+      "cross_solver": true,
+      "reciprocity": false
+    },
+    "notes": [],
+    "semantic_status": "equivalent",
+    "rejection": null
+  }
+}

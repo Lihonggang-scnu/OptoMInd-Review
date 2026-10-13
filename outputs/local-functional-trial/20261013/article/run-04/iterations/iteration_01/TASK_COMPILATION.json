@@ -1,0 +1,238 @@
+{
+  "schema_version": "tmm-task-compilation.v1",
+  "status": "compiled",
+  "benchmark_id": null,
+  "model_name": "qwen3.7-flash",
+  "attempts": 2,
+  "task": {
+    "schema_version": "optical-design-task.tmm.v1",
+    "task_id": "tmm_execute_a_deterministic_tmm_optimization_for_a_p_7da4e5e38b",
+    "user_request_original": "Execute a deterministic TMM optimization for a planar stack: Incident Medium Air (n=1.0), Layer 1 TiO2 (n=2.40, lossless), Layer 2 SiO2 (n=1.46, lossless), Substrate Glass (n=1.52, lossless). Illumination: Normal incidence (0 deg), s-polarization. Wavelength range: 450 nm to 700 nm, sampled every 5 nm. Objective: Minimize the arithmetic mean of power reflectance across the sampled wavelengths. Design variables: Thickness of Layer 1 and Layer 2, both bounded between 40 nm and 160 nm. Optimization settings: Maximum 64 solver evaluations, random seed 17. Output the optimal thicknesses, the full reflectance spectrum, the calculated mean reflectance, and the best target score. Canonical user controls: incidence angles 0 degrees. polarization s. wavelength intervals 450-700 nm. soft objectives: minimize arithmetic mean power reflectance from 450 nm to 700 nm; achieve mean reflectance below 0.03 as a soft scoring preference. behaviors to suppress or avoid: high reflection in the 450 nm to 700 nm band. manufacturing constraints: layer thickness must be between 40 nm and 160 nm; exactly one layer of SiO2 and one layer of TiO2.",
+    "normalized_request_english": "Optimize thicknesses of two finite planar layers (n=2.40, n=1.46) between air and glass substrate to minimize mean power reflectance from 450 to 700 nm at normal s-polarization, with thickness bounds [40, 160] nm.",
+    "experiments": [
+      {
+        "experiment_id": "opt_mean_r_min",
+        "mode": "optimize",
+        "tmm_task": {
+          "simulation": {
+            "stack": {
+              "name": "dual_layer_ar_coating",
+              "incident": {
+                "constant_n": 1.0,
+                "constant_k": 0.0
+              },
+              "layers": [
+                {
+                  "material": null,
+                  "thickness_nm": 80.0,
+                  "coherence": "coherent",
+                  "optimizable": true,
+                  "min_thickness_nm": 40.0,
+                  "max_thickness_nm": 160.0,
+                  "label": "layer_1",
+                  "constant_n": 2.4,
+                  "constant_k": 0.0
+                },
+                {
+                  "material": null,
+                  "thickness_nm": 80.0,
+                  "coherence": "coherent",
+                  "optimizable": true,
+                  "min_thickness_nm": 40.0,
+                  "max_thickness_nm": 160.0,
+                  "label": "layer_2",
+                  "constant_n": 1.46,
+                  "constant_k": 0.0
+                }
+              ],
+              "exit": {
+                "constant_n": 1.52,
+                "constant_k": 0.0
+              }
+            },
+            "spectrum": {
+              "start_nm": 450.0,
+              "stop_nm": 700.0,
+              "points": 51
+            },
+            "illumination": {
+              "angles_deg": [
+                0.0
+              ],
+              "polarizations": [
+                "s"
+              ]
+            },
+            "solver": "smatrix",
+            "allow_material_extrapolation": false,
+            "requested_outputs": [
+              "R",
+              "T",
+              "A"
+            ],
+            "physics": {
+              "geometry_class": "layered_planar",
+              "material_class": "isotropic",
+              "excitation_class": "plane_wave",
+              "time_domain_required": false
+            }
+          },
+          "targets": [
+            {
+              "observable": "R",
+              "target": 0.0,
+              "wavelength_min_nm": 450.0,
+              "wavelength_max_nm": 700.0,
+              "weight": 1.0,
+              "angle_deg": 0.0,
+              "polarization": "s",
+              "constraint": "at_most",
+              "aggregation": "mean",
+              "name": "min_mean_reflectance"
+            }
+          ],
+          "optimizer": {
+            "method": "adam_lbfgs",
+            "max_steps": 64,
+            "learning_rate": 0.05,
+            "starts": 3,
+            "seed": 17,
+            "early_stop_patience": 15,
+            "improvement_tolerance": 1e-07,
+            "gradient_clip_norm": 10.0,
+            "thickness_window_nm": 100.0,
+            "quantization_nm": 1.0
+          }
+        },
+        "objectives": [
+          {
+            "objective_id": "min_mean_reflectance",
+            "metric": "mean_reflectance",
+            "sense": "minimize",
+            "weight": 1.0,
+            "target": 0.0,
+            "region": {
+              "wavelength_nm": [
+                450.0,
+                700.0
+              ],
+              "angle_deg": 0.0,
+              "polarization": "s"
+            },
+            "admission_role": "score_only"
+          },
+          {
+            "objective_id": "fixedscore.mean_reflectance_450_700nm",
+            "metric": "mean_reflectance",
+            "sense": "report",
+            "weight": 1.0,
+            "target": 0.03,
+            "region": {
+              "wavelength_nm": [
+                450.0,
+                700.0
+              ],
+              "angle_deg": 0,
+              "polarization": "s"
+            },
+            "admission_role": "score_only"
+          }
+        ],
+        "tags": [
+          "optimize",
+          "mean_r"
+        ]
+      }
+    ],
+    "verification": {
+      "require_spectral_convergence": true,
+      "require_independent_solver": true,
+      "check_passivity": true,
+      "check_energy_conservation": true,
+      "forbid_material_extrapolation": true
+    },
+    "portfolio": {
+      "maximum_candidates": 8,
+      "include_best_target_score": true,
+      "include_most_robust": true,
+      "include_simplest_fabrication": true,
+      "include_structurally_distinctive": true,
+      "include_pareto_front": true
+    },
+    "uncertainty": {
+      "thickness_sigma_nm": 0.0,
+      "thickness_error_model": "absolute_normal",
+      "thickness_relative_fraction": 0.0,
+      "thickness_samples": 1,
+      "angle_perturbation_deg": 0.0,
+      "material_dataset_policy": "resolved_only",
+      "maximum_material_scenarios": 1,
+      "random_seed": 17
+    },
+    "budget": {
+      "wall_time_seconds": 90.0,
+      "maximum_forward_evaluations": 64,
+      "maximum_optimizer_runs": 2,
+      "maximum_qwen_calls": 2,
+      "maximum_qwen_input_tokens": 12000,
+      "maximum_qwen_output_tokens": 2000,
+      "maximum_qwen_cost_cny": 2.0
+    },
+    "benchmark_id": null,
+    "metadata": {
+      "compiler": "QwenTMMTaskCompiler",
+      "compiler_schema": "tmm-task-compilation.v1",
+      "compiler_model": "qwen3.7-flash",
+      "performance_targets_are_soft": true,
+      "diversity_required": false,
+      "target_threshold_corrections": [],
+      "scoring_standard_target_alignments": [],
+      "illumination_corrections": [],
+      "substrate_corrections": [],
+      "solver_corrections": [],
+      "objective_synchronization": [
+        "opt_mean_r_min: synchronized 1 simple objectives from executable targets"
+      ],
+      "objective_freeze": [
+        "optimizer targets left as this route declared them; the run is ranked by the frozen scoring standard (-mean_reflectance_450_700nm - abs(mean_reflectance_450_700nm - 0.03))",
+        "opt_mean_r_min: attached the 1 frozen scoring objective(s) so this route is ranked by the same standard as every other"
+      ],
+      "objective_gate": [],
+      "objective_signature": "e4b68bf7469eb29a",
+      "uncertainty_normalization": []
+    }
+  },
+  "rationale": "The trial physical contract mandates constant-index layers (material=null) for TiO2 and SiO2, overriding the standard registry resolution. The stack is fixed as Air | Layer1(n=2.40) | Layer2(n=1.46) | Glass(n=1.52). Optimization targets mean reflectance minimization over 450-700 nm with specified bounds and seed.",
+  "validation_errors": [],
+  "usage": [
+    {
+      "completion_tokens": 206,
+      "prompt_tokens": 3485,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "text_tokens": 3485
+      },
+      "total_tokens": 3691,
+      "model_name": "qwen3.7-flash",
+      "mock_llm": false,
+      "cost_cny": 0.0008617999999999999
+    },
+    {
+      "completion_tokens": 1187,
+      "prompt_tokens": 3710,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "text_tokens": 3710
+      },
+      "total_tokens": 4897,
+      "model_name": "qwen3.7-flash",
+      "mock_llm": false,
+      "cost_cny": 0.0016916
+    }
+  ],
+  "raw_response_sha256": [
+    "92610bc717f92551fe9fdb59efd8652377e6e4d70af8cd6469629df1dd87b02a",
+    "26c6fa0acdc003f4e1bbe22a51ef57dfd8ade77a809c6311c08b28b2148e9e6b"
+  ],
+  "rejected_draft": ""
+}

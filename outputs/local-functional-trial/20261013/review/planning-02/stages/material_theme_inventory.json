@@ -1,0 +1,53 @@
+{
+  "material_theme_inventory": [
+    {
+      "evidence_source": "P0001",
+      "key_finding": "高数值孔径（NA）下单层超透镜的视场受彗差和像散限制极小（NA=0.5时<5 µm），这是单界面元件的固有属性，无法通过单一层面的相位分布完全校正。",
+      "relevance": "确立F1（物理界限）中关于FOV的基础约束，解释为何单纯相位工程难以同时实现高NA和大FOV。",
+      "theme": "单界面几何导致的视场与像差物理下限"
+    },
+    {
+      "evidence_source": "P0001",
+      "key_finding": "衍射元件效率遵循sinc²函数依赖关系，焦距与波长的解耦在连续宽带下极具挑战性；离散波长复用可行但复杂。",
+      "relevance": "支撑F1中关于带宽限制的物理机制，并引出F2中设计机制的必要性。",
+      "theme": "衍射效率的波长依赖性与色散解耦挑战"
+    },
+    {
+      "evidence_source": "P0002",
+      "key_finding": "推导了宽视场色散工程超透镜的带宽基本上限公式，量化了大NA和大FOV对带宽的双重压缩效应，并发现高FOV下带宽存在饱和现象。",
+      "relevance": "作为F1的核心定量依据，提供评估实验数据是否接近物理极限的基准。",
+      "theme": "带宽-视场-数值孔径的定量理论上限"
+    },
+    {
+      "evidence_source": "P0002",
+      "key_finding": "实现无像差成像所需的群延迟分布高度依赖于焦点位置的定义（如$r_0=F\tan(\theta)$ vs $r_0=F\theta$），掠入射时所需相位范围可能反而减小。",
+      "relevance": "深化F2中设计机制的讨论，表明优化策略需考虑具体的光学系统几何配置。",
+      "theme": "群延迟空间分布与焦点定义的敏感性"
+    },
+    {
+      "evidence_source": "P0001",
+      "key_finding": "共振型超透镜在斜入射下易激发反对称局域模式，导致效率显著下降，限制了大视场应用。",
+      "relevance": "连接F2（设计机制缺陷）与F3（效率权衡证据），解释为何某些设计在大角度下效率崩塌。",
+      "theme": "共振模式在离轴入射下的效率衰减"
+    },
+    {
+      "evidence_source": "P0001",
+      "key_finding": "单层超透镜与多片式商业物镜的直接对比是不恰当的，前者未校正像差；高效率数值（如86%）需结合MTF和旁瓣分析来全面评价成像质量。",
+      "relevance": "指导F3中如何正确解读和呈现实验数据，避免夸大性能 claim。",
+      "theme": "实验性能评估标准与商业镜头对比的误区"
+    },
+    {
+      "change": "updated",
+      "chapter_ids": [
+        "CH1",
+        "CH2"
+      ],
+      "content_signature": "77345ea74660d6ec",
+      "excerpt_truncated": true,
+      "inventory_origin": "material_update",
+      "material_excerpt": "{\"deep_read_material\": {\"_progressive_task_requirements\": {\"knowledge_gaps\": [], \"questions\": [{\"gap_key\": \"\", \"purpose\": \"Supply a concrete, attributed case for the coordinated review.\", \"question\": \"Extract the paper's evidence relevant to the coordinated review scope.\", \"question_id\": \"Q01\", \"required_output_ids\": [\"O01\"]}], \"required_outputs\": [{\"description\": \"Source-based findings, conditions, methods and limits useful to the review.\", \"output_id\": \"O01\", \"output_type\": \"practical_material\"}]}, \"_progressive_task_signature\": \"71bfd3343786247d\", \"cap_pressure\": {\"answer_tokens\": 967, \"completion_tokens\": 967, \"diagnostic_only\": true, \"finish_reason_length\": false, \"near_limit\": false, \"near_limits\": [], \"reasoning_tokens\": 0}, \"current_question_material\": [{\"examples\": [{\"attribution\": \"本研究 (Shastri and Monticone, 2022)\", \"conditions\": \"基于局部相互作用假设（将超原子建模为一维延迟线）；针对平面金属透镜和平面焦平面的系统；考虑了两种焦点位置映射关系：r0=Ftan(alpha) 和 r0=F*alpha；适用于衍射极限聚焦且斯特列尔比(Schrel ratio)较高的情况；背景折射率为nb。\", \"finding\": \"对于通过色散工程设计的消色差金属透镜，其最大可实现光谱带宽受到群延迟-带宽积的根本限制。随着数值孔径(NA)的增加，可实现带宽减小；随着视场(FOV)的增加，带宽极限也缩小。然而，这种带宽缩减存在饱和效应：当FOV超过某个依赖于NA的特定阈值后，带宽不再进一步下降。例如，对于固定NA=0.7nb的金属透镜，理论上FOV为180度的设计可能具有与FOV为60度设计相同的频谱带宽。这一结果源于有限尺寸金属透镜上所需的最大群延迟范围并非随入射角单调增加，而是在某个中间角度达到最大值。\", \"reference_ids\": [], \"use_in_review\": \"提供色散工程消色差金属透镜在宽视场下的理论带宽极限，阐明数值孔径(NA)和视场角(FOV)对最大可实现带宽的制约关系及饱和现象。\"}], \"explanation\": \"该研究从物理原理层面解释了宽视场色散工程消色差金属透镜的带宽限制机制。核心逻辑如下：\\n\\n1. **色散工程的要求**：为了实现宽带消色差操作（即在中心频率附近连续频率范围内实现无像差聚焦），金属透镜上的每个超原子不仅需要在中心频率处提供所需的相位分布，还需要提供特定的群延迟(profile)和零群延迟色散。对于宽视场系统，为了消除不同入射角光线产生的像差，理想的空间相位分布由两部分组成：线性相位梯度（用于将波前重定向至表面法线）和双曲线径向相位分布（用于将光聚焦到焦平面上的特定点）。\\n\\n2. **群延迟与带宽的限制**：由于金属透镜厚度仅为波长量级，纵向传播占主导，因此每个位置的超原子可被视为一个一维延迟线。根据Miller等人的基本限制理论，任何线性时不变系统中的群延迟与信号带宽之积存在上限（delay-bandwidth limit）。这意味着，超原子能实现的群延迟范围是有限的，从而限制了整个金属透镜能在多大频率范围内准确实现所需的群延迟分布。",
+      "paper_id": "84c74988ea8a29fd3a5a26d2655fc7505820f72e",
+      "source_handle": "P0002"
+    }
+  ]
+}

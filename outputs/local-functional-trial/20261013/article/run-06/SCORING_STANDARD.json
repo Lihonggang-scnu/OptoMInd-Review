@@ -1,0 +1,107 @@
+{
+  "status": "standardized",
+  "standard": {
+    "schema_version": "tmm-scoring-standard.v1",
+    "catalog_schema_version": "tmm-metric-catalog.v1",
+    "locked": true,
+    "question_digest": "cf712123ca1f601b",
+    "metrics": [
+      {
+        "variable": "mean_reflectance_450_700nm",
+        "canonical_id": "mean_reflectance@450-700nm",
+        "metric": "mean_reflectance",
+        "sense": "minimize",
+        "region": {
+          "wavelength_nm": [
+            450.0,
+            700.0
+          ],
+          "angle_deg": 0,
+          "polarization": "s"
+        },
+        "target": null,
+        "rationale": "The user explicitly requests to 'minimize the arithmetic mean power reflectance sampled from 450 to 700 nm' at 'normal incidence with s polarization'."
+      }
+    ],
+    "formula": "-mean_reflectance_450_700nm",
+    "formula_variables": [
+      "mean_reflectance_450_700nm"
+    ],
+    "metric_rationale": "This single metric directly captures the primary optimization objective: minimizing the average reflectance over the specified visible band (450-700 nm) for s-polarized light at normal incidence. The stated target of 0.03 is a success criterion for the result, not a separate ranking metric; since the goal is minimization, any design achieving <0.03 will naturally rank higher than those that do not under a 'minimize' sense. No other metrics are needed as the request does not specify competing bands, transmittance targets, or worst-case constraints.",
+    "formula_rationale": "The user's sole optimization objective is to minimize the arithmetic mean power reflectance across the 450–700 nm band. Since the scoring system requires that higher values indicate better designs, the single verified metric 'mean_reflectance_450_700nm' (which must be minimized) is negated. This ensures that as the physical reflectance decreases toward the target of 0.03, the score increases, correctly ranking lower-reflectance designs as superior without introducing arbitrary weights or unused variables.",
+    "provenance": {
+      "model": "qwen3.5-plus",
+      "metric_selection_attempts": 1,
+      "formula_attempts": 1,
+      "maximum_metrics": 4
+    }
+  },
+  "selection": {
+    "status": "selected",
+    "metrics": [
+      {
+        "variable": "mean_reflectance_450_700nm",
+        "canonical_id": "mean_reflectance@450-700nm",
+        "metric": "mean_reflectance",
+        "sense": "minimize",
+        "region": {
+          "wavelength_nm": [
+            450.0,
+            700.0
+          ],
+          "angle_deg": 0,
+          "polarization": "s"
+        },
+        "target": null,
+        "rationale": "The user explicitly requests to 'minimize the arithmetic mean power reflectance sampled from 450 to 700 nm' at 'normal incidence with s polarization'."
+      }
+    ],
+    "rationale": "This single metric directly captures the primary optimization objective: minimizing the average reflectance over the specified visible band (450-700 nm) for s-polarized light at normal incidence. The stated target of 0.03 is a success criterion for the result, not a separate ranking metric; since the goal is minimization, any design achieving <0.03 will naturally rank higher than those that do not under a 'minimize' sense. No other metrics are needed as the request does not specify competing bands, transmittance targets, or worst-case constraints.",
+    "attempts": 1,
+    "validation_errors": [],
+    "usage": [
+      {
+        "prompt_tokens": 3569,
+        "completion_tokens": 262,
+        "total_tokens": 3831,
+        "completion_tokens_details": {
+          "text_tokens": 262
+        },
+        "prompt_tokens_details": {
+          "text_tokens": 3569
+        },
+        "model_name": "qwen3.5-plus",
+        "mock_llm": false,
+        "cost_cny": 0.0041128
+      }
+    ]
+  },
+  "formula": {
+    "status": "authored",
+    "formula": "-mean_reflectance_450_700nm",
+    "variables": [
+      "mean_reflectance_450_700nm"
+    ],
+    "rationale": "The user's sole optimization objective is to minimize the arithmetic mean power reflectance across the 450–700 nm band. Since the scoring system requires that higher values indicate better designs, the single verified metric 'mean_reflectance_450_700nm' (which must be minimized) is negated. This ensures that as the physical reflectance decreases toward the target of 0.03, the score increases, correctly ranking lower-reflectance designs as superior without introducing arbitrary weights or unused variables.",
+    "attempts": 1,
+    "validation_errors": [],
+    "usage": [
+      {
+        "prompt_tokens": 1308,
+        "completion_tokens": 139,
+        "total_tokens": 1447,
+        "completion_tokens_details": {
+          "text_tokens": 139
+        },
+        "prompt_tokens_details": {
+          "text_tokens": 1308
+        },
+        "model_name": "qwen3.5-plus",
+        "mock_llm": false,
+        "cost_cny": 0.0017135999999999998
+      }
+    ]
+  },
+  "validation_errors": [],
+  "ranking_mechanism": "frozen_scoring_standard"
+}

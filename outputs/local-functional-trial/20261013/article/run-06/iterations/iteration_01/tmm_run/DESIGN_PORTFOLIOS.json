@@ -1,0 +1,257 @@
+{
+  "experiments": [
+    {
+      "experiment_id": "opt_min_r_mean_s_pol_450_700",
+      "mode": "optimize",
+      "physically_valid_candidate_count": 2,
+      "candidate_count": 2,
+      "baseline_status": "physically_valid",
+      "portfolio": {
+        "schema_version": "optical-design-portfolio.v1",
+        "selection_policy": "soft_objective_multi_candidate",
+        "candidates": [
+          {
+            "candidate_id": "opt_min_r_mean_s_pol_450_700__baseline",
+            "physics_status": "physically_valid",
+            "physically_admissible": true,
+            "target_score": 0.9616739339765763,
+            "objective_scores": {
+              "min_mean_reflectance": 0.9616739339765763
+            },
+            "robustness_score": null,
+            "simplicity_score": 1.0,
+            "distinctiveness_score": 0.07921104195617795,
+            "certificate_id": "807628aeaafa2ff051004fd7f7266687c9bba0dbb78c58591b12933e25fa9102",
+            "artifact_ids": [
+              "experiments/opt_min_r_mean_s_pol_450_700/baseline/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+              "experiments/opt_min_r_mean_s_pol_450_700/baseline/OBJECTIVE_REPORT.json"
+            ],
+            "metadata": {
+              "source": "initial_baseline",
+              "optimizer_id": null,
+              "thicknesses_nm": [
+                100.0,
+                100.0
+              ],
+              "objective_report": {
+                "schema_version": "tmm-objective-report.v1",
+                "aggregate_soft_score": 0.5676264612368286,
+                "weighted_directional_loss": 0.0015375230614904538,
+                "target_attainment": {
+                  "min_mean_reflectance": {
+                    "metric": "mean_reflectance",
+                    "observed": 0.03832606602342375,
+                    "target": 0.0,
+                    "sense": "minimize",
+                    "weight": 1.0,
+                    "soft_score": 0.9616739339765763,
+                    "role": "soft_scoring_objective",
+                    "region": {
+                      "wavelength_nm": [
+                        450.0,
+                        700.0
+                      ],
+                      "angle_deg": 0.0,
+                      "polarization": "s"
+                    },
+                    "channel_observations": {
+                      "angle=0|pol=s": 0.03832606602342375
+                    },
+                    "aggregation": "mean"
+                  },
+                  "fixedscore.mean_reflectance_450_700nm": {
+                    "metric": "mean_reflectance",
+                    "observed": 0.03832606602342375,
+                    "target": null,
+                    "sense": "report",
+                    "weight": 1.0,
+                    "soft_score": null,
+                    "role": "report_only",
+                    "region": {
+                      "wavelength_nm": [
+                        450.0,
+                        700.0
+                      ],
+                      "angle_deg": 0,
+                      "polarization": "s"
+                    },
+                    "channel_observations": {
+                      "angle=0|pol=s": 0.03832606602342375
+                    },
+                    "aggregation": "mean"
+                  }
+                },
+                "admission_role": "ranking_only"
+              },
+              "robustness_report": {},
+              "material_dataset_uncertainty_report": {}
+            }
+          },
+          {
+            "candidate_id": "opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2",
+            "physics_status": "physically_valid",
+            "physically_admissible": true,
+            "target_score": 0.9811618939085871,
+            "objective_scores": {
+              "min_mean_reflectance": 0.9811618939085871
+            },
+            "robustness_score": 0.7267493978892079,
+            "simplicity_score": 0.9756097560975611,
+            "distinctiveness_score": 0.0,
+            "certificate_id": "2730cd43e85107bc3905e96df9958ca2e3aac13292bae47f6c57beef7ecaa247",
+            "artifact_ids": [
+              "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/PHYSICS_ACCEPTANCE_CERTIFICATE.json",
+              "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/OBJECTIVE_REPORT.json",
+              "experiments/opt_min_r_mean_s_pol_450_700/candidates/opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2/ROBUSTNESS.json"
+            ],
+            "metadata": {
+              "source": "optimized_best",
+              "optimizer_id": "gradient_thickness",
+              "thicknesses_nm": [
+                90.54254727031935,
+                109.5529574424896
+              ],
+              "objective_report": {
+                "schema_version": "tmm-objective-report.v1",
+                "aggregate_soft_score": 0.7267493978892079,
+                "weighted_directional_loss": 0.00038758274735219297,
+                "target_attainment": {
+                  "min_mean_reflectance": {
+                    "metric": "mean_reflectance",
+                    "observed": 0.018838106091412923,
+                    "target": 0.0,
+                    "sense": "minimize",
+                    "weight": 1.0,
+                    "soft_score": 0.9811618939085871,
+                    "role": "soft_scoring_objective",
+                    "region": {
+                      "wavelength_nm": [
+                        450.0,
+                        700.0
+                      ],
+                      "angle_deg": 0.0,
+                      "polarization": "s"
+                    },
+                    "channel_observations": {
+                      "angle=0|pol=s": 0.018838106091412923
+                    },
+                    "aggregation": "mean"
+                  },
+                  "fixedscore.mean_reflectance_450_700nm": {
+                    "metric": "mean_reflectance",
+                    "observed": 0.018838106091412923,
+                    "target": null,
+                    "sense": "report",
+                    "weight": 1.0,
+                    "soft_score": null,
+                    "role": "report_only",
+                    "region": {
+                      "wavelength_nm": [
+                        450.0,
+                        700.0
+                      ],
+                      "angle_deg": 0,
+                      "polarization": "s"
+                    },
+                    "channel_observations": {
+                      "angle=0|pol=s": 0.018838106091412923
+                    },
+                    "aggregation": "mean"
+                  }
+                },
+                "admission_role": "ranking_only"
+              },
+              "robustness_report": {
+                "schema_version": "tmm-robustness-report.v1",
+                "candidate_id": "opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2",
+                "perturbation_model": {
+                  "distribution": "absolute_normal",
+                  "sigma_nm": 0.0,
+                  "relative_fraction": 0.0,
+                  "angle_distribution": "uniform_common_incidence_offset",
+                  "angle_perturbation_deg": 0.0,
+                  "samples": 1,
+                  "random_seed": 17,
+                  "bounds_policy": "clip_to_declared_layer_bounds"
+                },
+                "nominal_soft_score": 0.7267493978892079,
+                "sample_soft_scores": [
+                  0.7267493978892079
+                ],
+                "sample_angle_offsets_deg": [
+                  0.0
+                ],
+                "nominal_spectral_metrics": {
+                  "target_domain_mean_R": 0.018799506604644536,
+                  "target_domain_max_R": 0.028053524297037606,
+                  "target_domain_min_R": 0.010264464525667765
+                },
+                "sample_spectral_metrics": [
+                  {
+                    "target_domain_mean_R": 0.018799506604644536,
+                    "target_domain_max_R": 0.028053524297037606,
+                    "target_domain_min_R": 0.010264464525667765
+                  }
+                ],
+                "spectral_metric_summary": {
+                  "target_domain_max_R": {
+                    "mean": 0.028053524297037606,
+                    "standard_deviation": 0.0,
+                    "minimum": 0.028053524297037606,
+                    "maximum": 0.028053524297037606,
+                    "p05": 0.028053524297037606,
+                    "p95": 0.028053524297037606
+                  },
+                  "target_domain_mean_R": {
+                    "mean": 0.018799506604644536,
+                    "standard_deviation": 0.0,
+                    "minimum": 0.018799506604644536,
+                    "maximum": 0.018799506604644536,
+                    "p05": 0.018799506604644536,
+                    "p95": 0.018799506604644536
+                  },
+                  "target_domain_min_R": {
+                    "mean": 0.010264464525667765,
+                    "standard_deviation": 0.0,
+                    "minimum": 0.010264464525667765,
+                    "maximum": 0.010264464525667765,
+                    "p05": 0.010264464525667765,
+                    "p95": 0.010264464525667765
+                  }
+                },
+                "mean_soft_score": 0.7267493978892079,
+                "worst_soft_score": 0.7267493978892079,
+                "p10_soft_score": 0.7267493978892079,
+                "robustness_score": 0.7267493978892079,
+                "failed_simulations": 0,
+                "sample_failure_reasons": [],
+                "admission_role": "ranking_only"
+              },
+              "material_dataset_uncertainty_report": {}
+            }
+          }
+        ],
+        "assessed_candidate_count": 2,
+        "maximum_candidates": 8,
+        "selected_roles": {
+          "best_target_score": "opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2",
+          "most_robust": "opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2",
+          "simplest_fabrication": "opt_min_r_mean_s_pol_450_700__baseline",
+          "structurally_distinctive": "opt_min_r_mean_s_pol_450_700__baseline"
+        },
+        "pareto_candidate_ids": [
+          "opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2",
+          "opt_min_r_mean_s_pol_450_700__baseline"
+        ],
+        "rejected_candidate_ids": [],
+        "omitted_admissible_candidate_ids": [],
+        "notes": [
+          "Target attainment affects ranking only; it never decides physics validity.",
+          "Roles may point to the same candidate when one design leads several views.",
+          "Structural distinctiveness is optional and is omitted when no meaningfully distinct verified design exists."
+        ]
+      },
+      "portfolio_artifact_id": "experiments/opt_min_r_mean_s_pol_450_700/DESIGN_PORTFOLIO.json"
+    }
+  ]
+}

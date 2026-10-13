@@ -1,0 +1,28 @@
+{
+  "artifact": "iterations/iteration_01/ROUTE.json",
+  "artifact_kind": "pre_execution_plan",
+  "artifact_sha256": "700dab04cd21274c764f71272f00bc7622f144441051a984b0fc553987eac4b8",
+  "recorded_at_utc": "2026-10-13T05:41:29.053392+00:00",
+  "elapsed_seconds": 79.77474260004237,
+  "run_id": "real-ar-two-layer-20261013",
+  "iteration_id": "iteration_01",
+  "route_id": "route_01",
+  "scientific_hypothesis": "For a two-layer system with indices n_air=1.0, n_SiO2=1.46, n_TiO2=2.40, n_glass=1.52, placing the lower-index SiO2 layer adjacent to air and the higher-index TiO2 layer adjacent to the substrate will yield a broader spectral minimum or a lower mean reflectance in the 450-700 nm band compared to the reverse order, provided optimal thicknesses are found within the 40-160 nm constraints.",
+  "expected_advantages": [
+    "Smoother index transition from air to substrate may reduce sensitivity to wavelength variations",
+    "Standard high-low index pairing often yields robust broadband performance"
+  ],
+  "known_risks": [
+    "The specific thickness constraints (40-160 nm) may prevent reaching the theoretical quarter-wave optimum for both layers simultaneously",
+    "Local minima in the optimization landscape may trap the solver if the initial grid is too coarse"
+  ],
+  "expected_observations": [
+    "best_target_score should converge to a value representing the inverse of the minimum achievable mean reflectance for this specific topology",
+    "valid_candidates should equal 1 if the optimizer finds a solution within bounds, or 0 if the constraint set is infeasible (unlikely given bounds)",
+    "If the hypothesis holds, the resulting mean reflectance should be significantly lower than a single-layer equivalent, potentially approaching but not necessarily below 0.03"
+  ],
+  "stop_conditions": [
+    "If best_target_score improvement relative to the previous iteration in the internal loop is < 1e-4 for 3 consecutive steps, judge local convergence reached -> stop refinement and return current best",
+    "If valid_candidates = 0, judge that no solution exists within the 40-160 nm bounds for this topology -> terminate route and flag constraint infeasibility"
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "schema_version": "tmm-harness-state-history.v1",
+  "events": [
+    {
+      "sequence": 1,
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "stage": "received",
+      "reason": "run_created",
+      "details": {},
+      "created_at_unix": 1791870943.097931,
+      "previous_event_hash": null,
+      "event_hash": "baad92dd75f98e7d0093ff16f25f9c1cf512049ed5b06123d6f29c4f326cd03b"
+    },
+    {
+      "sequence": 2,
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "stage": "protocol_validated",
+      "reason": "immutable_task_contract_validated",
+      "details": {
+        "task_sha256": "5e0d1162af4ff068cc5906f992b6681650d14415233edacf51f06ec2285fc764"
+      },
+      "created_at_unix": 1791870943.1834428,
+      "previous_event_hash": "baad92dd75f98e7d0093ff16f25f9c1cf512049ed5b06123d6f29c4f326cd03b",
+      "event_hash": "e6d17007e26d48f23cdf4e0de8e506797dd83b1aff1d229e4fe0154aae0c5025"
+    },
+    {
+      "sequence": 3,
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "stage": "capability_classified",
+      "reason": "all_experiments_supported_by_tmm",
+      "details": {
+        "experiment_count": 1
+      },
+      "created_at_unix": 1791870943.1844425,
+      "previous_event_hash": "e6d17007e26d48f23cdf4e0de8e506797dd83b1aff1d229e4fe0154aae0c5025",
+      "event_hash": "67d014f63c561c6c63824d6be8934487a6a6c4da0d9f6cb3ea9cba7e4d748b2a"
+    },
+    {
+      "sequence": 4,
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "stage": "materials_resolved",
+      "reason": "material_manifests_frozen",
+      "details": {
+        "manifest_hashes": [
+          "91a74f67fb3cc47de62f86ccd06f974f1de8acd04ebb02e7571cdaf8a6dbd549"
+        ]
+      },
+      "created_at_unix": 1791870943.2234418,
+      "previous_event_hash": "67d014f63c561c6c63824d6be8934487a6a6c4da0d9f6cb3ea9cba7e4d748b2a",
+      "event_hash": "6e49214a5570176fe5a46347284b643bae6264d1b02b1771d9c86b5550c2213c"
+    },
+    {
+      "sequence": 5,
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "stage": "baseline_evaluated",
+      "reason": "baseline_physics_evaluated",
+      "details": {
+        "experiment_count": 1
+      },
+      "created_at_unix": 1791870943.4706655,
+      "previous_event_hash": "6e49214a5570176fe5a46347284b643bae6264d1b02b1771d9c86b5550c2213c",
+      "event_hash": "69dc28d8899e10979bdf0f81793cc49f896eb28808b185053fb73be7b6f4e947"
+    },
+    {
+      "sequence": 6,
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "stage": "searching",
+      "reason": "bounded_optimizer_portfolio_started",
+      "details": {},
+      "created_at_unix": 1791870943.4716673,
+      "previous_event_hash": "69dc28d8899e10979bdf0f81793cc49f896eb28808b185053fb73be7b6f4e947",
+      "event_hash": "5c1d38dbb92dd21b0674fa3cf1dada98fb6daf2110d4fda4401438f6cbb77d89"
+    },
+    {
+      "sequence": 7,
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "stage": "candidate_verification",
+      "reason": "optimizer_proposals_require_independent_verification",
+      "details": {},
+      "created_at_unix": 1791870948.262697,
+      "previous_event_hash": "5c1d38dbb92dd21b0674fa3cf1dada98fb6daf2110d4fda4401438f6cbb77d89",
+      "event_hash": "16f793cc42aad78a7945c06cb01ce73f136c95197e110d34a8d2cbec6356a215"
+    },
+    {
+      "sequence": 8,
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "stage": "diagnosing",
+      "reason": "operational_budget_exhausted",
+      "details": {
+        "message": "reservation exceeds available budget"
+      },
+      "created_at_unix": 1791870948.3082082,
+      "previous_event_hash": "16f793cc42aad78a7945c06cb01ce73f136c95197e110d34a8d2cbec6356a215",
+      "event_hash": "78649462e0c4591c6fda325ceed99cd9992681ce0a8f331c4f1825b0b37f5470"
+    },
+    {
+      "sequence": 9,
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "stage": "failed",
+      "reason": "budget_exhausted_before_any_verified_portfolio",
+      "details": {},
+      "created_at_unix": 1791870948.3092072,
+      "previous_event_hash": "78649462e0c4591c6fda325ceed99cd9992681ce0a8f331c4f1825b0b37f5470",
+      "event_hash": "76a6508dd2b010183ac0698f42f51cc6a781d0c834d181d4b97049ed1d85c285"
+    }
+  ]
+}

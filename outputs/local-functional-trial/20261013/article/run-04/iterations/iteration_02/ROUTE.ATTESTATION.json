@@ -1,0 +1,31 @@
+{
+  "artifact": "iterations/iteration_02/ROUTE.json",
+  "artifact_kind": "pre_execution_plan",
+  "artifact_sha256": "3df337ffb1ce0f87cc316e8670c2758b3946a60e255b8489513940fd6b199634",
+  "recorded_at_utc": "2026-10-13T05:56:26.969339+00:00",
+  "elapsed_seconds": 136.92584339994937,
+  "run_id": "real-ar-two-layer-20261013",
+  "iteration_id": "iteration_02",
+  "route_id": "route_01",
+  "scientific_hypothesis": "The failure of route_01 was caused by overly restrictive thickness bounds [40, 160] nm preventing the generation of valid initial candidates near the global optimum, rather than physical infeasibility of the design. Expanding the bounds to [20, 200] nm will allow the optimizer to find a valid configuration that minimizes mean reflectance.",
+  "expected_advantages": [
+    "Guarantees non-empty initial candidate pool by relaxing bounds",
+    "Grid-search initialization prevents stagnation in local minima",
+    "Deterministic evaluation ensures reproducibility with seed 17"
+  ],
+  "known_risks": [
+    "Optimal solution might lie outside the preferred 40-160 nm manufacturing range",
+    "Coarse grid might miss very sharp minima if step size is too large relative to budget"
+  ],
+  "expected_observations": [
+    "If the hypothesis holds, route_01 should produce a best_target_score higher than or equal to route_02 (if route_02 were run independently) and a mean reflectance value approaching the theoretical limit for this topology.",
+    "If the hypothesis is false, route_01 may converge to a local minimum with a significantly higher mean reflectance than physically possible for the alternative ordering, or the optimizer may push one or both thicknesses to the constraint boundaries (40 or 160 nm) without achieving a smooth spectrum.",
+    "valid_candidates should be greater than 0 if the constraint space contains physically realizable solutions.",
+    "tightest_margin should indicate how far the optimal solution is from the thickness boundaries."
+  ],
+  "stop_conditions": [
+    "If best_target_score improvement relative to the historical best (initially 0) is < 1e-3 for 2 consecutive internal optimization steps, judge search as stagnated -> stop and retain current best parameters.",
+    "If valid_candidates = 0, judge constraint set infeasible -> should relax total thickness budget or check material definitions, not re-run the same route.",
+    "If the final mean reflectance is > 0.10, consider the topology fundamentally unsuitable for the broadband requirement under these constraints -> stop and proceed to analyze the alternative ordering in the next round."
+  ]
+}

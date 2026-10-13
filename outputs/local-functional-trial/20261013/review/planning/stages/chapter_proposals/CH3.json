@@ -1,0 +1,118 @@
+{
+  "cache_contract": "60aa9571b85c1da3652e540b21a77e9b333c3f0617f3ccc004cb9c2b54040357",
+  "response": {
+    "chapter_proposals": [
+      {
+        "chapter_id": "CH3",
+        "directed_reads": [
+          {
+            "focus_area": "Section discussing 'fair comparison metrics', 'MTF analysis of metalenses', and 'off-axis efficiency drop mechanisms in resonant structures'. Specifically look for any cited experimental data points regarding bandwidth narrowing as a function of field angle.",
+            "rationale": "这是本章构建‘公正评估标准’和验证‘效率权衡’的核心数据来源。需确认文中是否提供了具体的 MTF 下降案例或旁瓣增大的定量描述，以支撑对当前技术水平的批判性评估。",
+            "source_handle": "P0001"
+          }
+        ],
+        "excluded_source_handles": [],
+        "purpose": "基于现有材料中的实验数据与物理分析，验证理论界限的有效性，评估当前可见光消色差超透镜的技术成熟度，并建立区分‘聚焦效率’与‘成像质量’的公正评估标准。",
+        "scope": "本章严格限定于 P0001 所提供的实证数据、案例分析及评估框架。重点在于解构当前文献中常见的性能宣称，通过 MTF（调制传递函数）分析和旁瓣特征来重新审视器件的实际成像能力。由于缺乏 P0002 的具体量化公式及第三篇独立实验论文的深入数据，本章不试图构建精确的‘带宽 - 视场 - 效率’三维定量曲线，而是侧重于定性趋势的验证（如带宽随 FOV 增加的饱和/下降趋势）以及机制性归因（如离轴模式耦合导致的效率损失）。本章明确排除将单层超透镜与多片式商业物镜进行直接的整体性能排名，转而关注单界面物理极限下的相对表现。",
+        "substantive_threads": [
+          {
+            "analysis_task": "提取 P0001 中关于特定高 NA 器件的效率数据，分析其在不同波长和入射角下的表现。论证当前实验结果尚未触及 P0002 所暗示的理论上限，主要受限于制造工艺引起的相位误差及材料本征损耗，而非单纯的物理原理失效。",
+            "argument": "利用 P0001 中引用的高 NA 金属透镜实测数据，展示当前技术在可见光波段实现消色差的实际进展。重点指出，尽管部分器件在轴上（on-axis）表现出良好的聚焦效率，但在扩展视场（FOV）时，实验观测到的带宽显著收窄，这一现象与 CH1 中描述的物理饱和趋势定性一致。",
+            "evidence_base": [
+              "P0001"
+            ],
+            "theme": "当前器件性能的实证基准与局限"
+          },
+          {
+            "analysis_task": "依据 P0001 提出的评估标准，引入 MTF 分析和旁瓣（side-lobe）强度作为核心指标。分析案例中是否存在高能量集中但旁瓣过高导致图像对比度下降的情况。论证在缺乏复杂像差校正的单层结构中，仅凭效率指标无法全面反映器件性能，需建立包含空间频率响应的综合评估体系。",
+            "argument": "批判当前研究中将单层超透镜的‘聚焦效率’（focusing efficiency）直接等同于传统多片式物镜‘成像能力’的不当比较。强调高聚焦效率并不自动意味着低像差或高对比度成像，特别是在大视场下。",
+            "evidence_base": [
+              "P0001"
+            ],
+            "theme": "批判性评估：聚焦效率 vs. 成像质量"
+          },
+          {
+            "analysis_task": "结合 P0001 中关于共振结构在斜入射下激发反对称局域模式的论述，解释为何随着 FOV 增加，有效参与成像的光能量比例下降。讨论这种机制性的效率损失是否是实现宽视场消色差的必然代价，并区分其与由制造缺陷引起的非系统性损耗。",
+            "argument": "将实验观测到的效率下降趋势映射回具体的物理机制，验证 CH2 中提出的‘离轴模式耦合’假说。",
+            "evidence_base": [
+              "P0001"
+            ],
+            "theme": "效率权衡的物理根源：从理论到实验的映射"
+          },
+          {
+            "analysis_task": "综合 P0001 的实证观察与 P0002 的理论方向，指出当前实验器件在联合带宽与视场积上仍远低于理论极限。分析造成这一差距的主要原因：是纳米结构对理想群延迟分布的实现能力不足（设计/工艺限制），还是材料色散特性导致的根本性约束。明确标注由于缺乏 P0002 的定量临界条件，此处仅作趋势性对比，不提供精确的百分比差距计算。",
+            "argument": "在承认 P0002 具体公式不可用的前提下，定性讨论实验数据与理论预期之间的差距。",
+            "evidence_base": [
+              "P0001",
+              "P0002"
+            ],
+            "theme": "理论预测与实验现实的差距分析"
+          }
+        ],
+        "supplement_requests": [
+          {
+            "description": "鉴于 P0002 全文解析失败，需在正文中明确声明：关于‘带宽随 FOV 增加而饱和’的具体数学表达式（如带宽上限与 NA、FOV 的函数关系）无法在本综述中直接给出，相关论述仅基于该文献确立的定性物理图像及 P0001 的佐证。避免虚构具体的临界数值。",
+            "request_type": "clarification_on_missing_quantification"
+          },
+          {
+            "description": "从 P0001 中提取具体的 MTF 曲线描述或旁瓣分析案例，用于支撑‘公正评估标准’的论点。若 P0001 仅提供概念而未展示具体图表数据，则需调整措辞为‘提出基于 MTF 的评估框架’而非‘展示 MTF 实测数据对比’。",
+            "request_type": "data_extraction_focus"
+          }
+        ],
+        "title": "实证表现：实测带宽、视场与效率权衡的证据评估"
+      }
+    ]
+  },
+  "telemetry": {
+    "call_id": "review-d7eb922ceaf340",
+    "cap_pressure": {
+      "answer_tokens": 1344,
+      "completion_tokens": 1344,
+      "diagnostic_only": true,
+      "finish_reason_length": false,
+      "near_limit": false,
+      "near_limits": [],
+      "reasoning_tokens": 0
+    },
+    "complete": true,
+    "effective_request": {
+      "answer_tokens": 8192,
+      "enable_thinking": false,
+      "max_completion_tokens": 8192,
+      "max_tokens": null,
+      "model": "qwen3.5-plus",
+      "response_format": {
+        "type": "json_object"
+      },
+      "thinking_budget": 0,
+      "total_output_tokens": 8192
+    },
+    "elapsed_seconds": 30.0,
+    "finish_reason": "stop",
+    "prompt_estimation": {
+      "framing_margin": 8192,
+      "hosted_token_count_is_approximate": true,
+      "multiplier": 1.12,
+      "tokenizer": "data/tokenizers/qwen3_5_9b/tokenizer.json"
+    },
+    "requested_model": "qwen3.5-plus",
+    "returned_model": "qwen3.5-plus",
+    "runtime_config": {
+      "model": "qwen3.5-plus",
+      "output_tokens": 8192,
+      "thinking": false,
+      "thinking_budget": 0
+    },
+    "usage": {
+      "completion_tokens": 1344,
+      "completion_tokens_details": {
+        "text_tokens": 1344
+      },
+      "prompt_tokens": 3884,
+      "prompt_tokens_details": {
+        "text_tokens": 3884
+      },
+      "total_tokens": 5228
+    }
+  }
+}

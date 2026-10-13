@@ -1,0 +1,30 @@
+{
+  "artifact": "iterations/iteration_02/ROUTE.json",
+  "artifact_kind": "pre_execution_plan",
+  "artifact_sha256": "885bb5b4369226a2bec789736fdc29f756631e35c7bb15aae9636727382a7eb8",
+  "recorded_at_utc": "2026-10-13T06:12:58.853033+00:00",
+  "elapsed_seconds": 141.326110499911,
+  "run_id": "real-ar-two-layer-20261013",
+  "iteration_id": "iteration_02",
+  "route_id": "route_01",
+  "scientific_hypothesis": "Adding a third layer to the two-material system (SiO2/TiO2) provides sufficient degrees of freedom to reduce the arithmetic mean reflectance over 450-700 nm below the ~0.019 level achieved by the optimal 2-layer configuration, potentially approaching the soft target of 0.03 with greater margin or exceeding it significantly.",
+  "expected_advantages": [
+    "Broader spectral low-reflectance region compared to 2-layer design.",
+    "Lower arithmetic mean reflectance due to extra tuning parameter.",
+    "Potential to push mean reflectance well below 0.01."
+  ],
+  "known_risks": [
+    "Optimizer may converge to a local minimum where the third layer has negligible effect (thickness near bound or effectively zero optical impact).",
+    "Increased complexity might lead to thinner layers approaching the 40 nm lower bound, increasing sensitivity to fabrication errors (though not modeled here)."
+  ],
+  "expected_observations": [
+    "If the hypothesis holds, best_target_score should converge to a value corresponding to a mean reflectance significantly lower than a single-layer benchmark, potentially approaching but not guaranteed to reach the 0.03 soft target.",
+    "If the hypothesis fails (e.g., due to bandwidth limitations), best_target_score will plateau at a level corresponding to a mean reflectance > 0.03, and tightest_margin may indicate the solution is pushing against thickness bounds.",
+    "valid_candidates should remain > 0 throughout the search unless the bounds are mutually exclusive with physical resonance conditions (unlikely here)."
+  ],
+  "stop_conditions": [
+    "If best_target_score improvement relative to historical best is < 1e-3 for 2 consecutive rounds, judge search as stagnated -> stop and retain current best.",
+    "If valid_candidates = 0, judge constraint set infeasible -> relax total thickness budget or review bounds, do not re-run the same route.",
+    "If the final mean reflectance > 0.05, conclude that a two-layer system with these specific materials and bounds is insufficient for the target, and recommend stopping or changing material set (if allowed in future rounds)."
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "schema_version": "tournament-summary.v1",
+  "recorded_at_utc": "2026-10-13T06:13:26.220245+00:00",
+  "pareto_frontier": [
+    {
+      "candidate_id": "opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2",
+      "route_id": "route_01",
+      "route_source": "planned",
+      "iteration_id": "iteration_01",
+      "experiment_id": "opt_min_r_mean_s_pol_450_700",
+      "target_score": 0.9811618939085871,
+      "robustness_score": 0.7267493978892079,
+      "simplicity_score": 0.9756097560975611,
+      "physically_admissible": true,
+      "certificate_id": "2730cd43e85107bc3905e96df9958ca2e3aac13292bae47f6c57beef7ecaa247",
+      "solution_key": "route_01::iteration_01::opt_min_r_mean_s_pol_450_700::opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2"
+    },
+    {
+      "candidate_id": "opt_min_r_mean_s_pol_450_700__baseline",
+      "route_id": "route_01",
+      "route_source": "planned",
+      "iteration_id": "iteration_01",
+      "experiment_id": "opt_min_r_mean_s_pol_450_700",
+      "target_score": 0.9616739339765763,
+      "robustness_score": null,
+      "simplicity_score": 1.0,
+      "physically_admissible": true,
+      "certificate_id": "807628aeaafa2ff051004fd7f7266687c9bba0dbb78c58591b12933e25fa9102",
+      "solution_key": "route_01::iteration_01::opt_min_r_mean_s_pol_450_700::opt_min_r_mean_s_pol_450_700__baseline"
+    }
+  ],
+  "primary_recommendation": {
+    "candidate_id": "opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2",
+    "route_id": "route_01",
+    "route_source": "planned",
+    "iteration_id": "iteration_01",
+    "experiment_id": "opt_min_r_mean_s_pol_450_700",
+    "target_score": 0.9811618939085871,
+    "robustness_score": 0.7267493978892079,
+    "simplicity_score": 0.9756097560975611,
+    "physically_admissible": true,
+    "certificate_id": "2730cd43e85107bc3905e96df9958ca2e3aac13292bae47f6c57beef7ecaa247",
+    "solution_key": "route_01::iteration_01::opt_min_r_mean_s_pol_450_700::opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2",
+    "selection_basis": "Highest target score WITHIN the Pareto frontier (ties broken by the route/round/experiment/candidate composite key ascending, because candidate_id repeats across rounds). No frontier member was removed by this choice.",
+    "cross_route_comparability_disclaimer": "Cross-route target-score ordering is INDICATIVE ONLY. Each route normalizes its soft score against its own executable objective contract; the normalized values are not directly comparable between routes (red line 6). This ranking is used solely to pick the primary recommendation INSIDE the Pareto frontier -- it never removes any solution from the frontier, and every frontier member remains part of the delivered portfolio."
+  },
+  "route_comparison": [
+    {
+      "route_id": "route_01",
+      "source": "planned",
+      "status": "stopped_round_limit",
+      "termination_reason": "reached the per-route cap of 2 executed rounds",
+      "rounds_used": 2,
+      "best_solution": {
+        "candidate_id": "opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2",
+        "route_id": "route_01",
+        "route_source": "planned",
+        "iteration_id": "iteration_01",
+        "experiment_id": "opt_min_r_mean_s_pol_450_700",
+        "target_score": 0.9811618939085871,
+        "robustness_score": 0.7267493978892079,
+        "simplicity_score": 0.9756097560975611,
+        "physically_admissible": true,
+        "certificate_id": "2730cd43e85107bc3905e96df9958ca2e3aac13292bae47f6c57beef7ecaa247",
+        "solution_key": "route_01::iteration_01::opt_min_r_mean_s_pol_450_700::opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2"
+      },
+      "entered_pareto_frontier": true,
+      "design_orientation": {
+        "scientific_hypothesis": "Adding a third layer to the two-material system (SiO2/TiO2) provides sufficient degrees of freedom to reduce the arithmetic mean reflectance over 450-700 nm below the ~0.019 level achieved by the optimal 2-layer configuration, potentially approaching the soft target of 0.03 with greater margin or exceeding it significantly.",
+        "proposed_materials": [
+          "SiO2 (n=1.46)",
+          "TiO2 (n=2.40)",
+          "Glass Substrate (n=1.52)",
+          "Air (n=1.0)"
+        ],
+        "proposed_topology": "Air | Layer 1 | Layer 2 | Layer 3 | Glass Substrate. Total finite layers: 3. Material assignment hypothesis: Layer 1=SiO2, Layer 2=TiO2, Layer 3=SiO2 (LHL configuration)."
+      }
+    }
+  ],
+  "dominated_but_retained": [],
+  "eliminated_routes": [],
+  "negative_results": [
+    {
+      "kind": "zero_valid_candidates",
+      "route_id": "route_01",
+      "iteration_id": "iteration_02",
+      "run_status": "failed"
+    }
+  ],
+  "inadmissible_excluded": [],
+  "comparability_note": "Cross-route target-score ordering is INDICATIVE ONLY. Each route normalizes its soft score against its own executable objective contract; the normalized values are not directly comparable between routes (red line 6). This ranking is used solely to pick the primary recommendation INSIDE the Pareto frontier -- it never removes any solution from the frontier, and every frontier member remains part of the delivered portfolio.",
+  "planning_source_comparison": {
+    "schema_version": "planning-source-comparison.v1",
+    "comparison_basis": "Cross-arm performance uses frozen-standard representative scores only. Route-local target-score deltas are within-route diagnostics and are not cross-route rankings.",
+    "frozen_standard_formula": "-mean_reflectance_450_700nm",
+    "cross_source_comparison_valid": false,
+    "control_vs_literature_verdict": "control_or_literature_arm_missing",
+    "frozen_score_delta_control_minus_literature": null,
+    "groups": {
+      "planned": {
+        "route_ids": [
+          "route_01"
+        ],
+        "route_count": 1,
+        "routes_with_verified_candidates": 1,
+        "executed_rounds": 2,
+        "route_progress": [
+          {
+            "route_id": "route_01",
+            "source": "planned",
+            "initial_best_target_score": 0.9811618939085871,
+            "best_target_score": 0.9811618939085871,
+            "within_route_delta": 0.0,
+            "scored_rounds": 1,
+            "executed_rounds": 2
+          }
+        ],
+        "scoreable_routes_by_frozen_standard": 1,
+        "best_frozen_standard_result": {
+          "route_id": "route_01",
+          "candidate_id": "opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2",
+          "iteration_id": "iteration_01",
+          "experiment_id": "opt_min_r_mean_s_pol_450_700",
+          "score": -0.018838106091412923,
+          "inputs": {
+            "mean_reflectance_450_700nm": 0.018838106091412923
+          }
+        }
+      }
+    }
+  }
+}

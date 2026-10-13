@@ -1,0 +1,47 @@
+usage: veritmm [-h]
+               {describe,schema,examples,preflight,run,challenge,fit,plan-measurement,gradient,sensitivity,capability-catalog,lineage-graph,explain-superiority,optimize-problem,history,inspect,lineage,compare,verify-run,skill-path,install-skill,benchmark,agent-benchmark}
+               ...
+
+Agent-ready, verifier-first transfer-matrix execution tool.
+
+positional arguments:
+  {describe,schema,examples,preflight,run,challenge,fit,plan-measurement,gradient,sensitivity,capability-catalog,lineage-graph,explain-superiority,optimize-problem,history,inspect,lineage,compare,verify-run,skill-path,install-skill,benchmark,agent-benchmark}
+    describe            Describe supported physics and protocol
+    schema              Export a public JSON Schema
+    examples            List bundled task examples
+    preflight           Validate without running a spectrum
+    run                 Execute and certify one task
+    challenge           Run deterministic active challenge verification
+    fit                 Fit experimental measurements and report
+                        identifiability
+    plan-measurement    Choose next measurements from local Fisher information
+                        at a fitted point
+    gradient            Per-layer thickness gradients of a band objective
+                        (proposal basis)
+    sensitivity         Normalized per-layer thickness sensitivities (proposal
+                        basis)
+    capability-catalog  Show, regenerate, or drift-check the runtime
+                        capability catalog
+    lineage-graph       Build the read-only provenance graph over run
+                        directories
+    explain-superiority
+                        Explain why one run is superior to another via the
+                        provenance graph
+    optimize-problem    Compile a declarative OptimizationProblem and run the
+                        existing optimize chain
+    history             List persisted experiment runs
+    inspect             Inspect one persisted run
+    lineage             Show ancestors and children for a run
+    compare             Compare two persisted runs
+    verify-run          Independently verify one run directory (integrity,
+                        certification, replay, authenticity)
+    skill-path          Print the location of the packaged veritmm-tmm Agent
+                        Skill
+    install-skill       Install the packaged veritmm-tmm Agent Skill into a
+                        host skill directory
+    benchmark           Run the deterministic offline AgentBench suite
+    agent-benchmark     Score framework-neutral agent A/B trajectories
+
+options:
+  -h, --help            show this help message and exit
+exit_code=0

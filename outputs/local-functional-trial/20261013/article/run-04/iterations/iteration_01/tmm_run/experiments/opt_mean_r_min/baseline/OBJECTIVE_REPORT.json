@@ -1,0 +1,50 @@
+{
+  "schema_version": "tmm-objective-report.v1",
+  "aggregate_soft_score": 0.14880217822399627,
+  "weighted_directional_loss": 0.0867989029235604,
+  "target_attainment": {
+    "min_mean_reflectance": {
+      "metric": "mean_reflectance",
+      "observed": 0.28693077330254607,
+      "target": 0.0,
+      "sense": "minimize",
+      "weight": 1.0,
+      "soft_score": 0.7130692266974539,
+      "role": "soft_scoring_objective",
+      "region": {
+        "wavelength_nm": [
+          450.0,
+          700.0
+        ],
+        "angle_deg": 0.0,
+        "polarization": "s"
+      },
+      "channel_observations": {
+        "angle=0|pol=s": 0.28693077330254607
+      },
+      "aggregation": "mean"
+    },
+    "fixedscore.mean_reflectance_450_700nm": {
+      "metric": "mean_reflectance",
+      "observed": 0.28693077330254607,
+      "target": 0.03,
+      "sense": "report",
+      "weight": 1.0,
+      "soft_score": null,
+      "role": "report_only",
+      "region": {
+        "wavelength_nm": [
+          450.0,
+          700.0
+        ],
+        "angle_deg": 0,
+        "polarization": "s"
+      },
+      "channel_observations": {
+        "angle=0|pol=s": 0.28693077330254607
+      },
+      "aggregation": "mean"
+    }
+  },
+  "admission_role": "ranking_only"
+}

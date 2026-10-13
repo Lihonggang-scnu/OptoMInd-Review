@@ -1,0 +1,22 @@
+{
+  "source_commit": "76d15fb1d29d4e611cf7c7855e8dd0317ef8c7a1",
+  "target_head": "2945d61b4b3e1e12364c92db2ee767aa25d75afe",
+  "route": "review_problem -> docling_basic_batch -> cards -> selected_local_formula -> plan",
+  "paid_regional_default": false,
+  "api_calls": 0,
+  "gpu_calls": 0,
+  "network_calls": 0,
+  "help_checks": [
+    "python -B -X utf8 scripts/upgrade3/build_local_materials.py --help",
+    "python -B -X utf8 scripts/upgrade3/progressive_review_plan.py --help"
+  ],
+  "targeted_test_command": "python -B -X utf8 -m pytest -q tests/upgrade3/test_docling_batch_driver.py tests/upgrade3/test_docling_primary_material.py tests/upgrade3/test_local_formula_materials.py tests/upgrade3/test_planning_material_parser_wiring.py",
+  "targeted_tests": "14 passed",
+  "frozen_checks": [
+    "paper_reading_card required_outputs",
+    "planning_pool.v2 validation",
+    "explicit snapshot identity and DOCUMENT_MANIFEST validation",
+    "Windows card locator"
+  ],
+  "status": "ready for review"
+}

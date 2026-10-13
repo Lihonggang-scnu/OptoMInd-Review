@@ -1,0 +1,76 @@
+{
+  "schema_version": "tournament-summary.v1",
+  "recorded_at_utc": "2026-10-13T05:43:02.627887+00:00",
+  "pareto_frontier": [],
+  "primary_recommendation": null,
+  "route_comparison": [
+    {
+      "route_id": "route_01",
+      "source": "planned",
+      "status": "stopped_round_limit",
+      "termination_reason": "reached the per-route cap of 2 executed rounds",
+      "rounds_used": 2,
+      "best_solution": null,
+      "entered_pareto_frontier": false,
+      "design_orientation": {
+        "scientific_hypothesis": "Placing the lower-index SiO2 layer adjacent to air and the higher-index TiO2 layer adjacent to the glass substrate will yield a local minimum in mean reflectance, potentially satisfying the soft target of <0.03 if the thicknesses are tuned to create destructive interference across the 450-700 nm band.",
+        "proposed_materials": [
+          "air (n=1.0)",
+          "SiO2 (n=1.46)",
+          "TiO2 (n=2.40)",
+          "glass (n=1.52)"
+        ],
+        "proposed_topology": "Air | SiO2 (layer 1) | TiO2 (layer 2) | Glass substrate. Total finite layers: 2."
+      }
+    }
+  ],
+  "dominated_but_retained": [],
+  "eliminated_routes": [],
+  "negative_results": [
+    {
+      "kind": "zero_valid_candidates",
+      "route_id": "route_01",
+      "iteration_id": "iteration_01",
+      "run_status": "failed"
+    },
+    {
+      "kind": "zero_valid_candidates",
+      "route_id": "route_01",
+      "iteration_id": "iteration_02",
+      "run_status": "failed"
+    }
+  ],
+  "inadmissible_excluded": [],
+  "comparability_note": "Cross-route target-score ordering is INDICATIVE ONLY. Each route normalizes its soft score against its own executable objective contract; the normalized values are not directly comparable between routes (red line 6). This ranking is used solely to pick the primary recommendation INSIDE the Pareto frontier -- it never removes any solution from the frontier, and every frontier member remains part of the delivered portfolio.",
+  "planning_source_comparison": {
+    "schema_version": "planning-source-comparison.v1",
+    "comparison_basis": "Cross-arm performance uses frozen-standard representative scores only. Route-local target-score deltas are within-route diagnostics and are not cross-route rankings.",
+    "frozen_standard_formula": "-mean_reflectance_450_700nm",
+    "cross_source_comparison_valid": false,
+    "control_vs_literature_verdict": "control_or_literature_arm_missing",
+    "frozen_score_delta_control_minus_literature": null,
+    "groups": {
+      "planned": {
+        "route_ids": [
+          "route_01"
+        ],
+        "route_count": 1,
+        "routes_with_verified_candidates": 0,
+        "executed_rounds": 2,
+        "route_progress": [
+          {
+            "route_id": "route_01",
+            "source": "planned",
+            "initial_best_target_score": null,
+            "best_target_score": null,
+            "within_route_delta": null,
+            "scored_rounds": 0,
+            "executed_rounds": 2
+          }
+        ],
+        "scoreable_routes_by_frozen_standard": 0,
+        "best_frozen_standard_result": null
+      }
+    }
+  }
+}

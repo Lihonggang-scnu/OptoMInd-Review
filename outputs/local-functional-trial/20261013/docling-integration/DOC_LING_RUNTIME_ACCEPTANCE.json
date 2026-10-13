@@ -1,0 +1,307 @@
+{
+  "schema_version": "optomind.docling_runtime_acceptance.v1",
+  "audit_date": "2026-10-13",
+  "generated_at": "2026-10-13T14:50:31.441451+08:00",
+  "scope": "Read-only evidence checkpoint for the Docling basic batch, fulltext material snapshots, cards, selected-paper local formula enhancement, and corrected planning cache consumption.",
+  "audit_actions": {
+    "read_only_evidence_review": true,
+    "new_execution_by_audit": false,
+    "api_calls_by_audit": 0,
+    "gpu_work_by_audit": false,
+    "source_F_writes": false,
+    "target_repo_writes": false,
+    "full_regression_run": false,
+    "external_files_written": [
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\docling-integration\\DOC_LING_RUNTIME_ACCEPTANCE.json",
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\docling-integration\\DOC_LING_RUNTIME_ACCEPTANCE.md"
+    ]
+  },
+  "provenance": {
+    "source_frozen_commit": "76d15fb1d29d4e611cf7c7855e8dd0317ef8c7a1",
+    "source_worktree": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree",
+    "target_repo": "D:\\OptoMind-Article-3\\repos\\OptoMInd-Review",
+    "target_head_observed": "f1544d922538a4a1cec4fe72842472d152dae780",
+    "target_worktree_observed_clean": true,
+    "runtime_artifact_root": "D:\\OptoMind-Article-3\\local-functional-trial\\20261013",
+    "basic_and_formula_source_interpreter_note": "Receipts retain source PDF paths and formula model-cache paths under the F handoff tree; this audit did not alter that tree."
+  },
+  "basic_docling_batch": {
+    "evidence": [
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\docling-basic\\BATCH_RESULT.json",
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\logs\\review-docling-basic.log"
+    ],
+    "status": "success",
+    "mode": "basic",
+    "planned_count": 2,
+    "attempted_count": 2,
+    "unique_pdf_count": 2,
+    "source_record_count": 2,
+    "cached_count": 0,
+    "reconverted_count": 2,
+    "elapsed_seconds": 14.641,
+    "worker_returncode": 0,
+    "peak_gpu_memory_mib": 3995,
+    "device": "cuda",
+    "enable_remote_services": false,
+    "records": [
+      {
+        "canonical_paper_id": "dd2dc3ec9c62d3fea69db49d6c9a4c78eb1a6f49",
+        "source_sha256": "e3e00b4db932b9f95225150b11685dea6276fbc27f9f24408bd54679f5456ec1",
+        "source_page_count": 17,
+        "document_sha256": "369b0c226b6db8f32458f43e9dda5a97db6b93915c75fd553c37bd3a686e7d52",
+        "status": "success",
+        "cached": false,
+        "elapsed_seconds": 8.157,
+        "output": "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\docling-basic\\e3e00b4db932b9f95225"
+      },
+      {
+        "canonical_paper_id": "84c74988ea8a29fd3a5a26d2655fc7505820f72e",
+        "source_sha256": "60004cedb73ee78a6aa242d636259f4bc696766722613bd4dd7e67679d4e5915",
+        "source_page_count": 7,
+        "document_sha256": "caaf0d6f9a5754607fe40f76885678eb2aba77b06f823b923ca380a1abe1b3e3",
+        "status": "success",
+        "cached": false,
+        "elapsed_seconds": 1.25,
+        "output": "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\docling-basic\\60004cedb73ee78a6aa242"
+      }
+    ],
+    "runtime_cache_paths": {
+      "docling_artifacts": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\parser_repair\\docling_artifacts"
+    },
+    "package_observation": {
+      "docling": "2.138.0",
+      "docling_core": "2.101.1",
+      "docling_parse": "7.22.2",
+      "torch": "2.5.1+cu121",
+      "PyMuPDF": null
+    }
+  },
+  "material_snapshots": {
+    "evidence": [
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\logs\\review-materials-02.log",
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\materials-02"
+    ],
+    "records": [
+      {
+        "canonical_paper_id": "dd2dc3ec9c62d3fea69db49d6c9a4c78eb1a6f49",
+        "snapshot_id": "snapshot-08c038bb8496aee2485270fa",
+        "snapshot_path": "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\materials-02\\dd2dc3ec9c62d3fea69db49d6c9a4c78eb1a6f49\\snapshot-08c038bb8496aee2485270fa",
+        "material_depth": "fulltext",
+        "parser": "docling",
+        "selected_route": "docling_basic",
+        "body_readable": true,
+        "complete_page_coverage": true,
+        "source_pdf_sha256": "e3e00b4db932b9f95225150b11685dea6276fbc27f9f24408bd54679f5456ec1",
+        "source_page_count": 17,
+        "known_formula_gaps": 1
+      },
+      {
+        "canonical_paper_id": "84c74988ea8a29fd3a5a26d2655fc7505820f72e",
+        "snapshot_id": "snapshot-8645357434f7f7dd690428bf",
+        "snapshot_path": "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\materials-02\\84c74988ea8a29fd3a5a26d2655fc7505820f72e\\snapshot-8645357434f7f7dd690428bf",
+        "material_depth": "fulltext",
+        "parser": "docling",
+        "selected_route": "docling_basic",
+        "body_readable": true,
+        "complete_page_coverage": true,
+        "source_pdf_sha256": "60004cedb73ee78a6aa242d636259f4bc696766722613bd4dd7e67679d4e5915",
+        "source_page_count": 7,
+        "known_formula_gaps": 6
+      }
+    ],
+    "first_attempt_preserved": {
+      "evidence": [
+        "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\materials\\_batch_checkpoints\\dd2dc3ec9c62d3fea69db49d6c9a4c78eb1a6f49.json",
+        "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\materials\\_batch_checkpoints\\84c74988ea8a29fd3a5a26d2655fc7505820f72e.json",
+        "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\logs\\review-materials.log"
+      ],
+      "material_depth": "metadata_only",
+      "parser": "fallback",
+      "selected_route": "abstract_snippet_fallback",
+      "direct_checkpoint_reason": "primary_projection_DoclingAdapterError:docling_crop_renderer_unavailable; ordinary parser fallback considered",
+      "status": "published",
+      "handoff_cause_note": "The handoff identifies the first attempt as the missing-fitz/PyMuPDF environment case; the checkpoint itself records the crop-renderer/parser-unavailable reason above.",
+      "no_rewrite_of_old_attempt": true
+    },
+    "pymupdf_environment_note": {
+      "evidence": "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\logs\\review-pdf-renderer-install.log",
+      "installed_version": "pymupdf==1.27.2.3",
+      "installed_environment": "D:\\OptoMind-Article-3\\local-preparation\\envs\\review",
+      "materials_02_parser_receipts_PyMuPDF": null,
+      "interpretation": "The install receipt is for the new Review environment only; no source F environment change is inferred or recorded here."
+    }
+  },
+  "cards": {
+    "evidence": [
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\CARDS_RESULT.json",
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\cards\\BATCH_RESULTS.json",
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\cards\\BATCH_STATE.json"
+    ],
+    "manifest_finalized": true,
+    "rows_seen": 2,
+    "counts": {
+      "success": 2
+    },
+    "model": "qwen3.7-flash",
+    "selected_paper_id": "84c74988ea8a29fd3a5a26d2655fc7505820f72e",
+    "card_commits": [
+      {
+        "paper_id": "84c74988ea8a29fd3a5a26d2655fc7505820f72e",
+        "status": "success",
+        "card_id": "paper-card-ffd257ad247ee86681ce622e",
+        "commit_path": "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\cards\\cards\\84c74988ea8a29fd3a5a26d2655fc7505820f72e\\c011ac97f56824c7e608f8475b5d558b\\attempt-01\\COMMIT.json",
+        "snapshot_id": "snapshot-8645357434f7f7dd690428bf"
+      },
+      {
+        "paper_id": "dd2dc3ec9c62d3fea69db49d6c9a4c78eb1a6f49",
+        "status": "success",
+        "card_id": "paper-card-9172e71cd04d0f386babd33c",
+        "commit_path": "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\cards\\cards\\dd2dc3ec9c62d3fea69db49d6c9a4c78eb1a6f49\\44f0967f140e373c1c9a355fa961cd8f\\attempt-01\\COMMIT.json",
+        "snapshot_id": "snapshot-08c038bb8496aee2485270fa"
+      }
+    ]
+  },
+  "selected_local_formula": {
+    "evidence": [
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\formula-cache\\90b70b62eaaf22c2c01cb7afccf5b503b87638d4ee6ba55601ac9449a3fd18c5\\selection-054640f2c981107c\\results\\BATCH_RESULT.json",
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\formula-cache\\90b70b62eaaf22c2c01cb7afccf5b503b87638d4ee6ba55601ac9449a3fd18c5\\selection-054640f2c981107c\\results\\60004cedb73ee78a6aa2\\run.json",
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\formula-cache\\90b70b62eaaf22c2c01cb7afccf5b503b87638d4ee6ba55601ac9449a3fd18c5\\LOCAL_FORMULAS.json",
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\formula-cache\\90b70b62eaaf22c2c01cb7afccf5b503b87638d4ee6ba55601ac9449a3fd18c5\\CURRENT.json"
+    ],
+    "canonical_paper_id": "84c74988ea8a29fd3a5a26d2655fc7505820f72e",
+    "status": "success",
+    "mode": "formula",
+    "planned_count": 1,
+    "attempted_count": 1,
+    "unique_pdf_count": 1,
+    "cached_count": 0,
+    "reconverted_count": 1,
+    "elapsed_seconds_batch": 24.469,
+    "elapsed_seconds_record": 9.031,
+    "worker_returncode": 0,
+    "peak_gpu_memory_mib": 3604,
+    "device": "cuda",
+    "source_page_count": 7,
+    "requested_ref_count": 6,
+    "processed_ref_count": 6,
+    "empty_result_ref_count": 0,
+    "unprocessed_ref_count": 0,
+    "processed_refs": [
+      "#/texts/25",
+      "#/texts/32",
+      "#/texts/34",
+      "#/texts/36",
+      "#/texts/49",
+      "#/texts/53"
+    ],
+    "source_pdf": "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\materials-02\\84c74988ea8a29fd3a5a26d2655fc7505820f72e\\snapshot-8645357434f7f7dd690428bf\\sources\\original-pdf-60004cedb73e.pdf",
+    "source_bindings": {
+      "pdf_sha256": "60004cedb73ee78a6aa242d636259f4bc696766722613bd4dd7e67679d4e5915",
+      "raw_document_sha256": "caaf0d6f9a5754607fe40f76885678eb2aba77b06f823b923ca380a1abe1b3e3",
+      "enhanced_document_sha256": "bfe171991861ee62fbf2ad721d45bbd39dd70ddc97ad65abd282aab75c5d41a7",
+      "formula_sidecar_binding": {
+        "canonical_paper_id": "84c74988ea8a29fd3a5a26d2655fc7505820f72e",
+        "pdf_sha256": "60004cedb73ee78a6aa242d636259f4bc696766722613bd4dd7e67679d4e5915",
+        "raw_document_sha256": "caaf0d6f9a5754607fe40f76885678eb2aba77b06f823b923ca380a1abe1b3e3",
+        "projection_version": "optomind.docling_body.v1"
+      },
+      "hash_checks": {
+        "selected_pdf_file_hash_matches_binding": true,
+        "raw_document_file_hash_matches_binding": true,
+        "enhanced_document_file_hash_matches_binding": true,
+        "run_json_hash_matches_execution_receipt_sha256": true,
+        "selected_manifest_pdf_hash_matches_binding": true
+      }
+    },
+    "model_receipt": {
+      "name": "CodeFormulaV2",
+      "batch_size": 32,
+      "model_cache": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\parser_repair\\precision_candidate_trials_20261013\\docling_formula\\model_cache",
+      "packages": {
+        "docling": "2.138.0",
+        "docling-core": "2.101.1",
+        "docling-ibm-models": "4.0.3",
+        "docling-parse": "7.22.2",
+        "pypdfium2": "5.14.0",
+        "torch": "2.5.1+cu121"
+      },
+      "extract_formulas": true,
+      "api_overrides": {},
+      "remote_service_flag_in_basic_parser": false,
+      "execution_receipt_sha256": "fa3032535adb4104ab2092bda9b5249cf2ba5078c780b13e1bb65f966bbe4338",
+      "execution_receipt_file": "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\formula-cache\\90b70b62eaaf22c2c01cb7afccf5b503b87638d4ee6ba55601ac9449a3fd18c5\\selection-054640f2c981107c\\results\\60004cedb73ee78a6aa2\\run.json"
+    },
+    "output": {
+      "schema_version": "optomind.local_formula_materials.v1",
+      "recognized_region_count": 6,
+      "region_ids": [
+        "d00031",
+        "d00039",
+        "d00041",
+        "d00043",
+        "d00057",
+        "d00061"
+      ],
+      "statuses": {
+        "recognized": 6
+      },
+      "fidelity_status": "local_transcription_candidate_not_scientific_verification",
+      "sidecar_path": "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\formula-cache\\90b70b62eaaf22c2c01cb7afccf5b503b87638d4ee6ba55601ac9449a3fd18c5\\LOCAL_FORMULAS.json",
+      "current_pointer_path": "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\formula-cache\\90b70b62eaaf22c2c01cb7afccf5b503b87638d4ee6ba55601ac9449a3fd18c5\\CURRENT.json",
+      "current_profile_sha256": "50e05980f52080d6e91dae19ed7eabf85490fdcb27655fdf3051df32bb357291",
+      "top_level_raw_document_sha256": null,
+      "binding_raw_document_sha256_present": true
+    }
+  },
+  "planning_and_cache_reuse": {
+    "evidence": [
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\planning-02\\RUN_STATE.json",
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\planning-02\\PLANNING_RUN_REPORT.json",
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\planning-02\\DIRECTED_MATERIAL_CACHE.json",
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\planning-02\\level1\\external\\N9daf837789a3-abdca22701abe49e-31dfb85b28149743\\round_1\\directed\\84c74988ea8a29fd3a5a26d2655fc7505820f72e\\dr-task-58e2ac7ba1a25b2bb61b4f0a\\PROMPT.json",
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\planning-02\\level2\\external\\N48d7644a60ae-abdca22701abe49e-31dfb85b28149743\\round_1\\directed\\84c74988ea8a29fd3a5a26d2655fc7505820f72e\\dr-task-28f036c79300c22660c95005\\PROMPT.json",
+      "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\logs\\review-planning-03.log"
+    ],
+    "selected_paper_id": "84c74988ea8a29fd3a5a26d2655fc7505820f72e",
+    "observed_status": "stopped_after_level2",
+    "planning_report_status": "partial",
+    "completed_stages_through": "finalize_chapter_scope",
+    "chapter_count": 0,
+    "consumed_paper_ids": [
+      "84c74988ea8a29fd3a5a26d2655fc7505820f72e"
+    ],
+    "sidecar_reuse_evidence": {
+      "current_materials_path": "D:\\OptoMind-Article-3\\local-functional-trial\\20261013\\review\\formula-cache\\90b70b62eaaf22c2c01cb7afccf5b503b87638d4ee6ba55601ac9449a3fd18c5\\LOCAL_FORMULAS.json",
+      "current_profile_sha256": "50e05980f52080d6e91dae19ed7eabf85490fdcb27655fdf3051df32bb357291",
+      "planner_runtime_local_formula_config_sha256": "50e05980f52080d6e91dae19ed7eabf85490fdcb27655fdf3051df32bb357291",
+      "profile_hash_matches": true,
+      "level1_prompt_structured_source_material": true,
+      "level1_prompt_local_formula_status_recognized_count": 6,
+      "level2_prompt_structured_source_material": true,
+      "level2_prompt_local_formula_status_recognized_count": 6,
+      "planning_local_formula_batch_results": 0,
+      "classification": "sidecar_consumption_demonstrated; separate formula-executor cache-hit counter not present",
+      "initial_formula_batch_cache_count": 0
+    },
+    "planner_runtime_note": "The planning artifacts contain qwen3.7-flash directed-reading completions and a CALL_COST_level2 receipt; the API-zero statement in this checkpoint applies to the Docling/local-formula integration path and this audit, not to planner accounting."
+  },
+  "limitations_and_review_flags": [
+    "The first metadata-only fallback is preserved as provenance; the later materials-02 fulltext snapshots are the accepted Docling basic route.",
+    "The parser receipts record PyMuPDF as null even though PyMuPDF 1.27.2.3 was installed in the new Review environment; no old F environment modification is evidenced.",
+    "The six formula outputs are transcription candidates. The sidecar explicitly says local_transcription_candidate_not_scientific_verification; visual/source verification remains required, and some OCR-like corruption is visible in the candidate text.",
+    "The formula sidecar stores raw_document_sha256 at binding.raw_document_sha256 while its top-level raw_document_sha256 is null; the binding and run receipt agree and the file hash checks pass.",
+    "The formula batch was fresh (cached_count=0). Planning reused the sidecar/profile and embedded six recognized formula candidates, but no separate executor cache-hit metric proves a second formula conversion.",
+    "The corrected planning output is partial and stopped after level 2 with chapter_count=0; this is not a completed review plan.",
+    "GPU peak numbers are receipt-level maxima (3995 MiB basic, 3604 MiB formula); no independent time-series telemetry was inspected.",
+    "No full regression suite was run for this audit."
+  ],
+  "verification_summary": {
+    "basic_batch_success_2": true,
+    "materials_fulltext_docling_2": true,
+    "cards_valid_success_2": true,
+    "formula_binding_hashes_match": true,
+    "formula_processed_refs_6_of_6": true,
+    "planner_formula_profile_reused": true,
+    "planner_complete": false
+  }
+}

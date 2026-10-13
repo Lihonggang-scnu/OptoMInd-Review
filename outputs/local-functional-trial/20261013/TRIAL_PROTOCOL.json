@@ -1,0 +1,24 @@
+{
+  "authorization": "User 2026-10-13: two small real functional cases; total ceiling 15 CNY",
+  "models": ["qwen3.5-plus", "qwen3.7-flash"],
+  "total_limit_cny": 15.0,
+  "automatic_transport_retries": 0,
+  "key_slots_per_call": 1,
+  "unknown_spend_policy": "Retain reservation and stop all new model calls",
+  "pricing_source": "https://help.aliyun.com/zh/model-studio/model-pricing",
+  "review": {
+    "question": "For visible achromatic metalenses, how do phase/group-delay dispersion limits constrain the joint bandwidth and field of view, and what evidence supports the associated efficiency tradeoffs? Produce a focused evidence-based review plan separating physical bounds, design mechanisms and demonstrated performance. This pilot uses at most three full-text papers and is not a comprehensive review.",
+    "acceptance": ["Fresh model decomposition preserves all three tradeoffs", "Real retrieval receipts and authentic full-text sources", "New question-bound cards with traceable evidence locators", "Plan assigns distinct evidence responsibilities and records uncovered facets"],
+    "full_body": false,
+    "maximum_selected_fulltexts": 3
+  },
+  "article": {
+    "question": "Design a planar two-layer antireflection coating on a semi-infinite glass substrate (constant refractive index 1.52, lossless), with air incidence (index 1.0). Use only lossless constant-index SiO2 (n=1.46) and TiO2 (n=2.40), one layer of each in either order. Each layer thickness must be between 40 and 160 nm. At normal incidence with s polarization, minimize the arithmetic mean power reflectance sampled from 450 to 700 nm at 5 nm spacing. A mean reflectance below 0.03 is the stated target. Use deterministic TMM only, with no RCWA, FDFD, learned surrogate or hardware. Allow at most two executed research rounds with one route and at most 64 solver evaluations per round, seed 17. After observing the actual result, choose a justified adjustment or stop. Do not claim the target was met without the spectrum and independent numeric check.",
+    "acceptance": ["Model-origin proposal compiles and is actually executed by bundled VeriTMM", "Exact layer/material/domain constraints preserved", "Actual numerical feedback reaches model reflection and alters or terminates next action", "Exported winner spectrum independently recomputed using tmm.coh_tmm at absolute tolerance 1e-8", "Conclusion cites actual mean R and reports whether R<0.03"],
+    "maximum_executed_rounds": 2,
+    "routes": 1,
+    "seed": 17,
+    "target_mean_R": 0.03,
+    "comparison": "Only after a successful real loop; same frozen task and budget, no claim of benefit from one run"
+  }
+}

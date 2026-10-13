@@ -1,0 +1,115 @@
+{
+  "cap_pressure": {
+    "answer_tokens": 967,
+    "completion_tokens": 967,
+    "diagnostic_only": true,
+    "finish_reason_length": false,
+    "near_limit": false,
+    "near_limits": [],
+    "reasoning_tokens": 0
+  },
+  "content": {
+    "question_material": [
+      {
+        "examples": [
+          {
+            "attribution": "本研究 (Shastri and Monticone, 2022)",
+            "conditions": "基于局部相互作用假设（将超原子建模为一维延迟线）；针对平面金属透镜和平面焦平面的系统；考虑了两种焦点位置映射关系：r0=Ftan(alpha) 和 r0=F*alpha；适用于衍射极限聚焦且斯特列尔比(Schrel ratio)较高的情况；背景折射率为nb。",
+            "finding": "对于通过色散工程设计的消色差金属透镜，其最大可实现光谱带宽受到群延迟-带宽积的根本限制。随着数值孔径(NA)的增加，可实现带宽减小；随着视场(FOV)的增加，带宽极限也缩小。然而，这种带宽缩减存在饱和效应：当FOV超过某个依赖于NA的特定阈值后，带宽不再进一步下降。例如，对于固定NA=0.7nb的金属透镜，理论上FOV为180度的设计可能具有与FOV为60度设计相同的频谱带宽。这一结果源于有限尺寸金属透镜上所需的最大群延迟范围并非随入射角单调增加，而是在某个中间角度达到最大值。",
+            "reference_ids": [],
+            "use_in_review": "提供色散工程消色差金属透镜在宽视场下的理论带宽极限，阐明数值孔径(NA)和视场角(FOV)对最大可实现带宽的制约关系及饱和现象。"
+          }
+        ],
+        "explanation": "该研究从物理原理层面解释了宽视场色散工程消色差金属透镜的带宽限制机制。核心逻辑如下：\n\n1. **色散工程的要求**：为了实现宽带消色差操作（即在中心频率附近连续频率范围内实现无像差聚焦），金属透镜上的每个超原子不仅需要在中心频率处提供所需的相位分布，还需要提供特定的群延迟(profile)和零群延迟色散。对于宽视场系统，为了消除不同入射角光线产生的像差，理想的空间相位分布由两部分组成：线性相位梯度（用于将波前重定向至表面法线）和双曲线径向相位分布（用于将光聚焦到焦平面上的特定点）。\n\n2. **群延迟与带宽的限制**：由于金属透镜厚度仅为波长量级，纵向传播占主导，因此每个位置的超原子可被视为一个一维延迟线。根据Miller等人的基本限制理论，任何线性时不变系统中的群延迟与信号带宽之积存在上限（delay-bandwidth limit）。这意味着，超原子能实现的群延迟范围是有限的，从而限制了整个金属透镜能在多大频率范围内准确实现所需的群延迟分布。\n\n3. **FOV与NA的影响机制**：\n   - **NA的影响**：较大的NA意味着透镜边缘与中心之间的光程差更大，需要补偿的群延迟差异更大，因此带宽受限更严重。\n   - **FOV的影响**：更大的FOV意味着需要处理更大范围的入射角。直观上，入射角越大，跨透镜的群延迟补偿需求似乎应越大。然而，对于有限尺寸的金属透镜，所需的总相位范围（进而转化为群延迟范围）并不随入射角单调增加。在掠射角附近，所需相位范围反而最小，而在某个取决于透镜最大半径的角度达到最大。\n\n4. **饱和现象的解释**：由于上述非单调特性，当FOV增加到一定程度后，系统中出现的“最宽”群延迟范围不再随FOV的增加而显著扩大（因为新的更大入射角对应的群延迟范围可能小于或等于之前已存在的最大值）。因此，由最大群延迟决定的带宽下限也随之饱和，不再随FOV的进一步增大而降低。\n\n5. **假设与局限**：这些界限严格适用于基于局部相互作用的金属透镜（即响应仅取决于局部场）。如果采用非局部超表面、多层级联结构或利用横向传播的结构，或者放宽衍射极限/斯特列尔比的约束，这些界限可能会被突破或放松。此外，对于弯曲焦平面或其他成像几何形状，界限需重新推导。",
+        "question_id": "Q01",
+        "remaining_points": [
+          "文中提到对于级联超表面或非局部超表面的广义带宽界限推导是未来工作方向，目前未给出具体公式。",
+          "实际实验中高NA宽视场金属透镜的性能与理论界限的具体对比数据未在本文详细展开，仅作为展望提及。"
+        ]
+      }
+    ]
+  },
+  "effective_request": {
+    "answer_tokens": 8192,
+    "enable_thinking": false,
+    "max_completion_tokens": 8192,
+    "max_tokens": null,
+    "model": "qwen3.7-flash",
+    "response_format": {
+      "type": "json_object"
+    },
+    "thinking_budget": 0,
+    "total_output_tokens": 8192
+  },
+  "fulfilled": false,
+  "material_ready": true,
+  "open_questions": [
+    {
+      "question_id": "Q01",
+      "remaining_points": [
+        "文中提到对于级联超表面或非局部超表面的广义带宽界限推导是未来工作方向，目前未给出具体公式。",
+        "实际实验中高NA宽视场金属透镜的性能与理论界限的具体对比数据未在本文详细展开，仅作为展望提及。"
+      ]
+    }
+  ],
+  "paper_id": "84c74988ea8a29fd3a5a26d2655fc7505820f72e",
+  "paper_identity": {
+    "canonical_paper_id": "84c74988ea8a29fd3a5a26d2655fc7505820f72e",
+    "doi": "10.1051/epjam/2022012",
+    "title": "Bandwidth bounds for wide-field-of-view dispersion-engineered achromatic metalenses"
+  },
+  "paper_title": "Bandwidth bounds for wide-field-of-view dispersion-engineered achromatic metalenses",
+  "plain_text": "",
+  "prompt_sha256": "5cab7e06038d04f5434e1c1635499f25aff88a8be181b548416cbc7e39bc6cdc",
+  "question_material": [
+    {
+      "examples": [
+        {
+          "attribution": "本研究 (Shastri and Monticone, 2022)",
+          "conditions": "基于局部相互作用假设（将超原子建模为一维延迟线）；针对平面金属透镜和平面焦平面的系统；考虑了两种焦点位置映射关系：r0=Ftan(alpha) 和 r0=F*alpha；适用于衍射极限聚焦且斯特列尔比(Schrel ratio)较高的情况；背景折射率为nb。",
+          "finding": "对于通过色散工程设计的消色差金属透镜，其最大可实现光谱带宽受到群延迟-带宽积的根本限制。随着数值孔径(NA)的增加，可实现带宽减小；随着视场(FOV)的增加，带宽极限也缩小。然而，这种带宽缩减存在饱和效应：当FOV超过某个依赖于NA的特定阈值后，带宽不再进一步下降。例如，对于固定NA=0.7nb的金属透镜，理论上FOV为180度的设计可能具有与FOV为60度设计相同的频谱带宽。这一结果源于有限尺寸金属透镜上所需的最大群延迟范围并非随入射角单调增加，而是在某个中间角度达到最大值。",
+          "reference_ids": [],
+          "use_in_review": "提供色散工程消色差金属透镜在宽视场下的理论带宽极限，阐明数值孔径(NA)和视场角(FOV)对最大可实现带宽的制约关系及饱和现象。"
+        }
+      ],
+      "explanation": "该研究从物理原理层面解释了宽视场色散工程消色差金属透镜的带宽限制机制。核心逻辑如下：\n\n1. **色散工程的要求**：为了实现宽带消色差操作（即在中心频率附近连续频率范围内实现无像差聚焦），金属透镜上的每个超原子不仅需要在中心频率处提供所需的相位分布，还需要提供特定的群延迟(profile)和零群延迟色散。对于宽视场系统，为了消除不同入射角光线产生的像差，理想的空间相位分布由两部分组成：线性相位梯度（用于将波前重定向至表面法线）和双曲线径向相位分布（用于将光聚焦到焦平面上的特定点）。\n\n2. **群延迟与带宽的限制**：由于金属透镜厚度仅为波长量级，纵向传播占主导，因此每个位置的超原子可被视为一个一维延迟线。根据Miller等人的基本限制理论，任何线性时不变系统中的群延迟与信号带宽之积存在上限（delay-bandwidth limit）。这意味着，超原子能实现的群延迟范围是有限的，从而限制了整个金属透镜能在多大频率范围内准确实现所需的群延迟分布。\n\n3. **FOV与NA的影响机制**：\n   - **NA的影响**：较大的NA意味着透镜边缘与中心之间的光程差更大，需要补偿的群延迟差异更大，因此带宽受限更严重。\n   - **FOV的影响**：更大的FOV意味着需要处理更大范围的入射角。直观上，入射角越大，跨透镜的群延迟补偿需求似乎应越大。然而，对于有限尺寸的金属透镜，所需的总相位范围（进而转化为群延迟范围）并不随入射角单调增加。在掠射角附近，所需相位范围反而最小，而在某个取决于透镜最大半径的角度达到最大。\n\n4. **饱和现象的解释**：由于上述非单调特性，当FOV增加到一定程度后，系统中出现的“最宽”群延迟范围不再随FOV的增加而显著扩大（因为新的更大入射角对应的群延迟范围可能小于或等于之前已存在的最大值）。因此，由最大群延迟决定的带宽下限也随之饱和，不再随FOV的进一步增大而降低。\n\n5. **假设与局限**：这些界限严格适用于基于局部相互作用的金属透镜（即响应仅取决于局部场）。如果采用非局部超表面、多层级联结构或利用横向传播的结构，或者放宽衍射极限/斯特列尔比的约束，这些界限可能会被突破或放松。此外，对于弯曲焦平面或其他成像几何形状，界限需重新推导。",
+      "question_id": "Q01",
+      "remaining_points": [
+        "文中提到对于级联超表面或非局部超表面的广义带宽界限推导是未来工作方向，目前未给出具体公式。",
+        "实际实验中高NA宽视场金属透镜的性能与理论界限的具体对比数据未在本文详细展开，仅作为展望提及。"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "gap_key": "",
+      "purpose": "Supply a concrete, attributed case for the coordinated review.",
+      "question": "Extract the paper's evidence relevant to the coordinated review scope.",
+      "question_id": "Q01",
+      "required_output_ids": [
+        "O01"
+      ]
+    }
+  ],
+  "references": [],
+  "required_outputs": [
+    {
+      "description": "Source-based findings, conditions, methods and limits useful to the review.",
+      "output_id": "O01",
+      "output_type": "practical_material"
+    }
+  ],
+  "review_id": "visible-achromatic-metalens-pilot-20261013",
+  "runtime_config": {
+    "max_output_tokens": 8192,
+    "model": "qwen3.7-flash",
+    "thinking": false,
+    "thinking_budget": 0
+  },
+  "schema_version": "optomind.upgrade3.directed_reading.output.v4",
+  "source_hash": "7cd0f4ab71855a2512d039421251804f68bf9cb4003af726ce91ade9ebe376f0",
+  "status": "partial",
+  "task_hash": "28f036c79300c22660c950051e2805b46d625e8442ac65fe331149647708888e",
+  "task_id": "dr-task-28f036c79300c22660c95005",
+  "workflow": "practical_materials"
+}

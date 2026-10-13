@@ -1,0 +1,109 @@
+{
+  "binding": {
+    "canonical_paper_id": "84c74988ea8a29fd3a5a26d2655fc7505820f72e",
+    "pdf_sha256": "60004cedb73ee78a6aa242d636259f4bc696766722613bd4dd7e67679d4e5915",
+    "projection_version": "optomind.docling_body.v1",
+    "publication_version": "",
+    "raw_document_sha256": "caaf0d6f9a5754607fe40f76885678eb2aba77b06f823b923ca380a1abe1b3e3"
+  },
+  "enhanced_document_sha256": "bfe171991861ee62fbf2ad721d45bbd39dd70ddc97ad65abd282aab75c5d41a7",
+  "execution_receipt_sha256": "fa3032535adb4104ab2092bda9b5249cf2ba5078c780b13e1bb65f966bbe4338",
+  "fidelity_status": "local_transcription_candidate_not_scientific_verification",
+  "model": {
+    "batch_size": 32,
+    "model_cache": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\parser_repair\\precision_candidate_trials_20261013\\docling_formula\\model_cache",
+    "model_manifest": null,
+    "name": "CodeFormulaV2",
+    "options": {
+      "engine_options": {
+        "engine_type": "auto_inline",
+        "prefer_vllm": false
+      },
+      "expansion_factor": 0.18,
+      "extract_code": true,
+      "extract_formulas": true,
+      "max_size": null,
+      "model_spec": {
+        "api_overrides": {},
+        "default_repo_id": "docling-project/CodeFormulaV2",
+        "engine_overrides": {
+          "transformers": {
+            "extra_config": {
+              "extra_generation_config": {
+                "skip_special_tokens": false
+              },
+              "torch_dtype": "bfloat16",
+              "transformers_model_type": "automodel-imagetexttotext"
+            },
+            "min_engine_version": null,
+            "repo_id": null,
+            "revision": null,
+            "torch_dtype": null
+          }
+        },
+        "extra_generation_config": {},
+        "max_new_tokens": 4096,
+        "name": "CodeFormulaV2",
+        "prompt": "",
+        "response_format": "plaintext",
+        "revision": "main",
+        "stop_strings": [
+          "</doctag>",
+          "<end_of_utterance>"
+        ],
+        "supported_engines": null,
+        "temperature": 0.0,
+        "trust_remote_code": false
+      },
+      "scale": 2.0,
+      "stop_on_repetition": true
+    },
+    "packages": {
+      "docling": "2.138.0",
+      "docling-core": "2.101.1",
+      "docling-ibm-models": "4.0.3",
+      "docling-parse": "7.22.2",
+      "pypdfium2": "5.14.0",
+      "torch": "2.5.1+cu121"
+    }
+  },
+  "regions": [
+    {
+      "latex": "\\phi ( r , \\omega ) = - \\frac { \\omega } { c } \\left ( \\sqrt { F ^ { 2 } + r ^ { 2 } } - F \\right ) , \\quad \\ \\ ( 1 )",
+      "region_id": "d00031",
+      "source_ref": "#/texts/25",
+      "status": "recognized"
+    },
+    {
+      "latex": "\\phi _ { l } ( r , \\omega , \\alpha ) = - \\frac { \\omega } { c } ( r \\sin ( \\alpha ) ) ,",
+      "region_id": "d00039",
+      "source_ref": "#/texts/32",
+      "status": "recognized"
+    },
+    {
+      "latex": "\\begin{array} { l l } \\text {hetalens} & \\phi _ { s } ( r , \\omega , \\alpha ) = - \\frac { \\omega } { c } \\left ( \\sqrt { F ^ { 2 } + ( r - r _ { 0 } ( \\alpha ) ) ^ { 2 } } - \\sqrt { F ^ { 2 } + r _ { 0 } ( \\alpha ) ^ { 2 } } \\right ) . \\\\ \\text {center of} & r a \\wideedge d \\\\ \\text {a wide} & \\end{array} ( 3 )",
+      "region_id": "d00041",
+      "source_ref": "#/texts/34",
+      "status": "recognized"
+    },
+    {
+      "latex": "\\phi ( r , \\omega , \\alpha ) = \\phi _ { l } ( r , \\omega , \\alpha ) + \\phi _ { s } ( r , \\omega , \\alpha ) .",
+      "region_id": "d00043",
+      "source_ref": "#/texts/36",
+      "status": "recognized"
+    },
+    {
+      "latex": "t _ { g } ( r , \\alpha ) = - \\frac { F } { c } \\left [ \\frac { r } { F } \\sin ( \\alpha ) + \\sqrt { 1 + \\left ( \\frac { r } { F } - \\frac { r _ { 0 } ( \\alpha ) } { F } \\right ) ^ { 2 } } - \\sqrt { 1 + \\frac { r _ { 0 } ( \\alpha ) ^ { 2 } } { F } } \\right ] . \\quad \\text {allow line} \\, . \\quad \\text {atom is} \\quad \\text {turn, the} \\quad . \\quad \\text {dispersion} \\quad . \\quad \\text {dispersial} \\quad . \\quad \\text {deterministic}",
+      "region_id": "d00057",
+      "source_ref": "#/texts/49",
+      "status": "recognized"
+    },
+    {
+      "latex": "\\Delta \\omega \\leq \\frac { \\kappa } { \\Delta T _ { \\max } } .",
+      "region_id": "d00061",
+      "source_ref": "#/texts/53",
+      "status": "recognized"
+    }
+  ],
+  "schema_version": "optomind.local_formula_materials.v1"
+}

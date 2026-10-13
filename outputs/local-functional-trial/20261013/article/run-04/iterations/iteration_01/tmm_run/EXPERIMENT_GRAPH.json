@@ -1,0 +1,132 @@
+{
+  "schema_version": "optical-experiment-graph.v1",
+  "run_id": "real-ar-two-layer-20261013.iteration_01",
+  "nodes": [
+    {
+      "node_id": "591ecb6c9f934ddf",
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "task_hash": "98007c160d4272b95995f29594705ab1a2fc254d53f18f15c275c256d5a06451",
+      "action": {
+        "action_type": "generate_baseline",
+        "parameters": {
+          "experiment_id": "opt_mean_r_min",
+          "mode": "optimize"
+        },
+        "rationale": "",
+        "proposed_by": "deterministic_policy"
+      },
+      "created_at": 1791870943.2244415,
+      "parent_ids": [],
+      "status": "physically_valid",
+      "history": [
+        {
+          "event_id": 1,
+          "event_type": "status",
+          "payload": {
+            "status": "proposed"
+          },
+          "created_at": 1791870943.2244415
+        },
+        {
+          "event_id": 2,
+          "event_type": "status",
+          "payload": {
+            "status": "running"
+          },
+          "created_at": 1791870943.2324495
+        },
+        {
+          "event_id": 3,
+          "event_type": "status",
+          "payload": {
+            "certificate_id": "2ae23259e95f86e79c3ddbff775063d89519b8bbb64e0f5c07014148da5691a0",
+            "status": "physically_valid"
+          },
+          "created_at": 1791870943.463461
+        }
+      ]
+    },
+    {
+      "node_id": "4ed70118e9be4d39",
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "task_hash": "cdc23fbd09b73c4bbe84bcf2bc147f7601b329baf6ff0efdac4bfbca7df5573b",
+      "action": {
+        "action_type": "run_optimizer",
+        "parameters": {
+          "experiment_id": "opt_mean_r_min",
+          "optimizer_id": "gradient_thickness"
+        },
+        "rationale": "",
+        "proposed_by": "deterministic_policy"
+      },
+      "created_at": 1791870943.4745307,
+      "parent_ids": [],
+      "status": "candidate",
+      "history": [
+        {
+          "event_id": 4,
+          "event_type": "status",
+          "payload": {
+            "status": "proposed"
+          },
+          "created_at": 1791870943.4745307
+        },
+        {
+          "event_id": 5,
+          "event_type": "status",
+          "payload": {
+            "status": "running"
+          },
+          "created_at": 1791870943.4765296
+        },
+        {
+          "event_id": 6,
+          "event_type": "status",
+          "payload": {
+            "status": "candidate"
+          },
+          "created_at": 1791870948.2536976
+        }
+      ]
+    },
+    {
+      "node_id": "370a289b7229424e",
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "task_hash": "db8b7a6beb6e551df5f1cea85b20658b9c3c0bee27412033801486df915f7ee8",
+      "action": {
+        "action_type": "run_reference_solver",
+        "parameters": {
+          "experiment_id": "opt_mean_r_min",
+          "candidate_id": "opt_mean_r_min__gradient_thickness__01"
+        },
+        "rationale": "",
+        "proposed_by": "deterministic_policy"
+      },
+      "created_at": 1791870948.2816968,
+      "parent_ids": [
+        "591ecb6c9f934ddf"
+      ],
+      "status": "running",
+      "history": [
+        {
+          "event_id": 7,
+          "event_type": "status",
+          "payload": {
+            "status": "proposed"
+          },
+          "created_at": 1791870948.2816968
+        },
+        {
+          "event_id": 8,
+          "event_type": "status",
+          "payload": {
+            "status": "running"
+          },
+          "created_at": 1791870948.2846985
+        }
+      ]
+    }
+  ],
+  "article_schema_version": "optical-experiment-graph.article.v1",
+  "article_nodes": []
+}

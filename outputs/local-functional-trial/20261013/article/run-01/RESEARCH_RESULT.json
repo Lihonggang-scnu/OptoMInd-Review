@@ -1,0 +1,71 @@
+{
+  "schema_version": "tmm-research-harness-result.v1",
+  "run_id": "real-ar-two-layer-20261013",
+  "status": "analysis_failed",
+  "stage": "problem_analysis",
+  "question": "Design a planar two-layer antireflection coating on a semi-infinite glass substrate (constant refractive index 1.52, lossless), with air incidence (index 1.0). Use only lossless constant-index SiO2 (n=1.46) and TiO2 (n=2.40), one layer of each in either order. Each layer thickness must be between 40 and 160 nm. At normal incidence with s polarization, minimize the arithmetic mean power reflectance sampled from 450 to 700 nm at 5 nm spacing. A mean reflectance below 0.03 is the stated target. Use deterministic TMM only, with no RCWA, FDFD, learned surrogate or hardware. Allow at most two executed research rounds with one route and at most 64 solver evaluations per round, seed 17. After observing the actual result, choose a justified adjustment or stop. Do not claim the target was met without the spectrum and independent numeric check.",
+  "problem_analysis": {
+    "analysis": null,
+    "model_name": "qwen3.5-plus",
+    "usage": [
+      {
+        "prompt_tokens": 1431,
+        "completion_tokens": 1052,
+        "total_tokens": 2483,
+        "completion_tokens_details": {
+          "text_tokens": 1052
+        },
+        "prompt_tokens_details": {
+          "text_tokens": 1431
+        },
+        "model_name": "qwen3.5-plus",
+        "mock_llm": false,
+        "cost_cny": 0.006194399999999999
+      },
+      {
+        "prompt_tokens": 2563,
+        "completion_tokens": 1057,
+        "total_tokens": 3620,
+        "completion_tokens_details": {
+          "text_tokens": 1057
+        },
+        "prompt_tokens_details": {
+          "text_tokens": 2563
+        },
+        "model_name": "qwen3.5-plus",
+        "mock_llm": false,
+        "cost_cny": 0.007124
+      }
+    ],
+    "validation_warnings": [
+      "explicit wavelength interval 5-5 nm was not preserved"
+    ],
+    "status": "invalid",
+    "attempts": 2
+  },
+  "method_research": {},
+  "strategy_plan": {},
+  "iterations": [],
+  "feedback_history": [],
+  "final_answer": null,
+  "telemetry": {
+    "wall_seconds": 43.80921739991754,
+    "continuation_wall_seconds": 43.80921739991754,
+    "qwen_calls": 2,
+    "qwen_input_tokens": 3994,
+    "qwen_output_tokens": 2109,
+    "estimated_qwen_cost_cny": 0.0133184,
+    "models": [
+      "qwen3.5-plus"
+    ],
+    "forward_evaluations": 0,
+    "optimizer_runs": 0,
+    "method_research_service_totals": {},
+    "performance_targets_used_as_gates": false
+  },
+  "artifacts": [
+    "REQUEST.json",
+    "RESEARCH_EVENTS.jsonl",
+    "PROBLEM_ANALYSIS.json"
+  ]
+}

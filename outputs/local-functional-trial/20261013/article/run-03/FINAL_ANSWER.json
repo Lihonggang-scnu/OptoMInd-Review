@@ -1,0 +1,90 @@
+{
+  "schema_version": "tmm-research-answer.v1",
+  "status": "completed_best_effort_no_verified_candidate",
+  "problem_id": "tmm_problem_cf712123ca1f601b",
+  "problem_interpretation": "Design a planar two-layer antireflection coating on a semi-infinite glass substrate (refractive index 1.52, lossless) with air incidence (refractive index 1.0). The stack must consist of exactly one layer of SiO2 (n=1.46) and one layer of TiO2 (n=2.40) in either order. Each layer thickness is constrained between 40 nm and 160 nm. The objective is to minimize the arithmetic mean power reflectance for s-polarized light at normal incidence, sampled from 450 nm to 700 nm with 5 nm spacing, using deterministic Transfer Matrix Method calculations. A mean reflectance below 0.03 is a soft scoring preference. The optimization allows at most two research rounds with one route and up to 64 solver evaluations per round using seed 17. Results must be validated by spectrum and numeric check before claiming target achievement.",
+  "method_findings": [],
+  "route_summaries": [
+    {
+      "iteration_id": "iteration_01",
+      "route_id": "route_01",
+      "route_title": "Optimization of SiO2-over-TiO2 Two-Layer AR Stack",
+      "route_source": "planned",
+      "scientific_hypothesis": "Placing the lower-index SiO2 layer adjacent to air and the higher-index TiO2 layer adjacent to the glass substrate will yield a local minimum in mean reflectance, potentially satisfying the soft target of <0.03 if the thicknesses are tuned to create destructive interference across the 450-700 nm band.",
+      "run_status": "failed",
+      "physically_valid_candidate_count": 0,
+      "best_target_score": null,
+      "best_robustness_score": null,
+      "failure_categories": [
+        "runtime_environment"
+      ]
+    },
+    {
+      "iteration_id": "iteration_02",
+      "route_id": "route_01",
+      "route_title": "Grid Search Optimization of Air|SiO2|TiO2|Glass Two-Layer AR Coating",
+      "route_source": "planned",
+      "scientific_hypothesis": "Placing the lower-index SiO2 layer adjacent to air and the higher-index TiO2 layer adjacent to the glass substrate will yield a local minimum in mean reflectance, potentially satisfying the soft target of <0.03 if the thicknesses are tuned to create destructive interference across the 450-700 nm band.",
+      "run_status": "failed",
+      "physically_valid_candidate_count": 0,
+      "best_target_score": null,
+      "best_robustness_score": null,
+      "failure_categories": [
+        "runtime_environment"
+      ]
+    }
+  ],
+  "recommended_candidates": [],
+  "failed_or_limited_routes": [
+    {
+      "iteration_id": "iteration_01",
+      "route_id": "route_01",
+      "route_title": "Optimization of SiO2-over-TiO2 Two-Layer AR Stack",
+      "route_source": "planned",
+      "scientific_hypothesis": "Placing the lower-index SiO2 layer adjacent to air and the higher-index TiO2 layer adjacent to the glass substrate will yield a local minimum in mean reflectance, potentially satisfying the soft target of <0.03 if the thicknesses are tuned to create destructive interference across the 450-700 nm band.",
+      "run_status": "failed",
+      "physically_valid_candidate_count": 0,
+      "best_target_score": null,
+      "best_robustness_score": null,
+      "failure_categories": [
+        "runtime_environment"
+      ]
+    },
+    {
+      "iteration_id": "iteration_02",
+      "route_id": "route_01",
+      "route_title": "Grid Search Optimization of Air|SiO2|TiO2|Glass Two-Layer AR Coating",
+      "route_source": "planned",
+      "scientific_hypothesis": "Placing the lower-index SiO2 layer adjacent to air and the higher-index TiO2 layer adjacent to the glass substrate will yield a local minimum in mean reflectance, potentially satisfying the soft target of <0.03 if the thicknesses are tuned to create destructive interference across the 450-700 nm band.",
+      "run_status": "failed",
+      "physically_valid_candidate_count": 0,
+      "best_target_score": null,
+      "best_robustness_score": null,
+      "failure_categories": [
+        "runtime_environment"
+      ]
+    }
+  ],
+  "stop_decision": {
+    "action": "stop_best_effort",
+    "reason": "The bounded research budget ended; verified candidates are preserved.",
+    "observed_improvement": null,
+    "remaining_headroom": null,
+    "preserve_candidate_ids": [],
+    "feedback_for_planner": []
+  },
+  "references": [],
+  "limitations": [
+    "Which layer ordering (SiO2/TiO2 vs TiO2/SiO2) provides the global minimum reflectance under the specific 40-160 nm thickness constraints.",
+    "Whether the soft target of mean reflectance < 0.03 is physically achievable with only two layers of these specific materials.",
+    "Some planned routes produced recorded failures or capability limits; see the iteration artifacts.",
+    "No traceable literature item directly influenced the executed route; the result is theory-guided."
+  ],
+  "artifact_index": [
+    "iterations/iteration_01/COMPILED_TASK.json",
+    "iterations/iteration_01/tmm_run/EXECUTION_ERROR.json",
+    "iterations/iteration_02/COMPILED_TASK.json",
+    "iterations/iteration_02/tmm_run/EXECUTION_ERROR.json"
+  ],
+  "markdown": "# TMM research and design result\n\n## Problem interpretation\n\nDesign a planar two-layer antireflection coating on a semi-infinite glass substrate (refractive index 1.52, lossless) with air incidence (refractive index 1.0). The stack must consist of exactly one layer of SiO2 (n=1.46) and one layer of TiO2 (n=2.40) in either order. Each layer thickness is constrained between 40 nm and 160 nm. The objective is to minimize the arithmetic mean power reflectance for s-polarized light at normal incidence, sampled from 450 nm to 700 nm with 5 nm spacing, using deterministic Transfer Matrix Method calculations. A mean reflectance below 0.03 is a soft scoring preference. The optimization allows at most two research rounds with one route and up to 64 solver evaluations per round using seed 17. Results must be validated by spectrum and numeric check before claiming target achievement.\n\n## Method research\n\n- No reusable literature method was available; planning used explicit optical theory assumptions.\n\n## Routes executed\n\n- **Optimization of SiO2-over-TiO2 Two-Layer AR Stack** — status `failed`, source `planned`, verified candidates 0, best soft score n/a.\n- **Grid Search Optimization of Air|SiO2|TiO2|Glass Two-Layer AR Coating** — status `failed`, source `planned`, verified candidates 0, best soft score n/a.\n\n## Planning-source comparison\n\nThe memory-only control and literature-planned routes are separated by source. Frozen-standard scores are used for a cross-source verdict only when both arms have scoreable representatives; score deltas inside a route are diagnostics.\n- Frozen-standard comparison: `control_or_literature_arm_missing`.\n- `planned`: 1 route(s), 0 with verified candidates, 2 executed round(s).\n\n## Recommended candidate portfolio\n\nNo candidate passed deterministic physics verification.\n\n## Feedback and stopping decision\n\nThe loop stopped with `stop_best_effort`: The bounded research budget ended; verified candidates are preserved.\n\n## Limitations\n\n- Which layer ordering (SiO2/TiO2 vs TiO2/SiO2) provides the global minimum reflectance under the specific 40-160 nm thickness constraints.\n- Whether the soft target of mean reflectance < 0.03 is physically achievable with only two layers of these specific materials.\n- Some planned routes produced recorded failures or capability limits; see the iteration artifacts.\n- No traceable literature item directly influenced the executed route; the result is theory-guided.\n\n## Literature provenance\n\n- No literature reference was used by the executed route.\n"
+}

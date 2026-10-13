@@ -1,0 +1,146 @@
+usage: progressive_review_plan.py [-h] [--preflight | --run] --pool POOL
+                                  --plan PLAN --output-dir OUTPUT_DIR
+                                  [--topic-id TOPIC_ID] [--key-file KEY_FILE]
+                                  [--budget-ledger BUDGET_LEDGER]
+                                  [--budget-limit-cny BUDGET_LIMIT_CNY]
+                                  [--deep-read-limit DEEP_READ_LIMIT]
+                                  [--chapter-workers CHAPTER_WORKERS]
+                                  [--reader-workers READER_WORKERS]
+                                  [--chapter-model CHAPTER_MODEL]
+                                  [--timeout-seconds TIMEOUT_SECONDS]
+                                  [--thinking-budget THINKING_BUDGET]
+                                  [--output-tokens OUTPUT_TOKENS]
+                                  [--reader-thinking-budget READER_THINKING_BUDGET]
+                                  [--reader-output-tokens READER_OUTPUT_TOKENS]
+                                  [--tokenizer TOKENIZER]
+                                  [--prior-reading PRIOR_READING]
+                                  [--local-material-index LOCAL_MATERIAL_INDEX]
+                                  [--no-external-supplement]
+                                  [--stop-after {level1,level2}] [--resume]
+                                  [--outline-strengthening | --no-outline-strengthening]
+                                  [--outline-strengthening-output OUTLINE_STRENGTHENING_OUTPUT]
+                                  [--retry-unresolved]
+                                  [--editorial-feedback EDITORIAL_FEEDBACK]
+                                  [--planning-revision | --no-planning-revision]
+                                  [--recover-chapters-from RECOVER_CHAPTERS_FROM]
+                                  [--recover-chapter RECOVER_CHAPTER]
+                                  [--material-parser-mode {fast_native,docling_basic}]
+                                  [--cache-root CACHE_ROOT]
+                                  [--deadline-seconds DEADLINE_SECONDS]
+                                  [--network-workers NETWORK_WORKERS]
+                                  [--request-timeout-seconds REQUEST_TIMEOUT_SECONDS]
+                                  [--max-retries MAX_RETRIES]
+                                  [--disable-rescue]
+                                  [--rescue-max-candidates RESCUE_MAX_CANDIDATES]
+                                  [--rescue-max-search-calls RESCUE_MAX_SEARCH_CALLS]
+                                  [--rescue-max-extract-calls RESCUE_MAX_EXTRACT_CALLS]
+                                  [--refresh]
+                                  [--docling-document-json DOCLING_DOCUMENT_JSON]
+                                  [--docling-run-json DOCLING_RUN_JSON]
+                                  [--docling-cli-config DOCLING_CLI_CONFIG]
+                                  [--docling-batch-index DOCLING_BATCH_INDEX]
+                                  [--docling-cache-root DOCLING_CACHE_ROOT]
+                                  [--docling-max-processes DOCLING_MAX_PROCESSES]
+                                  [--docling-crop-scale DOCLING_CROP_SCALE]
+                                  [--account-ledger ACCOUNT_LEDGER]
+                                  [--account-budget-limit ACCOUNT_BUDGET_LIMIT]
+                                  [--account-mapping-dir ACCOUNT_MAPPING_DIR]
+                                  [--key-index KEY_INDEX]
+                                  [--local-formula-config LOCAL_FORMULA_CONFIG]
+                                  [--local-formula-cache-root LOCAL_FORMULA_CACHE_ROOT]
+
+全量 B → 两级备料与规划 → 可写细纲与章节素材包
+
+options:
+  -h, --help            show this help message and exit
+  --preflight           只读预检，不调用模型或检索
+  --run                 运行真实规划与按需工具调用
+  --pool POOL
+  --plan PLAN
+  --output-dir OUTPUT_DIR
+  --topic-id TOPIC_ID
+  --key-file KEY_FILE
+  --budget-ledger BUDGET_LEDGER
+  --budget-limit-cny BUDGET_LIMIT_CNY
+  --deep-read-limit DEEP_READ_LIMIT
+  --chapter-workers CHAPTER_WORKERS
+  --reader-workers READER_WORKERS
+  --chapter-model CHAPTER_MODEL
+  --timeout-seconds TIMEOUT_SECONDS
+  --thinking-budget THINKING_BUDGET
+                        Thinking allowance for every planner stage; 0 disables
+                        thinking
+  --output-tokens OUTPUT_TOKENS
+                        Answer allowance for every planner stage
+  --reader-thinking-budget READER_THINKING_BUDGET
+  --reader-output-tokens READER_OUTPUT_TOKENS
+  --tokenizer TOKENIZER
+  --prior-reading PRIOR_READING
+  --local-material-index LOCAL_MATERIAL_INDEX
+                        SQLite index built by planning_material_search;
+                        enables the local-first triage
+  --no-external-supplement
+                        Triage locally and only emit external requests; never
+                        contact a provider
+  --stop-after {level1,level2}
+  --resume
+  --outline-strengthening, --no-outline-strengthening
+                        完整规划默认后置任务簇加强；--no-outline-strengthening
+                        显式关闭，阶段停点与预检不会运行
+  --outline-strengthening-output OUTLINE_STRENGTHENING_OUTPUT
+                        加强恢复目录；默认是规划输出同级的 <output-dir>.outline_strengthening
+  --retry-unresolved    明确重试加强阶段保存的无效回答一次；保留已成功阶段、原尝试与预算记录
+  --editorial-feedback EDITORIAL_FEEDBACK
+                        可选的内容编辑意见 JSON，交给已有审阅与章节返修环节
+  --planning-revision, --no-planning-revision
+                        默认启用 M1 材料导航与本地按需回填；--no-planning-revision
+                        使用旧编排，但仍提供完整 A/B 材料
+  --recover-chapters-from RECOVER_CHAPTERS_FROM
+                        从明确指定的历史输出根恢复兼容的成功章节 owner plan；不扫描历史
+  --recover-chapter RECOVER_CHAPTER
+                        限制恢复的章节 ID，可重复传入；省略则按兼容性逐章判断
+  --material-parser-mode {fast_native,docling_basic}
+                        Use resident Docling basic parsing only when
+                        explicitly configured
+  --cache-root CACHE_ROOT
+  --deadline-seconds DEADLINE_SECONDS
+  --network-workers NETWORK_WORKERS
+  --request-timeout-seconds REQUEST_TIMEOUT_SECONDS
+  --max-retries MAX_RETRIES
+  --disable-rescue      disable bounded public full-text rescue
+  --rescue-max-candidates RESCUE_MAX_CANDIDATES
+                        maximum exact public URLs considered per paper
+  --rescue-max-search-calls RESCUE_MAX_SEARCH_CALLS
+                        bounded public search calls per paper
+  --rescue-max-extract-calls RESCUE_MAX_EXTRACT_CALLS
+                        bounded reader extraction calls per paper
+  --refresh             ignore validated cache entries and publish a new
+                        version
+  --docling-document-json DOCLING_DOCUMENT_JSON
+                        opt-in saved native DoclingDocument JSON
+  --docling-run-json DOCLING_RUN_JSON
+                        matching saved run.json with PDF hash, packages and
+                        pipeline options
+  --docling-cli-config DOCLING_CLI_CONFIG
+                        explicit CLI configuration JSON; command must emit
+                        document.json and run.json
+  --docling-batch-index DOCLING_BATCH_INDEX
+                        completed resident batch index; import native
+                        document/run by PDF hash without a GPU process
+  --docling-cache-root DOCLING_CACHE_ROOT
+                        isolated Docling cache; defaults to acquisition
+                        cache/docling
+  --docling-max-processes DOCLING_MAX_PROCESSES
+                        shared adapter local process/cache construction bound
+                        (initial default 1; maximum 8)
+  --docling-crop-scale DOCLING_CROP_SCALE
+                        original-PDF crop render scale
+  --account-ledger ACCOUNT_LEDGER
+                        paired shared account ledger
+  --account-budget-limit ACCOUNT_BUDGET_LIMIT
+  --account-mapping-dir ACCOUNT_MAPPING_DIR
+  --key-index KEY_INDEX
+  --local-formula-config LOCAL_FORMULA_CONFIG
+                        explicit offline CodeFormulaV2 batch profile; enhance
+                        a selected paper before directed reading
+  --local-formula-cache-root LOCAL_FORMULA_CACHE_ROOT

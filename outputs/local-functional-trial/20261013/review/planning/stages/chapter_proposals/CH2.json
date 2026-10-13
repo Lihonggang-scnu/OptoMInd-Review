@@ -1,0 +1,114 @@
+{
+  "cache_contract": "b87a8452296609313fc39f3d37e61c8a4d2897bf60b6d8bb4840ea380b123262",
+  "response": {
+    "chapter_proposals": [
+      {
+        "chapter_id": "CH2",
+        "directed_reads": [
+          {
+            "focus": "提取关于共振结构在斜入射下效率下降的具体机制描述（反对称模式激发），以及波导型与共振型元原子在色散调控能力上的对比细节。关注其对‘不公平比较’的论述，以便在后文评估中区分机制缺陷与评估标准问题。",
+            "source_handle": "P0001"
+          },
+          {
+            "focus": "尽管全文解析失败，仍需利用路由摘要中保留的定性结论：确认‘大 NA 与大 FOV 对带宽的双重压缩’逻辑，以及‘有限孔径下群延迟需求非单调变化’的反直觉特性。严禁编造具体公式或数值，仅将其作为解释 CH2 中设计复杂性的理论背景支撑。",
+            "source_handle": "P0002"
+          }
+        ],
+        "excluded_source_handles": [],
+        "purpose": "深入剖析现有超透镜设计如何通过调控群延迟（Group Delay）来应对 CH1 所述的物理极限，重点揭示这些补偿机制在斜入射或宽带条件下引发的效率下降、模式耦合及制造容差敏感性等内在代价。",
+        "scope": "本章聚焦于‘机制 - 代价’的因果链条。涵盖波导型与共振型元原子的色散调控原理对比；宽视场成像所需的复杂群延迟空间分布及其实现难点；宽带相位匹配对设计自由度的压缩效应；以及实际制造中材料色散与非理想耦合对理论性能的偏离。不展开具体的数学公式推导（因 P0002 数据缺失），而是基于物理图像和 P0001 的机制分类进行定性论证。",
+        "substantive_threads": [
+          {
+            "argument": "阐述两种主流补偿策略的物理本质差异。波导型（Propagation Phase）依赖结构高度变化积累相位，其色散特性主要由材料折射率决定，相对平滑但调控范围受限；几何相位（Geometric Phase）通过旋转各向异性结构引入与波长无关的相位突变，虽能灵活构建相位剖面，但本质上仅作用于圆偏振分量，且难以独立调控群延迟而不影响传输效率。结合 P0001 的观点，指出单一机制难以同时满足宽带与大视场的双重苛刻要求，混合机制往往引入更复杂的串扰。",
+            "conditions": "区分元原子类型（dielectric waveguide vs. resonant antenna）及其对偏振的依赖性。",
+            "evidence_base": [
+              "P0001"
+            ],
+            "theme": "色散调控的双路径：传播延迟与几何相位的机制对比"
+          },
+          {
+            "argument": "基于 P0002 的理论框架（定性引用），论述为实现无像差宽视场成像，透镜边缘需提供的群延迟分布呈现非直观的空间复杂性（如在有限孔径下，最大群延迟需求未必出现在最大入射角处）。重点分析 P0001 指出的关键失效机制：在斜入射条件下，共振型元原子易激发反对称局域模式（antisymmetric localized modes），导致能量无法有效耦合至目标衍射级次，从而造成显著的离轴效率下降。这表明，试图通过共振增强来补偿色散，往往以牺牲视场均匀性为代价。",
+            "conditions": "严格限定于单界面超透镜；强调斜入射角度与共振模式激发的关联性；明确 P0002 的具体分布函数因解析失败不可用，仅引用其‘非直观性’和‘饱和趋势’结论。",
+            "evidence_base": [
+              "P0001",
+              "P0002"
+            ],
+            "theme": "宽视场下的群延迟分布困境与离轴效率损耗"
+          },
+          {
+            "argument": "分析在追求更宽工作波段时，不同波长下的相位匹配条件相互制约，导致可用于优化效率的设计自由度急剧减少。为了在宽谱内维持恒定的焦距，元原子必须在多个离散波长点同时满足特定的相位和群延迟值，这迫使设计者选择高 Q 值共振或复杂的多层结构，进而引入了窄带响应特性或更高的吸收/散射损耗。论证这种‘带宽 - 效率’的权衡是色散工程的内禀属性，而非单纯的工艺缺陷。",
+            "conditions": "关联 CH1 中提到的 sinc^2 效率普遍律，说明宽带操作如何加剧这一衰减效应。",
+            "evidence_base": [
+              "P0001"
+            ],
+            "theme": "带宽扩展中的自由度压缩与效率权衡"
+          },
+          {
+            "argument": "指出 P0002 所描述的理想群延迟分布在现实中被进一步扭曲。实际纳米结构存在邻近效应（proximity effects）和复杂的近场耦合，导致单个元原子的响应偏离孤立模拟结果。此外，构成元原子的材料本身在可见光波段的色散（尤其是靠近带边时）会引入额外的非线性相位误差。这些因素共同作用，使得实际器件的群延迟分布偏离理论最优解，加剧了聚焦效率的损失和旁瓣能量的上升。",
+            "conditions": "区分‘设计理论限制’与‘制造/材料引入的额外限制’；强调这是导致实验性能低于 P0002 理论上限的重要原因之一。",
+            "evidence_base": [
+              "P0001",
+              "P0002"
+            ],
+            "theme": "理论理想与实际制造的偏差：材料色散与耦合效应"
+          }
+        ],
+        "supplement_requests": [],
+        "title": "设计机制：色散补偿策略及其内在的效率代价",
+        "transition_logic": "本章揭示了即便在理论上设计了完美的群延迟分布，实际物理机制（如模式耦合、材料色散）仍会引入显著的效率代价。这些理论机制的复杂性与内在矛盾，最终必须在实验器件中得到验证。下文（CH3）将转向实证表现，基于实测数据评估当前技术水平与上述物理极限的距离，并审视这些效率权衡在真实器件中的具体表现形式。"
+      }
+    ]
+  },
+  "telemetry": {
+    "call_id": "review-c20385c627aa4a",
+    "cap_pressure": {
+      "answer_tokens": 1346,
+      "completion_tokens": 1346,
+      "diagnostic_only": true,
+      "finish_reason_length": false,
+      "near_limit": false,
+      "near_limits": [],
+      "reasoning_tokens": 0
+    },
+    "complete": true,
+    "effective_request": {
+      "answer_tokens": 8192,
+      "enable_thinking": false,
+      "max_completion_tokens": 8192,
+      "max_tokens": null,
+      "model": "qwen3.5-plus",
+      "response_format": {
+        "type": "json_object"
+      },
+      "thinking_budget": 0,
+      "total_output_tokens": 8192
+    },
+    "elapsed_seconds": 28.75,
+    "finish_reason": "stop",
+    "prompt_estimation": {
+      "framing_margin": 8192,
+      "hosted_token_count_is_approximate": true,
+      "multiplier": 1.12,
+      "tokenizer": "data/tokenizers/qwen3_5_9b/tokenizer.json"
+    },
+    "requested_model": "qwen3.5-plus",
+    "returned_model": "qwen3.5-plus",
+    "runtime_config": {
+      "model": "qwen3.5-plus",
+      "output_tokens": 8192,
+      "thinking": false,
+      "thinking_budget": 0
+    },
+    "usage": {
+      "completion_tokens": 1346,
+      "completion_tokens_details": {
+        "text_tokens": 1346
+      },
+      "prompt_tokens": 4179,
+      "prompt_tokens_details": {
+        "text_tokens": 4179
+      },
+      "total_tokens": 5525
+    }
+  }
+}

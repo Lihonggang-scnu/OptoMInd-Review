@@ -1,0 +1,52 @@
+[
+  {
+    "iteration_id": "iteration_01",
+    "route_id": "route_01",
+    "route_title": "Optimization of TiO2/SiO2/Glass Stack",
+    "compilation_status": "compiled",
+    "compilation_rationale": "The trial physical contract mandates constant-index layers (material=null) for TiO2 and SiO2, overriding the standard registry resolution. The stack is fixed as Air | Layer1(n=2.40) | Layer2(n=1.46) | Glass(n=1.52). Optimization targets mean reflectance minimization over 450-700 nm with specified bounds and seed.",
+    "compilation_errors": [],
+    "run_status": "budget_exhausted",
+    "physically_valid_candidate_count": 0,
+    "best_target_score": null,
+    "best_robustness_score": null,
+    "selected_candidate_ids": [],
+    "failure_categories": [
+      "search_progress"
+    ],
+    "experiment_summaries": [],
+    "candidate_summaries": [],
+    "budget_usage": {
+      "wall_time_seconds": 5.1399999998975545,
+      "forward_evaluations": 168,
+      "optimizer_runs": 1,
+      "qwen_calls": 0,
+      "qwen_input_tokens": 0,
+      "qwen_output_tokens": 0,
+      "qwen_cost_cny": 0.0
+    },
+    "work_dir": "iterations/iteration_01",
+    "task_path": "iterations/iteration_01/COMPILED_TASK.json",
+    "result_path": "iterations/iteration_01/tmm_run/FINAL_RESULT.json"
+  },
+  {
+    "iteration_id": "iteration_02",
+    "route_id": "route_01",
+    "route_title": "Relaxed Bounds Grid-Search for TiO2/SiO2 AR Coating",
+    "compilation_status": "needs_higher_fidelity",
+    "compilation_rationale": "The user requests a deterministic grid search (8x8=64 evaluations) with no iterative refinement. The supported TMM task draft supports gradient-based optimization (Adam/LBFGS) or forward simulation, but does not support discrete exhaustive grid search as an optimizer method. This requires a higher-fidelity execution engine capable of discrete combinatorial sampling.",
+    "compilation_errors": [],
+    "run_status": "not_run",
+    "physically_valid_candidate_count": 0,
+    "best_target_score": null,
+    "best_robustness_score": null,
+    "selected_candidate_ids": [],
+    "failure_categories": [],
+    "experiment_summaries": [],
+    "candidate_summaries": [],
+    "budget_usage": {},
+    "work_dir": "iterations/iteration_02",
+    "task_path": null,
+    "result_path": null
+  }
+]

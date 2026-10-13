@@ -1,0 +1,76 @@
+{
+  "schema_version": "tournament-summary.v1",
+  "recorded_at_utc": "2026-10-13T05:56:38.534406+00:00",
+  "pareto_frontier": [],
+  "primary_recommendation": null,
+  "route_comparison": [
+    {
+      "route_id": "route_01",
+      "source": "planned",
+      "status": "stopped_round_limit",
+      "termination_reason": "reached the per-route cap of 2 executed rounds",
+      "rounds_used": 2,
+      "best_solution": null,
+      "entered_pareto_frontier": false,
+      "design_orientation": {
+        "scientific_hypothesis": "The failure of route_01 was caused by overly restrictive thickness bounds [40, 160] nm preventing the generation of valid initial candidates near the global optimum, rather than physical infeasibility of the design. Expanding the bounds to [20, 200] nm will allow the optimizer to find a valid configuration that minimizes mean reflectance.",
+        "proposed_materials": [
+          "Air (n=1.0)",
+          "TiO2 (n=2.40, lossless)",
+          "SiO2 (n=1.46, lossless)",
+          "Glass (n=1.52, lossless)"
+        ],
+        "proposed_topology": "Air | TiO2 (Layer 1) | SiO2 (Layer 2) | Glass Substrate. Total finite layers: 2."
+      }
+    }
+  ],
+  "dominated_but_retained": [],
+  "eliminated_routes": [],
+  "negative_results": [
+    {
+      "kind": "zero_valid_candidates",
+      "route_id": "route_01",
+      "iteration_id": "iteration_01",
+      "run_status": "budget_exhausted"
+    },
+    {
+      "kind": "zero_valid_candidates",
+      "route_id": "route_01",
+      "iteration_id": "iteration_02",
+      "run_status": "not_run"
+    }
+  ],
+  "inadmissible_excluded": [],
+  "comparability_note": "Cross-route target-score ordering is INDICATIVE ONLY. Each route normalizes its soft score against its own executable objective contract; the normalized values are not directly comparable between routes (red line 6). This ranking is used solely to pick the primary recommendation INSIDE the Pareto frontier -- it never removes any solution from the frontier, and every frontier member remains part of the delivered portfolio.",
+  "planning_source_comparison": {
+    "schema_version": "planning-source-comparison.v1",
+    "comparison_basis": "Cross-arm performance uses frozen-standard representative scores only. Route-local target-score deltas are within-route diagnostics and are not cross-route rankings.",
+    "frozen_standard_formula": "-mean_reflectance_450_700nm - abs(mean_reflectance_450_700nm - 0.03)",
+    "cross_source_comparison_valid": false,
+    "control_vs_literature_verdict": "control_or_literature_arm_missing",
+    "frozen_score_delta_control_minus_literature": null,
+    "groups": {
+      "planned": {
+        "route_ids": [
+          "route_01"
+        ],
+        "route_count": 1,
+        "routes_with_verified_candidates": 0,
+        "executed_rounds": 2,
+        "route_progress": [
+          {
+            "route_id": "route_01",
+            "source": "planned",
+            "initial_best_target_score": null,
+            "best_target_score": null,
+            "within_route_delta": null,
+            "scored_rounds": 0,
+            "executed_rounds": 2
+          }
+        ],
+        "scoreable_routes_by_frozen_standard": 0,
+        "best_frozen_standard_result": null
+      }
+    }
+  }
+}

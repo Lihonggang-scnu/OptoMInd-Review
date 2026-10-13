@@ -1,0 +1,141 @@
+{
+  "schema_version": "optical-experiment-graph.v1",
+  "run_id": "real-ar-two-layer-20261013.iteration_01",
+  "nodes": [
+    {
+      "node_id": "226b271d257a4b97",
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "task_hash": "57c953cc6bcf72b92b9c25cd6ad4c03bf050721fe0a597af7d14e5f021f16770",
+      "action": {
+        "action_type": "generate_baseline",
+        "parameters": {
+          "experiment_id": "opt_min_r_mean_s_pol_450_700",
+          "mode": "optimize"
+        },
+        "rationale": "",
+        "proposed_by": "deterministic_policy"
+      },
+      "created_at": 1791871929.267171,
+      "parent_ids": [],
+      "status": "physically_valid",
+      "history": [
+        {
+          "event_id": 1,
+          "event_type": "status",
+          "payload": {
+            "status": "proposed"
+          },
+          "created_at": 1791871929.267171
+        },
+        {
+          "event_id": 2,
+          "event_type": "status",
+          "payload": {
+            "status": "running"
+          },
+          "created_at": 1791871929.278171
+        },
+        {
+          "event_id": 3,
+          "event_type": "status",
+          "payload": {
+            "certificate_id": "807628aeaafa2ff051004fd7f7266687c9bba0dbb78c58591b12933e25fa9102",
+            "status": "physically_valid"
+          },
+          "created_at": 1791871929.503507
+        }
+      ]
+    },
+    {
+      "node_id": "db9215a6cea54d69",
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "task_hash": "4f9b2a7dfdc36754732a0fed3e38aff4865b5a22cdc7433146ade20a5014f295",
+      "action": {
+        "action_type": "run_optimizer",
+        "parameters": {
+          "experiment_id": "opt_min_r_mean_s_pol_450_700",
+          "optimizer_id": "gradient_thickness"
+        },
+        "rationale": "",
+        "proposed_by": "deterministic_policy"
+      },
+      "created_at": 1791871929.5135086,
+      "parent_ids": [],
+      "status": "candidate",
+      "history": [
+        {
+          "event_id": 4,
+          "event_type": "status",
+          "payload": {
+            "status": "proposed"
+          },
+          "created_at": 1791871929.5135086
+        },
+        {
+          "event_id": 5,
+          "event_type": "status",
+          "payload": {
+            "status": "running"
+          },
+          "created_at": 1791871929.5165064
+        },
+        {
+          "event_id": 6,
+          "event_type": "status",
+          "payload": {
+            "status": "candidate"
+          },
+          "created_at": 1791871933.9620411
+        }
+      ]
+    },
+    {
+      "node_id": "54a1d6d4e6524f1f",
+      "run_id": "real-ar-two-layer-20261013.iteration_01",
+      "task_hash": "b942de6fa5290e2494f4aaaa463f20e023c717dece0945d316b4f74756b81083",
+      "action": {
+        "action_type": "run_reference_solver",
+        "parameters": {
+          "experiment_id": "opt_min_r_mean_s_pol_450_700",
+          "candidate_id": "opt_min_r_mean_s_pol_450_700__grad__9fbba01872a2"
+        },
+        "rationale": "",
+        "proposed_by": "deterministic_policy"
+      },
+      "created_at": 1791871933.9890409,
+      "parent_ids": [
+        "226b271d257a4b97"
+      ],
+      "status": "physically_valid",
+      "history": [
+        {
+          "event_id": 7,
+          "event_type": "status",
+          "payload": {
+            "status": "proposed"
+          },
+          "created_at": 1791871933.9890409
+        },
+        {
+          "event_id": 8,
+          "event_type": "status",
+          "payload": {
+            "status": "running"
+          },
+          "created_at": 1791871933.9908156
+        },
+        {
+          "event_id": 9,
+          "event_type": "status",
+          "payload": {
+            "certificate_id": "2730cd43e85107bc3905e96df9958ca2e3aac13292bae47f6c57beef7ecaa247",
+            "status": "physically_valid"
+          },
+          "created_at": 1791871934.1028128
+        }
+      ]
+    }
+  ],
+  "article_schema_version": "optical-experiment-graph.article.v1",
+  "article_nodes": []
+}

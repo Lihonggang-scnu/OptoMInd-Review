@@ -1,0 +1,69 @@
+{
+  "schema_version": "tournament-state.v1",
+  "updated_at_utc": "2026-10-13T05:43:02.625887+00:00",
+  "wave": 2,
+  "budget_snapshot": {
+    "iterations_used": 2,
+    "maximum_iterations": 2,
+    "configured_maximum_iterations": 2,
+    "rounds_per_route": 2,
+    "shared_iteration_pool": false,
+    "wall_seconds_elapsed": 173.348
+  },
+  "tracks": [
+    {
+      "route_id": "route_01",
+      "source": "planned",
+      "status": "stopped_round_limit",
+      "termination_reason": "reached the per-route cap of 2 executed rounds",
+      "rounds_used": 2,
+      "score_history": [],
+      "best_candidate_ids": [],
+      "current_route": {
+        "route_id": "route_01",
+        "title": "Grid Search Optimization of Air|SiO2|TiO2|Glass Two-Layer AR Coating",
+        "route_kind": "optimize_existing_stack",
+        "scientific_hypothesis": "Placing the lower-index SiO2 layer adjacent to air and the higher-index TiO2 layer adjacent to the glass substrate will yield a local minimum in mean reflectance, potentially satisfying the soft target of <0.03 if the thicknesses are tuned to create destructive interference across the 450-700 nm band.",
+        "design_principle": "Two-layer quarter-wave-like antireflection design where the intermediate index steps (1.0 -> 1.46 -> 2.40 -> 1.52) reduce Fresnel reflections compared to a single interface, optimized via exhaustive parameter sweep to guarantee finding the global minimum within the bounded domain.",
+        "proposed_materials": [
+          "air (n=1.0)",
+          "SiO2 (n=1.46)",
+          "TiO2 (n=2.40)",
+          "glass (n=1.52)"
+        ],
+        "proposed_topology": "Air | SiO2 (layer 1) | TiO2 (layer 2) | Glass substrate. Total finite layers: 2.",
+        "design_variables": [
+          "thickness_SiO2_nm (bounded 40-160)",
+          "thickness_TiO2_nm (bounded 40-160)"
+        ],
+        "soft_objectives": [
+          "minimize arithmetic mean power reflectance (s-pol, normal incidence) over 450-700 nm",
+          "achieve mean reflectance below 0.03"
+        ],
+        "manufacturing_considerations": [
+          "Layer thickness must remain within 40-160 nm range for both materials",
+          "Exactly one layer of each material specified"
+        ],
+        "evidence_ids": [],
+        "theory_basis": [
+          "Fresnel equations for normal incidence",
+          "Transfer Matrix Method for multilayer interference",
+          "Destructive interference condition for broadband AR coatings"
+        ],
+        "expected_advantages": [
+          "Deterministic grid search eliminates optimizer stochastic failure modes",
+          "Explicit 2-layer topology resolves the previous compilation mismatch",
+          "SiO2-first ordering provides a smoother index transition from air"
+        ],
+        "known_risks": [
+          "The discrete material indices (1.46, 2.40) may not perfectly match the ideal theoretical indices for a two-layer AR on glass (n=1.52), limiting the minimum achievable reflectance",
+          "Thickness bounds (40-160 nm) may exclude the optimal quarter-wave thicknesses for certain wavelengths in the band"
+        ],
+        "execution_request_english": "Execute a deterministic Transfer Matrix Method optimization for a planar stack with the following fixed topology: Incident Medium (Air, n=1.0) | Layer 1 (SiO2, n=1.46, lossless) | Layer 2 (TiO2, n=2.40, lossless) | Substrate (Glass, n=1.52, lossless). The stack must contain exactly these two finite layers. Optimize the thickness of Layer 1 and Layer 2, both constrained between 40 nm and 160 nm. The objective is to minimize the arithmetic mean power reflectance for s-polarized light at normal incidence (0 degrees), sampled from 450 nm to 700 nm in 5 nm steps. Use a deterministic grid search or bounded global optimizer with seed 17, allowing up to 64 solver evaluations. Report the optimal thickness pair, the full reflectance spectrum, and the calculated mean reflectance. Canonical user controls: incidence angles 0 degrees. polarization s. wavelength intervals 450-700 nm. soft objectives: minimized arithmetic mean power reflectance in the 450-700 nm band; mean reflectance below 0.03 as a soft scoring preference. behaviors to suppress or avoid: high reflection in the 450-700 nm band. manufacturing constraints: layer thickness bounds: 40 nm to 160 nm; exactly one layer of SiO2 and one layer of TiO2.",
+        "priority": 1,
+        "parent_route_id": "route_01",
+        "revision_reason": "Previous route failed with 0 valid candidates due to runtime/topology mismatch. This route enforces the exact 2-layer topology requested by the user and switches to a deterministic grid search to ensure valid candidate generation."
+      }
+    }
+  ]
+}

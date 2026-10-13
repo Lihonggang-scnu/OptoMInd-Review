@@ -1,0 +1,47 @@
+{
+  "content": "{\n  \"metrics\": [\n    {\n      \"metric\": \"mean_reflectance\",\n      \"sense\": \"minimize\",\n      \"wavelength_unit\": \"nm\",\n      \"region\": {\n        \"wavelength_nm\": [450, 700],\n        \"angle_deg\": 0,\n        \"polarization\": \"s\"\n      },\n      \"target\": 0.03,\n      \"rationale\": \"The user explicitly requests to 'minimize the arithmetic mean power reflectance sampled from 450 to 700 nm' and states 'A mean reflectance below 0.03 is the stated target'. The metric uses 'minimize' for the optimization direction and includes the 'target' because the sense is effectively treated as a match to the threshold in scoring contexts where a specific value is desired, though strictly the prompt says minimize with a target constraint. However, looking at the allowed senses for 'mean_reflectance', 'match' is allowed and requires a target. Since the user has a specific numeric goal (0.03) that defines success, using 'match' with target 0.03 is the most faithful representation of 'below 0.03 is the stated target' combined with minimization. Wait, the prompt says 'minimize... A mean reflectance below 0.03 is the stated target'. If I use 'minimize', the target field is omitted. If I use 'match', the target is required. The user wants to minimize, but has a specific pass/fail criterion. Usually, 'minimize' is the correct sense for 'make it as low as possible', and the 0.03 is a constraint. However, the instructions say 'match means closest to a stated number is best'. The user says 'below 0.03'. Minimizing gets you closer to 0, which is below 0.03. 'Match 0.03' would penalize going below 0.03 if it goes too far? No, usually match implies a specific sweet spot. The request says 'minimize'. I will stick to 'minimize' and omit the target, as 'minimize' captures 'as low as possible', and the 0.03 is a success criterion, not necessarily the ideal value (0 is better than 0.03). Re-reading the rules: 'target (number, optional): Required when sense is \"                                                                                                                                                                                                                                                                                                                                                         \n\n    }\n  ],\n  \"rationale\": \"The selection contains exactly one metric because the user's request focuses on a single objective: minimizing the average reflectance over a specific band. The metric 'mean_reflectance' directly corresponds to 'arithmetic mean power reflectance'. The region is set to [450, 700] nm as explicitly requested ('sampled from 450 to 700 nm'). The channel is restricted to normal incidence (0 degrees) and 's' polarization as specified ('At normal incidence with s polarization'). The sense is 'minimize' because the user asks to 'minimize' this value. The target of 0.03 mentioned in the text is a success threshold, not necessarily the optimal value (which would be 0), so 'minimize' is the correct mathematical sense for the optimizer; including it as a 'match' target would incorrectly imply that 0.03 is the ideal value rather than an upper bound. No other metrics are needed as there are no competing requirements (e.g., high transmission in another band or angular robustness) mentioned.\"\n}",
+  "raw_response": "{\"choices\":[{\"message\":{\"content\":\"{\\n  \\\"metrics\\\": [\\n    {\\n      \\\"metric\\\": \\\"mean_reflectance\\\",\\n      \\\"sense\\\": \\\"minimize\\\",\\n      \\\"wavelength_unit\\\": \\\"nm\\\",\\n      \\\"region\\\": {\\n        \\\"wavelength_nm\\\": [450, 700],\\n        \\\"angle_deg\\\": 0,\\n        \\\"polarization\\\": \\\"s\\\"\\n      },\\n      \\\"target\\\": 0.03,\\n      \\\"rationale\\\": \\\"The user explicitly requests to 'minimize the arithmetic mean power reflectance sampled from 450 to 700 nm' and states 'A mean reflectance below 0.03 is the stated target'. The metric uses 'minimize' for the optimization direction and includes the 'target' because the sense is effectively treated as a match to the threshold in scoring contexts where a specific value is desired, though strictly the prompt says minimize with a target constraint. However, looking at the allowed senses for 'mean_reflectance', 'match' is allowed and requires a target. Since the user has a specific numeric goal (0.03) that defines success, using 'match' with target 0.03 is the most faithful representation of 'below 0.03 is the stated target' combined with minimization. Wait, the prompt says 'minimize... A mean reflectance below 0.03 is the stated target'. If I use 'minimize', the target field is omitted. If I use 'match', the target is required. The user wants to minimize, but has a specific pass/fail criterion. Usually, 'minimize' is the correct sense for 'make it as low as possible', and the 0.03 is a constraint. However, the instructions say 'match means closest to a stated number is best'. The user says 'below 0.03'. Minimizing gets you closer to 0, which is below 0.03. 'Match 0.03' would penalize going below 0.03 if it goes too far? No, usually match implies a specific sweet spot. The request says 'minimize'. I will stick to 'minimize' and omit the target, as 'minimize' captures 'as low as possible', and the 0.03 is a success criterion, not necessarily the ideal value (0 is better than 0.03). Re-reading the rules: 'target (number, optional): Required when sense is \\\"                                                                                                                                                                                                                                                                                                                                                         \\n\\n    }\\n  ],\\n  \\\"rationale\\\": \\\"The selection contains exactly one metric because the user's request focuses on a single objective: minimizing the average reflectance over a specific band. The metric 'mean_reflectance' directly corresponds to 'arithmetic mean power reflectance'. The region is set to [450, 700] nm as explicitly requested ('sampled from 450 to 700 nm'). The channel is restricted to normal incidence (0 degrees) and 's' polarization as specified ('At normal incidence with s polarization'). The sense is 'minimize' because the user asks to 'minimize' this value. The target of 0.03 mentioned in the text is a success threshold, not necessarily the optimal value (which would be 0), so 'minimize' is the correct mathematical sense for the optimizer; including it as a 'match' target would incorrectly imply that 0.03 is the ideal value rather than an upper bound. No other metrics are needed as there are no competing requirements (e.g., high transmission in another band or angular robustness) mentioned.\\\"\\n}\",\"role\":\"assistant\"},\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null}],\"object\":\"chat.completion\",\"usage\":{\"prompt_tokens\":3540,\"completion_tokens\":768,\"total_tokens\":4308,\"completion_tokens_details\":{\"text_tokens\":768},\"prompt_tokens_details\":{\"text_tokens\":3540}},\"created\":1791870048,\"system_fingerprint\":null,\"model\":\"qwen3.5-plus\",\"id\":\"chatcmpl-1a9ba196-845b-9842-8caf-8cc9f8debb0e\"}",
+  "raw_response_sha256": "688a1398e2cea1aa5993161d2e5b5ddc4e8c314f5ed157080ab3024681c1412e",
+  "requested_model": "qwen3.5-plus",
+  "returned_model": "qwen3.5-plus",
+  "finish_reason": "stop",
+  "complete": true,
+  "request_id": "chatcmpl-1a9ba196-845b-9842-8caf-8cc9f8debb0e",
+  "usage": {
+    "prompt_tokens": 3540,
+    "completion_tokens": 768,
+    "total_tokens": 4308,
+    "completion_tokens_details": {
+      "text_tokens": 768
+    },
+    "prompt_tokens_details": {
+      "text_tokens": 3540
+    }
+  },
+  "status_code": 200,
+  "call_id": "article-cbef2416bd304b",
+  "attempt": 1,
+  "key_index": 0,
+  "elapsed_seconds": 16.156999999890104,
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "enable_thinking": false,
+    "thinking_budget": 0,
+    "answer_tokens": 4000,
+    "total_output_tokens": 4000,
+    "max_completion_tokens": 4000,
+    "max_tokens": null,
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "cap_pressure": {
+    "near_limit": false,
+    "near_limits": [],
+    "completion_tokens": 768,
+    "reasoning_tokens": 0,
+    "answer_tokens": 768,
+    "finish_reason_length": false,
+    "diagnostic_only": true
+  }
+}
