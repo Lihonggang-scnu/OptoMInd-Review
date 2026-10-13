@@ -1,0 +1,36 @@
+{
+  "at": "2026-10-13T17:39:09.430398+00:00",
+  "reviewer": "root",
+  "source_commit": "f62ebf48154bdb5b91162963cb0c76d8118b8aa6",
+  "gate": "def8a576efaa9d2b3909817a9aea220763c467386c704e63440b01bb812ab645",
+  "request_sha256": "d8495e772ec631e1fdaa7ed2fbef05933c8861600a0986695ab075cafd193a63",
+  "response_sha256": "9c4ddb9ace4e8bab6fd50d458153e0a444f6d892fe8ea95000d901b2e14c5eda",
+  "entire_response_read": true,
+  "source_tables_1_through_4_read": true,
+  "decision": "approve_useful_material_with_recorded_scientific_error",
+  "accepted_core": "OPM eta/sqrt(T) and T=eta simplification sqrt(eta) times Strehl are now both source-faithful; EOPM equations and most comparisons are usable. Raw input and source remain available.",
+  "remaining_scientific_errors": [
+    {
+      "location": "Banerji example Design3 AML OPM",
+      "observed": "Response uses0.51, but Table2 has blank there;0.51 belongs to Design2 CDL. Overview also overgeneralizes all designs and labels a midIR design as visible.",
+      "treatment": "record, preserve raw, no hand-edited model artifact and no further paid retry for this local scientific slip"
+    }
+  ],
+  "acceptance_reason": "User explicitly allows limited LLM scientific errors; requested metric definitions and several concrete comparisons are useful. Formula display seam is corrected. Root judges this isolated table attribution error does not justify blocking entire planning or repeatedly buying the same paper. No claim of error-free scientific extraction.",
+  "delegate_advice": "Delegated Luna advised hold/reject due that table cell. Root read source table and response independently; overrides under accepted tolerance, not attributed to Luna.",
+  "elapsed_seconds": 50.95300000021234,
+  "usage": {
+    "completion_tokens": 5016,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3182,
+      "text_tokens": 5016
+    },
+    "prompt_tokens": 72234,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 72234
+    },
+    "total_tokens": 77250
+  },
+  "manual_scientific_answer_injected": false
+}
