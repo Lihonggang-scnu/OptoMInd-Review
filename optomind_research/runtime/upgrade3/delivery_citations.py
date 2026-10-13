@@ -393,13 +393,13 @@ def update_cross_references(
 # ---------------------------------------------------------------------------
 
 
-def render_references_section(citation_map: Mapping[str, Any]) -> str:
+def render_references_section(citation_map: Mapping[str, Any], *, language: str = "zh") -> str:
     """The numbered reference list generated from the ONE final map."""
 
-    lines = ["## 参考文献", ""]
+    lines = ["## References" if language == "en" else "## 参考文献", ""]
     for ref in citation_map["references"]:
         line = (f"[{ref['reference_number']}] {ref['title']}"
-                + (f"（{ref['year']}）" if ref["year"] else ""))
+                + ((f" ({ref['year']})" if language == "en" else f"（{ref['year']}）") if ref["year"] else ""))
         if ref["doi"]:
             line += f". DOI: {ref['doi']}"
         lines.append(line)
@@ -407,16 +407,16 @@ def render_references_section(citation_map: Mapping[str, Any]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def replace_references_section(reader_text: str, citation_map: Mapping[str, Any]) -> tuple[str, bool]:
+def replace_references_section(reader_text: str, citation_map: Mapping[str, Any], *, language: str = "zh") -> tuple[str, bool]:
     """Swap the old handle-form reference section for the numbered one.
 
     Returns ``(new_text, replaced)``; without an existing section the
     numbered list is appended at the end.
     """
 
-    block = render_references_section(citation_map)
+    block = render_references_section(citation_map, language=language)
     pattern = re.compile(
-        r"^#{2,3}\s+参考文献[^\n]*\n(?:(?!^#{2,3}\s).)*",
+        r"^#{2,3}\s+(?:参考文献|References)[^\n]*\n(?:(?!^#{2,3}\s).)*",
         re.MULTILINE | re.DOTALL,
     )
     if pattern.search(reader_text):
@@ -437,6 +437,7 @@ def run_figures_citations_stage(
     figure_assets: Sequence[Mapping[str, Any]] = (),
     table_moves: Mapping[int, int] | None = None,
     figure_moves: Mapping[int, int] | None = None,
+    language: str = "zh",
 ) -> dict[str, Any]:
     """Work-order 04 stage over the FINAL manuscript (03 output).
 
@@ -471,7 +472,7 @@ def run_figures_citations_stage(
     citation_map = build_delivery_citation_map(
         final_handle_draft=figure_text, identity_catalogs=identity_catalogs)
     reader_text, _mapped, residual = render_reader_citations(figure_text, citation_map)
-    reader_text, references_replaced = replace_references_section(reader_text, citation_map)
+    reader_text, references_replaced = replace_references_section(reader_text, citation_map, language=language)
 
     handles_path = out_dir / "MANUSCRIPT_HANDLES.md"
     handles_path.write_text(figure_text, encoding="utf-8", newline="\n")

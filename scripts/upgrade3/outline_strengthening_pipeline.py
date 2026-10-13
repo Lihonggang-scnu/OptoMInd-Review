@@ -23,6 +23,7 @@ from scripts.upgrade3 import outline_strengthening as cli
 from optomind_research.runtime.upgrade3 import outline_selection as selection
 from optomind_research.runtime.upgrade3 import outline_strengthening as strengthening
 from optomind_research.runtime.upgrade3 import progressive_review_plan as planning
+from optomind_research.runtime.upgrade3.plan_handoff import SCHEMA as HANDOFF_SCHEMA, file_hash
 
 
 def _dump(path: Path, value: Any) -> None:
@@ -106,10 +107,13 @@ def export_complete_plan(base_plan: Mapping[str, Any], packets: Mapping[str, Map
     plan['outline_strengthening_handoff'] = dict(provenance)
     _dump(target / 'DETAILED_REVIEW_PLAN.json', plan)
     _dump(target / 'HANDOFF_MANIFEST.json', {**dict(provenance), 'revision': revision,
+            'schema_version': HANDOFF_SCHEMA, 'plan_sha256': _hash(plan),
             'packet_root': str(target.resolve()), 'chapter_ids': list(packets),
             'packet_sha256': {key: _hash(value) for key, value in packets.items()}})
     if publish:
-        _dump(output / 'CURRENT_PLAN.json', {'packet_root': str(target.resolve()), 'revision': revision,
+        _dump(output / 'CURRENT_PLAN.json', {'schema_version': HANDOFF_SCHEMA,
+                                            'manifest_sha256': file_hash(target / 'HANDOFF_MANIFEST.json'),
+                                            'packet_root': str(target.resolve()), 'revision': revision,
                                             'manifest': str((target / 'HANDOFF_MANIFEST.json').resolve())})
     return target
 

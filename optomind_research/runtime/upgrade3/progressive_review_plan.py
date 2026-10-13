@@ -830,6 +830,9 @@ def load_planning_pool(path: str | Path) -> list[dict[str, Any]]:
                 if not isinstance(raw, Mapping):
                     raise ProgressivePlanError(f"pool_row_not_object:{line_number}")
                 row = dict(raw)
+                if row.get("schema_version") == "planning_pool.v2":
+                    from .planning_pool_adapter import validate_pool_row
+                    row = validate_pool_row(row, root=source.parent)
                 paper_id = _canonical_paper_id(row)
                 if not paper_id:
                     raise ProgressivePlanError(f"pool_paper_id_missing:{line_number}")
@@ -7301,6 +7304,11 @@ def _snapshot_for_candidate(candidate: Mapping[str, Any]) -> Path | None:
     material = card.get("material") if isinstance(card.get("material"), Mapping) else {}
     desired_id = _text(material.get("snapshot_id") or card.get("snapshot_id"))
     paper_id = _text(candidate.get("_paper_id") or _canonical_paper_id(candidate))
+    if candidate.get("snapshot_dir"):
+        snapshot = Path(candidate["snapshot_dir"])
+        if snapshot.is_dir() and _snapshot_id(snapshot) and (not desired_id or _snapshot_id(snapshot) == desired_id):
+            return snapshot.resolve()
+        raise ProgressivePlanError("explicit_snapshot_identity_mismatch")
     for parent in [card_path.parent, *card_path.parents]:
         source_unit_path = parent / "SOURCE_UNIT.json"
         if source_unit_path.is_file():
@@ -7312,7 +7320,7 @@ def _snapshot_for_candidate(candidate: Mapping[str, Any]) -> Path | None:
                 snapshot = Path(str(unit.get("snapshot_path") or ""))
                 if not snapshot.is_absolute():
                     snapshot = source_unit_path.parent / snapshot
-                if snapshot.is_dir() and (not desired_id or _snapshot_id(snapshot) in {"", desired_id}):
+                if snapshot.is_dir() and (not desired_id or _snapshot_id(snapshot) == desired_id):
                     return snapshot.resolve()
         batch_path = parent / "BATCH_STATE.json"
         if batch_path.is_file():
@@ -7333,14 +7341,14 @@ def _snapshot_for_candidate(candidate: Mapping[str, Any]) -> Path | None:
                     if not snapshot.is_dir():
                         continue
                     snapshot_id = _snapshot_id(snapshot)
-                    if desired_id and snapshot_id and snapshot_id != desired_id:
+                    if not snapshot_id or (desired_id and snapshot_id != desired_id):
                         continue
                     return snapshot.resolve()
     return None
 
 
 def _snapshot_id(snapshot_dir: Path) -> str:
-    for name in ("manifest.json", "SNAPSHOT_MANIFEST.json", "snapshot.json"):
+    for name in ("DOCUMENT_MANIFEST.json", "manifest.json", "SNAPSHOT_MANIFEST.json", "snapshot.json"):
         path = snapshot_dir / name
         if not path.is_file():
             continue
@@ -7374,7 +7382,7 @@ def _directed_source_state(candidate: Mapping[str, Any]) -> dict[str, Any]:
     snapshot = _snapshot_for_candidate(candidate)
     if snapshot is None:
         return result
-    for name in ("manifest.json", "SNAPSHOT_MANIFEST.json", "snapshot.json"):
+    for name in ("DOCUMENT_MANIFEST.json", "manifest.json", "SNAPSHOT_MANIFEST.json", "snapshot.json"):
         path = snapshot / name
         if path.is_file():
             try:

@@ -48,10 +48,11 @@ def run_manuscript_delivery(*, config, front_back_report, out_dir, stages=None,
     output.mkdir(parents=True, exist_ok=True)
     stages = dict(stages or {})
     r3 = dict(front_back_report.get("runtime_report") or front_back_report)
-    stages["03_front_back"] = r3
+    input_stage = "article_complete_input" if config.get("front_back_mode") == "article_complete" else "03_front_back"
+    stages[input_stage] = r3
     final = Path(str(r3.get("final_manuscript") or ""))
     if (r3.get("status") not in ({"generated", "complete"} if config.get("front_back_mode") == "post_body" else {"generated", "complete", "partial"})) or not final.is_file():
-        return delivery._downstream_report(config, stages, ["03_front_back"])
+        return delivery._downstream_report(config, stages, [input_stage])
     catalogs = config.get("identity_catalogs") or []
     if config.get("front_back_mode") == "post_body":
         from .manuscript_front_back import FrontBackError
@@ -75,24 +76,42 @@ def run_manuscript_delivery(*, config, front_back_report, out_dir, stages=None,
             fixture_responses=checker.get("fixture"), recordings=checker.get("recordings"),
             client_factory=client_factory, run=run, token_counter=token_counter,
             profile=checker_profile(checker.get("profile")), retry_failed=retry_failed,
-            enabled=enabled, max_model_rounds=checker.get("max_model_rounds", 2))
+            enabled=enabled, max_model_rounds=checker.get("max_model_rounds", 2),
+            protected_paragraphs=config.get("scientific_protected_paragraphs"))
     else:
         result = {"stage": "manuscript_checker", "status": "disabled",
             "selected_manuscript": {"path": str(final.resolve()), "sha256": sha256(final),
-                "status": "disabled", "provenance": {"source": "03_front_back", "reason": "checker_explicitly_disabled"}},
+                "status": "disabled", "provenance": {"source": input_stage, "reason": "checker_explicitly_disabled"}},
             "applied": [], "pending": [], "diagnostics": [], "model_calls": 0, "external_requests": 0}
-    if enabled or config.get("front_back_mode") == "post_body":
+    if enabled or config.get("front_back_mode") in {"post_body", "article_complete"}:
         stages["03_manuscript_checker"] = result
     selected = result.get("selected_manuscript")
     if not selected:
         return delivery._downstream_report(config, stages, ["03_manuscript_checker"])
     selected_path = verify_selected(selected)
+    # Article scientific authoring may freeze source-bound negative/unknown
+    # paragraphs. This opt-in exact-text guard deliberately favors a blocked
+    # handoff over publishing a semantic promotion or falling back to old text.
+    protected = config.get("scientific_protected_paragraphs") or []
+    if protected:
+        source_text = final.read_text(encoding="utf-8")
+        selected_text = selected_path.read_text(encoding="utf-8")
+        for row in protected:
+            text = row.get("text")
+            count = row.get("minimum_occurrences")
+            if (not isinstance(text, str) or not text.strip()
+                    or type(count) is not int or count < 1
+                    or source_text.count(text) < count):
+                raise ValueError("scientific_protected_paragraph_binding_invalid")
+            if selected_text.count(text) < count:
+                raise ValueError("scientific_negative_unknown_paragraph_changed:publication_blocked")
     numbering_input, projection = (selected_path, None)
     if config.get("front_back_mode") == "post_body":
         numbering_input, projection = delivery._post_body_numbering_input(
             selected_path, output, config.get("chapter_roles") or [])
     r4 = run_figures_citations_stage(final_draft_path=numbering_input,
         identity_catalogs=catalogs, out_dir=output / "04_figures_citations",
+        language=str(config.get("language") or "zh"),
         figure_assets=config.get("figure_assets") or [],
         table_moves=config.get("table_moves") or None, figure_moves=config.get("figure_moves") or None)
     r4["selected_manuscript"] = selected
@@ -118,7 +137,9 @@ def run_manuscript_delivery(*, config, front_back_report, out_dir, stages=None,
         "unresolved_questions": result.get("unresolved_questions") or [],
         "post_numbering_mapping_check": mapping_check,
         "source_body_delivery": front_back_report.get("source_body_delivery"),
-        "scientific_acceptance": False}
+        "scientific_acceptance": False, "input_stage": input_stage,
+        "adopted_result_ref": r3.get("adopted_result_ref"),
+        "input_manuscript": {"path": str(final.resolve()), "sha256": sha256(final)}}
     r5 = delivery.run_publication_delivery(reader_draft_path=reader,
         references_path=r4["references_path"], figure_map_path=r4.get("mapping_path"),
         assets_dir=r4.get("assets_dir"), out_dir=output / "05_publication",

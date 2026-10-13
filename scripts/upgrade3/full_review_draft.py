@@ -438,7 +438,14 @@ class IdentityIndex:
         # Some local cards may contain bibliographic fields.  Add them only
         # when explicitly present; never infer authors or a venue.
         card_path = Path(str(entry.get("card_path") or ""))
-        if card_path.is_file():
+        try:
+            card_available = card_path.is_file()
+        except OSError:
+            # Foreign-machine audit locators are not local live caches. In
+            # particular a Windows path may exceed POSIX's component limit.
+            card_available = False
+            item["card_locator_status"] = "unavailable_on_this_machine"
+        if card_available:
             try:
                 card = _read_json(card_path)
             except AssemblyError:

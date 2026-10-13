@@ -1276,16 +1276,31 @@ def run_publication_delivery(
             "publication_metadata_path": str(out_dir / "PUBLICATION_METADATA.json"),
         })
         try:
+            # Article's minimal accepted runtime can coexist with this public
+            # adapter. Older renderers bind S2 enrichment to enrich_crossref
+            # and do not expose enrich_s2/pdf_strict; preserve offline behavior.
+            import inspect
+            renderer_parameters = inspect.signature(build_latex_publication).parameters
+            accepts_kwargs = any(p.kind is inspect.Parameter.VAR_KEYWORD for p in renderer_parameters.values())
+            optional = {key: value for key, value in {"enrich_s2": False, "pdf_strict": False}.items()
+                        if key in renderer_parameters or accepts_kwargs}
             pub_result = build_latex_publication(
                 content_package_path=pkg_path,
                 output_dir=out_dir / "tex",
+                metadata_path=out_dir / "PUBLICATION_METADATA.json",
                 source_markdown_path=published_path,
                 language=language,
                 enrich_crossref=False,
-                enrich_s2=False,
                 compile_pdf=True,
-                pdf_strict=False,
+                **optional,
             )
+            tex_result["renderer_module"] = build_latex_publication.__module__
+            tex_result["renderer_parameters"] = sorted(renderer_parameters)
+            artifacts = pub_result.get("artifacts") or {}
+            if artifacts.get("compiled_pdf"):
+                tex_result["pdf_path"] = artifacts["compiled_pdf"]
+            if artifacts.get("main_tex"):
+                tex_result["tex_path"] = artifacts["main_tex"]
             tex_result.update({k: pub_result.get(k)
                                for k in ("pdf_path", "tex_path",
                                          "pdf_skipped_reason", "status")
@@ -1306,10 +1321,10 @@ def run_publication_delivery(
     return report
 
 
-_REFS_HEADING_COUNT_RE = re.compile(r"^#{1,3}\s+参考文献", re.MULTILINE)
+_REFS_HEADING_COUNT_RE = re.compile(r"^#{1,3}\s+(?:参考文献|References)", re.MULTILINE)
 _NUMBERED_REF_RE = re.compile(r"^\[\d+\]", re.MULTILINE)
 _ABSTRACT_HEADING_RE = re.compile(r"^#{2,3}\s+(?:摘要|Abstract)\s*$", re.MULTILINE)
-_KEYWORDS_LINE_RE = re.compile(r"^\*\*关键词[：:]\*\*.*$", re.MULTILINE)
+_KEYWORDS_LINE_RE = re.compile(r"^(?:\*\*)?(?:关键词|Keywords)[：:](?:\*\*)?.*$", re.MULTILINE)
 
 
 def _verify_reader_draft(reader_text: str, *, expected_refs: int) -> dict[str, Any]:
@@ -1352,7 +1367,7 @@ def _extract_front_matter(text: str) -> dict[str, Any]:
         owned = "abstract" in parts
         if owned:
             text = parts.get("title", "") + "\n\n" + parts["abstract"]
-    keyword_line = re.compile(r"^\*\*(?:关键词|Keywords)[：:]\*\*.*$", re.I) \
+    keyword_line = re.compile(r"^(?:\*\*)?(?:关键词|Keywords)[：:](?:\*\*)?.*$", re.I) \
         if owned else _KEYWORDS_LINE_RE
     title = ""
     abstract = ""
@@ -1369,10 +1384,9 @@ def _extract_front_matter(text: str) -> dict[str, Any]:
             in_abstract = False
         if in_abstract and not keyword_line.match(line):
             abstract += line + "\n"
-        match = re.search(r"\*\*(?:关键词|Keywords)[：:]\*\*\s*(.+)", line, re.I) \
-            if owned else re.search(r"\*\*关键词[：:]\*\*\s*(.+)", line)
+        match = re.match(r"^(?:\*\*)?(?:关键词|Keywords)[：:](?:\*\*)?\s*(.+)", line, re.I)
         if match:
-            tokens = re.split(r"[；;]", match.group(1)) if owned else match.group(1).split("；")
+            tokens = re.split(r"[；;]", match.group(1))
             keywords = [k.strip() for k in tokens if k.strip()]
     return {"title": title, "abstract": abstract.strip(),
             "keywords": keywords}

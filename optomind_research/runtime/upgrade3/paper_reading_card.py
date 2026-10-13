@@ -159,6 +159,7 @@ def _load_plan(plan_path: str | Path) -> dict[str, Any]:
         "research_object": research_object,
         "facets": facets,
         "criteria": criteria,
+        **({"required_outputs": plan["required_outputs"]} if plan.get("required_outputs") else {}),
         "additional_constraints": list(plan.get("additional_constraints") or ()) if isinstance(plan.get("additional_constraints") or (), Sequence) and not isinstance(plan.get("additional_constraints"), (str, bytes)) else [],
     }
 
@@ -309,6 +310,7 @@ def _normalize_plan_mapping(plan: Mapping[str, Any]) -> dict[str, Any]:
         "research_object": research_object,
         "facets": facets,
         "criteria": criteria,
+        **({"required_outputs": plan["required_outputs"]} if plan.get("required_outputs") else {}),
         "additional_constraints": list(plan.get("additional_constraints") or ()) if isinstance(plan.get("additional_constraints") or (), Sequence) and not isinstance(plan.get("additional_constraints"), (str, bytes)) else [],
     }
 

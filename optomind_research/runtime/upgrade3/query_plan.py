@@ -198,6 +198,10 @@ Do not rename, add, reorder or remove any key.
 {
   "schema_version": "%(schema)s",
   "question_en": "",
+  "original_question": "",
+  "requirements": [
+    {"id": "R1", "source_text": "", "object": "", "comparison": "", "conditions": [], "outcomes": [], "positive_constraints": [], "exclusions": []}
+  ],
   "research_object": "",
   "ambiguity": {
     "is_ambiguous": false,
@@ -208,6 +212,7 @@ Do not rename, add, reorder or remove any key.
     {
       "id": "",
       "ask": "",
+      "requirement_mapping": ["R1"],
       "keyword_queries": [],
       "question_queries": [],
       "filters": {
@@ -230,6 +235,16 @@ Do not rename, add, reorder or remove any key.
 }
 
 # FIELD RULES
+
+original_question / requirements / facets[].requirement_mapping
+  Copy the user's exact original question without translation into original_question.
+  Enumerate every explicitly requested object, comparison, condition, outcome,
+  positive constraint and exclusion as requirements. source_text must be an exact
+  excerpt of the original question. Each requirement has a unique R-number id;
+  each facet maps to the requirement ids it addresses. Cover every requirement.
+  Do not add a scientific objective the user did not request. Do not treat an
+  unspecified comparison or outcome as requested. Use empty fields when absent.
+  These are declared mappings for human review, not proof of semantic coverage.
 
 question_en
   The user's question normalised into English. Preserve every request, object,
@@ -712,6 +727,7 @@ def validate_plan(
     *,
     fields: Mapping[str, Any] | None = None,
     declared_requests: int | None = None,
+    original_question: str | None = None,
     field_repairer: Callable[[str, Any, Sequence[str]], Any] | None = None,
 ) -> dict[str, Any]:
     """Check the plan's shape AND its content, and repair rather than raise."""
@@ -735,12 +751,15 @@ def validate_plan(
     # A field nobody defined is the hallucination this validator exists for: the
     # downstream cannot parse it and nothing else will notice.
     for key in raw:
-        if key not in _TOP_KEYS:
+        if key not in _TOP_KEYS and key not in {"original_question", "requirements"}:
             errors.append(_error("plan_key_undefined", "$." + _text(key)))
     if _text(raw.get("schema_version")) not in ("", QUERY_PLAN_SCHEMA):
         errors.append(_error("plan_schema_version", "$.schema_version",
                              _text(raw.get("schema_version"))))
     plan["schema_version"] = QUERY_PLAN_SCHEMA
+    for key in ("original_question", "requirements"):
+        if key in raw:
+            plan[key] = raw[key]
     plan["question_en"] = _text(raw.get("question_en"))
     if not plan["question_en"]:
         errors.append(_error("question_en_empty", "$.question_en"))
@@ -783,12 +802,15 @@ def validate_plan(
             errors.append(_error("facet_keys", path, ",".join(missing)))
             continue
         for key in item:
-            if key not in _FACET_KEYS:
+            if key not in _FACET_KEYS and key not in {"requirement_mapping", "literal_postfilters", "evidence_requirements"}:
                 errors.append(_error("facet_key_undefined",
                                      "%s.%s" % (path, _text(key))))
         facet: dict[str, Any] = {"id": _text(item.get("id"))}
         if facet["id"] != "F%d" % (len(facets) + 1):
             errors.append(_error("facet_id", path + ".id", facet["id"]))
+        for key in ("requirement_mapping", "literal_postfilters", "evidence_requirements"):
+            if key in item:
+                facet[key] = item[key]
         facet["ask"] = _text(item.get("ask"))
         if not facet["ask"]:
             errors.append(_error("facet_without_ask", path + ".ask"))
@@ -857,7 +879,7 @@ def validate_plan(
 
         raw_filters = item.get("filters") if isinstance(item.get("filters"), Mapping) else {}
         for key in raw_filters:
-            if key not in _FILTER_KEYS:
+            if key not in _FILTER_KEYS and key not in {"publication_date_or_year", "year"}:
                 errors.append(_error("filter_key_undefined",
                                      "%s.filters.%s" % (path, _text(key))))
         filters: dict[str, list[str]] = {}
@@ -904,6 +926,9 @@ def validate_plan(
                     "before": _text(value), "after": "",
                 })
             filters[name] = values
+        for key in ("publication_date_or_year", "year"):
+            if key in raw_filters:
+                filters[key] = raw_filters[key]
         facet["filters"] = filters
         facets.append(facet)
 
@@ -951,6 +976,30 @@ def validate_plan(
         constraints = [constraints]
     plan["additional_constraints"] = [_text(item) for item in (constraints or ())
                                       if _text(item)]
+    if original_question is not None and raw.get("original_question") is not None and raw["original_question"] != original_question:
+        errors.append(_error("original_question_mismatch", "$.original_question"))
+    requirements = raw.get("requirements")
+    if requirements is not None:
+        if not isinstance(requirements, list) or any(not isinstance(r, Mapping) for r in requirements):
+            errors.append(_error("requirements_must_be_objects", "$.requirements"))
+        else:
+            ids = [str(r.get("id") or "") for r in requirements]
+            if len(ids) != len(set(ids)) or any(not rid for rid in ids):
+                errors.append(_error("requirement_ids_invalid", "$.requirements"))
+            original = str(raw.get("original_question") or "")
+            for r in requirements:
+                excerpt = str(r.get("source_text") or "")
+                if not original or not excerpt or excerpt not in original:
+                    errors.append(_error("requirement_source_not_in_original", "$.requirements", str(r.get("id"))))
+            mapped = set()
+            for facet in facets:
+                mapping = facet.get("requirement_mapping", [])
+                if not isinstance(mapping, list) or any(not isinstance(v, str) for v in mapping):
+                    errors.append(_error("requirement_mapping_invalid", "$.facets"))
+                    continue
+                mapped.update(mapping)
+            if mapped - set(ids) or set(ids) - mapped:
+                errors.append(_error("requirement_mapping_incomplete", "$.facets"))
     return _report(not errors, plan, errors, repairs,
                    raw_plan=raw_plan, refused_queries=refused_queries)
 

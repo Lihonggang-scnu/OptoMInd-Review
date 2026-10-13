@@ -495,6 +495,10 @@ class S2IntelligenceGateway:
         limit: int = 20,
         open_access_pdf: bool = False,
         enrich_limit: int = 0,
+        publication_types: list[str] | None = None,
+        fields_of_study: list[str] | None = None,
+        publication_date_or_year: str = "",
+        year: str = "",
     ) -> tuple[list[S2PaperRecord], S2GatewayResponse]:
         """Run lightweight discovery and collect every configured page.
 
@@ -523,6 +527,10 @@ class S2IntelligenceGateway:
             }
             if open_access_pdf:
                 params["openAccessPdf"] = ""
+            for key, value in {"publicationTypes": publication_types, "fieldsOfStudy": fields_of_study,
+                               "publicationDateOrYear": publication_date_or_year, "year": year}.items():
+                if value:
+                    params[key] = ",".join(value) if isinstance(value, (list, tuple)) else str(value)
             response = self.transport.request_json(
                 "GET",
                 f"{GRAPH_BASE}/paper/search",

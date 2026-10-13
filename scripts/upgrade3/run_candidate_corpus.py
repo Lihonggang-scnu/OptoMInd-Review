@@ -27,14 +27,22 @@ def main() -> int:
     parser.add_argument("--out", default="outputs/upgrade3/QP02/CANDIDATE_CORPUS.json")
     parser.add_argument("--snippets", default="outputs/upgrade3/QP02/SNIPPET_TEXT.sqlite")
     parser.add_argument("--per-query-limit", type=int, default=100)
+    parser.add_argument("--preview", action="store_true", help="Print exact execution contract without provider construction or network")
+    parser.add_argument("--resume", help="Previous corpus JSON; retry failed queries only")
+    parser.add_argument("--assumption", action="append", default=[])
     args = parser.parse_args()
 
-    from optomind_research.s2_intelligence_gateway import S2IntelligenceGateway
     from optomind_research.runtime.upgrade3.candidate_corpus import (
         SnippetTextStore, build_candidate_corpus, plan_queries, write_corpus)
 
-    plan = json.loads((REPO / args.schema).read_text(encoding="utf-8"))
+    from dataclasses import asdict
+    from optomind_research.runtime.upgrade3.plan_contract import load_plan
+    plan, receipt = load_plan(REPO / args.schema, assumptions=args.assumption)
     specs = plan_queries(plan)
+    if args.preview:
+        print(json.dumps({"plan_receipt": receipt, "queries": [asdict(q) for q in specs], "network_calls": 0}, ensure_ascii=False, indent=2))
+        return 0
+    from optomind_research.s2_intelligence_gateway import S2IntelligenceGateway
     print("schema      :", args.schema)
     print("research    :", safe(plan.get("research_object"), 70))
     print("queries     :", len(specs),
@@ -47,7 +55,9 @@ def main() -> int:
     store = SnippetTextStore(REPO / args.snippets)
     corpus = build_candidate_corpus(
         plan, gateway=S2IntelligenceGateway(), per_query_limit=args.per_query_limit,
-        enrich=True, snippet_store=store)
+        enrich=True, snippet_store=store, plan_receipt=receipt, assumptions=args.assumption,
+        resume=json.loads((REPO / args.resume).read_text()) if args.resume else None,
+        checkpoint_callback=lambda checkpoint: write_corpus(Path(str(REPO / args.out) + ".checkpoint.json"), checkpoint))
     store.close()
 
     print("--- per query ---", flush=True)

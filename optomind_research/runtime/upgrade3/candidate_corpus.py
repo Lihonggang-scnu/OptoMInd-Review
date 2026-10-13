@@ -24,11 +24,14 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
+import uuid
+
+from .plan_contract import compile_constraints, fingerprint
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-SCHEMA_VERSION = "optomind.candidate_corpus.v2"
+SCHEMA_VERSION = "optomind.candidate_corpus.v3"
 
 #: Two budgets, deliberately not one.
 #:
@@ -115,6 +118,9 @@ class QuerySpec:
     query_type: str          # "keyword" | "question"
     query_text: str
     retrieval_source: str    # the endpoint this query is executed against
+    server_params: dict = field(default_factory=dict)
+    postfilters: dict = field(default_factory=dict)
+    unapplied_constraints: list = field(default_factory=list)
 
 
 @dataclass
@@ -138,11 +144,13 @@ def plan_queries(plan):
         for index, text in enumerate(facet.get("keyword_queries") or (), start=1):
             if str(text or "").strip():
                 specs.append(QuerySpec("%s_KQ_%02d" % (facet_id, index), facet_id,
-                                       "keyword", str(text).strip(), KEYWORD_SOURCE))
+                                       "keyword", str(text).strip(), KEYWORD_SOURCE,
+                                       *compile_constraints(plan, facet, KEYWORD_SOURCE)))
         for index, text in enumerate(facet.get("question_queries") or (), start=1):
             if str(text or "").strip():
                 specs.append(QuerySpec("%s_QQ_%02d" % (facet_id, index), facet_id,
-                                       "question", str(text).strip(), QUESTION_SOURCE))
+                                       "question", str(text).strip(), QUESTION_SOURCE,
+                                       *compile_constraints(plan, facet, QUESTION_SOURCE)))
     return specs
 
 
@@ -238,6 +246,12 @@ def _locator(item):
     }
 
 
+def _hit_id(run_id, hit):
+    return "H" + fingerprint({"run_id": run_id, "query": hit.row.get("query_id"),
+                             "identifiers": hit.identifiers, "text_hash": hit.row.get("text_hash"),
+                             "rank": hit.row.get("result_rank")})[:24]
+
+
 def _text_hash(text):
     return hashlib.sha256(str(text or "").encode("utf-8")).hexdigest()
 
@@ -298,6 +312,45 @@ def _diversity_order(hits):
     return first + rest
 
 
+def response_receipt(response):
+    code = getattr(response, "status_code", None)
+    return {"ok": bool(getattr(response, "ok", code == 200)), "status_code": code,
+            "status_category": getattr(response, "status_category", ""),
+            "error": getattr(response, "error", ""), "audit": getattr(response, "audit", {}) or {},
+            "cache_hit": bool(getattr(response, "cache_hit", False))}
+
+
+def _finish_audit(audit, hits):
+    receipts = audit.get("responses", [])
+    failed = any(not r["ok"] for r in receipts)
+    partial = any(r["status_category"] == "partial_availability" or
+                  r["audit"].get("truncated_reason") in {"later_page_unavailable", "first_page_unavailable"}
+                  for r in receipts)
+    audit["execution_status"] = ("partial" if hits else "failed") if failed or partial else ("success" if hits else "zero_results")
+    audit["ok"] = not (failed or partial)
+    audit["returned"] = len(hits)
+    return hits, audit
+
+
+def _postfilter(hits, spec, audit):
+    kept, rejected, unknown = [], 0, 0
+    for hit in hits:
+        text = " ".join(str(hit.fields.get(k) or "") for k in ("title", "abstract")) + " " + hit.raw_snippet_text
+        text = text.casefold()
+        if not text.strip() and spec.postfilters:
+            unknown += 1
+            kept.append(hit)
+            continue
+        include = spec.postfilters.get("include_terms", [])
+        exclude = spec.postfilters.get("exclude_terms", [])
+        if any(str(t).casefold() not in text for t in include) or any(str(t).casefold() in text for t in exclude):
+            rejected += 1
+        else:
+            kept.append(hit)
+    audit["postfilter"] = {"rejected": rejected, "unknown_material": unknown, "policy": spec.postfilters}
+    return kept
+
+
 def harvest_query(gateway, spec, *, per_query_limit, discovery_target=0):
     """Run ONE query and keep every hit it produced."""
 
@@ -309,6 +362,8 @@ def harvest_query(gateway, spec, *, per_query_limit, discovery_target=0):
         "query_type": spec.query_type, "query_text": spec.query_text,
         "retrieval_source": spec.retrieval_source,
         "requested_limit": limit, "returned": 0, "status": None,
+        "responses": [], "server_params": spec.server_params,
+        "unapplied_constraints": spec.unapplied_constraints,
     }
 
     if spec.retrieval_source == QUESTION_SOURCE:
@@ -321,19 +376,32 @@ def harvest_query(gateway, spec, *, per_query_limit, discovery_target=0):
         if target:
             request_limit = min(MAX_RESULTS_PER_QUERY,
                                 max(limit, min(target * 2, limit * SNIPPET_DISCOVERY_MAX_FACTOR)))
-        items, response = gateway.search_snippets(spec.query_text, limit=request_limit)
+        items, response = gateway.search_snippets(spec.query_text, limit=request_limit, **spec.server_params)
         audit["status"] = getattr(response, "status_code", None)
+        audit["responses"].append(response_receipt(response))
         audit["requested_limits"] = [request_limit]
         hits = _snippet_hits(items, spec)
         unique = len({h.identifiers.get("corpus") for h in hits if h.identifiers.get("corpus")})
         exhausted = len(items) < request_limit
         while (target and unique < target and not exhausted
-               and request_limit < MAX_RESULTS_PER_QUERY):
+               and request_limit < MAX_RESULTS_PER_QUERY and audit["responses"][-1]["ok"]):
             deeper = min(MAX_RESULTS_PER_QUERY, max(request_limit + 1,
                                                    request_limit * SNIPPET_DISCOVERY_MAX_FACTOR))
-            more, response = gateway.search_snippets(spec.query_text, limit=deeper)
+            try:
+                more, response = gateway.search_snippets(spec.query_text, limit=deeper, **spec.server_params)
+            except Exception as exc:
+                # A failed widening request does not erase completed pages.
+                # Keep its attempt receipt and let the ordinary partial/resume
+                # path retain and retry this query with its original material.
+                audit["requested_limits"].append(deeper)
+                audit["status"] = None
+                audit["responses"].append({"ok": False, "status_code": None,
+                    "status_category": "transport_failure", "error": type(exc).__name__,
+                    "audit": {"truncated_reason": "later_page_unavailable"}, "cache_hit": False})
+                break
             audit["requested_limits"].append(deeper)
             audit["status"] = getattr(response, "status_code", None)
+            audit["responses"].append(response_receipt(response))
             seen = {_passage_key(h) for h in hits}
             deeper_hits = _snippet_hits(more, spec, rank_offset=len(hits),
                                         request_index=len(audit["requested_limits"]))
@@ -363,9 +431,10 @@ def harvest_query(gateway, spec, *, per_query_limit, discovery_target=0):
             "requests": len(audit["requested_limits"]),
         })
         audit["returned"] = len(hits)
-        return hits, audit
+        return _finish_audit(audit, _postfilter(hits, spec, audit))
     else:
-        papers, response = gateway.search_papers(spec.query_text, limit=limit)
+        papers, response = gateway.search_papers(spec.query_text, limit=limit, **spec.server_params)
+        audit["responses"].append(response_receipt(response))
         audit["status"] = getattr(response, "status_code", None)
         for rank, record in enumerate(papers[:limit], start=1):
             hits.append(Hit(
@@ -386,8 +455,7 @@ def harvest_query(gateway, spec, *, per_query_limit, discovery_target=0):
                     "snippet_locator": None, "text_hash": None,
                 }))
 
-    audit["returned"] = len(hits)
-    return hits, audit
+    return _finish_audit(audit, _postfilter(hits, spec, audit))
 
 
 # ------------------------------------------------------------------- papers --
@@ -424,6 +492,16 @@ def _paper_from(identifiers, fields):
 def _merge_papers(papers, union):
     """Fold papers that share any handle into one, keeping every field."""
 
+    # Preserve aliases carried through earlier merge/enrichment passes.
+    expanded = []
+    for paper in papers:
+        expanded.append(paper)
+        for kind, values in (paper.get("aliases") or {}).items():
+            key = {"s2": "paper_id", "doi": "doi", "corpus": "corpus_id"}.get(kind)
+            if key:
+                for value in values:
+                    expanded.append({**paper, key: value})
+    papers = expanded
     for paper in papers:
         handles = [h for h in (_handle("s2", paper.get("paper_id")),
                                _handle("doi", paper.get("doi")),
@@ -470,8 +548,9 @@ def _merge_papers(papers, union):
     merges = []
     for _, entry in sorted(merged.items()):
         paper = _paper_from(entry["identifiers"], entry["fields"])
+        paper["aliases"] = entry["identifiers"]
         papers.append(paper)
-        primary = paper.get("paper_id") or _handle("corpus", paper.get("corpus_id"))
+        primary = paper.get("paper_id") or _handle("corpus", paper.get("corpus_id")) or _handle("doi", paper.get("doi"))
         for kind, values in entry["identifiers"].items():
             for value in values:
                 index[_handle(kind, value)] = primary
@@ -484,16 +563,20 @@ def _merge_papers(papers, union):
     return papers, index, merges
 
 
-def enrich_papers(gateway, papers):
+def enrich_papers(gateway, papers, audit=None):
     """Fill author/year/venue/abstract/DOI for the deduplicated set.
 
     One batch call per 500 papers, so cost follows the corpus size rather than
     the number of queries.
     """
 
+    audit = audit if audit is not None else []
     by_handle = {}
     request_ids = []
     for paper in papers:
+        for kind, values in (paper.get("aliases") or {}).items():
+            for value in values:
+                by_handle.setdefault(_handle(kind, value), paper)
         if paper.get("paper_id"):
             by_handle[_handle("s2", paper["paper_id"])] = paper
             request_ids.append(str(paper["paper_id"]))
@@ -505,8 +588,11 @@ def enrich_papers(gateway, papers):
     for start in range(0, len(request_ids), 500):
         chunk = request_ids[start:start + 500]
         try:
-            records, _ = gateway.batch_papers(chunk)
-        except Exception:  # noqa: BLE001 - enrichment is best effort
+            records, response = gateway.batch_papers(chunk)
+            audit.append({"requested_ids": chunk, **response_receipt(response), "returned": len(records),
+                          "complete": len(records) == len(chunk)})
+        except Exception as exc:  # best effort, but failure remains visible
+            audit.append({"requested_ids": chunk, "ok": False, "error": str(exc), "returned": 0})
             continue
         for record in records:
             paper_id = str(getattr(record, "paper_id", "") or "")
@@ -516,6 +602,10 @@ def enrich_papers(gateway, papers):
                 target = by_handle.get(_handle("corpus", corpus_id))
             if target is None:
                 continue
+            for kind, value in _identifiers(paper_id=paper_id, corpus_id=corpus_id, doi=getattr(record, "doi", "")).items():
+                bucket = target.setdefault("aliases", {}).setdefault(kind, [])
+                if value not in bucket:
+                    bucket.append(value)
             if paper_id and not target.get("paper_id"):
                 target["paper_id"] = paper_id
             if corpus_id not in (None, "") and not target.get("corpus_id"):
@@ -541,7 +631,8 @@ def enrich_papers(gateway, papers):
 def build_candidate_corpus(plan, *, gateway, per_query_limit=DEFAULT_PAGE_SIZE,
                            enrich=True, snippet_store=None, planner_state=None,
                            allow_degraded=False,
-                           snippet_discovery_target=SNIPPET_DISCOVERY_TARGET):
+                           snippet_discovery_target=SNIPPET_DISCOVERY_TARGET, resume=None,
+                           plan_receipt=None, assumptions=(), checkpoint_callback=None):
     """Execute every query, deduplicate papers, and keep every hit.
 
     ``planner_state`` is the planner's own verdict on the plan.  When the plan
@@ -550,8 +641,28 @@ def build_candidate_corpus(plan, *, gateway, per_query_limit=DEFAULT_PAGE_SIZE,
     recorded in the corpus either way.
     """
 
+    if "plan" in plan or "query_plan_v2" in plan or "schema_version" in plan:
+        from .plan_contract import load_plan
+        plan, loaded_receipt = load_plan(plan, assumptions=assumptions)
+        if plan_receipt and plan_receipt.get("plan_sha256") != loaded_receipt["plan_sha256"]:
+            raise ValueError("plan_receipt_hash_mismatch")
+        plan_receipt = plan_receipt or loaded_receipt
+    if (plan.get("ambiguity") or {}).get("needs_user_input") and not assumptions:
+        raise ValueError("plan_needs_clarification_or_explicit_assumptions")
+    plan_hash = fingerprint(plan)
+    if resume and resume.get("plan_hash") != plan_hash:
+        raise ValueError("resume_plan_hash_mismatch")
+    execution_hash = fingerprint({"queries": [asdict(q) for q in plan_queries(plan)],
+                                  "per_query_limit": per_query_limit, "snippet_discovery_target": snippet_discovery_target})
+    if resume and resume.get("execution_hash") != execution_hash:
+        raise ValueError("resume_execution_hash_mismatch")
+    run_id = (resume or {}).get("run_id") or uuid.uuid4().hex
+    if snippet_store is not None:
+        snippet_store.bind(run_id, plan_hash)
     channels = channel_state(plan)
     supplied = dict(planner_state or {})
+    if supplied.get("status") and supplied["status"] not in {"ok", "primary_valid_v2", "primary_valid_v2_after_revision"}:
+        raise ValueError("planner_state_not_valid")
     supplied_degradation = dict(supplied.get("degradation") or {})
     degraded = bool(channels["missing_channels"]) or bool(supplied_degradation.get("degraded"))
     input_state = {
@@ -572,22 +683,75 @@ def build_candidate_corpus(plan, *, gateway, per_query_limit=DEFAULT_PAGE_SIZE,
     hits = []
     audits = []
 
+    saved = {r["query_id"]: r for r in (resume or {}).get("query_checkpoints", [])}
+    # Load all prior snippets before writing any changed query. A larger retry
+    # can shift later H ids; reading lazily would otherwise consume overwritten text.
+    restored = {}
+    for qid, previous in saved.items():
+        restored[qid] = []
+        for h in previous["hits"]:
+            data = dict(h)
+            old_hit_id = data.pop("checkpoint_hit_id", "")
+            hit = Hit(**data)
+            if hit.row.get("text_hash"):
+                if snippet_store is None:
+                    raise ValueError("resume_requires_bound_snippet_store")
+                hit.raw_snippet_text = snippet_store.get(old_hit_id)
+                if _text_hash(hit.raw_snippet_text) != hit.row["text_hash"]:
+                    raise ValueError("resume_snippet_hash_mismatch")
+            restored[qid].append(hit)
+    checkpoints = []
     for spec in specs:
-        found, audit = harvest_query(gateway, spec, per_query_limit=per_query_limit,
-                                     discovery_target=snippet_discovery_target)
+        previous = saved.get(spec.query_id)
+        if previous and previous["audit"].get("ok"):
+            found, audit = restored[spec.query_id], previous["audit"]
+        else:
+            try:
+                found, audit = harvest_query(gateway, spec, per_query_limit=per_query_limit,
+                                             discovery_target=snippet_discovery_target)
+            except Exception as exc:
+                found, audit = [], {**asdict(spec), "ok": False, "execution_status": "failed",
+                                    "error": str(exc), "returned": 0, "status": None}
+            if previous:
+                # A failed retry must not erase evidence returned by a prior page.
+                keys = {(tuple(sorted(h.identifiers.items())), h.row.get("text_hash")) for h in found}
+                retained = [h for h in restored[spec.query_id]
+                            if (tuple(sorted(h.identifiers.items())), h.row.get("text_hash")) not in keys]
+                found.extend(retained)
+                audit["prior_attempts"] = [*previous["audit"].get("prior_attempts", []),
+                                           {k: v for k, v in previous["audit"].items() if k != "prior_attempts"}]
+                audit["retained_prior_hits"] = len(retained)
+                audit["returned"] = len(found)
+                if found and not audit.get("ok"):
+                    audit["execution_status"] = "partial"
         hits.extend(found)
         audits.append(audit)
+        checkpoint_hits = []
+        for i, hit in enumerate(found, 1):
+            hit_id = _hit_id(run_id, hit)
+            if snippet_store is not None and hit.raw_snippet_text:
+                snippet_store.add(hit_id, hit.raw_snippet_text)
+            checkpoint_hits.append({**asdict(hit), "raw_snippet_text": "", "checkpoint_hit_id": hit_id})
+        checkpoints.append({"query_id": spec.query_id, "audit": audit, "hits": checkpoint_hits})
+        if snippet_store is not None:
+            snippet_store.connection.commit()
+        if checkpoint_callback is not None:
+            checkpoint_callback({"schema_version": "optomind.query_checkpoint.v1", "run_id": run_id,
+                                 "plan_hash": plan_hash, "execution_hash": execution_hash,
+                                 "query_checkpoints": [*checkpoints, *[v for k, v in saved.items() if k not in {c["query_id"] for c in checkpoints}]]})
 
     provisional = [_paper_from(hit.identifiers, hit.fields)
                    for hit in hits if hit.identifiers]
     papers, lookup, merges = _merge_papers(provisional, union)
 
+    enrichment_audit = []
     if enrich:
-        papers = enrich_papers(gateway, papers)
+        papers = enrich_papers(gateway, papers, enrichment_audit)
         # Enrichment is what teaches a snippet-only paper its S2 id, so the merge
         # has to run AGAIN afterwards.  Without the second pass one paper stays
         # two objects -- one holding the S2 id, one holding only a corpus id.
-        papers, lookup, merges = _merge_papers(papers, union)
+        papers, lookup, later_merges = _merge_papers(papers, union)
+        merges.extend(later_merges)
 
     retrieval_hits = []
     for index, hit in enumerate(hits, start=1):
@@ -599,7 +763,8 @@ def build_candidate_corpus(plan, *, gateway, per_query_limit=DEFAULT_PAGE_SIZE,
                 break
         row = dict(hit.row)
         retrieval_hits.append({
-            "hit_id": "H%06d" % index,
+            "hit_id": _hit_id(run_id, hit),
+            "provider_identifiers": dict(hit.identifiers),
             "paper_id": lookup.get(handle, ""),
             "corpus_id": hit.identifiers.get("corpus", ""),
             "facet_id": row["facet_id"],
@@ -622,20 +787,35 @@ def build_candidate_corpus(plan, *, gateway, per_query_limit=DEFAULT_PAGE_SIZE,
             if hit.raw_snippet_text:
                 snippet_store.add(row["hit_id"], hit.raw_snippet_text)
 
-    exclusions: list[str] = []
-    for facet in (plan.get("facets") or []):
-        for item in (facet or {}).get("must_exclude") or ():
-            text = str(item or "").strip()
-            if text and text not in exclusions:
-                exclusions.append(text)
-    for item in plan.get("additional_constraints") or ():
-        text = str(item or "").strip()
-        if text and text not in exclusions:
-            exclusions.append(text)
+    # Natural language requirements are not literal exclusion substrings.
+    exclusions = []
+    degraded = degraded or any(not a.get("ok") for a in audits) or any(not a.get("ok") or not a.get("complete", True) for a in enrichment_audit)
+    input_state["plan_state"] = "degraded" if degraded else "complete"
+    input_state["degraded"] = degraded
+    artifacts = {}
+    if snippet_store is not None:
+        snippet_store.connection.commit()
+        artifacts["snippet_store"] = {"path": str(snippet_store.path.resolve()),
+            "sha256": hashlib.sha256(snippet_store.path.read_bytes()).hexdigest(),
+            "run_id": run_id, "plan_hash": plan_hash}
+    aliases = dict(lookup)
+    aliases.update({key[3:]: value for key, value in lookup.items() if key.startswith("s2:")})
 
     return {
         "schema_version": SCHEMA_VERSION,
         "research_object": plan.get("research_object", ""),
+        "run_id": run_id, "plan_hash": plan_hash, "execution_hash": execution_hash, "plan_receipt": plan_receipt or {},
+        "facets": plan.get("facets", []), "expected_queries": [asdict(spec) for spec in specs],
+        "execution_plan": {"schema_version": "optomind.retrieval_execution_plan.v1", "queries": [asdict(spec) for spec in specs]},
+        "constraints_status": "unapplied_requirements" if any(s.unapplied_constraints for s in specs) else "applied",
+        "unapplied_constraints": [{"query_id": spec.query_id, **item} for spec in specs for item in spec.unapplied_constraints],
+        "query_checkpoints": checkpoints, "enrichment_audit": enrichment_audit,
+        "work_identity": {"schema_version": "optomind.work_identity.v1", "alias_to_canonical": aliases, "merge_history": merges},
+        "bundle": {"schema_version": "optomind.skeleton_bundle.v1", "run_id": run_id,
+                   "plan_hash": plan_hash, "artifacts": artifacts},
+        "facet_completeness": [{"facet_id": f.get("id"),
+            "retrieval_hit": any(h["facet_id"] == f.get("id") for h in retrieval_hits),
+            "read_status": "not_assessed", "evidence_sufficiency": "not_assessed"} for f in plan.get("facets", [])],
         # The plan's own exclusions, kept with the corpus so the scope judgement can
         # use the user's words instead of a maintained list.
         "exclusions": exclusions,
@@ -752,6 +932,17 @@ class SnippetTextStore:
             "hit_id TEXT PRIMARY KEY, raw_snippet_text TEXT NOT NULL)")
         self.connection.commit()
 
+    def bind(self, run_id, plan_hash):
+        self.connection.execute("CREATE TABLE IF NOT EXISTS run_binding (run_id TEXT, plan_hash TEXT)")
+        rows = self.connection.execute("SELECT run_id, plan_hash FROM run_binding").fetchall()
+        if rows and rows != [(run_id, plan_hash)]:
+            raise ValueError("snippet_store_wrong_run")
+        if not rows:
+            if self.count():
+                raise ValueError("snippet_store_unbound_existing_data")
+            self.connection.execute("INSERT INTO run_binding VALUES (?, ?)", (run_id, plan_hash))
+        self.connection.commit()
+
     def add(self, hit_id, text):
         self.connection.execute(
             "INSERT OR REPLACE INTO snippet_text (hit_id, raw_snippet_text) VALUES (?, ?)",
@@ -775,5 +966,7 @@ class SnippetTextStore:
 def write_corpus(path, corpus):
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(json.dumps(corpus, ensure_ascii=False, indent=2), encoding="utf-8")
+    temporary = target.with_name(target.name + ".tmp")
+    temporary.write_text(json.dumps(corpus, ensure_ascii=False, indent=2), encoding="utf-8")
+    temporary.replace(target)
     return target

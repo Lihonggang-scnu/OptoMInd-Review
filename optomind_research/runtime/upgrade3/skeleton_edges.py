@@ -34,29 +34,48 @@ def collect(
     citations_limit: int = 300,
     max_workers: int = 12,
     progress_every: int = 50,
+    gateway: Any = None,
 ) -> dict[str, Any]:
     """Fetch references and citations for every core paper, with a disk cache."""
 
-    from optomind_research.s2_intelligence_gateway import S2IntelligenceGateway
-
     corpus = json.loads(Path(corpus_path).read_text(encoding="utf-8"))
     papers = corpus["papers"]
-    ids = [p["paper_id"] for p in papers if p.get("paper_id")]
+    ids = sorted({str(p["paper_id"]) for p in papers if p.get("paper_id")})
     print("core papers with an S2 id:", len(ids), flush=True)
 
-    gateway = S2IntelligenceGateway()
+    if gateway is None:
+        from optomind_research.s2_intelligence_gateway import S2IntelligenceGateway
+        gateway = S2IntelligenceGateway()
     out_dir.mkdir(parents=True, exist_ok=True)
     edge_path = out_dir / "GRAPH_EDGES.jsonl"
 
-    done_ids: set[str] = set()
+    previous = {}
     if edge_path.exists():
-        with edge_path.open(encoding="utf-8") as handle:
-            for line in handle:
+        with edge_path.open(encoding="utf-8") as source:
+            for line in source:
                 try:
-                    done_ids.add(json.loads(line)["source_paper"])
-                except Exception:  # noqa: BLE001
+                    record = json.loads(line)
+                    pid = str(record["source_paper"])
+                    # Reusing a directory for another corpus must not silently
+                    # treat old empty failures as success in the new run.
+                    if corpus.get("run_id") and record.get("run_id") != corpus["run_id"]:
+                        continue
+                    if corpus.get("plan_hash") and record.get("plan_hash") != corpus["plan_hash"]:
+                        continue
+                    previous[pid] = record
+                except (ValueError, KeyError, TypeError):
                     continue
-        print("resuming; already collected:", len(done_ids), flush=True)
+
+    def completed(record, relation):
+        status = (record.get("relation_status") or {}).get(relation) or {}
+        return (status.get("state") == "success" and status.get("ok") is True
+                and int(status.get("requested_limit") or 0) >=
+                (references_limit if relation == "references" else citations_limit))
+
+    done_ids = {pid for pid, record in previous.items()
+                if all(completed(record, relation) for relation in ("references", "citations"))}
+    if previous:
+        print("resuming; successful papers:", len(done_ids), flush=True)
 
     lock = threading.Lock()
     handle = edge_path.open("a", encoding="utf-8")
@@ -64,14 +83,37 @@ def collect(
     started = time.time()
 
     def one(paper_id: str) -> None:
-        record: dict[str, Any] = {"source_paper": paper_id, "references": [], "citations": []}
+        record: dict[str, Any] = {**previous.get(paper_id, {}),
+            "source_paper": paper_id, "run_id": corpus.get("run_id"),
+            "plan_hash": corpus.get("plan_hash")}
+        statuses = record.setdefault("relation_status", {})
         for relation, limit in (("references", references_limit), ("citations", citations_limit)):
+            if completed(record, relation):
+                continue
+            old_status = statuses.get(relation) or {}
             try:
                 items, response = gateway._paper_edges(paper_id, relation=relation, limit=limit)
                 status = getattr(response, "status_code", 0)
+                ok = bool(getattr(response, "ok", status == 200))
+                category = str(getattr(response, "status_category", "") or "")
+                audit = dict(getattr(response, "audit", {}) or {})
+                error = str(getattr(response, "error", "") or "")
+                payload = getattr(response, "payload", {}) or {}
+                partial = category == "partial_availability" or bool(audit.get("partial_availability"))
+                success = ok and not partial
+                truncated = bool(payload.get("next") is not None or audit.get("truncated"))
+                receipt = {"ok": ok, "state": "success" if success else ("partial" if items else "failed"),
+                           "status_code": status, "status_category": category,
+                           "error": error, "audit": audit, "truncated": truncated,
+                           "requested_limit": limit, "attempts": int(old_status.get("attempts") or 0) + 1}
             except Exception as exc:  # noqa: BLE001
-                items, status = [], "ERR:" + type(exc).__name__
-            if status != 200:
+                items, success = [], False
+                receipt = {"ok": False, "state": "failed", "status_code": 0,
+                           "status_category": "exception", "error": str(exc), "audit": {},
+                           "truncated": False, "requested_limit": limit,
+                           "attempts": int(old_status.get("attempts") or 0) + 1}
+            statuses[relation] = receipt
+            if not success:
                 with lock:
                     counters["fail_refs" if relation == "references" else "fail_cites"] += 1
             inner = "citedPaper" if relation == "references" else "citingPaper"
@@ -89,14 +131,21 @@ def collect(
                     "is_influential": bool(item.get("isInfluential")),
                     "has_context": bool(item.get("contexts")),
                 })
-            record[relation] = [r for r in rows if r["paper_id"] or r["corpus_id"]]
+            rows = [r for r in rows if r["paper_id"] or r["corpus_id"]]
+            if not success:
+                # Keep partial evidence while retrying the failed relation later.
+                combined = {(r.get("paper_id"), r.get("corpus_id")): r
+                            for r in record.get(relation) or []}
+                combined.update({(r["paper_id"], r["corpus_id"]): r for r in rows})
+                rows = list(combined.values())
+            record[relation] = rows
             with lock:
                 counters["refs" if relation == "references" else "cites"] += len(record[relation])
         with lock:
             handle.write(json.dumps(record, ensure_ascii=False) + "\n")
             handle.flush()
             counters["papers"] += 1
-            if counters["papers"] % progress_every == 0:
+            if progress_every and counters["papers"] % progress_every == 0:
                 elapsed = time.time() - started
                 rate = counters["papers"] / elapsed * 60 if elapsed else 0
                 left = (len(ids) - len(done_ids) - counters["papers"]) / max(rate, 0.01)
@@ -110,7 +159,10 @@ def collect(
     handle.close()
 
     summary = {
+        "schema_version": "optomind.graph_collection.v2",
+        "run_id": corpus.get("run_id"), "plan_hash": corpus.get("plan_hash"),
         "core_papers": len(ids),
+        "previously_successful": len(done_ids),
         "newly_collected": counters["papers"],
         "references_edges": counters["refs"],
         "citations_edges": counters["cites"],

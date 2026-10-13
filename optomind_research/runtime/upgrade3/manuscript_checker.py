@@ -341,7 +341,7 @@ def _failure(case, edit_id, proposal, code):
 
 
 def execute_checker_response(*, draft_text, response, identity_catalogs=None,
-                             material_records=None, pending_ids=None, pending_bindings=None, round_number=1):
+                             material_records=None, pending_ids=None, pending_bindings=None, round_number=1, protected_paragraphs=None):
     """Pure strict execution; independent valid proposals survive invalid siblings."""
     case = _material_case(draft_text, material_records)
     parsed = _decode(response)
@@ -363,6 +363,13 @@ def execute_checker_response(*, draft_text, response, identity_catalogs=None,
                 if row.get("target_block_id") not in allowed_blocks:
                     raise ManuscriptCheckerError("repair_target_outside_pending_scope")
             patch, adapted, extra = _validate_change(case, row, edit_id, identity_catalogs or [])
+            # Frozen Article scientific limitations are exact source ranges,
+            # not a keyword-based claim of semantic entailment. Other valid
+            # edits in the same response remain independently applicable.
+            for protected in protected_paragraphs or []:
+                for match in re.finditer(re.escape(protected["text"]), draft_text):
+                    if max(patch["start"], match.start()) < min(patch["end"], match.end()):
+                        raise ManuscriptCheckerError("scientific_negative_unknown_span_protected")
             valid.append(patch)
             extras[edit_id] = extra
             adapters[edit_id] = adapted
@@ -455,7 +462,7 @@ def run_manuscript_checker(*, draft_path, out_dir, identity_catalogs=None,
                            material_records=None, figure_assets=None, chapter_roles=None,
                            language="zh", fixture_responses=None, recordings=None,
                            client_factory=None, run=False, token_counter=None, profile=None,
-                           retry_failed=False, enabled=True, max_model_rounds=2):
+                           retry_failed=False, enabled=True, max_model_rounds=2, protected_paragraphs=None):
     """Check selected 03 manuscript; cache resumes never reset logical rounds.
 
     Fixtures must contain the actual snapshot hash, just like live responses.
@@ -477,6 +484,8 @@ def run_manuscript_checker(*, draft_path, out_dir, identity_catalogs=None,
         "first_messages_sha256": _hash(first_messages), "profile": effective,
         "max_model_rounds": max_model_rounds, "enabled": enabled,
         "response_source": "fixture" if fixture_responses is not None else "recordings" if recordings is not None else "provider"}
+    if protected_paragraphs:
+        identity["scientific_protected_paragraphs"] = protected_paragraphs
     # Bind fixture payloads too. Callable fixtures exist solely for synthetic
     # tests; their saved RAW becomes the authoritative immutable response.
     if fixture_responses is not None and not callable(fixture_responses):
@@ -601,7 +610,7 @@ def run_manuscript_checker(*, draft_path, out_dir, identity_catalogs=None,
                         pending_ids=[p["edit_id"] for p in pending],
                         pending_bindings={f["edit_id"]: f.get("allowed_current_block_ids", [])
                                           for f in (feedback or {}).get("failures", [])} if number > 1 and not format_repair else None,
-                        round_number=1 if format_repair else number)
+                        round_number=1 if format_repair else number, protected_paragraphs=protected_paragraphs)
                     completed_response = True
                     current = result["draft_text"]
                     pending = result["pending"]

@@ -54,14 +54,23 @@ def main() -> int:
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--corpus", default="outputs/upgrade3/QP02/CANDIDATE_CORPUS.json")
-    parser.add_argument("--edges", default="outputs/upgrade3/SKELETON/GRAPH_EDGES.jsonl")
+    parser.add_argument("--edges", help="Override the corpus bundle edge artifact")
     parser.add_argument("--out", default="outputs/upgrade3/SKELETON")
     parser.add_argument("--ablation", action="store_true")
+    parser.add_argument("--allow-degraded", action="store_true")
+    parser.add_argument("--no-parquet", action="store_true", help="Write JSON outputs without Parquet exports")
     args = parser.parse_args()
 
     base = load_config()
+    corpus_path = REPO / args.corpus
+    corpus = json.loads(corpus_path.read_text(encoding="utf-8"))
+    corpus["_bundle_base"] = str(corpus_path.resolve().parent)
+    from optomind_research.runtime.upgrade3.scholarly_skeleton import _artifact_path
+    edge_path = (REPO / args.edges if args.edges else
+                 _artifact_path(corpus, REPO / args.out, "edges", "GRAPH_EDGES.jsonl"))
     if not args.ablation:
-        run_skeleton_v2(REPO / args.corpus, REPO / args.edges, REPO / args.out, base)
+        run_skeleton_v2(corpus_path, edge_path, REPO / args.out, base,
+                        dump_edges=not args.no_parquet, allow_degraded=args.allow_degraded)
         print("done:", REPO / args.out)
         return 0
 
@@ -72,7 +81,7 @@ def main() -> int:
             config["fusion"]["layer_weights"] = weights
         out = REPO / args.out / "ablation" / name
         print("\n===== ablation", name, flush=True)
-        skeleton = run_skeleton(REPO / args.corpus, REPO / args.edges, out, config,
+        skeleton = run_skeleton(corpus_path, edge_path, out, config,
                                 dump_edges=False)
         portfolio = skeleton["portfolio"]
         stats = skeleton["edge_statistics"]

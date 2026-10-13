@@ -73,7 +73,9 @@ Return exactly one JSON object, no prose and no markdown fence:
 {"papers": [{"paper_id": "...", "label": "one of the four",
              "sub_question": "which sub-question it relates to, or empty",
              "evidence": "the words in the material that support the label, quoted",
-             "uncertain": "what is still unknown, or empty"}]}
+             "uncertain": "what is still unknown, or empty",
+             "evidence_source": "abstract|own_passage|citing_sentence",
+             "use": "explicit intended use, required for background_or_method"}]}
 One entry per candidate, using the exact paper_id given."""
 
 
@@ -141,106 +143,147 @@ def _extract_json(text: str) -> dict[str, Any]:
     return json.loads(text[start:end + 1])
 
 
+def validate_routing_rows(packets, rows, facets=()):
+    """One input/one output. Routing never constitutes read-confirmed evidence."""
+    allowed = {str(p["paper_id"]): p for p in packets}
+    grouped = {pid: [] for pid in allowed}
+    rejected = []
+    for row in rows if isinstance(rows, list) else []:
+        if not isinstance(row, Mapping) or str(row.get("paper_id")) not in allowed:
+            rejected.append("unknown_paper_id")
+            continue
+        grouped[str(row["paper_id"])].append(row)
+    result = {}
+    for pid, packet in allowed.items():
+        candidates = grouped[pid]
+        row = candidates[0] if len(candidates) == 1 else {}
+        errors = [] if len(candidates) == 1 else ["missing_or_duplicate_output"]
+        label = str(row.get("label") or "")
+        if label not in LABELS:
+            errors.append("invalid_label")
+        quote = str(row.get("evidence") or "").strip().strip('"“”')
+        source = str(row.get("evidence_source") or "")
+        material = packet.get("material") or {}
+        # A unique exact source may be recovered for older router responses.
+        matches = [k for k, v in material.items() if k != "title" and quote and quote in v]
+        if not source and len(matches) == 1:
+            source = matches[0]
+        if not quote or source not in matches:
+            errors.append("unverified_quote")
+        sub_question = str(row.get("sub_question") or "")
+        facet_values = {str(f.get(k) or "") for f in facets for k in ("id", "ask")} - {""}
+        if facets and label != "clearly_irrelevant" and sub_question not in facet_values:
+            errors.append("unknown_or_missing_sub_question")
+        use = str(row.get("use") or "").strip()
+        if label == "background_or_method" and not use:
+            errors.append("method_use_required")
+        if source == "citing_sentence" and label == "directly_relevant":
+            errors.append("citation_is_not_own_evidence")
+        result[pid] = {"label": "needs_verification" if errors else label,
+            "label_as_returned": label, "sub_question": str(row.get("sub_question") or ""),
+            "evidence": quote if not errors else "", "evidence_source": source,
+            "uncertain": str(row.get("uncertain") or ""), "use": use,
+            "validation_errors": errors, "read_confirmed": False,
+            "routing_validated": not errors}
+    return result, rejected
+
+
 def read_candidates(question: str, facets: Sequence[Mapping[str, Any]], packets: Sequence[Mapping],
                     config: Mapping[str, Any], *, call=None, budget: Mapping[str, Any] | None = None,
                     progress=None) -> dict[str, Any]:
-    """Send the packets in batches, with a hard cost and count ceiling."""
+    """Bounded routing with a shared, pre-dispatch model-price reservation ledger.
 
-    cfg = dict((config.get("reading") or {}))
-    prices = {"input_per_1k": float(cfg.get("price_cny_per_1k_input", 0.0008)),
-              "output_per_1k": float(cfg.get("price_cny_per_1k_output", 0.002))}
-    cap_cny = float((budget or {}).get("cost_cap_cny", cfg.get("cost_cap_cny", 5.0)))
-    max_papers = int((budget or {}).get("max_papers", cfg.get("max_papers", 300)))
-    batch_default = int(cfg.get("batch_default", 10))
-    batch_max = int(cfg.get("batch_max", 20))
-
-    if call is None:
-        os.environ.setdefault("QWEN_BYPASS_PROXY", "1")
-        from llm.qwen_chat_client import call_qwen_chat
-
+    Injected calls are single-attempt transports; unknown usage freezes their
+    reservation. The production client reserves at each actual HTTP attempt.
+    """
+    from .module4.runtime import (GlobalBudgetLedger, QwenDirectClient, invoke_client,
+        estimated_cost_cny, QwenTransportError)
+    cfg = dict(config.get("reading") or {})
+    limits = dict(budget or {})
+    cap = float(limits.get("cost_cap_cny", cfg.get("cost_cap_cny", 5.0)))
+    count = int(limits.get("max_papers", cfg.get("max_papers", 300)))
+    model = str(cfg.get("model", "qwen3.7-flash"))
+    maximum = int(cfg.get("max_tokens", 4000))
+    batch_size = max(1, min(int(cfg.get("batch_default", 10)), int(cfg.get("batch_max", 20))))
+    started = time.time()
+    ledger = None
+    if cap > 0:
+        ledger = limits.get("ledger") or GlobalBudgetLedger(limit_cny=cap, path=limits.get("ledger_path"))
+    injected = call is not None
+    if not injected and ledger is not None:
+        client = QwenDirectClient(model=model, key_file=cfg.get("key_file"), max_retries=0,
+            max_output_tokens=maximum, thinking=False, json_mode=True, budget_ledger=ledger)
         def call(messages, model_tier):
-            return call_qwen_chat("ReadingRouter", messages, model_tier=model_tier,
-                                  max_retries=1, temperature=0.0, force_mock=False,
-                                  max_tokens=int(cfg.get("max_tokens", 4000)),
-                                  response_format={"type": "json_object"})
-
-    sub_questions = [{"id": str(f.get("id") or ""), "ask": str(f.get("ask") or "")}
-                     for f in facets or ()]
-    judgements: dict[str, dict[str, Any]] = {}
-    accounting = {
-        "model_tier": str(cfg.get("model_tier", "c_model")),
-        "model_names": [], "calls": 0, "retries": 0, "input_tokens": 0, "output_tokens": 0,
-        "estimated_cost_cny": 0.0, "cost_cap_cny": cap_cny, "max_papers": max_papers,
-        "papers_read": 0, "papers_skipped_for_material": 0, "cost_is_estimate": True,
-        "stop_reason": "",
-    }
-    queue: list[Mapping] = []
-    for packet in packets:
-        if len(packet.get("material_sources") or []) < MIN_MATERIAL_SOURCES:
+            return invoke_client(client, messages, model=model, max_output_tokens=maximum,
+                                 thinking=False, call_id="reading-router")
+    accounting = {"model_tier": model, "model_names": [], "calls": 0, "retries": 0,
+        "input_tokens": 0, "output_tokens": 0, "estimated_cost_cny": 0.0,
+        "cost_cap_cny": cap, "max_papers": count, "papers_read": 0,
+        "papers_skipped_for_material": 0, "cost_is_estimate": True, "stop_reason": "",
+        "reservation_enforced": True, "rejected_outputs": [], "read_confirmed": 0}
+    queue, judgements, seen = [], {}, set()
+    for p in packets:
+        pid = str(p.get("paper_id") or "")
+        if not pid or pid in seen:
+            raise ValueError("routing_input_missing_or_duplicate_paper_id")
+        seen.add(pid)
+        judgements[pid] = {"label": "needs_verification", "label_as_returned": "",
+            "sub_question": "", "evidence": "", "uncertain": "not_routed", "use": "",
+            "routing_validated": False, "read_confirmed": False, "validation_errors": ["not_routed"]}
+        if len([v for v in (p.get("material") or {}).values() if v]) < MIN_MATERIAL_SOURCES:
             accounting["papers_skipped_for_material"] += 1
             continue
-        if accounting["papers_read"] + len(queue) >= max_papers:
-            break
-        queue.append(packet)
-
-    index = 0
-    while index < len(queue):
-        if accounting["estimated_cost_cny"] >= cap_cny:
+        if len(queue) < max(0, count):
+            queue.append(p)
+    for index in range(0, len(queue), batch_size):
+        batch = queue[index:index + batch_size]
+        if ledger is None:
             accounting["stop_reason"] = "cost_cap_reached"
             break
-        remaining_cap = max_papers - accounting["papers_read"]
-        size = min(batch_default, batch_max, remaining_cap)
-        batch = list(queue[index:index + size])
-        if not batch:
-            break
-        payload = {"review_question": question, "sub_questions": sub_questions,
-                   "candidates": batch}
-        messages = [{"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}]
-        started = time.time()
-        result = call(messages, accounting["model_tier"])
-        usage = dict((result or {}).get("_llm_usage") or {})
-        accounting["calls"] += 1
-        accounting["retries"] += int(usage.get("retry_count") or 0)
-        accounting["input_tokens"] += int(usage.get("input_tokens") or 0)
-        accounting["output_tokens"] += int(usage.get("output_tokens") or 0)
-        name = str(usage.get("model_name") or "")
-        if name and name not in accounting["model_names"]:
-            accounting["model_names"].append(name)
-        accounting["estimated_cost_cny"] = round(
-            accounting["estimated_cost_cny"] + _usage_cost(usage, prices), 6)
-        if (result or {}).get("fallback_used"):
-            accounting["stop_reason"] = "transport_failure"
-            break
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content":
+            json.dumps({"review_question": question, "sub_questions": list(facets), "candidates": batch}, ensure_ascii=False)}]
+        reservation = None
         try:
-            parsed = _extract_json((result or {}).get("content") or "")
-        except ValueError:
-            accounting["stop_reason"] = "unparseable_response"
-            index += len(batch)
-            continue
-        for row in parsed.get("papers") or ():
-            pid = str((row or {}).get("paper_id") or "")
-            if not pid:
-                continue
-            label = str((row or {}).get("label") or "").strip()
-            judgements[pid] = {
-                "label": label if label in LABELS else "needs_verification",
-                "label_as_returned": label,
-                "sub_question": str((row or {}).get("sub_question") or "")[:300],
-                "evidence": str((row or {}).get("evidence") or "")[:600],
-                "uncertain": str((row or {}).get("uncertain") or "")[:400],
-                "use": str((row or {}).get("use") or "")[:200],
-            }
-        accounting["papers_read"] = len(judgements)
-        index += len(batch)
+            # Honor the run's own cap even when the shared ledger has a larger
+            # project ceiling. The transport also reserves its exact wire bound.
+            bound = estimated_cost_cny({"input_tokens": len(json.dumps(messages).encode()) + 512,
+                "output_tokens": maximum}, model=model, conservative=True)
+            if accounting["estimated_cost_cny"] + bound > cap:
+                accounting["stop_reason"] = "cost_cap_reached"
+                break
+            if injected:
+                reservation = ledger.reserve(bound, "reading-router:%d" % index)
+            accounting["calls"] += 1
+            raw = call(messages, model)
+            usage = dict(raw.get("usage") or raw.get("_llm_usage") or {})
+            returned_model = str(raw.get("returned_model") or usage.get("model_name") or model)
+            cost = estimated_cost_cny(usage, model=returned_model)
+            if reservation:
+                ledger.settle(reservation["reservation_id"], cost, telemetry={"usage": usage, "returned_model": returned_model})
+                reservation = None
+            accounting["estimated_cost_cny"] += cost
+            accounting["input_tokens"] += int(usage.get("input_tokens", usage.get("prompt_tokens", 0)))
+            accounting["output_tokens"] += int(usage.get("output_tokens", usage.get("completion_tokens", 0)))
+            if returned_model not in accounting["model_names"]:
+                accounting["model_names"].append(returned_model)
+            content = raw.get("content")
+            parsed = content if isinstance(content, Mapping) else _extract_json(content)
+            validated, rejected = validate_routing_rows(batch, parsed.get("papers"), facets)
+            judgements.update(validated)
+            accounting["rejected_outputs"].extend(rejected)
+            accounting["papers_read"] += len(batch)
+        except (OSError, ValueError, QwenTransportError) as exc:
+            if reservation:
+                ledger.settle(reservation["reservation_id"], None, uncertain=True)
+            accounting["stop_reason"] = "cost_cap_reached" if "budget" in str(exc) else "unverified_response_or_transport"
+            accounting["error"] = type(exc).__name__
+            break
         if progress:
-            progress(index, len(queue), accounting)
+            progress(index + len(batch), len(queue), accounting)
     if not accounting["stop_reason"]:
-        accounting["stop_reason"] = ("read_all_candidates" if index >= len(queue)
-                                     else "count_cap_reached")
-    return {"judgements": judgements, "accounting": accounting,
-            "queued": len(queue), "elapsed_seconds": round(time.time() - started, 1)
-            if queue else 0.0}
+        accounting["stop_reason"] = "count_cap_reached" if len(seen) > count else "read_all_candidates"
+    return {"judgements": judgements, "accounting": accounting, "queued": len(queue),
+            "elapsed_seconds": round(time.time() - started, 1)}
 
 
 def main() -> int:
@@ -265,7 +308,11 @@ def main() -> int:
     meta = json.loads((root / "NODE_META.json").read_text(encoding="utf-8"))
     SS._merge_abstract_fill(root, meta)
     config = SS.load_config()
-    edge_set = SS.EdgeSet()
+    corpus["_bundle_base"] = str(root.resolve())
+    edge_path = SS._artifact_path(corpus, root, "edges", "GRAPH_EDGES.jsonl")
+    raw_edges = SS._read_bound_edges(corpus, edge_path, root)
+    corpus, raw_edges, _ = SS.canonical_view(corpus, raw_edges, meta)
+    edge_set = SS.build_layers(raw_edges, corpus, SS.facet_features(corpus, config), config, identity_meta=meta)
     own, mentions = SS._material_text_by_paper(root, corpus, edge_set)
     # Top-up runs are idempotent: a paper already judged keeps its judgement, and
     # the budget goes to the papers the re-selection brought in.
@@ -273,7 +320,8 @@ def main() -> int:
     previous_path = root / "READING.json"
     if previous_path.exists():
         try:
-            previous = json.loads(previous_path.read_text(encoding="utf-8")).get("judgements") or {}
+            previous = {pid: row for pid, row in (json.loads(previous_path.read_text(encoding="utf-8")).get("judgements") or {}).items()
+                        if row.get("routing_validated") is True}
         except ValueError:
             previous = {}
     order = [row for row in candidate_order(sk.get("domain_relevance") or {},
@@ -288,7 +336,8 @@ def main() -> int:
     facets = (plan.get("plan") or {}).get("facets") or []
     outcome = read_candidates(question, facets, packets, config,
                               budget={"max_papers": args.max_papers,
-                                      "cost_cap_cny": args.cost_cap_cny},
+                                      "cost_cap_cny": args.cost_cap_cny,
+                                      "ledger_path": root / "READING_BUDGET.sqlite"},
                               progress=lambda i, n, a: print(
                                   "  %d/%d read, %.4f CNY (estimate)" % (
                                       i, n, a["estimated_cost_cny"]), flush=True))

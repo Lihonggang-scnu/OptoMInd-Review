@@ -220,6 +220,9 @@ class QueryPlannerAgent:
         fields = QP.load_field_dictionary()
         prompt = QP.render_prompt(fields, user_question=question)
         outcome: dict[str, Any] = {
+            "original_question": question,
+            "semantic_coverage": "not_assessed",
+            "first_hit_scope": "format_validation_only",
             "status": "not_attempted",
             "first_hit": False,
             "revision_rounds": 0,
@@ -258,7 +261,7 @@ class QueryPlannerAgent:
             outcome["degradation"] = self._degradation(outcome, {})
             self.last_query_plan = outcome
             return outcome
-        report = QP.validate_plan(candidate, fields=fields)
+        report = QP.validate_plan(candidate, fields=fields, original_question=question)
         # Both rounds are kept in full, with the validator's own fingerprint, so a
         # stored run can be replayed and the verdict of the day reproduced.  Only
         # storing the final cleaned plan made "why did this fail" unrecoverable:
@@ -290,7 +293,7 @@ class QueryPlannerAgent:
                 except ValueError:
                     candidate = None
                 if candidate is not None:
-                    retry = QP.validate_plan(candidate, fields=fields)
+                    retry = QP.validate_plan(candidate, fields=fields, original_question=question)
                 else:
                     retry = {
                         "ok": False,

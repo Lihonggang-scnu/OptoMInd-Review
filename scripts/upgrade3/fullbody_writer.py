@@ -23,6 +23,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from scripts.upgrade3 import writer_candidates as shared
+from optomind_research.runtime.upgrade3.plan_handoff import validate_plan_handoff
 
 DEFAULT_CONFIG = PROJECT_ROOT / "config/fullbody_writer/plus_first.json"
 MANIFEST_SCHEMA = "optomind.fullbody_manifest.v1"
@@ -129,6 +130,8 @@ def _resolve_root(path: Path, files: _Files) -> Path:
         if not pointer.is_file():
             if not path.is_dir():
                 raise ValueError("packet_root_missing:" + str(path))
+            for dependency in validate_plan_handoff(path):
+                files.add(dependency, role="selected_plan_handoff")
             return path
         if pointer.name != "CURRENT_PLAN.json":
             raise ValueError("packet_root_requires_directory_or_CURRENT_PLAN_json")
@@ -139,6 +142,10 @@ def _resolve_root(path: Path, files: _Files) -> Path:
         payload = read_json(pointer)
         target = payload.get("packet_root") if isinstance(payload, Mapping) else None
         path = _path(target, pointer.parent, "current_plan_packet_root")
+        manifest = payload.get("manifest") if isinstance(payload, Mapping) else None
+        manifest_path = _path(manifest, pointer.parent, "current_plan_manifest") if manifest else None
+        for dependency in validate_plan_handoff(path, manifest_path=manifest_path, pointer=payload):
+            files.add(dependency, role="selected_plan_handoff")
 
 
 def resolve_packet_root(path: str | Path) -> tuple[Path, list[dict[str, Any]]]:

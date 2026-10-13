@@ -1773,11 +1773,11 @@ def _pool_row_from_card(
     gap_id: str,
     judgment_path: str,
 ) -> dict[str, Any]:
-    planning_view = card.get("planning_view") if isinstance(card.get("planning_view"), Mapping) else {}
+    from .planning_pool_adapter import pool_row_from_card
+    projected = pool_row_from_card(card, paper_id=paper_id or str(candidate.record.get("canonical_paper_id") or candidate.record.get("doi") or ""),
+                                   card_path=card_path, validate=False)
     row = {
-        "paper_id": paper_id or str(candidate.record.get("canonical_paper_id") or candidate.record.get("doi") or ""),
-        "card_path": card_path,
-        "planning_view": dict(planning_view),
+        **projected,
         "supplement_source_unit_id": source_unit_id,
         "supplement_status": judgment.get("status"),
         "material_ready": bool(judgment.get("material_ready", judgment.get("status") in {"fulfilled", "partial"})),

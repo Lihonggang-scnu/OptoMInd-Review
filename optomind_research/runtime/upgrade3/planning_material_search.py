@@ -1077,6 +1077,9 @@ def _load_card_indexed_materials(config: SearchIndexConfig) -> tuple[dict[str, d
     pool = [json.loads(line) for line in Path(config.pool_path).read_text(encoding="utf-8").splitlines() if line.strip()]
     by_id: dict[str, dict[str, Any]] = {}
     for row in pool:
+        if row.get("schema_version") == "planning_pool.v2":
+            from .planning_pool_adapter import validate_pool_row
+            row = validate_pool_row(row, root=Path(config.pool_path).parent)
         pid = str(row.get("paper_id") or "").strip()
         if pid:
             by_id[pid] = dict(row)
@@ -1183,7 +1186,8 @@ def build_index(
                 if fallback is not None:
                     card_path = fallback
                     card_payload = _material_identity(card_path)
-            snapshot = _find_snapshot(pid, config.snapshot_roots)
+            snapshot = (Path(pool_row["snapshot_dir"]) if pool_row.get("schema_version") == "planning_pool.v2"
+                        else _find_snapshot(pid, config.snapshot_roots))
             directed = _find_directed(pid, config.directed_roots)
             record = PaperRecord(
                 paper_id=pid,

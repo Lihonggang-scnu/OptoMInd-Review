@@ -20,6 +20,7 @@ Nothing here downloads a PDF, calls GROBID, or asks an LLM anything.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import re
@@ -101,34 +102,48 @@ def _minmax(values: Mapping[str, float]) -> dict[str, float]:
 
 def facet_features(corpus: Mapping[str, Any],
                    config: Mapping[str, Any]) -> dict[str, Any]:
-    """Layer 1: how strongly each paper belongs to each facet.
+    """Query-rank relevance, separate from passage density and reading evidence.
 
-    Query-level relevance and snippet evidence density are both kept.  Multiple
-    snippets from one query are NOT collapsed: they carry how densely a paper's
-    body answers that question.
+    Planned queries (including zero hits and failures) define coverage. A paper
+    contributes at most one reciprocal-rank vote to each independent query.
     """
 
     hits = corpus.get("retrieval_hits") or []
-    facets = [str(f.get("id")) for f in corpus.get("facets") or ()]
-    if not facets:
-        facets = sorted({str(h.get("facet_id")) for h in hits})
-
+    facets = [str(f.get("id")) for f in corpus.get("facets") or () if f.get("id")]
+    expected = corpus.get("expected_queries")
+    if expected is None:
+        expected = corpus.get("query_audit") or []
     queries_per_facet: dict[str, set] = defaultdict(set)
-    for hit in hits:
-        queries_per_facet[str(hit.get("facet_id"))].add(str(hit.get("query_id")))
+    for query in expected:
+        facet, query_id = str(query.get("facet_id") or ""), str(query.get("query_id") or "")
+        if facet and query_id:
+            queries_per_facet[facet].add(query_id)
+            if facet not in facets:
+                facets.append(facet)
+    # Old corpora have no plan universe. Keep them readable, but label the
+    # denominator as observed rather than presenting it as complete retrieval.
+    denominator_source = "expected_queries" if corpus.get("expected_queries") is not None else (
+        "query_audit" if expected else "observed_hits_legacy")
+    if denominator_source == "observed_hits_legacy":
+        for hit in hits:
+            facet = str(hit.get("facet_id") or "")
+            if facet:
+                queries_per_facet[facet].add(str(hit.get("query_id") or ""))
+                if facet not in facets:
+                    facets.append(facet)
+    for facet in facets:
+        queries_per_facet.setdefault(facet, set())
 
     acc: dict[str, dict[str, dict[str, Any]]] = defaultdict(
         lambda: defaultdict(lambda: {
             "queries": set(), "keyword_queries": set(), "question_queries": set(),
-            "snippet_hits": 0, "ranks": [], "snippet_scores": [], "rrf": 0.0}))
-
+            "snippet_hits": 0, "query_ranks": {}, "snippet_scores": []}))
     for hit in hits:
-        paper = str(hit.get("paper_id") or "")
-        facet = str(hit.get("facet_id") or "")
-        if not paper or not facet:
+        paper, facet = str(hit.get("paper_id") or ""), str(hit.get("facet_id") or "")
+        query_id = str(hit.get("query_id") or "")
+        if not paper or not facet or not query_id:
             continue
         row = acc[paper][facet]
-        query_id = str(hit.get("query_id"))
         row["queries"].add(query_id)
         if hit.get("query_type") == "question":
             row["question_queries"].add(query_id)
@@ -137,31 +152,43 @@ def facet_features(corpus: Mapping[str, Any],
             row["keyword_queries"].add(query_id)
         rank = hit.get("result_rank")
         if isinstance(rank, int) and rank > 0:
-            row["ranks"].append(rank)
-            # Reciprocal Rank Fusion across the independent ranked lists.
-            row["rrf"] += 1.0 / (60.0 + rank)
+            row["query_ranks"][query_id] = min(rank, row["query_ranks"].get(query_id, rank))
         score = hit.get("score")
         if isinstance(score, (int, float)):
             row["snippet_scores"].append(float(score))
 
     out: dict[str, dict[str, Any]] = {}
+    facet_hit_queries: dict[str, set] = defaultdict(set)
     for paper, by_facet in acc.items():
         out[paper] = {}
         for facet, row in by_facet.items():
-            total_queries = len(queries_per_facet.get(facet, ())) or 1
-            scores = row["snippet_scores"]
+            planned = queries_per_facet.get(facet, set())
+            covered = row["queries"] & planned
+            facet_hit_queries[facet].update(covered)
+            scores, ranks = row["snippet_scores"], list(row["query_ranks"].values())
             out[paper][facet] = {
                 "distinct_query_hits": len(row["queries"]),
-                "query_coverage": round(len(row["queries"]) / total_queries, 4),
+                "query_ids": sorted(row["queries"]),
+                "expected_query_count": len(planned),
+                "query_coverage": round(len(covered) / len(planned), 4) if planned else 0.0,
                 "keyword_query_hits": len(row["keyword_queries"]),
                 "question_query_hits": len(row["question_queries"]),
                 "snippet_hit_count": row["snippet_hits"],
-                "best_rank": min(row["ranks"]) if row["ranks"] else None,
-                "RRF_score": round(row["rrf"], 6),
+                "best_rank": min(ranks) if ranks else None,
+                "RRF_score": round(sum(1.0 / (60.0 + rank) for rank in ranks), 6),
                 "max_snippet_score": round(max(scores), 4) if scores else None,
                 "mean_snippet_score": round(sum(scores) / len(scores), 4) if scores else None,
             }
-    return {"features": out, "facets": facets,
+    coverage = {facet: {
+        "expected_queries": len(queries_per_facet[facet]),
+        "queries_with_hits": len(facet_hit_queries[facet]),
+        "retrieval_coverage": round(len(facet_hit_queries[facet]) / len(queries_per_facet[facet]), 4)
+        if queries_per_facet[facet] else 0.0,
+        "papers_with_hits": sum(facet in rows for rows in out.values()),
+        "read_papers": 0, "evidence_sufficient_papers": 0,
+    } for facet in facets}
+    return {"features": out, "facets": facets, "coverage": coverage,
+            "denominator_source": denominator_source,
             "queries_per_facet": {k: sorted(v) for k, v in queries_per_facet.items()}}
 
 
@@ -217,7 +244,7 @@ def object_relatedness(title: str, terms: Sequence[str],
     return round(max((idf.get(t, 0.0) for t in terms if t in words), default=0.0), 4)
 
 
-def load_raw_edges(path: str | Path) -> dict[str, dict[str, Any]]:
+def load_raw_edges(path: str | Path, *, run_id=None, plan_hash=None) -> dict[str, dict[str, Any]]:
     """Read the jsonl the collector wrote, keyed by source paper."""
 
     rows: dict[str, dict[str, Any]] = {}
@@ -229,6 +256,10 @@ def load_raw_edges(path: str | Path) -> dict[str, dict[str, Any]]:
             try:
                 record = json.loads(line)
             except ValueError:
+                continue
+            if run_id and record.get("run_id") not in (None, run_id):
+                continue
+            if plan_hash and record.get("plan_hash") not in (None, plan_hash):
                 continue
             rows[str(record.get("source_paper"))] = record
     return rows
@@ -406,6 +437,87 @@ def canonical_works(rows: Mapping[str, Mapping[str, Any]],
             "nodes_considered": len(rows)}
 
 
+
+def _canonical_id(pid, alias):
+    pid = str(pid or "")
+    seen = set()
+    while pid in alias and pid not in seen:
+        seen.add(pid)
+        pid = str(alias[pid])
+    return pid
+
+
+def _canonical_mapping(rows, alias):
+    """Merge keyed sidecars deterministically, preferring canonical records."""
+    out = {}
+    for pid in sorted(rows, key=lambda p: (str(p) != _canonical_id(p, alias), str(p))):
+        canonical = _canonical_id(pid, alias)
+        info = rows[pid]
+        if canonical not in out:
+            out[canonical] = dict(info) if isinstance(info, Mapping) else info
+        elif isinstance(info, Mapping) and isinstance(out[canonical], dict):
+            for key, value in info.items():
+                if out[canonical].get(key) in (None, "", [], {}) and value is not None:
+                    out[canonical][key] = value
+    return out
+
+
+def canonical_view(corpus, raw_edges, enrichment=None):
+    """One immutable projection shared by graphs, hits and every keyed sidecar."""
+    core = [p["paper_id"] for p in corpus.get("papers") or [] if p.get("paper_id")]
+    identity = canonical_works(work_identity_meta(corpus, raw_edges, enrichment), core)
+    prior = corpus.get("work_identity") or {}
+    alias = dict(prior.get("alias_to_canonical") or prior.get("alias") or {})
+    alias.update(identity["alias"])
+    alias = {str(pid): _canonical_id(target, alias) for pid, target in alias.items()}
+    alias = {pid: target for pid, target in alias.items() if pid != target}
+    identity["alias"] = alias
+    identity["prior_registry"] = prior.get("registry") or prior.get("works") or []
+    identity["merge_history"] = prior.get("merge_history") or []
+    identity["canonical_nodes"] = sorted({_canonical_id(pid, alias) for pid in core})
+    view = dict(corpus)
+    papers = {}
+    for paper in corpus.get("papers") or []:
+        pid = str(paper.get("paper_id") or "")
+        if not pid:
+            pid = "corpus:" + str(paper["corpus_id"]) if paper.get("corpus_id") else (
+                "doi:" + str(paper["doi"]) if paper.get("doi") else "")
+        if not pid:
+            continue
+        canonical = _canonical_id(pid, alias)
+        row = papers.setdefault(canonical, {"paper_id": canonical, "provider_paper_ids": []})
+        row["provider_paper_ids"] = sorted(set(row["provider_paper_ids"] +
+                                               [pid] + list(paper.get("provider_paper_ids") or [])))
+        for key, value in paper.items():
+            if key not in ("paper_id", "provider_paper_ids") and row.get(key) in (None, "", [], {}):
+                row[key] = value
+    view["papers"] = list(papers.values())
+    view["retrieval_hits"] = [{**hit,
+        "provider_paper_id": hit.get("provider_paper_id") or hit.get("paper_id"),
+        "paper_id": _canonical_id(hit.get("paper_id"), alias)}
+        for hit in corpus.get("retrieval_hits") or []]
+    view["_canonical_identity"] = identity
+    edges = {}
+    for source, record in raw_edges.items():
+        source = _canonical_id(source, alias)
+        row = edges.setdefault(source, {**record, "source_paper": source,
+                                        "references": [], "citations": []})
+        for relation in ("references", "citations"):
+            by_id = {node["paper_id"]: node for node in row[relation]}
+            for node in record.get(relation) or []:
+                pid = _canonical_id(node.get("paper_id") or (
+                    "corpus:" + str(node["corpus_id"]) if node.get("corpus_id") else ""), alias)
+                if not pid or pid == source:
+                    continue
+                item = {**node, "paper_id": pid,
+                        "provider_paper_id": node.get("provider_paper_id") or node.get("paper_id")}
+                if pid in by_id:
+                    for flag in ("is_influential", "has_context"):
+                        item[flag] = bool(item.get(flag) or by_id[pid].get(flag))
+                by_id[pid] = item
+            row[relation] = list(by_id.values())
+    return view, edges, identity
+
 def build_layers(
     raw_edges: Mapping[str, Mapping[str, Any]],
     corpus: Mapping[str, Any],
@@ -426,8 +538,8 @@ def build_layers(
     # portfolio.  The alias map is applied to every edge endpoint below, before
     # any of the derived structures exist, so the whole graph is built on canon
     # ids rather than repaired afterwards.
-    identity = canonical_works(work_identity_meta(corpus, raw_edges, identity_meta),
-                               core_ids)
+    identity = corpus.get("_canonical_identity") or canonical_view(
+        corpus, raw_edges, identity_meta)[2]
     alias = identity["alias"]
     if alias:
         core_ids = {alias.get(pid, pid) for pid in core_ids}
@@ -442,7 +554,8 @@ def build_layers(
         pid = str(paper.get("paper_id") or "")
         if pid:
             meta[pid] = {"year": paper.get("year"), "title": paper.get("title") or "",
-                         "citation_count": None, "core": True}
+                         "citation_count": paper.get("citation_count"), "abstract": paper.get("abstract") or "",
+                         "core": True}
 
     citation: list[dict[str, Any]] = []
     references_of: dict[str, set] = defaultdict(set)
@@ -665,7 +778,15 @@ def build_layers(
     def keep_edge(row: Mapping[str, Any]) -> bool:
         return str(row.get("source")) in active and str(row.get("target")) in active
 
+    relation_counts = {"success": 0, "failed": 0, "partial": 0, "not_executed": 0, "legacy_unknown": 0}
+    for pid in core_ids:
+        record = raw_edges.get(pid)
+        for relation in ("references", "citations"):
+            receipt = ((record or {}).get("relation_status") or {}).get(relation) or {}
+            state = receipt.get("state") or ("legacy_unknown" if record is not None else "not_executed")
+            relation_counts[state if state in relation_counts else "legacy_unknown"] += 1
     statistics = {
+        "relation_completeness": {"expected": 2 * len(core_ids), **relation_counts},
         "core_papers": len(core_ids),
         "boundary_candidates": len(boundary_reasons),
         "boundary_admitted": len(admitted),
@@ -727,6 +848,7 @@ def build_graphs(
 
     import igraph as ig
 
+    corpus, _, _ = canonical_view({**corpus, "work_identity": edge_set.identity}, {})
     core_ids = {str(p["paper_id"]) for p in corpus.get("papers") or () if p.get("paper_id")}
     active = set(core_ids) | set(edge_set.boundary)
     nodes = sorted(active)
@@ -882,6 +1004,10 @@ def detect_communities(graphs: Mapping[str, Any], config: Mapping[str, Any]) -> 
     import leidenalg
 
     composite = graphs["composite"]
+    if not graphs["nodes"]:
+        return {"runs": [], "best_run": {}, "membership": [], "modularity": 0.0,
+                "community_count": 0, "sizes": {}, "stability": {},
+                "mean_stability": None, "pair_agreement_mean": None}
     cfg = config.get("communities") or {}
     seeds = list(cfg.get("seeds") or [1, 7, 13])
     resolutions = list(cfg.get("resolutions") or [0.8, 1.0, 1.2])
@@ -897,7 +1023,7 @@ def detect_communities(graphs: Mapping[str, Any], config: Mapping[str, Any]) -> 
             runs.append({
                 "seed": int(seed), "resolution": float(resolution),
                 "membership": list(partition.membership),
-                "modularity": float(partition.modularity),
+                "modularity": float(partition.modularity) if math.isfinite(partition.modularity) else 0.0,
                 "community_count": len(set(partition.membership)),
             })
 
@@ -1324,7 +1450,7 @@ def build_portfolio(
             candidates[paper].add("facet:%s" % facet)
         feature = facet_feature["features"].get(paper) or {}
         for facet, row in feature.items():
-            for query_id in (facet_feature["queries_per_facet"].get(facet) or ()):
+            for query_id in row.get("query_ids") or ():
                 if row["query_coverage"] > 0:
                     candidates[paper].add("query:%s" % query_id)
         community = (graph_feat.get(paper) or {}).get("community")
@@ -1478,8 +1604,8 @@ def _meta_from(corpus: Mapping[str, Any],
     for paper in corpus.get("papers") or ():
         pid = str(paper.get("paper_id") or "")
         if pid:
-            meta[pid] = {"title": paper.get("title") or "", "year": paper.get("year"),
-                         "citation_count": None, "core": True}
+            meta[pid] = {**paper, "title": paper.get("title") or "", "year": paper.get("year"),
+                         "citation_count": paper.get("citation_count"), "core": True}
     for record in raw_edges.values():
         for relation in ("references", "citations"):
             for node in record.get(relation) or ():
@@ -1500,6 +1626,9 @@ def _meta_from(corpus: Mapping[str, Any],
 def run_skeleton(corpus_path: Path, edge_path: Path, out_dir: Path,
                  config: Mapping[str, Any], *, dump_edges: bool = True) -> dict[str, Any]:
     corpus = json.loads(Path(corpus_path).read_text(encoding="utf-8"))
+    corpus["_bundle_base"] = str(Path(corpus_path).resolve().parent)
+    raw_edges = _read_bound_edges(corpus, edge_path, out_dir)
+    corpus, raw_edges, identity = canonical_view(corpus, raw_edges)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1507,7 +1636,6 @@ def run_skeleton(corpus_path: Path, edge_path: Path, out_dir: Path,
     ff = facet_features(corpus, config)
 
     print("[2/9] edges -> four layers + citation backbone", flush=True)
-    raw_edges = load_raw_edges(edge_path)
     edge_set = build_layers(raw_edges, corpus, ff, config)
     print("      ", json.dumps(edge_set.statistics, ensure_ascii=False), flush=True)
 
@@ -1555,6 +1683,7 @@ def run_skeleton(corpus_path: Path, edge_path: Path, out_dir: Path,
         "configuration": config,
         "facets": ff["facets"],
         "paper_facet_features": ff["features"],
+        "coverage": _coverage_with_reading(ff, {}),
         "papers": [{"paper_id": p, "core": True, **{k: meta.get(p, {}).get(k)
                                                      for k in ("title", "year")}}
                    for p in sorted(graphs["core_ids"])],
@@ -1579,14 +1708,8 @@ def run_skeleton(corpus_path: Path, edge_path: Path, out_dir: Path,
         json.dumps(communities["profiles"], ensure_ascii=False, indent=1), encoding="utf-8")
     (out_dir / "INVESTIGATION_PORTFOLIO.json").write_text(
         json.dumps(portfolio, ensure_ascii=False, indent=1), encoding="utf-8")
-    (out_dir / "VOCABULARY_AUDIT.json").write_text(
-        json.dumps(domain["vocabulary_audit"], ensure_ascii=False, indent=1),
-        encoding="utf-8")
-    (out_dir / "SELECTION_TRACE.json").write_text(
-        json.dumps({"trace": portfolio["trace"],
-                    "priority_portfolio": portfolio["priority_portfolio"],
-                    "deep_analysis_corpus": portfolio["deep_analysis_corpus"]},
-                   ensure_ascii=False, indent=1), encoding="utf-8")
+    (out_dir / "WORK_IDENTITY.json").write_text(
+        json.dumps(identity, ensure_ascii=False, indent=1), encoding="utf-8")
 
     if dump_edges:
         import pandas as pd
@@ -1603,6 +1726,7 @@ def run_skeleton(corpus_path: Path, edge_path: Path, out_dir: Path,
         pd.DataFrame(facet_rows).to_parquet(out_dir / "PAPER_FACET_FEATURES.parquet",
                                             index=False)
 
+    _write_skeleton_bundle(out_dir, corpus_path, edge_path, corpus, _coverage_with_reading(ff, {}))
     return skeleton
 
 
@@ -1951,7 +2075,7 @@ def build_eligible_portfolio(roles, cross, graph_feat, temporal, facet_feature,
             candidates[paper].add("facet:%s" % facet)
         for facet, row in (facet_feature["features"].get(paper) or {}).items():
             if row["query_coverage"] > 0:
-                for query_id in (facet_feature["queries_per_facet"].get(facet) or ()):
+                for query_id in row.get("query_ids") or ():
                     candidates[paper].add("query:%s" % query_id)
         community = (graph_feat.get(paper) or {}).get("community")
         if community is not None:
@@ -2065,21 +2189,179 @@ def build_eligible_portfolio(roles, cross, graph_feat, temporal, facet_feature,
 # ------------------------------------------------- orchestrator v2 ---------
 
 
-def _load_enrichment(out_dir):
-    """Authoritative metadata and embeddings, when the enrich step has run."""
+class ArtifactBindingError(ValueError):
+    """A sidecar does not belong to the declared corpus/run."""
 
-    meta_path = Path(out_dir) / "NODE_META.json"
-    vec_path = Path(out_dir) / "NODE_EMBEDDINGS.npz"
-    if not meta_path.exists() or not vec_path.exists():
-        return {}, {}
-    import numpy as np
 
-    meta = json.loads(meta_path.read_text(encoding="utf-8"))
-    data = np.load(vec_path, allow_pickle=True)
-    ids = [str(x) for x in data["ids"]]
-    matrix = data["matrix"]
-    vectors = {pid: matrix[i] for i, pid in enumerate(ids)}
+def _file_hash(path):
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _artifact_path(corpus, out_dir, name, default=None):
+    bundle = corpus.get("bundle") or {}
+    entry = (bundle.get("artifacts") or {}).get(name, bundle.get(name))
+    for key in ("run_id", "plan_hash"):
+        expected = corpus.get(key)
+        if expected and bundle.get(key) and expected != bundle[key]:
+            raise ArtifactBindingError("bundle %s differs from corpus" % key)
+    if entry is None:
+        # Explicit null means this run has no artifact. Only old manifests that
+        # omit the key may use legacy conventional-file discovery.
+        if name in (bundle.get("artifacts") or {}) or name in bundle:
+            return None
+        return Path(out_dir) / default if default else None
+    if not isinstance(entry, Mapping) or not entry.get("path"):
+        raise ArtifactBindingError("invalid %s artifact descriptor" % name)
+    for key in ("run_id", "plan_hash"):
+        expected = corpus.get(key) or bundle.get(key)
+        if expected and entry.get(key) and expected != entry[key]:
+            raise ArtifactBindingError("%s %s differs from corpus" % (name, key))
+    path = Path(entry["path"])
+    if not path.is_absolute():
+        path = Path(corpus.get("_bundle_base") or out_dir) / path
+    if not path.is_file():
+        raise ArtifactBindingError("declared %s artifact is missing: %s" % (name, path))
+    expected_hash = entry.get("sha256") or entry.get("hash")
+    if not expected_hash or _file_hash(path) != expected_hash:
+        raise ArtifactBindingError("%s artifact sha256 mismatch or missing" % name)
+    return path
+
+
+
+def _read_bound_edges(corpus, edge_path, out_dir):
+    bundle = corpus.get("bundle") or {}
+    descriptor = (bundle.get("artifacts") or {}).get("edges", bundle.get("edges"))
+    if descriptor is None and ("edges" in (bundle.get("artifacts") or {}) or "edges" in bundle):
+        return {}
+    if edge_path is None:
+        return {}
+    if descriptor is not None:
+        declared = _artifact_path(corpus, out_dir, "edges")
+        if declared.resolve() != Path(edge_path).resolve():
+            raise ArtifactBindingError("selected edge artifact differs from corpus bundle")
+    return load_raw_edges(edge_path, run_id=corpus.get("run_id"), plan_hash=corpus.get("plan_hash"))
+
+def _load_enrichment(out_dir, corpus=None):
+    """Metadata is useful without vectors; both can be explicitly run-bound."""
+    corpus = corpus or {}
+    meta_path = _artifact_path(corpus, out_dir, "metadata", "NODE_META.json")
+    vec_path = _artifact_path(corpus, out_dir, "vectors", "NODE_EMBEDDINGS.npz")
+    meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path is not None and meta_path.exists() else {}
+    vectors = {}
+    if vec_path is not None and vec_path.exists():
+        # Existing enrich files may use an object array for IDs. This is a local
+        # pipeline artifact, never fetched or loaded from an arbitrary URL.
+        with np.load(vec_path, allow_pickle=True) as data:
+            ids = [str(x) for x in data["ids"]]
+            matrix = data["matrix"]
+            vectors = {pid: matrix[i] for i, pid in enumerate(ids)}
     return meta, vectors
+
+
+def _coverage_with_reading(ff, reading):
+    coverage = {facet: dict(row) for facet, row in ff["coverage"].items()}
+    for paper, by_facet in ff["features"].items():
+        verdict = reading.get(paper) or {}
+        # Pre-reading routing explicitly reports read_confirmed=False. A
+        # relevance label alone must never inflate actual source-read coverage.
+        is_read = bool(verdict.get("read_confirmed") is True and
+                       verdict.get("source_validated") is True)
+        for facet in by_facet:
+            if facet not in coverage:
+                continue
+            coverage[facet]["read_papers"] += int(is_read)
+            # A routing label or a lexical hint is never evidence sufficiency.
+            sufficient = verdict.get("evidence_sufficient_by_facet") or {}
+            coverage[facet]["evidence_sufficient_papers"] += int(is_read and sufficient.get(facet) is True)
+    total = len(coverage)
+    return {"denominator_source": ff["denominator_source"], "facets": coverage,
+            "facet_count": total,
+            "retrieval_facet_coverage": sum(r["papers_with_hits"] > 0 for r in coverage.values()) / total if total else 0.0,
+            "read_facet_coverage": sum(r["read_papers"] > 0 for r in coverage.values()) / total if total else 0.0,
+            "evidence_sufficient_facet_coverage": sum(r["evidence_sufficient_papers"] > 0 for r in coverage.values()) / total if total else 0.0}
+
+
+def _verified_pool_reading(path, alias, *, evidence_receipt=None, expected_plan_hash=None):
+    """Explicit selected full cards provide read coverage, never routing JSON."""
+    if path is None:
+        return {}
+    from .progressive_review_plan import load_planning_pool
+    rows = load_planning_pool(path)
+    # Legacy rows are still usable planning inputs, but cannot assert new
+    # verified-read proof without the v2 card/snapshot/PLAN validation path.
+    verified = {row["canonical_paper_id"]: {"read_confirmed": True,
+                 "source_validated": True, "card_path": row["card_path"],
+                 "snapshot_id": row["snapshot_id"], "material_depth": row.get("material_depth_label")}
+                for row in rows if row.get("schema_version") == "planning_pool.v2"
+                and row.get("read_confirmed") is True and row.get("source_validated") is True}
+    if evidence_receipt is not None:
+        from .article_evidence import EvidenceRequest, source_unit_from_snapshot
+        from .evidence_assessment import validate_assessed_unit
+        if not isinstance(evidence_receipt, dict) or not evidence_receipt.get("path") or not evidence_receipt.get("sha256"):
+            raise ValueError("coverage_receipt_descriptor_required")
+        receipt_path = Path(evidence_receipt["path"])
+        if _file_hash(receipt_path) != evidence_receipt["sha256"]:
+            raise ValueError("coverage_receipt_hash_mismatch")
+        receipt = json.loads(receipt_path.read_text())
+        if not expected_plan_hash or receipt.get("plan_hash") != expected_plan_hash:
+            raise ValueError("coverage_receipt_plan_mismatch")
+        bundle = receipt["evidence_bundle"]
+        request = EvidenceRequest.from_mapping(bundle["request"])
+        facet_outputs = receipt.get("facet_outputs") or {}
+        if not facet_outputs or any(not values or set(values) - set(request.required_outputs) for values in facet_outputs.values()):
+            raise ValueError("coverage_receipt_facet_mapping_invalid")
+        selected = {row["canonical_paper_id"]: row for row in rows if row.get("schema_version") == "planning_pool.v2"}
+        for unit in bundle["source_units"]:
+            ident = unit["canonical_paper_id"]
+            if ident not in selected:
+                continue  # Newly retrieved material is not yet a selected read card.
+            row = selected[ident]
+            original = source_unit_from_snapshot(snapshot_dir=row["snapshot_dir"], roles=unit["roles"])
+            checked = validate_assessed_unit(request, original, unit.get("output_assessment") or {})
+            verified[ident]["evidence_sufficient_by_facet"] = {
+                facet: set(outputs).issubset(checked["fulfilled_outputs"]) for facet, outputs in facet_outputs.items()}
+            verified[ident]["assessment_receipt"] = evidence_receipt
+    return _canonical_mapping(verified, alias)
+
+
+def _write_skeleton_bundle(out_dir, corpus_path, edge_path, corpus, coverage):
+    """Publish explicit paths and hashes only after every output was written."""
+    bundle = corpus.get("bundle") or {}
+    run_id = corpus.get("run_id") or bundle.get("run_id")
+    plan_hash = corpus.get("plan_hash") or bundle.get("plan_hash")
+    artifacts = {}
+    paths = {"corpus": Path(corpus_path), "edges": (
+                 _artifact_path(corpus, out_dir, "edges")
+                 if "edges" in (bundle.get("artifacts") or {}) or "edges" in bundle
+                 else Path(edge_path) if edge_path is not None else None),
+             "snippet_store": _artifact_path(corpus, out_dir, "snippet_store", "SNIPPET_TEXT.sqlite"),
+             "metadata": _artifact_path(corpus, out_dir, "metadata", "NODE_META.json"),
+             "vectors": _artifact_path(corpus, out_dir, "vectors", "NODE_EMBEDDINGS.npz"),
+             "reading": _artifact_path(corpus, out_dir, "reading", "READING.json"),
+             "work_identity": Path(out_dir) / "WORK_IDENTITY.json",
+             "skeleton": Path(out_dir) / "SCHOLARLY_SKELETON.json",
+             "cards": Path(out_dir) / "INVESTIGATION_CARDS.json",
+             "portfolio": Path(out_dir) / "INVESTIGATION_PORTFOLIO.json"}
+    for name, path in paths.items():
+        artifacts[name] = ({"path": str(path.resolve()), "sha256": _file_hash(path),
+                            "run_id": run_id, "plan_hash": plan_hash}
+                           if path is not None and path.is_file() else None)
+    result = {"schema_version": "optomind.skeleton_bundle.v1", "run_id": run_id,
+              "plan_hash": plan_hash, "namespace": bundle.get("namespace") or run_id,
+              "artifacts": artifacts, "coverage": coverage,
+              "scope": "reading navigation; does not establish scientific evidence sufficiency"}
+    (Path(out_dir) / "SKELETON_BUNDLE.json").write_text(
+        json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    (Path(out_dir) / "READING_NAVIGATION_MANIFEST.json").write_text(
+        json.dumps({"schema_version": "optomind.reading_navigation.v1", "run_id": run_id,
+                    "plan_hash": plan_hash, "bundle": "SKELETON_BUNDLE.json", "coverage": coverage,
+                    "cards": artifacts["cards"], "portfolio": artifacts["portfolio"]},
+                   ensure_ascii=False, indent=2), encoding="utf-8")
+    return result
 
 
 def _merge_abstract_fill(out_dir, meta):
@@ -2124,20 +2406,36 @@ def _snippet_text_by_paper(out_dir, corpus, edge_set=None, *, max_chars=4000,
     """
 
     empty: Any = ({}, {}) if split_mentions else {}
-    path = Path(out_dir) / "SNIPPET_TEXT.sqlite"
-    if not path.exists():
-        # A run without a snippet store has no body text; the caller still needs
-        # the shape it asked for, which is why this returns a pair when asked.
+    path = _artifact_path(corpus, out_dir, "snippet_store", "SNIPPET_TEXT.sqlite")
+    if path is None or not path.exists():
         return empty
+    expected = {str(hit.get("hit_id")): str(hit.get("text_hash") or "")
+                for hit in corpus.get("retrieval_hits") or []}
     by_hit = {}
     try:
-        connection = sqlite3.connect(str(path))
-        for hit_id, text in connection.execute(
-                "SELECT hit_id, raw_snippet_text FROM snippet_text"):
-            by_hit[str(hit_id)] = str(text or "")
-        connection.close()
-    except Exception:  # noqa: BLE001
-        return empty
+        connection = sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)
+        try:
+            has_binding = connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='run_binding'").fetchone()
+            if has_binding:
+                bindings = connection.execute("SELECT run_id, plan_hash FROM run_binding").fetchall()
+                run_id = corpus.get("run_id") or (corpus.get("bundle") or {}).get("run_id")
+                plan_hash = corpus.get("plan_hash") or (corpus.get("bundle") or {}).get("plan_hash")
+                if (run_id or plan_hash) and (len(bindings) != 1 or
+                        (run_id and bindings[0][0] != run_id) or
+                        (plan_hash and bindings[0][1] != plan_hash)):
+                    raise ArtifactBindingError("snippet_store database run binding differs from corpus")
+            for hit_id, text in connection.execute(
+                    "SELECT hit_id, raw_snippet_text FROM snippet_text"):
+                hit_id, text = str(hit_id), str(text or "")
+                digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+                # H000001 repeats every run. A locator alone is never identity.
+                if expected.get(hit_id) and expected[hit_id] == digest:
+                    by_hit[hit_id] = text
+        finally:
+            connection.close()
+    except sqlite3.Error as exc:
+        raise ArtifactBindingError("unreadable snippet_store: %s" % exc) from exc
     out: dict[str, list[str]] = {}
     for hit in corpus.get("retrieval_hits") or ():
         paper = str(hit.get("paper_id") or "")
@@ -2200,23 +2498,24 @@ def run_skeleton_v2(corpus_path, edge_path, out_dir, config, *, dump_edges=True,
     from optomind_research.runtime.upgrade3 import domain_relevance as DR
 
     corpus = json.loads(Path(corpus_path).read_text(encoding="utf-8"))
+    corpus["_bundle_base"] = str(Path(corpus_path).resolve().parent)
     input_state = dict(corpus.get("input_state") or {})
     if corpus.get("degraded") and not allow_degraded:
         raise DegradedCorpusError(input_state)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    raw_edges = _read_bound_edges(corpus, edge_path, out_dir)
+    identity_meta, early_vectors = _load_enrichment(out_dir, corpus)
+    _artifact_path(corpus, out_dir, "reading", "READING.json")
+    _snippet_text_by_paper(out_dir, corpus)
+    corpus, raw_edges, identity = canonical_view(corpus, raw_edges, identity_meta)
+    alias = identity["alias"]
+
     print("[1/11] facet membership", flush=True)
     ff = facet_features(corpus, config)
 
     print("[2/11] edges -> layers + backbone", flush=True)
-    raw_edges = load_raw_edges(edge_path)
-    # The enrichment file is read here as well as at step 6: node identity needs
-    # the titles, years and DOIs of the boundary papers before the graph exists.
-    try:
-        identity_meta, _early_vectors = _load_enrichment(out_dir)
-    except Exception:  # noqa: BLE001
-        identity_meta = {}
     edge_set = build_layers(raw_edges, corpus, ff, config, identity_meta=identity_meta)
     (out_dir / "WORK_IDENTITY.json").write_text(
         json.dumps({"summary": {k: v for k, v in edge_set.identity.items() if k != "registry"},
@@ -2236,11 +2535,12 @@ def run_skeleton_v2(corpus_path, edge_path, out_dir, config, *, dump_edges=True,
     global_feat = graph_features(graphs, communities["membership"])
 
     print("[6/11] metadata + embeddings", flush=True)
-    meta, vectors = _load_enrichment(out_dir)
+    meta = _canonical_mapping(identity_meta, alias)
+    vectors = _canonical_mapping(early_vectors, alias)
     fallback = _meta_from(corpus, raw_edges)
     for pid, info in fallback.items():
         merged = meta.setdefault(pid, {})
-        for key in ("title", "year", "citation_count"):
+        for key in ("title", "year", "citation_count", "abstract", "doi", "authors", "venue"):
             if merged.get(key) in (None, "") and info.get(key) not in (None, ""):
                 merged[key] = info[key]
         merged.setdefault("is_core", pid in graphs["core_ids"])
@@ -2252,6 +2552,7 @@ def run_skeleton_v2(corpus_path, edge_path, out_dir, config, *, dump_edges=True,
             merged.setdefault("year", paper.get("year"))
             merged["is_core"] = True
     filled = _merge_abstract_fill(out_dir, meta)
+    meta = _canonical_mapping(meta, alias)
     print("       meta=%d vectors=%d abstract_fill=%d" % (
         len(meta), len(vectors), filled), flush=True)
 
@@ -2277,13 +2578,14 @@ def run_skeleton_v2(corpus_path, edge_path, out_dir, config, *, dump_edges=True,
     # A bounded pre-reading pass may have run on this topic.  When it has, its
     # labels are evidence about relevance that the lexical rulers do not have, and
     # they are allowed to move a paper up as well as down.
-    reading_path = Path(out_dir) / "READING.json"
+    reading_path = _artifact_path(corpus, out_dir, "reading", "READING.json")
     reading = {}
-    if reading_path.exists():
+    if reading_path is not None and reading_path.exists():
         try:
             reading = json.loads(reading_path.read_text(encoding="utf-8")).get("judgements") or {}
         except ValueError:
             reading = {}
+        reading = _canonical_mapping(reading, alias)
         print("       reading labels available for %d papers" % len(reading), flush=True)
     domain = DR.classify_domain_relevance(ff, meta, vectors, edge_set, raw_edges,
                                           graphs["core_ids"], config, corpus=corpus,
@@ -2365,6 +2667,9 @@ def run_skeleton_v2(corpus_path, edge_path, out_dir, config, *, dump_edges=True,
         "degraded": bool(corpus.get("degraded")),
         "facets": ff["facets"],
         "paper_facet_features": ff["features"],
+        "coverage": _coverage_with_reading(ff, _verified_pool_reading(config.get("planning_pool_path"), alias,
+            evidence_receipt=config.get("evidence_assessment_receipt"), expected_plan_hash=corpus.get("plan_hash"))),
+        "bundle_file": "SKELETON_BUNDLE.json",
         "pools": {"sizes": pools["sizes"], "per_facet": pools["per_facet"],
                   "graph_support_pool": pools["graph_support_pool"],
                   "eligible_pool": pools["eligible_pool"],
@@ -2436,6 +2741,7 @@ def run_skeleton_v2(corpus_path, edge_path, out_dir, config, *, dump_edges=True,
         pd.DataFrame(domain_rows).to_parquet(out_dir / "DOMAIN_RELEVANCE.parquet",
                                              index=False)
 
+    _write_skeleton_bundle(out_dir, corpus_path, edge_path, corpus, skeleton["coverage"])
     return skeleton, pools, cards, portfolio
 
 
@@ -2458,7 +2764,7 @@ def _paper_dimensions(paper, roles, cross, graph_feat, temporal, facet_feature,
         dims["facet:%s" % facet] = 1.0
     for facet, row in (facet_feature["features"].get(paper) or {}).items():
         if row["query_coverage"] > 0:
-            for query_id in (facet_feature["queries_per_facet"].get(facet) or ()):
+            for query_id in row.get("query_ids") or ():
                 dims["query:%s" % query_id] = 1.0
     community = (graph_feat.get(paper) or {}).get("community")
     if community is not None:

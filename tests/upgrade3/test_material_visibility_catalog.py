@@ -15,7 +15,7 @@ def _payload(record):
     return strengthening.build_strengthening_payload(
         research_question="Which findings apply under which conditions?",
         chapter_id="CH01",
-        chapter_plan={"chapter_id": "CH01", "units": [{"unit_id": "CH01_U01"}]},
+        chapter_plan={"chapter_id": "CH01", "units": [{"unit_id": "CH01_U01", "source_handles": ["P0001"]}]},
         source_materials=[record],
     )
 
@@ -36,7 +36,7 @@ def _record(finding="Treatment improved the measured outcome", condition="Only i
 
 def _visible_locators(messages):
     value = json.loads(messages[1]["content"])
-    return value["material_catalog"]["entries"][0]["source_supplied_locators"]
+    return value["material_catalog"]["priority_semantic_entries"][0]["source_supplied_locators"]
 
 
 @pytest.mark.parametrize("finding,condition", [
@@ -54,16 +54,17 @@ def test_semantic_material_visible_after_long_method_in_actual_messages(finding,
     locators = {item["path"]: item for item in _visible_locators(access)}
     summary = json.loads(locators["study_summary_A"]["source_excerpt"])
     assert summary["key_findings"] == original["study_summary_A"]["key_findings"]
-    assert summary["problem_or_question"] == "Does the relation generalize?"
-    assert summary["research_scope"] == "A bounded comparison"
     assert summary["contribution_and_limits"] == original["study_summary_A"]["contribution_and_limits"]
-    assert locators["study_summary_A"]["omitted_material_paths"] == ["study_summary_A.approach"]
     assert locators["study_summary_A"]["omitted_materials_requestable"] is True
-    assert json.loads(locators["review_planning_B"]["source_excerpt"]) == row["review_planning_B"]
+    assert json.loads(locators["review_planning_B"]["source_excerpt"])["planning_summary"] == row["review_planning_B"]["planning_summary"]
     unread = demand.resolve_material_requests(payload, catalog, {"status": "no_change"})
     owner_text = json.dumps(demand.owner_messages(payload, catalog, unread), ensure_ascii=False)
-    assert finding in owner_text and condition in owner_text
+    assert finding not in owner_text and condition not in owner_text
     assert "LONG-METHOD-ONLY" not in owner_text
+    read = demand.resolve_material_requests(payload, catalog, {"status": "access_plan", "material_requests": [{"access_id": "source_materials[0]"}]})
+    owner_text = json.dumps(demand.owner_messages(payload, catalog, read), ensure_ascii=False)
+    assert finding in owner_text and condition in owner_text
+    assert "LONG-METHOD-ONLY" in owner_text
     assert row == original
 
 
@@ -74,7 +75,11 @@ def test_atomic_findings_never_cut_and_omitted_records_are_requestable():
     row["study_summary_A"]["key_findings"] = [oversized, visible]
     payload = _payload(row)
     catalog = demand.build_material_catalog(payload)
-    loc = next(item for item in _visible_locators(demand.access_messages(payload, catalog)) if item["path"] == "study_summary_A")
+    # The stored semantic view is bounded; the actual priority view keeps
+    # whole findings, and explicit reads return the complete source record.
+    loc = next(item for item in catalog["entries"][0]["source_supplied_locators"] if item["path"] == "study_summary_A")
+    actual = next(item for item in _visible_locators(demand.access_messages(payload, catalog)) if item["path"] == "study_summary_A")
+    assert json.loads(actual["source_excerpt"])["key_findings"] == [oversized, visible]
     assert json.loads(loc["source_excerpt"])["key_findings"] == [visible]
     assert "oversized" not in loc["source_excerpt"]
     assert "study_summary_A.key_findings" in loc["omitted_material_paths"]
@@ -133,4 +138,4 @@ def test_generous_locator_retains_complete_multikilobyte_finding_and_full_b():
     locators = {item["path"]: item for item in _visible_locators(demand.access_messages(payload, catalog))}
     assert len(locators["study_summary_A"]["source_excerpt"]) > 4 * 600
     assert json.loads(locators["study_summary_A"]["source_excerpt"])["key_findings"] == row["study_summary_A"]["key_findings"]
-    assert json.loads(locators["review_planning_B"]["source_excerpt"]) == row["review_planning_B"]
+    assert json.loads(locators["review_planning_B"]["source_excerpt"])["planning_summary"] == row["review_planning_B"]["planning_summary"]

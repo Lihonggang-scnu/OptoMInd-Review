@@ -895,19 +895,17 @@ def _prepare_query_plan(
     compact_path = query_dir / "query_plan.json"
     atomic_write_json(compact_path, compact_plan)
 
-    primary_cost, primary_in, primary_out = _usage_cost(agent.last_usage)
-    repair_cost, repair_in, repair_out = _usage_cost(
-        agent.last_repair_usage
-    )
+    from optomind_research.runtime.upgrade3.plan_contract import aggregate_planner_usage
+    planner_usage = aggregate_planner_usage(
+        review_package, last_usage=agent.last_usage,
+        last_repair_usage=agent.last_repair_usage, cost_function=_usage_cost)
     planner_generation_status = str(review_package.get("status") or "")
     metrics = {
         # ``status`` remains as a compatibility alias in the stage-local
         # receipt.  Run-level callers must expose the unambiguous field below.
         "status": planner_generation_status,
         "planner_generation_status": planner_generation_status,
-        "cost_cny": round(primary_cost + repair_cost, 6),
-        "input_tokens": primary_in + repair_in,
-        "output_tokens": primary_out + repair_out,
+        **planner_usage,
         "needs_human_confirmation": bool(
             review_package.get("needs_human_confirmation", True)
         ),
@@ -916,6 +914,8 @@ def _prepare_query_plan(
     final_validation = review_package.get("final_validation", {})
     safe_generation_statuses = {
         "primary_valid",
+        "primary_valid_v2",
+        "primary_valid_v2_after_revision",
         "repaired_by_format_model",
         "primary_valid_optional_notes_dropped",
         "repaired_optional_notes_dropped",
