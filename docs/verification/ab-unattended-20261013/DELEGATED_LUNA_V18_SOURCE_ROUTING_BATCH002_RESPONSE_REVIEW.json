@@ -1,0 +1,79 @@
+{
+  "gate": "05d4014c34f18c092d2728263524271d9510c71628789abb7dc737e38930889b",
+  "stage": "planning-transport:progressive_review_plan",
+  "call_id": "progressive-review:source_routing:source-routing-batch_002-of-005:e2e51f49063ca04fa993b0282ff013435c4a95988e8f56191d83bd11687196b1",
+  "reviewer": "delegated_luna",
+  "source_commit": "f62ebf48154bdb5b91162963cb0c76d8118b8aa6",
+  "binding_sha256": "ff4a54ea3f51b8baeba4430aaadeaf8c8dc2f5a3691d55b22e1d4d5650e7346c",
+  "request_messages_sha256": "77be554a4ce9333558b70b5eda91649515866bdb1e628d91aa9cc90a20b7adbf",
+  "request_sha256": "9af8b33c2df101742c50918c9f1b7fa3143ad1993347d14b0aff94898bf31f91",
+  "response_sha256": "adc4d6edd7cc68e50553fcac37749c9f2b1d893f637183251032aabdd50c6dd8",
+  "result_sha256": "cc3dcd28389844d100506a065fb3b80d955bf43f2ff4b250a9ce3910499b8801",
+  "raw_response_sha256": "1af48a0c82c52e0bbb10645923f3af479fd9e22071d37caf9334629db797878d",
+  "read_scope": {
+    "kind": "source_routing_batch",
+    "batch_index": 2,
+    "batch_count": 5,
+    "expected_input_rows": 60,
+    "actual_output_rows": 60,
+    "actual_unique_handles": 60,
+    "missing_handles": [],
+    "duplicate_handles": {},
+    "extra_handles": [],
+    "title_mismatches": [],
+    "bad_chapter_ids": [],
+    "missing_material": [],
+    "material_char_len_range": [
+      69,
+      114
+    ],
+    "chapter_frequency": {
+      "CH1": 23,
+      "CH2": 28,
+      "CH5": 25,
+      "CH4": 18,
+      "CH3": 28
+    },
+    "contract_expected": {
+      "array_key": "source_routes",
+      "one_row_per_source_handle": true,
+      "route_every_input": true,
+      "target_chinese_characters_per_useful_source": "80-150",
+      "do_not_invent_sources": true
+    },
+    "actual_response_content_read": "entire source_routes content, all 60 rows"
+  },
+  "requested_profile": {
+    "model": "qwen3.5-plus",
+    "connection": "direct",
+    "stream": true,
+    "json_mode": false,
+    "key_index": 1,
+    "max_keys": 1,
+    "max_output_tokens": 32768,
+    "thinking_budget": 16384,
+    "timeout_seconds": 900.0,
+    "max_retries": 0
+  },
+  "actual_model_metadata": {
+    "requested_model": "qwen3.5-plus",
+    "returned_model": "qwen3.5-plus",
+    "complete": true,
+    "status_code": 200,
+    "finish_reason": "stop",
+    "elapsed_seconds": 285.8279999999795,
+    "request_id": "chatcmpl-76681bdd-5be0-9151-8ade-8eb9f2766221",
+    "key_index": 0,
+    "stream_done": true,
+    "stream_event_count": 4444
+  },
+  "identity_and_material_check": "pass",
+  "quality": "approve_routine_source_routing",
+  "manual_scientific_fix_injected": false,
+  "request_decision_written": true,
+  "response_decision_written": true,
+  "decision": "approve",
+  "decision_receipt_sha256": "adc4d6edd7cc68e50553fcac37749c9f2b1d893f637183251032aabdd50c6dd8",
+  "reason": "All 60 expected handles route exactly once with valid chapter IDs and usable bounded material; cross-domain/limited-depth entries retain contextual rather than direct-evidence wording.",
+  "at": "2026-10-13T18:07:31.303586+00:00"
+}

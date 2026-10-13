@@ -1,0 +1,84 @@
+{
+  "gate": "75631893ffb6945a32322b9c224d2bfb4380b7433bbe4a22c565679a1e8bc2a3",
+  "stage": "planning-transport:progressive_review_plan",
+  "call_id": "progressive-review:source_routing:source-routing-batch_003-of-005:55f9d2fd46e3a7fa1cb5cec917f0c2d9d90ee3b58ccf3c70d5d5047ba76b7db5",
+  "reviewer": "delegated_luna",
+  "source_commit": "f62ebf48154bdb5b91162963cb0c76d8118b8aa6",
+  "binding_sha256": "ff4a54ea3f51b8baeba4430aaadeaf8c8dc2f5a3691d55b22e1d4d5650e7346c",
+  "request_messages_sha256": "3f7e2c295eb9fb28eb288ea863e04e37f0c328532238b326a24f7bdccd2b4780",
+  "request_sha256": "008faae1d6f31a580d44ca18171ddb2438cd8cc34a1bc904eb3b89d950be6033",
+  "response_sha256": "c0866b19d93275f588457a657324859d9964e7d160b141fde432a33d3899bc1d",
+  "result_sha256": "49c17dc9818e6ba1a252ecdf27478adf1a67deb7343d60fb97f7b59d09422c54",
+  "raw_response_sha256": "1b889a409d5e1e01eae11c79bf50d1b91c75d8ceecde7b5e8c4fb4b8177ce18a",
+  "read_scope": {
+    "kind": "source_routing_batch",
+    "batch_index": 3,
+    "batch_count": 5,
+    "expected_input_rows": 60,
+    "raw_nested_json_valid": false,
+    "raw_parse_error": {
+      "type": "JSONDecodeError",
+      "message": "Expecting ',' delimiter: line 243 column 104 (char 10269)",
+      "line": 243,
+      "column": 104,
+      "char": 10269,
+      "line_text": "      \"specific_usable_material\": \"系统报告不同 NA 及单/双焦点配置下的聚焦效率数据，揭示高 NA 与多焦点分割对效率的制约。直接用于绘制或解释“效率 - 带宽-NA\"三维权衡曲线，说明拓扑优化在突破传统相位调制效率瓶颈上的具体增益幅度，作为定量性能基准。\""
+    },
+    "audit_only_tolerant_parse": "one quote was escaped in memory solely to inspect row identity; no artifact was changed",
+    "audit_output_rows": 60,
+    "audit_unique_handles": 60,
+    "audit_missing_handles": [],
+    "audit_duplicate_handles": {},
+    "audit_extra_handles": [],
+    "audit_title_mismatches": [
+      {
+        "source_handle": "P0131",
+        "returned_title": "Multifunctional 2.5D metastructures enabled by adjoint optimization",
+        "original_title": "Multifunctional 25D metastructures enabled by adjoint optimization"
+      }
+    ],
+    "audit_bad_chapter_ids": [],
+    "audit_missing_material": [],
+    "contract_expected": {
+      "array_key": "source_routes",
+      "one_row_per_source_handle": true,
+      "route_every_input": true,
+      "target_chinese_characters_per_useful_source": "80-150",
+      "do_not_invent_sources": true
+    },
+    "actual_response_content_read": "entire source_routes content, including all 60 rows"
+  },
+  "requested_profile": {
+    "model": "qwen3.5-plus",
+    "connection": "direct",
+    "stream": true,
+    "json_mode": false,
+    "key_index": 1,
+    "max_keys": 1,
+    "max_output_tokens": 32768,
+    "thinking_budget": 16384,
+    "timeout_seconds": 900.0,
+    "max_retries": 0
+  },
+  "actual_model_metadata": {
+    "requested_model": "qwen3.5-plus",
+    "returned_model": "qwen3.5-plus",
+    "complete": true,
+    "status_code": 200,
+    "finish_reason": "stop",
+    "elapsed_seconds": 278.23400000017136,
+    "request_id": "chatcmpl-42fa159d-813f-90b2-8e7f-9349c125e272",
+    "key_index": 0,
+    "stream_done": true,
+    "stream_event_count": 4330
+  },
+  "identity_and_material_check": "contract_fail_raw_json_invalid; audit identities otherwise 60/60 with one title mismatch",
+  "quality": "reject_invalid_json_contract",
+  "manual_scientific_fix_injected": false,
+  "request_decision_written": true,
+  "response_decision_written": true,
+  "decision": "reject",
+  "decision_receipt_sha256": "c0866b19d93275f588457a657324859d9964e7d160b141fde432a33d3899bc1d",
+  "reason": "Raw nested source_routes JSON is malformed at P0150; audit-only repair found P0131 title drift. Preserve raw response and do not treat batch as complete.",
+  "at": "2026-10-13T18:06:57.608164+00:00"
+}

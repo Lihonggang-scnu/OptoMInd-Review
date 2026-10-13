@@ -1,0 +1,88 @@
+{
+  "gate": "0529e0cc003103a5c28ede04574b4e023f4662aca5d7c9e0aa4fdad1fe3eadde",
+  "stage": "planning-transport:progressive_review_plan",
+  "call_id": "progressive-review:source_routing:source-routing-batch_001-of-005:cf855cf0554580e050603a1a11d97e85e5e726afcb664a870856af43cebac3a5",
+  "reviewer": "delegated_luna",
+  "source_commit": "f62ebf48154bdb5b91162963cb0c76d8118b8aa6",
+  "binding_sha256": "ff4a54ea3f51b8baeba4430aaadeaf8c8dc2f5a3691d55b22e1d4d5650e7346c",
+  "request_messages_sha256": "b3b6a9bfbebb8cf5d96e7aea0832d90439278dc1afa06aff10c7dedc8944a848",
+  "request_sha256": "79e01a0407725d89fe0dd0ff8234a297c51653cec55abc647d16072a4c77309b",
+  "response_sha256": "8f9275dfd70a5a354096030129849b5c5b137d19bd878a1b99ec1f2caf74ebdf",
+  "result_sha256": "0cb2218554ffb6bbbf66329d2479a71f048f9c651e20b4b599752d7332072c97",
+  "raw_response_sha256": "40f80ddaf40e0fa8346533e671d53279ba0659ff27033a9590a8879dbfac7cc0",
+  "read_scope": {
+    "kind": "source_routing_batch",
+    "batch_index": 1,
+    "batch_count": 5,
+    "expected_input_rows": 60,
+    "actual_output_rows": 60,
+    "actual_unique_handles": 59,
+    "missing_handles": [
+      "P0030"
+    ],
+    "duplicate_handles": {
+      "P0028": 2
+    },
+    "extra_handles": [],
+    "title_mismatches": [
+      {
+        "source_handle": "P0024",
+        "returned_title": "Inverse-designed achromatic flat lens enabling imaging across the visible and near-infrared with diameter > 3 mm and NA = 0.3",
+        "original_title": "Inverse-designed achromatic flat lens enabling imaging across the visible and near-infrared with diameter > 3 mm and NA = 0.3"
+      },
+      {
+        "source_handle": "P0028",
+        "returned_title": "RGB Achromatic Metalens Doublet for Digital Imaging.",
+        "original_title": "Real-time terahertz meta-cryptography using polarization-multiplexed graphene-based computer-generated holograms"
+      }
+    ],
+    "empty_chapter_ids": [
+      {
+        "source_handle": "P0044",
+        "chapter_ids": []
+      }
+    ],
+    "contract_expected": {
+      "array_key": "source_routes",
+      "one_row_per_source_handle": true,
+      "route_every_input": true,
+      "target_chinese_characters_per_useful_source": "80-150",
+      "do_not_invent_sources": true
+    },
+    "actual_response_content_read": "entire source_routes content, including all 60 rows",
+    "material_text_check": "read; no material text was rewritten or used to inject a correction"
+  },
+  "requested_profile": {
+    "model": "qwen3.5-plus",
+    "connection": "direct",
+    "stream": true,
+    "json_mode": false,
+    "key_index": 1,
+    "max_keys": 1,
+    "max_output_tokens": 32768,
+    "thinking_budget": 16384,
+    "timeout_seconds": 900.0,
+    "max_retries": 0
+  },
+  "actual_model_metadata": {
+    "requested_model": "qwen3.5-plus",
+    "returned_model": "qwen3.5-plus",
+    "complete": true,
+    "status_code": 200,
+    "finish_reason": "stop",
+    "elapsed_seconds": 195.65599999995902,
+    "request_id": "chatcmpl-24dc9cfc-25ef-9e8a-bc59-4df06f80e5f3",
+    "key_index": 0,
+    "stream_done": true,
+    "stream_event_count": 3183
+  },
+  "identity_and_material_check": "fail",
+  "quality": "reject_routing_contract_and_source_identity_failure",
+  "manual_scientific_fix_injected": false,
+  "request_decision_written": true,
+  "response_decision_written": true,
+  "decision": "reject",
+  "decision_receipt_sha256": "8f9275dfd70a5a354096030129849b5c5b137d19bd878a1b99ec1f2caf74ebdf",
+  "reason": "60 output rows do not form a one-row-per-input routing: P0030 is missing, P0028 is duplicated, one P0028 row carries the wrong source identity/title, and P0044 has empty chapter_ids. The raw response is preserved and not treated as complete or scientifically fulfilled.",
+  "at": "2026-10-13T18:04:48.505927+00:00"
+}

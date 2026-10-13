@@ -148,6 +148,52 @@ def _response(directory, request_sha256):
     return record
 
 
+_DECISION_KEYS = {"schema", "stage", "call_id", "phase", "request_sha256",
+                  "response_sha256", "decision", "reason"}
+_RESPONSE_REVIEW_KEYS = {
+    "schema", "stage", "call_id", "phase", "reviewer", "review_kind",
+    "decision", "reason", "request_sha256", "response_sha256",
+    "decision_sha256",
+}
+
+
+def _response_decision(directory, *, stage, call_id, request, response):
+    """Load the immutable response decision and bind it to current artifacts."""
+    receipt = _load(directory / "RESPONSE_DECISION.json")
+    request_sha256 = _hash(request)
+    response_sha256 = _hash(response)
+    if (type(receipt) is not dict or set(receipt) != _DECISION_KEYS
+            or receipt.get("schema") != "supervisor.decision.v1"
+            or receipt.get("stage") != stage or receipt.get("call_id") != call_id
+            or receipt.get("phase") != "response"
+            or receipt.get("request_sha256") != request_sha256
+            or receipt.get("response_sha256") != response_sha256
+            or receipt.get("decision") not in {"approve", "reject"}):
+        raise SupervisionError("decision_integrity_failure")
+    return receipt
+
+
+def _response_review(directory, *, stage, call_id, request, response, decision):
+    """Validate an optional root format review without changing old gates."""
+    path = directory / "RESPONSE_REVIEW.json"
+    if not path.exists():
+        return None
+    review = _load(path)
+    if (type(review) is not dict or set(review) != _RESPONSE_REVIEW_KEYS
+            or review.get("schema") != "supervisor.response_review.v1"
+            or review.get("stage") != stage or review.get("call_id") != call_id
+            or review.get("phase") != "response"
+            or review.get("reviewer") != "root"
+            or review.get("review_kind") != "format_reparse"
+            or review.get("decision") not in {"approve", "reject"}
+            or not isinstance(review.get("reason"), str) or not review.get("reason").strip()
+            or review.get("request_sha256") != _hash(request)
+            or review.get("response_sha256") != _hash(response)
+            or review.get("decision_sha256") != _hash(decision)):
+        raise SupervisionError("response_review_integrity_failure")
+    return review
+
+
 def _validate_request(request):
     if type(request) is not dict or request.get("schema") != "supervisor.request.v1":
         raise SupervisionError("request_integrity_failure")
@@ -171,6 +217,48 @@ def decide(*, root, stage, call_id, phase, decision, reason=""):
                "phase": phase, "request_sha256": request_hash, "response_sha256": response_hash,
                "decision": decision, "reason": reason}
     _put_once(directory / (phase.upper() + "_DECISION.json"), receipt)
+    return receipt
+
+
+def review_response(*, root, stage, call_id, reviewer, decision, reason,
+                    review_kind="format_reparse"):
+    """Record an explicit root review for a previously rejected response.
+
+    This is an additive artifact.  It never edits RESPONSE_DECISION.json or
+    RESPONSE.json, and it only permits the narrowly scoped format reparse
+    review.  Provider and ledger calls are outside this function.
+    """
+    if reviewer != "root":
+        raise SupervisionError("root_reviewer_required")
+    if review_kind != "format_reparse":
+        raise SupervisionError("unsupported_response_review_kind")
+    if decision not in {"approve", "reject"}:
+        raise SupervisionError("invalid_response_review_decision")
+    if not isinstance(reason, str) or not reason.strip():
+        raise SupervisionError("response_review_reason_required")
+    directory = call_directory(root, stage, call_id)
+    request = _validate_request(_load(directory / "REQUEST.json"))
+    if request.get("stage") != stage or request.get("call_id") != call_id:
+        raise SupervisionError("request_identity_failure")
+    response = _response(directory, _hash(request))
+    original_decision = _response_decision(
+        directory, stage=stage, call_id=call_id, request=request, response=response)
+    if original_decision["decision"] != "reject":
+        raise SupervisionError("response_review_requires_rejected_response")
+    receipt = {
+        "schema": "supervisor.response_review.v1",
+        "stage": stage,
+        "call_id": call_id,
+        "phase": "response",
+        "reviewer": reviewer,
+        "review_kind": review_kind,
+        "decision": decision,
+        "reason": reason,
+        "request_sha256": _hash(request),
+        "response_sha256": _hash(response),
+        "decision_sha256": _hash(original_decision),
+    }
+    _put_once(directory / "RESPONSE_REVIEW.json", receipt)
     return receipt
 
 
@@ -216,8 +304,17 @@ class SupervisedClient:
                 or any(receipt.get(key) != value for key, value in expected.items())
                 or receipt.get("decision") not in {"approve", "reject"}):
             raise SupervisionError("decision_integrity_failure")
+        review = None
+        if phase == "response":
+            review = _response_review(
+                self.directory, stage=self.stage, call_id=self.call_id,
+                request=request, response=response, decision=receipt)
         if receipt["decision"] == "reject":
+            if phase == "response" and review is not None and review["decision"] == "approve":
+                return
             raise SupervisionError(phase + "_rejected")
+        if phase == "response" and review is not None and review["decision"] != "approve":
+            raise SupervisionError("response_review_rejected")
 
     def __call__(self, messages, **kwargs):
         # Observer is explicitly nonsemantic. All other kwargs must be exact JSON.
@@ -280,9 +377,17 @@ def main():
     command.add_argument("--phase", choices=("request", "response"), required=True)
     command.add_argument("--decision", choices=("approve", "reject"), required=True)
     command.add_argument("--reason", default="")
+    review = sub.add_parser("review-response")
+    for key in ("root", "stage", "call-id"):
+        review.add_argument("--" + key, required=True)
+    review.add_argument("--reviewer", required=True)
+    review.add_argument("--decision", choices=("approve", "reject"), required=True)
+    review.add_argument("--reason", required=True)
+    review.add_argument("--review-kind", default="format_reparse")
     args = vars(parser.parse_args())
-    args.pop("command")
-    print(json.dumps(decide(**args), ensure_ascii=False, indent=2))
+    command_name = args.pop("command")
+    action = review_response if command_name == "review-response" else decide
+    print(json.dumps(action(**args), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

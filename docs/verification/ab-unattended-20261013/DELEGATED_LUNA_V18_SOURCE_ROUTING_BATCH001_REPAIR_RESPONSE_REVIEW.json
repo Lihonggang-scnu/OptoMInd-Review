@@ -1,0 +1,72 @@
+{
+  "gate": "cf226399ba00152673a556d227b3bc22d8ec99546fe4ba80bd22d19f14a0039d",
+  "stage": "planning-transport:progressive_review_plan",
+  "call_id": "progressive-review:source_routing:source-routing-batch_001-of-005-repair-001:05ba0b678fe3af2342e0ac4056d25a470a517ad613952f0a44c8bb64a8ec5678",
+  "reviewer": "delegated_luna",
+  "source_commit": "f62ebf48154bdb5b91162963cb0c76d8118b8aa6",
+  "binding_sha256": "ff4a54ea3f51b8baeba4430aaadeaf8c8dc2f5a3691d55b22e1d4d5650e7346c",
+  "request_messages_sha256": "f3e8fe118c0a823c456de251a43817c1ff3b1f13d22948f79bbc094e99d947f6",
+  "request_sha256": "b01fe09d8c3714bbc59fed5f103d0c0673c5e21b489f9617173031de740a0e51",
+  "response_sha256": "9aa1e7fe717732ce8ec7d06c740290474c21438970d7b6050a7c9bc04844fa69",
+  "result_sha256": "9cf3eaefe1860be844c11fbc4d1255cf6850007be58729a9afc6479c7cd28afb",
+  "raw_response_sha256": "e6c1fdad01ca2fb4aa80ee31b2ef651074bab3d87a0c2c28bd6f40d1422f355a",
+  "read_scope": {
+    "kind": "source_routing_bounded_repair_response",
+    "repair_for_batch": "batch_001",
+    "repair_attempt": 1,
+    "expected_input_rows": 60,
+    "actual_output_rows": 60,
+    "actual_unique_handles": 60,
+    "missing_handles": [],
+    "duplicate_handles": {},
+    "extra_handles": [],
+    "title_mismatches": [],
+    "bad_chapter_ids": [],
+    "empty_chapter_ids": [
+      {
+        "source_handle": "P0044",
+        "reason": "研究对象为水下吸波/降噪材料，涉及微波频段电磁吸收与声学噪声抑制。与光学超透镜色散工程在物理机制和应用领域上存在显著差异，无法直接用于论证光学带宽、NA 或效率的权衡关系，故不纳入正文实质分析。"
+      }
+    ],
+    "empty_chapter_policy": "P0044 is explicitly marked irrelevant and has a concise non-inclusion explanation; allowed by the task prompt",
+    "missing_material": [],
+    "material_char_len_range": [
+      91,
+      123
+    ],
+    "actual_response_content_read": "entire normalized source_routes content, all 60 rows"
+  },
+  "requested_profile": {
+    "model": "qwen3.5-plus",
+    "connection": "direct",
+    "stream": true,
+    "json_mode": false,
+    "key_index": 1,
+    "max_keys": 1,
+    "max_output_tokens": 32768,
+    "thinking_budget": 16384,
+    "timeout_seconds": 900.0,
+    "max_retries": 0
+  },
+  "actual_model_metadata": {
+    "requested_model": "qwen3.5-plus",
+    "returned_model": "qwen3.5-plus",
+    "complete": true,
+    "status_code": 200,
+    "finish_reason": "stop",
+    "elapsed_seconds": 179.4680000001099,
+    "request_id": "chatcmpl-0c3ac36f-267c-96cf-a9f6-7494bf7b6131",
+    "key_index": 0,
+    "stream_done": true,
+    "stream_event_count": 2898
+  },
+  "identity_and_material_check": "pass_after_bounded_repair",
+  "quality": "approve_normalized_repair_routing",
+  "manual_scientific_fix_injected": false,
+  "request_decision_written": true,
+  "response_decision_written": true,
+  "decision": "approve",
+  "decision_receipt_sha256": "9aa1e7fe717732ce8ec7d06c740290474c21438970d7b6050a7c9bc04844fa69",
+  "reason": "Normalized repair restores P0030 and corrects P0028 identity; all 60 routes are complete. Raw failed response remains rejected and uncounted.",
+  "at": "2026-10-13T18:18:43.086782+00:00"
+}
