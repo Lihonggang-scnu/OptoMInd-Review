@@ -109,6 +109,18 @@ class StreamOpener:
         return FakeStreamResponse(self.lines)
 
 
+class SequenceStreamOpener:
+    """Return one controlled SSE response per bounded transport attempt."""
+
+    def __init__(self, responses):
+        self.responses = list(responses)
+        self.bodies = []
+
+    def open(self, request, timeout):
+        self.bodies.append(json.loads(request.data))
+        return self.responses.pop(0)
+
+
 class EffectiveTokenTransportTests(unittest.TestCase):
     def setUp(self):
         self.env_patch = patch.dict(runtime.os.environ, {"OPTOMIND_ECONOMY_TEXT_CEILING": "0"})
@@ -268,6 +280,75 @@ class EffectiveTokenTransportTests(unittest.TestCase):
             row = ledger.as_dict()["reservations"][0]
             self.assertEqual(row["status"], "uncertain")
             self.assertTrue(list(Path(temp).glob("*.sse.partial")))
+
+    def test_stream_eof_retries_with_new_hold_and_preserves_partial_evidence(self):
+        partial = FakeStreamResponse([
+            b'data: {"id":"retry-1","choices":[{"delta":{"reasoning_content":"thinking"},"finish_reason":null}]}\n\n',
+        ])
+        complete = FakeStreamResponse([
+            b'data: {"id":"retry-2","choices":[{"delta":{"content":"{\\"ok\\":true}"},"finish_reason":"stop"}]}\n\n',
+            b'data: {"id":"retry-2","choices":[],"usage":{"prompt_tokens":3,"completion_tokens":2}}\n\n',
+            b"data: [DONE]\n\n",
+        ])
+        opener = SequenceStreamOpener([partial, complete])
+        with tempfile.TemporaryDirectory() as temp:
+            ledger = runtime.GlobalBudgetLedger(limit_cny=60)
+            client = runtime.QwenDirectClient(
+                model="qwen3.8-max", json_mode=False, max_retries=1,
+                raw_response_dir=Path(temp), budget_ledger=ledger,
+                prompt_token_counter=lambda *_: 100,
+            )
+            body, result = self.invoke(client, opener=opener, stream=True, call_id="stream-retry")
+
+            self.assertTrue(body["stream"])
+            self.assertEqual(len(opener.bodies), 2)
+            self.assertEqual(result["content"], '{"ok":true}')
+            rows = ledger.as_dict()["reservations"]
+            self.assertEqual([row["status"] for row in rows], ["uncertain", "settled"])
+            self.assertIsNone(rows[0]["actual_cny"])
+            self.assertIsNotNone(rows[1]["actual_cny"])
+            self.assertGreater(ledger.reserved_cny, 0)
+            partial_path = Path(rows[0]["telemetry"]["partial_raw_path"])
+            self.assertTrue(partial_path.exists())
+            self.assertTrue(list(Path(temp).glob("*.sse.raw")))
+
+    def test_stream_deadline_timeout_is_not_retried(self):
+        response = TimeoutTrackingStreamResponse([], timeout_error=True)
+        opener = SequenceStreamOpener([response])
+        with tempfile.TemporaryDirectory() as temp:
+            ledger = runtime.GlobalBudgetLedger(limit_cny=60)
+            client = runtime.QwenDirectClient(
+                model="qwen3.8-max", json_mode=False, max_retries=1,
+                timeout_seconds=5, stream_overall_timeout_seconds=5,
+                raw_response_dir=Path(temp), budget_ledger=ledger,
+                prompt_token_counter=lambda *_: 100,
+            )
+            with self.assertRaisesRegex(runtime.QwenTransportError, "qwen_stream_read_timeout") as caught:
+                self.invoke(client, opener=opener, stream=True, call_id="stream-deadline")
+            self.assertFalse(caught.exception.transient)
+            self.assertEqual(len(opener.bodies), 1)
+            self.assertEqual(ledger.as_dict()["reservations"][0]["status"], "uncertain")
+
+    def test_repeated_call_id_keeps_prior_partial_stream_evidence(self):
+        opener = SequenceStreamOpener([
+            FakeStreamResponse([
+                b'data: {"id":"same-call-first","choices":[{"delta":{"reasoning_content":"first"},"finish_reason":null}]}\n\n',
+            ]),
+            FakeStreamResponse([
+                b'data: {"id":"same-call-second","choices":[{"delta":{"reasoning_content":"second"},"finish_reason":null}]}\n\n',
+            ]),
+        ])
+        with tempfile.TemporaryDirectory() as temp:
+            client = runtime.QwenDirectClient(
+                model="qwen3.8-max", max_retries=0, raw_response_dir=Path(temp),
+            )
+            for _ in range(2):
+                with self.assertRaisesRegex(runtime.QwenTransportError, "qwen_stream_incomplete"):
+                    self.invoke(client, opener=opener, stream=True, call_id="same-call")
+            partials = sorted(Path(temp).glob("*.sse.partial"))
+            self.assertEqual(len(partials), 2)
+            self.assertNotEqual(partials[0].name, partials[1].name)
+            self.assertNotEqual(partials[0].read_bytes(), partials[1].read_bytes())
 
     def test_stop_done_without_usage_keeps_complete_text_and_full_billing_hold(self):
         lines = [

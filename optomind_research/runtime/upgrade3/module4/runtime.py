@@ -511,11 +511,11 @@ def _stream_response(
             "partial_reasoning_bytes": reasoning_bytes,
         }
 
-    def fail(reason: str, *, stage: str, **fields: Any) -> None:
+    def fail(reason: str, *, stage: str, transient: bool = False, **fields: Any) -> None:
         emit("stream_error", reason=reason, phase=stage, **fields)
         raise QwenTransportError(
             reason,
-            transient=False,
+            transient=transient,
             record={
                 **snapshot(), "complete": False, "partial_error": reason,
                 "transport_phase": stage,
@@ -589,15 +589,24 @@ def _stream_response(
             try:
                 line = response.readline()
             except (socket.timeout, TimeoutError):
-                fail("qwen_stream_read_timeout", stage="stream_read", event_count=event_count)
+                # A socket timeout caused by the overall deadline is a hard
+                # stop.  An inactivity timeout with time left may be a
+                # transient provider connection stall and can use the
+                # caller's bounded retry policy.
+                fail(
+                    "qwen_stream_read_timeout", stage="stream_read",
+                    transient=remaining > inactivity_timeout + 1e-6,
+                    event_count=event_count,
+                    deadline_reached=remaining <= inactivity_timeout + 1e-6,
+                )
             except OSError:
-                fail("qwen_stream_read_error", stage="stream_read", event_count=event_count)
+                fail("qwen_stream_read_error", stage="stream_read", transient=True, event_count=event_count)
             if not line:
                 if data_lines:
                     process_data(b"\n".join(data_lines))
                     data_lines.clear()
                 if not done:
-                    fail("qwen_stream_incomplete", stage="stream_eof", event_count=event_count)
+                    fail("qwen_stream_incomplete", stage="stream_eof", transient=True, event_count=event_count)
                 break
             first_wire_byte = not raw_bytes
             raw_bytes.extend(line)
@@ -618,7 +627,7 @@ def _stream_response(
                 data_lines.append(stripped[5:].lstrip())
                 continue
         if not done:
-            fail("qwen_stream_incomplete", stage="stream_eof", event_count=event_count)
+            fail("qwen_stream_incomplete", stage="stream_eof", transient=True, event_count=event_count)
     finally:
         if raw_handle is not None:
             raw_handle.close()
@@ -1007,6 +1016,11 @@ class QwenDirectClient:
     def __call__(self, messages: Sequence[Mapping[str, Any]], **kwargs: Any) -> dict[str, Any]:
         call_id = _text(kwargs.get("call_id")) or "call-" + uuid.uuid4().hex[:16]
         safe_call_id = "".join(char if char.isalnum() or char in "-_" else "_" for char in call_id)[:100] or "call"
+        # A resumed/unattended process may reuse the same logical call ID,
+        # key index, and attempt number.  Keep the evidence path unique per
+        # invocation so a new partial stream can never truncate an older one;
+        # this is deliberately outside the request/cache identity.
+        invocation_id = uuid.uuid4().hex[:16]
         model = _text(kwargs.get("model")) or self.model
         if model != self.model:
             raise QwenTransportError("runtime_model_mismatch", transient=False, record={"requested": model, "configured": self.model})
@@ -1145,7 +1159,8 @@ class QwenDirectClient:
                         if stream:
                             self.raw_response_dir.mkdir(parents=True, exist_ok=True) if self.raw_response_dir else None
                             if self.raw_response_dir:
-                                partial_path = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.sse.partial")
+                                raw_stem = safe_call_id + f"-invoke{invocation_id}-key{key_index}-attempt{attempt}"
+                                partial_path = self.raw_response_dir / (raw_stem + ".sse.partial")
                             else:
                                 fd, temp_name = tempfile.mkstemp(prefix=safe_call_id + "-", suffix=".sse.partial")
                                 os.close(fd)
@@ -1160,7 +1175,7 @@ class QwenDirectClient:
                             )
                             raw = stream_result["raw_bytes"]
                             if self.raw_response_dir:
-                                target = self.raw_response_dir / (safe_call_id + f"-key{key_index}-attempt{attempt}.sse.raw")
+                                target = self.raw_response_dir / (raw_stem + ".sse.raw")
                                 os.replace(partial_path, target)
                                 partial_path = target
                             else:
@@ -1256,7 +1271,14 @@ class QwenDirectClient:
                             telemetry=_uncertain_telemetry(exc, key_index=key_index, attempt=attempt, effective_request=effective_request),
                         )
                         reservation_settled = True
-                    raise
+                    # A stream parser can report a connection-level failure
+                    # after the provider accepted the request.  Preserve the
+                    # uncertain hold, then let only explicitly transient
+                    # failures use the existing bounded retry loop.  Parser,
+                    # provider, and deadline failures remain terminal.
+                    last_error = exc
+                    if not exc.transient or attempt >= self.max_retries:
+                        raise
                 except urllib.error.HTTPError as exc:
                     raw = exc.read() if hasattr(exc, "read") else b""
                     status = int(exc.code)
