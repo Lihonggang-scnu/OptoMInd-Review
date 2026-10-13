@@ -183,3 +183,153 @@ def test_default_index_build_failure_is_saved_and_not_converted_to_external(tmp_
     assert payload["error_type"] == "RuntimeError"
     assert "offline build failure" in payload["error"]
     assert not (config.output_dir / "planning_material_index.sqlite").exists()
+
+
+def test_runner_replays_saved_journal_material_before_need_id_and_does_not_reacquire(
+    tmp_path, monkeypatch,
+):
+    """A saved external result must seed the first managed index generation.
+
+    The journal's old need id is intentionally unrelated to the new request.
+    Only its real derived pool is reused; the old answer state is never copied
+    into the current need contract.
+    """
+
+    run_dir = tmp_path / "run"
+    journal_root = run_dir / "level1"
+    journal_root.mkdir(parents=True)
+    base_rows = []
+    source_rows = {}
+    for number in range(1, 245):
+        paper_id = f"paper-{number:04d}"
+        row = _row(tmp_path, paper_id=paper_id, with_card=False)
+        row["_source_handle"] = f"P{number:04d}"
+        base_rows.append(row)
+    for number, source_unit_id in ((1, "SU01"), (2, "SU03")):
+        row = base_rows[number - 1]
+        paper_id = row["_paper_id"]
+        snapshot = tmp_path / "source" / source_unit_id / paper_id / f"snapshot-{source_unit_id.lower()}"
+        snapshot.mkdir(parents=True)
+        (snapshot / "manifest.json").write_text(
+            json.dumps({"snapshot_id": snapshot.name}), encoding="utf-8"
+        )
+        (snapshot / "READING_VIEW.md").write_text(
+            f"{source_unit_id} source material with its stated conditions and result.",
+            encoding="utf-8",
+        )
+        card = tmp_path / "source" / source_unit_id / paper_id / "PAPER_READING_CARD.json"
+        card.write_text(json.dumps({
+            "paper_identity": {"canonical_paper_id": paper_id, "title": paper_id},
+            "material": {"declared_content_depth": "fulltext"},
+            "general_understanding": {"work_summary": f"{source_unit_id} A"},
+            "review_planning": {"planning_summary": f"{source_unit_id} B"},
+        }), encoding="utf-8")
+        row["card_path"] = str(card)
+        row["snapshot_dir"] = str(snapshot)
+        source_rows[source_unit_id] = row
+
+    new_id = "paper-0245"
+    new_snapshot = tmp_path / "source" / "SU02" / new_id / "snapshot-su02"
+    new_snapshot.mkdir(parents=True)
+    (new_snapshot / "manifest.json").write_text(
+        json.dumps({"snapshot_id": new_snapshot.name}), encoding="utf-8"
+    )
+    (new_snapshot / "READING_VIEW.md").write_text(
+        "SU02 source material with its stated conditions and result.", encoding="utf-8"
+    )
+    new_card = tmp_path / "source" / "SU02" / new_id / "PAPER_READING_CARD.json"
+    new_card.write_text(json.dumps({
+        "paper_identity": {"canonical_paper_id": new_id, "title": new_id},
+        "material": {"declared_content_depth": "fulltext"},
+        "general_understanding": {"work_summary": "SU02 A"},
+        "review_planning": {"planning_summary": "SU02 B"},
+    }), encoding="utf-8")
+    new_row = _row(tmp_path, paper_id=new_id)
+    new_row.update({
+        "_source_handle": "P0245", "card_path": str(new_card),
+        "snapshot_dir": str(new_snapshot), "supplement_source_unit_id": "SU02",
+        "supplement_gap_material": {"gap_id": "G", "useful_material": "SU02 saved material"},
+    })
+    derived = journal_root / "external" / "old-need" / "PLANNING_POOL.jsonl"
+    derived.parent.mkdir(parents=True)
+    derived.write_text(
+        "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in [*base_rows, new_row]),
+        encoding="utf-8",
+    )
+    source_units = [
+        {"card_id": source_unit_id, "card_path": row["card_path"], "snapshot_path": row["snapshot_dir"]}
+        for source_unit_id, row in (*source_rows.items(), ("SU02", new_row))
+    ]
+    (journal_root / "retrieval_loop.jsonl").write_text(json.dumps({
+        "need_id": "N_OLD_NEED_ID",
+        "status": "partial",
+        "external_results": [{
+            "status": "partial", "outcome": "gap_partially_fulfilled",
+            "derived_pool_path": str(derived), "source_units": source_units,
+        }],
+    }) + "\n", encoding="utf-8")
+
+    config = planner.ProgressivePlannerConfig(
+        topic_id="saved-journal-topic", pool_path=tmp_path / "pool.jsonl",
+        plan_path=tmp_path / "plan.json", output_dir=run_dir,
+    )
+    captured = {}
+    external_calls = []
+
+    def fake_triage(gap, **kwargs):
+        captured["index_path"] = Path(kwargs["index_path"])
+        with search_module.PlanningMaterialIndex(kwargs["index_path"], readonly=True) as index:
+            captured["counts"] = index.counts()
+            captured["source_ids"] = {
+                row["paper_id"] for row in index.papers()
+                if row["paper_id"] in {"paper-0001", "paper-0002", "paper-0245"}
+            }
+            captured["snapshots"] = {
+                row["paper_id"]: row["snapshot_path"] for row in index.papers()
+                if row["paper_id"] in {"paper-0001", "paper-0002", "paper-0245"}
+            }
+        return {"decision": "direct_use", "answers_requested_question": True,
+                "usable_content": "Saved local material answers this fixture.", "still_missing": ""}
+
+    def should_not_reacquire(*args, **kwargs):
+        external_calls.append((args, kwargs))
+        raise AssertionError("saved journal source was reacquired")
+
+    monkeypatch.setattr(planning_supplement, "run_gap_local_triage", fake_triage)
+    runner = planner.make_retrieval_loop_runner(
+        config, allow_external=False, supplement_runner=should_not_reacquire,
+    )
+    result = runner(
+        phase="level1", output_dir=journal_root,
+        supplement_requests=[{
+            "gap_id": "G", "gap_question": "Which saved source states the conditions and result?",
+            "targeted_queries": [{"query_text": "saved source conditions result"}],
+            "known_papers": [{"paper_id": "paper-0001"}],
+        }],
+        directed_requests=[], pool_rows=base_rows,
+        plan={"research_question": "Saved source conditions"},
+        prior_tool_results={}, prior_directed={}, source_handle_map={}, resume=True,
+    )
+
+    assert captured["counts"]["papers"] == 245
+    assert captured["source_ids"] == {"paper-0001", "paper-0002", "paper-0245"}
+    assert all(captured["snapshots"].values())
+    assert not external_calls
+    assert result["retrieval_loop"]["needs"][0]["status"] == "answered"
+    assert "N_OLD_NEED_ID" not in json.dumps(result["retrieval_loop"], ensure_ascii=False)
+    assert any(
+        str(group.get("derived_pool_path")) == str(derived)
+        for group in result["supplement_results"]
+        if isinstance(group, dict)
+    )
+
+    # Exercise the same outer consumer used by ProgressiveReviewPlan.  The
+    # saved result must add its real row while the old journal need remains
+    # absent from the current retrieval state.
+    outer_rows = [dict(row) for row in base_rows]
+    planner._merge_supplement_pool_updates(outer_rows, result)
+    assert len(outer_rows) == 245
+    outer_by_id = {row["_paper_id"]: row for row in outer_rows}
+    assert {outer_by_id[paper_id]["supplement_source_unit_id"] for paper_id in outer_by_id
+            if outer_by_id[paper_id].get("supplement_source_unit_id")} == {"SU02"}
+    assert outer_by_id[new_id]["snapshot_dir"] == str(new_snapshot)

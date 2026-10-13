@@ -8362,14 +8362,8 @@ def make_retrieval_loop_runner(
                 if paper_id and paper_id not in nominated:
                     request["known_papers"].append({"paper_id": paper_id})
                     nominated.add(paper_id)
-        index_path = Path(local_index_path) if local_index_path else config.output_dir / "planning_material_index.sqlite"
-        needs = needs_from_planner_gap_rows(gaps, intended_use="mechanism", user_scope=topic)
-        cache_path = config.output_dir / "RETRIEVAL_NEED_CACHE.json"
-        saved_cache = _read_json(cache_path) if cache_path.is_file() else {}
-        cache_records = dict(saved_cache.get("records") or {}) if saved_cache.get("schema_version") == "optomind.retrieval_need_cache.v1" else {}
-        cache_records = {key: row for key, row in cache_records.items() if isinstance(row, Mapping)
-                         and isinstance(row.get("state"), Mapping) and isinstance(row.get("contract"), Mapping)
-                         and isinstance(row.get("source_fingerprints"), Mapping)}
+        journal_path = root / "retrieval_loop.jsonl"
+
         def persisted_supplement_results(state: Mapping[str, Any]) -> list[Mapping[str, Any]]:
             """Unwrap saved closure/journal envelopes to their real pool rows."""
 
@@ -8400,11 +8394,70 @@ def make_retrieval_loop_runner(
                 nested = value.get("external_results")
                 if isinstance(nested, list):
                     pending.extend(nested)
-                # Keep envelopes that the pool merger understands.  Their
-                # nested ``results`` are traversed by that existing helper.
+                nested = value.get("results")
+                if isinstance(nested, list):
+                    pending.extend(nested)
+                # Keep envelopes that the pool merger understands. Their
+                # nested ``results`` are traversed by this same helper.
                 if any(key in value for key in ("derived_pool_path", "candidate_rows", "results")):
                     found.append(value)
             return found
+
+        def current_journal_supplement_results() -> list[Mapping[str, Any]]:
+            """Read only saved supplement artifacts belonging to this phase root.
+
+            The journal may carry an older need id after a local-index rebuild.
+            Its saved source rows are still valid inputs for the new local index,
+            while the old need state remains subject to the current contract.
+            Restricting derived pools to this run root prevents a foreign history
+            directory from silently adding material or changing a paid request.
+            """
+
+            if not resume or not journal_path.is_file():
+                return []
+            root_resolved = root.resolve()
+            found: list[Mapping[str, Any]] = []
+            seen_results: set[str] = set()
+            for line in journal_path.read_text(encoding="utf-8-sig").splitlines():
+                if not line.strip():
+                    continue
+                try:
+                    entry = json.loads(line)
+                except (UnicodeError, json.JSONDecodeError):
+                    continue
+                if not isinstance(entry, Mapping):
+                    continue
+                for result in persisted_supplement_results(entry):
+                    derived_value = _text(result.get("derived_pool_path"))
+                    candidate_rows = result.get("candidate_rows")
+                    if derived_value:
+                        derived = Path(derived_value)
+                        if not derived.is_absolute():
+                            derived = root / derived
+                        try:
+                            derived.resolve().relative_to(root_resolved)
+                        except ValueError:
+                            continue
+                        if not derived.is_file():
+                            continue
+                    elif not isinstance(candidate_rows, list) or not candidate_rows:
+                        continue
+                    result_key = derived_value or _material_content_signature(candidate_rows)
+                    if result_key in seen_results:
+                        continue
+                    seen_results.add(result_key)
+                    found.append(result)
+            return found
+
+        journal_persisted = current_journal_supplement_results()
+        index_path = Path(local_index_path) if local_index_path else config.output_dir / "planning_material_index.sqlite"
+        needs = needs_from_planner_gap_rows(gaps, intended_use="mechanism", user_scope=topic)
+        cache_path = config.output_dir / "RETRIEVAL_NEED_CACHE.json"
+        saved_cache = _read_json(cache_path) if cache_path.is_file() else {}
+        cache_records = dict(saved_cache.get("records") or {}) if saved_cache.get("schema_version") == "optomind.retrieval_need_cache.v1" else {}
+        cache_records = {key: row for key, row in cache_records.items() if isinstance(row, Mapping)
+                         and isinstance(row.get("state"), Mapping) and isinstance(row.get("contract"), Mapping)
+                         and isinstance(row.get("source_fingerprints"), Mapping)}
         # A prior phase may have persisted fulfilled supplement material in
         # the retrieval cache while the caller still passes the original
         # pool.  Include those durable rows when preparing the managed index;
@@ -8414,6 +8467,8 @@ def make_retrieval_loop_runner(
         prior_persisted = persisted_supplement_results(prior_tool_results or {})
         if prior_persisted:
             _merge_supplement_pool_updates(index_rows, {"supplement_results": prior_persisted}, preserve_current_material=True)
+        if journal_persisted:
+            _merge_supplement_pool_updates(index_rows, {"supplement_results": journal_persisted}, preserve_current_material=True)
         for cached in cache_records.values():
             state = cached.get("state") if isinstance(cached, Mapping) else {}
             persisted = persisted_supplement_results(state) if isinstance(state, Mapping) else []
@@ -8607,6 +8662,8 @@ def make_retrieval_loop_runner(
         working_pool = [dict(row) for row in pool_rows]
         if prior_persisted:
             _merge_supplement_pool_updates(working_pool, {"supplement_results": prior_persisted}, preserve_current_material=True)
+        if journal_persisted:
+            _merge_supplement_pool_updates(working_pool, {"supplement_results": journal_persisted}, preserve_current_material=True)
         for inherited in inherited_by_id.values():
             for cached in inherited:
                 cached_state = cached.get("state") if isinstance(cached, Mapping) else {}
@@ -8615,7 +8672,6 @@ def make_retrieval_loop_runner(
                     {"supplement_results": persisted_supplement_results(cached_state) if isinstance(cached_state, Mapping) else []},
                     preserve_current_material=True,
                 )
-        journal_path = root / "retrieval_loop.jsonl"
         if resume and journal_path.is_file():
             for line in journal_path.read_text(encoding="utf-8").splitlines():
                 if not line.strip():
@@ -8919,6 +8975,35 @@ def make_retrieval_loop_runner(
             local_index_generation = [["managed_source_signature", final_signature]] if final_signature else []
         materials_by_chapter: dict[str, list[dict[str, Any]]] = {}
         supplement_results: list[dict[str, Any]] = []
+        returned_supplement_signatures: set[str] = set()
+
+        def append_returned_supplement_results(results: Sequence[Mapping[str, Any]]) -> None:
+            """Keep saved material visible to the outer pool merger.
+
+            A journal result can belong to an older need contract after the
+            managed local index is rebuilt.  Returning its saved result lets
+            the outer planner retain the real derived pool, while the current
+            retrieval loop remains the only source of need status and owner
+            bindings.  Do not copy the old need id into the current state.
+            """
+
+            for result in results:
+                if not isinstance(result, Mapping):
+                    continue
+                item = dict(result)
+                signature = _material_content_signature(item)
+                if signature in returned_supplement_signatures:
+                    continue
+                returned_supplement_signatures.add(signature)
+                supplement_results.append(item)
+
+        # The journal replay above is intentionally used before need-id
+        # derivation for local indexing.  Preserve the same saved envelopes in
+        # the runner result so the outer planner's merger sees the material as
+        # well.  This does not mark an old need answered or bind it to a new
+        # owner; it only exposes the immutable source result for pool merging.
+        if journal_persisted:
+            append_returned_supplement_results(journal_persisted)
         directed_results: list[dict[str, Any]] = []
         for need_state in loop_result.get("needs") or []:
             need_id = _text(need_state.get("need_id"))
@@ -8966,7 +9051,7 @@ def make_retrieval_loop_runner(
             raw = raw_results[-1] if raw_results else {}
             if raw_results:
                 if kind_by_id.get(need_id) == "supplement":
-                    supplement_results.extend(raw_results)
+                    append_returned_supplement_results(raw_results)
                 else:
                     directed_results.extend(raw_results)
             usable = _text(need_state.get("usable_content") or local.get("usable_content"))
