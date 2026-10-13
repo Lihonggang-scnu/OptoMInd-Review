@@ -75,6 +75,34 @@ def test_explicit_negative_keeps_original_row_and_boundary(marker):
     assert normalized["review_planning"]["scope_interpretation_cautions"][-1] == "F1: 未涉及其他温度。"
 
 
+@pytest.mark.parametrize("alias", ["warning", "result", "observation"])
+def test_key_finding_content_aliases_preserve_negative_result_and_raw_row(alias):
+    raw = response()
+    row = {"conditions": "真实阴性结果的实验条件", alias: "真实阴性结果"}
+    raw["content"]["general_understanding"]["key_findings"] = [row]
+    before = copy.deepcopy(raw)
+    normalized = card.validate_card_output(raw, {"review_plan": {"facets": [{"id": "F1"}]}})
+    assert raw == before
+    assert normalized["general_understanding"]["key_findings"] == [{"finding": "真实阴性结果", "conditions": "真实阴性结果的实验条件"}]
+
+    conflict = copy.deepcopy(before)
+    conflict["content"]["general_understanding"]["key_findings"][0]["finding"] = "另一条结果"
+    with pytest.raises(card.CardOutputError, match="finding_alias_conflict"):
+        card.validate_card_output(conflict, {"review_plan": {"facets": [{"id": "F1"}]}})
+
+
+def test_key_finding_explicit_marker_splits_conditions_without_inference():
+    raw = response()
+    raw["content"]["general_understanding"]["key_findings"] = [{"conditions": "实验条件；[finding] 明确观察结果"}]
+    normalized = card.validate_card_output(raw, {"review_plan": {"facets": [{"id": "F1"}]}})
+    assert normalized["general_understanding"]["key_findings"] == [{"finding": "明确观察结果", "conditions": "实验条件"}]
+
+    conditions_only = copy.deepcopy(raw)
+    conditions_only["content"]["general_understanding"]["key_findings"] = [{"conditions": "只有实验条件"}]
+    with pytest.raises(card.CardOutputError, match="key_findings_item_empty:0"):
+        card.validate_card_output(conditions_only, {"review_plan": {"facets": [{"id": "F1"}]}})
+
+
 @pytest.mark.parametrize("changed", [
     {"contribution": "The measured response doubles at the measured temperature."},
     {"possible_uses": None}, {"possible_uses": []}, {"possible_uses": {}},

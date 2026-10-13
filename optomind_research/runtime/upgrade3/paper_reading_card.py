@@ -39,7 +39,7 @@ from .paper_reading_card_prompt import PROMPT_VERSION, build_messages
 
 
 SCHEMA_VERSION = "optomind.paper_reading_card.v1"
-VALIDATOR_VERSION = "optomind.paper_reading_card.validator.v5"
+VALIDATOR_VERSION = "optomind.paper_reading_card.validator.v6"
 MODEL = "qwen3.7-flash"
 INPUT_PROFILES = {"standard", "economy"}
 DEFAULT_INPUT_PROFILE = "economy"
@@ -419,19 +419,32 @@ def _normalize_findings(value: Any, field: str) -> list[dict[str, str]]:
     normalized: list[dict[str, str]] = []
     for index, row in enumerate(rows):
         if isinstance(row, Mapping):
-            listing_value = row.get("listing")
-            listing_text = _norm(listing_value) if isinstance(listing_value, str) else ""
-            if "finding" not in row and listing_text:
-                finding_value = row.get("listing")
-            else:
-                finding_value = row.get("finding") or row.get("claim") or row.get("text") or row.get("summary")
-            if "finding" in row and "listing" in row:
-                finding_value_canonical = _norm(row.get("finding"))
-                finding_value_alias = listing_text
-                if finding_value_canonical and finding_value_alias and finding_value_canonical != finding_value_alias:
+            # Preserve the model's raw row in RAW_RESPONSE.json while
+            # accepting explicit content labels observed in older responses.
+            # Every non-empty label must agree; silently choosing one would
+            # make a conflicting scientific answer look valid.
+            finding_values = []
+            for key in ("finding", "claim", "text", "summary", "listing", "warning", "result", "observation"):
+                if key in row:
+                    candidate = _norm(row.get(key))
+                    if candidate:
+                        finding_values.append((key, candidate))
+            if finding_values:
+                finding = finding_values[0][1]
+                if any(candidate != finding for _, candidate in finding_values[1:]):
                     raise CardOutputError("key_findings_finding_alias_conflict")
-            finding = _norm(finding_value)
+            else:
+                finding = ""
             conditions = _norm(row.get("conditions") or row.get("condition") or row.get("context"))
+            # One historical response put the explicit marker and answer in
+            # the conditions string.  Split only one literal marker; without
+            # it, a conditions-only row remains an invalid empty finding.
+            if not finding and conditions.count("[finding]") == 1:
+                before, after = conditions.split("[finding]", 1)
+                marker_finding = after.strip(" ;；,，:：\t\r\n")
+                if marker_finding:
+                    finding = marker_finding
+                    conditions = before.strip(" ;；,，:：\t\r\n")
         else:
             finding = _norm(row)
             conditions = ""
