@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import sqlite3
 import sys
 from pathlib import Path
@@ -94,6 +95,80 @@ def budget_snapshot(path):
             "available_cny": value - actual - held if value is not None else None}
 
 
+_SAFE_EXCEPTION_TYPE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]{0,79}$")
+
+
+def _exception_chain(exc):
+    """Return bounded exception type names without messages or payloads."""
+
+    names = []
+    seen = set()
+    current = exc
+    while isinstance(current, BaseException) and id(current) not in seen and len(names) < 8:
+        seen.add(id(current))
+        name = type(current).__name__
+        if _SAFE_EXCEPTION_TYPE.fullmatch(name):
+            names.append(name)
+        current = current.__cause__ or current.__context__
+    return names
+
+
+def _failure_record(exc):
+    """Build the small failure envelope shared by stderr and RUN_FAILURE.
+
+    The direct transport already reduces an underlying network exception to a
+    class name in ``record['error']``.  It is safe to retain that name as the
+    cause hint, while messages, headers, and response bodies stay out of the
+    structured additions here.
+    """
+
+    record = getattr(exc, "record", {})
+    record = record if isinstance(record, dict) else {}
+    chain = _exception_chain(exc)
+    cause_type = chain[1] if len(chain) > 1 else record.get("cause_type") or record.get("error")
+    if not isinstance(cause_type, str) or not _SAFE_EXCEPTION_TYPE.fullmatch(cause_type):
+        cause_type = None
+    status_code = getattr(exc, "status_code", None)
+    if status_code is None:
+        status_code = record.get("status_code")
+    provider_error_code = record.get("provider_error_code")
+    result = {"status": "failed", "error_type": type(exc).__name__, "error": str(exc)}
+    if cause_type and cause_type != result["error_type"]:
+        result["cause_type"] = cause_type
+    if isinstance(status_code, int) and not isinstance(status_code, bool):
+        result["status_code"] = status_code
+    if isinstance(provider_error_code, str) and provider_error_code:
+        result["provider_error_code"] = provider_error_code[:160]
+    return result
+
+
+def _mark_run_state_failed(output_dir, failure):
+    """Close the durable run state when the outer CLI catches an exception."""
+
+    path = Path(output_dir) / "RUN_STATE.json"
+    if not path.is_file():
+        return
+    try:
+        state = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError):
+        return
+    if not isinstance(state, dict):
+        return
+    current_stage = state.get("current_stage", "")
+    state.update({
+        "status": "failed",
+        "last_error": failure.get("error", ""),
+        "last_error_type": failure.get("error_type", ""),
+        # Preserve the stage that was active when the provider/validator
+        # failed; clearing it makes an unattended resume look falsely idle.
+        "current_stage": current_stage,
+    })
+    for key in ("cause_type", "status_code", "provider_error_code"):
+        if key in failure:
+            state[key] = failure[key]
+    planning._atomic_json(path, state)
+
+
 def preflight(cfg, args):
     from optomind_research.runtime.upgrade3.module4.runtime import estimated_cost_cny
     rows = planning.load_planning_pool(cfg.pool_path)
@@ -118,6 +193,7 @@ def preflight(cfg, args):
             "budget": budget_snapshot(args.budget_ledger), "deep_read_limit": cfg.shared_deep_read_budget,
             "planner_model": cfg.planner_model, "reader_model": cfg.reader_model,
             "planner_runtime_config": settings, "directed_reader_runtime_config": planning._directed_reader_settings(cfg),
+            "planner_transport": {"name": planning.PLANNER_TRANSPORT, "stream": planning.PLANNER_STREAM},
             "material_parser_mode": material_parser_mode(args),
             "planning_revision_enabled": cfg.planning_revision_enabled,
             "chapter_material_view": "full_A_B",
@@ -275,13 +351,14 @@ def main(argv=None, *, regional_client_constructor=None):
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 2 if args.run and not args.stop_after and result.get("status") != "complete" else 0
     except Exception as exc:
-        error = {"status": "failed", "error_type": type(exc).__name__, "error": str(exc)}
+        error = _failure_record(exc)
         if cfg.output_dir.is_dir():
             import traceback
             (cfg.output_dir / "RUN_FAILURE.json").write_text(
                 json.dumps({**error, "traceback": traceback.format_exc()}, ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
+            _mark_run_state_failed(cfg.output_dir, error)
         print(json.dumps(error, ensure_ascii=False), file=sys.stderr)
         return 1
 

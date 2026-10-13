@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import inspect
+import json
 import math
 from dataclasses import replace
 
@@ -58,6 +59,7 @@ def test_every_stage_passes_requested_budgets_without_hidden_reductions(tmp_path
         assert settings["thinking_budget"] == thinking
         assert settings["thinking"] is bool(thinking)
         assert settings["model"] == (model.chapter_model if stage in {"chapter_details", "case_groups"} else model.model)
+    assert seen["call"]["stream"] is True
 
 
 def test_capacity_and_batch_signature_use_actual_limits(tmp_path, monkeypatch):
@@ -149,6 +151,79 @@ def test_planner_stage_preserves_wire_budget_and_cap_pressure_telemetry(tmp_path
     assert record["telemetry"]["effective_request"] == effective
     assert record["telemetry"]["cap_pressure"] == pressure
     assert record["telemetry"]["runtime_config"]["thinking_budget"] == 16384
+    assert record["telemetry"]["runtime_config"]["stream"] is True
+    assert record["telemetry"]["transport"] == {"name": "module4_sse", "stream": True}
+
+
+def test_planner_transport_does_not_change_scientific_cache_contract(tmp_path, monkeypatch):
+    model = adapter(tmp_path)
+    engine = p.ProgressiveReviewPlanner(config(tmp_path), planner=model)
+    payload = {"topic_id": "quality", "source_materials": [{"conditions": "25 C"}]}
+    before = engine._cache_contract("provisional_scope", payload)
+
+    seen = {}
+
+    class StreamCapture:
+        def __init__(self, **kwargs):
+            seen["constructor"] = kwargs
+
+        def __call__(self, _messages, **kwargs):
+            seen["call"] = kwargs
+            return {"content": "{}", "finish_reason": "stop"}
+
+    monkeypatch.setattr(runtime, "QwenDirectClient", StreamCapture)
+    result = model("provisional_scope", payload)
+
+    assert seen["call"]["stream"] is True
+    assert result["telemetry"]["transport"]["stream"] is True
+    assert engine._cache_contract("provisional_scope", payload) == before
+
+
+def test_planner_transport_failure_is_not_retried_or_adopted(tmp_path, monkeypatch):
+    calls = []
+
+    class Interrupted:
+        def __init__(self, **_kwargs):
+            pass
+
+        def __call__(self, _messages, **kwargs):
+            calls.append(kwargs)
+            raise runtime.QwenTransportError(
+                "qwen_transport_error", transient=True,
+                reason_code="RemoteDisconnected",
+                record={"error": "RemoteDisconnected", "stream": True},
+            )
+
+    monkeypatch.setattr(runtime, "QwenDirectClient", Interrupted)
+    model = adapter(tmp_path)
+    with pytest.raises(runtime.QwenTransportError, match="qwen_transport_error"):
+        model("provisional_scope", {"topic_id": "quality"})
+    assert len(calls) == 1
+    assert calls[0]["stream"] is True
+
+
+def test_cli_failure_envelope_preserves_transport_identity_and_active_stage(tmp_path):
+    error = runtime.QwenTransportError(
+        "qwen_transport_error", transient=True, status_code=503,
+        reason_code="RemoteDisconnected",
+        record={
+            "error": "RemoteDisconnected",
+            "provider_error_code": "upstream_disconnect",
+            "status_code": 503,
+        },
+    )
+    failure = cli._failure_record(error)
+    assert failure["cause_type"] == "RemoteDisconnected"
+    assert failure["status_code"] == 503
+    assert failure["provider_error_code"] == "upstream_disconnect"
+
+    state_path = tmp_path / "RUN_STATE.json"
+    state_path.write_text(json.dumps({"status": "in_progress", "current_stage": "provisional_scope"}), encoding="utf-8")
+    cli._mark_run_state_failed(tmp_path, failure)
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    assert state["status"] == "failed"
+    assert state["current_stage"] == "provisional_scope"
+    assert state["last_error"] == "qwen_transport_error"
 
 
 def test_query_refinement_passes_quality_helper_limits(tmp_path, monkeypatch):

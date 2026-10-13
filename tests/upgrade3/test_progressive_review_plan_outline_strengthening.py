@@ -297,6 +297,10 @@ def test_cli_incomplete_packet_structure_stops_before_selector(tmp_path, monkeyp
     failure = json.loads(captured.err)
     assert 'complete_plan_' in failure['error']
     assert not calls and (out / 'RUN_FAILURE.json').is_file()
+    state = pipeline._load(out / 'RUN_STATE.json')
+    assert state['status'] == 'failed'
+    assert state['last_error'] == failure['error']
+    assert state['current_stage'] == ''
 
 
 def test_cli_preflight_does_not_dispatch_or_open_key(tmp_path, monkeypatch, capsys):

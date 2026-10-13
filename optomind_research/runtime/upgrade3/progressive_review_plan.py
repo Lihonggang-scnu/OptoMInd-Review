@@ -36,6 +36,11 @@ DEFAULT_PLANNER_THINKING_BUDGET = 16_384
 DEFAULT_PLANNER_OUTPUT_TOKENS = 32_768
 DEFAULT_READER_THINKING_BUDGET = 8_192
 DEFAULT_READER_OUTPUT_TOKENS = 20_000
+# Long planner calls use the mature module4 SSE reader.  Keep this transport
+# choice out of scientific cache contracts: it changes delivery mechanics, not
+# the model, prompt, material, or effective token allowances.
+PLANNER_STREAM = True
+PLANNER_TRANSPORT = "module4_sse"
 QUERY_REFINEMENT_THINKING_BUDGET = 4_096
 QUERY_REFINEMENT_OUTPUT_TOKENS = 4_096
 DEFAULT_POOL_PATH = Path("outputs/planning_support/20260923/practical_refresh/supplement_live/PLANNING_POOL.jsonl")
@@ -2282,10 +2287,19 @@ class QwenProgressivePlanner:
             max_output_tokens=output_tokens,
             thinking=bool(call_thinking_budget),
             thinking_budget=call_thinking_budget,
+            stream=PLANNER_STREAM,
             call_id=call_id,
         )
         response, telemetry = _parse_planner_response(raw)
-        telemetry["runtime_config"] = {**settings, "thinking": bool(call_thinking_budget)}
+        # Transport is operational provenance.  It is deliberately recorded
+        # beside the effective profile rather than added to ``settings``;
+        # ``settings`` participates in scientific stage cache contracts.
+        telemetry["runtime_config"] = {
+            **settings,
+            "thinking": bool(call_thinking_budget),
+            "stream": PLANNER_STREAM,
+        }
+        telemetry["transport"] = {"name": PLANNER_TRANSPORT, "stream": PLANNER_STREAM}
         telemetry["prompt_estimation"] = {
             "tokenizer": "data/tokenizers/qwen3_5_9b/tokenizer.json",
             "multiplier": TOKEN_MARGIN_MULTIPLIER,
