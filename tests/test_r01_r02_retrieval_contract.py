@@ -163,6 +163,19 @@ def test_declared_cross_domain_requirements_preserved_without_semantic_claim(que
     with pytest.raises(ValueError, match="requirement_mapping_incomplete"): load_plan(p)
 
 
+def test_requirement_mapping_rejection_identifies_missing_and_unknown_ids():
+    from optomind_research.runtime.upgrade3.query_plan import validate_plan
+    p = plan()
+    p['original_question'] = p['question_en']
+    p['requirements'] = [{'id': 'R1', 'source_text': p['question_en']}]
+    p['facets'][0]['requirement_mapping'] = ['UNKNOWN']
+    result = validate_plan(p)
+    assert not result['ok']
+    error = next(row for row in result['errors'] if row['code'] == 'requirement_mapping_incomplete')
+    assert "Unmapped requirement IDs: ['R1']" in error['detail']
+    assert "unknown mapped IDs: ['UNKNOWN']" in error['detail']
+
+
 def test_snippet_checkpoint_resume_and_hash_rejection(tmp_path):
     class Snippets(Gateway):
         def search_snippets(self, query, **kwargs):

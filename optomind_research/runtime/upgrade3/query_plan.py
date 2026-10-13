@@ -999,7 +999,10 @@ def validate_plan(
                     continue
                 mapped.update(mapping)
             if mapped - set(ids) or set(ids) - mapped:
-                errors.append(_error("requirement_mapping_incomplete", "$.facets"))
+                detail = ("Every declared requirement must have a facet mapping. "
+                          f"Unmapped requirement IDs: {sorted(set(ids) - mapped)}; "
+                          f"unknown mapped IDs: {sorted(mapped - set(ids))}.")
+                errors.append(_error("requirement_mapping_incomplete", "$.facets", detail))
     return _report(not errors, plan, errors, repairs,
                    raw_plan=raw_plan, refused_queries=refused_queries)
 
