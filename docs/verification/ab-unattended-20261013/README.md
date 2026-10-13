@@ -123,3 +123,8 @@ V20恢复时，一次空失败将原有具体still_missing回退为原始大问�
 恢复中一笔0.0035714元的选材调用重复了此前科学拒绝，已照实计费；root拒绝错对象候选，未手填空选答案。后续相同被拒请求不应重复购买。这属于开发监督过程的实际记录，不写成系统自主成功。
 
 V21实际受测源c730ad8126fc495d6ca02eb73ec9f8d05897a42d，绑定RUN_BINDING_PLANNING_V21_PARTIAL_FEEDBACK_20261014.json；CURRENT_PROCESS_PLANNING_V21.json及真实命令行确定本地执行归属。V19/V20已停止，旧未付门不得批准。原账本恢复前实际6.6530529元、旧未知4.5168676元。精读worker上限32；本地公式增强在单planner内以全局线程锁串行执行，公式worker固定1、显存上限8192MiB，因此不随32个模型worker同时加载32份GPU模型。多planner不共享该线程锁，本次保证单planner实际运行。
+
+
+## 协调缓存的同一兼容证明
+
+V21实际原样复用一级纲要、245路由和五章构思；对应文件哈希与恢复前快照完全相同。协调输入也仅多5条无材料失败历史，其余字段逐值一致。已有科学投影直接证明相等，故将同一个严格缓存证明有界用于harmonized_scope/level1_tool_results，保留原input/contract并另写reuse receipt；实际材料、条件、提示词或模型改变仍调用。未付99472500门已退役，未购买新的协调答案。详见ROOT_V21_HARMONIZED_CACHE_ACCEPTANCE.json及原请求差异。

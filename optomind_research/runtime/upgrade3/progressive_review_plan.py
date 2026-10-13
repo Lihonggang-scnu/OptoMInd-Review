@@ -1803,16 +1803,25 @@ def _level1_tool_feedback_has_material(value: Any) -> bool:
     return False
 
 
-def _level1_tool_feedback_projection(payload: Mapping[str, Any]) -> tuple[dict[str, Any], dict[str, int]] | None:
-    """Project retry bookkeeping for the narrow level1-outline cache seam.
+def _level1_tool_feedback_projection(
+    payload: Mapping[str, Any],
+    *,
+    stage: str = "level1_outline",
+    feedback_key: str = "actual_tool_results",
+) -> tuple[dict[str, Any], dict[str, int]] | None:
+    """Project retry bookkeeping for the narrow outline/scope cache seam.
 
     The projection is intentionally limited to explicit tool feedback.  It
     normalizes run-derived need-id suffixes, removes exact duplicate source
     rows in tool material, and omits attempts which contain no material.  The
     original payload and all attempts remain persisted; this projection is
-    only a proof that the saved outline's scientific input is unchanged.
+    only a proof that the saved model input is unchanged.  ``stage`` and
+    ``feedback_key`` are explicit so the same proof can serve the harmonized
+    scope input without treating arbitrary payload fields as retry metadata.
     """
-    actual = payload.get("actual_tool_results") if isinstance(payload, Mapping) else None
+    if stage not in {"level1_outline", "harmonized_scope"} or not feedback_key:
+        return None
+    actual = payload.get(feedback_key) if isinstance(payload, Mapping) else None
     if not isinstance(actual, Mapping):
         return None
 
@@ -1868,7 +1877,7 @@ def _level1_tool_feedback_projection(payload: Mapping[str, Any]) -> tuple[dict[s
                 normalized_rows.append(row)
             by_chapter[chapter] = normalized_rows
 
-    projected["actual_tool_results"] = tool_results
+    projected[feedback_key] = tool_results
     return projected, stats
 
 
@@ -4054,8 +4063,10 @@ class ProgressiveReviewPlanner:
         contract: str,
         frozen_inputs: Any,
         state: dict[str, Any],
+        stage: str = "level1_outline",
+        feedback_key: str = "actual_tool_results",
     ) -> Any | None:
-        """Reuse an outline when only retry bookkeeping changed in tool feedback.
+        """Reuse a model stage when only retry bookkeeping changed in tool feedback.
 
         The saved contract is recomputed from its original input with the live
         prompt/model/token settings.  A prompt or runtime change therefore
@@ -4063,14 +4074,18 @@ class ProgressiveReviewPlanner:
         """
         if not isinstance(frozen_inputs, Mapping):
             return None
-        prior_inputs = (state.get("stage_inputs") or {}).get("level1_outline")
+        prior_inputs = (state.get("stage_inputs") or {}).get(stage)
         if not isinstance(prior_inputs, Mapping):
             return None
-        saved_contract = (state.get("stage_cache_contracts") or {}).get("level1_outline")
-        if not saved_contract or self._cache_contract("level1_outline", prior_inputs) != saved_contract:
+        saved_contract = (state.get("stage_cache_contracts") or {}).get(stage)
+        if not saved_contract or self._cache_contract(stage, prior_inputs) != saved_contract:
             return None
-        prior_projection = _level1_tool_feedback_projection(prior_inputs)
-        current_projection = _level1_tool_feedback_projection(frozen_inputs)
+        prior_projection = _level1_tool_feedback_projection(
+            prior_inputs, stage=stage, feedback_key=feedback_key,
+        )
+        current_projection = _level1_tool_feedback_projection(
+            frozen_inputs, stage=stage, feedback_key=feedback_key,
+        )
         if prior_projection is None or current_projection is None:
             return None
         if prior_projection[0] != current_projection[0]:
@@ -4084,9 +4099,10 @@ class ProgressiveReviewPlanner:
         old_projected, old_stats = prior_projection
         new_projected, new_stats = current_projection
         receipts = dict(state.get("stage_reuse_receipts") or {})
-        receipts["level1_outline"] = {
-            "mode": "level1_outline_tool_feedback_compatible",
-            "stage": "level1_outline",
+        receipts[stage] = {
+            "mode": stage + "_tool_feedback_compatible",
+            "stage": stage,
+            "feedback_key": feedback_key,
             "model_call": False,
             "old_contract": saved_contract,
             "current_contract": contract,
@@ -4100,6 +4116,10 @@ class ProgressiveReviewPlanner:
             ).hexdigest(),
             "projected_input_sha256": hashlib.sha256(
                 json.dumps(old_projected, ensure_ascii=False, sort_keys=True,
+                           default=_json_default, separators=(",", ":")).encode("utf-8")
+            ).hexdigest(),
+            "current_projected_input_sha256": hashlib.sha256(
+                json.dumps(new_projected, ensure_ascii=False, sort_keys=True,
                            default=_json_default, separators=(",", ":")).encode("utf-8")
             ).hexdigest(),
             "projection_changes": {"old": old_stats, "current": new_stats},
@@ -4118,9 +4138,15 @@ class ProgressiveReviewPlanner:
         if resume and path.is_file() and contract is not None:
             if (state.get("stage_cache_contracts") or {}).get(name) == contract:
                 return _read_json(path)
-            if name == "level1_outline":
+            feedback_key = {
+                "level1_outline": "actual_tool_results",
+                "harmonized_scope": "level1_tool_results",
+            }.get(name)
+            if feedback_key:
                 reused = self._reuse_level1_outline_tool_feedback(
-                    path=path, contract=contract, frozen_inputs=frozen_inputs, state=state)
+                    path=path, contract=contract, frozen_inputs=frozen_inputs, state=state,
+                    stage=name, feedback_key=feedback_key,
+                )
                 if reused is not None:
                     return reused
         state.update({"status": "in_progress", "current_stage": name})
