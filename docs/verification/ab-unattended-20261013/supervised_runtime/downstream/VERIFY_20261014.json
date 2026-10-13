@@ -1,0 +1,48 @@
+{
+  "schema": "optomind.downstream_supervision_verify.v1",
+  "timestamp": "2026-10-14",
+  "changed": [
+    {
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\downstream_supervision_20261014\\downstream_supervision.py",
+      "sha256": "1CA7D1DFE7F21222881FECD96F1AEEC991E96E0B017EF6DC526D9848F74C81DD"
+    },
+    {
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\downstream_supervision_20261014\\test_downstream_supervision.py",
+      "sha256": "2F58333541EA27CE8154452417DF4771A40722E69E3F8B2E55C3223D47543066"
+    },
+    {
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\downstream_supervision_20261014\\DOWNSTREAM_SUPERVISION_ARGV_20261014.json",
+      "sha256": "139C740580F63F46CF7AC26F4C5FD2E6D012E725B21939E5A6E3863A362B7CFB"
+    }
+  ],
+  "commands": [
+    {
+      "command": "python -m py_compile F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\downstream_supervision_20261014\\downstream_supervision.py F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\downstream_supervision_20261014\\test_downstream_supervision.py",
+      "result": "pass"
+    },
+    {
+      "command": "python -m pytest -q --basetemp=F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\downstream_supervision_20261014\\.pytest-tmp F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\downstream_supervision_20261014\\test_downstream_supervision.py",
+      "result": "2 passed in 2.50s; fake provider only, temporary dual ledgers, six supervised calls in explicit-run test"
+    },
+    {
+      "command": "python F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\downstream_supervision_20261014\\downstream_supervision.py arrangement --binding F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\downstream_supervision_20261014\\parser-smoke-binding.json -- --help",
+      "result": "pass; wrapper binding consumed before first --, formal arrangement help returned 0, no provider"
+    },
+    {
+      "command": "$env:PYTHONUTF8='1'; python -m pytest -q --basetemp=F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\downstream_supervision_20261014\\.pytest-selected-s tests/test_body_delivery_closeout.py::test_actual_normal_inputs_parts_and_publication_keep_selected_body_and_diagnostics[True-legacy-input] tests/upgrade3/test_manuscript_delivery.py::test_actual_selection_flows_to_reader_and_publication_metadata",
+      "cwd": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree",
+      "result": "2 passed in 2.52s; selected_body handoff to reader/publication regression"
+    }
+  ],
+  "safety": {
+    "network_calls": 0,
+    "paid_calls": 0,
+    "production_source_edits": 0,
+    "production_output_or_ledger_edits": 0,
+    "running_processes_touched": 0
+  },
+  "blockers": [
+    "The locked planning_resume_v19 snapshot lacks its tools/ package and prompt files; direct execution of the selected_body tests from that snapshot therefore stops at import/prompt lookup. The same read-only regression passes against the current worktree snapshot with its existing assets. This does not affect the new launcher tests, which use a synthetic packet and monkeypatched editor prompt."
+  ]
+}
+

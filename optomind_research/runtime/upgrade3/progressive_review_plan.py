@@ -3526,6 +3526,16 @@ def run_feedback_loop(
     }
 
 
+def _directed_chapter_ids(task: Mapping[str, Any] | None) -> list[str]:
+    task = task if isinstance(task, Mapping) else {}
+    owners = task.get("chapter_ids") or task.get("assigned_chapters") or []
+    if isinstance(owners, str):
+        owners = [owners]
+    if task.get("chapter_id"):
+        owners = [*owners, task["chapter_id"]]
+    return list(dict.fromkeys(_text(value) for value in owners if _text(value)))
+
+
 def _merge_directed_tasks(tasks: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     merged: dict[str, dict[str, Any]] = {}
     for raw in tasks:
@@ -3548,12 +3558,11 @@ def _merge_directed_tasks(tasks: Sequence[Mapping[str, Any]]) -> list[dict[str, 
             row["retry_empty_result"] = True
         if raw.get("round_specs") and not row.get("round_specs"):
             row["round_specs"] = [dict(spec) for spec in raw["round_specs"] if isinstance(spec, Mapping)]
-        owners = raw.get("chapter_ids") or []
-        if isinstance(owners, str):
-            owners = [owners]
-        if raw.get("chapter_id"):
-            owners = [*owners, raw["chapter_id"]]
-        row["chapter_ids"] = list(dict.fromkeys([*row["chapter_ids"], *[str(x) for x in owners if _text(x)]]))
+        row["chapter_ids"] = list(dict.fromkeys([*row["chapter_ids"], *_directed_chapter_ids(raw)]))
+        for key in ("focus", "section"):
+            value = _text(raw.get(key))
+            if value:
+                row[key] = value
         for key in ("questions", "required_outputs"):
             values = raw.get(key) or ((raw.get("question") or raw.get("focus")) if key == "questions" else None) or []
             if isinstance(values, (str, Mapping)):
@@ -3630,7 +3639,7 @@ def _normalize_gaps(gaps: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
             "reuse_plan_facet_ids": list(dict.fromkeys(_text(x) for x in reuse_facets if _text(x)))[:3],
             "known_papers": [dict(x) if isinstance(x, Mapping) else {"paper_id": str(x)} for x in (raw.get("known_papers") or []) if isinstance(x, Mapping) or _text(x)],
             "reviewed_references": [dict(x) for x in (raw.get("reviewed_references") or []) if isinstance(x, Mapping)],
-            "chapter_ids": list(dict.fromkeys(_text(x) for x in (raw.get("chapter_ids") or []) if _text(x))),
+            "chapter_ids": _directed_chapter_ids(raw),
             "priority": raw.get("priority", 0),
             **{key: raw[key] for key in ("intended_use", "user_scope", "required_concepts", "known_paper_handles", "comparison_object", "need_id", "retry_empty_result") if key in raw},
         })
@@ -3662,6 +3671,8 @@ def _directed_task_requirements(task: Mapping[str, Any] | None) -> dict[str, Any
     """Normalize the scientific request fields used to decide read reuse."""
 
     task = task if isinstance(task, Mapping) else {}
+    focus = _text(task.get("focus"))
+    section = _text(task.get("section"))
     gaps = task.get("knowledge_gaps") or task.get("knowledge_gap") or task.get("reasons") or task.get("reason") or []
     if isinstance(gaps, str):
         gaps = [gaps]
@@ -3682,6 +3693,8 @@ def _directed_task_requirements(task: Mapping[str, Any] | None) -> dict[str, Any
     raw_questions = task.get("questions") or []
     if not raw_questions and task.get("question"):
         raw_questions = [task.get("question")]
+    if not raw_questions and focus:
+        raw_questions = [{"question": focus}]
     if isinstance(raw_questions, (str, Mapping)):
         raw_questions = [raw_questions]
     questions: list[dict[str, Any]] = []
@@ -3704,28 +3717,42 @@ def _directed_task_requirements(task: Mapping[str, Any] | None) -> dict[str, Any
                     "description": _text(item.get("purpose") or item.get("required_output") or question),
                 })
                 output_ids.append(output_id)
-        questions.append({
+        if section:
+            section_note = f"Reading position: {section}"
+            if section_note not in purpose:
+                purpose = f"{section_note}; {purpose}" if purpose else section_note
+        question_row = {
             "question_id": _text(item.get("question_id") or item.get("id")) or f"Q{index:02d}",
             "question": question,
             "purpose": purpose,
             "gap_key": _text(item.get("gap_key") or item.get("knowledge_gap")) or "; ".join(gaps),
             "required_output_ids": sorted(set(output_ids)),
-        })
+        }
+        questions.append(question_row)
     if not questions:
         question = _text(task.get("knowledge_gap") or task.get("reason") or "Extract the paper's evidence relevant to the coordinated review scope.")
         if not outputs:
             outputs = [{"output_id": "O01", "output_type": "practical_material", "description": "Source-based findings, conditions, methods and limits useful to the review."}]
+        purpose = "Supply a concrete, attributed case for the coordinated review."
+        if section:
+            section_note = f"Reading position: {section}"
+            purpose = f"{section_note}; {purpose}" if section_note not in purpose else purpose
         questions = [{
             "question_id": "Q01", "question": question,
-            "purpose": "Supply a concrete, attributed case for the coordinated review.",
+            "purpose": purpose,
             "gap_key": "; ".join(gaps),
             "required_output_ids": sorted(row["output_id"] for row in outputs),
         }]
-    return {
+    normalized = {
         "questions": questions,
         "required_outputs": outputs,
         "knowledge_gaps": sorted({_text(value) for value in gaps if _text(value)}),
     }
+    if focus:
+        normalized["focus"] = focus
+    if section:
+        normalized["section"] = section
+    return normalized
 
 
 def _directed_task_signature(task: Mapping[str, Any] | None) -> str:
@@ -9761,7 +9788,7 @@ def make_directed_reading_runner(
             planning = candidate.get("planning_view") if isinstance(candidate.get("planning_view"), Mapping) else {}
             planning_identity = planning.get("paper_identity") if isinstance(planning.get("paper_identity"), Mapping) else {}
             title = _text(identity.get("title") or planning_identity.get("title") or candidate.get("title"))
-            chapter_ids = list(task.get("chapter_ids") or [])
+            chapter_ids = _directed_chapter_ids(task)
             chapter_title = " / ".join(_text(item) for item in chapter_ids) or "Coordinated review"
             kind = _text(identity.get("paper_kind") or a_summary.get("paper_kind") or a_summary.get("study_type") or candidate.get("paper_kind") or "study")
             scope = _text((card.get("material") or {}).get("material_scope") if isinstance(card.get("material"), Mapping) else "") or planning.get("material_scope")
@@ -9781,7 +9808,8 @@ def make_directed_reading_runner(
                 "questions": questions,
                 "approve_core": True,
                 "substantive_review": "review" in kind.casefold() or "meta-analysis" in kind.casefold(),
-                "metadata": {"chapter_ids": chapter_ids, "request_origin": str(context.get("phase") or "progressive_review")},
+                "metadata": {"chapter_ids": chapter_ids, "request_origin": str(context.get("phase") or "progressive_review"),
+                             **({"section": _text(task.get("section"))} if _text(task.get("section")) else {})},
             }
             request = build_directed_request(
                 review_id=config.topic_id,

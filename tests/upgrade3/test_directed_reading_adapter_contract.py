@@ -5,7 +5,8 @@ from pathlib import Path
 from optomind_research.runtime.upgrade3 import directed_reading as dr
 from optomind_research.runtime.upgrade3.progressive_review_plan import (
     ProgressivePlannerConfig, _directed_task_requirements, _directed_material_compatible,
-    _decorate_directed_material, _directed_task_signature, make_directed_reading_runner,
+    _decorate_directed_material, _directed_task_signature, _merge_directed_tasks,
+    make_directed_reading_runner,
 )
 
 
@@ -66,6 +67,39 @@ def test_string_question_has_executable_purpose_and_outputs(tmp_path, monkeypatc
     result = runner([request], **context)
     assert len(calls) == 1, result
     assert result["results"][0]["status"] == "fulfilled"
+
+
+def test_focus_section_and_assigned_chapters_reach_reader_without_generic_collision(tmp_path, monkeypatch):
+    from optomind_research.runtime.upgrade3.progressive_review_plan import _normalize_gaps
+    assert _normalize_gaps([{"gap_id": "G1", "question": "Compare the conditions.", "assigned_chapters": "CH2"}])[0]["chapter_ids"] == ["CH2"]
+    runner, context, calls, _ = fixture(tmp_path, monkeypatch, [answer()])
+    raw = {
+        "paper_id": "paper-1",
+        "focus": "Extract the temperature-dependent change.",
+        "section": "Results / Temperature sweep",
+        "assigned_chapters": ["CH2", "CH3"],
+    }
+    normalized = _directed_task_requirements(raw)
+    assert normalized["questions"][0]["question"] == raw["focus"]
+    assert "Reading position: Results / Temperature sweep" in normalized["questions"][0]["purpose"]
+    assert _directed_task_requirements(normalized) == normalized
+    generic = _directed_task_requirements({"paper_id": "paper-1"})
+    assert generic["questions"][0]["question"] == "Extract the paper's evidence relevant to the coordinated review scope."
+    explicit = _directed_task_requirements({**raw, "questions": [{"question": "Keep this explicit."}]})
+    assert explicit["questions"][0]["question"] == "Keep this explicit."
+    merged = _merge_directed_tasks([raw])
+    assert merged[0]["chapter_ids"] == ["CH2", "CH3"]
+    assert merged[0]["focus"] == raw["focus"] and merged[0]["section"] == raw["section"]
+    assert _directed_task_signature(_merge_directed_tasks(merged)[0]) == _directed_task_signature(merged[0])
+    assert _merge_directed_tasks([{**raw, "assigned_chapters": "CH4"}])[0]["chapter_ids"] == ["CH4"]
+    changed = {**raw, "focus": "Extract the absolute aperture limit."}
+    assert _directed_task_signature(raw) != _directed_task_signature(changed)
+
+    result = runner([raw], **context)
+    assert result["results"][0]["status"] == "fulfilled", result
+    wire_payload = json.loads(calls[0]["messages"][-1]["content"])
+    assert wire_payload["questions"][0]["question"] == raw["focus"]
+    assert raw["section"] in wire_payload["questions"][0]["purpose"]
 
 
 def test_empty_result_explicit_retry_preserves_old_raw_and_result(tmp_path, monkeypatch):

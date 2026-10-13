@@ -1,0 +1,86 @@
+{
+  "schema": "optomind.downstream_supervision_prep.v1",
+  "date": "2026-10-14",
+  "scope": "development-only launcher; no production source, output, ledger, gate, PID, or provider call",
+  "binding": {
+    "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\RUN_BINDING_PLANNING_V19_CACHE_COMPAT_20261014.json",
+    "source_commit": "cb7d009b2811f813aa2fd97cd2450a8e4dedf556",
+    "source_worktree": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v19",
+    "project_limit_cny": 80.0,
+    "account_limit_cny": 300.0,
+    "key_index": 1,
+    "connection": "direct",
+    "physical_retries": 0,
+    "key_rotation": false,
+    "dual_ledger": "reuse binding project_ledger + account_ledger through PlanningTransport"
+  },
+  "launcher": {
+    "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\downstream_supervision_20261014\\downstream_supervision.py",
+    "entries": ["arrangement", "body", "parts", "checker"],
+    "default": "formal CLI preview; adapter.check only",
+    "default_supervision_root": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision",
+    "source_import": "source_worktree is read from the supplied binding and placed first before formal module import; no v19 source is forced for a later binding",
+    "native_gate": "only formal argv containing --run enters PlanningTransport.activate; writer_candidates allowlist is scoped and restored",
+    "funding_and_gate_protocol": "existing planning_supervision_candidate.planning_transport only"
+  },
+  "formal_baseline": {
+    "authoring": {
+      "body_version": "baseline",
+      "model": "qwen3.5-plus",
+      "thinking_budget": 8192,
+      "output_tokens": 32768
+    },
+    "quality_and_article_edit": {
+      "model": "qwen3.5-plus",
+      "thinking_budget": 16384,
+      "output_tokens": 24576
+    },
+    "arrangement": {
+      "model": "qwen3.5-plus",
+      "thinking_budget": 16384,
+      "output_tokens": 32768
+    },
+    "post_body_parts_and_checker": {
+      "model": "qwen3.5-plus",
+      "thinking_budget": 16384,
+      "output_tokens": 32768
+    },
+    "quality_flags": {
+      "normal_formal_BODY": {"quality_control": true, "article_edit": true},
+      "legacy_standalone_defaults": {"quality_control": false, "article_edit": false},
+      "equivalence": "standalone legacy CLI must pass --quality-control --article-edit to match formal BODY"
+    }
+  },
+  "configuration_evidence": [
+    "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v19\\docs\\current\\PIPELINE.md",
+    "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v19\\docs\\current\\RUN_GUIDE.md",
+    "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v19\\optomind_research\\runtime\\upgrade3\\review_delivery.py::BODY_DELIVERY_DEFAULTS",
+    "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v19\\scripts\\upgrade3\\legacy_unit_writer.py",
+    "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v19\\scripts\\upgrade3\\manuscript_parts.py",
+    "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v19\\scripts\\upgrade3\\manuscript_delivery.py"
+  ],
+  "argv_templates": {
+    "arrangement_preview": [
+      "python", "preparation/downstream_supervision_20261014/downstream_supervision.py", "arrangement", "--", "--all-chapters", "--packet-root", "<approved_packet_root>", "--output-root", "<arrangement_output>", "--planning-revision", "--budget-ledger", "<project_ledger>", "--round-cap-cny", "10", "--no-retry", "--key-index", "1"
+    ],
+    "arrangement_native_explicit": [
+      "python", "preparation/downstream_supervision_20261014/downstream_supervision.py", "arrangement", "--", "--all-chapters", "--packet-root", "<approved_packet_root>", "--output-root", "<arrangement_output>", "--planning-revision", "--budget-ledger", "<project_ledger>", "--round-cap-cny", "10", "--no-retry", "--key-file", "<bound_key_file>", "--key-index", "1", "--run"
+    ],
+    "body_native_explicit": [
+      "python", "preparation/downstream_supervision_20261014/downstream_supervision.py", "body", "--", "--delivery-start", "body", "--delivery-manifest", "<approved_full_body_manifest>", "--delivery-out", "<body_output>", "--run", "--ledger", "<project_ledger>", "--budget-limit", "80", "--account-ledger", "<account_ledger>", "--account-budget-limit", "300", "--account-mapping-dir", "<account_mapping_dir>", "--key-file", "<bound_key_file>", "--key-index", "1"
+    ],
+    "parts_preview_then_native": [
+      "python", "preparation/downstream_supervision_20261014/downstream_supervision.py", "parts", "--", "--draft", "<DELIVERY_REPORT.selected_body.handle_draft>", "--body-report", "<DELIVERY_REPORT>", "--context", "<post_body_context>", "--research-question", "<bound_question>", "--output", "<parts_output>", "--live", "--ledger", "<project_ledger>", "--budget-limit", "80", "--account-ledger", "<account_ledger>", "--account-budget-limit", "300", "--account-mapping-dir", "<account_mapping_dir>", "--incremental-budget", "5", "--tokenizer", "<existing_local_tokenizer>", "--key-index", "1", "[--run --key-file <bound_key_file>]"
+    ],
+    "checker_preview_then_native": [
+      "python", "preparation/downstream_supervision_20261014/downstream_supervision.py", "checker", "--", "--parts-report", "<parts_report>", "--config", "<delivery_config>", "--output", "<delivery_output>", "--live", "--ledger", "<project_ledger>", "--budget-limit", "80", "--account-ledger", "<account_ledger>", "--account-budget-limit", "300", "--account-mapping-dir", "<account_mapping_dir>", "--incremental-budget", "5", "--tokenizer", "<existing_local_tokenizer>", "--key-index", "1", "[--run --key-file <bound_key_file>]"
+    ],
+    "sequencing": "BODY selected_body -> parts -> checker -> existing front/back/numbering/publication consumers; use accepted reports/handles, never latest-file guessing"
+  },
+  "free_regression": {
+    "selected_body_handoff": "python -m pytest -q <source>/tests/test_body_delivery_closeout.py <source>/tests/upgrade3/test_manuscript_delivery.py",
+    "launcher_tests": "python -m pytest -q <this_directory>/test_downstream_supervision.py",
+    "network": false,
+    "paid_calls": false
+  }
+}
