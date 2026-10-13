@@ -22,3 +22,12 @@
 正式入口仍 scripts/upgrade3/paper_reading_batch.py；保留同目录、同manifest、同材料、同预算及模型配置恢复。--reparse-saved-responses保留旧调用兼容，免费重校验现已默认执行。成功产物保持缓存复用，既有账本不能清零。
 
 本地光学运行根目录 F:/OptoMind-Review-2/outputs/e2e_optics_20261012_80cny；preparation/ab_unattended_20261013保存逐项证据和下游预览。开发期人工supervision不是产品默认运行前提：审读应使用正式decide接口，不手拼receipt，也不因生产已支持的无损别名误拦。
+
+
+## 正式保存响应恢复补充
+
+字段兼容使用原文：key_findings内明确的warning/result/observation等内容字段可作为finding别名；冲突仍拒绝，conditions-only不填充。单个显式[finding]标记可无损拆分条件与发现。格式恢复与真实内容质量分开。
+
+正式run_paper_reading_card(saved_response_dir=...)也验证历史投影兼容，严格保留原输入、prompt、runtime和来源。72项相关检查通过。两份真实历史RAW已通过该正式入口免费恢复（一个projection_compatible=true、一个false），原RAW哈希不变，无客户端/账本创建；证据见REAL_SAVED_RECOVERY_CHECK.json。
+
+规划已使用锁定244卡池开始运行。以上两份新恢复派生产物未悄悄改入正在运行的输入，批状态和显式排除回执保持启动时一致，后续按正式恢复合入。

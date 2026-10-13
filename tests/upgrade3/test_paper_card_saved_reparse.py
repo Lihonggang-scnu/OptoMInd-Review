@@ -2,6 +2,7 @@
 import copy
 import json
 import shutil
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -138,6 +139,66 @@ def test_saved_reparse_and_bound_cache_never_touch_live_resources(tmp_path, monk
     monkeypatch.setattr(card, "VALIDATOR_VERSION", "LOCAL_ONLY.validator.next")
     assert card.run_paper_reading_card(**options)["output_dir"] != result["output_dir"]
     assert frozen_files(output) == before
+
+
+def test_saved_reparse_allows_proven_current_projection_change(tmp_path, monkeypatch):
+    inputs = card_inputs(tmp_path)
+    output = tmp_path / "attempt-01"
+    before = create_failed(inputs, output, monkeypatch)
+    original = card.PreparedSnapshotProvider(inputs["snapshot_dir"]).load()
+    changed_packet = copy.deepcopy(original.build_reading_packet())
+    changed_packet["observations"][0]["text"] += " projection-only re-encoding"
+    monkeypatch.setattr(card.PreparedSnapshot, "build_reading_packet", lambda self: copy.deepcopy(changed_packet))
+    forbidden = forbid_live(monkeypatch)
+    result = card.run_paper_reading_card(
+        **inputs, output_dir=output, saved_response_dir=output, client=forbidden,
+        key_file=tmp_path / "never-read.key", budget_ledger_path=tmp_path / "never-create.sqlite",
+        budget_limit_cny=80,
+    )
+    receipt = json.loads((Path(result["output_dir"]) / "REPARSE_RECEIPT.json").read_text(encoding="utf-8"))
+    assert receipt["projection_compatible"] is True
+    assert receipt["source_snapshot_sha256"] != receipt["current_snapshot_sha256"]
+    assert result["card"]["snapshot_sha256"] == receipt["source_snapshot_sha256"]
+    assert frozen_files(output) == before
+    assert not (tmp_path / "never-create.sqlite").exists()
+
+
+def test_saved_reparse_projection_proof_rejects_changed_source_and_runtime(tmp_path, monkeypatch):
+    inputs = card_inputs(tmp_path)
+    output = tmp_path / "attempt-01"
+    create_failed(inputs, output, monkeypatch)
+    original_load = card.PreparedSnapshotProvider.load
+
+    def changed_source(provider):
+        snapshot = original_load(provider)
+        blocks = [dict(row) for row in snapshot.blocks]
+        blocks[0]["text_normalized"] = str(blocks[0].get("text_normalized") or "") + " source mutation"
+        return replace(snapshot, blocks=tuple(blocks))
+
+    monkeypatch.setattr(card.PreparedSnapshotProvider, "load", changed_source)
+    forbidden = forbid_live(monkeypatch)
+    with pytest.raises(card.CardInputError, match="saved_response_projection_snapshot_mismatch"):
+        card.run_paper_reading_card(
+            **inputs, output_dir=output, saved_response_dir=output, client=forbidden,
+            key_file=tmp_path / "never-read.key", budget_ledger_path=tmp_path / "never-create.sqlite",
+            budget_limit_cny=80,
+        )
+    assert not (output / "derived").exists()
+
+    # A projection difference cannot waive a changed request budget parameter.
+    monkeypatch.undo()
+    original = card.PreparedSnapshotProvider(inputs["snapshot_dir"]).load()
+    changed_packet = copy.deepcopy(original.build_reading_packet())
+    changed_packet["observations"][0]["text"] += " projection-only re-encoding"
+    monkeypatch.setattr(card.PreparedSnapshot, "build_reading_packet", lambda self: copy.deepcopy(changed_packet))
+    forbidden = forbid_live(monkeypatch)
+    with pytest.raises(card.CardInputError, match="saved_response_projection_binding_mismatch:runtime_config"):
+        card.run_paper_reading_card(
+            **inputs, output_dir=output, saved_response_dir=output, client=forbidden,
+            key_file=tmp_path / "never-read.key", budget_ledger_path=tmp_path / "never-create.sqlite",
+            budget_limit_cny=80, max_output_tokens=16000,
+        )
+    assert not (output / "derived").exists()
 
 
 @pytest.mark.parametrize("artifact,field,value", [

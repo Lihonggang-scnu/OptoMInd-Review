@@ -405,3 +405,10 @@ python scripts/upgrade3/lower_budget_limit.py --ledger path/to/current_experimen
 实测配置、解析质量、双账本及恢复证据见 [统一验收入口](../verification/pdf-parser-parallel-20261013/README.md)。正文主线路及已有首尾/出版步骤不变，材料解析不会自动替代后续阅读。
 
 规划补材料启用相同路线时，向 `scripts/upgrade3/progressive_review_plan.py` 显式传入同组 Docling/recognition 参数；共享工厂复用解析器、识别器、缓存和全局并发限制。完整示例在 [local_materials](../local_materials.md)。A/B CLI 可显式加 `--reparse-saved-responses` 免费恢复兼容的已保存格式失败，不重买完整响应；新增论文仍计费。实际路径及严格恢复边界见 [衔接契约](../verification/pdf-parser-parallel-20261013/CONSUMER_COUPLING.md)。
+
+
+## 2026-10-13 A/B无人值守与当前光学运行
+
+A/B批次默认先免费重校验保存的完整响应，旧恢复开关仍兼容；同目录run和写状态preflight均有进程锁，重复启动明确报告already_running。无损字段别名和历史读取投影可验证恢复，真正空答案/改过的材料仍隔离，不生成固定兜底正文。当前说明和真实恢复证据见 [A/B无人值守验收](../verification/ab-unattended-20261013/README.md)。
+
+上面的区域云识别参数是历史显式可选能力。本机当前光学运行补材使用本地docling_basic及本地CodeFormulaV2，完整批解析采用已测三驻留配置，单论文补材用单进程；不得因省略配置退回旧区域视觉API。现有失败与无可读材料保持各自状态，已验证的池可通过显式缺口回执交给规划，不能冒充全池成功。

@@ -197,6 +197,23 @@ def build_card_input(snapshot: PreparedSnapshot, plan: Mapping[str, Any]) -> dic
     if not isinstance(plan, Mapping):
         raise CardInputError("m1_plan_required")
     packet = snapshot.build_reading_packet()
+    return _build_card_input_from_packet(snapshot, plan, packet)
+
+
+def _build_card_input_from_packet(
+    snapshot: PreparedSnapshot, plan: Mapping[str, Any], packet: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Build the card binding from an explicitly supplied reading packet.
+
+    The normal path supplies the current packet.  Saved-response recovery may
+    also supply the packet captured with the original request; the immutable
+    snapshot hash check is performed by the caller before this projection is
+    trusted.
+    """
+
+    if not isinstance(packet, Mapping):
+        raise CardInputError("reading_packet_object_required")
+    packet = dict(packet)
     if not packet.get("eligible"):
         raise CardInputError("reading_material_not_eligible")
     if not packet.get("observations"):
@@ -836,19 +853,117 @@ def _verify_saved_source(source: Path, hashes: Mapping[str, str]) -> None:
             raise CardInputError(f"saved_response_source_changed:{name}")
 
 
+def _input_artifact(card_input: Mapping[str, Any], runtime_config: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "prompt_version": PROMPT_VERSION,
+        "card_id": card_input["card_id"],
+        "paper_identity": card_input["paper_identity"],
+        "material": card_input["material"],
+        "review_plan": card_input["review_plan"],
+        "snapshot_id": card_input["snapshot_id"],
+        "snapshot_sha256": card_input["snapshot_sha256"],
+        "topic_sha256": card_input["topic_sha256"],
+        "reading_packet": card_input["reading_packet"],
+        "model_reading_packet": card_input["model_reading_packet"],
+        "runtime_config": dict(runtime_config),
+    }
+
+
+def _prompt_artifact(
+    messages: Sequence[Mapping[str, Any]], *, input_profile: str,
+    concise_output: bool, thinking: bool,
+) -> dict[str, Any]:
+    return {
+        "prompt_version": PROMPT_VERSION,
+        "messages": list(messages),
+        "prompt_sha256": _sha(messages),
+        "input_profile": input_profile,
+        "concise_output": bool(concise_output),
+        "thinking": bool(thinking),
+    }
+
+
+def _saved_projection_binding(
+    saved_input: Mapping[str, Any], saved_prompt: Mapping[str, Any],
+    saved_audit: Mapping[str, Any] | None, *, snapshot: PreparedSnapshot,
+    plan: Mapping[str, Any], card_input: Mapping[str, Any],
+    input_artifact: Mapping[str, Any], prompt_artifact: Mapping[str, Any],
+    input_audit: Mapping[str, Any] | None,
+    runtime_config: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Bind a saved attempt, allowing only a proven packet projection change."""
+
+    if saved_input == input_artifact and saved_prompt == prompt_artifact and saved_audit == input_audit:
+        return {
+            "projection_compatible": False,
+            "validation_input": card_input,
+            "source_snapshot_sha256": _text(saved_input.get("snapshot_sha256")),
+            "current_snapshot_sha256": _text(card_input.get("snapshot_sha256")),
+        }
+
+    # A projection compatibility path is only for a changed reading packet;
+    # all identity, topic and request controls remain exact.
+    for key in (
+        "schema_version", "paper_identity", "snapshot_id", "topic_sha256",
+        "review_plan", "prompt_version", "runtime_config",
+    ):
+        if saved_input.get(key) != input_artifact.get(key):
+            raise CardInputError(f"saved_response_projection_binding_mismatch:{key}")
+    old_snapshot_sha256 = _text(saved_input.get("snapshot_sha256"))
+    current_snapshot_sha256 = _text(card_input.get("snapshot_sha256"))
+    if not old_snapshot_sha256 or old_snapshot_sha256 == current_snapshot_sha256:
+        raise CardInputError("saved_response_projection_change_not_proven")
+
+    old_packet = saved_input.get("reading_packet")
+    if not isinstance(old_packet, Mapping):
+        raise CardInputError("saved_response_projection_reading_packet_required")
+    old_card_input = _build_card_input_from_packet(snapshot, plan, old_packet)
+    if old_card_input["snapshot_sha256"] != old_snapshot_sha256:
+        raise CardInputError("saved_response_projection_snapshot_mismatch")
+    expected_old_input = _input_artifact(old_card_input, runtime_config)
+    if dict(saved_input) != expected_old_input:
+        raise CardInputError("saved_response_projection_input_packet_mismatch")
+
+    old_messages, old_audit = _build_card_request(
+        old_card_input,
+        input_profile=_text(runtime_config.get("input_profile")),
+        concise_output=bool(runtime_config.get("concise_output")),
+    )
+    if old_audit is not None:
+        old_audit = dict(old_audit)
+        old_audit["runtime_config"] = dict(runtime_config)
+    expected_old_prompt = _prompt_artifact(
+        old_messages,
+        input_profile=_text(runtime_config.get("input_profile")),
+        concise_output=bool(runtime_config.get("concise_output")),
+        thinking=bool(runtime_config.get("thinking")),
+    )
+    if dict(saved_prompt) != expected_old_prompt:
+        raise CardInputError("saved_response_projection_prompt_mismatch")
+    if saved_audit != old_audit:
+        raise CardInputError("saved_response_projection_input_audit_mismatch")
+    return {
+        "projection_compatible": True,
+        "validation_input": old_card_input,
+        "source_snapshot_sha256": old_snapshot_sha256,
+        "current_snapshot_sha256": current_snapshot_sha256,
+    }
+
+
 def _load_saved_response(
     source: Path, *, input_artifact: Mapping[str, Any], prompt_artifact: Mapping[str, Any],
-    input_audit: Mapping[str, Any] | None,
-) -> tuple[dict[str, Any], dict[str, bytes], dict[str, Any]]:
+    input_audit: Mapping[str, Any] | None, snapshot: PreparedSnapshot,
+    plan: Mapping[str, Any], card_input: Mapping[str, Any],
+    runtime_config: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, bytes], dict[str, Any], dict[str, Any]]:
     """Read a complete validation-failed attempt without touching live resources."""
 
     if (source / "COMMIT.json").exists():
         raise CardInputError("saved_response_source_has_invalid_commit")
     names = ["INPUT_PACKET.json", "PROMPT.json", "RAW_RESPONSE.json", "USAGE.json", "FAILURE.json"]
-    if input_audit is not None:
+    if input_audit is not None or (source / "INPUT_AUDIT.json").exists():
         names.append("INPUT_AUDIT.json")
-    elif (source / "INPUT_AUDIT.json").exists():
-        raise CardInputError("saved_response_input_audit_mismatch")
     payloads: dict[str, dict[str, Any]] = {}
     source_bytes: dict[str, bytes] = {}
     for name in names:
@@ -861,16 +976,17 @@ def _load_saved_response(
             raise CardInputError(f"saved_response_artifact_not_object:{name}")
         source_bytes[name] = data
         payloads[name] = dict(value)
-    if payloads["INPUT_PACKET.json"] != input_artifact:
-        raise CardInputError("saved_response_input_packet_mismatch")
-    if payloads["PROMPT.json"] != prompt_artifact:
-        raise CardInputError("saved_response_prompt_mismatch")
-    if input_audit is not None and payloads["INPUT_AUDIT.json"] != input_audit:
-        raise CardInputError("saved_response_input_audit_mismatch")
+    saved_audit = payloads.get("INPUT_AUDIT.json")
+    projection_binding = _saved_projection_binding(
+        payloads["INPUT_PACKET.json"], payloads["PROMPT.json"], saved_audit,
+        snapshot=snapshot, plan=plan, card_input=card_input,
+        input_artifact=input_artifact, prompt_artifact=prompt_artifact,
+        input_audit=input_audit, runtime_config=runtime_config,
+    )
     failure = payloads["FAILURE.json"]
     if failure.get("status") != "failed" or failure.get("phase") != "validation" or failure.get("error") != "CardOutputError":
         raise CardInputError("saved_response_requires_output_validation_failure")
-    if failure.get("model") != MODEL or failure.get("prompt_sha256") != prompt_artifact["prompt_sha256"]:
+    if failure.get("model") != MODEL or failure.get("prompt_sha256") != payloads["PROMPT.json"].get("prompt_sha256"):
         raise CardInputError("saved_response_failure_binding_mismatch")
     result = payloads["RAW_RESPONSE.json"]
     if result.get("complete") is not True or _text(result.get("finish_reason")).casefold() not in _STOP_REASONS:
@@ -882,17 +998,21 @@ def _load_saved_response(
     if payloads["USAGE.json"] != telemetry or ("telemetry" in failure and failure["telemetry"] != telemetry):
         raise CardInputError("saved_response_usage_mismatch")
     hashes = {name: hashlib.sha256(data).hexdigest() for name, data in source_bytes.items()}
-    binding = {
+    receipt_binding = {
         "source_dir": str(source.resolve()), "source_files": hashes,
-        "validator_version": VALIDATOR_VERSION, "input_sha256": _sha(input_artifact),
-        "prompt_sha256": prompt_artifact["prompt_sha256"],
-        "runtime_config": dict(input_artifact["runtime_config"]),
+        "validator_version": VALIDATOR_VERSION, "input_sha256": _sha(payloads["INPUT_PACKET.json"]),
+        "prompt_sha256": _text(payloads["PROMPT.json"].get("prompt_sha256")),
+        "input_audit_sha256": _sha(payloads["INPUT_AUDIT.json"]) if "INPUT_AUDIT.json" in payloads else "",
+        "runtime_config": dict(runtime_config),
         "response_sha256": hashes["RAW_RESPONSE.json"],
+        "projection_compatible": bool(projection_binding["projection_compatible"]),
+        "source_snapshot_sha256": projection_binding["source_snapshot_sha256"],
+        "current_snapshot_sha256": projection_binding["current_snapshot_sha256"],
     }
-    receipt = {"schema_version": "optomind.paper_card_saved_reparse.v1", **binding,
-               "cache_key": _sha(binding), "physical_calls": 0}
+    receipt = {"schema_version": "optomind.paper_card_saved_reparse.v1", **receipt_binding,
+               "cache_key": _sha(receipt_binding), "physical_calls": 0}
     _verify_saved_source(source, hashes)
-    return result, source_bytes, receipt
+    return result, source_bytes, receipt, projection_binding["validation_input"]
 
 
 def run_paper_reading_card(
@@ -957,26 +1077,14 @@ def run_paper_reading_card(
         "runtime_config": runtime_config,
         "input_audit_sha256": input_audit_sha256,
     }
-    input_artifact = {
-        "schema_version": SCHEMA_VERSION,
-        "prompt_version": PROMPT_VERSION,
-        "card_id": card_input["card_id"],
-        "paper_identity": card_input["paper_identity"],
-        "material": card_input["material"],
-        "review_plan": card_input["review_plan"],
-        "snapshot_id": card_input["snapshot_id"],
-        "snapshot_sha256": card_input["snapshot_sha256"],
-        "topic_sha256": card_input["topic_sha256"],
-        "reading_packet": card_input["reading_packet"],
-        "model_reading_packet": card_input["model_reading_packet"],
-        "runtime_config": runtime_config,
-    }
-    prompt_artifact = {
-        "prompt_version": PROMPT_VERSION, "messages": messages, "prompt_sha256": _sha(messages),
-        "input_profile": profile, "concise_output": bool(concise_output), "thinking": bool(thinking),
-    }
+    input_artifact = _input_artifact(card_input, runtime_config)
+    prompt_artifact = _prompt_artifact(
+        messages, input_profile=profile, concise_output=concise_output, thinking=thinking,
+    )
     reparse_receipt = None
     saved_binding: dict[str, Any] = {}
+    effective_prompt_sha256 = prompt_artifact["prompt_sha256"]
+    effective_input_audit_sha256 = input_audit_sha256
     if saved_response_dir is not None:
         source = Path(saved_response_dir).resolve()
         if output.resolve() != source:
@@ -984,16 +1092,25 @@ def run_paper_reading_card(
         reused = _existing_success(source, card_input, expected=expected_commit)
         if reused is not None:
             return reused
-        raw_result, source_bytes, reparse_receipt = _load_saved_response(
+        raw_result, source_bytes, reparse_receipt, validation_input = _load_saved_response(
             source, input_artifact=input_artifact, prompt_artifact=prompt_artifact, input_audit=input_audit,
+            snapshot=snapshot, plan=plan, card_input=card_input, runtime_config=runtime_config,
         )
+        card_input = validation_input
+        effective_prompt_sha256 = reparse_receipt["prompt_sha256"]
+        effective_input_audit_sha256 = reparse_receipt["input_audit_sha256"]
         saved_binding = {"saved_reparse_cache_key": reparse_receipt["cache_key"], "validator_version": VALIDATOR_VERSION}
-        expected_commit = {**expected_commit, **saved_binding}
+        expected_commit = {
+            **expected_commit,
+            "prompt_sha256": effective_prompt_sha256,
+            "input_audit_sha256": effective_input_audit_sha256,
+            **saved_binding,
+        }
         output = source / "derived" / reparse_receipt["cache_key"]
         reused = _existing_success(output, card_input, expected=expected_commit)
         if reused is not None:
             return {**reused, "reparsed": True, "saved_response_dir": str(source)}
-        normalized = validate_card_output(raw_result, card_input)
+        normalized = validate_card_output(raw_result, validation_input)
         _verify_saved_source(source, reparse_receipt["source_files"])
         _ensure_output_dir(output, card_input, expected=expected_commit)
         for name, data in source_bytes.items():
@@ -1083,7 +1200,7 @@ def run_paper_reading_card(
             "general_understanding_cache_reuse": "not_claimed",
             "model": MODEL,
             "prompt_version": PROMPT_VERSION,
-            "prompt_sha256": _sha(messages),
+            "prompt_sha256": effective_prompt_sha256,
             "input_profile": profile,
             "thinking": bool(thinking),
             "concise_output": bool(concise_output),
@@ -1099,8 +1216,8 @@ def run_paper_reading_card(
         "snapshot_id": card["snapshot_id"],
         "snapshot_sha256": card["snapshot_sha256"],
         "topic_sha256": card["topic_sha256"],
-        "prompt_sha256": _sha(messages),
-        "input_audit_sha256": input_audit_sha256,
+        "prompt_sha256": effective_prompt_sha256,
+        "input_audit_sha256": effective_input_audit_sha256,
         "runtime_config": expected_commit["runtime_config"],
         "model": MODEL,
         **saved_binding,
