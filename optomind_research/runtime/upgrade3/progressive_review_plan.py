@@ -96,6 +96,7 @@ class ProgressivePlannerConfig:
     recovery_from: Path | None = None
     recovery_chapters: tuple[str, ...] = ()
     reader_thinking_budget: int = DEFAULT_READER_THINKING_BUDGET
+    local_formula_config_path: Path | None = None
 
 
 def _json_default(value: Any) -> Any:
@@ -1751,8 +1752,12 @@ def _planner_call_settings(planner: Any, stage: str, *, config: Any = None) -> d
 def _directed_reader_settings(config: ProgressivePlannerConfig) -> dict[str, Any]:
     from .directed_reading import directed_reader_runtime_config
 
-    return directed_reader_runtime_config(model=config.reader_model,
+    settings = directed_reader_runtime_config(model=config.reader_model,
         max_output_tokens=config.chapter_output_tokens, thinking_budget=config.reader_thinking_budget)
+    if config.local_formula_config_path is not None:
+        from .local_formula_materials import local_formula_profile_hash
+        settings["local_formula_config_sha256"] = local_formula_profile_hash(config.local_formula_config_path)
+    return settings
 
 
 def _planning_helper_settings(config: ProgressivePlannerConfig) -> dict[str, Any]:
@@ -8497,6 +8502,7 @@ def make_directed_reading_runner(
     budget_ledger_path: str | Path,
     budget_limit_cny: float,
     prior_readings: Sequence[Mapping[str, Any]] = (),
+    local_formula_enhancer: Callable[..., Any] | None = None,
 ) -> Callable[..., Mapping[str, Any]]:
     """Build a callable adapter over existing snapshots and DirectedReadingStore."""
     def run(tasks: Sequence[Mapping[str, Any]], **context: Any) -> Mapping[str, Any]:
@@ -8547,7 +8553,7 @@ def make_directed_reading_runner(
             current_source = _directed_source_state(candidate)
             if current_source.get("material_identity_conflict"):
                 return {"paper_id": paper_id, "status": "unavailable", "reason": "source_identity_conflict"}
-            if reused and _directed_material_compatible(signature_task, reused) and _prior_read_source_compatible(candidate, reused):
+            if reused and local_formula_enhancer is None and _directed_material_compatible(signature_task, reused) and _prior_read_source_compatible(candidate, reused):
                 return {
                     "paper_id": paper_id,
                     "status": "reused_prior_deep_read",
@@ -8566,6 +8572,14 @@ def make_directed_reading_runner(
                 return {"paper_id": paper_id, "status": "partial" if retained else "unavailable",
                         "reason": "existing_snapshot_not_found", **({"material": retained} if retained else {})}
             card = _card_for_candidate(candidate)
+            formula_enhancement_path = None
+            if local_formula_enhancer is not None:
+                try:
+                    formula_enhancement_path = local_formula_enhancer(snapshot_dir=snapshot,
+                        output_dir=phase_root / "local_formula" / _safe_id(paper_id))
+                except Exception as exc:
+                    return {"paper_id": paper_id, "status": "unavailable", "reason": "local_formula_enhancement_failed",
+                            "error": f"{type(exc).__name__}:{exc}", "ordinary_snapshot_path": str(snapshot)}
             identity = card.get("paper_identity") if isinstance(card.get("paper_identity"), Mapping) else {}
             a_summary = card.get("general_understanding") if isinstance(card.get("general_understanding"), Mapping) else {}
             planning = candidate.get("planning_view") if isinstance(candidate.get("planning_view"), Mapping) else {}
@@ -8612,6 +8626,7 @@ def make_directed_reading_runner(
                     request=request,
                     paper=nomination,
                     snapshot_dir=snapshot,
+                    formula_enhancement_path=formula_enhancement_path,
                     output_dir=output_dir,
                     store=store,
                     task=task_payload,
@@ -8624,6 +8639,8 @@ def make_directed_reading_runner(
                     retry_empty_result=task.get("retry_empty_result") is True or context.get("retry_empty_result") is True,
                 )
                 artifact = result.get("output") if isinstance(result.get("output"), Mapping) else {}
+                if local_formula_enhancer is not None:
+                    artifact = {**dict(artifact), "runtime_config": _directed_reader_settings(config)}
                 material = _decorate_directed_material(artifact, task=signature_task, prior_material=reused)
                 return {**dict(artifact), "paper_id": paper_id, "status": _directed_material_status(signature_task, artifact), "output_dir": str(result.get("output_dir") or output_dir), "material": material, "task_signature": task_signature, "reused": bool(result.get("reused")), "network_call": bool(result.get("network_call"))}
             except Exception as exc:

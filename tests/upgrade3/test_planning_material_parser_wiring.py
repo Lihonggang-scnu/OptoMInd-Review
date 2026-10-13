@@ -157,7 +157,7 @@ def test_formal_planning_parser_exposes_identical_runtime_flags(tmp_path):
 
 
 @pytest.mark.parametrize("enabled", [False, True])
-def test_formal_planning_main_injects_factory_only_when_explicit(tmp_path, monkeypatch, enabled):
+def test_formal_planning_main_injects_selected_parser_factory(tmp_path, monkeypatch, enabled):
     from test_progressive_review_plan_outline_strengthening import setup_cli
     argv, _, _, _ = setup_cli(tmp_path, monkeypatch)
     captured = {}
@@ -171,8 +171,9 @@ def test_formal_planning_main_injects_factory_only_when_explicit(tmp_path, monke
     flags = ["--docling-cli-config", "explicit.json", "--docling-max-processes", "2", "--recognition-config", "plus.json",
         "--recognition-concurrency", "8", "--recognition-run"] if enabled else []
     assert cli.main([*argv, "--stop-after", "level1", *flags], regional_client_constructor=constructor) == 0
-    assert captured["factory"] is (shared_factory if enabled else None)
-    assert ("args" in captured) is enabled
+    assert captured["factory"] is shared_factory
+    assert cli.material_parser_mode(captured["args"]) == ("deep_layout" if enabled else "fast_native")
+    assert "args" in captured
     if enabled:
         assert captured["constructor"] is constructor and captured["args"].recognition_concurrency == 8
 

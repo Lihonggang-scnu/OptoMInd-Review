@@ -183,6 +183,9 @@ def _compact_packet(
 
         output_index = len(ordered_text)
         prefix = _marker(source_kind, section_path) if group != previous_group else ""
+        region_id = _text((observation.get("source") or {}).get("region_id"))
+        if region_id:
+            prefix += f"[region {region_id}] "
         ordered_text.append(prefix + raw_text)
         emitted_hash = _digest(normalized)
         emitted_hashes.append(emitted_hash)

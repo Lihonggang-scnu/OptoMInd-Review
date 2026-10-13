@@ -567,6 +567,15 @@ def _block_id(source_document_id: str, block_type: str, locator: str) -> str:
     return f"block-{_sha256(_json_bytes([source_document_id, block_type, locator]))[:20]}"
 
 
+def _docling_primary_locator(element: ET.Element | None) -> dict[str, Any]:
+    if element is None or not element.get("data-docling-location"):
+        return {}
+    value = json.loads(element.get("data-docling-location"))
+    if not isinstance(value, dict) or value.get("projection_version") != "optomind.docling_body.v1":
+        raise SnapshotError("invalid_docling_primary_locator")
+    return value
+
+
 def _docling_layout_payloads(extra_specs: Sequence[Mapping[str, Any]]) -> list[tuple[Mapping[str, Any], Mapping[str, Any]]]:
     """Read opt-in canonical Docling layout artifacts without trusting them as XML."""
 
@@ -1046,6 +1055,14 @@ def build_snapshot_from_bytes(
         }
         if _attr(element, "coords"):
             entry["locator"]["coords"] = _attr(element, "coords")
+        primary_locator = _docling_primary_locator(element)
+        if primary_locator:
+            entry["locator"].update(primary_locator)
+            entry.update(parser="docling", parser_version=primary_locator["parser_version"],
+                         fidelity_status="parser_candidate_requires_visual_or_source_review",
+                         recognition_status=element.get("data-recognition-status") or "parser_candidate",
+                         parser_provenance={key: primary_locator[key] for key in (
+                             "pdf_sha256", "projection_version", "parser_config_sha256", "region_id", "source_ref")})
         if kind == "figure":
             graphic = next((node for node in element.iter() if _local_name(node.tag) in {"graphic", "inline-graphic", "media"}), None)
             href = _attr(graphic, "href", "url") if graphic is not None else ""
@@ -1109,6 +1126,7 @@ def build_snapshot_from_bytes(
             block["locator"]["coords"] = _attr(element, "coords")
         if element is not None and _attr(element, "data-page"):
             block["locator"]["page"] = int(_attr(element, "data-page")) if _attr(element, "data-page").isdigit() else _attr(element, "data-page")
+        block["locator"].update(_docling_primary_locator(element))
         if element is not None and draft.block_type == "table_cell":
             block["locator"].update(table_geometry.get(id(element), {}))
             table = next((parent for parent in _ancestors(element, parents) if id(parent) in pending_asset_by_element), None)

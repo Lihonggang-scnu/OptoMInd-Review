@@ -18,11 +18,13 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import threading
 import tempfile
 import time
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
@@ -30,6 +32,7 @@ from typing import Any, Callable, Mapping, Sequence
 
 DOCLING_LAYOUT_SCHEMA_VERSION = "optomind.docling_layout.v1"
 DOCLING_ADAPTER_SCHEMA_VERSION = "optomind.docling_adapter.v2"
+DOCLING_BODY_PROJECTION_VERSION = "optomind.docling_body.v1"
 
 
 class DoclingAdapterError(ValueError):
@@ -128,6 +131,170 @@ def _native_location(item: Mapping[str, Any], pages: Mapping[str, Any]) -> dict[
         bbox = [min(left, right), min(top, bottom), max(left, right), max(top, bottom)]
     return {"page": page, "bbox": bbox, "bbox_origin": "TOPLEFT", "docling_prov": provenance,
             "source_json_pointer": _text(item.get("self_ref")).removeprefix("#")}
+
+
+def native_document_to_jats(document: Mapping[str, Any], *, pdf_sha256: str,
+                            parser_version: str, config: Mapping[str, Any],
+                            title: str = "", doi: str = "",
+                            page_geometry: Mapping[str, Any] | None = None) -> tuple[bytes, dict[str, Any]]:
+    """Project the native reading order, with an index for *all* source items.
+
+    This is a loss-preserving parser projection, not mathematical repair. The
+    original JSON and PDF remain the authorities for regional rereading.
+    """
+    if document.get("schema_name") != "DoclingDocument":
+        raise DoclingAdapterError("docling_document_schema_invalid")
+    pages = document.get("pages") or {}
+    by_ref = {_text(item.get("self_ref")): item for key in ("texts", "tables", "pictures", "groups")
+              for item in document.get(key) or ()}
+    article = ET.Element("article", {"data-docling-projection": DOCLING_BODY_PROJECTION_VERSION})
+    meta = ET.SubElement(ET.SubElement(article, "front"), "article-meta")
+    ET.SubElement(ET.SubElement(meta, "title-group"), "article-title").text = title
+    if doi:
+        ET.SubElement(meta, "article-id", {"pub-id-type": "doi"}).text = doi
+    body = ET.SubElement(article, "body")
+    sections: list[tuple[int, ET.Element]] = [(0, body)]
+    ref_list: ET.Element | None = None
+    records: list[dict[str, Any]] = []
+    registered: dict[str, dict[str, Any]] = {}
+    visited: set[str] = set()
+
+    def record(item: Mapping[str, Any], *, owner: str = "") -> dict[str, Any]:
+        ref = _text(item.get("self_ref"))
+        if ref in registered:
+            return registered[ref]
+        loc = _native_location(item, pages)
+        locations = []
+        for prov in item.get("prov") or ():
+            one = _native_location({"self_ref": ref, "prov": [prov]}, pages)
+            geometry = (page_geometry or {}).get(str(one["page"])) or {}
+            size = (pages.get(str(one["page"])) or {}).get("size") or {}
+            locations.append({"page": one["page"], "bbox": one["bbox"],
+                              "bbox_origin": "TOPLEFT", "unit": "pt",
+                              "page_width": geometry.get("width", size.get("width")),
+                              "page_height": geometry.get("height", size.get("height")),
+                              "page_rotation": geometry.get("rotation", 0),
+                              "charspan": prov.get("charspan")})
+        row = {"region_id": f"d{len(records) + 1:05d}", "source_ref": ref,
+               "kind": _text(item.get("label") or "text"), "owner_region_id": owner,
+               "order_index": len(records), "locations": locations, **loc,
+               "docling_primary": True, "pdf_sha256": pdf_sha256,
+               "projection_version": DOCLING_BODY_PROJECTION_VERSION,
+               "parser": "docling", "parser_version": parser_version,
+               "parser_config_sha256": config_sha256(config),
+               "text_sha256": _sha256(_text(item.get("text") or item.get("orig")).encode("utf-8"))}
+        records.append(row)
+        registered[ref] = row
+        return row
+
+    def attrs(row: Mapping[str, Any]) -> dict[str, str]:
+        return {"id": row["region_id"], "data-docling-location": _canonical(row).decode("utf-8")}
+
+    def linked(parent: ET.Element, item: Mapping[str, Any], key: str, tag: str,
+               owner: str) -> None:
+        for link in item.get(key) or ():
+            ref = _text(link.get("$ref"))
+            child = by_ref.get(ref)
+            if child is None:
+                raise DoclingAdapterError(f"docling_{key}_ref_missing")
+            row = record(child, owner=owner)
+            ET.SubElement(parent, tag, attrs(row)).text = _text(child.get("text") or child.get("orig"))
+            visited.add(ref)
+
+    def visit(item: Mapping[str, Any]) -> None:
+        nonlocal ref_list
+        ref = _text(item.get("self_ref"))
+        if ref in visited:
+            return
+        visited.add(ref)
+        label = _text(item.get("label"))
+        parent = sections[-1][1]
+        if label in {"table", "picture", "formula"}:
+            row = record(item)
+            if label == "table":
+                wrapper = ET.SubElement(parent, "table-wrap", attrs(row))
+                linked(wrapper, item, "captions", "caption", row["region_id"])
+                table = ET.SubElement(wrapper, "table")
+                cells = (item.get("data") or {}).get("table_cells") or []
+                table_rows: dict[int, ET.Element] = {}
+                for i, cell in sorted(enumerate(cells), key=lambda pair: (pair[1]["start_row_offset_idx"], pair[1]["start_col_offset_idx"])):
+                    r = int(cell["start_row_offset_idx"])
+                    if r not in table_rows:
+                        table_rows[r] = ET.SubElement(table, "tr")
+                    cell_item = {"self_ref": f"{ref}/data/table_cells/{i}", "label": "table_cell",
+                                 "text": cell.get("text"), "prov": [{"page_no": row["page"], "bbox": cell.get("bbox") or {}}]}
+                    cell_row = record(cell_item, owner=row["region_id"])
+                    cell_attrs = attrs(cell_row) | {"rowspan": str(max(1, int(cell.get("row_span") or 1))),
+                                                   "colspan": str(max(1, int(cell.get("col_span") or 1)))}
+                    ET.SubElement(table_rows[r], "th" if cell.get("column_header") else "td", cell_attrs).text = _text(cell.get("text"))
+                if not cells:
+                    ET.SubElement(wrapper, "caption").text = "Table region has no recognized cells."
+                linked(wrapper, item, "footnotes", "table-wrap-foot", row["region_id"])
+            elif label == "formula":
+                recognized = _text(item.get("text")).strip()
+                row.update(recognition_status="parser_candidate" if recognized else "missing",
+                           representation="unenhanced_pdf_text")
+                formula = ET.SubElement(parent, "disp-formula", attrs(row))
+                formula.set("data-recognition-status", "parser_candidate" if recognized else "missing")
+                ET.SubElement(formula, "p").text = (
+                    "Unenhanced formula parser_text: " + recognized if recognized else
+                    "Unrecognized formula region; parser_text: " + _text(item.get("orig")))
+            else:
+                figure = ET.SubElement(parent, "fig", attrs(row))
+                linked(figure, item, "captions", "caption", row["region_id"])
+                if not item.get("captions"):
+                    ET.SubElement(figure, "caption", attrs(row) | {"id": row["region_id"] + "-caption"}).text = "Figure image region; pixels have not been interpreted."
+                # The raw PDF and region index support lazy image retrieval.
+                ET.SubElement(figure, "graphic", {"href": row["region_id"]})
+                linked(figure, item, "footnotes", "fn", row["region_id"])
+        elif label not in {"", "group", "list"}:
+            row = record(item)
+            text = _text(item.get("text") or item.get("orig"))
+            if text.strip() and label not in {"page_header", "page_footer"}:
+                if label == "section_header":
+                    level = max(1, int(item.get("level") or 1))
+                    while len(sections) > 1 and sections[-1][0] >= level:
+                        sections.pop()
+                    section = ET.SubElement(sections[-1][1], "sec")
+                    sections.append((level, section))
+                    ET.SubElement(section, "title", attrs(row)).text = text
+                elif label == "reference":
+                    if ref_list is None:
+                        ref_list = ET.SubElement(ET.SubElement(article, "back"), "ref-list")
+                    ET.SubElement(ref_list, "ref", attrs(row)).text = text
+                else:
+                    ET.SubElement(parent, "title" if label == "title" else "p", attrs(row)).text = text
+        for child in item.get("children") or ():
+            target = by_ref.get(_text(child.get("$ref")))
+            if target is None:
+                raise DoclingAdapterError("docling_child_ref_missing")
+            visit(target)
+
+    visit(document.get("body") or {})
+    # Some native documents omit furniture or otherwise unlinked items from
+    # body.children. They remain locatable without injecting them into prose.
+    for ref, item in by_ref.items():
+        if ref not in registered and item.get("label") not in {"group", "list"}:
+            record(item)
+    for page in pages:
+        item = {"self_ref": f"#/pages/{page}", "label": "page",
+                "prov": [{"page_no": int(page), "bbox": {"l": 0, "t": 0,
+                    "r": (pages[page].get("size") or {}).get("width", 0),
+                    "b": (pages[page].get("size") or {}).get("height", 0), "coord_origin": "TOPLEFT"}}]}
+        record(item)
+    index = {"schema_version": "optomind.pdf_region_index.v1", "projection_version": DOCLING_BODY_PROJECTION_VERSION,
+             "pdf_sha256": pdf_sha256, "parser_version": parser_version,
+             "parser_config_sha256": config_sha256(config), "regions": records}
+    # PDF font maps can contain XML-forbidden controls. Keep the exact native
+    # JSON and its text hashes; normalize only the generated XML serialization.
+    forbidden = re.compile(r"[^\x09\x0a\x0d\x20-\ud7ff\ue000-\ufffd\U00010000-\U0010ffff]")
+    removed = 0
+    for element in article.iter():
+        if element.text:
+            removed += len(forbidden.findall(element.text))
+            element.text = forbidden.sub("", element.text)
+    index["xml_text_cleanup_count"] = removed
+    return ET.tostring(article, encoding="utf-8", xml_declaration=True), index
 
 
 def native_document_to_layout(
@@ -501,6 +668,7 @@ class DoclingCliAdapter:
         crops: Sequence[Mapping[str, Any]] = (),
         run_metadata: Mapping[str, Any] | None = None,
         deadline: float | None = None,
+        recognize: bool = True,
     ) -> list[dict[str, Any]]:
         key = str(self.config.cache_path(_sha256(bytes(pdf_bytes))))
         with self._cache_locks_guard:
@@ -520,7 +688,61 @@ class DoclingCliAdapter:
         finally:
             cache_lock.release()
         # Local extraction slots never span paid recognition or HTTP waits.
-        return self._recognized(specs)
+        return self._recognized(specs) if recognize else specs
+
+    def prepare_document(self, pdf_bytes: bytes, *, title: str = "", doi: str = "",
+                         source_document_id: str = "original-pdf", deadline: float | None = None) -> dict[str, Any]:
+        """Use the shared base cache as the complete ordinary PDF source.
+
+        Recognition is deliberately bypassed, even when this adapter also has
+        a recognizer attached for a later task.
+        """
+        specs = self.prepare(pdf_bytes, source_document_id=source_document_id, deadline=deadline, recognize=False)
+        native = next((spec for spec in specs if spec.get("role") == "pdf_layout_raw"), None)
+        if native is None:
+            raise DoclingAdapterError("docling_primary_requires_native_document")
+        import fitz
+        with fitz.open(stream=pdf_bytes, filetype="pdf") as pdf:
+            geometry = {str(i + 1): {"width": page.mediabox.width, "height": page.mediabox.height,
+                                     "rotation": page.rotation} for i, page in enumerate(pdf)}
+        data, index = native_document_to_jats(json.loads(bytes(native["data"])), pdf_sha256=_sha256(pdf_bytes),
+            parser_version=self.config.parser_version, config=self.config.fingerprint(), title=title, doi=doi,
+            page_geometry=geometry)
+        layout = json.loads(next(spec["data"] for spec in specs if spec.get("role") == "pdf_layout_parser"))
+        if not (layout.get("coverage") or {}).get("recognized_body_blocks"):
+            raise DoclingAdapterError("docling_primary_requires_text_or_ocr; layout-only/scanned pages are not fulltext")
+        extras = []
+        for spec in specs:
+            item = dict(spec)
+            if item.get("role") == "pdf_layout_parser":
+                item["role"] = "pdf_primary_layout"
+            if item.get("role") == "pdf_region_crop":
+                original = _text(item.get("asset_member"))
+                region = next((r for r in index["regions"] if r["source_ref"] == original), None)
+                if region:
+                    item["asset_href"] = region["region_id"]
+            extras.append(item)
+        index.update(source_document_id=source_document_id, raw_document_sha256=_sha256(bytes(native["data"])),
+                     raw_document_source_document_id=native["source_document_id"])
+        run = next((spec for spec in specs if spec.get("role") == "parser_run"), None)
+        if run:
+            index["raw_run_sha256"] = _sha256(bytes(run["data"]))
+        gaps = list(layout.get("known_gaps") or ())
+        document = json.loads(bytes(native["data"]))
+        if (not any(item.get("label") == "reference" for item in document.get("texts") or ())
+                and any(item.get("label") == "section_header" and _text(item.get("text")).strip().casefold() in
+                        {"references", "bibliography", "参考文献"} for item in document.get("texts") or ())):
+            gaps.append({"kind": "bibliography", "status": "unstructured",
+                "reason": "Docling did not label individual references; the bibliography text is retained in ordinary source order, not normalized reference identities"})
+        if index["xml_text_cleanup_count"]:
+            gaps.append({"kind": "xml_text_cleanup", "status": "normalized",
+                "reason": f"removed {index['xml_text_cleanup_count']} XML-forbidden controls from derived text; exact native JSON retained"})
+        index["projection_known_gaps"] = gaps
+        extras.append({"source_document_id": "docling-regions-" + _sha256(pdf_bytes)[:16],
+                       "role": "pdf_primary_region_index", "source_name": "REGION_INDEX.json",
+                       "format": "json", "mime_type": "application/json", "data": _canonical(index) + b"\n",
+                       "derived_from": source_document_id, "route": "docling", "legal_use_status": "derived"})
+        return {"data": data, "additional_sources": extras, "region_index": index, "known_gaps": gaps}
 
     def _prepare_local(
         self,
@@ -748,6 +970,50 @@ class DoclingCliAdapter:
         finally:
             if succeeded:
                 shutil.rmtree(work_dir, ignore_errors=True)
+
+
+class DoclingBatchAdapter:
+    """Import a resident batch by PDF hash, without starting model processes."""
+    def __init__(self, index_path: str | Path, *, cache_root: str | Path, crop_scale: float = 2.5):
+        self.index_path = Path(index_path).resolve()
+        self.cache_root, self.crop_scale = Path(cache_root).resolve(), crop_scale
+        payload = json.loads(self.index_path.read_bytes())
+        if payload.get("mode") != "basic":
+            raise DoclingAdapterError("ordinary_batch_requires_basic_mode")
+        self.rows: dict[str, dict[str, Any]] = {}
+        self.adapters: dict[str, DoclingCliAdapter] = {}
+        self.lock = threading.Lock()
+        for row in payload.get("records") or ():
+            if row.get("status", "success") not in {"success", "resumed", "cached"}:
+                continue
+            if row.get("complete_page_coverage") is not True:
+                raise DoclingAdapterError("ordinary_batch_requires_complete_page_coverage")
+            sha = _text(row.get("pdf_sha256") or row.get("source_sha256"))
+            if len(sha) != 64:
+                raise DoclingAdapterError("batch_source_hash_required")
+            if sha in self.rows:
+                raise DoclingAdapterError("batch_duplicate_pdf_hash")
+            self.rows[sha] = dict(row)
+
+    def prepare_document(self, pdf_bytes: bytes, **kwargs: Any) -> dict[str, Any]:
+        sha = _sha256(pdf_bytes)
+        with self.lock:
+            if sha not in self.adapters:
+                row = self.rows.get(sha)
+                if row is None:
+                    raise DoclingAdapterError("pdf_not_in_prepared_docling_batch")
+                output = Path(_text(row.get("output") or row.get("output_dir")))
+                if not output.is_absolute(): output = self.index_path.parent / output
+                document = Path(_text(row.get("document_path") or output / "document.json"))
+                run = Path(_text(row.get("run_path") or output / "run.json"))
+                if not document.is_absolute(): document = self.index_path.parent / document
+                if not run.is_absolute(): run = self.index_path.parent / run
+                if row.get("document_sha256") and _sha256(document.read_bytes()) != row["document_sha256"]:
+                    raise DoclingAdapterError("batch_document_hash_mismatch")
+                config = DoclingAdapterConfig.from_saved_run(document, run, cache_root=self.cache_root, crop_scale=self.crop_scale)
+                self.adapters[sha] = DoclingCliAdapter(config)
+            adapter = self.adapters[sha]
+        return adapter.prepare_document(pdf_bytes, **kwargs)
 
 
 def bind_pdf_source_specs(specs: Sequence[Mapping[str, Any]], pdf_source_document_id: str, pdf_sha256: str) -> list[dict[str, Any]]:

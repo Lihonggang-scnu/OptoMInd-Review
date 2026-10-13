@@ -1,9 +1,78 @@
 # Local material snapshots
 
+Current local PDF route (2026-10-13): resident basic batch → ordinary
+snapshots/A-B → selected-paper local CodeFormulaV2 → practical directed
+reading. This route has **no model API calls**. [Verified commands and limits](verification/local-docling-batch-20261013/README.md).
+
+```powershell
+# Run in the configured local Docling Python environment. One converter stays resident.
+python scripts/upgrade3/parse_docling_batch.py --mode basic --manifest LOCAL_PDFS.json --config BASIC_CONFIG.json --output-root outputs/pdf_basic --resume
+# Ordinary snapshots are immediately usable by A/B; no formula stage is required.
+python scripts/upgrade3/build_local_materials.py --batch-manifest LOCAL_PDFS.json --docling-batch-index outputs/pdf_basic/BATCH_RESULT.json --material-parser-mode docling_basic --cache-root outputs/pdf_cache --output-root outputs/pdf_materials --disable-rescue
+# Existing planner entry: add these flags to the normal authorized planning command.
+# --local-formula-config HOOK_CONFIG.json --local-formula-cache-root outputs/local_formula_cache
+```
+
+`BASIC_CONFIG.json` uses the existing Docling `packages` and native
+`pipeline_options` contract, with local `artifacts_path`, layout/table batch
+8, accelerator threads 8, and formula/picture enrichment disabled. Start with
+one resident process: the tested three-process Windows route had native
+crashes despite adequate GPU memory. `FORMULA_DRIVER.json` is:
+
+```json
+{"model_cache":"C:/local/codeformula_models","batch_size":32,"device":"cuda","timeout_seconds":600,"gpu_limit_mib":8192}
+```
+
+`HOOK_CONFIG.json` names the executable and that driver profile:
+
+```json
+{"python":"C:/local/docling_env/Scripts/python.exe","driver_config":"FORMULA_DRIVER.json"}
+```
+
+Model/cache paths resolve against the corresponding configuration file.
+Keep model caches immutable while reusing results; use a new profile/cache
+or an explicit model manifest when replacing weights. The planner's existing
+directed-reading runner automatically invokes this hook after choosing a
+paper, before the LLM read. Completed formulas reuse their sidecar; only
+pending formula refs enter the local queue. The source snapshot stays intact.
+An enhancement failure stops the affected directed read and never falls back
+to a paid regional provider. Without local hook configuration ordinary
+reading proceeds with explicit unenhanced formulas. Per-PDF successes survive
+batch failures and are checked by hash/config/page coverage on `--resume`.
+
+The older regional-transcription descriptions below are an **explicit
+historical option**, not this local default. Their GROBID/fitz primary-body
+and 2-process/8-HTTP settings apply only to `deep_layout`; `docling_basic`
+uses Docling as the actual ordinary body source and does not call Qwen.
+
 The upgrade-3 local material layer turns a local TEI or JATS XML document into
 an immutable snapshot for later reading. It does not choose a research facet or
 write claims. The default XML/acquisition path does not call a model; explicitly
 enabled regional transcription can call the configured vision model.
+
+For ordinary PDF batches with local Docling dependencies configured, use
+`--material-parser-mode docling_basic`. This produces the entire ordinary
+body in native reading order, table structures, figure locators and a
+source-bound `REGION_INDEX.json` artifact inside the snapshot's `sources/`.
+Every prose/structure item has a short region handle before A/B or directed
+reading starts. PDF formula text remains explicitly unenhanced until a later
+local formula task. The basic route does not call the regional vision provider.
+Native XML remains preferred when supplied. With Docling flags and no
+recognition flags the CLI selects `docling_basic`; without either it retains
+`fast_native`. The historical supplement/paid recognition route requires the
+explicit `deep_layout` or recognition configuration.
+
+```powershell
+python scripts/upgrade3/build_local_materials.py --batch-manifest LOCAL_PDFS.json --output-root outputs/basic_materials --cache-root outputs/basic_cache --docling-cli-config LOCAL_DOCLING_CONFIG.json --material-parser-mode docling_basic --disable-rescue
+```
+
+The ordinary snapshot and A/B preview can complete while formula enhancement
+is still absent. Full coordinates, source/version hashes, page geometry and
+native JSON references remain in the immutable sidecar; model inputs use
+short handles and all scientific cell/caption/note content. Unlabelled native
+bibliography text is retained with an explicit unstructured-reference gap.
+Scanning without OCR is recorded as a parser/coverage gap, not certified as
+full text. Image locators and captions do not imply image interpretation.
 
 Build a snapshot with:
 

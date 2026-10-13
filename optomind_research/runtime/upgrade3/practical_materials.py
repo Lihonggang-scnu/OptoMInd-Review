@@ -20,7 +20,7 @@ _TABLE_CELL = re.compile(
 _REFERENCE_HEADING = re.compile(r"^#{1,6}\s+(?:\[block-[^\]]+\]\s*)?References\s*$", re.IGNORECASE)
 
 
-def load_practical_material(snapshot_dir: str | Path) -> dict[str, Any]:
+def load_practical_material(snapshot_dir: str | Path, *, formula_enhancement_path: str | Path | None = None) -> dict[str, Any]:
     """Read the ordinary view plus the shared source-bound structures.
 
     The markdown view remains the writing-friendly surface.  When the
@@ -46,6 +46,7 @@ def load_practical_material(snapshot_dir: str | Path) -> dict[str, Any]:
             "citation": citation,
         })
     structured_assets: list[dict[str, Any]] = []
+    ordered_body: str | None = None
     try:
         # Import lazily to keep this small helper usable with legacy material
         # directories that do not contain a complete prepared snapshot.
@@ -53,6 +54,18 @@ def load_practical_material(snapshot_dir: str | Path) -> dict[str, Any]:
 
         snapshot = PreparedSnapshotProvider(root).load()
         packet = snapshot.build_reading_packet()
+        if any(source.get("role") == "pdf_primary_region_index" for source in snapshot.manifest.get("source_documents") or ()):
+            pieces: list[str] = []
+            previous_section: tuple[str, ...] = ()
+            for item in packet.get("observations") or ():
+                source = item.get("source") or {}
+                section = tuple(str(part) for part in source.get("section_path") or ())
+                if section and section != previous_section:
+                    pieces.append("## " + " > ".join(section))
+                previous_section = section
+                marker = f"[region {source['region_id']}] " if source.get("region_id") else ""
+                pieces.append(marker + str(item.get("text") or ""))
+            ordered_body = "\n\n".join(pieces)
         structured_assets = [
             dict(item)
             for item in packet.get("observations") or ()
@@ -68,12 +81,18 @@ def load_practical_material(snapshot_dir: str | Path) -> dict[str, Any]:
         for item in structured_assets
         if str(item.get("text") or "").strip()
     )
-    return {
-        "body": _clean_reading_view(reading_view),
+    result = {
+        "body": ordered_body if ordered_body is not None else _clean_reading_view(reading_view),
         "references": normalized_references,
         "structured_assets": structured_assets,
-        "structured_material": structured_material,
+        "structured_material": "" if ordered_body is not None else structured_material,
     }
+    if formula_enhancement_path is not None:
+        from .local_formula_materials import load_formula_materials, formula_material_text
+        formula_material = load_formula_materials(root, formula_enhancement_path)
+        result["local_formula_enhancement"] = formula_material
+        result["structured_material"] += "\n\n" + formula_material_text(formula_material)
+    return result
 
 
 def _clean_reading_view(reading_view: str) -> str:

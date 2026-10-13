@@ -512,6 +512,8 @@ def _structured_asset_text(
 ) -> str:
     """Render retained formula/table structure without interpreting it."""
 
+    if (asset.get("locator") or {}).get("docling_primary"):
+        return _primary_docling_asset_text(asset, blocks_by_id)
     asset = project_docling_asset_for_reading(asset)
     asset_id = _text(asset.get("asset_id"))
     asset_type = _text(asset.get("type")).casefold()
@@ -588,6 +590,38 @@ def _structured_asset_text(
     return "\n".join(lines)
 
 
+def _primary_docling_asset_text(asset: Mapping[str, Any], blocks_by_id: Mapping[str, Mapping[str, Any]]) -> str:
+    """Keep all source content in model input; resolve geometry from handles.
+
+    The complete immutable assets/region index retain coordinates, provenance
+    and original XML. Scientific cells and notes are never clipped here.
+    """
+    locator = asset.get("locator") or {}
+    kind = _text(asset.get("type"))
+    lines = [f"[structured {kind} region] region_id={locator.get('region_id')}",
+             "recognition_status=" + _text(asset.get("recognition_status") or "parser_candidate")]
+    if kind == "formula":
+        import xml.etree.ElementTree as ET
+        raw = _asset_raw_source(asset)
+        text = "".join(ET.fromstring(raw).itertext()) if raw else ""
+        lines.extend(["representation=unenhanced_pdf_text; source region can be enhanced independently", text])
+        return "\n".join(lines)
+    cells = []
+    structure = asset.get("table_structure") or {}
+    for cell in structure.get("rows") or ():
+        loc = cell.get("locator") or {}
+        cells.append({key: loc.get(key) for key in ("row_index", "col_index", "row_span", "col_span", "is_header")}
+                     | {"region_id": loc.get("region_id"), "text": _text(cell.get("text"))})
+    captions = []
+    for block_id in asset.get("caption_block_ids") or ():
+        block = blocks_by_id.get(_text(block_id)) or {}
+        captions.append({"region_id": (block.get("locator") or {}).get("region_id"), "text": _text(block.get("text_normalized"))})
+    footnotes = [{"region_id": (note.get("locator") or {}).get("region_id"), "text": _text(note.get("text"))}
+                 for note in structure.get("footnotes") or ()]
+    lines.extend(["table_structure_json:", json.dumps({"cells": cells, "captions": captions, "footnotes": footnotes}, ensure_ascii=False, separators=(",", ":"))])
+    return "\n".join(lines)
+
+
 def _structured_asset_observations(
     manifest: Mapping[str, Any],
     blocks: Sequence[Mapping[str, Any]],
@@ -643,6 +677,7 @@ def _structured_asset_observations(
             "raw_path": _text(source.get("raw_path")),
             "raw_sha256": _text(source.get("raw_sha256")),
             "asset_locator": locator,
+            **({"region_id": locator["region_id"]} if locator.get("docling_primary") else {}),
             "asset_raw_sha256": _hash_text(_asset_raw_source(asset)) if _asset_raw_source(asset) else "",
             "asset_content_status": _text(asset.get("content_status")),
             "asset_parsed_successfully": asset.get("parsed_successfully"),
@@ -785,12 +820,25 @@ def build_reading_packet(
     represented_block_ids = _structured_asset_representation_block_ids(
         blocks, assets, structured_observations
     )
+    for asset in assets:
+        locator = asset.get("locator") or {}
+        if asset.get("type") == "figure" and locator.get("docling_primary"):
+            caption_ids = set(asset.get("caption_block_ids") or ())
+            caption_text = "\n".join(_text(block.get("text_normalized")) for block in blocks if block.get("block_id") in caption_ids)
+            structured_observations.append({"observation_id": f"asset:{asset['asset_id']}",
+                "source_kind": "article_figure", "text": "Figure region; image pixels have not been interpreted.\n" + caption_text,
+                "source": {"snapshot_id": _text(manifest.get("snapshot_id")), "asset_id": asset["asset_id"],
+                           "source_document_id": asset["source_document_id"], "region_id": locator["region_id"],
+                           "asset_locator": dict(locator), "source_kind": "article_figure"}})
+            represented_block_ids.update(caption_ids)
+        if asset.get("type") == "table" and locator.get("docling_primary"):
+            represented_block_ids.update(_text(note.get("block_id")) for note in (asset.get("table_structure") or {}).get("footnotes") or ())
     for block in blocks:
         text = _normalized(block.get("text_normalized"))
         if not text or not block.get("research_content", True) or block.get("block_type") in {"heading", "reference"}:
             continue
         block_kind = _text(block.get("block_type")).casefold()
-        if block_kind in {"table_cell", "formula", "table_caption", "caption"}:
+        if block_kind in {"table_cell", "formula", "table_caption", "caption", "figure_caption", "footnote"}:
             if _text(block.get("block_id")) in represented_block_ids:
                 continue
         is_abstract = _is_abstract_block(block)
@@ -823,6 +871,7 @@ def build_reading_packet(
                     "raw_path": _text(source.get("raw_path")),
                     "raw_sha256": _text(source.get("raw_sha256")),
                     "locator": dict(block.get("locator") or {}),
+                    **({"region_id": block["locator"]["region_id"]} if (block.get("locator") or {}).get("docling_primary") else {}),
                     "section_path": list(block.get("section_path") or ()),
                     "source_kind": source_kind,
                     "source_text_hash": _text(block.get("text_hash")) or _hash_text(text),
@@ -831,6 +880,12 @@ def build_reading_packet(
             }
         )
     observations.extend(structured_observations)
+    if any((block.get("locator") or {}).get("docling_primary") for block in blocks):
+        def primary_order(observation: Mapping[str, Any]) -> int:
+            source = observation.get("source") or {}
+            locator = source.get("locator") or source.get("asset_locator") or {}
+            return int(locator.get("order_index", 10**12))
+        observations.sort(key=primary_order)
     auxiliary = _auxiliary_observations(
         manifest, Path(root) if root is not None else None, _text(manifest.get("snapshot_id"))
     )

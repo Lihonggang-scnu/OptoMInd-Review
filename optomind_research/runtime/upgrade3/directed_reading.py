@@ -4371,8 +4371,9 @@ def _practical_reading_plan(
     snapshot_dir: str | Path,
     task: Mapping[str, Any] | None,
     max_input_tokens: int,
+    formula_enhancement_path: str | Path | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, str]], dict[str, Any], list[dict[str, Any]], list[dict[str, Any]], list[str]]:
-    material = load_practical_material(snapshot_dir)
+    material = load_practical_material(snapshot_dir, formula_enhancement_path=formula_enhancement_path)
     if (Path(snapshot_dir) / "DOCUMENT_MANIFEST.json").exists():
         policy = PreparedSnapshotProvider(snapshot_dir).load().reading_policy()
         if policy.get("material_boundary"):
@@ -4435,11 +4436,13 @@ def preflight_directed_reading(
     thinking_budget: int = DEFAULT_THINKING_BUDGET,
     max_input_tokens: int = DEFAULT_MAX_INPUT_TOKENS,
     selected_source_packet_path: str | Path | None = None,
+    formula_enhancement_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Preflight the ordinary writing-material prompt; no verifier is budgeted."""
 
     receipt, _messages, _material, _questions, _outputs, _gaps = _practical_reading_plan(
-        request=request, paper=paper, snapshot_dir=snapshot_dir, task=task, max_input_tokens=max_input_tokens
+        request=request, paper=paper, snapshot_dir=snapshot_dir, task=task, max_input_tokens=max_input_tokens,
+        formula_enhancement_path=formula_enhancement_path
     )
     runtime_config = directed_reader_runtime_config(model=model, max_output_tokens=max_output_tokens, thinking_budget=thinking_budget)
     receipt.update(runtime_config)
@@ -4543,6 +4546,7 @@ def run_directed_reading(
     attempt: int = 1,
     retry_empty_result: bool = False,
     selected_source_packet_path: str | Path | None = None,
+    formula_enhancement_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Produce practical writing material with one Qwen read and no verifier gate."""
 
@@ -4562,7 +4566,8 @@ def run_directed_reading(
     # Do not pair newly supplied content with an old stored title.
     effective_paper = {**admitted_paper, **{key: value for key, value in paper.items() if value not in (None, "")}}
     receipt, messages, material, questions, outputs, gaps = _practical_reading_plan(
-        request=request, paper=effective_paper, snapshot_dir=snapshot_dir, task=task, max_input_tokens=max_input_tokens
+        request=request, paper=effective_paper, snapshot_dir=snapshot_dir, task=task, max_input_tokens=max_input_tokens,
+        formula_enhancement_path=formula_enhancement_path
     )
     # The practical reader consumes this cleaned body and bibliography, not
     # snapshot paths/names. Reuse the store's existing content-bound task key.
@@ -4839,6 +4844,8 @@ def _cli_parser() -> argparse.ArgumentParser:
     p.add_argument("--model", default=MODEL)
     p.add_argument("--retry-empty-result", action="store_true", help="explicitly retry a saved empty answer once in a new directory, preserving its result and raw response")
     p.add_argument("--request", required=True); p.add_argument("--paper", required=True); p.add_argument("--snapshot", required=True); p.add_argument("--store", required=True); p.add_argument("--task"); p.add_argument("--output-dir", required=True); p.add_argument("--key-file"); p.add_argument("--budget-ledger"); p.add_argument("--budget-limit-cny", type=float); p.add_argument("--max-output-tokens", type=int, default=DEFAULT_MAX_OUTPUT_TOKENS); p.add_argument("--thinking-budget", type=int, default=DEFAULT_THINKING_BUDGET); p.add_argument("--max-input-tokens", type=int, default=DEFAULT_MAX_INPUT_TOKENS)
+    for command in ("preflight", "run"):
+        sub.choices[command].add_argument("--formula-enhancement", type=Path, help="source-bound local formula sidecar; no regional provider is invoked")
     return parser
 
 
@@ -4919,13 +4926,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(json.dumps({key: result.get(key) for key in ("status", "output_dir", "network_call", "estimated_required_cny", "selected_packet_audit")}, ensure_ascii=False, indent=2))
             return 0
         if args.command == "preflight":
-            receipt = preflight_directed_reading(request=request, paper=paper, snapshot_dir=args.snapshot, task=task, model=args.model, max_output_tokens=args.max_output_tokens, thinking_budget=args.thinking_budget, max_input_tokens=args.max_input_tokens)
+            receipt = preflight_directed_reading(request=request, paper=paper, snapshot_dir=args.snapshot, task=task, model=args.model, max_output_tokens=args.max_output_tokens, thinking_budget=args.thinking_budget, max_input_tokens=args.max_input_tokens, formula_enhancement_path=args.formula_enhancement)
             if args.output_dir:
                 _atomic_json(Path(args.output_dir) / "DIRECTED_PREFLIGHT.json", receipt)
             print(json.dumps(receipt, ensure_ascii=False, indent=2))
             return 0
         store = DirectedReadingStore(args.store) if args.store else None
-        result = run_directed_reading(request=request, paper=paper, snapshot_dir=args.snapshot, output_dir=args.output_dir, store=store, task=task, retry_empty_result=args.retry_empty_result, key_file=args.key_file, budget_ledger_path=args.budget_ledger, budget_limit_cny=args.budget_limit_cny, model=args.model, max_output_tokens=args.max_output_tokens, thinking_budget=args.thinking_budget, max_input_tokens=args.max_input_tokens)
+        result = run_directed_reading(request=request, paper=paper, snapshot_dir=args.snapshot, output_dir=args.output_dir, store=store, task=task, retry_empty_result=args.retry_empty_result, key_file=args.key_file, budget_ledger_path=args.budget_ledger, budget_limit_cny=args.budget_limit_cny, model=args.model, max_output_tokens=args.max_output_tokens, thinking_budget=args.thinking_budget, max_input_tokens=args.max_input_tokens, formula_enhancement_path=args.formula_enhancement)
         print(json.dumps({"output_dir": result.get("output_dir"), "reused": result.get("reused", False)}, ensure_ascii=False, indent=2))
         return 0
     except (DirectedReadingError, OSError, ValueError) as exc:

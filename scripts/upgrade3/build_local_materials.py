@@ -64,6 +64,118 @@ def _summary(result: Any) -> dict[str, Any]:
     }
 
 
+PARSER_GAP_KINDS = frozenset({"fitz", "grobid", "pdf", "docling", "formula", "table", "xml_text_cleanup"})
+
+
+def material_parser_mode(args: argparse.Namespace) -> str:
+    """Select the ordinary native route unless a layout route is explicit.
+
+    The existing Docling/recognition flags remain the opt-in deep-reading
+    seam.  A fast invocation cannot accidentally carry those flags through a
+    reused Namespace or saved command line.
+    """
+
+    configured_layout = any(
+        getattr(args, name, None)
+        for name in (
+            "docling_document_json",
+            "docling_run_json",
+            "docling_cli_config",
+            "docling_batch_index",
+            "recognition_config",
+            "recognition_run",
+            "recognition_reviewed_failures",
+        )
+    )
+    requested = str(getattr(args, "material_parser_mode", "") or "").strip().casefold()
+    if requested == "":
+        recognition_requested = any(getattr(args, name, None) for name in
+                                    ("recognition_config", "recognition_run", "recognition_reviewed_failures"))
+        return "deep_layout" if recognition_requested else "docling_basic" if configured_layout else "fast_native"
+    if requested in {"fast", "native", "fast_native"}:
+        if configured_layout:
+            raise ValueError("fast_native_cannot_use_docling_or_regional_flags")
+        return "fast_native"
+    if requested == "docling_basic":
+        if not any(getattr(args, name, None) for name in ("docling_cli_config", "docling_document_json", "docling_run_json", "docling_batch_index")):
+            raise ValueError("docling_basic_requires_explicit_docling_configuration")
+        if any(getattr(args, name, None) for name in ("recognition_config", "recognition_run", "recognition_reviewed_failures")):
+            raise ValueError("docling_basic_cannot_require_regional_recognition")
+        return "docling_basic"
+    if requested in {"deep", "deep_read", "deep_layout"}:
+        if not configured_layout:
+            raise ValueError("deep_layout_requires_explicit_docling_or_regional_configuration")
+        return "deep_layout"
+    raise ValueError(f"unsupported_material_parser_mode:{requested}")
+
+
+def _parser_gap_entry(gap: Mapping[str, Any]) -> dict[str, Any] | None:
+    kind = str(gap.get("kind") or "").strip().casefold()
+    reason = str(gap.get("reason") or "").strip()
+    reason_lower = reason.casefold()
+    relevant = kind in PARSER_GAP_KINDS or any(
+        marker in reason_lower for marker in ("formula", "table", "layout", "grobid", "fitz")
+    )
+    if not relevant:
+        return None
+    status = str(gap.get("status") or "unknown").strip().casefold()
+    if status in {"failed", "error", "partial"}:
+        classification = "confirmed_failure"
+    elif status in {"known_gap", "uncertain", "pending", "parser_candidate"}:
+        classification = "unverified_or_possible_layout_formula_loss"
+    else:
+        classification = "informational_parser_route"
+    return {
+        "kind": kind,
+        "status": status,
+        "classification": classification,
+        "reason": reason,
+    }
+
+
+def _write_parser_gap_sidecar(root: Path, result: Any) -> None:
+    """Write queryable parser gaps beside a newly written checkpoint.
+
+    This is a derived audit file.  It never edits the immutable snapshot or
+    changes a material-depth decision, and it deliberately does not classify
+    every unverified formula as a confirmed parser failure.
+    """
+
+    entries = []
+    for gap in list(getattr(result, "known_gaps", ()) or ()):
+        if isinstance(gap, Mapping):
+            value = _parser_gap_entry(gap)
+            if value is not None:
+                entries.append(value)
+    identity = getattr(result, "identity", None)
+    artifacts = []
+    for artifact in list(getattr(result, "artifacts", ()) or ()):
+        data = bytes(getattr(artifact, "data", b"") or b"")
+        artifacts.append({
+            "kind": str(getattr(artifact, "kind", "") or ""),
+            "route": str(getattr(artifact, "route", "") or ""),
+            "sha256": hashlib.sha256(data).hexdigest() if data else "",
+        })
+    paper_id = str(getattr(identity, "canonical_paper_id", "") or "paper")
+    payload = {
+        "schema_version": "optomind.parser_failure_sidecar.v1",
+        "paper_id": paper_id,
+        "status": str(getattr(result, "status", "") or ""),
+        "material_depth": str(getattr(result, "material_depth", "") or ""),
+        "body_readable": str(getattr(result, "material_depth", "") or "") == "fulltext",
+        "selected_route": str(getattr(result, "selected_route", "") or ""),
+        "parser": str(getattr(result, "parser", "") or ""),
+        "entries": entries,
+        "artifacts": artifacts,
+        "errors": list(getattr(result, "errors", ()) or ()),
+    }
+    target = root / "PARSER_FAILURES" / f"{_safe_slug(paper_id)}.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = target.with_suffix(f".tmp-{os.getpid()}")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.replace(temporary, target)
+
+
 def _print(value: Mapping[str, Any]) -> None:
     print(json.dumps(dict(value), ensure_ascii=True, sort_keys=True), flush=True)
 
@@ -122,7 +234,8 @@ def _regional_completion(snapshot: Any) -> tuple[bool, dict[str, int]]:
         if asset.get("parser") == "docling" and asset.get("type") in {"formula", "table"}:
             status = str(asset.get("recognition_status") or "parser_candidate")
             statuses[status] = statuses.get(status, 0) + 1
-    return all(status in {"recognized", "uncertain"} for status in statuses), statuses
+    basic = any(source.get("role") == "pdf_primary_region_index" for source in snapshot.manifest.get("source_documents") or ())
+    return basic or all(status in {"recognized", "uncertain"} for status in statuses), statuses
 
 
 def _load_resume(root: Path, paper_id: Any, fingerprint: str, *, refresh: bool) -> dict[str, Any] | None:
@@ -152,11 +265,15 @@ def _save_checkpoint(root: Path, result: Any, fingerprint: str) -> None:
     payload["fingerprint"] = fingerprint
     snapshot = getattr(result, "snapshot", None)
     complete, statuses = _regional_completion(snapshot) if snapshot is not None else (False, {})
-    payload["regional_recognition_complete"] = complete
+    basic = snapshot is not None and any(s.get("role") == "pdf_primary_region_index" for s in snapshot.manifest.get("source_documents") or ())
+    payload["ordinary_material_complete"] = bool(snapshot is not None and complete)
+    payload["regional_recognition_required"] = not basic
+    payload["regional_recognition_complete"] = all(status in {"recognized", "uncertain"} for status in statuses) if snapshot is not None else False
     payload["regional_recognition_status_counts"] = statuses
     temporary = path.with_suffix(f".tmp-{os.getpid()}")
     temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     os.replace(temporary, path)
+    _write_parser_gap_sidecar(root, result)
 
 
 def _resolve_local_path(value: Any, base: Path) -> Path | None:
@@ -168,6 +285,8 @@ def _resolve_local_path(value: Any, base: Path) -> Path | None:
 
 def add_material_acquisition_arguments(parser: argparse.ArgumentParser, *, include_shared_budget_options: bool = True) -> None:
     """Add the same explicit acquisition/parser options to both formal CLIs."""
+    parser.add_argument("--material-parser-mode", choices=("fast_native", "docling_basic", "deep_layout"),
+                        help="Docling configuration selects ordinary docling_basic; regional recognition needs explicit deep_layout/recognition flags")
     parser.add_argument("--cache-root", type=Path, default=Path("data/local_material_acquisition_cache"))
     parser.add_argument("--deadline-seconds", type=float, default=180.0)
     parser.add_argument("--network-workers", type=int, default=4)
@@ -181,6 +300,7 @@ def add_material_acquisition_arguments(parser: argparse.ArgumentParser, *, inclu
     parser.add_argument("--docling-document-json", type=Path, help="opt-in saved native DoclingDocument JSON")
     parser.add_argument("--docling-run-json", type=Path, help="matching saved run.json with PDF hash, packages and pipeline options")
     parser.add_argument("--docling-cli-config", type=Path, help="explicit CLI configuration JSON; command must emit document.json and run.json")
+    parser.add_argument("--docling-batch-index", type=Path, help="completed resident batch index; import native document/run by PDF hash without a GPU process")
     parser.add_argument("--docling-cache-root", type=Path, help="isolated Docling cache; defaults to acquisition cache/docling")
     parser.add_argument("--docling-max-processes", type=int, help="shared adapter local process/cache construction bound (initial default 1; maximum 8)")
     parser.add_argument("--docling-crop-scale", type=float, default=2.5, help="original-PDF crop render scale")
@@ -229,9 +349,19 @@ def make_material_acquirer_factory(args: argparse.Namespace, *, regional_client_
     """
     args = argparse.Namespace(**vars(args))
     args.budget_limit = getattr(args, "budget_limit", getattr(args, "budget_limit_cny", None))
+    parser_mode = material_parser_mode(args)
     config = AcquisitionConfig(deadline_seconds=args.deadline_seconds, network_workers=args.network_workers, request_timeout_seconds=args.request_timeout_seconds, max_retries=args.max_retries, cache_root=args.cache_root, refresh=args.refresh, rescue_enabled=not args.disable_rescue, rescue_max_candidates=args.rescue_max_candidates, rescue_max_search_calls=args.rescue_max_search_calls, rescue_max_extract_calls=args.rescue_max_extract_calls)
     providers: dict[str, Any] = {}
-    if args.docling_document_json or args.docling_run_json or args.docling_cli_config:
+    if getattr(args, "docling_batch_index", None):
+        if parser_mode != "docling_basic" or any((args.docling_cli_config, args.docling_document_json, args.docling_run_json)):
+            raise ValueError("docling_batch_index_requires_basic_and_no_other_docling_source")
+        from optomind_research.runtime.upgrade3.docling_adapter import DoclingBatchAdapter, config_sha256
+        providers["docling"] = DoclingBatchAdapter(args.docling_batch_index,
+            cache_root=args.docling_cache_root or args.cache_root / "docling", crop_scale=args.docling_crop_scale)
+        config.docling_enabled = config.docling_primary = True
+        config.docling_config_sha256 = config_sha256({"batch_index_sha256": hashlib.sha256(args.docling_batch_index.read_bytes()).hexdigest(),
+            "crop_scale": args.docling_crop_scale, "body_projection": "optomind.docling_body.v1"})
+    elif parser_mode in {"deep_layout", "docling_basic"}:
         from optomind_research.runtime.upgrade3.docling_adapter import DoclingAdapterConfig, DoclingCliAdapter, config_sha256
 
         cache_root = args.docling_cache_root or args.cache_root / "docling"
@@ -278,6 +408,7 @@ def make_material_acquirer_factory(args: argparse.Namespace, *, regional_client_
             recognizer = RegionalRecognizer(recognition_config, provider_factory=factory, reviewed_failures=args.recognition_reviewed_failures)
         providers["docling"] = DoclingCliAdapter(adapter_config, recognizer=recognizer)
         config.docling_enabled = True
+        config.docling_primary = parser_mode == "docling_basic"
         config.docling_config_sha256 = config_sha256({"parser_version": adapter_config.parser_version, **adapter_config.fingerprint(),
             "recognition": {"request": recognizer.config.fingerprint(), "policy": recognizer.config.policy()} if recognizer else None,
             "local_scheduling": {"max_processes": adapter_config.max_processes}, "recognition_run": args.recognition_run})
@@ -297,6 +428,10 @@ def make_material_acquirer_factory(args: argparse.Namespace, *, regional_client_
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
+    try:
+        parser_mode = material_parser_mode(args)
+    except ValueError as exc:
+        parser.error(str(exc))
     modes = sum(bool(item) for item in (args.input, args.prepared, args.batch_manifest)) + (1 if args.record_json and not args.input else 0)
     if modes != 1:
         _build_parser().error("choose exactly one of --input, --prepared, --record-json, or --batch-manifest")
@@ -366,7 +501,7 @@ def main(argv: list[str] | None = None) -> int:
                     result = AcquisitionResult(identity=acquirer._record_identity(row), status="failed", material_depth="unknown",
                         errors=[f"{type(exc).__name__}:{exc}"])
                 _save_checkpoint(args.output_root, result, fingerprint)
-                _print(_summary(result))
+                _print({**_summary(result), "material_parser_mode": parser_mode})
                 completed += 1
 
         def on_result(result: Any) -> None:
@@ -375,7 +510,7 @@ def main(argv: list[str] | None = None) -> int:
             if not fingerprint:
                 fingerprint = network_fingerprints.get(_safe_slug(result.identity.doi), "") or network_fingerprints.get(_safe_slug(result.identity.title), "")
             _save_checkpoint(args.output_root, result, fingerprint)
-            _print(_summary(result))
+            _print({**_summary(result), "material_parser_mode": parser_mode})
             completed += 1
 
         acquirer.acquire_batch(network_records, on_result=on_result)
@@ -389,12 +524,14 @@ def main(argv: list[str] | None = None) -> int:
             record["canonical_paper_id"] = args.canonical_paper_id or args.input.stem
         is_pdf = args.input.suffix.casefold() == ".pdf" or data.startswith(b"%PDF")
         result = acquirer.acquire_local(record, pdf_bytes=data if is_pdf else (args.pdf.read_bytes() if args.pdf else None), xml_bytes=None if is_pdf else data, source_name=args.input.name, source_document_id=args.source_document_id, source_role=args.source_role, source_uri=args.source_uri, publication_version=args.publication_version)
-        _print(_summary(result))
+        _write_parser_gap_sidecar(args.output_root, result)
+        _print({**_summary(result), "material_parser_mode": parser_mode})
         return 0 if result.status == "published" else 1
 
     record = _record(args.record_json, args.canonical_paper_id)
     result = acquirer.acquire(record)
-    _print(_summary(result))
+    _write_parser_gap_sidecar(args.output_root, result)
+    _print({**_summary(result), "material_parser_mode": parser_mode})
     return 0 if result.status == "published" else 1
 
 
