@@ -4,47 +4,77 @@ Current local PDF route (2026-10-13): resident basic batch → ordinary
 snapshots/A-B → selected-paper local CodeFormulaV2 → practical directed
 reading. This route has **no model API calls**. [Verified commands and limits](verification/local-docling-batch-20261013/README.md).
 
+## Canonical local batch entry
+
+Use `scripts/upgrade3/parse_docling_batch.py` as the one basic/formula batch
+entry. The checked-in portable profile is
+`docs/verification/local-docling-batch-20261013/BASIC_PARALLEL3_CONFIG.template.json`.
+It contains the complete Docling `packages` and `pipeline_options` contract,
+with the three-process production settings: `workers: 3`, layout/table/OCR
+batches 4, accelerator threads 4, `safe_parser: true`, native
+`parser_threads: 1`, `max_documents_per_worker: 20`, and whole-card
+`gpu_limit_mib: 8192`. Each child is rotated after at most 20 PDFs; verified
+per-PDF receipts are reused by `--resume`. A config that omits `workers`
+continues to mean the historical one-process route; three workers require the
+explicit profile or `--workers 3`.
+
+On the measurement machine, the same entry and profile were run as follows.
+Replace `$repo`, `$pool`, `$python`, the manifest and the output root when
+moving the route to another checkout or PDF pool; the template's relative
+`pipeline_options.artifacts_path` points to this worktree's sibling
+`parser_repair\docling_artifacts` and must point to an existing local cache.
+
 ```powershell
-# Run in the configured local Docling Python environment. The verified current
-# profile is an explicit three-child b4/t4 route under the 8 GiB whole-card cap.
-python scripts/upgrade3/parse_docling_batch.py --mode basic --manifest LOCAL_PDFS.json --config BASIC_PARALLEL3_CONFIG.json --output-root outputs/pdf_basic --resume --workers 3
-# Ordinary snapshots are immediately usable by A/B; no formula stage is required.
-python scripts/upgrade3/build_local_materials.py --batch-manifest LOCAL_PDFS.json --docling-batch-index outputs/pdf_basic/BATCH_RESULT.json --material-parser-mode docling_basic --cache-root outputs/pdf_cache --output-root outputs/pdf_materials --disable-rescue
-# Existing planner entry: add these flags to the normal authorized planning command.
-# --local-formula-config HOOK_CONFIG.json --local-formula-cache-root outputs/local_formula_cache
+$repo = 'F:\OptoMind-Review-2\outputs\e2e_optics_20261012_80cny\worktree'
+$pool = 'F:\OptoMind-Review-2\outputs\pdf_bulk_route_20261013\docling_speed'
+$python = 'F:\OptoMind-Review-2\outputs\e2e_optics_20261012_80cny\parser_repair\venv_docling\Scripts\python.exe'
+$manifest = "$pool\LOCAL_PDF_MANIFEST_NORMALIZED.json"
+$config = "$repo\docs\verification\local-docling-batch-20261013\BASIC_PARALLEL3_CONFIG.template.json"
+$out = "$pool\official_parallel_full_55"
+& $python -B -X utf8 "$repo\scripts\upgrade3\parse_docling_batch.py" `
+  --mode basic --manifest $manifest --config $config --output-root $out `
+  --resume --workers 3
+
+& $python -B -X utf8 "$repo\scripts\upgrade3\build_local_materials.py" `
+  --batch-manifest $manifest --docling-batch-index "$out\BATCH_RESULT.json" `
+  --material-parser-mode docling_basic --cache-root "$pool\pdf_cache" `
+  --output-root "$pool\pdf_materials" --disable-rescue
 ```
 
-`BASIC_PARALLEL3_CONFIG.json` uses the existing Docling `packages` and native
-`pipeline_options` contract, with local `artifacts_path`, layout/table batch 4,
-accelerator threads 4, `workers: 3`, `safe_parser: true`,
-`backend_options.parser_threads: 1`,
-`backend_options.release_native_memory_every_n_pages: 0`, and
-`max_documents_per_worker: 20`; formula/picture enrichment remains disabled.
-Each basic child uses one native parser thread and exits after at most 20 PDFs;
-the parent reuses verified per-PDF outputs while starting the next fresh child.
-An older config that omits `workers` keeps the historical single-process route;
-three children require this explicit profile or `--workers 3`. `FORMULA_DRIVER.json` is:
+The basic route keeps the original PDF, page geometry, body/table/formula
+provenance and `REGION_INDEX.json`, while ordinary region images are rendered
+lazily on demand. It does not embed whole-page image payloads. `deep_layout`
+keeps the earlier eager-crop semantics and uses a separate cache fingerprint.
+Tables enter through the basic local recognizer; formula enhancement is a
+separate selected-paper step.
 
-```json
-{"model_cache":"C:/local/codeformula_models","batch_size":32,"device":"cuda","timeout_seconds":600,"gpu_limit_mib":8192}
-```
-
-`HOOK_CONFIG.json` names the executable and that driver profile:
+For directed reading, point the existing hook at the already cached local
+CodeFormulaV2 model. The measured local profile used `batch_size: 32`,
+`device: cuda`, `timeout_seconds: 600`, and `gpu_limit_mib: 8192`; it is a
+single-process formula route and must not be combined with the basic three
+worker fan-out. A portable hook shape is:
 
 ```json
 {"python":"C:/local/docling_env/Scripts/python.exe","driver_config":"FORMULA_DRIVER.json"}
 ```
 
-Model/cache paths resolve against the corresponding configuration file.
-Keep model caches immutable while reusing results; use a new profile/cache
-or an explicit model manifest when replacing weights. The planner's existing
-directed-reading runner automatically invokes this hook after choosing a
-paper, before the LLM read. Completed formulas reuse their sidecar; only
-pending formula refs enter the local queue. The source snapshot stays intact.
-An enhancement failure stops the affected directed read and never falls back
-to a paid regional provider. Without local hook configuration ordinary
-reading proceeds with explicit unenhanced formulas. Per-PDF successes survive
-batch failures and are checked by hash/config/page coverage on `--resume`.
+```json
+{"model_cache":"C:/local/codeformula_models","batch_size":32,"device":"cuda","timeout_seconds":600,"gpu_limit_mib":8192}
+```
+
+On this machine, `model_cache` was
+`F:\OptoMind-Review-2\outputs\e2e_optics_20261012_80cny\parser_repair\precision_candidate_trials_20261013\docling_formula\model_cache`.
+Keep this cache immutable and reuse completed formula sidecars by source/config
+hash. The directed-reading runner invokes the local hook after selecting a
+paper and before the practical reader; it preserves raw formula text and does
+not call a paid regional fallback. Without the hook, ordinary reading keeps
+formulas explicitly unenhanced.
+
+The formal 55-PDF run used the manifest above and produced 55/55 successful
+PDFs (1,038 pages), 6,966 MiB peak whole-card memory, and zero native crashes
+in 68.812 seconds. Its `BATCH_RESULT.json`, worker history and content
+comparison remain under `$pool\official_parallel_full_55`; the verification
+README records the older single-process and rejected concurrent profiles.
 
 Native parser process faults are automatically retried in a fresh resident
 worker, reusing every verified successful PDF. Basic children already use the

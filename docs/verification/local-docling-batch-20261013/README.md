@@ -2,6 +2,42 @@
 
 This change provides a local PDF material route. The optical review A/B path is restored at V7. No model API was called in these parser experiments; Mistral and Mathpix were not enabled.
 
+## One canonical entry and portable profile
+
+Use `scripts/upgrade3/parse_docling_batch.py` for both basic parsing and the
+selected-formula mode. `BASIC_PARALLEL3_CONFIG.template.json` in this
+verification directory is the complete checked-in three-process profile. Its
+basic recommendation is `workers=3`, layout/table/OCR batch 4, accelerator
+threads 4, `safe_parser=true`, native `parser_threads=1`, and a fresh child
+after at most 20 PDFs, with `gpu_limit_mib=8192` for total-card usage. A config
+that omits `workers` deliberately retains the historical one-process default;
+do not infer three workers from an old config.
+
+The tested machine command was:
+
+```powershell
+$repo = 'F:\OptoMind-Review-2\outputs\e2e_optics_20261012_80cny\worktree'
+$pool = 'F:\OptoMind-Review-2\outputs\pdf_bulk_route_20261013\docling_speed'
+$python = 'F:\OptoMind-Review-2\outputs\e2e_optics_20261012_80cny\parser_repair\venv_docling\Scripts\python.exe'
+& $python -B -X utf8 "$repo\scripts\upgrade3\parse_docling_batch.py" `
+  --mode basic `
+  --manifest "$pool\LOCAL_PDF_MANIFEST_NORMALIZED.json" `
+  --config "$repo\docs\verification\local-docling-batch-20261013\BASIC_PARALLEL3_CONFIG.template.json" `
+  --output-root "$pool\official_parallel_full_55" `
+  --resume --workers 3
+```
+
+For another checkout, change only the repository, Python environment, PDF
+manifest and output root. The template's relative
+`pipeline_options.artifacts_path` is adapted to this worktree's sibling
+`parser_repair\docling_artifacts`; point it to the existing local Docling
+model cache before running elsewhere. The profile is offline and contains no
+keys or article text. Ordinary `docling_basic` snapshots defer region-image
+crops while retaining the original PDF, page/bbox coordinates and region
+index. Selected-paper enrichment uses the already cached local CodeFormulaV2
+profile (batch 32, single process); it is not a full-PDF formula rerun and
+never falls back to a paid provider.
+
 ## Adopted route
 
 1. Native XML remains preferred when available. For PDF batches, `scripts/upgrade3/parse_docling_batch.py --mode basic` uses the explicit verified `workers=3`, b4/t4, single-native-parser-thread profile under the 8 GiB whole-card cap. Each child handles at most 20 PDFs, then resumes from verified per-PDF receipts in a fresh child. Historical configs without `workers` retain one resident process. It saves native document JSON and a per-PDF receipt.
@@ -12,6 +48,15 @@ This change provides a local PDF material route. The optical review A/B path is 
 Configuration, commands and the distinction from the historical regional API route are maintained in [local_materials.md](../../local_materials.md). Do not enable the old regional vision provider for this local-only route.
 
 ## Measurements and content review
+
+### Manifest audit
+
+The real local manifest `LOCAL_PDF_MANIFEST_NORMALIZED.json` contains 55 unique
+PDFs and 1,038 source pages. The final `official_parallel_full_55/BATCH_RESULT.json`
+contains 55 unique `success` records: all 55 have matching source hashes, full
+page coverage, and both `document.json` and `run.json`; no manifest PDF remains
+unparsed. This is a PDF-parser count and is independent of any A/B or directed
+reading `pending` cards.
 
 Hardware: RTX 3080 10 GB; experiments constrained whole-card usage below 8 GiB. These are local inference measurements, not complete review-generation times.
 

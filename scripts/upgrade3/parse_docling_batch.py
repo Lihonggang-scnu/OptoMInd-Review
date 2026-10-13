@@ -1,5 +1,17 @@
 """Resident, offline Docling basics or selected CodeFormulaV2 enrichment.
 
+CANONICAL BASIC PROFILE (2026-10-13): use workers=3, layout/table/OCR
+batch=4, accelerator threads=4, safe_parser=True, native parser_threads=1,
+and rotate each child after at most 20 PDFs. Keep the whole-card ceiling at
+8 GiB (gpu_limit_mib=8192), including desktop/background usage. The basic
+route defers ordinary region-image crops and keeps PDF/page/bbox provenance;
+selected-paper formula enrichment uses the already cached local CodeFormulaV2
+route (single process, normally batch 32). The portable profile and exact
+command are documented at
+docs/verification/local-docling-batch-20261013/README.md and the template
+BASIC_PARALLEL3_CONFIG.template.json. Configurations that omit workers keep
+the historical single-worker default; do not silently promote them to three.
+
 One isolated child holds one converter/model for the whole pending batch.
 Per-PDF atomic receipts survive a native-process crash; resume skips verified
 successes. No model API, server, download or full-page image payload is used.
