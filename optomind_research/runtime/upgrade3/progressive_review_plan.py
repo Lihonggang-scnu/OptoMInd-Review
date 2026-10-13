@@ -1755,6 +1755,123 @@ def _planner_call_settings(planner: Any, stage: str, *, config: Any = None) -> d
     return {"model": model, "output_tokens": max(64, output), "thinking_budget": thinking}
 
 
+_LEVEL1_TOOL_NEED_ID_SUFFIX = re.compile(r"^(?P<base>N[^-]+)-(?P<suffix>[0-9a-f]{16,})$")
+_LEVEL1_TOOL_MATERIAL_KEYS = {
+    "source_units", "usable_content", "useful_material", "auxiliary_material",
+    "question_material", "materials", "source_materials", "candidate_rows", "material",
+    "evidence", "citation_anchors", "findings", "finding", "conditions", "limitations",
+    "answer", "limits",
+}
+
+
+def _level1_tool_need_id_projection(value: Any) -> Any:
+    """Drop only the run-derived suffix from a tool need id.
+
+    Need ids are orchestration metadata.  This helper is deliberately called
+    only below ``actual_tool_results``; scientific ids and task payloads keep
+    their exact values.
+    """
+    if not isinstance(value, str):
+        return value
+    match = _LEVEL1_TOOL_NEED_ID_SUFFIX.fullmatch(value)
+    return match.group("base") if match else value
+
+
+def _level1_tool_feedback_has_material(value: Any) -> bool:
+    """Recognize retained tool material without treating paths/status as evidence."""
+    if isinstance(value, Mapping):
+        for key, item in value.items():
+            if str(key) in _LEVEL1_TOOL_MATERIAL_KEYS and item not in (None, "", [], {}):
+                return True
+        status = str(value.get("status") or "").casefold()
+        # A completed scientific result must remain a compatibility boundary
+        # even when its material is represented by a separate consumer field.
+        # Wrapper records with nested ``results`` use process status only and
+        # are intentionally judged by their nested records instead.
+        if status in {"fulfilled", "answered", "partial", "supporting"}:
+            return True
+        if (status in {"complete", "completed"}
+                and "results" not in value
+                and any(key in value for key in (
+                    "gap_id", "gap_question", "answer", "finding", "findings",
+                    "conditions", "evidence", "citation_anchors", "material",
+                ))):
+            return True
+        return any(_level1_tool_feedback_has_material(item) for item in value.values())
+    if isinstance(value, (list, tuple)):
+        return any(_level1_tool_feedback_has_material(item) for item in value)
+    return False
+
+
+def _level1_tool_feedback_projection(payload: Mapping[str, Any]) -> tuple[dict[str, Any], dict[str, int]] | None:
+    """Project retry bookkeeping for the narrow level1-outline cache seam.
+
+    The projection is intentionally limited to explicit tool feedback.  It
+    normalizes run-derived need-id suffixes, removes exact duplicate source
+    rows in tool material, and omits attempts which contain no material.  The
+    original payload and all attempts remain persisted; this projection is
+    only a proof that the saved outline's scientific input is unchanged.
+    """
+    actual = payload.get("actual_tool_results") if isinstance(payload, Mapping) else None
+    if not isinstance(actual, Mapping):
+        return None
+
+    projected = json.loads(json.dumps(payload, ensure_ascii=False, default=_json_default))
+    stats = {
+        "normalized_need_ids": 0,
+        "deduplicated_source_rows": 0,
+        "ignored_material_free_attempts": 0,
+    }
+
+    def normalize_tool_value(value: Any) -> Any:
+        if isinstance(value, Mapping):
+            normalized: dict[str, Any] = {}
+            for key, item in value.items():
+                if str(key) == "need_id":
+                    replacement = _level1_tool_need_id_projection(item)
+                    if replacement != item:
+                        stats["normalized_need_ids"] += 1
+                    item = replacement
+                normalized[str(key)] = normalize_tool_value(item)
+            return normalized
+        if isinstance(value, list):
+            return [normalize_tool_value(item) for item in value]
+        return value
+
+    tool_results = normalize_tool_value(actual)
+    supplement_results = tool_results.get("supplement_results")
+    if isinstance(supplement_results, list):
+        retained = [item for item in supplement_results if _level1_tool_feedback_has_material(item)]
+        stats["ignored_material_free_attempts"] = len(supplement_results) - len(retained)
+        tool_results["supplement_results"] = retained
+
+    by_chapter = tool_results.get("tool_materials_by_chapter")
+    if isinstance(by_chapter, Mapping):
+        for chapter, rows in list(by_chapter.items()):
+            if not isinstance(rows, list):
+                continue
+            normalized_rows: list[Any] = []
+            for row in rows:
+                if isinstance(row, Mapping) and isinstance(row.get("sources"), list):
+                    row = dict(row)
+                    sources: list[Any] = []
+                    seen_sources: set[str] = set()
+                    for source in row["sources"]:
+                        source_key = json.dumps(source, ensure_ascii=False, sort_keys=True,
+                                                separators=(",", ":"), default=_json_default)
+                        if source_key in seen_sources:
+                            stats["deduplicated_source_rows"] += 1
+                            continue
+                        seen_sources.add(source_key)
+                        sources.append(source)
+                    row["sources"] = sources
+                normalized_rows.append(row)
+            by_chapter[chapter] = normalized_rows
+
+    projected["actual_tool_results"] = tool_results
+    return projected, stats
+
+
 def _directed_reader_settings(config: ProgressivePlannerConfig) -> dict[str, Any]:
     from .directed_reading import directed_reader_runtime_config
 
@@ -3903,6 +4020,69 @@ class ProgressiveReviewPlanner:
         return self._stage(name, lambda: _call_record(self.planner, stage, payload),
                            resume=resume, state=state, cache_inputs=payload)
 
+    def _reuse_level1_outline_tool_feedback(
+        self,
+        *,
+        path: Path,
+        contract: str,
+        frozen_inputs: Any,
+        state: dict[str, Any],
+    ) -> Any | None:
+        """Reuse an outline when only retry bookkeeping changed in tool feedback.
+
+        The saved contract is recomputed from its original input with the live
+        prompt/model/token settings.  A prompt or runtime change therefore
+        rejects this path before the narrow projection is considered.
+        """
+        if not isinstance(frozen_inputs, Mapping):
+            return None
+        prior_inputs = (state.get("stage_inputs") or {}).get("level1_outline")
+        if not isinstance(prior_inputs, Mapping):
+            return None
+        saved_contract = (state.get("stage_cache_contracts") or {}).get("level1_outline")
+        if not saved_contract or self._cache_contract("level1_outline", prior_inputs) != saved_contract:
+            return None
+        prior_projection = _level1_tool_feedback_projection(prior_inputs)
+        current_projection = _level1_tool_feedback_projection(frozen_inputs)
+        if prior_projection is None or current_projection is None:
+            return None
+        if prior_projection[0] != current_projection[0]:
+            return None
+        try:
+            result = _read_json(path)
+        except ProgressivePlanError:
+            return None
+        if not isinstance(result, Mapping):
+            return None
+        old_projected, old_stats = prior_projection
+        new_projected, new_stats = current_projection
+        receipts = dict(state.get("stage_reuse_receipts") or {})
+        receipts["level1_outline"] = {
+            "mode": "level1_outline_tool_feedback_compatible",
+            "stage": "level1_outline",
+            "model_call": False,
+            "old_contract": saved_contract,
+            "current_contract": contract,
+            "old_input_sha256": hashlib.sha256(
+                json.dumps(prior_inputs, ensure_ascii=False, sort_keys=True,
+                           default=_json_default, separators=(",", ":")).encode("utf-8")
+            ).hexdigest(),
+            "current_input_sha256": hashlib.sha256(
+                json.dumps(frozen_inputs, ensure_ascii=False, sort_keys=True,
+                           default=_json_default, separators=(",", ":")).encode("utf-8")
+            ).hexdigest(),
+            "projected_input_sha256": hashlib.sha256(
+                json.dumps(old_projected, ensure_ascii=False, sort_keys=True,
+                           default=_json_default, separators=(",", ":")).encode("utf-8")
+            ).hexdigest(),
+            "projection_changes": {"old": old_stats, "current": new_stats},
+            "original_stage_input_preserved": True,
+            "original_stage_contract_preserved": True,
+        }
+        state["stage_reuse_receipts"] = receipts
+        _atomic_json(self.config.output_dir / "RUN_STATE.json", state)
+        return result
+
     def _stage(self, name: str, fn: Callable[[], Any], *, resume: bool, state: dict[str, Any], cache_inputs: Any = None) -> Any:
         path = self.config.output_dir / "stages" / (name + ".json")
         # Snapshot before invoking a callable which may mutate its inputs.
@@ -3911,6 +4091,11 @@ class ProgressiveReviewPlanner:
         if resume and path.is_file() and contract is not None:
             if (state.get("stage_cache_contracts") or {}).get(name) == contract:
                 return _read_json(path)
+            if name == "level1_outline":
+                reused = self._reuse_level1_outline_tool_feedback(
+                    path=path, contract=contract, frozen_inputs=frozen_inputs, state=state)
+                if reused is not None:
+                    return reused
         state.update({"status": "in_progress", "current_stage": name})
         _atomic_json(self.config.output_dir / "RUN_STATE.json", state)
         result = fn()
