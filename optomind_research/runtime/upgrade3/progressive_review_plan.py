@@ -15,6 +15,7 @@ import os
 import re
 import sqlite3
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -7320,6 +7321,15 @@ def _snapshot_for_candidate(candidate: Mapping[str, Any]) -> Path | None:
     material = card.get("material") if isinstance(card.get("material"), Mapping) else {}
     desired_id = _text(material.get("snapshot_id") or card.get("snapshot_id"))
     paper_id = _text(candidate.get("_paper_id") or _canonical_paper_id(candidate))
+    declared_value = _text(candidate.get("snapshot_dir") or candidate.get("snapshot_path"))
+    if declared_value:
+        declared = Path(declared_value)
+        if not declared.is_dir():
+            return None
+        declared_id = _snapshot_id(declared)
+        if desired_id and declared_id and declared_id != desired_id:
+            return None
+        return declared.resolve()
     for parent in [card_path.parent, *card_path.parents]:
         source_unit_path = parent / "SOURCE_UNIT.json"
         if source_unit_path.is_file():
@@ -7371,6 +7381,378 @@ def _snapshot_id(snapshot_dir: Path) -> str:
             nested = payload.get("snapshot") if isinstance(payload.get("snapshot"), Mapping) else {}
             return _text(payload.get("snapshot_id") or nested.get("snapshot_id"))
     return ""
+
+
+def _planning_index_file_sha(path: Path) -> str:
+    """Hash one local material file without loading it into the prompt."""
+
+    if not path.is_file():
+        return ""
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _planning_index_snapshot_fingerprint(snapshot: Path | None) -> dict[str, str]:
+    if snapshot is None or not snapshot.is_dir():
+        return {"path": "", "snapshot_id": "", "content_sha256": ""}
+    files = ("manifest.json", "SNAPSHOT_MANIFEST.json", "snapshot.json")
+    manifest = next((snapshot / name for name in files if (snapshot / name).is_file()), None)
+    if manifest is None:
+        manifest = next((snapshot / name for name in ("DOCUMENT_BLOCKS.jsonl", "READING_VIEW.md")
+                         if (snapshot / name).is_file()), None)
+    return {
+        "path": str(snapshot.resolve()),
+        "snapshot_id": _snapshot_id(snapshot),
+        "content_sha256": _planning_index_file_sha(manifest) if manifest else "",
+    }
+
+
+def _supplement_material_rows(row: Mapping[str, Any]) -> list[dict[str, Any]]:
+    values: list[Mapping[str, Any]] = []
+    singular = row.get("supplement_gap_material")
+    if isinstance(singular, Mapping) and singular:
+        values.append(singular)
+    for item in row.get("supplement_gap_materials") or ():
+        if isinstance(item, Mapping) and item:
+            values.append(item)
+    output: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for item in values:
+        key = json.dumps(dict(item), ensure_ascii=False, sort_keys=True, default=_json_default)
+        if key in seen:
+            continue
+        seen.add(key)
+        output.append(dict(item))
+    return output
+
+
+def _supplement_overlay_card(row: Mapping[str, Any], original: Path,
+                             supplements: Sequence[Mapping[str, Any]], destination: Path) -> None:
+    """Expose saved supporting review material through the existing card index.
+
+    Supplement responses are already persisted on the pool row, but the search
+    index only knows the card/snapshot/directed-reading channels.  A versioned
+    local overlay keeps the original card untouched and lets ``build_index``
+    index the saved supporting text through its normal card segments.
+    """
+
+    payload: dict[str, Any] = {}
+    source_identity = _candidate_identity(row)
+    original_is_compatible = True
+    if original.is_file():
+        try:
+            loaded = _read_json(original)
+        except (OSError, UnicodeError, ValueError):
+            loaded = {}
+        if isinstance(loaded, Mapping):
+            # A supplement overlay may preserve a compatible card, but it
+            # must never repair an identity mismatch by overwriting the
+            # card's identity with the pool row.  Independent supplement
+            # material remains eligible below.
+            original_is_compatible = _saved_card_identity_conflict(source_identity, loaded) is None
+            if original_is_compatible:
+                payload = dict(loaded)
+    identity = row.get("planning_view") if isinstance(row.get("planning_view"), Mapping) else {}
+    paper_identity = identity.get("paper_identity") if isinstance(identity.get("paper_identity"), Mapping) else {}
+    payload.setdefault("paper_identity", dict(paper_identity))
+    if not isinstance(payload.get("paper_identity"), Mapping):
+        payload["paper_identity"] = {}
+    payload["paper_identity"] = {
+        **dict(payload["paper_identity"]),
+        "canonical_paper_id": _text(row.get("_paper_id") or _canonical_paper_id(row)),
+        "title": _text(paper_identity.get("title") or row.get("title")),
+        "doi": _text(paper_identity.get("doi") or row.get("doi")),
+        "year": _text(paper_identity.get("year") or row.get("year")),
+    }
+    if not isinstance(payload.get("material"), Mapping):
+        payload["material"] = {
+            "declared_content_depth": _text(
+                (row.get("_b_summary") or {}).get("declared_content_depth")
+                if isinstance(row.get("_b_summary"), Mapping) else ""
+            ) or _text(identity.get("declared_content_depth")),
+            "material_scope": _text(identity.get("material_scope")),
+        }
+    review = payload.get("review_planning") if isinstance(payload.get("review_planning"), Mapping) else {}
+    review = dict(review)
+    entries = [dict(item) for item in review.get("broader_review_uses") or () if isinstance(item, Mapping)]
+    existing_materials = {
+        _text(item.get("material")) for item in entries if isinstance(item, Mapping) and _text(item.get("material"))
+    }
+    for item in supplements:
+        material_parts = [
+            _text(item.get(key)) for key in ("useful_material", "auxiliary_material", "evidence", "limitations")
+            if _text(item.get(key))
+        ]
+        material = "\n".join(dict.fromkeys(material_parts)).strip()
+        if not material or material in existing_materials:
+            continue
+        purpose = _text(item.get("outline_action") or item.get("remaining_gap"))
+        entries.append({
+            "connection_to_review": _text(item.get("gap_id")) or "saved supporting review material",
+            "material": material,
+            "purpose": purpose,
+        })
+        existing_materials.add(material)
+    review["broader_review_uses"] = entries
+    payload["review_planning"] = review
+    if not payload.get("planning_view") and isinstance(identity, Mapping):
+        payload["planning_view"] = dict(identity)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    _atomic_json(destination, payload)
+
+
+def _prepare_default_planning_index_inputs(
+    pool_rows: Sequence[Mapping[str, Any]], source_root: Path, *, write_overlays: bool = True,
+) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]], tuple[Path, ...], tuple[Path, ...],
+           dict[str, str], dict[str, str], str]:
+    """Normalize pool rows and collect the roots consumed by ``build_index``."""
+
+    normalized: list[dict[str, Any]] = []
+    identities: dict[str, dict[str, Any]] = {}
+    snapshot_roots: set[Path] = set()
+    directed_roots: set[Path] = set()
+    snapshot_paths: dict[str, str] = {}
+    directed_paths: dict[str, str] = {}
+    fingerprint_rows: list[dict[str, Any]] = []
+    for position, raw in enumerate(pool_rows, start=1):
+        if not isinstance(raw, Mapping):
+            raise ProgressivePlanError("local_index_pool_row_not_object")
+        row = dict(raw)
+        paper_id = _text(row.get("_paper_id") or _canonical_paper_id(row) or row.get("paper_id"))
+        if not paper_id:
+            raise ProgressivePlanError("local_index_pool_identity_missing")
+        handle = _text(row.get("_source_handle")) or f"P{position:04d}"
+        row["paper_id"] = paper_id
+        row["_paper_id"] = paper_id
+        row["_source_handle"] = handle
+        row["_b_summary"] = row.get("_b_summary") or _compact_b_record(row)
+        original_card = Path(str(row.get("card_path") or ""))
+        # The pool row's declared snapshot is authoritative when present.
+        # Only fall back to SOURCE_UNIT/BATCH_STATE metadata when the row has
+        # no usable declaration; never let a broad root silently select an
+        # older same-paper snapshot.
+        declared_value = _text(row.get("snapshot_dir") or row.get("snapshot_path"))
+        declared_snapshot = Path(declared_value)
+        snapshot = (declared_snapshot.resolve() if declared_value and declared_snapshot.is_dir()
+                    else _snapshot_for_candidate(row))
+        snapshot_fingerprint = _planning_index_snapshot_fingerprint(snapshot)
+        snapshot_paths[paper_id] = str(snapshot) if snapshot is not None else ""
+        if snapshot is not None:
+            snapshot_roots.add(snapshot.parent.parent)
+        direct = Path(str(row.get("directed_reading_path") or ""))
+        directed_paths[paper_id] = str(direct.resolve()) if direct.is_file() else ""
+        if direct.is_file():
+            directed_roots.add(direct.parent.parent)
+        supplements = _supplement_material_rows(row)
+        card_path = original_card
+        original_card_payload = _card_for_candidate(row) if original_card.is_file() else {}
+        card_identity_conflict = bool(
+            original_card_payload and _saved_card_identity_conflict(_candidate_identity(row), original_card_payload) is not None
+        )
+        if card_identity_conflict:
+            # Keep the source identity in the pool row, but quarantine the
+            # contradictory card channel.  Snapshot/direct/supplement
+            # channels are independent and remain usable.
+            card_path = Path("")
+            row["card_path"] = ""
+        if supplements:
+            card_key = hashlib.sha256(paper_id.encode("utf-8")).hexdigest()[:32]
+            card_path = source_root / "cards" / f"{card_key}.json"
+            if write_overlays:
+                _supplement_overlay_card(row, original_card, supplements, card_path)
+            row["card_path"] = str(card_path)
+        compact = row.get("_b_summary") if isinstance(row.get("_b_summary"), Mapping) else _compact_b_record(row)
+        planning = row.get("planning_view") if isinstance(row.get("planning_view"), Mapping) else {}
+        identity = planning.get("paper_identity") if isinstance(planning.get("paper_identity"), Mapping) else {}
+        identities[handle] = {
+            "paper_id": paper_id,
+            "card_path": str(card_path) if str(card_path) not in {"", "."} else "",
+            "title": _text(identity.get("title") or compact.get("title") or row.get("title")),
+            "doi": _text(identity.get("doi") or compact.get("doi") or row.get("doi")),
+            "year": _text(identity.get("year") or compact.get("year") or row.get("year")),
+        }
+        normalized.append(row)
+        fingerprint_rows.append({
+            "paper_id": paper_id,
+            "source_handle": handle,
+            "card_sha256": _planning_index_file_sha(original_card),
+            "snapshot": {
+                "path": snapshot_fingerprint.get("path", ""),
+                "snapshot_id": snapshot_fingerprint.get("snapshot_id", ""),
+                "content_sha256": snapshot_fingerprint.get("content_sha256", ""),
+            },
+            # Pool summaries and generated routing paths are not indexed
+            # evidence.  The card/snapshot/direct-reading hashes plus the
+            # stable supplement material fingerprint describe what the index
+            # actually searches and remain stable across phase output dirs.
+            "supplement": _supplement_material_fingerprints(row),
+            "directed_reading_path": str(direct.resolve()) if direct.is_file() else "",
+            "directed_reading_sha256": _planning_index_file_sha(direct),
+            "card_identity_conflict": card_identity_conflict,
+        })
+    signature = hashlib.sha256(json.dumps(
+        fingerprint_rows, ensure_ascii=False, sort_keys=True, default=_json_default
+    ).encode("utf-8")).hexdigest()
+    return (normalized, identities, tuple(sorted(snapshot_roots, key=str)),
+            tuple(sorted(directed_roots, key=str)), snapshot_paths, directed_paths, signature)
+
+
+def _default_planning_index_meta_path(index_path: Path) -> Path:
+    return index_path.with_name(index_path.name + ".meta.json")
+
+
+def _default_planning_index_failure_path(index_path: Path) -> Path:
+    return index_path.with_name(index_path.name + ".FAILURE.json")
+
+
+def _archive_default_planning_index(index_path: Path, meta_path: Path) -> None:
+    existing = [Path(str(index_path) + suffix) for suffix in ("", "-wal", "-shm", "-journal")]
+    if not any(path.exists() for path in existing) and not meta_path.is_file():
+        return
+    archive_root = index_path.parent / "planning_material_index_history"
+    archive_root.mkdir(parents=True, exist_ok=True)
+    old_signature = ""
+    if meta_path.is_file():
+        try:
+            metadata = _read_json(meta_path)
+        except (OSError, UnicodeError, ValueError):
+            metadata = {}
+        if isinstance(metadata, Mapping):
+            old_signature = _text(metadata.get("source_signature"))[:16]
+    label = old_signature or str(time.time_ns())
+    archive_base = archive_root / f"{index_path.stem}.{label}{index_path.suffix}"
+    if any(Path(str(archive_base) + suffix).exists() for suffix in ("", "-wal", "-shm", "-journal")):
+        archive_base = archive_root / f"{index_path.stem}.{label}.{time.time_ns()}{index_path.suffix}"
+    for suffix in ("", "-wal", "-shm", "-journal"):
+        source = Path(str(index_path) + suffix)
+        if source.exists():
+            os.replace(source, Path(str(archive_base) + suffix))
+    if meta_path.is_file():
+        os.replace(meta_path, archive_root / (archive_base.name + ".meta.json"))
+
+
+def _move_sqlite_bundle(source: Path, target: Path) -> None:
+    for suffix in ("", "-wal", "-shm", "-journal"):
+        path = Path(str(source) + suffix)
+        if path.exists():
+            os.replace(path, Path(str(target) + suffix))
+
+
+def _remove_sqlite_bundle(path: Path) -> None:
+    for suffix in ("", "-wal", "-shm", "-journal"):
+        try:
+            Path(str(path) + suffix).unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+def _ensure_default_planning_material_index(
+    config: ProgressivePlannerConfig,
+    pool_rows: Sequence[Mapping[str, Any]],
+    *,
+    index_path: str | Path | None = None,
+) -> Path:
+    """Create/update the managed default local index without touching user indexes."""
+
+    if index_path is not None:
+        return Path(index_path)
+    target = config.output_dir / "planning_material_index.sqlite"
+    metadata_path = _default_planning_index_meta_path(target)
+    rows = [dict(row) for row in pool_rows if isinstance(row, Mapping)]
+    if not rows:
+        _archive_default_planning_index(target, metadata_path)
+        return target
+    source_root = config.output_dir / "planning_material_index_sources"
+    # The signature is computed while preparing the versioned local source
+    # files.  Build failures are recorded and raised; they must not become an
+    # apparently empty local index followed by a paid external search.
+    source_root.mkdir(parents=True, exist_ok=True)
+    failure_path = _default_planning_index_failure_path(target)
+    try:
+        normalized, identities, snapshot_roots, directed_roots, snapshot_paths, directed_paths, signature = _prepare_default_planning_index_inputs(
+            rows, source_root, write_overlays=False
+        )
+        version_root = source_root / signature
+        version_root.mkdir(parents=True, exist_ok=True)
+        # Recreate supplement overlays under the stable version directory.  This is
+        # a generated source projection; original cards and snapshots are untouched.
+        normalized, identities, snapshot_roots, directed_roots, snapshot_paths, directed_paths, signature = _prepare_default_planning_index_inputs(
+            rows, version_root, write_overlays=True
+        )
+    except Exception as exc:
+        try:
+            _atomic_json(failure_path, {
+                "status": "failed",
+                "schema_version": "optomind.progressive_review_plan.default_local_index.v1",
+                "source_signature": "",
+                "error_type": type(exc).__name__,
+                "error": str(exc)[:1000],
+            })
+        except OSError:
+            pass
+        raise ProgressivePlanError("default_planning_material_index_failed:" + type(exc).__name__) from exc
+    pool_path = version_root / "POOL.jsonl"
+    identity_path = version_root / "IDENTITIES.json"
+    if not pool_path.is_file():
+        _write_jsonl(pool_path, normalized)
+    if not identity_path.is_file():
+        _atomic_json(identity_path, {"source_identity_map": identities})
+
+    from .planning_material_search import PlanningMaterialIndex, SearchIndexConfig, build_index
+
+    if target.is_file() and metadata_path.is_file():
+        try:
+            existing_meta = _read_json(metadata_path)
+            with PlanningMaterialIndex(target, readonly=True) as existing_index:
+                existing_index.counts()
+            if isinstance(existing_meta, Mapping) and existing_meta.get("source_signature") == signature:
+                return target
+        except Exception:
+            pass
+
+    temporary = target.with_name(f".{target.name}.{signature[:16]}.{time.time_ns()}.tmp")
+    try:
+        report = build_index(SearchIndexConfig(
+            topic_id=config.topic_id,
+            index_path=temporary,
+            pool_path=pool_path,
+            identity_map_path=identity_path,
+            snapshot_roots=snapshot_roots,
+            directed_roots=directed_roots,
+            snapshot_paths=snapshot_paths,
+            directed_paths=directed_paths,
+        ))
+        _archive_default_planning_index(target, metadata_path)
+        _move_sqlite_bundle(temporary, target)
+        _atomic_json(metadata_path, {
+            "status": "ready",
+            "schema_version": "optomind.progressive_review_plan.default_local_index.v1",
+            "source_signature": signature,
+            "source_root": str(version_root.resolve()),
+            "pool_rows": len(normalized),
+            "build_report": report.to_dict() if hasattr(report, "to_dict") else report,
+        })
+        try:
+            failure_path.unlink(missing_ok=True)
+        except OSError:
+            pass
+        return target
+    except Exception as exc:
+        _remove_sqlite_bundle(temporary)
+        try:
+            _atomic_json(failure_path, {
+                "status": "failed",
+                "schema_version": "optomind.progressive_review_plan.default_local_index.v1",
+                "source_signature": signature,
+                "error_type": type(exc).__name__,
+                "error": str(exc)[:1000],
+            })
+        except OSError:
+            pass
+        raise ProgressivePlanError("default_planning_material_index_failed:" + type(exc).__name__) from exc
 
 
 def _candidate_identity(candidate: Mapping[str, Any]) -> dict[str, Any]:
@@ -7545,6 +7927,10 @@ def make_planning_supplement_runner(
         index_path = Path(local_index_path) if local_index_path else (
             config.output_dir / "planning_material_index.sqlite"
         )
+        if local_index_path is None and not context.get("skip_local_triage"):
+            index_path = _ensure_default_planning_material_index(
+                config, context.get("pool_rows") or (), index_path=None
+            )
         local_judge = QwenLocalTriageJudge(
             key_file=key_file, budget_ledger_path=budget_ledger_path,
             budget_limit_cny=float(budget_limit_cny), model=config.reader_model,
@@ -7728,6 +8114,8 @@ def _extend_planning_material_index(index_path: Path, rows: Sequence[Mapping[str
     identity = {}
     snapshot_roots = set()
     directed_roots = set()
+    snapshot_paths: dict[str, str] = {}
+    directed_paths: dict[str, str] = {}
     with PlanningMaterialIndex(index_path, readonly=True) as old_index:
         existing = {row["paper_id"]: dict(row) for row in old_index.papers()}
     for row in rows:
@@ -7740,19 +8128,28 @@ def _extend_planning_material_index(index_path: Path, rows: Sequence[Mapping[str
                             **{key: compact.get(key) for key in ("title", "doi", "year")}}
         snapshot = _snapshot_for_candidate(row)
         old = existing.get(paper_id) or {}
-        if snapshot is None and old.get("snapshot_path"):
+        declared_snapshot_value = _text(row.get("snapshot_dir") or row.get("snapshot_path"))
+        if snapshot is None and not declared_snapshot_value and old.get("snapshot_path"):
             prior_path = Path(old["snapshot_path"])
             snapshot = prior_path if prior_path.is_dir() else None
+        snapshot_paths[paper_id] = str(snapshot.resolve()) if snapshot is not None else ""
         if snapshot:
             snapshot_roots.add(snapshot.parent.parent)
-        if old.get("directed_reading_path"):
-            directed_roots.add(Path(old["directed_reading_path"]).parent.parent)
+        direct = Path(str(row.get("directed_reading_path") or ""))
+        if not direct.is_file() and old.get("directed_reading_path"):
+            prior_direct = Path(old["directed_reading_path"])
+            direct = prior_direct if prior_direct.is_file() else Path("")
+        directed_paths[paper_id] = str(direct.resolve()) if direct.is_file() else ""
+        if direct.is_file():
+            directed_roots.add(direct.parent.parent)
     if not identity:
         return
     identity_path = root / "IDENTITIES.json"
     _atomic_json(identity_path, {"source_identity_map": identity})
     build_index(SearchIndexConfig(topic_id=topic_id, index_path=index_path, pool_path=pool_path,
-                                  identity_map_path=identity_path, snapshot_roots=tuple(snapshot_roots), directed_roots=tuple(directed_roots)))
+                                  identity_map_path=identity_path, snapshot_roots=tuple(snapshot_roots),
+                                  directed_roots=tuple(directed_roots), snapshot_paths=snapshot_paths,
+                                  directed_paths=directed_paths))
     with PlanningMaterialIndex(index_path) as index:
         for row in rows:
             materials = row.get("supplement_gap_materials") or [row.get("supplement_gap_material")]
@@ -7817,6 +8214,15 @@ def _supplement_source_fingerprint(row: Mapping[str, Any]) -> str:
         "B": card.get("review_planning") or {},
         "planning": {key: value for key, value in planning.items() if key != "paper_identity"},
     }
+    declared_snapshot = Path(str(row.get("snapshot_dir") or row.get("snapshot_path") or ""))
+    snapshot = declared_snapshot if declared_snapshot.is_dir() else _snapshot_for_candidate(row)
+    snapshot_fingerprint = _planning_index_snapshot_fingerprint(snapshot)
+    material["snapshot"] = {
+        "snapshot_id": snapshot_fingerprint.get("snapshot_id", ""),
+        "content_sha256": snapshot_fingerprint.get("content_sha256", ""),
+    }
+    direct = Path(str(row.get("directed_reading_path") or ""))
+    material["directed_reading_sha256"] = _planning_index_file_sha(direct)
     return _material_content_signature(_owner_cache_projection(material))
 
 
@@ -7957,25 +8363,94 @@ def make_retrieval_loop_runner(
                     request["known_papers"].append({"paper_id": paper_id})
                     nominated.add(paper_id)
         index_path = Path(local_index_path) if local_index_path else config.output_dir / "planning_material_index.sqlite"
-        # Conservative generation guard for journal replay. The durable judge
-        # cache below fingerprints actual material, so WAL checkpoint/stat-only
-        # changes may re-inspect but cannot repay identical model inputs.
-        local_index_generation = []
-        for path in (index_path, Path(str(index_path) + "-wal")):
-            if path.is_file():
-                stat = path.stat()
-                if path != index_path and stat.st_size == 0:
-                    continue  # read-only SQLite can create an empty WAL
-                local_index_generation.append([str(path.resolve()), stat.st_ino, stat.st_size, stat.st_mtime_ns])
         needs = needs_from_planner_gap_rows(gaps, intended_use="mechanism", user_scope=topic)
-        kind_by_id: dict[str, str] = {}
-        request_by_id: dict[str, Mapping[str, Any]] = {}
         cache_path = config.output_dir / "RETRIEVAL_NEED_CACHE.json"
         saved_cache = _read_json(cache_path) if cache_path.is_file() else {}
         cache_records = dict(saved_cache.get("records") or {}) if saved_cache.get("schema_version") == "optomind.retrieval_need_cache.v1" else {}
         cache_records = {key: row for key, row in cache_records.items() if isinstance(row, Mapping)
                          and isinstance(row.get("state"), Mapping) and isinstance(row.get("contract"), Mapping)
                          and isinstance(row.get("source_fingerprints"), Mapping)}
+        def persisted_supplement_results(state: Mapping[str, Any]) -> list[Mapping[str, Any]]:
+            """Unwrap saved closure/journal envelopes to their real pool rows."""
+
+            found: list[Mapping[str, Any]] = []
+            pending: list[Any] = [state.get("external_results") or [], state.get("supplement_results") or []]
+            for attempt in state.get("attempts") or () if isinstance(state.get("attempts"), list) else ():
+                if isinstance(attempt, Mapping):
+                    pending.append(attempt.get("external_result"))
+                    pending.append(attempt.get("external_results"))
+            seen: set[int] = set()
+            while pending:
+                value = pending.pop()
+                if isinstance(value, list):
+                    pending.extend(value)
+                    continue
+                if not isinstance(value, Mapping):
+                    continue
+                marker = id(value)
+                if marker in seen:
+                    continue
+                seen.add(marker)
+                raw = value.get("raw_result")
+                if isinstance(raw, Mapping):
+                    pending.append(raw)
+                nested = value.get("external_result")
+                if isinstance(nested, Mapping):
+                    pending.append(nested)
+                nested = value.get("external_results")
+                if isinstance(nested, list):
+                    pending.extend(nested)
+                # Keep envelopes that the pool merger understands.  Their
+                # nested ``results`` are traversed by that existing helper.
+                if any(key in value for key in ("derived_pool_path", "candidate_rows", "results")):
+                    found.append(value)
+            return found
+        # A prior phase may have persisted fulfilled supplement material in
+        # the retrieval cache while the caller still passes the original
+        # pool.  Include those durable rows when preparing the managed index;
+        # this keeps its generation stable across phase restarts without
+        # changing the caller's pool object.
+        index_rows = [dict(row) for row in pool_rows if isinstance(row, Mapping)]
+        prior_persisted = persisted_supplement_results(prior_tool_results or {})
+        if prior_persisted:
+            _merge_supplement_pool_updates(index_rows, {"supplement_results": prior_persisted}, preserve_current_material=True)
+        for cached in cache_records.values():
+            state = cached.get("state") if isinstance(cached, Mapping) else {}
+            persisted = persisted_supplement_results(state) if isinstance(state, Mapping) else []
+            if persisted:
+                _merge_supplement_pool_updates(index_rows, {"supplement_results": persisted}, preserve_current_material=True)
+        # Prepare the managed default index before deriving cache/need
+        # identities.  Otherwise the first phase fingerprints an absent
+        # index and the next phase fingerprints the newly-built index, which
+        # forces duplicate retrieval despite unchanged material.
+        if local_index_path is None and (gaps or tasks):
+            index_path = _ensure_default_planning_material_index(config, index_rows, index_path=None)
+        # Conservative generation guard for journal replay. The durable judge
+        # cache below fingerprints actual material, so WAL checkpoint/stat-only
+        # changes may re-inspect but cannot repay identical model inputs.
+        local_index_generation = []
+        if local_index_path is None:
+            # The managed index is atomically rebuilt from a content
+            # signature.  SQLite opens may update mtime/WAL metadata even
+            # when no source changed, so use that stable signature for cache
+            # compatibility instead of filesystem timestamps.
+            managed_meta_path = _default_planning_index_meta_path(index_path)
+            try:
+                managed_meta = _read_json(managed_meta_path) if managed_meta_path.is_file() else {}
+            except ProgressivePlanError:
+                managed_meta = {}
+            source_signature = _text(managed_meta.get("source_signature")) if isinstance(managed_meta, Mapping) else ""
+            if source_signature:
+                local_index_generation.append(["managed_source_signature", source_signature])
+        else:
+            for path in (index_path, Path(str(index_path) + "-wal")):
+                if path.is_file():
+                    stat = path.stat()
+                    if path != index_path and stat.st_size == 0:
+                        continue  # read-only SQLite can create an empty WAL
+                    local_index_generation.append([str(path.resolve()), stat.st_ino, stat.st_size, stat.st_mtime_ns])
+        kind_by_id: dict[str, str] = {}
+        request_by_id: dict[str, Mapping[str, Any]] = {}
         contract_by_id: dict[str, dict[str, Any]] = {}
         inherited_by_id: dict[str, list[Mapping[str, Any]]] = {}
         cached_answer_by_id: dict[str, Mapping[str, Any]] = {}
@@ -7983,8 +8458,16 @@ def make_retrieval_loop_runner(
                            for row in pool_rows if isinstance(row, Mapping)}
 
         def lookup_compatible(cached: Mapping[str, Any], nominations: list[str]) -> bool:
-            return (cached.get("local_index_generation", local_index_generation) == local_index_generation
-                    and cached.get("local_nominations", nominations) == nominations)
+            if cached.get("local_nominations", nominations) != nominations:
+                return False
+            if cached.get("local_index_generation", local_index_generation) == local_index_generation:
+                return True
+            # A managed index may legitimately gain an unrelated pool row.
+            # Source compatibility is checked separately for each cached
+            # answer, so this generation-only change must not force a paid
+            # retrieval for the already-used papers. Explicit user indexes
+            # retain their strict filesystem generation contract.
+            return local_index_path is None and bool(local_index_generation) and bool(cached.get("local_index_generation"))
 
         def source_compatible(cached: Mapping[str, Any]) -> bool:
             # A conservative index-generation change requires a fresh look but
@@ -8112,7 +8595,8 @@ def make_retrieval_loop_runner(
 
         index_path = Path(local_index_path) if local_index_path else config.output_dir / "planning_material_index.sqlite"
         judge = None
-        if key_file and budget_ledger_path and budget_limit_cny is not None:
+        if (key_file and (local_index_path is not None or Path(key_file).is_file()) and budget_ledger_path
+                and budget_limit_cny is not None):
             from .planning_material_triage import QwenLocalTriageJudge
             judge = QwenLocalTriageJudge(
                 key_file=key_file, budget_ledger_path=budget_ledger_path,
@@ -8121,9 +8605,16 @@ def make_retrieval_loop_runner(
                 raw_response_dir=root / "_llm_response_cache",
             )
         working_pool = [dict(row) for row in pool_rows]
+        if prior_persisted:
+            _merge_supplement_pool_updates(working_pool, {"supplement_results": prior_persisted}, preserve_current_material=True)
         for inherited in inherited_by_id.values():
             for cached in inherited:
-                _merge_supplement_pool_updates(working_pool, {"supplement_results": cached.get("state", {}).get("external_results") or []}, preserve_current_material=True)
+                cached_state = cached.get("state") if isinstance(cached, Mapping) else {}
+                _merge_supplement_pool_updates(
+                    working_pool,
+                    {"supplement_results": persisted_supplement_results(cached_state) if isinstance(cached_state, Mapping) else []},
+                    preserve_current_material=True,
+                )
         journal_path = root / "retrieval_loop.jsonl"
         if resume and journal_path.is_file():
             for line in journal_path.read_text(encoding="utf-8").splitlines():
@@ -8136,6 +8627,18 @@ def make_retrieval_loop_runner(
                 for result in recovered:
                     if isinstance(result, Mapping):
                         _merge_supplement_pool_updates(working_pool, {"supplement_results": [result]}, preserve_current_material=True)
+        if local_index_path is None:
+            index_path = _ensure_default_planning_material_index(config, working_pool, index_path=None)
+            # The current phase may add a newly fulfilled supplement after
+            # the preflight index generation used to construct its need id.
+            # Cache the final managed source signature so the next phase can
+            # recognize and reuse that saved response without a new call.
+            try:
+                managed_meta = _read_json(_default_planning_index_meta_path(index_path))
+            except ProgressivePlanError:
+                managed_meta = {}
+            final_signature = _text(managed_meta.get("source_signature")) if isinstance(managed_meta, Mapping) else ""
+            local_index_generation = [["managed_source_signature", final_signature]] if final_signature else []
         local_results: dict[str, Mapping[str, Any]] = {}
         external_results: dict[str, list[Mapping[str, Any]]] = {}
         explicit_retry_consumed: set[str] = set()
@@ -8401,6 +8904,19 @@ def make_retrieval_loop_runner(
             retry_need_ids=[need_id for need_id, request in request_by_id.items()
                             if request.get("retry_empty_result") is True and need_id not in cached_answer_by_id],
         )
+        if local_index_path is None:
+            # External closure can add a real supplement after preflight.
+            # Publish the managed index source signature for that final pool
+            # before writing the retrieval cache, so a later phase recognizes
+            # the same saved material instead of treating the rebuilt index as
+            # a new lookup contract.
+            index_path = _ensure_default_planning_material_index(config, working_pool, index_path=None)
+            try:
+                managed_meta = _read_json(_default_planning_index_meta_path(index_path))
+            except ProgressivePlanError:
+                managed_meta = {}
+            final_signature = _text(managed_meta.get("source_signature")) if isinstance(managed_meta, Mapping) else ""
+            local_index_generation = [["managed_source_signature", final_signature]] if final_signature else []
         materials_by_chapter: dict[str, list[dict[str, Any]]] = {}
         supplement_results: list[dict[str, Any]] = []
         directed_results: list[dict[str, Any]] = []

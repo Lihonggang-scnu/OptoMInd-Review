@@ -555,6 +555,11 @@ def _safe_token(value: Any) -> str:
 
 def _query_audit_provider_state(audit: Mapping[str, Any]) -> tuple[bool, bool]:
     status = audit.get("status")
+    query_succeeded = (
+        isinstance(status, int)
+        and 200 <= status < 300
+        and not str(audit.get("error") or "").strip()
+    )
     issue = False
     retryable = False
     if isinstance(status, int):
@@ -571,8 +576,8 @@ def _query_audit_provider_state(audit: Mapping[str, Any]) -> tuple[bool, bool]:
             continue
         attempt_status = attempt.get("status_code")
         if attempt_status is None or (isinstance(attempt_status, int) and (attempt_status < 200 or attempt_status >= 300)):
-            issue = True
-        retryable = retryable or bool(attempt.get("retryable"))
+            issue = issue or not query_succeeded
+        retryable = retryable or (bool(attempt.get("retryable")) and not query_succeeded)
     return issue, retryable
 
 

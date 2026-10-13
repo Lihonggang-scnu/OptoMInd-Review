@@ -209,6 +209,10 @@ BODY的02阶段记录 `body_selected`，不会再全文编辑一次；03读取�
 
 ## A/B 与材料可见性
 
+规划补材料默认先检索本轮材料：未传 `--local-material-index` 时，正式 runner 从当前 pool、兼容的已保存补充结果和 journal 自动维护输出目录内的 `planning_material_index.sqlite`，不用调用者另外建库。索引精确绑定当前 snapshot/direct-reading，保留完整材料与条件；材料不足才外检索。显式传入的用户索引只读，不自动覆盖。建库工程失败会保存 FAILURE 并停止受影响阶段，不能装成“本地没有材料”。同目录 `--resume` 保留已完成构思和真实补读成果。
+
+检索 fallback 的有效 2xx 返回按成功处理，早先供应方的限流仍保留在 `provider_attempts`；不能因为 S2 429 把随后成功的 OpenAlex 查询变成服务故障重试。正常空选择也不代表领域没有相关研究。实现与本地证据见 [无人值守接缝记录](../verification/ab-unattended-20261013/README.md)。
+
 ### 正式规划入口
 
 - `ProgressivePlannerConfig.planning_revision_enabled` 与 CLI 默认开启。

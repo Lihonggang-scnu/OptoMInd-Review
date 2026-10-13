@@ -52,6 +52,56 @@ def supplement_inputs(root):
     return request_path
 
 
+@pytest.mark.parametrize("returned", [0, 12])
+def test_successful_fallback_keeps_warning_without_provider_retry(returned):
+    audit = {"status": 200, "returned": returned, "provider_attempts": [
+        {"provider": "semantic_scholar", "status_code": 429, "retryable": True},
+        {"provider": "openalex", "status_code": 200, "retryable": False},
+    ]}
+    original = json.dumps(audit, sort_keys=True)
+    assert supplement._query_audit_provider_state(audit) == (False, False)
+    assert json.dumps(audit, sort_keys=True) == original
+
+
+def test_all_provider_failures_remain_retryable():
+    assert supplement._query_audit_provider_state({
+        "status": 429, "provider_attempts": [
+            {"provider": "semantic_scholar", "status_code": 429, "retryable": True},
+            {"provider": "openalex", "status_code": None, "retryable": True},
+        ],
+    }) == (True, True)
+
+
+def test_valid_empty_selection_after_fallback_does_not_claim_provider_outage(tmp_path, monkeypatch):
+    request_path = supplement_inputs(tmp_path / "inputs")
+    request = json.loads(request_path.read_text(encoding="utf-8"))
+    request["known_papers"] = []
+    request["targeted_queries"] = [{"query_text": "synthetic device response", "query_type": "keyword", "facet_id": "F1"}]
+    request_path.write_text(json.dumps(request), encoding="utf-8")
+    audit = {"status": 200, "returned": 1, "provider_attempts": [
+        {"provider": "semantic_scholar", "status_code": 429, "retryable": True},
+        {"provider": "openalex", "status_code": 200, "retryable": False},
+    ]}
+    audit["provider_issue"], audit["retryable"] = supplement._query_audit_provider_state(audit)
+    candidate = supplement._Candidate(source_kind="search_candidate", record={
+        "paper_id": "fixture-paper", "title": "Synthetic device response",
+    }, lineage={}, search_hits=[])
+    monkeypatch.setattr(supplement, "_query_specs_and_hits", lambda *a, **k: ([audit], [candidate], "planner_supplied_targeted_queries"))
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Empty selection must not acquire or read a paper")
+
+    result = supplement.run_planning_supplement(
+        request_path, output_dir=tmp_path / "empty-selection", gateway=None,
+        acquirer_factory=forbidden, card_runner=forbidden, fulfillment_judge=forbidden,
+        candidate_selector=lambda **kwargs: [],
+    )
+    assert result["status"] != "fulfilled"
+    assert result["outcome"] not in {"retryable_provider_outage", "provider_access_error", "acquisition_or_judgment_failed"}
+    saved = json.loads((tmp_path / "empty-selection" / "SUPPLEMENT_INDEX.json").read_text(encoding="utf-8"))
+    assert saved["fulfillment_judgment"]["query_audits"][0]["provider_attempts"][0]["status_code"] == 429
+
+
 class AcquisitionBoundary:
     """Substitute only acquisition; parse and validate its captured XML normally."""
 

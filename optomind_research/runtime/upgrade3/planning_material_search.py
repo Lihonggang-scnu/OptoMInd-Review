@@ -438,6 +438,13 @@ class SearchIndexConfig:
     snapshot_roots: tuple[Path, ...] = ()
     directed_roots: tuple[Path, ...] = ()
     synthetic_card_roots: tuple[Path, ...] = ()
+    # When a caller has already proved the exact material selected for each
+    # pool row, do not fall back to the first directory found under a broad
+    # root.  An empty value is intentional: it means this paper has no
+    # usable material in the current pool and must not inherit an older
+    # snapshot/direct-reading file with the same paper id.
+    snapshot_paths: Mapping[str, str] = field(default_factory=dict)
+    directed_paths: Mapping[str, str] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -448,6 +455,8 @@ class SearchIndexConfig:
             "snapshot_roots": [str(p) for p in self.snapshot_roots],
             "directed_roots": [str(p) for p in self.directed_roots],
             "synthetic_card_roots": [str(p) for p in self.synthetic_card_roots],
+            "snapshot_paths": {str(k): str(v) for k, v in sorted(self.snapshot_paths.items())},
+            "directed_paths": {str(k): str(v) for k, v in sorted(self.directed_paths.items())},
         }
 
 
@@ -1183,8 +1192,18 @@ def build_index(
                 if fallback is not None:
                     card_path = fallback
                     card_payload = _material_identity(card_path)
-            snapshot = _find_snapshot(pid, config.snapshot_roots)
-            directed = _find_directed(pid, config.directed_roots)
+            if pid in config.snapshot_paths:
+                exact_value = str(config.snapshot_paths[pid]).strip()
+                exact_snapshot = Path(exact_value)
+                snapshot = exact_snapshot if exact_value and exact_snapshot.is_dir() else None
+            else:
+                snapshot = _find_snapshot(pid, config.snapshot_roots)
+            if pid in config.directed_paths:
+                exact_value = str(config.directed_paths[pid]).strip()
+                exact_directed = Path(exact_value)
+                directed = exact_directed if exact_value and exact_directed.is_file() else None
+            else:
+                directed = _find_directed(pid, config.directed_roots)
             record = PaperRecord(
                 paper_id=pid,
                 source_handle=handle,
