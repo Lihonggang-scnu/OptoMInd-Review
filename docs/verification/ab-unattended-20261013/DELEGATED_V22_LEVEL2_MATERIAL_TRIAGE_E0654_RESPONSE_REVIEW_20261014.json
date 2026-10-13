@@ -1,0 +1,46 @@
+{
+  "schema_version": "optomind.delegated_response_review.v1",
+  "review_type": "v22_level2_material_triage_response",
+  "reviewer": "delegated_luna",
+  "generated_at": "2026-10-13T21:10:34.396954Z",
+  "gate": "e0654ab6ee04975c50dea5d667bb50d8cd0bc63471c1afd52c6692525c8657e7",
+  "call_id": "planning-material-triage:Nec9f36bccaf87765884a-09d49b3716c8fe8d",
+  "stage": "planning-transport:planning_material_triage",
+  "namespace": "planning_v22_scope_cache",
+  "source_commit": "76f46ee4d4a337b8b3fafd19e6723c4266b82c42",
+  "binding_file": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\RUN_BINDING_PLANNING_V22_SCOPE_CACHE_20261014.json",
+  "binding_sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60",
+  "request_sha256": "6378084ac1a445ab7df022dc7f5b84432e74d76f38aea14cd84d50fff9ecff6a",
+  "response_sha256": "ec5f25f9116346788434487bcb1e01e08d28e2d651a2f372e18f874aca479e6e",
+  "result_sha256": "09c727392722168f1adc594f484940a8c55db1589b07fb3c420f8012f70b3eb3",
+  "request_file_sha256": "6378084ac1a445ab7df022dc7f5b84432e74d76f38aea14cd84d50fff9ecff6a",
+  "runtime": {
+    "model": "qwen3.7-flash",
+    "connection": "direct",
+    "key_index": 1,
+    "max_retries": 0,
+    "project_limit_cny": 80.0,
+    "account_limit_cny": 300.0
+  },
+  "read_scope": {
+    "question": "在可见光波段，孔径大于 1cm 的消色差超透镜的实验实测效率与 NA 的具体对应数据有哪些？",
+    "local_material_count": 5,
+    "source_handles": [
+      "P0004",
+      "P0017",
+      "P0230"
+    ],
+    "complete_response_content_read": true
+  },
+  "quality": {
+    "decision": "external_research",
+    "answers_requested_question": false,
+    "useful_content": true,
+    "core_finding": "Visible-band, aperture >1 cm, achromatic experimental efficiency/NA evidence remains unresolved in supplied material; P0004 is THz and was explicitly separated.",
+    "minor_note": "quantitative_comparisons includes a nonnumeric efficiency item explicitly marked as not reported; no fabricated efficiency value."
+  },
+  "decision": "approve",
+  "response_decision_written": true,
+  "response_decision_sha256": "ec5f25f9116346788434487bcb1e01e08d28e2d651a2f372e18f874aca479e6e",
+  "response_decision_reason": "Delegated review read the complete response content. It correctly distinguishes the requested visible-band >1 cm achromatic metalens evidence from the supplied THz P0004 context and reports external_research with answers_requested_question=false; it preserves the unresolved efficiency/NA evidence gap. The efficiency comparison item is explicitly marked as not numerically reported, so this minor presentation issue does not invalidate the response."
+}

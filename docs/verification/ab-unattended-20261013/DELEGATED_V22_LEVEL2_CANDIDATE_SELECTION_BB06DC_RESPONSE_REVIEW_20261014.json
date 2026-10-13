@@ -1,0 +1,35 @@
+{
+  "schema_version": "optomind.delegated_response_review.v1",
+  "review_type": "v22_level2_candidate_selection_response",
+  "reviewer": "delegated_luna",
+  "generated_at": "2026-10-13T21:19:53.321307Z",
+  "gate": "bb06dc96f58de9da351c730e348ca211c0650309cb2aa9030758e433a78ad6e8",
+  "call_id": "planning-candidate-selection:550cd1e1eede33c8e194cbc251ca620dfd05647a70e4d94a25426d97f35a1326",
+  "stage": "planning-transport:planning_supplement",
+  "namespace": "planning_v22_scope_cache",
+  "source_commit": "76f46ee4d4a337b8b3fafd19e6723c4266b82c42",
+  "binding_sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60",
+  "request_sha256": "112baaedefd648e61dc18f5bff6e1f3061032264a26e008790d0868058040098",
+  "response_sha256": "437822c55acabdd49b47564984772befe1498a1d0e1a78d1f7517f2e482fb957",
+  "result_sha256": "528b8e41aca644604c5fe69b2b786f0c56e0070189beabc298ef20f066f654c6",
+  "runtime": {
+    "model": "qwen3.7-flash",
+    "connection": "direct",
+    "key_index": 1,
+    "max_retries": 0,
+    "project_limit_cny": 80.0,
+    "account_limit_cny": 300.0
+  },
+  "review": {
+    "complete_response_content_read": true,
+    "candidate_count": 2,
+    "selected_indices": [],
+    "all_candidates_irrelevant": true,
+    "gap_preserved": true,
+    "acquisition_avoided": true,
+    "reason": "候选论文均不相关。索引0为纳米制造综述，未提供特定超透镜的效率与NA数据；索引1研究声学时Floquet系统，与可见光光子学无关。"
+  },
+  "decision": "approve",
+  "response_decision_written": true,
+  "response_decision_reason": "Delegated review read the complete selector response. It returns selected_indices=[] and correctly rejects both candidates as off-topic, preserving the unresolved visible-band >1 cm achromatic efficiency/NA gap and preventing an irrelevant material acquisition."
+}

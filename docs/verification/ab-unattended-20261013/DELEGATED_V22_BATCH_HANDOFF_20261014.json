@@ -1,0 +1,2043 @@
+{
+  "schema_version": "optomind.delegated_v22_batch_handoff.v1",
+  "record_type": "metadata_only_public_running_handoff",
+  "generated_at_utc": "2026-10-13T21:12:38.263097+00:00",
+  "scope": {
+    "E": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny",
+    "U": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013",
+    "archive_root": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\docs\\verification\\ab-unattended-20261013",
+    "raw_response_or_unlicensed_fulltext_copied": false,
+    "production_source_or_ledger_modified": false,
+    "paid_retry_started": false
+  },
+  "binding": {
+    "file": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\RUN_BINDING_PLANNING_V22_SCOPE_CACHE_20261014.json",
+      "sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60",
+      "bytes": 10763
+    },
+    "source_commit": "76f46ee4d4a337b8b3fafd19e6723c4266b82c42",
+    "active_source_worktree": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v22",
+    "active_source_head_read_only": "76f46ee4d4a337b8b3fafd19e6723c4266b82c42",
+    "active_source_clean_read_only": true,
+    "legacy_source_root_field_observed": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v19",
+    "binding_source_worktree_head_match": true,
+    "supervision_namespace": "planning_v22_scope_cache",
+    "source_root_consumer_audit": {
+      "active_source_field": "source_worktree",
+      "active_transport_source_pin": "planning_transport.py:67-72,189-190,214,232 uses binding[\"source_worktree\"] for git/source and loaded-module validation",
+      "active_supervised_driver_source_field": "run_planning_supervised.py:253 uses binding[\"source_worktree\"]",
+      "active_downstream_driver_source_field": "downstream_supervision.py:143 imports binding[\"source_worktree\"]",
+      "legacy_source_root_field": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v19",
+      "source_root_read_by_active_v22_planning_transport": false,
+      "source_root_status": "legacy_redundant_binding_metadata_for_this_active_transport",
+      "qualification": "ab_execution.py has a generic source_root fallback when explicitly called, but it is not the active V22 planning transport pin; do not replace source_worktree based on the stale field.",
+      "code_evidence": [
+        {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v22\\docs\\verification\\ab-unattended-20261013\\supervised_runtime\\planning_transport.py",
+          "lines": "67-72,189-190,214,232",
+          "meaning": "source_worktree pin and module path checks"
+        },
+        {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v22\\docs\\verification\\ab-unattended-20261013\\supervised_runtime\\run_planning_supervised.py",
+          "lines": "253",
+          "meaning": "supervised driver imports bound worktree"
+        },
+        {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v22\\docs\\verification\\ab-unattended-20261013\\supervised_runtime\\downstream\\downstream_supervision.py",
+          "lines": "143",
+          "meaning": "downstream driver imports bound worktree"
+        }
+      ]
+    }
+  },
+  "launch_and_argv": {
+    "current_process": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\CURRENT_PROCESS_PLANNING_V22.json",
+      "sha256": "0d1fca322b7f3e6e17941edb9d9d2ce0b3be44d4706e231f94c380a30706b9e1",
+      "bytes": 779
+    },
+    "launch_receipt": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\PLANNING_V22_LAUNCH.json",
+      "sha256": "c04f0d8d1e7049e7cd3f75ef69fef0496fc386945a40472de1404f53bf2882db",
+      "bytes": 4274
+    },
+    "argv_receipt": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\PLANNING_V22_RUN_ARGV.json",
+      "sha256": "5c346854aababef1071f0c6fffaae6ca1f568e85b5db3ac25a344c2987970135",
+      "bytes": 3318
+    },
+    "pid_observed_in_receipt": 25116,
+    "argv_summary": {
+      "mode": "plan --run --resume",
+      "binding_argument": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\RUN_BINDING_PLANNING_V22_SCOPE_CACHE_20261014.json",
+      "failed_exclusions_argument_present": true,
+      "reader_workers": 32,
+      "chapter_workers": 3,
+      "reader_model": "qwen3.7-flash",
+      "reader_thinking_budget": 8192,
+      "reader_output_tokens": 20000,
+      "connection_profile": "direct/index1/max_keys1/retries0",
+      "sensitive_argument_values_omitted": true
+    }
+  },
+  "transport_profile_verified": {
+    "model": "qwen3.7-flash",
+    "thinking_budget": 8192,
+    "answer_output_tokens": 20000,
+    "connection": "direct",
+    "stream": false,
+    "json_mode": true,
+    "key_index": 1,
+    "max_keys": 1,
+    "max_retries": 0,
+    "timeout_seconds": 300.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "temperature": 0.1,
+    "binding_sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60"
+  },
+  "review_coverage": {
+    "calls_total": 10,
+    "root_response_reviews": 2,
+    "delegated_response_reviews": 8,
+    "all_request_decisions_approve": true,
+    "all_response_decisions_approve": true,
+    "all_transport_complete_200_stop": true,
+    "reviewer_classes": {
+      "delegated_luna": 4,
+      "root": 2,
+      "delegated_supplement_fallback_audit": 4
+    },
+    "review_records_are_paths_and_hashes_only": true
+  },
+  "budget_observed_read_only": {
+    "project_ledger": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\budget.sqlite",
+      "sha256": "2f664f02361e25a516f89a5dd036380f87d423a418a3d6f137736f047d6b7ac8",
+      "bytes": 3764224
+    },
+    "account_ledger": {
+      "path": "F:\\OptoMind-Review-2\\local_accounting\\qwen_first_20261010_300cny\\budget.sqlite",
+      "sha256": "9c5a32bbe8908c1da8d6148bac02475e6465f0af4999e0b19ab51642e29aa155",
+      "bytes": 4161536
+    },
+    "project_limit_cny": 80.0,
+    "account_limit_cny": 300.0,
+    "estimated_upper_reservation_cny": 2.8398912,
+    "actual_settled_project_cny": 0.209709,
+    "actual_settled_account_cny": 0.209709,
+    "ledger_actual_totals_equal": true,
+    "settled_call_count": 10,
+    "total_elapsed_seconds": 486.002,
+    "min_elapsed_seconds": 29.344,
+    "max_elapsed_seconds": 70.829,
+    "total_elapsed_semantics": "sum_of_ten_provider_response_elapsed_seconds_not_batch_wall_clock",
+    "physical_transport_wall_clock_seconds_observed": 71.271777
+  },
+  "source_records": {
+    "root_request_acceptance": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\ROOT_V22_DIRECTED_REQUEST_ACCEPTANCE.json",
+      "sha256": "adb47608a651327b54abd354c4d57b8f49afa934f60737ab7fb3e5d6613e7384",
+      "bytes": 8975
+    },
+    "root_response_reviews": [
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\ROOT_V22_DIRECTED_P0001_REVIEW.json",
+        "sha256": "f601f65eaa6168af338026ecc3aa08f608579d343a0a1805f91a65b30d19c01a",
+        "bytes": 1419
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\ROOT_V22_DIRECTED_P0069_REVIEW.json",
+        "sha256": "b0dd59ce859e4dab3a6b96e71f6616ee6629a1ce256d18be05a6d1cb1d13bbbc",
+        "bytes": 1217
+      }
+    ],
+    "delegated_response_reviews": [
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0003_RESPONSE_REVIEW_20261014.json",
+        "sha256": "d2c4e92e40bc8f52b40507e63b389bb30d3103b0ea088b88923adec639382b4a",
+        "bytes": 2457
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0022_RESPONSE_REVIEW_20261014.json",
+        "sha256": "f6af13e792facaf770900e7e37cf35cabe183b649dafec620e95cf3bccae1011",
+        "bytes": 2577
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0081_RESPONSE_REVIEW_20261014.json",
+        "sha256": "7da5eeb597301400a688c134886d4b944780e14638e4195fd259cee6389b95b4",
+        "bytes": 2650
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0090_RESPONSE_REVIEW_20261014.json",
+        "sha256": "84d3b79fa9a53a4124ce652d6a149a41e37e32fc30018b0efac71440e76f0b5b",
+        "bytes": 2355
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0139_RESPONSE_REVIEW_20261014.json",
+        "sha256": "c7a4b056fff7a724237662f9ad265171f4a16572a0d54691c0847f48523034f3",
+        "bytes": 2632
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0148_RESPONSE_REVIEW_20261014.json",
+        "sha256": "e3e6a79514ca4e1a31ca27fe982419dbf785a1a006d0fa4c410728c7ad87a4a5",
+        "bytes": 2626
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0187_RESPONSE_REVIEW_20261014.json",
+        "sha256": "731d1d9225a19ac9969b911b817b9b9f843f276d4f8796c30ff5d5fcdd44e1a2",
+        "bytes": 2764
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0245_RESPONSE_REVIEW_20261014.json",
+        "sha256": "3cebfdf52b6ee24e3d42427e7e6b49fa2a46959b44b7a67d863edb61795c8464",
+        "bytes": 2765
+      }
+    ]
+  },
+  "calls": [
+    {
+      "source_handle": "P0022",
+      "paper_title": "High-performance achromatic flat lens by multiplexing meta-atoms on a stepwise phase dispersion compensation layer",
+      "canonical_paper_id": "1a72dd2ce2d2bc166146ac27110cac04b58eb74d",
+      "gate": "12a40f20e05a6fe724f7fc7e1f48afbe6639134e8adf1dca09ffa553fbc72a21",
+      "call_id": "directed-reading:optics-e2e-20261012:dr-task-823e11c356fe522afb57cd51:attempt-01:f0a7976a80d13eb30ceb3b37f73d1ec0ce8880e6f3c65fc49713987837c214c2",
+      "task_id": "dr-task-823e11c356fe522afb57cd51",
+      "reviewer_class": "delegated",
+      "reviewer": "delegated_luna",
+      "review_record": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0022_RESPONSE_REVIEW_20261014.json",
+        "sha256": "f6af13e792facaf770900e7e37cf35cabe183b649dafec620e95cf3bccae1011",
+        "bytes": 2577
+      },
+      "request": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\12a40f20e05a6fe724f7fc7e1f48afbe6639134e8adf1dca09ffa553fbc72a21\\REQUEST.json",
+        "sha256": "6ce4f6e41c76327f5cc5ce235b03cf9b990d7150be9ff180a8cd3ad7f9adab25",
+        "bytes": 195529
+      },
+      "invocation": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\12a40f20e05a6fe724f7fc7e1f48afbe6639134e8adf1dca09ffa553fbc72a21\\INVOCATION.json",
+        "sha256": "30710b5c84b07eeb48f2bea3228e62375940d4f465e2b29fcc9a3707bbe7892f",
+        "bytes": 121
+      },
+      "response": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\12a40f20e05a6fe724f7fc7e1f48afbe6639134e8adf1dca09ffa553fbc72a21\\RESPONSE.json",
+        "sha256": "1ef8bd3ce6c08d163b6ee158e658b6ef492ed8c0a35919c0cf3ade30da1d78f6",
+        "bytes": 33242
+      },
+      "request_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\12a40f20e05a6fe724f7fc7e1f48afbe6639134e8adf1dca09ffa553fbc72a21\\REQUEST_DECISION.json",
+        "sha256": "79762d2b6ddbf799c463995175e5a614a1314ad1968538a9025f32a4e0244451",
+        "bytes": 682
+      },
+      "response_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\12a40f20e05a6fe724f7fc7e1f48afbe6639134e8adf1dca09ffa553fbc72a21\\RESPONSE_DECISION.json",
+        "sha256": "f08a6237c86503188a93e01ca3d29029d21d0f73270f5dc252d54220181c6c3e",
+        "bytes": 1072
+      },
+      "request_sha256": "f8fe0f53210c19487a467f8e191f96b86f292ff002932f058ef773ebcf0b0464",
+      "response_result_sha256": "bd0a771aca6105d4097d84ceef4fd772c37b099acf1f12af7e3bc6376c1af385",
+      "decision": "approve",
+      "request_decision_value": "approve",
+      "status_code": 200,
+      "complete": true,
+      "finish_reason": "stop",
+      "requested_model": "qwen3.7-flash",
+      "returned_model": "qwen3.7-flash",
+      "elapsed_seconds": 70.829,
+      "estimated_reservation_cny": 0.262086,
+      "project_ledger": {
+        "reservation_id": "res-4353d3d5ac23404a",
+        "reserved_cny": 0.262086,
+        "actual_cny": 0.011293200000000002,
+        "status": "settled"
+      },
+      "account_ledger": {
+        "reservation_id": "res-3168962da9484674",
+        "reserved_cny": 0.262086,
+        "actual_cny": 0.011293200000000002,
+        "status": "settled"
+      },
+      "profile_checked": {
+        "connection": "direct",
+        "key_index": 1,
+        "max_keys": 1,
+        "max_retries": 0,
+        "stream": false,
+        "timeout_seconds": 300.0,
+        "stream_overall_timeout_seconds": 3600.0,
+        "model": "qwen3.7-flash",
+        "thinking_budget": 8192,
+        "max_output_tokens": 20000,
+        "json_mode": true,
+        "temperature": 0.1,
+        "binding_sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60"
+      },
+      "owner_mapping": {
+        "chapter_ids_from_level2_registry": [
+          "CH2",
+          "CH3"
+        ],
+        "expected_native_chapter_owners_from_root_acceptance": [
+          "CH2",
+          "CH3"
+        ],
+        "match": true,
+        "section_from_level2_registry": "SPDC layer design and efficiency analysis",
+        "request_origin": "level2",
+        "explicit_owner_field_in_reader_payload": false
+      },
+      "task_registry": {
+        "paper_status": "approved_core",
+        "task_status": "pending",
+        "task_hash": "823e11c356fe522afb57cd510dd4ec1c5bf80ed7512ebef9bb48c02268cd93e1",
+        "source_hash": "93bb635592fc752b4dab2dae75573f1023a34e2e353e7d50505f207ff610824e",
+        "reading_row_present": false,
+        "reading_status": null,
+        "reading_source_hash": null,
+        "reading_output_dir": null
+      },
+      "level2_output": {
+        "output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\1a72dd2ce2d2bc166146ac27110cac04b58eb74d\\dr-task-823e11c356fe522afb57cd51",
+        "input_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\1a72dd2ce2d2bc166146ac27110cac04b58eb74d\\dr-task-823e11c356fe522afb57cd51\\INPUT.json",
+          "sha256": "1e0c9e15589d159e714ab6fbf57084b9ac35a192e3c846bd7fb2f0dd9971d343",
+          "bytes": 1934
+        },
+        "directed_reading_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\1a72dd2ce2d2bc166146ac27110cac04b58eb74d\\dr-task-823e11c356fe522afb57cd51\\DIRECTED_READING.json",
+          "sha256": "307ca5d8c0dbe15046eefbcb08cfda272c775e3c969183e92c2c66b031e87a3a",
+          "bytes": 20259
+        },
+        "commit_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\1a72dd2ce2d2bc166146ac27110cac04b58eb74d\\dr-task-823e11c356fe522afb57cd51\\COMMIT.json",
+          "sha256": "1bec1b2de2427718d9ede01939ed9384ec38abe6d8263c47a74aa9c27f0bb23e",
+          "bytes": 415
+        },
+        "output_task_id": "dr-task-823e11c356fe522afb57cd51",
+        "output_task_hash": "823e11c356fe522afb57cd510dd4ec1c5bf80ed7512ebef9bb48c02268cd93e1",
+        "output_source_hash": "1a4d4172f7fd94417ee0cf68d2c1dd9574ae1281758acd59ebff666049784c92",
+        "task_hash_matches_registry": true,
+        "source_hash_matches_registry": false,
+        "status": "partial",
+        "material_ready": true,
+        "fulfilled": false,
+        "commit_status": "partial",
+        "commit_ready": true
+      },
+      "material_delivery_fields_verified": {
+        "transport_request": [
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.paper_title",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.questions[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.required_outputs[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.structured_source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.optional_bibliography"
+        ],
+        "level2_input": [
+          "level2/.../<paper_id>/<task_id>/INPUT.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:task",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:source_hash"
+        ],
+        "level2_result": [
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:question_material",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:material_ready"
+        ],
+        "next_stage_consumption_verified": false
+      },
+      "filesystem_mtime_observed_utc": {
+        "invocation": "2026-10-13T20:57:26.351727Z",
+        "response": "2026-10-13T20:58:37.589039Z",
+        "response_decision": "2026-10-13T21:00:12.989124Z",
+        "timestamp_kind": "filesystem_mtime_observation_not_provider_timestamp"
+      }
+    },
+    {
+      "source_handle": "P0003",
+      "paper_title": "Focusing on Bandwidth: Achromatic Metalens Limits",
+      "canonical_paper_id": "04c2edca37332de9e3e4878638eb69de352fb281",
+      "gate": "27425173b6381e92b1445048663f9f4ac74eb37f179c2d1f8501e6da17d82bd5",
+      "call_id": "directed-reading:optics-e2e-20261012:dr-task-c4e997efbffb9bba0ae1703b:attempt-01:8807985d1c0b52bddd0a30b851b7638345401a338462b50b7547d009a35afa21",
+      "task_id": "dr-task-c4e997efbffb9bba0ae1703b",
+      "reviewer_class": "delegated",
+      "reviewer": "delegated_luna",
+      "review_record": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0003_RESPONSE_REVIEW_20261014.json",
+        "sha256": "d2c4e92e40bc8f52b40507e63b389bb30d3103b0ea088b88923adec639382b4a",
+        "bytes": 2457
+      },
+      "request": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\27425173b6381e92b1445048663f9f4ac74eb37f179c2d1f8501e6da17d82bd5\\REQUEST.json",
+        "sha256": "3fcbf35d0ae20f85a7bb806416a863b7f91befe70eef3f2b75871425dd888066",
+        "bytes": 252527
+      },
+      "invocation": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\27425173b6381e92b1445048663f9f4ac74eb37f179c2d1f8501e6da17d82bd5\\INVOCATION.json",
+        "sha256": "ece019fe9d55a2828c3fdf786565b85398d7d258718ffdc64b96d963101e4081",
+        "bytes": 121
+      },
+      "response": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\27425173b6381e92b1445048663f9f4ac74eb37f179c2d1f8501e6da17d82bd5\\RESPONSE.json",
+        "sha256": "2b50e3109b21d1aea6ef7456277f4b2398539eda6d5bb4f98403f29038d00ac9",
+        "bytes": 29686
+      },
+      "request_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\27425173b6381e92b1445048663f9f4ac74eb37f179c2d1f8501e6da17d82bd5\\REQUEST_DECISION.json",
+        "sha256": "e8c0b45a352efc77ca001cf287e1f815b611b83b4ca3b351d4bbd9a9b35bec7c",
+        "bytes": 682
+      },
+      "response_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\27425173b6381e92b1445048663f9f4ac74eb37f179c2d1f8501e6da17d82bd5\\RESPONSE_DECISION.json",
+        "sha256": "99ac14fb4d5c882a74274991fd913d492eb97dbff86c5d11c0e59130df749927",
+        "bytes": 1007
+      },
+      "request_sha256": "a7d0713bbe95c81fbf0cbf03769e42f8d2bbf8faaa832a8b9ab2cd2eedb3bf6d",
+      "response_result_sha256": "e844284d7ebcb58085e2c8a43b205ca8a5f5d7720a646e0a117c1f2f6bdad761",
+      "decision": "approve",
+      "request_decision_value": "approve",
+      "status_code": 200,
+      "complete": true,
+      "finish_reason": "stop",
+      "requested_model": "qwen3.7-flash",
+      "returned_model": "qwen3.7-flash",
+      "elapsed_seconds": 41.562,
+      "estimated_reservation_cny": 0.2962836,
+      "project_ledger": {
+        "reservation_id": "res-aa4df786f19d4af5",
+        "reserved_cny": 0.2962836,
+        "actual_cny": 0.0336006,
+        "status": "settled"
+      },
+      "account_ledger": {
+        "reservation_id": "res-d9cb217493f44fd8",
+        "reserved_cny": 0.2962836,
+        "actual_cny": 0.0336006,
+        "status": "settled"
+      },
+      "profile_checked": {
+        "connection": "direct",
+        "key_index": 1,
+        "max_keys": 1,
+        "max_retries": 0,
+        "stream": false,
+        "timeout_seconds": 300.0,
+        "stream_overall_timeout_seconds": 3600.0,
+        "model": "qwen3.7-flash",
+        "thinking_budget": 8192,
+        "max_output_tokens": 20000,
+        "json_mode": true,
+        "temperature": 0.1,
+        "binding_sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60"
+      },
+      "owner_mapping": {
+        "chapter_ids_from_level2_registry": [
+          "CH1"
+        ],
+        "expected_native_chapter_owners_from_root_acceptance": [
+          "CH1"
+        ],
+        "match": true,
+        "section_from_level2_registry": "Theory and Fundamental Limit sections",
+        "request_origin": "level2",
+        "explicit_owner_field_in_reader_payload": false
+      },
+      "task_registry": {
+        "paper_status": "approved_core",
+        "task_status": "committed",
+        "task_hash": "c4e997efbffb9bba0ae1703b5bd83f0f35de18e13380a10bd8b58be113e27b0e",
+        "source_hash": "751bccadb2011bec02b660794d2b976196156394f0c59e29b5f870864dbbda89",
+        "reading_row_present": true,
+        "reading_status": "committed",
+        "reading_source_hash": "751bccadb2011bec02b660794d2b976196156394f0c59e29b5f870864dbbda89",
+        "reading_output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\04c2edca37332de9e3e4878638eb69de352fb281\\dr-task-c4e997efbffb9bba0ae1703b"
+      },
+      "level2_output": {
+        "output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\04c2edca37332de9e3e4878638eb69de352fb281\\dr-task-c4e997efbffb9bba0ae1703b",
+        "input_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\04c2edca37332de9e3e4878638eb69de352fb281\\dr-task-c4e997efbffb9bba0ae1703b\\INPUT.json",
+          "sha256": "8c2c2026539a54eb271bf47979fbaa178bb52a8c5c519eb2aa812933b2a17b0e",
+          "bytes": 1597
+        },
+        "directed_reading_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\04c2edca37332de9e3e4878638eb69de352fb281\\dr-task-c4e997efbffb9bba0ae1703b\\DIRECTED_READING.json",
+          "sha256": "97d000337b1b060fcf9693291ddb98f227b1344ba12e0e702ae10999cb335df7",
+          "bytes": 7751
+        },
+        "commit_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\04c2edca37332de9e3e4878638eb69de352fb281\\dr-task-c4e997efbffb9bba0ae1703b\\COMMIT.json",
+          "sha256": "3ff10c61916bdf2096617cedcfd7a85c2395a772022b4fa3af8f7db454741f99",
+          "bytes": 422
+        },
+        "output_task_id": "dr-task-c4e997efbffb9bba0ae1703b",
+        "output_task_hash": "c4e997efbffb9bba0ae1703b5bd83f0f35de18e13380a10bd8b58be113e27b0e",
+        "output_source_hash": "5c64214b2d0ffab436878db252586b963d3bf8a2e21dd5d66bcaa21b2fd0b752",
+        "task_hash_matches_registry": true,
+        "source_hash_matches_registry": false,
+        "status": "material_ready",
+        "material_ready": true,
+        "fulfilled": true,
+        "commit_status": "material_ready",
+        "commit_ready": true
+      },
+      "material_delivery_fields_verified": {
+        "transport_request": [
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.paper_title",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.questions[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.required_outputs[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.structured_source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.optional_bibliography"
+        ],
+        "level2_input": [
+          "level2/.../<paper_id>/<task_id>/INPUT.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:task",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:source_hash"
+        ],
+        "level2_result": [
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:question_material",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:material_ready"
+        ],
+        "next_stage_consumption_verified": false
+      },
+      "filesystem_mtime_observed_utc": {
+        "invocation": "2026-10-13T20:57:26.325766Z",
+        "response": "2026-10-13T20:58:08.287663Z",
+        "response_decision": "2026-10-13T20:59:18.744571Z",
+        "timestamp_kind": "filesystem_mtime_observation_not_provider_timestamp"
+      }
+    },
+    {
+      "source_handle": "P0139",
+      "paper_title": "Design of high efficiency achromatic metalens with large operation bandwidth using bilayer architecture",
+      "canonical_paper_id": "978de65626fd08fbe82ee0ab12b04486c03ce6c2",
+      "gate": "2e8eec4fa64c35ccf74761a54802fa46a5784a184ba1c63b89ace32dc2081bfe",
+      "call_id": "directed-reading:optics-e2e-20261012:dr-task-181bd0d48b88416f9b54a5cf:attempt-01:fd9b5c780f459fad58101694bca0184999898f02125faddfd0f5453cdd3af6d0",
+      "task_id": "dr-task-181bd0d48b88416f9b54a5cf",
+      "reviewer_class": "delegated",
+      "reviewer": "delegated_luna",
+      "review_record": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0139_RESPONSE_REVIEW_20261014.json",
+        "sha256": "c7a4b056fff7a724237662f9ad265171f4a16572a0d54691c0847f48523034f3",
+        "bytes": 2632
+      },
+      "request": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\2e8eec4fa64c35ccf74761a54802fa46a5784a184ba1c63b89ace32dc2081bfe\\REQUEST.json",
+        "sha256": "75e69098424b997ba3c8818e3f1d9cec7d91ac867c535c7cd03e6631624cb3a3",
+        "bytes": 119781
+      },
+      "invocation": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\2e8eec4fa64c35ccf74761a54802fa46a5784a184ba1c63b89ace32dc2081bfe\\INVOCATION.json",
+        "sha256": "ae117dc70ed91c578d96b86a1970cea67c63fd8a819d710865bb7cd8db8b24bb",
+        "bytes": 121
+      },
+      "response": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\2e8eec4fa64c35ccf74761a54802fa46a5784a184ba1c63b89ace32dc2081bfe\\RESPONSE.json",
+        "sha256": "96c7eab564bf48ff705dd2d1fb589b537cc9a23211c60ebd0f56d0065476fdde",
+        "bytes": 26390
+      },
+      "request_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\2e8eec4fa64c35ccf74761a54802fa46a5784a184ba1c63b89ace32dc2081bfe\\REQUEST_DECISION.json",
+        "sha256": "59789d78d4def2f7d42fab94430aee07302ffd4800522591e312b6cf23f9db10",
+        "bytes": 682
+      },
+      "response_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\2e8eec4fa64c35ccf74761a54802fa46a5784a184ba1c63b89ace32dc2081bfe\\RESPONSE_DECISION.json",
+        "sha256": "82e743e51e71862513542583a7ed90501d8de173b2e303f359180f88dc71296b",
+        "bytes": 1129
+      },
+      "request_sha256": "d442224376374b50ac192de8bbea75d02550fc9ec4ff9e3661c7a07334f66d61",
+      "response_result_sha256": "931efde259c707e45a1cf31f1f80e6f5c4e3ee106a722c036233bfc1ea655b48",
+      "decision": "approve",
+      "request_decision_value": "approve",
+      "status_code": 200,
+      "complete": true,
+      "finish_reason": "stop",
+      "requested_model": "qwen3.7-flash",
+      "returned_model": "qwen3.7-flash",
+      "elapsed_seconds": 48.359,
+      "estimated_reservation_cny": 0.21663120000000002,
+      "project_ledger": {
+        "reservation_id": "res-0385a0a2de2b46c6",
+        "reserved_cny": 0.21663120000000002,
+        "actual_cny": 0.0075318,
+        "status": "settled"
+      },
+      "account_ledger": {
+        "reservation_id": "res-2e0f6707f0f84160",
+        "reserved_cny": 0.21663120000000002,
+        "actual_cny": 0.0075318,
+        "status": "settled"
+      },
+      "profile_checked": {
+        "connection": "direct",
+        "key_index": 1,
+        "max_keys": 1,
+        "max_retries": 0,
+        "stream": false,
+        "timeout_seconds": 300.0,
+        "stream_overall_timeout_seconds": 3600.0,
+        "model": "qwen3.7-flash",
+        "thinking_budget": 8192,
+        "max_output_tokens": 20000,
+        "json_mode": true,
+        "temperature": 0.1,
+        "binding_sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60"
+      },
+      "owner_mapping": {
+        "chapter_ids_from_level2_registry": [
+          "CH2",
+          "CH3"
+        ],
+        "expected_native_chapter_owners_from_root_acceptance": [
+          "CH2",
+          "CH3"
+        ],
+        "match": true,
+        "section_from_level2_registry": "Alignment tolerance simulation",
+        "request_origin": "level2",
+        "explicit_owner_field_in_reader_payload": false
+      },
+      "task_registry": {
+        "paper_status": "approved_core",
+        "task_status": "committed",
+        "task_hash": "181bd0d48b88416f9b54a5cf44ee8d0960845b833ab7c2b8d44921d4f48e898a",
+        "source_hash": "cc06b3ee97627cf998daeddbb4fd6a7d1bfa8f1492934cb3c0e0de773d430fc3",
+        "reading_row_present": true,
+        "reading_status": "committed",
+        "reading_source_hash": "cc06b3ee97627cf998daeddbb4fd6a7d1bfa8f1492934cb3c0e0de773d430fc3",
+        "reading_output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\978de65626fd08fbe82ee0ab12b04486c03ce6c2\\dr-task-181bd0d48b88416f9b54a5cf"
+      },
+      "level2_output": {
+        "output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\978de65626fd08fbe82ee0ab12b04486c03ce6c2\\dr-task-181bd0d48b88416f9b54a5cf",
+        "input_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\978de65626fd08fbe82ee0ab12b04486c03ce6c2\\dr-task-181bd0d48b88416f9b54a5cf\\INPUT.json",
+          "sha256": "833293103c21d0e921031a607a209a36ca29d97aadbeeeb0a574861b767567e0",
+          "bytes": 1899
+        },
+        "directed_reading_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\978de65626fd08fbe82ee0ab12b04486c03ce6c2\\dr-task-181bd0d48b88416f9b54a5cf\\DIRECTED_READING.json",
+          "sha256": "7fd8911ebd69f4108d03e05041a97ff9ce8cc1c9d31f37bd51044379e54d0d0b",
+          "bytes": 25396
+        },
+        "commit_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\978de65626fd08fbe82ee0ab12b04486c03ce6c2\\dr-task-181bd0d48b88416f9b54a5cf\\COMMIT.json",
+          "sha256": "3028dc636df8b48d15406aee08a40fa6f12151c15e932a58621ac4a435a9c667",
+          "bytes": 422
+        },
+        "output_task_id": "dr-task-181bd0d48b88416f9b54a5cf",
+        "output_task_hash": "181bd0d48b88416f9b54a5cf44ee8d0960845b833ab7c2b8d44921d4f48e898a",
+        "output_source_hash": "942339e189c9a27d6e28c308164cf4958b81b24b0c50d4e5ecbbaae2650046c1",
+        "task_hash_matches_registry": true,
+        "source_hash_matches_registry": false,
+        "status": "material_ready",
+        "material_ready": true,
+        "fulfilled": true,
+        "commit_status": "material_ready",
+        "commit_ready": true
+      },
+      "material_delivery_fields_verified": {
+        "transport_request": [
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.paper_title",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.questions[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.required_outputs[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.structured_source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.optional_bibliography"
+        ],
+        "level2_input": [
+          "level2/.../<paper_id>/<task_id>/INPUT.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:task",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:source_hash"
+        ],
+        "level2_result": [
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:question_material",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:material_ready"
+        ],
+        "next_stage_consumption_verified": false
+      },
+      "filesystem_mtime_observed_utc": {
+        "invocation": "2026-10-13T20:57:26.351727Z",
+        "response": "2026-10-13T20:58:15.263412Z",
+        "response_decision": "2026-10-13T20:59:18.752570Z",
+        "timestamp_kind": "filesystem_mtime_observation_not_provider_timestamp"
+      }
+    },
+    {
+      "source_handle": "P0090",
+      "paper_title": "Broadband achromatic dielectric metalenses",
+      "canonical_paper_id": "6351599e90d5a1b21c5cf61360bfaf116f8963b9",
+      "gate": "3507505e95e47eed0670444424b7f36df6b5639fb512cc8a63ef7bbe0c9d16e2",
+      "call_id": "directed-reading:optics-e2e-20261012:dr-task-63f264bedd8bd89bda452d61:attempt-01:60d8b631641c3cd44f660807f6e9ce2e61c1fcd54497091b00cbd1bcadedd320",
+      "task_id": "dr-task-63f264bedd8bd89bda452d61",
+      "reviewer_class": "delegated",
+      "reviewer": "delegated_luna",
+      "review_record": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0090_RESPONSE_REVIEW_20261014.json",
+        "sha256": "84d3b79fa9a53a4124ce652d6a149a41e37e32fc30018b0efac71440e76f0b5b",
+        "bytes": 2355
+      },
+      "request": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\3507505e95e47eed0670444424b7f36df6b5639fb512cc8a63ef7bbe0c9d16e2\\REQUEST.json",
+        "sha256": "511af73736968b8bf1915b18b898cd9f6a5822436ee05704732ebdc62fdedefe",
+        "bytes": 198168
+      },
+      "invocation": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\3507505e95e47eed0670444424b7f36df6b5639fb512cc8a63ef7bbe0c9d16e2\\INVOCATION.json",
+        "sha256": "d4345bd74e1d74456a5f2b6dfde029ce72d09f0fc3306eed7a89d80e152cfe2b",
+        "bytes": 121
+      },
+      "response": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\3507505e95e47eed0670444424b7f36df6b5639fb512cc8a63ef7bbe0c9d16e2\\RESPONSE.json",
+        "sha256": "c22d286787c2286b6a24fbbc8e7d8256ef4f9191ae79d2061bb540f64b5cbc65",
+        "bytes": 29688
+      },
+      "request_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\3507505e95e47eed0670444424b7f36df6b5639fb512cc8a63ef7bbe0c9d16e2\\REQUEST_DECISION.json",
+        "sha256": "3fe034ca225b19e512643c5f3ffd767d1e21647b3d4bf2a66bd0679c730e5147",
+        "bytes": 682
+      },
+      "response_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\3507505e95e47eed0670444424b7f36df6b5639fb512cc8a63ef7bbe0c9d16e2\\RESPONSE_DECISION.json",
+        "sha256": "74bde3446828e7032d219cdf18bd40fdb80af7e2631133e853651464ebe6fb78",
+        "bytes": 921
+      },
+      "request_sha256": "939f1668bcc1fdbe9aa81f30734f1bae36474db02a29ecc99bc5c8f40521f497",
+      "response_result_sha256": "a782e7435c0c1fcd1b6e10821d7c483ff11c8844ecd79771d835b5fe58481c98",
+      "decision": "approve",
+      "request_decision_value": "approve",
+      "status_code": 200,
+      "complete": true,
+      "finish_reason": "stop",
+      "requested_model": "qwen3.7-flash",
+      "returned_model": "qwen3.7-flash",
+      "elapsed_seconds": 59.344,
+      "estimated_reservation_cny": 0.2636688,
+      "project_ledger": {
+        "reservation_id": "res-f79328f2108345c4",
+        "reserved_cny": 0.2636688,
+        "actual_cny": 0.010403200000000001,
+        "status": "settled"
+      },
+      "account_ledger": {
+        "reservation_id": "res-db1f44c72b2143a2",
+        "reserved_cny": 0.2636688,
+        "actual_cny": 0.010403200000000001,
+        "status": "settled"
+      },
+      "profile_checked": {
+        "connection": "direct",
+        "key_index": 1,
+        "max_keys": 1,
+        "max_retries": 0,
+        "stream": false,
+        "timeout_seconds": 300.0,
+        "stream_overall_timeout_seconds": 3600.0,
+        "model": "qwen3.7-flash",
+        "thinking_budget": 8192,
+        "max_output_tokens": 20000,
+        "json_mode": true,
+        "temperature": 0.1,
+        "binding_sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60"
+      },
+      "owner_mapping": {
+        "chapter_ids_from_level2_registry": [
+          "CH1",
+          "CH2",
+          "CH3"
+        ],
+        "expected_native_chapter_owners_from_root_acceptance": [
+          "CH1",
+          "CH2",
+          "CH3"
+        ],
+        "match": true,
+        "section_from_level2_registry": "Results and Discussion (Fig. 4)",
+        "request_origin": "level2",
+        "explicit_owner_field_in_reader_payload": false
+      },
+      "task_registry": {
+        "paper_status": "approved_core",
+        "task_status": "committed",
+        "task_hash": "63f264bedd8bd89bda452d614c7f00fabed5986dd28f8a35d9ce17d112b21fe4",
+        "source_hash": "e4c42e1f12ed8995e518295d2b5f86890b786a65395127888b27405825cda690",
+        "reading_row_present": true,
+        "reading_status": "committed",
+        "reading_source_hash": "e4c42e1f12ed8995e518295d2b5f86890b786a65395127888b27405825cda690",
+        "reading_output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\6351599e90d5a1b21c5cf61360bfaf116f8963b9\\dr-task-63f264bedd8bd89bda452d61"
+      },
+      "level2_output": {
+        "output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\6351599e90d5a1b21c5cf61360bfaf116f8963b9\\dr-task-63f264bedd8bd89bda452d61",
+        "input_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\6351599e90d5a1b21c5cf61360bfaf116f8963b9\\dr-task-63f264bedd8bd89bda452d61\\INPUT.json",
+          "sha256": "d3b7730ec0f082f9614226da0a39d11c09129ad9dce3caa8a3040d9cbc276952",
+          "bytes": 1575
+        },
+        "directed_reading_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\6351599e90d5a1b21c5cf61360bfaf116f8963b9\\dr-task-63f264bedd8bd89bda452d61\\DIRECTED_READING.json",
+          "sha256": "2df4a212dbd2e4fae5faa54a0e72d3aad425a63f3ceeb118e229fdb751bf2a66",
+          "bytes": 24116
+        },
+        "commit_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\6351599e90d5a1b21c5cf61360bfaf116f8963b9\\dr-task-63f264bedd8bd89bda452d61\\COMMIT.json",
+          "sha256": "33b88ab56d3b8fd472d2ab3f3f67f54faaaaf890b094271983c90b1e855c9b7a",
+          "bytes": 422
+        },
+        "output_task_id": "dr-task-63f264bedd8bd89bda452d61",
+        "output_task_hash": "63f264bedd8bd89bda452d614c7f00fabed5986dd28f8a35d9ce17d112b21fe4",
+        "output_source_hash": "7a956fb58f5e88ccfbb0e7ca646db5e408b93c70029597bd92d8c7f6bf9be5ea",
+        "task_hash_matches_registry": true,
+        "source_hash_matches_registry": false,
+        "status": "material_ready",
+        "material_ready": true,
+        "fulfilled": true,
+        "commit_status": "material_ready",
+        "commit_ready": true
+      },
+      "material_delivery_fields_verified": {
+        "transport_request": [
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.paper_title",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.questions[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.required_outputs[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.structured_source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.optional_bibliography"
+        ],
+        "level2_input": [
+          "level2/.../<paper_id>/<task_id>/INPUT.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:task",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:source_hash"
+        ],
+        "level2_result": [
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:question_material",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:material_ready"
+        ],
+        "next_stage_consumption_verified": false
+      },
+      "filesystem_mtime_observed_utc": {
+        "invocation": "2026-10-13T20:57:26.358683Z",
+        "response": "2026-10-13T20:58:26.142314Z",
+        "response_decision": "2026-10-13T21:00:13.004960Z",
+        "timestamp_kind": "filesystem_mtime_observation_not_provider_timestamp"
+      }
+    },
+    {
+      "source_handle": "P0001",
+      "paper_title": "Generalized metric for broadband flat lens performance comparison",
+      "canonical_paper_id": "00296128540e82bd7ae6964f0febba322d4cfd78",
+      "gate": "374488c564636e72ec352b239ac4ef6cab385cdc454daae8f257052db76776f3",
+      "call_id": "directed-reading:optics-e2e-20261012:dr-task-c4becd74054123c34df954a5:attempt-01:966436ee81266f21e1c5657ed184a4b51ce65b7c3b660a23174c1dfdccca1a83",
+      "task_id": "dr-task-c4becd74054123c34df954a5",
+      "reviewer_class": "root",
+      "reviewer": "root",
+      "review_record": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\ROOT_V22_DIRECTED_P0001_REVIEW.json",
+        "sha256": "f601f65eaa6168af338026ecc3aa08f608579d343a0a1805f91a65b30d19c01a",
+        "bytes": 1419
+      },
+      "request": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\374488c564636e72ec352b239ac4ef6cab385cdc454daae8f257052db76776f3\\REQUEST.json",
+        "sha256": "9994eeeed2aafcb7377fb9aecd87a5d5615eb3d2bac56a5fbdcb169f6a972232",
+        "bytes": 428123
+      },
+      "invocation": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\374488c564636e72ec352b239ac4ef6cab385cdc454daae8f257052db76776f3\\INVOCATION.json",
+        "sha256": "9709dcb67711d5988e13fcf06d6dd77255d5694a614a008eb5105538395fa911",
+        "bytes": 121
+      },
+      "response": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\374488c564636e72ec352b239ac4ef6cab385cdc454daae8f257052db76776f3\\RESPONSE.json",
+        "sha256": "9729f9c07e0e583709a61305fb8cbb345668c5993da06412dac5067dc6c376a0",
+        "bytes": 14993
+      },
+      "request_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\374488c564636e72ec352b239ac4ef6cab385cdc454daae8f257052db76776f3\\REQUEST_DECISION.json",
+        "sha256": "e73da8c9ee1802ff3da28fb2a2a33c8beb3a17d0061051cbae52b58029736dbf",
+        "bytes": 682
+      },
+      "response_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\374488c564636e72ec352b239ac4ef6cab385cdc454daae8f257052db76776f3\\RESPONSE_DECISION.json",
+        "sha256": "3d0f0cdfba1e966bbe873155ca6ed1f56e24905c10724c737c6a637386e63176",
+        "bytes": 689
+      },
+      "request_sha256": "d7ac258a494c46fe126a38c35f714e605d027fceaa04d72ae7c4e8102b91d6fe",
+      "response_result_sha256": "fa3f51268e22f66b18813ba9054871b108dc6d7521f9aeaac884f077befec160",
+      "decision": "approve",
+      "request_decision_value": "approve",
+      "status_code": 200,
+      "complete": true,
+      "finish_reason": "stop",
+      "requested_model": "qwen3.7-flash",
+      "returned_model": "qwen3.7-flash",
+      "elapsed_seconds": 29.344,
+      "estimated_reservation_cny": 0.40163519999999997,
+      "project_ledger": {
+        "reservation_id": "res-a82043fd22964b4b",
+        "reserved_cny": 0.40163519999999997,
+        "actual_cny": 0.0497646,
+        "status": "settled"
+      },
+      "account_ledger": {
+        "reservation_id": "res-b635b4a40fc04d67",
+        "reserved_cny": 0.40163519999999997,
+        "actual_cny": 0.0497646,
+        "status": "settled"
+      },
+      "profile_checked": {
+        "connection": "direct",
+        "key_index": 1,
+        "max_keys": 1,
+        "max_retries": 0,
+        "stream": false,
+        "timeout_seconds": 300.0,
+        "stream_overall_timeout_seconds": 3600.0,
+        "model": "qwen3.7-flash",
+        "thinking_budget": 8192,
+        "max_output_tokens": 20000,
+        "json_mode": true,
+        "temperature": 0.1,
+        "binding_sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60"
+      },
+      "owner_mapping": {
+        "chapter_ids_from_level2_registry": [
+          "CH3",
+          "CH5"
+        ],
+        "expected_native_chapter_owners_from_root_acceptance": [
+          "CH3",
+          "CH5"
+        ],
+        "match": true,
+        "section_from_level2_registry": "OPM metric definition and comparison tables",
+        "request_origin": "level2",
+        "explicit_owner_field_in_reader_payload": false
+      },
+      "task_registry": {
+        "paper_status": "approved_core",
+        "task_status": "committed",
+        "task_hash": "c4becd74054123c34df954a597ff3759c6d852d445dea372ce259d500fe53fab",
+        "source_hash": "6d9666f2b18a5189ecacb933f6a1308867c72b8b44ccc65b2914188e1242f5c9",
+        "reading_row_present": true,
+        "reading_status": "committed",
+        "reading_source_hash": "6d9666f2b18a5189ecacb933f6a1308867c72b8b44ccc65b2914188e1242f5c9",
+        "reading_output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\00296128540e82bd7ae6964f0febba322d4cfd78\\dr-task-c4becd74054123c34df954a5"
+      },
+      "level2_output": {
+        "output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\00296128540e82bd7ae6964f0febba322d4cfd78\\dr-task-c4becd74054123c34df954a5",
+        "input_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\00296128540e82bd7ae6964f0febba322d4cfd78\\dr-task-c4becd74054123c34df954a5\\INPUT.json",
+          "sha256": "9098b8395aab6d1a9401148da880241a17887aff3c8819c8e1cebcc553dd320a",
+          "bytes": 1803
+        },
+        "directed_reading_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\00296128540e82bd7ae6964f0febba322d4cfd78\\dr-task-c4becd74054123c34df954a5\\DIRECTED_READING.json",
+          "sha256": "ec9fd31b5d6ead943b3a457258b49fc1751c8f6569e37c93dbf7af74d36b0ebf",
+          "bytes": 22119
+        },
+        "commit_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\00296128540e82bd7ae6964f0febba322d4cfd78\\dr-task-c4becd74054123c34df954a5\\COMMIT.json",
+          "sha256": "a2273005fdfb1bfe93aa79a5b9feb20f0e359ed46526c544d78cff1e5edf8558",
+          "bytes": 422
+        },
+        "output_task_id": "dr-task-c4becd74054123c34df954a5",
+        "output_task_hash": "c4becd74054123c34df954a597ff3759c6d852d445dea372ce259d500fe53fab",
+        "output_source_hash": "878bdbda5d0ecd71d5f2a1f7d1cf757d91dd9700d60f05fa8a094ccbaab68184",
+        "task_hash_matches_registry": true,
+        "source_hash_matches_registry": false,
+        "status": "material_ready",
+        "material_ready": true,
+        "fulfilled": true,
+        "commit_status": "material_ready",
+        "commit_ready": true
+      },
+      "material_delivery_fields_verified": {
+        "transport_request": [
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.paper_title",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.questions[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.required_outputs[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.structured_source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.optional_bibliography"
+        ],
+        "level2_input": [
+          "level2/.../<paper_id>/<task_id>/INPUT.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:task",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:source_hash"
+        ],
+        "level2_result": [
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:question_material",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:material_ready"
+        ],
+        "next_stage_consumption_verified": false
+      },
+      "filesystem_mtime_observed_utc": {
+        "invocation": "2026-10-13T20:57:26.348674Z",
+        "response": "2026-10-13T20:57:56.221036Z",
+        "response_decision": "2026-10-13T21:01:29.827418Z",
+        "timestamp_kind": "filesystem_mtime_observation_not_provider_timestamp"
+      }
+    },
+    {
+      "source_handle": "P0187",
+      "paper_title": "Imaging with flat optics: metalenses or diffractive lenses?",
+      "canonical_paper_id": "cccccf70a6a7764a79cd12b4313f4c3a3e78135e",
+      "gate": "4e59f6de3e93db9a6e5edd7e8ca1ecb84ca952ae5430be76d6a49016cd98b331",
+      "call_id": "directed-reading:optics-e2e-20261012:dr-task-19224c747132655fa8fd05c4:attempt-01:a85bc1a47045e88f0c6a4ff171643f9bd5cfb5bb42d2d5afd12e419fd28bb82c",
+      "task_id": "dr-task-19224c747132655fa8fd05c4",
+      "reviewer_class": "delegated",
+      "reviewer": "delegated_supplement_fallback_audit",
+      "review_record": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0187_RESPONSE_REVIEW_20261014.json",
+        "sha256": "731d1d9225a19ac9969b911b817b9b9f843f276d4f8796c30ff5d5fcdd44e1a2",
+        "bytes": 2764
+      },
+      "request": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\4e59f6de3e93db9a6e5edd7e8ca1ecb84ca952ae5430be76d6a49016cd98b331\\REQUEST.json",
+        "sha256": "f96e7b64dfffe5a5e26ef5481499fdc8f76d371a641882a19d4e6a286e5ebb71",
+        "bytes": 665535
+      },
+      "invocation": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\4e59f6de3e93db9a6e5edd7e8ca1ecb84ca952ae5430be76d6a49016cd98b331\\INVOCATION.json",
+        "sha256": "0fc11c62fec175e67650b5dec13a11337fc1ed1ec6d63224e3bd95dda7f9ef6c",
+        "bytes": 121
+      },
+      "response": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\4e59f6de3e93db9a6e5edd7e8ca1ecb84ca952ae5430be76d6a49016cd98b331\\RESPONSE.json",
+        "sha256": "b64de72fb91f7746529b3aaf7e2058b22631b723411d193c3a9d980f6ddbe5dc",
+        "bytes": 26073
+      },
+      "request_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\4e59f6de3e93db9a6e5edd7e8ca1ecb84ca952ae5430be76d6a49016cd98b331\\REQUEST_DECISION.json",
+        "sha256": "495e836e6f6c118868e13b18448bf14b72a6b464be7171ac89ee2e43cb84df4a",
+        "bytes": 682
+      },
+      "response_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\4e59f6de3e93db9a6e5edd7e8ca1ecb84ca952ae5430be76d6a49016cd98b331\\RESPONSE_DECISION.json",
+        "sha256": "2fc8b82686dfb4c6df209684af0db62791851c656db31c0b8abe1e147fad9194",
+        "bytes": 785
+      },
+      "request_sha256": "d7fd31a890f2d537dc77c1fe6d2add44053795f5716758782b9ec964627624d7",
+      "response_result_sha256": "80c3cc1d84db10b1ab6cd8afdb727ca11369cff8ca9144fe00ae7e4a9799af9d",
+      "decision": "approve",
+      "request_decision_value": "approve",
+      "status_code": 200,
+      "complete": true,
+      "finish_reason": "stop",
+      "requested_model": "qwen3.7-flash",
+      "returned_model": "qwen3.7-flash",
+      "elapsed_seconds": 51.219,
+      "estimated_reservation_cny": 0.5440884,
+      "project_ledger": {
+        "reservation_id": "res-1e508fea014e4778",
+        "reserved_cny": 0.5440884,
+        "actual_cny": 0.06798180000000001,
+        "status": "settled"
+      },
+      "account_ledger": {
+        "reservation_id": "res-f9f74b1af8a44168",
+        "reserved_cny": 0.5440884,
+        "actual_cny": 0.06798180000000001,
+        "status": "settled"
+      },
+      "profile_checked": {
+        "connection": "direct",
+        "key_index": 1,
+        "max_keys": 1,
+        "max_retries": 0,
+        "stream": false,
+        "timeout_seconds": 300.0,
+        "stream_overall_timeout_seconds": 3600.0,
+        "model": "qwen3.7-flash",
+        "thinking_budget": 8192,
+        "max_output_tokens": 20000,
+        "json_mode": true,
+        "temperature": 0.1,
+        "binding_sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60"
+      },
+      "owner_mapping": {
+        "chapter_ids_from_level2_registry": [
+          "CH3",
+          "CH5"
+        ],
+        "expected_native_chapter_owners_from_root_acceptance": [
+          "CH3",
+          "CH5"
+        ],
+        "match": true,
+        "section_from_level2_registry": "MDL vs Metalens efficiency comparison",
+        "request_origin": "level2",
+        "explicit_owner_field_in_reader_payload": false
+      },
+      "task_registry": {
+        "paper_status": "approved_core",
+        "task_status": "committed",
+        "task_hash": "19224c747132655fa8fd05c4724d355146a25b9e796deca0dfbae8fe1b49dd41",
+        "source_hash": "0b032bab8d95b9facad70f63624f61cea2c88bedbf8cd3d4898cd41b00beba3f",
+        "reading_row_present": true,
+        "reading_status": "committed",
+        "reading_source_hash": "0b032bab8d95b9facad70f63624f61cea2c88bedbf8cd3d4898cd41b00beba3f",
+        "reading_output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\cccccf70a6a7764a79cd12b4313f4c3a3e78135e\\dr-task-19224c747132655fa8fd05c4"
+      },
+      "level2_output": {
+        "output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\cccccf70a6a7764a79cd12b4313f4c3a3e78135e\\dr-task-19224c747132655fa8fd05c4",
+        "input_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\cccccf70a6a7764a79cd12b4313f4c3a3e78135e\\dr-task-19224c747132655fa8fd05c4\\INPUT.json",
+          "sha256": "fd37389aab6daa2628a8e4d40df96bb3133359d70cfd2f92be0fab1221ca3232",
+          "bytes": 1741
+        },
+        "directed_reading_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\cccccf70a6a7764a79cd12b4313f4c3a3e78135e\\dr-task-19224c747132655fa8fd05c4\\DIRECTED_READING.json",
+          "sha256": "2abee3c863901faea28c1d51c52e5957d031431d5a5ca1d9cdce5891cd71656f",
+          "bytes": 6780
+        },
+        "commit_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\cccccf70a6a7764a79cd12b4313f4c3a3e78135e\\dr-task-19224c747132655fa8fd05c4\\COMMIT.json",
+          "sha256": "c7488c2f8d37d87d49e3d946ce7af13ecac6dc0f90d2d31a976a5a85e35ab8f4",
+          "bytes": 422
+        },
+        "output_task_id": "dr-task-19224c747132655fa8fd05c4",
+        "output_task_hash": "19224c747132655fa8fd05c4724d355146a25b9e796deca0dfbae8fe1b49dd41",
+        "output_source_hash": "81ad1368218c0efe96db1fa87ea1d5644abf4f3b0aa1a7e4d6fd2637bcebd32d",
+        "task_hash_matches_registry": true,
+        "source_hash_matches_registry": false,
+        "status": "material_ready",
+        "material_ready": true,
+        "fulfilled": true,
+        "commit_status": "material_ready",
+        "commit_ready": true
+      },
+      "material_delivery_fields_verified": {
+        "transport_request": [
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.paper_title",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.questions[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.required_outputs[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.structured_source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.optional_bibliography"
+        ],
+        "level2_input": [
+          "level2/.../<paper_id>/<task_id>/INPUT.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:task",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:source_hash"
+        ],
+        "level2_result": [
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:question_material",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:material_ready"
+        ],
+        "next_stage_consumption_verified": false
+      },
+      "filesystem_mtime_observed_utc": {
+        "invocation": "2026-10-13T20:57:26.368191Z",
+        "response": "2026-10-13T20:58:18.233805Z",
+        "response_decision": "2026-10-13T21:02:18.185186Z",
+        "timestamp_kind": "filesystem_mtime_observation_not_provider_timestamp"
+      }
+    },
+    {
+      "source_handle": "P0069",
+      "paper_title": "Metasurface optics for full-color computational imaging",
+      "canonical_paper_id": "402e84bb3cc3f9fcc1c772a0bc1d42e2c1eabcbf",
+      "gate": "c11f908e6f2a3f044185ec37dad43bc89220b48ac8138ce42d7fb0b104cd3fc6",
+      "call_id": "directed-reading:optics-e2e-20261012:dr-task-b339817aa860d0892c8b1958:attempt-01:f0e8ae8b65a241698dc07b34ddf33eee508bfd938de74273756c98533b07e952",
+      "task_id": "dr-task-b339817aa860d0892c8b1958",
+      "reviewer_class": "root",
+      "reviewer": "root",
+      "review_record": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\ROOT_V22_DIRECTED_P0069_REVIEW.json",
+        "sha256": "b0dd59ce859e4dab3a6b96e71f6616ee6629a1ce256d18be05a6d1cb1d13bbbc",
+        "bytes": 1217
+      },
+      "request": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\c11f908e6f2a3f044185ec37dad43bc89220b48ac8138ce42d7fb0b104cd3fc6\\REQUEST.json",
+        "sha256": "ea5c64729427eb43c2bd3a29815c8effa8dd61611d29515283e516416e880e8e",
+        "bytes": 112043
+      },
+      "invocation": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\c11f908e6f2a3f044185ec37dad43bc89220b48ac8138ce42d7fb0b104cd3fc6\\INVOCATION.json",
+        "sha256": "2275d5bf6ab3dd487a9ea1492bcf52d5e47134b14d8b3627ad77ad72178c6c01",
+        "bytes": 121
+      },
+      "response": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\c11f908e6f2a3f044185ec37dad43bc89220b48ac8138ce42d7fb0b104cd3fc6\\RESPONSE.json",
+        "sha256": "28c23f0f1e4a3e0d01a30592bed67dd970565263fd41f8a36376dbcd1aae861d",
+        "bytes": 20306
+      },
+      "request_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\c11f908e6f2a3f044185ec37dad43bc89220b48ac8138ce42d7fb0b104cd3fc6\\REQUEST_DECISION.json",
+        "sha256": "3b293f93e056877ae9d730c77960813fb1ea38cb469172b30753aab6e409a002",
+        "bytes": 682
+      },
+      "response_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\c11f908e6f2a3f044185ec37dad43bc89220b48ac8138ce42d7fb0b104cd3fc6\\RESPONSE_DECISION.json",
+        "sha256": "b2b7db423a49ea8a5e446ad5351d56a8cf171706dfe8cb66c791ae86306cd78b",
+        "bytes": 689
+      },
+      "request_sha256": "d5260fc4f469d26738e2673bd8a2cf891b2013c4e95175205c87eaee127af211",
+      "response_result_sha256": "d3c1c7740cf8fd1ca3e01d7d7ff8b8e76a65dd69630770a1193c95ad037524d7",
+      "decision": "approve",
+      "request_decision_value": "approve",
+      "status_code": 200,
+      "complete": true,
+      "finish_reason": "stop",
+      "requested_model": "qwen3.7-flash",
+      "returned_model": "qwen3.7-flash",
+      "elapsed_seconds": 41.688,
+      "estimated_reservation_cny": 0.21198840000000002,
+      "project_ledger": {
+        "reservation_id": "res-facae9e880e940d8",
+        "reserved_cny": 0.21198840000000002,
+        "actual_cny": 0.006311400000000001,
+        "status": "settled"
+      },
+      "account_ledger": {
+        "reservation_id": "res-d55be5d0c3f94ed3",
+        "reserved_cny": 0.21198840000000002,
+        "actual_cny": 0.006311400000000001,
+        "status": "settled"
+      },
+      "profile_checked": {
+        "connection": "direct",
+        "key_index": 1,
+        "max_keys": 1,
+        "max_retries": 0,
+        "stream": false,
+        "timeout_seconds": 300.0,
+        "stream_overall_timeout_seconds": 3600.0,
+        "model": "qwen3.7-flash",
+        "thinking_budget": 8192,
+        "max_output_tokens": 20000,
+        "json_mode": true,
+        "temperature": 0.1,
+        "binding_sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60"
+      },
+      "owner_mapping": {
+        "chapter_ids_from_level2_registry": [
+          "CH2",
+          "CH5"
+        ],
+        "expected_native_chapter_owners_from_root_acceptance": [
+          "CH2",
+          "CH5"
+        ],
+        "match": true,
+        "section_from_level2_registry": "EDOF deconvolution SNR analysis",
+        "request_origin": "level2",
+        "explicit_owner_field_in_reader_payload": false
+      },
+      "task_registry": {
+        "paper_status": "approved_core",
+        "task_status": "pending",
+        "task_hash": "b339817aa860d0892c8b195806cefc01e02a809cdc898d99cae8ce02c11015d8",
+        "source_hash": "0c0949ff4956091e36b76aad22f75ae8a7a4237f880ee4643a627e148fb16995",
+        "reading_row_present": false,
+        "reading_status": null,
+        "reading_source_hash": null,
+        "reading_output_dir": null
+      },
+      "level2_output": {
+        "output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\402e84bb3cc3f9fcc1c772a0bc1d42e2c1eabcbf\\dr-task-b339817aa860d0892c8b1958",
+        "input_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\402e84bb3cc3f9fcc1c772a0bc1d42e2c1eabcbf\\dr-task-b339817aa860d0892c8b1958\\INPUT.json",
+          "sha256": "166b32c125f666a09902f905fd2ac92fcc260c73e763adb693fb1031f11bfb08",
+          "bytes": 1793
+        },
+        "directed_reading_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\402e84bb3cc3f9fcc1c772a0bc1d42e2c1eabcbf\\dr-task-b339817aa860d0892c8b1958\\DIRECTED_READING.json",
+          "sha256": "dc7b3147d7a8cf927a48ff601d314afb5d9ca4a7bfd180ecfaca8af0618aa35f",
+          "bytes": 17694
+        },
+        "commit_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\402e84bb3cc3f9fcc1c772a0bc1d42e2c1eabcbf\\dr-task-b339817aa860d0892c8b1958\\COMMIT.json",
+          "sha256": "cab70f206664aff4a78f799be1ad21066f67df0f2cf3004168c25bcf322c9d1f",
+          "bytes": 415
+        },
+        "output_task_id": "dr-task-b339817aa860d0892c8b1958",
+        "output_task_hash": "b339817aa860d0892c8b195806cefc01e02a809cdc898d99cae8ce02c11015d8",
+        "output_source_hash": "ee3d90ca6d162f5a3ff0e84d731c49272c5390735786a6a9e4882712aeb884ad",
+        "task_hash_matches_registry": true,
+        "source_hash_matches_registry": false,
+        "status": "partial",
+        "material_ready": true,
+        "fulfilled": false,
+        "commit_status": "partial",
+        "commit_ready": true
+      },
+      "material_delivery_fields_verified": {
+        "transport_request": [
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.paper_title",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.questions[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.required_outputs[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.structured_source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.optional_bibliography"
+        ],
+        "level2_input": [
+          "level2/.../<paper_id>/<task_id>/INPUT.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:task",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:source_hash"
+        ],
+        "level2_result": [
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:question_material",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:material_ready"
+        ],
+        "next_stage_consumption_verified": false
+      },
+      "filesystem_mtime_observed_utc": {
+        "invocation": "2026-10-13T20:57:26.340020Z",
+        "response": "2026-10-13T20:58:08.465650Z",
+        "response_decision": "2026-10-13T21:01:29.803111Z",
+        "timestamp_kind": "filesystem_mtime_observation_not_provider_timestamp"
+      }
+    },
+    {
+      "source_handle": "P0081",
+      "paper_title": "Large-scale achromatic flat lens by light frequency-domain coherence optimization",
+      "canonical_paper_id": "5962cb4d103e70a96089aa6140bbab34218b0177",
+      "gate": "d5a841897f7b46cee837c44278454d56d2a2c4d0f12446111720d66ea6fb7964",
+      "call_id": "directed-reading:optics-e2e-20261012:dr-task-1138800dcde0baa9003b3557:attempt-01:ca0d5c2a5474890d72fb588fecc6e7cf25d3d15f2307c25f4aa7506693dae89a",
+      "task_id": "dr-task-1138800dcde0baa9003b3557",
+      "reviewer_class": "delegated",
+      "reviewer": "delegated_supplement_fallback_audit",
+      "review_record": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0081_RESPONSE_REVIEW_20261014.json",
+        "sha256": "7da5eeb597301400a688c134886d4b944780e14638e4195fd259cee6389b95b4",
+        "bytes": 2650
+      },
+      "request": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\d5a841897f7b46cee837c44278454d56d2a2c4d0f12446111720d66ea6fb7964\\REQUEST.json",
+        "sha256": "96ede8bff5f2bdd7bd8d2737f6362d5c432a8744c74af96c8d043e4a82dea8f9",
+        "bytes": 151725
+      },
+      "invocation": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\d5a841897f7b46cee837c44278454d56d2a2c4d0f12446111720d66ea6fb7964\\INVOCATION.json",
+        "sha256": "ee026b546f532c434fbaa74f14f8d0de6b66b15071b9888cbd3b1c7d33939b4e",
+        "bytes": 121
+      },
+      "response": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\d5a841897f7b46cee837c44278454d56d2a2c4d0f12446111720d66ea6fb7964\\RESPONSE.json",
+        "sha256": "6102f172bd62b167e74c76601db353104a2a5f870d4a2a06934a40bbdb3983a7",
+        "bytes": 39401
+      },
+      "request_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\d5a841897f7b46cee837c44278454d56d2a2c4d0f12446111720d66ea6fb7964\\REQUEST_DECISION.json",
+        "sha256": "0b591704b515a02aaab84719c4fee54b909903ecf34c120c52ac8d3a33a87478",
+        "bytes": 682
+      },
+      "response_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\d5a841897f7b46cee837c44278454d56d2a2c4d0f12446111720d66ea6fb7964\\RESPONSE_DECISION.json",
+        "sha256": "6ae792d335ebd1f4a3e6f0e8b3f38496ea134c184ffb57dee4c69141673fa4e1",
+        "bytes": 688
+      },
+      "request_sha256": "cc05de914925b8e07b6f3908d23fd5bb4c87002c1b9bfb043ddce4d598e61e6e",
+      "response_result_sha256": "b5b794cf3dd7b89c125fbc5a0df09487af5134428f8c8761bc5b391f52b43552",
+      "decision": "approve",
+      "request_decision_value": "approve",
+      "status_code": 200,
+      "complete": true,
+      "finish_reason": "stop",
+      "requested_model": "qwen3.7-flash",
+      "returned_model": "qwen3.7-flash",
+      "elapsed_seconds": 70.235,
+      "estimated_reservation_cny": 0.2358036,
+      "project_ledger": {
+        "reservation_id": "res-b1f8803ba7c74cbb",
+        "reserved_cny": 0.2358036,
+        "actual_cny": 0.010868200000000001,
+        "status": "settled"
+      },
+      "account_ledger": {
+        "reservation_id": "res-e0aa4c1e79b04520",
+        "reserved_cny": 0.2358036,
+        "actual_cny": 0.010868200000000001,
+        "status": "settled"
+      },
+      "profile_checked": {
+        "connection": "direct",
+        "key_index": 1,
+        "max_keys": 1,
+        "max_retries": 0,
+        "stream": false,
+        "timeout_seconds": 300.0,
+        "stream_overall_timeout_seconds": 3600.0,
+        "model": "qwen3.7-flash",
+        "thinking_budget": 8192,
+        "max_output_tokens": 20000,
+        "json_mode": true,
+        "temperature": 0.1,
+        "binding_sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60"
+      },
+      "owner_mapping": {
+        "chapter_ids_from_level2_registry": [
+          "CH3",
+          "CH4"
+        ],
+        "expected_native_chapter_owners_from_root_acceptance": [
+          "CH3",
+          "CH4"
+        ],
+        "match": true,
+        "section_from_level2_registry": "Theory of Light Frequency-Domain Coherence",
+        "request_origin": "level2",
+        "explicit_owner_field_in_reader_payload": false
+      },
+      "task_registry": {
+        "paper_status": "approved_core",
+        "task_status": "committed",
+        "task_hash": "1138800dcde0baa9003b355720bdc673e00f069a5e1746659ca0786b8527f0b5",
+        "source_hash": "769e817339107151f385fab32eb154022e23f45b51826d422af7638ab099ed82",
+        "reading_row_present": true,
+        "reading_status": "committed",
+        "reading_source_hash": "769e817339107151f385fab32eb154022e23f45b51826d422af7638ab099ed82",
+        "reading_output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\5962cb4d103e70a96089aa6140bbab34218b0177\\dr-task-1138800dcde0baa9003b3557"
+      },
+      "level2_output": {
+        "output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\5962cb4d103e70a96089aa6140bbab34218b0177\\dr-task-1138800dcde0baa9003b3557",
+        "input_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\5962cb4d103e70a96089aa6140bbab34218b0177\\dr-task-1138800dcde0baa9003b3557\\INPUT.json",
+          "sha256": "be234607600602553488302da354b933d4dd984c5f0771650571e010b3ff743d",
+          "bytes": 1662
+        },
+        "directed_reading_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\5962cb4d103e70a96089aa6140bbab34218b0177\\dr-task-1138800dcde0baa9003b3557\\DIRECTED_READING.json",
+          "sha256": "e3fc66697bc0d1b94c449bb80616fa0b9da118be888a3768437a01b34f90b7b8",
+          "bytes": 25862
+        },
+        "commit_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\5962cb4d103e70a96089aa6140bbab34218b0177\\dr-task-1138800dcde0baa9003b3557\\COMMIT.json",
+          "sha256": "39264c590c27e7701ebceb96246475d870a72a571dcd8d66d5306b285d07ba37",
+          "bytes": 422
+        },
+        "output_task_id": "dr-task-1138800dcde0baa9003b3557",
+        "output_task_hash": "1138800dcde0baa9003b355720bdc673e00f069a5e1746659ca0786b8527f0b5",
+        "output_source_hash": "6ea38c2990e498f85fa6cfffbe0131302fd4c376c2d531f8c53f10cad5026c8e",
+        "task_hash_matches_registry": true,
+        "source_hash_matches_registry": false,
+        "status": "material_ready",
+        "material_ready": true,
+        "fulfilled": true,
+        "commit_status": "material_ready",
+        "commit_ready": true
+      },
+      "material_delivery_fields_verified": {
+        "transport_request": [
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.paper_title",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.questions[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.required_outputs[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.structured_source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.optional_bibliography"
+        ],
+        "level2_input": [
+          "level2/.../<paper_id>/<task_id>/INPUT.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:task",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:source_hash"
+        ],
+        "level2_result": [
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:question_material",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:material_ready"
+        ],
+        "next_stage_consumption_verified": false
+      },
+      "filesystem_mtime_observed_utc": {
+        "invocation": "2026-10-13T20:57:26.351727Z",
+        "response": "2026-10-13T20:58:37.182966Z",
+        "response_decision": "2026-10-13T21:02:24.533338Z",
+        "timestamp_kind": "filesystem_mtime_observation_not_provider_timestamp"
+      }
+    },
+    {
+      "source_handle": "P0245",
+      "paper_title": "Broadband Achromatic Hybrid Metalens Module with 100° Field of View for Visible Imaging",
+      "canonical_paper_id": "OpenAlex:W4410526519",
+      "gate": "e0eef205635c4173b8053fb0b8d26e343372cc2f154b25fb67f5074751a83936",
+      "call_id": "directed-reading:optics-e2e-20261012:dr-task-3b0d6e33f8e72fa32dd8cf99:attempt-01:515824a98750a13e76a99b4d2555e1b4715703aa1b091806f85e480874767cc6",
+      "task_id": "dr-task-3b0d6e33f8e72fa32dd8cf99",
+      "reviewer_class": "delegated",
+      "reviewer": "delegated_supplement_fallback_audit",
+      "review_record": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0245_RESPONSE_REVIEW_20261014.json",
+        "sha256": "3cebfdf52b6ee24e3d42427e7e6b49fa2a46959b44b7a67d863edb61795c8464",
+        "bytes": 2765
+      },
+      "request": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\e0eef205635c4173b8053fb0b8d26e343372cc2f154b25fb67f5074751a83936\\REQUEST.json",
+        "sha256": "01e61890a85b53be66d3f21675e7988760bcb2e2576d479dcf18c668f36bf9bf",
+        "bytes": 72298
+      },
+      "invocation": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\e0eef205635c4173b8053fb0b8d26e343372cc2f154b25fb67f5074751a83936\\INVOCATION.json",
+        "sha256": "115a263275a41929eaaea1b9f30a543d1aa28895870229a4bb0fafc82a97479a",
+        "bytes": 121
+      },
+      "response": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\e0eef205635c4173b8053fb0b8d26e343372cc2f154b25fb67f5074751a83936\\RESPONSE.json",
+        "sha256": "d1aa76637a216f0fffd10eb85644b3eb7c3507de357b8e05977d32cd491133f1",
+        "bytes": 22179
+      },
+      "request_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\e0eef205635c4173b8053fb0b8d26e343372cc2f154b25fb67f5074751a83936\\REQUEST_DECISION.json",
+        "sha256": "e358a3b71c8b0577fffe69d97d4a4b295c947927074d13e95f812af0c3e00df1",
+        "bytes": 682
+      },
+      "response_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\e0eef205635c4173b8053fb0b8d26e343372cc2f154b25fb67f5074751a83936\\RESPONSE_DECISION.json",
+        "sha256": "d9b5c7b0811a52ba44930ea5b86c971caf1a15a1164e71482722b3b614cac6ae",
+        "bytes": 805
+      },
+      "request_sha256": "3f3814c457a16d34c886c30c066475fef331467bffadc002c32453eff785a157",
+      "response_result_sha256": "79603f8cfc4dd126ccc602fa132296ba8961a4b216dd327fb4ce708afa9e1c52",
+      "decision": "approve",
+      "request_decision_value": "approve",
+      "status_code": 200,
+      "complete": true,
+      "finish_reason": "stop",
+      "requested_model": "qwen3.7-flash",
+      "returned_model": "qwen3.7-flash",
+      "elapsed_seconds": 41.344,
+      "estimated_reservation_cny": 0.188148,
+      "project_ledger": {
+        "reservation_id": "res-aa69de36626f410b",
+        "reserved_cny": 0.188148,
+        "actual_cny": 0.0052774,
+        "status": "settled"
+      },
+      "account_ledger": {
+        "reservation_id": "res-b170ec8dd6d141db",
+        "reserved_cny": 0.188148,
+        "actual_cny": 0.0052774,
+        "status": "settled"
+      },
+      "profile_checked": {
+        "connection": "direct",
+        "key_index": 1,
+        "max_keys": 1,
+        "max_retries": 0,
+        "stream": false,
+        "timeout_seconds": 300.0,
+        "stream_overall_timeout_seconds": 3600.0,
+        "model": "qwen3.7-flash",
+        "thinking_budget": 8192,
+        "max_output_tokens": 20000,
+        "json_mode": true,
+        "temperature": 0.1,
+        "binding_sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60"
+      },
+      "owner_mapping": {
+        "chapter_ids_from_level2_registry": [
+          "CH4",
+          "CH5"
+        ],
+        "expected_native_chapter_owners_from_root_acceptance": [
+          "CH4",
+          "CH5"
+        ],
+        "match": true,
+        "section_from_level2_registry": "Hybrid system optical power distribution",
+        "request_origin": "level2",
+        "explicit_owner_field_in_reader_payload": false
+      },
+      "task_registry": {
+        "paper_status": "approved_core",
+        "task_status": "committed",
+        "task_hash": "3b0d6e33f8e72fa32dd8cf9947b3bfce577f8e62f71354c99e2bd35b0e87441b",
+        "source_hash": "db6de265b2724c54674ecbc5c54c7e39415a80b833fb40be249d6f05e42738b6",
+        "reading_row_present": true,
+        "reading_status": "committed",
+        "reading_source_hash": "db6de265b2724c54674ecbc5c54c7e39415a80b833fb40be249d6f05e42738b6",
+        "reading_output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\OpenAlex_W4410526519\\dr-task-3b0d6e33f8e72fa32dd8cf99"
+      },
+      "level2_output": {
+        "output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\OpenAlex_W4410526519\\dr-task-3b0d6e33f8e72fa32dd8cf99",
+        "input_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\OpenAlex_W4410526519\\dr-task-3b0d6e33f8e72fa32dd8cf99\\INPUT.json",
+          "sha256": "9f5e0563fedea5e4eb5dd2d5f6342376a11296f9a0ae228542f2c4e90a0c6a94",
+          "bytes": 1731
+        },
+        "directed_reading_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\OpenAlex_W4410526519\\dr-task-3b0d6e33f8e72fa32dd8cf99\\DIRECTED_READING.json",
+          "sha256": "561574486c1c7513708920cbb21fdd1f8c801994c31ed5ab97d2ccda6f210ee8",
+          "bytes": 13473
+        },
+        "commit_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\OpenAlex_W4410526519\\dr-task-3b0d6e33f8e72fa32dd8cf99\\COMMIT.json",
+          "sha256": "280b7c6bdd2b7bb5b0274d68f81bdaf12fabf796422eb6559eb6b246bee29c71",
+          "bytes": 402
+        },
+        "output_task_id": "dr-task-3b0d6e33f8e72fa32dd8cf99",
+        "output_task_hash": "3b0d6e33f8e72fa32dd8cf9947b3bfce577f8e62f71354c99e2bd35b0e87441b",
+        "output_source_hash": "0ed260683df5a70b357831e58aa63bd337be56e92b4621c143ab28058fe00050",
+        "task_hash_matches_registry": true,
+        "source_hash_matches_registry": false,
+        "status": "material_ready",
+        "material_ready": true,
+        "fulfilled": true,
+        "commit_status": "material_ready",
+        "commit_ready": true
+      },
+      "material_delivery_fields_verified": {
+        "transport_request": [
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.paper_title",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.questions[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.required_outputs[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.structured_source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.optional_bibliography"
+        ],
+        "level2_input": [
+          "level2/.../<paper_id>/<task_id>/INPUT.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:task",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:source_hash"
+        ],
+        "level2_result": [
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:question_material",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:material_ready"
+        ],
+        "next_stage_consumption_verified": false
+      },
+      "filesystem_mtime_observed_utc": {
+        "invocation": "2026-10-13T20:57:26.317262Z",
+        "response": "2026-10-13T20:58:08.088798Z",
+        "response_decision": "2026-10-13T21:02:24.599629Z",
+        "timestamp_kind": "filesystem_mtime_observation_not_provider_timestamp"
+      }
+    },
+    {
+      "source_handle": "P0148",
+      "paper_title": "Multilayer Noninteracting Dielectric Metasurfaces for Multiwavelength Metaoptics.",
+      "canonical_paper_id": "9f5a6c2656f1bec87d3416772c5bcdc907f46291",
+      "gate": "f183095f37024ee57fde39a02db273ada08cdc9b68a3fe0a3b026f0d9b934e54",
+      "call_id": "directed-reading:optics-e2e-20261012:dr-task-bc9dcd28d683198bd29f2519:attempt-01:a241b9bc4b944d57167ed10983844fd29c84547de2ea8aa5719f587a0723dea3",
+      "task_id": "dr-task-bc9dcd28d683198bd29f2519",
+      "reviewer_class": "delegated",
+      "reviewer": "delegated_supplement_fallback_audit",
+      "review_record": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\preparation\\ab_unattended_20261013\\DELEGATED_V22_P0148_RESPONSE_REVIEW_20261014.json",
+        "sha256": "e3e6a79514ca4e1a31ca27fe982419dbf785a1a006d0fa4c410728c7ad87a4a5",
+        "bytes": 2626
+      },
+      "request": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\f183095f37024ee57fde39a02db273ada08cdc9b68a3fe0a3b026f0d9b934e54\\REQUEST.json",
+        "sha256": "c35f745d4e0c01e9823493acfaec72ccaeeb594663ed48f16ee5d365a413b88f",
+        "bytes": 124648
+      },
+      "invocation": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\f183095f37024ee57fde39a02db273ada08cdc9b68a3fe0a3b026f0d9b934e54\\INVOCATION.json",
+        "sha256": "d33a013eaa6c53b7e413351edc3c7d6d6ea6283b75a47623ee3d37f1e300dc7b",
+        "bytes": 121
+      },
+      "response": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\f183095f37024ee57fde39a02db273ada08cdc9b68a3fe0a3b026f0d9b934e54\\RESPONSE.json",
+        "sha256": "3074a2a367a6855fb755acfb4ddbb35e8281f19372f0f41ea6a3b967bcfbe9a1",
+        "bytes": 18365
+      },
+      "request_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\f183095f37024ee57fde39a02db273ada08cdc9b68a3fe0a3b026f0d9b934e54\\REQUEST_DECISION.json",
+        "sha256": "e264185eb3c2eb58bc75c7ca2d54b3483b9502c34405d7312f5174890893a156",
+        "bytes": 682
+      },
+      "response_decision": {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\f183095f37024ee57fde39a02db273ada08cdc9b68a3fe0a3b026f0d9b934e54\\RESPONSE_DECISION.json",
+        "sha256": "77da46bae645bf55094afcaf7228a01b0b9d160540f86bdca4db3e86a4f09463",
+        "bytes": 681
+      },
+      "request_sha256": "0705cb7d1c909a36e6b14c429e394fd49a1082d51d0c86650a1ea08d49678a44",
+      "response_result_sha256": "da2592b1e6c008b956dd6c58369553df775eed21444120a2512242f8073b4dbd",
+      "decision": "approve",
+      "request_decision_value": "approve",
+      "status_code": 200,
+      "complete": true,
+      "finish_reason": "stop",
+      "requested_model": "qwen3.7-flash",
+      "returned_model": "qwen3.7-flash",
+      "elapsed_seconds": 32.078,
+      "estimated_reservation_cny": 0.219558,
+      "project_ledger": {
+        "reservation_id": "res-147580b91f9b49d1",
+        "reserved_cny": 0.219558,
+        "actual_cny": 0.0066768,
+        "status": "settled"
+      },
+      "account_ledger": {
+        "reservation_id": "res-9f71ea0a891947a7",
+        "reserved_cny": 0.219558,
+        "actual_cny": 0.0066768,
+        "status": "settled"
+      },
+      "profile_checked": {
+        "connection": "direct",
+        "key_index": 1,
+        "max_keys": 1,
+        "max_retries": 0,
+        "stream": false,
+        "timeout_seconds": 300.0,
+        "stream_overall_timeout_seconds": 3600.0,
+        "model": "qwen3.7-flash",
+        "thinking_budget": 8192,
+        "max_output_tokens": 20000,
+        "json_mode": true,
+        "temperature": 0.1,
+        "binding_sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60"
+      },
+      "owner_mapping": {
+        "chapter_ids_from_level2_registry": [
+          "CH2",
+          "CH3"
+        ],
+        "expected_native_chapter_owners_from_root_acceptance": [
+          "CH2",
+          "CH3"
+        ],
+        "match": true,
+        "section_from_level2_registry": "Alignment tolerance analysis",
+        "request_origin": "level2",
+        "explicit_owner_field_in_reader_payload": false
+      },
+      "task_registry": {
+        "paper_status": "approved_core",
+        "task_status": "committed",
+        "task_hash": "bc9dcd28d683198bd29f2519192a54e6394a71136a850f83d259e8edffe0fa19",
+        "source_hash": "f8a572b54c8b95535aedcd20b5618eda1a7192157d943f05f4b8ba1294b356bd",
+        "reading_row_present": true,
+        "reading_status": "committed",
+        "reading_source_hash": "f8a572b54c8b95535aedcd20b5618eda1a7192157d943f05f4b8ba1294b356bd",
+        "reading_output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\9f5a6c2656f1bec87d3416772c5bcdc907f46291\\dr-task-bc9dcd28d683198bd29f2519"
+      },
+      "level2_output": {
+        "output_dir": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\9f5a6c2656f1bec87d3416772c5bcdc907f46291\\dr-task-bc9dcd28d683198bd29f2519",
+        "input_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\9f5a6c2656f1bec87d3416772c5bcdc907f46291\\dr-task-bc9dcd28d683198bd29f2519\\INPUT.json",
+          "sha256": "27aa92da890af934a97003ba25a4ccfbc8776d0e39b222e178c5877302ec4536",
+          "bytes": 1854
+        },
+        "directed_reading_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\9f5a6c2656f1bec87d3416772c5bcdc907f46291\\dr-task-bc9dcd28d683198bd29f2519\\DIRECTED_READING.json",
+          "sha256": "1c1488e62d8c6bf5411e0605afc3b7d9cfb59752ab235071d69722ef510b848b",
+          "bytes": 19093
+        },
+        "commit_json": {
+          "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed\\9f5a6c2656f1bec87d3416772c5bcdc907f46291\\dr-task-bc9dcd28d683198bd29f2519\\COMMIT.json",
+          "sha256": "d86b8fb144d95d0997efe1991ad91c07524b72760a586b56405342946de31890",
+          "bytes": 422
+        },
+        "output_task_id": "dr-task-bc9dcd28d683198bd29f2519",
+        "output_task_hash": "bc9dcd28d683198bd29f2519192a54e6394a71136a850f83d259e8edffe0fa19",
+        "output_source_hash": "8d5031c930d9638aef021ed24b81835832ffb72aafa7e89aaae314ba564e0375",
+        "task_hash_matches_registry": true,
+        "source_hash_matches_registry": false,
+        "status": "material_ready",
+        "material_ready": true,
+        "fulfilled": true,
+        "commit_status": "material_ready",
+        "commit_ready": true
+      },
+      "material_delivery_fields_verified": {
+        "transport_request": [
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.paper_title",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.questions[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.required_outputs[]",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.structured_source_material",
+          "supervision/calls/<gate>/REQUEST.json:messages[1].content.optional_bibliography"
+        ],
+        "level2_input": [
+          "level2/.../<paper_id>/<task_id>/INPUT.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:task",
+          "level2/.../<paper_id>/<task_id>/INPUT.json:source_hash"
+        ],
+        "level2_result": [
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:paper_identity",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:question_material",
+          "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:material_ready"
+        ],
+        "next_stage_consumption_verified": false
+      },
+      "filesystem_mtime_observed_utc": {
+        "invocation": "2026-10-13T20:57:26.361192Z",
+        "response": "2026-10-13T20:57:58.945633Z",
+        "response_decision": "2026-10-13T21:02:24.657230Z",
+        "timestamp_kind": "filesystem_mtime_observation_not_provider_timestamp"
+      }
+    }
+  ],
+  "level2_store_observed": {
+    "run_state": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\RUN_STATE.json",
+      "sha256": "fd85e61cac7acab293cf6cd140feb3af7f7037a9e05b0db558dab9c0fdc30e14",
+      "bytes": 5741823,
+      "status": "in_progress",
+      "current_stage": "level2_tools",
+      "pool_rows": 244,
+      "stage_inputs_keys": [
+        "chapter_proposals",
+        "harmonized_scope",
+        "level1_outline",
+        "level1_tools",
+        "provisional_scope"
+      ],
+      "level2_tools_stage_input_key_present": false,
+      "last_error_type": "QwenTransportError"
+    },
+    "directed_reading_store": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\directed_reading.sqlite",
+      "sha256": "5f530c7e1b9b02e4c85132650fc99ea5ea9924af4dcb7624136e20023ba3353a",
+      "bytes": 159744,
+      "directed_papers": 10,
+      "directed_tasks": 26,
+      "directed_readings": 11,
+      "ten_batch_registry_reading_rows": 8,
+      "ten_batch_missing_reading_rows": [
+        "P0022",
+        "P0069"
+      ]
+    },
+    "level2_output_root": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\level2\\external\\directed_prefetch\\round_1\\directed",
+    "level2_outputs_all_ten_present": true,
+    "level2_output_status_counts": {
+      "material_ready": 8,
+      "partial": 2
+    },
+    "level2_output_fulfilled_false": [
+      "P0022",
+      "P0069"
+    ],
+    "registry_source_hash_mismatch_handles": [
+      "P0022",
+      "P0003",
+      "P0139",
+      "P0090",
+      "P0001",
+      "P0187",
+      "P0069",
+      "P0081",
+      "P0245",
+      "P0148"
+    ],
+    "registry_source_hash_mismatch_handles_semantics": "expected: registry directed_tasks.source_hash is task_source_hash while output source_hash is material_payload_sha256; not an unresolved compatibility mismatch",
+    "registry_vs_output_source_hash_comparison_verified": true,
+    "partial_material_consumer_verified_by_code": true,
+    "partial_material_next_stage_persistence_verified": false,
+    "directed_material_cache_current_observation": {
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\DIRECTED_MATERIAL_CACHE.json",
+      "sha256": "ac2beb71f9613119727cbc03622baf3b0826de5a5a27f09cf23786ab356e2d0c",
+      "entry_count": 5,
+      "v22_exact_task_id_matches": 0,
+      "v22_exact_task_ids": []
+    }
+  },
+  "identity_owner_mapping": {
+    "verified_fields": [
+      "canonical paper identity in directed_reading.sqlite.directed_papers and level2 DIRECTED_READING.json.paper_identity",
+      "task_id and task_hash in directed_tasks, INPUT.json, and DIRECTED_READING.json",
+      "request focus in REQUEST.json.messages[1].content.questions[].question and purpose",
+      "section/chapter ownership in directed_papers.metadata_json and root acceptance expected_native_chapter_owners",
+      "source_material/structured_source_material/bibliography delivery fields in all ten transport requests"
+    ],
+    "owner_mapping_all_ten_matches_root_acceptance": true,
+    "reader_payload_explicit_owner_field": false,
+    "reader_payload_explicit_section_field": false,
+    "section_is_carried_in_question_purpose": true,
+    "missing_or_unverified_for_root": [
+      "Reader payloads do not carry a standalone owner/section/chapter_ids field; formal ownership is available in native directed_papers.metadata_json and root acceptance, not in messages[1].content.",
+      "P0022 has task status pending and no directed_readings row; P0069 has task status committed but no directed_readings row. Both level2 artifacts are present and material_ready=true, but status=partial and fulfilled=false.",
+      "All ten output task_hash values match the registry task_hash; output source_hash differs from the registry source_hash for all ten. Hash-role reconciliation is not inferred here.",
+      "RUN_STATE.current_stage is level2_tools, but RUN_STATE.stage_inputs has no level2_tools key; propagation of these ten results into the next planner input is not independently verified.",
+      "Binding source_worktree/active HEAD is V22 commit 76f..., while legacy binding source_root field points to planning_resume_v19; preserve active source_worktree and verify any consumer of source_root before the next major stage."
+    ]
+  },
+  "material_delivery_contract": {
+    "verified_request_fields": [
+      "supervision/calls/<gate>/REQUEST.json:messages[1].content.paper_title",
+      "supervision/calls/<gate>/REQUEST.json:messages[1].content.questions[]",
+      "supervision/calls/<gate>/REQUEST.json:messages[1].content.required_outputs[]",
+      "supervision/calls/<gate>/REQUEST.json:messages[1].content.source_material",
+      "supervision/calls/<gate>/REQUEST.json:messages[1].content.structured_source_material",
+      "supervision/calls/<gate>/REQUEST.json:messages[1].content.optional_bibliography"
+    ],
+    "verified_level2_fields": [
+      "level2/.../<paper_id>/<task_id>/INPUT.json:paper_identity",
+      "level2/.../<paper_id>/<task_id>/INPUT.json:task",
+      "level2/.../<paper_id>/<task_id>/INPUT.json:source_hash",
+      "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:paper_identity",
+      "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:question_material",
+      "level2/.../<paper_id>/<task_id>/DIRECTED_READING.json:material_ready"
+    ],
+    "next_major_stage_input_delivery": "unverified: current RUN_STATE.current_stage=level2_tools and stage_inputs.level2_tools is absent; current five-entry DIRECTED_MATERIAL_CACHE has zero exact V22 task IDs, so downstream ten-material delivery still needs a post-stage persistence check",
+    "full_material_not_copied_into_handoff": true,
+    "formal_consumer_paths_verified_by_code": [
+      "level2 result directed_results[*].materials (fulfilled and partial)",
+      "ProgressiveReviewPlanner._result_paper_materials(level2_tool_result)",
+      "ProgressiveReviewPlanner._read_materials and case_read_materials",
+      "ProgressiveReviewPlanner._chapter_details all_materials"
+    ],
+    "partial_native_store_behavior": "partial ready artifacts are retained on disk and task status is released to pending; directed_readings row is only created by commit_reading for fulfilled results",
+    "owner_content_is_not_reader_row": true
+  },
+  "quality_observations": {
+    "all_ten_identity_material_checks_from_review_records": "pass",
+    "P0003_correction": "Theory/formula explanations are useful; examples=[] is accepted as a source-shaped result and is not a format gap or rework trigger.",
+    "partial_or_explicit_limits_preserved": [
+      "P0022",
+      "P0139",
+      "P0187",
+      "P0245"
+    ],
+    "manual_scientific_answers_injected": false,
+    "no_response_claimed_fulfilled_beyond_recorded_status": true
+  },
+  "root_next_decision": [
+    "No paid retry is implied by this record.",
+    "The ten registry/output source_hash differences are explained by the task-contract versus material-payload hash roles; no hash repair is indicated. Verify registry directed_tasks.source_hash against committed directed_readings.source_hash for fulfilled rows.",
+    "Partial P0022/P0069 material is retained and is eligible for the formal result/material consumer path despite no directed_readings row; root must still verify persisted level2_tools output and next-stage input because this snapshot is in_progress.",
+    "Root remains the decision owner for the next major stage gate; this handoff exposes only verified metadata and delegated/root audit paths."
+  ],
+  "audit_updated_at_utc": "2026-10-13T21:22:49.544370Z",
+  "transport_timing_observed_read_only": {
+    "timestamp_source": "filesystem mtime_ns of immutable INVOCATION.json, RESPONSE.json, and RESPONSE_DECISION.json files; envelopes expose hashes/schema/result but no provider timestamp field",
+    "first_invocation": {
+      "handle": "P0245",
+      "gate": "e0eef205635c4173b8053fb0b8d26e343372cc2f154b25fb67f5074751a83936",
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\e0eef205635c4173b8053fb0b8d26e343372cc2f154b25fb67f5074751a83936\\INVOCATION.json",
+      "observed_at_utc": "2026-10-13T20:57:26.317262Z"
+    },
+    "earliest_physical_response": {
+      "handle": "P0001",
+      "gate": "374488c564636e72ec352b239ac4ef6cab385cdc454daae8f257052db76776f3",
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\374488c564636e72ec352b239ac4ef6cab385cdc454daae8f257052db76776f3\\RESPONSE.json",
+      "observed_at_utc": "2026-10-13T20:57:56.221036Z"
+    },
+    "last_physical_response": {
+      "handle": "P0022",
+      "gate": "12a40f20e05a6fe724f7fc7e1f48afbe6639134e8adf1dca09ffa553fbc72a21",
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\12a40f20e05a6fe724f7fc7e1f48afbe6639134e8adf1dca09ffa553fbc72a21\\RESPONSE.json",
+      "observed_at_utc": "2026-10-13T20:58:37.589039Z"
+    },
+    "last_response_decision": {
+      "handle": "P0148",
+      "gate": "f183095f37024ee57fde39a02db273ada08cdc9b68a3fe0a3b026f0d9b934e54",
+      "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\f183095f37024ee57fde39a02db273ada08cdc9b68a3fe0a3b026f0d9b934e54\\RESPONSE_DECISION.json",
+      "observed_at_utc": "2026-10-13T21:02:24.657230Z"
+    },
+    "physical_transport_wall_clock_seconds": 71.271777,
+    "review_tail_after_last_physical_response_seconds": 227.068191,
+    "first_invocation_to_last_response_decision_seconds": 298.339968,
+    "first_response_to_last_response_decision_seconds": 268.436195,
+    "sum_provider_elapsed_seconds": 486.002,
+    "sum_provider_elapsed_semantics": "sum of ten per-call RESPONSE.result.elapsed_seconds; not a batch wall-clock duration",
+    "review_wait_semantics": "filesystem-observed tail from last physical response to latest response decision; decisions may overlap individual response arrivals"
+  },
+  "source_hash_semantics_audit": {
+    "status": "resolved_expected_role_difference",
+    "registry_field": "directed_tasks.source_hash",
+    "registry_definition": "task_source_hash = sha256_value({source_hash: source_digest, paper_identity, runtime_config, prompt_sha256})",
+    "output_fields": [
+      "level2/.../INPUT.json.source_hash",
+      "level2/.../DIRECTED_READING.json.source_hash"
+    ],
+    "output_definition": "source_digest = sha256_value(material) from _practical_reading_plan; this is the cleaned material payload digest",
+    "committed_reading_definition": "directed_readings.source_hash stores task_source_hash passed by commit_reading, so it equals the registry task source_hash for fulfilled tasks",
+    "task_hash_definition": "sha256_value of the normalized review/topic/paper/questions/required_outputs/gap_keys/source_hash contract in DirectedReadingStore.add_task",
+    "observed_all_ten_task_hash_matches_registry": true,
+    "observed_all_ten_registry_vs_output_source_hash_differences": true,
+    "observed_eight_committed_registry_vs_reading_source_hash_equal": true,
+    "partial_rows": {
+      "P0022": {
+        "artifact_status": "partial",
+        "material_ready": true,
+        "fulfilled": false,
+        "task_status": "pending",
+        "directed_readings_row": false
+      },
+      "P0069": {
+        "artifact_status": "partial",
+        "material_ready": true,
+        "fulfilled": false,
+        "task_status": "pending",
+        "directed_readings_row": false
+      }
+    },
+    "integrity_conclusion": "No compatibility/hash leak is indicated by the ten output-vs-registry differences; compare registry source_hash to committed directed_readings.source_hash, and compare output source_hash to the material payload.",
+    "code_evidence": [
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v22\\optomind_research\\runtime\\upgrade3\\directed_reading.py",
+        "lines": "111-116",
+        "meaning": "_canonical and sha256_value"
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v22\\optomind_research\\runtime\\upgrade3\\directed_reading.py",
+        "lines": "720-765",
+        "meaning": "DirectedReadingStore.add_task hashes source_hash into task_hash and stores source_hash in directed_tasks"
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v22\\optomind_research\\runtime\\upgrade3\\directed_reading.py",
+        "lines": "4568-4586",
+        "meaning": "source_digest is material hash; task_source_hash adds identity/runtime/prompt"
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v22\\optomind_research\\runtime\\upgrade3\\directed_reading.py",
+        "lines": "4690,4754,4781-4785",
+        "meaning": "INPUT/artifact carry source_digest; fulfilled commit stores task_source_hash; partial releases task"
+      }
+    ]
+  },
+  "material_consumer_audit": {
+    "partial_artifact_behavior": "P0022 and P0069 each have DIRECTED_READING.json and COMMIT.json with material_ready=true, status=partial, fulfilled=false; the reader records an attempt then release_task(status=pending), so absence of directed_readings row is expected for an incomplete answer.",
+    "runner_return_behavior": "make_directed_reading_runner.read_one returns the artifact as material regardless of partial status; its aggregate materials list includes every non-empty material mapping.",
+    "adaptive_cache_behavior": "external_closure decorates each returned material, puts it in read_materials, and writes the read_cache_path envelope; this path is separate from directed_readings commit rows.",
+    "formal_paper_materials_behavior": "_result_paper_materials walks supplement_results and directed_results and collects materials/papers without filtering on fulfilled or directed_readings row presence.",
+    "owner_content_behavior": "retrieval_loop.owner_content is a supplement-queue ownership projection; directed-reader material is carried under directed_results/materials and _read_materials, so owner_content absence alone does not mean a directed read was dropped.",
+    "downstream_case_behavior": "case_read_materials unions prior_readings, _result_paper_materials(level1_tools), _result_paper_materials(level2_tools), _result_paper_materials(chapter_tools), and _read_materials; partial material is eligible at this layer.",
+    "downstream_chapter_behavior": "_chapter_details builds l2_materials with _result_paper_materials(level2_tools) and merges _read_materials into all_materials; status is not used as a DB-row gate.",
+    "observed_current_persistence": {
+      "run_state_path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\RUN_STATE.json",
+      "current_stage": "level2_tools",
+      "level2_tools_stage_input_key_present": false,
+      "directed_material_cache_path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\DIRECTED_MATERIAL_CACHE.json",
+      "directed_material_cache_sha256": "ac2beb71f9613119727cbc03622baf3b0826de5a5a27f09cf23786ab356e2d0c",
+      "directed_material_cache_entry_count": 5,
+      "directed_material_cache_v22_task_id_matches": 0,
+      "directed_material_cache_v22_task_ids": [],
+      "next_stage_consumption": "unverified_until_level2_tools_stage_file_and_RUN_STATE.stage_inputs.level2_tools_are_persisted_and_checked"
+    },
+    "conclusion": "Partial material is retained and has a formal in-memory/downstream consumer path independent of directed_readings rows; this snapshot cannot yet claim that all ten V22 materials reached the next planner stage because level2_tools is still in progress and its stage input is absent.",
+    "code_evidence": [
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v22\\optomind_research\\runtime\\upgrade3\\progressive_review_plan.py",
+        "lines": "9780-9939",
+        "meaning": "reader output material aggregation includes partial rows"
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v22\\optomind_research\\runtime\\upgrade3\\progressive_review_plan.py",
+        "lines": "9547-9602,9632-9765",
+        "meaning": "adaptive closure decorates material, computes partial status, and returns directed_results/materials"
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v22\\optomind_research\\runtime\\upgrade3\\progressive_review_plan.py",
+        "lines": "4133-4170,4670-4753",
+        "meaning": "level2_tools stage persistence and _read_materials update occur when collector returns"
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v22\\optomind_research\\runtime\\upgrade3\\progressive_review_plan.py",
+        "lines": "6331-6348,5431-5441,6371-6382",
+        "meaning": "paper-material and case/chapter consumers do not require directed_readings DB rows"
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v22\\optomind_research\\runtime\\upgrade3\\progressive_review_plan.py",
+        "lines": "7386-7415",
+        "meaning": "owner_content is only one supplement ownership projection"
+      },
+      {
+        "path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\execution_sources\\planning_resume_v22\\optomind_research\\runtime\\upgrade3\\directed_reading.py",
+        "lines": "4774-4785",
+        "meaning": "partial artifact/commit persisted and task released pending; no committed reading row"
+      }
+    ]
+  }
+}

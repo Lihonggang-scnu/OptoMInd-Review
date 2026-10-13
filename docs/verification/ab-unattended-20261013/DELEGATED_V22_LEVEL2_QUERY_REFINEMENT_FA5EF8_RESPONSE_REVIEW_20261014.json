@@ -1,0 +1,42 @@
+{
+  "schema_version": "optomind.delegated_response_review.v1",
+  "review_type": "v22_level2_query_refinement_response",
+  "reviewer": "delegated_luna",
+  "generated_at": "2026-10-13T21:18:01.558559Z",
+  "gate": "fa5ef8e429e924b01682b1697eed8627994f13069eb06a2d9d79f64109095b46",
+  "call_id": "query-refinement:Nec9f36bccaf87765884a-09d49b3716c8fe8d:1:8801abde2b65e5b69ee588f02a56e2df71667a8ed004287eafbf9178adf4f038",
+  "stage": "planning-transport:progressive_review_plan",
+  "namespace": "planning_v22_scope_cache",
+  "source_commit": "76f46ee4d4a337b8b3fafd19e6723c4266b82c42",
+  "binding_sha256": "2b276e93e7de40422679cf868860e2c784a833c680d80a5b651f4ffe3b282d60",
+  "request_sha256": "1e72e75580acaf365d4aca6cd1833865f8dc15086e1e88d3b79781c0acb532c5",
+  "response_sha256": "b9d5f6608566a03a61a1e81c5eb859a1cc5f61dffb0eeb3787b2a9f67fa236fc",
+  "result_sha256": "44e588ee1adef766af9b309935ab7ff2033310a9db23aba5ef4882eca500b35f",
+  "runtime": {
+    "model": "qwen3.7-flash",
+    "connection": "direct",
+    "key_index": 1,
+    "max_retries": 0,
+    "project_limit_cny": 80.0,
+    "account_limit_cny": 300.0
+  },
+  "review": {
+    "complete_response_content_read": true,
+    "query_count": 2,
+    "query_types": [
+      "keyword",
+      "question"
+    ],
+    "constraints_preserved": [
+      "visible light",
+      "broadband achromatic",
+      "aperture >1 cm",
+      "NA/efficiency trade-off",
+      "multiple NA/comparative evidence"
+    ],
+    "gap_preserved": true
+  },
+  "decision": "approve",
+  "response_decision_written": true,
+  "response_decision_reason": "Delegated review read the complete query-refinement response. It returns exactly two bounded English queries that preserve the visible-band, broadband achromatic, aperture >1 cm, and NA/efficiency trade-off constraints, explicitly seek multiple NA or comparative data, and do not claim the gap is resolved."
+}
