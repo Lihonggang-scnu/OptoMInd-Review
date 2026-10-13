@@ -4419,7 +4419,7 @@ def directed_reader_runtime_config(
     """The exact model/answer/reasoning contract used for automatic reuse."""
     return {
         "model": model,
-        "thinking": True,
+        "thinking": bool(thinking_budget),
         "max_output_tokens": max(64, int(max_output_tokens)),
         "thinking_budget": int(thinking_budget),
     }
@@ -4712,7 +4712,7 @@ def run_directed_reading(
                 model=model,
                 key_file=key_file,
                 max_output_tokens=int(max_output_tokens),
-                thinking=True,
+                thinking=bool(thinking_budget),
                 thinking_budget=int(thinking_budget),
                 json_mode=bool(model_pricing(model)["thinking_json"]),
                 raw_response_dir=output / "raw_responses",
@@ -4727,7 +4727,7 @@ def run_directed_reading(
                 messages,
                 model=model,
                 max_output_tokens=int(max_output_tokens),
-                thinking=True,
+                thinking=bool(thinking_budget),
                 thinking_budget=int(thinking_budget),
                 call_id=f"directed-reading:{review_id}:{task_id}:attempt-{int(attempt):02d}",
             )

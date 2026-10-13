@@ -410,6 +410,25 @@ def test_live_reader_constructor_receives_effective_model_budget(reading, monkey
     assert all(result["output"][key] == value for key, value in metadata.items())
 
 
+def test_zero_thinking_budget_disables_thinking_on_the_wire(reading, monkeypatch, tmp_path):
+    constructors, calls = [], []
+    class Client:
+        def __init__(self, **kwargs):
+            constructors.append(kwargs)
+        def complete(self, messages, **kwargs):
+            calls.append(kwargs)
+            return {"content": answer()}
+    monkeypatch.setattr(dr, "QwenDirectClient", Client)
+    key = tmp_path / "fixture-not-a-real-key.txt"
+    key.write_text("synthetic-test-placeholder")
+    result = dr.run_directed_reading(**reading, key_file=key,
+        budget_ledger_path=tmp_path / "zero-thinking.sqlite", budget_limit_cny=100,
+        thinking_budget=0)
+    assert len(constructors) == len(calls) == 1
+    assert constructors[0]['thinking'] is calls[0]['thinking'] is False
+    assert result['output']['runtime_config']['thinking'] is False
+
+
 def test_interrupted_reader_raw_only_reuses_exact_runtime(reading):
     blocked = []
 
