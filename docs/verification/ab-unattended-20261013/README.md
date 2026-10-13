@@ -31,3 +31,16 @@
 正式run_paper_reading_card(saved_response_dir=...)也验证历史投影兼容，严格保留原输入、prompt、runtime和来源。72项相关检查通过。两份真实历史RAW已通过该正式入口免费恢复（一个projection_compatible=true、一个false），原RAW哈希不变，无客户端/账本创建；证据见REAL_SAVED_RECOVERY_CHECK.json。
 
 规划已使用锁定244卡池开始运行。以上两份新恢复派生产物未悄悄改入正在运行的输入，批状态和显式排除回执保持启动时一致，后续按正式恢复合入。
+
+
+## 运行传输与状态
+
+正式规划现显式使用已有module4流式传输，保持模型、科学prompt和思考/回答容量。异常同步RUN_FAILURE与RUN_STATE.failed，记录安全的异常类型，不再让已退出进程显示in_progress。
+
+仅连接级SSE断流允许沿调用者已有max_retries有界重试；整体deadline/解析/拒绝仍停止。每次未知费用保留，下一次另预留且服从同一封顶。当前开发验收明确physical retries=0，仍不会隐藏自动重试。每次stream invocation使用独立raw文件名，保存旧partial而不覆盖。相关离线34项通过（另28项直接unittest有重叠，不相加）。
+
+此前非流式RemoteDisconnected与一次SSE早断均无最终答案，旧未知占额保留。用户关闭TUN后，V15相同244B/同模型同容量直连135.953秒完整返回，root全文亲审provisional_scope后放行。五个正文知识章节，未插入引言；目前继续level1_tools，尚未完成完整综述。
+
+开发监督运行源码34c333602a09cd18cc51273050b227c1542f31d0；后续连接重试/证据文件保护提交4629d30b见Git历史，未混称已真实触发自动重试。supervised_runtime保存本轮监督接线源码，它是本地验收adapter，产品正常入口仍scripts/upgrade3/progressive_review_plan.py，不依赖人工审读gate。显式failed_exclusions允许冻结244合格卡及7真实失败/19无材料的边界，不篡改原批状态。
+
+残余已知测试：test_legacy_prompt_proves_reuse_but_cannot_hide_current_change在本次与未改34c基线均失败（旧精读兼容会重新执行而非缓存复用），保留记录，不强行放宽真实材料兼容。
