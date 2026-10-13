@@ -444,6 +444,9 @@ class IdentityIndex:
             # Foreign-machine audit locators are not local live caches. In
             # particular a Windows path may exceed POSIX's component limit.
             card_available = False
+        if entry.get("card_path") and not card_available:
+            # Windows may report False where POSIX raises ENAMETOOLONG.
+            # Both mean this audit locator supplies no local card bytes.
             item["card_locator_status"] = "unavailable_on_this_machine"
         if card_available:
             try:
