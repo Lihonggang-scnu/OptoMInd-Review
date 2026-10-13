@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import re
+import tempfile
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -18,9 +19,196 @@ _TABLE_CELL = re.compile(
     re.IGNORECASE,
 )
 _REFERENCE_HEADING = re.compile(r"^#{1,6}\s+(?:\[block-[^\]]+\]\s*)?References\s*$", re.IGNORECASE)
+_RAW_FORMULA_MARKER = re.compile(
+    r"^> \[raw formula asset (?P<asset_id>[^;\]]+);(?P<attributes>[^\]]*)\]\s*$",
+    re.IGNORECASE,
+)
 
 
-def load_practical_material(snapshot_dir: str | Path, *, formula_enhancement_path: str | Path | None = None) -> dict[str, Any]:
+def _raw_formula_blocks(reading_view: str) -> dict[str, str]:
+    """Collect raw formula blocks without interpreting their scientific content."""
+
+    lines = reading_view.splitlines()
+    result: dict[str, str] = {}
+    index = 0
+    while index < len(lines):
+        marker = _RAW_FORMULA_MARKER.match(lines[index])
+        if marker is None:
+            index += 1
+            continue
+        end = index + 1
+        while end < len(lines) and lines[end].strip().removeprefix("> ").strip() != "```":
+            end += 1
+        if end < len(lines):
+            payload = list(lines[index + 1:end])
+            if payload and payload[0].strip().removeprefix("> ").strip().startswith("```"):
+                payload = payload[1:]
+            # Older views quote every formula line.  Remove only the markdown
+            # transport prefix; never normalize or rewrite the XML payload.
+            payload = [line[2:] if line.startswith("> ") else line for line in payload]
+            raw = "\n".join(payload).strip()
+            # Keep the first trustworthy occurrence for a stable asset map;
+            # duplicate view blocks must not change the selected source.
+            result.setdefault(marker.group("asset_id").strip(), raw)
+            index = end + 1
+        else:
+            index += 1
+    return result
+
+
+def _formula_asset_map(snapshot_assets: Sequence[Mapping[str, Any]], reading_view: str) -> dict[str, str]:
+    """Return raw formula XML by stable asset id, with a view-only fallback."""
+
+    result: dict[str, str] = {}
+    for asset in snapshot_assets:
+        if not isinstance(asset, Mapping) or asset.get("type") != "formula":
+            continue
+        asset_id = str(asset.get("asset_id") or "").strip()
+        content_ref = asset.get("content_ref")
+        raw = str(
+            content_ref.get("raw_source")
+            if isinstance(content_ref, Mapping) and content_ref.get("raw_source")
+            else asset.get("raw_source") or ""
+        )
+        if asset_id and raw:
+            result[asset_id] = raw
+    for asset_id, raw in _raw_formula_blocks(reading_view).items():
+        result.setdefault(asset_id, raw)
+    return result
+
+
+def _pandoc_formula_conversions(formulas: Mapping[str, str]) -> dict[str, dict[str, Any]]:
+    """Convert all formula assets in one offline Pandoc invocation.
+
+    The returned values contain only a derived readable view.  Raw XML stays in
+    the immutable snapshot and in ``structured_material``; a failed conversion
+    is therefore an explicit raw fallback rather than a guessed formula.
+    """
+
+    if not formulas:
+        return {}
+    result = {
+        asset_id: {
+            "asset_id": asset_id,
+            "status": "raw_fallback",
+            "raw_source_retained": True,
+        }
+        for asset_id in formulas
+    }
+    try:
+        from ..latex_publication_renderer import _find_binary, _run_command
+
+        pandoc = _find_binary("pandoc")
+    except (ImportError, OSError, TypeError, ValueError) as exc:
+        reason = f"pandoc_unavailable:{type(exc).__name__}"
+        return {asset_id: {**row, "reason": reason} for asset_id, row in result.items()}
+    if not pandoc:
+        return {asset_id: {**row, "reason": "pandoc_unavailable"} for asset_id, row in result.items()}
+
+    ordered = list(formulas.items())
+    marker_by_asset = {
+        asset_id: f"optomind-formula-{index}"
+        for index, (asset_id, _raw) in enumerate(ordered)
+    }
+    with tempfile.TemporaryDirectory(prefix="opm-formula-view-") as work_dir:
+        work = Path(work_dir)
+        source = work / "formulas.html"
+        target = work / "formulas.md"
+        source.write_text(
+            "<!doctype html>\n"
+            + "\n".join(
+                f'<div id="{marker_by_asset[asset_id]}">{raw}</div>'
+                for asset_id, raw in ordered
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        outcome = _run_command(
+            [pandoc, "-f", "html", "-t", "markdown", "--wrap=none", source.name, "--output", target.name],
+            cwd=work,
+            timeout_seconds=60.0,
+        )
+        if outcome.get("returncode") != 0 or not target.is_file():
+            reason = "pandoc_timeout" if outcome.get("timed_out") else "pandoc_failed"
+            return {asset_id: {**row, "reason": reason} for asset_id, row in result.items()}
+        try:
+            markdown = target.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as exc:
+            reason = f"pandoc_output_unreadable:{type(exc).__name__}"
+            return {asset_id: {**row, "reason": reason} for asset_id, row in result.items()}
+
+    for asset_id, marker in marker_by_asset.items():
+        match = re.search(
+            rf"(?ms)^:::\s*\{{#[^}}]*{re.escape(marker)}[^}}]*\}}\s*\n(?P<body>.*?)^:::\s*$",
+            markdown,
+        )
+        if match is None:
+            result[asset_id]["reason"] = "pandoc_marker_missing"
+            continue
+        text = re.sub(r"(?m)^:::\s*\{[^\n]*\}\s*$", "", match.group("body")).strip()
+        if not text or re.search(r"<\/?(?:[A-Za-z_][\w.-]*:)?(?:math|mfrac|msqrt|mtable)\b", text, re.IGNORECASE):
+            result[asset_id]["reason"] = "pandoc_formula_unresolved"
+            continue
+        result[asset_id] = {
+            "asset_id": asset_id,
+            "status": "converted",
+            "representation": "pandoc-markdown",
+            "text": text,
+            "raw_source_retained": True,
+        }
+    return result
+
+
+def _project_formula_view(reading_view: str, formulas: Mapping[str, str]) -> tuple[str, list[dict[str, Any]]]:
+    """Replace raw formula view blocks while preserving IDs and raw fallback."""
+
+    conversions = _pandoc_formula_conversions(formulas)
+    if not conversions:
+        return reading_view, []
+    lines = reading_view.splitlines()
+    output: list[str] = []
+    index = 0
+    while index < len(lines):
+        marker = _RAW_FORMULA_MARKER.match(lines[index])
+        if marker is None:
+            output.append(lines[index])
+            index += 1
+            continue
+        asset_id = marker.group("asset_id").strip()
+        end = index + 1
+        while end < len(lines) and lines[end].strip().removeprefix("> ").strip() != "```":
+            end += 1
+        conversion = conversions.get(asset_id)
+        if end >= len(lines) or conversion is None:
+            output.append(lines[index])
+            index += 1
+            continue
+        if conversion.get("status") == "converted":
+            output.extend([
+                f"> [formula view asset {asset_id}; representation=pandoc-markdown; raw_source_retained=true]",
+                "> ```text",
+            ])
+            for row in str(conversion.get("text") or "").splitlines():
+                output.append(">" if not row else f"> {row}")
+            output.extend(["> ```", ""])
+        else:
+            attributes = marker.group("attributes").strip()
+            if attributes:
+                attributes += "; "
+            attributes += f"view_conversion={conversion.get('reason') or 'raw_fallback'}; raw_source_retained=true"
+            output.append(f"> [raw formula asset {asset_id}; {attributes}]")
+            output.extend(lines[index + 1:end + 1])
+        index = end + 1
+    audit = [dict(row) for row in conversions.values()]
+    return "\n".join(output) + ("\n" if reading_view.endswith("\n") else ""), audit
+
+
+def load_practical_material(
+    snapshot_dir: str | Path,
+    *,
+    formula_enhancement_path: str | Path | None = None,
+    formula_view: bool = True,
+) -> dict[str, Any]:
     """Read the ordinary view plus the shared source-bound structures.
 
     The markdown view remains the writing-friendly surface.  When the
@@ -46,6 +234,7 @@ def load_practical_material(snapshot_dir: str | Path, *, formula_enhancement_pat
             "citation": citation,
         })
     structured_assets: list[dict[str, Any]] = []
+    snapshot_formula_assets: list[Mapping[str, Any]] = []
     ordered_body: str | None = None
     try:
         # Import lazily to keep this small helper usable with legacy material
@@ -54,6 +243,10 @@ def load_practical_material(snapshot_dir: str | Path, *, formula_enhancement_pat
 
         snapshot = PreparedSnapshotProvider(root).load()
         packet = snapshot.build_reading_packet()
+        snapshot_formula_assets = [
+            asset for asset in snapshot.assets
+            if isinstance(asset, Mapping) and asset.get("type") == "formula"
+        ]
         if any(source.get("role") == "pdf_primary_region_index" for source in snapshot.manifest.get("source_documents") or ()):
             pieces: list[str] = []
             previous_section: tuple[str, ...] = ()
@@ -81,8 +274,16 @@ def load_practical_material(snapshot_dir: str | Path, *, formula_enhancement_pat
         for item in structured_assets
         if str(item.get("text") or "").strip()
     )
+    projected_reading_view = reading_view
+    # Native snapshots retain raw formula blocks in READING_VIEW.md.  Convert
+    # that display surface in one batch while keeping the source-bound packet
+    # and immutable files byte-for-byte unchanged.  PDF-region projections use
+    # their ordered parser body and therefore do not get a guessed replacement.
+    if ordered_body is None and formula_view:
+        formulas = _formula_asset_map(snapshot_formula_assets, reading_view)
+        projected_reading_view, _formula_view_audit = _project_formula_view(reading_view, formulas)
     result = {
-        "body": ordered_body if ordered_body is not None else _clean_reading_view(reading_view),
+        "body": ordered_body if ordered_body is not None else _clean_reading_view(projected_reading_view),
         "references": normalized_references,
         "structured_assets": structured_assets,
         "structured_material": "" if ordered_body is not None else structured_material,

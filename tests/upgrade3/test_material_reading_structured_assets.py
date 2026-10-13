@@ -28,7 +28,12 @@ from optomind_research.runtime.upgrade3.paper_reading_card import (
 )
 from optomind_research.runtime.upgrade3.directed_reading import build_prompt_source_packet
 from optomind_research.runtime.upgrade3.docling_adapter import build_source_specs, canonical_layout
-from optomind_research.runtime.upgrade3.practical_materials import load_practical_material
+from optomind_research.runtime.latex_publication_renderer import _find_binary
+from optomind_research.runtime.upgrade3.practical_materials import (
+    _formula_asset_map,
+    _project_formula_view,
+    load_practical_material,
+)
 
 
 REAL_JATS_SNAPSHOT = Path(os.environ["OPTOMIND_JATS_FIXTURE_SNAPSHOT"]) if os.environ.get("OPTOMIND_JATS_FIXTURE_SNAPSHOT") else None
@@ -277,6 +282,40 @@ def test_native_snapshot_builder_preserves_formula_and_table_geometry(tmp_path):
         assert tables[0]["asset_id"] in user
         assert "mfrac" in user
         assert "col_span" in user
+
+    # The practical writing view gets a readable, batched Pandoc projection;
+    # the source snapshot and structured raw formula remain the evidence.
+    original_view = (snapshot.root / "READING_VIEW.md").read_bytes()
+    practical = load_practical_material(snapshot.root)
+    if _find_binary("pandoc"):
+        assert r"\frac" in practical["body"]
+        assert r"\sqrt" in practical["body"]
+    else:
+        assert formulas[0]["content_ref"]["raw_source"] in practical["body"]
+        assert "view_conversion=pandoc_unavailable" in practical["body"]
+    assert formulas[0]["asset_id"] in practical["body"]
+    raw_source = formulas[0]["content_ref"]["raw_source"]
+    assert raw_source == formulas[0]["raw_source"]
+    assert raw_source in practical["structured_material"]
+    assert "Wavelength (nm)" in practical["body"]
+    assert "Efficiency" in practical["body"]
+    assert (snapshot.root / "READING_VIEW.md").read_bytes() == original_view
+
+
+def test_formula_view_fallback_keeps_unquoted_raw_mathml(monkeypatch):
+    raw = "<inline-formula><math><mfrac><mi>a</mi><mi>b</mi></mfrac><msqrt><mi>r</mi></msqrt></math></inline-formula>"
+    view = "> [raw formula asset formula-1; representation=mathml]\n> ```xml\n" + raw + "\n> ```\n"
+    monkeypatch.setattr(
+        "optomind_research.runtime.latex_publication_renderer._find_binary",
+        lambda _name: "",
+    )
+    projected, audit = _project_formula_view(view, _formula_asset_map(
+        [{"asset_id": "formula-1", "type": "formula", "content_ref": {"raw_source": raw}}], view
+    ))
+    assert audit[0]["status"] == "raw_fallback"
+    assert audit[0]["reason"] == "pandoc_unavailable"
+    assert raw in projected
+    assert "view_conversion=pandoc_unavailable" in projected
 
 
 def test_native_nested_table_geometry_and_caption_formula_linking(tmp_path):

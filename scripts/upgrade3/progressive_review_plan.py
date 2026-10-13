@@ -303,6 +303,8 @@ def main(argv=None, *, regional_client_constructor=None):
                 local_index_path=(args.local_material_index.resolve() if args.local_material_index else None),
                 allow_external=not args.no_external_supplement,
                 acquirer_factory=acquirer_factory,
+                deadline_seconds=args.deadline_seconds,
+                request_timeout_seconds=args.request_timeout_seconds,
             )
             local_formula_enhancer = None
             if args.local_formula_config:

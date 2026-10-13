@@ -290,7 +290,8 @@ class _GatedClient:
             "project_ledger": str(Path(self.adapter.binding["project_ledger"]).resolve()),
             "account_ledger": str(Path(self.adapter.binding["account_ledger"]).resolve()),
             "project_limit_cny": 80.0, "account_limit_cny": 300.0,
-            "temperature": float(kwargs.get("temperature", 0.1))}
+            "temperature": float(kwargs.get("temperature", 0.1)),
+            "supervision_lock_scope": str(self.adapter.binding.get("supervision_lock_scope", "global"))}
         raw, body = build_qwen_wire_body(messages, model=profile["model"], max_output_tokens=answer,
             thinking=thinking, thinking_budget=budget, json_mode=live.json_mode,
             stream=profile["stream"], temperature=profile["temperature"])
@@ -313,4 +314,5 @@ class _GatedClient:
             self.adapter.check()
             return live(actual_messages, **actual_kwargs)
         return SupervisedClient(checked_invoke, root=self.adapter.supervision_root,
-            stage=stage, call_id=call_id, profile=profile)(messages, **kwargs)
+            stage=stage, call_id=call_id, profile=profile,
+            lock_scope=profile["supervision_lock_scope"])(messages, **kwargs)

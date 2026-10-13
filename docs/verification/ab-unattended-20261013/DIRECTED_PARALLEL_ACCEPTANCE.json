@@ -1,0 +1,42 @@
+{
+  "at": "2026-10-13T17:12:40.072454+00:00",
+  "status": "candidate_offline_verified_pending_native_v18",
+  "mechanism": "adaptive phase batches independent directed tasks into the existing reader executor; stateful journal/owner merge stays ordered",
+  "config": {
+    "native_reader_workers_for_resume": 32,
+    "actual_parallelism": "min(pending independent tasks, reader_workers)",
+    "model_and_material_capacity": "unchanged",
+    "local_formula_gpu_queue": "existing bounded queue retained"
+  },
+  "verification": [
+    {
+      "command": "python -m pytest -q tests/upgrade3/test_directed_reading_adapter_contract.py::test_adaptive_prefetch_batches_same_paper_questions_and_reuses_success tests/upgrade3/test_supplement_discovery_deadline.py",
+      "outcome": "6 passed in 1.30s",
+      "physical_api_calls": 0
+    },
+    {
+      "command": "python -m pytest -q test_planning_transport.py::test_native_planning_call_lock_allows_independent_physical_requests test_planning_transport.py::test_real_planner_two_gates_one_dual_reservation_and_replay --basetemp=free_call_lock_v18",
+      "outcome": "2 passed in 1.64s",
+      "scope": "development adapter; simulated physical overlap and dual reservation"
+    },
+    {
+      "command": "python -m pytest -q tests/upgrade3/test_directed_reading_adapter_contract.py::test_resume_reuses_source_bound_partial_without_reader_call tests/upgrade3/test_directed_reading_adapter_contract.py::test_adaptive_prefetch_batches_same_paper_questions_and_reuses_success tests/upgrade3/test_progressive_review_plan_material_reuse.py::test_formula_view_only_hash_migration_reuses_exact_saved_raw_source",
+      "outcome": "3 passed in 1.89s",
+      "scope": "actual adaptive closure retains useful partial with unresolved points; display-only source migration; independent task overlap",
+      "physical_api_calls": 0
+    }
+  ],
+  "retired_pid": 43624,
+  "retired_source": "091a6a38ae3b1c09a6237e67e4f85e6192f52adb",
+  "retired_unpaid_gate": "425dcde5b2d8fa1e887b7c45bb28f9db6b4a39c9a9ef62e8c03992ecfb8a12e3",
+  "no_reserved_or_running_directed_claims_at_stop": true,
+  "accepted_directed_results_retained": 4,
+  "real_32_way_precision_reading_claimed": false,
+  "current_project_snapshot": {
+    "settled_actual_cny": 5.2294315,
+    "uncertain_amount_cny": 4.5168676,
+    "reserved_amount_cny": 0,
+    "project_limit_cny": 80,
+    "unknown_holds_released": false
+  }
+}

@@ -24,6 +24,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -298,7 +299,9 @@ def _diversity_order(hits):
     return first + rest
 
 
-def harvest_query(gateway, spec, *, per_query_limit, discovery_target=0):
+def harvest_query(
+    gateway, spec, *, per_query_limit, discovery_target=0, deadline=None
+):
     """Run ONE query and keep every hit it produced."""
 
     limit = max(1, min(int(per_query_limit), MAX_RESULTS_PER_QUERY))
@@ -321,17 +324,24 @@ def harvest_query(gateway, spec, *, per_query_limit, discovery_target=0):
         if target:
             request_limit = min(MAX_RESULTS_PER_QUERY,
                                 max(limit, min(target * 2, limit * SNIPPET_DISCOVERY_MAX_FACTOR)))
-        items, response = gateway.search_snippets(spec.query_text, limit=request_limit)
+        search_kwargs = {"limit": request_limit}
+        if deadline is not None:
+            search_kwargs["deadline"] = deadline
+        items, response = gateway.search_snippets(spec.query_text, **search_kwargs)
         audit["status"] = getattr(response, "status_code", None)
         audit["requested_limits"] = [request_limit]
         hits = _snippet_hits(items, spec)
         unique = len({h.identifiers.get("corpus") for h in hits if h.identifiers.get("corpus")})
         exhausted = len(items) < request_limit
         while (target and unique < target and not exhausted
-               and request_limit < MAX_RESULTS_PER_QUERY):
+               and request_limit < MAX_RESULTS_PER_QUERY
+               and (deadline is None or time.monotonic() < deadline)):
             deeper = min(MAX_RESULTS_PER_QUERY, max(request_limit + 1,
                                                    request_limit * SNIPPET_DISCOVERY_MAX_FACTOR))
-            more, response = gateway.search_snippets(spec.query_text, limit=deeper)
+            search_kwargs = {"limit": deeper}
+            if deadline is not None:
+                search_kwargs["deadline"] = deadline
+            more, response = gateway.search_snippets(spec.query_text, **search_kwargs)
             audit["requested_limits"].append(deeper)
             audit["status"] = getattr(response, "status_code", None)
             seen = {_passage_key(h) for h in hits}
@@ -365,7 +375,10 @@ def harvest_query(gateway, spec, *, per_query_limit, discovery_target=0):
         audit["returned"] = len(hits)
         return hits, audit
     else:
-        papers, response = gateway.search_papers(spec.query_text, limit=limit)
+        search_kwargs = {"limit": limit}
+        if deadline is not None:
+            search_kwargs["deadline"] = deadline
+        papers, response = gateway.search_papers(spec.query_text, **search_kwargs)
         audit["status"] = getattr(response, "status_code", None)
         for rank, record in enumerate(papers[:limit], start=1):
             hits.append(Hit(

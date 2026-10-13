@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from optomind_research.runtime.upgrade3 import directed_reading, planning_retrieval_loop, planning_supplement
 from optomind_research.runtime.upgrade3.progressive_review_plan import (
     ProgressivePlannerConfig,
@@ -10,6 +12,8 @@ from optomind_research.runtime.upgrade3.progressive_review_plan import (
     _decorate_directed_material,
     _directed_task_signature,
     _resolve_planner_handles,
+    _directed_source_state,
+    _prior_read_source_compatible,
     make_directed_reading_runner,
     make_planning_supplement_runner,
     make_retrieval_loop_runner,
@@ -122,6 +126,50 @@ def test_doi_match_without_assets_falls_back_to_acquisition(tmp_path, monkeypatc
 
     assert reused is None
     assert len(acquire_calls) == 1
+
+
+def test_formula_view_only_hash_migration_reuses_exact_saved_raw_source(tmp_path):
+    from optomind_research.runtime.latex_publication_renderer import _find_binary
+
+    if not _find_binary("pandoc"):
+        pytest.skip("pandoc is required to exercise the derived formula-view hash migration")
+    source_unit = tmp_path / "source-unit"
+    snapshot = source_unit / "snapshot"
+    snapshot.mkdir(parents=True)
+    raw = "<inline-formula><math><mfrac><mi>a</mi><mi>b</mi></mfrac><msqrt><mi>r</mi></msqrt></math></inline-formula>"
+    (snapshot / "READING_VIEW.md").write_text(
+        "> [raw formula asset formula-1; representation=mathml]\n"
+        "> ```xml\n" + raw + "\n> ```\n",
+        encoding="utf-8",
+    )
+    card = source_unit / "PAPER_READING_CARD.json"
+    card.write_text(json.dumps({
+        "paper_identity": {"canonical_paper_id": "formula-paper", "title": "Formula fixture"},
+        "material": {"snapshot_id": ""},
+    }), encoding="utf-8")
+    (source_unit / "SOURCE_UNIT.json").write_text(
+        json.dumps({"snapshot_path": str(snapshot)}), encoding="utf-8"
+    )
+    candidate = {
+        "_paper_id": "formula-paper",
+        "card_path": str(card),
+        "planning_view": {"paper_identity": {"canonical_paper_id": "formula-paper", "title": "Formula fixture"}},
+    }
+    from optomind_research.runtime.upgrade3.practical_materials import load_practical_material
+
+    saved_hash = directed_reading.sha256_value(load_practical_material(snapshot, formula_view=False))
+    state = _directed_source_state(candidate, include_unprojected=True)
+    assert state["source_hash"] != saved_hash
+    assert state["unprojected_source_hash"] == saved_hash
+    assert _prior_read_source_compatible(candidate, {"source_hash": saved_hash, "paper_id": "formula-paper"})
+
+    (snapshot / "READING_VIEW.md").write_text(
+        "> [raw formula asset formula-1; representation=mathml]\n"
+        "> ```xml\n" + raw.replace("<mi>b</mi>", "<mi>c</mi>") + "\n> ```\n",
+        encoding="utf-8",
+    )
+    assert not _prior_read_source_compatible(candidate, {"source_hash": saved_hash, "paper_id": "formula-paper"})
+    assert not _prior_read_source_compatible(candidate, {"source_hash": "", "paper_id": "formula-paper"})
 
 
 def _directed_task(*, question="What finding?", output="Reported finding"):

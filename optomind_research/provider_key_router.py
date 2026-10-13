@@ -157,13 +157,17 @@ class ProviderKeyRouter:
             ]:
                 del _LANE_REGISTRY[key]
 
-    def acquire_lane(self) -> tuple[ProviderKeyLane | None, float]:
+    def acquire_lane(
+        self, *, deadline: float | None = None
+    ) -> tuple[ProviderKeyLane | None, float]:
         """Reserve an available lane; returns ``(lane, wait_seconds)``."""
 
         total_wait = 0.0
         selected: ProviderKeyLane | None = None
         while selected is None:
             now = self.now_fn()
+            if deadline is not None and now >= deadline:
+                return None, total_wait
             with _LANE_LOCK:
                 eligible = [
                     lane
@@ -201,18 +205,22 @@ class ProviderKeyRouter:
                     return None, total_wait
                 deadlines: list[float] = []
                 for lane in usable:
-                    deadline = max(
+                    lane_deadline = max(
                         lane.cool_until,
                         lane.last_request_at + self.min_interval_seconds,
                     )
-                    if deadline > now:
-                        deadlines.append(deadline - now)
+                    if lane_deadline > now:
+                        deadlines.append(lane_deadline - now)
                 wait = (
                     min(deadlines)
                     if deadlines
                     else MIN_POLL_SECONDS
                 )
                 wait = min(max(wait, 0.0), MAX_ACQUIRE_WAIT)
+                if deadline is not None:
+                    wait = min(wait, max(0.0, deadline - now))
+                    if wait <= 0:
+                        return None, total_wait
             self.sleep_fn(wait)
             total_wait += wait
         if (
@@ -225,8 +233,19 @@ class ProviderKeyRouter:
                     self.min_interval_seconds,
                 )
                 if reserve_wait > 0:
+                    if deadline is not None:
+                        reserve_wait = min(
+                            reserve_wait,
+                            max(0.0, deadline - self.now_fn()),
+                        )
+                        if reserve_wait <= 0:
+                            self.release_lane(selected)
+                            return None, total_wait
                     self.sleep_fn(reserve_wait)
                     total_wait += reserve_wait
+                    if deadline is not None and self.now_fn() >= deadline:
+                        self.release_lane(selected)
+                        return None, total_wait
             except Exception:
                 self.release_lane(selected)
                 raise

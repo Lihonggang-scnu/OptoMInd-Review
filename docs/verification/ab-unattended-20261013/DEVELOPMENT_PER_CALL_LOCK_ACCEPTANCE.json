@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-13T16:43:25.115830+00:00",
+  "status": "offline_adapter_verified_production_adaptive_prefetch_pending",
+  "scope": "Per-call development supervision only; model/prompt/material/budget unchanged",
+  "adapter_path": "preparation/planning_supervision_candidate/planning_transport.py",
+  "prior_sha256": "49abe81342e3d2d8f28d2cb9b2989a53ead2681e534ff0d6d380c62accc1a934",
+  "candidate_sha256": "61bb9ffb2bc7992a1ddbf3b952bbb1acc2a0a3052a3b50383272f1b023f1a481",
+  "binding_field": "supervision_lock_scope",
+  "effective_value_in_next_binding": "call",
+  "verification_command": "python -m pytest -q test_planning_transport.py::test_native_planning_call_lock_allows_independent_physical_requests test_planning_transport.py::test_real_planner_two_gates_one_dual_reservation_and_replay --basetemp=free_call_lock_v18",
+  "verification": "2 passed in1.64s; two native planning fake physical invocations overlap, both request/response gates and dual reservations retained; cached replay remains no extra calls",
+  "real_api_calls": 0,
+  "production_ledger_writes": 0,
+  "current_v17_reloaded": false
+}

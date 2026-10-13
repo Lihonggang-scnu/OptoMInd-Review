@@ -5,7 +5,7 @@ from pathlib import Path
 from optomind_research.runtime.upgrade3 import directed_reading as dr
 from optomind_research.runtime.upgrade3.progressive_review_plan import (
     ProgressivePlannerConfig, _directed_task_requirements, _directed_material_compatible,
-    _decorate_directed_material, make_directed_reading_runner,
+    _decorate_directed_material, _directed_task_signature, make_directed_reading_runner,
 )
 
 
@@ -181,6 +181,69 @@ def test_same_paper_batch_counts_one_independent_paper(tmp_path, monkeypatch):
     assert dr.DirectedReadingStore(config.output_dir / "directed_reading.sqlite", core_cap=1).summary(config.topic_id)["core_count"] == 1
 
 
+def test_adaptive_prefetch_batches_same_paper_questions_and_reuses_success(tmp_path, monkeypatch):
+    from dataclasses import replace
+    from threading import Barrier, Lock
+    from optomind_research.runtime.upgrade3.progressive_review_plan import make_retrieval_loop_runner
+
+    _, context, _, base_config = fixture(tmp_path, monkeypatch, [answer(), answer("At 10 K")])
+    config = replace(base_config, reader_workers=2)
+    calls = []
+    active = 0
+    maximum_active = 0
+    state_lock = Lock()
+    start_together = Barrier(2)
+    responses = iter((answer(), answer("At 10 K")))
+
+    class ConcurrentBoundaryClient:
+        def __init__(self, **kwargs):
+            pass
+
+        def complete(self, messages, **kwargs):
+            nonlocal active, maximum_active
+            with state_lock:
+                active += 1
+                maximum_active = max(maximum_active, active)
+            try:
+                start_together.wait(timeout=3)
+                calls.append(kwargs)
+                return {"content": json.dumps(next(responses)), "usage": {"prompt_tokens": 1, "completion_tokens": 1}}
+            finally:
+                with state_lock:
+                    active -= 1
+
+    monkeypatch.setattr(dr, "QwenDirectClient", ConcurrentBoundaryClient)
+    reader = make_directed_reading_runner(
+        config, key_file=tmp_path / "synthetic-placeholder.txt",
+        budget_ledger_path=tmp_path / "ledger.json", budget_limit_cny=30,
+    )
+    batches = []
+
+    def batched_reader(tasks, **kwargs):
+        batches.append([_directed_task_signature(item) for item in tasks])
+        return reader(tasks, **kwargs)
+
+    retrieval = make_retrieval_loop_runner(config, allow_external=False, directed_reader=batched_reader)
+    requests = [task(), task(question="Which conditions?")]
+    first = retrieval(
+        phase="prefetch-first", directed_requests=requests,
+        pool_rows=list(context["pool_by_id"].values()), resume=False,
+    )
+    second = retrieval(
+        phase="prefetch-second", directed_requests=requests,
+        pool_rows=list(context["pool_by_id"].values()), resume=False,
+    )
+
+    assert len(batches) >= 2, batches
+    assert len(batches[0]) == 2
+    assert len(set(batches[0])) == 2
+    assert maximum_active == 2
+    assert len(calls) == 2, "the second run may call the reader adapter, but must reuse saved tasks"
+    assert first["consumed_paper_ids"] == second["consumed_paper_ids"] == ["paper-1"]
+    assert all(state["status"] == "answered" for state in first["retrieval_loop"]["needs"])
+    assert all(state["status"] == "answered" for state in second["retrieval_loop"]["needs"])
+
+
 def test_real_retrieval_closure_keeps_partial_status_and_content(tmp_path, monkeypatch):
     from optomind_research.runtime.upgrade3.progressive_review_plan import make_retrieval_loop_runner
     runner, context, calls, config = fixture(tmp_path, monkeypatch, [answer(remaining="Replication unavailable")])
@@ -193,6 +256,32 @@ def test_real_retrieval_closure_keeps_partial_status_and_content(tmp_path, monke
     assert state["still_missing"]
     assert result["tool_materials_by_chapter"]["C1"][0]["usable_content"]
 
+
+def test_resume_reuses_source_bound_partial_without_reader_call(tmp_path, monkeypatch):
+    from optomind_research.runtime.upgrade3.progressive_review_plan import make_retrieval_loop_runner
+
+    runner, context, calls, config = fixture(
+        tmp_path, monkeypatch, [answer(remaining="Replication unavailable")],
+    )
+    retrieval = make_retrieval_loop_runner(config, allow_external=False, directed_reader=runner)
+    run_kwargs = {
+        "phase": "partial-resume",
+        "output_dir": tmp_path / "adaptive",
+        "directed_requests": [{**task(), "chapter_ids": ["C1"]}],
+        "pool_rows": list(context["pool_by_id"].values()),
+        "plan": {"research_question": "Synthetic study"},
+    }
+    first = retrieval(**run_kwargs, resume=False)
+    assert len(calls) == 1
+    for _ in range(2):
+        resumed = retrieval(**run_kwargs, resume=True)
+        assert len(calls) == 1
+        raw = resumed["directed_results"][-1]
+        assert raw["status"] == "partial"
+        assert raw["materials"][0]["question_material"][0]["remaining_points"] == "Replication unavailable"
+        state = resumed["retrieval_loop"]["needs"][0]
+        assert state["still_missing"] == "Replication unavailable"
+    assert first["directed_results"][0]["status"] == "partial"
 
 def test_real_retrieval_closure_routes_provider_failure_to_same_round_retry(tmp_path):
     from optomind_research.runtime.upgrade3.progressive_review_plan import (

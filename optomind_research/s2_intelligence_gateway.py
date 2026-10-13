@@ -295,6 +295,8 @@ class S2Transport:
         ttl_seconds: float = 7 * 86400,
         negative_ttl_seconds: float = 86400,
         schema_version: str = "v1",
+        deadline: float | None = None,
+        fast_fail_retryable: bool = False,
     ) -> S2GatewayResponse:
         endpoint = urllib.parse.urlparse(url).path
         cache_key = canonical_request_key(
@@ -342,9 +344,15 @@ class S2Transport:
         last_slot: int | None = None
 
         for attempt in range(self.max_attempts):
-            lane, lane_wait = self.router.acquire_lane()
+            if deadline is not None and time.monotonic() >= deadline:
+                last_error = last_error or "deadline_exceeded"
+                last_category = "availability_delay"
+                break
+            lane, lane_wait = self.router.acquire_lane(**({"deadline": deadline} if deadline is not None else {}))
             if lane is None:
-                last_error = last_error or "no usable S2 key lane"
+                last_error = last_error or (
+                    "deadline_exceeded" if deadline is not None else "no usable S2 key lane"
+                )
                 if last_category != "authentication_failure":
                     last_category = "availability_delay"
                 break
@@ -366,8 +374,17 @@ class S2Transport:
                 headers=headers,
                 method=method.upper(),
             )
+            remaining = None if deadline is None else deadline - time.monotonic()
+            if remaining is not None and remaining <= 0:
+                self.router.release_lane(lane)
+                last_error = last_error or "deadline_exceeded"
+                last_category = "availability_delay"
+                break
+            socket_timeout = self.timeout_seconds if remaining is None else min(
+                self.timeout_seconds, max(0.01, remaining)
+            )
             try:
-                with self.opener(request, timeout=self.timeout_seconds) as resp:
+                with self.opener(request, timeout=socket_timeout) as resp:
                     raw = resp.read()
                     payload = (
                         json.loads(raw.decode("utf-8", errors="replace")) if raw else {}
@@ -421,6 +438,8 @@ class S2Transport:
                         self.router.rate_limit_cool_lane(lane, wait)
                     else:
                         self.router.cool_lane(lane, wait)
+                    if fast_fail_retryable and exc.code == 429:
+                        break
                     if attempt + 1 < self.max_attempts:
                         continue
                 elif exc.code in {401, 403}:
@@ -495,6 +514,8 @@ class S2IntelligenceGateway:
         limit: int = 20,
         open_access_pdf: bool = False,
         enrich_limit: int = 0,
+        deadline: float | None = None,
+        fast_fail_retryable: bool = False,
     ) -> tuple[list[S2PaperRecord], S2GatewayResponse]:
         """Run lightweight discovery and collect every configured page.
 
@@ -512,8 +533,12 @@ class S2IntelligenceGateway:
         aggregate_response: S2GatewayResponse | None = None
         provider_total: int | None = None
         truncated_reason = ""
+        response: S2GatewayResponse | None = None
 
         while len(papers) < requested_limit and offset < 10_000:
+            if deadline is not None and time.monotonic() >= deadline:
+                truncated_reason = "deadline"
+                break
             page_limit = min(100, requested_limit - len(papers))
             params: dict[str, Any] = {
                 "query": query,
@@ -523,11 +548,17 @@ class S2IntelligenceGateway:
             }
             if open_access_pdf:
                 params["openAccessPdf"] = ""
+            transport_options = {}
+            if deadline is not None:
+                transport_options["deadline"] = deadline
+            if fast_fail_retryable:
+                transport_options["fast_fail_retryable"] = True
             response = self.transport.request_json(
                 "GET",
                 f"{GRAPH_BASE}/paper/search",
                 params=params,
                 ttl_seconds=7 * 86400,
+                **transport_options,
             )
             if aggregate_response is None:
                 aggregate_response = response
@@ -576,14 +607,14 @@ class S2IntelligenceGateway:
             if provider_total is not None and offset >= provider_total:
                 break
 
-        if aggregate_response is None:  # pragma: no cover - loop always executes
+        if aggregate_response is None:  # deadline may expire before first page
             aggregate_response = S2GatewayResponse(
                 ok=False,
-                status_category="request_contract_failure",
-                error="paper search did not execute",
+                status_category="availability_delay" if truncated_reason == "deadline" else "request_contract_failure",
+                error="deadline_exceeded" if truncated_reason == "deadline" else "paper search did not execute",
                 endpoint=f"{GRAPH_BASE}/paper/search",
             )
-        if papers and truncated_reason == "later_page_unavailable":
+        if papers and truncated_reason in {"later_page_unavailable", "deadline"}:
             aggregate_response.status_category = "partial_availability"
         aggregate_response.audit.update(
             {
@@ -598,7 +629,7 @@ class S2IntelligenceGateway:
                 "enrichment_calls": 0,
             }
         )
-        if response.ok and papers and enrich_limit > 0:
+        if response is not None and response.ok and papers and enrich_limit > 0:
             shortlist = [paper.paper_id for paper in papers if paper.paper_id][
                 : max(1, min(int(enrich_limit), 20))
             ]
@@ -680,6 +711,8 @@ class S2IntelligenceGateway:
         min_citation_count: int | None = None,
         publication_date_or_year: str = "",
         max_workers: int | None = None,
+        deadline: float | None = None,
+        fast_fail_retryable: bool = False,
     ) -> tuple[list[dict[str, Any]], S2GatewayResponse]:
         base_params: dict[str, Any] = {
             "query": query,
@@ -724,8 +757,14 @@ class S2IntelligenceGateway:
             params = dict(base_params)
             if batch:
                 params["paperIds"] = ",".join(batch)
+            transport_options = {}
+            if deadline is not None:
+                transport_options["deadline"] = deadline
+            if fast_fail_retryable:
+                transport_options["fast_fail_retryable"] = True
             response = self.transport.request_json(
-                "GET", endpoint, params=params, ttl_seconds=30 * 86400
+                "GET", endpoint, params=params, ttl_seconds=30 * 86400,
+                **transport_options,
             )
             rows: list[dict[str, Any]] = []
             seen_rows: set[str] = set()

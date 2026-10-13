@@ -79,6 +79,7 @@ class OpenAlexBackend:
         router: ProviderKeyRouter | None = None,
         opener: Any | None = None,
         sleep_fn: Any | None = None,
+        timeout_seconds: float = 30.0,
     ) -> None:
         self._last_request = 0.0
         self._rate_limit = rate_limit if rate_limit is not None else RATE_LIMIT_SECONDS
@@ -86,6 +87,8 @@ class OpenAlexBackend:
         self.adapter_only = False
         self.last_error = ""
         self.last_status = "ready"
+        self._sleep_fn = sleep_fn or time.sleep
+        self._timeout_seconds = max(0.1, float(timeout_seconds))
         self.stats: Dict[str, int] = {"requests": 0, "errors": 0, "rate_limited": 0, "keys_loaded": 0, "keys_exhausted": 0}
         self._opener = opener or urllib.request.urlopen
         api_keys = _openalex_api_keys()
@@ -98,7 +101,7 @@ class OpenAlexBackend:
                 RATE_LIMIT_SECONDS,
             ),
             max_attempts=len(api_keys) or 1,
-            sleep_fn=sleep_fn or time.sleep,
+            sleep_fn=self._sleep_fn,
         )
         if not hasattr(OpenAlexBackend, "_global_lock"):
             OpenAlexBackend._global_lock = threading.Lock()
@@ -106,15 +109,24 @@ class OpenAlexBackend:
             OpenAlexBackend._global_disabled_until = 0.0
             OpenAlexBackend._global_last_error = ""
 
-    def _respect_rate_limit(self) -> None:
+    def _respect_rate_limit(self, deadline: float | None = None) -> bool:
         with OpenAlexBackend._global_lock:
             now = time.monotonic()
             elapsed = now - float(getattr(OpenAlexBackend, "_global_last_request", 0.0))
             delay = max(float(self._rate_limit or RATE_LIMIT_SECONDS), RATE_LIMIT_SECONDS) - elapsed
+            if deadline is not None and now >= deadline:
+                return False
             if delay > 0:
-                time.sleep(delay)
+                if deadline is not None:
+                    delay = min(delay, max(0.0, deadline - now))
+                    if delay <= 0:
+                        return False
+                self._sleep_fn(delay)
+                if deadline is not None and time.monotonic() >= deadline:
+                    return False
             OpenAlexBackend._global_last_request = time.monotonic()
             self._last_request = OpenAlexBackend._global_last_request
+            return True
 
     def search(
         self,
@@ -122,9 +134,15 @@ class OpenAlexBackend:
         max_results: int = 10,
         from_year: int | None = None,
         sort: str = "relevance_score:desc",
+        *,
+        deadline: float | None = None,
     ) -> List[Dict[str, Any]]:
         """Search OpenAlex and return normalized SourceRecord dicts."""
         if self.adapter_only:
+            return []
+        if deadline is not None and time.monotonic() >= deadline:
+            self.last_error = "deadline_exceeded"
+            self.last_status = "provider_error"
             return []
         api_keys = self._router.keys
         disabled_until = float(getattr(OpenAlexBackend, "_global_disabled_until", 0.0))
@@ -143,7 +161,7 @@ class OpenAlexBackend:
                 f"from_publication_date:{int(from_year)}-01-01"
             )
         url = OPENALEX_API_BASE + "?" + urllib.parse.urlencode(base_params)
-        data = self._request_with_router(url)
+        data = self._request_with_router(url, deadline=deadline)
         if data is None:
             self.adapter_only = True
             return []
@@ -202,17 +220,22 @@ class OpenAlexBackend:
                 break
         return out
 
-    def _request_with_router(self, url: str) -> Optional[Dict[str, Any]]:
+    def _request_with_router(
+        self, url: str, *, deadline: float | None = None
+    ) -> Optional[Dict[str, Any]]:
         """Fetch one URL through router-selected per-key lanes."""
 
         data: Optional[Dict[str, Any]] = None
         # One logical request tries each configured lane at most once; a
         # no-key public request is a single anonymous attempt.
         for _ in range(len(self._router.lanes)):
-            lane, _ = self._router.acquire_lane()
+            lane, _ = self._router.acquire_lane(**({"deadline": deadline} if deadline is not None else {}))
             if lane is None:
+                if deadline is not None and time.monotonic() >= deadline:
+                    self.last_error = "deadline_exceeded"
+                    self.last_status = "provider_error"
                 break
-            data = self._request_json(url, lane)
+            data = self._request_json(url, lane, deadline=deadline)
             if data is not None:
                 break
         return data
@@ -221,13 +244,19 @@ class OpenAlexBackend:
         self,
         url: str,
         lane: Any,
+        *,
+        deadline: float | None = None,
     ) -> Optional[Dict[str, Any]]:
         """One lane-scoped request; errors are classified internally."""
 
         if not lane.key:
             # Public/no-key path stays globally conservative across backend
             # instances; authenticated lanes pace per key in the router.
-            self._respect_rate_limit()
+            if not self._respect_rate_limit(deadline):
+                self._router.release_lane(lane)
+                self.last_error = "deadline_exceeded"
+                self.last_status = "provider_error"
+                return None
         self.stats["requests"] += 1
         auth_params: Dict[str, str] = {}
         if lane.key:
@@ -245,8 +274,17 @@ class OpenAlexBackend:
         }
         req = urllib.request.Request(final_url, headers=headers)
         slot = self._router.local_slot(lane)
+        remaining = None if deadline is None else deadline - time.monotonic()
+        if remaining is not None and remaining <= 0:
+            self._router.release_lane(lane)
+            self.last_error = "deadline_exceeded"
+            self.last_status = "provider_error"
+            return None
+        socket_timeout = self._timeout_seconds if remaining is None else min(
+            self._timeout_seconds, max(0.01, remaining)
+        )
         try:
-            with self._opener(req, timeout=30) as resp:
+            with self._opener(req, timeout=socket_timeout) as resp:
                 self.last_error = ""
                 self.last_status = "ok"
                 self._router.reset_lane_penalty(lane)

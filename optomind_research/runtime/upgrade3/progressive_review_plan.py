@@ -3657,6 +3657,90 @@ def _directed_material_status(task: Mapping[str, Any], material: Mapping[str, An
     return practical_result_status(current, _directed_task_requirements(task)["questions"])
 
 
+def _directed_material_remaining_points(material: Mapping[str, Any] | None) -> str:
+    """Preserve the unresolved points already recorded by a partial reading."""
+
+    if not isinstance(material, Mapping):
+        return ""
+    values: list[str] = []
+
+    def add(value: Any) -> None:
+        if isinstance(value, Mapping):
+            for key in ("remaining_points", "remaining_gap", "open_questions", "still_missing"):
+                if key in value:
+                    add(value.get(key))
+            return
+        if isinstance(value, (list, tuple)):
+            for item in value:
+                add(item)
+            return
+        text = _text(value)
+        if text and text not in values:
+            values.append(text)
+
+    rows = _material_current_question_rows(material)
+    if not rows:
+        rows = _material_question_rows(material)
+    for row in rows:
+        if not isinstance(row, Mapping):
+            continue
+        for key in ("remaining_points", "remaining_gap", "open_questions"):
+            add(row.get(key))
+    content = material.get("content") if isinstance(material.get("content"), Mapping) else {}
+    for source in (material, content):
+        for key in ("remaining_points", "remaining_gap", "open_questions", "still_missing"):
+            add(source.get(key))
+    return "; ".join(values)
+
+
+def _directed_material_partial_reuse_compatible(
+    task: Mapping[str, Any],
+    material: Mapping[str, Any] | None,
+    *,
+    candidate: Mapping[str, Any],
+    config: ProgressivePlannerConfig,
+    explicit_prior_ids: set[str] | None = None,
+) -> bool:
+    """Allow only a useful, source-proven partial result to resume unchanged.
+
+    Fulfillment remains governed by ``_directed_material_compatible``.  This
+    helper only prevents an identical partial from being sent to the reader
+    again; its unresolved points remain visible to the retrieval loop.
+    """
+
+    if not isinstance(material, Mapping):
+        return False
+    expected = _directed_task_signature(task)
+    actual = _material_task_signature(material)
+    if not expected or expected != actual:
+        return False
+    if not _directed_material_runtime_compatible(material, config, explicit_prior_ids):
+        return False
+    if _directed_material_status(task, material) != "partial":
+        return False
+    return _prior_read_source_compatible(candidate, material)
+
+
+def _directed_material_partial_reuse_result(
+    task: Mapping[str, Any], material: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Project retained partial material into the external-closure contract."""
+
+    paper_id = _text(material.get("paper_id") or material.get("canonical_paper_id") or task.get("paper_id"))
+    return {
+        "status": "partial",
+        "materials": [dict(material)],
+        "consumed_paper_ids": [paper_id] if paper_id else [],
+        "attempted_paper_ids": [],
+        "task_signature": _directed_task_signature(task),
+        "task_reused": True,
+        "reused": True,
+        "partial_reused": True,
+        "network_call": False,
+        "still_missing": _directed_material_remaining_points(material),
+    }
+
+
 def _material_question_rows(material: Mapping[str, Any] | None) -> list[Any]:
     if not isinstance(material, Mapping):
         return []
@@ -7762,7 +7846,11 @@ def _candidate_identity(candidate: Mapping[str, Any]) -> dict[str, Any]:
             "paper_id": _text(candidate.get("_paper_id") or _canonical_paper_id(candidate))}
 
 
-def _directed_source_state(candidate: Mapping[str, Any]) -> dict[str, Any]:
+def _directed_source_state(
+    candidate: Mapping[str, Any],
+    *,
+    include_unprojected: bool = False,
+) -> dict[str, Any]:
     """Current readable content, independent of directories and snapshot names."""
     from .directed_reading import sha256_value
     from .practical_materials import load_practical_material
@@ -7785,7 +7873,14 @@ def _directed_source_state(candidate: Mapping[str, Any]) -> dict[str, Any]:
             if isinstance(manifest, Mapping) and _saved_card_identity_conflict(identity, manifest) is not None:
                 return {**result, "material_identity_conflict": True}
     try:
-        result["source_hash"] = sha256_value(load_practical_material(snapshot))
+        result["source_hash"] = sha256_value(load_practical_material(snapshot, formula_view=True))
+        if include_unprojected:
+            # A formula display conversion is a derived prompt view.  Keep the
+            # old raw-view hash available only for the explicit compatibility
+            # check; the normal source state and need signature remain stable.
+            result["unprojected_source_hash"] = sha256_value(
+                load_practical_material(snapshot, formula_view=False)
+            )
     except (OSError, UnicodeError, ValueError):
         pass
     return result
@@ -7823,11 +7918,23 @@ def _prior_read_source_compatible(candidate: Mapping[str, Any], material: Mappin
         return False
     # A review-derived account remains usable without its own snapshot, but
     # its presence alone is not proof that an earlier task answer is unchanged.
-    current = _directed_source_state(candidate)
+    current = _directed_source_state(candidate, include_unprojected=True)
     if current.get("material_identity_conflict"):
         return False
     previous = _prior_read_source_hash(material)
-    return bool(previous and current["source_hash"] and previous == current["source_hash"])
+    if previous and current["source_hash"] and previous == current["source_hash"]:
+        return True
+    # Permit only the known derived-view migration.  The current projected
+    # hash must differ, while the exact raw-view hash must equal the saved
+    # proof. Missing old proof, changed source material, and failed reads do
+    # not enter this path.
+    return bool(
+        previous
+        and current.get("source_hash")
+        and current.get("unprojected_source_hash")
+        and previous != current["source_hash"]
+        and previous == current["unprojected_source_hash"]
+    )
 
 
 def load_prior_readings(paths: Sequence[str | Path], pool_rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
@@ -7895,6 +8002,8 @@ def make_planning_supplement_runner(
     local_index_path: str | Path | None = None,
     allow_external: bool = True,
     acquirer_factory: Callable[[Path], Any] | None = None,
+    deadline_seconds: float | None = None,
+    request_timeout_seconds: float | None = None,
 ) -> Callable[..., Mapping[str, Any]]:
     """Build a callable adapter over the existing practical supplement path.
 
@@ -7913,7 +8022,7 @@ def make_planning_supplement_runner(
             run_planning_supplement, run_qwen_fulfillment_judge, allocate_supplement_attempt,
         )
         from .planning_material_triage import QwenLocalTriageJudge
-        from ...s2_intelligence_gateway import S2IntelligenceGateway
+        from ...s2_intelligence_gateway import S2IntelligenceGateway, S2Transport
         from tools.academic_backends.openalex_backend import OpenAlexBackend
 
         phase_root = Path(context.get("output_dir") or config.output_dir / str(context.get("phase") or "tools"))
@@ -8029,7 +8138,17 @@ def make_planning_supplement_runner(
         def default_acquirer_factory(material_root: Path):
             return MaterialAcquirer(material_root, config=AcquisitionConfig(cache_root=material_root / "cache"))
 
-        gateway = CompositeS2OpenAlexGateway(S2IntelligenceGateway(), OpenAlexBackend())
+        s2_transport = (
+            S2Transport(timeout_seconds=float(request_timeout_seconds))
+            if request_timeout_seconds is not None else None
+        )
+        gateway = CompositeS2OpenAlexGateway(
+            S2IntelligenceGateway(transport=s2_transport),
+            OpenAlexBackend(
+                timeout_seconds=float(request_timeout_seconds)
+                if request_timeout_seconds is not None else 30.0
+            ),
+        )
         results: list[dict[str, Any]] = []
         for gap in remaining:
             gap_id = _safe_id(gap.get("gap_id") or f"gap_{len(results) + 1:02d}")
@@ -8058,6 +8177,11 @@ def make_planning_supplement_runner(
             _atomic_json(request_path, request)
             output_dir = allocate_supplement_attempt(phase_root / "supplements" / gap_id)
             try:
+                discovery_deadline = None
+                if deadline_seconds is not None:
+                    discovery_deadline = time.monotonic() + max(
+                        1.0, float(deadline_seconds)
+                    )
                 result = run_planning_supplement(
                     request_path,
                     output_dir=output_dir,
@@ -8072,6 +8196,7 @@ def make_planning_supplement_runner(
                     },
                     candidate_selector=selector,
                     reuse_material=reuse_material,
+                    discovery_deadline=discovery_deadline,
                 )
                 returned_dir = Path(str(result.get("output_dir") or output_dir))
                 index_path = returned_dir / "SUPPLEMENT_INDEX.json"
@@ -8326,7 +8451,9 @@ def make_retrieval_loop_runner(
             prior_directed: Mapping[str, Any] | None = None, source_handle_map: Mapping[str, str] | None = None,
             resume: bool = True, output_dir: str | Path | None = None, **_: Any) -> Mapping[str, Any]:
         from .planning_retrieval_loop import (
-            InformationNeed, LoopConfig, need_id_for, needs_from_planner_gap_rows, run_retrieval_loop,
+            InformationNeed, LoopConfig, RetrievalJournal, _is_scientific_attempt,
+            _need_signature, _signature_matches, need_id_for, needs_from_planner_gap_rows,
+            run_retrieval_loop,
         )
 
         root = Path(output_dir or config.output_dir / str(phase).lower())
@@ -8702,6 +8829,233 @@ def make_retrieval_loop_runner(
         pool_by_id = {str(row.get("_paper_id")): dict(row) for row in working_pool if isinstance(row, Mapping)}
         paper_to_handle = {str(value): str(key) for key, value in (source_handle_map or {}).items()}
 
+        # The adaptive queue below remains sequential because its journal,
+        # owner bindings and supplement pool are stateful. Directed reading
+        # is independent per task, and the reader adapter already owns a
+        # bounded executor. Prefetch those tasks once, then let the loop
+        # consume the projected rows in its original need order.
+        prefetched_directed: dict[tuple[str, str], dict[str, Any]] = {}
+        prefetch_journal = RetrievalJournal(
+            journal_path if resume else Path(journal_path).with_suffix(".fresh.jsonl")
+        )
+
+        def directed_prefetch_key(request: Mapping[str, Any]) -> tuple[str, str]:
+            return (_text(request.get("paper_id") or request.get("canonical_paper_id")),
+                    _directed_task_signature(request))
+
+        def directed_journal_is_terminal(need: Any) -> bool:
+            """Avoid starting a batch for a saved terminal need on resume."""
+
+            if not resume:
+                return False
+            signature = _need_signature(need)
+            entries = [
+                entry for entry in prefetch_journal.entries_for(need.need_id)
+                if isinstance(entry, Mapping)
+                and _is_scientific_attempt(entry)
+                and _signature_matches(entry.get("need_signature"), signature)
+            ]
+            if not entries:
+                return False
+            latest = entries[-1]
+            status = _text(latest.get("status")).casefold()
+            action = _text(latest.get("action")).casefold()
+            round_index = int(latest.get("round") or 0)
+            return (
+                status == "answered"
+                or action == "stop"
+                or status.startswith("stopped")
+                or (status == "partial" and round_index >= 3)
+            )
+
+        def slice_prefetched_directed_result(
+            raw: Mapping[str, Any], request: Mapping[str, Any],
+            batch_keys: Sequence[tuple[str, str]],
+        ) -> dict[str, Any]:
+            """Project one batch row back to the loop's one-need contract."""
+
+            paper_id, task_signature = directed_prefetch_key(request)
+            rows = [
+                dict(row) for row in raw.get("results") or ()
+                if isinstance(row, Mapping)
+                and _text(row.get("paper_id")) == paper_id
+                and (
+                    _text(row.get("task_signature")) == task_signature
+                    or _material_task_signature(row.get("material")) == task_signature
+                )
+            ]
+            if not rows:
+                same_paper = [
+                    dict(row) for row in raw.get("results") or ()
+                    if isinstance(row, Mapping) and _text(row.get("paper_id")) == paper_id
+                ]
+                if len(batch_keys) == 1 and len(same_paper) == 1:
+                    rows = same_paper
+            materials = [
+                dict(row.get("material")) for row in rows
+                if isinstance(row.get("material"), Mapping)
+            ]
+            if not materials:
+                materials = [
+                    dict(material) for material in raw.get("materials") or ()
+                    if isinstance(material, Mapping)
+                    and _text(material.get("paper_id") or material.get("canonical_paper_id")) == paper_id
+                    and _material_task_signature(material) == task_signature
+                ]
+            if not rows and not materials and len(batch_keys) == 1:
+                # A provider-level failure without per-task rows is still
+                # attributable when this batch contained one task.
+                projected = dict(raw)
+                projected["task_signature"] = task_signature
+                projected["results"] = []
+                projected["materials"] = []
+                projected["consumed_paper_ids"] = [
+                    paper_id for item in raw.get("consumed_paper_ids") or ()
+                    if _text(item) == paper_id
+                ]
+                projected["attempted_paper_ids"] = [
+                    paper_id for item in raw.get("attempted_paper_ids") or ()
+                    if _text(item) == paper_id
+                ]
+                return projected
+            if not rows and not materials:
+                return {
+                    "status": "failed", "provider_failed": True,
+                    "error": "directed_batch_result_missing_task",
+                    "task_signature": task_signature,
+                    "results": [{"paper_id": paper_id, "task_signature": task_signature,
+                                  "status": "failed", "error": "directed_batch_result_missing_task"}],
+                    "materials": [], "consumed_paper_ids": [],
+                    "attempted_paper_ids": [],
+                }
+            row = rows[0] if rows else {}
+            status = _text(row.get("status") or raw.get("status")) or "unmet"
+            projected = dict(raw)
+            projected.update({
+                "status": status,
+                "task_signature": task_signature,
+                "results": rows,
+                "materials": materials,
+                "consumed_paper_ids": [
+                    paper_id for item in raw.get("consumed_paper_ids") or ()
+                    if _text(item) == paper_id
+                ],
+                "attempted_paper_ids": [
+                    paper_id for item in raw.get("attempted_paper_ids") or ()
+                    if _text(item) == paper_id
+                ],
+                "failed_paper_ids": [
+                    paper_id for item in raw.get("failed_paper_ids") or ()
+                    if _text(item) == paper_id
+                ],
+            })
+            if row.get("error"):
+                projected["error"] = _text(row.get("error"))
+            if status.casefold() in {"failed", "provider_failed", "provider_error"}:
+                projected["provider_failed"] = True
+            return projected
+
+        def prefetch_directed_tasks() -> None:
+            if directed_reader is None or not needs:
+                return
+            candidates: list[tuple[Any, Mapping[str, Any], tuple[str, str]]] = []
+            seen: set[tuple[str, str]] = set()
+            for need in needs:
+                if kind_by_id.get(need.need_id) != "directed":
+                    continue
+                request = request_by_id.get(need.need_id)
+                if not isinstance(request, Mapping):
+                    continue
+                key = directed_prefetch_key(request)
+                if not key[0] or key in seen:
+                    continue
+                seen.add(key)
+                retry_requested = request.get("retry_empty_result") is True
+                prior_material = read_materials.get(key[0])
+                prior_signature = read_task_signatures.get(key[0]) or _material_task_signature(prior_material)
+                if (
+                    not retry_requested
+                    and prior_material is not None
+                    and prior_signature == key[1]
+                    and _directed_material_runtime_compatible(prior_material, config, explicit_prior_ids)
+                    and _directed_material_compatible(request, prior_material)
+                    and _prior_read_source_compatible(pool_by_id.get(key[0], {}), prior_material)
+                ):
+                    continue
+                if (
+                    not retry_requested
+                    and _directed_material_partial_reuse_compatible(
+                        request, prior_material,
+                        candidate=pool_by_id.get(key[0], {}),
+                        config=config,
+                        explicit_prior_ids=explicit_prior_ids,
+                    )
+                ):
+                    # A useful partial is already source- and task-bound.
+                    # Leave it for the sequential closure to project with its
+                    # original remaining points; do not send it to the reader.
+                    continue
+                if not retry_requested and directed_journal_is_terminal(need):
+                    continue
+                candidates.append((need, request, key))
+            if not candidates:
+                return
+
+            # Reserve only the unique paper slots that the existing
+            # sequential closure could consume. Every task for a selected
+            # paper stays in the batch, so same-paper questions remain
+            # independent without spending a second paper slot.
+            planned_consumed = set(consumed_ids)
+            selected: list[Mapping[str, Any]] = []
+            selected_keys: list[tuple[str, str]] = []
+            for _need, request, key in candidates:
+                if key[0] not in planned_consumed:
+                    if len(planned_consumed) >= int(config.shared_deep_read_budget):
+                        continue
+                    planned_consumed.add(key[0])
+                selected.append(dict(request))
+                selected_keys.append(key)
+            if not selected:
+                return
+            context = {
+                "phase": phase,
+                # Keep the same phase/round shape as the sequential closure;
+                # the directed reader adds its own task-specific leaf.
+                "output_dir": root / "external" / "directed_prefetch" / "round_1",
+                "topic_id": config.topic_id,
+                "plan": dict(plan or {}),
+                "pool_rows": working_pool,
+                "pool_by_id": pool_by_id,
+                "source_handle_map": dict(source_handle_map or {}),
+                "prior_tool_results": dict(prior_tool_results or {}),
+                "prior_directed": dict(prior_directed or {}),
+                "prior_readings": list(prior_readings),
+                "shared_deep_read_budget": config.shared_deep_read_budget,
+                "remaining_deep_read_budget": max(0, int(config.shared_deep_read_budget) - len(consumed_ids)),
+                "skip_local_triage": True,
+            }
+            try:
+                raw = directed_reader(selected, **context)
+                if not isinstance(raw, Mapping):
+                    raise ProgressivePlanError("directed_prefetch_return_not_object")
+                # Physical reads have already taken their paper slots. Make
+                # them visible to supplement closures before the sequential
+                # loop starts, not only when each later directed need is folded.
+                consumed_ids.update(_text(item) for item in raw.get("consumed_paper_ids") or () if _text(item))
+                for request, key in zip(selected, selected_keys):
+                    prefetched_directed[key] = slice_prefetched_directed_result(raw, request, selected_keys)
+            except Exception as exc:
+                error = type(exc).__name__
+                for request, key in zip(selected, selected_keys):
+                    prefetched_directed[key] = {
+                        "status": "failed", "provider_failed": True, "error": error,
+                        "task_signature": key[1],
+                        "results": [{"paper_id": key[0], "task_signature": key[1],
+                                     "status": "failed", "error": error}],
+                        "materials": [], "consumed_paper_ids": [],
+                        "attempted_paper_ids": [key[0]],
+                    }
+
         def retain_local_context(need_id: str, result: Mapping[str, Any]) -> dict[str, Any]:
             result = dict(result)
             retained = _text((request_by_id.get(need_id) or {}).get("reusable_material"))
@@ -8896,17 +9250,31 @@ def make_retrieval_loop_runner(
             task_signature = _directed_task_signature(request)
             prior_material = read_materials.get(paper_id)
             prior_signature = read_task_signatures.get(paper_id) or _material_task_signature(prior_material)
-            if prior_material is not None and prior_signature and prior_signature == task_signature \
+            if not request["retry_empty_result"] and prior_material is not None and prior_signature and prior_signature == task_signature \
                     and _directed_material_runtime_compatible(prior_material, config, explicit_prior_ids) \
                     and _directed_material_compatible(request, prior_material) \
                     and _prior_read_source_compatible(pool_by_id.get(paper_id, {}), prior_material):
                 raw = {"status": "reused_prior_deep_read", "materials": [dict(prior_material)],
                        "consumed_paper_ids": [paper_id], "task_reused": True}
+            elif (
+                not request["retry_empty_result"]
+                and _directed_material_partial_reuse_compatible(
+                    request, prior_material,
+                    candidate=pool_by_id.get(paper_id, {}),
+                    config=config,
+                    explicit_prior_ids=explicit_prior_ids,
+                )
+            ):
+                raw = _directed_material_partial_reuse_result(request, prior_material)
             elif paper_id not in consumed_ids and len(consumed_ids) >= config.shared_deep_read_budget:
                 return {"status": "unmet", "usable_content": "", "still_missing": need.question,
                         "outcome": "shared_deep_read_budget_exhausted"}
             else:
-                raw = dict(directed_reader([request], **context))
+                prefetched = prefetched_directed.pop((paper_id, task_signature), None)
+                if prefetched is not None:
+                    raw = dict(prefetched)
+                else:
+                    raw = dict(directed_reader([request], **context))
                 consumed_ids.update(raw.get("consumed_paper_ids") or [])
                 decorated_materials: list[dict[str, Any]] = []
                 for item in raw.get("materials") or []:
@@ -8943,12 +9311,20 @@ def make_retrieval_loop_runner(
             if provider_failed and not useful:
                 status = "failed"
             added = [_text(item.get("paper_id")) for item in materials if isinstance(item, Mapping) and _text(item.get("paper_id"))]
-            return {"status": status, "still_missing": "" if status == "fulfilled" else need.question,
+            still_missing = ""
+            if status != "fulfilled":
+                still_missing = _text(raw.get("still_missing")) if raw.get("partial_reused") else ""
+                still_missing = still_missing or need.question
+            return {"status": status, "still_missing": still_missing,
                     "usable_content": useful, "new_handles": added, "raw_result": raw,
                      "consumed_paper_ids": list(raw.get("consumed_paper_ids") or []),
                      "provider_failed": provider_failed and not useful,
                      "error": _text(raw.get("error") or raw.get("reason")) if provider_failed and not useful else ""}
 
+        # Perform independent directed reads before the stateful loop starts.
+        # The loop still consumes one projected row at a time, preserving its
+        # journal, owner, cache, and budget bookkeeping order.
+        prefetch_directed_tasks()
         loop_config = LoopConfig(
             index_path=index_path, journal_path=root / "retrieval_loop.jsonl",
             max_rounds=3, max_empty_rounds=2, max_queries_per_round=3,

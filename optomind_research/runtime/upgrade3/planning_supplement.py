@@ -21,6 +21,7 @@ import math
 import re
 import tempfile
 import time
+import inspect
 from dataclasses import dataclass, field
 from pathlib import Path
 from types import SimpleNamespace
@@ -124,17 +125,32 @@ class CompositeS2OpenAlexGateway:
         self.last_provider_audit = []
         self.last_openalex_records = []
         self.last_search_provider = ""
+        deadline = kwargs.get("deadline")
         s2_rows: list[Any] = []
         s2_status: int | None = None
         try:
-            s2_rows, s2_response = self.s2_gateway.search_papers(query, limit=limit, **kwargs)
+            s2_kwargs = dict(kwargs)
+            # This flag is deliberately set only by the supplement composite:
+            # ordinary S2 callers retain their patient retry policy.
+            parameters = inspect.signature(self.s2_gateway.search_papers).parameters
+            accepts_kwargs = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in parameters.values())
+            if accepts_kwargs or "fast_fail_retryable" in parameters:
+                s2_kwargs["fast_fail_retryable"] = True
+            if not accepts_kwargs and "deadline" not in parameters:
+                s2_kwargs.pop("deadline", None)
+            s2_rows, s2_response = self.s2_gateway.search_papers(
+                query, limit=limit, **s2_kwargs
+            )
             s2_status = self._status(s2_response)
-            self.last_provider_audit.append({
+            s2_attempt = {
                 "provider": "semantic_scholar",
                 "status_code": s2_status,
                 "returned": len(s2_rows or []),
                 "retryable": s2_status is None or s2_status in {408, 425, 429} or s2_status >= 500,
-            })
+            }
+            if getattr(s2_response, "audit", None):
+                s2_attempt["audit"] = dict(s2_response.audit)
+            self.last_provider_audit.append(s2_attempt)
         except Exception as exc:
             self.last_provider_audit.append({
                 "provider": "semantic_scholar",
@@ -147,10 +163,26 @@ class CompositeS2OpenAlexGateway:
             self.last_search_provider = "semantic_scholar"
             return s2_rows[:limit], _SearchResponse(s2_status)
 
+        if deadline is not None and time.monotonic() >= deadline:
+            # Keep the S2 failure/empty result and make the skipped fallback
+            # visible; do not synthesize either hits or an OpenAlex outage.
+            self.last_provider_audit.append({
+                "provider": "openalex",
+                "status_code": None,
+                "returned": 0,
+                "error": "not_executed_deadline",
+                "executed": False,
+                "retryable": False,
+            })
+            return [], _SearchResponse(s2_status)
+
         openalex_rows: list[dict[str, Any]] = []
         openalex_error = ""
         try:
-            openalex_rows = list(self.openalex_backend.search(query, max_results=min(int(limit), 50)) or [])
+            openalex_kwargs = {"max_results": min(int(limit), 50)}
+            if deadline is not None:
+                openalex_kwargs["deadline"] = deadline
+            openalex_rows = list(self.openalex_backend.search(query, **openalex_kwargs) or [])
             backend_status = str(getattr(self.openalex_backend, "last_status", "") or "").casefold()
             # OpenAlexBackend returns [] for both a successful empty search and
             # a failed/disabled transport. Its status field is the distinction.
@@ -656,6 +688,7 @@ def _query_specs_and_hits(
     request: PlanningSupplementRequest,
     plan: Mapping[str, Any],
     gateway: Any | None,
+    deadline: float | None = None,
 ) -> tuple[list[dict[str, Any]], list[_Candidate], str]:
     specs, query_source = _query_specs(request, plan)
     query_audits: list[dict[str, Any]] = []
@@ -683,6 +716,7 @@ def _query_specs_and_hits(
                 spec,
                 per_query_limit=request.per_query_limit,
                 discovery_target=0,
+                deadline=deadline,
             )
             row = dict(audit)
             provider_attempts = [
@@ -2263,6 +2297,7 @@ def run_planning_supplement(
     card_options: Mapping[str, Any] | None = None,
     candidate_selector: Callable[..., Sequence[int]] | None = None,
     reuse_material: Callable[..., Mapping[str, Any] | None] | None = None,
+    discovery_deadline: float | None = None,
 ) -> dict[str, Any]:
     """Run one bounded supplement; all external collaborators are injectable.
 
@@ -2288,7 +2323,9 @@ def run_planning_supplement(
     _write_json(root / "REQUEST.json", request.to_dict())
     _write_json(root / "PLAN_SOURCE_AUDIT.json", dict(plan_report.get("source_audit") or {}))
 
-    query_audits, search_candidates, actual_query_source = _query_specs_and_hits(request, plan, gateway)
+    query_audits, search_candidates, actual_query_source = _query_specs_and_hits(
+        request, plan, gateway, deadline=discovery_deadline
+    )
     if not specs:
         actual_query_source = query_source
     candidates = _merge_candidate_sources([*_explicit_candidates(request), *search_candidates])
