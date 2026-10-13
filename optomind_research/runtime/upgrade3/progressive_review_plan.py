@@ -8596,6 +8596,39 @@ def _supplement_answered(state: Mapping[str, Any]) -> bool:
     return isinstance(state, Mapping) and state.get("status") == "answered" and bool(_text(state.get("usable_content"))) and not _text(state.get("still_missing"))
 
 
+def _preserve_prior_still_missing_on_empty_failure(
+    result: Mapping[str, Any] | None,
+    prior: Mapping[str, Any] | None,
+    question: Any,
+) -> dict[str, Any]:
+    """Keep a concrete prior gap when a new local attempt found no material.
+
+    A changed lookup/index identity can replay an older partial state under a
+    new need id.  Local triage conventionally falls back to the broad need
+    question for an empty/unjudgeable result; that fallback must not erase a
+    more specific unresolved point from the prior partial.  Explicit new
+    content or an explicit new remaining point stays authoritative.
+    """
+
+    current = dict(result) if isinstance(result, Mapping) else {}
+    previous_missing = _text((prior or {}).get("still_missing")) if isinstance(prior, Mapping) else ""
+    current_missing = _text(current.get("still_missing"))
+    question_text = _text(question)
+    if not previous_missing or previous_missing == question_text:
+        return current
+    useful = any(_text(current.get(key)) for key in (
+        "usable_content", "useful_material", "auxiliary_material", "reusable_material",
+    ))
+    status = _text(current.get("status") or current.get("decision")).casefold()
+    failure_like = bool(current.get("provider_failed")) or status in {
+        "failed", "provider_failed", "provider_error", "unjudgeable", "unassessed",
+        "unmet", "empty", "external_research", "needs_external", "partial",
+    }
+    if not useful and failure_like and (not current_missing or current_missing == question_text):
+        current["still_missing"] = previous_missing
+    return current
+
+
 def _local_writer_context(local: Mapping[str, Any], *, omit_gap_limit: bool = False) -> dict[str, Any]:
     raw = local.get("writer_material") if isinstance(local, Mapping) else None
     writer = dict(raw) if isinstance(raw, Mapping) else {}
@@ -9270,6 +9303,11 @@ def make_retrieval_loop_runner(
 
         def retain_local_context(need_id: str, result: Mapping[str, Any]) -> dict[str, Any]:
             result = dict(result)
+            if need_id in request_by_id and "still_missing" in result:
+                request_by_id[need_id] = {
+                    **dict(request_by_id.get(need_id) or {}),
+                    "still_missing": _text(result.get("still_missing")),
+                }
             retained = _text((request_by_id.get(need_id) or {}).get("reusable_material"))
             if retained:
                 result["usable_content"] = "\n\n".join(dict.fromkeys(
@@ -9347,6 +9385,7 @@ def make_retrieval_loop_runner(
             if not any(p.kind == inspect.Parameter.VAR_KEYWORD for p in parameters.values()):
                 kwargs = {key: value for key, value in kwargs.items() if key in parameters}
             result = run_gap_local_triage(gap_row, **kwargs)
+            result = _preserve_prior_still_missing_on_empty_failure(result, prior, gap.question)
             # Keep the current judgment authoritative for completion while
             # inherited prose retains its own source and scientific context.
             return retain_local_context(gap.gap_id, result)
@@ -9388,7 +9427,8 @@ def make_retrieval_loop_runner(
             }
             if kind_by_id.get(need.need_id) == "supplement":
                 if supplement_runner is None or not allow_external:
-                    return {"status": "unmet", "usable_content": "", "still_missing": need.question}
+                    return {"status": "unmet", "usable_content": "",
+                            "still_missing": _text(request.get("still_missing")) or need.question}
                 request["targeted_queries"] = [dict(item) for item in queries if isinstance(item, Mapping)]
                 plan_facets = [_text(item.get("id")) for item in (plan or {}).get("facets") or ()
                                if isinstance(item, Mapping) and _text(item.get("id"))]
@@ -9457,7 +9497,8 @@ def make_retrieval_loop_runner(
             # External retrieval can be disabled while reading an already
             # downloaded paper remains available under the shared read budget.
             if directed_reader is None:
-                return {"status": "unmet", "usable_content": "", "still_missing": need.question}
+                return {"status": "unmet", "usable_content": "",
+                        "still_missing": _text(request.get("still_missing")) or need.question}
             paper_id = _text(request.get("paper_id"))
             task_signature = _directed_task_signature(request)
             prior_material = read_materials.get(paper_id)
@@ -9479,7 +9520,8 @@ def make_retrieval_loop_runner(
             ):
                 raw = _directed_material_partial_reuse_result(request, prior_material)
             elif paper_id not in consumed_ids and len(consumed_ids) >= config.shared_deep_read_budget:
-                return {"status": "unmet", "usable_content": "", "still_missing": need.question,
+                return {"status": "unmet", "usable_content": "",
+                        "still_missing": _text(request.get("still_missing")) or need.question,
                         "outcome": "shared_deep_read_budget_exhausted"}
             else:
                 prefetched = prefetched_directed.pop((paper_id, task_signature), None)
@@ -9526,7 +9568,7 @@ def make_retrieval_loop_runner(
             still_missing = ""
             if status != "fulfilled":
                 still_missing = _text(raw.get("still_missing")) if raw.get("partial_reused") else ""
-                still_missing = still_missing or need.question
+                still_missing = still_missing or _text(request.get("still_missing")) or need.question
             return {"status": status, "still_missing": still_missing,
                     "usable_content": useful, "new_handles": added, "raw_result": raw,
                      "consumed_paper_ids": list(raw.get("consumed_paper_ids") or []),

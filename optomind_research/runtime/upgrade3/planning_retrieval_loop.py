@@ -161,6 +161,32 @@ def _merge_usable_content(previous: str, current: str) -> str:
     return previous + "\n\n" + current
 
 
+def _merge_still_missing(
+    previous: Any,
+    candidate: Any,
+    question: Any,
+    *,
+    useful_content: Any = "",
+    status: Any = "",
+) -> str:
+    """Do not replace a concrete prior gap with an empty-attempt fallback."""
+
+    previous_text = str(previous or "").strip()
+    candidate_text = str(candidate or "").strip()
+    question_text = str(question or "").strip()
+    status_text = str(status or "").strip().casefold()
+    useful = bool(str(useful_content or "").strip())
+    if candidate_text:
+        if (candidate_text == question_text and previous_text and previous_text != question_text
+                and (not useful or status_text in {"provider_retry", "provider_failed", "provider_error", "failed"})
+                and status_text not in {"fulfilled", "answered", "direct_use"}):
+            return previous_text
+        return candidate_text
+    if status_text in {"fulfilled", "answered", "direct_use"} and useful:
+        return ""
+    return previous_text
+
+
 def _requirement_content(value: Any) -> Any:
     """Separate output/question routing labels from acceptance content."""
     if isinstance(value, Mapping):
@@ -622,9 +648,14 @@ def run_retrieval_loop(
                 for raw in raw_rows:
                     if isinstance(raw, Mapping) and raw not in state.external_results:
                         state.external_results.append(dict(raw))
-                state.usable_content = _merge_usable_content(state.usable_content, str(diagnostic.get("usable_content") or ""))
-                if diagnostic.get("still_missing"):
-                    state.still_missing = str(diagnostic["still_missing"])
+                diagnostic_usable = str(diagnostic.get("usable_content") or "").strip()
+                prior_usable = state.usable_content
+                state.usable_content = _merge_usable_content(state.usable_content, diagnostic_usable)
+                diagnostic_new_usable = diagnostic_usable if state.usable_content != prior_usable else ""
+                state.still_missing = _merge_still_missing(
+                    state.still_missing, diagnostic.get("still_missing"), need.question,
+                    useful_content=diagnostic_new_usable, status=diagnostic.get("status") or "provider_retry",
+                )
                 consumed = {str(item) for item in diagnostic.get("consumed_paper_ids") or () if str(item).strip()}
                 consumed_paper_ids.update(consumed)
                 state.consumed_paper_ids = tuple(sorted(set(state.consumed_paper_ids).union(consumed)))
@@ -637,8 +668,14 @@ def run_retrieval_loop(
                 )
                 state.round_index = max(state.round_index, round_index)
                 state.local_decision = str(saved.get("local_decision") or state.local_decision)
-                state.usable_content = _merge_usable_content(state.usable_content, str(saved.get("usable_content") or ""))
-                state.still_missing = str(saved.get("still_missing", state.still_missing) or "")
+                saved_usable = str(saved.get("usable_content") or "").strip()
+                prior_usable = state.usable_content
+                state.usable_content = _merge_usable_content(state.usable_content, saved_usable)
+                saved_new_usable = saved_usable if state.usable_content != prior_usable else ""
+                state.still_missing = _merge_still_missing(
+                    state.still_missing, saved.get("still_missing"), need.question,
+                    useful_content=saved_new_usable, status=saved.get("status") or saved.get("action"),
+                )
                 state.queries = list(saved.get("queries") or [])
                 state.query_status = str(saved.get("query_status") or ("ready" if state.queries else ""))
                 state.query_source = str(saved.get("query_source") or "")
@@ -675,11 +712,15 @@ def run_retrieval_loop(
             state.local_decision = decision
             state.local_triage = dict(local)
             usable = str(local.get("usable_content") or "").strip()
+            prior_usable = state.usable_content
             if usable:
                 state.usable_content = _merge_usable_content(state.usable_content, usable)
+            local_new_usable = usable if state.usable_content != prior_usable else ""
             local_missing = str(local.get("still_missing") or "").strip()
-            if local_missing and (not state.still_missing or state.still_missing == need.question):
-                state.still_missing = local_missing
+            state.still_missing = _merge_still_missing(
+                state.still_missing, local_missing, need.question,
+                useful_content=local_new_usable, status=local.get("status") or local.get("decision"),
+            )
             state.read_focus = str(local.get("read_focus") or state.read_focus)
             state.external_ask = str(local.get("external_ask") or state.external_ask)
             passages = local.get("passages")
@@ -923,8 +964,14 @@ def run_retrieval_loop(
                     error = str(outcome.get("error") or "provider_failed")
                     raw_result = _external_raw_result(outcome)
                     state.external_results.append(raw_result)
-                    state.usable_content = _merge_usable_content(state.usable_content, str(outcome.get("usable_content") or ""))
-                    state.still_missing = str(outcome.get("still_missing") or state.still_missing or need.question)
+                    outcome_usable = str(outcome.get("usable_content") or "")
+                    prior_usable = state.usable_content
+                    state.usable_content = _merge_usable_content(state.usable_content, outcome_usable)
+                    outcome_new_usable = outcome_usable if state.usable_content != prior_usable else ""
+                    state.still_missing = _merge_still_missing(
+                        state.still_missing, outcome.get("still_missing"), need.question,
+                        useful_content=outcome_new_usable, status="provider_retry",
+                    ) or need.question
                     consumed = {str(item) for item in outcome.get("consumed_paper_ids") or () if str(item).strip()}
                     consumed_paper_ids.update(consumed)
                     state.consumed_paper_ids = tuple(sorted(set(state.consumed_paper_ids).union(consumed)))
@@ -960,8 +1007,10 @@ def run_retrieval_loop(
 
             added_handles = tuple(str(item) for item in (outcome.get("new_handles") or ()) if str(item))
             useful = str(outcome.get("usable_content") or "").strip()
+            prior_usable = state.usable_content
             if useful:
                 state.usable_content = _merge_usable_content(state.usable_content, useful)
+            new_useful = useful if state.usable_content != prior_usable else ""
             state.new_handles = tuple(dict.fromkeys([*state.new_handles, *added_handles]))
             for handle in added_handles:
                 shared_reads.setdefault(handle, round_index)
@@ -984,10 +1033,10 @@ def run_retrieval_loop(
             entry["external_status"] = status
             entry["external_outcome"] = str(outcome.get("outcome") or "")
             entry["external_usable_content"] = bool(useful)
-            if str(outcome.get("still_missing") or "").strip():
-                state.still_missing = str(outcome["still_missing"])
-            elif status == "fulfilled" and useful:
-                state.still_missing = ""
+            state.still_missing = _merge_still_missing(
+                state.still_missing, outcome.get("still_missing"), need.question,
+                useful_content=useful if status == "fulfilled" else new_useful, status=status,
+            )
             if str(outcome.get("external_ask") or "").strip():
                 state.external_ask = str(outcome["external_ask"])
 
