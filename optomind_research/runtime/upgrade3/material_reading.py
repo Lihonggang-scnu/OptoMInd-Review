@@ -12,8 +12,11 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Mapping, Sequence
+
+from .document_snapshot import classify_source_material_roles
 
 
 MATERIAL_READING_SCHEMA_VERSION = "optomind.material_reading.v1"
@@ -262,7 +265,10 @@ def build_reading_policy(
     claim = manifest.get("producer_fulltext_claim") or {}
     has_abstract = bool(abstract_blocks or metadata_abstract_count)
     has_snippets = bool(snippet_blocks or snippet_count)
-    if has_abstract and has_snippets and not body_blocks:
+    material_roles = classify_source_material_roles(manifest, blocks)
+    if material_roles["supplementary_only"]:
+        material_scope = "supplementary_plus_abstract" if has_abstract else "supplementary_only"
+    elif has_abstract and has_snippets and not body_blocks:
         material_scope = "abstract_plus_snippets"
     elif has_abstract and not body_blocks:
         material_scope = "abstract_only"
@@ -273,14 +279,14 @@ def build_reading_policy(
     else:
         material_scope = "metadata_only"
     eligible = material_scope in {
-        "fulltext", "structured_partial", "abstract_only", "abstract_plus_snippets", "snippet_only"
+        "fulltext", "structured_partial", "abstract_only", "abstract_plus_snippets", "snippet_only", "supplementary_only", "supplementary_plus_abstract"
     }
-    return {
+    policy = {
         "schema_version": MATERIAL_READING_SCHEMA_VERSION,
         "snapshot_id": snapshot_id,
         "material_scope": material_scope,
         "declared_content_depth": declared_depth,
-        "fulltext_claimed": bool(claim.get("claimed")),
+        "fulltext_claimed": bool(claim.get("claimed")) and not material_roles["supplementary_only"],
         "paper_identity": _paper_identity(manifest),
         "identity_status": _text((manifest.get("identity_check") or {}).get("status") or "unknown"),
         "known_gaps": [dict(item) for item in manifest.get("known_gaps") or () if isinstance(item, Mapping)],
@@ -308,6 +314,485 @@ def build_reading_policy(
             ],
         },
     }
+    if material_roles["supplementary_source_ids"]:
+        policy["material_boundary"] = {**material_roles, "producer_declared_content_depth": declared_depth}
+        policy["usage_limits"]["prohibited"].append("treat_supplementary_material_as_main_article")
+        if material_roles["supplementary_only"]:
+            policy["declared_content_depth"] = "supplementary"
+            gap = {"kind": "material_scope", "status": "supplementary_only", "reason": "Supplied document is supporting/supplementary material; the main article is not supplied. Explicit methods, conditions and findings in the supplement remain usable.", "source_document_ids": material_roles["supplementary_source_ids"]}
+            if gap not in policy["known_gaps"]:
+                policy["known_gaps"].append(gap)
+    return policy
+
+
+def _asset_raw_source(asset: Mapping[str, Any]) -> str:
+    """Return the immutable structured source already retained for an asset."""
+
+    raw_source = _text(asset.get("raw_source"))
+    if raw_source:
+        return raw_source
+    content_ref = asset.get("content_ref")
+    if isinstance(content_ref, Mapping):
+        return _text(content_ref.get("raw_source"))
+    return ""
+
+
+def _asset_body_contexts(
+    blocks: Sequence[Mapping[str, Any]],
+    assets: Sequence[Mapping[str, Any]],
+) -> dict[str, list[Mapping[str, Any]]]:
+    """Select structured assets that belong to eligible article-body blocks.
+
+    Asset indexes also contain front-matter, figure, and other non-text assets.
+    A body claim alone must not make all of those assets reading evidence.  A
+    formula/table is eligible when it is linked from an eligible body block or
+    when its immutable XML locator is under the article body and there is an
+    eligible body block from the same source document.  The latter covers
+    structured nodes whose parent block was rendered as ordinary text.
+    """
+
+    body_blocks = [block for block in blocks if _is_body_block(block)]
+    if not body_blocks:
+        return {}
+    linked: dict[str, list[Mapping[str, Any]]] = {}
+    for block in body_blocks:
+        for asset_id in block.get("asset_refs") or ():
+            aid = _text(asset_id)
+            if aid:
+                linked.setdefault(aid, []).append(block)
+
+    body_source_ids = {
+        _text(block.get("source_document_id"))
+        for block in body_blocks
+        if _text(block.get("source_document_id"))
+    }
+    selected: dict[str, list[Mapping[str, Any]]] = {}
+    for asset in assets:
+        if not isinstance(asset, Mapping):
+            continue
+        asset_id = _text(asset.get("asset_id"))
+        asset_type = _text(asset.get("type")).casefold()
+        if not asset_id or asset_type not in {"formula", "table"}:
+            continue
+        if _text(asset.get("content_status")).casefold() not in {"available", ""} and not (asset.get("parser") and asset.get("recognition_provenance")):
+            continue
+        if asset.get("parsed_successfully") is False:
+            continue
+        related = list(linked.get(asset_id) or ())
+        if not related:
+            locator = asset.get("locator")
+            locator = locator if isinstance(locator, Mapping) else {}
+            xml_path = _text(locator.get("xml_path")).casefold()
+            source_id = _text(asset.get("source_document_id"))
+            if "/body[" in xml_path and source_id in body_source_ids:
+                related = [
+                    block
+                    for block in body_blocks
+                    if _text(block.get("source_document_id")) == source_id
+                    and _text((block.get("locator") or {}).get("xml_path"))
+                    and (
+                        xml_path.startswith(
+                            _text((block.get("locator") or {}).get("xml_path")).casefold() + "/"
+                        )
+                        or xml_path
+                        == _text((block.get("locator") or {}).get("xml_path")).casefold()
+                    )
+                ]
+        if related or (
+            "/body[" in _text((asset.get("locator") or {}).get("xml_path")).casefold()
+            and _text(asset.get("source_document_id")) in body_source_ids
+        ):
+            selected[asset_id] = related
+    return selected
+
+
+def _nearest_body_context(
+    asset: Mapping[str, Any], related: Sequence[Mapping[str, Any]]
+) -> Mapping[str, Any] | None:
+    """Choose the deepest linked body block for compact provenance fields."""
+
+    if not related:
+        return None
+    asset_path = _text((asset.get("locator") or {}).get("xml_path"))
+    candidates = []
+    for block in related:
+        block_path = _text((block.get("locator") or {}).get("xml_path"))
+        candidates.append((len(block_path), block))
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    for _, block in candidates:
+        block_path = _text((block.get("locator") or {}).get("xml_path"))
+        if not asset_path or asset_path.startswith(block_path + "/") or asset_path == block_path:
+            return block
+    return candidates[0][1]
+
+
+# These locator fields describe parser/source bookkeeping.  Scientific and
+# unknown fields are never selected for factoring, and cell coordinates,
+# spans, header flags and individual source pointers always stay on the cell.
+_DOCLING_SHARED_LOCATOR_FIELDS = frozenset({
+    "parser", "parser_version", "page", "bbox", "bbox_origin", "docling_prov",
+    "raw_path", "raw_sha256", "raw_document_raw_path", "raw_document_sha256",
+    "raw_document_source_document_id", "raw_document_json_pointer", "region_id",
+    "fidelity_status", "recognition_status",
+})
+
+
+def project_docling_asset_for_reading(asset: Mapping[str, Any]) -> Mapping[str, Any]:
+    """Factor repeated audit data in a prompt copy; never modify frozen assets.
+
+    Locators remain losslessly reconstructable by merging the explicit table
+    defaults with each cell locator. Native XML assets retain their old shape.
+    Only exact duplicate structures inside parser provenance become references
+    to the complete immutable audit file; unknown/scientific fields remain.
+    """
+
+    if _text(asset.get("parser")).casefold() != "docling":
+        return asset
+    projected = deepcopy(dict(asset))
+    structure = asset.get("table_structure")
+    if isinstance(structure, Mapping):
+        rows = structure.get("rows")
+        if isinstance(rows, list) and rows and all(
+            isinstance(cell, Mapping) and isinstance(cell.get("locator"), Mapping)
+            for cell in rows
+        ) and not {"cell_locator_defaults", "cell_locator_inheritance"}.intersection(structure):
+            asset_locator = asset.get("locator") or {}
+            first = rows[0]["locator"]
+            defaults = {
+                key: deepcopy(value)
+                for key, value in first.items()
+                if key in _DOCLING_SHARED_LOCATOR_FIELDS
+                and all(key in cell["locator"] and cell["locator"][key] == value for cell in rows)
+                and (key not in asset_locator or asset_locator[key] == value)
+            }
+            if defaults:
+                output_structure = projected["table_structure"]
+                output_structure["cell_locator_defaults"] = defaults
+                output_structure["cell_locator_inheritance"] = (
+                    "Each rows entry inherits cell_locator_defaults; merge defaults "
+                    "then that entry's locator to recover its complete original locator."
+                )
+                for original, cell in zip(rows, output_structure["rows"]):
+                    cell["locator"] = {key: value for key, value in cell["locator"].items() if key not in defaults}
+                    if {**defaults, **cell["locator"]} != original["locator"]:
+                        raise ValueError("docling_cell_locator_projection_not_reconstructable")
+
+    duplicate_structures: list[tuple[str, Any]] = []
+    if isinstance(structure, Mapping) and structure:
+        duplicate_structures.append(("/table_structure", structure))
+        if structure.get("rows"):
+            duplicate_structures.append(("/table_structure/rows", structure["rows"]))
+    recognition = asset.get("recognition_content")
+    if isinstance(recognition, Mapping) and recognition.get("cells"):
+        duplicate_structures.append(("/recognition_content/cells", recognition["cells"]))
+
+    def audit_projection(value: Any) -> Any:
+        if isinstance(value, (Mapping, list)):
+            for pointer, original in duplicate_structures:
+                if value == original:
+                    return {"audit_reference": {"file": "DOCUMENT_ASSETS.json",
+                            "asset_id": _text(asset.get("asset_id")), "asset_json_pointer": pointer},
+                            "content_supplied_in_table_structure": True}
+        if isinstance(value, Mapping):
+            return {key: audit_projection(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [audit_projection(item) for item in value]
+        return deepcopy(value)
+
+    if isinstance(asset.get("parser_provenance"), Mapping):
+        projected["parser_provenance"] = audit_projection(asset["parser_provenance"])
+    return projected
+
+
+def _structured_asset_text(
+    asset: Mapping[str, Any],
+    related: Sequence[Mapping[str, Any]],
+    blocks_by_id: Mapping[str, Mapping[str, Any]],
+    source_document: Mapping[str, Any] | None = None,
+) -> str:
+    """Render retained formula/table structure without interpreting it."""
+
+    if (asset.get("locator") or {}).get("docling_primary"):
+        return _primary_docling_asset_text(asset, blocks_by_id)
+    asset = project_docling_asset_for_reading(asset)
+    asset_id = _text(asset.get("asset_id"))
+    asset_type = _text(asset.get("type")).casefold()
+    locator = asset.get("locator") if isinstance(asset.get("locator"), Mapping) else {}
+    source_document_id = _text(asset.get("source_document_id"))
+    xml_path = _text(locator.get("xml_path"))
+    linked_ids = [
+        _text(block.get("block_id"))
+        for block in related
+        if _text(block.get("block_id"))
+    ]
+    section_paths = []
+    seen_sections: set[tuple[str, ...]] = set()
+    for block in related:
+        section = tuple(_text(value) for value in block.get("section_path") or () if _text(value))
+        if section and section not in seen_sections:
+            seen_sections.add(section)
+            section_paths.append(" > ".join(section))
+    lines = [
+        f"[structured {asset_type} asset] asset_id={asset_id}",
+        f"source_document_id={source_document_id}",
+        f"source_name={_text((source_document or {}).get('source_name'))}",
+        f"raw_path={_text((source_document or {}).get('raw_path'))}",
+        f"raw_sha256={_text((source_document or {}).get('raw_sha256'))}",
+        f"xml_path={xml_path}",
+        f"content_status={_text(asset.get('content_status'))}",
+        f"parsed_successfully={asset.get('parsed_successfully')}",
+        f"linked_body_block_ids={','.join(linked_ids)}",
+    ]
+    if asset.get("parser"):
+        lines.extend([
+            f"parser={_text(asset.get('parser'))} version={_text(asset.get('parser_version'))}",
+            f"fidelity_status={_text(asset.get('fidelity_status'))}; parsed_successfully is structural parsing, not scientific verification",
+            f"recognition_status={_text(asset.get('recognition_status') or 'parser_candidate')}",
+            "parser_provenance=" + json.dumps(dict(asset.get("parser_provenance") or {}), ensure_ascii=False, sort_keys=True),
+        ])
+        if asset.get("recognition_provenance"):
+            lines.append("recognition_provenance=" + json.dumps(dict(asset["recognition_provenance"]), ensure_ascii=False, sort_keys=True))
+        if _text(asset.get("parser")).casefold() == "docling" and asset_type == "table":
+            lines.append("asset_locator=" + json.dumps(dict(locator), ensure_ascii=False, sort_keys=True))
+    if section_paths:
+        lines.append(f"section_paths={' || '.join(section_paths)}")
+    if asset_type == "formula":
+        caption_ids = [_text(value) for value in asset.get("caption_block_ids") or () if _text(value)]
+        if caption_ids:
+            lines.append("captions:")
+            for block_id in caption_ids:
+                caption = blocks_by_id.get(block_id)
+                if caption is not None:
+                    lines.append(f"caption block_id={block_id}: {_text(caption.get('text_normalized'))}")
+        raw_source = _asset_raw_source(asset)
+        if not raw_source:
+            return ""
+        source_format = _text((asset.get("content_ref") or {}).get("source_form")) if asset.get("parser") else "preserved_xml_or_mathml"
+        lines.extend([f"raw_source_format={source_format}", "raw_source:", raw_source])
+        if asset.get("normalized_latex"):
+            lines.extend(["normalized_latex:", _text(asset["normalized_latex"]), "equation_label=" + _text(asset.get("equation_label"))])
+        return "\n".join(lines)
+
+    structure = asset.get("table_structure")
+    if not isinstance(structure, Mapping):
+        return ""
+    caption_ids = [_text(value) for value in asset.get("caption_block_ids") or () if _text(value)]
+    if caption_ids:
+        lines.append("captions:")
+        for block_id in caption_ids:
+            caption = blocks_by_id.get(block_id)
+            if caption is None:
+                continue
+            lines.append(f"caption block_id={block_id}: {_text(caption.get('text_normalized'))}")
+
+    lines.append("table_structure_json:")
+    lines.append(json.dumps(dict(structure), ensure_ascii=False, sort_keys=True, separators=(",", ":"), default=str))
+    return "\n".join(lines)
+
+
+def _primary_docling_asset_text(asset: Mapping[str, Any], blocks_by_id: Mapping[str, Mapping[str, Any]]) -> str:
+    """Keep all source content in model input; resolve geometry from handles.
+
+    The complete immutable assets/region index retain coordinates, provenance
+    and original XML. Scientific cells and notes are never clipped here.
+    """
+    locator = asset.get("locator") or {}
+    kind = _text(asset.get("type"))
+    lines = [f"[structured {kind} region] region_id={locator.get('region_id')}",
+             "recognition_status=" + _text(asset.get("recognition_status") or "parser_candidate")]
+    if kind == "formula":
+        import xml.etree.ElementTree as ET
+        raw = _asset_raw_source(asset)
+        text = "".join(ET.fromstring(raw).itertext()) if raw else ""
+        lines.extend(["representation=unenhanced_pdf_text; source region can be enhanced independently", text])
+        return "\n".join(lines)
+    cells = []
+    structure = asset.get("table_structure") or {}
+    for cell in structure.get("rows") or ():
+        loc = cell.get("locator") or {}
+        cells.append({key: loc.get(key) for key in ("row_index", "col_index", "row_span", "col_span", "is_header")}
+                     | {"region_id": loc.get("region_id"), "text": _text(cell.get("text"))})
+    captions = []
+    for block_id in asset.get("caption_block_ids") or ():
+        block = blocks_by_id.get(_text(block_id)) or {}
+        captions.append({"region_id": (block.get("locator") or {}).get("region_id"), "text": _text(block.get("text_normalized"))})
+    footnotes = [{"region_id": (note.get("locator") or {}).get("region_id"), "text": _text(note.get("text"))}
+                 for note in structure.get("footnotes") or ()]
+    lines.extend(["table_structure_json:", json.dumps({"cells": cells, "captions": captions, "footnotes": footnotes}, ensure_ascii=False, separators=(",", ":"))])
+    return "\n".join(lines)
+
+
+def _structured_asset_observations(
+    manifest: Mapping[str, Any],
+    blocks: Sequence[Mapping[str, Any]],
+    assets: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Expose retained formula/table structures as one source-bound observation each."""
+
+    contexts = _asset_body_contexts(blocks, assets)
+    if not contexts:
+        return []
+    blocks_by_id = {
+        _text(block.get("block_id")): block
+        for block in blocks
+        if _text(block.get("block_id"))
+    }
+    source_documents = {
+        _text(item.get("source_document_id")): item
+        for item in manifest.get("source_documents") or ()
+        if isinstance(item, Mapping) and _text(item.get("source_document_id"))
+    }
+    paper_identity = _paper_identity(manifest)
+    identity_status = _text((manifest.get("identity_check") or {}).get("status") or "unknown")
+    observations: list[dict[str, Any]] = []
+    for asset in assets:
+        if not isinstance(asset, Mapping):
+            continue
+        asset_id = _text(asset.get("asset_id"))
+        related = contexts.get(asset_id)
+        if related is None:
+            continue
+        source_document_id = _text(asset.get("source_document_id"))
+        source = source_documents.get(source_document_id) or {}
+        text = _structured_asset_text(asset, related, blocks_by_id, source)
+        if not text:
+            continue
+        nearest = _nearest_body_context(asset, related)
+        locator = dict(asset.get("locator") or {}) if isinstance(asset.get("locator"), Mapping) else {}
+        asset_type = _text(asset.get("type")).casefold()
+        source_kind = "article_formula" if asset_type == "formula" else "article_table"
+        source_payload = {
+            "snapshot_id": _text(manifest.get("snapshot_id")),
+            "block_id": _text(nearest.get("block_id")) if nearest else "",
+            "related_block_ids": [
+                _text(block.get("block_id"))
+                for block in related
+                if _text(block.get("block_id"))
+            ],
+            "asset_id": asset_id,
+            "asset_type": asset_type,
+            "source_document_id": source_document_id,
+            "source_role": _text(source.get("role") or "main"),
+            "source_name": _text(source.get("source_name")),
+            "raw_path": _text(source.get("raw_path")),
+            "raw_sha256": _text(source.get("raw_sha256")),
+            "asset_locator": locator,
+            **({"region_id": locator["region_id"]} if locator.get("docling_primary") else {}),
+            "asset_raw_sha256": _hash_text(_asset_raw_source(asset)) if _asset_raw_source(asset) else "",
+            "asset_content_status": _text(asset.get("content_status")),
+            "asset_parsed_successfully": asset.get("parsed_successfully"),
+            "caption_block_ids": [_text(value) for value in asset.get("caption_block_ids") or () if _text(value)],
+            "source_form": _text((asset.get("content_ref") or {}).get("source_form")) if isinstance(asset.get("content_ref"), Mapping) else "",
+            "section_path": list(nearest.get("section_path") or ()) if nearest else [],
+            "source_kind": source_kind,
+            "source_text_hash": _hash_text(text),
+            "identity_status": identity_status,
+            "known_gap_kinds": sorted(
+                {
+                    _text(gap.get("kind"))
+                    for gap in manifest.get("known_gaps") or ()
+                    if isinstance(gap, Mapping) and _text(gap.get("kind"))
+                }
+            ),
+            "paper_identity": dict(paper_identity),
+        }
+        observations.append(
+            {
+                "observation_id": f"asset:{asset_id}",
+                "text": text,
+                "source_kind": source_kind,
+                "source": source_payload,
+            }
+        )
+    return observations
+
+
+def _structured_asset_representation_block_ids(
+    blocks: Sequence[Mapping[str, Any]],
+    assets: Sequence[Mapping[str, Any]],
+    observations: Sequence[Mapping[str, Any]],
+) -> set[str]:
+    """Return blocks whose content is fully present in a structured observation.
+
+    A parser or source table may be incomplete while still producing a
+    non-empty structure.  In that case the ordinary cell/caption blocks are
+    kept as fallback evidence.  Formula raw source is independently complete,
+    so a formula block and its linked caption can be folded into the formula
+    observation when that source is available.
+    """
+
+    observed_asset_ids = {
+        _text(item.get("source", {}).get("asset_id"))
+        for item in observations
+        if isinstance(item, Mapping) and isinstance(item.get("source"), Mapping)
+    }
+    if not observed_asset_ids:
+        return set()
+    contexts = _asset_body_contexts(blocks, assets)
+    blocks_by_id = {
+        _text(block.get("block_id")): block
+        for block in blocks
+        if _text(block.get("block_id"))
+    }
+    represented: set[str] = set()
+    for asset in assets:
+        if not isinstance(asset, Mapping):
+            continue
+        asset_id = _text(asset.get("asset_id"))
+        if asset_id not in observed_asset_ids:
+            continue
+        related = contexts.get(asset_id) or ()
+        asset_type = _text(asset.get("type")).casefold()
+        if asset_type == "formula":
+            # The raw source and caption text are both present in the formula
+            # observation.  Do not hide a formula block whose source was lost.
+            if not _asset_raw_source(asset):
+                continue
+            represented.update(
+                _text(block.get("block_id"))
+                for block in related
+                if _text(block.get("block_type")).casefold() == "formula"
+                and _text(block.get("block_id"))
+            )
+            represented.update(
+                _text(block_id)
+                for block_id in asset.get("caption_block_ids") or ()
+                if _text(block_id) in blocks_by_id
+            )
+            continue
+        if asset_type != "table":
+            continue
+        structure = asset.get("table_structure")
+        if not isinstance(structure, Mapping):
+            continue
+        cell_blocks = [
+            block for block in related
+            if _text(block.get("block_type")).casefold() == "table_cell"
+            and _text(block.get("block_id"))
+        ]
+        row_ids = {
+            _text(row.get("block_id"))
+            for row in structure.get("rows") or ()
+            if isinstance(row, Mapping) and _text(row.get("block_id"))
+        }
+        # Empty tables have no cell content to suppress.  A populated table is
+        # complete only when every linked cell is represented in its rows.
+        cells_complete = (
+            bool(cell_blocks) and all(
+                _text(block.get("block_id")) in row_ids for block in cell_blocks
+            )
+        ) or (not cell_blocks and bool(row_ids))
+        if cells_complete:
+            represented.update(_text(block.get("block_id")) for block in cell_blocks)
+            # Caption text is emitted by _structured_asset_text alongside a
+            # complete table; fold it once with that projection.  A partial or
+            # empty table keeps its original caption as fallback context.
+            represented.update(
+                _text(block_id)
+                for block_id in asset.get("caption_block_ids") or ()
+                if _text(block_id) in blocks_by_id
+            )
+    return represented
 
 
 def build_reading_packet(
@@ -320,14 +805,42 @@ def build_reading_packet(
 ) -> dict[str, Any]:
     """Build a compact packet containing text and trusted source provenance."""
 
-    del assets, references  # Reserved for future targeted asset/reference views.
     policy = build_reading_policy(manifest, blocks, root=root)
+    supplementary_ids = set((policy.get("material_boundary") or {}).get("supplementary_source_ids") or ())
     paper_identity = _paper_identity(manifest)
     observations: list[dict[str, Any]] = []
+    # Structured formula/table observations are the canonical model projection
+    # for those assets.  Their source blocks remain in the immutable snapshot
+    # and are still available to directed/source-index consumers, but emitting
+    # both a cell/formula block and the same structured asset here would make a
+    # reader see duplicate evidence.  Only suppress the block kinds whose
+    # content is fully represented by the structured projection; prose blocks
+    # that mention an asset remain ordinary article observations.
+    structured_observations = _structured_asset_observations(manifest, blocks, assets)
+    represented_block_ids = _structured_asset_representation_block_ids(
+        blocks, assets, structured_observations
+    )
+    for asset in assets:
+        locator = asset.get("locator") or {}
+        if asset.get("type") == "figure" and locator.get("docling_primary"):
+            caption_ids = set(asset.get("caption_block_ids") or ())
+            caption_text = "\n".join(_text(block.get("text_normalized")) for block in blocks if block.get("block_id") in caption_ids)
+            structured_observations.append({"observation_id": f"asset:{asset['asset_id']}",
+                "source_kind": "article_figure", "text": "Figure region; image pixels have not been interpreted.\n" + caption_text,
+                "source": {"snapshot_id": _text(manifest.get("snapshot_id")), "asset_id": asset["asset_id"],
+                           "source_document_id": asset["source_document_id"], "region_id": locator["region_id"],
+                           "asset_locator": dict(locator), "source_kind": "article_figure"}})
+            represented_block_ids.update(caption_ids)
+        if asset.get("type") == "table" and locator.get("docling_primary"):
+            represented_block_ids.update(_text(note.get("block_id")) for note in (asset.get("table_structure") or {}).get("footnotes") or ())
     for block in blocks:
         text = _normalized(block.get("text_normalized"))
         if not text or not block.get("research_content", True) or block.get("block_type") in {"heading", "reference"}:
             continue
+        block_kind = _text(block.get("block_type")).casefold()
+        if block_kind in {"table_cell", "formula", "table_caption", "caption", "figure_caption", "footnote"}:
+            if _text(block.get("block_id")) in represented_block_ids:
+                continue
         is_abstract = _is_abstract_block(block)
         is_body = _is_body_block(block)
         is_snippet = _is_retrieved_snippet_block(block)
@@ -341,6 +854,7 @@ def build_reading_packet(
         source_kind = (
             "article_abstract" if is_abstract else
             "retrieved_snippet" if is_snippet else
+            "supplementary_body" if _text(block.get("source_document_id")) in supplementary_ids else
             "article_body"
         )
         observations.append(
@@ -357,6 +871,7 @@ def build_reading_packet(
                     "raw_path": _text(source.get("raw_path")),
                     "raw_sha256": _text(source.get("raw_sha256")),
                     "locator": dict(block.get("locator") or {}),
+                    **({"region_id": block["locator"]["region_id"]} if (block.get("locator") or {}).get("docling_primary") else {}),
                     "section_path": list(block.get("section_path") or ()),
                     "source_kind": source_kind,
                     "source_text_hash": _text(block.get("text_hash")) or _hash_text(text),
@@ -364,12 +879,19 @@ def build_reading_packet(
                 },
             }
         )
+    observations.extend(structured_observations)
+    if any((block.get("locator") or {}).get("docling_primary") for block in blocks):
+        def primary_order(observation: Mapping[str, Any]) -> int:
+            source = observation.get("source") or {}
+            locator = source.get("locator") or source.get("asset_locator") or {}
+            return int(locator.get("order_index", 10**12))
+        observations.sort(key=primary_order)
     auxiliary = _auxiliary_observations(
         manifest, Path(root) if root is not None else None, _text(manifest.get("snapshot_id"))
     )
     observations.extend(auxiliary)
     identity_status = _text((manifest.get("identity_check") or {}).get("status") or "unknown")
-    known_gaps = [dict(item) for item in manifest.get("known_gaps") or () if isinstance(item, Mapping)]
+    known_gaps = policy["known_gaps"]
     source_by_path = {
         _text(item.get("raw_path")): item
         for item in manifest.get("source_documents") or ()
@@ -377,13 +899,15 @@ def build_reading_packet(
     }
     for item in observations:
         source = item.setdefault("source", {})
+        if _text(source.get("source_document_id")) in supplementary_ids:
+            source["document_role"] = "supplementary_material"
         source["identity_status"] = identity_status
         source["known_gap_kinds"] = sorted({_text(gap.get("kind")) for gap in known_gaps if gap.get("kind")})
         source["paper_identity"] = dict(paper_identity)
         source_record = source_by_path.get(_text(source.get("raw_path")))
         if source_record is not None:
             source["raw_sha256"] = _text(source_record.get("raw_sha256"))
-    return {
+    packet = {
         "schema_version": MATERIAL_READING_SCHEMA_VERSION,
         "snapshot_id": _text(manifest.get("snapshot_id")),
         "paper_identity": paper_identity,
@@ -395,6 +919,9 @@ def build_reading_packet(
         "usage_limits": policy["usage_limits"],
         "observations": observations,
     }
+    if policy.get("material_boundary"):
+        packet["material_boundary"] = policy["material_boundary"]
+    return packet
 
 
 def build_reading_messages(

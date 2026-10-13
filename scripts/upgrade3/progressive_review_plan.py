@@ -13,6 +13,11 @@ if __package__ in {None, ""}:
 
 from optomind_research.runtime.upgrade3 import progressive_review_plan as planning
 from scripts.upgrade3 import outline_strengthening_pipeline as strengthening_pipeline
+from scripts.upgrade3.build_local_materials import (
+    add_material_acquisition_arguments,
+    make_material_acquirer_factory,
+    material_parser_mode,
+)
 
 
 def parser():
@@ -71,6 +76,9 @@ def parser():
         default=[],
         help="限制恢复的章节 ID，可重复传入；省略则按兼容性逐章判断",
     )
+    add_material_acquisition_arguments(p, include_shared_budget_options=False)
+    p.add_argument("--local-formula-config", type=Path, help="explicit offline CodeFormulaV2 batch profile; enhance a selected paper before directed reading")
+    p.add_argument("--local-formula-cache-root", type=Path)
     return p
 
 
@@ -110,6 +118,7 @@ def preflight(cfg, args):
             "budget": budget_snapshot(args.budget_ledger), "deep_read_limit": cfg.shared_deep_read_budget,
             "planner_model": cfg.planner_model, "reader_model": cfg.reader_model,
             "planner_runtime_config": settings, "directed_reader_runtime_config": planning._directed_reader_settings(cfg),
+            "material_parser_mode": material_parser_mode(args),
             "planning_revision_enabled": cfg.planning_revision_enabled,
             "chapter_material_view": "full_A_B",
             "notes": ["本地分词估算，真实用量以服务返回为准。", "首次调用成本不是完整流程费用。", "各级与章内按具体问题补充，先查本地、再小批外部检索；所有章节共享精读额度。"]}
@@ -158,11 +167,15 @@ def post_planning_handoff(cfg, args, plan_result):
             "packet_root": pointer["packet_root"], "current_plan": str(pointer_path)}
 
 
-def main(argv=None):
+def main(argv=None, *, regional_client_constructor=None):
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8")
     args = parser().parse_args(argv)
+    try:
+        selected_material_parser_mode = material_parser_mode(args)
+    except ValueError as exc:
+        parser().error(str(exc))
     if not args.planning_revision:
         print("Warning: --no-planning-revision selects legacy orchestration without M1 navigation; chapter planning still receives full A/B material.", file=sys.stderr)
     cfg = planning.ProgressivePlannerConfig(
@@ -173,6 +186,7 @@ def main(argv=None):
         timeout_seconds=args.timeout_seconds, thinking_budget=args.thinking_budget,
         planner_output_tokens=args.output_tokens, tokenizer_path=args.tokenizer.resolve(),
         reader_thinking_budget=args.reader_thinking_budget, chapter_output_tokens=args.reader_output_tokens,
+        local_formula_config_path=(args.local_formula_config.resolve() if args.local_formula_config else None),
         planning_revision_enabled=bool(args.planning_revision),
         local_material_index_path=(args.local_material_index.resolve() if args.local_material_index else None),
         recovery_from=(args.recover_chapters_from.resolve() if args.recover_chapters_from else None),
@@ -190,6 +204,12 @@ def main(argv=None):
             if not args.key_file or not args.budget_ledger or args.budget_limit_cny is None:
                 raise planning.ProgressivePlanError("run_requires_key_file_and_shared_budget")
             before = budget_snapshot(args.budget_ledger)
+            # Always use the shared acquisition factory. With no explicit
+            # Docling flags it is the fast native route; basic Docling is
+            # constructed only when a local saved/batch source is supplied.
+            acquirer_factory = make_material_acquirer_factory(
+                args, regional_client_constructor=regional_client_constructor
+            )
             rows = planning.load_planning_pool(cfg.pool_path)
             prior = planning.load_prior_readings(args.prior_reading, rows)
             planner = planning.QwenProgressivePlanner(
@@ -206,8 +226,15 @@ def main(argv=None):
                 budget_limit_cny=args.budget_limit_cny,
                 local_index_path=(args.local_material_index.resolve() if args.local_material_index else None),
                 allow_external=not args.no_external_supplement,
+                acquirer_factory=acquirer_factory,
             )
-            reader = planning.make_directed_reading_runner(cfg, key_file=args.key_file, budget_ledger_path=args.budget_ledger, budget_limit_cny=args.budget_limit_cny, prior_readings=prior)
+            local_formula_enhancer = None
+            if args.local_formula_config:
+                from optomind_research.runtime.upgrade3.local_formula_materials import make_local_formula_enhancer
+                local_formula_enhancer = make_local_formula_enhancer(args.local_formula_config,
+                    cache_root=args.local_formula_cache_root or cfg.output_dir / "local_formula_cache")
+            reader = planning.make_directed_reading_runner(cfg, key_file=args.key_file, budget_ledger_path=args.budget_ledger, budget_limit_cny=args.budget_limit_cny, prior_readings=prior,
+                **({"local_formula_enhancer": local_formula_enhancer} if local_formula_enhancer is not None else {}))
             adaptive = planning.make_retrieval_loop_runner(
                 cfg,
                 key_file=args.key_file,
@@ -238,7 +265,9 @@ def main(argv=None):
             result = {"status": "outline_strengthening_partial" if strengthening_incomplete else planning_status,
                       "planning_status": planning_status,
                       "completed_through": result.get("completed_through", "chapter_details" if planning_status == "initial_draft" else "complete"),
-                      "planning_revision_enabled": cfg.planning_revision_enabled, "chapter_material_view": "full_A_B",
+                      "planning_revision_enabled": cfg.planning_revision_enabled,
+                      "material_parser_mode": selected_material_parser_mode,
+                      "chapter_material_view": "full_A_B",
                       "output_dir": str(cfg.output_dir), "chapter_count": len(result.get("chapters") or []),
                       "candidate_screening": {k: v for k, v in (result.get("candidate_screening") or {}).items() if k != "candidate_rows"},
                       "deep_read_budget": result.get("deep_read_budget"), **handoff, **usage}

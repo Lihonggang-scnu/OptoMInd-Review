@@ -293,6 +293,9 @@ class AcquisitionConfig:
     rescue_max_candidates: int = 8
     rescue_max_search_calls: int = 2
     rescue_max_extract_calls: int = 4
+    docling_enabled: bool = False
+    docling_primary: bool = False
+    docling_config_sha256: str = ""
 
     def __post_init__(self) -> None:
         self.deadline_seconds = max(1.0, float(self.deadline_seconds))
@@ -371,7 +374,7 @@ class Artifact:
             "compression": "gzip" if self.metadata.get("compressed") else "",
             "legal_use_status": self.metadata.get("legal_use_status", "unknown"),
         }
-        for key in ("asset_href", "asset_member", "image_readable"):
+        for key in ("asset_href", "asset_member", "image_readable", "provenance"):
             if key in self.metadata:
                 spec[key] = self.metadata[key]
         return spec
@@ -1665,10 +1668,47 @@ class MaterialAcquirer:
         audit.update({"status": "rejected", "reason": "unrecognised_content"})
         return None, audit, []
 
+    def _attach_pdf_layout(self, artifact: Artifact, pdf_bytes: bytes, gaps: list[dict[str, Any]], deadline: float) -> tuple[Artifact, list[dict[str, Any]]]:
+        """Opt-in layout supplement before publication; native XML never enters here."""
+        if not self.config.docling_enabled or self.config.docling_primary:
+            return artifact, gaps
+        adapter = self.providers.get("docling")
+        if adapter is None:
+            return artifact, gaps + [{"kind": "docling", "status": "unavailable", "reason": "opt-in Docling provider was not configured"}]
+        try:
+            specs = adapter.prepare(pdf_bytes, source_document_id="pdf-content-" + _sha256(pdf_bytes)[:12], deadline=deadline)
+            artifact.metadata["pdf_layout_sources"] = specs
+            layout = next(json.loads(spec["data"]) for spec in specs if spec.get("role") == "pdf_layout_parser")
+            gaps = gaps + list(layout.get("known_gaps") or ()) + [{"kind": "docling", "status": "parser_candidate",
+                "reason": "source-bound layout supplement; structural parsing does not verify scientific fidelity"}]
+        except (ValueError, OSError, TypeError, KeyError) as exc:
+            gaps = gaps + [{"kind": "docling", "status": "failed", "reason": f"{type(exc).__name__}:{exc}"}]
+        return artifact, gaps
+
     def _parse_pdf(self, pdf_bytes: bytes, route: _Route, identity: IdentityResolution, deadline: float, headers: Mapping[str, str]) -> tuple[Artifact | None, list[dict[str, Any]]]:
         if not _pdf_is_readable(pdf_bytes):
             return None, [{"kind": "pdf", "status": "partial", "reason": "PDF format or page structure was unreadable"}]
         pdf_artifact = Artifact(kind="pdf", data=pdf_bytes, route=route.name, source_url=route.url, content_type=headers.get("content-type", "application/pdf"), source_name=f"{route.name}.pdf", metadata={"legal_use_status": "oa"})
+        primary_gaps: list[dict[str, Any]] = []
+        if self.config.docling_primary:
+            adapter = self.providers.get("docling")
+            try:
+                if adapter is None:
+                    raise ValueError("docling_primary_provider_missing")
+                prepared = adapter.prepare_document(pdf_bytes, title=identity.title, doi=identity.doi,
+                    source_document_id="original-pdf-" + _sha256(pdf_bytes)[:12], deadline=deadline)
+                if not _xml_has_research_body(prepared["data"]):
+                    raise ValueError("docling_primary_has_no_readable_body")
+                main = Artifact(kind="docling_xml", data=prepared["data"], route="docling_basic",
+                    source_url=route.url, content_type="application/xml", derived_from=route.name,
+                    source_name="docling-body.jats.xml", metadata={"parser": "docling", "synthetic_identity": True,
+                        "legal_use_status": "oa", "pdf_artifact": pdf_artifact,
+                        "pdf_primary_sources": prepared["additional_sources"]})
+                return main, list(prepared.get("known_gaps") or ()) + [{"kind": "pdf", "status": "docling_basic",
+                    "reason": "ordinary body and region index from native Docling; regional enhancement is independent"}]
+            except (ValueError, OSError, TypeError, KeyError) as exc:
+                primary_gaps.append({"kind": "docling", "status": "failed",
+                    "reason": f"primary_projection_{type(exc).__name__}:{exc}; ordinary parser fallback considered"})
         pdf_path = self.cache_root / "pdf_work" / f"{_sha256(pdf_bytes)}.pdf"
         pdf_path.parent.mkdir(parents=True, exist_ok=True)
         if not pdf_path.exists(): pdf_path.write_bytes(pdf_bytes)
@@ -1692,10 +1732,10 @@ class MaterialAcquirer:
                 if _xml_kind(tei_bytes) and _xml_has_research_body(tei_bytes):
                     tei = Artifact(kind="tei", data=tei_bytes, route="grobid", source_url=route.url, content_type="application/xml", derived_from=route.name, source_name="grobid-derived.tei.xml", metadata={"parser": "grobid", "parser_version": parsed.get("parser_version", ""), "legal_use_status": "oa", "identity_basis": "pdf_parser_observation", "source_role": "pdf_parser_observation"})
                     tei.metadata["pdf_artifact"] = pdf_artifact
-                    return tei, [
+                    return self._attach_pdf_layout(tei, pdf_bytes, primary_gaps + [
                         {"kind": "pdf", "status": "grobid", "reason": "structured TEI derived from original PDF"},
                         {"kind": "grobid", "status": "known_gap", "reason": "TEI may flatten superscript notation, represent figures as captions/coordinates, and split or mislabel bibliography contributors; original PDF is retained"},
-                    ]
+                    ], deadline)
                 if _xml_kind(tei_bytes):
                     # A parseable header-only/empty TEI is not fulltext. Keep
                     # the PDF and continue to the local fitz fallback.
@@ -1728,16 +1768,16 @@ class MaterialAcquirer:
                     xml = f"<?xml version=\"1.0\" encoding=\"UTF-8\"?><article><front><article-meta><title-group><article-title>{title}</article-title></title-group></article-meta></front><body><sec><title>PDF text</title>{body}</sec></body></article>".encode()
                     tei = Artifact(kind="fitz_xml", data=xml, route="fitz", source_url=route.url, content_type="application/xml", derived_from=route.name, source_name="fitz-derived.xml", metadata={"parser": "fitz", "page_count": len(pages), "positions": positions, "legal_use_status": "oa", "synthetic_identity": True})
                     tei.metadata["pdf_artifact"] = pdf_artifact
-                    gaps = [
+                    gaps = primary_gaps + [
                         {"kind": "pdf", "status": "fitz", "reason": "full-page text extracted; page positions retained"},
                         {"kind": "fitz", "status": "known_gap", "reason": "layout, table relations, formulas, figure pixels, and scanned text may be lost"},
                     ]
                     if removed:
                         gaps.append({"kind": "xml_text_cleanup", "status": "normalized", "reason": f"removed {removed} XML 1.0 forbidden characters from derived PDF text; original PDF and page positions retained"})
-                    return tei, gaps
+                    return self._attach_pdf_layout(tei, pdf_bytes, gaps, deadline)
             except Exception:
                 pass
-        gaps = [{"kind": "pdf", "status": "partial", "reason": "fulltext parser unavailable or unreadable"}]
+        gaps = primary_gaps + [{"kind": "pdf", "status": "partial", "reason": "fulltext parser unavailable or unreadable"}]
         if return_gap is not None:
             gaps.insert(0, return_gap)
         return None, gaps
@@ -1758,12 +1798,23 @@ class MaterialAcquirer:
         for index, artifact in enumerate(result.artifacts):
             if artifact is main: continue
             sid = f"artifact-{index + 1}-{_sha256(artifact.data)[:12]}"
+            if main.metadata.get("pdf_primary_sources") and artifact.kind == "pdf":
+                sid = "original-pdf-" + _sha256(artifact.data)[:12]
             source_ids[artifact.kind + str(index)] = sid
             add_extra(artifact.source_spec(sid), artifact.data)
         if main.metadata.get("pdf_artifact") is not None:
             pdf_artifact = main.metadata["pdf_artifact"]
             sid = f"original-pdf-{_sha256(pdf_artifact.data)[:12]}"
             add_extra(pdf_artifact.source_spec(sid), pdf_artifact.data)
+        if main.metadata.get("pdf_layout_sources"):
+            from .docling_adapter import bind_pdf_source_specs
+
+            pdf_digest = _sha256(main.metadata["pdf_artifact"].data)
+            retained_pdf = next(spec for spec in extras if _sha256(bytes(spec["data"])) == pdf_digest)
+            for spec in bind_pdf_source_specs(main.metadata["pdf_layout_sources"], retained_pdf["source_document_id"], pdf_digest):
+                add_extra(spec, bytes(spec["data"]))
+        for spec in main.metadata.get("pdf_primary_sources") or ():
+            add_extra(spec, bytes(spec["data"]))
         if main.wire_bytes:
             sid = f"wire-{_sha256(main.wire_bytes)[:12]}"
             add_extra({"source_document_id": sid, "role": "wire_bytes", "source_uri": redact_url(main.source_url), "source_name": f"{main.route}.wire", "format": "wire", "mime_type": "application/octet-stream", "derived_from": main.route, "route": main.route, "compression": "gzip" if main.wire_bytes[:2] == b"\x1f\x8b" else ""}, main.wire_bytes)
@@ -1850,7 +1901,7 @@ class MaterialAcquirer:
             if artifact.kind == "jats":
                 pmcid = _text(route.metadata.get("pmcid") or record.get("pmcid") or record.get("pmc_id"))
                 self._attach_pmc_assets(artifact, pmcid, result, deadline)
-            body_kinds = {"jats", "tei", "fitz_xml", "core_text_jats"}
+            body_kinds = {"jats", "tei", "fitz_xml", "docling_xml", "core_text_jats"}
             result.material_depth = "fulltext" if artifact.kind in body_kinds and artifact.metadata.get("identity_verified", True) else "structured_partial"
             if not artifact.metadata.get("identity_verified", True):
                 result.known_gaps.append({"kind": "identity", "status": "partial", "reason": "body source was readable but independent identity evidence was incomplete"})
@@ -1989,7 +2040,7 @@ class MaterialAcquirer:
         deadline = started + self.config.deadline_seconds
         identity = self._record_identity(record)
         result = AcquisitionResult(identity=identity, status="failed", material_depth="unknown")
-        if pdf_bytes:
+        if pdf_bytes and not self.config.docling_primary:
             self._ensure_grobid()
         main: Artifact | None = None
         if xml_bytes:
@@ -2028,7 +2079,8 @@ class MaterialAcquirer:
 
     def acquire_batch(self, records: Sequence[Mapping[str, Any]], *, on_result: Callable[[AcquisitionResult], None] | None = None) -> list[AcquisitionResult]:
         results: list[AcquisitionResult | None] = [None] * len(records)
-        self._ensure_grobid()
+        if not self.config.docling_primary:
+            self._ensure_grobid()
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.config.network_workers) as pool:
             future_map = {pool.submit(self.acquire, record): index for index, record in enumerate(records)}
             for future in concurrent.futures.as_completed(future_map):

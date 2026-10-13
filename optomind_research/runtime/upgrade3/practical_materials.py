@@ -20,8 +20,14 @@ _TABLE_CELL = re.compile(
 _REFERENCE_HEADING = re.compile(r"^#{1,6}\s+(?:\[block-[^\]]+\]\s*)?References\s*$", re.IGNORECASE)
 
 
-def load_practical_material(snapshot_dir: str | Path) -> dict[str, Any]:
-    """Read the ordinary snapshot view and bibliography without hash checks."""
+def load_practical_material(snapshot_dir: str | Path, *, formula_enhancement_path: str | Path | None = None) -> dict[str, Any]:
+    """Read the ordinary view plus the shared source-bound structures.
+
+    The markdown view remains the writing-friendly surface.  When the
+    directory is a validated prepared snapshot, the same material-reading
+    projection used by cards is exposed separately so tables and formulas do
+    not depend on lossy markdown formatting.
+    """
 
     root = Path(snapshot_dir)
     reading_view = (root / "READING_VIEW.md").read_text(encoding="utf-8")
@@ -39,10 +45,54 @@ def load_practical_material(snapshot_dir: str | Path) -> dict[str, Any]:
             "source_marker": marker,
             "citation": citation,
         })
-    return {
-        "body": _clean_reading_view(reading_view),
+    structured_assets: list[dict[str, Any]] = []
+    ordered_body: str | None = None
+    try:
+        # Import lazily to keep this small helper usable with legacy material
+        # directories that do not contain a complete prepared snapshot.
+        from .local_materials import PreparedSnapshotProvider
+
+        snapshot = PreparedSnapshotProvider(root).load()
+        packet = snapshot.build_reading_packet()
+        if any(source.get("role") == "pdf_primary_region_index" for source in snapshot.manifest.get("source_documents") or ()):
+            pieces: list[str] = []
+            previous_section: tuple[str, ...] = ()
+            for item in packet.get("observations") or ():
+                source = item.get("source") or {}
+                section = tuple(str(part) for part in source.get("section_path") or ())
+                if section and section != previous_section:
+                    pieces.append("## " + " > ".join(section))
+                previous_section = section
+                marker = f"[region {source['region_id']}] " if source.get("region_id") else ""
+                pieces.append(marker + str(item.get("text") or ""))
+            ordered_body = "\n\n".join(pieces)
+        structured_assets = [
+            dict(item)
+            for item in packet.get("observations") or ()
+            if isinstance(item, Mapping)
+            and item.get("source_kind") in {"article_formula", "article_table"}
+        ]
+    except (OSError, ValueError, TypeError, KeyError):
+        # The original reading view remains available for older directories;
+        # callers can inspect the absence of this optional projection.
+        structured_assets = []
+    structured_material = "\n\n".join(
+        str(item.get("text") or "").strip()
+        for item in structured_assets
+        if str(item.get("text") or "").strip()
+    )
+    result = {
+        "body": ordered_body if ordered_body is not None else _clean_reading_view(reading_view),
         "references": normalized_references,
+        "structured_assets": structured_assets,
+        "structured_material": "" if ordered_body is not None else structured_material,
     }
+    if formula_enhancement_path is not None:
+        from .local_formula_materials import load_formula_materials, formula_material_text
+        formula_material = load_formula_materials(root, formula_enhancement_path)
+        result["local_formula_enhancement"] = formula_material
+        result["structured_material"] += "\n\n" + formula_material_text(formula_material)
+    return result
 
 
 def _clean_reading_view(reading_view: str) -> str:
@@ -160,6 +210,7 @@ def build_practical_reader_messages(
         "questions": [dict(row) for row in questions],
         "required_outputs": [dict(row) for row in required_outputs],
         "source_material": str(material.get("body") or ""),
+        "structured_source_material": str(material.get("structured_material") or ""),
         "optional_bibliography": [dict(row) for row in material.get("references") or ()],
     }
     return [

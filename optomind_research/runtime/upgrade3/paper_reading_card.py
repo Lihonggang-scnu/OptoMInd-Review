@@ -255,6 +255,7 @@ def _compact_model_packet(packet: Mapping[str, Any]) -> dict[str, Any]:
                     "snapshot_id": _text(source.get("snapshot_id") or packet.get("snapshot_id")),
                     "block_id": _text(source.get("block_id")),
                     "source_document_id": _text(source.get("source_document_id")),
+                    **({"region_id": _text(source["region_id"])} if source.get("region_id") else {}),
                     "source_kind": _text(source.get("source_kind") or item.get("source_kind")),
                 },
             }
