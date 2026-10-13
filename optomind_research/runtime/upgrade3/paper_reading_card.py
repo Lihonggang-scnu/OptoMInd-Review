@@ -975,8 +975,8 @@ def run_paper_reading_card(
         _atomic_json(output / "PROMPT.json", prompt_artifact)
         if input_audit is not None:
             _atomic_json(output / "INPUT_AUDIT.json", input_audit)
-        ledger = GlobalBudgetLedger(limit_cny=budget_limit_cny, path=budget_ledger_path) if budget_ledger_path else None
         if client is None:
+            ledger = GlobalBudgetLedger(limit_cny=budget_limit_cny, path=budget_ledger_path) if budget_ledger_path else None
             client = QwenDirectClient(
                 model=MODEL, key_file=key_file, timeout_seconds=timeout_seconds,
                 max_output_tokens=max_output_tokens, max_retries=max(0, int(max_retries)),
