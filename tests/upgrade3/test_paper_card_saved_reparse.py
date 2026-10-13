@@ -1,6 +1,7 @@
 """Offline recovery contracts: only fake model clients and temporary artifacts."""
 import copy
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -144,7 +145,26 @@ def batch_options(tmp_path, inputs):
                 initial_workers=1, max_workers=1, retry_delay_seconds=0, poll_seconds=0)
 
 
-def test_batch_explicit_reparse_preserves_physical_attempt_and_failure(tmp_path, monkeypatch):
+def test_run_output_root_lock_rejects_same_process_owner(tmp_path):
+    output = tmp_path / "batch"
+    with batch._batch_output_lock(output):
+        with pytest.raises(batch.PaperReadingBatchError, match="batch_already_running"):
+            with batch._batch_output_lock(output):
+                pass
+
+
+def test_preflight_same_root_is_rejected_while_another_entry_holds_lock(tmp_path):
+    output = tmp_path / "batch"
+    with batch._batch_output_lock(output):
+        with pytest.raises(batch.PaperReadingBatchError, match="batch_already_running"):
+            batch.run_paper_reading_batch(
+                manifest_path=tmp_path / "missing-manifest.json",
+                output_root=output,
+                mode="preflight",
+            )
+
+
+def test_batch_auto_reparse_preserves_physical_attempt_and_failure(tmp_path, monkeypatch):
     inputs = card_inputs(tmp_path)
     options = batch_options(tmp_path, inputs)
     provider = FakeProvider()
@@ -157,9 +177,9 @@ def test_batch_explicit_reparse_preserves_physical_attempt_and_failure(tmp_path,
     attempt = Path(item["output_dir"])
     before, history = frozen_files(attempt), copy.deepcopy(item["attempts"])
     forbidden = forbid_live(monkeypatch)
-    unchanged = batch.run_paper_reading_batch(**options, client_factory=forbidden)
-    assert next(iter(unchanged["state"]["items"].values()))["status"] == "failed"
-    recovered = batch.run_paper_reading_batch(**options, client_factory=forbidden, reparse_saved_responses=True)
+    # A normal unattended resume must discover and revalidate the complete
+    # saved response before asking for a new client or paid attempt.
+    recovered = batch.run_paper_reading_batch(**options, client_factory=forbidden)
     item = next(iter(recovered["state"]["items"].values()))
     assert item["status"] == "reused" and item["attempt"] == 1 and item["attempts"] == history
     assert item["reparse_history"][-1]["physical_calls"] == 0
@@ -215,6 +235,54 @@ def test_transient_live_retries_remain_bounded(tmp_path):
     result = batch.run_paper_reading_batch(**options, client_factory=lambda *args: provider)
     item = next(iter(result["state"]["items"].values()))
     assert item["status"] == "failed" and item["attempt"] == len(provider.calls) == 2
+
+
+def test_pre_reservation_stop_retries_without_a_saved_response_or_unknown_spend(tmp_path):
+    inputs = card_inputs(tmp_path)
+    options = batch_options(tmp_path, inputs)
+
+    class PreReservationStop:
+        def __init__(self):
+            self.calls = 0
+
+        def complete(self, *args, **kwargs):
+            self.calls += 1
+            raise runtime.QwenTransportError("regional_dispatch_stopped_before_reservation")
+
+    provider = PreReservationStop()
+    result = batch.run_paper_reading_batch(**options, client_factory=lambda *args: provider)
+    item = next(iter(result["state"]["items"].values()))
+    assert item["status"] == "failed" and item["attempt"] == 2 and provider.calls == 2
+    assert [row["retryable"] for row in item["attempts"]] == [True, True]
+    for attempt in (Path(item["output_dir"]).parent / "attempt-01", Path(item["output_dir"]).parent / "attempt-02"):
+        assert (attempt / "FAILURE.json").is_file()
+        assert not (attempt / "RAW_RESPONSE.json").exists()
+
+
+def test_legacy_pre_reservation_state_is_retried_after_resume(tmp_path):
+    inputs = card_inputs(tmp_path)
+    options = batch_options(tmp_path, inputs)
+
+    class PreReservationStop:
+        def complete(self, *args, **kwargs):
+            raise runtime.QwenTransportError("regional_dispatch_stopped_before_reservation")
+
+    failed = batch.run_paper_reading_batch(**options, client_factory=lambda *args: PreReservationStop())
+    item = next(iter(failed["state"]["items"].values()))
+    first = Path(item["output_dir"]).parent / "attempt-01"
+    shutil.rmtree(Path(item["output_dir"]))
+    item["status"] = "failed"
+    item["attempt"] = 1
+    item["output_dir"] = str(first)
+    item["last_error"] = "regional_dispatch_stopped_before_reservation"
+    item["attempts"] = [copy.deepcopy(item["attempts"][0])]
+    item["attempts"][0]["retryable"] = False  # historical state before this repair
+    batch._atomic_json(Path(options["output_root"]) / "BATCH_STATE.json", failed["state"])
+
+    recovered = batch.run_paper_reading_batch(**options, client_factory=lambda *args: CardModelBoundary())
+    item = next(iter(recovered["state"]["items"].values()))
+    assert item["status"] == "success" and item["attempt"] == 2
+    assert Path(item["output_dir"]).name == "attempt-02"
 
 
 def test_interrupted_attempt_without_raw_keeps_files_and_uses_next_number(tmp_path):

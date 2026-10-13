@@ -32,7 +32,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--manifest", required=True, help="JSON manifest (records/rows plus optional finalized flag)")
     parser.add_argument("--output-root", required=True, help="Immutable per-batch output directory")
     parser.add_argument("--run", action="store_true", help="Explicitly permit live model calls; default is preflight")
-    parser.add_argument("--reparse-saved-responses", action="store_true", help="Before new live attempts, reparse complete saved validation failures for free; retain source artifacts and attempt counts")
+    parser.add_argument("--reparse-saved-responses", action="store_true", help="Compatibility flag; run mode automatically reparses complete saved validation failures for free before live attempts")
     parser.add_argument("--input-profile", choices=("standard", "economy"), default=DEFAULT_INPUT_PROFILE)
     parser.add_argument("--no-thinking", action="store_true", default=not DEFAULT_THINKING)
     parser.add_argument("--thinking-budget", type=int, default=DEFAULT_THINKING_BUDGET)

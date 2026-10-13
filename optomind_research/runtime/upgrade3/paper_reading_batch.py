@@ -8,6 +8,8 @@ already-prepared snapshots from a manifest and maintains an atomic checkpoint.
 from __future__ import annotations
 
 import concurrent.futures
+from contextlib import contextmanager
+from functools import wraps
 import hashlib
 import json
 import math
@@ -39,10 +41,87 @@ DEFAULT_BUDGET_LIMIT_CNY = 25.0
 MAX_ATTEMPTS_PER_PAPER = 2
 _SAFE_RE = re.compile(r"[^A-Za-z0-9._-]+")
 _TRANSIENT_STATUS = {408, 409, 425, 429, 500, 502, 503, 504}
+# This internal marker is raised after a batch stop event but before the
+# per-call budget reservation, so one bounded retry cannot duplicate a
+# provider request or spend an unknown amount.
+_PRE_RESERVATION_RETRY_REASON = "regional_dispatch_stopped_before_reservation"
 
 
 class PaperReadingBatchError(ValueError):
     """Deterministic batch input/state failure."""
+
+
+@contextmanager
+def _batch_output_lock(output: Path):
+    """Hold an OS-released run lock for one output root.
+
+    The lock file is intentionally persistent, while the byte-range lock is
+    held by the process.  A crash therefore releases the lock through the OS
+    without leaving stale ownership metadata that a later invocation might
+    mistake for an active process.  Every mode that writes the output root
+    enters this context.
+    """
+
+    output.mkdir(parents=True, exist_ok=True)
+    handle = (output / ".paper_reading_batch.lock").open("a+b")
+    try:
+        if os.name == "nt":
+            import msvcrt
+
+            handle.seek(0)
+            try:
+                has_byte = bool(handle.read(1))
+            except OSError as exc:
+                # Windows may reject the read itself while another process
+                # owns the byte range, before ``locking`` is reached.
+                raise PaperReadingBatchError("batch_already_running") from exc
+            if not has_byte:
+                handle.write(b"0")
+                handle.flush()
+            handle.seek(0)
+            try:
+                msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+            except OSError as exc:
+                raise PaperReadingBatchError("batch_already_running") from exc
+        else:
+            import fcntl
+
+            try:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except (BlockingIOError, OSError) as exc:
+                raise PaperReadingBatchError("batch_already_running") from exc
+        yield
+    finally:
+        try:
+            if os.name == "nt":
+                import msvcrt
+
+                handle.seek(0)
+                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        except OSError:
+            # Closing the descriptor still releases the OS lock when an
+            # interrupted process is unwinding.
+            pass
+        finally:
+            handle.close()
+
+
+def _with_run_lock(function: Callable[..., Any]) -> Callable[..., Any]:
+    """Decorate the public entry point without changing its API."""
+
+    @wraps(function)
+    def wrapped(*args: Any, **kwargs: Any) -> Any:
+        output_root = kwargs.get("output_root")
+        if output_root is None:
+            return function(*args, **kwargs)
+        with _batch_output_lock(Path(output_root).resolve()):
+            return function(*args, **kwargs)
+
+    return wrapped
 
 
 def _canonical(value: Any) -> bytes:
@@ -277,7 +356,10 @@ def _transient_failure(exc: BaseException) -> bool:
         status = record.get("status_code")
     if status in _TRANSIENT_STATUS or bool(getattr(exc, "transient", False)):
         return True
-    text = str(exc).casefold()
+    text = str(exc).strip().casefold()
+    reason_code = str(getattr(exc, "reason_code", "") or "").strip().casefold()
+    if text == _PRE_RESERVATION_RETRY_REASON or reason_code == _PRE_RESERVATION_RETRY_REASON:
+        return True
     return "timeout" in text or "timed out" in text
 
 
@@ -402,6 +484,21 @@ def _saved_validation_dirs(base: Path) -> list[Path]:
     return candidates
 
 
+def _is_pre_reservation_failure(record: Mapping[str, Any] | Any) -> bool:
+    """Recognize the durable zero-call stop marker from older batch state."""
+
+    if not isinstance(record, Mapping):
+        return False
+    return str(record.get("error") or "").strip().casefold() == _PRE_RESERVATION_RETRY_REASON
+
+
+def _item_has_pre_reservation_failure(item: Mapping[str, Any]) -> bool:
+    attempts = item.get("attempts")
+    if isinstance(attempts, Sequence) and not isinstance(attempts, (str, bytes)) and attempts:
+        return _is_pre_reservation_failure(attempts[-1])
+    return str(item.get("last_error") or "").strip().casefold() == _PRE_RESERVATION_RETRY_REASON
+
+
 def _call_one(
     item: Mapping[str, Any],
     *,
@@ -454,31 +551,38 @@ def _call_one(
         except Exception as exc:
             return {"ok": False, "attempt": attempt, "output_dir": str(attempt_dir), "error_type": type(exc).__name__, "error": str(exc), "retryable": False, "budget_failure": False, "status_code": _status_code(exc), "operation": "commit_reuse"}
 
-    if reparse_saved_responses:
-        for attempt_dir in reversed(_saved_validation_dirs(base)):
-            attempt = int(attempt_dir.name.split("-", 1)[1])
-            try:
-                result = run_paper_reading_card(
-                    snapshot_dir=item["snapshot_dir"], plan_path=item["plan_path"],
-                    output_dir=attempt_dir, saved_response_dir=attempt_dir,
-                    input_profile=config["input_profile"], thinking=bool(config["thinking"]),
-                    concise_output=bool(config["concise_output"]),
-                    max_output_tokens=int(config["max_output_tokens"]),
-                    thinking_budget=int(config["thinking_budget"]),
-                    timeout_seconds=float(config["timeout_seconds"]), max_retries=0,
-                )
-                return {"ok": True, "result": result, "attempt": attempt,
-                        "output_dir": result["output_dir"], "reused": True,
-                        "reparsed": bool(result.get("reparsed")), "operation": "saved_reparse"}
-            except Exception as exc:
-                return {"ok": False, "attempt": attempt, "output_dir": str(attempt_dir),
-                        "error_type": type(exc).__name__, "error": str(exc),
-                        "retryable": False, "budget_failure": False, "status_code": _status_code(exc), "operation": "saved_reparse"}
+    # A complete response from an earlier attempt is always the first
+    # recovery candidate.  ``reparse_saved_responses`` remains in the public
+    # signature for callers from older batch versions, but unattended runs
+    # must not require an operator-only flag to perform a free validation.
+    for attempt_dir in reversed(_saved_validation_dirs(base)):
+        attempt = int(attempt_dir.name.split("-", 1)[1])
+        try:
+            result = run_paper_reading_card(
+                snapshot_dir=item["snapshot_dir"], plan_path=item["plan_path"],
+                output_dir=attempt_dir, saved_response_dir=attempt_dir,
+                input_profile=config["input_profile"], thinking=bool(config["thinking"]),
+                concise_output=bool(config["concise_output"]),
+                max_output_tokens=int(config["max_output_tokens"]),
+                thinking_budget=int(config["thinking_budget"]),
+                timeout_seconds=float(config["timeout_seconds"]), max_retries=0,
+            )
+            return {"ok": True, "result": result, "attempt": attempt,
+                    "output_dir": result["output_dir"], "reused": True,
+                    "reparsed": bool(result.get("reparsed")), "operation": "saved_reparse"}
+        except Exception as exc:
+            # Do not fall through to a paid attempt when a saved response is
+            # malformed, no longer bound to the current input, or still fails
+            # the scientific validator.  The item remains an explicit gap.
+            return {"ok": False, "attempt": attempt, "output_dir": str(attempt_dir),
+                    "error_type": type(exc).__name__, "error": str(exc),
+                    "retryable": False, "budget_failure": False, "status_code": _status_code(exc), "operation": "saved_reparse"}
 
     # Older batch versions left even nonretryable validation failures pending.
     # Resuming without explicit recovery must not buy another response.
     previous = (item.get("attempts") or [{}])[-1]
-    if previous.get("status") == "failed" and not previous.get("retryable") and not previous.get("budget_failure"):
+    if (previous.get("status") == "failed" and not previous.get("retryable")
+            and not previous.get("budget_failure") and not _is_pre_reservation_failure(previous)):
         return {"ok": False, "attempt": int(previous.get("attempt") or item.get("attempt") or 0),
                 "output_dir": previous.get("output_dir") or item.get("output_dir", ""),
                 "error_type": previous.get("error_type", "nonretryable_saved_failure"),
@@ -608,6 +712,7 @@ def _write_aggregates(output_root: Path, state: Mapping[str, Any]) -> None:
     _atomic_json(output_root / "BATCH_RESULTS.json", {"schema_version": SCHEMA_VERSION, "counts": _summary_counts(state.get("items") or {}), "cards": summaries, "cards_index": "BATCH_CARDS_INDEX.jsonl", "planning_views": "BATCH_PLANNING_VIEWS.jsonl", "manifest_finalized": bool(state.get("manifest_finalized")), "stop_reason": state.get("stop_reason", "")})
 
 
+@_with_run_lock
 def run_paper_reading_batch(
     *,
     manifest_path: str | Path,
@@ -629,11 +734,13 @@ def run_paper_reading_batch(
     client_factory: Callable[..., Any] | None = None,
     reparse_saved_responses: bool = False,
 ) -> dict[str, Any]:
-    """Run/preflight a resumable batch, optionally reparsing saved failures.
+    """Run/preflight a resumable batch with free saved-response recovery.
 
-    ``reparse_saved_responses`` is an explicit local recovery policy, not a
-    change to the physical request configuration or attempt limit.  New papers
-    still follow the normal live path in run mode.
+    ``reparse_saved_responses`` is retained for source compatibility with
+    older callers.  A complete validation-failed response is now considered
+    automatically on every run-mode resume before a new physical attempt;
+    the flag does not change billing or attempt limits.  New papers still
+    follow the normal live path in run mode.
     """
 
     manifest = Path(manifest_path).resolve()
@@ -700,9 +807,14 @@ def run_paper_reading_batch(
     pending = deque(newly_pending)
     pending_set = set(pending)
     for key, item in (state.get("items") or {}).items():
-        if mode == "run" and reparse_saved_responses and item.get("status") == "failed":
+        if mode == "run" and item.get("status") == "failed":
             base = output / "cards" / _safe_slug(item["paper_id"]) / key
-            if _saved_validation_dirs(base):
+            can_recover_saved = bool(_saved_validation_dirs(base))
+            can_retry_pre_reservation = (
+                int(item.get("attempt") or 0) < MAX_ATTEMPTS_PER_PAPER
+                and _item_has_pre_reservation_failure(item)
+            )
+            if can_recover_saved or can_retry_pre_reservation:
                 item["status"] = "pending"
         if item.get("status") == "pending" and key not in pending_set:
             pending.append(key)
