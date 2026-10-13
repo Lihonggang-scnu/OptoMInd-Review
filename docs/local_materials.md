@@ -40,6 +40,23 @@ to a paid regional provider. Without local hook configuration ordinary
 reading proceeds with explicit unenhanced formulas. Per-PDF successes survive
 batch failures and are checked by hash/config/page coverage on `--resume`.
 
+Native parser process faults are automatically retried in a fresh resident
+worker, reusing every verified successful PDF. `max_native_restarts` defaults
+to 3 (maximum 10) consecutive retries without progress and does not invalidate
+inference caches. New successful PDFs or isolation of a repeated culprit reset
+this counter; the overall deadline and per-culprit limits still apply. Set 0
+to disable automatic native retries. `WORKER_HISTORY.json`
+retains each original exit code, started PDF receipt and recovery attempt;
+`CURRENT_WORKER.json` exposes the active PID. A PDF that triggers two native
+faults in the same run is isolated while other PDFs continue, then receives
+one attempt with a single native parser thread and periodic native memory
+release disabled. This effective backend profile is bound in its receipt and
+cache fingerprint. A further failure stays explicit and partial, never full
+text. Reaching the restart limit returns a partial batch for inspection.
+Timeout, the whole GPU memory ceiling and operator interruption are not
+retried or bypassed. A zero-exit worker that leaves no result stops with
+`worker_no_progress` instead of repeatedly loading models.
+
 The older regional-transcription descriptions below are an **explicit
 historical option**, not this local default. Their GROBID/fitz primary-body
 and 2-process/8-HTTP settings apply only to `deep_layout`; `docling_basic`

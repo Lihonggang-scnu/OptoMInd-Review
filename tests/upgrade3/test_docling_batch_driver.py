@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import types
+from argparse import Namespace
 
 import pytest
 
@@ -48,3 +49,81 @@ def test_allocator_reserves_background_and_512mib():
     assert batch.allocator_fraction(10240, 6000) == pytest.approx((8192 - 6000 - 512) / 10240)
     with pytest.raises(ValueError, match="headroom"):
         batch.allocator_fraction(10240, 8000)
+
+
+def recovery_setup(tmp_path, monkeypatch):
+    args = Namespace(output_root=tmp_path, mode="basic", resume=True, execution_id="")
+    rows = [{"label": name, "pdf_sha256": name} for name in ("a", "b")]
+    monkeypatch.setattr(batch, "gpu_allocator", lambda config: .5)
+    def cache(args, row, config):
+        path = args.output_root / row["label"] / "run.json"
+        value = batch.read(path) if path.exists() else None
+        return value if value and value["status"] == "success" else None
+    monkeypatch.setattr(batch, "cached", cache)
+    return args, rows
+
+
+def test_native_restart_reuses_success_and_preserves_original_culprit(tmp_path, monkeypatch):
+    args, rows = recovery_setup(tmp_path, monkeypatch); calls = []
+    def run(command, root, config, started, samples, entry):
+        calls.append(entry["labels"])
+        for label in entry["labels"]:
+            batch.atomic(root / label / "run.json", {"label": label, "execution_id": entry["execution_id"],
+                "status": "started" if len(calls) == 1 and label == "b" else "success"})
+        code = 0xC0000374 if len(calls) == 1 else 0
+        entry.update(returncode=code); return code, None
+    monkeypatch.setattr(batch, "run_isolated_worker", run)
+    code, aborted, history, _ = batch.recover_workers(args, rows, {}, batch.time.monotonic(), [], [])
+    assert code == 0 and aborted is None and calls == [["a", "b"], ["b"]]
+    assert history[0]["returncode"] == 0xC0000374 and history[0]["started_culprits"] == ["b"]
+    assert batch.read(tmp_path / "WORKER_HISTORY.json")[0]["receipts"][1]["status"] == "started"
+
+
+def test_repeated_culprit_isolated_then_one_safe_parser_attempt(tmp_path, monkeypatch):
+    args, rows = recovery_setup(tmp_path, monkeypatch); calls = []
+    def run(command, root, config, started, samples, entry):
+        calls.append((entry["labels"], entry["safe_parser"]))
+        if entry["safe_parser"] or len(calls) == 3:
+            for label in entry["labels"]: batch.atomic(root / label / "run.json", {"label": label, "status": "success", "execution_id": entry["execution_id"]})
+            code = 0
+        else:
+            batch.atomic(root / "a" / "run.json", {"label": "a", "status": "started", "execution_id": entry["execution_id"]})
+            code = 0xC0000005
+        entry.update(returncode=code); return code, None
+    monkeypatch.setattr(batch, "run_isolated_worker", run)
+    code, aborted, history, _ = batch.recover_workers(args, rows, {}, batch.time.monotonic(), [], [])
+    assert code == 0 and aborted is None
+    assert calls == [(["a", "b"], False), (["a", "b"], False), (["b"], False), (["a"], True)]
+    assert len(history) == 4
+
+
+@pytest.mark.parametrize("code,reason", [(1, None), (0xC0000374, "batch_deadline_exceeded"), (0xC0000374, "whole_gpu_memory_ceiling_exceeded")])
+def test_non_native_and_controlled_stop_never_retry(tmp_path, monkeypatch, code, reason):
+    args, rows = recovery_setup(tmp_path, monkeypatch); calls = []
+    def run(command, root, config, started, samples, entry):
+        calls.append(entry); entry.update(returncode=code); return code, reason
+    monkeypatch.setattr(batch, "run_isolated_worker", run)
+    result = batch.recover_workers(args, rows, {}, batch.time.monotonic(), [], [])
+    assert result[:2] == (code, reason) and len(calls) == 1
+
+
+def test_zero_exit_without_receipt_stops_instead_of_reloading_models(tmp_path, monkeypatch):
+    args, rows = recovery_setup(tmp_path, monkeypatch); calls = []
+    def run(command, root, config, started, samples, entry):
+        calls.append(entry); entry.update(returncode=0); return 0, None
+    monkeypatch.setattr(batch, "run_isolated_worker", run)
+    result = batch.recover_workers(args, rows, {}, batch.time.monotonic(), [], [])
+    assert result[:2] == (0, "worker_no_progress") and len(calls) == 1
+
+
+def test_windows_cleanup_targets_only_owned_pid_tree(monkeypatch):
+    calls = []
+    class Process:
+        pid = 12345
+        def poll(self): return None
+        def wait(self, timeout): calls.append(("wait", timeout))
+    monkeypatch.setattr(batch.os, "name", "nt")
+    monkeypatch.setattr(batch.subprocess, "CREATE_NO_WINDOW", 0x08000000, raising=False)
+    monkeypatch.setattr(batch.subprocess, "run", lambda command, **kwargs: calls.append(command) or Namespace(returncode=0))
+    batch.stop_owned_worker(Process())
+    assert calls == [["taskkill", "/PID", "12345", "/T", "/F"], ("wait", 15)]
