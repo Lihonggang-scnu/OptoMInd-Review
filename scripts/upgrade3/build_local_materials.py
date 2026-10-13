@@ -357,7 +357,8 @@ def make_material_acquirer_factory(args: argparse.Namespace, *, regional_client_
             raise ValueError("docling_batch_index_requires_basic_and_no_other_docling_source")
         from optomind_research.runtime.upgrade3.docling_adapter import DoclingBatchAdapter, config_sha256
         providers["docling"] = DoclingBatchAdapter(args.docling_batch_index,
-            cache_root=args.docling_cache_root or args.cache_root / "docling", crop_scale=args.docling_crop_scale)
+            cache_root=args.docling_cache_root or args.cache_root / "docling", crop_scale=args.docling_crop_scale,
+            render_crops=False)
         config.docling_enabled = config.docling_primary = True
         config.docling_config_sha256 = config_sha256({"batch_index_sha256": hashlib.sha256(args.docling_batch_index.read_bytes()).hexdigest(),
             "crop_scale": args.docling_crop_scale, "body_projection": "optomind.docling_body.v1"})
@@ -373,12 +374,14 @@ def make_material_acquirer_factory(args: argparse.Namespace, *, regional_client_
                 command=tuple(value["command"]), command_args=tuple(value.get("command_args") or ()),
                 config=dict(value["config"]), timeout_seconds=float(value.get("timeout_seconds", args.deadline_seconds)),
                 output_filename=str(value.get("output_filename") or "document.json"), crop_scale=args.docling_crop_scale,
+                render_crops=parser_mode != "docling_basic",
                 max_processes=args.docling_max_processes if args.docling_max_processes is not None else value.get("max_processes", 1))
         else:
             if not (args.docling_document_json and args.docling_run_json):
                 raise ValueError("saved Docling import requires both --docling-document-json and --docling-run-json")
             adapter_config = DoclingAdapterConfig.from_saved_run(args.docling_document_json, args.docling_run_json,
                 cache_root=cache_root, crop_scale=args.docling_crop_scale,
+                render_crops=parser_mode != "docling_basic",
                 max_processes=args.docling_max_processes if args.docling_max_processes is not None else 1)
         recognizer = None
         if args.recognition_config:

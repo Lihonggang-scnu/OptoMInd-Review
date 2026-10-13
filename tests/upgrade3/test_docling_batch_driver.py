@@ -51,6 +51,16 @@ def test_allocator_reserves_background_and_512mib():
         batch.allocator_fraction(10240, 8000)
 
 
+def test_basic_default_uses_single_thread_profile_and_bounded_child():
+    args = Namespace(mode="basic", safe_parser=False)
+    assert batch.basic_safe_parser({}, args)
+    assert batch.batch_worker_count({}, args) == 1
+    assert batch.batch_worker_count({"workers": 3}, args) == 3
+    assert batch.worker_batch_limit({}, args) == 20
+    assert batch.worker_batch_limit({"max_documents_per_worker": 7}, args) == 7
+    assert batch.worker_batch_limit({"max_documents_per_worker": 7}, Namespace(mode="formula", safe_parser=False)) is None
+
+
 def recovery_setup(tmp_path, monkeypatch):
     args = Namespace(output_root=tmp_path, mode="basic", resume=True, execution_id="")
     rows = [{"label": name, "pdf_sha256": name} for name in ("a", "b")]
@@ -91,7 +101,7 @@ def test_repeated_culprit_isolated_then_one_safe_parser_attempt(tmp_path, monkey
             code = 0xC0000005
         entry.update(returncode=code); return code, None
     monkeypatch.setattr(batch, "run_isolated_worker", run)
-    code, aborted, history, _ = batch.recover_workers(args, rows, {}, batch.time.monotonic(), [], [])
+    code, aborted, history, _ = batch.recover_workers(args, rows, {"safe_parser": False}, batch.time.monotonic(), [], [])
     assert code == 0 and aborted is None
     assert calls == [(["a", "b"], False), (["a", "b"], False), (["b"], False), (["a"], True)]
     assert len(history) == 4

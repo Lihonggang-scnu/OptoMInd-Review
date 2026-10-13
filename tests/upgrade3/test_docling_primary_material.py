@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 
 from test_docling_native_bridge import _fixture
-from optomind_research.runtime.upgrade3.docling_adapter import DoclingCliAdapter, native_document_to_jats
+from optomind_research.runtime.upgrade3.docling_adapter import DoclingAdapterConfig, DoclingCliAdapter, native_document_to_jats
 from optomind_research.runtime.upgrade3.material_acquisition import AcquisitionConfig, MaterialAcquirer
 from optomind_research.runtime.upgrade3.local_materials import PreparedSnapshotProvider
 from optomind_research.runtime.upgrade3.paper_reading_card import build_card_input, build_card_messages
@@ -108,6 +109,22 @@ def test_formal_basic_cli_free_snapshot_and_warm_checkpoint(tmp_path, capsys):
     assert snapshot.manifest["producer_fulltext_claim"]["scope"] == "docling_basic"
     assert "Recognized body text" in snapshot.reading_view
     assert "An offline body source" not in snapshot.reading_view
+
+
+def test_basic_snapshot_defers_crops_but_keeps_region_index_and_pdf_binding(tmp_path):
+    data, document, run, config = _fixture(tmp_path)
+    adapter_config = DoclingAdapterConfig.from_saved_run(
+        config.document_path, config.run_metadata_path,
+        cache_root=tmp_path / "deferred-cache", crop_scale=2.5, render_crops=False)
+    prepared = DoclingCliAdapter(adapter_config).prepare_document(data, title="Deferred crops")
+    roles = [item["role"] for item in prepared["additional_sources"]]
+    assert "pdf_primary_region_index" in roles
+    assert "pdf_region_crop" not in roles
+    assert "pdf_crop_manifest" in roles
+    index = prepared["region_index"]
+    assert index["pdf_sha256"] == hashlib.sha256(data).hexdigest()
+    assert any(region.get("bbox") for region in index["regions"] if region.get("kind") != "page")
+    assert any(gap.get("status") == "deferred" for gap in prepared["known_gaps"])
 
 
 def test_flattened_formula_and_multiple_provenance_are_not_latex(tmp_path):

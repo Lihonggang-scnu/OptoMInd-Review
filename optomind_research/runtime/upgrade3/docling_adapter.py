@@ -605,6 +605,7 @@ class DoclingAdapterConfig:
     run_metadata_path: str | Path = ""
     output_filename: str = "document.json"
     crop_scale: float = 2.5
+    render_crops: bool = True
     max_processes: int = 1
 
     def __post_init__(self):
@@ -622,8 +623,14 @@ class DoclingAdapterConfig:
 
     def fingerprint(self) -> dict[str, Any]:
         value = {"options": dict(self.config), "command": list(self.command), "command_args": list(self.command_args),
-                 "crop_strategy": "region-and-linked-caption-footnote-v1",
-                 "output_filename": self.output_filename, "crop_scale": float(self.crop_scale)}
+                 "crop_strategy": "region-and-linked-caption-footnote-v1", "output_filename": self.output_filename,
+                 "crop_scale": float(self.crop_scale)}
+        if not self.render_crops:
+            # Keep the historical deep-layout fingerprint byte-for-byte
+            # compatible; only the new deferred basic profile gets a distinct
+            # cache identity.
+            value["crop_strategy"] = "deferred-region-crops-v1"
+            value["render_crops"] = False
         for key, path in (("raw_document_sha256", self.document_path), ("raw_run_sha256", self.run_metadata_path)):
             if path:
                 value[key] = _sha256(Path(path).read_bytes())
@@ -785,7 +792,10 @@ class DoclingCliAdapter:
                 config=fingerprint, cache_key_value=cache_dir.name)
             normalized["raw_document_sha256"] = _sha256(raw_document)
             normalized["raw_run_sha256"] = _sha256(raw_run)
-            crops = self._render_crops(pdf_bytes, normalized, deadline=deadline)
+            crops = self._render_crops(pdf_bytes, normalized, deadline=deadline) if self.config.render_crops else []
+            if not self.config.render_crops:
+                normalized.setdefault("known_gaps", []).append({"kind": "crops", "status": "deferred",
+                    "reason": "ordinary basic snapshot retains PDF page/bbox region handles; image crops render on demand for deep reading"})
         else:
             normalized = _validate_layout(layout)
             self._validate_binding(normalized, pdf_sha, fingerprint)
@@ -974,9 +984,10 @@ class DoclingCliAdapter:
 
 class DoclingBatchAdapter:
     """Import a resident batch by PDF hash, without starting model processes."""
-    def __init__(self, index_path: str | Path, *, cache_root: str | Path, crop_scale: float = 2.5):
+    def __init__(self, index_path: str | Path, *, cache_root: str | Path, crop_scale: float = 2.5,
+                 render_crops: bool = False):
         self.index_path = Path(index_path).resolve()
-        self.cache_root, self.crop_scale = Path(cache_root).resolve(), crop_scale
+        self.cache_root, self.crop_scale, self.render_crops = Path(cache_root).resolve(), crop_scale, bool(render_crops)
         payload = json.loads(self.index_path.read_bytes())
         if payload.get("mode") != "basic":
             raise DoclingAdapterError("ordinary_batch_requires_basic_mode")
@@ -1010,7 +1021,8 @@ class DoclingBatchAdapter:
                 if not run.is_absolute(): run = self.index_path.parent / run
                 if row.get("document_sha256") and _sha256(document.read_bytes()) != row["document_sha256"]:
                     raise DoclingAdapterError("batch_document_hash_mismatch")
-                config = DoclingAdapterConfig.from_saved_run(document, run, cache_root=self.cache_root, crop_scale=self.crop_scale)
+                config = DoclingAdapterConfig.from_saved_run(document, run, cache_root=self.cache_root,
+                    crop_scale=self.crop_scale, render_crops=self.render_crops)
                 self.adapters[sha] = DoclingCliAdapter(config)
             adapter = self.adapters[sha]
         return adapter.prepare_document(pdf_bytes, **kwargs)

@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -89,7 +90,14 @@ def formula_request(args, row):
 
 
 def fingerprint(args, row, config):
-    effective = {key: value for key, value in config.items() if key not in {"gpu_limit_mib", "timeout_seconds", "memory_fraction", "max_native_restarts"}}
+    # Scheduling and native-lifetime knobs do not change the document request.
+    # Excluding them keeps existing successful receipts reusable when the
+    # verified parallel profile is adopted.
+    operational = {"gpu_limit_mib", "timeout_seconds", "memory_fraction", "max_native_restarts",
+                   "workers", "max_documents_per_worker", "safe_parser"}
+    if args.mode == "basic":
+        operational.add("backend_options")
+    effective = {key: value for key, value in config.items() if key not in operational}
     key = {"mode": args.mode, "pdf_sha256": row["pdf_sha256"], "config": effective,
            "executor_version": "optomind.resident_docling_executor.v1"}
     if args.mode == "formula":
@@ -98,8 +106,8 @@ def fingerprint(args, row, config):
     return sha(json.dumps(key, sort_keys=True).encode())
 
 
-def cached(args, row, config):
-    output = Path(args.output_root) / row["label"]
+def cached(args, row, config, output_root=None):
+    output = Path(output_root if output_root is not None else args.output_root) / row["label"]
     receipt = output / "run.json"; document = output / "document.json"
     if not receipt.is_file(): return None
     value = read(receipt)
@@ -241,6 +249,7 @@ def parser():
     p.add_argument("--mode", choices=("basic", "formula"), required=True)
     p.add_argument("--manifest", type=Path, required=True); p.add_argument("--config", type=Path, required=True)
     p.add_argument("--output-root", type=Path, required=True); p.add_argument("--resume", action="store_true")
+    p.add_argument("--workers", type=int, help="basic worker processes; defaults to the config value or 1")
     p.add_argument("--raw-doc-root", type=Path); p.add_argument("--selection", type=Path)
     p.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
     p.add_argument("--memory-fraction", type=float, help=argparse.SUPPRESS)
@@ -248,6 +257,50 @@ def parser():
     p.add_argument("--worker-labels", type=Path, help=argparse.SUPPRESS)
     p.add_argument("--safe-parser", action="store_true", help=argparse.SUPPRESS)
     return p
+
+
+def basic_safe_parser(config, args):
+    """Use the bounded native parser profile for every basic child.
+
+    The profile is the stable route for concurrent resident converters.  The
+    explicit flag remains accepted for recovery/history compatibility; the
+    production basic route now opts in automatically without changing formula
+    enrichment behavior.
+    """
+    return args.mode == "basic" and (getattr(args, "safe_parser", False) or config.get("safe_parser", True))
+
+
+def worker_batch_limit(config, args):
+    """Bound basic child lifetime while retaining per-PDF cache reuse."""
+    if args.mode != "basic":
+        return None
+    value = config.get("max_documents_per_worker", 20)
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        raise ValueError("max_documents_per_worker_invalid")
+    if value < 1:
+        raise ValueError("max_documents_per_worker_must_be_positive")
+    return min(value, 1000)
+
+
+def batch_worker_count(config, args):
+    """Return the parent basic fan-out; formula enrichment stays serial."""
+    if args.mode != "basic":
+        return 1
+    value = getattr(args, "workers", None)
+    if value is None:
+        # Historical configs omit this operational knob. Keep their old
+        # single-resident-process behavior; the verified three-process route
+        # opts in through an explicit config or --workers 3.
+        value = config.get("workers", 1)
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        raise ValueError("workers_invalid")
+    if value < 1 or value > 8:
+        raise ValueError("workers_must_be_between_1_and_8")
+    return value
 
 
 def process_alive(pid):
@@ -355,6 +408,8 @@ def recover_workers(args, rows, config, started, samples, original_argv):
     for row in rows:
         path = args.output_root / row["label"] / "run.json"
         if path.is_file() and read(path).get("status") == "quarantined": quarantined.add(row["label"])
+    bounded_profile = basic_safe_parser(config, args)
+    batch_limit = worker_batch_limit(config, args)
     code = 0; aborted = None; restarts = 0; consecutive_no_progress = 0; execution_ids = set()
     while True:
         pending = [row for row in rows if row["label"] not in quarantined and not cached(args, row, config)]
@@ -364,18 +419,22 @@ def recover_workers(args, rows, config, started, samples, original_argv):
         if not pending:
             if not safe_queue: break
             pending = [safe_queue.pop(0)]; safe = True
+        elif batch_limit is not None:
+            pending = pending[:batch_limit]
         if time.monotonic() - started > float(config.get("timeout_seconds", 1800)):
             aborted = "batch_deadline_exceeded"; break
         args.execution_id = uuid.uuid4().hex; execution_ids.add(args.execution_id)
         labels_path = args.output_root / ".workers" / f"{args.execution_id}.json"
         atomic(labels_path, [row["label"] for row in pending])
         entry = {"execution_id": args.execution_id, "status": "starting", "started_at": time.time(),
-            "labels": [row["label"] for row in pending], "safe_parser": safe, "restart_number": restarts}
+            "labels": [row["label"] for row in pending], "safe_parser": bool(bounded_profile or safe),
+            "parser_profile": "single_thread" if (bounded_profile or safe) else "installed_default",
+            "max_documents_per_worker": batch_limit, "restart_number": restarts}
         history.append(entry); current_history.append(entry); atomic(history_path, history)
         command = [sys.executable, "-B", "-X", "utf8", str(Path(__file__).resolve()), *original_argv,
             "--worker", "--resume", "--worker-labels", str(labels_path), "--memory-fraction", str(gpu_allocator(config)),
             "--execution-id", args.execution_id]
-        if safe: command.append("--safe-parser")
+        if bounded_profile or safe: command.append("--safe-parser")
         code, aborted = run_isolated_worker(command, args.output_root, config, started, samples, entry)
         receipts = []
         for row in pending:
@@ -420,6 +479,236 @@ def recover_workers(args, rows, config, started, samples, original_argv):
     return code, aborted, current_history, execution_ids
 
 
+def promote_staged_outputs(args, rows, config):
+    """Promote only cache-compatible completed shard outputs."""
+    staging = args.output_root / ".workers"
+    rows_by_label = {row["label"]: row for row in rows}
+    if not staging.is_dir():
+        return []
+    promoted = []
+    for session in sorted(staging.iterdir(), key=lambda path: path.name):
+        if not session.is_dir():
+            continue
+        for worker_root in sorted(session.iterdir(), key=lambda path: path.name):
+            if not worker_root.is_dir():
+                continue
+            for label_root in sorted(worker_root.iterdir(), key=lambda path: path.name):
+                row = rows_by_label.get(label_root.name)
+                if row is None or not label_root.is_dir():
+                    continue
+                if not (label_root / "run.json").is_file():
+                    continue
+                target = args.output_root / label_root.name
+                try:
+                    staged_valid = cached(args, row, config, worker_root)
+                except ValueError:
+                    staged_valid = None
+                if staged_valid is None:
+                    continue
+                try:
+                    target_valid = cached(args, row, config)
+                except ValueError:
+                    target_valid = None
+                if target_valid is not None:
+                    continue
+                if target.exists():
+                    stale = target.with_name(target.name + ".stale-" + uuid.uuid4().hex)
+                    shutil.move(str(target), str(stale))
+                shutil.move(str(label_root), str(target))
+                promoted.append(label_root.name)
+    return promoted
+
+
+def split_rows(rows, worker_count):
+    count = min(max(1, int(worker_count)), len(rows))
+    groups = [[] for _ in range(count)]
+    offset = 0
+    for index in range(count):
+        remaining = len(rows) - offset
+        slots = count - index
+        size = (remaining + slots - 1) // slots
+        groups[index].extend(rows[offset:offset + size])
+        offset += size
+    return [group for group in groups if group]
+
+
+def run_parallel_workers(args, rows, config, started, samples, original_argv, worker_count):
+    """Run disjoint basic shards concurrently and flatten compatible receipts."""
+    session = args.output_root / ".workers" / f"parallel-{uuid.uuid4().hex}"
+    session.mkdir(parents=True, exist_ok=True)
+    config_path = session / "config.json"
+    atomic(config_path, config)
+    groups = split_rows(rows, worker_count)
+    children = []
+    completed = False
+    cleanup_errors = []
+
+    def cleanup_children():
+        for child in children:
+            proc = child.get("proc")
+            if proc is not None and proc.poll() is None:
+                try:
+                    stop_owned_worker(proc)
+                except Exception as exc:
+                    cleanup_errors.append(f"{type(exc).__name__}:{exc}")
+            for stream_name in ("stdout", "stderr"):
+                stream = child.get(stream_name)
+                if stream is not None:
+                    try:
+                        stream.close()
+                    except Exception:
+                        pass
+
+    try:
+        for index, group in enumerate(groups, start=1):
+            worker_root = session / f"worker_{index}"
+            worker_root.mkdir(parents=True, exist_ok=True)
+            shard_manifest = worker_root / "manifest.json"
+            atomic(
+                shard_manifest,
+                {"records": [
+                    {"label": row["label"], "local_pdf": row["local_pdf"],
+                     "pdf_sha256": row["pdf_sha256"], "canonical_paper_id": row.get("canonical_paper_id", "")}
+                    for row in group
+                ]},
+            )
+            stdout = stderr = None
+            try:
+                stdout = (worker_root / "stdout.log").open("ab")
+                stderr = (worker_root / "stderr.log").open("ab")
+                command = [
+                    sys.executable, "-B", "-X", "utf8", str(Path(__file__).resolve()),
+                    *original_argv,
+                    "--manifest", str(shard_manifest), "--config", str(config_path),
+                    "--output-root", str(worker_root), "--resume", "--workers", "1",
+                ]
+                proc = subprocess.Popen(
+                    command, stdout=stdout, stderr=stderr,
+                    env={**os.environ, "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1", "HF_DATASETS_OFFLINE": "1"},
+                    creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                )
+            except BaseException:
+                for stream in (stdout, stderr):
+                    if stream is not None:
+                        stream.close()
+                raise
+            children.append({
+                "index": index, "group": group, "worker_root": worker_root,
+                "proc": proc, "stdout": stdout, "stderr": stderr,
+                "command": command, "started": time.monotonic(),
+                "returncode": None, "abort_reason": None, "result": None,
+            })
+
+        aborted = None
+        peak = None
+        timeout = float(config.get("timeout_seconds", 1800) or 1800)
+        while any(child["proc"].poll() is None for child in children):
+            used = gpu_memory()
+            samples.append(used)
+            if isinstance(used, int):
+                peak = max(peak or used, used)
+            limit = int(config.get("gpu_limit_mib", 8192) or 8192)
+            if isinstance(used, int) and used > limit:
+                aborted = f"whole_gpu_memory_ceiling_exceeded:{used}>{limit}MiB"
+            elif time.monotonic() - started > timeout:
+                aborted = f"batch_deadline_exceeded:{timeout}s"
+            if aborted:
+                for child in children:
+                    if child["proc"].poll() is None:
+                        child["abort_reason"] = aborted
+                        stop_owned_worker(child["proc"])
+                break
+            time.sleep(.5)
+
+        aggregate_history = []
+        execution_ids = set()
+        records_by_label = {}
+        child_summaries = []
+        child_codes = []
+        for child in children:
+            proc = child["proc"]
+            try:
+                code = proc.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                stop_owned_worker(proc)
+                code = proc.wait(timeout=15)
+            child["returncode"] = code
+            child_codes.append(code)
+            result_path = child["worker_root"] / "BATCH_RESULT.json"
+            result = read(result_path) if result_path.is_file() else None
+            child["result"] = result
+            if result:
+                child_peak = result.get("peak_gpu_memory_mib")
+                if isinstance(child_peak, int):
+                    peak = max(peak or child_peak, child_peak)
+                for record in result.get("records") or []:
+                    label = record.get("label")
+                    if label:
+                        records_by_label[label] = dict(record)
+            history_path = child["worker_root"] / "WORKER_HISTORY.json"
+            history = read(history_path) if history_path.is_file() else []
+            for entry in history:
+                entry = dict(entry)
+                entry["parallel_worker"] = child["index"]
+                aggregate_history.append(entry)
+                if entry.get("execution_id"):
+                    execution_ids.add(entry["execution_id"])
+            for row in child["group"]:
+                label = row["label"]
+                staged = child["worker_root"] / label
+                target = args.output_root / label
+                staged_valid = None
+                if staged.is_dir() and (staged / "run.json").is_file():
+                    try:
+                        staged_valid = cached(args, row, config, child["worker_root"])
+                    except ValueError:
+                        staged_valid = None
+                try:
+                    target_valid = cached(args, row, config)
+                except ValueError:
+                    target_valid = None
+                if staged_valid is not None and target_valid is None:
+                    if target.exists():
+                        stale = target.with_name(target.name + ".stale-" + uuid.uuid4().hex)
+                        shutil.move(str(target), str(stale))
+                    shutil.move(str(staged), str(target))
+                    target_valid = cached(args, row, config)
+                record = target_valid or records_by_label.get(label)
+                if record is not None:
+                    record["output"] = str(target)
+                    record["output_root"] = str(target)
+                    record["document_path"] = str(target / "document.json")
+                    record["run_path"] = str(target / "run.json")
+                    records_by_label[label] = record
+            reason = child["abort_reason"] or (result or {}).get("abort_reason")
+            child_summaries.append({
+                "index": child["index"], "labels": [row["label"] for row in child["group"]],
+                "returncode": code, "abort_reason": reason,
+                "wall_seconds": round(time.monotonic() - child["started"], 3),
+                "status": (result or {}).get("status", "missing"),
+                "worker_root": str(child["worker_root"]),
+                "worker_execution_count": (result or {}).get("worker_execution_count", len(history)),
+                "native_crash_count": (result or {}).get("native_crash_count", 0),
+                "peak_gpu_memory_mib": (result or {}).get("peak_gpu_memory_mib"),
+            })
+        if aborted is None:
+            failed = [summary for summary in child_summaries if summary["returncode"] != 0 or summary["status"] != "success"]
+            if failed:
+                aborted = next((summary["abort_reason"] for summary in failed if summary["abort_reason"]), "parallel_child_failed")
+        code = 0 if aborted is None else next((value for value in child_codes if value != 0), 1)
+        completed = True
+        return {
+            "code": code, "aborted": aborted, "history": aggregate_history,
+            "execution_ids": execution_ids, "records": records_by_label,
+            "children": child_summaries, "peak_gpu_memory_mib": peak,
+            "worker_count": len(groups),
+        }
+    finally:
+        cleanup_children()
+        if completed and cleanup_errors:
+            raise RuntimeError("parallel_owned_worker_cleanup_failed:" + ";".join(cleanup_errors))
+
+
 def main(argv=None):
     args = parser().parse_args(argv)
     args.output_root = args.output_root.resolve()
@@ -433,6 +722,7 @@ def main(argv=None):
             path = Path(container[key]); container[key] = str(path.resolve() if path.is_absolute() else (args.config.parent / path).resolve())
     config["gpu_limit_mib"] = min(8192, int(config.get("gpu_limit_mib", 8192)))
     rows, aliases, input_failures = normalize(args.manifest)
+    worker_count = batch_worker_count(config, args)
     if args.worker:
         if args.worker_labels:
             selected = set(read(args.worker_labels)); rows = [row for row in rows if row["label"] in selected]
@@ -441,13 +731,26 @@ def main(argv=None):
     lock_path = args.output_root / ".batch.lock"
     acquire_lock(lock_path)
     started = time.monotonic(); samples = []; code = 0; aborted = None; worker_history = []; execution_ids = set()
+    parallel_children = []
+    parallel_peak = None
     try:
+        # A previous parent may have finished a shard before it was able to
+        # flatten the stable labels. Reuse those receipts before scheduling.
+        promote_staged_outputs(args, rows, config)
         done = [cached(args, row, config) if args.resume else None for row in rows]
         if not args.resume and any((args.output_root / row["label"] / "run.json").exists() for row in rows):
             raise ValueError("existing_batch_results_require_resume")
         if not all(done):
-            code, aborted, worker_history, execution_ids = recover_workers(args, rows, config, started, samples,
-                list(argv if argv is not None else sys.argv[1:]))
+            original_argv = list(argv if argv is not None else sys.argv[1:])
+            if args.mode == "basic" and worker_count > 1:
+                parallel = run_parallel_workers(args, rows, config, started, samples, original_argv, worker_count)
+                code, aborted = parallel["code"], parallel["aborted"]
+                worker_history, execution_ids = parallel["history"], parallel["execution_ids"]
+                parallel_children, parallel_peak = parallel["children"], parallel["peak_gpu_memory_mib"]
+                atomic(args.output_root / "WORKER_HISTORY.json", worker_history)
+            else:
+                code, aborted, worker_history, execution_ids = recover_workers(args, rows, config, started, samples,
+                    original_argv)
         results = []
         for row_index, row in enumerate(rows):
             value = cached(args, row, config)
@@ -466,7 +769,10 @@ def main(argv=None):
             "elapsed_seconds": round(time.monotonic() - started, 3), "worker_returncode": code, "abort_reason": aborted,
             "native_crash_count": sum(native_crash(h["returncode"]) for h in worker_history),
             "worker_execution_count": len(worker_history), "worker_history_path": str(args.output_root / "WORKER_HISTORY.json"),
-            "peak_gpu_memory_mib": max((x for x in samples if x is not None), default=None)}
+            "workers": worker_count, "parallel_children": parallel_children,
+            "peak_gpu_memory_mib": max([x for x in samples if x is not None] + ([parallel_peak] if parallel_peak is not None else []), default=None)}
+        if worker_history:
+            atomic(args.output_root / "WORKER_HISTORY.json", worker_history)
         atomic(args.output_root / "BATCH_RESULT.json", report)
         print(json.dumps({key: report[key] for key in ("status", "unique_pdf_count", "cached_count", "reconverted_count", "elapsed_seconds", "worker_returncode")}, ensure_ascii=True))
         return 0 if report["status"] == "success" else 2

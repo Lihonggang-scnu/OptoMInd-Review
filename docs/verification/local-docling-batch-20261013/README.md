@@ -1,10 +1,10 @@
 # Local Docling batch and directed-reading handoff — 2026-10-13
 
-This change provides a local PDF material route. The optical review end-to-end run remains paused. No model API was called in these parser experiments; Mistral and Mathpix were not enabled.
+This change provides a local PDF material route. The optical review A/B path is restored at V7. No model API was called in these parser experiments; Mistral and Mathpix were not enabled.
 
 ## Adopted route
 
-1. Native XML remains preferred when available. For PDF batches, `scripts/upgrade3/parse_docling_batch.py --mode basic` keeps one Docling converter resident across the batch. It saves native document JSON and a per-PDF receipt.
+1. Native XML remains preferred when available. For PDF batches, `scripts/upgrade3/parse_docling_batch.py --mode basic` uses the explicit verified `workers=3`, b4/t4, single-native-parser-thread profile under the 8 GiB whole-card cap. Each child handles at most 20 PDFs, then resumes from verified per-PDF receipts in a fresh child. Historical configs without `workers` retain one resident process. It saves native document JSON and a per-PDF receipt.
 2. `scripts/upgrade3/build_local_materials.py --material-parser-mode docling_basic --docling-batch-index ...` imports the verified batch result into ordinary snapshots. The PDF body comes from Docling reading order, with tables, captions and source-bound region handles. It is not the former GROBID/fitz body with only supplementary Docling assets.
 3. Ordinary reading and A/B creation use these snapshots immediately. Original PDF, native JSON and the page/bounding-box index remain available independently of A/B and deep reading.
 4. When directed reading selects a paper, `--local-formula-config` invokes local CodeFormulaV2 before preparing the deep-reader request. The derived formula material is bound to the original PDF and region index and enters the practical reading messages. The original snapshot is not rewritten. Tables already enter through the basic local table recognizer; this hook enhances formulas, not every table or figure.
@@ -18,7 +18,10 @@ Hardware: RTX 3080 10 GB; experiments constrained whole-card usage below 8 GiB. 
 | Run | Observed result |
 | --- | --- |
 | Basic, one resident process, batch 8 / threads 8 | 55 distinct PDFs, 1,038 pages, all successful in 106.505 seconds; peak 4,186 MiB |
-| Basic, three processes | Only 18 of 55 PDFs completed; two Windows native crashes. Rejected as default despite faster small-sample results |
+| Basic, three processes with parser_threads=1 | 55/55 successful; peak 7,075 MiB; zero native crashes; seven content comparisons equal to the b8 baseline |
+| Formal production entry, explicit three-child b4/t4 profile | 55/55 newly converted in 68.812 seconds; peak 6,966 MiB; three children, one execution each; zero native crashes |
+| Basic, default bounded single-thread children | 55/55 successful in 141.078 seconds; three fresh children (20/20/15); peak 3,692 MiB; seven content comparisons equal to the b8 baseline |
+| Basic, three processes with the installed parser default | Only 18 of 55 PDFs completed; two Windows native crashes. Rejected despite faster small-sample results |
 | Local formula enhancement, batch 32 | 34 formulas across five PDFs in 42.746 seconds; peak 5,895 MiB |
 | Formula batch 16 versus 32 | All 34 outputs identical after whitespace normalization |
 
@@ -27,6 +30,12 @@ The 55-PDF count includes supplementary/version files; it is not a count of uniq
 Root visually checked original formula and comparison-table pages. Fractions, roots, subscripts and the main relationships survived; dense tables retained row/column structure and numerical content. Some micro-unit characters became `m`, and some formula labels were omitted. Original page/region access is retained for these imperfections. Figure positions/captions are available; semantic interpretation of figures is not claimed. Scanned papers need an explicit OCR route, and unstructured bibliography text is not a resolved identity catalog.
 
 The local LightOnOCR-3 trial was not selected for batch production: this Windows Transformers backend took 360.65 seconds without completing one page. A single formula crop completed in 11.68 seconds. No claim is made about accelerated Linux backends not tested here.
+
+The formal production comparison is retained at `F:\OptoMind-Review-2\outputs\pdf_bulk_route_20261013\docling_speed\official_parallel_full_55_CONTENT_COMPARISON.json`: all 55 PDFs matched the existing b8 baseline on semantic content, pages, regions, formulas, tables, scientific text and recognized cells (55/55 for every check). Basic snapshot publication now defers eager image crops while retaining the PDF, page/bbox provenance and `REGION_INDEX.json`; `deep_layout` keeps the prior crop behavior, with a separate deferred cache fingerprint.
+
+The verified three-child settings apply to the resident batch entry above. A
+single-PDF on-demand Docling CLI configured elsewhere remains its own route and
+does not automatically inherit the batch parser-thread override.
 
 ## Local evidence
 

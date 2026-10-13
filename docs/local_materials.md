@@ -5,19 +5,25 @@ snapshots/A-B → selected-paper local CodeFormulaV2 → practical directed
 reading. This route has **no model API calls**. [Verified commands and limits](verification/local-docling-batch-20261013/README.md).
 
 ```powershell
-# Run in the configured local Docling Python environment. One converter stays resident.
-python scripts/upgrade3/parse_docling_batch.py --mode basic --manifest LOCAL_PDFS.json --config BASIC_CONFIG.json --output-root outputs/pdf_basic --resume
+# Run in the configured local Docling Python environment. The verified current
+# profile is an explicit three-child b4/t4 route under the 8 GiB whole-card cap.
+python scripts/upgrade3/parse_docling_batch.py --mode basic --manifest LOCAL_PDFS.json --config BASIC_PARALLEL3_CONFIG.json --output-root outputs/pdf_basic --resume --workers 3
 # Ordinary snapshots are immediately usable by A/B; no formula stage is required.
 python scripts/upgrade3/build_local_materials.py --batch-manifest LOCAL_PDFS.json --docling-batch-index outputs/pdf_basic/BATCH_RESULT.json --material-parser-mode docling_basic --cache-root outputs/pdf_cache --output-root outputs/pdf_materials --disable-rescue
 # Existing planner entry: add these flags to the normal authorized planning command.
 # --local-formula-config HOOK_CONFIG.json --local-formula-cache-root outputs/local_formula_cache
 ```
 
-`BASIC_CONFIG.json` uses the existing Docling `packages` and native
-`pipeline_options` contract, with local `artifacts_path`, layout/table batch
-8, accelerator threads 8, and formula/picture enrichment disabled. Start with
-one resident process: the tested three-process Windows route had native
-crashes despite adequate GPU memory. `FORMULA_DRIVER.json` is:
+`BASIC_PARALLEL3_CONFIG.json` uses the existing Docling `packages` and native
+`pipeline_options` contract, with local `artifacts_path`, layout/table batch 4,
+accelerator threads 4, `workers: 3`, `safe_parser: true`,
+`backend_options.parser_threads: 1`,
+`backend_options.release_native_memory_every_n_pages: 0`, and
+`max_documents_per_worker: 20`; formula/picture enrichment remains disabled.
+Each basic child uses one native parser thread and exits after at most 20 PDFs;
+the parent reuses verified per-PDF outputs while starting the next fresh child.
+An older config that omits `workers` keeps the historical single-process route;
+three children require this explicit profile or `--workers 3`. `FORMULA_DRIVER.json` is:
 
 ```json
 {"model_cache":"C:/local/codeformula_models","batch_size":32,"device":"cuda","timeout_seconds":600,"gpu_limit_mib":8192}
@@ -41,7 +47,8 @@ reading proceeds with explicit unenhanced formulas. Per-PDF successes survive
 batch failures and are checked by hash/config/page coverage on `--resume`.
 
 Native parser process faults are automatically retried in a fresh resident
-worker, reusing every verified successful PDF. `max_native_restarts` defaults
+worker, reusing every verified successful PDF. Basic children already use the
+single-thread parser profile; `max_native_restarts` defaults
 to 3 (maximum 10) consecutive retries without progress and does not invalidate
 inference caches. New successful PDFs or isolation of a repeated culprit reset
 this counter; the overall deadline and per-culprit limits still apply. Set 0
@@ -56,6 +63,12 @@ text. Reaching the restart limit returns a partial batch for inspection.
 Timeout, the whole GPU memory ceiling and operator interruption are not
 retried or bypassed. A zero-exit worker that leaves no result stops with
 `worker_no_progress` instead of repeatedly loading models.
+
+The basic snapshot path now defers rendering every PDF region image. It still
+publishes the original PDF, page geometry, body/table/formula provenance and
+`REGION_INDEX.json`; the local formula hook resolves those PDF/bbox handles on
+demand. `deep_layout` retains the existing eager crop semantics, and the
+deferred profile has a separate cache fingerprint.
 
 The older regional-transcription descriptions below are an **explicit
 historical option**, not this local default. Their GROBID/fitz primary-body
