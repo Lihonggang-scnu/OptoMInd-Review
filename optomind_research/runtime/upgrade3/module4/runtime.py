@@ -665,20 +665,31 @@ class GlobalBudgetLedger:
         if self.path:
             self.path = Path(self.path)
             self.path.parent.mkdir(parents=True, exist_ok=True)
-            with closing(sqlite3.connect(self.path)) as db:
-                db.execute("CREATE TABLE IF NOT EXISTS budget_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
-                db.execute("CREATE TABLE IF NOT EXISTS budget_reconciliations (reservation_id TEXT PRIMARY KEY, evidence_sha256 TEXT NOT NULL, audit_json TEXT NOT NULL, reconciled_at REAL NOT NULL)")
-                db.execute("CREATE TABLE IF NOT EXISTS reservations (reservation_id TEXT PRIMARY KEY, call_id TEXT NOT NULL, amount_cny REAL NOT NULL, actual_cny REAL, status TEXT NOT NULL, created_at REAL NOT NULL, usage_json TEXT, returned_model TEXT, finish_reason TEXT, request_id TEXT, raw_response_sha256 TEXT, status_code INTEGER)")
-                columns = {row[1] for row in db.execute("PRAGMA table_info(reservations)").fetchall()}
-                for name, sql_type in (("usage_json", "TEXT"), ("returned_model", "TEXT"), ("finish_reason", "TEXT"), ("request_id", "TEXT"), ("raw_response_sha256", "TEXT"), ("status_code", "INTEGER"), ("provider_error_code", "TEXT"), ("key_index", "INTEGER"), ("attempt", "INTEGER"), ("request_metadata_json", "TEXT")):
-                    if name not in columns:
-                        db.execute(f"ALTER TABLE reservations ADD COLUMN {name} {sql_type}")
-                if self.limit_cny is not None:
-                    row = db.execute("SELECT value FROM budget_meta WHERE key='limit_cny'").fetchone()
-                    if row is not None and abs(float(row[0]) - float(self.limit_cny)) > 1e-9:
-                        raise QwenTransportError("global_budget_limit_conflict", transient=False, record={"existing_limit_cny": float(row[0]), "requested_limit_cny": float(self.limit_cny)})
-                    db.execute("INSERT OR IGNORE INTO budget_meta(key,value) VALUES ('limit_cny',?)", (str(float(self.limit_cny)),))
-                db.commit()
+            # Several in-process workers may construct a direct client at the
+            # same time.  Serialize the short schema/ALTER transaction and
+            # wait for the same bounded interval used by reserve/settle;
+            # otherwise each constructor can race on SQLite's DDL lock before
+            # any supervised HTTP call exists.
+            with closing(sqlite3.connect(self.path, timeout=30.0)) as db:
+                db.execute("PRAGMA busy_timeout=30000")
+                db.execute("BEGIN IMMEDIATE")
+                try:
+                    db.execute("CREATE TABLE IF NOT EXISTS budget_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+                    db.execute("CREATE TABLE IF NOT EXISTS budget_reconciliations (reservation_id TEXT PRIMARY KEY, evidence_sha256 TEXT NOT NULL, audit_json TEXT NOT NULL, reconciled_at REAL NOT NULL)")
+                    db.execute("CREATE TABLE IF NOT EXISTS reservations (reservation_id TEXT PRIMARY KEY, call_id TEXT NOT NULL, amount_cny REAL NOT NULL, actual_cny REAL, status TEXT NOT NULL, created_at REAL NOT NULL, usage_json TEXT, returned_model TEXT, finish_reason TEXT, request_id TEXT, raw_response_sha256 TEXT, status_code INTEGER)")
+                    columns = {row[1] for row in db.execute("PRAGMA table_info(reservations)").fetchall()}
+                    for name, sql_type in (("usage_json", "TEXT"), ("returned_model", "TEXT"), ("finish_reason", "TEXT"), ("request_id", "TEXT"), ("raw_response_sha256", "TEXT"), ("status_code", "INTEGER"), ("provider_error_code", "TEXT"), ("key_index", "INTEGER"), ("attempt", "INTEGER"), ("request_metadata_json", "TEXT")):
+                        if name not in columns:
+                            db.execute(f"ALTER TABLE reservations ADD COLUMN {name} {sql_type}")
+                    if self.limit_cny is not None:
+                        row = db.execute("SELECT value FROM budget_meta WHERE key='limit_cny'").fetchone()
+                        if row is not None and abs(float(row[0]) - float(self.limit_cny)) > 1e-9:
+                            raise QwenTransportError("global_budget_limit_conflict", transient=False, record={"existing_limit_cny": float(row[0]), "requested_limit_cny": float(self.limit_cny)})
+                        db.execute("INSERT OR IGNORE INTO budget_meta(key,value) VALUES ('limit_cny',?)", (str(float(self.limit_cny)),))
+                    db.commit()
+                except Exception:
+                    db.rollback()
+                    raise
 
     def _refresh_from_db(self) -> None:
         if not self.path:

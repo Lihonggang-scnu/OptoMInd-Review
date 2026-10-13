@@ -39,7 +39,7 @@ from .paper_reading_card_prompt import PROMPT_VERSION, build_messages
 
 
 SCHEMA_VERSION = "optomind.paper_reading_card.v1"
-VALIDATOR_VERSION = "optomind.paper_reading_card.validator.v4"
+VALIDATOR_VERSION = "optomind.paper_reading_card.validator.v5"
 MODEL = "qwen3.7-flash"
 INPUT_PROFILES = {"standard", "economy"}
 DEFAULT_INPUT_PROFILE = "economy"
@@ -535,28 +535,55 @@ def validate_card_output(result: Any, card_input: Mapping[str, Any]) -> dict[str
 
     raw = _decode_content(result)
     alias_diagnostics: list[dict[str, Any]] = []
-    for canonical_key, alias_key in (("general_understanding", "A"), ("review_planning", "B")):
-        if alias_key not in raw:
+    view_aliases = (("general_understanding", "A"), ("review_planning", "B"))
+    canonical_keys = {canonical for canonical, _ in view_aliases}
+    labelled_aliases: dict[str, list[str]] = {canonical: [] for canonical in canonical_keys}
+    for source_key in raw:
+        if not isinstance(source_key, str):
             continue
-        alias_value = raw[alias_key]
-        if not isinstance(alias_value, Mapping):
-            raise CardOutputError(f"top_level_view_alias_not_object:{alias_key}")
+        match = re.fullmatch(r"([AB])\s+(.+)", source_key)
+        if not match or match.group(2) not in canonical_keys:
+            continue
+        expected_key = "general_understanding" if match.group(1) == "A" else "review_planning"
+        if match.group(2) != expected_key:
+            raise CardOutputError(
+                f"top_level_view_alias_label_conflict:{source_key}:{expected_key}"
+            )
+        labelled_aliases[expected_key].append(source_key)
+
+    for canonical_key, alias_key in view_aliases:
+        source_keys = ([alias_key] if alias_key in raw else []) + labelled_aliases[canonical_key]
+        if not source_keys:
+            continue
         canonical_present = canonical_key in raw
-        if canonical_present:
-            canonical_value = raw[canonical_key]
-            if not isinstance(canonical_value, Mapping) or _canonical(canonical_value) != _canonical(alias_value):
-                raise CardOutputError(f"top_level_view_alias_conflict:{canonical_key}:{alias_key}")
-        else:
-            raw[canonical_key] = alias_value
-        # The immutable RAW artifact holds the original object.  Record only
-        # its location and digest, avoiding duplicate scientific material in
-        # the published card and downstream planning inputs.
-        alias_diagnostics.append({
-            "reason": "top_level_view_alias", "source_key": alias_key,
-            "canonical_key": canonical_key, "canonical_present": canonical_present,
-            "raw_artifact": "RAW_RESPONSE.json", "decoded_content_path": f"$.{alias_key}",
-            "raw_value_sha256": _sha(alias_value),
-        })
+        canonical_value = raw.get(canonical_key)
+        if canonical_present and not isinstance(canonical_value, Mapping):
+            raise CardOutputError(f"top_level_view_alias_conflict:{canonical_key}:{source_keys[0]}")
+        for source_key in source_keys:
+            alias_value = raw[source_key]
+            if not isinstance(alias_value, Mapping):
+                raise CardOutputError(f"top_level_view_alias_not_object:{source_key}")
+            if canonical_present:
+                comparison_value = canonical_value
+            else:
+                comparison_value = raw[source_keys[0]]
+            if source_key != source_keys[0] or canonical_present:
+                if _canonical(comparison_value) != _canonical(alias_value):
+                    raise CardOutputError(f"top_level_view_alias_conflict:{canonical_key}:{source_key}")
+            # The immutable RAW artifact holds the original object.  Record
+            # only its location and digest, avoiding duplicate scientific
+            # material in the published card and planning inputs.
+            diagnostic = {
+                "reason": "top_level_view_alias", "source_key": source_key,
+                "canonical_key": canonical_key, "canonical_present": canonical_present,
+                "raw_artifact": "RAW_RESPONSE.json", "decoded_content_path": f"$.{source_key}",
+                "raw_value_sha256": _sha(alias_value),
+            }
+            if source_key not in {"A", "B"}:
+                diagnostic["alias_form"] = "labelled_canonical"
+            alias_diagnostics.append(diagnostic)
+        if not canonical_present:
+            raw[canonical_key] = raw[source_keys[0]]
     a = raw.get("general_understanding")
     b = raw.get("review_planning")
     if not isinstance(a, Mapping) or not isinstance(b, Mapping):

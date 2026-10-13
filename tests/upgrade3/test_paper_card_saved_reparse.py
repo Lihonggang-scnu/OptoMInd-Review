@@ -308,6 +308,51 @@ def test_top_level_AB_alias_conflicts_missing_fields_and_wrong_types_fail(case):
 
 
 @pytest.mark.parametrize("keep_canonical", [False, True])
+def test_labelled_canonical_top_level_aliases_preserve_content_and_raw_reference(keep_canonical):
+    canonical = response()
+    card_input = {"review_plan": {"facets": [{"id": "F1"}]}}
+    expected = card.validate_card_output(canonical, card_input)
+    aliased = copy.deepcopy(canonical)
+    content = aliased["content"]
+    content["A general_understanding"] = copy.deepcopy(content["general_understanding"])
+    content["B review_planning"] = copy.deepcopy(content["review_planning"])
+    if not keep_canonical:
+        del content["general_understanding"], content["review_planning"]
+    before = copy.deepcopy(aliased)
+    actual = card.validate_card_output(aliased, card_input)
+    assert aliased == before
+    assert actual["general_understanding"] == expected["general_understanding"]
+    assert actual["review_planning"] == expected["review_planning"]
+    aliases = actual["normalization_diagnostics"][:2]
+    assert [row["source_key"] for row in aliases] == ["A general_understanding", "B review_planning"]
+    for row in aliases:
+        assert row["canonical_present"] is keep_canonical
+        assert row["alias_form"] == "labelled_canonical"
+        assert row["raw_artifact"] == "RAW_RESPONSE.json"
+        assert row["decoded_content_path"] == "$." + row["source_key"]
+        assert row["raw_value_sha256"] == card._sha(content[row["source_key"]])
+        assert "raw_value" not in row and "raw_row" not in row
+    assert actual["normalization_diagnostics"][2:] == expected["normalization_diagnostics"]
+
+
+@pytest.mark.parametrize("case", ["label_conflict", "labelled_A_conflict", "two_labelled_conflict"])
+def test_labelled_canonical_top_level_alias_conflicts_fail_closed(case):
+    content = response()["content"]
+    if case == "label_conflict":
+        content["A review_planning"] = copy.deepcopy(content["review_planning"])
+        content.pop("review_planning")
+    elif case == "labelled_A_conflict":
+        content["A general_understanding"] = copy.deepcopy(content["general_understanding"])
+        content["A general_understanding"]["work_summary"] = "Different content"
+    else:
+        content["A general_understanding"] = copy.deepcopy(content["general_understanding"])
+        content["A general_understanding"]["work_summary"] = "Different content"
+        content["A"] = copy.deepcopy(content["general_understanding"])
+    with pytest.raises(card.CardOutputError):
+        card.validate_card_output({"content": content}, {"review_plan": {"facets": [{"id": "F1"}]}})
+
+
+@pytest.mark.parametrize("keep_canonical", [False, True])
 def test_exact_approology_alias_keeps_content_and_raw_location(keep_canonical):
     raw = response()
     a = raw["content"]["general_understanding"]
