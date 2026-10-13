@@ -286,6 +286,52 @@ def _budget_failure(exc: BaseException) -> bool:
     return "budget" in text and ("exceed" in text or "reserve" in text or "limit" in text)
 
 
+def _status_code(exc: BaseException) -> int | None:
+    """Expose a bounded HTTP status, including wrapped transport failures.
+
+    ``paper_reading_card`` preserves ``QwenTransportError`` directly, but its
+    generic client-error path raises ``CardTransportError`` from the original
+    exception.  Walk the short cause/context chain so a real 429 is not lost
+    when it crosses that boundary; do not serialize arbitrary exception data.
+    """
+
+    current: BaseException | None = exc
+    seen: set[int] = set()
+    for _ in range(4):
+        if current is None or id(current) in seen:
+            break
+        seen.add(id(current))
+        value = getattr(current, "status_code", None)
+        if value is None:
+            record = getattr(current, "record", None)
+            if isinstance(record, Mapping):
+                value = record.get("status_code")
+        try:
+            if value is not None:
+                return int(value)
+        except (TypeError, ValueError, OverflowError):
+            pass
+        nested = getattr(current, "__cause__", None) or getattr(current, "__context__", None)
+        current = nested if isinstance(nested, BaseException) else None
+    return None
+
+
+def _rate_limit_failure(outcome: Mapping[str, Any]) -> bool:
+    """Back off only on an explicit provider rate-limit status.
+
+    A timeout, disconnect, or generic transient transport failure remains
+    bounded-retryable but is not evidence that the provider imposed a
+    concurrency limit.  Keeping this distinction prevents a VPN/socket issue
+    from silently ratcheting the scheduler down.  The caller applies at most
+    one small decrement per completion wave.
+    """
+
+    try:
+        return int(outcome.get("status_code")) == 429
+    except (TypeError, ValueError, OverflowError):
+        return False
+
+
 def _budget_has_room(config: Mapping[str, Any]) -> bool:
     """Check durable spend plus open/uncertain reservations after a drain."""
 
@@ -406,7 +452,7 @@ def _call_one(
             )
             return {"ok": True, "result": result, "attempt": attempt, "output_dir": str(attempt_dir), "reused": bool(result.get("reused"))}
         except Exception as exc:
-            return {"ok": False, "attempt": attempt, "output_dir": str(attempt_dir), "error_type": type(exc).__name__, "error": str(exc), "retryable": False, "budget_failure": False, "operation": "commit_reuse"}
+            return {"ok": False, "attempt": attempt, "output_dir": str(attempt_dir), "error_type": type(exc).__name__, "error": str(exc), "retryable": False, "budget_failure": False, "status_code": _status_code(exc), "operation": "commit_reuse"}
 
     if reparse_saved_responses:
         for attempt_dir in reversed(_saved_validation_dirs(base)):
@@ -427,7 +473,7 @@ def _call_one(
             except Exception as exc:
                 return {"ok": False, "attempt": attempt, "output_dir": str(attempt_dir),
                         "error_type": type(exc).__name__, "error": str(exc),
-                        "retryable": False, "budget_failure": False, "operation": "saved_reparse"}
+                        "retryable": False, "budget_failure": False, "status_code": _status_code(exc), "operation": "saved_reparse"}
 
     # Older batch versions left even nonretryable validation failures pending.
     # Resuming without explicit recovery must not buy another response.
@@ -463,7 +509,7 @@ def _call_one(
         )
         return {"ok": True, "result": result, "attempt": attempt, "output_dir": str(attempt_dir), "reused": bool(result.get("reused"))}
     except Exception as exc:
-        return {"ok": False, "attempt": attempt, "output_dir": str(attempt_dir), "error_type": type(exc).__name__, "error": str(exc), "retryable": _transient_failure(exc), "budget_failure": _budget_failure(exc)}
+        return {"ok": False, "attempt": attempt, "output_dir": str(attempt_dir), "error_type": type(exc).__name__, "error": str(exc), "retryable": _transient_failure(exc), "budget_failure": _budget_failure(exc), "status_code": _status_code(exc)}
 
 
 def _refresh_items(*, manifest_path: Path, state: dict[str, Any], config: Mapping[str, Any]) -> tuple[bool, list[str]]:
@@ -602,32 +648,49 @@ def run_paper_reading_batch(
     state_path = output / "BATCH_STATE.json"
     events_path = output / "BATCH_EVENTS.jsonl"
     state = _load_state(state_path)
+    worker_policy_changed = False
     if state is not None:
         if str(state.get("manifest_path") or "") != str(manifest):
             raise PaperReadingBatchError("batch_manifest_mismatch_use_new_output_root")
         previous_config = dict(state.get("config") or {})
         if previous_config != config:
-            # A no-network preflight is intentionally promotable to the same
-            # live batch once its operator supplies the key and ledger.
-            comparable_previous = dict(previous_config)
-            comparable_current = dict(config)
-            for name in (
-                "mode",
-                "key_file",
-                "budget_limit_cny",
-                "budget_ledger_path",
-                "initial_workers",
-                "max_workers",
-                "retry_delay_seconds",
-            ):
-                comparable_previous.pop(name, None)
-                comparable_current.pop(name, None)
-            if previous_config.get("mode") != "preflight" or config.get("mode") != "run" or comparable_previous != comparable_current:
-                raise PaperReadingBatchError("batch_config_mismatch_use_new_output_root")
-            state["config"] = config
-            for item in (state.get("items") or {}).values():
-                if item.get("status") == "preflight":
-                    item["status"] = "pending"
+            previous_mode = previous_config.get("mode")
+            current_mode = config.get("mode")
+            scheduling_fields = ("initial_workers", "max_workers", "retry_delay_seconds")
+            if previous_mode == "run" and current_mode == "run":
+                # Worker policy is scheduling metadata, not part of a paper's
+                # work key.  Permit changing it on a live resume while keeping
+                # model, prompt, ledger, and all other semantic settings bound.
+                comparable_previous = dict(previous_config)
+                comparable_current = dict(config)
+                for name in scheduling_fields:
+                    comparable_previous.pop(name, None)
+                    comparable_current.pop(name, None)
+                if comparable_previous != comparable_current:
+                    raise PaperReadingBatchError("batch_config_mismatch_use_new_output_root")
+                state["config"] = config
+                worker_policy_changed = True
+            else:
+                # A no-network preflight is intentionally promotable to the
+                # same live batch once its operator supplies the key and ledger.
+                comparable_previous = dict(previous_config)
+                comparable_current = dict(config)
+                for name in (
+                    "mode",
+                    "key_file",
+                    "budget_limit_cny",
+                    "budget_ledger_path",
+                    *scheduling_fields,
+                ):
+                    comparable_previous.pop(name, None)
+                    comparable_current.pop(name, None)
+                if previous_mode != "preflight" or current_mode != "run" or comparable_previous != comparable_current:
+                    raise PaperReadingBatchError("batch_config_mismatch_use_new_output_root")
+                state["config"] = config
+                worker_policy_changed = True
+                for item in (state.get("items") or {}).values():
+                    if item.get("status") == "preflight":
+                        item["status"] = "pending"
         for item in (state.get("items") or {}).values():
             if item.get("status") == "running":
                 item["status"] = "pending"
@@ -647,8 +710,11 @@ def run_paper_reading_batch(
     _atomic_json(state_path, state)
     _append_event(events_path, {"event": "batch_started", "mode": mode, "manifest": str(manifest), "finalized": finalized, "items": len(state["items"])})
 
-    target_workers = int(state.get("target_workers") or initial_workers)
-    success_streak = int(state.get("success_streak") or 0)
+    target_workers = int(initial_workers) if worker_policy_changed else int(state.get("target_workers") or initial_workers)
+    target_workers = max(1, min(target_workers, int(max_workers)))
+    success_streak = 0 if worker_policy_changed else int(state.get("success_streak") or 0)
+    state["target_workers"] = target_workers
+    state["success_streak"] = success_streak
     in_flight: dict[concurrent.futures.Future[Any], str] = {}
     halt_dispatch = False
 
@@ -685,13 +751,14 @@ def run_paper_reading_batch(
             enqueue_ready(executor)
             if in_flight:
                 done, _ = concurrent.futures.wait(tuple(in_flight), return_when=concurrent.futures.FIRST_COMPLETED)
+                rate_limit_backoff_applied = False
                 for future in done:
                     key = in_flight.pop(future)
                     item = state["items"][key]
                     try:
                         outcome = future.result()
                     except Exception as exc:
-                        outcome = {"ok": False, "attempt": 0, "output_dir": "", "error_type": type(exc).__name__, "error": str(exc), "retryable": _transient_failure(exc), "budget_failure": _budget_failure(exc)}
+                        outcome = {"ok": False, "attempt": 0, "output_dir": "", "error_type": type(exc).__name__, "error": str(exc), "retryable": _transient_failure(exc), "budget_failure": _budget_failure(exc), "status_code": _status_code(exc)}
                     if outcome.get("ok"):
                         item["status"] = "preflight" if mode == "preflight" else ("reused" if outcome.get("reused") else "success")
                         item["output_dir"] = outcome.get("output_dir", "")
@@ -707,7 +774,7 @@ def run_paper_reading_batch(
                         _append_event(events_path, {"event": "paper_complete", "work_key": key, "paper_id": item.get("paper_id"), "status": item["status"], "attempt": item.get("attempt", 0), "target_workers": target_workers})
                     else:
                         attempt = int(outcome.get("attempt") or 0)
-                        failure_record = {"attempt": attempt, "output_dir": outcome.get("output_dir", ""), "status": "failed", "error_type": outcome.get("error_type", ""), "error": outcome.get("error", ""), "retryable": bool(outcome.get("retryable")), "budget_failure": bool(outcome.get("budget_failure"))}
+                        failure_record = {"attempt": attempt, "output_dir": outcome.get("output_dir", ""), "status": "failed", "error_type": outcome.get("error_type", ""), "error": outcome.get("error", ""), "retryable": bool(outcome.get("retryable")), "budget_failure": bool(outcome.get("budget_failure")), "status_code": outcome.get("status_code")}
                         if outcome.get("operation") == "saved_reparse":
                             item.setdefault("reparse_history", []).append({**failure_record, "physical_calls": 0})
                         elif outcome.get("operation") not in {"saved_failure", "commit_reuse"}:
@@ -725,14 +792,19 @@ def run_paper_reading_batch(
                                 pending.append(key)
                                 pending_set.add(key)
                         elif outcome.get("retryable") and attempt < MAX_ATTEMPTS_PER_PAPER:
-                            target_workers = max(1, target_workers // 2)
+                            if _rate_limit_failure(outcome) and not rate_limit_backoff_applied:
+                                # A single completion wave may contain several
+                                # 429s.  Apply one bounded decrement so a burst
+                                # cannot collapse the whole worker window.
+                                target_workers = max(1, target_workers - 4)
+                                rate_limit_backoff_applied = True
                             if retry_delay_seconds:
                                 time.sleep(float(retry_delay_seconds))
                             item["status"] = "pending"
                             if key not in pending_set:
                                 pending.append(key)
                                 pending_set.add(key)
-                        _append_event(events_path, {"event": "paper_failed", "work_key": key, "paper_id": item.get("paper_id"), "attempt": attempt, "retry_scheduled": item["status"] == "pending", "error_type": outcome.get("error_type", ""), "target_workers": target_workers})
+                        _append_event(events_path, {"event": "paper_failed", "work_key": key, "paper_id": item.get("paper_id"), "attempt": attempt, "retry_scheduled": item["status"] == "pending", "error_type": outcome.get("error_type", ""), "status_code": outcome.get("status_code"), "rate_limit_backoff": _rate_limit_failure(outcome), "target_workers": target_workers})
                 state["target_workers"] = target_workers
                 state["success_streak"] = success_streak
                 state["max_observed_inflight"] = max(int(state.get("max_observed_inflight") or 0), len(in_flight))
