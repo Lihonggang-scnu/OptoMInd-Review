@@ -44,3 +44,15 @@
 开发监督运行源码34c333602a09cd18cc51273050b227c1542f31d0；后续连接重试/证据文件保护提交4629d30b见Git历史，未混称已真实触发自动重试。supervised_runtime保存本轮监督接线源码，它是本地验收adapter，产品正常入口仍scripts/upgrade3/progressive_review_plan.py，不依赖人工审读gate。显式failed_exclusions允许冻结244合格卡及7真实失败/19无材料的边界，不篡改原批状态。
 
 残余已知测试：test_legacy_prompt_proves_reuse_but_cannot_hide_current_change在本次与未改34c基线均失败（旧精读兼容会重新执行而非缓存复用），保留记录，不强行放宽真实材料兼容。
+
+## 默认本地供材与检索fallback接缝（续）
+
+受测源码27018c5d13a570d66f743dc7db7531a832d65b9a。V15已在未付款门停止，scope与真实补充成果保留；V16在同目录/同80元项目及300元账户账本恢复。
+
+- 默认local index从当前pool与已保存的真实补充材料自动建立；旧版本索引保留，显式用户index不写。精确snapshot/direct-reading绑定、错配卡隔离，独立可用转述仍接入。建库失败明确保存FAILURE并停止受影响路径，不伪装成本地无材料。
+- 已付partial从journal恢复给working_pool/index，未把partial升级成fulfilled。全局scope有效输入合同保持完全相同，免费验证已确认可复用。
+- 查询已有效返回2xx时，不因更早的S2限流把OpenAlex成功fallback判成整体outage；原provider_attempts保留。合法空选不会触发这种服务故障重试。全部provider失败仍保留原失败与有界重试。
+- 免费实际索引：244基础论文＋1份新全文＝245paper、24769segment，建库3.969秒；三份已读source均可定位，精确快照3/3一致，原pool/journal哈希不变。245份均有可读document blocks，其中摘要仍按摘要深度使用，不能称为245份全文。假judge仅验证I/O，不计为真实科学判断。
+- 有界本地控制56通过、1项缺既有fixture排除；root另验默认index6通过（与前项重叠）及补检索22通过，不相加冒充独立全套测试。编译、diff-check通过。
+
+新的真实监督继续level1_tools；不重做已通过构思、不重跑A/B或BODY。ROOT_GAP01_HYBRID_JUDGE_REVIEW记录了正式判断器无需人工提示，自行区分MTF与效率并保留unmet/supporting的实际结果。局部模型概括错误单独留存，不手改科学产物。
