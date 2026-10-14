@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from contextlib import closing
 import argparse
+import hashlib
 import json
 import math
 import sqlite3
@@ -38,6 +39,7 @@ def add_arguments(p: argparse.ArgumentParser, *, include_io: bool = True) -> arg
     p.add_argument("--budget-limit", type=float, default=30.0,
                    help="Absolute lifetime CNY cap of this separate experiment, never an increment")
     p.add_argument("--ledger", help="Explicit dedicated SQLite ledger, required with --run; reuse for all resumes")
+    p.add_argument("--shared-project-binding", help="Explicit immutable JSON authorizing this BODY run to attach to an existing project/account ledger and mapping directory")
     p.add_argument("--account-ledger", help="Optional second SQLite ledger shared by physical calls across projects; reuse its path")
     p.add_argument("--account-budget-limit", type=float, help="Immutable account lifetime CNY cap; required only for a new account ledger")
     p.add_argument("--account-mapping-dir", help="Persistent dual-reservation receipt directory; defaults beside the account ledger; reuse on resume")
@@ -70,10 +72,17 @@ def _ledger_snapshot(ledger: Path, marker: Path, scope: dict) -> dict:
         raise ValueError("legacy_ledger_missing:no_budget_reset")
     if not marker.is_file() or _read(marker) != scope:
         raise ValueError("legacy_ledger_scope_conflict:retain_existing_budget_and_reconcile")
+    return _ledger_contents_snapshot(ledger, scope["budget_limit_cny"])
+
+
+def _ledger_contents_snapshot(ledger: Path, limit: float) -> dict:
+    """Validate every existing hold before any constructor can initialize SQL."""
+    if not ledger.is_file():
+        raise ValueError("legacy_ledger_missing:no_budget_reset")
     try:
         with closing(sqlite3.connect(ledger.as_uri() + "?mode=ro", uri=True)) as db:
             row = db.execute("SELECT value FROM budget_meta WHERE key='limit_cny'").fetchone()
-            if row is None or not math.isfinite(float(row[0])) or float(row[0]) != scope["budget_limit_cny"]:
+            if row is None or not math.isfinite(float(row[0])) or float(row[0]) != limit:
                 raise ValueError("legacy_stored_budget_limit_changed")
             rows = db.execute("SELECT reservation_id, amount_cny, actual_cny, status FROM reservations").fetchall()
     except sqlite3.Error as exc:
@@ -93,12 +102,114 @@ def _ledger_snapshot(ledger: Path, marker: Path, scope: dict) -> dict:
                              "actual_cny": cost, "status": status})
     if not all(math.isfinite(value) for value in (actual, held, used)):
         raise ValueError("legacy_invalid_budget_total")
-    return {"ledger_path": str(ledger), "limit_cny": scope["budget_limit_cny"],
-            "actual_cny": actual, "reserved_cny": held, "remaining_cny": max(0, scope["budget_limit_cny"] - used),
+    return {"ledger_path": str(ledger), "limit_cny": limit,
+            "actual_cny": actual, "reserved_cny": held, "remaining_cny": max(0, limit - used),
             "reservations": reservations}
 
 
+def _shared_project_contract(args) -> tuple[dict, dict]:
+    """Validate an explicit complete attachment, never infer an experiment."""
+    source = Path(args.shared_project_binding).expanduser().resolve()
+    try:
+        raw = source.read_bytes()
+        value = json.loads(raw.decode("utf-8-sig"))
+    except (OSError, UnicodeError, ValueError) as exc:
+        raise ValueError("shared_project_binding_invalid:no_budget_reset") from exc
+    if not isinstance(value, dict):
+        raise ValueError("shared_project_binding_invalid:no_budget_reset")
+
+    def path_field(name):
+        item = value.get(name)
+        if not isinstance(item, str) or not item.strip():
+            raise ValueError("shared_project_binding_missing:" + name)
+        path = Path(item).expanduser()
+        return (path if path.is_absolute() else source.parent / path).resolve()
+
+    def cap_field(name):
+        item = value.get(name)
+        if isinstance(item, bool) or not isinstance(item, (int, float)) or not math.isfinite(item) or item <= 0:
+            raise ValueError("shared_project_binding_invalid:" + name)
+        return float(item)
+
+    project = path_field("project_ledger")
+    account = path_field("account_ledger")
+    mappings = path_field("account_mapping_dir")
+    project_cap = cap_field("project_limit_cny")
+    account_cap = cap_field("account_limit_cny")
+    identity = value.get("project_scope") if "project_scope" in value else value.get("question_sha256")
+    if "project_scope" not in value and (not isinstance(identity, str) or len(identity) != 64
+                                           or any(char not in "0123456789abcdefABCDEF" for char in identity)):
+        raise ValueError("shared_project_binding_invalid:question_sha256")
+    if not isinstance(identity, str) or not identity.strip() or args.budget_scope != identity:
+        raise ValueError("shared_project_scope_conflict:no_budget_reset")
+    if not args.ledger or Path(args.ledger).expanduser().resolve() != project or args.budget_limit != project_cap:
+        raise ValueError("shared_project_ledger_or_cap_conflict:no_budget_reset")
+    if not args.account_ledger or Path(args.account_ledger).expanduser().resolve() != account or account == project:
+        raise ValueError("shared_project_account_ledger_conflict:no_budget_reset")
+    if args.account_budget_limit is not None and args.account_budget_limit != account_cap:
+        raise ValueError("shared_project_account_cap_conflict:no_budget_reset")
+    if args.account_mapping_dir and Path(args.account_mapping_dir).expanduser().resolve() != mappings:
+        raise ValueError("shared_project_mapping_conflict:no_budget_reset")
+    if not mappings.is_dir():
+        raise ValueError("shared_project_mapping_missing:no_budget_reset")
+    # No GlobalBudgetLedger construction until both existing databases have
+    # passed read-only cap and full settled/reserved/uncertain validation.
+    _ledger_contents_snapshot(project, project_cap)
+    _ledger_contents_snapshot(account, account_cap)
+    scope = {"route": "legacy_unit_writer_shared_project", "ledger_path": str(project),
+             "budget_limit_cny": project_cap, "experiment_scope": identity,
+             "account_ledger": str(account), "account_limit_cny": account_cap,
+             "account_mapping_dir": str(mappings), "project_binding_path": str(source),
+             "project_binding_sha256": hashlib.sha256(raw).hexdigest()}
+    return scope, value
+
+
+def _shared_project_factory(args, counter):
+    from optomind_research.runtime.upgrade3.dual_budget import bind_json
+    scope, source = _shared_project_contract(args)
+    output = Path(args.output_dir).expanduser().resolve()
+    binding = output / "BUDGET_BINDING.json"
+    attachment = output / "SHARED_PROJECT_ATTACHMENT.json"
+    if binding.exists() and _read(binding) != scope:
+        raise ValueError("shared_project_output_binding_conflict:no_budget_reset")
+    evidence = {"schema_version": "shared_project_attachment.v1", "budget_binding": scope,
+                "source_binding": source}
+    if attachment.exists() and _read(attachment) != evidence:
+        raise ValueError("shared_project_output_binding_conflict:no_budget_reset")
+    report_path = output / "RUN_REPORT.json"
+    if not binding.exists() and report_path.is_file():
+        old = (_read(report_path).get("ledger") or {}).get("ledger_path")
+        if old and Path(old).resolve() != Path(scope["ledger_path"]):
+            raise ValueError("legacy_output_ledger_changed:no_budget_reset")
+    args.account_budget_limit = scope["account_limit_cny"]
+    args.account_mapping_dir = scope["account_mapping_dir"]
+    account = _bind_account(args, output, Path(scope["ledger_path"]))
+    bind_json(binding, scope)
+    bind_json(attachment, evidence)
+    args.budget_ledger = scope["ledger_path"]
+    args.responses = None
+    args.allow_max = False
+    base_factory = make_live_factory(args, token_counter=counter)
+
+    def snapshot():
+        current, _ = _shared_project_contract(args)
+        if current != scope or not binding.is_file() or _read(binding) != scope:
+            raise ValueError("shared_project_output_binding_conflict:no_budget_reset")
+        return _ledger_contents_snapshot(Path(scope["ledger_path"]), scope["budget_limit_cny"])
+
+    def guarded_factory(role, attempt, profile):
+        snapshot()
+        return base_factory(role, attempt, profile)
+
+    guarded_factory.execution_mode = "live"
+    guarded_factory.ledger_snapshot = snapshot
+    guarded_factory.account_ledger_snapshot = account.as_dict
+    return guarded_factory
+
+
 def _dedicated_factory(args, book, counter):
+    if getattr(args, "shared_project_binding", None):
+        return _shared_project_factory(args, counter)
     if not math.isfinite(args.budget_limit) or args.budget_limit <= 0:
         raise ValueError("legacy_budget_must_be_finite_positive")
     if not args.ledger:

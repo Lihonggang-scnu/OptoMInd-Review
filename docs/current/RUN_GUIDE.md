@@ -47,10 +47,13 @@ python -X utf8 scripts/upgrade3/progressive_review_plan.py --plan PLAN.json --po
 python -X utf8 scripts/upgrade3/chapter_arrangement.py --packet-root outputs/my_planning/CURRENT_PLAN.json --output-root outputs/my_arrangement --all-chapters --planning-revision --run --key-file LOCAL_KEY_FILE.txt --budget-ledger PROJECT_BUDGET.sqlite
 
 # BODY_MANIFEST.json 替换为 ARRANGEMENT_RUN.json.body_manifest 的实际路径。
-python -X utf8 run_review_harness.py --delivery-start body --delivery-manifest BODY_MANIFEST.json --delivery-out outputs/my_delivery --tokenizer TOKENIZER.json --run --ledger PROJECT_BUDGET.sqlite --budget-limit <absolute_CNY_cap> --budget-scope <persistent_scope> --key-file LOCAL_KEY_FILE.txt --key-index 1
+# 承接上游既有项目双账时，显式绑定原项目；不能伪造独立实验的 legacy-route 标记。
+python -X utf8 run_review_harness.py --delivery-start body --delivery-manifest BODY_MANIFEST.json --delivery-out outputs/my_delivery --tokenizer TOKENIZER.json --run --ledger PROJECT_BUDGET.sqlite --budget-limit <absolute_CNY_cap> --budget-scope <persistent_scope> --shared-project-binding PROJECT_BINDING.json --account-ledger ACCOUNT_BUDGET.sqlite --key-file LOCAL_KEY_FILE.txt --key-index 1
 ```
 
 编排沿用既有单轮最多10元的封顶，同时受原共享账本累计余额约束；这不是新增额度。其 CLI 没有 tokenizer 参数，规划与 BODY 的 tokenizer 不会隐式传给编排。预算不足时按编排报告保存/停止，不临时放宽预算或另起账本。
+
+2026-10-14补齐的共用账本入口：`PROJECT_BINDING.json` 明确保存 `project_ledger`、`project_limit_cny`、`project_scope`、`account_ledger`、`account_limit_cny`、`account_mapping_dir`。路径可相对绑定文件；额度是原累计封顶。`--budget-scope` 必须与 `project_scope` 完全相同；只有旧绑定没有此字段时，才兼容使用完整 `question_sha256`。账户额度和映射目录若没有额外传参，沿用绑定声明；缺字段、错路径、错额度或无效旧账本在模型调用前停止。BODY输出保存 `SHARED_PROJECT_ATTACHMENT.json` 和 `BUDGET_BINDING.json`，不修改原结算或占额。恢复沿用同一绑定文件、输出目录和账本。未指定共享绑定时，原独立BODY实验的账本归属保护保持有效；此时应使用自己的独立账本，不能把上游共用账本直接套进去。
 
 本轮未真实调用模型。免费验证使用正式 CLI 分发、原规划/stage缓存、selection/on-demand、完整合回、编排和BODY消费者，只替换模型/工具客户端；模拟费用写入测试临时 SQLite 账本，验证恢复不重复调用/占费、失败占额保留。合并回归216项通过，另2项原有Windows长路径测试排除；命令与覆盖范围见 [本轮接线证据](RUN_GUIDE_EVIDENCE.md#2026-10-11默认细纲加强与无人值守接线)。项目费用账本未改，本轮费用0。
 

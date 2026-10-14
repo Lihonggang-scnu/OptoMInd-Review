@@ -61,3 +61,10 @@ v1 的请求、响应和费用记录不动。v2 按实际消息与有效模型�
 V29 真实修复现已通过：受测源码 `8602e1c0cd3273067e773b6a63aa22af3c03d041`，117.110 秒、0.5347 元，原生 `updated` 且结构错误为空。root 完整亲读确认返回当前四单元、12 条段落任务和 20 个案例；每单元来源集合保持，研究条件保留，没有伪造旧 ID 映射或空内容。其他四章和协调器没有重跑，随后自然进入案例阶段，无手填完成状态。
 
 见 [ROOT_V29_REPAIR_REQUEST_REVIEW.json](ROOT_V29_REPAIR_REQUEST_REVIEW.json)、[ROOT_V29_REPAIR_RESPONSE_REVIEW.json](ROOT_V29_REPAIR_RESPONSE_REVIEW.json) 和 [DELEGATED_CONTRACT_FAILURE_DIAGNOSIS.md](DELEGATED_CONTRACT_FAILURE_DIAGNOSIS.md)。本次修复解决编辑对象与输出合同接缝；科学论述基本保留原计划，已有过强概括和局部材料标签问题仍如实记录，不能把格式修复称为全面科学纠错。专项 48 项及 root 追加边界 30 项通过，范围分别记录。
+
+
+## 2026-10-14：第三章实际修复后续与共用账本接缝
+
+第三章V2同模型修复已被正式负责人路径采用，4单元、12段落任务和20案例保持；原始失败和两次修复费用均保留。后续案例响应中的5篇来源不在本批候选材料，但属于已接受的章节案例。根智能体完整阅读返回，并用正式 `_attach_case_groups` 与本轮材料池免费试合：17个选中身份均有真实材料，原任务与条件不变；不把本批未重读等同独立科学复核。详见 ROOT_V29_CH3_CASE_RESPONSE_REVIEW.json。
+
+提前发现BODY独立实验账本归属检查会拒绝上游既有共用账本。正式入口现增加显式 `--shared-project-binding`，核对原项目、账户、累计封顶、scope和原费用映射目录，不造legacy-route标记、不清账。默认独立实验保护及写作提示词不变。正常harness、同目录恢复、原SQL记录和metadata保持、未知及在途占额约束：17项专项检查通过；54项既有legacy/dual保护检查通过。全部免费，未据此报告正文质量提升。用法见 docs/current/RUN_GUIDE.md；真实正文承接将在本轮后续验证。
