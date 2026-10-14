@@ -1382,6 +1382,84 @@ def _completion_envelope(response: Any) -> Mapping[str, Any]:
     raise UnitWritingError("completion_response_unreadable")
 
 
+def _completion_adjacent_body_strings(text: str) -> Mapping[str, Any] | None:
+    """Recover only complete, adjacent JSON strings after a named body value."""
+    def unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate_json_member")
+            result[key] = value
+        return result
+
+    def invalid_constant(value: str) -> Any:
+        raise ValueError("invalid_json_constant:" + value)
+
+    decoder = json.JSONDecoder(object_pairs_hook=unique_object, parse_constant=invalid_constant)
+    allowed = {"body_markdown", "table_markdown", "status", "covered_task_ids", "issues"}
+    fields: dict[str, Any] = {}
+    fragments: list[str] = []
+    spans: list[dict[str, Any]] = []
+    adjacent = False
+    index = 1
+
+    def whitespace(at: int) -> int:
+        while at < len(text) and text[at] in " \t\r\n":
+            at += 1
+        return at
+
+    try:
+        if not text.startswith("{"):
+            return None
+        while True:
+            index = whitespace(index)
+            start = index
+            token, end = decoder.raw_decode(text, index)
+            if not isinstance(token, str):
+                return None
+            index = whitespace(end)
+            if index < len(text) and text[index] == ":":
+                if token not in allowed or token in fields:
+                    return None
+                index = whitespace(index + 1)
+                value_start = index
+                value, index = decoder.raw_decode(text, index)
+                fields[token] = value
+                adjacent = token == "body_markdown"
+                if adjacent:
+                    if not isinstance(value, str) or not value.strip():
+                        return None
+                    fragments.append(value)
+                    spans.append({"kind": "body_markdown", "start": value_start, "end": index})
+            elif adjacent and token.strip():
+                fragments.append(token)
+                spans.append({"kind": "adjacent_unkeyed_string", "start": start, "end": end})
+            else:
+                return None
+            index = whitespace(index)
+            if index < len(text) and text[index] == "}":
+                if whitespace(index + 1) != len(text):
+                    return None
+                break
+            if index >= len(text) or text[index] != ",":
+                return None
+            index += 1
+        # This representation recovery must never authorize direct application.
+        if len(fragments) < 2 or "status" in fields or "covered_task_ids" in fields:
+            return None
+        fields["body_markdown"] = "\n\n".join(fragments)
+        fields["_adjacent_body_string_recovery"] = {
+            "code": "completion_adjacent_body_strings_recovered",
+            "offset_basis": "stripped_json_content_unicode_codepoints",
+            "string_spans": spans,
+            "separator": "\n\n",
+            "candidate_only": True,
+        }
+        return fields
+    except (ValueError, RecursionError):
+        return None
+
+
 def _completion_envelope_details(response: Any) -> tuple[Mapping[str, Any], str]:
     """Preserve completion metadata when recovering a complete JSON envelope."""
     if isinstance(response, Mapping):
@@ -1404,6 +1482,9 @@ def _completion_envelope_details(response: Any) -> tuple[Mapping[str, Any], str]
                             return data, "json_literal_controls"
                     except (TypeError, ValueError):
                         pass
+                    adjacent = _completion_adjacent_body_strings(text)
+                    if adjacent is not None:
+                        return adjacent, "json_adjacent_body_strings"
                     from .chapter_arrangement import _escape_inner_json_quotes
                     from json_repair import repair_json
                     try:
@@ -1634,6 +1715,8 @@ def run_unit_completion(
         result["issues"].extend(item for item in normalization if item.get("code") == "table_markdown_missing_or_invalid")
         result["model_status"] = status if result["model_status_present"] else ""
         result["response_envelope"] = dict(envelope)
+        if parsed_via == "json_adjacent_body_strings":
+            result["issues"].append(dict(envelope["_adjacent_body_string_recovery"]))
         if parsed_via in {"json_literal_controls", "json_repair_quote_escape_crosschecked"}:
             result["issues"].append({"code": "completion_json_syntax_recovered", "parsed_via": parsed_via})
         missing_metadata = [key for key in ("status", "covered_task_ids") if key not in envelope]
@@ -1668,7 +1751,8 @@ def run_unit_completion(
             if (not result["model_status_present"] and fragment.strip()
                     and isinstance(response, Mapping) and response.get("complete") is True
                     and response.get("finish_reason") == "stop"
-                    and parsed_via in {"object", "json", "json_literal_controls", "json_repair_quote_escape_crosschecked"}
+                    and parsed_via in {"object", "json", "json_literal_controls", "json_repair_quote_escape_crosschecked",
+                                       "json_adjacent_body_strings"}
                     and (not table_requested or table_check["valid"])):
                 result["candidate_eligible"] = True
                 result["candidate_body_markdown"] = existing_body + ("" if not existing_body else "\n\n") + fragment
