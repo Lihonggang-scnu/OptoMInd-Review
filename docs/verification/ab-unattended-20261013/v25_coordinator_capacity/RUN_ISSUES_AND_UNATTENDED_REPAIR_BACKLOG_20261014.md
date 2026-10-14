@@ -7,6 +7,7 @@
 状态含义如下：
 
 - **正式修复并真实采用**：当前 source-bound lineage 中有代码修复，并有绑定运行或 native consumer receipt 证明采用；离线验证和生产采用分开写。
+- **正式修复已产出但生产验证待补**：source 修复或接线已提交，并有 free/offline 控制证据；尚无真实生产启动或 native consumer receipt，不能写成已采用或已完好。
 - **人工恢复/监督**：root/delegated 停止、恢复、拦截或拒绝使运行能继续；人工科学拦截不算程序自主检查。
 - **仅离线**：读检查或合成 probe，没有付费 provider call，也没有生产状态变更。
 - **仍未修**：有临时 guard 或保守策略，但通用无人值守能力仍缺失。
@@ -227,16 +228,29 @@
 - **raw/付费/拒绝事实**：V27/V28 response 在批准 gate 下交给 native validator 但未质量采纳，结构拒绝不是 provider rejection；V28 unpaid stop 未付费且保留状态。V29 request/response 在 gate `5cf3168293...` 下完成，owner contract repair 费用 `0.5347` 元，V29 process 继续 native case_groups；随后 CH3 case response 在同轮 native pool 中实际费用 `0.362502` 元，root approve 但明确 5 个 plan-only 来源没有重读完整材料、不是新科学结论。预算快照为 project `14.7210831`、account `24.0155579`、unknown `4.5168676`、reserved `0`，按当前 SQL/账本解释，不拆 unsupported 单次金额。没有人工科学改写，原失败和 partial 记录未清零。
 - **建议修复/验证**：保持 v2 唯一编辑对象合同：`chapter_plan.units` 权威，旧五线程仅只读背景；动态说明 `cases/ordered_development/paragraph_briefs/relations_limits/substantive_point/transition`，完整保留材料和条件，禁止旧线程猜映射或生成占位字段。继续以 case_groups/default 加强、`post_planning_handoff/load_complete_packets` 的实际任务/材料消费者校验和 root 对 `CURRENT_PLAN` 的审阅判断交付边界；不要把 V29 seam 通过等同全链无人值守认证。
 
-### UIR-022：project-80 共享账本缺少 legacy-route marker，legacy BODY 启动被拒
+### UIR-022：project-80 共享账本缺少 legacy-route marker，legacy BODY 启动被拒；修复已产出但 BODY 尚未验证
 
 - **触发**：在现有 project-80 ledger 上，`legacy_unit_writer._dedicated_factory` 发现没有 `legacy-route` marker，拒绝进入 BODY 启动。原 binding 的 project path、budget cap、question 与历史记录均正确；问题出在共享账本绑定/marker 透传接缝，而非题目或历史丢失。
 - **实际影响**：本次 legacy BODY 没有形成实际启动/验收，不能把后续 wrapper 或配置检查写成 BODY 已运行，也不能泛化为整个下游链路失败。当前没有 BODY response、正式正文质量或无人值守通过证据。
-- **临时处理**：保留现有 project ledger、原 binding 与历史；Sol 正实现显式 `--shared-project-binding` 由正常 harness 透传。当前只做准备/接线修复，不手工补 marker、不改账本、不绕过 legacy writer，尚未进行真实 BODY 验收。
-- **正式能力状态**：`formal_fix_in_progress`。当前 `legacy_unit_writer` 的 marker 检查会安全拒绝缺少共享绑定的 BODY 启动；显式 shared-project binding 的生产 harness 透传尚未被真实 BODY 运行证明。
-- **当前边界**：这是下游共享账本启动接缝的实际拒绝，不是 provider rejection 或 BODY 科学质量结论。原 project path/cap/question/history 仍保留；`preparation/downstream_supervision_20261014` 现有材料属于 development-only launcher/configuration，不能替代真实 BODY receipt。
-- **证据定位**：`execution_sources/planning_resume_v29/scripts/upgrade3/legacy_unit_writer.py` 的 `_dedicated_factory` marker 检查；`preparation/downstream_supervision_20261014/DOWNSTREAM_SUPERVISION_ARGV_20261014.json` 的 development-only scope、binding/ledger/harness 配置与 native gate 说明；`RUN_BINDING_PLANNING_V29_OWNER_AUTHORITATIVE_INPUT_20261014.json` 的原 project/question/cap/binding；`execution_sources/planning_resume_v29/tests/test_legacy_unit_route.py` 与 `test_legacy_unit_route_review.py` 的离线 route 约束，均不等同真实 BODY 验收。
-- **raw/付费/拒绝事实**：legacy marker 缺失导致 BODY 入口在启动前被拒；该事实是程序/共享账本合同拒绝，不是模型或 provider rejection。当前没有 BODY response/质量结果；无额外单次费用归因，费用仍以双账本/当前 SQL 为准。
-- **建议修复/验证**：让显式 `--shared-project-binding` 经正常 harness 传入 legacy writer，并核对其绑定到原 project ledger、cap、question 和历史后再做一次真实 BODY 运行；保留首次拒绝记录，禁止人工写 marker 或修改账本来制造通过。只有取得真实 BODY stage/response/消费者 receipt 后，才能更新本条，不把 wrapper/help 或离线 route test 当成 BODY 完成。
+- **临时处理**：保留初始拒绝、现有 project ledger、原 binding 与历史。commit `2c75ef5748fc4349771fb3d281d5f1b73f3dbed1` 已推送，用于显式 `--shared-project-binding` 透传；17 项专项控制与 54 项既有控制分别通过 free 检查。没有手工补 marker、改账本或绕过 legacy writer，真实 BODY 尚未启动。
+- **正式能力状态**：`formal_fix_in_progress`。共享绑定修复已经提交并通过两组 free 控制检查，但尚未被真实 BODY 启动或下游 consumer receipt 证明采用，因此生产边界仍开放。
+- **当前边界**：这是下游共享账本启动接缝的实际拒绝，不是 provider rejection 或 BODY 科学质量结论。原 project path/cap/question/history 仍保留；2c75ef 与 free 检查是离线/无 provider 证据，不是 BODY 完成证据。
+- **证据定位**：`execution_sources/planning_resume_v29/scripts/upgrade3/legacy_unit_writer.py` 的 `_dedicated_factory` marker 检查；`worktree` 当前 HEAD 为 `2c75ef5748fc4349771fb3d281d5f1b73f3dbed1`；`worktree/tests/test_body_shared_project_budget.py`、`worktree/tests/test_legacy_unit_route.py`、`worktree/tests/test_legacy_unit_route_review.py` 为 free 绑定/route 控制；`preparation/downstream_supervision_20261014/DOWNSTREAM_SUPERVISION_ARGV_20261014.json` 仍是 development-only launcher/configuration；`RUN_BINDING_PLANNING_V29_OWNER_AUTHORITATIVE_INPUT_20261014.json` 保留原 project/question/cap/history 基线。
+- **raw/付费/拒绝事实**：legacy marker 缺失导致 BODY 入口在启动前被拒；这是程序/共享账本合同拒绝，不是模型或 provider rejection。2c75ef 修复检查为 free；没有真实 BODY request/response/provider charge/正文质量结果。费用仍以双账本/当前 SQL 为准，初始拒绝未覆盖。
+- **建议修复/验证**：让显式 `--shared-project-binding` 经正常 harness 传入 legacy writer，并核对其绑定到原 project ledger、cap、question 和 history 后再做一次真实 BODY 运行；保留首次拒绝，禁止人工写 marker 或修改账本来制造通过。只有取得 native BODY stage/response/consumer receipts 后，才能更新本条，不把 wrapper/help 或离线 route test 当成 BODY 完成。
+- **验证状态**：修复 commit 与 17/54 两组 free 控制已记录；真实 BODY 尚未启动，仍待生产验证。
+
+### UIR-023：默认 outline strengthening 因 CH2/CH3 单元缺稳定 ID 暂停
+
+- **触发**：V29 五章 owner 材料与六个 case 批 native complete 后，默认加强免费预检以 `selection_unit_id_missing:CH2` 暂停。CH2 有 5 个 unit、CH3 有 4 个 unit，均没有 `unit_id`/`id`；科学任务输入完整，其余章节的显式 ID 保留。
+- **实际影响**：默认加强的 selection/arrangement 没有启动：`PIPELINE_REPORT` 为 `selection_paused`、`arrangement_not_run=true`、`groups=[]`。已选择 Max，但零 provider call。原 `PIPELINE_INPUT`、`PIPELINE_REPORT` 和原有效 revision 仍保留，owner/case cache 未改；这是加强 consumer 接缝暂停，不等同 V29 owner/case 质量失败。
+- **临时处理**：保留输入 hash `c93adaaddf1fc4abdf297eebc3beb41c4cd2ea25baf76222e007bb826b689371` 与 revision `719fe0b6144c6ee890f8`。已批准在 `load_complete_packets` consumer 端使用 IdMap：只给确实缺 ID 的 CH2/CH3 unit 初始化章命名空间稳定 ID，保留已有显式 ID，原 owner/case cache 不动。规范化快照目标为新的 `strengthening.v31` 目录，不改写旧 input hash；没有手写科学答案或固定 fallback。
+- **正式能力状态**：`formal_fix_in_progress`。consumer 侧缺 ID 规范化正在实现，但尚未审阅规范化 V31 snapshot、恢复后的 selection 或 native strengthening response，不宣称无人值守加强成功。
+- **当前边界**：当前事实只影响默认加强的 selection 入口，尚未进入 arrangement/provider 工作；不是 provider rejection，也不能推出全部 V29 owner/case 阶段失败，更不增加全元素完美门槛。最终交付和无人值守稳健性仍待实际 consumer receipt。
+- **证据定位**：`worktree/outputs/optics_e2e/07_progressive_review_plan_docling_20261013.outline_strengthening/PIPELINE_REPORT.json`（`status=selection_paused`、`reason=selection_unit_id_missing:CH2`、5 chapters、`arrangement_not_run=true`、`groups=[]`）；同目录 `PIPELINE_INPUT.json`（上述 input hash）；同目录 `COMPLETE_CHAPTER_INPUT.json`（CH2 5 个、CH3 4 个无 `unit_id/id`，CH1/4/5 保留显式 ID）；`revisions/719fe0b6144c6ee890f8/HANDOFF_MANIFEST.json`（`status=original_valid_plan`、同 hash）；`preparation/ab_unattended_20261013/ROOT_BASE_PLAN_CASE_HANDOFF_REVIEW_20261014.json`（22 units、66 briefs、base packets accepted、paid selector 因缺 ID 未运行、`manual_scientific_edits=false`）；以及 `worktree/scripts/upgrade3/outline_strengthening_pipeline.py`、`outline_strengthening.py` 的 source-bound consumer 路径。
+- **raw/付费/拒绝事实**：`selection_unit_id_missing:CH2` 是程序/consumer 预检暂停，不是 provider rejection；Max 选择零 provider call、无新的 selection reservation。V29 owner/case 的 paid、raw、rejected 和 unknown ledger 事实继续分开，旧 input hash/valid revision 未覆盖；未注入科学答案，也未使用固定兜底。
+- **建议修复/验证**：只在 `load_complete_packets` consumer 边界实现 IdMap，给缺 ID 的 5 个 CH2 与 4 个 CH3 unit 分配稳定章命名空间 ID，检测冲突，保留所有显式 ID，并保持 owner/case cache 与旧 input hash 不变。将规范化快照写入新的 `strengthening.v31`，再分别验证 free preflight/selection、无重复 dispatch、任何 paid reservation、native strengthening response 和下游 consumer receipt。
+- **验证状态**：仍在进行。只有取得带 source/input provenance 的 V31 规范化快照、无重复调用的恢复 selection、native strengthening response 及下游校验后，才能关闭；当前 `selection_paused` 和零调用事实须作为原始失败保留。
 
 ## 历史与当前边界
 
@@ -245,12 +259,13 @@
 - V26 coordinator response 已 root approve 并保留付费结果，但 owner `feedback_by_chapter` 丢失 5 条 primary/reappearance 职责建议；CH1–CH3 owner 在未付款门前被安全停止。commit `33a2d229` 已形成并在 V27 真实采用，三份 owner REQUEST 已核对收到 3/3/5 条角色意见；最终 owner 质量与全链自治仍 pending。
 - V27 CH3 owner response 被 native 合同正确标记为 unresolved：只给五个 `substantive_threads`、缺少原四个 `units`；V28 有界 recovery 仍猜旧 ID，两个失败与 partial/raw 均保留。CH1/CH2/CH4/CH5 已通过，不能把 CH3 partial 自动等同 final 必然阻塞。
 - UIR-021 的 v2 唯一编辑对象修复已推 commit `8602e1c0` 并在 V29 source/binding/PID `8860` 真实采用；V29 返回有效四-unit plan、无结构错误并继续 case_groups。最终交付仍取决于完整有效章节、加强输出和消费者校验，其他无人值守风险未认证。
-- 下游新增真实接缝：project-80 共享 ledger 缺少 legacy-route marker，`legacy_unit_writer._dedicated_factory` 在 BODY 启动前拒绝；原 binding path/cap/question/history 正确，显式 `--shared-project-binding` harness 透传仍未完成真实 BODY 验收。
+- 下游新增真实接缝：project-80 共享 ledger 缺少 legacy-route marker，`legacy_unit_writer._dedicated_factory` 在 BODY 启动前拒绝；修复 commit `2c75ef5748fc4349771fb3d281d5f1b73f3dbed1` 已推送，17 项专项与 54 项既有控制分别 free 通过，但真实 BODY 尚未启动。
 - V23 `query_has_no_searchable_terms` 是已记录的旧故障；V24 使用 `be0abeaf` 的 optional-focus 修复并继续 native execution。
 - V7 A/B source-pin mismatch 与 stale `finalized_complete` 是历史 A/B 证据；当前快照的 V24 source/binding 已配对，AB preflight 的 `source_pin_matches=true`。
 - `WinError 5` 是零付费、未改 live batch 的离线 synthetic reproduction，不等同于当前 live A/B 已发生并发写失败。
 - GROBID service health 与 CPU/parser resume 是可用性证据，不是公式/表格 fidelity 通过；原始 PDF、raw response、付费/拒绝/unknown 记录继续作为审计边界。
 - `chapter_details` 的 `shared_outline` 只是背景 handoff 完整性风险；CH1–CH3 gates 已批准，本轮没有证明重复或 chapter quality failure。
 - arrangement 模板的 `--key-index` 是执行前入口预检发现；只做了 wrapper/help 检查，不能写成 native arrangement 已失败或被 provider 拒绝。
+- V29 默认加强预检因 `selection_unit_id_missing:CH2` 暂停：CH2 五个与 CH3 四个 unit 缺 `unit_id/id`，Max 零调用；原输入/revision 保留，consumer-side IdMap 规范化至新的 `strengthening.v31` 仍在进行，不能写成加强恢复或全链无人值守通过。
 
 完整机器可读字段、证据定位、raw/付费/拒绝事实及验证建议见同目录 JSON。后续修复应在新 source-bound worktree/预算账本中单独验证；本登记不在本轮展开大改。

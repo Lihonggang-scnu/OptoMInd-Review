@@ -57,6 +57,8 @@ python -X utf8 run_review_harness.py --delivery-start body --delivery-manifest B
 
 本轮未真实调用模型。免费验证使用正式 CLI 分发、原规划/stage缓存、selection/on-demand、完整合回、编排和BODY消费者，只替换模型/工具客户端；模拟费用写入测试临时 SQLite 账本，验证恢复不重复调用/占费、失败占额保留。合并回归216项通过，另2项原有Windows长路径测试排除；命令与覆盖范围见 [本轮接线证据](RUN_GUIDE_EVIDENCE.md#2026-10-11默认细纲加强与无人值守接线)。项目费用账本未改，本轮费用0。
 
+2026-10-14补充：完整规划进入加强时，程序复用既有IdMap，为当前确实缺ID的单元补章命名空间身份，并保留到新revision；不改科学任务或显式ID，不猜历史拆合。旧加强目录若已绑定不同输入哈希，保留现场并用 `--outline-strengthening-output` 指定新的同级目录，原规划、负责人和案例兼容缓存继续复用。
+
 正常执行不需要人工填写质量通过或完成标记。启动器依次调用规划、编排、BODY三个正式入口：规划成功后读 `CURRENT_PLAN.json`；编排成功且 `body_ready=true` 后读 `body_manifest`；BODY交付后读 `DELIVERY_REPORT.json.selected_body`。编排采用内容决定的不可变快照，同输入再次运行保持BODY输入指纹一致；材料或任务变化则刷新相关输入。失败、预算不足和真正缺件保存状态并停止，恢复复用已成功步骤。全文编辑也接收正式 `--retry-failed`，保存RAW可免费重解析，有效成功结果不重复购买。
 
 这段接续覆盖准备好的规划输入到BODY交付。独立首尾及出版仍按下文显式启用；三个阶段CLI没有合并为“用户问题到PDF”的单命令入口。

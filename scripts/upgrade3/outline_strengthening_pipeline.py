@@ -23,6 +23,7 @@ from scripts.upgrade3 import outline_strengthening as cli
 from optomind_research.runtime.upgrade3 import outline_selection as selection
 from optomind_research.runtime.upgrade3 import outline_strengthening as strengthening
 from optomind_research.runtime.upgrade3 import progressive_review_plan as planning
+from optomind_research.runtime.upgrade3.chapter_arrangement import IdMap
 
 
 def _dump(path: Path, value: Any) -> None:
@@ -54,6 +55,59 @@ def _source_provenance() -> dict:
     return {'git_commit': commit, 'executed_source_files_sha256': hashes, 'source_fingerprint': _hash(hashes)}
 
 
+def _initialize_missing_unit_ids(packets: Mapping[str, Mapping[str, Any]]) -> dict[str, dict]:
+    """Initialize current legacy units, never infer historical split/merge IDs.
+
+    The complete snapshot freezes its ordered baseline. Exported revisions
+    retain these now-explicit IDs, so later loads do not number them again.
+    """
+    result = copy.deepcopy(dict(packets))
+    reserved: set[str] = set()
+    for chapter_id, packet in result.items():
+        units = (packet.get('chapter_plan') or {}).get('units')
+        if not isinstance(units, list) or not units or any(not isinstance(unit, dict) for unit in units):
+            raise ValueError('complete_plan_chapter_tasks_required:' + chapter_id)
+        local = set()
+        missing = False
+        for unit in units:
+            explicit = str(unit.get('unit_id') or '').strip()
+            alias = str(unit.get('id') or '').strip()
+            if explicit and alias and explicit != alias:
+                raise ValueError('complete_plan_unit_identity_conflict:' + chapter_id)
+            identity = explicit or alias
+            if not identity:
+                missing = True
+            elif identity in reserved:
+                raise ValueError('selection_unit_id_duplicate:' + identity)
+            else:
+                reserved.add(identity)
+                local.add(identity)
+        remap = packet.get('unit_id_remap') or packet['chapter_plan'].get('unit_id_remap') or {}
+        if remap and missing:
+            raise ValueError('complete_plan_missing_unit_identity_with_remap:' + chapter_id)
+        if not isinstance(remap, Mapping):
+            raise ValueError('complete_plan_unit_id_remap_invalid:' + chapter_id)
+        for target, ancestors in remap.items():
+            if str(target) not in local or not isinstance(ancestors, (str, list)) or not ancestors:
+                raise ValueError('complete_plan_unit_id_remap_invalid:' + chapter_id)
+        # Existing explicit task scopes are not licenses to guess an old ID
+        # for an unnamed unit. Empty scopes retain the existing infer-all rule.
+        # Read-only IDs can name another chapter's legitimate neighbor; their
+        # references remain subject to the selector's complete global catalog.
+        for refs in (packet.get('modifiable_unit_ids'),
+                     (packet.get('unit_identity_contract') or {}).get('existing_unit_ids')):
+            if missing and refs and set(str(value) for value in refs) - local:
+                raise ValueError('complete_plan_missing_unit_identity_with_scope:' + chapter_id)
+    ids = IdMap(None)
+    for chapter_id, packet in result.items():
+        for index, unit in enumerate(packet['chapter_plan']['units'], 1):
+            if not str(unit.get('unit_id') or unit.get('id') or '').strip():
+                signature = IdMap.unit_signature(chapter_id, index, '')
+                unit['unit_id'] = ids.unit_id(signature, f'{chapter_id}_U{index:02d}', reserved=reserved)
+                reserved.add(unit['unit_id'])
+    return result
+
+
 def load_complete_packets(packet_root: Path) -> tuple[dict, dict[str, dict]]:
     """Use the exact planner manifest, never infer completeness from a group file."""
     plan = _load(packet_root / 'DETAILED_REVIEW_PLAN.json')
@@ -75,15 +129,19 @@ def load_complete_packets(packet_root: Path) -> tuple[dict, dict[str, dict]]:
                     'review_argument_status', 'review_argument_source', 'source_identity_map'):
             if not raw.get(key) and plan.get(key):
                 raw[key] = copy.deepcopy(plan[key])
-        # Keep all packet metadata as well as the explicit strengthening contract.
+        packets[chapter_id] = raw
+    declared = [str(row.get('chapter_id')) for row in plan.get('shared_outline') or [] if row.get('chapter_id')]
+    if declared and set(declared) != set(packets):
+        raise ValueError('complete_plan_packet_coverage_mismatch')
+    packets = _initialize_missing_unit_ids(packets)
+    for chapter_id, raw in packets.items():
+        # Build ID-dependent owner scopes only after the complete baseline
+        # has identities. Scientific content and original files stay untouched.
         envelope = cli._payload(raw)
         if not (envelope.get('chapter_plan') or {}).get('units'):
             raise ValueError('complete_plan_chapter_tasks_required:' + chapter_id)
         packets[chapter_id] = {**copy.deepcopy(raw), **envelope}
         packets[chapter_id]['input_integrity'] = strengthening._input_integrity(packets[chapter_id])
-    declared = [str(row.get('chapter_id')) for row in plan.get('shared_outline') or [] if row.get('chapter_id')]
-    if declared and set(declared) != set(packets):
-        raise ValueError('complete_plan_packet_coverage_mismatch')
     return plan, packets
 
 

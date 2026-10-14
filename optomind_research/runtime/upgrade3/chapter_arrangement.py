@@ -393,11 +393,11 @@ class IdMap:
     a compatibility path for older packets without IDs, not semantic identity.
     """
 
-    def __init__(self, path: Path) -> None:
-        self.path = Path(path)
+    def __init__(self, path: Path | None) -> None:
+        self.path = Path(path) if path is not None else None
         self.units: dict[str, str] = {}
         self.paragraphs: dict[str, str] = {}
-        if self.path.is_file():
+        if self.path is not None and self.path.is_file():
             try:
                 payload = json.loads(self.path.read_text(encoding="utf-8"))
             except (OSError, ValueError):
@@ -437,7 +437,7 @@ class IdMap:
         return self._legacy_id(self.paragraphs, signature, fallback, reserved or set())
 
     def save(self) -> None:
-        if not self._dirty:
+        if not self._dirty or self.path is None:
             return
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.path.write_text(json.dumps({
