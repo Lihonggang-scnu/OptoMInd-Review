@@ -827,6 +827,7 @@ def run_downstream_delivery(
     assembly_report: Mapping[str, Any],
     out_dir: str | Path,
     selected_body: Mapping[str, Any] | None = None,
+    body_input: Mapping[str, Any] | None = None,
     client_factory=None, run: bool = False, token_counter=None, retry_failed: bool = False,
 ) -> dict[str, Any]:
     """The ONE downstream coordinator: 02→03→04→05 over the assembled draft.
@@ -901,12 +902,13 @@ def run_downstream_delivery(
                 "halt_reasons": [f"handle_draft_missing:{output_root}"],
                 "downstream_status": "pending"}
 
-    # The selected BODY already owns a validated references catalog. Keep an
-    # explicit configured inventory authoritative; otherwise carry this run's
-    # actual catalog to both independent parts and the final citation pass.
-    if selected_body is not None and not config.get("identity_catalogs_explicit", "identity_catalogs" in config):
+    # Preserve the explicit primary namespace and also validate this run's
+    # selected references in independent parts and the final citation pass.
+    if selected_body is not None:
         catalog = json.loads(Path(selected_body["references_path"]).read_text(encoding="utf-8"))
-        config = {**config, "identity_catalogs": [catalog]}
+        catalogs = list(config.get("identity_catalogs") or []) if config.get(
+            "identity_catalogs_explicit", "identity_catalogs" in config) else []
+        config = {**config, "identity_catalogs": [*catalogs, catalog]}
 
     # ---- 02: full-text editing over the handle draft -----------------------
     if selected_body is not None:
@@ -953,17 +955,25 @@ def run_downstream_delivery(
             if config.get("front_back_mode") == "post_body":
                 from .serial_manuscript_parts import run_serial_parts
                 runner = run_serial_parts
+                context = config.get("post_body_context") or {}
+                context_receipt = None
+                if body_input is not None:
+                    from .post_body_context import build_post_body_context
+                    context, context_receipt = build_post_body_context(body_input, context=context)
                 extra["context"] = _post_body_identity_context(
-                    config.get("post_body_context") or {}, config.get("identity_catalogs") or [])
+                    context, config.get("identity_catalogs") or [])
             stages["03_front_back"] = runner(
                 draft_path=edited,
-                research_question=str(config.get("research_question") or ""),
+                research_question=str(config.get("research_question") or
+                    (extra.get("context") or {}).get("research_question") or ""),
                 chapter_roles=config.get("chapter_roles") or [],
                 out_dir=out_dir / "03_front_back",
                 parts_fixture_path=config.get("front_back_fixture"),
                 recordings=config.get("front_back_recordings"),
                 language=str(config.get("language") or "zh"),
                 **extra)
+            if config.get("front_back_mode") == "post_body" and context_receipt is not None:
+                stages["03_front_back"]["context_provenance"] = context_receipt
         except FrontBackError as exc:
             stages["03_front_back"] = {"stage": "front_back", "status": "failed",
                                        "error": str(exc),
@@ -1160,6 +1170,9 @@ def run_review_delivery(
         options = {**BODY_DELIVERY_DEFAULTS, **dict(body_options or {})}
         report = run_legacy_units(body_input, output_dir=out_dir, **options)
         report = {**report, "start": "body", "output_root": str(out_dir.resolve())}
+        from .post_body_context import body_input_sha256
+        report.update(body_input_path=str((out_dir / "FULL_BODY_INPUT.json").resolve()),
+                      body_input_sha256=body_input_sha256(body_input))
     else:
         raise ValueError(f"unknown_delivery_start:{start}")
 
@@ -1179,6 +1192,7 @@ def run_review_delivery(
     downstream = run_downstream_delivery(config=config, assembly_report=report,
                                          out_dir=out_dir,
                                          **({"selected_body": report["selected_body"],
+                                             "body_input": body_input,
                                              **{key: options[key] for key in ("client_factory", "run", "token_counter", "retry_failed") if key in options}}
                                             if start == "body" else {}))
     merged = {**report, **downstream}

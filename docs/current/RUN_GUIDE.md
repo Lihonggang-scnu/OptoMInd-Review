@@ -107,6 +107,8 @@ python -X utf8 run_review_harness.py --delivery-start body --delivery-input FULL
 
 `--reparse-saved`只处理质量RAW，不等于任意writer截断响应都能恢复。新补写/核查/编辑仍需原账本下的 `--run`。`--only-unit CHAPTER:UNIT`为局部测试，保留全文输入语境，但不生成完整稿或运行全篇编辑。
 
+2026-10-15补齐显式论文句柄的格式消费：作者或补写把已提供的 `Pxxxx` 写成普通正文时，程序只为目录中确认的句柄补引用括号，保留全部科学文字与原始返回；代码、链接、公式和未知句柄不猜改。旧成功缓存若因此丢失引用身份，会在 `format_derivatives` 保存带封印的新派生稿，原 `UNIT_RESULT`／正文／RAW不覆盖，恢复无需重买作者。已认可且没有丢失身份的缓存继续原样复用，避免为格式升级重跑核查。实际修复列表保存在 `unbracketed_source_handle_repairs`；纯数字引用仍要求既有明确映射，不能凭编号猜论文。
+
 ### 默认参数与配置优先级
 
 | 入口/角色 | 默认值 | 有效覆盖方式 |

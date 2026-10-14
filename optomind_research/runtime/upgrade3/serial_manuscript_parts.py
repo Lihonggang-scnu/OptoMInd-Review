@@ -17,7 +17,9 @@ from .manuscript_front_back import FrontBackError
 STAGE_ORDER = ("conception", "conclusion", "introduction", "abstract")
 BODY_CHAR_LIMIT = 400_000
 MATERIAL_CHAR_LIMIT = 100_000
-CONTEXT_CHAR_LIMIT = 150_000
+# Bounded engineering guard, not a model token-capacity assertion. The live
+# adapter independently checks the actual tokenizer and model input capacity.
+CONTEXT_CHAR_LIMIT = 250_000
 PROMPT_CHAR_LIMIT = 650_000
 RESPONSE_CHAR_LIMIT = 200_000
 PART_CHAR_LIMIT = 100_000

@@ -280,6 +280,46 @@ def _parse_raw(view, payload, profile, attempt, language, estimate, client=None,
     return saved
 
 
+def _recover_cached_handle_format(view, result, attempt, *, messages, estimate, language, model, mode):
+    """Repair silently lost explicit identities in a new sealed derivative.
+
+    Keep accepted old bodies with no lost identities unchanged. A cached writer
+    that spelled known paper handles only as prose must not lose its references
+    merely because a newer parser is used. Original result/body/raw stay intact.
+    """
+    body, repairs = writer._repair_unbracketed_source_handles(
+        result["body_markdown"], writer._known_unit_handles(view))
+    lost = {row["source_handle"] for row in repairs} - set(writer.citations_in(result["body_markdown"]))
+    if not lost:
+        return attempt, result, None
+    recovery = attempt / "format_derivatives" / _hash({
+        "original_result_sha256": _hash(result), "body_markdown": body})
+    result_path = recovery / "UNIT_RESULT.json"
+    if result_path.exists():
+        fixed = _read(result_path)
+        seal = _read(recovery / "RESULT_SEAL.json")
+        if seal.get("sha256") != _hash(fixed) or seal.get("body_file_sha256") != hashlib.sha256(
+                (recovery / fixed["body_path"]).read_bytes()).hexdigest():
+            raise CandidateError("legacy_format_derivative_integrity_failure")
+    else:
+        fixed = writer.write_unit_output(view, result["body_markdown"], recovery,
+            model=model, language=language, mode="fake" if mode == "injected" else "run",
+            used_messages=messages, estimate=estimate, usage=result.get("usage"),
+            response_path=str(attempt / "RAW_RESPONSE.json"),
+            finish_reason=result.get("finish_reason", ""), complete=result.get("complete", False),
+            issues=result.get("issues", []), citation_diagnostics=result,
+            effective_request=result.get("effective_request"), cap_pressure=result.get("cap_pressure"))
+        body_path = Path(fixed["body_path"])
+        fixed.update(body_path=body_path.name, generation_kind="format_derivative",
+            original_writer_result=str(attempt / "UNIT_RESULT.json"),
+            original_writer_result_sha256=_hash(result), scientific_acceptance=False)
+        _write(result_path, fixed)
+        _write(recovery / "RESULT_SEAL.json", {"sha256": _hash(fixed),
+            "body_file_sha256": hashlib.sha256(body_path.read_bytes()).hexdigest()})
+    return recovery, fixed, {"original_attempt": str(attempt), "format_derivative": str(recovery),
+        "restored_source_handles": sorted(lost), "model_calls": 0}
+
+
 def run_legacy_units(book: Mapping[str, Any], *, output_dir: str | Path,
                      model: str = "qwen3.5-plus", output_tokens: int = 32768,
                      thinking_budget: int = 8192, budget_limit: float = 30.0,
@@ -468,6 +508,11 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
                 _write(output / "RUN_REPORT.json", report)
         if chosen:
             attempt, result = chosen
+            attempt, result, format_recovery = _recover_cached_handle_format(
+                view, result, attempt, messages=messages, estimate=estimate,
+                language=language, model=model, mode=mode)
+            if format_recovery:
+                row["format_recovery"] = format_recovery
             row["attempt_dir"] = str(attempt)
             row["pending_problems"] = [*result.get("issues", []), *result.get("citation_problems", [])]
             assembly_attempt = attempt
@@ -523,7 +568,8 @@ def _run(book, *, output, model, output_tokens, thinking_budget, budget_limit,
                             original_writer_result_sha256=_hash(result),
                             resolved_original_issues=resolved,
                             original_writer_citation_provenance={key: deepcopy(result[key]) for key in
-                                ("numeric_citation_repairs", "citation_mapping_diagnostics", "citation_number_map_origin") if key in result},
+                                ("numeric_citation_repairs", "unbracketed_source_handle_repairs",
+                                 "citation_mapping_diagnostics", "citation_number_map_origin") if key in result},
                             quality_result=str(Path(quality["output_dir"]) / "QUALITY_RESULT.json"),
                             scientific_acceptance=False)
                         _write(derivative / "UNIT_RESULT.json", derived)

@@ -52,6 +52,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--repair-invalid", action="store_true",
                         help="Explicitly allow one cached model format repair per invalid stage")
     parser.add_argument("--body-report", type=Path, help="Accepted DELIVERY_REPORT.json; validates selected draft and carries diagnostics")
+    parser.add_argument("--body-input", type=Path,
+                        help="Explicit FULL_BODY_INPUT.json from the --body-report run; verified against RUN_IDENTITY.json")
     parser.add_argument("--identity-catalog", type=Path, action="append", default=[])
     parser.add_argument("--ledger", type=Path, help="Existing project ledger; never reset or initialized")
     parser.add_argument("--budget-limit", type=float, help="Original project lifetime cap")
@@ -71,6 +73,8 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.body_input and not (args.live and args.body_report):
+        parser.error("--body-input requires --live and --body-report")
     from optomind_research.runtime.upgrade3.review_delivery import (
         load_post_body_context,
         load_recordings,
@@ -81,7 +85,7 @@ def main(argv: list[str] | None = None) -> int:
             base_dir=args.context.resolve().parent if args.context else Path.cwd(),
         )
         question = str(args.research_question or context.get("research_question") or "").strip()
-        if not question:
+        if not question and not (args.live and args.body_report):
             parser.error("provide --research-question or context.research_question")
         if args.research_question:
             context["research_question"] = question

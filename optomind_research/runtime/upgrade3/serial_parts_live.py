@@ -85,6 +85,7 @@ def run_live_parts(*, args, context, chapter_roles, token_counter, tokenizer_inf
     """
     from scripts.upgrade3.writer_candidates import make_live_factory
     from .review_delivery import _post_body_identity_context
+    from .post_body_context import build_post_body_context, load_body_context_input, normalize_built_context
 
     output = Path(args.output).resolve()
     profile = _profile({"model": "qwen3.5-plus", "thinking": True,
@@ -93,8 +94,6 @@ def run_live_parts(*, args, context, chapter_roles, token_counter, tokenizer_inf
         "stream_overall_timeout_seconds": 1800.0}, "serial_parts")
     if not math.isfinite(args.incremental_budget) or args.incremental_budget <= 0:
         raise ValueError("serial_parts_incremental_budget_must_be_positive")
-    project = ledger_snapshot(args.ledger, args.budget_limit)
-    account = ledger_snapshot(args.account_ledger, args.account_budget_limit)
     draft = Path(args.draft).resolve()
     original = draft.read_bytes()
     manuscript = original.decode("utf-8")
@@ -102,23 +101,36 @@ def run_live_parts(*, args, context, chapter_roles, token_counter, tokenizer_inf
     if conflicts:
         raise SerialPartsError("placement_conflict")
     source_report = read_json(args.body_report) if args.body_report else None
+    context_receipt = None
     catalogs = [read_json(path) for path in args.identity_catalog]
+    if getattr(args, "body_input", None) and not source_report:
+        raise SerialPartsError("post_body_explicit_input_requires_body_report")
     if source_report:
         selected = source_report.get("selected_body") or {}
         if Path(selected.get("handles_draft", "")).resolve() != draft:
             raise ValueError("serial_parts_selected_body_path_mismatch")
         if not (source_report.get("body_delivery") or {}).get("ready"):
             raise ValueError("serial_parts_body_not_ready")
-        if not catalogs:
-            catalogs = [read_json(selected["references_path"])]
+        book, input_receipt = load_body_context_input(source_report,
+            body_input_path=getattr(args, "body_input", None))
+        context, context_receipt = build_post_body_context(book, context=context)
+        context_receipt.update(input_receipt)
+        catalogs.append(read_json(selected["references_path"]))
     context = _post_body_identity_context(context, catalogs)
     body = extract_body(manuscript, chapter_roles)
-    normalized = normalize_context(context, research_question=args.research_question,
-                                   body_text=body, chapter_roles=chapter_roles)
+    question = args.research_question or context.get("research_question") or ""
+    normalizer = normalize_built_context if context_receipt is not None else normalize_context
+    normalization_args = {"receipt": context_receipt} if context_receipt is not None else {}
+    normalized = normalizer(context, research_question=question,
+                            body_text=body, chapter_roles=chapter_roles, **normalization_args)
+    if context_receipt is not None:
+        context_receipt["normalized_context_chars"] = len(json.dumps(normalized, ensure_ascii=False, sort_keys=True))
     messages = build_stage_messages("conception", body_text=body,
-        research_question=args.research_question, chapter_roles=chapter_roles,
+        research_question=question, chapter_roles=chapter_roles,
         language=args.language, normalized_context=normalized)
     estimate = _estimate(messages, profile, None, token_counter)
+    project = ledger_snapshot(args.ledger, args.budget_limit)
+    account = ledger_snapshot(args.account_ledger, args.account_budget_limit)
     immutable = {"schema_version": "optomind.serial_parts.live.v1",
         "draft_path": str(draft), "draft_sha256": hashlib.sha256(original).hexdigest(),
         "conception_messages_sha256": messages_sha256(messages),
@@ -128,6 +140,9 @@ def run_live_parts(*, args, context, chapter_roles, token_counter, tokenizer_inf
         "account_limit_cny": args.account_budget_limit,
         "mapping_dir": str(Path(args.account_mapping_dir).resolve()),
         "incremental_limit_cny": args.incremental_budget, "tokenizer": tokenizer_info}
+    if context_receipt is not None:
+        immutable["body_context_input"] = {key: context_receipt[key] for key in (
+            "body_input_path", "body_input_sha256", "run_identity_path")}
     with _output_lock(output):
         binding_path = output / "LIVE_BINDING.json"
         if binding_path.exists():
@@ -143,6 +158,8 @@ def run_live_parts(*, args, context, chapter_roles, token_counter, tokenizer_inf
         write_json(output / "CONCEPTION_MESSAGES.json", messages)
         write_json(output / "CONTEXT.json", context)
         write_json(output / "IDENTITY_CATALOGS.json", catalogs)
+        if context_receipt is not None:
+            write_json(output / "CONTEXT_PROVENANCE.json", context_receipt)
         report = {"stage": "serial_parts_live", "status": "preview", "model_calls": 0,
             "external_requests": 0, "profile": profile, "estimate": estimate,
             "model_calls_scope": "this_invocation_only; cumulative budget deltas use fixed first-preview baseline",
@@ -150,6 +167,7 @@ def run_live_parts(*, args, context, chapter_roles, token_counter, tokenizer_inf
                 "identity_count": len(normalized["source_identity_map"]),
                 "material_records": len(normalized["material_records"]),
                 "final_outline_chapters": len(normalized.get("final_outline", []))},
+            "context_provenance": context_receipt,
             "budget_binding": binding, "source_body_delivery":
                 (source_report or {}).get("body_delivery"), "stage_calls": [],
             "final_manuscript": None, "scientific_acceptance": False}
@@ -251,7 +269,7 @@ def run_live_parts(*, args, context, chapter_roles, token_counter, tokenizer_inf
             attempts = output / "attempts"
             attempts.mkdir(exist_ok=True)
             attempt = attempts / f"attempt_{len(list(attempts.iterdir())) + 1:03d}"
-            result = run_serial_parts(draft_path=draft, research_question=args.research_question,
+            result = run_serial_parts(draft_path=draft, research_question=question,
                 chapter_roles=chapter_roles, out_dir=attempt, context=context,
                 language=args.language, provider=provider)
             result.update(model_calls=report["model_calls"], external_requests=report["external_requests"],

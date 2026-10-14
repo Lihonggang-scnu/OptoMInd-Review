@@ -1602,6 +1602,7 @@ def run_unit_completion(
         )
         fragment, repairs = _repair_numeric_citations(
             fragment, effective_map, known_handles)
+        fragment, handle_repairs = _repair_unbracketed_source_handles(fragment, known_handles)
         for repair in repairs:
             repair["mapping_origin"] = ("bibliography_exact_title" if map_origin == "generated_local_aliases"
                                         or explicit_map is None else "caller_explicit")
@@ -1611,6 +1612,7 @@ def run_unit_completion(
         result["citation_problems"].extend(mapping_diagnostics)
         result["citation_scope"] = "completion_fragment"
         result["numeric_citation_repairs"] = repairs
+        result["unbracketed_source_handle_repairs"] = handle_repairs
         result["bibliography_title_citation_map"] = title_map
         result["citation_number_map_origin"] = map_origin or "none"
         result["output_normalization"] = normalization
@@ -1752,6 +1754,7 @@ def write_unit_completion(
         "fence_report": result.get("fence_report") or {},
         "output_normalization": list(result.get("output_normalization") or []),
         "numeric_citation_repairs": list(result.get("numeric_citation_repairs") or []),
+        "unbracketed_source_handle_repairs": list(result.get("unbracketed_source_handle_repairs") or []),
         "bibliography_title_citation_map": dict(result.get("bibliography_title_citation_map") or {}),
         "citation_number_map_origin": result.get("citation_number_map_origin") or "none",
         "citation_mapping_diagnostics": list(result.get("citation_mapping_diagnostics") or []),
@@ -2105,6 +2108,46 @@ def _repair_numeric_citations(
     return "".join(output), repairs
 
 
+def _unbracketed_handle_matches(text: str) -> Iterable[re.Match[str]]:
+    """Explicit paper tokens in prose, excluding existing brackets and math."""
+    protected = [(match.start(), match.end()) for match in re.finditer(
+        r"\[[^\[\]]*\]|\$\$[\s\S]*?\$\$|(?<!\\)\$[^$\n]+(?<!\\)\$"
+        r"|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)|<!--[^>]*-->", text)]
+    for match in re.finditer(r"(?<![A-Za-z0-9_:])P\d{3,}(?![A-Za-z0-9_])", text):
+        if not any(start <= match.start() and match.end() <= end for start, end in protected):
+            yield match
+
+
+def _repair_unbracketed_source_handles(
+    text: str, known_handles: Iterable[str],
+) -> tuple[str, list[dict[str, str]]]:
+    """Bracket catalog-bound explicit handles; never infer a paper from a number.
+
+    Some otherwise useful writer responses use P#### as prose subjects. The
+    identity is already explicit; add citation delimiters without rewriting any
+    scientific words. Code, links, math, unknown handles and raw responses stay
+    unchanged. Callers persist these format repairs alongside the consumed body.
+    """
+    known = set(known_handles)
+    output, repairs = [], []
+    for segment, prose in _prose_segments(text):
+        if not prose:
+            output.append(segment)
+            continue
+        position = 0
+        for match in _unbracketed_handle_matches(segment):
+            handle = match.group(0)
+            if handle not in known:
+                continue
+            replacement = "[" + handle + "]"
+            output.extend((segment[position:match.start()], replacement))
+            repairs.append({"original": handle, "replacement": replacement,
+                            "source_handle": handle, "mapping_origin": "explicit_provided_handle"})
+            position = match.end()
+        output.append(segment[position:])
+    return "".join(output), repairs
+
+
 def _local_numeric_citation_map(known_handles: Iterable[str]) -> dict[str, str]:
     """Map unique numeric aliases from the current unit's local handles.
 
@@ -2292,11 +2335,18 @@ def _output_diagnostics(
     problems.extend({"code": "numeric_citation_unresolved", "citation": value,
                      "note": "没有可用的显式编号到当前来源映射，保留原文"} for value in numeric)
     problems.extend(tool_problems)
+    unbracketed = list(dict.fromkeys(match.group(0)
+        for segment, prose in _prose_segments(body) if prose
+        for match in _unbracketed_handle_matches(segment)))
+    problems.extend({"code": "unbracketed_source_handle", "handle": handle,
+                     "known": handle in known,
+                     "note": "显式论文身份缺引用括号；不猜测未知来源"} for handle in unbracketed)
     fenced = sorted(index + 1 for index in _fenced_line_indices(body))
     return {"used_source_handles": used, "unknown_citations": unknown,
             "known_tool_identifiers": sorted(tool_ids),
             "non_source_identifier_citations": tool_citations,
             "unresolved_numeric_citations": numeric, "citation_problems": problems,
+            "unbracketed_source_handles": unbracketed,
             "fence_report": {"remaining_fenced_lines": fenced},
             "content_review_status": "not_reviewed"}
 
@@ -2569,6 +2619,7 @@ def write_unit_output(
     context = {"materials": view.materials, "chapter_tool_materials": view.chapter_tool_materials}
     known_ids = set(_known_tool_identifiers(context))
     prior = citation_diagnostics or {}
+    body, handle_repairs = _repair_unbracketed_source_handles(body, _known_unit_handles(view))
     known_ids.update(prior.get("known_tool_identifiers") or [])
     for message in used_messages:
         try:
@@ -2581,6 +2632,8 @@ def write_unit_output(
                 "citation_number_map_origin", "citation_mapping_diagnostics"):
         if key in prior:
             diagnostics[key] = deepcopy(prior[key])
+    diagnostics["unbracketed_source_handle_repairs"] = [
+        *deepcopy(prior.get("unbracketed_source_handle_repairs") or []), *handle_repairs]
     diagnostics["citation_problems"].extend(prior.get("citation_mapping_diagnostics") or [])
     consumption = _table_consumption_report(body, bool(view.table_tasks))
     used = diagnostics["used_source_handles"]
@@ -2774,6 +2827,7 @@ def run_unit_writing(
     )
     known_handles = _known_unit_handles(view)
     body, repairs = _repair_numeric_citations(body, effective_map, known_handles)
+    body, handle_repairs = _repair_unbracketed_source_handles(body, known_handles)
     for repair in repairs:
         repair["mapping_origin"] = ("bibliography_exact_title" if map_origin == "generated_local_aliases"
                                     or explicit_map is None else "caller_explicit")
@@ -2790,6 +2844,7 @@ def run_unit_writing(
         **{key: value for key, value in consumption.items() if key != "issues"},
         "output_normalization": normalization,
         "numeric_citation_repairs": repairs,
+        "unbracketed_source_handle_repairs": handle_repairs,
         "bibliography_title_citation_map": title_map,
         "citation_number_map_origin": map_origin or "none",
         "messages": messages,
