@@ -39,13 +39,30 @@ _CASE_FIELDS = (
     "cases_and_sources",
     "cases_and_references",
     "case_objects",
+    "cases",
 )
 # Keep complete owner records alongside the compact source-use index. These
 # fields can contain distinct findings, identities, conditions and limits that
 # cannot be reconstructed from paragraph text or a single contribution string.
 _OWNER_DETAIL_FIELDS = (*_CASE_FIELDS, "synthesis_and_transition")
+_UNIT_TITLE_FIELDS = ("unit_title", "title", "focus", "unit_focus", "name", "theme")
+_UNIT_DEVELOPMENT_FIELDS = ("ordered_development", "development")
+_UNIT_CONDITION_FIELDS = (
+    "evidence_conditions_and_limits", "evidence_conditions", "conditions_and_limits", "evidence_conditions_limits",
+)
+_UNIT_RELATION_FIELDS = (
+    "argument_relations", "relations_conditions_limits", "relations_and_limits", "relations_limits", "material_supported_relations",
+)
+_UNIT_SYNTHESIS_FIELDS = (
+    "cross_paper_synthesis_and_conflicts", "synthesis_and_conflicts", "synthesis", "synthesis_and_limits",
+    *_UNIT_RELATION_FIELDS[1:],
+)
+_OWNER_FIELD_VALUES = tuple(dict.fromkeys((
+    *_UNIT_TITLE_FIELDS, *_UNIT_DEVELOPMENT_FIELDS, *_UNIT_CONDITION_FIELDS,
+    *_UNIT_SYNTHESIS_FIELDS, *_UNIT_RELATION_FIELDS, "transition",
+)))
 OWNER_UNIT_CONTEXT_FIELDS = (
-    "evidence_conditions", "synthesis", "transition", "argument_relations",
+    "title", "ordered_development", "evidence_conditions", "synthesis", "transition", "argument_relations", "owner_field_values",
     *_OWNER_DETAIL_FIELDS,
 )
 
@@ -216,6 +233,8 @@ class UnitView:
 
     def owner_context(self) -> dict[str, Any]:
         return {
+            "title": self.title,
+            "ordered_development": self.ordered_development,
             "evidence_conditions": self.evidence_conditions,
             "synthesis": self.synthesis,
             "transition": self.transition,
@@ -479,11 +498,16 @@ def chapter_identity(packet: Mapping[str, Any]) -> tuple[str, str]:
 
 
 def _unit_title(unit: Mapping[str, Any], index: int) -> str:
-    for key in ("unit_title", "title", "focus", "unit_focus", "name"):
+    for key in _UNIT_TITLE_FIELDS:
         value = str(unit.get(key) or "").strip()
         if value:
             return value
     return f"unit {index}"
+
+
+def _owner_field_value(unit: Mapping[str, Any], fields: Sequence[str], default: Any = "") -> Any:
+    """Retain legacy canonical precedence; raw complementary values travel too."""
+    return next((unit[key] for key in fields if unit.get(key)), default)
 
 
 def _paragraph_rows(unit: Mapping[str, Any]) -> list[dict[str, Any]]:
@@ -1168,26 +1192,20 @@ def build_chapter_view(
             unit_index=index,
             title=_unit_title(unit, index),
             substantive_point=substantive,
-            ordered_development=str(unit.get("ordered_development") or ""),
+            ordered_development=str(_owner_field_value(unit, _UNIT_DEVELOPMENT_FIELDS)),
             paragraph_briefs=briefs,
             case_uses=case_rows,
-            evidence_conditions=str(
-                unit.get("evidence_conditions_and_limits")
-                or unit.get("evidence_conditions")
-                or unit.get("conditions_and_limits")
-                or ""
-            ),
-            synthesis=str(
-                unit.get("cross_paper_synthesis_and_conflicts")
-                or unit.get("synthesis_and_conflicts")
-                or unit.get("synthesis")
-                or unit.get("synthesis_and_limits")
-                or ""
-            ),
+            evidence_conditions=str(_owner_field_value(unit, _UNIT_CONDITION_FIELDS)),
+            synthesis=str(_owner_field_value(unit, _UNIT_SYNTHESIS_FIELDS)),
             transition=str(unit.get("transition") or ""),
             raw_keys=tuple(sorted(unit.keys())),
-            argument_relations=deepcopy(unit.get("argument_relations")),
-            owner_details={key: deepcopy(unit[key]) for key in _OWNER_DETAIL_FIELDS if key in unit},
+            argument_relations=deepcopy(unit["argument_relations"] if "argument_relations" in unit
+                                        else _owner_field_value(unit, _UNIT_RELATION_FIELDS[1:], None)),
+            owner_details={
+                **{key: deepcopy(unit[key]) for key in _OWNER_DETAIL_FIELDS if key in unit},
+                **({"owner_field_values": {key: deepcopy(unit[key]) for key in _OWNER_FIELD_VALUES if key in unit}}
+                   if any(key in unit for key in _OWNER_FIELD_VALUES) else {}),
+            },
         ))
     ids.save()
 
