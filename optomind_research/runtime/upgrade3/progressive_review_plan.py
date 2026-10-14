@@ -4667,6 +4667,54 @@ class ProgressiveReviewPlanner:
         _atomic_json(self.config.output_dir / "stages" / "source_routing_summary.json", result)
         return result
 
+    def _accepted_tool_cycle_cache(
+        self, name: str, state: Mapping[str, Any], pool_rows: Sequence[Mapping[str, Any]],
+    ) -> bool:
+        """Reuse compatible tool material already consumed by a completed planner stage."""
+        consumer = {
+            "level1_tools": ("level1_outline", "actual_tool_results"),
+            "level2_tools": ("finalize_chapter_scope", "level2_tool_results"),
+        }.get(name)
+        completed = state.get("completed_stages") or []
+        if not consumer or name not in completed or consumer[0] not in completed or state.get("current_stage") == name:
+            return False
+        path = self.config.output_dir / "stages" / (name + ".json")
+        consumer_path = self.config.output_dir / "stages" / (consumer[0] + ".json")
+        if not path.is_file() or not consumer_path.is_file():
+            return False
+        try:
+            result = _read_json(path)
+            inputs = (state.get("stage_inputs") or {}).get(consumer[0]) or {}
+            if not isinstance(result, Mapping) or result.get("status") not in {"complete", "not_requested"}:
+                return False
+            feedback = self._compact_tool_feedback(result)
+            if inputs.get(consumer[1]) != feedback:
+                old = _level1_tool_feedback_projection(inputs, stage=consumer[0], feedback_key=consumer[1])
+                new = _level1_tool_feedback_projection({**inputs, consumer[1]: feedback}, stage=consumer[0], feedback_key=consumer[1])
+                if old is None or new is None or old[0] != new[0]:
+                    return False
+            # The collector already stores source proofs for supplement reads.
+            # Check those proofs without importing later phase material/index
+            # generations into the earlier phase's effective input.
+            needs = (result.get("retrieval_loop") or {}).get("needs") or []
+            supplement_needs = [need for need in needs if isinstance(need, Mapping) and need.get("reuse_key")]
+            if not supplement_needs:
+                return True
+            cache = _read_json(self.config.output_dir / "RETRIEVAL_NEED_CACHE.json")
+            records = (cache.get("records") or {}).values()
+            current = {_text(row.get("_paper_id") or _canonical_paper_id(row)): row for row in pool_rows}
+            for need in supplement_needs:
+                proofs = [row for row in records if isinstance(row, Mapping)
+                          and (row.get("contract") or {}).get("reuse_key") == need["reuse_key"]
+                          and (row.get("state") or {}).get("need_id") == need.get("need_id")
+                          and isinstance(row.get("source_fingerprints"), Mapping)]
+                if not any(all(paper_id not in current or _supplement_source_fingerprint(current[paper_id]) == signature
+                               for paper_id, signature in row["source_fingerprints"].items()) for row in proofs):
+                    return False
+            return True
+        except (ProgressivePlanError, AttributeError, TypeError):
+            return False
+
     def _tool_cycle(
         self,
         *,
@@ -4720,11 +4768,20 @@ class ProgressiveReviewPlanner:
                     raise ProgressivePlanError("retrieval_loop_runner_return_not_object")
                 return dict(result)
 
+            retry_requested = any(
+                request.get("retry_empty_result") is True
+                for request in [*supplement_requests, *directed_requests] if isinstance(request, Mapping)
+            )
+            reuse_accepted = (
+                resume and not retry_requested
+                and getattr(self.retrieval_loop_runner, "completed_stage_cache_uses_managed_index", True)
+                and self._accepted_tool_cycle_cache(name, state, pool_rows)
+            )
             result = self._stage(
-                # The collector owns per-need/material compatibility and
-                # explicit failure retries. Re-enter it even when the outer
-                # arguments match; its durable caches reuse fulfilled work.
-                name, run_adaptive_cycle, resume=False, state=state,
+                # Completed consumers fix the accepted tool boundary. Unfinished
+                # phases and explicit retries still use the collector's journals;
+                # _stage additionally requires the live effective-input contract.
+                name, run_adaptive_cycle, resume=reuse_accepted, state=state,
                 cache_inputs=cycle_inputs,
             )
             for chapter_id, rows in (result.get("tool_materials_by_chapter") or {}).items():
@@ -9763,6 +9820,8 @@ def make_retrieval_loop_runner(
             "tool_materials_by_chapter": materials_by_chapter,
             "consumed_paper_ids": sorted(consumed_ids),
         }
+    # Explicit external indexes retain the collector's strict generation check.
+    run.completed_stage_cache_uses_managed_index = local_index_path is None
     return run
 
 
