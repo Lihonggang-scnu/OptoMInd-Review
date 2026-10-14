@@ -4717,23 +4717,68 @@ class ProgressiveReviewPlanner:
             "level2_tools": ("finalize_chapter_scope", "level2_tool_results"),
         }.get(name)
         completed = state.get("completed_stages") or []
-        if not consumer or name not in completed or consumer[0] not in completed or state.get("current_stage") == name:
+        chapter_consumers = name == "chapters_tools"
+        if (name not in completed or not (consumer or chapter_consumers)
+                or (consumer and consumer[0] not in completed)
+                or (state.get("current_stage") == name and not chapter_consumers)):
             return False
         path = self.config.output_dir / "stages" / (name + ".json")
-        consumer_path = self.config.output_dir / "stages" / (consumer[0] + ".json")
-        if not path.is_file() or not consumer_path.is_file():
+        consumer_path = self.config.output_dir / "stages" / (consumer[0] + ".json") if consumer else None
+        if not path.is_file() or (consumer_path and not consumer_path.is_file()):
             return False
         try:
             result = _read_json(path)
-            inputs = (state.get("stage_inputs") or {}).get(consumer[0]) or {}
             if not isinstance(result, Mapping) or result.get("status") not in {"complete", "not_requested"}:
                 return False
-            feedback = self._compact_tool_feedback(result)
-            if inputs.get(consumer[1]) != feedback:
-                old = _level1_tool_feedback_projection(inputs, stage=consumer[0], feedback_key=consumer[1])
-                new = _level1_tool_feedback_projection({**inputs, consumer[1]: feedback}, stage=consumer[0], feedback_key=consumer[1])
-                if old is None or new is None or old[0] != new[0]:
+            if chapter_consumers:
+                # Chapter details are cached per packet, not as one model stage.
+                # Prove every completed chapter received its actual tool content;
+                # _stage still checks live requests, sources and runtime settings.
+                chapter_ids = state.get("completed_chapters") or []
+                materials = result.get("tool_materials_by_chapter") or {}
+                if not chapter_ids or not isinstance(materials, Mapping):
                     return False
+                if any(rows and chapter_id not in chapter_ids for chapter_id, rows in materials.items()):
+                    return False
+
+                def content_key(material: Mapping[str, Any]) -> str:
+                    material = dict(material)
+                    sources = []
+                    for source in material.get("sources") or []:
+                        source = dict(source)
+                        stable_id = _text(source.get("paper_id") or source.get("canonical_paper_id"))
+                        # A local handle may be rebound after pool augmentation.
+                        # Require the same stable identity and every other field.
+                        if stable_id and not re.fullmatch(r"P\d+", stable_id):
+                            source.pop("source_handle", None)
+                        sources.append(source)
+                    material["sources"] = sources
+                    return json.dumps(material, ensure_ascii=False, sort_keys=True, default=_json_default)
+
+                for chapter_id in chapter_ids:
+                    packet_path = self.config.output_dir / "stages" / "chapters" / (_safe_id(chapter_id) + ".json")
+                    if not packet_path.is_file():
+                        return False
+                    packet = _read_json(packet_path)
+                    if (not packet.get("_chapter_details_input_contract")
+                            or _text((packet.get("chapter") or {}).get("chapter_id")) != chapter_id
+                            or not (packet.get("chapter_plan") or {}).get("units")):
+                        return False
+                    delivered = packet.get("_adaptive_input_materials") or []
+                    for row in materials.get(chapter_id, []):
+                        expected = _tool_material_for_prompt(row)
+                        matches = [item for item in delivered if item.get("need_id") == expected.get("need_id")
+                                   and content_key(item) == content_key(expected)]
+                        if len(matches) != 1:
+                            return False
+            else:
+                inputs = (state.get("stage_inputs") or {}).get(consumer[0]) or {}
+                feedback = self._compact_tool_feedback(result)
+                if inputs.get(consumer[1]) != feedback:
+                    old = _level1_tool_feedback_projection(inputs, stage=consumer[0], feedback_key=consumer[1])
+                    new = _level1_tool_feedback_projection({**inputs, consumer[1]: feedback}, stage=consumer[0], feedback_key=consumer[1])
+                    if old is None or new is None or old[0] != new[0]:
+                        return False
             # The collector already stores source proofs for supplement reads.
             # Check those proofs without importing later phase material/index
             # generations into the earlier phase's effective input.

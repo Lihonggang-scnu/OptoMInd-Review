@@ -110,3 +110,70 @@ def test_supplement_source_proof_survives_internal_history_but_rejects_source_ch
     reading.write_text("Corrected source measurement")
     f.engine._tool_cycle(**f.args, state=f.state)
     assert len(f.calls) == 2
+
+
+def accepted_chapter_cycle(tmp_path):
+    cfg = p.ProgressivePlannerConfig("T", tmp_path / "pool", tmp_path / "plan", tmp_path)
+    calls = []
+    tool = {"need_id": "N1", "usable_content": "An independent comparison with its conditions.",
+            "sources": [{"paper_id": "DOI:10.example/a", "source_handle": "DOI:10.example/a",
+                         "title": "A study", "section_path": ["Results"]}]}
+    result = {"status": "complete", "tool_materials_by_chapter": {"CH1": [tool]},
+              "retrieval_loop": {"needs": []}}
+    def runner(**kwargs):
+        calls.append(kwargs)
+        return copy.deepcopy(result)
+    engine = p.ProgressiveReviewPlanner(cfg, planner=lambda *_: pytest.fail("No model call"),
+                                      retrieval_loop_runner=runner)
+    args = dict(phase="chapters", supplement_requests=[], directed_requests=[{"paper_id": "one", "questions": ["Compare"]}],
+                pool_rows=[{"_paper_id": "one", "_b_summary": {"finding": "Original"}}],
+                plan={"question": "Q"}, prior_directed=None, prior_tool_results=None,
+                source_handle_map={"P0001": "one"}, resume=True)
+    state = {}
+    first = engine._tool_cycle(**args, state=state)
+    delivered = p._tool_material_for_prompt(tool)
+    delivered["sources"][0]["source_handle"] = "P0001"
+    for chapter_id in ["CH1", "CH2"]:
+        p._atomic_json(tmp_path / "stages" / "chapters" / (chapter_id + ".json"), {
+            "chapter": {"chapter_id": chapter_id}, "chapter_plan": {"units": [{"point": "A complete task"}]},
+            "_chapter_details_input_contract": "saved-effective-contract",
+            "_adaptive_input_materials": [delivered] if chapter_id == "CH1" else [],
+        })
+    state.update(completed_chapters=["CH1", "CH2"], current_stage="chapters_tools")
+    return SimpleNamespace(engine=engine, cfg=cfg, state=state, args=args, calls=calls, first=first,
+                           packet=tmp_path / "stages" / "chapters" / "CH1.json")
+
+
+def test_completed_chapter_consumers_reuse_without_collection(tmp_path):
+    f = accepted_chapter_cycle(tmp_path)
+    before = f.packet.read_bytes()
+    assert f.engine._tool_cycle(**f.args, state=f.state) == f.first
+    assert len(f.calls) == 1 and f.packet.read_bytes() == before
+
+
+@pytest.mark.parametrize("change", ["missing_packet", "empty_plan", "content", "identity", "condition", "task", "pool", "reader", "retry"])
+def test_chapter_cache_needs_real_consumers_and_current_input_contract(tmp_path, change):
+    f = accepted_chapter_cycle(tmp_path)
+    packet = p._read_json(f.packet)
+    if change == "missing_packet":
+        (tmp_path / "stages" / "chapters" / "CH2.json").unlink()
+    elif change == "empty_plan":
+        packet["chapter_plan"]["units"] = []
+    elif change == "content":
+        packet["_adaptive_input_materials"][0]["usable_content"] = "A different answer"
+    elif change == "identity":
+        packet["_adaptive_input_materials"][0]["sources"][0]["paper_id"] = "different-study"
+    elif change == "condition":
+        packet["_adaptive_input_materials"][0]["sources"][0]["section_path"] = ["Different experiment"]
+    elif change == "task":
+        f.args["directed_requests"][0]["questions"] = ["New comparison"]
+    elif change == "pool":
+        f.args["pool_rows"][0]["_b_summary"]["finding"] = "Corrected"
+    elif change == "reader":
+        f.engine.config = replace(f.cfg, reader_model="different-reader")
+    elif change == "retry":
+        f.args["directed_requests"][0]["retry_empty_result"] = True
+    if change != "missing_packet":
+        p._atomic_json(f.packet, packet)
+    f.engine._tool_cycle(**f.args, state=f.state)
+    assert len(f.calls) == 2
