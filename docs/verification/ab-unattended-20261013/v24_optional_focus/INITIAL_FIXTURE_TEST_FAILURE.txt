@@ -1,0 +1,34 @@
+...F............                                                         [100%]
+================================== FAILURES ===================================
+_ test_optional_unsearchable_focus_keeps_question_anchors_and_partial[   -empty_query] _
+
+tmp_path = WindowsPath('F:/OptoMind-Review-2/outputs/e2e_optics_20261012_80cny/worktree/outputs/optional_focus_audit_20261014/pytest_first/test_optional_unsearchable_foc3')
+focus = '   ', reason = 'empty_query'
+
+    @pytest.mark.parametrize("focus, reason", [
+        (UNSEARCHABLE_FOCUS, "query_has_no_searchable_terms"),
+        ("the and a", "query_has_no_searchable_terms"),
+        ("!!!", "query_has_no_searchable_terms"),
+        ("   ", "empty_query"),
+    ])
+    def test_optional_unsearchable_focus_keeps_question_anchors_and_partial(tmp_path, focus, reason):
+        path, gap, judge, calls, _ = fixture(tmp_path, focus)
+        with search.PlanningMaterialIndex(path, readonly=True) as index:
+            initial = triage.triage_gap(index, gap, judge=judge, top_papers=1, max_passages=1)
+            result = triage.read_local_capture(index, initial, judge=judge)
+        assert len(calls) == 2  # The existing bounded read, with new question-anchored material.
+        assert {row["paper_id"] for row in calls[1]["passages"]} == {"a", "b"}
+        assert "Initial partial measurement." in result.usable_content
+        assert result.decision == "external_research" and result.answers_requested_question is False
+        assert result.external_ask == "Find a measured cyclic comparison."
+        assert result.local_reading.search_found is True
+        assert result.local_reading.not_matched_reason == ""
+>       assert "read_focus_search_unavailable:" + reason in result.local_reading.bounded_read_omissions
+E       AssertionError: assert ('read_focus_search_unavailable:' + 'empty_query') in ()
+E        +  where () = LocalReadingBundle(gap=LocalGap(gap_id='G', question='thermal conductivity', intended_use='mechanism', user_scope='', ...ured conditions',), matched_sections=('Measured conditions',))], bounded_read_omissions=(), explicit_reading_status={}).bounded_read_omissions
+E        +    where LocalReadingBundle(gap=LocalGap(gap_id='G', question='thermal conductivity', intended_use='mechanism', user_scope='', ...ured conditions',), matched_sections=('Measured conditions',))], bounded_read_omissions=(), explicit_reading_status={}) = TriageJudgment(gap=LocalGap(gap_id='G', question='thermal conductivity', intended_use='mechanism', user_scope='', succ...xplicit_reading_status={}), cost_cny=0.0, model_calls=2, quantitative_comparisons=[], answers_requested_question=False).local_reading
+
+tests\upgrade3\test_planning_optional_focus_query.py:58: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/upgrade3/test_planning_optional_focus_query.py::test_optional_unsearchable_focus_keeps_question_anchors_and_partial[   -empty_query]
+1 failed, 15 passed in 1.44s

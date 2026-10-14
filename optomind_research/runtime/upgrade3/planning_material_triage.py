@@ -33,6 +33,7 @@ from typing import Any, Callable, Mapping, Sequence
 
 from .planning_material_search import (
     PlanningMaterialIndex,
+    PlanningMaterialSearchError,
     SearchHit,
     SearchResult,
     _adjacent_terms,
@@ -887,28 +888,46 @@ def read_local_capture(index: PlanningMaterialIndex, judgment: TriageJudgment, *
                     bounded_channels=True, context_chars=0)
     candidate_ids = list(dict.fromkeys(hit.paper_id for hit in result.hits))
     hits = list(result.hits)
-    if judgment.read_focus:
-        focused = search(index, judgment.read_focus, concepts=gap.concepts,
-                         required_concepts=gap.required_concepts,
-                         top_papers=LOCAL_EXPANSION_PAPERS, passages_per_paper=2,
-                         bounded_channels=True, context_chars=0)
+    focus = (judgment.read_focus or "").strip()
+    focus_unavailable = "read_focus_search_unavailable:empty_query" if judgment.read_focus and not focus else ""
+    focused = None
+    if focus:
+        try:
+            focused = search(index, focus, concepts=gap.concepts,
+                             required_concepts=gap.required_concepts,
+                             top_papers=LOCAL_EXPANSION_PAPERS, passages_per_paper=2,
+                             bounded_channels=True, context_chars=0)
+        except PlanningMaterialSearchError as exc:
+            if str(exc) != "query_has_no_searchable_terms":
+                raise
+            # Focus is optional: keep the original question's candidates and
+            # previous reading instead of confusing an unsearchable query
+            # with absent local material.
+            focus_unavailable = "read_focus_search_unavailable:query_has_no_searchable_terms"
+    if focused is not None:
         for hit in focused.hits:
             if hit.paper_id not in candidate_ids and len(candidate_ids) < LOCAL_EXPANSION_PAPERS:
                 candidate_ids.append(hit.paper_id)
         # Also inspect the focus within the anchors even when the focus's own
         # global ranking would omit them. Bounded per-paper, no query rewrite.
         if candidate_ids:
-            focused = search(index, judgment.read_focus, concepts=gap.concepts,
+            focused = search(index, focus, concepts=gap.concepts,
                              required_concepts=gap.required_concepts, paper_ids=candidate_ids,
                              top_papers=LOCAL_EXPANSION_PAPERS, passages_per_paper=2,
                              bounded_channels=True, context_chars=0)
             hits.extend(focused.hits)
     previous = judgment.local_reading or LocalReadingBundle(gap=gap)
+    if focus_unavailable:
+        previous = replace(previous, bounded_read_omissions=tuple(dict.fromkeys([
+            *previous.bounded_read_omissions, focus_unavailable,
+        ])))
     bundle = replace(previous, passages=list(previous.passages),
                      paper_contexts=list(previous.paper_contexts),
                      explicit_reading_status=dict(previous.explicit_reading_status),
                      new_task_fields=("focused_local_read",), searched_papers=len(candidate_ids))
     if not _append_bounded_hits(index, bundle, hits):
+        if focus_unavailable:
+            judgment.local_reading = previous
         return judgment
     bundle.required_concepts_all_missing = tuple(
         concept for concept in gap.required_concepts

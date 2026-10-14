@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "source_fix": "planning_material_triage.read_local_capture optional focus only",
+  "gate": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\c3c802f5ff05250d0490d476dc5abeb2b3932b571ff0dc63d3e0851c16f094f8",
+  "actual_question": "是否有可见光波段、孔径>1cm 且同时提供实测效率与 NA 的消色差超透镜数据？",
+  "actual_read_focus": "无需再读当前材料，需检索新的可见光大孔径消色差超透镜文献。",
+  "decision": "external_research",
+  "question_query_terms": [
+    {
+      "concept": "cm",
+      "forms": [
+        "cm"
+      ],
+      "source": "question"
+    },
+    {
+      "concept": "na",
+      "forms": [
+        "na"
+      ],
+      "source": "question"
+    }
+  ],
+  "focus_query_terms": [],
+  "caught_error_only": "PlanningMaterialSearchError:query_has_no_searchable_terms from optional focus search",
+  "preserved": "original question anchors, prior partial material, unmet status and external request; no invented missing-material conclusion",
+  "focus_omission_field": "local_reading.bounded_read_omissions",
+  "tests": {
+    "passed": 16,
+    "log": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optional_focus_audit_20261014\\focused_tests_final.log",
+    "original_fixture_failure_log": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optional_focus_audit_20261014\\focused_tests_first.log",
+    "fixture_failure_note": "Whitespace focus was stripped by normal judgment normalization; test corrected to exercise a direct caller with whitespace. Production unchanged."
+  },
+  "existing_native_paid_response_cache": {
+    "request": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\local_lookup\\f4eb1d81c99f0303b2ff5361eeb06192b3b9ae85412d1944905febfe733efd81\\attempt-y077acu8\\REQUEST.json",
+    "result": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\07_progressive_review_plan_docling_20261013\\local_lookup\\f4eb1d81c99f0303b2ff5361eeb06192b3b9ae85412d1944905febfe733efd81\\attempt-y077acu8\\RESULT.json",
+    "cache_request_payload_equal_paid_c3_input_except_gap_id": true,
+    "bucket_signature_matches_existing_request": true,
+    "saved_raw_judgment_equal_paid_c3_content": true,
+    "behavior": "Existing _LocalJudgeCheckpoint returns RESULT.json before invoking judge whenever effective inputs and settings remain equal; optional-focus patch does not change first-read payload or prompts. No native planner/provider replay performed."
+  },
+  "paid_calls": 0,
+  "no_prompt_or_tokenizer_change": true,
+  "follow_up_existing_limit": "A main question without searchable expansion terms or English concepts still raises the strict original error; multilingual primary-query routing is outside this repair."
+}
