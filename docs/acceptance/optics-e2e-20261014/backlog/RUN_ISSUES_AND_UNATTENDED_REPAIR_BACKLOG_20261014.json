@@ -1,0 +1,1204 @@
+{
+  "schema": "optomind.run_issues_unattended_repair_backlog.v1",
+  "generated_on": "2026-10-14",
+  "scope": {
+    "output_root": "private-workspace/outputs/e2e_optics_20261012_80cny",
+    "source_worktree": "private-workspace/outputs/e2e_optics_20261012_80cny/worktree",
+    "evidence_root": "private-workspace/outputs/e2e_optics_20261012_80cny/preparation/ab_unattended_20261013",
+    "owned_files": [
+      "preparation/ab_unattended_20261013/RUN_ISSUES_AND_UNATTENDED_REPAIR_BACKLOG_20261014.md",
+      "preparation/ab_unattended_20261013/RUN_ISSUES_AND_UNATTENDED_REPAIR_BACKLOG_20261014.json"
+    ],
+    "source_scope_rule": "This register records observed run behavior and deferred repair work. It does not modify source, gates, ledgers, run outputs, or prior evidence."
+  },
+  "state_snapshot": {
+    "execution_state_updated_utc": "2026-10-14T14:23:46.237646+08:00",
+    "current_stage": "chapters_tools",
+    "status": "running_native_resume_after_optional_focus_fix",
+    "current_source_commit": "be0abeaf2ae1bdc1e5a5188b471abb14faec775a",
+    "current_binding": "RUN_BINDING_PLANNING_V24_OPTIONAL_FOCUS_20261014.json",
+    "current_binding_sha256": "0892fdda8ec8d236ad63cea59b7709b36124444c65e8725e5d59815fc53775c6",
+    "current_pid": 552,
+    "paid_calls": 1012,
+    "actual_cny": 7.7108251,
+    "reserved_cny": 0,
+    "uncertain_cny": 4.5168676,
+    "snapshot_authority_note": "paid_calls/actual_cny/reserved_cny/uncertain_cny are historical EXECUTION_STATE snapshot values; current expense and paid-call decisions must use the current current SQL ledger SQL.",
+    "completion_certified": false,
+    "quality_boundary": "Program progress, native JSON, or a passing adapter test does not certify scientific quality or unattended robustness."
+  },
+  "classification": {
+    "formal_repair_produced_and_used": "A source change is present in the current source-bound lineage and its use is evidenced by a bound run or native consumer receipt. Offline acceptance remains separately stated.",
+    "manual_recovery_or_supervision": "A root/delegated stop, hold, rejection, or restoration allowed the run to continue; this is not an autonomous program check.",
+    "offline_only": "A read-only or synthetic probe reproduced or checked the behavior without a paid provider call or production mutation.",
+    "still_unfixed": "The run has a guard or workaround, but the general unattended capability requested in the entry is absent.",
+    "formal_fix_in_progress": "A formal source repair is produced or being integrated, but real production adoption or the required native receipt is still pending."
+  },
+  "issues": [
+    {
+      "id": "UIR-001",
+      "classification": "formal_repair_produced_and_used",
+      "title": "Directed reading focus, section, and chapter ownership were lost in generic fallback",
+      "trigger": "A directed read or supplement supplied a non-empty focus/section and assigned_chapters, but the adapter normalized it through the generic requirement path before the reader consumed those fields.",
+      "actual_impact": "Ten autonomous specific requests became generic readings without chapter ownership. Stable paper identities and source text remained intact, but evidence could be delivered to the wrong review purpose or chapter.",
+      "temporary_handling": "The V19 unpaid gate was stopped before new paid work. Old raw results and caches were retained, and the repair was resumed in a new source-bound namespace without hand-editing scientific content.",
+      "formal_capability_status": "Commit c6a5f01e added chapter aliases, focus-to-question normalization, section notes, and task signatures. The current V24 source be0abeaf is descended from that change; the saved harmonized projection passed 10/10 ownership checks. The projection check was offline and did not itself make provider calls.",
+      "current_boundary": "The repair preserves routing fields; it does not decide whether a model's scientific claim is correct.",
+      "evidence": [
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V19_FOCUS_REPAIR_ACCEPTANCE.json",
+          "locator": "problem/change/verification; 10/10 focus, section, and chapter owners preserved; no API call"
+        },
+        {
+          "path": "worktree/optomind_research/runtime/upgrade3/progressive_review_plan.py",
+          "locator": "lines 3538-3574 and 3679-3768; assigned_chapters, focus, section, and task signature are consumed"
+        },
+        {
+          "path": "EXECUTION_STATE.json",
+          "locator": "current_execution_v24.source_commit and binding"
+        }
+      ],
+      "raw_paid_rejected_facts": "The repair acceptance reports settled actual CNY 6.6494815, reserved CNY 0, and uncertain CNY 4.5168676 before/after; no scientific answer was injected.",
+      "repair_proposal": "Keep the normalized routing fields in the immutable request/response contract and fail closed when chapter ownership is missing for a task that declares it. Retain the original task plus the normalized task as separate provenance.",
+      "verification": "Run a bound fixture with focus, section, assigned_chapters, explicit question, and generic reading together; assert exact reader message fields, chapter ownership, distinct task signatures, and zero provider calls for the adapter regression."
+    },
+    {
+      "id": "UIR-002",
+      "classification": "formal_repair_produced_and_used",
+      "title": "Chinese or otherwise unsearchable optional focus stopped the planner",
+      "trigger": "The optional read_focus contained Chinese prose or only stopwords/punctuation and was passed to local FTS as if it were a searchable query.",
+      "actual_impact": "V23 stopped at 2026-10-14 14:04:54 with PlanningMaterialSearchError(query_has_no_searchable_terms) in read_local_capture -> planning_material_search.search -> fts_query. The failure was a stage blocker even though earlier paid successes were valid.",
+      "temporary_handling": "V23 was retired and its failure backup was preserved. No automatic restart or scientific rewrite was performed. V24 adopted a narrow catch for this optional-focus error, retained the original question candidates and previous partial reading, and recorded the omission.",
+      "formal_capability_status": "Commit be0abeaf is bound to V24 and contains the optional-focus guard. The offline tests cover the Chinese phrase, stopwords, punctuation, blank focus, and preservation of partials; V24 continued past the prior failure. The main question and low-level FTS errors remain strict and still raise.",
+      "current_boundary": "The guard prevents an optional focus from erasing usable candidates; it does not prove that the focus was scientifically satisfied.",
+      "evidence": [
+        {
+          "path": "preparation/ab_unattended_20261013/DELEGATED_V23_TOOL_IO_SUPERVISION_20261014.md",
+          "locator": "line 28; actual V23 failure and call chain"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/query_empty_failure_20261014",
+          "locator": "preserved V23 failure backup"
+        },
+        {
+          "path": "worktree/optomind_research/runtime/upgrade3/planning_material_triage.py",
+          "locator": "lines 891-927; optional focus catch and omission record"
+        },
+        {
+          "path": "worktree/tests/upgrade3/test_planning_optional_focus_query.py",
+          "locator": "lines 13, 40-107; unsearchable-focus preservation and strict main-query tests"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/DELEGATED_V24_TOOL_IO_SUPERVISION_20261014.md",
+          "locator": "lines 1-13; V24 source/binding and continued native operation"
+        }
+      ],
+      "raw_paid_rejected_facts": "The V23 failure was not a paid scientific success; paid successes were preserved and unknown/ledger entries were not released. V24's one-time duplicate query-refinement response was separately retained as a useful partial with bandwidth >100 nm still missing.",
+      "repair_proposal": "Keep the optional-focus boundary explicit: classify no-searchable-term only for optional focus, retain original anchors, and emit a machine-readable omission that downstream stages cannot interpret as fulfilled. Add metrics for focus-unavailable frequency.",
+      "verification": "Inject Chinese, stopword, punctuation, blank, and genuine index-error cases into a saved native run; assert only optional empty queries are contained, original candidates/partials are retained, and other search failures remain visible."
+    },
+    {
+      "id": "UIR-003",
+      "classification": "formal_repair_produced_and_used",
+      "title": "A completed adaptive stage was re-entered and incurred an unwanted outline call",
+      "trigger": "The adaptive tool collector re-entered an already closed stage under the same input contract during native resume.",
+      "actual_impact": "The repeated outline d44047f4 was held unpaid, but one unwanted paid attempt added CNY 0.0083584: actual rose from 7.0427231 to 7.0510815. Completed stages, raw responses, and budgets were preserved, so the issue was cost and unattended stage safety rather than scientific overwrite.",
+      "temporary_handling": "PID 4268 was stopped, the new attempts snapshot was retained, and the prior tool snapshot was restored. The retired gate and all 11 older snapshots remain history only; no scientific content was hand-edited.",
+      "formal_capability_status": "Commit 02dce0d4f77580ff6598f092c561304a2ae0c3df is the formal completed-adaptive-stage resume repair and was used in the bound lineage: its 32-item acceptance and real V23 eight-stage zero-new-call reuse are recorded, and the V24 continuation reused nine stages. The manual backtrack remains the handling of the earlier incident; a universal immutable closed-stage preflight for every future unattended path is not yet evidenced.",
+      "current_boundary": "The formal repair is produced and used for the recorded V23/V24 reuse boundaries, but the earlier paid re-entry remains a real cost incident and does not prove that every future changed-contract or stale-marker path is safe.",
+      "evidence": [
+        {
+          "path": "EXECUTION_STATE.json",
+          "locator": "closed_phase_cache_repair; stop_reason, unwanted_new_actual_cny, preserved snapshot, and restored stage"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/closed_phase_backtrack_20261014_100651",
+          "locator": "preserved attempts snapshot"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V23_NATIVE_TOOL_SNAPSHOT_RECOVERY.json",
+          "locator": "native snapshot recovery receipt; api_calls=0 and ledger_modified=false"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V23_CHAPTER_NEED_REQUEST_REVIEW.json",
+          "locator": "actual_v23_resume_reused_stages=8; first fresh stage was chapter_need_analysis"
+        },
+        {
+          "path": "execution_sources/planning_resume_v23",
+          "locator": "git commit 02dce0d4f77580ff6598f092c561304a2ae0c3df, docs/verification/ab-unattended-20261013/README.md; 32-item checks and eight-stage zero-new-call recovery"
+        },
+        {
+          "path": "EXECUTION_STATE.json",
+          "locator": "current_execution_v24 same native output/ledgers; top completed_stages contains the nine-stage V24 reuse boundary"
+        }
+      ],
+      "raw_paid_rejected_facts": "The unwanted amount is explicitly recorded as CNY 0.0083584; old uncertain CNY 4.5168676 was unchanged; repeated outline was held unpaid and original raw artifacts were not replaced.",
+      "repair_proposal": "Before any stage dispatch, compare immutable stage name, input contract hash, accepted output hash, and run binding. If the stage is closed, emit a non-paid resume event and require an explicit new-stage contract; never infer reopen from a missing in-memory marker.",
+      "verification": "Replay a closed-stage resume with the same and changed input hashes. The same contract must create zero reservations and zero provider calls; a changed contract must create a new versioned stage and preserve the prior output. Separately assert the 32-item acceptance, V23 eight-stage zero-call reuse, and V24 nine-stage reuse receipts without treating them as a scientific-quality pass."
+    },
+    {
+      "id": "UIR-004",
+      "classification": "still_unfixed",
+      "title": "Exact duplicate query refinement was not content-deduplicated across V23 and V24",
+      "trigger": "The V24 query-refinement system message, user message, and complete wire body were byte-for-byte equal to an already approved V23 request, while the call ID, source commit, binding, and pool generation changed.",
+      "actual_impact": "A fresh paid invocation was opened despite no new material or scientific use. Its response was a useful partial but omitted the original bandwidth >100 nm condition, so paying again did not close the gap.",
+      "temporary_handling": "Root/delegated supervision authorized this one duplicate once for V24 recovery, accepted only the partial, and required the unmet condition to remain. Subsequent exact repeats are to be held for root.",
+      "formal_capability_status": "Current cache reuse is task/material and call-envelope sensitive enough to permit this duplicate. No formal content-addressed query/refinement dedupe with an explicit override receipt is present.",
+      "current_boundary": "A different question, output contract, source identity, or genuinely new material may justify a new call; same wire content must not be repurchased merely because the run namespace changed.",
+      "evidence": [
+        {
+          "path": "preparation/ab_unattended_20261013/DELEGATED_V24_TOOL_IO_SUPERVISION_20261014.md",
+          "locator": "lines 5-13; byte-equal V23/V24 input, one-time authorization, useful partial, bandwidth gap retained"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_OPTICS_VS_GUT_PLANNING_20261014.md",
+          "locator": "query-refinement duplicate observation and requirement to hold further exact repeats"
+        },
+        {
+          "path": "EXECUTION_STATE.json",
+          "locator": "current paid_calls/actual_cny and V24 binding"
+        }
+      ],
+      "raw_paid_rejected_facts": "The V24 response was HTTP 200 and approved as a useful partial; it was not rejected as a transport failure. The duplicate cost is part of the aggregate actual CNY and is not assigned a fabricated per-call amount here.",
+      "repair_proposal": "Compute a canonical request key from the complete wire body plus source semantic identity, material generation, task signature, and required output contract. Reuse an approved response when all are equal; require a reasoned, separately logged override for an exact duplicate.",
+      "verification": "Run two identical query-refinement requests under different call IDs and bindings against a synthetic cache: assert one provider call, one ledger settlement, an explicit reuse receipt, and a new call only when question/material/output semantics change."
+    },
+    {
+      "id": "UIR-005",
+      "classification": "still_unfixed",
+      "title": "Source exclusion objects using the handle alias were not resolved",
+      "trigger": "Planner responses represented a source exclusion as an object with a handle field, while the generic mapping resolver read source_handle, paper_id, or canonical_paper_id but not handle.",
+      "actual_impact": "The exclusion was not applied and routed material was conservatively retained. No source was lost in this run, but unattended planning can over-include evidence, misroute chapter material, and create avoidable reads.",
+      "temporary_handling": "The root review recorded the alias contract issue, kept material rather than hand-editing the scientific output, and required a downstream consumer check. Direct-read paths that explicitly inspect handle do not prove that exclusion mappings are complete.",
+      "formal_capability_status": "Still unfixed in the current source: _resolve_source_handle for Mapping does not include handle. The current V24 output remained safe by conservative retention, not by correct exclusion.",
+      "current_boundary": "Conservative retention avoided false deletion in this run; it is not equivalent to honoring the model's exclusion request.",
+      "evidence": [
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V22_FINAL_SCOPE_RESPONSE_REVIEW.json",
+          "locator": "residuals; model exclusion objects use handle alias and current resolver does not recognize it"
+        },
+        {
+          "path": "worktree/optomind_research/runtime/upgrade3/progressive_review_plan.py",
+          "locator": "lines 871-875 versus 894-901; generic resolver fields omit handle while direct reads have a separate handle branch"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_OPTICS_VS_GUT_PLANNING_20261014.md",
+          "locator": "source identity and exclusion residuals"
+        }
+      ],
+      "raw_paid_rejected_facts": "No scientific answer was rewritten and no paid call was made solely to repair the alias. The final scope was approved with the residual recorded; material was retained conservatively.",
+      "repair_proposal": "Normalize source_handle, handle, paper_id, canonical_paper_id, and approved scalar aliases through one resolver for every source list, exclusion, direct read, and known-paper object. Unknown or ambiguous aliases should fail closed with a non-paid diagnostic.",
+      "verification": "Feed equivalent exclusion objects using each supported alias and assert the same canonical source ID is removed exactly once; test unknown and conflicting aliases for a held, auditable failure."
+    },
+    {
+      "id": "UIR-006",
+      "classification": "manual_recovery_or_supervision",
+      "title": "Strict scientific thresholds passed schema validation but failed semantic comparison",
+      "trigger": "A V24 triage response read direct evidence for an exact 1 cm aperture and marked it as satisfying a requirement of aperture >1 cm; a candidate selector repeated the boundary error and added speculative candidates without joint evidence for achromatic, measured-efficiency, and NA conditions.",
+      "actual_impact": "The response and candidate selection were rejected by delegated/root review. Raw response, candidate list, and fee were retained; no downstream paid read or manual scientific rewrite used them. The target gap stayed unresolved.",
+      "temporary_handling": "Human/delegated supervision rejected the response and recorded response_rejected/provider_retry in the native journal. This was a scientific intercept, not an autonomous program check.",
+      "formal_capability_status": "Still unfixed. JSON completeness and field-level parsing did not enforce comparator semantics, joint conditions, measured versus simulated evidence, or speculation limits.",
+      "current_boundary": "Other V24 responses correctly preserved unmet conditions, but those approvals do not certify a general semantic gate.",
+      "evidence": [
+        {
+          "path": "preparation/ab_unattended_20261013/DELEGATED_V24_TOOL_IO_SUPERVISION_20261014.md",
+          "locator": "lines 40-46 and 115-120; exact 1 cm versus >1 cm rejections"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_OPTICS_VS_GUT_PLANNING_20261014.md",
+          "locator": "line 66; root concurrence and raw/fee preservation"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V24_27F_TRIAGE_REQUEST_REVIEW.json",
+          "locator": "request review; no manual scientific answer or material edits"
+        }
+      ],
+      "raw_paid_rejected_facts": "The triage response was HTTP 200/complete but rejected for semantic quality. The candidate-selection response was also raw-retained with no downstream paid read. No replacement answer was inserted.",
+      "repair_proposal": "Add deterministic claim validators for units, strict comparators, conjunction of target conditions, evidence type, and uncertainty language before direct_use or candidate selection. Preserve rejected raw output and make the validator decision distinct from human review.",
+      "verification": "Use boundary fixtures for exactly 1 cm, just above 1 cm, measured versus simulated efficiency, and single-condition versus joint-condition papers. Assert exact-boundary evidence cannot satisfy a strict > predicate and speculative text cannot create a selection."
+    },
+    {
+      "id": "UIR-007",
+      "classification": "manual_recovery_or_supervision",
+      "title": "Question/source identity and task alignment required human interception",
+      "trigger": "A triage question named P0004 while the supplied material included P0050, and a P0187 task asked for an OPM definition absent from the supplied MDL/metalens source.",
+      "actual_impact": "The native responses preserved source identity and left the missing subquestions unresolved, but unattended direct-use logic could have substituted a similarly themed paper or presented a source-absent definition as answered.",
+      "temporary_handling": "Supervision held the mismatch, performed a focused read that later supplied exact P0004 material, and accepted P0187 only as a useful partial with OPM unresolved. No hand-filled definition or source swap was made.",
+      "formal_capability_status": "Source identity pins and local handles are present, but there is no general autonomous check that the requested claim type and target source are semantically compatible before direct_use.",
+      "current_boundary": "The later focused read resolved one material supply mismatch; it did not establish a general task-source compatibility capability.",
+      "evidence": [
+        {
+          "path": "preparation/ab_unattended_20261013/DELEGATED_V23_TOOL_IO_SUPERVISION_20261014.md",
+          "locator": "lines 15-18; P0004/P0050 distinction and focused-read recovery"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V23_CONTINUATION_NOTES.md",
+          "locator": "OPM request/source mismatch and no hand-fill"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_OPTICS_VS_GUT_PLANNING_20261014.md",
+          "locator": "lines 33-34; identity correct but OPM requirement misassigned"
+        }
+      ],
+      "raw_paid_rejected_facts": "P0004 follow-up produced a useful partial with P0227 efficiency still unresolved. P0187 was accepted only with the OPM subquestion unresolved; no scientific correction was paid for or injected.",
+      "repair_proposal": "Carry an expected source ID and claim-type contract into every triage/read request. Before direct_use, require source identity, target object, metric, and condition coverage to match; otherwise emit source-mismatch/unmet without substituting a thematic neighbor.",
+      "verification": "Construct paired P0004/P0050 and source-absent OPM fixtures; assert identity-preserving partials, non-substitution, and an explicit unresolved field without human intervention."
+    },
+    {
+      "id": "UIR-008",
+      "classification": "still_unfixed",
+      "title": "Ambiguous transport attempts remain held without unattended cost reconciliation",
+      "trigger": "RemoteDisconnected, stream incomplete/error-event, and stream read-timeout events occurred after provider invocation but without a usable response or definitive provider charge status.",
+      "actual_impact": "The current run record retains eight unknown reservations totaling CNY 4.5168676; they still count toward the 80 CNY project cap. Remaining cap can be used for other authorized work. The historical A/B manifest separately retained six unknowns totaling CNY 0.3121156, including a batch-relevant RemoteDisconnected amount of CNY 0.0854376; the historical latest transport record held CNY 2.102376. These records must not be added blindly. Unknown work cannot be safely retried or declared successful.",
+      "temporary_handling": "The bounded SSE/raw-preservation path saved raw call identifiers and partial streams, held the eight unknown reservations, and prohibited automatic retry or re-buy of those ambiguous work items. It did not impose a universal stop on unrelated authorized reservations while cap remains; raw, paid, and rejected facts stayed separate.",
+      "formal_capability_status": "Transport safety is formal and was used, but end-to-end reconciliation is still absent. Provider status or idempotency may be used only when the official provider contract exposes and supports it; no such endpoint or capability is assumed here.",
+      "current_boundary": "Unknown holds consume the cap and keep completion certainty unresolved, while unrelated authorized work may continue within the remaining cap. The hold is a supervision boundary, not an autonomous settlement or refund.",
+      "evidence": [
+        {
+          "path": "preparation/throughput_recovery_20261013/AB_RECOVERY_MANIFEST_V7_20261013.json",
+          "locator": "ledger.status_totals and uncertain_paid_failures; six holds and hold_unknown_no_automatic_retry"
+        },
+        {
+          "path": "preparation/throughput_recovery_20261013/AB_RECOVERY_MANIFEST_V7_20261013.json",
+          "locator": "resume_guard; no automatic retry, no re-buy, stale-running reconciliation"
+        },
+        {
+          "path": "EXECUTION_STATE.json",
+          "locator": "latest_transport_failure and uncertain_cny; separate planning snapshot"
+        },
+        {
+          "path": "worktree/optomind_research/runtime/upgrade3/module4/runtime.py",
+          "locator": "lines 1245-1271 and 1310-1354; uncertain settlement and raw transport telemetry"
+        }
+      ],
+      "raw_paid_rejected_facts": "Unknown reservations are retained with invocation-observed/response-unobserved facts; they are not counted as settled success. The usable AB responses and failed/reparse artifacts remain separate.",
+      "repair_proposal": "Where the official provider contract supports it, use call/invocation status and provider-recognized idempotency to reconcile unknowns; otherwise retain an explicit unresolved hold and require an operator decision. Add an explicit unknown-to-settled/refunded ledger transition only when provider evidence exists, and keep unrelated authorized reservations independent.",
+      "verification": "Inject disconnect-before-response, partial-stream, timeout, and definitive provider-rejection cases. Assert preserved raw evidence, no blind retry or re-buy, deterministic reconciliation when the official provider supports status/idempotency, and explicit unresolved ownership when it does not; completion must not claim the ambiguous work as success."
+    },
+    {
+      "id": "UIR-009",
+      "classification": "still_unfixed",
+      "title": "Stale finalized_complete state was inconsistent with pending/running work",
+      "trigger": "After a transport stop, BATCH_STATE retained stop_reason=finalized_complete while pending and running rows remained and the final report was absent.",
+      "actual_impact": "An unattended controller trusting the stale marker could skip work, release a false completion, or resume without reconciling in-flight rows. Manual observation found success 122, reused 5, pending 117, running 3, failed 4, and insufficient 19.",
+      "temporary_handling": "The operator rule required no pending/running rows, a final AB_RUN_REPORT, and process exit; the stale marker alone was ignored. The observation made no live-state changes.",
+      "formal_capability_status": "Still unfixed in the recorded batch state machine. The current V24 planning state is a later source-bound continuation, so this historical A/B marker must not be reported as a current V24 failure.",
+      "current_boundary": "The manual rule prevented a false completion in this snapshot; it is not an autonomous state transition repair.",
+      "evidence": [
+        {
+          "path": "preparation/throughput_recovery_20261013/STATE_OBSERVATION.json",
+          "locator": "issue, actual_counts, and operator_rule"
+        },
+        {
+          "path": "preparation/throughput_recovery_20261013/AB_RECOVERY_MANIFEST_V7_20261013.json",
+          "locator": "after_stop counts, stop_reason, report_present=false"
+        },
+        {
+          "path": "EXECUTION_STATE.json",
+          "locator": "ab_preflight.source_pin_matches=true and current V24 source/binding; later state is not this stale A/B snapshot"
+        }
+      ],
+      "raw_paid_rejected_facts": "No new paid call was made by the state observation. Pending/running rows and the absent report were preserved as facts; they were not reclassified as success.",
+      "repair_proposal": "Make completion a derived invariant over row states, process exit, final report hash, and ledger reconciliation. Invalidate stale stop_reason on load and persist an explicit reconciliation event before resume or report publication.",
+      "verification": "Start from a stale finalized_complete fixture with pending/running rows, missing report, and a dead PID. Assert fail-closed status, deterministic reconciliation, no duplicate reservations, and completion only after all invariants hold."
+    },
+    {
+      "id": "UIR-010",
+      "classification": "offline_only",
+      "title": "One A/B output root is not safe for independent concurrent writers",
+      "trigger": "Two independent child processes were released against the same batch_root and shared state/aggregate/pool paths.",
+      "actual_impact": "The offline probe reproduced PermissionError [WinError 5] while both processes replaced BATCH_STATE.json. The same design permits last-writer-wins state/aggregate loss, duplicate attempt allocation, and pool/bridge overwrite.",
+      "temporary_handling": "The probe used synthetic local data, made zero paid transport calls, touched no ledger, and did not touch the live batch. Current operation is constrained to one owner per root and separate roots for independent experiments.",
+      "formal_capability_status": "No cross-process owner lock or per-workkey lease is implemented. This is an offline reproduction, not a claim that the current live batch failed concurrently.",
+      "current_boundary": "SQLite budget serialization protects the cap but does not claim output ownership or deduplicate work.",
+      "evidence": [
+        {
+          "path": "preparation/ab_concurrency_20261013/IO_AUDIT.md",
+          "locator": "lines 12, 30-37; synthetic probe, zero paid calls, WinError 5 reproduction"
+        },
+        {
+          "path": "preparation/ab_concurrency_20261013/IO_AUDIT.md",
+          "locator": "lines 41-69; unlocked state/aggregate/bridge writes, attempt race, and recommended owner lease"
+        }
+      ],
+      "raw_paid_rejected_facts": "The probe recorded paid_transport_calls=0 and ledger_touched=false. No live card, gate, ledger, or source was changed by the probe.",
+      "repair_proposal": "Acquire an owner lock/lease before batch execution and hold it through bridge/pool promotion; add atomic per-workkey claims before attempt allocation. Keep separate output roots for experiments and retain the ledger only for budget serialization.",
+      "verification": "Run two processes against one root and assert one owner is held without WinError, duplicate attempts, or aggregate overwrite; run two independent roots and assert both complete with disjoint state and ledgers."
+    },
+    {
+      "id": "UIR-011",
+      "classification": "formal_repair_produced_and_used",
+      "title": "Complete saved responses could fail the paper-card format contract",
+      "trigger": "Native responses contained useful content but used an accepted alias or placed a negative finding under warning without the canonical finding key; item 105 had a combined-field shape with [finding] in conditions.",
+      "actual_impact": "The A/B snapshot recorded 102 native successes and 3 native format failures, while five earlier saved format failures were recovered by free reparse. Remaining failures were not treated as material exclusion or scientific success and did not receive paid retries.",
+      "temporary_handling": "Raw INPUT/PROMPT/RAW/USAGE/FAILURE bytes stayed unchanged. Saved-response validation and native free replay produced derived cards where strict checks passed; failures remained retained for stage-end acceptance.",
+      "formal_capability_status": "Saved-response alias/negative-finding recovery was produced and used, including two native free recoveries. The remaining semantic/contract cases show that the production validator still needs a complete versioned contract and consumer acceptance gate.",
+      "current_boundary": "Free reparse proves format recoverability and byte preservation, not scientific correctness of the underlying response.",
+      "evidence": [
+        {
+          "path": "preparation/AB_REVIEWER_PROGRESS.md",
+          "locator": "lines 120-126 and 205-216; 56/58/105 format cases, raw preservation, no paid retry"
+        },
+        {
+          "path": "preparation/PARSER_CONSUMER_COUPLING_20261013.md",
+          "locator": "lines 23-29; format failures and two free saved-response reparses"
+        },
+        {
+          "path": "preparation/ab_saved_reparse_validation/v5_new_format_failures_20261013/INVESTIGATION_RECEIPT.json",
+          "locator": "status read_only_diagnosis_complete_no_production_patch and exact missing finding path"
+        },
+        {
+          "path": "preparation/ab_saved_reparse_validation/native_batch_free_recovery_20261013/NATIVE_BATCH_FREE_RECOVERY.json",
+          "locator": "physical_calls=0, ledger_mutation=false, original reject/raw equality, recovered_native_cache_count=2"
+        }
+      ],
+      "raw_paid_rejected_facts": "The three current native format failures and five recovered saved failures remain separately counted. Free reparse used zero physical calls; rejected raw responses and original input hashes remain available.",
+      "repair_proposal": "Version the output contract and implement strict, explicit alias/negative-finding normalization with conflict rejection. Make stage-end consumers distinguish format recovery, scientific rejection, and successful evidence; never publish a derived card without preserving the source failure and scope.",
+      "verification": "Replay each saved failure in an isolated copy with zero network calls; assert exact input/raw hashes, negative text and row order, original reject decision, derived status, and no paid retry. Add conflicting alias and wrong-type fixtures."
+    },
+    {
+      "id": "UIR-012",
+      "classification": "formal_repair_produced_and_used",
+      "title": "Parser consumer binding could report the wrong source version",
+      "trigger": "A/B parameters read the new parser binding while SupervisedFactory still read the old binding, allowing a request to be labeled with the wrong source version.",
+      "actual_impact": "The provenance of a card could not be trusted even if its content was otherwise valid; an unattended release could mix source, binding, and output lineage.",
+      "temporary_handling": "The seam was repaired before resumed A/B production: factory accepts explicit binding_path, A/B passes it through, old files were retained, and no model call was added. Historical source-pin mismatch reports were stopped rather than accepted.",
+      "formal_capability_status": "The explicit-binding repair was exercised with 17 free tests and current preflight reports source_pin_matches=true. This closes the observed seam for the bound route; immutable source/binding checks still need to remain a hard start gate.",
+      "current_boundary": "Current V24 planning source and binding match; an older V7 report with actual source ac8b2a35 versus expected cc6ee3d9 is historical evidence of the problem, not a current V24 mismatch.",
+      "evidence": [
+        {
+          "path": "preparation/PARSER_RESUME_HANDOFF_20261013.md",
+          "locator": "line 21; explicit binding_path repair and 17 free tests"
+        },
+        {
+          "path": "preparation/throughput_recovery_20261013/AB_RUN_REPORT_V7.json",
+          "locator": "status=source_pin_mismatch; actual and expected source commits"
+        },
+        {
+          "path": "EXECUTION_STATE.json",
+          "locator": "ab_preflight.source_pin_matches=true and current_execution_v24 source/binding"
+        }
+      ],
+      "raw_paid_rejected_facts": "The seam repair made no model call and did not rewrite existing cards or ledgers. V7 was not certified after its source mismatch; its report remains evidence only.",
+      "repair_proposal": "Require every factory/client to receive the binding object explicitly, record source and binding hashes in each request/response receipt, and refuse dispatch or publication on mismatch.",
+      "verification": "Use two bindings with distinct source hashes and assert each request, card, report, and ledger receipt carries only its selected binding; a deliberate mismatch must stop before reservation."
+    },
+    {
+      "id": "UIR-013",
+      "classification": "formal_repair_produced_and_used",
+      "title": "Local Docling worker failures required CPU resume and retained unresolved regions",
+      "trigger": "Two native Docling workers failed before repair and some local PDF regions returned uncertain or error status.",
+      "actual_impact": "The historical regional/Plus recovery snapshot recorded 38 basic PDF snapshots requiring CPU resume and 400 recognized, 23 uncertain, and 14 error regions. Those old region counts are not the current parser route. Treating them as all-success would hide missing formula/table evidence.",
+      "temporary_handling": "The historical V6 resume used a separate CPU snapshot, preserved 105 native usable cards and 3 saved failed responses, and started no new paid requests. The current adopted path is local Docling plus local CodeFormulaV2 for targeted deep reads; error and uncertain material remains explicit.",
+      "formal_capability_status": "Crash-resume and raw preservation were used in the E2E material chain, and the current adopted parser path is local Docling plus local CodeFormulaV2. Region-level unresolved status and per-region unattended reconciliation remain repair candidates; no blanket conversion of error to recognized was made.",
+      "current_boundary": "A resumed CPU snapshot is an availability recovery, not evidence that every scientific region was understood. Ordinary local parser errors may remain reported, with targeted deep reading for important claims.",
+      "evidence": [
+        {
+          "path": "EXECUTION_STATE.json",
+          "locator": "local_docling_resume and materials_progress; 2 native crashes, 38 CPU snapshots, 400/23/14/0 region states"
+        },
+        {
+          "path": "preparation/PARSER_RESUME_HANDOFF_20261013.md",
+          "locator": "lines 38-46; original failures, scope, and region status retained"
+        },
+        {
+          "path": "preparation/PARSER_CONSUMER_COUPLING_20261013.md",
+          "locator": "lines 9 and 23; unresolved statuses propagated to readers"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/PREVIEW_CHECKLIST.json",
+          "locator": "docling_basic and local CodeFormulaV2 hook selected; no old visual/regional API flag"
+        }
+      ],
+      "raw_paid_rejected_facts": "Resume reported new_paid_requests_started=0; original PDFs, failed responses, uncertain regions, and their statuses were retained.",
+      "repair_proposal": "Candidate for later robustness work: persist per-region leases and retry budgets, separate worker crash from content recognition failure, and classify unresolved regions by the importance of the downstream claim. Use targeted local CodeFormulaV2 deep reads for important unresolved regions; do not impose a universal all-elements publication block.",
+      "verification": "Kill a worker during a region batch and rerun from the checkpoint; assert no duplicate region call, preserved raw source, deterministic status reconciliation, and a report that exposes every unresolved region. Separately verify that an important claim can be enhanced by targeted local CodeFormulaV2 while ordinary local errors remain visible."
+    },
+    {
+      "id": "UIR-014",
+      "classification": "still_unfixed",
+      "title": "Healthy GROBID service did not guarantee formula or table fidelity",
+      "trigger": "A real PDF-to-TEI parse was healthy and complete at the service level, but the output flattened equation 4 and contained no table nodes for the source page 8 table.",
+      "actual_impact": "Health and element counts could have falsely suggested a complete scientific snapshot: the historical GROBID parse flattened equation 4 and had no table nodes for source page 8. Formula structure and table evidence were not safe for the affected quantitative claims.",
+      "temporary_handling": "The original PDF and separate TEI were preserved. The current adopted route is local Docling plus local CodeFormulaV2 for targeted formula/table deep reads; the old regional Plus route is historical, and GROBID remains a body-text fallback pending claim-level fidelity review.",
+      "formal_capability_status": "Service readiness and real parse are historical availability evidence; the current local Docling/CodeFormulaV2 path is adopted for targeted reads, while parser fidelity remains claim-scoped rather than universally accepted. No source checkpoint was replaced on health or element count alone.",
+      "current_boundary": "This is a content-fidelity boundary, not a Docker uptime failure. Ordinary local parser errors may remain explicit, and targeted deep reads may strengthen important claims; no universal all-elements-perfect gate is current policy.",
+      "evidence": [
+        {
+          "path": "preparation/DOCKER_GROBID_REPAIR.md",
+          "locator": "lines 42-54; healthy service, real parse, flattened equation, missing table, fidelity gate"
+        },
+        {
+          "path": "EXECUTION_STATE.json",
+          "locator": "historical parser_repair.selected_route and unaccepted formula/figure aspects"
+        },
+        {
+          "path": "preparation/PARSER_CONSUMER_COUPLING_20261013.md",
+          "locator": "line 3; native XML/GROBID plus local layout/region route"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/QUALITY_GATE_README.md",
+          "locator": "line 54; planning uses local CodeFormulaV2 hook with zero network/paid LLM calls"
+        }
+      ],
+      "raw_paid_rejected_facts": "The validation parse did not replace original PDF or acquisition checkpoints. No model call or paid scientific correction is implied by parser health.",
+      "repair_proposal": "Candidate for later robustness work: compare sampled high-importance equation structure, table rows/cells, captions, and page locations against the original PDF before using those claims quantitatively. Retain uncertain elements as explicit gaps without imposing a universal publication block.",
+      "verification": "Use a fixed PDF fixture containing fractions, roots, and tables; verify selected high-importance claims against the original page and route unresolved items to targeted local CodeFormulaV2 reads. Prove that ordinary local errors remain visible and that health-only output cannot silently become a verified claim."
+    },
+    {
+      "id": "UIR-015",
+      "classification": "formal_repair_produced_and_used",
+      "title": "Supplementary-only material was temporarily promoted as fulltext",
+      "trigger": "A supplementary PDF was initially classified as the main article/fulltext during the A/B material route.",
+      "actual_impact": "A reader could attribute SI-only claims to the main paper and overstate scope. The issue was caught before the unpaid next gate and did not require a paid retry, but it showed document-role classification could silently distort evidence boundaries.",
+      "temporary_handling": "The owned process was stopped at the unpaid gate; the SI was retained with truthful supplementary_plus_abstract scope, missing main article status was recorded, and old gate/binding was not restarted.",
+      "formal_capability_status": "The source-bound parser/material resume fixed the observed route and current material acceptance reports the scope truthfully. General document-role inference still needs to remain a hard validation rather than a filename/provider assumption.",
+      "current_boundary": "The repaired item is resolved for the recorded source; it does not prove every future supplement/main-paper pair will be classified correctly.",
+      "evidence": [
+        {
+          "path": "preparation/AB_REVIEWER_PROGRESS.md",
+          "locator": "lines 54-64; SI promoted as fulltext, stop, and truthful V5 scope"
+        },
+        {
+          "path": "EXECUTION_STATE.json",
+          "locator": "ab_material_scope_hold.status and root_acceptance"
+        },
+        {
+          "path": "preparation/PARSER_RESUME_HANDOFF_20261013.md",
+          "locator": "lines 9, 15, 19; source roles and explicit new material roots"
+        }
+      ],
+      "raw_paid_rejected_facts": "The gate was unpaid/unapproved when stopped; the SI and abstract were preserved and no main-article claim was silently substituted. Existing unknown entries were untouched.",
+      "repair_proposal": "Require document-role evidence from manifest/provider metadata and a visible scope field in every reader packet. Block fulltext claims when only SI/abstract/metadata is available, and carry the scope into downstream summaries.",
+      "verification": "Use main-paper, SI-only, abstract-only, and duplicate-title fixtures; assert scope classification, reader prompt, and downstream claim limits remain correct without relying on filenames."
+    },
+    {
+      "id": "UIR-016",
+      "classification": "still_unfixed",
+      "title": "chapter_details shared_outline carries global argument text but not a complete five-chapter responsibility list",
+      "trigger": "The current finalize output supplies shared_outline as a dictionary of statement, review_argument, source, and status. It does not itself carry the complete five-chapter division list; the current chapter scope/materials and adjacent title handoff remain supplied through the chapter-details request and later whole-plan coordination.",
+      "actual_impact": "This is a background completeness and consumer-contract risk: arrangement or whole coordination could repeat global context or miss a chapter handoff if it assumes shared_outline is the complete division map. No duplicate was established in this run and no chapter-details quality failure is claimed.",
+      "temporary_handling": "Root approved the actual CH1, CH2, and CH3 request gates and retained full-card materials as authoritative: 1f215d9d26c76be839472b8a1cb9369e01d157d004b4432ebf65f89d16cfd132, bae97f93b8636c0b56c1c23808502a1ea131356483a1fde52e517af0a7030cfa, and aa1594fe15d60d192432ffdd08d394967a331206b0964aab89962b31d9e3e7ab. Whole-plan coordination remains responsible for cross-chapter calibration; no manual rewrite was made.",
+      "formal_capability_status": "The five chapter objects exist in finalize_chapter_scope and the three actual V24 chapter-details request/response gates were approved. The shared_outline handoff shape is not yet an explicit complete division contract; this remains a background risk pending observation of the actual whole-coordination consumer, not a current scientific-quality failure.",
+      "current_boundary": "Own-chapter scope, material context, adjacent-title handoff, and global argument are available across the request/coordination inputs, while shared_outline alone is only the global dictionary. Do not infer missing chapters or claim a duplicate until the actual arrangement/whole packet is inspected.",
+      "evidence": [
+        {
+          "path": "worktree/outputs/optics_e2e/07_progressive_review_plan_docling_20261013/stages/finalize_chapter_scope.json",
+          "locator": "response.chapters has five chapter objects; response.shared_outline keys are statement, review_argument, review_argument_source, and review_argument_status"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V24_CHAPTER_DETAILS_REQUEST_REVIEW.json",
+          "locator": "actual CH1/CH2/CH3 request decisions and gates listed above; full-card materials authoritative and early overlap delegated to native coordination"
+        },
+        {
+          "path": "supervision/calls/1f215d9d26c76be839472b8a1cb9369e01d157d004b4432ebf65f89d16cfd132/REQUEST.json",
+          "locator": "chapter-details request carries shared_outline plus the current chapter input"
+        },
+        {
+          "path": "supervision/calls/bae97f93b8636c0b56c1c23808502a1ea131356483a1fde52e517af0a7030cfa/REQUEST.json",
+          "locator": "chapter-details request carries shared_outline plus the current chapter input"
+        },
+        {
+          "path": "supervision/calls/aa1594fe15d60d192432ffdd08d394967a331206b0964aab89962b31d9e3e7ab/REQUEST.json",
+          "locator": "chapter-details request carries shared_outline plus the current chapter input"
+        }
+      ],
+      "raw_paid_rejected_facts": "The three request gates were approved and the response reviews accepted useful intermediate chapter plans for continuation; no gate rejection, manual scientific answer, or claim of final-outline completion is recorded for this seam.",
+      "repair_proposal": "Define a versioned handoff that separates global_shared_outline from an explicit chapter_sequence_context containing all chapter IDs/titles, each own scope, and the needed previous/next handoff. Require the whole coordinator or arrangement consumer to validate that contract, while allowing it to fill cross-chapter coordination from the five chapter objects.",
+      "verification": "Build a five-chapter fixture and inspect the actual whole-coordination/arrangement packet: assert every chapter has one own scope and intended adjacent handoff, global argument is not duplicated as chapter ownership, and any overlap is reported for coordination. Treat this as a candidate contract check, not a publication block."
+    },
+    {
+      "id": "UIR-017",
+      "classification": "offline_only",
+      "title": "Development arrangement template forwards an unsupported key-index option",
+      "trigger": "The sibling development-only DOWNSTREAM_SUPERVISION_ARGV_20261014.json arrangement templates include --key-index after the wrapper separator, but the native scripts/upgrade3/chapter_arrangement.py parser does not declare --key-index. The file also binds an older V19 arrangement template; root is generating the correct V24 argv.",
+      "actual_impact": "If the old native arrangement argv were executed unchanged, argument parsing could reject the unsupported option before arrangement. It was not formally executed, so no real arrangement failure, provider call, paid reservation, or production mutation occurred.",
+      "temporary_handling": "The launcher remained development-only and was used only for wrapper/help checks. Root is preparing the correct V24 argv, and PlanningTransport forces identity index 1 through the active binding; no provider run was started from the stale template.",
+      "formal_capability_status": "This is a preparation/entry contract error found before execution, not a production arrangement failure. The template is not evidence that native arrangement has failed; final V24 argv/parser compatibility remains to be checked before any authorized run.",
+      "current_boundary": "The wrapper help pass proves only the wrapper's offline path. It does not prove that the forwarded native argv is accepted or that arrangement output is complete.",
+      "evidence": [
+        {
+          "path": "preparation/downstream_supervision_20261014/DOWNSTREAM_SUPERVISION_ARGV_20261014.json",
+          "locator": "scope=development-only; binding is V19-era; arrangement_preview and arrangement_native_explicit include --key-index 1"
+        },
+        {
+          "path": "worktree/scripts/upgrade3/chapter_arrangement.py",
+          "locator": "_parser around lines 59-90; supported options include --key-file and --run but no --key-index"
+        },
+        {
+          "path": "preparation/downstream_supervision_20261014/VERIFY_20261014.json",
+          "locator": "wrapper/help verification only; network=0, paid_calls=0, and no production source/output/ledger edits"
+        }
+      ],
+      "raw_paid_rejected_facts": "No native arrangement provider request was executed from this template; no arrangement charge, rejection, output, gate, or ledger mutation is attributed to it. The observed fact is the offline argv/parser mismatch.",
+      "repair_proposal": "Generate the final arrangement argv from the active V24 binding and native parser contract, omit unsupported options, and keep identity index 1 in PlanningTransport/binding where officially enforced. Validate the complete forwarded argv before adding --run.",
+      "verification": "Run an offline parse/help check against the exact V24 forwarded argv and assert no unknown options, current source/binding hashes, and no provider call before --run. Keep the stale template as preparation evidence rather than relabeling it as an arrangement failure."
+    },
+    {
+      "id": "UIR-018",
+      "classification": "formal_repair_produced_and_used",
+      "title": "Five saved chapter_details packets were followed by a whole-plan preflight capacity exit",
+      "trigger": "Under V24, root approved and saved CH1 through CH5 chapter_details packets, then the flow reached whole_plan_improvement. The paid-call planner context preflight exited with input=1069227, output=32768, and thinking=16384, and RUN_STATE became failed.",
+      "actual_impact": "The five saved chapter packets and their approvals remain preserved, but the V24 attempt produced no whole_plan_improvement response. Whole-plan coordination did not complete, so downstream arrangement/body cannot be treated as complete merely because all five chapter packets were saved. This is the retained V24 context/capacity seam incident, not a finding that the five chapter outputs failed scientific review.",
+      "temporary_handling": "The original V24 RUN_FAILURE.json, RUN_STATE.json, five chapter packets, and root review records were manually frozen and retained. After inspecting the input composition, root started V25 --resume with the same output/ledgers, reusing compatible stages and the five chapter responses without rerunning those chapters. The manual freeze/restart is supervision, not autonomous recovery.",
+      "formal_capability_status": "Formal repair produced and used in the V25/V26 source-bound lineage. Commit 8ded10187c83c23a690f6ef0a88e0e0946d7beb5 changes only whole-plan message construction: the first occurrence of a large JSON value remains complete and later completely identical values use an internal JSON Pointer; different content under the same ID is never merged and scientific conditions are not clipped. Six new checks plus 77 existing checks passed, and V26 passed the real capacity gate and received a root-approved coordinator response. The capacity/response seam is verified in real execution, but owner routing remains incomplete under UIR-020, so this does not certify the full chain or unattended robustness.",
+      "current_boundary": "The retained failed run identity is source be0abeaf2ae1bdc1e5a5188b471abb14faec775a, V24, production PID 552. Current V26 is source dc1b73aa7d95e6ac4a4277559fdf4b11763ca889, binding RUN_BINDING_PLANNING_V26_CHAPTER_CONSUMERS_20261014.json, production PID 29780. The V26 coordinator response was root-approved with provider_elapsed_seconds=88.21899999999732 and scientific_answers_injected=false; root then safely stopped unpaid owner gates. Stop and new-binding operations remain supervision rather than autonomous proof.",
+      "evidence": [
+        {
+          "path": "worktree/outputs/optics_e2e/07_progressive_review_plan_docling_20261013/RUN_STATE.json",
+          "locator": "status=failed; current_stage=whole_plan_improvement; last_error=planner_context_preflight_exceeded:whole_plan_improvement:input=1069227:output=32768:thinking=16384; stage_outputs=null"
+        },
+        {
+          "path": "worktree/outputs/optics_e2e/07_progressive_review_plan_docling_20261013/RUN_FAILURE.json",
+          "locator": "ProgressivePlanError traceback; failure raised from the whole_plan_improvement stage call"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V24_CHAPTER_DETAILS_REQUEST_REVIEW.json",
+          "locator": "CH1 through CH5 request rows are root approve with gates 1f215d9d, bae97f, aa1594fe, c567b96c, and 39a9f08"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V24_CHAPTER_DETAILS_RESPONSE_REVIEW.json",
+          "locator": "CH1 through CH5 response rows are root approve with response hashes and saved intermediate chapter-plan receipts"
+        },
+        {
+          "path": "worktree/outputs/optics_e2e/07_progressive_review_plan_docling_20261013/stages/chapters/CH1.json",
+          "locator": "saved CH1 chapter_details packet"
+        },
+        {
+          "path": "worktree/outputs/optics_e2e/07_progressive_review_plan_docling_20261013/stages/chapters/CH2.json",
+          "locator": "saved CH2 chapter_details packet"
+        },
+        {
+          "path": "worktree/outputs/optics_e2e/07_progressive_review_plan_docling_20261013/stages/chapters/CH3.json",
+          "locator": "saved CH3 chapter_details packet"
+        },
+        {
+          "path": "worktree/outputs/optics_e2e/07_progressive_review_plan_docling_20261013/stages/chapters/CH4.json",
+          "locator": "saved CH4 chapter_details packet"
+        },
+        {
+          "path": "worktree/outputs/optics_e2e/07_progressive_review_plan_docling_20261013/stages/chapters/CH5.json",
+          "locator": "saved CH5 chapter_details packet"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/PLANNING_V24_LAUNCH.json",
+          "locator": "source_commit=be0abeaf, V24 binding, pid=552, and no_scientific_answers_injected=true"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ROOT_CAPACITY_PROOF.json",
+          "locator": "lossless reconstructed five-chapter payload; 143 sharing references; measured 893042 to 375371 tokens; margin input 428608; total context 477760; thinking=16384 and output=32768 unchanged"
+        },
+        {
+          "path": "worktree/docs/verification/ab-unattended-20261013/v25_coordinator_capacity/README.md",
+          "locator": "whole-plan-only JSON Pointer repair; six new and 77 existing free checks; no same-ID different-content merge; offline reconstruction boundary and pending real coordination review"
+        },
+        {
+          "path": "execution_sources/planning_resume_v25",
+          "locator": "git commit 8ded10187c83c23a690f6ef0a88e0e0946d7beb5; source-bound formal repair"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V25.json",
+          "locator": "source_commit=8ded1018, pid=9376, same native output and ledgers, previous_pid_exited=552, no_scientific_answers_injected=true"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V25_COORDINATOR_CAPACITY_20261014.json",
+          "locator": "V25 binding with source_commit=8ded1018 and coordinator_capacity_recovery of the V24 failure"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/PLANNING_V25_PREVIEW.stdout.json",
+          "locator": "preview_only; actual coordinator completion remains pending and no success certification is present"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V26.json",
+          "locator": "source_commit=dc1b73aa, pid=29780, same native output and ledgers, and no_scientific_answers_injected=true"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V26_CHAPTER_CONSUMERS_20261014.json",
+          "locator": "V26 source-bound binding used for the capacity-passing whole-plan request"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V26_COORDINATOR_REQUEST_REVIEW.json",
+          "locator": "gate=38e897ed, root decision=approve, measured_input_tokens=373656, estimated_input=426687, estimated_reservation_cny=2.886396, response_sha256=null at request review"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V26_COORDINATOR_RESPONSE_REVIEW.json",
+          "locator": "phase=response; decision=approve; gate=38e897ed; response_sha256=656152314b10de281b870b2c3a508bdd44e5b9a544915f5bff1216557a5be38c; provider_elapsed_seconds=88.21899999999732; scientific_answers_injected=false; root review records concrete primary/reappearance roles and remaining limits"
+        }
+      ],
+      "raw_paid_rejected_facts": "The V24 incident is a ProgressivePlanError from the paid-call preflight, not a provider response or provider rejection; that whole-plan attempt stopped before paid reservation/provider call and has no whole-plan model output. The repair proof is offline reconstruction: 143 identical-value references, measured message tokens 893042 to 375371, margin input 428608, total context 477760, and unchanged thinking/output 16384/32768 with lossless roundtrip and unchanged scientific payload. V26 produced a root-approved coordinator response with provider_elapsed_seconds=88.21899999999732 and scientific_answers_injected=false; source-sharing was exercised by a real call. The aggregate top-level fee transition 9.3730111 to 10.9642751 remains a current SQL/ledger fact, not a per-call attribution. Unpaid owner gates had no provider start, fee, response, or rejection.",
+      "repair_proposal": "Keep the 8ded101 exact-value JSON Pointer sharing as the formal whole-plan capability and continue rejecting same-ID different-content merges. Retain the actual generated message, pointer dereference equality, provider receipt, response, and stage state. Confirm the same five-chapter source/binding does not rerun chapters, clip conditions, or lower thinking/output; then repair and verify UIR-020 owner routing before using later owner/stage evidence to assess the full chain.",
+      "verification": "Offline proof is recorded in ROOT_CAPACITY_PROOF.json and the v25_coordinator_capacity README: six new plus 77 existing checks, 143 lossless references, and the measured capacity reduction. V26 passed the real capacity gate and its coordinator response was root-approved with an 88.219-second provider elapsed time. Owner routing then exposed UIR-020 and was stopped at unpaid gates; full-chain and unattended success remain unverified."
+    },
+    {
+      "id": "UIR-019",
+      "classification": "formal_repair_produced_and_used",
+      "title": "V25 resume reentered chapters_tools because the closed-stage consumer cache omitted it",
+      "trigger": "During V25 --resume, the closed/accepted_tool_cycle_cache consumer mapping did not include chapters_tools. Although the stage was complete and five saved chapter packets had consumed the relevant tool need/material, resume reentered query-refinement. The unpaid gate b036fe1f390253bfa3db32743ac8134842d8f92944af6171b78b94928970fc0b had no decision or INVOCATION.",
+      "actual_impact": "The recovery path exposed a real risk of repeating a closed stage and was stopped before query-refinement dispatch. No provider was started, no ledger changed, and no new fee was incurred in this attempt. V26 reused the prior stages and five chapter packets without a repeated query-refinement call and reached the root-approved whole-plan request, which verifies the seam's real reuse behavior but does not certify unattended operation or scientific coordination.",
+      "temporary_handling": "Root safely stopped PID 9376 at the unpaid gate according to V25_UNPAID_STOP.json, preserving all results and budgets. The unpaid gate was not dispatched further. Root then selected the new V26 source/binding and supervised PID 29780; the stop and binding change remain human supervision rather than autonomous recovery.",
+      "formal_capability_status": "Formal repair produced and used in the V26 source-bound lineage. Commit dc1b73aa7d95e6ac4a4277559fdf4b11763ca889 adds chapters_tools consumer support: a complete valid five-chapter packet and tool need must match every non-handle field; handle rebinding is allowed only for a stable paper_id with all other source fields equal; _stage still compares the current input contract, so a new task, material, model, or explicit retry invalidates reuse. Ten new cases plus 13 existing and 6 coordinator checks (29 total), and a free proof over 16 tool rows and 5 packets, passed offline. V26 real execution reused the prior stages and five packets without repeating query-refinement; changed-contract invalidation has offline evidence, while full unattended certification remains open.",
+      "current_boundary": "The V25 reentry and manual unpaid stop are real. V25_UNPAID_STOP.json records provider_started=false and ledger_changed=false. V26 is source dc1b73aa7d95e6ac4a4277559fdf4b11763ca889 with RUN_BINDING_PLANNING_V26_CHAPTER_CONSUMERS_20261014.json and PID 29780; whole-plan request 38e897ed was root-approved with measured_input_tokens=373656, estimated_input=426687, and estimated_reservation_cny=2.886396. That request-review file is a request-phase snapshot with response_sha256=null; ROOT_V26_COORDINATOR_RESPONSE_REVIEW.json later records the approved coordinator response. Neither response nor reuse proves complete owner routing or unattended autonomy; root stop/new-binding actions remain supervised.",
+      "evidence": [
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/V25_REENTERED_CHAPTER_TOOLS_RUN_STATE.json",
+          "locator": "V25 resumed state retaining completed chapters_tools and the reentry context"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/V25_UNPAID_STOP.json",
+          "locator": "unpaid gate b036fe1f, pid=9376, reason=completed chapter tool cache reentered, provider_started=false, ledger_changed=false"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ROOT_CHAPTER_CONSUMER_CACHE_PROOF.json",
+          "locator": "accepted_chapter_tool_consumer_cache=true; five packet hashes; expected follow-up is _stage comparison of current effective input contract"
+        },
+        {
+          "path": "worktree/docs/verification/ab-unattended-20261013/v25_coordinator_capacity/README.md",
+          "locator": "recovery seam section; ten new checks and free verification over 16 chapter tool rows and five packets"
+        },
+        {
+          "path": "execution_sources/planning_resume_v26",
+          "locator": "git commit dc1b73aa7d95e6ac4a4277559fdf4b11763ca889; committed chapters_tools consumer compatibility and current-contract invalidation"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V26.json",
+          "locator": "source_commit=dc1b73aa, pid=29780, previous_pid_exited=9376, same native output and ledgers, and no_scientific_answers_injected=true"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V26_CHAPTER_CONSUMERS_20261014.json",
+          "locator": "V26 source-bound binding used for the real reuse verification"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V26_COORDINATOR_REQUEST_REVIEW.json",
+          "locator": "request-phase snapshot: root approve whole-plan request 38e897ed; measured_input_tokens=373656; estimated_input=426687; estimated_reservation_cny=2.886396; response_sha256=null at request review"
+        }
+      ],
+      "raw_paid_rejected_facts": "Gate b036fe1f390253bfa3db32743ac8134842d8f92944af6171b78b94928970fc0b was an unpaid stop with no decision or INVOCATION; provider_started=false and ledger_changed=false. No provider rejection, paid call, or coordinator response is attributed to the V25 reentry. V26's request-review snapshot has response_sha256=null because it is a request-phase record; a later ROOT_V26_COORDINATOR_RESPONSE_REVIEW.json records the root-approved coordinator response. Reuse verification, owner routing, and scientific coordination remain separate.",
+      "repair_proposal": "Keep the committed dc1b73aa chapters_tools consumer contract: require full packet/tool-need equality over all non-handle fields, permit handle rebinding only under stable paper identity and equal remaining source fields, and run the existing _stage current-input-contract check on every resume. Emit a reuse receipt for same-contract zero-call reuse and invalidate on task/material/model/explicit-retry changes. Retain root stop and new-binding actions as supervised controls until unattended certification exists.",
+      "verification": "The 29-case suite and real 16-row/five-packet free proof passed, and V26 source-bound execution reused prior stages and five packets without a repeated query-refinement call before reaching the root-approved whole-plan request. Changed-contract invalidation has offline evidence, and the later coordinator response review is captured separately. Owner routing and downstream stage evidence remain open; do not infer unattended success from reuse or request approval alone."
+    },
+    {
+      "id": "UIR-020",
+      "classification": "formal_repair_produced_and_used",
+      "title": "Coordinator cross-chapter adjustments were not fully routed into owner feedback",
+      "trigger": "V26's complete coordinator response was root-approved and contained five cross_chapter_adjustments with concept, primary_chapter, and re_appearance_value assignments. The owner feedback_by_chapter route recognized only chapter_id/id, so the CH1, CH2, and CH3 actual REQUEST inputs received scalar thesis/objective feedback while all five responsibility entries were omitted.",
+      "actual_impact": "The V26 paid coordinator result is retained and is not rerun, but its CH1 through CH3 owners did not receive the complete cross-chapter responsibility feedback; that path cannot be treated as having applied the full coordinator adjustment. Root safely stopped PID 29780 at the three unpaid owner gates, with no owner provider start or manual scientific feedback. After the repair, V27 actual owner REQUEST inputs received 3/3/5 original role entries, with full A/B, deep, and candidate material preserved; final owner quality remains pending.",
+      "temporary_handling": "Root preserved the V26 coordinator raw gate/response and omission inputs, then stopped before dispatching unpaid owner gates d7a157f4e77439d57ee52a57b556ffd9df4549baaefb7301c0ebe72eb5f8331d, dc663c95b9c9f40822c14ac2055ef381921641b6a56247f10345942b9ff2059f, and b716af549208f0d62bf45decb753ae28250c15a433b966d69a9574fe3694b847. V27 native resume reused the paid whole-plan result without repaying it; root reviewed and approved the three owner request gates in parallel. No scientific or editorial feedback was manually injected.",
+      "formal_capability_status": "formal_repair_produced_and_used. Commit 33a2d2297f94b2659920cb3229b264f5e676a383 is pushed and bound to V27. The generic route uses known chapter IDs and preserves complete original model entries; five new routing tests plus 43 existing handoff/contract tests passed. V27 real REQUEST inputs verified 3/3/5 role entries, original text, and material retention. This does not certify owner response quality or unattended completion.",
+      "current_boundary": "This is a real owner-routing defect exposed after a paid, root-approved coordinator response and subsequently used to verify the formal repair, not a coordinator-quality rejection. V27 source is 33a2d2297f94b2659920cb3229b264f5e676a383 with PID 29964 and binding RUN_BINDING_PLANNING_V27_COORDINATOR_FEEDBACK_20261014.json. ROOT_V27_OWNER_REQUEST_REVIEWS.json contains request-phase approvals for CH1 through CH3; final owner responses/quality, downstream stage state, and unattended behavior remain unverified.",
+      "evidence": [
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V26_COORDINATOR_RESPONSE_REVIEW.json",
+          "locator": "phase=response; decision=approve; gate=38e897ed; response_sha256=656152314b10de281b870b2c3a508bdd44e5b9a544915f5bff1216557a5be38c; root review records five concrete primary/reappearance role assignments"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/V26_OWNER_FEEDBACK_UNPAID_STOP.json",
+          "locator": "pid=29780; three unpaid owner gates; owner_provider_started=false; manual_scientific_feedback_added=false"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ACTUAL_OWNER_CH1_INPUT.json",
+          "locator": "actual CH1 REQUEST contains scalar chapter_feedback thesis/objective shape; editorial_feedback_for_chapter is empty"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ACTUAL_OWNER_CH2_INPUT.json",
+          "locator": "actual CH2 REQUEST contains scalar chapter_feedback thesis/objective shape; editorial_feedback_for_chapter is empty"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ACTUAL_OWNER_CH3_INPUT.json",
+          "locator": "actual CH3 REQUEST contains scalar chapter_feedback thesis/objective shape; editorial_feedback_for_chapter is empty"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ACTUAL_COORDINATOR_PAYLOAD_RESOLVED.json",
+          "locator": "resolved coordinator input reconstruction used for the V26 native request; pair with response review for returned assignments"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/V26_OWNER_FEEDBACK_OMISSION_RUN_STATE.json",
+          "locator": "owner-feedback omission/recovery state for the missing chapter routing"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V26.json",
+          "locator": "source-bound V26 native process identity and no scientific answer injection"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V26_CHAPTER_CONSUMERS_20261014.json",
+          "locator": "V26 source/binding identity used for the native coordinator and owner path"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V27_OWNER_REQUEST_REVIEWS.json",
+          "locator": "three request-phase root approvals; CH1/CH2/CH3 role_entries_delivered=3/3/5; manual_feedback_empty=true; full source/deep material counts retained; response_sha256=null because these are request reviews"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ACTUAL_V27_OWNER_CH1_INPUT.json",
+          "locator": "actual V27 CH1 REQUEST contains the scalar feedback plus 3 original role entries; full relevant A/B/deep/candidate projections retained; no manual scientific/editorial feedback"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ACTUAL_V27_OWNER_CH2_INPUT.json",
+          "locator": "actual V27 CH2 REQUEST contains the scalar feedback plus 3 original role entries; full relevant A/B/deep/candidate projections retained; no manual scientific/editorial feedback"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ACTUAL_V27_OWNER_CH3_INPUT.json",
+          "locator": "actual V27 CH3 REQUEST contains the scalar feedback plus 5 original role entries; full relevant A/B/deep/candidate projections retained; no manual scientific/editorial feedback"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V27.json",
+          "locator": "status=running_native_resume; pid=29964; source_commit=33a2d229; previous_pid_exited=29780; same_native_output_and_ledgers=true; no_scientific_answers_injected=true"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V27_COORDINATOR_FEEDBACK_20261014.json",
+          "locator": "V27 source-bound binding with coordinator_feedback_recovery; paid whole-plan reuse and no prompt/model/budget change"
+        },
+        {
+          "path": "execution_sources/planning_resume_v27",
+          "locator": "source-bound worktree for commit 33a2d2297f94b2659920cb3229b264f5e676a383"
+        }
+      ],
+      "raw_paid_rejected_facts": "V26 coordinator gate 38e897ed was root-approved and its paid result is retained; it is not a provider rejection and is not rerun. The three V26 owner gates were unpaid safety stops with owner_provider_started=false, so there is no V26 owner decision, response, fee, or provider rejection. V27 native resume reused the already-paid whole-plan result without a second coordinator payment; its three owner request reviews are approve decisions at request phase with response_sha256=null, not owner responses or final quality results. No manual scientific/editorial feedback was injected. Do not infer provider state or idempotency support where the provider does not officially expose it.",
+      "repair_proposal": "Keep the committed known-chapter route preserving the full original model entry, including concept, primary_chapter, and re_appearance_value; do not merge different content under one ID or write scientific answers. Hold or fail closed on unknown/ambiguous IDs with an auditable diagnostic. V27 has already reused the paid V26 coordinator response and verified 3/3/5 role entries with original material retained; next inspect owner responses, final owner quality, stage state, and root review with prompts/models/budget unchanged.",
+      "verification": "V26 coordinator approval, the omission in all three V26 actual owner inputs, and the V26 unpaid stop are evidenced. Commit 33a2d229 passed five new routing tests plus 43 existing handoff/contract tests, and V27 native requests verified the original role entries in CH1/CH2/CH3 as 3/3/5 with full material projections and empty manual feedback. Final owner responses/quality and whole-chain unattended certification remain open."
+    },
+    {
+      "id": "UIR-021",
+      "classification": "formal_repair_produced_and_used",
+      "title": "Owner editing-object ambiguity was repaired by V29 v2 after retained V27/V28 failures",
+      "trigger": "The real V27 CH3 owner response supplied an updated_plan containing five substantive_threads but no units, while the valid prior plan had four units. V28 still returned the thread layout and guessed old IDs, producing structural_unit_change_old_units_missing_stable_ids and unit_id_remap_references_unknown_unit. The seam was an ambiguity between the chapter's old five-thread context and the current four-unit chapter_plan editing object.",
+      "actual_impact": "V27 and V28 CH3 revisions were not quality-adopted; their raw/partial records and the original four-unit plan remain preserved. V29 v2 made chapter_plan.units the sole editable object and old chapter threads read-only background. Its actual native response returned errors=[], four units, 12 briefs, and 20 cases with the same per-unit source sets and retained conditions, then continued into case_groups without manual state edits. The later CH3 case response was root-approved: five plan-only sources had real owner materials, native_attach plus the current pool closed 17 sources, and the original four units/12 briefs/cases/conditions stayed unchanged; this is not a missing-material case or a new scientific discovery, and those five sources were not fully reread at the case stage. Final deliverability is determined by complete valid chapters plus subsequent strengthening output and consumer validation, and has not reached final. The old P0157/Alvarez source error is recorded only as a local uniformity wording issue; no corrective scientific answer was injected.",
+      "temporary_handling": "Root safely stopped V28 at unpaid gate 1185b6f0ad7810697c9eef47d8bdaacc1a844e0da7c6d83caacdbcf0e9d67e7d with reserved=0, preserving native state and the saved CH1 case batch; the V1 paid failure/claim was not rewritten. V29 then ran one independent v2 recovery with full materials and no hand-written fields, without repaying the coordinator or other owners. Native post_planning_handoff/load_complete_packets can preserve complete valid chapters while scientific revision remains partial.",
+      "formal_capability_status": "formal_repair_produced_and_used. Commit 8602e1c0cd3273067e773b6a63aa22af3c03d041 is pushed and used by V29. Forty-eight targeted tests plus 30 root boundary checks passed as separate sets; they are not presented as a full-repository total. Root reviewed the V29 request/response: the current plan/material fields remained equal, old threads were read-only background, dynamic unit structure was explicit, no manual scientific feedback was added, and the native response was updated with no structural errors. This seam is repaired in real execution, while other unattended risks and final delivery quality remain uncertified.",
+      "current_boundary": "The CH3 owner revision was previously unresolved, but V29 now returned a structurally valid four-unit update; partial status is not treated as an automatic final-plan blocker. V29 is source 8602e1c0cd3273067e773b6a63aa22af3c03d041, PID 8860, binding RUN_BINDING_PLANNING_V29_OWNER_AUTHORITATIVE_INPUT_20261014.json with SHA256 0ace86577986b6ec091ba36c70947580bc87289590470aeffbf0799c8115a790, and gate 5cf3168293b130453da4ef3a3f1bb5d24b95ab27595b4a57ae035bd65da3a002. The V29 response has limited substantive changes; overbroad comparison/wording and a material-label issue remain recorded for later autonomous steps. Root still reviews current plan, case_groups/default strengthening, and actual consumers before final delivery.",
+      "evidence": [
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V27_CH3_OWNER_UNRESOLVED.json",
+          "locator": "chapter_id=CH3; gate=f8c295317ce73e3af2b75814dd5a03a266c00a56b1f12026454e5fe0ca6f832e; response_sha256=50784e454311b2d65c4db1a4f684d87dc2e6dcdf3bcd0b24c33908da227fb225; root approved raw delivery to native validator, explicitly not quality acceptance"
+        },
+        {
+          "path": "worktree/outputs/optics_e2e/07_progressive_review_plan_docling_20261013/stages/affected_chapter_revision/CH3.json",
+          "locator": "status=partial; owner_status=unresolved; structural_errors includes structural_unit_change_requires_explicit_unit_ids_and_remap; response status=updated; original four-unit chapter_plan remains in cache input"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V27_OWNER_RESPONSE_REVIEWS.json",
+          "locator": "CH1, CH2, CH4, and CH5 response rows are root approve with response hashes; these independent owner responses passed while CH3 stayed unresolved"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V27.json",
+          "locator": "V27 source-bound native process identity and no_scientific_answers_injected=true"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V27_COORDINATOR_FEEDBACK_20261014.json",
+          "locator": "V27 binding and ledger/supervision identity for the owner-response stage"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_contract_recovery_20261014/ROOT_V28_REPAIR_REQUEST_REVIEW.json",
+          "locator": "root-approved V28 recovery request snapshot; gate=cb099e5222d87a4e10ee9a01fd81704d1ca7f62e0cf99f1082c7670bf9f93fc7; request_sha256=d640437cebb1f8ff952f7417dcad5de95ad0ed727f0684720a6c5ace82da2e35; pair with the separate response review"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_contract_recovery_20261014/ROOT_V28_REPAIR_RESPONSE_REVIEW.json",
+          "locator": "root read response; owner_status=unresolved; returned_has_units=false; structural_errors=structural_unit_change_old_units_missing_stable_ids and unit_id_remap_references_unknown_unit; decision=allow_native_rejection_and_preserve_original_valid_plan; elapsed=140.98399999999674s; prompt_tokens=223315; completion_tokens=7729; adopt_repair=false"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V28.json",
+          "locator": "status=running_native_resume; pid=11176; source_commit=821640ef0493899db8812dd844ad97a7e8419293; previous_pid_exited=29964; same_native_output_and_ledgers=true; no_scientific_answers_injected=true"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V28_OWNER_CONTRACT_RECOVERY_20261014.json",
+          "locator": "binding_sha256=4215760cfa0611eed756f42758fac9fc78ad236799eb77f0469a73b4effd8ef9; source_commit=821640ef; physical_retries=0; key rotation=false"
+        },
+        {
+          "path": "execution_sources/planning_resume_v28",
+          "locator": "frozen source worktree for the owner-contract repair commit 821640ef0493899db8812dd844ad97a7e8419293"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_contract_recovery_20261014/V28_UNPAID_STOP.json",
+          "locator": "pid=11176 safely stopped at unpaid gate 1185b6f0ad7810697c9eef47d8bdaacc1a844e0da7c6d83caacdbcf0e9d67e7d; native state preserved; CH1 case batch saved; paid_inflight=0"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_contract_recovery_20261014/ROOT_V29_REPAIR_REQUEST_REVIEW.json",
+          "locator": "gate=5cf3168293b130453da4ef3a3f1bb5d24b95ab27595b4a57ae035bd65da3a002; request_sha256=a33fe1919266951586bf55b288c00e284b8fe3565fe268870286582c616fa116; source_commit=8602e1c0; original current-plan/material fields equal; chapter_plan.units sole editable object; old context read-only; human_scientific_feedback_added=false"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_contract_recovery_20261014/ROOT_V29_REPAIR_RESPONSE_REVIEW.json",
+          "locator": "owner_status=updated; structural_errors=[]; four-unit response with 12 briefs and 20 cases; root_complete_response_read=true; elapsed=117.11000000000058s; prompt_tokens=229622; completion_tokens=6288; known_paid_repair_cny=0.5347; no manual scientific rewrite"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V29.json",
+          "locator": "status=running_native_resume; pid=8860; source_commit=8602e1c0; previous_pid_exited=11176; same_native_output_and_ledgers=true; no_scientific_answers_injected=true"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V29_OWNER_AUTHORITATIVE_INPUT_20261014.json",
+          "locator": "binding_sha256=0ace86577986b6ec091ba36c70947580bc87289590470aeffbf0799c8115a790; V29 authoritative-input source binding"
+        },
+        {
+          "path": "execution_sources/planning_resume_v29",
+          "locator": "frozen source worktree for the V29 v2 owner editing-object repair"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_contract_recovery_20261014/ROOT_V29_CH3_CASE_RESPONSE_REVIEW.json",
+          "locator": "chapter_id=CH3; decision=approve_native_response_with_recorded_limits; five plan-only handles all have real material; response_unique_sources=17; all_prior_cases_and_conditions_unchanged=true; raw_or_scientific_outputs_modified=false"
+        }
+      ],
+      "raw_paid_rejected_facts": "V27 and V28 responses were delivered under approved gates to the native validator but were not quality-adopted; their structural decisions were program contract outcomes, not provider rejections. V28 unpaid stop preserved native state with paid_inflight=0. V29 request/response under gate 5cf3168293... completed the repair with actual known cost 0.5347 CNY; the response had no structural errors and native execution continued to case_groups. The later CH3 case response was root-approved with actual cost 0.362502 CNY, 17 closed unique sources, and no raw/scientific output modification; five plan-only sources had real material but were not fully reread, so this is not a new scientific result. The snapshot then was project=14.7210831, account=24.0155579, unknown=4.5168676, reserved=0; interpret these through current SQL/ledger state and do not decompose unsupported per-call amounts. No manual scientific rewrite occurred, and earlier raw/partial failures remain preserved.",
+      "repair_proposal": "Keep the V29 v2 unique editing-object contract: chapter_plan.units is authoritative, old five-thread chapter context is read-only background, and units expose dynamic cases/ordered_development/paragraph_briefs/relations_limits/substantive_point/transition structure. Preserve all materials and conditions, reject guessed mappings or placeholder fields, and validate case_groups/default strengthening plus post_planning_handoff/load_complete_packets actual consumers. V29 repaired this seam; root must still review current-plan validity and later output before final delivery or any unattended certification.",
+      "verification": "V27/V28 raw failures, native structural errors, preserved four-unit plan, V28 unpaid stop, and independent CH1/CH2/CH4/CH5 approvals are evidenced. V29 commit 8602e1c0 passed 48 targeted checks and separate root 30 boundary checks, and its root-reviewed native response is updated with errors=[], four units, 12 briefs, 20 cases, equal source sets/current plan, and retained conditions. The separate CH3 case review confirms real-material closure for 17 sources, unchanged prior cases/conditions, and no scientific output modification; native execution continued without manual edits. Final current-plan/strengthening/consumer review and other unattended risks remain open."
+    },
+    {
+      "id": "UIR-022",
+      "classification": "formal_repair_produced_and_used",
+      "title": "Project-80 shared-ledger legacy-route BODY seam was repaired and adopted; first writer and assessor phases were accepted, broader BODY quality remains open",
+      "trigger": "On the existing project-80 ledger, legacy_unit_writer._dedicated_factory found no legacy-route marker and refused BODY startup. The original binding project path, budget cap, question, and history were correct; the defect was at shared-ledger binding/marker propagation rather than in the scientific task or retained history.",
+      "actual_impact": "The initial legacy BODY attempt stopped before startup and produced no response. After the explicit shared-project-binding repair, the V32 normal harness (PID 30620) created the native shared attachment and budget binding, and the first writer and assessor phases returned paid responses that root read and accepted. This proves adoption of the repaired seam for the observed first unit; it does not certify every BODY unit, final body quality, or unattended end-to-end robustness.",
+      "temporary_handling": "The initial refusal, existing project ledger, original binding, and history remain preserved. Commit 2c75ef5748fc4349771fb3d281d5f1b73f3dbed1 was pushed for explicit --shared-project-binding propagation; its 17 specialized and 54 prior controls remain recorded as separate free sets. V32 used the normal harness and native O09 BUDGET_BINDING/SHARED_PROJECT_ATTACHMENT; no marker was written manually, no ledger was altered, and no scientific field was hand-filled.",
+      "formal_capability_status": "formal_repair_produced_and_used. The shared-binding repair is source-bound and was used by V32: source commit babe64cbdbe9b682d26aeca27ec655cee274b64a, binding RUN_BINDING_DOWNSTREAM_V32_OWNER_FIELDS_20261014.json (SHA256 b6b3aea1c924574092738f44f788663ecc7589977564c280d8e1fffd6e3ac63c), normal-harness PID 30620. Native attachment and the original project/account dual ledgers were used; writer gate e55bc8843446ffb82447bd783786741cf85605d568be6a70e6f76e8e670d59a3 and assessor gate 8218f162cfec82b2afd0006514cd19d19868ded3fe6aeb88a2035aa607ce3e2b both returned and were root-accepted. The repaired seam is therefore adopted in this run, while downstream completion and unattended certification remain open.",
+      "current_boundary": "The original marker refusal remains a real historical startup failure, not a provider rejection. The observed V32 binding seam is now working through the normal harness, but the evidence covers the first writer/assessor phases only. Writer LaTeX-decoder and assessor body_quote diagnostics remain visible as UIR-026/027, and full BODY consumer receipts, final quality, and unattended robustness are not certified.",
+      "evidence": [
+        {
+          "path": "execution_sources/planning_resume_v29/scripts/upgrade3/legacy_unit_writer.py",
+          "locator": "_dedicated_factory checks the legacy-route marker before creating the BODY factory; this is the source of the initial refusal"
+        },
+        {
+          "path": "worktree",
+          "locator": "source HEAD=2c75ef5748fc4349771fb3d281d5f1b73f3dbed1 (explicit existing project/account budget attachment repair)"
+        },
+        {
+          "path": "worktree/tests/test_body_shared_project_budget.py",
+          "locator": "17 specialized free shared-project budget/binding controls for the committed repair"
+        },
+        {
+          "path": "worktree/tests/test_legacy_unit_route.py",
+          "locator": "legacy-route marker and explicit-binding free controls; not by itself a BODY acceptance"
+        },
+        {
+          "path": "worktree/tests/test_legacy_unit_route_review.py",
+          "locator": "legacy-route review free controls; not by itself a BODY acceptance"
+        },
+        {
+          "path": "preparation/downstream_supervision_20261014/BODY_COMMAND_V32.json",
+          "locator": "normal-harness V32 command; source babe64cbdbe9b682d26aeca27ec655cee274b64a and bound BODY execution settings"
+        },
+        {
+          "path": "preparation/downstream_supervision_20261014/ROOT_BODY_V32_PREVIEW_REVIEW.json",
+          "locator": "root-approved V32 preview and original dual-ledger/first-unit scope; preparation evidence only"
+        },
+        {
+          "path": "worktree/outputs/optics_e2e/09_body_delivery/body/BUDGET_BINDING.json",
+          "locator": "native route legacy_unit_writer_shared_project; project budget 80.0 and account budget 300.0; existing ledger/binding paths retained"
+        },
+        {
+          "path": "worktree/outputs/optics_e2e/09_body_delivery/body/SHARED_PROJECT_ATTACHMENT.json",
+          "locator": "native shared-project attachment consumed by the observed BODY route"
+        },
+        {
+          "path": "preparation/downstream_supervision_20261014/ROOT_BODY_V32_FIRST_REQUEST_REVIEW.json",
+          "locator": "writer gate e55bc884..., root-approved actual CH1:U1 request, same as free preview, original tasks/cases/sources preserved"
+        },
+        {
+          "path": "preparation/downstream_supervision_20261014/ROOT_BODY_V32_CH1_U1_RESPONSE_REVIEW.json",
+          "locator": "writer gate e55bc884..., complete response read, root accepted into native task quality check; retained LaTeX escape diagnostic"
+        },
+        {
+          "path": "preparation/downstream_supervision_20261014/ROOT_BODY_V32_CH1_U1_QUALITY_REQUEST_REVIEW.json",
+          "locator": "assessor gate 8218f162..., original full writer payload identical and root-approved quality request"
+        },
+        {
+          "path": "preparation/downstream_supervision_20261014/ROOT_BODY_V32_CH1_U1_QUALITY_RESPONSE_REVIEW.json",
+          "locator": "assessor gate 8218f162..., complete response read, root approved for native validation while retaining body_quote unverified diagnostic"
+        }
+      ],
+      "raw_paid_rejected_facts": "The missing legacy-route marker caused the first BODY entry to be refused before startup; this is a program/shared-ledger contract refusal, not a model or provider rejection, and the refusal remains preserved. The 2c75ef repair checks were free. V32 then used the native shared attachment and original project-80/account-300 dual ledgers: writer gate e55bc884... and assessor gate 8218f162... both produced paid responses that root accepted. The historical 8 unknown holds totaling 4.5168676 remain counted; there is no new funds pool and no settled=NULL assertion. Exact current expense and paid-call decisions remain governed by the current current SQL ledger SQL, and the paid responses do not imply final BODY quality.",
+      "repair_proposal": "Keep explicit --shared-project-binding in the normal harness and native shared attachment, verify the original ledger, cap, question, and history on every BODY start, and retain first refusal plus all paid/raw receipts. Add free decoder/quote-integrity fixtures for UIR-026/027, then verify later BODY units and consumer receipts without hand-writing scientific fields or manually repairing diagnostics. Do not close the broader unattended boundary from the first accepted writer/assessor pair alone.",
+      "verification": "The committed repair was adopted by the V32 normal harness: O09 native BUDGET_BINDING and SHARED_PROJECT_ATTACHMENT exist, PID 30620 reached BODY, and root accepted the paid writer and assessor responses under gates e55bc884... and 8218f162.... Initial refusal, dual-ledger identity, historical unknown holds, and response diagnostics remain recorded. This closes the observed shared-binding adoption gap but leaves later BODY consumers, final quality, and unattended end-to-end verification pending."
+    },
+    {
+      "id": "UIR-023",
+      "classification": "formal_repair_produced_and_used",
+      "title": "Missing unit IDs were normalized; V31 selector, both owner groups, and native strengthening completed",
+      "trigger": "After the V29 five-chapter owner material and six case batches were natively complete, the free preflight for default outline strengthening paused with selection_unit_id_missing:CH2. CH2 had five units and CH3 had four units with neither unit_id nor id; the scientific task inputs were complete while the remaining chapters retained explicit IDs.",
+      "actual_impact": "The consumer-side identity repair has a complete V31 adoption and strengthening receipt. The five-packet copy exposes 22 units with stable generated IDs only for CH2/CH3; non-identity scientific fields remain equal, repeated load/export remains identical, and the original owner/case cache, failed-strengthening outputs, and original six JSON hashes remain preserved. The root-read selector response returned status=selected with exactly two groups, CH1 U5 and CH4-U2. Both Max owner groups were completed and accepted; the final CURRENT_PLAN is five chapters, 22 units, and 69 paragraph briefs, with only CH1-U5 and CH4-U2 changed and the other 20 units exact. The native strengthening actual cost was 5.5426824 CNY. This closes the unit-ID/selector/owner strengthening seam; the subsequent arrangement projection loss is recorded separately as UIR-025, so no body or full unattended completion claim is made.",
+      "temporary_handling": "The initial selection_unit_id_missing report and old revision were retained. Source 30f9ddf4d2057eba2e548e2fef11dc502f613484 was pushed; the free preservation/validation path passed 18 checks with one missing historical asset explicitly excluded. The real selector gate 480213d4a23e0be20401bb85432a8aea4e07157cd0ccd0e8149780a5504957bd was approved with binding SHA256 132c4068386c4aabca20d139df4f4b689dccd1ca75d88b3a19ebc76e922fb53e, qwen3.8-max, thinking/output 32768 each, and PID 15792. Root read and accepted both selected owner groups and the final plan; the old V31 arrangement attempt was then stopped before provider invocation when the separate owner-field projection seam was found. No scientific correction list or previous strengthening answer was supplied.",
+      "formal_capability_status": "formal_repair_produced_and_used. Commit 30f9ddf4d2057eba2e548e2fef11dc502f613484 was pushed and used by the standalone V31 selector/strengthening process. The five-packet copy/IdMap repair passed 18 free checks, generated only CH2/CH3 IDs, preserved non-identity fields, and was used in the root-approved selector messages. Both selected owner groups returned native updated responses accepted by root; the final five-chapter/22-unit/69-brief plan was accepted with exactly two changed units and 20 exact units, and the strengthening actual was 5.5426824 CNY. V32 then consumed this accepted plan through the repaired owner-field arrangement consumer; the five-chapter arrangement completion is recorded under UIR-025, while the first BODY writer/assessor phases were subsequently adopted under UIR-022; full BODY quality remains a separate boundary.",
+      "current_boundary": "The missing-ID consumer seam, selector, two owner groups, V31 native strengthening, and the subsequent V32 five-chapter arrangement consumer are complete and root-accepted. The accepted final plan and arrangement artifacts do not constitute full BODY quality or unattended completion; the first BODY writer/assessor phases subsequently used the UIR-022 shared-ledger seam, while later BODY consumers remain open. The separate full-native-resume entry mistake remains UIR-024 and is not solved by this V31/V32 completion.",
+      "evidence": [
+        {
+          "path": "preparation/ab_unattended_20261013/selection_unit_identity_fix_20261014/PRESERVATION_REPORT.json",
+          "locator": "copied_bytes_identical=true; free validation passed=18 with one explicitly excluded missing historical asset; model_calls=0; original owner/case cache and failed-strengthening outputs untouched; real isolated five-packet copy path"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/selection_unit_identity_fix_20261014/VALIDATION_REPORT.json",
+          "locator": "status=prepared_no_paid_calls; chapter_count=5; selector_unit_count=22; CH2 five and CH3 four generated IDs; non_identity_fields_equal_to_original_consumer=true for CH1-CH5; repeated_load_identical=true; exported_revision_reload_identical=true"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/selection_unit_identity_fix_20261014/ROOT_V31_SELECTOR_REQUEST_REVIEW.json",
+          "locator": "decision=approve_same_chapter_autonomous_selection; source_commit=30f9ddf4; binding_sha256=132c4068; gate=480213d4; actual_messages_equal_formal_free_preview=true; actual_wire_messages_equal_reviewed_messages=true; five chapter rows sum to 22 units; human scientific problem list/previous strengthening answer=false; upstream_reentered=false"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/selection_unit_identity_fix_20261014/selection/PREPARE_REPORT.json",
+          "locator": "status=prepared_no_paid_calls; mode=select; chapter_count=5; unit_count=22; request_sha256=71d3ef0d...; qwen3.8-max profile with 32768 thinking/output"
+        },
+        {
+          "path": "supervision/calls/480213d4a23e0be20401bb85432a8aea4e07157cd0ccd0e8149780a5504957bd/REQUEST_DECISION.json",
+          "locator": "stage=planning-transport:outline_selection; decision=approve; request_sha256=8d608080...; response_sha256 remains pending in this request-phase receipt"
+        },
+        {
+          "path": "CURRENT_PROCESS_STRENGTHENING_V31.json",
+          "locator": "historical V31 launch record: PID=15792, source_commit=30f9ddf4, binding_sha256=132c4068; final completion is evidenced by the V31 final-plan and execution-state receipts below"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V31_UNIT_IDENTITY_20261014.json",
+          "locator": "source-bound V31 binding for the unit-identity consumer recovery; source_commit=30f9ddf4"
+        },
+        {
+          "path": "preparation/downstream_supervision_20261014/STRENGTHENING_COMMAND_V31.json",
+          "locator": "native_entry=scripts.upgrade3.outline_strengthening_pipeline.main; output=...outline_strengthening.v31; retired_unpaid_full_resume_pid=18804"
+        },
+        {
+          "path": "worktree/outputs/optics_e2e/07_progressive_review_plan_docling_20261013.outline_strengthening.v31/PIPELINE_INPUT.json",
+          "locator": "normalized standalone V31 input exists with a new input hash; no selector result/quality receipt is yet recorded"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/selection_unit_identity_fix_20261014/ROOT_V31_SELECTOR_RESPONSE_REVIEW.json",
+          "locator": "decision=approve; status=selected; selected_units=2 of available_units=22; selected groups are ch1-u5-large-aperture-boundary (CH1 U5) and ch4-u2-fov-comparison (CH4-U2); valid_same_chapter_groups=true; root personally read/accepted response"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/selection_unit_identity_fix_20261014/ROOT_V31_GROUP1_ACCESS_RESPONSE_REVIEW.json",
+          "locator": "decision=approve; six targeted reads; response_personally_read_complete=true; all six resolution records complete_record_equals_original=true"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/selection_unit_identity_fix_20261014/ROOT_V31_GROUP1_OWNER_REQUEST_REVIEW.json",
+          "locator": "decision=approve; editable U5; six selected records full_record_equal_after_json_pointer_expansion=true and equal to the actual Max owner input; no material clipping; inherited relevant_tool_feedback_chars=284821"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/selection_unit_identity_fix_20261014/ROOT_V31_GROUP1_OWNER_RESPONSE_REVIEW.json",
+          "locator": "decision=approve; native_status=updated; structural_errors=[]; original_briefs=3 and new_briefs=4; old case handles retained with P0004 added; limitations retained; P0004 boundary and U3 division recorded"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/selection_unit_identity_fix_20261014/ROOT_V31_GROUP2_OWNER_REQUEST_REVIEW.json",
+          "locator": "decision=approve for editable CH4-U2; request record equality verified by root; four full records plus three P0230 metadata partials equal to resolved records; owner response is recorded separately as native updated/accepted"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/DELEGATED_V31_MATERIAL_ACCESS_REVIEWS.json",
+          "locator": "delegated Group2 Plus material access accepted; four full records and three P0230 metadata partials; owner response is not present in this receipt"
+        },
+        {
+          "path": "execution_sources/downstream_v32_owner_fields/docs/verification/ab-unattended-20261013/v25_coordinator_capacity/owner_field_handoff_20261014/ROOT_V31_GROUP2_OWNER_RESPONSE_REVIEW.json",
+          "locator": "native_status=updated; structural_errors=[]; root decision=approve; the second selected owner group response is complete and accepted"
+        },
+        {
+          "path": "execution_sources/downstream_v32_owner_fields/docs/verification/ab-unattended-20261013/v25_coordinator_capacity/owner_field_handoff_20261014/ROOT_V31_FINAL_CURRENT_PLAN_REVIEW.json",
+          "locator": "native_pipeline_status=complete; decision=accept_for_formal_arrangement; five chapters; 22 units; 69 paragraph briefs; changed_units=2 (CH1-U5 and CH4-U2); unchanged_units=20; unchanged_unit_content_exact=true"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/execution_state_history/20261014_arrangement_v31_before_unpaid_pause.json",
+          "locator": "default_strengthening_progress status=complete_root_accepted; selected_units=2; accepted_groups=2; final_revision recorded; strengthening_actual_cny=5.5426824; source_and_budget_unchanged=true"
+        },
+        {
+          "path": "worktree/outputs/optics_e2e/07_progressive_review_plan_docling_20261013.outline_strengthening.v31/PIPELINE_REPORT.json",
+          "locator": "status=complete; both selected groups status=updated; chapter_count=5; arrangement_not_run=true; adopted V31 revision retained"
+        }
+      ],
+      "raw_paid_rejected_facts": "The original selection_unit_id_missing:CH2 was a program/consumer preflight pause, not a provider rejection. Free identity validation used zero model calls and recorded 18 passes plus one explicitly excluded missing historical asset. The selector-stage observed cost was 1.104780; Group1 observations were Max 2.613228 plus Plus 0.0382952; delegated Group2 Plus material access was 0.0292072; the completed native strengthening actual was 5.5426824 CNY. These are stage observations and the current budget SQL remains authoritative. The selector and owner responses were accepted, but the subsequent arrangement gate was stopped before invocation with zero fee under UIR-025; the later V32 BODY writer/assessor receipts are recorded under UIR-022. Do not erase the old report/revision or merge the V31 unpaid stop into provider/scientific failure.",
+      "repair_proposal": "Keep the consumer-only IdMap and final-plan contract: assign stable chapter-namespace IDs only to genuinely missing CH2/CH3 units, preserve explicit IDs and all non-identity scientific fields, and leave owner/case caches immutable. For downstream, require the canonical owner-field projection fixed by UIR-025 before paid arrangement, then verify every chapter request/response, source identity, unit coverage, arrangement artifact, and ledger receipt separately. Keep UIR-024 resume-entry guards separate; do not claim body quality from the accepted strengthening plan alone.",
+      "verification": "Repair delivery is verified by the 18-pass free identity bridge, root-approved selector response with two groups, accepted native owner updates for both groups, the final current-plan review (five chapters, 22 units, 69 briefs, two changed and 20 exact), and the execution-state receipt recording strengthening_actual_cny=5.5426824. The repaired V32 arrangement consumer subsequently produced five accepted chapter arrangements; the first BODY writer/assessor phases were subsequently called and root-accepted under UIR-022; later BODY consumers and full quality remain unverified."
+    },
+    {
+      "id": "UIR-024",
+      "classification": "manual_recovery_or_supervision",
+      "title": "Full native planner resume reentered an upstream tool need while resuming post-planning strengthening",
+      "trigger": "The first V31 attempt used full native planner --resume to reach the post-planning consumer instead of the repository standalone scripts.upgrade3.outline_strengthening_pipeline entry on already completed packets. The evolving working pool reintroduced an ended tool need and reached query-refinement gate 2979680d33edfeb29027effe1a15ab7082ad732c619f113c91754927f9b5f8fa.",
+      "actual_impact": "This was a local execution-entry mistake, not a scientific-module result. PID 18804 was stopped before an approved selector request, with new_calls=0, no new reservation or fee, unchanged ledger rows, unchanged accepted final five packet contents, and no scientific output mutation. It demonstrates that a full native resume can reopen upstream work while trying to resume a completed post-planning consumer; it does not prove that every native resume path fails.",
+      "temporary_handling": "Root preserved the unpaid gate, retired launcher copy, stop receipt, and the five accepted packet hashes, then switched to the formal standalone V31 command with the same project/account ledgers and completed packet root. The current standalone selector runs under PID 15792; no manual scientific edits or ledger changes were used to bypass the gate.",
+      "formal_capability_status": "manual_recovery_or_supervision. The unsafe entry was contained by an unpaid stop and the standalone consumer is now the active entry. There is no general proof that full native planner resume will refuse to re-enter completed upstream tools when the working pool evolves; that broader resume risk remains unverified.",
+      "current_boundary": "The recorded impact is limited to local resume/entry selection and was stopped before provider work. It is not a selector rejection, scientific quality failure, or evidence that the V31 standalone selector is bad. V31 selector/strengthening and the repaired V32 five-chapter arrangement later completed through separate native entries; the first BODY writer/assessor phases later used the separate UIR-022 seam, but later BODY consumers and the general full-native-resume guard remain unverified. The general full-native-resume guard is still unverified.",
+      "evidence": [
+        {
+          "path": "preparation/ab_unattended_20261013/selection_unit_identity_fix_20261014/V31_FULL_RESUME_UNPAID_STOP.json",
+          "locator": "stopped_pid=18804; unpaid_gate=2979680d...; new_calls=0; original_final_five_packets_unchanged=true; reason says full resume reopened a tool need from evolving working pool; no ledger or scientific output changes"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/selection_unit_identity_fix_20261014/V31_RETIRED_FULL_RESUME_LAUNCHER.py",
+          "locator": "preserved copy of the local full-resume launcher used before the unpaid stop; retained for audit, not the current standalone entry"
+        },
+        {
+          "path": "preparation/downstream_supervision_20261014/STRENGTHENING_COMMAND_V31.json",
+          "locator": "formal native entry=scripts.upgrade3.outline_strengthening_pipeline.main; reason directs use of existing standalone post-planning consumer; retired_unpaid_full_resume_pid=18804"
+        },
+        {
+          "path": "CURRENT_PROCESS_STRENGTHENING_V31.json",
+          "locator": "current standalone process status=running; pid=15792; same completed packet root and approved V31 binding"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/selection_unit_identity_fix_20261014/PRESERVATION_REPORT.json",
+          "locator": "free preservation path records the five-packet copy and unchanged owner/case/failed-strengthening assets; no model calls"
+        }
+      ],
+      "raw_paid_rejected_facts": "PID 18804 reached an unapproved/unpaid program gate and was stopped before a provider request; new_calls=0, ledger rows unchanged, reserved/actual new cost=0, and the five accepted final packets stayed unchanged. This is a local execution-entry problem and manual supervision event, not a provider rejection or scientific response. The retired launcher and gate receipt remain raw evidence.",
+      "repair_proposal": "Make the standalone post-planning consumer the explicit entry when completed packets are already accepted. For any full planner --resume, derive resume eligibility from immutable accepted packet/stage contracts and refuse or hold if it would reopen completed tool needs without a changed contract, new material, or explicit retry. Validate no query-refinement reentry, no duplicate provider call, and no ledger mutation before allowing the standalone consumer.",
+      "verification": "Containment is verified by the unpaid stop and the subsequent standalone V31 launch; later V31 strengthening and V32 arrangement receipts are recorded separately and do not erase this raw entry mistake. The general full-native-resume guard is not proven; retain this supervision/execution seam until a free controlled resume test and a real completed-packet handoff demonstrate the invariant."
+    },
+    {
+      "id": "UIR-025",
+      "classification": "formal_repair_produced_and_used",
+      "title": "Arrangement owner-field projection was repaired and V32 five-chapter arrangement completed; BODY first phases adopted, quality remains open",
+      "trigger": "After V31 selector/owner strengthening produced the root-accepted five-chapter, 22-unit, 69-brief CURRENT_PLAN, the native arrangement entry reached unpaid gate f8dac8f2... and root found that the canonical owner-field projection omitted owner condition/relation/title/development aliases and the case fields for all 70 cases. The V31 arrangement process PID 8008 was stopped before physical provider invocation.",
+      "actual_impact": "The original V31 arrangement consumer would have sent an incomplete owner handoff despite the accepted final plan: source values, IDs, and tasks were retained, but the canonical view omitted the named owner aliases and all 70 case fields. PID 8008 was stopped at the unpaid gate with physical_invocation_absent=true and zero fee, so that attempt has no arrangement model response. After the generic consumer repair, V32 consumed the accepted five-chapter/22-unit/69-brief plan in five actual qwen3.5-plus calls; ARRANGEMENT_RUN now reports status=body_ready, complete=true, body_ready=true, all five chapters successful and no pending chapters, with CH3 validation recording three table tasks. Root personally reviewed and approved all five actual requests and complete responses (CH2 retains recorded quality risks). This proves arrangement consumption. The subsequent V32 BODY normal harness used the repaired shared attachment for first writer/assessor phases accepted by root; that does not prove full BODY quality or unattended completion.",
+      "temporary_handling": "Root preserved the V31 unpaid gate/stop. Source babe64cbdbe9b682d26aeca27ec655cee274b64a was pushed; 23 focused free checks passed, and a controlled short chain with five chapters, 22 units, and 69 briefs exercised the handoff without new writing. FIELD_HANDOFF_PROOF records all 70 original cases indexed/preserved through owner_unit_context/writer messages, source values/IDs/tasks unchanged, 47 byte-identical full message files, and the raw first failure. V32 used binding SHA256 b6b3aea1c924574092738f44f788663ecc7589977564c280d8e1fffd6e3ac63c with PID 16256; root then reviewed all five actual arrangement requests and complete responses. The next BODY step was not called; the shared-ledger BODY seam remains UIR-022.",
+      "formal_capability_status": "formal_repair_produced_and_used. The owner-field consumer repair is pushed and covered by the 23 focused free checks plus the controlled five-chapter/22-unit/69-brief short chain. The V32 source/binding produced five real qwen3.5-plus arrangement calls, all five chapter artifacts were accepted, and the arrangement run reports complete/body_ready=true with actual cost 0.3330432 CNY. Root reviewed all requests/responses, with CH2 carrying recorded quality risks. The first BODY writer/assessor phases were subsequently invoked through UIR-022 and accepted by root; UIR-022 remains the separate boundary for later BODY consumers and quality.",
+      "current_boundary": "The original V31 arrangement attempt was contained before any provider call, so its missing-field projection was a real pre-invocation production defect. The V32 repair is now verified through the complete five-chapter arrangement consumer: 22 units and 69 briefs were retained, CH3 added three table tasks, and all five root response reviews are present. The arrangement/body handoff subsequently entered BODY through UIR-022's normal harness; first writer/assessor receipts are accepted, while later BODY consumers and quality remain pending. The free preview is retained as preparation evidence and is not itself a full BODY result. UIR-024 full-native-resume risk is separate.",
+      "evidence": [
+        {
+          "path": "preparation/downstream_supervision_20261014/ARRANGEMENT_V31_UNPAID_FIELD_HANDOFF_STOP.json",
+          "locator": "gate=f8dac8f2...; pid=8008; physical_invocation_absent=true; upstream_not_rerun=true; scientific_answers_not_supplied=true; stop reason records owner alias/case projection loss"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/INITIAL_TEST_FAILURE.txt",
+          "locator": "raw first free test failure retained: explicit empty argument_relations became None; 1 failed/9 passed before the preservation fix"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/TEST_RUNS.json",
+          "locator": "initial 9 passed/1 failed; fixed 23 passed; existing tool results transcribed, no tests repeated during preservation"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/PASSED_TEST_OUTPUT.txt",
+          "locator": "23 passed in 0.88s for owner alias and condition/relation handoff focused checks"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/FIELD_HANDOFF_PROOF.json",
+          "locator": "model_calls=0; unit_count=22; brief_count=69; recognized cases=70; owner field aliases and condition/relation fields counted; source values/IDs unchanged; 47 full message files byte-identical; 23 passed"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/full_message_evidence",
+          "locator": "47 preserved full message files for the controlled handoff proof"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/REPRODUCE_FREE_HANDOFF.py",
+          "locator": "preserved free controlled handoff reproduction script; no model calls and no new writing"
+        },
+        {
+          "path": "preparation/downstream_supervision_20261014/ARRANGEMENT_COMMAND_V31.json",
+          "locator": "V31 native arrangement command; PID=8008; same dual ledgers; scientific_material_clipping=false; command was stopped by the unpaid field-handoff gate"
+        },
+        {
+          "path": "CURRENT_PROCESS_ARRANGEMENT_V31.json",
+          "locator": "historical V31 arrangement process record: pid=8008; source=30f9ddf4; arrangement entry before the unpaid stop"
+        },
+        {
+          "path": "preparation/downstream_supervision_20261014/ARRANGEMENT_COMMAND_V32.json",
+          "locator": "V32 native arrangement command; source_commit=babe64cbd; binding SHA=b6b3aea1...; PID=16256; key index fixed by PlanningTransport; native CLI has no --key-index flag"
+        },
+        {
+          "path": "CURRENT_PROCESS_ARRANGEMENT_V32.json",
+          "locator": "status=running; pid=16256; source_commit=babe64cbd; binding_sha256=b6b3aea1...; retired_predecessor_pid=8008"
+        },
+        {
+          "path": "RUN_BINDING_DOWNSTREAM_V32_OWNER_FIELDS_20261014.json",
+          "locator": "source-bound V32 owner-field consumer binding; source_commit=babe64cbdbe9b682d26aeca27ec655cee274b64a; binding_sha256=b6b3aea1c924574092738f44f788663ecc7589977564c280d8e1fffd6e3ac63c"
+        },
+        {
+          "path": "preparation/downstream_supervision_20261014/ARRANGEMENT_V32_PREVIEW_REPORT.json",
+          "locator": "model_calls=0 preview_only; packet root is accepted V31 revision; five chapters requested; preview is not a paid response"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/ROOT_V32_ACTUAL_CH1_REQUEST_REVIEW.json",
+          "locator": "root-reviewed actual CH1 arrangement request; decision=approve; source/binding lineage preserved"
+        },
+        {
+          "path": "worktree/outputs/optics_e2e/08_chapter_arrangement/ARRANGEMENT_RUN.json",
+          "locator": "status=body_ready; complete=true; body_ready=true; model_calls=5 qwen3.5-plus; five successful_chapter_ids and zero pending; round_after.round_settled_cny=0.3330432; 22-unit/69-brief plan consumed; body itself has not been called"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/ROOT_V32_ACTUAL_CH2_REQUEST_REVIEW.json",
+          "locator": "root-reviewed actual CH2 arrangement request; decision=approve; source/binding lineage preserved"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/ROOT_V32_ACTUAL_CH3_REQUEST_REVIEW.json",
+          "locator": "root-reviewed actual CH3 arrangement request; decision=approve; source/binding lineage preserved"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/ROOT_V32_ACTUAL_CH4_REQUEST_REVIEW.json",
+          "locator": "root-reviewed actual CH4 arrangement request; decision=approve; source/binding lineage preserved"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/ROOT_V32_ACTUAL_CH5_REQUEST_REVIEW.json",
+          "locator": "root-reviewed actual CH5 arrangement request; decision=approve; source/binding lineage preserved"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/ROOT_V32_CH1_ARRANGEMENT_RESPONSE_REVIEW.json",
+          "locator": "root-reviewed complete CH1 arrangement response; decision=approve; response contract/quality record retained"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/ROOT_V32_CH2_ARRANGEMENT_RESPONSE_REVIEW.json",
+          "locator": "root-reviewed complete CH2 arrangement response; decision=approve_with_recorded_quality_risks; response contract/quality record retained"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/ROOT_V32_CH3_ARRANGEMENT_RESPONSE_REVIEW.json",
+          "locator": "root-reviewed complete CH3 arrangement response; decision=approve; response contract/quality record retained"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/ROOT_V32_CH4_ARRANGEMENT_RESPONSE_REVIEW.json",
+          "locator": "root-reviewed complete CH4 arrangement response; decision=approve; response contract/quality record retained"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_field_handoff_fix_20261014/ROOT_V32_CH5_ARRANGEMENT_RESPONSE_REVIEW.json",
+          "locator": "root-reviewed complete CH5 arrangement response; decision=approve; response contract/quality record retained"
+        },
+        {
+          "path": "worktree/outputs/optics_e2e/08_chapter_arrangement/_accepted/CH3/ac5cc43db6df21b5b54e696160f137687c156763714533396b04e2b26fd6eee1/CHAPTER_ARRANGEMENT.json",
+          "locator": "validation.ok=true; contract_ok=true; status=arranged; units_returned=4; units_expected=4; table_tasks=3; errors=[]"
+        }
+      ],
+      "raw_paid_rejected_facts": "V31 arrangement gate f8dac8f2... was unpaid and physically uninvoked; PID 8008 stopped with zero fee, so there is no provider rejection or raw arrangement response from that attempt. The initial focused free test failure is retained alongside the fixed 23-pass output. V32 made five actual qwen3.5-plus arrangement calls and ARRANGEMENT_RUN records actual settled cost 0.3330432 CNY; all five request/response reviews were root-approved, with CH2 quality risks recorded. The later BODY first writer/assessor responses and paid facts are recorded under UIR-022; later BODY cost aggregation and full quality conclusion remain open. The pending shared-ledger/consumer boundary is UIR-022.",
+      "repair_proposal": "Keep the canonical owner-field projection that forwards title, development, theme, evidence conditions/limits, relations/conditions/limits, and every case field for every unit, with pre-payment equality checks. Treat the complete V32 arrangement artifacts as the handoff input for BODY only after UIR-022 shared-ledger/legacy-route startup is repaired and verified; then validate BODY request/response, body manifest, and ledger receipt separately. Preserve the first failure and byte-identical message evidence; do not hand-edit scientific content or infer missing fields.",
+      "verification": "The formal consumer fix is verified offline by 23 focused checks and the controlled five-chapter/22-unit/69-brief handoff, with 70 cases indexed/preserved and 47 full message files retained. Production adoption is now verified by ARRANGEMENT_RUN status=body_ready/complete=true, five actual Plus calls with round_settled_cny=0.3330432, five successful chapter IDs, zero pending chapters, root-approved requests/responses, and CH3 table_tasks=3. The first BODY writer/assessor phases were subsequently called through UIR-022's normal entry and accepted by root; later BODY consumers, complete cost reconciliation, and quality remain pending under UIR-022."
+    },
+    {
+      "id": "UIR-026",
+      "classification": "still_unfixed",
+      "title": "BODY writer single-LaTeX JSON escape may decode as a tab (minor diagnostic; run continued)",
+      "trigger": "The root review of the first actual BODY writer response recorded a single LaTeX JSON-escape diagnostic: a valid escape prefix such as backslash-t may be interpreted by the existing decoder as a tab and alter a math token.",
+      "actual_impact": "The observed effect is localized formatting/decoder-fidelity uncertainty in the writer response. Native parsing preserved the diagnostic and the run continued; this does not erase the paid writer response or establish quality for the affected formatting field.",
+      "temporary_handling": "The raw writer response and root receipt were retained. No local LaTeX string or scientific field was hand-filled or rewritten; the normal native path continued to the assessor phase.",
+      "formal_capability_status": "still_unfixed. The current response path records the control-character diagnostic, but no generic decoder repair or production recheck has yet been completed.",
+      "current_boundary": "This is a minor current parser/formatting fidelity issue observed in the first BODY writer response, not a provider rejection, a BODY startup failure, or a claim that all LaTeX output is corrupted. It remains relevant to later quality checks and unattended robustness.",
+      "evidence": [
+        {
+          "path": "preparation/downstream_supervision_20261014/ROOT_BODY_V32_CH1_U1_RESPONSE_REVIEW.json",
+          "locator": "writer gate e55bc884..., root complete-response review; retained_quality_notes records the single LaTeX JSON-escape/control-character diagnostic and native_parser_control_counts=9:1"
+        },
+        {
+          "path": "preparation/downstream_supervision_20261014/ROOT_BODY_V32_FIRST_REQUEST_REVIEW.json",
+          "locator": "root-approved actual CH1:U1 writer request and preserved original task/material scope"
+        }
+      ],
+      "raw_paid_rejected_facts": "The writer call under gate e55bc884... returned and was root-accepted into native task quality check; the escape diagnostic was retained in that receipt. There was no provider rejection and no manual correction. The broader run keeps the original dual-ledger and historical unknown accounting.",
+      "repair_proposal": "Add a free fixture that round-trips a single LaTeX JSON escape through the actual decoder, distinguishes a literal backslash-t from a tab, and records control-character positions. Recheck one real response before treating that field as verified; preserve raw output and do not inject a scientific replacement.",
+      "verification": "Current root response review proves the diagnostic was observed and preserved while execution continued. No formal decoder fix or post-fix BODY receipt exists yet."
+    },
+    {
+      "id": "UIR-027",
+      "classification": "still_unfixed",
+      "title": "BODY assessor concatenated non-contiguous sentences, leaving body_quote unverified (minor diagnostic; run continued)",
+      "trigger": "The root review of the first actual BODY assessor response found that the P02 body_quote joined separated sentences without an omission marker; its quote check was unmatched while the other two task quotes were exact.",
+      "actual_impact": "One assessor quote cannot currently be verified as a contiguous source span. Native quality review retained the unverified diagnostic and continued; the assessor response remains a paid returned response, but this quote field is not a quality-pass claim.",
+      "temporary_handling": "The raw assessor response and quality receipt were preserved. No quote was manually inserted or repaired, and no local scientific or editorial feedback was added; native validation continued with the diagnostic visible.",
+      "formal_capability_status": "still_unfixed. The current assessor path can retain and report the mismatch, but no generic non-contiguous-quote validator or repaired production receipt has yet been completed.",
+      "current_boundary": "This is a localized quote-evidence issue in the observed assessor response, not a provider rejection, a BODY wiring failure, or a conclusion that the complete body is scientifically invalid. It prevents certifying that specific quote until a later verification step resolves it.",
+      "evidence": [
+        {
+          "path": "preparation/downstream_supervision_20261014/ROOT_BODY_V32_CH1_U1_QUALITY_RESPONSE_REVIEW.json",
+          "locator": "assessor gate 8218f162..., root complete-response review; P02 quote_match=unmatched and quality_judgment retains body_quote unverified while approving native validation"
+        },
+        {
+          "path": "preparation/downstream_supervision_20261014/ROOT_BODY_V32_CH1_U1_QUALITY_REQUEST_REVIEW.json",
+          "locator": "root-approved assessor request with original full writer payload identical"
+        }
+      ],
+      "raw_paid_rejected_facts": "The assessor call under gate 8218f162... returned and was root-accepted for native validation; the P02 body_quote mismatch was retained in the receipt. There was no provider rejection and no manual quote repair. The call remains part of the existing dual-ledger accounting.",
+      "repair_proposal": "Add a free fixture for selecting non-contiguous source sentences and require a contiguous-span/offset or explicit omission marker before a body_quote is marked verified. Recheck a later native receipt, preserve the original unverified response, and do not hand-write quote text.",
+      "verification": "Current root quality response review proves the unverified quote was observed and preserved while the run continued. No formal quote-validation repair or post-fix receipt exists yet."
+    }
+  ],
+  "not_current_failures": [
+    "The V23 query-empty failure is a recorded prior failure; V24 is bound to be0abeaf with the optional-focus guard and continued native execution.",
+    "The V7 A/B source-pin mismatch and stale finalized_complete marker are historical A/B evidence; current EXECUTION_STATE records V24 source/binding and AB preflight source_pin_matches=true.",
+    "The cross-process WinError 5 is an offline synthetic reproduction with zero paid calls and no live batch mutation, not a claim that the current live A/B run used multiple writers.",
+    "The parser/GROBID fidelity finding is a retained quality boundary; service health and the resumed native route do not mean formula/table fidelity passed.",
+    "The chapter_details shared_outline shape is a background handoff completeness risk; the three CH1-CH3 gates were approved and no duplicate or chapter-quality failure was established.",
+    "The arrangement --key-index mismatch is a pre-execution template error; only wrapper/help checks ran, so it is not a native arrangement failure or provider rejection."
+  ]
+}
