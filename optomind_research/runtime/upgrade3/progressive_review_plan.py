@@ -1706,6 +1706,37 @@ def build_candidate_navigation(
     }
 
 
+def _route_coordinator_adjustments(
+    improvement: Mapping[str, Any], chapter_ids: Sequence[str],
+) -> dict[str, Any]:
+    """Bind model-provided primary/reappearance feedback to its actual owners.
+
+    The coordinator also returns concept-level entries without ``chapter_id``.
+    Preserve their words and route only to declared chapter identifiers; the
+    provider response remains untouched and no scientific advice is invented.
+    """
+    output = dict(improvement)
+    raw = improvement.get("cross_chapter_adjustments")
+    if isinstance(raw, Mapping):
+        raw = [({**dict(value), "chapter_id": key} if isinstance(value, Mapping)
+                else {"chapter_id": key, "adjustment": value}) for key, value in raw.items()]
+    if not isinstance(raw, (list, tuple)):
+        return output
+    known = list(dict.fromkeys(_text(item) for item in chapter_ids if _text(item)))
+    routed = []
+    for item in raw:
+        if not isinstance(item, Mapping) or _text(item.get("chapter_id") or item.get("id")):
+            routed.append(dict(item) if isinstance(item, Mapping) else item)
+            continue
+        rendered = json.dumps(item, ensure_ascii=False, default=_json_default)
+        targets = [chapter_id for chapter_id in known
+                   if re.search(r"(?<![A-Za-z0-9_])" + re.escape(chapter_id) + r"(?![A-Za-z0-9_])", rendered)]
+        routed.extend([{**dict(item), "chapter_id": chapter_id} for chapter_id in targets]
+                      or [dict(item)])
+    output["cross_chapter_adjustments"] = routed
+    return output
+
+
 def _share_exact_review_materials(payload: Mapping[str, Any]) -> tuple[dict[str, Any], int]:
     """Share exact repeated context within a coordinator request, without trimming.
 
@@ -5364,7 +5395,10 @@ class ProgressiveReviewPlanner:
                 "citation_rules": dict(CURRENT_CITATION_RULES),
             },
         ))
-        improvement = dict(_stage_response(whole_record))
+        improvement = _route_coordinator_adjustments(
+            _stage_response(whole_record),
+            [_text((row.get("chapter") or {}).get("chapter_id")) for row in detail_records],
+        )
         improvement["late_material_changes"] = late_material_changes
         # The light whole-plan pass often returns useful prose adjustments but
         # leaves the chapter rewrite implicit.  Give named affected chapters a
@@ -6061,7 +6095,10 @@ class ProgressiveReviewPlanner:
             cache_inputs=whole_inputs,
         )
         improvement = _stage_response(whole_record)
-        improvement = dict(improvement)
+        improvement = _route_coordinator_adjustments(
+            improvement,
+            [_text((row.get("chapter") or {}).get("chapter_id")) for row in detail_records],
+        )
         improvement["late_material_changes"] = by_chapter_material
         improvement["material_theme_inventory"] = whole_inputs["material_theme_inventory"]
         # In the opt-in path the whole-plan response is feedback for the

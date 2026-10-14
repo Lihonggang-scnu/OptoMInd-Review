@@ -352,13 +352,13 @@
     },
     {
       "id": "UIR-018",
-      "classification": "still_unfixed",
+      "classification": "formal_repair_produced_and_used",
       "title": "Five saved chapter_details packets were followed by a whole-plan preflight capacity exit",
       "trigger": "Under V24, root approved and saved CH1 through CH5 chapter_details packets, then the flow reached whole_plan_improvement. The paid-call planner context preflight exited with input=1069227, output=32768, and thinking=16384, and RUN_STATE became failed.",
-      "actual_impact": "The five saved chapter packets and their approvals remain preserved, but no whole_plan_improvement response was produced. Whole-plan coordination did not complete, so downstream arrangement/body cannot be treated as complete merely because all five chapter packets were saved. This is a current context/capacity seam blocker, not a finding that the five chapter outputs failed scientific review.",
-      "temporary_handling": "The initial RUN_FAILURE.json, RUN_STATE.json, five chapter packets, and root review records are retained while root inspects the actual input composition. No model-capacity bypass, thinking/output reduction, scientific-condition clipping, handwritten coordination answer, or rerun of the existing five chapters is being used.",
-      "formal_capability_status": "Still unfixed. The current preflight exposes the oversize context as ProgressivePlanError, but no production-adopted whole-plan context-composition or capacity-governance repair has been evidenced and no later root repair receipt exists. Detecting and exiting at preflight is not an unattended recovery.",
-      "current_boundary": "The failed run identity is source be0abeaf2ae1bdc1e5a5188b471abb14faec775a, V24, production PID 552. RUN_STATE and RUN_FAILURE are the direct evidence for this whole-plan failure. The top-level EXECUTION_STATE was captured while chapter workers were concurrent and can show chapter_details; it must not override the recorded whole-plan failure. Upstream five-chapter approval is not whole-plan completion.",
+      "actual_impact": "The five saved chapter packets and their approvals remain preserved, but the V24 attempt produced no whole_plan_improvement response. Whole-plan coordination did not complete, so downstream arrangement/body cannot be treated as complete merely because all five chapter packets were saved. This is the retained V24 context/capacity seam incident, not a finding that the five chapter outputs failed scientific review.",
+      "temporary_handling": "The original V24 RUN_FAILURE.json, RUN_STATE.json, five chapter packets, and root review records were manually frozen and retained. After inspecting the input composition, root started V25 --resume with the same output/ledgers, reusing compatible stages and the five chapter responses without rerunning those chapters. The manual freeze/restart is supervision, not autonomous recovery.",
+    "formal_capability_status": "Formal repair produced and used in the V25/V26 source-bound lineage. Commit 8ded10187c83c23a690f6ef0a88e0e0946d7beb5 changes only whole-plan message construction: the first occurrence of a large JSON value remains complete and later completely identical values use an internal JSON Pointer; different content under the same ID is never merged and scientific conditions are not clipped. Six new checks plus 77 existing checks passed, and V26 passed the real capacity gate and received a root-approved coordinator response. The capacity/response seam is verified in real execution, but owner routing remains incomplete under UIR-020, so this does not certify the full chain or unattended robustness.",
+    "current_boundary": "The retained failed run identity is source be0abeaf2ae1bdc1e5a5188b471abb14faec775a, V24, production PID 552. Current V26 is source dc1b73aa7d95e6ac4a4277559fdf4b11763ca889, binding RUN_BINDING_PLANNING_V26_CHAPTER_CONSUMERS_20261014.json, production PID 29780. The V26 coordinator response was root-approved with provider_elapsed_seconds=88.21899999999732 and scientific_answers_injected=false; root then safely stopped unpaid owner gates. Stop and new-binding operations remain supervision rather than autonomous proof.",
       "evidence": [
         {
           "path": "worktree/outputs/optics_e2e/07_progressive_review_plan_docling_20261013/RUN_STATE.json",
@@ -399,11 +399,149 @@
         {
           "path": "preparation/ab_unattended_20261013/PLANNING_V24_LAUNCH.json",
           "locator": "source_commit=be0abeaf, V24 binding, pid=552, and no_scientific_answers_injected=true"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ROOT_CAPACITY_PROOF.json",
+          "locator": "lossless reconstructed five-chapter payload; 143 sharing references; measured 893042 to 375371 tokens; margin input 428608; total context 477760; thinking=16384 and output=32768 unchanged"
+        },
+        {
+          "path": "worktree/docs/verification/ab-unattended-20261013/v25_coordinator_capacity/README.md",
+          "locator": "whole-plan-only JSON Pointer repair; six new and 77 existing free checks; no same-ID different-content merge; offline reconstruction boundary and pending real coordination review"
+        },
+        {
+          "path": "execution_sources/planning_resume_v25",
+          "locator": "git commit 8ded10187c83c23a690f6ef0a88e0e0946d7beb5; source-bound formal repair"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V25.json",
+          "locator": "source_commit=8ded1018, pid=9376, same native output and ledgers, previous_pid_exited=552, no_scientific_answers_injected=true"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V25_COORDINATOR_CAPACITY_20261014.json",
+          "locator": "V25 binding with source_commit=8ded1018 and coordinator_capacity_recovery of the V24 failure"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/PLANNING_V25_PREVIEW.stdout.json",
+          "locator": "preview_only; actual coordinator completion remains pending and no success certification is present"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V26.json",
+          "locator": "source_commit=dc1b73aa, pid=29780, same native output and ledgers, and no_scientific_answers_injected=true"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V26_CHAPTER_CONSUMERS_20261014.json",
+          "locator": "V26 source-bound binding used for the capacity-passing whole-plan request"
+        },
+        {
+      "path": "preparation/ab_unattended_20261013/ROOT_V26_COORDINATOR_REQUEST_REVIEW.json",
+      "locator": "gate=38e897ed, root decision=approve, measured_input_tokens=373656, estimated_input=426687, estimated_reservation_cny=2.886396, response_sha256=null at request review"
+    },
+    {
+      "path": "preparation/ab_unattended_20261013/ROOT_V26_COORDINATOR_RESPONSE_REVIEW.json",
+      "locator": "phase=response; decision=approve; gate=38e897ed; response_sha256=656152314b10de281b870b2c3a508bdd44e5b9a544915f5bff1216557a5be38c; provider_elapsed_seconds=88.21899999999732; scientific_answers_injected=false; root review records concrete primary/reappearance roles and remaining limits"
         }
       ],
-      "raw_paid_rejected_facts": "This is a ProgressivePlanError from the paid-call preflight, not a provider response or provider rejection. The initial failure record states that this whole-plan attempt stopped before paid reservation/provider call and has no whole-plan model output. Existing chapter paid calls, raw packets, and approvals remain separate and must not be counted as whole-plan success.",
-      "repair_proposal": "For later formal repair, first produce an auditable composition breakdown for the five-chapter whole-plan input, then design a capacity-safe coordination contract that preserves the configured thinking/output and all scientific conditions. Evidence-backed segmentation, handoff, or reuse may be considered, but silent condition clipping or handwritten answers is not an acceptable repair. The preflight should emit an actionable deterministic receipt before payment.",
-      "verification": "Using the same five saved chapter packets and source/binding, run an offline preflight fixture that reports input contributors and has a zero-paid failure path. After a repair receipt exists, verify a capacity-safe coordination path preserves scientific conditions and configured thinking/output, does not rerun the five existing chapters, and is then exercised once in an authorized production run."
+  "raw_paid_rejected_facts": "The V24 incident is a ProgressivePlanError from the paid-call preflight, not a provider response or provider rejection; that whole-plan attempt stopped before paid reservation/provider call and has no whole-plan model output. The repair proof is offline reconstruction: 143 identical-value references, measured message tokens 893042 to 375371, margin input 428608, total context 477760, and unchanged thinking/output 16384/32768 with lossless roundtrip and unchanged scientific payload. V26 produced a root-approved coordinator response with provider_elapsed_seconds=88.21899999999732 and scientific_answers_injected=false; source-sharing was exercised by a real call. The aggregate top-level fee transition 9.3730111 to 10.9642751 remains a current SQL/ledger fact, not a per-call attribution. Unpaid owner gates had no provider start, fee, response, or rejection.",
+  "repair_proposal": "Keep the 8ded101 exact-value JSON Pointer sharing as the formal whole-plan capability and continue rejecting same-ID different-content merges. Retain the actual generated message, pointer dereference equality, provider receipt, response, and stage state. Confirm the same five-chapter source/binding does not rerun chapters, clip conditions, or lower thinking/output; then repair and verify UIR-020 owner routing before using later owner/stage evidence to assess the full chain.",
+  "verification": "Offline proof is recorded in ROOT_CAPACITY_PROOF.json and the v25_coordinator_capacity README: six new plus 77 existing checks, 143 lossless references, and the measured capacity reduction. V26 passed the real capacity gate and its coordinator response was root-approved with an 88.219-second provider elapsed time. Owner routing then exposed UIR-020 and was stopped at unpaid gates; full-chain and unattended success remain unverified."
+    },
+    {
+      "id": "UIR-019",
+      "classification": "formal_repair_produced_and_used",
+      "title": "V25 resume reentered chapters_tools because the closed-stage consumer cache omitted it",
+      "trigger": "During V25 --resume, the closed/accepted_tool_cycle_cache consumer mapping did not include chapters_tools. Although the stage was complete and five saved chapter packets had consumed the relevant tool need/material, resume reentered query-refinement. The unpaid gate b036fe1f390253bfa3db32743ac8134842d8f92944af6171b78b94928970fc0b had no decision or INVOCATION.",
+      "actual_impact": "The recovery path exposed a real risk of repeating a closed stage and was stopped before query-refinement dispatch. No provider was started, no ledger changed, and no new fee was incurred in this attempt. V26 reused the prior stages and five chapter packets without a repeated query-refinement call and reached the root-approved whole-plan request, which verifies the seam's real reuse behavior but does not certify unattended operation or scientific coordination.",
+      "temporary_handling": "Root safely stopped PID 9376 at the unpaid gate according to V25_UNPAID_STOP.json, preserving all results and budgets. The unpaid gate was not dispatched further. Root then selected the new V26 source/binding and supervised PID 29780; the stop and binding change remain human supervision rather than autonomous recovery.",
+      "formal_capability_status": "Formal repair produced and used in the V26 source-bound lineage. Commit dc1b73aa7d95e6ac4a4277559fdf4b11763ca889 adds chapters_tools consumer support: a complete valid five-chapter packet and tool need must match every non-handle field; handle rebinding is allowed only for a stable paper_id with all other source fields equal; _stage still compares the current input contract, so a new task, material, model, or explicit retry invalidates reuse. Ten new cases plus 13 existing and 6 coordinator checks (29 total), and a free proof over 16 tool rows and 5 packets, passed offline. V26 real execution reused the prior stages and five packets without repeating query-refinement; changed-contract invalidation has offline evidence, while full unattended certification remains open.",
+    "current_boundary": "The V25 reentry and manual unpaid stop are real. V25_UNPAID_STOP.json records provider_started=false and ledger_changed=false. V26 is source dc1b73aa7d95e6ac4a4277559fdf4b11763ca889 with RUN_BINDING_PLANNING_V26_CHAPTER_CONSUMERS_20261014.json and PID 29780; whole-plan request 38e897ed was root-approved with measured_input_tokens=373656, estimated_input=426687, and estimated_reservation_cny=2.886396. That request-review file is a request-phase snapshot with response_sha256=null; ROOT_V26_COORDINATOR_RESPONSE_REVIEW.json later records the approved coordinator response. Neither response nor reuse proves complete owner routing or unattended autonomy; root stop/new-binding actions remain supervised.",
+      "evidence": [
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/V25_REENTERED_CHAPTER_TOOLS_RUN_STATE.json",
+          "locator": "V25 resumed state retaining completed chapters_tools and the reentry context"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/V25_UNPAID_STOP.json",
+          "locator": "unpaid gate b036fe1f, pid=9376, reason=completed chapter tool cache reentered, provider_started=false, ledger_changed=false"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ROOT_CHAPTER_CONSUMER_CACHE_PROOF.json",
+          "locator": "accepted_chapter_tool_consumer_cache=true; five packet hashes; expected follow-up is _stage comparison of current effective input contract"
+        },
+        {
+          "path": "worktree/docs/verification/ab-unattended-20261013/v25_coordinator_capacity/README.md",
+          "locator": "recovery seam section; ten new checks and free verification over 16 chapter tool rows and five packets"
+        },
+        {
+          "path": "execution_sources/planning_resume_v26",
+          "locator": "git commit dc1b73aa7d95e6ac4a4277559fdf4b11763ca889; committed chapters_tools consumer compatibility and current-contract invalidation"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V26.json",
+          "locator": "source_commit=dc1b73aa, pid=29780, previous_pid_exited=9376, same native output and ledgers, and no_scientific_answers_injected=true"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V26_CHAPTER_CONSUMERS_20261014.json",
+          "locator": "V26 source-bound binding used for the real reuse verification"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V26_COORDINATOR_REQUEST_REVIEW.json",
+      "locator": "request-phase snapshot: root approve whole-plan request 38e897ed; measured_input_tokens=373656; estimated_input=426687; estimated_reservation_cny=2.886396; response_sha256=null at request review"
+        }
+      ],
+  "raw_paid_rejected_facts": "Gate b036fe1f390253bfa3db32743ac8134842d8f92944af6171b78b94928970fc0b was an unpaid stop with no decision or INVOCATION; provider_started=false and ledger_changed=false. No provider rejection, paid call, or coordinator response is attributed to the V25 reentry. V26's request-review snapshot has response_sha256=null because it is a request-phase record; a later ROOT_V26_COORDINATOR_RESPONSE_REVIEW.json records the root-approved coordinator response. Reuse verification, owner routing, and scientific coordination remain separate.",
+      "repair_proposal": "Keep the committed dc1b73aa chapters_tools consumer contract: require full packet/tool-need equality over all non-handle fields, permit handle rebinding only under stable paper identity and equal remaining source fields, and run the existing _stage current-input-contract check on every resume. Emit a reuse receipt for same-contract zero-call reuse and invalidate on task/material/model/explicit-retry changes. Retain root stop and new-binding actions as supervised controls until unattended certification exists.",
+  "verification": "The 29-case suite and real 16-row/five-packet free proof passed, and V26 source-bound execution reused prior stages and five packets without a repeated query-refinement call before reaching the root-approved whole-plan request. Changed-contract invalidation has offline evidence, and the later coordinator response review is captured separately. Owner routing and downstream stage evidence remain open; do not infer unattended success from reuse or request approval alone."
+    },
+    {
+      "id": "UIR-020",
+      "classification": "formal_fix_in_progress",
+      "title": "Coordinator cross-chapter adjustments were not fully routed into owner feedback",
+      "trigger": "V26's complete coordinator response was root-approved and contained five cross_chapter_adjustments with concept, primary_chapter, and re_appearance_value assignments. The owner feedback_by_chapter route recognized only chapter_id/id, so the CH1, CH2, and CH3 actual REQUEST inputs received scalar thesis/objective feedback while all five responsibility entries were omitted.",
+      "actual_impact": "The paid coordinator result is retained and is not rerun, but CH1 through CH3 owners did not receive the cross-chapter responsibility feedback. Their later revisions cannot be treated as having applied the complete coordinator adjustment. Root safely stopped PID 29780 at the three unpaid owner gates; no owner provider started and no manual scientific feedback was injected.",
+      "temporary_handling": "Root preserved the coordinator raw gate/response and the actual owner inputs, then stopped before dispatching unpaid owner gates d7a157f4e77439d57ee52a57b556ffd9df4549baaefb7301c0ebe72eb5f8331d, dc663c95b9c9f40822c14ac2055ef381921641b6a56247f10345942b9ff2059f, and b716af549208f0d62bf45decb753ae28250c15a433b966d69a9574fe3694b847. A generic known-chapter routing repair is in progress; it preserves the original model text, leaves prompts/models/budget unchanged, and does not hand-write scientific answers. V27 native reuse plus new owner-input verification is pending.",
+      "formal_capability_status": "formal_fix_in_progress. The current route reliably handles scalar feedback carrying chapter_id/id; the planned generic route will use known chapter IDs, preserve complete original entries, and hold or fail closed on unknown or ambiguous entries. No production-adopted repair receipt exists yet, so V26 owner output is not evidence that the repair was used.",
+      "current_boundary": "This is a real owner-routing defect exposed after a paid, root-approved coordinator response, not a coordinator-quality rejection. The response review records gate 38e897ed, provider elapsed 88.21899999999732 seconds, and scientific_answers_injected=false. Owner provider calls were not started and the unpaid gates have no owner response; the full chain and unattended behavior remain unverified.",
+      "evidence": [
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V26_COORDINATOR_RESPONSE_REVIEW.json",
+          "locator": "phase=response; decision=approve; gate=38e897ed; response_sha256=656152314b10de281b870b2c3a508bdd44e5b9a544915f5bff1216557a5be38c; root review records five concrete primary/reappearance role assignments"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/V26_OWNER_FEEDBACK_UNPAID_STOP.json",
+          "locator": "pid=29780; three unpaid owner gates; owner_provider_started=false; manual_scientific_feedback_added=false"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ACTUAL_OWNER_CH1_INPUT.json",
+          "locator": "actual CH1 REQUEST contains scalar chapter_feedback thesis/objective shape; editorial_feedback_for_chapter is empty"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ACTUAL_OWNER_CH2_INPUT.json",
+          "locator": "actual CH2 REQUEST contains scalar chapter_feedback thesis/objective shape; editorial_feedback_for_chapter is empty"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ACTUAL_OWNER_CH3_INPUT.json",
+          "locator": "actual CH3 REQUEST contains scalar chapter_feedback thesis/objective shape; editorial_feedback_for_chapter is empty"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ACTUAL_COORDINATOR_PAYLOAD_RESOLVED.json",
+          "locator": "resolved coordinator input reconstruction used for the V26 native request; pair with response review for returned assignments"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/V26_OWNER_FEEDBACK_OMISSION_RUN_STATE.json",
+          "locator": "owner-feedback omission/recovery state for the missing chapter routing"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V26.json",
+          "locator": "source-bound V26 native process identity and no scientific answer injection"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V26_CHAPTER_CONSUMERS_20261014.json",
+          "locator": "V26 source/binding identity used for the native coordinator and owner path"
+        }
+      ],
+      "raw_paid_rejected_facts": "Coordinator gate 38e897ed was root-approved and its paid result is retained; it is not a provider rejection and is not rerun. The three owner gates were unpaid safety stops with owner_provider_started=false, so there is no owner decision, response, fee, or provider rejection to report. Do not infer provider state or idempotency support where the provider does not officially expose it.",
+      "repair_proposal": "Route only known chapter IDs while preserving the full original model entry, including concept, primary_chapter, and re_appearance_value; do not merge different content under one ID or write scientific answers. Hold or fail closed on unknown/ambiguous IDs with an auditable diagnostic. Reuse the paid V26 coordinator response in V27, verify that CH1 through CH3 inputs contain all five responsibility entries without cross-chapter loss, and then inspect owner responses, stage state, and root review with prompts/models/budget unchanged.",
+      "verification": "V26 coordinator approval and the omission in all three actual owner inputs are evidenced; unpaid owner stopping prevented a paid owner response. Formal routing repair and V27 native-input verification are pending, so this item remains open and does not imply a whole-chain or unattended pass."
     }
   ],
   "not_current_failures": [
