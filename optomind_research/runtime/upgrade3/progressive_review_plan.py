@@ -1706,7 +1706,48 @@ def build_candidate_navigation(
     }
 
 
+def _share_exact_review_materials(payload: Mapping[str, Any]) -> tuple[dict[str, Any], int]:
+    """Share exact repeated context within a coordinator request, without trimming.
+
+    Keep the first complete value in place. Later identical large values use
+    an in-request JSON Pointer; paper identity alone never establishes equality.
+    Chapters, materials and cached packets themselves remain unchanged.
+    """
+    seen: dict[str, str] = {}
+    references = 0
+
+    def visit(value: Any, pointer: str) -> Any:
+        nonlocal references
+        if isinstance(value, (Mapping, list, tuple, str)):
+            encoded = json.dumps(value, ensure_ascii=False, sort_keys=True,
+                                 separators=(",", ":"), default=_json_default)
+            if len(encoded) >= 2000:
+                if encoded in seen:
+                    references += 1
+                    return {"$ref": seen[encoded]}
+                seen[encoded] = pointer
+        if isinstance(value, Mapping):
+            return {key: visit(child, pointer + "/" + str(key).replace("~", "~0").replace("/", "~1"))
+                    for key, child in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [visit(child, pointer + "/" + str(index)) for index, child in enumerate(value)]
+        return value
+
+    return visit(payload, "#"), references
+
+
 def _messages_for(stage: str, payload: Mapping[str, Any]) -> list[dict[str, str]]:
+    # The global coordinator may see the same full card/answer in several
+    # chapters and tool histories. Share exact copies, never scientific fields.
+    material_reference_note = ""
+    if stage == "whole_plan_improvement":
+        payload, shared_count = _share_exact_review_materials(payload)
+        if shared_count:
+            material_reference_note = (
+                "\n材料共享说明：{\"$ref\":\"#/...\"} 指向本请求JSON内首次出现的完整内容，"
+                "按JSON Pointer展开阅读（~1表示/，~0表示~），不是缺失材料或外部文件。"
+                "引用位置沿用原章节和用途；相同内容共享不代表不同论文身份合并。\n"
+            )
     rendered_payload = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), default=_json_default)
     planning_revision = bool(payload.get("planning_revision_mode"))
     # BODY case additions use one formal contract in both modes.  The
@@ -1734,7 +1775,7 @@ def _messages_for(stage: str, payload: Mapping[str, Any]) -> list[dict[str, str]
         )
     return [
         {"role": "system", "content": _planner_instructions(stage, planning_revision=planning_revision)},
-        {"role": "user", "content": "当前任务：" + stage + "\n" + rendered_payload + "\n\n【本轮交付】" + task_output},
+        {"role": "user", "content": "当前任务：" + stage + "\n" + material_reference_note + rendered_payload + "\n\n【本轮交付】" + task_output},
     ]
 
 
