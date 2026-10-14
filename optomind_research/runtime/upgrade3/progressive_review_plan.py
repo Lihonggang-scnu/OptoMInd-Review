@@ -6284,8 +6284,8 @@ class ProgressiveReviewPlanner:
                         break
                 if resume and compatible_success is not None:
                     return index, compatible_success
-                try:
-                    record = _call_record(self.planner, "affected_chapter_revision", revision_payload)
+
+                def classify_record(record: Mapping[str, Any]) -> dict[str, Any]:
                     response = _stage_response(record)
                     adopted_materials, adoption_resolution = _close_owner_response_materials(revision_payload, response)
                     owner_status, updated_plan, unit_id_remap, structural_errors = _classify_owner_response(
@@ -6294,7 +6294,7 @@ class ProgressiveReviewPlanner:
                         adopted_materials,
                         expected_chapter_id=chapter_id,
                     )
-                    saved = {
+                    return {
                         "chapter_id": chapter_id,
                         "status": "complete" if owner_status in {"updated", "no_change"} else "partial",
                         "owner_status": owner_status,
@@ -6307,6 +6307,42 @@ class ProgressiveReviewPlanner:
                         "telemetry": record.get("telemetry") or {},
                         "cache_inputs": dict(revision_payload),
                     }
+
+                # A paid, returned JSON with this exact original contract is
+                # already an answer. Reuse it before buying any new base call.
+                # Repair provenance stays outside the original cache contract.
+                repair_root = revision_root / "contract_repairs" / _safe_id(chapter_id) / owner_contract
+                first_path = repair_root / "first_attempt.json"
+                saved = None
+                for prior_path in (first_path, cache_path):
+                    if not prior_path.is_file():
+                        continue
+                    try:
+                        prior = _read_json(prior_path)
+                    except ProgressivePlanError:
+                        if prior_path == first_path:
+                            break
+                        prior = {}
+                    if (isinstance(prior, Mapping) and prior.get("status") == "partial"
+                            and prior.get("chapter_id") == chapter_id
+                            and prior.get("owner_cache_contract") == owner_contract
+                            and _owner_cache_projection(prior.get("cache_inputs")) == projection
+                            and isinstance(prior.get("response"), Mapping)):
+                        saved = classify_record(prior)
+                        break
+                    if prior_path == first_path:
+                        break
+                if saved is None and (first_path.is_file() or (repair_root / "request.json").is_file()):
+                    # Never repurchase a base answer to replace missing or
+                    # unreadable provenance for an already claimed repair.
+                    saved = {"chapter_id": chapter_id, "status": "partial", "owner_status": "unresolved",
+                             "cache_inputs": dict(revision_payload),
+                             "structural_errors": ["owner_contract_repair_original_response_unavailable"],
+                             "contract_repair": {"status": "in_flight_or_unknown",
+                                                 "request_path": str(repair_root / "request.json")}}
+                try:
+                    if saved is None:
+                        saved = classify_record(_call_record(self.planner, "affected_chapter_revision", revision_payload))
                 except Exception as exc:
                     saved = {
                         "chapter_id": chapter_id,
@@ -6316,6 +6352,91 @@ class ProgressiveReviewPlanner:
                         "error_detail": str(exc)[:1000],
                         "cache_inputs": dict(revision_payload),
                     }
+
+                # Only repair a complete returned JSON rejected by the output,
+                # ID or supplied-source contract. Provider errors and explicit
+                # unresolved/partial answers are not a request to try again.
+                errors = saved.get("structural_errors") or []
+                repairable = saved.get("status") == "partial" and errors and all(
+                    error in {
+                        "owner_response_missing_complete_plan", "owner_response_chapter_mismatch",
+                        "updated_plan_duplicate_unit_ids",
+                        "structural_unit_change_requires_explicit_unit_ids_and_remap",
+                        "structural_unit_change_old_units_missing_stable_ids",
+                        "unit_id_remap_references_unknown_unit", "unit_id_remap_missing_new_unit",
+                        "unit_id_remap_missing_previous_unit",
+                    } or error.startswith("updated_unit_sources_unavailable:") for error in errors
+                )
+                if repairable:
+                    repair_root.mkdir(parents=True, exist_ok=True)
+                    claim_path = repair_root / "request.json"
+                    result_path = repair_root / "result.json"
+                    failure_path = repair_root / "failure.json"
+                    # The original response and its charges survive every
+                    # repair outcome, including interruption before validation.
+                    if not first_path.is_file():
+                        _atomic_json(first_path, {**saved, "owner_cache_contract": owner_contract,
+                                                 "cache_projection": projection})
+                    first_attempt = _read_json(first_path)
+                    repair_payload = {
+                        **revision_payload,
+                        "call_id": f"affected-chapter-revision-contract-repair-{_safe_id(chapter_id)}-{owner_contract}",
+                        "contract_repair": {
+                            "version": 1,
+                            "scope": "output_structure_only",
+                            "previous_response": first_attempt["response"],
+                            "diagnostics": first_attempt.get("structural_errors") or [],
+                            "instructions": [
+                                "Repair the returned JSON output contract using all original materials and the previous response.",
+                                "Preserve supported substantive content; do not invent evidence or supply empty placeholder content.",
+                                "Return status updated or no_change and chapter_updates containing this chapter's complete updated_plan.",
+                                "updated_plan must contain the complete units list, preserving valid original plan content and paragraph_briefs.",
+                                "Use explicit stable unit_id values. If splitting, merging or replacing units, supply unit_id_remap from new IDs to original IDs.",
+                                "If unit_identity_contract.existing_unit_ids is empty, preserve the original unit structure and knowledge responsibilities. Do not guess old IDs or make splits/merges that cannot be validated against known IDs; do not reduce knowledge content merely to satisfy the format.",
+                                "Do not guess a unit mapping by list position or merely rename another field to units. Decide the mapping yourself from the complete original plan and response.",
+                                "Reference only source handles in the supplied materials and preserve their conditions and limits.",
+                                "If a faithful complete result cannot be returned, explicitly report unresolved; do not fake success.",
+                            ],
+                        },
+                    }
+                    repair_meta = {"owner_cache_contract": owner_contract,
+                                   "first_attempt_path": str(first_path), "request_path": str(claim_path),
+                                   "result_path": str(result_path), "failure_path": str(failure_path),
+                                   "call_id": repair_payload["call_id"]}
+                    claimed = False
+                    try:
+                        # Exclusive creation is also a durable at-most-once
+                        # claim. An incomplete/unreadable claim is never retried.
+                        with claim_path.open("x", encoding="utf-8") as stream:
+                            json.dump({**repair_meta, "status": "in_flight_or_unknown",
+                                       "payload": repair_payload}, stream, ensure_ascii=False,
+                                      indent=2, default=_json_default)
+                            stream.flush()
+                            os.fsync(stream.fileno())
+                        claimed = True
+                    except FileExistsError:
+                        pass
+                    if claimed:
+                        try:
+                            repair_record = _call_record(self.planner, "affected_chapter_revision", repair_payload)
+                            _atomic_json(result_path, repair_record)
+                        except Exception as exc:
+                            _atomic_json(failure_path, {**repair_meta, "status": "failed_or_unknown",
+                                "error": type(exc).__name__, "error_detail": str(exc)[:1000]})
+                    repair_meta["status"] = "in_flight_or_unknown"
+                    if result_path.is_file():
+                        try:
+                            repair_record = _read_json(result_path)
+                            if not isinstance(repair_record, Mapping) or not isinstance(repair_record.get("response"), Mapping):
+                                raise ProgressivePlanError("owner_contract_repair_invalid_saved_record")
+                            saved = classify_record(repair_record)
+                            repair_meta["status"] = saved["status"]
+                        except (ProgressivePlanError, TypeError, ValueError, KeyError) as exc:
+                            repair_meta["status"] = "invalid_saved_result"
+                            repair_meta["error"] = type(exc).__name__
+                    elif failure_path.is_file():
+                        repair_meta["status"] = "failed_or_unknown"
+                    saved["contract_repair"] = repair_meta
                 saved["cache_projection"] = projection
                 saved["cache_signature"] = _material_content_signature(projection)
                 saved["owner_cache_contract"] = owner_contract

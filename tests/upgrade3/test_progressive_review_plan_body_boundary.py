@@ -47,7 +47,7 @@ STAGES = (
 def planner_functions():
     """Execute production function bodies only; no model/client/network imports."""
     names = {
-        "_json_default", "_text", "_planner_instructions", "_messages_for",
+        "_json_default", "_text", "_planner_instructions", "_messages_for", "_share_exact_review_materials",
         "_outline_chapter_rows", "_compact_routing_outline", "_chapter_units",
     }
     source = ast.parse(SOURCE_PATH.read_text(encoding="utf-8"))
