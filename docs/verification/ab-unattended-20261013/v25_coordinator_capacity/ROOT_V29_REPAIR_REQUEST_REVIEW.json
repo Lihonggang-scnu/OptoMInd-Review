@@ -1,0 +1,40 @@
+{
+  "schema": "root.owner_v2_request_review.v1",
+  "gate": "5cf3168293b130453da4ef3a3f1bb5d24b95ab27595b4a57ae035bd65da3a002",
+  "request_sha256": "a33fe1919266951586bf55b288c00e284b8fe3565fe268870286582c616fa116",
+  "source_commit": "8602e1c0cd3273067e773b6a63aa22af3c03d041",
+  "original_current_plan_and_material_fields_equal": true,
+  "original_chapter_context_preserved_read_only": true,
+  "sole_editable_object": "chapter_plan.units",
+  "units": 4,
+  "unit_schema_fields": [
+    "cases",
+    "ordered_development",
+    "paragraph_briefs",
+    "relations_limits",
+    "substantive_point",
+    "transition"
+  ],
+  "human_scientific_feedback_added": false,
+  "profile": {
+    "model": "qwen3.5-plus",
+    "thinking_budget": 16384,
+    "max_output_tokens": 32768,
+    "connection": "direct",
+    "key_index": 1,
+    "max_retries": 0
+  },
+  "preview": {
+    "estimated_reservation_cny": 2.24108,
+    "prompt_estimate": {
+      "framing_margin": 8192,
+      "measured_tokens": 229612,
+      "method": "provided_token_counter",
+      "multiplier": 1.12,
+      "prompt_tokens": 265358
+    },
+    "wire_body_sha256": "5ab23671dd5aef9bd30f553b1d8e239b8574b7eb79c57de6ac92c083afdc514a",
+    "wire_bytes": 907674
+  },
+  "last_delivery": "本次只修复被拒回答的输出合同。chapter_plan 是唯一可编辑的当前完整计划，chapter_plan.units 是当前单元；chapter_background 及 rejected_responses 仅为完整背景/失败历史，其中 substantive_threads 不是当前单元，不能把背景章壳或失败回答作为 updated_plan。保留当前各单元的知识职责、顺序、有效内容、案例和材料边界，不为符合格式减少知识。保留原有单元ID；原单元没有ID时不要求补ID，不能把新赋ID当作原有ID或编造旧ID映射，本次不拆合、不替换单元身份。仅依据原材料和原反馈修复交付，不引入新证据。返回完整 updated_plan，必须有 units 数组及各单元实际内容；不能把 substantive_threads 机械改名后冒充当前 units，不用空字段或类型示例冒充内容。无法忠实返回完整结果时明确 unresolved；材料和任务无需变化时可如实 no_change。当前计划有 4 个单元，输出 units 保持该数量和知识职责；下面的数组元素仅表示类型。\n输出结构（仅字段和类型，不是待填科学答案）：{\"status\":\"updated | no_change | unresolved\",\"chapter_updates\":[{\"chapter_id\":\"string\",\"updated_plan\":{\"reader_objective\":\"string\",\"thesis\":\"string\",\"units\":[{\"cases\":[{\"conditions\":\"string\",\"finding\":\"string\",\"object_setting\":\"string\",\"source_handle\":\"string\"}],\"ordered_development\":\"string\",\"paragraph_briefs\":[{\"development\":\"string\",\"point\":\"string\",\"source_handles\":[\"string\"]}],\"relations_limits\":\"string\",\"substantive_point\":\"string\",\"transition\":\"string\"}]}}]}"
+}

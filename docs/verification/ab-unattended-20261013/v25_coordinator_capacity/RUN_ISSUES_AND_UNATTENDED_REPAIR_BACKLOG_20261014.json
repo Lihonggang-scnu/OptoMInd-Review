@@ -494,13 +494,13 @@
     },
     {
       "id": "UIR-020",
-      "classification": "formal_fix_in_progress",
+      "classification": "formal_repair_produced_and_used",
       "title": "Coordinator cross-chapter adjustments were not fully routed into owner feedback",
       "trigger": "V26's complete coordinator response was root-approved and contained five cross_chapter_adjustments with concept, primary_chapter, and re_appearance_value assignments. The owner feedback_by_chapter route recognized only chapter_id/id, so the CH1, CH2, and CH3 actual REQUEST inputs received scalar thesis/objective feedback while all five responsibility entries were omitted.",
-      "actual_impact": "The paid coordinator result is retained and is not rerun, but CH1 through CH3 owners did not receive the cross-chapter responsibility feedback. Their later revisions cannot be treated as having applied the complete coordinator adjustment. Root safely stopped PID 29780 at the three unpaid owner gates; no owner provider started and no manual scientific feedback was injected.",
-      "temporary_handling": "Root preserved the coordinator raw gate/response and the actual owner inputs, then stopped before dispatching unpaid owner gates d7a157f4e77439d57ee52a57b556ffd9df4549baaefb7301c0ebe72eb5f8331d, dc663c95b9c9f40822c14ac2055ef381921641b6a56247f10345942b9ff2059f, and b716af549208f0d62bf45decb753ae28250c15a433b966d69a9574fe3694b847. A generic known-chapter routing repair is in progress; it preserves the original model text, leaves prompts/models/budget unchanged, and does not hand-write scientific answers. V27 native reuse plus new owner-input verification is pending.",
-      "formal_capability_status": "formal_fix_in_progress. The current route reliably handles scalar feedback carrying chapter_id/id; the planned generic route will use known chapter IDs, preserve complete original entries, and hold or fail closed on unknown or ambiguous entries. No production-adopted repair receipt exists yet, so V26 owner output is not evidence that the repair was used.",
-      "current_boundary": "This is a real owner-routing defect exposed after a paid, root-approved coordinator response, not a coordinator-quality rejection. The response review records gate 38e897ed, provider elapsed 88.21899999999732 seconds, and scientific_answers_injected=false. Owner provider calls were not started and the unpaid gates have no owner response; the full chain and unattended behavior remain unverified.",
+      "actual_impact": "The V26 paid coordinator result is retained and is not rerun, but its CH1 through CH3 owners did not receive the complete cross-chapter responsibility feedback; that path cannot be treated as having applied the full coordinator adjustment. Root safely stopped PID 29780 at the three unpaid owner gates, with no owner provider start or manual scientific feedback. After the repair, V27 actual owner REQUEST inputs received 3/3/5 original role entries, with full A/B, deep, and candidate material preserved; final owner quality remains pending.",
+      "temporary_handling": "Root preserved the V26 coordinator raw gate/response and omission inputs, then stopped before dispatching unpaid owner gates d7a157f4e77439d57ee52a57b556ffd9df4549baaefb7301c0ebe72eb5f8331d, dc663c95b9c9f40822c14ac2055ef381921641b6a56247f10345942b9ff2059f, and b716af549208f0d62bf45decb753ae28250c15a433b966d69a9574fe3694b847. V27 native resume reused the paid whole-plan result without repaying it; root reviewed and approved the three owner request gates in parallel. No scientific or editorial feedback was manually injected.",
+      "formal_capability_status": "formal_repair_produced_and_used. Commit 33a2d2297f94b2659920cb3229b264f5e676a383 is pushed and bound to V27. The generic route uses known chapter IDs and preserves complete original model entries; five new routing tests plus 43 existing handoff/contract tests passed. V27 real REQUEST inputs verified 3/3/5 role entries, original text, and material retention. This does not certify owner response quality or unattended completion.",
+      "current_boundary": "This is a real owner-routing defect exposed after a paid, root-approved coordinator response and subsequently used to verify the formal repair, not a coordinator-quality rejection. V27 source is 33a2d2297f94b2659920cb3229b264f5e676a383 with PID 29964 and binding RUN_BINDING_PLANNING_V27_COORDINATOR_FEEDBACK_20261014.json. ROOT_V27_OWNER_REQUEST_REVIEWS.json contains request-phase approvals for CH1 through CH3; final owner responses/quality, downstream stage state, and unattended behavior remain unverified.",
       "evidence": [
         {
           "path": "preparation/ab_unattended_20261013/ROOT_V26_COORDINATOR_RESPONSE_REVIEW.json",
@@ -537,11 +537,118 @@
         {
           "path": "RUN_BINDING_PLANNING_V26_CHAPTER_CONSUMERS_20261014.json",
           "locator": "V26 source/binding identity used for the native coordinator and owner path"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V27_OWNER_REQUEST_REVIEWS.json",
+          "locator": "three request-phase root approvals; CH1/CH2/CH3 role_entries_delivered=3/3/5; manual_feedback_empty=true; full source/deep material counts retained; response_sha256=null because these are request reviews"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ACTUAL_V27_OWNER_CH1_INPUT.json",
+          "locator": "actual V27 CH1 REQUEST contains the scalar feedback plus 3 original role entries; full relevant A/B/deep/candidate projections retained; no manual scientific/editorial feedback"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ACTUAL_V27_OWNER_CH2_INPUT.json",
+          "locator": "actual V27 CH2 REQUEST contains the scalar feedback plus 3 original role entries; full relevant A/B/deep/candidate projections retained; no manual scientific/editorial feedback"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/coordination_capacity_fix_20261014/ACTUAL_V27_OWNER_CH3_INPUT.json",
+          "locator": "actual V27 CH3 REQUEST contains the scalar feedback plus 5 original role entries; full relevant A/B/deep/candidate projections retained; no manual scientific/editorial feedback"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V27.json",
+          "locator": "status=running_native_resume; pid=29964; source_commit=33a2d229; previous_pid_exited=29780; same_native_output_and_ledgers=true; no_scientific_answers_injected=true"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V27_COORDINATOR_FEEDBACK_20261014.json",
+          "locator": "V27 source-bound binding with coordinator_feedback_recovery; paid whole-plan reuse and no prompt/model/budget change"
+        },
+        {
+          "path": "execution_sources/planning_resume_v27",
+          "locator": "source-bound worktree for commit 33a2d2297f94b2659920cb3229b264f5e676a383"
         }
       ],
-      "raw_paid_rejected_facts": "Coordinator gate 38e897ed was root-approved and its paid result is retained; it is not a provider rejection and is not rerun. The three owner gates were unpaid safety stops with owner_provider_started=false, so there is no owner decision, response, fee, or provider rejection to report. Do not infer provider state or idempotency support where the provider does not officially expose it.",
-      "repair_proposal": "Route only known chapter IDs while preserving the full original model entry, including concept, primary_chapter, and re_appearance_value; do not merge different content under one ID or write scientific answers. Hold or fail closed on unknown/ambiguous IDs with an auditable diagnostic. Reuse the paid V26 coordinator response in V27, verify that CH1 through CH3 inputs contain all five responsibility entries without cross-chapter loss, and then inspect owner responses, stage state, and root review with prompts/models/budget unchanged.",
-      "verification": "V26 coordinator approval and the omission in all three actual owner inputs are evidenced; unpaid owner stopping prevented a paid owner response. Formal routing repair and V27 native-input verification are pending, so this item remains open and does not imply a whole-chain or unattended pass."
+      "raw_paid_rejected_facts": "V26 coordinator gate 38e897ed was root-approved and its paid result is retained; it is not a provider rejection and is not rerun. The three V26 owner gates were unpaid safety stops with owner_provider_started=false, so there is no V26 owner decision, response, fee, or provider rejection. V27 native resume reused the already-paid whole-plan result without a second coordinator payment; its three owner request reviews are approve decisions at request phase with response_sha256=null, not owner responses or final quality results. No manual scientific/editorial feedback was injected. Do not infer provider state or idempotency support where the provider does not officially expose it.",
+      "repair_proposal": "Keep the committed known-chapter route preserving the full original model entry, including concept, primary_chapter, and re_appearance_value; do not merge different content under one ID or write scientific answers. Hold or fail closed on unknown/ambiguous IDs with an auditable diagnostic. V27 has already reused the paid V26 coordinator response and verified 3/3/5 role entries with original material retained; next inspect owner responses, final owner quality, stage state, and root review with prompts/models/budget unchanged.",
+      "verification": "V26 coordinator approval, the omission in all three V26 actual owner inputs, and the V26 unpaid stop are evidenced. Commit 33a2d229 passed five new routing tests plus 43 existing handoff/contract tests, and V27 native requests verified the original role entries in CH1/CH2/CH3 as 3/3/5 with full material projections and empty manual feedback. Final owner responses/quality and whole-chain unattended certification remain open."
+    },
+    {
+      "id": "UIR-021",
+      "classification": "formal_repair_produced_and_used",
+      "title": "Owner editing-object ambiguity was repaired by V29 v2 after retained V27/V28 failures",
+      "trigger": "The real V27 CH3 owner response supplied an updated_plan containing five substantive_threads but no units, while the valid prior plan had four units. V28 still returned the thread layout and guessed old IDs, producing structural_unit_change_old_units_missing_stable_ids and unit_id_remap_references_unknown_unit. The seam was an ambiguity between the chapter's old five-thread context and the current four-unit chapter_plan editing object.",
+      "actual_impact": "V27 and V28 CH3 revisions were not quality-adopted; their raw/partial records and the original four-unit plan remain preserved. V29 v2 made chapter_plan.units the sole editable object and old chapter threads read-only background. Its actual native response returned errors=[], four units, 12 briefs, and 20 cases with the same per-unit source sets and retained conditions, then continued into case_groups without manual state edits. Final deliverability is determined by complete valid chapters plus subsequent strengthening output and consumer validation, and has not reached final. The old P0157/Alvarez source error remains a source fact; no corrective scientific answer was injected.",
+      "temporary_handling": "Root safely stopped V28 at unpaid gate 1185b6f0ad7810697c9eef47d8bdaacc1a844e0da7c6d83caacdbcf0e9d67e7d with reserved=0, preserving native state and the saved CH1 case batch; the V1 paid failure/claim was not rewritten. V29 then ran one independent v2 recovery with full materials and no hand-written fields, without repaying the coordinator or other owners. Native post_planning_handoff/load_complete_packets can preserve complete valid chapters while scientific revision remains partial.",
+      "formal_capability_status": "formal_repair_produced_and_used. Commit 8602e1c0cd3273067e773b6a63aa22af3c03d041 is pushed and used by V29. Forty-eight targeted tests plus 30 root boundary checks passed as separate sets; they are not presented as a full-repository total. Root reviewed the V29 request/response: the current plan/material fields remained equal, old threads were read-only background, dynamic unit structure was explicit, no manual scientific feedback was added, and the native response was updated with no structural errors. This seam is repaired in real execution, while other unattended risks and final delivery quality remain uncertified.",
+      "current_boundary": "The CH3 owner revision was previously unresolved, but V29 now returned a structurally valid four-unit update; partial status is not treated as an automatic final-plan blocker. V29 is source 8602e1c0cd3273067e773b6a63aa22af3c03d041, PID 8860, binding RUN_BINDING_PLANNING_V29_OWNER_AUTHORITATIVE_INPUT_20261014.json with SHA256 0ace86577986b6ec091ba36c70947580bc87289590470aeffbf0799c8115a790, and gate 5cf3168293b130453da4ef3a3f1bb5d24b95ab27595b4a57ae035bd65da3a002. The V29 response has limited substantive changes; overbroad comparison/wording and a material-label issue remain recorded for later autonomous steps. Root still reviews current plan, case_groups/default strengthening, and actual consumers before final delivery.",
+      "evidence": [
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V27_CH3_OWNER_UNRESOLVED.json",
+          "locator": "chapter_id=CH3; gate=f8c295317ce73e3af2b75814dd5a03a266c00a56b1f12026454e5fe0ca6f832e; response_sha256=50784e454311b2d65c4db1a4f684d87dc2e6dcdf3bcd0b24c33908da227fb225; root approved raw delivery to native validator, explicitly not quality acceptance"
+        },
+        {
+          "path": "worktree/outputs/optics_e2e/07_progressive_review_plan_docling_20261013/stages/affected_chapter_revision/CH3.json",
+          "locator": "status=partial; owner_status=unresolved; structural_errors includes structural_unit_change_requires_explicit_unit_ids_and_remap; response status=updated; original four-unit chapter_plan remains in cache input"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/ROOT_V27_OWNER_RESPONSE_REVIEWS.json",
+          "locator": "CH1, CH2, CH4, and CH5 response rows are root approve with response hashes; these independent owner responses passed while CH3 stayed unresolved"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V27.json",
+          "locator": "V27 source-bound native process identity and no_scientific_answers_injected=true"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V27_COORDINATOR_FEEDBACK_20261014.json",
+          "locator": "V27 binding and ledger/supervision identity for the owner-response stage"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_contract_recovery_20261014/ROOT_V28_REPAIR_REQUEST_REVIEW.json",
+          "locator": "root-approved V28 recovery request snapshot; gate=cb099e5222d87a4e10ee9a01fd81704d1ca7f62e0cf99f1082c7670bf9f93fc7; request_sha256=d640437cebb1f8ff952f7417dcad5de95ad0ed727f0684720a6c5ace82da2e35; pair with the separate response review"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_contract_recovery_20261014/ROOT_V28_REPAIR_RESPONSE_REVIEW.json",
+          "locator": "root read response; owner_status=unresolved; returned_has_units=false; structural_errors=structural_unit_change_old_units_missing_stable_ids and unit_id_remap_references_unknown_unit; decision=allow_native_rejection_and_preserve_original_valid_plan; elapsed=140.98399999999674s; prompt_tokens=223315; completion_tokens=7729; adopt_repair=false"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V28.json",
+          "locator": "status=running_native_resume; pid=11176; source_commit=821640ef0493899db8812dd844ad97a7e8419293; previous_pid_exited=29964; same_native_output_and_ledgers=true; no_scientific_answers_injected=true"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V28_OWNER_CONTRACT_RECOVERY_20261014.json",
+          "locator": "binding_sha256=4215760cfa0611eed756f42758fac9fc78ad236799eb77f0469a73b4effd8ef9; source_commit=821640ef; physical_retries=0; key rotation=false"
+        },
+        {
+          "path": "execution_sources/planning_resume_v28",
+          "locator": "frozen source worktree for the owner-contract repair commit 821640ef0493899db8812dd844ad97a7e8419293"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_contract_recovery_20261014/V28_UNPAID_STOP.json",
+          "locator": "pid=11176 safely stopped at unpaid gate 1185b6f0ad7810697c9eef47d8bdaacc1a844e0da7c6d83caacdbcf0e9d67e7d; native state preserved; CH1 case batch saved; paid_inflight=0"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_contract_recovery_20261014/ROOT_V29_REPAIR_REQUEST_REVIEW.json",
+          "locator": "gate=5cf3168293b130453da4ef3a3f1bb5d24b95ab27595b4a57ae035bd65da3a002; request_sha256=a33fe1919266951586bf55b288c00e284b8fe3565fe268870286582c616fa116; source_commit=8602e1c0; original current-plan/material fields equal; chapter_plan.units sole editable object; old context read-only; human_scientific_feedback_added=false"
+        },
+        {
+          "path": "preparation/ab_unattended_20261013/owner_contract_recovery_20261014/ROOT_V29_REPAIR_RESPONSE_REVIEW.json",
+          "locator": "owner_status=updated; structural_errors=[]; four-unit response with 12 briefs and 20 cases; root_complete_response_read=true; elapsed=117.11000000000058s; prompt_tokens=229622; completion_tokens=6288; known_paid_repair_cny=0.5347; no manual scientific rewrite"
+        },
+        {
+          "path": "CURRENT_PROCESS_PLANNING_V29.json",
+          "locator": "status=running_native_resume; pid=8860; source_commit=8602e1c0; previous_pid_exited=11176; same_native_output_and_ledgers=true; no_scientific_answers_injected=true"
+        },
+        {
+          "path": "RUN_BINDING_PLANNING_V29_OWNER_AUTHORITATIVE_INPUT_20261014.json",
+          "locator": "binding_sha256=0ace86577986b6ec091ba36c70947580bc87289590470aeffbf0799c8115a790; V29 authoritative-input source binding"
+        },
+        {
+          "path": "execution_sources/planning_resume_v29",
+          "locator": "frozen source worktree for the V29 v2 owner editing-object repair"
+        }
+      ],
+      "raw_paid_rejected_facts": "V27 and V28 responses were delivered under approved gates to the native validator but were not quality-adopted; their structural decisions were program contract outcomes, not provider rejections. V28 unpaid stop preserved native state with paid_inflight=0. V29 request/response under gate 5cf3168293... completed the repair with actual known cost 0.5347 CNY; the response had no structural errors and native execution continued to case_groups. The snapshot then was project=14.7210831, account=24.0155579, unknown=4.5168676, reserved=0; interpret these through current SQL/ledger state and do not decompose unsupported per-call amounts. No manual scientific rewrite occurred, and earlier raw/partial failures remain preserved.",
+      "repair_proposal": "Keep the V29 v2 unique editing-object contract: chapter_plan.units is authoritative, old five-thread chapter context is read-only background, and units expose dynamic cases/ordered_development/paragraph_briefs/relations_limits/substantive_point/transition structure. Preserve all materials and conditions, reject guessed mappings or placeholder fields, and validate case_groups/default strengthening plus post_planning_handoff/load_complete_packets actual consumers. V29 repaired this seam; root must still review current-plan validity and later output before final delivery or any unattended certification.",
+      "verification": "V27/V28 raw failures, native structural errors, preserved four-unit plan, V28 unpaid stop, and independent CH1/CH2/CH4/CH5 approvals are evidenced. V29 commit 8602e1c0 passed 48 targeted checks and separate root 30 boundary checks, and its root-reviewed native response is updated with errors=[], four units, 12 briefs, 20 cases, equal source sets/current plan, and retained conditions. Native execution continued without manual edits; final current-plan/strengthening/consumer review and other unattended risks remain open."
     }
   ],
   "not_current_failures": [
