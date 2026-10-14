@@ -7,7 +7,7 @@ import pytest
 
 from optomind_research.runtime.upgrade3.progressive_review_plan import (
     ProgressivePlannerConfig, ProgressiveReviewPlanner, _atomic_json,
-    _classify_owner_response, _planner_call_settings,
+    _classify_owner_response, _planner_call_settings, _messages_for, _owner_contract_repair_payload,
 )
 
 
@@ -109,10 +109,12 @@ def test_saved_paid_partial_buys_only_repair_and_preserves_inputs_and_charges(tm
     output, improvement, planner = review(tmp_path, boundary)
     assert len(boundary.owners()) == 1
     repair = boundary.owners()[0]
-    assert {key: value for key, value in repair.items() if key not in {"call_id", "contract_repair"}} == {
-        key: value for key, value in original["cache_inputs"].items() if key != "call_id"}
-    assert repair["contract_repair"]["previous_response"] == original["response"]
-    assert repair["contract_repair"]["diagnostics"] == original["structural_errors"]
+    assert {key: value for key, value in repair.items() if key not in {"call_id", "contract_repair", "chapter", "chapter_background"}} == {
+        key: value for key, value in original["cache_inputs"].items() if key not in {"call_id", "chapter"}}
+    assert repair["chapter_background"] == original["cache_inputs"]["chapter"]
+    assert repair["contract_repair"]["rejected_responses"][0]["response"] == original["response"]
+    assert repair["contract_repair"]["diagnostics"][:len(original["structural_errors"])] == original["structural_errors"]
+    assert repair["contract_repair"]["diagnostics"][-1].startswith("updated_plan.units_missing:")
     assert repair["unit_identity_contract"]["existing_unit_ids"] == []
     assert repair["call_id"] != original["cache_inputs"]["call_id"]
     assert _planner_call_settings(planner.planner, "affected_chapter_revision", config=planner.config)["model"] == "offline-model"
@@ -230,7 +232,7 @@ def test_empty_returned_json_is_still_reused_as_a_paid_partial(tmp_path):
     boundary = Boundary()
     review(tmp_path, boundary)
     assert len(boundary.owners()) == 1
-    assert boundary.owners()[0]["contract_repair"]["previous_response"] == {}
+    assert boundary.owners()[0]["contract_repair"]["rejected_responses"][0]["response"] == {}
 
 
 @pytest.mark.parametrize("missing", ["first_attempt", "unreadable_first_attempt", "result"])
@@ -251,3 +253,153 @@ def test_damaged_journal_fails_closed_without_another_paid_call(tmp_path, missin
     assert boundary.owners() == []
     assert output[0]["chapter_plan"] == packet()["chapter_plan"]
     assert improvement["owner_revision_unresolved"] == ["CH1"]
+
+
+def test_v2_messages_choose_current_units_and_keep_full_background_without_guessing_ids():
+    item = packet()
+    item["chapter"]["substantive_threads"] = [{"thread_name": f"Background {i}"} for i in range(5)]
+    item["chapter_plan"]["units"] *= 4
+    payload = {**item, "chapter_id": "CH1", "planning_revision_mode": True}
+    repair = _owner_contract_repair_payload(payload, invalid_response(), ["missing units"])
+    assert repair["chapter_background"] == item["chapter"]
+    assert repair["chapter_plan"] == item["chapter_plan"]
+    assert repair["source_materials"] == item["source_materials"]
+    assert repair["chapter"] == {"chapter_id": "CH1"}
+    assert repair["contract_repair"]["current_unit_count"] == 4
+    schema = repair["contract_repair"]["output_schema"]["chapter_updates"][0]["updated_plan"]
+    assert schema["units"][0]["paragraph_briefs"][0]["source_handles"] == ["string"]
+    assert "substantive_threads" not in schema and "unit_id" not in schema["units"][0]
+    messages = _messages_for("affected_chapter_revision", repair)
+    for text in (messages[0]["content"], messages[1]["content"].rsplit("【本轮交付】", 1)[1]):
+        assert "chapter_plan 是唯一可编辑" in text
+        assert "原单元没有ID时不要求补ID" in text
+        assert "当前计划有 4 个单元" in text
+    assert "Original argument" not in json.dumps(schema)
+
+
+def seed_legacy_repair(root, original, response=None):
+    legacy = root / "stages/affected_chapter_revision/contract_repairs/CH1" / original["owner_cache_contract"]
+    _atomic_json(legacy / "first_attempt.json", original)
+    _atomic_json(legacy / "request.json", {"version": 1, "payload": original["cache_inputs"]})
+    _atomic_json(legacy / "result.json", {"response": response or invalid_response(),
+                                          "telemetry": {"test_charge_reference": "legacy-v1-charge"}})
+    return legacy
+
+
+def test_failed_v1_gets_one_new_v2_contract_without_mutating_old_paid_records(tmp_path):
+    original = seed_paid_partial(tmp_path)
+    legacy = seed_legacy_repair(tmp_path, original)
+    before = {p.name: p.read_bytes() for p in legacy.glob("*.json")}
+    boundary = Boundary()
+    review(tmp_path, boundary)
+    assert len(boundary.owners()) == 1
+    repair = boundary.owners()[0]
+    assert repair["contract_repair"]["version"] == 2
+    assert [r["origin"] for r in repair["contract_repair"]["rejected_responses"]] == ["original_owner", "contract_repair_v1"]
+    saved = read(latest(tmp_path))
+    assert saved["contract_repair"]["repair_cache_contract"]
+    assert Path(saved["contract_repair"]["request_path"]).parent.parent.name == "v2"
+    assert {p.name: p.read_bytes() for p in legacy.glob("*.json")} == before
+    boundary.calls.clear()
+    review(tmp_path, boundary)
+    assert boundary.calls == []
+
+
+def test_v2_accepts_new_ids_without_mapping_to_nonexistent_old_ids(tmp_path):
+    seed_paid_partial(tmp_path)
+    class InventedIdentity(Boundary):
+        def __call__(self, stage, payload):
+            result = super().__call__(stage, payload)
+            if stage == "affected_chapter_revision":
+                result["response"]["chapter_updates"][0]["updated_plan"]["units"][0]["unit_id"] = "invented-old-ID"
+            return result
+    boundary = InventedIdentity()
+    output, improvement, _ = review(tmp_path, boundary)
+    assert read(latest(tmp_path))["status"] == "complete"
+    assert output[0]["chapter_plan"]["units"][0]["unit_id"] == "invented-old-ID"
+    boundary.calls.clear()
+    review(tmp_path, boundary)
+    assert boundary.calls == []
+    assert improvement["owner_revision_unresolved"] == []
+
+
+@pytest.mark.parametrize("invalid", ["empty_units", "type_schema", "unknown_old_id"])
+def test_v2_rejects_contentless_schema_and_fabricated_old_mapping(tmp_path, invalid):
+    seed_paid_partial(tmp_path)
+    class InvalidRepair(Boundary):
+        def __call__(self, stage, payload):
+            result = super().__call__(stage, payload)
+            if stage == "affected_chapter_revision":
+                response = result["response"]
+                plan = response["chapter_updates"][0]["updated_plan"]
+                if invalid == "empty_units":
+                    plan["units"] = [{} for unit in payload["chapter_plan"]["units"]]
+                elif invalid == "type_schema":
+                    response["chapter_updates"][0]["updated_plan"] = copy.deepcopy(payload["contract_repair"]["output_schema"]["chapter_updates"][0]["updated_plan"])
+                else:
+                    plan["units"][0]["unit_id"] = "new-ID"
+                    response["unit_id_remap"] = {"new-ID": ["nonexistent-old-ID"]}
+            return result
+    boundary = InvalidRepair()
+    output, improvement, _ = review(tmp_path, boundary)
+    expected = {"empty_units": "missing_substantive_units", "type_schema": "returned_type_schema",
+                "unknown_old_id": "unknown_old_unit_identity"}[invalid]
+    assert read(latest(tmp_path))["structural_errors"] == ["owner_contract_repair:" + expected]
+    assert output[0]["chapter_plan"] == packet()["chapter_plan"]
+    assert improvement["owner_revision_unresolved"] == ["CH1"]
+    boundary.calls.clear()
+    review(tmp_path, boundary)
+    assert boundary.calls == []
+
+
+def test_v2_after_v1_failure_reuses_four_other_owners_and_coordinator(tmp_path):
+    items = []
+    for number in range(1, 6):
+        item = packet()
+        item["chapter"]["chapter_id"] = f"CH{number}"
+        items.append(item)
+    shared = {"chapters": [item["chapter"] for item in items]}
+    class FiveOwners(Boundary):
+        seed = True
+        def __call__(self, stage, payload):
+            if stage == "whole_plan_improvement":
+                self.calls.append((stage, copy.deepcopy(payload)))
+                return {"chapter_updates": [{"chapter_id": item["chapter"]["chapter_id"], "feedback": "Clarify"} for item in items]}
+            self.calls.append((stage, copy.deepcopy(payload)))
+            if payload["chapter_id"] == "CH3" and self.seed:
+                raise RuntimeError("Seed paid partial separately")
+            return {"status": "updated", "chapter_updates": [{"chapter_id": payload["chapter_id"],
+                                                                "updated_plan": copy.deepcopy(payload["chapter_plan"])}]}
+    boundary = FiveOwners()
+    config = ProgressivePlannerConfig(topic_id="topic", pool_path=tmp_path / "unused", plan_path=tmp_path / "unused",
+                                      output_dir=tmp_path, planning_revision_enabled=True, chapter_workers=1)
+    def run():
+        planner = ProgressiveReviewPlanner(config, planner=boundary)
+        state_path = tmp_path / "RUN_STATE.json"
+        return planner._post_case_review(root=tmp_path, topic="question", harmonized={"shared_outline": shared},
+            level1_outline={}, detail_records=copy.deepcopy(items), baseline_detail_records=copy.deepcopy(items),
+            case_record={}, level1_tool_result={}, level2_tool_result={}, chapter_tool_result={}, editorial_feedback={},
+            resume=True, state=read(state_path) if state_path.is_file() else {})
+    run()
+    path = tmp_path / "stages/affected_chapter_revision/CH3.json"
+    original = read(path)
+    response = invalid_response()
+    response["chapter_updates"][0]["chapter_id"] = "CH3"
+    original.update(status="partial", response=response, structural_errors=["structural_unit_change_requires_explicit_unit_ids_and_remap"])
+    _atomic_json(path, original)
+    legacy = path.parent / "contract_repairs/CH3" / original["owner_cache_contract"]
+    _atomic_json(legacy / "first_attempt.json", original)
+    _atomic_json(legacy / "request.json", {"version": 1})
+    _atomic_json(legacy / "result.json", {"response": response, "telemetry": {"test_charge_reference": "v1"}})
+    original_successes = {cid: (path.parent / f"{cid}.json").read_bytes() for cid in ("CH1", "CH2", "CH4", "CH5")}
+    boundary.seed = False
+    boundary.calls.clear()
+    run()
+    assert len(boundary.calls) == 1
+    assert boundary.calls[0][0] == "affected_chapter_revision"
+    assert boundary.calls[0][1]["chapter_id"] == "CH3"
+    assert boundary.calls[0][1]["contract_repair"]["version"] == 2
+    assert {cid: (path.parent / f"{cid}.json").read_bytes() for cid in original_successes} == original_successes
+    boundary.calls.clear()
+    run()
+    assert boundary.calls == []

@@ -1804,8 +1804,26 @@ def _messages_for(stage: str, payload: Mapping[str, Any]) -> list[dict[str, str]
             '若材料和任务无需改变，明确返回 status=no_change 并可复用完整原计划。若拆分或合并单元，所有新单元必须有稳定 unit_id，'
             '并提供显式 unit_id_remap，不能按列表位置猜测对应关系。不要返回只有说明没有 updated_plan 的成功结果。'
         )
+    system = _planner_instructions(stage, planning_revision=planning_revision)
+    repair = payload.get("contract_repair")
+    if stage == "affected_chapter_revision" and isinstance(repair, Mapping) and repair.get("version") == 2:
+        repair_task = (
+            "本次只修复被拒回答的输出合同。chapter_plan 是唯一可编辑的当前完整计划，"
+            "chapter_plan.units 是当前单元；chapter_background 及 rejected_responses 仅为完整背景/失败历史，"
+            "其中 substantive_threads 不是当前单元，不能把背景章壳或失败回答作为 updated_plan。"
+            "保留当前各单元的知识职责、顺序、有效内容、案例和材料边界，不为符合格式减少知识。"
+            "保留原有单元ID；原单元没有ID时不要求补ID，不能把新赋ID当作原有ID或编造旧ID映射，"
+            "本次不拆合、不替换单元身份。仅依据原材料和原反馈修复交付，不引入新证据。"
+            "返回完整 updated_plan，必须有 units 数组及各单元实际内容；"
+            "不能把 substantive_threads 机械改名后冒充当前 units，不用空字段或类型示例冒充内容。"
+            "无法忠实返回完整结果时明确 unresolved；材料和任务无需变化时可如实 no_change。"
+        )
+        repair_task += f"当前计划有 {repair.get('current_unit_count')} 个单元，输出 units 保持该数量和知识职责；下面的数组元素仅表示类型。"
+        system += "\n\n【当前唯一任务与编辑对象】" + repair_task
+        task_output = repair_task + "\n输出结构（仅字段和类型，不是待填科学答案）：" + json.dumps(
+            repair.get("output_schema") or {}, ensure_ascii=False, separators=(",", ":"))
     return [
-        {"role": "system", "content": _planner_instructions(stage, planning_revision=planning_revision)},
+        {"role": "system", "content": system},
         {"role": "user", "content": "当前任务：" + stage + "\n" + material_reference_note + rendered_payload + "\n\n【本轮交付】" + task_output},
     ]
 
@@ -2511,6 +2529,53 @@ class QwenProgressivePlanner:
 def _call_record(planner: Callable[[str, Mapping[str, Any]], Any], stage: str, payload: Mapping[str, Any]) -> dict[str, Any]:
     response, telemetry = _parse_planner_response(planner(stage, payload))
     return {"response": response, "telemetry": telemetry}
+
+
+def _owner_contract_repair_payload(
+    revision_payload: Mapping[str, Any],
+    first_response: Mapping[str, Any],
+    diagnostics: Sequence[str],
+    previous_repair: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Separate the actual editable plan from full historical chapter context."""
+
+    def schema(value: Any) -> Any:
+        if isinstance(value, Mapping):
+            return {str(key): schema(child) for key, child in value.items()}
+        if isinstance(value, (list, tuple)):
+            if value and all(isinstance(child, Mapping) for child in value):
+                return [{str(key): schema(child) for row in value for key, child in row.items()}]
+            return [schema(value[0])] if value else "array"
+        if isinstance(value, bool):
+            return "boolean"
+        if isinstance(value, (int, float)):
+            return "number"
+        return "null" if value is None else "string"
+
+    rejected = [{"origin": "original_owner", "response": dict(first_response)}]
+    if previous_repair is not None:
+        rejected.append({"origin": "contract_repair_v1", "response": dict(previous_repair)})
+    issues = list(diagnostics)
+    returned_plan = _owner_response_plan(previous_repair if previous_repair is not None else first_response) or {}
+    if not isinstance(returned_plan.get("units"), list):
+        issues.append("updated_plan.units_missing: editable units are only #/chapter_plan/units; chapter_background and rejected_responses are not current plans")
+    return {
+        **revision_payload,
+        "chapter": {"chapter_id": revision_payload.get("chapter_id")},
+        "chapter_background": revision_payload.get("chapter") or {},
+        "contract_repair": {
+            "version": 2, "scope": "output_structure_only",
+            "editable_plan_pointer": "#/chapter_plan",
+            "editable_units_pointer": "#/chapter_plan/units",
+            "current_unit_count": len((revision_payload.get("chapter_plan") or {}).get("units") or []),
+            "rejected_responses": rejected,
+            "diagnostics": issues,
+            "output_schema": {
+                "status": "updated | no_change | unresolved",
+                "chapter_updates": [{"chapter_id": "string", "updated_plan": schema(revision_payload.get("chapter_plan") or {})}],
+            },
+        },
+    }
 
 
 def _stage_response(record: Mapping[str, Any]) -> dict[str, Any]:
@@ -6313,6 +6378,8 @@ class ProgressiveReviewPlanner:
                 # Repair provenance stays outside the original cache contract.
                 repair_root = revision_root / "contract_repairs" / _safe_id(chapter_id) / owner_contract
                 first_path = repair_root / "first_attempt.json"
+                existing_claim = next((path for path in [repair_root / "request.json", *sorted((repair_root / "v2").glob("*/request.json"))]
+                                       if path.is_file()), None)
                 saved = None
                 for prior_path in (first_path, cache_path):
                     if not prior_path.is_file():
@@ -6332,14 +6399,15 @@ class ProgressiveReviewPlanner:
                         break
                     if prior_path == first_path:
                         break
-                if saved is None and (first_path.is_file() or (repair_root / "request.json").is_file()):
+                if ((saved is None and first_path.is_file())
+                        or (existing_claim is not None and (saved is None or not first_path.is_file()))):
                     # Never repurchase a base answer to replace missing or
                     # unreadable provenance for an already claimed repair.
                     saved = {"chapter_id": chapter_id, "status": "partial", "owner_status": "unresolved",
                              "cache_inputs": dict(revision_payload),
                              "structural_errors": ["owner_contract_repair_original_response_unavailable"],
                              "contract_repair": {"status": "in_flight_or_unknown",
-                                                 "request_path": str(repair_root / "request.json")}}
+                                                 "request_path": str(existing_claim or repair_root / "request.json")}}
                 try:
                     if saved is None:
                         saved = classify_record(_call_record(self.planner, "affected_chapter_revision", revision_payload))
@@ -6369,74 +6437,112 @@ class ProgressiveReviewPlanner:
                 )
                 if repairable:
                     repair_root.mkdir(parents=True, exist_ok=True)
-                    claim_path = repair_root / "request.json"
-                    result_path = repair_root / "result.json"
-                    failure_path = repair_root / "failure.json"
-                    # The original response and its charges survive every
-                    # repair outcome, including interruption before validation.
+                    # Shared immutable base evidence predates all repair versions.
                     if not first_path.is_file():
                         _atomic_json(first_path, {**saved, "owner_cache_contract": owner_contract,
                                                  "cache_projection": projection})
                     first_attempt = _read_json(first_path)
-                    repair_payload = {
-                        **revision_payload,
-                        "call_id": f"affected-chapter-revision-contract-repair-{_safe_id(chapter_id)}-{owner_contract}",
-                        "contract_repair": {
-                            "version": 1,
-                            "scope": "output_structure_only",
-                            "previous_response": first_attempt["response"],
-                            "diagnostics": first_attempt.get("structural_errors") or [],
-                            "instructions": [
-                                "Repair the returned JSON output contract using all original materials and the previous response.",
-                                "Preserve supported substantive content; do not invent evidence or supply empty placeholder content.",
-                                "Return status updated or no_change and chapter_updates containing this chapter's complete updated_plan.",
-                                "updated_plan must contain the complete units list, preserving valid original plan content and paragraph_briefs.",
-                                "Use explicit stable unit_id values. If splitting, merging or replacing units, supply unit_id_remap from new IDs to original IDs.",
-                                "If unit_identity_contract.existing_unit_ids is empty, preserve the original unit structure and knowledge responsibilities. Do not guess old IDs or make splits/merges that cannot be validated against known IDs; do not reduce knowledge content merely to satisfy the format.",
-                                "Do not guess a unit mapping by list position or merely rename another field to units. Decide the mapping yourself from the complete original plan and response.",
-                                "Reference only source handles in the supplied materials and preserve their conditions and limits.",
-                                "If a faithful complete result cannot be returned, explicitly report unresolved; do not fake success.",
-                            ],
-                        },
-                    }
-                    repair_meta = {"owner_cache_contract": owner_contract,
-                                   "first_attempt_path": str(first_path), "request_path": str(claim_path),
-                                   "result_path": str(result_path), "failure_path": str(failure_path),
-                                   "call_id": repair_payload["call_id"]}
-                    claimed = False
-                    try:
-                        # Exclusive creation is also a durable at-most-once
-                        # claim. An incomplete/unreadable claim is never retried.
-                        with claim_path.open("x", encoding="utf-8") as stream:
-                            json.dump({**repair_meta, "status": "in_flight_or_unknown",
-                                       "payload": repair_payload}, stream, ensure_ascii=False,
-                                      indent=2, default=_json_default)
-                            stream.flush()
-                            os.fsync(stream.fileno())
-                        claimed = True
-                    except FileExistsError:
-                        pass
-                    if claimed:
+                    legacy_request = repair_root / "request.json"
+                    legacy_result = repair_root / "result.json"
+                    previous_repair = None
+                    diagnostics = list(first_attempt.get("structural_errors") or [])
+                    allow_v2 = not legacy_request.is_file()
+                    legacy_meta = {"version": 1, "status": "in_flight_or_unknown",
+                                   "owner_cache_contract": owner_contract,
+                                   "first_attempt_path": str(first_path), "request_path": str(legacy_request),
+                                   "result_path": str(legacy_result)}
+                    if legacy_result.is_file():
                         try:
-                            repair_record = _call_record(self.planner, "affected_chapter_revision", repair_payload)
-                            _atomic_json(result_path, repair_record)
-                        except Exception as exc:
-                            _atomic_json(failure_path, {**repair_meta, "status": "failed_or_unknown",
-                                "error": type(exc).__name__, "error_detail": str(exc)[:1000]})
-                    repair_meta["status"] = "in_flight_or_unknown"
-                    if result_path.is_file():
-                        try:
-                            repair_record = _read_json(result_path)
-                            if not isinstance(repair_record, Mapping) or not isinstance(repair_record.get("response"), Mapping):
+                            legacy_record = _read_json(legacy_result)
+                            if not isinstance(legacy_record, Mapping) or not isinstance(legacy_record.get("response"), Mapping):
                                 raise ProgressivePlanError("owner_contract_repair_invalid_saved_record")
-                            saved = classify_record(repair_record)
-                            repair_meta["status"] = saved["status"]
+                            legacy_saved = classify_record(legacy_record)
+                            saved = legacy_saved
+                            legacy_meta["status"] = saved["status"]
+                            # A completed, rejected structural answer is new
+                            # evidence for v2; an unknown charge is never retried.
+                            allow_v2 = saved["status"] == "partial" and all(
+                                not error.startswith("owner_response_status:")
+                                for error in saved.get("structural_errors") or []
+                            )
+                            previous_repair = legacy_record["response"]
+                            diagnostics.extend(saved.get("structural_errors") or [])
                         except (ProgressivePlanError, TypeError, ValueError, KeyError) as exc:
-                            repair_meta["status"] = "invalid_saved_result"
-                            repair_meta["error"] = type(exc).__name__
-                    elif failure_path.is_file():
-                        repair_meta["status"] = "failed_or_unknown"
-                    saved["contract_repair"] = repair_meta
+                            allow_v2 = False
+                            legacy_meta.update(status="invalid_saved_result", error=type(exc).__name__)
+                    if not allow_v2:
+                        saved["contract_repair"] = legacy_meta
+                    else:
+                        repair_payload = _owner_contract_repair_payload(
+                            revision_payload, first_attempt["response"], list(dict.fromkeys(diagnostics)), previous_repair)
+                        # Derive a unique call identity first, then fingerprint
+                        # its final messages and effective model/capacity using
+                        # the existing compatibility projection. No hash cycle.
+                        repair_payload["call_id"] = "owner-contract-repair-v2"
+                        identity = self._cache_contract("affected_chapter_revision", repair_payload)
+                        repair_payload["call_id"] = f"owner-repair-v2-{_safe_id(chapter_id)[:12]}-{identity[:40]}"
+                        repair_contract = self._cache_contract("affected_chapter_revision", repair_payload)
+                        version_root = repair_root / "v2" / repair_contract
+                        version_root.mkdir(parents=True, exist_ok=True)
+                        claim_path = version_root / "request.json"
+                        result_path = version_root / "result.json"
+                        failure_path = version_root / "failure.json"
+                        repair_meta = {"version": 2, "owner_cache_contract": owner_contract,
+                                       "repair_cache_contract": repair_contract,
+                                       "first_attempt_path": str(first_path), "request_path": str(claim_path),
+                                       "result_path": str(result_path), "failure_path": str(failure_path),
+                                       "call_id": repair_payload["call_id"]}
+                        if previous_repair is not None:
+                            repair_meta["previous_repair"] = legacy_meta
+                        claimed = False
+                        try:
+                            # The old version's claim is never changed. Each
+                            # compatible v2 request also has one durable claim.
+                            with claim_path.open("x", encoding="utf-8") as stream:
+                                json.dump({**repair_meta, "status": "in_flight_or_unknown",
+                                           "payload": repair_payload}, stream, ensure_ascii=False,
+                                          indent=2, default=_json_default)
+                                stream.flush()
+                                os.fsync(stream.fileno())
+                            claimed = True
+                        except FileExistsError:
+                            pass
+                        if claimed:
+                            try:
+                                repair_record = _call_record(self.planner, "affected_chapter_revision", repair_payload)
+                                _atomic_json(result_path, repair_record)
+                            except Exception as exc:
+                                _atomic_json(failure_path, {**repair_meta, "status": "failed_or_unknown",
+                                    "error": type(exc).__name__, "error_detail": str(exc)[:1000]})
+                        repair_meta["status"] = "in_flight_or_unknown"
+                        if result_path.is_file():
+                            try:
+                                repair_record = _read_json(result_path)
+                                if not isinstance(repair_record, Mapping) or not isinstance(repair_record.get("response"), Mapping):
+                                    raise ProgressivePlanError("owner_contract_repair_invalid_saved_record")
+                                saved = classify_record(repair_record)
+                                old_units = (revision_payload.get("chapter_plan") or {}).get("units") or []
+                                old_ids = [_text(unit.get("unit_id") or unit.get("id"))
+                                           for unit in old_units if isinstance(unit, Mapping)]
+                                if saved["status"] == "complete":
+                                    content_error = _chapter_details_record_error({
+                                        "response": {"chapter_plan": saved["updated_plan"]},
+                                        "telemetry": repair_record.get("telemetry") or {},
+                                    })
+                                    if saved["updated_plan"] == repair_payload["contract_repair"]["output_schema"]["chapter_updates"][0]["updated_plan"]:
+                                        content_error = "returned_type_schema"
+                                    if any(old_id not in set(old_ids) for old_refs in (saved.get("unit_id_remap") or {}).values()
+                                           for old_id in old_refs):
+                                        content_error = "unknown_old_unit_identity"
+                                    if content_error:
+                                        saved.update(status="partial", owner_status="unresolved", updated_plan=None,
+                                                     source_materials=[], structural_errors=["owner_contract_repair:" + content_error])
+                                repair_meta["status"] = saved["status"]
+                            except (ProgressivePlanError, TypeError, ValueError, KeyError) as exc:
+                                repair_meta.update(status="invalid_saved_result", error=type(exc).__name__)
+                        elif failure_path.is_file():
+                            repair_meta["status"] = "failed_or_unknown"
+                        saved["contract_repair"] = repair_meta
                 saved["cache_projection"] = projection
                 saved["cache_signature"] = _material_content_signature(projection)
                 saved["owner_cache_contract"] = owner_contract
