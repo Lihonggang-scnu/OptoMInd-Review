@@ -1,4 +1,5 @@
 """Offline contract probes, not claims of autonomous scientific quality."""
+import hashlib
 import json
 from pathlib import Path
 from unittest.mock import patch
@@ -242,6 +243,56 @@ def test_format_repair_projects_provider_envelope_without_transport_duplicates(t
         assert marker not in second_payload
     saved_raw = json.loads((out / 'round_1/RAW_RESPONSE.json').read_text(encoding='utf-8'))
     assert saved_raw == raw
+
+
+def test_syntax_only_reason_quote_recovery_keeps_edit_and_raw(tmp_path):
+    source = tmp_path / 'source.md'
+    source_text = 'Alpha.\n'
+    source.write_text(source_text)
+    reason = 'Use "quoted" wording and "more" context.'
+    holder = {}
+
+    def fixture(payload, number):
+        assert number == 1
+        malformed_content = (
+            '```json\n{"snapshot_id":"' + payload['snapshot_id'] +
+            '","changes":[{"target_block_id":"B0001","operation":"replace",'
+            '"original_text":"Alpha.","replacement_text":"Beta.",'
+            '"reason":"Use "quoted" wording and "more" context.","kind":"editorial"}],'
+            '"unresolved_questions":[]}\n```\n'
+        )
+        raw = {'content': malformed_content, 'complete': True, 'finish_reason': 'stop',
+               'call_id': 'checker-call-1', 'returned_model': 'qwen3.5-plus'}
+        holder.update(raw=raw, content=malformed_content)
+        return raw
+
+    out = tmp_path / 'check'
+    result = run_manuscript_checker(draft_path=source, out_dir=out, fixture_responses=fixture)
+    assert result['status'] == 'edited' and result['logical_rounds'] == 1
+    assert result['applied'][0]['original_text'] == 'Alpha.'
+    assert result['applied'][0]['replacement_text'] == 'Beta.'
+    assert result['applied'][0]['reason'] == reason
+    assert Path(result['selected_manuscript']['path']).read_text(encoding='utf-8') == 'Beta.\n'
+
+    raw_path = out / 'round_1/RAW_RESPONSE.json'
+    raw_bytes = raw_path.read_bytes()
+    assert json.loads(raw_bytes.decode('utf-8')) == holder['raw']
+    recovery_path = out / 'round_1/FORMAT_RECOVERY.json'
+    recovery = json.loads(recovery_path.read_text(encoding='utf-8'))
+    audit = recovery['audits'][0]
+    assert audit['original_sha256'] == hashlib.sha256(holder['content'].encode('utf-8')).hexdigest()
+    assert len(audit['edits']) == 6
+    assert [edit['operation'] for edit in audit['edits']].count('escape_inner_quote') == 4
+    assert [edit['operation'] for edit in audit['edits']].count('remove_outer_fence') == 2
+    assert json.loads(audit['normalized_text'])['changes'][0]['reason'] == reason
+    receipt = json.loads((out / 'round_1/EXECUTION_RECEIPT.json').read_text(encoding='utf-8'))
+    assert receipt['format_recovery_path'] == str(recovery_path)
+
+
+@pytest.mark.parametrize('malformed', ['{"snapshot_id":', '{"x":"a"b":1}'])
+def test_syntax_only_recovery_still_rejects_truncated_or_ambiguous_json(malformed):
+    with pytest.raises(ManuscriptCheckerError, match='invalid_json'):
+        execute_checker_response(draft_text='Alpha.\n', response=malformed)
 
 
 def test_no_change_disabled_and_missing_provider(tmp_path):

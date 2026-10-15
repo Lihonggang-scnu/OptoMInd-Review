@@ -20,6 +20,7 @@ from .post_body_revision_contracts import (
     sha256_text, validate_patch,
 )
 from .delivery_citations import BRACKET_RE, HANDLE_TOKEN_RE, build_delivery_citation_map
+from .json_format_recovery import JsonFormatError, recover_json_format
 from .review_unit_writer import _fenced_line_indices
 from .writer_candidates import DEFAULT_PROFILE, _output_lock
 
@@ -64,6 +65,15 @@ def _write(path, value):
 
 def _read(path):
     return json.loads(Path(path).read_bytes().decode("utf-8"))
+
+
+def _write_format_recovery(step, raw_path, audits):
+    if not audits:
+        return None
+    path = Path(step) / "FORMAT_RECOVERY.json"
+    _write(path, {"schema": "optomind.manuscript_checker.format_recovery.v1",
+                  "raw_response_path": str(raw_path), "audits": audits})
+    return path
 
 
 def _format_repair_response(raw):
@@ -134,12 +144,13 @@ def build_checker_messages(*, draft_text, identity_catalogs=None, material_recor
             {"role": "user", "content": json.dumps(payload, ensure_ascii=False, indent=2)}]
 
 
-def _decode(raw):
+def _decode(raw, recovery_audit=None):
     if isinstance(raw, Mapping) and "content" in raw:
         if raw.get("complete") is False or raw.get("finish_reason", "stop") != "stop":
             raise ManuscriptCheckerError("incomplete_response")
         raw = raw["content"]
     if isinstance(raw, str):
+        recovery_text = raw
         text = raw.strip()
         if text.startswith("```"):
             match = re.fullmatch(r"```(?:json)?\s*\n?(.*?)\n?```", text, re.S)
@@ -149,7 +160,12 @@ def _decode(raw):
         try:
             raw = json.loads(text)
         except ValueError as exc:
-            raise ManuscriptCheckerError("invalid_json") from exc
+            try:
+                raw, audit = recover_json_format(recovery_text)
+            except (JsonFormatError, ValueError):
+                raise ManuscriptCheckerError("invalid_json") from exc
+            if audit is not None and recovery_audit is not None:
+                recovery_audit.append(audit)
     if not isinstance(raw, Mapping):
         raise ManuscriptCheckerError("response_not_object")
     if set(raw) - {"snapshot_id", "changes", "unresolved_questions"}:
@@ -362,10 +378,11 @@ def _failure(case, edit_id, proposal, code):
 
 
 def execute_checker_response(*, draft_text, response, identity_catalogs=None,
-                             material_records=None, pending_ids=None, pending_bindings=None, round_number=1):
+                             material_records=None, pending_ids=None, pending_bindings=None, round_number=1,
+                             decode_audit=None):
     """Pure strict execution; independent valid proposals survive invalid siblings."""
     case = _material_case(draft_text, material_records)
-    parsed = _decode(response)
+    parsed = _decode(response, recovery_audit=decode_audit)
     if parsed.get("snapshot_id") != case["base_sha256"]:
         raise ManuscriptCheckerError("stale_snapshot")
     rows = parsed["changes"]
@@ -609,6 +626,7 @@ def run_manuscript_checker(*, draft_path, out_dir, identity_catalogs=None,
                     _write(report_path, report)
                     return report
                 previous = current
+                decode_audit = []
                 try:
                     returned_model = (raw.get("returned_model") or raw.get("model")) if isinstance(raw, Mapping) else None
                     if returned_model and returned_model != effective["model"]:
@@ -622,7 +640,7 @@ def run_manuscript_checker(*, draft_path, out_dir, identity_catalogs=None,
                         pending_ids=[p["edit_id"] for p in pending],
                         pending_bindings={f["edit_id"]: f.get("allowed_current_block_ids", [])
                                           for f in (feedback or {}).get("failures", [])} if number > 1 and not format_repair else None,
-                        round_number=1 if format_repair else number)
+                        round_number=1 if format_repair else number, decode_audit=decode_audit)
                     completed_response = True
                     current = result["draft_text"]
                     pending = result["pending"]
@@ -631,11 +649,16 @@ def run_manuscript_checker(*, draft_path, out_dir, identity_catalogs=None,
                     if result["applied"]:
                         selected_path = step / "CANDIDATE_HANDLES.md"
                         _write_bytes(selected_path, current.encode("utf-8"))
-                    _write(step / "EXECUTION_RECEIPT.json", {**result, "draft_text": None,
+                    recovery_path = _write_format_recovery(step, raw_path, decode_audit)
+                    receipt = {**result, "draft_text": None,
                         "input_sha256": sha256_text(previous), "output_sha256": sha256_text(current),
-                        "selected_path": str(selected_path)})
+                        "selected_path": str(selected_path)}
+                    if recovery_path is not None:
+                        receipt["format_recovery_path"] = str(recovery_path)
+                    _write(step / "EXECUTION_RECEIPT.json", receipt)
                     feedback = _repair_feedback(previous, current, pending, result["applied"])
                 except (ManuscriptCheckerError, RevisionContractError) as exc:
+                    _write_format_recovery(step, raw_path, decode_audit)
                     if number > 1 and pending:
                         report["diagnostics"].append({"code": "repair_response_invalid", "error": str(exc)})
                     else:
