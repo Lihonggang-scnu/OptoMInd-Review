@@ -26,6 +26,14 @@ from .writer_candidates import DEFAULT_PROFILE, _output_lock
 SCHEMA = "optomind.manuscript_checker.v1"
 PROMPT_PATH = Path(__file__).resolve().parents[3] / "prompts" / "manuscript_checker.md"
 
+_FORMAT_REPAIR_ENVELOPE_FIELDS = (
+    "content", "call", "call_id", "model", "returned_model", "requested_model",
+    "request_id", "provider_request_id", "finish_reason", "complete",
+    "usage", "effective_request", "elapsed_seconds", "execution_mode",
+    "raw_response_sha256", "raw_stream_sha256", "provider_raw_response_sha256",
+    "response_sha256", "response_payload_sha256", "sse_payload_sha256",
+)
+
 
 class ManuscriptCheckerError(ValueError):
     """A source, cache, protocol or selected-artifact integrity failure."""
@@ -56,6 +64,19 @@ def _write(path, value):
 
 def _read(path):
     return json.loads(Path(path).read_bytes().decode("utf-8"))
+
+
+def _format_repair_response(raw):
+    """Keep only the provider envelope needed to repair a malformed response.
+
+    Provider responses retain their complete content, while transport/raw
+    wrappers and duplicated normalized or reasoning payloads stay local in
+    RAW_RESPONSE.json. Non-provider fixtures (strings or mappings without
+    ``content``) are returned unchanged for backwards compatibility.
+    """
+    if not isinstance(raw, Mapping) or "content" not in raw:
+        return raw
+    return {key: deepcopy(raw[key]) for key in _FORMAT_REPAIR_ENVELOPE_FIELDS if key in raw}
 
 
 def _tokens(text):
@@ -620,7 +641,8 @@ def run_manuscript_checker(*, draft_path, out_dir, identity_catalogs=None,
                     else:
                         pending = [{"edit_id": "RESPONSE", "code": "response:" + str(exc), "proposal": {}}]
                     feedback = {"format_repair": True, "pending_edit_ids": [], "failures": pending,
-                        "invalid_response": raw, "instruction": "Repair the original response format or snapshot binding only. Copy the actual snapshot. Do not discover a new set of issues."}
+                        "invalid_response": _format_repair_response(raw),
+                        "instruction": "Repair the original response format or snapshot binding only. Copy the actual snapshot. Do not discover a new set of issues."}
                     _write(step / "RESPONSE_ERROR.json", {"error": str(exc)})
                 _write(step / "FEEDBACK.json", feedback)
                 if not pending:

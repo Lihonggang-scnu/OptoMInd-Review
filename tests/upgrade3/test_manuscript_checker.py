@@ -192,6 +192,58 @@ def test_invalid_json_uses_only_one_format_repair(tmp_path):
     assert result['status'] == 'no_change' and result['logical_rounds'] == 2
 
 
+def test_format_repair_projects_provider_envelope_without_transport_duplicates(tmp_path):
+    source = tmp_path / 'source.md'
+    source.write_text('Alpha.\n')
+    invalid_content = '{"snapshot_id":'
+    raw = {
+        'content': invalid_content,
+        'call_id': 'call-1',
+        'model': 'qwen-test',
+        'returned_model': 'qwen-test',
+        'request_id': 'request-1',
+        'finish_reason': 'stop',
+        'complete': True,
+        'usage': {'prompt_tokens': 11, 'completion_tokens': 7},
+        'effective_request': {'model': 'qwen-test', 'answer_tokens': 128},
+        'raw_response_sha256': 'raw-response-sha',
+        'raw_stream_sha256': 'raw-stream-sha',
+        'raw_response': 'RAW_RESPONSE_SENTINEL',
+        'normalized_response': 'NORMALIZED_RESPONSE_SENTINEL',
+        'normalized_response_json': {'marker': 'NORMALIZED_JSON_SENTINEL'},
+        'reasoning_content': 'REASONING_SENTINEL',
+        'transport_events': [{'marker': 'TRANSPORT_SENTINEL'}],
+    }
+    seen = []
+
+    def fixture(payload, number):
+        seen.append(payload)
+        if number == 1:
+            return raw
+        feedback = payload['feedback']
+        assert feedback['invalid_response']['content'] == invalid_content
+        assert feedback['invalid_response']['usage'] == raw['usage']
+        assert feedback['invalid_response']['effective_request'] == raw['effective_request']
+        assert feedback['invalid_response']['request_id'] == raw['request_id']
+        assert set(feedback['invalid_response']) == {
+            'content', 'call_id', 'model', 'returned_model', 'request_id',
+            'finish_reason', 'complete', 'usage', 'effective_request',
+            'raw_response_sha256', 'raw_stream_sha256',
+        }
+        return {'snapshot_id': payload['snapshot_id'], 'changes': [], 'unresolved_questions': []}
+
+    out = tmp_path / 'check'
+    result = run_manuscript_checker(draft_path=source, out_dir=out, fixture_responses=fixture)
+    assert result['status'] == 'no_change' and result['logical_rounds'] == 2
+    assert len(seen) == 2
+    second_payload = json.dumps(seen[1], ensure_ascii=False)
+    for marker in ('RAW_RESPONSE_SENTINEL', 'NORMALIZED_RESPONSE_SENTINEL',
+                   'NORMALIZED_JSON_SENTINEL', 'REASONING_SENTINEL', 'TRANSPORT_SENTINEL'):
+        assert marker not in second_payload
+    saved_raw = json.loads((out / 'round_1/RAW_RESPONSE.json').read_text(encoding='utf-8'))
+    assert saved_raw == raw
+
+
 def test_no_change_disabled_and_missing_provider(tmp_path):
     source = tmp_path / 'source.md'
     source.write_bytes(b'Alpha.\r\n')
