@@ -10,6 +10,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+from types import SimpleNamespace
 
 from ..artifact_store import atomic_write_json
 from .candidate_corpus import (
@@ -57,6 +58,143 @@ def _bind(path, value):
 
 def _fold(text):
     return " ".join(text.split()).casefold()
+
+
+_METADATA_FIELDS = ("paper_id", "corpus_id", "doi", "title", "authors", "year", "venue", "abstract")
+
+
+def _metadata_aliases(fields):
+    aliases = set()
+    if fields.get("paper_id"):
+        aliases.add(fields["paper_id"])
+    if fields.get("corpus_id") not in (None, ""):
+        aliases.add("CorpusId:" + str(fields["corpus_id"]))
+    return aliases
+
+
+def _valid_metadata_fields(fields):
+    return (isinstance(fields, dict) and set(fields) == set(_METADATA_FIELDS)
+            and all(fields[k] is None or isinstance(fields[k], str)
+                    for k in ("paper_id", "doi", "title", "venue", "abstract"))
+            and (fields["corpus_id"] is None or type(fields["corpus_id"]) in (str, int))
+            and (fields["year"] is None or type(fields["year"]) is int)
+            and (fields["authors"] is None or isinstance(fields["authors"], list)
+                 and all(isinstance(a, str) for a in fields["authors"]))
+            and bool(_metadata_aliases(fields)))
+
+
+class _MetadataJournalGateway:
+    """Only successful enrichment fields, with exact prefix-view replay.
+
+    Records are immutable. Views reference those records and remember missing
+    IDs/HTTP outcomes, so later knowledge cannot rewrite an earlier paid input.
+    Returning only rows linked to requested IDs adds no provenance-free papers.
+    """
+    def __init__(self, gateway, path):
+        self.gateway, self.path = gateway, Path(path)
+        self.prefix_length, self.integrity_error = 0, None
+        self.data = {"schema_version": "optomind.initial_metadata.v1", "records": [], "views": {}}
+        if self.path.exists():
+            try:
+                saved = _read(self.path)
+                data = saved["data"]
+                if saved.get("sha256") != _hash(data) or not self._valid(data):
+                    raise ValueError("invalid metadata checksum or structure")
+                self.data = data
+            except (OSError, ValueError, TypeError, KeyError, AttributeError) as exc:
+                raise InitialRetrievalError("initial_retrieval_metadata_journal_corrupt") from exc
+
+    @staticmethod
+    def _valid(data):
+        if (not isinstance(data, dict) or set(data) != {"schema_version", "records", "views"}
+                or data["schema_version"] != "optomind.initial_metadata.v1"
+                or not isinstance(data["records"], list) or not isinstance(data["views"], dict)):
+            return False
+        for row in data["records"]:
+            if (not isinstance(row, dict) or set(row) != {"query_prefix_length", "fields"}
+                    or type(row["query_prefix_length"]) is not int or row["query_prefix_length"] < 1
+                    or not _valid_metadata_fields(row["fields"])):
+                return False
+        for key, view in data["views"].items():
+            if (not isinstance(view, dict) or set(view) != {
+                    "query_prefix_length", "requested_ids", "record_indexes", "unavailable_ids",
+                    "provider_status_code", "transport_outcome", "error_type"}
+                    or type(view["query_prefix_length"]) is not int or view["query_prefix_length"] < 1
+                    or not isinstance(view["requested_ids"], list)
+                    or any(not isinstance(i, str) or not i for i in view["requested_ids"])
+                    or not isinstance(view["record_indexes"], list)
+                    or not isinstance(view["unavailable_ids"], list)
+                    or (view["provider_status_code"] is not None and type(view["provider_status_code"]) is not int)
+                    or view["transport_outcome"] not in {"not_called", "success", "unsuccessful"}
+                    or not isinstance(view["error_type"], str)
+                    or key != _hash({"query_prefix_length": view["query_prefix_length"],
+                                     "requested_ids": view["requested_ids"]})):
+                return False
+            available_aliases = set()
+            for index in view["record_indexes"]:
+                if type(index) is not int or not 0 <= index < len(data["records"]):
+                    return False
+                row = data["records"][index]
+                if (row["query_prefix_length"] > view["query_prefix_length"]
+                        or not _metadata_aliases(row["fields"]).intersection(view["requested_ids"])):
+                    return False
+                available_aliases.update(_metadata_aliases(row["fields"]))
+            if view["unavailable_ids"] != [i for i in view["requested_ids"] if i not in available_aliases]:
+                return False
+        return True
+
+    def check_integrity(self):
+        # enrich_papers treats provider exceptions as best effort. Local journal
+        # failures must escape that handler before any corpus/request is saved.
+        if self.integrity_error is not None:
+            raise InitialRetrievalError("initial_retrieval_metadata_journal_write_failed") from self.integrity_error
+
+    def batch_papers(self, ids):
+        try:
+            return self._batch_papers(list(dict.fromkeys(ids)))
+        except Exception as exc:
+            self.integrity_error = exc
+            raise
+
+    def _batch_papers(self, ids):
+        identity = {"query_prefix_length": self.prefix_length, "requested_ids": ids}
+        key = _hash(identity)
+        view = self.data["views"].get(key)
+        if view is None:
+            indexes = [i for i, row in enumerate(self.data["records"])
+                       if row["query_prefix_length"] <= self.prefix_length
+                       and _metadata_aliases(row["fields"]).intersection(ids)]
+            aliases = set().union(*(_metadata_aliases(self.data["records"][i]["fields"]) for i in indexes))
+            missing = [i for i in ids if i not in aliases]
+            status, outcome, error_type = None, "not_called", ""
+            if missing:
+                try:
+                    records, response = self.gateway.batch_papers(missing)
+                    status = getattr(response, "status_code", None)
+                    success = (type(status) is int and 200 <= status < 300
+                               and getattr(response, "ok", True) is not False)
+                    outcome = "success" if success else "unsuccessful"
+                except Exception as exc:
+                    records, success = [], False
+                    outcome, error_type = "unsuccessful", type(exc).__name__
+                if success:
+                    for record in records:
+                        fields = {k: getattr(record, k, None) for k in _METADATA_FIELDS}
+                        if not _valid_metadata_fields(fields):
+                            raise InitialRetrievalError("initial_retrieval_invalid_metadata_record")
+                        if not _metadata_aliases(fields).intersection(missing):
+                            continue
+                        indexes.append(len(self.data["records"]))
+                        self.data["records"].append({"query_prefix_length": self.prefix_length, "fields": fields})
+                        aliases.update(_metadata_aliases(fields))
+            view = {**identity, "record_indexes": indexes,
+                    "unavailable_ids": [i for i in ids if i not in aliases],
+                    "provider_status_code": status, "transport_outcome": outcome, "error_type": error_type}
+            self.data["views"][key] = view
+            atomic_write_json(self.path, {"data": self.data, "sha256": _hash(self.data)})
+        records = [SimpleNamespace(**self.data["records"][i]["fields"]) for i in view["record_indexes"]]
+        return records, SimpleNamespace(status_code=view["provider_status_code"],
+                                         metadata_view_replayed=True)
 
 
 def _original_queries(plan):
@@ -233,6 +371,7 @@ def run_initial_retrieval(plan, *, output_dir, gateway, planner_state=None,
     configuration = {"schema_version": "optomind.initial_retrieval.v1", "target": CORPUS_TARGET_LOW,
                      "max_supplementary_rounds": MAX_ROUNDS, "initial_topup": bool(initial_topup),
                      "per_query_limit": per_query_limit, "enrich": bool(enrich),
+                     "metadata_reuse": "durable_success_prefix_views.v1" if enrich else "disabled",
                      "snippet_discovery_target": snippet_discovery_target,
                      "corpus_path": str(corpus_path), "snippets_path": str(snippets_path),
                      "qwen": {**PROFILE, **(qwen_config or {})},
@@ -251,6 +390,7 @@ def run_initial_retrieval(plan, *, output_dir, gateway, planner_state=None,
     skipped_query_ids = set()
     budget_limited = False
     hits, audits = [], []
+    metadata = _MetadataJournalGateway(gateway, root / "METADATA_JOURNAL.json") if enrich else None
     store = SnippetTextStore(snippets_path)
 
     def save_active():
@@ -304,10 +444,15 @@ def run_initial_retrieval(plan, *, output_dir, gateway, planner_state=None,
         return current
 
     def assemble():
+        if metadata is not None:
+            metadata.check_integrity()
+            metadata.prefix_length = len(audits)
         corpus = assemble_candidate_corpus(
-            plan, hits=hits, audits=audits, gateway=gateway, per_query_limit=per_query_limit,
+            plan, hits=hits, audits=audits, gateway=metadata or gateway, per_query_limit=per_query_limit,
             enrich=enrich, snippet_store=store, planner_state=planner_state,
             snippet_discovery_target=snippet_discovery_target)
+        if metadata is not None:
+            metadata.check_integrity()
         store.connection.commit()
         atomic_write_json(corpus_path, corpus)
         return corpus
@@ -385,6 +530,8 @@ def run_initial_retrieval(plan, *, output_dir, gateway, planner_state=None,
     artifacts += sorted((root / "queries").glob("*.json"))
     artifacts += sorted(p for p in root.glob("supplement_round*/*") if p.is_file())
     artifacts += sorted(root.glob("supplement_round*/http/*.raw"))
+    if (root / "METADATA_JOURNAL.json").exists():
+        artifacts.append(root / "METADATA_JOURNAL.json")
     atomic_write_json(handoff_path, {**corpus["initial_retrieval"],
                                    "corpus_path": str(corpus_path), "snippets_path": str(snippets_path),
                                    "artifacts": [{"path": str(p), "sha256": _file_hash(p)} for p in artifacts]})

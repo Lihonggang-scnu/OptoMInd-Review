@@ -354,3 +354,116 @@ def test_legacy_primitive_and_real_client_profile_stay_valid(tmp_path):
     assert client.model == "qwen3.5-plus" and not client.json_mode
     with pytest.raises(ir.InitialRetrievalError, match="requires_key"):
         ir.make_topup_client_factory()(tmp_path)
+
+
+def test_successful_metadata_bridges_survive_later_429_and_restart(tmp_path):
+    class UnstableMetadataGateway(Gateway):
+        def __init__(self):
+            super().__init__({"original keywords": [1], "Original optical question?": [1],
+                              "new scoped papers": [2]}, interrupt="pause later query")
+            self.metadata_calls = []
+
+        def search_papers(self, text, **kwargs):
+            records, response = super().search_papers(text, **kwargs)
+            for record in records:
+                record.corpus_id = None  # Only successful enrichment bridges it.
+            return records, response
+
+        def batch_papers(self, ids):
+            self.metadata_calls.append(list(ids))
+            if len(self.metadata_calls) == 1:
+                record = paper(1)
+                record.doi = "10.1/real-success"
+                return [record], SimpleNamespace(status_code=200)
+            return [paper(2)], SimpleNamespace(status_code=429)  # Failed response is never admitted metadata.
+
+    gateway = UnstableMetadataGateway()
+    model = Model([{"queries": [query(1, "new scoped papers"),
+                                {**query(1, "pause later query"), "query_id": "SUP_R1_F1_KQ_02"}]},
+                   {"queries": []}, {"queries": []}])
+    def execute():
+        return ir.run_initial_retrieval(plan(), output_dir=tmp_path, gateway=gateway,
+                                        client_factory=model.factory, enrich=True, snippet_discovery_target=0)
+    with pytest.raises(KeyboardInterrupt):
+        execute()
+    saved = json.loads((tmp_path / "CANDIDATE_CORPUS.json").read_text())
+    assert saved["statistics"]["distinct_papers"] == 2
+    assert {h["paper_id"] for h in saved["retrieval_hits"][:2]} == {"P1"}
+    assert sum(a["new_identities"] for a in saved["query_audit"][:2]) == 1
+    assert set(gateway.metadata_calls[0]) == {"P1", "CorpusId:1"}
+    assert gateway.metadata_calls[1:] == [["P2"]]
+    assert next(p for p in saved["papers"] if p["paper_id"] == "P2")["corpus_id"] == ""
+    corpus = execute()
+    assert corpus["statistics"]["distinct_papers"] == 2
+    assert gateway.metadata_calls[1:] == [["P2"], ["P2"]]
+    assert len(model.requests) == 3
+    assert next(p for p in corpus["papers"] if p["paper_id"] == "P1")["doi"] == "10.1/real-success"
+
+
+def test_later_successful_bridge_merges_duplicates_without_rewriting_paid_prefix(tmp_path):
+    class LaterBridgeGateway(Gateway):
+        def __init__(self):
+            super().__init__({"original keywords": [1, 2], "discover genuine bridge": [3]},
+                             interrupt="pause after genuine bridge")
+            self.metadata_calls = []
+
+        def search_papers(self, text, **kwargs):
+            records, response = super().search_papers(text, **kwargs)
+            for record in records:
+                record.corpus_id = None
+            return records, response
+
+        def batch_papers(self, ids):
+            self.metadata_calls.append(list(ids))
+            if ids == ["P1", "P2"]:
+                # P2 was unavailable at the original prefix; later success must
+                # not retroactively fill it on restart and change paid REQUEST.
+                record = paper(1)
+                record.doi = "10.1/shared-real-doi"
+                return [record], SimpleNamespace(status_code=200)
+            records = []
+            for identity in (2, 3):
+                if "P" + str(identity) in ids:
+                    record = paper(identity)
+                    record.corpus_id = 2
+                    record.doi = "10.1/shared-real-doi"
+                    records.append(record)
+            return records, SimpleNamespace(status_code=200)
+
+    gateway = LaterBridgeGateway()
+    model = Model([{"queries": [query(1, "discover genuine bridge"),
+                                {**query(1, "pause after genuine bridge"), "query_id": "SUP_R1_F1_KQ_02"}]},
+                   {"queries": []}, {"queries": []}])
+    def execute():
+        return ir.run_initial_retrieval(plan(), output_dir=tmp_path, gateway=gateway,
+                                        client_factory=model.factory, enrich=True, snippet_discovery_target=0)
+    with pytest.raises(KeyboardInterrupt):
+        execute()
+    request_path = tmp_path / "supplement_round1" / "REQUEST.json"
+    first_request = request_path.read_bytes()
+    assert json.loads(first_request)["payload"]["current_distinct_papers"] == 2
+    saved = json.loads((tmp_path / "CANDIDATE_CORPUS.json").read_text())
+    assert saved["statistics"]["distinct_papers"] == 1
+    calls = list(gateway.metadata_calls)
+    corpus = execute()
+    assert corpus["statistics"]["distinct_papers"] == 1
+    assert request_path.read_bytes() == first_request
+    assert gateway.metadata_calls == calls  # Original failed/partial view replayed.
+    assert len(model.requests) == 3
+
+
+def test_corrupt_metadata_journal_stops_visibly_before_retrieval_or_paid_call(tmp_path):
+    gateway = Gateway({"original keywords": [1]}, interrupt="pause metadata run")
+    model = Model([{"queries": [query(1, "pause metadata run")]}])
+    with pytest.raises(KeyboardInterrupt):
+        ir.run_initial_retrieval(plan(), output_dir=tmp_path, gateway=gateway,
+                                 client_factory=model.factory, enrich=True)
+    journal = tmp_path / "METADATA_JOURNAL.json"
+    saved = json.loads(journal.read_text())
+    saved["data"]["records"][0]["fields"]["doi"] = "10.1/corrupt"
+    journal.write_text(json.dumps(saved))
+    calls, requests = list(gateway.calls), len(model.requests)
+    with pytest.raises(ir.InitialRetrievalError, match="metadata_journal_corrupt"):
+        ir.run_initial_retrieval(plan(), output_dir=tmp_path, gateway=gateway,
+                                 client_factory=model.factory, enrich=True)
+    assert gateway.calls == calls and len(model.requests) == requests

@@ -38,6 +38,8 @@ python -X utf8 scripts/upgrade3/run_candidate_corpus.py --schema PLAN.json --out
 
 每轮 `REQUEST.json` 在调用前落盘；`RAW_RESPONSE.json` 在解析和执行新查询前保存；原生HTTP raw可免费恢复解析。逐查询journal保留完整片段和harvest摘要，完成查询恢复时复用。无效JSON、非法/重复查询、空查询均留痕并计入最多3轮，不暗中付费修第四次。三轮后不足500篇仍返回0，`initial_retrieval.target_unmet=true`、`downstream_allowed=true`；既定预算拒绝追加也保留已有语料，以 `stop_reason=budget_limited` 正常交接。真正中断、本地损坏或已派发却无完成receipt会停止并保留现场，不自动重买或伪装成零结果。
 
+初始M2的 `METADATA_JOURNAL.json` 只保留成功元数据返回中用于身份/字段补齐的真实字段及S2/CorpusID别名，后续只查询尚无成功记录的ID；新的429、异常或空返回不会丢掉已有身份桥。每个查询前缀另存记录引用、未获得元数据的ID及传输结果，恢复时重放该前缀当时的视图，后续新发现的DOI/身份桥不提前改写已付费REQUEST。后续新前缀仍可据真实新桥归并重复论文；不会加入没有当前hit来源的旧论文。journal有校验和并纳入最终handoff，损坏或本地写入失败会明确停止。旧失败attempt保留，修复验证使用独立目录。
+
 新上游适配器调用正式 `optomind_research.runtime.upgrade3.initial_retrieval.execute_initial_m2(plan_path=…, outcome_path=…, output_dir=…, run=True, qwen_config={…})`，其中配置键为 `key_file/key_index/budget_ledger_path/budget_limit_cny`，双账可加 `account_ledger_path/account_limit_cny/account_mapping_directory`；也可注入使用原既有账本的 `client_factory(round_dir)`。免费预览传 `run=False`。交给M3前读取 `INITIAL_RETRIEVAL_HANDOFF.json`，确认 `status=complete` 及 `downstream_allowed=true`，采用其中 `corpus_path/snippets_path`。已有普通M3消费者继续读取原v2 corpus字段。历史外部 `E/preparation/upstream_execution.py` 未修改，旧综合harness不宣称自动接入本机制。`build_supplement_request(plan, corpus, round_number=1)` 可离线导出真实既有语料的完整反馈请求；它不会执行或花费。后续规划补搜与材料准入算法没有变化。
 
 ### 完整规划默认细纲加强（2026-10-11）
