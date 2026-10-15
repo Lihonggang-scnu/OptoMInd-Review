@@ -594,6 +594,41 @@ def test_only_added_heading_prefix_is_editorial_and_preserves_title_numbers(old,
 
 
 @pytest.mark.parametrize('old,new', [
+    ('### 3.1 3.1 ML baseline title', '### 3.1 ML baseline title'),
+    ('### 5.2 ML-based design', '### 5.2 MDL-based design'),
+])
+def test_same_heading_section_number_ignores_duplicate_or_unit_like_prefix(old, new):
+    text = old + '\n'
+    result = execute(text, change(old, new, kind='editorial'))
+    assert not result['pending'] and len(result['applied']) == 1
+    assert result['draft_text'] == new + '\n'
+
+
+def test_duplicate_heading_number_followed_by_unit_stays_scientific():
+    old = '### 3.1 3.1 μm传感器'
+    new = '### 3.1 μm传感器'
+    result = execute(old + '\n', change(old, new, kind='editorial'))
+    assert not result['applied']
+    assert result['pending'][0]['code'] == 'meaning_change_requires_scientific_evidence'
+
+
+def test_heading_body_numeric_threshold_change_stays_blocked():
+    old = '### 5.2 ML threshold 1cm'
+    new = '### 5.2 ML threshold 2cm'
+    result = execute(old + '\n', change(old, new, kind='editorial'))
+    assert not result['applied']
+    assert result['pending'][0]['code'] == 'meaning_change_requires_scientific_evidence'
+
+
+def test_heading_section_number_change_stays_blocked():
+    old = '### 3.1 ML baseline'
+    new = '### 3.2 ML baseline'
+    result = execute(old + '\n', change(old, new, kind='editorial'))
+    assert not result['applied']
+    assert result['pending'][0]['code'] == 'meaning_change_requires_scientific_evidence'
+
+
+@pytest.mark.parametrize('old,new', [
     ('### Cohort n=23', '### 7.2.1 Cohort n=24'),
     ('### Cohort n=23', '### 7.2.1 Cohort'),
     ('### Temperature 37 °C', '### 7.2.1 Temperature 38 °C'),

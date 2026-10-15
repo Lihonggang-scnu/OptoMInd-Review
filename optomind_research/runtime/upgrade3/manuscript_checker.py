@@ -184,6 +184,42 @@ def _numeric_signature(text):
     return [re.sub(r"\s+", "", n) for n in re.findall(r"[+\-−–]?\s*\d+(?:[,.]\d+)*(?:[eE][+\-−]?\d+)?(?:\s*(?:%|‰|[A-Za-zµμ]+))?", text)]
 
 
+_HEADING_LINE_RE = re.compile(
+    r"(?P<indent> {0,3})(?P<marks>#{1,6})(?P<space>[ \t]+)"
+    r"(?P<title>[^\r\n]*)(?P<newline>\r?\n)?\Z"
+)
+_HEADING_SECTION_RE = re.compile(r"(?P<number>\d+(?:\.\d+)+)\.?(?=[ \t]+|$)")
+_HEADING_VALUE_UNIT_RE = re.compile(r"^[ \t]*(?:μm|µm|um|nm|cm|mm|%)((?![A-Za-zµμ]))",
+                                    re.IGNORECASE)
+
+
+def _heading_section_parts(line):
+    heading = _HEADING_LINE_RE.fullmatch(line)
+    if not heading:
+        return None
+    section = _HEADING_SECTION_RE.match(heading["title"])
+    if not section:
+        return None
+    return heading, section["number"]
+
+
+def _without_same_heading_section_prefix(parts):
+    heading, number = parts
+    title = heading["title"]
+    prefix = re.compile(r"^" + re.escape(number) + r"\.?(?=[ \t]+|$)")
+    removed = False
+    while True:
+        match = prefix.match(title)
+        if not match:
+            break
+        if removed and _HEADING_VALUE_UNIT_RE.match(title[match.end():]):
+            break
+        title = title[match.end():].lstrip()
+        removed = True
+    return (heading["indent"] + heading["marks"] + heading["space"] + title
+            + (heading["newline"] or ""))
+
+
 def _numeric_signatures(before, after):
     old_lines, new_lines = before.splitlines(keepends=True), after.splitlines(keepends=True)
     if len(old_lines) == len(new_lines):
@@ -194,12 +230,17 @@ def _numeric_signatures(before, after):
             heading = r" {0,3}#{1,6}[ \t]+([^\r\n]*)(\r?\n)?"
             old_heading, new_heading = re.fullmatch(heading, old), re.fullmatch(heading, new)
             if old_heading and new_heading:
+                old_section, new_section = _heading_section_parts(old), _heading_section_parts(new)
+                if old_section and new_section and old_section[1] == new_section[1]:
+                    old_lines[index] = _without_same_heading_section_prefix(old_section)
+                    new_lines[index] = _without_same_heading_section_prefix(new_section)
+                    continue
                 numbered = re.fullmatch(r"\d+(?:\.\d+)+\.?[ \t]+(.+)", new_heading[1])
                 # Only an added dotted section prefix may disappear from the
                 # comparison; every character of the actual title must remain.
                 if numbered and numbered[1] == old_heading[1]:
                     new_lines[index] = new[:new_heading.start(1)] + numbered[1] + (new_heading[2] or "")
-        after = "".join(new_lines)
+        before, after = "".join(old_lines), "".join(new_lines)
     return _numeric_signature(before), _numeric_signature(after)
 
 

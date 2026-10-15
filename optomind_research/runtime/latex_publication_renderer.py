@@ -2575,6 +2575,12 @@ def _render_main_tex(
 \setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
 \providecommand{\pandocbounded}[1]{#1}
 """
+    # Long CJK titles can orphan their final glyph at article's default size.
+    # Change display typography only; PDF metadata and the manuscript stay exact.
+    title_tex = _latex_escape(metadata["title"])
+    if sum(unicodedata.east_asian_width(ch) in {"W", "F"}
+           for ch in metadata["title"]) >= 24:
+        title_tex = r"\Large " + title_tex
     return (
         preamble
         + r"""\hypersetup{
@@ -2587,7 +2593,7 @@ def _render_main_tex(
 }
 
 \title{"""
-        + _latex_escape(metadata["title"])
+        + title_tex
         + r"""}
 \author{"""
         + authors
