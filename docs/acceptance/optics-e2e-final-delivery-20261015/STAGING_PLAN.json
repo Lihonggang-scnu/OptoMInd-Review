@@ -1,0 +1,234 @@
+{
+  "schema": "optomind.public_body_v34_staging_plan.v1",
+  "status": "body_delivery_ready_staged",
+  "created_utc": "2026-10-15T07:20:00Z",
+  "source_commit": "0b42997aea7f53cef060aa357d125acd455c0d08",
+  "source_upload_status": "local_only_not_uploaded",
+  "supervision_binding": {
+    "logical_path": "<E>/RUN_BINDING_DOWNSTREAM_V34_COMPLETION_RECOVERY_20261015.json",
+    "sha256": "d69ba6ce7c6fc854b97e306b20f8fa514bdea2fb6119f46c96c047c028da79a1"
+  },
+  "body_w": "<BODY_W>/",
+  "delivery_report": "<BODY_W>/DELIVERY_REPORT.json",
+  "body_report_sha256": "165560005d6a88dd7045bc7d7de5061d1b8025c237d8398bc7fd665b5d0c718d",
+  "built_utc": "2026-10-15T07:44:13.4010558Z",
+  "readiness_gate": {
+    "require_body_delivery_ready": true,
+    "require_generation_complete": true,
+    "require_assembly_complete": false,
+    "selected_body_status": "complete",
+    "article_edit_status": [
+      "edited",
+      "complete"
+    ],
+    "require_full_unit_count": 22,
+    "require_all_22_units": true,
+    "do_not_use_preview_selected_body": true,
+    "assembly_complete_is_diagnostic_only": true
+  },
+  "units": [
+    {
+      "chapter_id": "CH1",
+      "unit_id": "U1"
+    },
+    {
+      "chapter_id": "CH1",
+      "unit_id": "U2"
+    },
+    {
+      "chapter_id": "CH1",
+      "unit_id": "U3"
+    },
+    {
+      "chapter_id": "CH1",
+      "unit_id": "U4"
+    },
+    {
+      "chapter_id": "CH1",
+      "unit_id": "U5"
+    },
+    {
+      "chapter_id": "CH2",
+      "unit_id": "CH2_U01"
+    },
+    {
+      "chapter_id": "CH2",
+      "unit_id": "CH2_U02"
+    },
+    {
+      "chapter_id": "CH2",
+      "unit_id": "CH2_U03"
+    },
+    {
+      "chapter_id": "CH2",
+      "unit_id": "CH2_U04"
+    },
+    {
+      "chapter_id": "CH2",
+      "unit_id": "CH2_U05"
+    },
+    {
+      "chapter_id": "CH3",
+      "unit_id": "CH3_U01"
+    },
+    {
+      "chapter_id": "CH3",
+      "unit_id": "CH3_U02"
+    },
+    {
+      "chapter_id": "CH3",
+      "unit_id": "CH3_U03"
+    },
+    {
+      "chapter_id": "CH3",
+      "unit_id": "CH3_U04"
+    },
+    {
+      "chapter_id": "CH4",
+      "unit_id": "CH4-U1"
+    },
+    {
+      "chapter_id": "CH4",
+      "unit_id": "CH4-U2"
+    },
+    {
+      "chapter_id": "CH4",
+      "unit_id": "CH4-U3"
+    },
+    {
+      "chapter_id": "CH4",
+      "unit_id": "CH4-U4"
+    },
+    {
+      "chapter_id": "CH5",
+      "unit_id": "U1_OPM_SNR_Tradeoff"
+    },
+    {
+      "chapter_id": "CH5",
+      "unit_id": "U2_MDL_vs_Metalens"
+    },
+    {
+      "chapter_id": "CH5",
+      "unit_id": "U3_Hybrid_Large_Aperture"
+    },
+    {
+      "chapter_id": "CH5",
+      "unit_id": "U4_Application_Verdict"
+    }
+  ],
+  "per_unit_public_projection": [
+    "ORIGINAL_AUTHOR_BODY.md",
+    "QUALITY_BODY.md",
+    "MODEL_RESPONSE.json"
+  ],
+  "model_response_projection": {
+    "include": [
+      "content",
+      "usage",
+      "effective_request",
+      "elapsed",
+      "request_task_identity_parameter_projection"
+    ],
+    "raw_request_sse_policy": "pointer_and_sha256_only"
+  },
+  "assembled_projection": {
+    "include": [
+      "native_assembled_draft",
+      "actual_selected_body_reader_draft",
+      "references_and_numbering_projection",
+      "article_editor_response_and_execution_projection"
+    ]
+  },
+  "evidence_projection": {
+    "root_reviews": "CH1 V32 and CH2-CH4 V33 prior-phase Root reviews are preserved with lineage and source hashes; CH5 is V34",
+    "native_u1_adjacent_string_repair": "<D>/ROOT_BODY_V34_CH5_U1_NATIVE_REPAIR_TRIAL.jsonl",
+    "free_capacity_resume": "<D>/codex_capacity_resume_20261015/FREE_RESUME_PROOF.json",
+    "free_unused_source_audit": "<D>/unused_source_audit_20261015/{UNUSED_SOURCE_AUDIT.md,UNUSED_SOURCE_EVIDENCE.json}",
+    "post_body_parts": "<E>/worktree/outputs/optics_e2e/10_post_body_v34_parts; four generated parts with parameter/content projections and final manuscript",
+    "parts_root_reviews": "<D>/{ROOT_PARTS_V34_COMPLETE_REVIEW.json,ROOT_PARTS_V34_FREE_PREVIEW_REVIEW.json,ROOT_PARTS_V34_IO_REVIEWS.jsonl}",
+    "reference_coverage_90": "<D>/{ROOT_REFERENCE_COVERAGE_90_REVIEW.md,ROOT_REFERENCE_COVERAGE_90_REVIEW.json}",
+    "root_and_delegated_review_lineage": "pointer_and_sha256_only"
+  },
+  "exclusions": [
+    "credentials_and_keys",
+    "SQLite_ledgers",
+    "PDF_original_papers",
+    "XML_original_content",
+    "FULL_BODY_INPUT.json",
+    "REGISTERED_FULL_BODY_INPUT.json",
+    "UNIT_MESSAGES.json_bodies",
+    "RAW_RESPONSE.json_full_payloads",
+    "SSE_raw_stream_bodies",
+    "large_source_materials"
+  ],
+  "archive": {
+    "status": "not_submitted",
+    "unsubmitted_archive_sha256": null,
+    "source_commit_sha": "0b42997aea7f53cef060aa357d125acd455c0d08",
+    "prior_pushed_stage_commit_sha": "661201fb89a5ccb233412aef4ab8d10c4808495a"
+  },
+  "last_refreshed_utc": "2026-10-15T09:00:11.937751+00:00",
+  "c37_checker_publication": {
+    "status": "staged_with_root_final_review",
+    "run": "<C37>/",
+    "source_commit": "cef2650c5ad48690e2100ec160603b79e63bdf1e",
+    "delivery_report": "<C37>/MANUSCRIPT_DELIVERY_REPORT.json",
+    "checker": {
+      "rounds": 2,
+      "saved_response_recovery": true,
+      "new_model_calls": 0,
+      "new_external_requests": 0,
+      "applied_edits": 10,
+      "pending_edits": 4,
+      "status": "complete_with_diagnostics",
+      "format_recovery": "<C37>/03_manuscript_checker/round_2/FORMAT_RECOVERY.json"
+    },
+    "numbering_and_references": {
+      "numbered_entries": 90,
+      "doi_entries": 88,
+      "duplicate_canonical_entries": 0,
+      "stage_report": "<C37>/04_figures_citations/STAGE_REPORT.json",
+      "references": "<C37>/04_figures_citations/REFERENCES.json"
+    },
+    "publication": {
+      "delivery_report": "<C37>/05_publication/DELIVERY_REPORT.json",
+      "published_markdown": "<C37>/05_publication/MANUSCRIPT_PUBLISHED.md",
+      "pdf": "<C37>/05_publication/tex/main.pdf",
+      "pdf_pages": 31
+    },
+    "public_stage_files": {
+      "checker": "c37_checker/",
+      "publication": "c37_publication/"
+    },
+    "root_final_review": {
+      "status": "copied",
+      "json": "c37_publication/root_review/ROOT_FINAL_DELIVERY_REVIEW.json",
+      "markdown": "c37_publication/root_review/ROOT_FINAL_DELIVERY_REVIEW.md",
+      "pointer": "c37_publication/root_review/ROOT_FINAL_DELIVERY_REVIEW_POINTERS.json"
+    },
+    "exclusions": [
+      "full checker messages/context materials",
+      "raw provider envelopes and SSE streams",
+      "credentials and SQLite ledgers",
+      "original paper PDFs/XML",
+      "TeX intermediates and source archive"
+    ],
+    "uir_issues_projection": {
+      "status": "projected",
+      "source": "<E>/preparation/ab_unattended_20261013/RUN_ISSUES_AND_UNATTENDED_REPAIR_BACKLOG_20261014.json",
+      "json": "c37_publication/root_review/UIR_032_034_ISSUES.projection.json",
+      "markdown": "c37_publication/root_review/UIR_032_034_ISSUES.md",
+      "ids": [
+        "UIR-032",
+        "UIR-033",
+        "UIR-034"
+      ],
+      "excluded": [
+        "full issue backlog state_snapshot",
+        "EXECUTION_STATE",
+        "SQLite ledgers",
+        "credentials and database contents"
+      ]
+    }
+  }
+}

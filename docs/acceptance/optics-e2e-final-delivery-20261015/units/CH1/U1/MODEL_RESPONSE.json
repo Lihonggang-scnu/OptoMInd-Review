@@ -1,0 +1,379 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH1",
+  "unit_id": "U1",
+  "attempt_dir": "<BODY_W>/units/CH1/U1/1638e54f14e52c775688180831b6732b920241790506638035b980c63dd6f0f0/attempt_001",
+  "model_source_attempt_dir": "<BODY_W>/units/CH1/U1/1638e54f14e52c775688180831b6732b920241790506638035b980c63dd6f0f0/attempt_001",
+  "attempt": "attempt_001",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": null,
+  "format_recovery": null,
+  "content": "{\n  \"body_markdown\": \"## 时间 - 带宽积（TBP）与群延迟的物理上限\\n\\n宽带消色差金属透镜的设计首先受限于线性时不变系统的基本物理约束，即时间延迟与带宽的乘积存在上限。Presutti 和 Monticone 将金属透镜建模为径向排列的一维延迟线阵列，利用时间 - 带宽积（Time-Bandwidth Product, TBP）理论推导了无像差金属透镜的带宽极限公式 [P0003]。在该框架下，信号获得的时间延迟 $\\Delta T$ 与带宽 $\\Delta \\omega$ 满足 $\\Delta T \\Delta \\omega \\leq \\kappa$，其中 $\\kappa$ 为取决于器件物理机制的无量纲常数。为了实现消色差聚焦，透镜边缘相对于中心必须提供最大群延迟 $\\Delta T_{\\max}$ 以补偿光程差，该延迟由数值孔径（NA）和焦距 $F$ 决定。结合 TBP 界限，导出带宽上限为 $\\Delta \\omega \\leq (\\kappa c/F) Q(NA/n_b)$，其中 $Q(NA/n_b)$ 是随 NA 增大而急剧减小的函数 [P0003]。这一关系表明，在单层结构中，高数值孔径与宽带宽在物理上是互斥的：当 $NA/n_b \\to 1$ 时，所需群延迟发散，导致理论带宽趋近于零。因此，色散工程的核心挑战在于如何在有限的 $\\kappa$ 值下最大化可用带宽，或如何通过结构设计突破单一延迟线的限制。\\n\\n$\\kappa$ 值的具体物理含义取决于超表面的实现机制，主要分为共振型与波导型两类，二者在带宽潜力上存在本质差异。对于基于深亚波长共振超原子的超薄金属透镜，其相位调控依赖于近共振散射，耦合模理论给出 $\\kappa = 2$ [P0003][P0099]。这种机制受限于谐振器的品质因数 Q，虽然能实现 $2\\pi$ 相位覆盖，但强烈的色散导致工作带宽极窄，通常仅适用于单色或离散波长应用。相比之下，基于介质波导的传播相位型超表面（厚度约为一个波长量级）不依赖近共振相互作用，其 $\\kappa$ 值与器件厚度 $L$ 及折射率对比度 $\\Delta n$ 成正比，即 $\\kappa \\propto L \\Delta n$ [P0003][P0099]。这意味着通过增加结构厚度或使用高折射率材料，可以线性提升可用的群延迟范围，从而放宽带宽限制。然而，色散幅度与可用带宽之间存在互补性权衡：增强单层的色散调控能力往往以牺牲带宽或引入损耗为代价。例如，在基于电磁诱导透明（EIT）类响应的超材料设计中，增加静态磁化率或耦合强度虽能增强色散补偿幅度，但会压缩色散曲线的有效带宽，且多层堆叠以累积色散会导致透射率显著下降 [P0047]。因此，单纯依靠单层波导结构的厚度增加来换取带宽，面临着材料本征损耗与深宽比加工难度的双重约束。\\n\\n慢光缓冲器理论为理解上述延迟 - 带宽反比关系提供了直观的物理类比，同时也揭示了该模型的适用边界。在线性光学延迟线中，极低的群速度必然伴随极低的带宽或吞吐量，且最小物理尺寸受限于介质中的光波长 [P0163][P0212]。P0163 的研究证实，对于线性时不变谐振腔，无论是否具有非互易性，时间 - 带宽积严格受限于 $\\Delta t \\Delta \\omega = 2$，带宽由衰减速率决定而非输入耦合系数 [P0163]。P0212 进一步将这一极限推广至一维慢光结构，指出最大比特延迟数主要由结构长度（以波长计）和最大相对介电常数变化量的乘积决定 [P0212]。这些结论强化了金属透镜中“高延迟即窄带宽”的物理直觉。然而，必须注意到 P0003 的解析推导基于一维纵向传播假设，忽略了厚器件中可能存在的横向模式耦合 [P0003]。实际二维/三维超表面中，侧向传播路径可能引入额外的相位延迟，使有效 $\\kappa$ 值偏离一维预测。此外，慢光类比中的比特存储容量限制不能直接套用于成像系统的空间相位调控，因为成像质量还受限于衍射极限和像差容忍度（如 Strehl 比）。因此，TBP 界限严格适用于线性时不变系统，当 NA 趋近于介质折射率时，单层结构的带宽极限趋近于零，这为后续讨论引入垂直自由度（如多层堆叠）的必要性奠定了理论基础。\",\n  \"issues\": []\n}",
+  "content_sha256": "91afb5ed5e9875294435065dde1c8c65665fcc6f285345efd8d17b1c1bf2725e",
+  "usage": {
+    "completion_tokens": 2767,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1704,
+      "text_tokens": 2767
+    },
+    "prompt_tokens": 130564,
+    "prompt_tokens_details": {
+      "text_tokens": 130564
+    },
+    "total_tokens": 133331
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": 56.82800000000134,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-90fa20a4-58f1-95e8-b28d-2b0e1883aaf9",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_with_pending",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "e8b467059b2d8febfd31ea6c17e7696355fad5fe48474573f310bb43f319dd0e",
+    "original_body_sha256": "f3716a1bf9c7e038de67acda09d926175bf7491380d8fc8f8342cea0e1314855",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH1/U1/1638e54f14e52c775688180831b6732b920241790506638035b980c63dd6f0f0/attempt_001/REQUEST.json",
+      "sha256": "41cac59482464886f34d3c1c2942fd485c34041a676bd3227078547566e930d0",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH1/U1/1638e54f14e52c775688180831b6732b920241790506638035b980c63dd6f0f0/attempt_001/UNIT_INPUT.json",
+      "sha256": "e0b958dd02a22d7a2b69bdac46ab1211161dbd380921f07e2c814f5a8d3082f3",
+      "bytes": 385247
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH1/U1/1638e54f14e52c775688180831b6732b920241790506638035b980c63dd6f0f0/UNIT_PACK.json",
+      "sha256": "9e2fb64d19b2f1b8a6374279ae4cb25c89ce3470fcb477f6641055ab73a40eb9",
+      "bytes": 469400
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH1/U1/1638e54f14e52c775688180831b6732b920241790506638035b980c63dd6f0f0/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "eb50736f150e133e782be586db6fa34de5ef528f924958c77593ef0c309438ed",
+      "bytes": 496891
+    },
+    "identity": {
+      "chapter_id": "CH1",
+      "unit_id": "U1",
+      "language": "zh",
+      "source_handles": [
+        "P0003",
+        "P0099",
+        "P0047",
+        "P0163",
+        "P0212",
+        "P0050",
+        "P0064",
+        "P0227",
+        "P0154",
+        "P0224",
+        "P0133",
+        "P0004",
+        "P0189",
+        "P0094",
+        "P0031",
+        "P0161",
+        "P0041",
+        "P0072",
+        "P0162",
+        "P0022",
+        "P0100",
+        "P0246",
+        "P0018",
+        "P0061",
+        "P0057",
+        "P0220",
+        "P0033",
+        "P0148",
+        "P0247"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "建立时间 - 带宽积（TBP）框架，阐明群延迟与带宽的反比关系，区分共振型与波导型器件的 κ 值差异及其对带宽潜力的影响",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "U1_P01",
+          "point": "建立 TBP 框架并导出带宽 -NA 依赖关系",
+          "development": "从线性时不变系统的时间延迟 ΔT 与带宽 Δω 乘积受常数 κ 限制出发，结合透镜边缘最大光程差推导 Δω ≤ (κc/F)Q(NA/n_b)。",
+          "source_uses": [
+            {
+              "source_handle": "P0003",
+              "role": "主论据",
+              "use": "提供 TBP 框架的解析推导，导出带宽极限公式 Δω ≤ (κc/F)Q(NA/n_b)，建立延迟 - 带宽反比关系"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U1_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U1_P01",
+              "unit_id": "U1",
+              "ordinal": 1,
+              "point": "建立 TBP 框架并导出带宽 -NA 依赖关系",
+              "development": "从线性时不变系统的时间延迟 ΔT 与带宽 Δω 乘积受常数 κ 限制出发，结合透镜边缘最大光程差推导 Δω ≤ (κc/F)Q(NA/n_b)。",
+              "source_handles": [
+                "P0003"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "U1_P02",
+          "point": "区分共振型与波导型器件的 κ 值差异",
+          "development": "对比单模谐振器（κ=2）与无损介电波导（κ=2π(L/λ_c)Δn）的物理基础，说明高纵横比结构如何通过延长相互作用长度提升色散覆盖潜力。",
+          "source_uses": [
+            {
+              "source_handle": "P0003",
+              "role": "主论据",
+              "use": "定义共振型器件 κ=2 的物理基础"
+            },
+            {
+              "source_handle": "P0099",
+              "role": "主论据",
+              "use": "定义波导型器件 κ∝LΔn 的物理基础，说明高纵横比结构如何通过延长相互作用长度提升色散覆盖潜力"
+            },
+            {
+              "source_handle": "P0047",
+              "role": "例证",
+              "use": "提供色散幅度与可用带宽互补性的量化示例，论证单一单元难以同时满足大色散量与宽工作带宽的需求"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U1_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U1_P02",
+              "unit_id": "U1",
+              "ordinal": 2,
+              "point": "区分共振型与波导型器件的 κ 值差异",
+              "development": "对比单模谐振器（κ=2）与无损介电波导（κ=2π(L/λ_c)Δn）的物理基础，说明高纵横比结构如何通过延长相互作用长度提升色散覆盖潜力。",
+              "source_handles": [
+                "P0003",
+                "P0099"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "U1_P03",
+          "point": "慢光类比与一维模型适用性边界",
+          "development": "引用慢光缓冲器的延迟 - 带宽反比规律强化物理直觉，同时指出 P0003 的一维纵向假设在厚器件中忽略横向传播，实际超表面需考虑模式耦合带来的修正。",
+          "source_uses": [
+            {
+              "source_handle": "P0163",
+              "role": "主论据",
+              "use": "引用慢光缓冲器的延迟 - 带宽反比规律强化物理直觉，说明极低的群速度必然伴随极低的带宽或吞吐量"
+            },
+            {
+              "source_handle": "P0212",
+              "role": "背景",
+              "use": "提供一维慢光结构的基础理论极限，强调结构尺寸和介电常数对比度对延迟能力的根本制约"
+            },
+            {
+              "source_handle": "P0003",
+              "role": "局限",
+              "use": "指出一维纵向假设在厚器件中忽略横向传播，实际超表面需考虑模式耦合带来的修正"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U1_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U1_P03",
+              "unit_id": "U1",
+              "ordinal": 3,
+              "point": "慢光类比与一维模型适用性边界",
+              "development": "引用慢光缓冲器的延迟 - 带宽反比规律强化物理直觉，同时指出 P0003 的一维纵向假设在厚器件中忽略横向传播，实际超表面需考虑模式耦合带来的修正。",
+              "source_handles": [
+                "P0163",
+                "P0212",
+                "P0003"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "owner_fields_present": [
+        "argument_relations",
+        "cases",
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "evidence_conditions_limits",
+        "ordered_development",
+        "relations_conditions_limits",
+        "theme"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 130554,
+      "reserved_input_tokens": 154413,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 195373,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 1.600692,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 29,
+      "with_study_summary_A": 29,
+      "with_review_planning_B": 29,
+      "with_deep_read_material": [
+        "P0003"
+      ],
+      "with_supplement_material": 0,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0003"
+      ],
+      "chapter_tool_materials": 4,
+      "read_from_disk": [
+        "P0003",
+        "P0004",
+        "P0018",
+        "P0022",
+        "P0031",
+        "P0033",
+        "P0041",
+        "P0047",
+        "P0050",
+        "P0057",
+        "P0061",
+        "P0064",
+        "P0072",
+        "P0094",
+        "P0099",
+        "P0100",
+        "P0133",
+        "P0148",
+        "P0154",
+        "P0161",
+        "P0162",
+        "P0163",
+        "P0189",
+        "P0212",
+        "P0220",
+        "P0224",
+        "P0227",
+        "P0246",
+        "P0247"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH1/U1/1638e54f14e52c775688180831b6732b920241790506638035b980c63dd6f0f0/attempt_001/RAW_RESPONSE.json",
+      "sha256": "7de164f007e2fa1c228352c8f466cd53637221505753dd0205d7626953df2c0f",
+      "bytes": 322023
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH1/U1/1638e54f14e52c775688180831b6732b920241790506638035b980c63dd6f0f0/attempt_001/transport/1638e54f14e52c77-attempt_001-invoke0cf13c1a703e4cff-key0-attempt0.sse.raw",
+      "sha256": "520371b84f6bc95500baf10247a4489410c5349a8cc6c948098840e509e8fd75",
+      "bytes": 250671
+    },
+    "response_payload_sha256": "520371b84f6bc95500baf10247a4489410c5349a8cc6c948098840e509e8fd75",
+    "sse_payload_sha256": "520371b84f6bc95500baf10247a4489410c5349a8cc6c948098840e509e8fd75"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH1/U1/1638e54f14e52c775688180831b6732b920241790506638035b980c63dd6f0f0/attempt_001/quality/c1eb93ede3ec4ca6113ac9b9321e4d4afd37b6765d3700c68830a04d76c52dd7/QUALITY_BODY.md",
+    "sha256": "1fee616281b54f8479abb727363684c2ec457c2de8232bc4f6f10e92db13e74a",
+    "bytes": 4212
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

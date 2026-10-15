@@ -1,0 +1,500 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH3",
+  "unit_id": "CH3_U04",
+  "attempt_dir": "<BODY_W>/units/CH3/CH3_U04/a2a24f8184b270ce52dd4d63e8375997e5f34b9825fc720c56c2c08907863263/attempt_001",
+  "model_source_attempt_dir": "<BODY_W>/units/CH3/CH3_U04/a2a24f8184b270ce52dd4d63e8375997e5f34b9825fc720c56c2c08907863263/attempt_001",
+  "attempt": "attempt_001",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": null,
+  "format_recovery": null,
+  "content": "{\n  \"body_markdown\": \"增加垂直自由度或切换宏观衍射机制虽能缓解单层色散限制，但伴随界面反射、特征尺寸缩小或计算复杂度上升的隐性成本。3D 打印多层结构通过伴随法拓扑优化打破单层 NA-带宽权衡，在可见光波段 NA=0.5 时实现平均聚焦效率约 42.7%，但层数超过 3 层后因界面反射累积效率开始回落 [P0220]。折射 - 衍射混合架构（HAML）利用宏观相位板分担色散需求，合并式架构在近红外波段（1000-1800 nm）NA=0.27 时平均效率超 60%（最高~80%），而空气间隔式架构虽将 NA 提升至 0.32，效率却降至 27% [P0072]。逆设计多级衍射透镜（ADL）通过优化高度剖面规避亚波长制造瓶颈，在可见光波段 NA=0.05 时效率>40%，但 NA 升至 0.18 时效率降至~22.1%，且最小特征尺寸（~0.25 μm @ NA=0.9 仿真）仍远大于金属透镜要求 [P0237]。这些实证表明，架构策略可通过增加自由度缓解色散压力，但无法消除物理极限，且往往引入新的效率损失机制。\n\n单纯追求光学效率或分辨率不足以表征实际成像价值，需引入整体性能指标（OPM）解析效率、分辨率与信噪比的非线性耦合。OPM 定义为$\\\\text{OPM} = (\\\\eta/\\\\sqrt{T}) \\\\cdot \\\\text{Strehl}$，其中$\\\\eta$代表信号水平，$T$代表总透射率（噪声源），Strehl 代表分辨率 [P0001]。在散粒噪声限制下，$\\\\eta/\\\\sqrt{T}$项使得低效率设计在系统级信噪比上遭受不成比例的惩罚。案例分析显示，消色差超透镜虽提升分辨率，但效率损失导致 OPM 往往低于等效常规衍射透镜，如短波红外波段某消色差设计 OPM 为 0.55，而等效传统衍射透镜为 0.64 [P0001]。计算辅助 EDOF 路径虽能通过去卷积提升图像结构相似性（SSIM 提升 0.209），但去卷积后图像的 SNR 低于仅针对绿光聚焦的单透镜图像，证实了光学带宽扩展以 SNR 损失为代价 [P0069]。因此，效率损失通过信噪比非线性地拖累系统级成像质量，单纯的光学参数优化需让位于系统级权衡。\n\n在通用成像场景中，多级衍射透镜（MDL）凭借高能效与低制造门槛占据系统级优势，超透镜的价值锚点在于极致微型化与特殊功能集成。仿真对比表明，MDL 在相同光学规格下窄带效率>87%（NA=0.97），宽带效率>70%（NA=0.81），且最小特征宽度显著大于金属透镜，支持低成本聚合物卷对卷制造 [P0187]。相比之下，可见光波段 1cm 孔径的消色差超透镜实测效率约 15%（RGB 平均），且受限于亚波长制造公差 [P0023]。MDL 在效率与制造兼容性上具有综合优势，但超透镜在微型化、偏振操控及计算协同等 niche 场景不可替代。综合判断，当前技术阶段消色差超透镜整体性能尚未超越等效常规衍射光学系统，未来突破需依赖材料折射率对比度提升或混合架构协同设计。\n\n| 架构策略 | 工作波段 | 数值孔径 (NA) | 平均效率 | 关键优势/局限 |\n| :--- | :--- | :--- | :--- | :--- |\n| 3D 打印多层结构 | 可见光 (400-800 nm) | 0.5 | ~42.7% (实验) | 打破单层 NA-带宽权衡；界面反射限制层数扩展 [P0220] |\n| 折射 - 衍射混合架构 (HAML) | 近红外 (1000-1800 nm) | 0.27 (合并式) / 0.32 (空气间隔) | >60% (合并式) / 27% (空气间隔) | 相位板分担色散；空气间隔式对准敏感且效率低 [P0072] |\n| 逆设计多级衍射透镜 (ADL) | 可见光 (450-750 nm) | 0.05 / 0.18 | >40% / ~22.1% | 规避亚波长制造瓶颈；效率随 NA 增加显著下降 [P0237] |\n| 传统多级衍射透镜 (MDL) | 可见光/近红外 (仿真) | 0.97 (窄带) / 0.81 (宽带) | >87% (窄带) / >70% (宽带) | 高能效与制造可行性；特征尺寸宽松 [P0187] |\",\n  \"issues\": []\n}",
+  "content_sha256": "287efa5595c0aec2a45aab660353b53350cbdb39977a6b18a3b1f9a20ee5fd35",
+  "usage": {
+    "completion_tokens": 5196,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4014,
+      "text_tokens": 5196
+    },
+    "prompt_tokens": 303188,
+    "prompt_tokens_details": {
+      "text_tokens": 303188
+    },
+    "total_tokens": 308384
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": 103.04700000000594,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-d09dd575-9863-9e73-ab1b-8538261726af",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_with_pending",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "795ed98672311cea8e3ff7553aece49101f4ddecf6ddbf7c396c690503606f21",
+    "original_body_sha256": "d70dc736d3e2b4828fccac394bc41ebfe49dd01670f05bfebe51b253376d8cec",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U04/a2a24f8184b270ce52dd4d63e8375997e5f34b9825fc720c56c2c08907863263/attempt_001/REQUEST.json",
+      "sha256": "82a546e62e807d1e5007bb262a9b7546fc5816a236788f31aba36f831d5da9c5",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U04/a2a24f8184b270ce52dd4d63e8375997e5f34b9825fc720c56c2c08907863263/attempt_001/UNIT_INPUT.json",
+      "sha256": "4d5129cb139b02075a44ae873053943f48f3a8f47e6906434e60238654b8ad3b",
+      "bytes": 894830
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U04/a2a24f8184b270ce52dd4d63e8375997e5f34b9825fc720c56c2c08907863263/UNIT_PACK.json",
+      "sha256": "7c6529b290359765acf59f31f4543a2ec6adebb50915ccd7a2d69a517fca06c0",
+      "bytes": 1109220
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U04/a2a24f8184b270ce52dd4d63e8375997e5f34b9825fc720c56c2c08907863263/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "4d13813fb00c7a7e550662876551e09da4b6372adf31bf2fae239ab2a789e975",
+      "bytes": 1158286
+    },
+    "identity": {
+      "chapter_id": "CH3",
+      "unit_id": "CH3_U04",
+      "language": "zh",
+      "source_handles": [
+        "P0220",
+        "P0072",
+        "P0237",
+        "P0001",
+        "P0069",
+        "P0187",
+        "P0148",
+        "P0139",
+        "P0061",
+        "P0231",
+        "P0131",
+        "P0210",
+        "P0179",
+        "P0181",
+        "P0117",
+        "P0147",
+        "P0110",
+        "P0033",
+        "P0022",
+        "P0202",
+        "P0090",
+        "P0099",
+        "P0160",
+        "P0235",
+        "P0004",
+        "P0162",
+        "P0106",
+        "P0204",
+        "P0121",
+        "P0063",
+        "P0225",
+        "P0079",
+        "P0018",
+        "P0157",
+        "P0059",
+        "P0165",
+        "P0052",
+        "P0017",
+        "P0230",
+        "P0094",
+        "P0183",
+        "P0154",
+        "P0192",
+        "P0023",
+        "P0159",
+        "P0246",
+        "P0126",
+        "P0196",
+        "P0176",
+        "P0112",
+        "P0077",
+        "P0134",
+        "P0128",
+        "P0050"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "评估架构策略对效率的调节效能，并通过系统级综合指标（OPM）完成效率、分辨率与信噪比的统一权衡判定。",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "CH3_U04_P01",
+          "point": "盘点多层堆叠、混合架构与逆设计策略的效率调节效能。",
+          "development": "对比 P0220（3D 打印多层，NA=0.5 效率~42%）、P0072（混合架构，效率>60%）与 P0237（逆设计 ADL，NA=0.05 效率>40%），说明增加垂直自由度或切换宏观衍射机制可有效缓解单层色散限制，但伴随界面反射、特征尺寸缩小或计算复杂度上升的隐性成本。",
+          "source_uses": [
+            {
+              "source_handle": "P0220",
+              "role": "主论据",
+              "use": "验证增加垂直自由度打破单层 NA-带宽权衡的可行性，同时揭示界面反射累积带来的效率回落天花板。"
+            },
+            {
+              "source_handle": "P0072",
+              "role": "例证",
+              "use": "展示折射 - 衍射混合架构利用宏观相位板分担色散需求以维持高透射率的策略。"
+            },
+            {
+              "source_handle": "P0237",
+              "role": "例证",
+              "use": "提供逆设计多级衍射透镜在低 NA 下维持较高效率的数据，规避亚波长制造瓶颈。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH3_U04_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH3_U04_P01",
+              "unit_id": "CH3_U04",
+              "ordinal": 1,
+              "point": "盘点多层堆叠、混合架构与逆设计策略的效率调节效能。",
+              "development": "对比 P0220（3D 打印多层，NA=0.5 效率~42%）、P0072（混合架构，效率>60%）与 P0237（逆设计 ADL，NA=0.05 效率>40%），说明增加垂直自由度或切换宏观衍射机制可有效缓解单层色散限制，但伴随界面反射、特征尺寸缩小或计算复杂度上升的隐性成本。",
+              "source_handles": [
+                "P0220",
+                "P0072",
+                "P0237"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH3_U04_P02",
+          "point": "引入 OPM/EOPM 指标解析效率、分辨率与信噪比的非线性耦合。",
+          "development": "基于 P0001 的 OPM 公式，阐释为何消色差设计常以效率大幅牺牲换取 Strehl 比的微小提升；指出在散粒噪声限制下，η/√T 项使得低效率设计在系统级信噪比上遭受不成比例的惩罚，导致整体成像质量未达预期。",
+          "source_uses": [
+            {
+              "source_handle": "P0001",
+              "role": "主论据",
+              "use": "引入整体性能指标 OPM 框架，解析消色差设计常以效率大幅牺牲换取分辨率微小提升的系统级信噪比惩罚。"
+            },
+            {
+              "source_handle": "P0069",
+              "role": "背景",
+              "use": "提供计算辅助 EDOF 路径的实证，量化去卷积后 SNR 损失与光学带宽扩展的权衡。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH3_U04_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH3_U04_P02",
+              "unit_id": "CH3_U04",
+              "ordinal": 2,
+              "point": "引入 OPM/EOPM 指标解析效率、分辨率与信噪比的非线性耦合。",
+              "development": "基于 P0001 的 OPM 公式，阐释为何消色差设计常以效率大幅牺牲换取 Strehl 比的微小提升；指出在散粒噪声限制下，η/√T 项使得低效率设计在系统级信噪比上遭受不成比例的惩罚，导致整体成像质量未达预期。",
+              "source_handles": [
+                "P0001"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH3_U04_P03",
+          "point": "对标超透镜与多级衍射透镜（MDL）的系统级综合表现。",
+          "development": "结合 P0187 的 MDL 仿真数据（宽带>70% 效率，特征尺寸宽松）与前述超透镜实测数据，论证在通用成像场景中 MDL 凭借高能效与低制造门槛占据系统级优势；明确超透镜的价值锚点在于极致微型化、特殊波段适配及偏振/计算协同等 niche 场景。",
+          "source_uses": [
+            {
+              "source_handle": "P0187",
+              "role": "主论据",
+              "use": "对标传统多级衍射透镜，论证其在高 NA 宽带场景下凭借宽松特征尺寸与高能效占据系统级综合优势。"
+            },
+            {
+              "source_handle": "P0237",
+              "role": "比较",
+              "use": "作为逆设计衍射架构的对比案例。"
+            },
+            {
+              "source_handle": "P0072",
+              "role": "比较",
+              "use": "作为混合架构的对比案例。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH3_U04_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH3_U04_P03",
+              "unit_id": "CH3_U04",
+              "ordinal": 3,
+              "point": "对标超透镜与多级衍射透镜（MDL）的系统级综合表现。",
+              "development": "结合 P0187 的 MDL 仿真数据（宽带>70% 效率，特征尺寸宽松）与前述超透镜实测数据，论证在通用成像场景中 MDL 凭借高能效与低制造门槛占据系统级优势；明确超透镜的价值锚点在于极致微型化、特殊波段适配及偏振/计算协同等 niche 场景。",
+              "source_handles": [
+                "P0187",
+                "P0237",
+                "P0072"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [
+        {
+          "table_id": "CH3_U04_T01",
+          "purpose": "比较不同架构策略在效率、带宽与制造可行性上的系统级表现。",
+          "columns": [
+            "架构策略",
+            "工作波段",
+            "数值孔径 (NA)",
+            "平均效率",
+            "关键优势/局限"
+          ],
+          "row_tasks": [
+            {
+              "content": "3D 打印多层结构",
+              "source_uses": [
+                {
+                  "source_handle": "P0220",
+                  "role": "比较",
+                  "use": "提供可见光波段 NA=0.5 效率~42.7% 的数据。"
+                }
+              ]
+            },
+            {
+              "content": "折射 - 衍射混合架构 (HAML)",
+              "source_uses": [
+                {
+                  "source_handle": "P0072",
+                  "role": "比较",
+                  "use": "提供近红外波段合并式架构效率>60% 的数据。"
+                }
+              ]
+            },
+            {
+              "content": "逆设计多级衍射透镜 (ADL)",
+              "source_uses": [
+                {
+                  "source_handle": "P0237",
+                  "role": "比较",
+                  "use": "提供可见光波段 NA=0.05 效率>40% 的数据。"
+                }
+              ]
+            },
+            {
+              "content": "传统多级衍射透镜 (MDL)",
+              "source_uses": [
+                {
+                  "source_handle": "P0187",
+                  "role": "比较",
+                  "use": "提供宽带效率>70% 及特征尺寸宽松的数据。"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "owner_fields_present": [
+        "argument_relations",
+        "cases",
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "ordered_development",
+        "relations_limits",
+        "transition"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 303178,
+      "reserved_input_tokens": 347752,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 388712,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 2.374048,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 54,
+      "with_study_summary_A": 54,
+      "with_review_planning_B": 54,
+      "with_deep_read_material": [
+        "P0001",
+        "P0069",
+        "P0090",
+        "P0139",
+        "P0148",
+        "P0157",
+        "P0187"
+      ],
+      "with_supplement_material": 1,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0001",
+        "P0069",
+        "P0090",
+        "P0139",
+        "P0148",
+        "P0157",
+        "P0187"
+      ],
+      "chapter_tool_materials": 17,
+      "read_from_disk": [
+        "P0001",
+        "P0004",
+        "P0017",
+        "P0018",
+        "P0022",
+        "P0023",
+        "P0033",
+        "P0050",
+        "P0052",
+        "P0059",
+        "P0061",
+        "P0063",
+        "P0069",
+        "P0072",
+        "P0077",
+        "P0079",
+        "P0090",
+        "P0094",
+        "P0099",
+        "P0106",
+        "P0110",
+        "P0112",
+        "P0117",
+        "P0121",
+        "P0126",
+        "P0128",
+        "P0131",
+        "P0134",
+        "P0139",
+        "P0147",
+        "P0148",
+        "P0154",
+        "P0157",
+        "P0159",
+        "P0160",
+        "P0162",
+        "P0165",
+        "P0176",
+        "P0179",
+        "P0181",
+        "P0183",
+        "P0187",
+        "P0192",
+        "P0196",
+        "P0202",
+        "P0204",
+        "P0210",
+        "P0220",
+        "P0225",
+        "P0230",
+        "P0231",
+        "P0235",
+        "P0237",
+        "P0246"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U04/a2a24f8184b270ce52dd4d63e8375997e5f34b9825fc720c56c2c08907863263/attempt_001/RAW_RESPONSE.json",
+      "sha256": "a70962bd09634a451618aabd15fef89ad6d91fdf81f3783e42c26a4a995e4d13",
+      "bytes": 567357
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U04/a2a24f8184b270ce52dd4d63e8375997e5f34b9825fc720c56c2c08907863263/attempt_001/transport/a2a24f8184b270ce-attempt_001-invokec6d049ea4e3e4042-key0-attempt0.sse.raw",
+      "sha256": "60788bdf5411ae86c3eee6ed5245e23d902c0e1b0f8923760cd47041b6370fee",
+      "bytes": 451659
+    },
+    "response_payload_sha256": "60788bdf5411ae86c3eee6ed5245e23d902c0e1b0f8923760cd47041b6370fee",
+    "sse_payload_sha256": "60788bdf5411ae86c3eee6ed5245e23d902c0e1b0f8923760cd47041b6370fee"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH3/CH3_U04/a2a24f8184b270ce52dd4d63e8375997e5f34b9825fc720c56c2c08907863263/attempt_001/quality/4e8845b435405e23ce88d27be8c62a7c27c5f3cb30a2ed1bae921cf8c58a8c0e/QUALITY_BODY.md",
+    "sha256": "836ddd55df0b167bf0334fb9fdbc8ccae53f911572cdbe2f1b8c8ba10edb033a",
+    "bytes": 3832
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

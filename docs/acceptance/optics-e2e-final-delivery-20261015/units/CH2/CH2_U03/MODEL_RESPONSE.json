@@ -1,0 +1,445 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH2",
+  "unit_id": "CH2_U03",
+  "attempt_dir": "<BODY_W>/units/CH2/CH2_U03/c96631242ee9f5ac21fd2ba228aa5884cc021c5f19bacfa8d9c371ba08f43fe0/attempt_001/format_derivatives/416884c0c04ca517e8dbf10119cbbf078fffa81cb0cd660f6747563b328733ae",
+  "model_source_attempt_dir": "<BODY_W>/units/CH2/CH2_U03/c96631242ee9f5ac21fd2ba228aa5884cc021c5f19bacfa8d9c371ba08f43fe0/attempt_001",
+  "attempt": "416884c0c04ca517e8dbf10119cbbf078fffa81cb0cd660f6747563b328733ae",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": "format_recovery",
+  "format_recovery": {
+    "original_attempt": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\09_body_delivery\\body\\units\\CH2\\CH2_U03\\c96631242ee9f5ac21fd2ba228aa5884cc021c5f19bacfa8d9c371ba08f43fe0\\attempt_001",
+    "format_derivative": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\09_body_delivery\\body\\units\\CH2\\CH2_U03\\c96631242ee9f5ac21fd2ba228aa5884cc021c5f19bacfa8d9c371ba08f43fe0\\attempt_001\\format_derivatives\\416884c0c04ca517e8dbf10119cbbf078fffa81cb0cd660f6747563b328733ae",
+    "restored_source_handles": [
+      "P0024",
+      "P0041",
+      "P0073",
+      "P0107",
+      "P0123",
+      "P0194",
+      "P0197",
+      "P0243"
+    ],
+    "model_calls": 0
+  },
+  "content": "```json\n{\n  \"body_markdown\": \"逆设计框架通过释放瞳孔函数的非唯一性，突破了传统解析设计在孔径与带宽权衡上的刚性约束。P0024 展示了利用逆衍射变换将焦平面相位作为自由参数优化的策略，在直径 3.145 mm、NA=0.3 的器件上实现了 0.45–1.0 μm 连续光谱的消色差聚焦，焦点尺寸接近衍射极限。该设计不同于固定瞳孔函数产生球面波前的传统方法，而是通过求解满足强度聚焦但相位任意的瞳孔分布，利用材料色散特性辅助宽带相位匹配。实验验证了离轴像差在入射角≥15°时变得明显，但<15°时对比度保持良好，估计全视场角约 30°。相比之下，P0073 采用基于全波拓扑优化的伴随法框架，将空间每一点的介电常数作为设计变量，通过最大化所有设计频率和角度下斯特列尔比最小值的目标函数，在~10λ厚度内同时校正色差和几何像差。其 3D 轴对称透镜设计（NA=0.12，直径 50λ）实现了平均绝对聚焦效率 72%，所有设计点 SR>0.86。然而，这类计算资源需求巨大（需~1000 CPU 周时间），且实际制造受限于当前 3D 纳米加工技术精度。作为对照，P0243 展示了基于原子层沉积制备 TiO₂纳米柱的确定性设计，在 NA=0.8 时实现 86% 的峰值效率，但其消色差机制未明确交代，带宽范围受限，凸显了逆设计在平衡带宽与孔径方面的优势，尽管效率数据需结合具体 NA 条件谨慎对比。\n\n拓扑优化中局部周期近似（LPA）的预测偏差构成了大面积逆设计的主要效率边界。P0194 提出了结合拓扑优化与 LPA 的计算框架，用于设计具有数百万自由度的大面积超表面。在直径 1200λ、NA=0.51 的多层 TiO₂/SiO₂金属透镜设计中，LPA 预测的平均传输效率约 40%，全波仿真证实了预测准确性且未违反能量守恒界限。然而，在多波长（RGB）消色差设计中，由于设计沿表面快速变化，LPA 会忽略单元间的散射相互作用，导致预测效率偏高且出现杂散衍射。直径 200λ、NA=0.71 的三波长设计中，全波仿真显示的聚焦效率分别为~51%、50%、45%，高于 LPA 预测值，表明拓扑优化能探索更复杂的几何结构以缓解色差限制，但 LPA 误差在快速变化结构中显著。P0123 综述进一步指出，LPA 在处理强耦合和非周期性结构时失效，必须转向逆向设计和更精确的仿真（如 FMM、CMT、深度学习）。对于高折射率金属透镜，纳米级的直径偏差（>±5 nm）即可使效率降至 90% 以下，侧壁锥角从 0°增加到 12.5°时，平均聚焦效率从 68.14% 降至 19.64%。P0243 作为高精度制造基准，其 ALD 工艺实现的高保真度纳米结构（NA=0.8 时效率 86%）与逆设计结构的工艺敏感性形成对比，说明逆设计虽能逼近理论极限，但实际效率受制造公差影响显著，需在设计阶段引入容差约束。\n\n深度学习代理模型在色散约束优化中展现出加速迭代与捕捉互耦效应的双重效能，但模拟与实物间仍存在鸿沟。P0041 开发了 SiDSaT（Shape-integrated Dual-Spectrum-aware Transformer）架构，通过全局感知和局部感知双分支注意力机制分别捕捉光谱的全局依赖和局部尖锐特征，在 800–1600 nm 波段针对 TiO₂圆柱和立方体单元的相位预测平均绝对误差分别为 0.0473 和 0.0446。该模型嵌入结合粒子群优化和遗传算法的逆向设计框架，在 1000–1400 nm 宽带设计中实现了准消色差行为，最大焦距偏移约 90 μm（22.5%），在 1000–1300 nm 范围内偏移降至约 40 μm（10%）。研究提供了带宽与 NA 权衡的数学约束公式，指出大带宽和高 NA 需要单元库具有更宽的色散范围。P0107 在长波红外（9–12 μm）波段采用光学衍射神经网络框架，将标量衍射传播与基于梯度的优化相结合，实现了波长依赖相位分布与离散元原子选择的端到端协同优化，相比传统设计具有更高的平均聚焦效率和显著减少的焦距偏移，并在管道泄漏检测场景中验证了成像性能。P0197 则通过深度卷积神经网络预测纳米单元在非周期性环境下的局部电磁响应，在 1.55 μm 波长下，采用 N=4 邻居配置时，训练后的预测网络在测试集上的平均均方误差为 7e-5，对应振幅标准差 0.005、相位标准差 3.15 度。在 40 单元金属透镜优化中，焦点处电场强度提升 28.7%（光强提升 65.6%），平均相位误差从 30.4°降至 10.4°。然而，这些性能指标均为模拟结果，未考虑制造误差和材料损耗的实际影响，且应用验证局限于特定场景，深度学习模型的泛化能力依赖于训练数据的分布，对于超出训练范围的设计其预测准确性未知。\",\n  \"issues\": []\n}\n```",
+  "content_sha256": "5ece179a5a9fbc2dc69b1496659d7393ab875dd53cb837b0fd56b661dfd8c0e8",
+  "usage": {
+    "completion_tokens": 2119,
+    "completion_tokens_details": {
+      "reasoning_tokens": 829,
+      "text_tokens": 2119
+    },
+    "prompt_tokens": 220436,
+    "prompt_tokens_details": {
+      "text_tokens": 220436
+    },
+    "total_tokens": 222555
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": 45.54699999999866,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-ba266a45-c982-9e35-8673-41f4322960f2",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_pending_human_review",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "aaca2d8db2ea1a16a8dc0e48a363da60cd238522c3fcf7914c59cbbd121d9e62",
+    "original_body_sha256": "1be211893e84f3b3aa0e74639bccaaf6ebfcffdf3b0ea553ad24de5bff382638",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U03/c96631242ee9f5ac21fd2ba228aa5884cc021c5f19bacfa8d9c371ba08f43fe0/attempt_001/REQUEST.json",
+      "sha256": "e968bf8752192cd97165b48f1b2bca75c92f08afd79058e2969b17ac0dec4506",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U03/c96631242ee9f5ac21fd2ba228aa5884cc021c5f19bacfa8d9c371ba08f43fe0/attempt_001/UNIT_INPUT.json",
+      "sha256": "36c368c8d5e2951fa3fc4fd854ad57cd2eb32517a810d3990cd90036c1deff50",
+      "bytes": 671019
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U03/c96631242ee9f5ac21fd2ba228aa5884cc021c5f19bacfa8d9c371ba08f43fe0/UNIT_PACK.json",
+      "sha256": "bafee8986621375a8177a2b9f46ee826dd486facb5d54d3ebcb1d7f4c5000900",
+      "bytes": 815894
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U03/c96631242ee9f5ac21fd2ba228aa5884cc021c5f19bacfa8d9c371ba08f43fe0/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "ec79010e70b75fd9fe50a718ff84d20b91ce10c796dad3a0352b7152e2c48ea1",
+      "bytes": 853511
+    },
+    "identity": {
+      "chapter_id": "CH2",
+      "unit_id": "CH2_U03",
+      "language": "zh",
+      "source_handles": [
+        "P0024",
+        "P0073",
+        "P0243",
+        "P0194",
+        "P0123",
+        "P0041",
+        "P0107",
+        "P0197",
+        "P0148",
+        "P0139",
+        "P0061",
+        "P0231",
+        "P0131",
+        "P0210",
+        "P0179",
+        "P0181",
+        "P0117",
+        "P0147",
+        "P0110",
+        "P0033",
+        "P0112",
+        "P0001",
+        "P0069",
+        "P0059",
+        "P0077",
+        "P0134",
+        "P0128",
+        "P0050",
+        "P0018",
+        "P0165",
+        "P0154",
+        "P0202",
+        "P0090",
+        "P0099",
+        "P0160",
+        "P0235",
+        "P0004",
+        "P0162",
+        "P0106",
+        "P0204",
+        "P0121",
+        "P0063",
+        "P0225",
+        "P0079",
+        "P0157"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "逆向设计通过全局优化突破解析设计的局部最优，能实现大孔径和复杂波前调控，但计算成本高且制造验证滞后。",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "CH2_U03_P01",
+          "point": "论证逆设计框架在大孔径宽带消色差中的突破能力。",
+          "development": "分析 P0024 中瞳孔函数非唯一性与伴随法梯度计算的协同机制，展示>3mm 孔径下带宽与孔径的平衡潜力，指出材料耐久性与 FOV 限制。",
+          "source_uses": [
+            {
+              "source_handle": "P0024",
+              "role": "主论据",
+              "use": "逆设计实现>3mm 孔径、NA=0.3 宽带消色差"
+            },
+            {
+              "source_handle": "P0073",
+              "role": "例证",
+              "use": "展示基于伴随法的拓扑优化框架实现大尺度单片消色差设计"
+            },
+            {
+              "source_handle": "P0243",
+              "role": "比较",
+              "use": "提供确定性设计的高 NA 效率上限，与逆设计框架形成对照"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH2_U03_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH2_U03_P01",
+              "unit_id": "CH2_U03",
+              "ordinal": 1,
+              "point": "论证逆设计框架在大孔径宽带消色差中的突破能力。",
+              "development": "分析 P0024 中瞳孔函数非唯一性与伴随法梯度计算的协同机制，展示>3mm 孔径下带宽与孔径的平衡潜力，指出材料耐久性与 FOV 限制。",
+              "source_handles": [
+                "P0024"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH2_U03_P02",
+          "point": "揭示拓扑优化中 LPA 近似的预测偏差与效率边界。",
+          "development": "对比 P0194 中 LPA 与全波仿真的传输效率差异（40%-75%），解释快速变化结构中散射噪声的来源，确立效率预测的保守基准。",
+          "source_uses": [
+            {
+              "source_handle": "P0194",
+              "role": "主论据",
+              "use": "大面积多层超表面拓扑优化，量化 LPA 预测与全波仿真差异"
+            },
+            {
+              "source_handle": "P0123",
+              "role": "背景",
+              "use": "梳理大面积超表面设计中局部周期近似（LPA）与全波仿真的精度差异"
+            },
+            {
+              "source_handle": "P0243",
+              "role": "比较",
+              "use": "作为高精度制造基准，对比逆设计结构的工艺敏感性"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH2_U03_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH2_U03_P02",
+              "unit_id": "CH2_U03",
+              "ordinal": 2,
+              "point": "揭示拓扑优化中 LPA 近似的预测偏差与效率边界。",
+              "development": "对比 P0194 中 LPA 与全波仿真的传输效率差异（40%-75%），解释快速变化结构中散射噪声的来源，确立效率预测的保守基准。",
+              "source_handles": [
+                "P0194"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH2_U03_P03",
+          "point": "评估深度学习代理模型在色散约束优化中的效能。",
+          "development": "解析 P0041 Transformer 架构如何捕捉跨片段全局依赖与局部细节，引用 P0107 渐近相位补偿公式说明带宽 -NA 权衡的数学本质，指出模拟与实物的鸿沟。",
+          "source_uses": [
+            {
+              "source_handle": "P0041",
+              "role": "主论据",
+              "use": "Transformer 辅助逆设计，提供带宽与 NA 权衡的数学约束公式"
+            },
+            {
+              "source_handle": "P0107",
+              "role": "例证",
+              "use": "光学衍射神经网络框架实现 LWIR 波段高效消色差"
+            },
+            {
+              "source_handle": "P0197",
+              "role": "主论据",
+              "use": "提供深度学习代理模型预测纳米单元互耦效应的案例"
+            },
+            {
+              "source_handle": "P0243",
+              "role": "比较",
+              "use": "作为传统设计基准，凸显全局优化在突破解析设计局部最优中的必要性"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH2_U03_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH2_U03_P03",
+              "unit_id": "CH2_U03",
+              "ordinal": 3,
+              "point": "评估深度学习代理模型在色散约束优化中的效能。",
+              "development": "解析 P0041 Transformer 架构如何捕捉跨片段全局依赖与局部细节，引用 P0107 渐近相位补偿公式说明带宽 -NA 权衡的数学本质，指出模拟与实物的鸿沟。",
+              "source_handles": [
+                "P0041",
+                "P0107"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "owner_fields_present": [
+        "argument_relations",
+        "cases",
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "evidence_conditions_and_limits",
+        "material_supported_relations",
+        "ordered_development",
+        "transition"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 220426,
+      "reserved_input_tokens": 255070,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 296030,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 2.00332,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 45,
+      "with_study_summary_A": 45,
+      "with_review_planning_B": 45,
+      "with_deep_read_material": [
+        "P0069",
+        "P0090",
+        "P0139",
+        "P0148",
+        "P0157"
+      ],
+      "with_supplement_material": 1,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0069",
+        "P0090",
+        "P0139",
+        "P0148"
+      ],
+      "chapter_tool_materials": 8,
+      "read_from_disk": [
+        "P0001",
+        "P0004",
+        "P0018",
+        "P0024",
+        "P0033",
+        "P0041",
+        "P0050",
+        "P0059",
+        "P0061",
+        "P0063",
+        "P0069",
+        "P0073",
+        "P0077",
+        "P0079",
+        "P0090",
+        "P0099",
+        "P0106",
+        "P0107",
+        "P0110",
+        "P0112",
+        "P0117",
+        "P0121",
+        "P0123",
+        "P0128",
+        "P0131",
+        "P0134",
+        "P0139",
+        "P0147",
+        "P0148",
+        "P0154",
+        "P0157",
+        "P0160",
+        "P0162",
+        "P0165",
+        "P0179",
+        "P0181",
+        "P0194",
+        "P0197",
+        "P0202",
+        "P0204",
+        "P0210",
+        "P0225",
+        "P0231",
+        "P0235",
+        "P0243"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U03/c96631242ee9f5ac21fd2ba228aa5884cc021c5f19bacfa8d9c371ba08f43fe0/attempt_001/RAW_RESPONSE.json",
+      "sha256": "4ef9a1bde775f54ee00d87bae257ca6331c73568f713fe65beedcc15931c835b",
+      "bytes": 246143
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U03/c96631242ee9f5ac21fd2ba228aa5884cc021c5f19bacfa8d9c371ba08f43fe0/attempt_001/transport/c96631242ee9f5ac-attempt_001-invokee7d9f3db0b844805-key0-attempt0.sse.raw",
+      "sha256": "9b629606fc60429821cbf53ac993f508b4d68835a1128c000d1df5e09361edbe",
+      "bytes": 188167
+    },
+    "response_payload_sha256": "9b629606fc60429821cbf53ac993f508b4d68835a1128c000d1df5e09361edbe",
+    "sse_payload_sha256": "9b629606fc60429821cbf53ac993f508b4d68835a1128c000d1df5e09361edbe"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH2/CH2_U03/c96631242ee9f5ac21fd2ba228aa5884cc021c5f19bacfa8d9c371ba08f43fe0/attempt_001/format_derivatives/416884c0c04ca517e8dbf10119cbbf078fffa81cb0cd660f6747563b328733ae/quality/b09b1dbb8dd73a36d601f5f7868bdfb16d92ea4139bc14cc772d69cc7536aa22/QUALITY_BODY.md",
+    "sha256": "351af0b49b387160dba1dddcdc9eb7c4da6f47677b1cd787a1105765fdb660b9",
+    "bytes": 4914
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

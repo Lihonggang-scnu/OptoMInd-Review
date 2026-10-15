@@ -1,0 +1,1065 @@
+{
+  "baseline_path": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\worktree\\outputs\\optics_e2e\\09_body_delivery\\body\\assembled\\REVIEW_DRAFT_HANDLES.md",
+  "baseline_sha256": "65f4e2efbc04b778f3a2964f8f458589ca814837c837222104aef2daa082b470",
+  "input_sha256": "2db7cff74351a4a5ca818765a3a6c888e9c5a04988c449b205fadd1278846c12",
+  "references_sha256": "d88156b31e4a30d17f5e4a083e4506f10af3b17bc42ad5767ed0936a59a02086",
+  "native_counts": {
+    "catalog_papers": 115,
+    "used_papers": 90,
+    "unused_papers": 25
+  },
+  "category_counts": {
+    "1": 9,
+    "2": 6,
+    "3": 10
+  },
+  "rows": [
+    {
+      "handle": "P0017",
+      "category": 1,
+      "title": "Imaging-based molecular barcoding with pixelated dielectric metasurfaces",
+      "doi": "10.1126/science.aas9768",
+      "paper_id": "143acbb0c15345438f760f09aec047cb5bed4ee6",
+      "aliases": [],
+      "chapter_ids": [
+        "CH3",
+        "CH4"
+      ],
+      "source_uses": [],
+      "judgment": "分子条形码与高Q光谱传感，不是连续宽带透镜；跨领域备选可不用。",
+      "A_work_summary": "该研究提出了一种基于成像的中红外纳米光子传感方法，旨在解决传统中红外光谱仪体积庞大且灵敏度受限的问题。作者设计并制备了由10x10个介电谐振器组成的像素化超表面，每个像素的共振频率通过几何缩放线性调谐至目标光谱范围内的不同离散点。利用这种空间-光谱的一一映射关系，结合宽带光源和成像探测器，无需分光计或机械扫描即可获取分子的吸收指纹，并将其转化为类似条形码的空间吸收图。实验验证了该方法在蛋白质单层检测、聚合物成分分析及农药识别中的化学特异性与高灵敏度。",
+      "A_key_findings": [
+        {
+          "conditions": "数值模拟与理论分析",
+          "finding": "设计的锯齿状介电谐振器阵列能够产生光谱纯净的高Q值共振（平均Q > 200），并在谐振器表面提供超过三个数量级的局部电场近场增强。共振频率随缩放因子S线性变化，覆盖1350 cm⁻¹至1750 cm⁻¹范围。"
+        },
+        {
+          "conditions": "器件制备与表征",
+          "finding": "实验制备的10x10像素超表面实现了1370 cm⁻¹至1770 cm⁻¹的连续频率调谐，平均半高全宽（FWHM）为13.7 cm⁻¹，平均Q因子为115，显著优于基于金纳米天线的金属结构（Q因子提升一个数量级以上）。"
+        },
+        {
+          "conditions": "蛋白质单层检测",
+          "finding": "在超表面物理吸附蛋白A/G单层后，最大反射强度下降25%，提取的吸收信号高达140 mOD，对应检测限约为每平方微米2130个分子。反射率包络清晰地复现了酰胺I和II带的特征指纹。"
+        },
+        {
+          "conditions": "成像式无分光计检测",
+          "finding": "通过对所有像素的反射信号进行积分，生成的空间吸收图（分子条形码）能够区分具有不同振动特征的分子。对于PMMA和PE的混合物，线性分解分析准确反映了聚合物的比例变化。"
+        }
+      ],
+      "B_planning_summary": "本文提供了一种将光谱信息编码为空间信息的超表面设计方案，其核心在于利用高Q值介电谐振器的窄线宽特性来实现多频点的同时探测。虽然其主要应用对象是分子光谱而非透镜相位调控，但其关于“色散工程”（通过几何参数改变共振频率/相位响应）以及由此带来的性能权衡（如像素尺寸与信噪比、分辨率之间的平衡）的分析，可为综述中关于宽带器件设计中如何管理频率依赖性和空间分辨率的关系提供具体的物理机制案例和对比基线。",
+      "B_cautions": [
+        "本文的核心贡献在于传感而非成像透镜，因此在将其用于讨论透镜的色散工程时，必须严格区分光谱分辨率与空间分辨率的物理含义。",
+        "文中提到的“宽带”是指通过像素阵列覆盖多个离散频率点，而非单一像素内的宽带相位调控，不可混淆。",
+        "检测限数据基于特定模型假设，不应直接外推为通用传感器的绝对性能指标。"
+      ]
+    },
+    {
+      "handle": "P0031",
+      "category": 1,
+      "title": "Tailor the functionalities of metasurfaces based on a complete phase diagram",
+      "doi": "10.1103/physrevlett.115.235503",
+      "paper_id": "25ece0757366ed0e14f2ee0186876258f2445bec",
+      "aliases": [],
+      "chapter_ids": [
+        "CH1",
+        "CH5"
+      ],
+      "source_uses": [],
+      "judgment": "MIM单端口Qa/Qr阻尼相图，外围物理背景；TBP主线由P0003等承担，无需扩展材料体系。",
+      "A_work_summary": "该论文旨在解决MIM超表面功能多样性背后的物理机制不明的问题。作者基于耦合模理论（CMT），建立了一个由内禀损耗和辐射损耗两个无量纲参数控制的完整相图。通过解析推导这两个参数与几何/材料参数的关系，并在太赫兹频段进行实验验证，展示了如何通过调节腔厚、狭缝宽度或材料电导率，使器件在完美吸收、相位调制等不同功能区间发生切换。",
+      "A_key_findings": [
+        {
+          "conditions": "Qa = Qr",
+          "finding": "系统处于临界耦合状态，表现为完美吸收（A=1），Smith曲线经过原点。"
+        },
+        {
+          "conditions": "Qa > Qr (欠阻尼)",
+          "finding": "系统表现为磁性共振，反射相位变化范围接近360度，适用于相位调制、偏振控制等功能。"
+        },
+        {
+          "conditions": "Qa < Qr (过阻尼)",
+          "finding": "系统表现为电性共振，反射相位变化范围小于180度，适用于完美吸收或电反射器。"
+        },
+        {
+          "conditions": "调节腔厚h",
+          "finding": "减小h会使系统从欠阻尼区过渡到过阻尼区，因为Qr反比于h，而Qa正比于h。"
+        },
+        {
+          "conditions": "调节狭缝宽a",
+          "finding": "减小a会增加金属占比从而降低Qa，导致系统向过阻尼区移动。"
+        }
+      ],
+      "B_planning_summary": "该论文提供了理解超表面功能调控的物理基础，特别是通过损耗平衡（Qa/Qr）来切换功能的机制。对于综述而言，它有助于解释为什么某些结构设计会导致特定的相位响应或吸收特性，以及如何在宽带设计中权衡效率与带宽（通过控制阻尼状态）。",
+      "B_cautions": [
+        "该研究的相图和解析公式主要基于单端口谐振模型，适用于垂直入射或近法线入射情况，斜入射时的行为可能不同。",
+        "实验验证限于太赫兹频段，金属的电导率和介电函数的频率依赖性可能与光学频段有显著差异，外推至光学频段时需考虑金属的非局域效应和表面粗糙度。",
+        "解析公式在狭缝宽度接近周期的一半时（不满足薄狭缝近似）精度下降，此时需依赖全波模拟而非解析公式。"
+      ]
+    },
+    {
+      "handle": "P0033",
+      "category": 2,
+      "title": "High-Efficiency, Broadband, Near Diffraction-Limited, Dielectric Metalens in Ultraviolet Spectrum",
+      "doi": "10.3390/nano10030490",
+      "paper_id": "266e8eb2157dc3a6d01b3583d4207c55d279e5a1",
+      "aliases": [],
+      "chapter_ids": [
+        "CH1",
+        "CH2",
+        "CH3",
+        "CH4"
+      ],
+      "source_uses": [],
+      "judgment": "UV PB仿真“宽带聚焦≠定焦消色差”。正文2.1以P0243/P0019区分高效单色、离散双波长；4.2区分宽视场与消色差。基本用途覆盖，UV数据未用。",
+      "A_work_summary": "This study presents the design and simulation of a high-efficiency, broadband, near diffraction-limited transmissive metalens operating in the UV spectrum. The device utilizes a Pancharatnam-Berry (PB) phase mechanism implemented via rotating Si3N4 nanorods to control the phase of incident circularly polarized light. The authors optimized the unit cell geometry to achieve high polarization conversion efficiency and subsequently designed a metalens with a numerical aperture (NA) of 0.75 at a design wavelength of 300 nm. Simulation results demonstrate that the metalens maintains focusing characteristics across the 250–400 nm bandwidth, achieving a focusing efficiency of up to 77% and diffraction-limited focal spots. The work also investigates off-axis focusing performance at various incident angles.",
+      "A_key_findings": [
+        {
+          "conditions": "Unit cell optimization in 250-400 nm range",
+          "finding": "Polarization conversion efficiency reached as high as 96% with optimized nanorod dimensions: Height=210 nm, Width=85 nm, Length=95 nm, Period=240 nm."
+        },
+        {
+          "conditions": "Metalens design at $\\lambda_d$ = 300 nm, Diameter=10 µm, NA=0.75",
+          "finding": "Focusing efficiency achieved up to 77%. The focal spot Full Width at Half Maximum (FWHM) values at 250, 300, 350, and 400 nm were 206 nm, 210 nm, 226 nm, and 238 nm respectively, all satisfying the diffraction limit criterion ($\\lambda/2NA$)."
+        },
+        {
+          "conditions": "Off-axis incidence at 5°, 15°, and 25°",
+          "finding": "The metalens maintained clear focus spots across the broadband UV spectrum (250-400 nm) at these incident angles, demonstrating robustness against angular variation."
+        }
+      ],
+      "B_planning_summary": "This paper provides a concrete example of a high-performance dielectric metalens design in the UV spectrum using the Pancharatnam-Berry (PB) phase. It offers specific quantitative data on efficiency (polarization conversion and focusing) and resolution (diffraction-limited spots) across a defined broadband range (250-400 nm). For the review, it serves as a baseline for 'high-efficiency' designs but highlights the inherent trade-offs of the PB phase approach, particularly regarding dispersion and bandwidth limitations despite good focusing efficiency.",
+      "B_cautions": [
+        "The term 'broadband' in this paper refers to the ability to focus light across 250-400 nm, not to achromaticity (constant focal length). The focal length shifts significantly with wavelength, which is a critical limitation for dispersion engineering discussions.",
+        "All results are from FDTD simulations; experimental validation is absent. Efficiency and resolution metrics may differ in fabricated devices.",
+        "The PB phase mechanism is inherently dispersive; this paper does not implement dispersion engineering to correct this, making it a reference for the 'uncompensated' case."
+      ]
+    },
+    {
+      "handle": "P0057",
+      "category": 1,
+      "title": "Multi-plane, multi-band image projection via broadband diffractive optics.",
+      "doi": "10.1364/ao.59.000038",
+      "paper_id": "3a2cf3b2d4967b0dac30e75698528e167d75e94c",
+      "aliases": [],
+      "chapter_ids": [
+        "CH1",
+        "CH4"
+      ],
+      "source_uses": [],
+      "judgment": "多平面/多波段投影、平面串扰；偏离成像透镜带宽-NA主线，属外围备选。",
+      "A_work_summary": "This study demonstrates the design, fabrication, and experimental characterization of multi-level diffractive optical elements capable of projecting distinct images across different spectral bands and spatial planes under broadband illumination. The authors utilize a modified direct-binary-search algorithm to optimize pixel heights in photoresist structures, achieving high imaging efficiency without relying on absorbing filters or sub-wavelength metamaterials. Key demonstrations include full-color projection using mobile phone LEDs, simultaneous visible/NIR image separation, multi-plane projection with quantified crosstalk, lensless magnification via source distance adjustment, and the creation of both flat (index-contrast coated) and reflective BDOE variants. The work highlights the manufacturability and versatility of these Fresnel-regime diffractive elements compared to metasurfaces.",
+      "A_key_findings": [
+        {
+          "conditions": "Visible band (400-700nm) and NIR band (850nm) illumination of a single BDOE designed for both.",
+          "finding": "The device projects distinct images (rainbow heart in visible, lion silhouette in NIR) with low crosstalk (experimental global SSIM = 0.085). Average imaging efficiency was measured at 54%."
+        },
+        {
+          "conditions": "Multi-plane projection (2 and 3 planes) under broadband supercontinuum illumination.",
+          "finding": "Distinct images can be projected at different distances (e.g., 40mm and 60mm). Crosstalk increases with plane separation complexity; experimental global SSIM values ranged from 0.55 to 0.74 for adjacent planes, indicating significant overlap but distinguishable images."
+        },
+        {
+          "conditions": "Illumination with a point source (simulated by pinhole LED) vs. collimated source.",
+          "finding": "The BDOE acts as a lens with an image-structured PSF. Changing the source-to-element distance allows for image magnification following the lens-maker's equation, without additional optics."
+        },
+        {
+          "conditions": "Application of polyvinyl alcohol top-coating and silver sputtering.",
+          "finding": "A completely flat BDOE was achieved with slightly lower contrast. A reflective BDOE demonstrated achromatic image projection in reflection mode over the visible band (450-700nm), claimed as a first demonstration for this specific configuration."
+        },
+        {
+          "conditions": "Transmission measurements across 400-800nm.",
+          "finding": "Relative transmission efficiency exceeded 96% for most devices, acting as an anti-reflection coating. Imaging efficiency varied by design (e.g., 54% for dual-band, 29% for 2-plane, 91% for 3-plane)."
+        }
+      ],
+      "B_planning_summary": "This paper provides empirical data on the trade-offs between bandwidth, multiplexing capability (planes/bands), and imaging efficiency/fidelity in diffractive optics. It serves as a comparative baseline for 'large-feature' diffractive approaches versus 'sub-wavelength' metasurface approaches, particularly regarding manufacturability and efficiency limits. It offers specific metrics on crosstalk and efficiency that can contextualize dispersion engineering constraints in broader reviews of achromatic optics.",
+      "B_cautions": [
+        "The paper claims 'first demonstration' of reflective achromatic BDOEs; this should be treated as an author claim and verified against prior art if possible, noting it refers specifically to this configuration.",
+        "Crosstalk values (SSIM) are high (>0.5) for multi-plane cases, indicating significant image overlap; do not interpret these as 'clean' separation.",
+        "Feature size is fixed at ~20µm for most demos; results may not extrapolate to smaller scales where diffraction limits change.",
+        "Transmission efficiency (>96%) is distinct from imaging efficiency; high transmission does not guarantee high image fidelity."
+      ]
+    },
+    {
+      "handle": "P0077",
+      "category": 1,
+      "title": "Overcoming the limitations of 3D sensors with wide field of view metasurface-enhanced scanning lidar",
+      "doi": "10.1117/1.ap.5.4.046005",
+      "paper_id": "520d60aa1ac2858a516e9d5db784af0f032ee289",
+      "aliases": [],
+      "chapter_ids": [
+        "CH2",
+        "CH3",
+        "CH4",
+        "CH5"
+      ],
+      "source_uses": [],
+      "judgment": "633 nm单波长LiDAR/CDMA扫描速度-模糊范围，不是消色差；5.4已有P0011点云应用，不必增添侧线。",
+      "A_work_summary": "该研究针对传统直接飞行时间（d-ToF）激光雷达在高速扫描下面临的模糊范围（Ambiguity Range, AR）受限与信噪比（SNR）低之间的矛盾，提出了一种结合超表面扩束与光学码分多址（CDMA）编码的新型成像方案。作者构建了一个由633 nm激光器、二维AOD和GaN超表面组成的原型系统，实现了150度的大视场角和兆赫兹级的扫描速度。通过引入基于正交序列（OOC和PS）的块状CDMA技术，系统在保持高扫描速度的同时显著扩展了无模糊测距范围，并验证了其在低光照环境下的鲁棒性。实验比较表明，CDMA技术在消除“鬼影”伪影方面优于M-pulse方法，且在降低发射功率需求方面具有优势。",
+      "A_key_findings": [
+        {
+          "conditions": "实验条件：1.8 MHz扫描速度，633 nm波长，可见光背景噪声较高，目标反射率>90%",
+          "finding": "S-pulse模式在80 m范围内无模糊，但SNR较低；M-pulse模式（m=27）显著提高了SNR和点云密度，但当目标距离超过缩短后的AR（3 m）时，产生严重的鬼影伪影（如3.4 m处的物体显示为0.4 m）。"
+        },
+        {
+          "conditions": "Block CDMA模式：使用14个正交OOC序列组成的块，扫描速度1.8 MHz",
+          "finding": "CDMA模式将无模糊范围扩展至1155 m，成功消除了远距离目标的鬼影伪影。虽然边缘存在因高光强差异导致的“ blooming ”伪影，但通过数字硬限幅滤波器（Hard Limiter）可有效抑制。"
+        },
+        {
+          "conditions": "SNR测试：不同发射功率下的ToF稳定性",
+          "finding": "在低发射功率下，S-pulse在70 mW以下失效；CDMA（带硬限幅）在40 mW以下仍可靠，而M-pulse在10 mW以下仍稳定。CDMA相比S-pulse降低了约一半的功率需求，相比M-pulse降低了约七倍的功率需求即可达到相似的成像性能。"
+        },
+        {
+          "conditions": "理论模拟与分辨率测试",
+          "finding": "CDMA技术在相同AR下可实现比S-pulse快3-35倍的扫描速度。在4 MHz扫描速度下，原型机理论最大AR可达234 m，接近汽车激光雷达要求。AOD在2.5 MHz以上分辨率下降，主要受限于光束形成时间。"
+        }
+      ],
+      "B_planning_summary": "本文提供了超表面激光雷达系统中‘扫描速度-模糊范围’权衡关系的实证数据，特别是引入了CDMA编码作为打破传统d-ToF局限性的技术手段。对于综述而言，其核心价值在于展示了如何通过信号处理（编码/解码）与光学元件（超表面/AOD）的协同设计来优化系统性能，以及由此产生的新伪影类型（Blooming）及其处理方法。这为讨论‘色散工程/相位调控’如何服务于更广泛的系统级权衡（如FOV、速度、精度）提供了具体的工程案例。",
+      "B_cautions": [
+        "本文是单波长（633 nm）实验，结论不能直接外推至宽带消色差超表面设计。",
+        "'Ambiguity Range'在此文中特指由于脉冲重复频率导致的距离模糊，与光学系统中的‘景深’或‘瑞利长度’概念不同。",
+        "CDMA技术的性能高度依赖于正交序列的质量和处理算法（如硬限幅），并非所有编码方案都能获得同等增益。",
+        "AOD的扫描速度限制是本研究的特定瓶颈，不代表所有超表面扫描系统的极限。"
+      ]
+    },
+    {
+      "handle": "P0079",
+      "category": 3,
+      "title": "Minimalist optical system for achromatic imaging within extended field of view based on monolithic integrated meta-axicon cluster",
+      "doi": "10.1038/s41377-026-02272-y",
+      "paper_id": "54e53e2aba40ccb8b0f1fa5b22deb4dfe9614917",
+      "aliases": [],
+      "chapter_ids": [
+        "CH2",
+        "CH3"
+      ],
+      "source_uses": [
+        {
+          "task_id": "CH2::CH2_U04::CH2_U04_P01",
+          "source_handle": "P0079",
+          "role": "例证",
+          "use": "提供单片集成超轴突簇的消色差成像案例"
+        }
+      ],
+      "judgment": "明确例证漏写。A/B给出贝塞尔PSF、离轴横向色差修正、450–700 nm、4 mm主单元与10°拼接视场、去卷积依赖。2.4仅HAML/EDOF/Alvarez，独立机制和单元/总FOV条件未呈现。",
+      "A_work_summary": "针对传统色散工程超透镜在孔径、数值孔径（NA）与带宽间存在的严格制约，本研究提出一种基于自然色散定律的极简消色差成像范式。研究利用元棱镜（meta-axicon）产生的零阶贝塞尔光束具有宽带相对强度分布一致性的特性，结合非盲去卷积图像恢复技术实现消色差成像。为解决传统元棱镜视场角受限问题，设计了具有偏心圆锥相位的离轴元棱镜以校正横向色差并扩展视场。最终集成单片超表面（1个4 mm直径主元棱镜+8个3 mm直径离轴元棱镜），构建了视场拼接达10°的超相机，实现了大孔径下的宽频带高分辨率成像。",
+      "A_key_findings": [
+        {
+          "conditions": "轴上正入射，波长范围450-700 nm",
+          "finding": "元棱镜产生的贝塞尔光束相对强度分布呈现优异的宽带一致性，RGB通道测得的半高全宽（FWHM）分别为2.89 μm, 2.87 μm, 2.85 μm，与理论值高度吻合。"
+        },
+        {
+          "conditions": "离轴入射，未校正横向色差",
+          "finding": "常规元棱镜在离轴时PSF一致性迅速下降，当入射角超过2.7°时，NCC低于0.9的可接受阈值，且出现显著的侧向色差位移。"
+        },
+        {
+          "conditions": "离轴入射，经横向色差校正后（设计入射角4°）",
+          "finding": "校正后的离轴元棱镜将焦点偏移从约1 μm减小至100 nm以内，有效视场角扩展至方位角小于22.5°且倾角在2.5°-5°之间的区域。"
+        },
+        {
+          "conditions": "10° stitched FOV，全波段成像",
+          "finding": "拼接后的超相机在10°视场内实现消色差成像，极限角分辨率达到同孔径衍射极限透镜的80%以上（主元棱镜5.13 lp/mrad，离轴元棱镜3.76 lp/mrad）。"
+        }
+      ],
+      "B_planning_summary": "该论文提供了打破“孔径-带宽-NA”三角制约关系的实证案例。它不依赖传统的亚波长结构色散补偿，而是利用贝塞尔光束的物理特性实现消色差，为综述中关于“突破传统色散工程局限”或“新型消色差机制”的讨论提供了关键素材。同时，其离轴设计和视场拼接策略为分析超透镜视场扩展方法提供了具体参照。",
+      "B_cautions": [
+        "该研究的消色差效果依赖于特定的图像处理算法（TV正则化去卷积），不能直接等同于传统光学系统的免计算消色差性能。",
+        "视场角（FOV）指标为拼接后的总视场，单个元棱镜单元的有效无畸变视场较小，解读时需区分单元性能与系统性能。",
+        "材料未提供与其他大孔径消色差超透镜在相同测试条件下的直接对比数据，仅提供了理论上的局限性分析和自身实验结果。"
+      ]
+    },
+    {
+      "handle": "P0094",
+      "category": 3,
+      "title": "Recent Progress in Improving the Performance of Infrared Photodetectors via Optical Field Manipulations",
+      "doi": "10.3390/s22020677",
+      "paper_id": "662c74b982b2a6ee1ecdd526b7e12a747dbd1c9c",
+      "aliases": [],
+      "chapter_ids": [
+        "CH1",
+        "CH3",
+        "CH4",
+        "CH5"
+      ],
+      "source_uses": [],
+      "judgment": "综述转述Li et al.的3.3–5 μm、光敏面积5×5 μm、暗电流降低64倍、探测率提高5.5倍；5.4特殊价值例证没有面积→暗电流→探测率链。上游未排段，属可选应用补强。",
+      "A_work_summary": "本文是一篇综述，旨在探讨如何通过人工微结构特别是超表面技术来突破传统红外探测器的性能瓶颈。文章首先回顾了基于体材料和二维材料的各类红外探测器的现状与挑战，随后重点介绍了超表面在光场操控方面的机制，包括增强吸收、实现偏振分辨、构建宽带消色差金属透镜以及多功能集成。文中通过具体案例展示了超表面如何与现有半导体探测器单片集成，以改善量子效率、降低暗电流并实现多维度的光场调控，为下一代高性能红外探测器提供了新的设计思路。",
+      "A_key_findings": [
+        {
+          "conditions": "基于体材料（如HgCdTe, InGaAs）",
+          "finding": "传统探测器在低温下性能优异，但高温运行、大阵列制造及多色/多维控制仍面临挑战，且存在暗电流与量子效率之间的权衡限制。"
+        },
+        {
+          "conditions": "基于二维材料（如石墨烯, MoS2, BP）",
+          "finding": "具有超高载流子迁移率和超快响应，但受限于零带隙或弱光吸收，难以实现高探测率和高灵敏度，且大规模集成困难。"
+        },
+        {
+          "conditions": "超表面增强吸收",
+          "finding": "通过梯度相位超表面将入射光转换为表面波，或与金属纳米天线耦合，可显著增强薄层材料（如BP, 石墨烯）的光吸收，提升响应度。"
+        },
+        {
+          "conditions": "超表面偏振检测",
+          "finding": "利用几何相位（PB相位）或传播相位调控，可在亚波长尺度独立控制正交偏振态，实现紧凑型全斯托克斯偏振成像，无需级联传统光学元件。"
+        },
+        {
+          "conditions": "宽带消色差金属透镜集成",
+          "finding": "通过同时调控相位和群延迟色散，可实现宽带消色差聚焦。例如，集成于HgCdTe探测器上的介电金属透镜可将光敏面积缩小至5μm×5μm，使暗电流降低64倍，探测率提高5.5倍，并在3.3-5μm波段保持宽带响应。"
+        }
+      ],
+      "B_planning_summary": "该综述提供了关于“宽带消色差金属透镜”在红外探测器中应用的背景信息和具体案例，特别是Li et al. [155]的工作，展示了通过色散工程减小光敏面积以降低暗电流、提升探测率的实际效果。虽然它不直接回答带宽与数值孔径（NA）之间的具体权衡公式，但它证实了色散工程在实现宽带聚焦时的有效性，并指出了当前设计中存在的效率与偏振依赖性等问题，可作为理解色散工程实际应用价值和挑战的背景素材。",
+      "B_cautions": [
+        "本文是综述，所引用的Li et al. [155]等案例仅为特定研究条件下的结果，不代表所有色散工程设计的普遍规律。",
+        "文中提到的效率、带宽等性能指标依赖于具体的超表面设计和材料体系，不能直接外推到其他类型的超表面或波段。",
+        "对于带宽与NA、效率之间的具体权衡关系，本文仅提供定性描述和部分案例数据，缺乏系统的定量分析，需结合其他实证研究进行补充。"
+      ]
+    },
+    {
+      "handle": "P0100",
+      "category": 1,
+      "title": "A polarization-Insensitive Broadband Achromatic Metalens with High Efficiency in Ultraviolet-C band",
+      "doi": "",
+      "paper_id": "6d95ff31f344e8b07b531879f3bede53cb139567",
+      "aliases": [],
+      "chapter_ids": [
+        "CH1",
+        "CH4"
+      ],
+      "source_uses": [],
+      "judgment": "UVC低NA0.05、效率75%、焦移<10%的仿真；主线已有跨波段低NA宽带样本，非必须添加UVC小节。",
+      "A_work_summary": "This study addresses the challenge of chromatic aberration in ultraviolet optics by proposing a dispersion-engineered, polarization-insensitive broadband achromatic metalens operating across the entire UVC band (200–280 nm). The authors designed a transmissive metalens with a numerical aperture (NA) of 0.05, composed of cross-shaped SiO₂ meta-atoms on a sapphire substrate. Using full-wave simulations, they constructed a library of meta-atoms that satisfy both the required phase profile and group delay (GD) constraints to eliminate first-order chromatic aberration. The simulated results demonstrate an average focusing efficiency exceeding 75% and a focal shift of less than 10% across the bandwidth, while maintaining polarization independence due to the cylindrical symmetry of the structure. The work highlights the potential of SiO₂/sapphire platforms for space-compatible UV imaging.",
+      "A_key_findings": [
+        {
+          "conditions": "Numerical simulation of a 20 μm diameter metalens (NA=0.05) with SiO₂/SiO₂ cross-shaped meta-atoms on sapphire, illuminated by normal incidence plane waves across 200-280 nm.",
+          "finding": "The device achieves an average focusing efficiency of approximately 75% across the entire UVC bandwidth."
+        },
+        {
+          "conditions": "Same simulation setup, evaluating focal position stability.",
+          "finding": "The focal shift remains less than 10% across the bandwidth, with the maximum shift occurring at 210 nm, confirming effective achromatic performance."
+        },
+        {
+          "conditions": "Polarization analysis under normal incidence.",
+          "finding": "The metalens exhibits polarization insensitivity, producing identical focusing characteristics for arbitrary incident polarization states due to the cylindrical symmetry of the meta-atoms."
+        }
+      ],
+      "B_planning_summary": "This paper provides a concrete case study of dispersion engineering in the challenging Ultraviolet-C (UVC) regime. It offers specific quantitative data on the trade-off between bandwidth (200-280 nm) and focal shift (<10%) for a low-NA (0.05) metalens, along with efficiency metrics (>75%). It serves as a benchmark for material selection (SiO₂/sapphire) in UV applications and illustrates the practical limits of achromatic correction in short wavelengths where material options are scarce.",
+      "B_cautions": [
+        "The results are purely numerical simulations; do not treat them as experimentally verified performance.",
+        "The design is specific to NA=0.05; extrapolating to higher NAs or different bandwidths requires caution.",
+        "The term 'polarization-free' refers to the output being independent of input polarization due to symmetry, not necessarily that the meta-atoms themselves lack polarization sensitivity in all aspects, though the design ensures isotropic response."
+      ]
+    },
+    {
+      "handle": "P0106",
+      "category": 2,
+      "title": "Recent advances of wide-angle metalenses: principle, design, and applications",
+      "doi": "10.1515/nanoph-2021-0583",
+      "paper_id": "78b2aafc7f84f2cae7db8858ff234196de439c2b",
+      "aliases": [],
+      "chapter_ids": [
+        "CH2",
+        "CH3"
+      ],
+      "source_uses": [
+        {
+          "task_id": "CH2::CH2_U04::CH2_U04_P02",
+          "source_handle": "P0106",
+          "role": "背景",
+          "use": "提供宽视场金属透镜原理综述，辅助说明 FOV 权衡"
+        }
+      ],
+      "judgment": "背景FOV权衡已由4.1–4.2的P0119/P0230/P0055/P0120实质说明，2.3也写局部周期近似/互耦。没用综述身份不等于背景没写。",
+      "A_work_summary": "本文是一篇综述，旨在解决传统光学系统中大视场受限于像差（如彗差）而导致系统笨重的问题。文章首先解释了单片宽角金属透镜实现无像差成像的理想相位条件及其角度依赖性，随后归纳了五种用于校正彗差的基本配置（包括单结构侧方法和双结构侧方法）。接着，文章深入分析了高性能宽角金属透镜面临的挑战，即离散亚波长结构在大相位梯度下存在的相位采样不足与电磁耦合问题，并介绍了两种先进设计方法：伴随优化（adjoint optimization）和悬链线光学（catenary optics）。最后，综述了宽角金属透镜在超广角成像、傅里叶变换、光束偏转及自旋/轨道角动量同时检测中的代表性应用，并展望了宽带消色差、视场与数值孔径权衡以及突破180度视场等未来挑战。",
+      "A_key_findings": [
+        {
+          "conditions": "理想宽角成像",
+          "finding": "理想的宽角金属透镜相位分布必须依赖于入射角，且呈现不对称性；传统的忽略角度色散的金属透镜设计导致视场受限。"
+        },
+        {
+          "conditions": "二次型金属透镜（Quadratic Metalens）结合光阑",
+          "finding": "通过引入光阑并利用高折射率透明板补偿球差，可实现接近衍射极限的大视场（如178°×178°），但有效数值孔径（NA）通常较低（约0.2）。"
+        },
+        {
+          "conditions": "离散亚波长结构设计",
+          "finding": "为了获得大相位梯度，单元间距过小会导致强烈的电磁耦合，过大则导致模式控制困难；传统周期性边界假设在大梯度下失效，导致实际响应偏离理想值。"
+        },
+        {
+          "conditions": "悬链线结构（Catenary structures）",
+          "finding": "准连续的悬链线结构能实现更大的相位梯度和更高的转换效率，通过等相流线优化可抑制寄生传播相位，实现宽光谱和高角度的高效调制。"
+        },
+        {
+          "conditions": "伴随优化（Adjoint optimization）",
+          "finding": "拓扑优化提供高自由度但计算昂贵且二值化困难；形状优化更易于制造误差补偿，但初始结构的选择影响结果，且目前难以处理大面积器件的全模型模拟。"
+        }
+      ],
+      "B_planning_summary": "该综述虽聚焦于宽角金属透镜，但其关于“色散工程”、“带宽-数值孔径权衡”及“群延迟色散限制”的论述，为本综述中关于宽带消色差金属透镜的挑战分析提供了重要的背景框架和具体约束条件。特别是文中明确指出的“由于亚波长结构实现的群延迟色散有限，目前报道的宽带消色差金属透镜通常具有非常小的孔径或NA”，直接关联到本综述的核心问题F1-F3。",
+      "B_cautions": [
+        "该论文主要综述宽角金属透镜，而非专门针对宽带消色差金属透镜。其在色散工程方面的贡献主要体现在指出群延迟色散的限制和提出混合透镜的构想，而非详细的色散补偿机制分析。",
+        "文中提到的“记录级”视场（178°）是在特定条件下（如使用光阑、低NA）实现的，不能直接推广到所有宽带消色差金属透镜的性能预期。",
+        "作者提出的未来建议（如深度学习结合伴随优化）属于观点性内容，需注明为作者建议而非既定事实。"
+      ]
+    },
+    {
+      "handle": "P0110",
+      "category": 1,
+      "title": "Electrically Tunable Multifunctional Polarization-Dependent Metasurfaces Integrated with Liquid Crystals in the Visible Region.",
+      "doi": "10.1021/acs.nanolett.1c00104",
+      "paper_id": "7a87e9331ed07a9c82acaaa22079e0f5a25d6ac4",
+      "aliases": [],
+      "chapter_ids": [
+        "CH2",
+        "CH3"
+      ],
+      "source_uses": [],
+      "judgment": "液晶电调偏振/全息/单色变焦，未校正色差；外围动态器件，非必须纳入。",
+      "A_work_summary": "该研究旨在解决现有动态超表面器件难以充分利用偏振操控能力以及直接包裹液晶导致效率低下的问题。作者提出了一种新型封装策略，将全介质TiO2超表面与液晶层结合：在超表面顶部沉积一层平坦的TiO2作为平整层，并在其上方添加取向层以构建液晶盒，而非直接将液晶填充至纳米结构间隙中。这种设计提高了折射率对比度，改善了液晶取向均匀性。通过结合超表面的旋性依赖几何相位和液晶的电控双折射特性（作为可变波片），实现了两个正交旋性通道的光强连续调节和开关切换。研究验证了单色全息开关、多色复用全息开关以及动态变焦金属透镜的功能，展示了其在可见光范围内动态调控的潜力。",
+      "A_key_findings": [
+        {
+          "conditions": "可见光波段（450, 532, 635 nm），Case 2封装方案",
+          "finding": "优化的Case 2封装方案在各波长下的最大PCE约为Case 1的两倍。在450 nm、532 nm和635 nm处，优化后的纳米鳍片PCE分别达到37%、20%和32%。"
+        },
+        {
+          "conditions": "施加电压调控液晶取向角",
+          "finding": "通过电控液晶作为可变波片，实现了单个圆偏振通道的光强连续调节，以及在两个正交旋性通道（RCP/LCP）之间的开关切换。理论预测与实验测得的强度-电压曲线趋势一致。"
+        },
+        {
+          "conditions": "多色全息复用（635 nm红/532 nm绿）",
+          "finding": "利用矢量分解方案编码不同波长的相位信息。由于液晶非宽带波片特性，不同波长的开启电压不同，单独施加特定波长电压时，另一波长通道几乎不可见，有效避免了串扰，实现了多色动态全息显示。"
+        },
+        {
+          "conditions": "变焦金属透镜（532 nm，NA 0.45/0.24）",
+          "finding": "实现了两个独立焦点（200 μm和400 μm）的电控切换。在不同波长下，焦点位置因色散发生偏移（类似菲涅尔透镜效应），但设备仍能在可见光范围内合理执行电子可调变焦成像。"
+        }
+      ],
+      "B_planning_summary": "本文提供了一个关于“动态超表面中色散工程与带宽权衡”的具体实证案例。它展示了在可见光波段，当超表面与具有强烈色散特性的液晶层集成时，如何影响器件的多波长性能。特别是对于综述关注的“宽带消色差金属透镜”，本文演示了非消色差设计下的色散后果（焦点随波长移动），并指出了通过消色差设计改进的可能性。这为讨论带宽、数值孔径和效率之间的权衡提供了反面教材或基准对比，即在不进行复杂色散补偿的情况下，简单集成的局限性。",
+      "B_cautions": [
+        "本文并非专注于宽带消色差设计，而是侧重于动态调谐功能的实现。其色散表现是未被补偿的自然结果，不应被视为优秀的消色差范例，而应视为需要色散工程解决的问题示例。",
+        "效率数据（PCE）是在特定波长和结构下获得的，不同波长间效率差异较大（20%-37%），这表明在多色应用中需考虑波长相关的效率损失。",
+        "变焦功能依赖于几何相位的色散特性，导致不同波长焦点位置不同，这在宽带成像中是一个显著的局限性，需在综述中强调色散管理的重要性。"
+      ]
+    },
+    {
+      "handle": "P0126",
+      "category": 2,
+      "title": "Multiwavelength polarization insensitive lenses based on dielectric metasurfaces with meta-molecules",
+      "doi": "10.1364/optica.3.000628",
+      "paper_id": "8ad164b3d1f3d25a2b679a050fca43c6029546d8",
+      "aliases": [],
+      "chapter_ids": [
+        "CH3",
+        "CH4"
+      ],
+      "source_uses": [],
+      "judgment": "四柱meta-molecule离散915/1550 nm与效率不对称。1.3写离散≠连续；2.1的P0019写双波长效率不对称，P0160写晶格常数引发高阶衍射。核心知识覆盖，本篇历史身份和数据未用。",
+      "A_work_summary": "This study addresses the significant chromatic aberration inherent in metasurface lenses, where focal length typically scales inversely with wavelength. The authors propose a design method using 'meta-molecules'—unit cells composed of multiple meta-atoms (specifically four a-Si nano-posts)—to independently control the transmission phase at two distinct wavelengths. By optimizing the geometric parameters (diameters D1 and D2) of these posts, they demonstrate a transmissive lens capable of focusing light to the same focal distance at 915 nm and 1550 nm simultaneously. The fabricated device achieves numerical apertures up to 0.46 and focusing efficiencies as high as 72% at 1550 nm, validating the concept for applications requiring operation at specific, known wavelengths such as fluorescence microscopy.",
+      "A_key_findings": [
+        {
+          "conditions": "Lens diameter 300 µm, NA 0.46, focal distance 400 µm, operating at 915 nm and 1550 nm",
+          "finding": "The lens successfully focuses light from both wavelengths to nearly diffraction-limited spots at the same axial position. Measured Full Width at Half Maximum (FWHM) was 1.9 µm at 915 nm and 2.9 µm at 1550 nm."
+        },
+        {
+          "conditions": "Focusing efficiency defined as power within a 20-µm disk around focus relative to incident power",
+          "finding": "Measured focusing efficiencies were 22% at 915 nm and 65% at 1550 nm. A lower NA variant (NA 0.29) achieved higher efficiencies of 25% at 915 nm and 72% at 1550 nm."
+        },
+        {
+          "conditions": "Analysis of power loss mechanisms using simulated blazed gratings",
+          "finding": "Low efficiency at 915 nm is attributed to scattering into non-zero diffraction orders due to the relatively large lattice constant (720 nm), which is close to the cutoff for propagating modes in the substrate. Larger deflection angles (higher NA) exacerbate this loss."
+        }
+      ],
+      "B_planning_summary": "This paper provides a concrete case study of dispersion engineering in dielectric metalenses using a multi-parameter unit cell ('meta-molecule') to correct chromatic aberration at two specific wavelengths. It offers valuable data on the trade-offs between numerical aperture, focusing efficiency, and wavelength-specific performance, particularly highlighting the impact of lattice constants on diffraction losses. While not a broadband solution, it serves as a foundational example of how increasing unit cell complexity can mitigate dispersion, providing a baseline for comparing more advanced broadband designs.",
+      "B_cautions": [
+        "This work does not claim broadband achromatic performance; it explicitly corrects dispersion only at two discrete wavelengths. Do not cite it as an example of broadband operation.",
+        "The low efficiency at 915 nm is partly due to the specific lattice constant chosen (720 nm) being near the diffraction limit for that wavelength in the substrate. This is a design choice rather than a fundamental material limit.",
+        "The term 'meta-molecule' refers specifically to the 4-post unit cell used here; do not assume this terminology applies universally to all multi-atom metasurface units."
+      ]
+    },
+    {
+      "handle": "P0133",
+      "category": 2,
+      "title": "Broadband Achromatic Sub‐Diffraction Focusing by an Amplitude‐Modulated Terahertz Metalens",
+      "doi": "10.1002/adom.202000842",
+      "paper_id": "9531fda17a698ab0729d8b029eda2fb8a8a726c1",
+      "aliases": [],
+      "chapter_ids": [
+        "CH1",
+        "CH5"
+      ],
+      "source_uses": [],
+      "judgment": "THz振幅/相位/群延迟协同亚衍射聚焦。1.5的P0050已有超振荡亚衍射与代价，P0227已有振幅优化；小光斑不等于无代价的用途已写。三变量协同细节仍可选补，原材料无效率数值不能填效率表。",
+      "A_work_summary": "该研究针对现有超分辨率金属透镜多局限于单波长或离散波长，且宽带消色差金属透镜通常受限于衍射极限或焦点尺寸大于阿贝衍射极限的问题，提出了一种利用色散工程和振幅调制相结合的方法来实现宽带消色差亚衍射聚焦。通过同时控制延迟群分布、频率相关相位和振幅透射率，设计并制备了一个半径5.11 mm、焦距40.39 mm、数值孔径NA为0.125的金属透镜。理论和实验结果验证了在该带宽内实现了消色差亚衍射聚焦性能。",
+      "A_key_findings": [
+        {
+          "conditions": "太赫兹频段 2.29–2.70 THz，NA=0.125，半径5.11 mm，焦距40.39 mm",
+          "finding": "理论和实验结果均证实，所设计的金属透镜能够在指定的宽带范围内实现消色差亚衍射聚焦，即焦点尺寸小于对应的阿贝衍射极限（0.5λ/NA）。"
+        }
+      ],
+      "B_planning_summary": "该论文提供了一个具体的宽带消色差亚衍射金属透镜的设计实例，展示了如何通过同时优化相位、振幅和群延迟来实现超越衍射极限的聚焦。对于综述而言，它提供了关于“振幅调制”在宽带消色差设计中作用的实证数据，以及在高折射率介质材料上实现该目标的可行性证据，可用于讨论色散工程中的自由度利用及潜在的效率/带宽权衡。",
+      "B_cautions": [
+        "该研究仅在太赫兹频段（2.29-2.70 THz）验证，结论不能直接推广到可见光或其他频段，除非有明确的物理机制普适性论证。",
+        "摘要未提供聚焦效率的具体数值，因此在讨论效率权衡时需注明数据缺失，避免假设高效率或低效率。",
+        "数值孔径NA为0.125，属于相对较低的NA，其在高NA条件下的性能表现未知，不能代表所有宽带消色差金属透镜的性能上限。",
+        "作者声称的“简单方式”为主观评价，需结合其他文献对比其实际实现的复杂度和工艺难度。"
+      ]
+    },
+    {
+      "handle": "P0147",
+      "category": 3,
+      "title": "Composite functional metasurfaces for multispectral achromatic optics",
+      "doi": "10.1038/ncomms14992",
+      "paper_id": "9e29aa0c0e6aba02a4463247d167602c75218132",
+      "aliases": [],
+      "chapter_ids": [
+        "CH2",
+        "CH3"
+      ],
+      "source_uses": [
+        {
+          "task_id": "CH2::CH2_U02::CH2_U02_P01",
+          "source_handle": "P0147",
+          "role": "例证",
+          "use": "提供复合功能超表面在多光谱消色差中的应用案例"
+        }
+      ],
+      "judgment": "明确例证漏写。Au/Ag/Al三层RGB窄带堆叠、200 nm隔离、5.8–8.7%效率；2.2写SPDC/介质双层/3D打印，却无离散窄带拼接与金属损耗路线。不能把“多层”一词当作覆盖。",
+      "A_work_summary": "针对传统衍射型超表面透镜存在的严重色差问题，本研究提出了一种基于垂直密集堆叠独立超表面的复合功能超表面设计方法。该方法利用不同金属（金、银、铝）在不同光谱波段的局域表面等离激元共振特性差异，将三层分别针对红光（650 nm）、绿光（550 nm）和蓝光（450 nm）优化的单层透镜紧密堆叠，使各层聚焦于同一焦点，从而在可见光范围内实现消色差成像。研究团队通过电子束光刻工艺制备了该三层层状结构，并成功演示了白光下的消色差聚焦、自对准集成的受激发射损耗（STED）显微镜用光束整形元件，以及具有反常色散特性的透镜。尽管整体传输效率较低（约5.8-8.7%），但该工作证明了通过材料选择和多层设计可以有效抑制层间串扰并实现复杂的多光谱功能集成。",
+      "A_key_findings": [
+        {
+          "conditions": "可见光波段，RGB三色（650, 550, 450 nm），焦距1 mm",
+          "finding": "三层复合超表面透镜成功将RGB三色光聚焦于同一位置（1 mm处），形成白色焦点。与传统FZP相比，消除了超过400 μm的色差范围。各颜色在焦点处的半高全宽（FWHM）分别为2.6 μm（红）、2.43 μm（绿）和2.11 μm（蓝），与理论值吻合。"
+        },
+        {
+          "conditions": "透射效率测量",
+          "finding": "各波长的聚焦传输效率在5.8%至8.7%之间，符合二元衍射透镜的理论预期（~10%）。作者指出可通过优化光谱消光比或采用阻抗匹配概念进一步提高效率。"
+        },
+        {
+          "conditions": "STED显微镜应用",
+          "finding": "成功制备了双层集成元件，其中一层将绿光（550 nm）聚焦为高斯光束用于激发，另一层将红光（650 nm）聚焦为环形光束（拓扑荷数l=1和l=4）用于耗尽，实现了自对准的双波长光束整形。"
+        },
+        {
+          "conditions": "反常色散透镜",
+          "finding": "设计了使短波长先聚焦的透镜（蓝光300 μm，绿光400 μm，红光500 μm），展示了超越常规衍射色散规律的光学调控能力。"
+        }
+      ],
+      "B_planning_summary": "该论文提供了一种不同于纯介质超表面的“金属等离激元多层堆叠”范式来解决色散工程中的色差问题。虽然其核心机制依赖于金属共振而非介质几何色散，但其“分层设计以补偿色散”的系统级思路，以及关于带宽、效率与制造复杂度之间权衡的讨论，对于综述中分析不同技术路线（如介质vs金属，单层vs多层）的优劣具有重要参考价值。特别适用于讨论非衍射极限或特定应用场景（如显微成像）下的色散补偿策略。",
+      "B_cautions": [
+        "该研究基于金属等离激元共振，其物理机制（强吸收、窄带共振）与当前综述关注的“宽带消色差介质超表面”有本质区别。引用时需明确区分，避免将金属方案的局限性直接归咎于色散工程本身，而应视为不同材料体系下的不同权衡结果。",
+        "论文声称的“消色差”是基于三个离散波长的重合，并非真正的连续宽带无像差，需注意其与真正宽带介质透镜在光谱连续性上的差异。",
+        "效率数据（~10%）是二元衍射元件的理论上限附近，不代表所有超表面透镜的效率水平，不可泛化为该类器件的典型效率。"
+      ]
+    },
+    {
+      "handle": "P0154",
+      "category": 3,
+      "title": "Broadband thermal imaging using meta-optics",
+      "doi": "10.1038/s41467-024-45904-w",
+      "paper_id": "ac8f94ed0c9396203d65ba13b0dbdc85be7d59ee",
+      "aliases": [],
+      "chapter_ids": [
+        "CH1",
+        "CH2",
+        "CH3",
+        "CH4",
+        "CH5"
+      ],
+      "source_uses": [],
+      "judgment": "LWIR8–12 μm直接优化波长平均MTF表面积、复杂散射体、Strehl0.045对0.0075、真实环境热成像。2.3/4.4有逆设计/EDOF/MTF，但缺这一系统像质目标与对比条件。上游未排段，高优先补强。",
+      "A_work_summary": "本研究针对LWIR超构透镜在宽带成像中面临的强轴向色差限制，提出了一种基于逆设计的“MTF工程”框架。该框架利用深度学习辅助的多尺度可微分优化，将超原子的局部几何参数与全局相位分布相结合，以最大化波长平均下的调制传递函数（MTF）表面积作为目标函数。研究团队设计了具有复杂散射体结构的超原子，通过全硅平台进行了制造和实验表征。结果表明，所设计的超构透镜在宽带环境光成像中表现出显著优于传统前向设计金属透镜的图像质量，实现了波长平均斯特列尔比（Strehl ratio）六倍的提升，并配合计算后端实现了清晰的野外成像演示。",
+      "A_key_findings": [
+        {
+          "conditions": "仿真条件下，对比简单/复杂散射体超透镜与传统双曲面金属透镜",
+          "finding": "具有复杂散射体的超透镜实现了0.045的波长平均斯特列尔比，是传统双曲面金属透镜（0.0075）的六倍。即使引入制造误差扰动，其性能仍显著优于基准。"
+        },
+        {
+          "conditions": "实验室宽带照明成像测试",
+          "finding": "MTF工程超透镜能清晰分辨USAF靶标条纹，信噪比（PSNR）高于前向设计透镜。"
+        },
+        {
+          "conditions": "室内/室外环境光（in-the-wild）成像测试",
+          "finding": "在户外车辆、树木及室内人物场景中，MTF工程超透镜配合计算后端能恢复清晰细节，而传统透镜出现严重发光伪影且细节模糊。"
+        }
+      ],
+      "B_planning_summary": "该论文提供了一个具体的案例，展示了如何通过结合局部结构自由度（超原子参数化）和全局相位优化来突破宽带超构透镜的色差极限。它不单纯依赖传统的色散工程（如调整群延迟），而是通过最大化系统级成像指标（MTF体积）来平衡带宽与像质。这对于综述中讨论“带宽-数值孔径-效率”权衡以及“局部vs全局设计策略”有直接的素材价值。",
+      "B_cautions": [
+        "该研究的结论特定于LWIR波段（8-12 μm）和全硅材料，其他波段（如可见光）或材料（如GaAs）的色散特性不同，不可直接套用其带宽-NA权衡关系。",
+        "所谓的“六倍提升”是基于波长平均斯特列尔比的比较，且对比基准是前向设计的双曲面金属透镜，并非所有现有文献中的最优色散工程透镜。",
+        "计算后端的去卷积效果依赖于特定的噪声模型和正则化参数，实际部署时的实时性和通用性尚待验证。"
+      ]
+    },
+    {
+      "handle": "P0159",
+      "category": 3,
+      "title": "Aberration Corrected Large-scale Hybrid-metalenses",
+      "doi": "10.1364/optica.434040",
+      "paper_id": "b227d2c684f8a6748ca7c2a0e9321b309cb3b3de",
+      "aliases": [],
+      "chapter_ids": [
+        "CH3",
+        "CH4"
+      ],
+      "source_uses": [],
+      "judgment": "厘米级PB校正器贴合折射透镜，色差校正≥80%却球差增约20%、效率8.5%；另模式校球差70%、效率20%。2.4/5.3有混合框架但无色差与球差相互牺牲的实例。上游未排段，可选比较。",
+      "A_work_summary": "该论文提出并实验验证了一种利用大尺寸PB相位超表面作为“校正器”来补偿商用折射透镜像差的混合光学系统。作者设计了两种特定的超表面：一种用于校正色差（CAM），另一种用于校正球差（SAM）。通过电子束光刻技术在负性电子束抗蚀剂上制造出高深宽比的纳米鳍结构，并将其贴合在平凸透镜平面侧。实验结果表明，LCAM组合在600-800 nm波段内至少减少了80%的色差，LSAM组合在650 nm下减少了约70%的球差。成像实验显示该系统优于标准折射透镜。尽管由于PB相位编码特性导致整体聚焦效率较低（LCAM约8.5%，LSAM约20%），但该工作展示了厘米级混合器件在实现紧凑、宽带成像方面的潜力。",
+      "A_key_findings": [
+        {
+          "conditions": "CAM与平凸透镜组合（LCAM），波长范围600-800 nm",
+          "finding": "色差校正至少达到80%。焦点位置随波长的变化显著减小，但背景中存在未完全过滤的共偏振光，且由于超表面引入了少量球差，焦区略有展宽。"
+        },
+        {
+          "conditions": "SAM与平凸透镜组合（LSAM），波长650 nm",
+          "finding": "球差校正约70%。Zernike分析显示球差系数大幅降低，点扩散函数更尖锐对称，调制传递函数（MTF）在所有空间频率下均优于裸透镜。"
+        },
+        {
+          "conditions": "LCAM系统",
+          "finding": "整体聚焦效率约为8.5%。Zernike分析显示球差增加了约20%，这是因为校正色差所需的相位曲率与校正球差的相反，导致LCAM保留了部分残余球差。"
+        },
+        {
+          "conditions": "LSAM系统",
+          "finding": "整体聚焦效率约为20%。除了球差外，像散和彗差也略有减少，但高阶四面体像差（Tetrafoil）有所增加，不过对整体图像质量影响不大。"
+        }
+      ],
+      "B_planning_summary": "该论文提供了一个关于“混合折射-衍射/超表面”架构的具体案例，特别适用于讨论在现有商用折射光学基础上进行像差校正的工程路径。其核心价值在于展示了厘米级大孔径器件的实际性能，以及PB相位机制在色散控制上的特点（恒定色散 vs 空间变化色散）。对于综述中关于“trade-off”的讨论，该文提供了效率与校正能力之间的具体权衡数据，以及不同像差校正模式（CAM vs SAM）之间的相互制约关系。",
+      "B_cautions": [
+        "该研究的效率数据（~8.5-20%）是PB相位机制固有的物理限制，不代表所有超表面透镜的效率水平，也不代表经过优化的共振相位或其他编码策略的效率。",
+        "色差校正效果（80%）是在特定波长范围（600-800 nm）和特定透镜参数下测得的，不能直接外推到其他波段或不同焦距的透镜系统。",
+        "LCAM系统中球差的增加是设计选择的结果（为了校正色差而牺牲了球差校正的完美性），并非器件缺陷，但在评估综合成像质量时需考虑这一权衡。"
+      ]
+    },
+    {
+      "handle": "P0161",
+      "category": 1,
+      "title": "Broadband achromatic metalens in Terahertz regime",
+      "doi": "10.1109/irmmw-thz.2019.8874206",
+      "paper_id": "b5ef2e388c92aa8613ec66fc952c4c19ae58820e",
+      "aliases": [],
+      "chapter_ids": [
+        "CH1",
+        "CH5"
+      ],
+      "source_uses": [],
+      "judgment": "THz C形单元0.3–0.8 THz、NA0.385、峰值效率68%，鲁棒性无定量公差。已有P0004/P0050波段例证，主要是备选数据点。",
+      "A_work_summary": "该研究旨在解决太赫兹波段金属透镜色散严重、带宽受限的问题。作者设计并制备了一种基于C形单元的消色差金属透镜，通过数值模拟和实验验证了其在0.3至0.8 THz范围内实现消色差聚焦的能力。研究重点评估了透镜的光学性能（如焦距稳定性、效率、数值孔径）以及结构对制造误差（横向形状变形、刻蚀深度偏差）的鲁棒性。结果表明，该器件在宽频带内保持了接近衍射极限的焦点尺寸，具有较高的工作效率和数值孔径，展示了其在光谱学、飞行时间层析成像和超光谱成像系统中的应用潜力。",
+      "A_key_findings": [
+        {
+          "conditions": "频率范围0.3-0.8 THz，中心波长处",
+          "finding": "实现了约91%的相对带宽，观测到实验和数值模拟一致的消色差聚焦现象，焦点尺寸接近衍射极限（λ）。"
+        },
+        {
+          "conditions": "峰值频率处",
+          "finding": "工作效率超过68%，数值孔径（NA）达到0.385，提供了较高的空间分辨率。"
+        },
+        {
+          "conditions": "存在横向形状变形和刻蚀深度偏差时",
+          "finding": "C形结构表现出良好的鲁棒性，表明该设计对制造误差具有一定的容忍度。"
+        }
+      ],
+      "B_planning_summary": "该论文为综述中关于“太赫兹波段宽带消色差金属透镜”提供了关键的实证素材。其核心价值在于展示了C形单元结构在实现大带宽（91%）和高数值孔径（0.385）之间的平衡，并引入了结构鲁棒性这一实际工程考量。这有助于在综述中讨论特定几何结构（C形）在色散工程中的优势及其对制造精度的要求，特别是在太赫兹这一特定应用情境下。",
+      "B_cautions": [
+        "该结果仅适用于太赫兹频段，不可直接外推至可见光或红外波段，因为材料色散特性和单元尺度完全不同。",
+        "“鲁棒性”为定性描述，具体可容忍的误差范围未知，引用时需避免夸大其制造友好程度。",
+        "效率数据为峰值频率处，宽带内的平均效率或效率随频率变化的趋势未在摘要中提供，不宜推断全带宽效率均匀性。",
+        "NA=0.385属于中等偏高，但不同文献对NA的定义或测量方式可能不同，比较时需注意一致性。"
+      ]
+    },
+    {
+      "handle": "P0176",
+      "category": 3,
+      "title": "Octave bandwidth photonic fishnet-achromatic-metalens",
+      "doi": "10.1038/s41467-020-17015-9",
+      "paper_id": "c1ee5d1912d3d71e0194c6446090bea513438582",
+      "aliases": [],
+      "chapter_ids": [
+        "CH3",
+        "CH4"
+      ],
+      "source_uses": [],
+      "judgment": "鱼网结构控制相位斜率和截距，640–1200 nm平均效率>70%、Strehl>0.8，但小孔径10–20 μm。可校准3.1/3.2反复“必然效率下降”的过强概括，不能说突破全部界限。上游未排段，最高优先平衡证据。",
+      "A_work_summary": "本研究提出并实验演示了一种基于“鱼网”结构的全介质消色差金属透镜（FAM）。该研究旨在解决传统超表面因材料色散导致的宽带操作受限问题。通过同时控制相位斜率（决定焦距）和相位截距（影响效率），作者设计了一种具有多个自由度的单元结构。实验结果表明，该透镜在640 nm至1200 nm的连续波段内实现了超过70%的平均聚焦效率和大于80%的斯特列尔比，表现出衍射极限性能且对偏振不敏感。",
+      "A_key_findings": [
+        {
+          "conditions": "TiO2鱼网结构，直径10-20 μm，波长640-1200 nm",
+          "finding": "实现了约一个倍频程（640-1200 nm）的连续宽带操作，平均聚焦效率超过70%，斯特列尔比大于80%，证实了衍射极限聚焦。"
+        },
+        {
+          "conditions": "设计容差分析",
+          "finding": "蒙特卡洛模拟显示，相位截距误差小于30°时，效率下降小于10%，且不影响焦点位置，表明设计对制造偏差具有鲁棒性。"
+        },
+        {
+          "conditions": "与现有技术对比",
+          "finding": "相比此前报道的可见光波段金属透镜（带宽35%-41%，效率<35%），本工作在分数带宽（61%）和效率（70%）上均显著优于现有实验结果。"
+        }
+      ],
+      "B_planning_summary": "该论文为综述提供了关于如何通过几何参数耦合控制相位斜率和截距来实现宽带消色差的实证案例。它直接涉及带宽、效率和数值孔径之间的权衡，特别是展示了在保持高效率的同时扩展带宽至一个倍频程的可能性，以及这种设计方法对透镜尺寸和制造精度的具体要求。",
+      "B_cautions": [
+        "该研究的结论基于特定的TiO2材料和鱼网几何结构，其他材料体系（如Si, GaN）或单元结构可能表现出不同的色散特性和效率极限。",
+        "效率测量依赖于特定的孔径定义，与其他文献中的效率定义可能存在差异，比较时需注意。",
+        "作者声称这是“迄今报道的最宽带消色差金属透镜”，这一说法需结合综述中其他论文的发布时间点和具体指标进行验证，避免过度概括。"
+      ]
+    },
+    {
+      "handle": "P0179",
+      "category": 1,
+      "title": "Thermal Metasurfaces: Complete Emission Control by Combining Local and Nonlocal Light-Matter Interactions",
+      "doi": "10.1103/physrevx.11.021050",
+      "paper_id": "c434e5bb720d9221a547daf78628e5349e00cb1e",
+      "aliases": [],
+      "chapter_ids": [
+        "CH2",
+        "CH3"
+      ],
+      "source_uses": [],
+      "judgment": "QBIC热发射源局部/非局部及相干性，不同于被动透射透镜；仅外围类比，强行纳入容易混淆。",
+      "A_work_summary": "该论文提出了一种“热超表面”（thermal metasurface）的理论框架，旨在解决传统光学系统通过分立元件对非相干热光进行滤波和整形时效率低下、体积庞大的问题。作者指出，要实现完全的热发射控制，必须同时调控结构的局部散射特性（local scattering）和非局部扩展模式（nonlocal extended modes）。通过结合几何微扰（控制辐射寿命）和材料损耗（控制非辐射寿命），利用QBIC机制实现了时间相干性（窄线宽）和空间相干性的独立控制。理论推导表明，受限于时间反演对称性和互易性，仅靠非局部响应无法实现任意角度的自旋选择性单向发射；必须引入局部相位梯度（如几何相位）与非局部相位的协同作用。基于此框架，论文展示了产生任意椭圆偏振、单向发射、聚焦以及携带自旋/轨道角动量的热光束的设计方案。",
+      "A_key_findings": [
+        {
+          "conditions": "基于掺杂硅的二维光子晶体平板，支持连续体中的准束缚态（QBIC）。",
+          "finding": "通过独立的几何微扰参数（δ）和材料损耗参数（κ），可以分别独立调节QBIC的辐射Q因子（Qr ∝ 1/δ²）和非辐射Q因子（Ql ∝ 1/κ），从而实现对发射光谱线宽（时间相干性）和峰值发射率的同步控制。"
+        },
+        {
+          "conditions": "考虑QBIC模式的色散关系（曲率b）和光学寿命（τ）。",
+          "finding": "热发射的空间相干长度Lc由公式 Lc ≈ √(bτ) 决定。这意味着可以通过工程化能带结构（改变曲率b）来独立于时间相干性调控空间相干性。平坦的能带导致较低的空间相干性，而陡峭的能带有助于提高空间相干性。"
+        },
+        {
+          "conditions": "施加时间反演对称性和互易性约束，针对放置在镜面上的单层结构。",
+          "finding": "仅依靠非局部相位梯度（如传统的非局部超表面设计）无法实现任意角度的单向发射，因为互易性要求存在对应的反向通道。为了实现任意角度的自旋选择性单向发射，必须同时引入局部相位梯度（例如通过旋转椭圆纳米柱产生的几何相位）和非局部相位梯度。局部相位梯度将后向反射点移动到所需角度，而非局部相位梯度将QBIC共振锁定在该后向反射点上。"
+        }
+      ],
+      "B_planning_summary": "该论文提供了关于如何在亚波长尺度上从非相干热源中提取结构化光场的核心理论约束与设计原则。对于综述而言，其最大价值在于揭示了“局部”与“非局部”效应在热发射中的解耦与协同机制，特别是关于互易性对单向发射限制的解析证明，以及通过几何相位补偿实现任意角度单向发射的具体路线。这为理解宽带消色差金属透镜中可能存在的类似物理极限（如带宽与孔径的权衡）提供了类比基础，尽管应用场景不同（一个是主动发光源，一个是被动透射元件）。",
+      "B_cautions": [
+        "该论文的研究对象是热发射源（主动发光），而非透射型金属透镜（被动元件）。在将其发现应用于金属透镜的带宽或效率分析时，必须明确区分物理机制的差异（如Kirchhoff定律 vs 透射率）。",
+        "论文中关于空间相干性与能带曲率的关系是基于特定的QBIC模型推导的，不一定适用于所有类型的超表面或衍射光学元件。",
+        "单向发射的实现依赖于特定的镜面基底配置，这在透射式金属透镜中并不直接适用。"
+      ]
+    },
+    {
+      "handle": "P0183",
+      "category": 2,
+      "title": "On Metalenses with Arbitrarily Wide Field of View",
+      "doi": "10.1021/acsphotonics.0c00479",
+      "paper_id": "c855ac0370b79b7232cb0213d89c321395b09827",
+      "aliases": [],
+      "chapter_ids": [
+        "CH3",
+        "CH4"
+      ],
+      "source_uses": [],
+      "judgment": "532 nm二次相位>170°、FWHM约2λ、低效率；4.2的P0230/P0055具体解释同类FOV换分辨率/效率、场曲和畸变，核心用途覆盖。",
+      "A_work_summary": "该研究针对智能手机和虚拟现实等应用对单元件宽视场成像的需求，提出并实验验证了一种基于二次相位分布的金属透镜设计。通过放宽衍射极限分辨率的约束，该设计实现了超过170°的超大视场，同时保持了满足大多数成像应用所需的分辨率（FWHM ≈ 2λ₀）。研究通过傅里叶分析揭示了其物理机制：WFOV金属透镜在无限大曲率半径和无限大折射率的极限下，模拟了体光学中的球面透镜行为，从而克服了传统双合透镜或数值优化设计的视场限制。",
+      "A_key_findings": [
+        {
+          "conditions": "NA = 0.8, 焦距 f = 750 μm, 直径 D = 2 mm, 波长 532 nm",
+          "finding": "WFOV金属透镜实现了 >170° 的视场，且在高达 ±89° 的入射角范围内，点扩散函数（PSF）形状保持不变；相比之下，DL透镜在仅2°入射角时即出现严重畸变。"
+        },
+        {
+          "conditions": "中心视场（0°入射）",
+          "finding": "WFOV透镜的中心分辨率（FWHM ≈ 2λ₀）约为DL透镜的两倍（DL透镜为衍射极限，等效于NA=0.27的分辨率），但仍优于iPhone 11 Pro Max超广角镜头（FWHM ~ 2.26λ₀）和Nikon鱼眼镜头。"
+        },
+        {
+          "conditions": "不同NA值",
+          "finding": "对于WFOV透镜，视场（FOV）随NA增加而单调增加，直至NA≈0.9时达到180°；而对于DL透镜，分辨率随NA增加而提高，但视场迅速减小。两者在NA-FOV/Resolution权衡上呈现互补关系。"
+        },
+        {
+          "conditions": "斜入射效率",
+          "finding": "WFOV透镜相对于入射功率的聚焦效率在20°以内几乎不变，随后因透射率下降（余弦投影面积效应）而降低；其绝对效率（~3.5%）显著低于DL透镜（~23%），这是由球差和有效孔径限制导致的固有特性。"
+        }
+      ],
+      "B_planning_summary": "本文提供了金属透镜设计中“视场（FOV）”与“分辨率/效率”之间权衡的典型实证案例。它展示了通过改变相位分布（从双曲线到二次型）来打破传统衍射极限束缚，从而换取极大视场的策略。这对于综述中讨论如何平衡带宽、NA、效率和视场等多重约束具有重要参考价值，特别是作为非消色差、高NA宽视场设计的基准对比。",
+      "B_cautions": [
+        "本文研究的是单色光（532 nm）下的宽视场性能，未涉及宽带消色差（Achromatic）特性。在将其应用于综述中的“宽带”相关讨论时，必须明确其局限性，即未考虑群延迟（Group delay）或色散引起的视场变化。",
+        "WFOV透镜的低效率是其固有属性，源于二次相位分布导致的快速相位调制和倏逝波产生。在比较不同设计时，需注意这种效率损失并非 fabrication defect，而是物理机制决定的 trade-off。",
+        "所给摘要未交代该设计在可见光其他波段（如红光、蓝光）的具体表现，不同波长下纳米柱的共振特性可能导致相位响应偏离理想二次分布，从而影响实际FOV。"
+      ]
+    },
+    {
+      "handle": "P0189",
+      "category": 3,
+      "title": "Broadband Achromatic Metalens in the Long-Wave Infrared Regime",
+      "doi": "10.1109/jphot.2023.3243409",
+      "paper_id": "ce31d36ca39263ce1daffa7e93a69ff703318857",
+      "aliases": [],
+      "chapter_ids": [
+        "CH1",
+        "CH5"
+      ],
+      "source_uses": [],
+      "judgment": "LWIR C(ω)选择使FLFC4.1%对59.8%，正/负CD偏差分别损害焦距/效率，高度偏差也非对称。1.2已有C(ω)、2.5/3.3已有一般公差，但没有这条符号依赖的具体解释。上游未排段，可选机制补强，纯仿真。",
+      "A_work_summary": "该研究针对传统金属透镜在宽光谱范围内存在的色散导致的色差问题，提出了一种通过优化“光谱自由度”C(ω)来调控群延迟的设计方案。作者构建了直径200 μm、数值孔径0.24的消色差金属透镜模型，在9-12 μm波段内实现了焦距分数变化（FLFC）仅为4.1%的消色差聚焦，平均聚焦效率达51.7%。此外，论文还系统分析了关键尺寸（CD）偏差、 pillar高度变化和侧壁角度对透镜性能的影响，证明了该设计在特定参数范围内的鲁棒性及其与现有CMOS工艺的兼容性。",
+      "A_key_findings": [
+        {
+          "conditions": "C(ω) = 0.15 × 2π (M点), 波长范围 9-12 μm, NA=0.24",
+          "finding": "实现了最小的焦距分数变化（FLFC）为4.1%，实际群延迟分布接近理论目标值，有效抑制了色差。"
+        },
+        {
+          "conditions": "C(ω) = 0.55 × 2π (N点), 波长范围 9-12 μm",
+          "finding": "FLFC高达59.8%，实际群延迟显著偏离目标值，色差严重，证明C(ω)的选择对消色差性能至关重要。"
+        },
+        {
+          "conditions": "最佳设计参数下, 传输模式",
+          "finding": "平均聚焦效率为51.7%，效率随波长变化在35%-61%之间波动。"
+        },
+        {
+          "conditions": "制造偏差分析: CD偏差",
+          "finding": "正CD偏差导致FLFC急剧增加和焦距线性减小；负CD偏差对聚焦效率影响更大。小或大直径偏差均不利于维持设计波长的相位差。"
+        },
+        {
+          "conditions": "制造偏差分析: 高度偏差",
+          "finding": "当pillar高度低于设计值时，FLFC几乎不变但焦距变大；高于设计值时，FLFC增加，焦距变小。高度变化对平均效率影响较小。"
+        },
+        {
+          "conditions": "制造偏差分析: 侧壁角度(SA)",
+          "finding": "侧壁角度偏离90°会导致FLFC增加，平均焦距上升，且聚焦效率下降，主要归因于倾斜侧壁引起的相位误差增大。"
+        }
+      ],
+      "B_planning_summary": "本文提供了一个在长波红外（LWIR）波段实现宽带消色差金属透镜的具体案例，重点展示了如何通过优化光谱自由度C(ω)来平衡带宽与色差校正效果。其核心价值在于揭示了C(ω)作为独立设计维度的作用，以及制造偏差（特别是CD和侧壁角度）对消色差性能的非对称影响。这为综述中关于“色散工程如何影响带宽与数值孔径权衡”以及“制造工艺对光学性能的限制”提供了具体的实证数据和机制解释。",
+      "B_cautions": [
+        "本文结果为纯数值仿真，缺乏实验验证，因此其宣称的性能（如4.1% FLFC）在实际器件中可能因制造误差、材料吸收等因素而恶化。",
+        "C(ω)优化的有效性依赖于特定的纳米柱几何参数（高度7.9 μm，周期3.05 μm），其他结构体系下的普适性未知。",
+        "文章指出该方法在大孔径或高NA下可能受限，因此在将其推广到高NA应用时需格外谨慎。",
+        "效率计算基于理想抗反射涂层假设，实际系统中界面反射会进一步降低效率。"
+      ]
+    },
+    {
+      "handle": "P0196",
+      "category": 3,
+      "title": "Solid-immersion metalenses for infrared focal plane arrays",
+      "doi": "10.1063/1.5040395",
+      "paper_id": "d60f07ddb4a5a41786316264777d6fc9ff53a28b",
+      "aliases": [],
+      "chapter_ids": [
+        "CH3",
+        "CH4"
+      ],
+      "source_uses": [],
+      "judgment": "GaSb固浸阵列3–4 μm消色差、实测峰值52%、83°侧壁；尚未与实际FPA单片集成。5.4集成优势缺“独立透镜阵列测试≠探测器系统验证”的具体边界。上游未排段，可选应用条件。",
+      "A_work_summary": "该研究旨在解决传统微透镜需要额外沉积和对准步骤、难以与小型化像素兼容的问题，提出了一种直接刻蚀在探测器衬底背面（GaSb）的透射式固态浸没金属透镜。通过电子束光刻和ICP刻蚀工艺，制备了直径30 μm、厚度2 μm的10x10金属透镜阵列。实验测量了其在3-5 μm波段的光学性能，包括焦距、聚焦效率和强度增强。结果显示，宽带金属透镜在3-4 μm范围内具有恒定的焦距，最大聚焦效率实测为52%，强度增强约3倍，证明了该方案在提高IR FPA灵敏度和工作温度方面的潜力及可扩展性。",
+      "A_key_findings": [
+        {
+          "conditions": "GaSb衬底上的圆形纳米柱阵列，直径30 μm，厚度2 μm，NA~0.36",
+          "finding": "实现了固态浸没聚焦，即光线从空气进入GaSb衬底内部聚焦。"
+        },
+        {
+          "conditions": "宽带金属透镜，波长范围3-5 μm",
+          "finding": "在3-4 μm范围内焦距保持恒定（~152.9 μm），超过4 μm后焦距开始减小；实测最大聚焦效率为52%（BP-3390-345 nm），模拟平均效率70%。"
+        },
+        {
+          "conditions": "两种透镜设计（单色与宽带）",
+          "finding": "均实现了约3倍（300%）的峰值强度增强；单色透镜焦距随波长变化明显，宽带透镜在3-4 μm内色散控制较好。"
+        },
+        {
+          "conditions": "制造工艺限制",
+          "finding": "由于GaSb刻蚀困难，侧壁角度约为83°而非设计的90°，导致相位误差和聚焦光斑略大于衍射极限，但仍在FPA像素尺寸（10 μm）范围内。"
+        }
+      ],
+      "B_planning_summary": "该论文提供了关于介电金属透镜在红外波段进行色散工程的具体实例，特别是宽带消色差设计在有限带宽内的表现及其与数值孔径、聚焦效率之间的权衡关系。它展示了如何通过调整纳米柱几何参数来同时控制相位和群延迟，以及这种控制在实际器件中面临的制造公差限制。",
+      "B_cautions": [
+        "该研究的宽带消色差效果仅在3-4 μm范围内显著，不能外推至整个3-5 μm或更长波段。",
+        "聚焦效率的降低部分归因于制造缺陷（侧壁角度偏差），并非理论极限，实际优化后的效率可能更高。",
+        "实验测量的是独立透镜阵列的性能，尚未与实际的FPA探测器进行单片集成测试，因此对系统级信噪比的提升仅为推测。"
+      ]
+    },
+    {
+      "handle": "P0202",
+      "category": 3,
+      "title": "Crosstalk-free achromatic full Stokes imaging polarimetry metasurface enabled by polarization-dependent phase optimization",
+      "doi": "10.29026/oea.2022.220058",
+      "paper_id": "d8b4f02faad0068b14369b5356c0184b67ca194b",
+      "aliases": [],
+      "chapter_ids": [
+        "CH2",
+        "CH3"
+      ],
+      "source_uses": [],
+      "judgment": "正交偏振发散相位优化抑串扰，9–12 μm，实测串扰2.28–5.06%、Stokes误差约7–9%。5.4特殊功能没有此独立优化机制与“无串扰不为零”的条件。上游未排段，可选应用补强。",
+      "A_work_summary": "本研究针对传统超表面偏振仪带宽窄和串扰大的问题，提出了一种基于“偏振依赖相位优化”原理的无串扰宽带消色差全斯托克斯成像偏振仪。该器件由六个亚阵列组成，分别对应不同线性和圆偏振态，利用粒子群优化算法在硅纳米柱数据库中匹配所需的相位分布。研究通过数值模拟和实验测量，证实了该设计能在9-12 μm波段内实现无串扰的消色差聚焦，显著降低了正交偏振态间的串扰，并成功演示了偏振态的直接测量及偏振成像能力。",
+      "A_key_findings": [
+        {
+          "conditions": "9.3, 9.6, 10.3, 10.6 μm波长下的线性偏振金属透镜",
+          "finding": "测得消光比分别为19.77, 24.19, 43.799, 36.479，对应的串扰分别为5.06%, 4.13%, 2.28%, 2.75%；焦长约1cm，保持消色差特性。"
+        },
+        {
+          "conditions": "9-12 μm波段内的线性偏振设计对比",
+          "finding": "与传统单偏振优化方法相比，提出的方法平均消光比提高了约3.9倍，串扰减少了超过66.67%。"
+        },
+        {
+          "conditions": "9.3, 9.6, 10.3, 10.6 μm波长下的全斯托克斯参数测量",
+          "finding": "对于多种入射偏振态（包括线偏、椭圆偏等），测量的平均相对误差分别为7.08%, 8.62%, 7.15%, 7.59%，证明无需校准即可直接精确测量。"
+        }
+      ],
+      "B_planning_summary": "该论文提供了介电超表面中“偏振依赖相位优化”这一具体色散工程策略的实验证据。其核心价值在于展示了如何通过在设计阶段主动引入正交偏振的发散相位来抑制串扰，从而在不牺牲消色差性能的前提下提高偏振纯度。这为综述中讨论“如何在宽带消色差设计中平衡偏振选择性与串扰抑制”提供了具体的机制案例和性能基准数据。",
+      "B_cautions": [
+        "该研究的带宽（9-12 μm）属于中红外波段，其材料（硅）和结构设计不能直接外推至可见光或近红外波段，需注意材料色散特性的差异。",
+        "文中声称的“无串扰”是相对于传统方法而言（串扰<5%），并非绝对为零，使用时应保留这一量化边界。",
+        "关于带宽扩展的建议（如增加共振模式）仅为理论推测，尚未在本研究中得到实验证实，引用时需明确区分已验证结果与未来建议。"
+      ]
+    },
+    {
+      "handle": "P0231",
+      "category": 3,
+      "title": "An optic to replace space and its application towards ultra-thin imaging systems",
+      "doi": "10.1038/s41467-021-23358-8",
+      "paper_id": "f3725d9537d7d84c50d1f0ccea731ba767d48ad7",
+      "aliases": [],
+      "chapter_ids": [
+        "CH2",
+        "CH3"
+      ],
+      "source_uses": [],
+      "judgment": "无光焦度spaceplate替代传播空间；多层仿真R约5、油浸晶体实测R1.12。5.2/5.3谈总厚度与体积，却无聚焦与传播空间解耦的不同路线。上游未排段，可选系统替代方案。",
+      "A_work_summary": "该研究提出并实验验证了一种名为‘空间板’的光学元件，旨在解决传统成像系统中透镜间传播距离过大导致设备体积庞大的问题。空间板能够在其物理厚度远小于等效传播距离的情况下，模拟自由空间中的光波相位演化，从而在不改变光束角度和系统放大率的前提下缩短光路。作者通过傅里叶光学分析定义了空间板的非局域相位响应机制，设计了基于硅/二氧化硅的多层超材料结构并通过全波仿真验证了其性能，同时利用方解石晶体在油浸环境中进行了宽带可见光成像的实验演示，证明了空间压缩效应的物理可实现性及其在微型化成像系统中的潜力。",
+      "A_key_findings": [
+        {
+          "conditions": "多层超材料结构（硅/二氧化硅，~10μm厚，NA=0.26, λ=1550nm）",
+          "finding": "仿真显示压缩因子R≈4.9-5.2，实现了偏振不敏感操作，且在30nm带宽内有效，证明压缩因子可超过材料折射率比值限制。"
+        },
+        {
+          "conditions": "方解石晶体（负单轴双折射介质），背景介质为亚麻籽油或甘油，e偏振光",
+          "finding": "实验测得压缩因子R≈1.12，聚焦面前移Δ≈-3.4mm，与理论预测一致；在入射角高达35°（NA=0.85 in oil）时仍完美复现自由空间传播的横向位移。"
+        },
+        {
+          "conditions": "宽带可见光照明（白光），方解石空间板置于甘油中",
+          "finding": "成功将彩色图像的焦平面提前3.4mm，且保持图像放大率和视场不变，证实了空间板在宽带、消色差条件下的可行性。"
+        }
+      ],
+      "B_planning_summary": "本文提供了‘空间压缩’（Space Compression）这一关键机制的具体实例，展示了如何通过非局域相位工程（Nonlocal Phase Engineering）在不引入额外聚焦功率（无光焦度）的情况下缩短光路。这对于综述中讨论‘如何在保持数值孔径和带宽的同时优化系统紧凑性’具有直接参考价值，特别是关于‘空间’与‘透镜’功能解耦的设计思路。",
+      "B_cautions": [
+        "本文的‘空间板’特指替代自由空间传播距离的元件，不具备透镜的聚焦能力（零光焦度），因此在讨论‘聚焦效率’时需明确区分透镜功能与空间传播功能。",
+        "实验结果依赖于特定的背景介质折射率匹配（n_BG = n_e），在实际空气或真空应用中，需考虑界面反射和模式匹配问题，文中未详细展开此部分的损耗分析。",
+        "压缩因子R的定义基于等效传播距离与物理厚度之比，低R值并不意味着器件无效，但在实际系统集成中，R值直接决定了体积缩减的比例，需结合具体应用场景评估其意义。"
+      ]
+    },
+    {
+      "handle": "P0235",
+      "category": 2,
+      "title": "Advances in Meta-Optics and Metasurfaces: Fundamentals and Applications",
+      "doi": "10.3390/nano13071235",
+      "paper_id": "f74e0d44f31187be7c3ed9f00cf5a6ae091af128",
+      "aliases": [],
+      "chapter_ids": [
+        "CH2",
+        "CH3"
+      ],
+      "source_uses": [
+        {
+          "task_id": "CH2::CH2_U01::CH2_U01_P01",
+          "source_handle": "P0235",
+          "role": "背景",
+          "use": "提供元光学进展综述，支撑单层架构基础理论描述"
+        }
+      ],
+      "judgment": "背景单层基础理论已由2.1的P0090/P0099/P0118写实TBP、色散空间和LPF。综述身份未用，不构成独立知识缺口。",
+      "A_work_summary": "This review article maps the development of meta-optics over the past decade, tracing the shift from basic wavefront control to practical applications. It systematically introduces the fundamental principles of manipulating light using subwavelength meta-atoms, covering phase control (geometric, resonant, propagation, detour phases), amplitude control (via loss engineering or non-local coupling), and polarization control. The paper then categorizes meta-devices into monochromatic metalenses, broadband achromatic metalenses, and multi-functional devices like optical vortex generators. Finally, it discusses applications in computational imaging (e.g., light-field cameras, depth sensing) and optical image processing (e.g., edge enhancement, mathematical operations). The authors conclude by highlighting current challenges such as fabrication limits (aspect ratios), bandwidth-efficiency trade-offs, and integration issues, while outlining future directions in quantum optics and dynamic control.",
+      "A_key_findings": [
+        {
+          "conditions": "Phase control via geometric phase",
+          "finding": "Full 2π phase control can be achieved by rotating anisotropic meta-atoms (e.g., nano-pillars) under circularly polarized incidence, converting incident light to cross-polarized components with a phase shift of ±2ϕ."
+        },
+        {
+          "conditions": "Amplitude control via X-shaped meta-atoms",
+          "finding": "Amplitude modulation is possible by adjusting angular disparities in X-shaped meta-atoms, though conversion efficiency is limited (<50%) due to cross-talk; higher efficiencies (~90%) are achieved using Fabry-Pérot resonance in sandwich configurations."
+        },
+        {
+          "conditions": "Broadband achromatic metalens design",
+          "finding": "Achromatic focusing requires constant group delay across wavelengths. Strategies include engineering carrier phase and group delay dispersion simultaneously (e.g., combining geometric and resonant phases) or using integral resonances, allowing full-color imaging within specific bands (e.g., 470–670 nm)."
+        },
+        {
+          "conditions": "Multi-functional vortex metalenses",
+          "finding": "Metasurfaces can generate optical vortices with orbital angular momentum (OAM), enabling multi-channel focusing and detection of topological charges, which supports applications in particle sorting and optical communications."
+        }
+      ],
+      "B_planning_summary": "This review provides essential background on the physical mechanisms of dispersion engineering in dielectric metalenses, specifically how group delay and carrier phase are manipulated to achieve achromaticity. It highlights the inherent trade-offs between numerical aperture (NA), operational bandwidth, and device size/fabrication complexity, which directly addresses the user's facets on dispersion-induced trade-offs. It also offers context on computational imaging applications where these trade-offs impact system performance.",
+      "B_cautions": [
+        "The review synthesizes various studies; specific performance metrics (efficiency, bandwidth) should be attributed to the cited original works, not assumed as universal constants for all dielectric metalenses.",
+        "Trade-offs described are qualitative summaries of design challenges; precise quantitative relationships depend on specific material choices and fabrication technologies not fully detailed in this review.",
+        "The term 'achromatic' refers to specific designed bandwidths (e.g., visible range); it does not imply infinite bandwidth or perfect correction across all spectra."
+      ]
+    },
+    {
+      "handle": "P0247",
+      "category": 1,
+      "title": "Design, Simulation, Fabrication and Characterization of Optical Metasurface",
+      "doi": "",
+      "paper_id": "OpenAlex:W3139292363",
+      "aliases": [],
+      "chapter_ids": [
+        "CH1",
+        "CH4"
+      ],
+      "source_uses": [],
+      "judgment": "学位论文摘要仅设计/制造/表征流程；B明确无色散/NA/效率权衡数据，属技术背景，无需为篇数补引。",
+      "A_work_summary": "该论文是一篇学位论文摘要，总结了作者在光学超表面领域的研究，涵盖了从设计、仿真、制造到表征的完整流程。其核心贡献集中在可见光波段的金属透镜上，旨在利用空间离散化和相位重构方法实现对波前的全控制，包括同时改变相位、透射率和偏振状态。",
+      "A_key_findings": [
+        {
+          "conditions": "可见光波段",
+          "finding": "实现了基于空间离散化和相位重构方法的金属透镜设计、仿真、制造与表征，能够同时控制相位、透射和偏振。"
+        }
+      ],
+      "B_planning_summary": "该文献主要作为光学超表面基础概念和技术可行性的背景参考，证实了可见光波段金属透镜可通过空间离散化实现。由于缺乏具体的色散工程细节和定量权衡数据，它不能直接回答关于宽带消色差设计中带宽、NA、效率等参数权衡的核心问题，仅能提供基础技术路线的背景支持。",
+      "B_cautions": [
+        "该文献为学位论文摘要，侧重于展示完整的研究流程而非特定的物理机制突破。",
+        "文中提到的‘首次’（first time）声称需结合领域共识谨慎看待，且摘要未提供对比基线以验证其相对于现有技术的独特性。",
+        "无法从中提取关于色散工程、宽带消色差设计或具体性能权衡（trade-off）的任何定量或定性证据。"
+      ]
+    }
+  ],
+  "body_evidence": [
+    {
+      "paragraph_index": 26,
+      "line": 54,
+      "text": "单层介电超表面的消色差能力受限于时间 - 带宽积（TBP）物理界限与元原子相位 - 色散空间的覆盖范围。根据相位 - 色散空间设计框架，消色差金属透镜的最大半径 R_max、数值孔径 NA 与操作带宽Δω之间的权衡关系可表述为 R_max·NA·Δω ≤ 2cΔΦ'（近轴近似下），其中ΔΦ'为元原子库可提供的最大色散范围 [P0090]。该公式表明，在给定元原子库条件下，增大孔径、提高 NA 或扩展带宽三者不可兼得。实验验证显示，使用 Generation 1B 非晶硅纳米柱库（高度 1400 nm）制造的透镜在 NA≈0.24 时可实现 450 nm 带宽（1200-1650 nm）的消色差聚焦，而当 NA 提升至 0.88 时，有效带宽缩减至 200 nm（1200-1400 nm），直接证实了高 NA 对带宽的压缩效应 [P0090]。综述研究进一步指出，共振型超表面的无量纲κ值受限（κ=2），导致其理论带宽上限低于波导型结构，但两者均面临制造高深宽比纳米结构的工艺挑战 [P0099]。渐近相位补偿方法通过引入波长依赖的参考平面参数，可在固定 NA（0.164）下将带宽扩展至 600 nm（400-1000 nm），但其性能仍受限于纳米结构的最大相位色散能力，并通过极限邻近因子（LPF）量化设计对理论边界的逼近程度 [P0118]。总体而言，单层架构的色散补偿自由度受限于二维平面内的几何参数调控，难以同时满足大孔径、高 NA 与宽光谱的消色差需求。"
+    },
+    {
+      "paragraph_index": 30,
+      "line": 62,
+      "text": "增加垂直维度的设计自由度为突破单层超表面的相位 - 色散覆盖限制提供了新路径。阶梯相位色散补偿（SPDC）层通过引入光学厚度差ΔL(0) 分担色散补偿需求，使元原子仅需较小色散即可支持大半径 [P0022]。在 NA=0.9、半径 20.1 μm 的设计中，采用 6 个台阶（每台阶宽 2.7 μm）的 GaN 基底结合 c-Si 纳米柱，将所需元原子最大相位色散从传统设计的 13.60π降至 2.20π，理论上可在 650-1000 nm 波段实现消色差聚焦 [P0022]。然而，实测聚焦效率约 10%，显著低于模拟值 22.4%-29.1%，主要归因于 FIB 刻蚀导致的阶梯制造偏差 [P0022]。这种垂直堆叠策略通过分区复用元原子库，在固定焦距下使透镜半径可随光学厚度差增加而扩展，但制造复杂度随之上升 [P0022][P0140]。类似地，双层架构通过有效阿贝数概念指导平凸/平凹结构设计，利用层间轴向自由度解耦聚焦相位与色散补偿，在可见光波段实现平均聚焦效率高于 50%[P0201]。太赫兹波段的大孔径案例（直径 2.21 cm，NA=0.13）虽采用单层设计，但其离散多波长策略与 PSO 优化方法为多层系统的孔径扩展提供了参考基准 [P0004]。与单层 TiO₂平台相比（NA=0.8 时效率 86%），多层垂直解耦策略在维持高 NA 的同时扩展了带宽，但引入了对准容差的新要求 [P0243]。"
+    },
+    {
+      "paragraph_index": 38,
+      "line": 78,
+      "text": "当单层超表面的相位 - 色散自由度不足以支撑高数值孔径（NA）与宽带宽的同时实现时，引入折射元件或计算后处理成为突破物理极限的替代路径。混合折射 - 衍射架构（Hybrid Achromatic Metalens, HAML）通过将色散负担分担给传统折射元件或相位板，避免了单一超表面群延迟饱和的问题。在 [P0072] 展示的混合设计中，通过递归光线追踪算法将相位板与纳米柱金属透镜结合，合并式（Merged）结构在近红外波段（1000-1800 nm）实现了平均聚焦效率超过 60%（最高达 80%）的消色差性能，且斯特列尔比（Strehl ratio）大于 0.8；相比之下，为追求更高 NA（0.32）而采用的空气间隔式（Air-Spaced）结构虽然保持了宽带消色差能力，但平均效率降至 27%[P0072]。这种效率衰减揭示了混合架构中结构复杂度与光学性能的路径依赖：虽然 [P0143] 指出通过整体协同设计（将折射元件与超表面作为整体优化）可消除残余色散并实现厘米级尺度，但超表面单元库的色散覆盖范围仍是限制高 NA 下效率的关键瓶颈 [P0143]。此外，[P0156] 利用 3D 打印技术在可见光波段实现了 NA 0.3-0.47 的混合微透镜，聚焦效率在 30%-70% 之间，进一步证实了在高 NA 下维持宽带消色差需以效率损失或工艺复杂度为代价 [P0156]。与纯衍射单层架构相比（如 [P0243] 所示，其可见光波段效率可达 86% 但带宽受限），混合方案在扩展带宽的同时引入了界面反射、对准误差及折射材料吸收等新的损耗机制 [P0243][P0226]。"
+    },
+    {
+      "paragraph_index": 39,
+      "line": 80,
+      "text": "若光学自由度的增加受限于制造或材料物理，计算成像提供了另一条通过牺牲信噪比（SNR）换取光谱不变性的路径。扩展景深（EDOF）波前编码技术通过在超表面相位中引入立方项或对数非球面项，使点扩散函数（PSF）在宽光谱范围内保持形态一致，从而允许使用单一数字滤波器进行去卷积重建。[P0069] 的实验表明，经过维纳滤波去卷积后的 EDOF 系统在全可见光谱下的结构相似性指数（SSIM）比未去卷积基线提高了 0.209，显著减轻了色差模糊；然而，这种清晰度的提升是以 SNR 损失为代价的，去卷积后的图像 SNR 低于传统单片透镜在绿光对焦清晰时的 SNR[P0069]。[P0112] 通过逆设计进一步优化了 EDOF 超透镜，在 1 mm 孔径下实现了 290 nm 的光学带宽，但明确指出为了获得宽光谱下均匀的调制传递函数（MTF），必须在设计波长处牺牲部分 MTF 体积（volume under MTF curve）[P0112]。[P0134] 的对比研究进一步量化了不同相位掩模的权衡：虽然对数非球面（Log-asphere）设计可将光学带宽扩展至约 233 nm，优于立方相位的 112 nm，但其聚焦效率随波长波动较大，且依赖后处理反卷积 [P0134]。与纯光学效率基准（如 [P0243]）相比，计算成像方案在系统级指标（如 OPM）上往往因 SNR 损失而表现逊色，表明其适用于对体积敏感但对实时性或低光性能要求不苛刻的场景 [P0001][P0243]。"
+    },
+    {
+      "paragraph_index": 54,
+      "line": 116,
+      "text": "上述单色基准效率数据确立了评估色散工程代价的参照系。单色优化仅需满足单一频率的相位匹配条件，元原子可选择透射率最优的几何参数组合。然而，消色差设计需在连续谱内同时调控群延迟与高阶色散，迫使元原子选择偏离最优透射状态以换取相位色散补偿能力 [P0001]。这一机制性约束意味着：即使工艺完美，消色差设计的效率也必然低于同材料同 NA 的单色基准。OPM 指标分析表明，当前消色差超透镜的整体性能（OPM）普遍低于等效常规衍射透镜，主要原因在于效率损失对信噪比的影响超过了分辨率提升带来的收益 [P0001]。例如，在短波红外波段，消色差金属透镜的 OPM 为 0.55，而等效传统衍射透镜为 0.64-0.66 [P0001]。这一差距在可见光波段因材料吸收加剧而更为显著，空间复用消色差超透镜在 RGB 三通道的效率分别仅为 0.15、0.05、0.02，远低于等效常规衍射透镜的 0.58、0.59、0.56 [P0001]。因此，在确立单色高效率基准后，需进一步剖析引入宽带消色差功能时，色散补偿机制如何打破原有的能量守恒分配，导致效率系统性衰减。"
+    },
+    {
+      "paragraph_index": 58,
+      "line": 124,
+      "text": "不同材料体系与波段下的效率跌落轨迹进一步揭示了带宽、$NA$ 与工艺约束的综合影响。在近红外波段，利用高深宽比（~37.5）的二氧化钛纳米柱扩展群延迟范围，可实现平均 77.1%（$NA=0.24$）至 88.5%（$NA=0.1$）的高聚焦效率，表明在材料吸收较低且工艺允许高深宽比时，色散补偿的效率损失可被有效抑制 [P0218]。然而，在可见光高$NA$场景下，混合相位设计（$NA=0.564$）的仿真效率约为 36.4%，虽优于纯几何相位方案，但仍面临相位补偿策略带来的折损 [P0190]。系统级评估表明，当前消色差超透镜的整体性能（OPM 指标）尚未超越等效常规衍射光学系统，主要原因在于消色差设计带来的效率损失对信噪比的负面影响超过了分辨率提升的收益 [P0001]。这说明单纯追求带宽与$NA$的扩展必然以能量利用率下降为代价，且当前实测性能在系统层面仍受限于原理性损耗与工艺公差的共同作用。"
+    },
+    {
+      "paragraph_index": 78,
+      "line": 175,
+      "text": "在宽视场超透镜设计中，视场瓶颈的物理机制可归纳为三类：消色差相位匹配引入的相位噪声、二次相位像差容忍以及非消色差离轴伪影。现有研究通过不同波段与数值孔径（NA）的个案揭示了这些机制的制约作用，但由于工作条件（如波长、NA、相位剖面）差异显著，这些案例不能构成脱离具体条件的通用视场排名 [P0120][P0230][P0020][P0055]。具体而言，消色差设计试图通过色散工程抑制横向色差，但可能因多波长优化引入相位噪声而压缩离轴空间频谱；二次相位设计利用大焦深容忍纵向色差，但伴随场曲与低分辨率；而非消色差设计在窄带下虽可保持适度调制传递函数（MTF），却受限于寄生衍射与制造公差。这些路径分别以带宽、分辨率或效率为代价换取视场扩展，表明单层结构难以同时实现宽带、高 NA、高效率与宽视场。"
+    },
+    {
+      "paragraph_index": 80,
+      "line": 179,
+      "text": "二次相位设计则通过大焦深容忍纵向色差，但以场曲、桶形畸变、低分辨率和低效率为代价。[P0230] 在 740 nm 单色条件下（有效 NA≈0.71），将平面物体共轭至椭球面而非平面，产生显著桶形畸变与球差，中心分辨率半高全宽（FWHM）约 2λ₀，模拟聚焦效率仅约 7.4% [P0230]。[P0055] 在近红外两个波段（约 140 nm 带宽）、NA=0.83 条件下，利用大焦深容忍约 3%–5% 的纵向焦移，横向焦移约 3–4 μm 与约 3.5 μm 的点扩散函数（PSF）相当，但聚焦效率仅为 22%–36%，且分辨率远低于衍射极限 [P0055]。这类路径并非通过色散工程校正横向色差，而是以牺牲分辨率和能量集中度来放宽纵向色差与离轴容忍，其宽视场能力源于低分辨率容忍而非高分辨率消色差成像。"
+    },
+    {
+      "paragraph_index": 89,
+      "line": 197,
+      "text": "计算成像路径则通过重塑点扩散函数（PSF）容忍光学带宽扩展带来的色散，依赖后端算法恢复高频信息。逆设计扩展景深（EDOF）方案通过优化径向对称相位分布，使不同波长在共同平面上的 PSF 保持相似性，从而允许使用单一数字滤波器进行重建。在 1 cm 孔径、f/2 的可见光超表面系统中，结合概率扩散神经网络后端，经 Wiener 反卷积处理后线对对比度提升约 6 倍，在 0-70 lp/mm 范围内 MTF 对比度超过 30%[P0165]。然而，这种光学带宽的扩展以牺牲原始信噪比与对比度为代价：未经计算的原始图像对比度显著低于等效折射透镜，且在高空间频率（>70 lp/mm）下仍低于折射基准 [P0165]。早期研究亦证实，EDOF 系统通过牺牲信噪比换取对色散焦点偏移的容忍度，去卷积后的图像 SNR 低于单片金属透镜在绿光下对焦清晰时的水平 [P0069]。此外，算法泛化能力受限于训练分布，对于未见过的极端稀疏或特殊光谱场景，重建质量存在不确定性 [P0165]。"
+    },
+    {
+      "paragraph_index": 95,
+      "line": 210,
+      "text": "为突破纯光学色散工程的带宽限制，扩展景深（EDOF）结合计算重建成为另一条路径，但其伴随明确的信噪比代价。基于立方相位编码的 EDOF 超透镜通过产生光谱不变的点扩散函数（PSF），在去卷积后结构相似性指数（SSIM）相比单片系统提升 0.209，实现了可见光全彩成像 [P0069]。然而，这种带宽扩展是以牺牲信噪比为物理代价的：入射光被分散至更大的轴向体积中，导致去卷积后的 EDOF 图像 SNR 低于仅针对绿光对焦的单片透镜图像 [P0069]。逆设计 EDOF 方案虽能在 1 mm 孔径下维持约 47% 的聚焦效率（与传统双曲金属透镜的 51% 相当），但为了获得宽光谱下的均匀 MTF，必须在设计波长处牺牲部分 MTF 体积，这构成了光学带宽与可实现的 MTF 之间的基本权衡 [P0112]。值得注意的是，现有研究对 SNR 的描述多为定性比较（如“低于绿光对焦图像”），缺乏具体的峰值信噪比（PSNR）或平均 SNR 数值公式及变化百分比，且 SSIM 基线为α=0 单片系统而非理想清晰图像，在离散波长 LED 照明下测量 [P0069]。在混合系统架构中，理论分析表明低 NA 衍射元件即可维持高效率，为计算成像辅助架构提供了系统级设计基准，但这并未消除 EDOF 本身因能量分散导致的 SNR 损失 [P0070]。因此，计算成像虽能缓解光学带宽扩展带来的像质下降，但无法消除其伴随的信噪比惩罚，这限制了其在低光照场景下的应用。"
+    },
+    {
+      "paragraph_index": 97,
+      "line": 214,
+      "text": "在宽带消色差成像的仿真基准对比中，多级衍射透镜（MDL）展现出优于亚波长超透镜的综合性能潜力。基于有限时域差分法（FDTD）的对比研究显示，在匹配焦距、数值孔径（NA）和工作波长的条件下，MDL 的聚焦效率普遍高于代表性超透镜设计 [P0187]。具体而言，在窄带应用中，NA 高达 0.97 的 MDL 效率可超过 87%；在宽带应用中，NA 为 0.81 的 MDL 在整个波段内效率保持在 70% 以上，均优于同等规格下的超透镜 [P0187]。这一性能优势源于 MDL 允许使用微米级的特征宽度和低折射率聚合物材料（如 S1813 光刻胶），而超透镜通常依赖高折射率材料且特征尺寸需小于 100 nm 以维持共振相位调控 [P0187]。此外，系统级厚度分析指出，支撑基底往往主导了平面光学元件的总厚度，使得超透镜亚波长厚度的理论优势在实际成像系统中被大幅削弱，进一步降低了其相对于 MDL 的形态学吸引力 [P0187]。"
+    },
+    {
+      "paragraph_index": 107,
+      "line": 234,
+      "text": "然而，在通用成像性能尚未确立绝对优势的背景下，消色差超透镜在特定功能化与集成化场景中展现出不可替代的差异化价值。在需要极致微型化、垂直集成潜力或特殊功能复用的领域，超透镜提供了传统光学无法企及的自由度 [P0018]。例如，在 3D 传感与点云生成应用中，基于非晶硅纳米砖的混叠超表面利用几何相位与 Hermitian 共轭结构，实现了全空间（4π立体角）的随机点云投射，克服了传统衍射光学元件（DOE）仅限半空间工作的限制 [P0011]。该设计通过旋转对称性消除了对入射光偏振态的依赖，但在可见光波段受材料吸收限制，衍射效率约为 30%，而在红外波段（830 nm）仿真效率可达 85% [P0011]。在生物显微成像领域，双波长超表面物镜（820 nm 激发/605 nm 发射）成功应用于双光子显微镜，虽因带宽限制导致 605 nm 处聚焦效率从理想值的 63% 降至 45%，且收集效率较低（22.5%），但仍能获取与传统物镜定性可比的双光子图像 [P0042]。此外，其亚波长厚度使其在柔性基底封装（如 SU-8 覆盖后表面仍光滑）及片上光子学集成中具备独特优势 [P0042][P0018]。需注意的是，多数演示仍为实验室原型，长期稳定性与量产一致性待验证，且部分高性能设计仍依赖特定偏振态或窄带光源 [P0018][P0042]。"
+    }
+  ],
+  "identity_crosscheck": {
+    "normalized_doi_or_paper_id_already_used_for_native_unused": [],
+    "doi_normalization": "strip; remove doi: or https://doi.org/ or https://dx.doi.org/ prefix; lowercase"
+  }
+}

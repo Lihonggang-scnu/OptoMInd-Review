@@ -1,0 +1,387 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH4",
+  "unit_id": "CH4-U1",
+  "attempt_dir": "<BODY_W>/units/CH4/CH4-U1/9a308bf83aa79bec71f24902346af227b80772f84d026a419296d1ab278f2aab/attempt_001",
+  "model_source_attempt_dir": "<BODY_W>/units/CH4/CH4-U1/9a308bf83aa79bec71f24902346af227b80772f84d026a419296d1ab278f2aab/attempt_001",
+  "attempt": "attempt_001",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": null,
+  "format_recovery": null,
+  "content": "{\n  \"body_markdown\": \"大孔径消色差平面透镜的性能扩展首先受限于光频域相干性的物理约束。当透镜直径增大而有效厚度受限时，出瞳处不同径向位置的相位畸变累积差异会导致焦点处的归一化互相干函数 $J_\\\\omega(F)$ 显著下降，直接削弱聚焦效率与成像对比度 [P0081]。基于多级衍射透镜（AMDL）架构的理论模型与实验验证表明，在固定数值孔径（NA=0.1）与波段（400–1100 nm）下，随着直径从 1 mm 增至 10 mm，焦点处实测相干值从 0.61 降至 0.014，平均聚焦效率由 68% 骤降至 5%，成像对比度亦从 0.66 衰减至 0.06，当相干度低于 0.1 时图像细节已无法分辨 [P0081]。该研究推导的最大直径近似公式 $D_{max} \\\\approx \\\\frac{4(n_{max} - 1)H}{(1 - \\\\sqrt{1 - \\\\max J_\\\\omega(F)})NA}$ 揭示了在给定 NA 与允许性能损失下，孔径扩展必须以增加有效厚度 $(n_{max}-1)H$ 为代价，否则必须接受相干度降低导致的效率衰减，这解释了为何单纯增加孔径而不增加纵向相位自由度会导致性能急剧恶化 [P0081]。\\n\\n在厘米级孔径的实验实现上，现有数据主要集中在太赫兹波段或低 NA 可见光设计，可见光波段高 NA 厘米级消色差实测数据依然稀缺。太赫兹波段的实例显示，通过离散多波长设计与全局优化，单层全介质硅基金属透镜可实现 2.21 cm 直径与 0.80–1.20 THz 频段的消色差聚焦，实测平均聚焦效率超过 46%，但其数值孔径仅为 0.13 [P0004]。这一低 NA 结果是单层结构色散控制能力的直接体现，表明在单层架构下，大孔径与高 NA 难以兼得，且该效率数据不能直接外推至可见光高 NA 场景 [P0004]。可见光波段的大孔径尝试（如 1 cm 直径）多依赖计算成像辅助或混合架构，纯光学消色差设计在可见光厘米级尺度上仍面临效率与 NA 的严峻权衡，例如逆设计可见光金属透镜在 1 cm 孔径下虽能实现消色差，但实测效率约为 15%，且存在拼接误差导致的非均匀性 [P0023]。\\n\\n进一步从理论界限分析，高 NA 与宽视场设计中的带宽限制存在饱和效应。针对基于局部相互作用的平面金属透镜与平面焦面系统的理论推导表明，最大可实现带宽随视场角增加而减小，但当数值孔径较大（NA>0.24）时，带宽减小存在饱和现象，超过特定视场角后不再显著下降 [P0119]。这一理论界限严格依赖于局部相互作用假设，对于非局部超构表面或弯曲焦面不适用，但为单层设计提供了基准参考。拓扑优化的仿真数据佐证了高 NA 宽带设计的内在制约：在保持 23% 光谱带宽下，NA 从 0.24 提升至 0.7 时，平均绝对聚焦效率从 55% 降至 25%，且结构复杂度显著增加 [P0073]。综合来看，大孔径、高 NA 与宽带宽的兼容必然伴随聚焦效率衰减或结构复杂度跃升，单一超表面物理自由度在可见光波段已趋于枯竭，需依赖多层对准工艺优化或混合架构协同设计来突破现有极限。\",\n  \"issues\": [\n    {\n      \"unit_id\": \"CH4-U1\",\n      \"problem\": \"P0081 研究对象为多级衍射透镜（AMDL），虽在章节范围内作为大孔径参考，但其物理机制（宏观高度调制）与亚波长金属透镜（相位突变）存在差异，文中已做区分说明，但需注意读者可能混淆两者制造公差要求。\",\n      \"source_handles\": [\n        \"P0081\"\n      ],\n      \"action\": \"omit\"\n    },\n    {\n      \"unit_id\": \"CH4-U1\",\n      \"problem\": \"可见光波段厘米级高 NA 消色差实测数据在现有材料中确实稀缺，P0023 提供了 1cm 直径但效率较低（15%）且 NA 未明确（推测中等），P0004 为太赫兹波段，无法直接建立可见光效率-NA 定量曲线，文中已如实陈述数据缺失现状。\",\n      \"source_handles\": [\n        \"P0004\",\n        \"P0023\"\n      ],\n      \"action\": \"omit\"\n    },\n    {\n      \"unit_id\": \"CH4-U1\",\n      \"problem\": \"P0119 理论界限基于局部相互作用假设，P0073 为仿真数据，两者结合用于论证趋势，但需注意 P0073 未包含制造误差，实际效率可能更低。\",\n      \"source_handles\": [\n        \"P0119\",\n        \"P0073\"\n      ],\n      \"action\": \"omit\"\n    }\n  ]\n}",
+  "content_sha256": "b2eeb277bd2e37c19bd7511e712a4dac43bc285a2d8f077ef5b9464b0dcf6f52",
+  "usage": {
+    "completion_tokens": 2833,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1622,
+      "text_tokens": 2833
+    },
+    "prompt_tokens": 183282,
+    "prompt_tokens_details": {
+      "text_tokens": 183282
+    },
+    "total_tokens": 186115
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": 62.76600000000326,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-da6cc2a9-8f85-95ba-a100-345940d15d57",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_pending_human_review",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "0ff7b60d02a6b13735c529ba839405026fa9823b18937207104b4401cca99e2c",
+    "original_body_sha256": "804caf0c6f84cd4d8f0b953e11ff47e2e96ea47e1139c1e3aaf077a60c9a61db",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U1/9a308bf83aa79bec71f24902346af227b80772f84d026a419296d1ab278f2aab/attempt_001/REQUEST.json",
+      "sha256": "74c849311742300e6e55f7f713699895d5f8bece770801beb84d7bc590db76dd",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U1/9a308bf83aa79bec71f24902346af227b80772f84d026a419296d1ab278f2aab/attempt_001/UNIT_INPUT.json",
+      "sha256": "1560f47dcea8a221d14d5466e89bea3933305adb0a4ff835b27e348c3086ea52",
+      "bytes": 557593
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U1/9a308bf83aa79bec71f24902346af227b80772f84d026a419296d1ab278f2aab/UNIT_PACK.json",
+      "sha256": "01b0d74d971b07f3d45adbc8dfe303beadd19a2b2a598ed48ea09ef43ab103eb",
+      "bytes": 669330
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U1/9a308bf83aa79bec71f24902346af227b80772f84d026a419296d1ab278f2aab/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "7f56b637d4de395528313cb11f5457221eb455b6ff786371cdb8d31f151e5072",
+      "bytes": 702253
+    },
+    "identity": {
+      "chapter_id": "CH4",
+      "unit_id": "CH4-U1",
+      "language": "zh",
+      "source_handles": [
+        "P0081",
+        "P0004",
+        "P0119",
+        "P0073",
+        "P0165",
+        "P0052",
+        "P0017",
+        "P0230",
+        "P0094",
+        "P0183",
+        "P0154",
+        "P0117",
+        "P0192",
+        "P0023",
+        "P0063",
+        "P0159",
+        "P0018",
+        "P0246",
+        "P0162",
+        "P0033",
+        "P0160",
+        "P0148",
+        "P0126",
+        "P0022",
+        "P0196",
+        "P0176",
+        "P0041",
+        "P0072",
+        "P0100",
+        "P0061",
+        "P0057",
+        "P0220",
+        "P0247",
+        "P0112",
+        "P0001",
+        "P0069",
+        "P0059",
+        "P0077",
+        "P0134",
+        "P0128",
+        "P0050"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "孔径扩展的光频域相干性约束与带宽极限",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "CH4-U1_P01",
+          "point": "引入光频域互相干函数量化相位畸变对焦点性能的影响，建立直径增大导致相干区域收缩的定量关系。",
+          "development": "推导非理想平透镜相位分布包含理想双曲面相位与畸变项，频率域互相干函数实部反映出瞳子波在焦点的干涉状态；结合 P0081 实验测量 S1-S5 样品 PSF 与斯特列尔比，验证相干度下降直接导致聚焦效率与成像对比度衰减。",
+          "source_uses": [
+            {
+              "source_handle": "P0081",
+              "role": "主论据",
+              "use": "提供多级衍射透镜 (AMDL) 直径从 1 mm 增至 10 mm 时相干值与效率下降的实测数据，验证相干度降低直接导致成像对比度衰减。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH4-U1_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH4-U1_P01",
+              "unit_id": "CH4-U1",
+              "ordinal": 1,
+              "point": "引入光频域互相干函数量化相位畸变对焦点性能的影响，建立直径增大导致相干区域收缩的定量关系。",
+              "development": "推导非理想平透镜相位分布包含理想双曲面相位与畸变项，频率域互相干函数实部反映出瞳子波在焦点的干涉状态；结合 P0081 实验测量 S1-S5 样品 PSF 与斯特列尔比，验证相干度下降直接导致聚焦效率与成像对比度衰减。",
+              "source_handles": [
+                "P0081"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH4-U1_P02",
+          "point": "对比太赫兹大孔径实例，明确波段差异与低 NA 条件下的制造可行性边界。",
+          "development": "展示 P0004 离散多波长设计与全局优化如何解除连续波长线性相位 - 频率约束，实现厘米级器件的高效率与偏振不敏感；强调该成果受限于单层结构色散控制能力导致的低 NA(0.13)，避免将太赫兹高效率直接外推至可见光高 NA 预期。",
+          "source_uses": [
+            {
+              "source_handle": "P0004",
+              "role": "例证",
+              "use": "展示太赫兹波段 2.21 cm 单层全硅金属透镜的消色差性能，明确低 NA(0.13) 条件下的制造可行性边界，避免外推至可见光高 NA。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH4-U1_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH4-U1_P02",
+              "unit_id": "CH4-U1",
+              "ordinal": 2,
+              "point": "对比太赫兹大孔径实例，明确波段差异与低 NA 条件下的制造可行性边界。",
+              "development": "展示 P0004 离散多波长设计与全局优化如何解除连续波长线性相位 - 频率约束，实现厘米级器件的高效率与偏振不敏感；强调该成果受限于单层结构色散控制能力导致的低 NA(0.13)，避免将太赫兹高效率直接外推至可见光高 NA 预期。",
+              "source_handles": [
+                "P0004"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH4-U1_P03",
+          "point": "结合理论带宽界限分析，揭示高 NA 宽视场设计中的群延迟需求增加与饱和效应。",
+          "development": "引用 P0119 延迟 - 带宽积约束，说明平面焦面局部相互作用下带宽随视场角增加而减小，且在大 NA 时存在饱和点；指出该理论严格依赖局部相互作用假设，为后续讨论非局部架构与混合系统提供基准。",
+          "source_uses": [
+            {
+              "source_handle": "P0119",
+              "role": "主论据",
+              "use": "提供平面焦面局部相互作用模型下的带宽 - 视场 -NA 理论界限，指出大 NA 时带宽减小的饱和现象。"
+            },
+            {
+              "source_handle": "P0073",
+              "role": "背景",
+              "use": "提供拓扑优化下绝对聚焦效率随数值孔径与带宽变化的定量趋势，佐证高 NA 宽带设计在结构复杂度与能量传输损耗间的内在制约。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH4-U1_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH4-U1_P03",
+              "unit_id": "CH4-U1",
+              "ordinal": 3,
+              "point": "结合理论带宽界限分析，揭示高 NA 宽视场设计中的群延迟需求增加与饱和效应。",
+              "development": "引用 P0119 延迟 - 带宽积约束，说明平面焦面局部相互作用下带宽随视场角增加而减小，且在大 NA 时存在饱和点；指出该理论严格依赖局部相互作用假设，为后续讨论非局部架构与混合系统提供基准。",
+              "source_handles": [
+                "P0119"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "owner_fields_present": [
+        "argument_relations",
+        "cases",
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "development",
+        "relations_and_limits",
+        "transition",
+        "unit_title"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 183272,
+      "reserved_input_tokens": 213457,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 254417,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 1.836868,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 41,
+      "with_study_summary_A": 41,
+      "with_review_planning_B": 41,
+      "with_deep_read_material": [
+        "P0069",
+        "P0081"
+      ],
+      "with_supplement_material": 1,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0069",
+        "P0081"
+      ],
+      "chapter_tool_materials": 8,
+      "read_from_disk": [
+        "P0001",
+        "P0004",
+        "P0017",
+        "P0018",
+        "P0022",
+        "P0023",
+        "P0033",
+        "P0041",
+        "P0050",
+        "P0052",
+        "P0057",
+        "P0059",
+        "P0061",
+        "P0063",
+        "P0069",
+        "P0072",
+        "P0073",
+        "P0077",
+        "P0081",
+        "P0094",
+        "P0100",
+        "P0112",
+        "P0117",
+        "P0119",
+        "P0126",
+        "P0128",
+        "P0134",
+        "P0148",
+        "P0154",
+        "P0159",
+        "P0160",
+        "P0162",
+        "P0165",
+        "P0176",
+        "P0183",
+        "P0192",
+        "P0196",
+        "P0220",
+        "P0230",
+        "P0246",
+        "P0247"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U1/9a308bf83aa79bec71f24902346af227b80772f84d026a419296d1ab278f2aab/attempt_001/RAW_RESPONSE.json",
+      "sha256": "6b9d69c2a4bb243504793b429e498b73cc16f83fd5f2e477925dae30d835a947",
+      "bytes": 328786
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U1/9a308bf83aa79bec71f24902346af227b80772f84d026a419296d1ab278f2aab/attempt_001/transport/9a308bf83aa79bec-attempt_001-invoke6171e47367664d67-key0-attempt0.sse.raw",
+      "sha256": "6f9290b1468e5527af5c34214bf5cebf7cba048edc648f77896d468c8c434ef5",
+      "bytes": 255404
+    },
+    "response_payload_sha256": "6f9290b1468e5527af5c34214bf5cebf7cba048edc648f77896d468c8c434ef5",
+    "sse_payload_sha256": "6f9290b1468e5527af5c34214bf5cebf7cba048edc648f77896d468c8c434ef5"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH4/CH4-U1/9a308bf83aa79bec71f24902346af227b80772f84d026a419296d1ab278f2aab/attempt_001/quality/1480fb364377378d5c5ed8ae1f54664ab107d2ecafb3fc841a77780704f87341/QUALITY_BODY.md",
+    "sha256": "89c1c9ad0e5b274c9b758564baab52a3320586d36b2829ab0b89af029094c248",
+    "bytes": 3114
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

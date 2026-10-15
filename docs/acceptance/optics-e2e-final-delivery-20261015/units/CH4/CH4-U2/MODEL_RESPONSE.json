@@ -1,0 +1,480 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH4",
+  "unit_id": "CH4-U2",
+  "attempt_dir": "<BODY_W>/units/CH4/CH4-U2/6ca1d8ee0c8452bacfeea19ed7f5f35a89869818cc58db580e8bb77857997eb9/attempt_001",
+  "model_source_attempt_dir": "<BODY_W>/units/CH4/CH4-U2/6ca1d8ee0c8452bacfeea19ed7f5f35a89869818cc58db580e8bb77857997eb9/attempt_001",
+  "attempt": "attempt_001",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": null,
+  "format_recovery": null,
+  "content": "{\n  \"body_markdown\": \"在宽视场超透镜设计中，视场瓶颈的物理机制可归纳为三类：消色差相位匹配引入的相位噪声、二次相位像差容忍以及非消色差离轴伪影。现有研究通过不同波段与数值孔径（NA）的个案揭示了这些机制的制约作用，但由于工作条件（如波长、NA、相位剖面）差异显著，这些案例不能构成脱离具体条件的通用视场排名 [P0120][P0230][P0020][P0055]。具体而言，消色差设计试图通过色散工程抑制横向色差，但可能因多波长优化引入相位噪声而压缩离轴空间频谱；二次相位设计利用大焦深容忍纵向色差，但伴随场曲与低分辨率；而非消色差设计在窄带下虽可保持适度调制传递函数（MTF），却受限于寄生衍射与制造公差。这些路径分别以带宽、分辨率或效率为代价换取视场扩展，表明单层结构难以同时实现宽带、高 NA、高效率与宽视场。\\n\\n在消色差相位匹配路径中，色散工程虽能有效抑制横向色差，但多波长优化引入的相位噪声会限制可用视场。P0120 在 1.5–1.6 μm 波段、NA=0.8 的单层硅矩形波导超透镜中，通过多波长平均相位误差最小化算法，将相对焦距偏移控制在 1.3%（<1.2 μm），且聚焦效率在波段内保持在 19.1%–20.9% [P0120]。然而，傅里叶频谱分析显示，色散匹配过程引入了额外的相位噪声，导致空间频谱幅度降低且不对称。当入射角超过约±43°时，频谱移出自由空间传播区域，焦斑严重退化，使得实测视场角限制在约±43°而非理论最大值 180° [P0120]。这说明该设计以可用视场为代价换取了宽带低色差，而非直接牺牲带宽或 NA，且该结论限于特定 NA 与近红外波段，不能直接外推至可见光或更高 NA 场景。\\n\\n二次相位设计则通过大焦深容忍纵向色差，但以场曲、桶形畸变、低分辨率和低效率为代价。P0230 在 740 nm 单色条件下（有效 NA≈0.71），将平面物体共轭至椭球面而非平面，产生显著桶形畸变与球差，中心分辨率半高全宽（FWHM）约 2λ₀，模拟聚焦效率仅约 7.4% [P0230]。P0055 在近红外两个波段（约 140 nm 带宽）、NA=0.83 条件下，利用大焦深容忍约 3%–5% 的纵向焦移，横向焦移约 3–4 μm 与约 3.5 μm 的点扩散函数（PSF）相当，但聚焦效率仅为 22%–36%，且分辨率远低于衍射极限 [P0055]。这类路径并非通过色散工程校正横向色差，而是以牺牲分辨率和能量集中度来放宽纵向色差与离轴容忍，其宽视场能力源于低分辨率容忍而非高分辨率消色差成像。\\n\\n非消色差离轴设计在窄带下可保持适度 MTF，但受二阶衍射鬼影和制造公差限制，不能将其离轴表现外推为宽带消色差能力。P0020 的 850 nm、F/2.5 Huygens 金属透镜在±15°视场和 40 nm 带宽内保持良好 MTF，但宽视场远心配置出现二阶衍射机械光圈鬼影 [P0020]。实测一级衍射效率约 20%，显著低于仿真 60%，主要归因于制造公差导致的天线相位响应误差 [P0020]。这表明未进行消色差色散工程时，可用视场还受寄生衍射和工艺敏感性约束，且窄带离轴像差的可接受性依赖于特定带宽条件。\\n\\n综合上述案例，横向色差与纵向色差、场曲在色散工程中扮演不同角色，不能将“宽视场”简单等同于横向色差校正。P0120 中色散匹配主要改善纵向焦移和横向色差，但剩余相位噪声成为离轴限制；P0230 与 P0055 中纵向色差可被大焦深掩盖，但椭球成像面、桶形畸变和低分辨率决定可解析视场；P0020 中窄带离轴像差可接受，但宽带工作会引入未校正色差和寄生衍射 [P0120][P0230][P0055][P0020]。因此，评估宽视场性能必须同时说明带宽、NA、效率、像面条件和可用视场，现有材料均未证明单层结构可同时实现宽带、高 NA、高效率与宽视场。\",\n  \"issues\": []\n}",
+  "content_sha256": "a982dd9667b06e1d52d36598161662315aaee1b0a5e13fef1f300ee006ca6dcd",
+  "usage": {
+    "completion_tokens": 3252,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2111,
+      "text_tokens": 3252
+    },
+    "prompt_tokens": 175714,
+    "prompt_tokens_details": {
+      "text_tokens": 175714
+    },
+    "total_tokens": 178966
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": 63.15600000000268,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-92419347-88f8-944d-aa76-405e36e056d1",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_pending_human_review",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "48d0f1060272423b8327d9160fdb247ee34ea3a5f26b8f067ff8fb1a8d38f9af",
+    "original_body_sha256": "c6d5bdb5b56cbf20137884dfe51620f128b721ca447623e5950a5a3ef567f40e",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U2/6ca1d8ee0c8452bacfeea19ed7f5f35a89869818cc58db580e8bb77857997eb9/attempt_001/REQUEST.json",
+      "sha256": "52bdbf4dd547d4b8204ee0a22bd1c45157d4ccba5368e65112acbecf4f8c38ec",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U2/6ca1d8ee0c8452bacfeea19ed7f5f35a89869818cc58db580e8bb77857997eb9/attempt_001/UNIT_INPUT.json",
+      "sha256": "5c60f7fc70d7727a72f1b4f31e6cec527a5c52f07aa4fbb1b266f683955dce20",
+      "bytes": 521223
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U2/6ca1d8ee0c8452bacfeea19ed7f5f35a89869818cc58db580e8bb77857997eb9/UNIT_PACK.json",
+      "sha256": "e48a3e6fcd50f5365444032609653fc4fd6fb668c061465513f214f6878d6dab",
+      "bytes": 640611
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U2/6ca1d8ee0c8452bacfeea19ed7f5f35a89869818cc58db580e8bb77857997eb9/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "19ed5126e0cebe4bd2c82489511484740c9fde449a1cc2cf555a629a145eb5e4",
+      "bytes": 671860
+    },
+    "identity": {
+      "chapter_id": "CH4",
+      "unit_id": "CH4-U2",
+      "language": "zh",
+      "source_handles": [
+        "P0120",
+        "P0230",
+        "P0020",
+        "P0055",
+        "P0004",
+        "P0165",
+        "P0052",
+        "P0017",
+        "P0094",
+        "P0183",
+        "P0154",
+        "P0117",
+        "P0192",
+        "P0023",
+        "P0063",
+        "P0159",
+        "P0018",
+        "P0246",
+        "P0162",
+        "P0033",
+        "P0160",
+        "P0148",
+        "P0126",
+        "P0022",
+        "P0196",
+        "P0176",
+        "P0041",
+        "P0072",
+        "P0100",
+        "P0061",
+        "P0057",
+        "P0220",
+        "P0247",
+        "P0112",
+        "P0001",
+        "P0069",
+        "P0059",
+        "P0077",
+        "P0134",
+        "P0128",
+        "P0050"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "宽视场下的横向色差、离轴像差与机制性视场瓶颈",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "CH4-U2_P01",
+          "point": "建立视场瓶颈的局部比较框架：区分消色差相位噪声、二次相位像差容忍和非消色差离轴伪影三类机制。",
+          "development": "以 P0120、P0230、P0020 为主要案例，并以 P0055 作为二次相位宽带容忍路径的补充，明确比较维度：工作波段与带宽、NA 或 F 数、相位剖面策略、限制视场的主导物理原因，以及被牺牲的性能维度是带宽、NA、效率还是可用视场。强调这些案例的波段、结构与设计目标不同，不能排成脱离条件的通用视场排名。",
+          "source_uses": [
+            {
+              "source_handle": "P0120",
+              "role": "比较",
+              "use": "作为消色差相位噪声限制视场的比较对象。"
+            },
+            {
+              "source_handle": "P0230",
+              "role": "比较",
+              "use": "作为二次相位像差容忍限制视场的比较对象。"
+            },
+            {
+              "source_handle": "P0020",
+              "role": "比较",
+              "use": "作为非消色差离轴伪影限制视场的比较对象。"
+            },
+            {
+              "source_handle": "P0055",
+              "role": "比较",
+              "use": "作为二次相位宽带容忍路径的补充比较对象。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH4-U2_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH4-U2_P01",
+              "unit_id": "CH4-U2",
+              "ordinal": 1,
+              "point": "建立视场瓶颈的局部比较框架：区分消色差相位噪声、二次相位像差容忍和非消色差离轴伪影三类机制。",
+              "development": "以 P0120、P0230、P0020 为主要案例，并以 P0055 作为二次相位宽带容忍路径的补充，明确比较维度：工作波段与带宽、NA 或 F 数、相位剖面策略、限制视场的主导物理原因，以及被牺牲的性能维度是带宽、NA、效率还是可用视场。强调这些案例的波段、结构与设计目标不同，不能排成脱离条件的通用视场排名。",
+              "source_handles": [
+                "P0120",
+                "P0230",
+                "P0020",
+                "P0055"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH4-U2_P02",
+          "point": "消色差色散工程可抑制横向色差，但相位噪声压缩空间频谱并限制可用视场。",
+          "development": "在 P0120 的 1.5–1.6 μm、NA=0.8、焦距 90 μm 条件下，多波长平均相位误差最小化使相对焦距偏移仅 1.3%，聚焦效率保持稳定，并有效抑制横向色差；但傅里叶频谱分析显示，色散匹配引入的相位噪声使空间频谱幅度降低且不对称，当入射角超过约±43°时频谱移出自由空间传播区域，焦斑退化。说明该设计以可用视场为代价换取宽带低色差，而非直接牺牲带宽或 NA。",
+          "source_uses": [
+            {
+              "source_handle": "P0120",
+              "role": "主论据",
+              "use": "详述 1.5–1.6 μm、NA=0.8 条件下色散匹配引入相位噪声压缩空间频谱，导致视场角限制在约±43°的机制。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH4-U2_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH4-U2_P02",
+              "unit_id": "CH4-U2",
+              "ordinal": 2,
+              "point": "消色差色散工程可抑制横向色差，但相位噪声压缩空间频谱并限制可用视场。",
+              "development": "在 P0120 的 1.5–1.6 μm、NA=0.8、焦距 90 μm 条件下，多波长平均相位误差最小化使相对焦距偏移仅 1.3%，聚焦效率保持稳定，并有效抑制横向色差；但傅里叶频谱分析显示，色散匹配引入的相位噪声使空间频谱幅度降低且不对称，当入射角超过约±43°时频谱移出自由空间传播区域，焦斑退化。说明该设计以可用视场为代价换取宽带低色差，而非直接牺牲带宽或 NA。",
+              "source_handles": [
+                "P0120"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH4-U2_P03",
+          "point": "二次相位设计通过大焦深容忍纵向色差，但以场曲、桶形畸变、低分辨率和低效率为代价。",
+          "development": "P0230 在 740 nm、有效 NA≈0.71 下将平面物体共轭至椭球面，产生桶形畸变与显著球差/离焦，中心 FWHM≈2λ₀，模拟效率约 7.4%；P0055 在 NA=0.83、近红外约 140 nm 带宽、实测 0–43° 范围内利用大焦深容忍约 3%–5% 的纵向焦移，横向焦移约 3–4 μm，与约 3.5 μm 的 PSF 相当，但效率仅 22%–36%，且分辨率远低于衍射极限。说明这类路径不是通过色散工程校正横向色差，而是以牺牲分辨率和能量集中度来放宽纵向色差与离轴容忍。",
+          "source_uses": [
+            {
+              "source_handle": "P0230",
+              "role": "主论据",
+              "use": "说明 740 nm 二次相位设计将平面物体共轭至椭球面，产生桶形畸变与低效率 (7.4%) 的代价。"
+            },
+            {
+              "source_handle": "P0055",
+              "role": "主论据",
+              "use": "补充近红外 140 nm 带宽下利用大焦深容忍纵向色差，但分辨率远低于衍射极限的实证。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH4-U2_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH4-U2_P03",
+              "unit_id": "CH4-U2",
+              "ordinal": 3,
+              "point": "二次相位设计通过大焦深容忍纵向色差，但以场曲、桶形畸变、低分辨率和低效率为代价。",
+              "development": "P0230 在 740 nm、有效 NA≈0.71 下将平面物体共轭至椭球面，产生桶形畸变与显著球差/离焦，中心 FWHM≈2λ₀，模拟效率约 7.4%；P0055 在 NA=0.83、近红外约 140 nm 带宽、实测 0–43° 范围内利用大焦深容忍约 3%–5% 的纵向焦移，横向焦移约 3–4 μm，与约 3.5 μm 的 PSF 相当，但效率仅 22%–36%，且分辨率远低于衍射极限。说明这类路径不是通过色散工程校正横向色差，而是以牺牲分辨率和能量集中度来放宽纵向色差与离轴容忍。",
+              "source_handles": [
+                "P0230",
+                "P0055"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH4-U2_P04",
+          "point": "非消色差离轴设计在窄带下可保持适度 MTF，但受二阶衍射鬼影和制造公差限制。",
+          "development": "P0020 的 850 nm、F/2.5 Huygens 金属透镜在±15°、40 nm 带宽内保持良好 MTF，但宽视场远心配置出现二阶衍射机械光圈鬼影；实测一级衍射效率约 20%，低于仿真 60%，归因于制造公差导致的天线相位响应误差。说明未进行消色差色散工程时，可用视场还受寄生衍射和工艺敏感性约束，不能将其离轴表现外推为宽带消色差能力。",
+          "source_uses": [
+            {
+              "source_handle": "P0020",
+              "role": "主论据",
+              "use": "界定 850 nm 非消色差 Huygens 设计在±15°视场下受二阶衍射鬼影和制造公差限制的表现。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH4-U2_P04"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH4-U2_P04",
+              "unit_id": "CH4-U2",
+              "ordinal": 4,
+              "point": "非消色差离轴设计在窄带下可保持适度 MTF，但受二阶衍射鬼影和制造公差限制。",
+              "development": "P0020 的 850 nm、F/2.5 Huygens 金属透镜在±15°、40 nm 带宽内保持良好 MTF，但宽视场远心配置出现二阶衍射机械光圈鬼影；实测一级衍射效率约 20%，低于仿真 60%，归因于制造公差导致的天线相位响应误差。说明未进行消色差色散工程时，可用视场还受寄生衍射和工艺敏感性约束，不能将其离轴表现外推为宽带消色差能力。",
+              "source_handles": [
+                "P0020"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH4-U2_P05",
+          "point": "归纳横向色差与纵向色差、场曲在色散工程中的不同角色。",
+          "development": "对比表明：P0120 中色散匹配主要改善纵向焦移和横向色差，但剩余相位噪声成为离轴限制；P0230 与 P0055 中纵向色差可被大焦深掩盖，但椭球成像面、桶形畸变和低分辨率决定可解析视场；P0020 中窄带离轴像差可接受，但宽带工作会引入未校正色差和寄生衍射。因此不能将“宽视场”简单等同于横向色差校正，而必须同时说明带宽、NA、效率、像面条件和可用视场。",
+          "source_uses": [
+            {
+              "source_handle": "P0120",
+              "role": "发展",
+              "use": "作为归纳横向色差与相位噪声关系的依据。"
+            },
+            {
+              "source_handle": "P0230",
+              "role": "发展",
+              "use": "作为归纳纵向色差与场曲关系的依据。"
+            },
+            {
+              "source_handle": "P0055",
+              "role": "发展",
+              "use": "作为归纳焦深容忍路径的依据。"
+            },
+            {
+              "source_handle": "P0020",
+              "role": "发展",
+              "use": "作为归纳窄带离轴像差约束的依据。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH4-U2_P05"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH4-U2_P05",
+              "unit_id": "CH4-U2",
+              "ordinal": 5,
+              "point": "归纳横向色差与纵向色差、场曲在色散工程中的不同角色。",
+              "development": "对比表明：P0120 中色散匹配主要改善纵向焦移和横向色差，但剩余相位噪声成为离轴限制；P0230 与 P0055 中纵向色差可被大焦深掩盖，但椭球成像面、桶形畸变和低分辨率决定可解析视场；P0020 中窄带离轴像差可接受，但宽带工作会引入未校正色差和寄生衍射。因此不能将“宽视场”简单等同于横向色差校正，而必须同时说明带宽、NA、效率、像面条件和可用视场。",
+              "source_handles": [
+                "P0120",
+                "P0230",
+                "P0055",
+                "P0020"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "owner_fields_present": [
+        "argument_relations",
+        "cases",
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "development",
+        "relations_and_limits",
+        "transition",
+        "unit_title"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 175704,
+      "reserved_input_tokens": 204981,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 245941,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 1.802964,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 41,
+      "with_study_summary_A": 41,
+      "with_review_planning_B": 41,
+      "with_deep_read_material": [
+        "P0069"
+      ],
+      "with_supplement_material": 0,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0069"
+      ],
+      "chapter_tool_materials": 8,
+      "read_from_disk": [
+        "P0001",
+        "P0004",
+        "P0017",
+        "P0018",
+        "P0020",
+        "P0022",
+        "P0023",
+        "P0033",
+        "P0041",
+        "P0050",
+        "P0052",
+        "P0055",
+        "P0057",
+        "P0059",
+        "P0061",
+        "P0063",
+        "P0069",
+        "P0072",
+        "P0077",
+        "P0094",
+        "P0100",
+        "P0112",
+        "P0117",
+        "P0120",
+        "P0126",
+        "P0128",
+        "P0134",
+        "P0148",
+        "P0154",
+        "P0159",
+        "P0160",
+        "P0162",
+        "P0165",
+        "P0176",
+        "P0183",
+        "P0192",
+        "P0196",
+        "P0220",
+        "P0230",
+        "P0246",
+        "P0247"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U2/6ca1d8ee0c8452bacfeea19ed7f5f35a89869818cc58db580e8bb77857997eb9/attempt_001/RAW_RESPONSE.json",
+      "sha256": "4dd38d4dc7adb6b3aac8a93b5bcee206d4cd943b663a4b17b218e77b59f78512",
+      "bytes": 355607
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U2/6ca1d8ee0c8452bacfeea19ed7f5f35a89869818cc58db580e8bb77857997eb9/attempt_001/transport/6ca1d8ee0c8452ba-attempt_001-invoke745079027c744f6f-key0-attempt0.sse.raw",
+      "sha256": "8875235ee932c5d8388fcd69a38e09f303e0269717e9e90c0403a12f97bfa64e",
+      "bytes": 279620
+    },
+    "response_payload_sha256": "8875235ee932c5d8388fcd69a38e09f303e0269717e9e90c0403a12f97bfa64e",
+    "sse_payload_sha256": "8875235ee932c5d8388fcd69a38e09f303e0269717e9e90c0403a12f97bfa64e"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH4/CH4-U2/6ca1d8ee0c8452bacfeea19ed7f5f35a89869818cc58db580e8bb77857997eb9/attempt_001/quality/fc03e1b4fd00896eb44e27b50ef61cf10063410dddd9e8a93e4f68e85aaecf65/QUALITY_BODY.md",
+    "sha256": "a1832a1542c601749454f0dc0ee6202c415d88bb3c3c578ee5b66e163085233b",
+    "bytes": 4074
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

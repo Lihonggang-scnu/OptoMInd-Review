@@ -1,0 +1,455 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH2",
+  "unit_id": "CH2_U01",
+  "attempt_dir": "<BODY_W>/units/CH2/CH2_U01/c0ef880e8d202151c1572d5a2a4ec4e4682c0725a3fb55b7d521062ae89f9858/attempt_001",
+  "model_source_attempt_dir": "<BODY_W>/units/CH2/CH2_U01/c0ef880e8d202151c1572d5a2a4ec4e4682c0725a3fb55b7d521062ae89f9858/attempt_001",
+  "attempt": "attempt_001",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": null,
+  "format_recovery": null,
+  "content": "```json\n{\n  \"body_markdown\": \"单层介电超表面的消色差能力受限于时间 - 带宽积（TBP）物理界限与元原子相位 - 色散空间的覆盖范围。根据相位 - 色散空间设计框架，消色差金属透镜的最大半径 R_max、数值孔径 NA 与操作带宽Δω之间的权衡关系可表述为 R_max·NA·Δω ≤ 2cΔΦ'（近轴近似下），其中ΔΦ'为元原子库可提供的最大色散范围 [P0090]。该公式表明，在给定元原子库条件下，增大孔径、提高 NA 或扩展带宽三者不可兼得。实验验证显示，使用 Generation 1B 非晶硅纳米柱库（高度 1400 nm）制造的透镜在 NA≈0.24 时可实现 450 nm 带宽（1200-1650 nm）的消色差聚焦，而当 NA 提升至 0.88 时，有效带宽缩减至 250 nm（1200-1400 nm），直接证实了高 NA 对带宽的压缩效应 [P0090]。综述研究进一步指出，共振型超表面的无量纲κ值受限（κ=2），导致其理论带宽上限低于波导型结构，但两者均面临制造高深宽比纳米结构的工艺挑战 [P0099]。渐近相位补偿方法通过引入波长依赖的参考平面参数，可在固定 NA（0.164）下将带宽扩展至 600 nm（400-1000 nm），但其性能仍受限于纳米结构的最大相位色散能力，并通过极限邻近因子（LPF）量化设计对理论边界的逼近程度 [P0118]。总体而言，单层架构的色散补偿自由度受限于二维平面内的几何参数调控，难以同时满足大孔径、高 NA 与宽光谱的消色差需求。\\n\\n单层相位机制在离散波长下的效率表现呈现显著的不对称性，且全局优化难以突破效率天花板。基于 Pancharatnam-Berry（PB）相位的双波长消色差设计在 780 nm 处可实现 90.2% 的聚焦效率，但在 660 nm 处效率降至 49.7%，色差从 1.28 μm 减少至 0.46 μm [P0019]。这种效率差异源于 PB 相位的波长依赖性：纳米结构的旋转角度虽能提供与波长无关的相位斜率，但偏振转换效率随波长变化，导致不同波长下的能量利用率不均。传播相位与几何相位协同调制的策略通过粒子群优化（PSO）算法在 400-650 nm 波段实现了约 29% 的平均聚焦效率，但该结果仅为仿真设计层面，缺乏实验验证 [P0045]。相比之下，基于 TiO2 纳米柱的单层 PB 相位透镜在 NA=0.8 时可实现 86% 的峰值转换效率，但该数据针对单色或窄带工作，未涉及宽带消色差条件下的效率分布 [P0243]。可见光波段的消色差单层设计（NA=0.2，470-670 nm）实测转换效率约为 20%，显著低于理论预测的 50%，主要归因于制造误差及纳米结构间的近场耦合效应 [P0204]。效率损失的四项具体来源包括：振幅变化（不同几何形状的元单元透射率不同）、相位误差（实际相位响应与理论线性模型偏差）、最近邻效应（高元单元库中电磁耦合增强）以及制造误差（侧壁粗糙度和尺寸偏差）[P0090]。这些机制共同导致单层消色差设计在追求宽带宽时往往以效率损失为代价，且效率的波长均匀性难以保证。\\n\\n异常色散与反射架构在单层设计中提供了额外的自由度，但其适用边界受限于架构特异性与波段约束。反射式消色差金属透镜利用 TiO2 方形纳米柱结合 Al 金属镜的导模共振激发异常色散，在可见光波段（490-550 nm，60 nm 带宽）实现了 NA=0.2 的消色差聚焦，模拟焦距分数变化为 1.2%，实测为 1.5%[P0084]。该设计通过调整纳米柱宽度，使同一相位值对应多个不同的几何参数选择，从而提供额外的自由度来平衡不同波长的相位需求。然而，60 nm 的带宽相对较窄，接近 LED 光源但远小于白光连续光谱，且该方案依赖于反射架构，不能直接套用于透射式应用 [P0084]。偏振不敏感的宽带消色差设计通过孔径共享分区相位协同操控（APPCM）策略，在 450-1400 nm 范围内实现了 950 nm 的超带宽，焦距变异系数（CV）仅为 4.05%，在 600-1400 nm 波段聚焦效率稳定在 70% 以上 [P0160]。但该方法在短波段（450-600 nm）因晶格常数引起的高阶衍射导致效率下降至 60% 以下，且所有结果均为 FDTD 仿真，缺乏实验制造与实测数据 [P0160]。高 NA 宽带消色差平透镜通过\"区域复用\"策略结合阶梯状光学厚度基底，在 NA=0.9、半径 20.1 μm 条件下实现了 650-1000 nm 波段的衍射极限聚焦，所需相位色散补偿从传统设计的 13.6π降低至 2.2π[P0162]。然而，该研究未报告能量效率数据，且大视场（FOV）下的像差表现未详细评估 [P0162]。总体而言，异常色散与反射架构虽能打破单一几何参数约束，但其性能优势往往局限于特定波段、偏振态或架构配置，难以普适推广至透射式可见光宽带消色差应用。\",\n  \"issues\": []\n}\n```",
+  "content_sha256": "922bcb44560ea58503d662ae9c7ac20a7a4744dab7f7d992fd1b322500800eb7",
+  "usage": {
+    "completion_tokens": 3941,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2580,
+      "text_tokens": 3941
+    },
+    "prompt_tokens": 208549,
+    "prompt_tokens_details": {
+      "text_tokens": 208549
+    },
+    "total_tokens": 212490
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": 76.0940000000046,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-542e4f31-ff8a-933f-a9a0-e977bf637c38",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_pending_human_review",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "e2f15f862d2282e46c0f0a553e7f1563c891b3756b5ab8aa1360a00be0dfab4f",
+    "original_body_sha256": "bf2f3d464eacb737175fbb9621664b86d836d86df31fd2f908f2a8566f29bdc6",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U01/c0ef880e8d202151c1572d5a2a4ec4e4682c0725a3fb55b7d521062ae89f9858/attempt_001/REQUEST.json",
+      "sha256": "b12802b50724f70bc72e265cdde03d2a365a63fbec0fbd0ecf3ceafdd20ec6c1",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U01/c0ef880e8d202151c1572d5a2a4ec4e4682c0725a3fb55b7d521062ae89f9858/attempt_001/UNIT_INPUT.json",
+      "sha256": "75e01778431c2a9ff180636a98edf34c60d5743a6dd1b54b419347b286efe6a6",
+      "bytes": 621064
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U01/c0ef880e8d202151c1572d5a2a4ec4e4682c0725a3fb55b7d521062ae89f9858/UNIT_PACK.json",
+      "sha256": "f2b260b7b347c92d283746cacd1ef9db9042e0e91b281a6ce388fe1d1535771b",
+      "bytes": 767764
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U01/c0ef880e8d202151c1572d5a2a4ec4e4682c0725a3fb55b7d521062ae89f9858/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "e610aa56e8ccaec365cb3b68c34947e15dde8a4ba924b7690955797d74a20a59",
+      "bytes": 803827
+    },
+    "identity": {
+      "chapter_id": "CH2",
+      "unit_id": "CH2_U01",
+      "language": "zh",
+      "source_handles": [
+        "P0090",
+        "P0099",
+        "P0210",
+        "P0118",
+        "P0018",
+        "P0235",
+        "P0162",
+        "P0165",
+        "P0204",
+        "P0243",
+        "P0019",
+        "P0045",
+        "P0160",
+        "P0084",
+        "P0148",
+        "P0139",
+        "P0061",
+        "P0231",
+        "P0131",
+        "P0179",
+        "P0181",
+        "P0117",
+        "P0147",
+        "P0110",
+        "P0033",
+        "P0112",
+        "P0001",
+        "P0069",
+        "P0059",
+        "P0077",
+        "P0134",
+        "P0128",
+        "P0050",
+        "P0154",
+        "P0202",
+        "P0004",
+        "P0106",
+        "P0121",
+        "P0063",
+        "P0225",
+        "P0079",
+        "P0157"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "单层超表面依赖几何相位或传播相位的色散特性进行补偿，受限于单元库的相位 - 色散覆盖范围，难以同时实现高 NA 与宽带宽。",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "CH2_U01_P01",
+          "point": "建立时间 - 带宽积（TBP）物理界限，阐明单层架构的固有约束。",
+          "development": "对比共振型（κ=2）与波导型器件的 TBP 差异，推导带宽与 NA 的反比函数关系，指出高 NA 必然压缩可用带宽。引用 P0090 的 Eq. 5 ($R_{max} \\cdot NA \\cdot \\Delta\\omega \\leq 2c\\Delta\\Phi'$) 作为量化依据。",
+          "source_uses": [
+            {
+              "source_handle": "P0090",
+              "role": "主论据",
+              "use": "提供 Eq. 5 量化带宽 -NA- 孔径约束"
+            },
+            {
+              "source_handle": "P0099",
+              "role": "背景",
+              "use": "提供宽带消色差金属透镜的基本物理极限（时间延迟与无量纲κ）"
+            },
+            {
+              "source_handle": "P0210",
+              "role": "主论据",
+              "use": "给出数值孔径、半径与消色差带宽的明确数学约束公式"
+            },
+            {
+              "source_handle": "P0118",
+              "role": "例证",
+              "use": "引入极限邻近因子（LPF）量化单层层内色散补偿效率"
+            },
+            {
+              "source_handle": "P0018",
+              "role": "背景",
+              "use": "提供超透镜发展综述背景，辅助说明单层物理极限的普遍性"
+            },
+            {
+              "source_handle": "P0235",
+              "role": "背景",
+              "use": "提供元光学进展综述，支撑单层架构基础理论描述"
+            },
+            {
+              "source_handle": "P0162",
+              "role": "例证",
+              "use": "提供高 NA 单层设计的性能边界案例"
+            },
+            {
+              "source_handle": "P0165",
+              "role": "主论据",
+              "use": "讨论大孔径宽带纳米光学的光谱带宽极限"
+            },
+            {
+              "source_handle": "P0204",
+              "role": "例证",
+              "use": "提供可见光宽带消色差单层设计的实证参考"
+            },
+            {
+              "source_handle": "P0243",
+              "role": "比较",
+              "use": "提供 TiO2 单层架构在高 NA 下的效率基准（PB 相位 86%）"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH2_U01_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH2_U01_P01",
+              "unit_id": "CH2_U01",
+              "ordinal": 1,
+              "point": "建立时间 - 带宽积（TBP）物理界限，阐明单层架构的固有约束。",
+              "development": "对比共振型（κ=2）与波导型器件的 TBP 差异，推导带宽与 NA 的反比函数关系，指出高 NA 必然压缩可用带宽。引用 P0090 的 Eq. 5 ($R_{max} \\cdot NA \\cdot \\Delta\\omega \\leq 2c\\Delta\\Phi'$) 作为量化依据。",
+              "source_handles": [
+                "P0090"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH2_U01_P02",
+          "point": "展示单层相位机制在离散波长下的效率不对称性与优化局限。",
+          "development": "分析 PB 相位与传播相位的波长依赖性，对比 P0019 的双波长效率差异（90.2% vs 49.7%）与 P0045 的 PSO 全局优化效率天花板（~29%），论证单一自由度无法同时满足多波长相位匹配。",
+          "source_uses": [
+            {
+              "source_handle": "P0019",
+              "role": "例证",
+              "use": "展示双波长效率差异（780nm 90.2% vs 660nm 49.7%）"
+            },
+            {
+              "source_handle": "P0045",
+              "role": "例证",
+              "use": "说明 PSO 算法优化在单层内的局限性（效率~29%）"
+            },
+            {
+              "source_handle": "P0160",
+              "role": "例证",
+              "use": "提供偏振不敏感设计在宽带下的性能参考，对比偏振敏感设计"
+            },
+            {
+              "source_handle": "P0243",
+              "role": "比较",
+              "use": "作为单层效率基准，对比几何相位与传播相位的色散覆盖局限"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH2_U01_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH2_U01_P02",
+              "unit_id": "CH2_U01",
+              "ordinal": 2,
+              "point": "展示单层相位机制在离散波长下的效率不对称性与优化局限。",
+              "development": "分析 PB 相位与传播相位的波长依赖性，对比 P0019 的双波长效率差异（90.2% vs 49.7%）与 P0045 的 PSO 全局优化效率天花板（~29%），论证单一自由度无法同时满足多波长相位匹配。",
+              "source_handles": [
+                "P0019",
+                "P0045"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH2_U01_P03",
+          "point": "评估异常色散与反射架构在单层中的适用边界。",
+          "development": "讨论 P0084 中导模共振提供的额外自由度如何支撑中等 NA 宽带工作，指出其架构特异性与透射式应用的不可通约性。",
+          "source_uses": [
+            {
+              "source_handle": "P0084",
+              "role": "例证",
+              "use": "可见光 60 nm 带宽与 NA=0.2 共存的设计实例，利用异常色散打破单一几何参数约束"
+            },
+            {
+              "source_handle": "P0243",
+              "role": "比较",
+              "use": "作为透射式单层基准，对比反射式架构的适用性差异"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH2_U01_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH2_U01_P03",
+              "unit_id": "CH2_U01",
+              "ordinal": 3,
+              "point": "评估异常色散与反射架构在单层中的适用边界。",
+              "development": "讨论 P0084 中导模共振提供的额外自由度如何支撑中等 NA 宽带工作，指出其架构特异性与透射式应用的不可通约性。",
+              "source_handles": [
+                "P0084"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "owner_fields_present": [
+        "argument_relations",
+        "cases",
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "evidence_conditions_and_limits",
+        "material_supported_relations",
+        "ordered_development",
+        "transition"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 208539,
+      "reserved_input_tokens": 241756,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 282716,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 1.950064,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 42,
+      "with_study_summary_A": 42,
+      "with_review_planning_B": 42,
+      "with_deep_read_material": [
+        "P0069",
+        "P0090",
+        "P0139",
+        "P0148",
+        "P0157"
+      ],
+      "with_supplement_material": 1,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0069",
+        "P0090",
+        "P0139",
+        "P0148"
+      ],
+      "chapter_tool_materials": 8,
+      "read_from_disk": [
+        "P0001",
+        "P0004",
+        "P0018",
+        "P0019",
+        "P0033",
+        "P0045",
+        "P0050",
+        "P0059",
+        "P0061",
+        "P0063",
+        "P0069",
+        "P0077",
+        "P0079",
+        "P0084",
+        "P0090",
+        "P0099",
+        "P0106",
+        "P0110",
+        "P0112",
+        "P0117",
+        "P0118",
+        "P0121",
+        "P0128",
+        "P0131",
+        "P0134",
+        "P0139",
+        "P0147",
+        "P0148",
+        "P0154",
+        "P0157",
+        "P0160",
+        "P0162",
+        "P0165",
+        "P0179",
+        "P0181",
+        "P0202",
+        "P0204",
+        "P0210",
+        "P0225",
+        "P0231",
+        "P0235",
+        "P0243"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U01/c0ef880e8d202151c1572d5a2a4ec4e4682c0725a3fb55b7d521062ae89f9858/attempt_001/RAW_RESPONSE.json",
+      "sha256": "e58d5efd82e2b62448d92b8c3908660000c793a79b3a6a71f5cc83f3e418df40",
+      "bytes": 307107
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U01/c0ef880e8d202151c1572d5a2a4ec4e4682c0725a3fb55b7d521062ae89f9858/attempt_001/transport/c0ef880e8d202151-attempt_001-invokea8edbab45fef4088-key0-attempt0.sse.raw",
+      "sha256": "b5fa1d08e4459b477bcf06d68814a660a1e1b65c7f47d25961dce1a2d2ba74f6",
+      "bytes": 235229
+    },
+    "response_payload_sha256": "b5fa1d08e4459b477bcf06d68814a660a1e1b65c7f47d25961dce1a2d2ba74f6",
+    "sse_payload_sha256": "b5fa1d08e4459b477bcf06d68814a660a1e1b65c7f47d25961dce1a2d2ba74f6"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH2/CH2_U01/c0ef880e8d202151c1572d5a2a4ec4e4682c0725a3fb55b7d521062ae89f9858/attempt_001/quality/f063b9d05c8656c97dd3b826cfcf1099f583b970c72944ad5ec413737f0b1cd5/QUALITY_BODY.md",
+    "sha256": "29219b5d26488691506db6210500e5029d62bfc34d4b09868dbca5c912dbc7fa",
+    "bytes": 4908
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

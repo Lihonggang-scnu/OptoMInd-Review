@@ -1,0 +1,396 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH1",
+  "unit_id": "U3",
+  "attempt_dir": "<BODY_W>/units/CH1/U3/bd4214a3887230df9a9c4d2c91ca7b32bacd2c79777c9bc7936d5869299f0a18/attempt_001",
+  "model_source_attempt_dir": "<BODY_W>/units/CH1/U3/bd4214a3887230df9a9c4d2c91ca7b32bacd2c79777c9bc7936d5869299f0a18/attempt_001",
+  "attempt": "attempt_001",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": null,
+  "format_recovery": null,
+  "content": "{\n  \"body_markdown\": \"实验数据整体呈现数值孔径（NA）与带宽的反比分布，符合相位 - 色散空间理论（Eq. 5）的预测。在近红外波段，基于非晶硅纳米柱的设计验证了这一根本限制：当 NA 设定为 0.24 时，器件可实现 450 nm 的消色差带宽（1200–1650 nm）；而当 NA 提升至 0.88 时，可用带宽被迫压缩至 250 nm（1200–1400 nm）[P0090]。可见光波段的实测数据点同样落在该趋势线附近，例如基于 TiO₂纳米鳍的消色差透镜在 NA=0.2 条件下实现了约 200 nm 的带宽（470–670 nm），但受限于几何相位与传播相位解耦时的本征损耗及制造缺陷，其峰值转换效率仅为 20%[P0204]。相比之下，通过优化 TiO₂纳米柱深宽比（~37.5）的近红外设计在 NA=0.24 时将带宽扩展至 350 nm（650–1000 nm），平均聚焦效率提升至 77.1%[P0218]。太赫兹与长波红外波段的数据则揭示了尺度效应带来的差异：太赫兹全介质金属透镜虽实现了厘米级孔径（2.21 cm），但受限于单层结构色散控制能力，NA 通常较低（0.13），平均效率约 46%[P0004]；而采用梯度折射率（GRIN）结构的太赫兹透镜虽将 NA 提升至 0.555 并覆盖 0.2–0.9 THz 超宽带，但高频端效率显著下降 [P0050]。长波红外全硅平台则展示了大孔径下的色差校正精度，在 NA=0.45、直径 6.36 cm 条件下实现了衍射极限紧聚焦，但极端色散场景下的振幅透射率变化仍是效率瓶颈 [P0227]。\\n\\n不同波段的数据特征差异源于材料吸收、衍射尺度与工艺成熟度的综合制约。可见光波段受限于短波长下的纳米加工精度及材料本征吸收，高深宽比结构制造困难，导致高效率与高 NA 难以兼得；例如基于 Si₃N₄的可见光消色差透镜虽实现了 80.39% 的高效率，但 NA 仅为 0.155，带宽 190 nm[P0246]。近红外波段因 TiO₂等材料低损耗特性及成熟刻蚀工艺，成为目前高 NA 宽带数据最丰富的区域，如分区复用复合基底设计在 650–1000 nm 波段实现了 NA=0.9 的聚焦，但该设计主要提供分辨率验证，未直接给出该高 NA 下的完整光谱效率实测数据 [P0162]。太赫兹波段因波长较长，允许更大的物理尺寸和公差，但单元相位色散范围有限，导致高 NA 设计稀缺。此外，需明确连续宽带消色差与离散多波长复用的物理边界：现有高性能数据多基于连续光谱相位匹配（如 P0090、P0218），而离散 RGB 消色差设计（如部分空间复用方案）不属于连续宽带范畴，其带宽 -NA 权衡机制不可直接混同比较 [P0018]。\\n\\n为量化单层结构对色散潜力的利用程度，渐近相位补偿理论引入了极限接近因子（Limit Proximity Factor, LPF）作为评估指标。LPF 反映了实际设计所利用的相位色散范围与理论可用最大范围的比值。当前先进单层设计（如 NA=0.164，带宽 400–1000 nm 的 TiO₂透镜）已达到当前实验调查中的最高 LPF 值，表明其最优利用了给定带宽与 NA 下的最大可用相位色散极限 [P0118]。这一结果暗示，在单层平面架构内，通过单纯优化单元几何形状或排列算法已难以显著突破现有的 NA-带宽乘积边界。进一步的性能提升必须依赖结构维度的扩展，例如引入垂直自由度（多层堆叠）或混合架构，以打破单层相位 - 色散空间的固有约束，但这必然伴随工艺复杂度与对准敏感性的增加。\",\n  \"issues\": []\n}",
+  "content_sha256": "548184a0a635a0e9a8f04060883201d0b77483980b458def2e62fa3c3a10eb1a",
+  "usage": {
+    "completion_tokens": 4366,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3373,
+      "text_tokens": 4366
+    },
+    "prompt_tokens": 130094,
+    "prompt_tokens_details": {
+      "text_tokens": 130094
+    },
+    "total_tokens": 134460
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": 79.64100000000326,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-df6d47f9-9ed3-950f-8d43-7a15745f013c",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_pending_human_review",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "b933022e2b89479dd01bb0c50de5e03c97cddd74be89a23d8163ce44280bb289",
+    "original_body_sha256": "6ffd3752155e0346ac5f018fce360edb301e23234a59060e4a72299ee7a88020",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH1/U3/bd4214a3887230df9a9c4d2c91ca7b32bacd2c79777c9bc7936d5869299f0a18/attempt_001/REQUEST.json",
+      "sha256": "07954a98099a1d53ce4304ea40650ed030f829f7254e133b9c6355da0cfa7325",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH1/U3/bd4214a3887230df9a9c4d2c91ca7b32bacd2c79777c9bc7936d5869299f0a18/attempt_001/UNIT_INPUT.json",
+      "sha256": "cc02decca686b8d2709bc04d3f276c248a7afa2c19955f1ced1980f7d6737a3a",
+      "bytes": 381288
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH1/U3/bd4214a3887230df9a9c4d2c91ca7b32bacd2c79777c9bc7936d5869299f0a18/UNIT_PACK.json",
+      "sha256": "0b6040d28eaefc1d362620dda84f4e5cf8e893e3d4c0d2ba3d3fe67f324e113a",
+      "bytes": 467345
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH1/U3/bd4214a3887230df9a9c4d2c91ca7b32bacd2c79777c9bc7936d5869299f0a18/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "c93f45439a9c0bdf8a41b6558ec12ba290b85a4dcc30d78b8694673afbf9db1a",
+      "bytes": 493068
+    },
+    "identity": {
+      "chapter_id": "CH1",
+      "unit_id": "U3",
+      "language": "zh",
+      "source_handles": [
+        "P0090",
+        "P0204",
+        "P0218",
+        "P0118",
+        "P0004",
+        "P0227",
+        "P0050",
+        "P0064",
+        "P0154",
+        "P0224",
+        "P0133",
+        "P0189",
+        "P0094",
+        "P0031",
+        "P0161",
+        "P0163",
+        "P0041",
+        "P0072",
+        "P0162",
+        "P0022",
+        "P0100",
+        "P0246",
+        "P0018",
+        "P0061",
+        "P0057",
+        "P0220",
+        "P0033",
+        "P0148",
+        "P0247"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "绘制并分析现有文献中的 NA 与带宽分布图，验证理论极限，明确可见光、近红外与太赫兹波段的数据特征与可比性边界",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "U3_P01",
+          "point": "NA-带宽分布趋势与理论边界吻合度",
+          "development": "将 P0090、P0204、P0218、P0118 的实测点映射至 NA-带宽坐标系，展示高 NA 设计普遍伴随带宽压缩，验证 TBP 与 Eq. 5 的预测力。",
+          "source_uses": [
+            {
+              "source_handle": "P0090",
+              "role": "主论据",
+              "use": "提供近红外波段（1200-1650 nm）实测点：Generation 1B 库实现 450nm 带宽（NA≈0.24），Generation 2 库实现 250nm 带宽（NA≈0.88）"
+            },
+            {
+              "source_handle": "P0204",
+              "role": "主论据",
+              "use": "提供可见光波段（470-670 nm）实测点：约 200nm 带宽，NA=0.2，平均偏振转换效率峰值约 20%"
+            },
+            {
+              "source_handle": "P0218",
+              "role": "主论据",
+              "use": "提供近红外生物成像窗口（650-1000 nm）实测点：350nm 带宽，NA=0.24，平均聚焦效率 77.1%"
+            },
+            {
+              "source_handle": "P0118",
+              "role": "主论据",
+              "use": "提供可见光至近红外（400-1000 nm）实测点：单层 TiO2 金属透镜达到当前实验最高 LPF 值"
+            },
+            {
+              "source_handle": "P0004",
+              "role": "例证",
+              "use": "补充太赫兹波段大孔径消色差透镜的实测性能数据（NA=0.13，带宽 0.4 THz，平均效率>46%），用于在 NA-带宽分布图中填补长波频段空白"
+            },
+            {
+              "source_handle": "P0227",
+              "role": "例证",
+              "use": "提供长波红外（LWIR）厘米级全硅消色差金属透镜数据（NA=0.45，直径达 6.36 cm），用于对比可见光/近红外毫米级器件的尺寸瓶颈"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U3_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U3_P01",
+              "unit_id": "U3",
+              "ordinal": 1,
+              "point": "NA-带宽分布趋势与理论边界吻合度",
+              "development": "将 P0090、P0204、P0218、P0118 的实测点映射至 NA-带宽坐标系，展示高 NA 设计普遍伴随带宽压缩，验证 TBP 与 Eq. 5 的预测力。",
+              "source_handles": [
+                "P0090",
+                "P0204",
+                "P0218",
+                "P0118"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "U3_P02",
+          "point": "波段差异与离散/连续消色差界定",
+          "development": "对比可见光（材料吸收强、晶格周期小）、NIR（工艺成熟、低损耗）与 THz（尺度大、NA 难提升）的数据特征，明确连续宽带消色差与多波长 RGB 复用的物理差异。",
+          "source_uses": [
+            {
+              "source_handle": "P0090",
+              "role": "主论据",
+              "use": "对比近红外波段（材料吸收弱、工艺成熟）的数据特征"
+            },
+            {
+              "source_handle": "P0204",
+              "role": "主论据",
+              "use": "对比可见光波段（材料吸收强、晶格周期小）的数据特征，说明 20% 效率源于几何相位与传播相位解耦时的本征损耗及制造缺陷"
+            },
+            {
+              "source_handle": "P0218",
+              "role": "主论据",
+              "use": "说明高效率（77%）依赖特定高深宽比工艺，外推至更高 NA 时需警惕侧壁粗糙度引发的散射增强"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U3_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U3_P02",
+              "unit_id": "U3",
+              "ordinal": 2,
+              "point": "波段差异与离散/连续消色差界定",
+              "development": "对比可见光（材料吸收强、晶格周期小）、NIR（工艺成熟、低损耗）与 THz（尺度大、NA 难提升）的数据特征，明确连续宽带消色差与多波长 RGB 复用的物理差异。",
+              "source_handles": [
+                "P0090",
+                "P0204",
+                "P0218"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "U3_P03",
+          "point": "LPF 指标与相位匹配优度评估",
+          "development": "引入 P0118 的 LPF 概念，说明当前先进设计已接近单层结构的色散利用上限，进一步突破需依赖结构维度扩展而非单纯单元优化。",
+          "source_uses": [
+            {
+              "source_handle": "P0118",
+              "role": "主论据",
+              "use": "引入 LPF 概念，说明当前先进设计已接近单层结构的色散利用上限，进一步突破需依赖结构维度扩展而非单纯单元优化"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U3_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U3_P03",
+              "unit_id": "U3",
+              "ordinal": 3,
+              "point": "LPF 指标与相位匹配优度评估",
+              "development": "引入 P0118 的 LPF 概念，说明当前先进设计已接近单层结构的色散利用上限，进一步突破需依赖结构维度扩展而非单纯单元优化。",
+              "source_handles": [
+                "P0118"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "owner_fields_present": [
+        "argument_relations",
+        "cases",
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "evidence_conditions_limits",
+        "ordered_development",
+        "relations_conditions_limits",
+        "theme"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 130084,
+      "reserved_input_tokens": 153887,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 194847,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 1.598588,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 29,
+      "with_study_summary_A": 29,
+      "with_review_planning_B": 29,
+      "with_deep_read_material": [
+        "P0090"
+      ],
+      "with_supplement_material": 0,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0090"
+      ],
+      "chapter_tool_materials": 4,
+      "read_from_disk": [
+        "P0004",
+        "P0018",
+        "P0022",
+        "P0031",
+        "P0033",
+        "P0041",
+        "P0050",
+        "P0057",
+        "P0061",
+        "P0064",
+        "P0072",
+        "P0090",
+        "P0094",
+        "P0100",
+        "P0118",
+        "P0133",
+        "P0148",
+        "P0154",
+        "P0161",
+        "P0162",
+        "P0163",
+        "P0189",
+        "P0204",
+        "P0218",
+        "P0220",
+        "P0224",
+        "P0227",
+        "P0246",
+        "P0247"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH1/U3/bd4214a3887230df9a9c4d2c91ca7b32bacd2c79777c9bc7936d5869299f0a18/attempt_001/RAW_RESPONSE.json",
+      "sha256": "fd84d77581a3264470164d43fc88cef1487e82b9ba5fe72d25aff28cfa826d3f",
+      "bytes": 487966
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH1/U3/bd4214a3887230df9a9c4d2c91ca7b32bacd2c79777c9bc7936d5869299f0a18/attempt_001/transport/bd4214a3887230df-attempt_001-invokecef629efd3634af4-key0-attempt0.sse.raw",
+      "sha256": "464e24935973ffe0242b41d6928489f4b14c256e5ee2de1300779985bf49475d",
+      "bytes": 387972
+    },
+    "response_payload_sha256": "464e24935973ffe0242b41d6928489f4b14c256e5ee2de1300779985bf49475d",
+    "sse_payload_sha256": "464e24935973ffe0242b41d6928489f4b14c256e5ee2de1300779985bf49475d"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH1/U3/bd4214a3887230df9a9c4d2c91ca7b32bacd2c79777c9bc7936d5869299f0a18/attempt_001/quality/5d27e48734b5ec0749927c283ea5ae13777b0e06023ca1b1a79d0cb83b17a3f9/QUALITY_BODY.md",
+    "sha256": "1352118220696d5ca42538daf3e7e22aefa2d9534f227bdbca727a497ddffbfb",
+    "bytes": 3558
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

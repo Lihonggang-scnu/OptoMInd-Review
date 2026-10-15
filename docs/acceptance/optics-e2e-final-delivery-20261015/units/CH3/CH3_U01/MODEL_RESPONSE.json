@@ -1,0 +1,513 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH3",
+  "unit_id": "CH3_U01",
+  "attempt_dir": "<BODY_W>/units/CH3/CH3_U01/fdcf6958017cff872ec918681976dbe5f3b97739170f830bbc9288135607ea15/attempt_001",
+  "model_source_attempt_dir": "<BODY_W>/units/CH3/CH3_U01/fdcf6958017cff872ec918681976dbe5f3b97739170f830bbc9288135607ea15/attempt_001",
+  "attempt": "attempt_001",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": null,
+  "format_recovery": null,
+  "content": "```json\n{\n  \"body_markdown\": \"## 3.1 单色基准效率的度量口径与材料体系上限\\n\\n聚焦效率的跨文献比较首先受制于度量口径的不统一。绝对效率（焦点功率/入射总功率）与相对效率（透过率或特定衍射级次占比）在数值上可相差数倍，而基底菲涅尔反射损耗是否扣除更直接影响效率基准线的设定。基于几何相位的 TiO₂超表面在可见光波段提供了当前最高的单色效率实证：在 480 nm、532 nm 和 660 nm 三个设计波长下，实测绝对峰值效率分别达到 82%、81% 和 78% [P0037]。该数据基于 ALD 共形填充结合 RIE 平面化工艺制备的纳米鳍片结构，表面粗糙度 RMS 仅 0.738 nm，有效抑制了散射损耗。值得注意的是，该效率值已扣除基底反射损失，代表材料本征透明度与工艺控制水平共同决定的效率上限。相比之下，c-Si 在高数值孔径下的效率表现揭示了折射率与耦合条件的制约：在 NA=0.98、波长 532 nm 条件下，空气中聚焦效率为 67%，而当前浸没环境（n=1.512）下 NA 提升至 1.48 时效率降至 48% [P0052]。这一效率损失主要源于纳米砖优化基于空气背景折射率设计，浸没后需重新优化背景折射率以补偿至 65%，表明效率数据必须明确标注测试环境与耦合条件。\\n\\n不同相位调控机制在相同材料体系下的性能边界差异显著。基于 PB 相位的 TiO₂超表面在 NA=0.8 时转换效率达 86%，而偏振不敏感设计在 NA=0.85 时效率为 60% [P0243]。这一差异源于偏振不敏感设计需采用对称结构，牺牲了部分相位调控自由度。材料复折射率虚部（k 值）对效率上限的决定性作用在非晶硅体系中表现最为极端：a-Si 在可见光波段因强吸收导致效率仅约 30%，而在红外波段可提升至 85% [P0001]。这一跨度界定了不同波段下介电材料本征损耗的物理天花板。Si₃N₄通过提高长宽比（43.33）补偿群延迟，在 NA=0.155、波段 460-650 nm 条件下实现平均聚焦效率 80.39% [P0210]，展示了通过几何尺寸扩展维持高效率的工艺路径，但该效率为单透镜实测值，阵列集成时因对准误差降至约 67%。\\n\\n| 材料体系 | 工作波段 | 数值孔径 (NA) | 峰值/平均效率 | 主要损耗机制 |\\n|---------|---------|--------------|--------------|-------------|\\n| 非晶 TiO₂ (ALD 工艺) [P0037] | 480/532/660 nm | 未明确（全息图演示） | 82%/81%/78% (绝对效率) | 表面散射（RMS 0.738 nm） |\\n| 单晶 Si (c-Si) [P0052] | 532 nm | 0.98 (空气)/1.48 (浸没) | 67% (空气)/48% (浸没) | 折射率失配、P-B 相位偏振依赖 |\\n| 非晶硅 (a-Si) [P0001] | 可见光 vs 红外 | 未明确 | ~30% (可见光) vs ~85% (红外) | 材料本征吸收（k 值带隙依赖） |\\n| 氮化硅 (Si₃N₄) [P0210] | 460-650 nm | 0.155 | 80.39% (单透镜)/67% (阵列) | 侧壁倾斜、阵列对准误差 |\\n\\n上述单色基准效率数据确立了评估色散工程代价的参照系。单色优化仅需满足单一频率的相位匹配条件，元原子可选择透射率最优的几何参数组合。然而，消色差设计需在连续谱内同时调控群延迟与高阶色散，迫使元原子选择偏离最优透射状态以换取相位色散补偿能力 [P0001]。这一机制性约束意味着：即使工艺完美，消色差设计的效率也必然低于同材料同 NA 的单色基准。OPM 指标分析表明，当前消色差超透镜的整体性能（OPM）普遍低于等效常规衍射透镜，主要原因在于效率损失对信噪比的影响超过了分辨率提升带来的收益 [P0001]。例如，在短波红外波段，消色差金属透镜的 OPM 为 0.55，而等效传统衍射透镜为 0.64-0.66 [P0001]。这一差距在可见光波段因材料吸收加剧而更为显著，空间复用消色差超透镜在 RGB 三通道的效率分别仅为 0.15、0.05、0.02，远低于等效常规衍射透镜的 0.58、0.59、0.56 [P0001]。因此，在确立单色高效率基准后，需进一步剖析引入宽带消色差功能时，色散补偿机制如何打破原有的能量守恒分配，导致效率系统性衰减。\",\n  \"issues\": []\n}\n```",
+  "content_sha256": "e6edf2236f87a51003740c684affef8863871d2a77a6421969e8d236994f9e28",
+  "usage": {
+    "completion_tokens": 1897,
+    "completion_tokens_details": {
+      "reasoning_tokens": 632,
+      "text_tokens": 1897
+    },
+    "prompt_tokens": 285979,
+    "prompt_tokens_details": {
+      "text_tokens": 285979
+    },
+    "total_tokens": 287876
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": 46.15600000000268,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-571a6bdd-ad0a-9cf9-a128-be215e5115d3",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_pending_human_review",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "c184a0f9cb9d2d2464b7ca27ab736f278758029ff5c8d218184cd31f79469ec3",
+    "original_body_sha256": "9b76483a203cfa8751d65778469ba9667ad8dd6cb7f2be98b3fb9fb820790205",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U01/fdcf6958017cff872ec918681976dbe5f3b97739170f830bbc9288135607ea15/attempt_001/REQUEST.json",
+      "sha256": "9e6459aa04903d23b7c0ab66996e081d297702481750ed25af8b58f635322a8f",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U01/fdcf6958017cff872ec918681976dbe5f3b97739170f830bbc9288135607ea15/attempt_001/UNIT_INPUT.json",
+      "sha256": "7f7b52ffbed80baad554b3db512abc769d6e365bcf5a2866b0bd3c50fbd70862",
+      "bytes": 827582
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U01/fdcf6958017cff872ec918681976dbe5f3b97739170f830bbc9288135607ea15/UNIT_PACK.json",
+      "sha256": "04de6b5bbd8d7535ec7620e4df17f5cd9d6d4301367d1f7499f9d62aef647bc7",
+      "bytes": 1040795
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U01/fdcf6958017cff872ec918681976dbe5f3b97739170f830bbc9288135607ea15/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "f299a0536cd1aeb66372dbd06e4fda54e12bfff5c20499c4aeb394df84c9c1fe",
+      "bytes": 1087769
+    },
+    "identity": {
+      "chapter_id": "CH3",
+      "unit_id": "CH3_U01",
+      "language": "zh",
+      "source_handles": [
+        "P0037",
+        "P0052",
+        "P0243",
+        "P0001",
+        "P0210",
+        "P0148",
+        "P0139",
+        "P0061",
+        "P0231",
+        "P0131",
+        "P0179",
+        "P0181",
+        "P0117",
+        "P0147",
+        "P0110",
+        "P0033",
+        "P0022",
+        "P0202",
+        "P0090",
+        "P0099",
+        "P0160",
+        "P0235",
+        "P0004",
+        "P0162",
+        "P0106",
+        "P0204",
+        "P0121",
+        "P0063",
+        "P0225",
+        "P0079",
+        "P0018",
+        "P0157",
+        "P0059",
+        "P0165",
+        "P0017",
+        "P0230",
+        "P0094",
+        "P0183",
+        "P0154",
+        "P0192",
+        "P0023",
+        "P0159",
+        "P0246",
+        "P0126",
+        "P0196",
+        "P0176",
+        "P0112",
+        "P0069",
+        "P0077",
+        "P0134",
+        "P0128",
+        "P0050"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "确立聚焦效率的测量口径与单色/窄带材料体系上限，为评估色散工程代价提供基准线。",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "CH3_U01_P01",
+          "point": "统一聚焦效率的度量标准与测试边界。",
+          "development": "辨析绝对效率（焦点功率/入射总功率）与相对效率（透过率/衍射级次占比）的差异，明确基底抗反射涂层与菲涅尔反射损耗在效率核算中的处理方式，建立跨文献比较的统一口径。",
+          "source_uses": [
+            {
+              "source_handle": "P0037",
+              "role": "主论据",
+              "use": "提供 TiO₂在可见光波段的绝对效率基准数据（82%/81%/78%），用于定义高效率上限。"
+            },
+            {
+              "source_handle": "P0052",
+              "role": "主论据",
+              "use": "提供 c-Si 在高 NA 及浸没环境下的效率数据（67%/48%），展示折射率与耦合条件的影响。"
+            },
+            {
+              "source_handle": "P0243",
+              "role": "比较",
+              "use": "对比 PB 相位与偏振不敏感设计的效率差异（86% vs 60%），明确相位调控机制的性能边界。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH3_U01_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH3_U01_P01",
+              "unit_id": "CH3_U01",
+              "ordinal": 1,
+              "point": "统一聚焦效率的度量标准与测试边界。",
+              "development": "辨析绝对效率（焦点功率/入射总功率）与相对效率（透过率/衍射级次占比）的差异，明确基底抗反射涂层与菲涅尔反射损耗在效率核算中的处理方式，建立跨文献比较的统一口径。",
+              "source_handles": [
+                "P0037",
+                "P0052",
+                "P0243"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH3_U01_P02",
+          "point": "按材料体系梳理单色/窄带高效率实证数据。",
+          "development": "对比 TiO₂（~80-86%）、c-Si（~67%）、Si₃N₄（~80%）在可见光波段的实测峰值效率，结合 a-Si 可见光（~30%）与红外（~85%）的跨度，论证材料复折射率虚部（k 值）与散射损耗对效率上限的决定性作用。",
+          "source_uses": [
+            {
+              "source_handle": "P0037",
+              "role": "例证",
+              "use": "佐证 TiO₂纳米鳍片在低吸收条件下的透射率表现。"
+            },
+            {
+              "source_handle": "P0052",
+              "role": "例证",
+              "use": "佐证高折射率材料在高 NA 下的效率表现。"
+            },
+            {
+              "source_handle": "P0243",
+              "role": "例证",
+              "use": "佐证不同相位调控机制的效率对比。"
+            },
+            {
+              "source_handle": "P0001",
+              "role": "主论据",
+              "use": "提供 a-Si 在可见光与红外波段的效率跨度数据（30% vs 85%），界定材料本征损耗天花板。"
+            },
+            {
+              "source_handle": "P0210",
+              "role": "例证",
+              "use": "提供 Si₃N₄通过高长宽比补偿群延迟维持高效率（80.39%）的工艺路径案例。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH3_U01_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH3_U01_P02",
+              "unit_id": "CH3_U01",
+              "ordinal": 2,
+              "point": "按材料体系梳理单色/窄带高效率实证数据。",
+              "development": "对比 TiO₂（~80-86%）、c-Si（~67%）、Si₃N₄（~80%）在可见光波段的实测峰值效率，结合 a-Si 可见光（~30%）与红外（~85%）的跨度，论证材料复折射率虚部（k 值）与散射损耗对效率上限的决定性作用。",
+              "source_handles": [
+                "P0037",
+                "P0052",
+                "P0243",
+                "P0001",
+                "P0210"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH3_U01_P03",
+          "point": "界定单色基准向宽带消色差过渡时的效率折损预期。",
+          "development": "指出单色优化仅满足单一频率相位匹配，而消色差设计需在连续谱内同时调控群延迟与高阶色散，必然迫使元原子选择偏离最优透射状态，引出下一节对原理性损耗机制的拆解。",
+          "source_uses": [
+            {
+              "source_handle": "P0037",
+              "role": "背景",
+              "use": "作为单色优化基准，对比消色差设计的效率折损。"
+            },
+            {
+              "source_handle": "P0001",
+              "role": "主论据",
+              "use": "指出单色优化仅满足单一频率相位匹配，引出消色差设计的额外损耗机制。"
+            },
+            {
+              "source_handle": "P0210",
+              "role": "背景",
+              "use": "说明群延迟补偿对几何尺寸的要求，暗示宽带设计的复杂性。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH3_U01_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH3_U01_P03",
+              "unit_id": "CH3_U01",
+              "ordinal": 3,
+              "point": "界定单色基准向宽带消色差过渡时的效率折损预期。",
+              "development": "指出单色优化仅满足单一频率相位匹配，而消色差设计需在连续谱内同时调控群延迟与高阶色散，必然迫使元原子选择偏离最优透射状态，引出下一节对原理性损耗机制的拆解。",
+              "source_handles": [
+                "P0037",
+                "P0001",
+                "P0210"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [
+        {
+          "table_id": "CH3_U01_T01",
+          "purpose": "比较不同材料体系在单色/窄带条件下的高效率实证数据，确立效率基准线。",
+          "columns": [
+            "材料体系",
+            "工作波段",
+            "数值孔径 (NA)",
+            "峰值/平均效率",
+            "主要损耗机制"
+          ],
+          "row_tasks": [
+            {
+              "content": "非晶 TiO₂ (ALD 工艺)",
+              "source_uses": [
+                {
+                  "source_handle": "P0037",
+                  "role": "比较",
+                  "use": "提供可见光波段 480/532/660 nm 下的峰值绝对效率数据。"
+                }
+              ]
+            },
+            {
+              "content": "单晶 Si (c-Si)",
+              "source_uses": [
+                {
+                  "source_handle": "P0052",
+                  "role": "比较",
+                  "use": "提供空气中及浸没环境下的效率数据，展示耦合条件影响。"
+                }
+              ]
+            },
+            {
+              "content": "非晶硅 (a-Si)",
+              "source_uses": [
+                {
+                  "source_handle": "P0001",
+                  "role": "比较",
+                  "use": "提供可见光与红外波段的效率跨度，界定吸收损耗天花板。"
+                }
+              ]
+            },
+            {
+              "content": "氮化硅 (Si₃N₄)",
+              "source_uses": [
+                {
+                  "source_handle": "P0210",
+                  "role": "比较",
+                  "use": "提供通过高长宽比补偿群延迟的效率数据。"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "owner_fields_present": [
+        "argument_relations",
+        "cases",
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "ordered_development",
+        "relations_limits",
+        "transition"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 285969,
+      "reserved_input_tokens": 328478,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 369438,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 2.296952,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 52,
+      "with_study_summary_A": 52,
+      "with_review_planning_B": 52,
+      "with_deep_read_material": [
+        "P0001",
+        "P0069",
+        "P0090",
+        "P0139",
+        "P0148",
+        "P0157"
+      ],
+      "with_supplement_material": 1,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0001",
+        "P0069",
+        "P0090",
+        "P0139",
+        "P0148",
+        "P0157"
+      ],
+      "chapter_tool_materials": 17,
+      "read_from_disk": [
+        "P0001",
+        "P0004",
+        "P0017",
+        "P0018",
+        "P0022",
+        "P0023",
+        "P0033",
+        "P0037",
+        "P0050",
+        "P0052",
+        "P0059",
+        "P0061",
+        "P0063",
+        "P0069",
+        "P0077",
+        "P0079",
+        "P0090",
+        "P0094",
+        "P0099",
+        "P0106",
+        "P0110",
+        "P0112",
+        "P0117",
+        "P0121",
+        "P0126",
+        "P0128",
+        "P0131",
+        "P0134",
+        "P0139",
+        "P0147",
+        "P0148",
+        "P0154",
+        "P0157",
+        "P0159",
+        "P0160",
+        "P0162",
+        "P0165",
+        "P0176",
+        "P0179",
+        "P0181",
+        "P0183",
+        "P0192",
+        "P0196",
+        "P0202",
+        "P0204",
+        "P0210",
+        "P0225",
+        "P0230",
+        "P0231",
+        "P0235",
+        "P0243",
+        "P0246"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U01/fdcf6958017cff872ec918681976dbe5f3b97739170f830bbc9288135607ea15/attempt_001/RAW_RESPONSE.json",
+      "sha256": "1a6de857b298a4a35fecaa56ec9c61ed40b5f885686c81d6f689fc717fcae85c",
+      "bytes": 216681
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U01/fdcf6958017cff872ec918681976dbe5f3b97739170f830bbc9288135607ea15/attempt_001/transport/fdcf6958017cff87-attempt_001-invoke2dd4cbc1871847db-key0-attempt0.sse.raw",
+      "sha256": "2d8ee59ff0c8168ac6bbe1f45e316ddc2dfd3dcddb77b8e73adb99851a0d9b3d",
+      "bytes": 166973
+    },
+    "response_payload_sha256": "2d8ee59ff0c8168ac6bbe1f45e316ddc2dfd3dcddb77b8e73adb99851a0d9b3d",
+    "sse_payload_sha256": "2d8ee59ff0c8168ac6bbe1f45e316ddc2dfd3dcddb77b8e73adb99851a0d9b3d"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH3/CH3_U01/fdcf6958017cff872ec918681976dbe5f3b97739170f830bbc9288135607ea15/attempt_001/quality/f2d7b66e51c98848f85289e9d954418b774f1b78aa928dd82a3f88833fb7e6dd/QUALITY_BODY.md",
+    "sha256": "581ccf76ee12fb46bace6e530ac14e37f4a694d2c94a22e4607efa73fcd4a6a3",
+    "bytes": 4194
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

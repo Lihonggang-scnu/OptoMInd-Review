@@ -1,0 +1,383 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH4",
+  "unit_id": "CH4-U4",
+  "attempt_dir": "<BODY_W>/units/CH4/CH4-U4/5c0eeb979d9dce53c36b4600ba0854c63a32e4ea9da7eb15ae4ff5aa8d0495a7/attempt_001",
+  "model_source_attempt_dir": "<BODY_W>/units/CH4/CH4-U4/5c0eeb979d9dce53c36b4600ba0854c63a32e4ea9da7eb15ae4ff5aa8d0495a7/attempt_001",
+  "attempt": "attempt_001",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": null,
+  "format_recovery": null,
+  "content": "{\n  \"body_markdown\": \"在单片超表面面临大孔径与宽视场物理瓶颈的背景下，混合光学架构与计算成像协同设计提供了系统级的替代路径。混合架构通过解耦色散管理与波前整形，利用成熟折射元件承担 bulk focusing 与宽带色散补偿，使末端超表面专注于离轴像差校正。例如，一种由五个折射塑料透镜与单个 SiNx 超表面组成的混合模块，在 460–656 nm 波段实现了 100°全视场消色差成像 [P0245]。在该设计中，折射序列负责主要的色散控制，而置于光路末端的超表面利用精确的相位分布校正轴向与离轴像差，从而在保持总光学长度不变（22.29 mm）的前提下，将边缘视场（100° FOV）的调制传递函数（MTF）在 100 lp/mm 处维持在 0.364，167 lp/mm 处维持在 0.161[P0245]。这种分工策略避免了单片超表面为同时满足大孔径相位连续性与大视场像差校正而面临的自由度枯竭问题，实测焦距稳定性偏差仅为 1.2%，且无需计算后处理即可捕获高质量图像 [P0245]。\\n\\n计算成像路径则通过重塑点扩散函数（PSF）容忍光学带宽扩展带来的色散，依赖后端算法恢复高频信息。逆设计扩展景深（EDOF）方案通过优化径向对称相位分布，使不同波长在共同平面上的 PSF 保持相似性，从而允许使用单一数字滤波器进行重建。在 1 cm 孔径、f/2 的可见光超表面系统中，结合概率扩散神经网络后端，经 Wiener 反卷积处理后线对对比度提升约 6 倍，在 0-70 lp/mm 范围内 MTF 对比度超过 30%[P0165]。然而，这种光学带宽的扩展以牺牲原始信噪比与对比度为代价：未经计算的原始图像对比度显著低于等效折射透镜，且在高空间频率（>70 lp/mm）下仍低于折射基准 [P0165]。早期研究亦证实，EDOF 系统通过牺牲信噪比换取对色散焦点偏移的容忍度，去卷积后的图像 SNR 低于单片金属透镜在绿光下对焦清晰时的水平 [P0069]。此外，算法泛化能力受限于训练分布，对于未见过的极端稀疏或特殊光谱场景，重建质量存在不确定性 [P0165]。\\n\\n系统级集成的制造与算法挑战进一步界定了这些替代路径的适用边界。逆设计 EDOF 超表面虽在 1 mm 孔径、NA~0.44 下实现了 290 nm 光学带宽与 47% 的聚焦效率，但蓝色波段（455 nm）的性能衰减提示全波段 PSF 不变性仍具难度 [P0112]。混合架构与计算路径均非纯超表面实现：前者增加了组装复杂度与对准敏感性（如多层对准误差可导致效率显著下降），后者引入了计算延迟与功耗 [P0112][P0165]。综合现有实证，色散工程超透镜在轻量化、紧凑集成或特殊波段场景具备不可替代性，但在通用高分辨率宽带成像性能上尚未超越等效传统光学 [P0165][P0245]。未来突破需依赖材料折射率对比度提升、多层对准工艺优化或光机算协同架构的进一步演进，而非单一超表面物理自由度的挖掘 [P0112][P0245]。\",\n  \"issues\": []\n}",
+  "content_sha256": "91b7ef036a381ed1d462674c9cc9bccc730bdf8b1a2020ab7224366091142834",
+  "usage": {
+    "completion_tokens": 4588,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3767,
+      "text_tokens": 4588
+    },
+    "prompt_tokens": 171299,
+    "prompt_tokens_details": {
+      "text_tokens": 171299
+    },
+    "total_tokens": 175887
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": 85.09399999999732,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-ab0114f5-82b7-9fd6-a9d8-c42095409e75",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_pending_human_review",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "e0ef781c2ffffe767b0cdadaa0074a50fff3afde9ce391a994d026be3c06f27d",
+    "original_body_sha256": "7bcc2f688b9ff55fbac1920533100efa254c05cf4f89402a473943ded519ca67",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U4/5c0eeb979d9dce53c36b4600ba0854c63a32e4ea9da7eb15ae4ff5aa8d0495a7/attempt_001/REQUEST.json",
+      "sha256": "ebb29b2f27fae1ac94b883dfe8c3f89d14cbdac92de052bc35f2bf1564fd0fc3",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U4/5c0eeb979d9dce53c36b4600ba0854c63a32e4ea9da7eb15ae4ff5aa8d0495a7/attempt_001/UNIT_INPUT.json",
+      "sha256": "cc1c1a8d42da0564b8181a58a903fe835b02eb1fdcde420ab56463ed759939a9",
+      "bytes": 511740
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U4/5c0eeb979d9dce53c36b4600ba0854c63a32e4ea9da7eb15ae4ff5aa8d0495a7/UNIT_PACK.json",
+      "sha256": "f1556553be0217bbf9060caa631588b976a2577e5a8db49665be7f9e42c5f89c",
+      "bytes": 624970
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U4/5c0eeb979d9dce53c36b4600ba0854c63a32e4ea9da7eb15ae4ff5aa8d0495a7/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "76318db41f8f7a46b0d6d4408a56edf2a164fe7b0ac1e0e266bbb7c15d21c0d1",
+      "bytes": 655791
+    },
+    "identity": {
+      "chapter_id": "CH4",
+      "unit_id": "CH4-U4",
+      "language": "zh",
+      "source_handles": [
+        "P0245",
+        "P0165",
+        "P0069",
+        "P0112",
+        "P0004",
+        "P0052",
+        "P0017",
+        "P0230",
+        "P0094",
+        "P0183",
+        "P0154",
+        "P0117",
+        "P0192",
+        "P0023",
+        "P0063",
+        "P0159",
+        "P0018",
+        "P0246",
+        "P0162",
+        "P0033",
+        "P0160",
+        "P0148",
+        "P0126",
+        "P0022",
+        "P0196",
+        "P0176",
+        "P0041",
+        "P0072",
+        "P0100",
+        "P0061",
+        "P0057",
+        "P0220",
+        "P0247",
+        "P0001",
+        "P0059",
+        "P0077",
+        "P0134",
+        "P0128",
+        "P0050"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "混合架构与计算成像的系统级替代路径",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "CH4-U4_P01",
+          "point": "解析折射 - 超表面混合模块的光焦度分配策略与离轴像差校正机制。",
+          "development": "说明 P0245 五个折射塑料透镜负责宽带色散控制，末端 SiNx 超表面利用精确波前整形同时校正轴向与离轴像差；展示 100° FOV 边缘 MTF 数据，论证混合架构在保持总长不变前提下实现宽视场消色差的可行性。",
+          "source_uses": [
+            {
+              "source_handle": "P0245",
+              "role": "主论据",
+              "use": "解析折射 - 超表面混合模块的光焦度分配策略，展示 100°全视场消色差且无需计算后处理的可行性。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH4-U4_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH4-U4_P01",
+              "unit_id": "CH4-U4",
+              "ordinal": 1,
+              "point": "解析折射 - 超表面混合模块的光焦度分配策略与离轴像差校正机制。",
+              "development": "说明 P0245 五个折射塑料透镜负责宽带色散控制，末端 SiNx 超表面利用精确波前整形同时校正轴向与离轴像差；展示 100° FOV 边缘 MTF 数据，论证混合架构在保持总长不变前提下实现宽视场消色差的可行性。",
+              "source_handles": [
+                "P0245"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH4-U4_P02",
+          "point": "对比逆设计 EDOF 方案与传统色散工程，阐述计算后端恢复高频信息的机制与代价。",
+          "development": "展示 P0165 1 cm 孔径 EDOF 透镜通过径向对称优化延长焦深，使不同波长 PSF 在共同平面相似；经 Wiener 反卷积与扩散模型处理后 MTF 提升 6 倍，但原始对比度低且高空间频率仍逊于折射基准，明确计算增益与 SNR 损失的权衡。",
+          "source_uses": [
+            {
+              "source_handle": "P0165",
+              "role": "主论据",
+              "use": "对比逆设计 EDOF 方案与传统色散工程，阐述计算后端 (Wiener 反卷积/扩散模型) 恢复高频信息的机制与原始对比度低的代价。"
+            },
+            {
+              "source_handle": "P0069",
+              "role": "背景",
+              "use": "提供计算成像辅助超表面系统的信噪比衰减基准，阐明反卷积恢复全彩宽带图像时原始光学对比度下降与算法增益间的系统权衡。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH4-U4_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH4-U4_P02",
+              "unit_id": "CH4-U4",
+              "ordinal": 2,
+              "point": "对比逆设计 EDOF 方案与传统色散工程，阐述计算后端恢复高频信息的机制与代价。",
+              "development": "展示 P0165 1 cm 孔径 EDOF 透镜通过径向对称优化延长焦深，使不同波长 PSF 在共同平面相似；经 Wiener 反卷积与扩散模型处理后 MTF 提升 6 倍，但原始对比度低且高空间频率仍逊于折射基准，明确计算增益与 SNR 损失的权衡。",
+              "source_handles": [
+                "P0165"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH4-U4_P03",
+          "point": "统合系统级集成的制造与算法挑战，界定纯光学与光机算协同方案的适用边界。",
+          "development": "引用 P0112 1 mm 孔径逆设计 EDOF 透镜的 290 nm 带宽与 47% 效率数据，指出蓝色波段衰减反映全波段 PSF 不变性难度；强调混合架构与计算路径均非纯超表面方案，其优势在于特定场景的紧凑性与轻量化，通用成像性能仍需依赖材料折射率对比度提升与工艺优化。",
+          "source_uses": [
+            {
+              "source_handle": "P0112",
+              "role": "主论据",
+              "use": "统合系统级集成的制造与算法挑战，指出蓝色波段衰减反映全波段 PSF 不变性难度，界定光机算协同方案的适用边界。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH4-U4_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH4-U4_P03",
+              "unit_id": "CH4-U4",
+              "ordinal": 3,
+              "point": "统合系统级集成的制造与算法挑战，界定纯光学与光机算协同方案的适用边界。",
+              "development": "引用 P0112 1 mm 孔径逆设计 EDOF 透镜的 290 nm 带宽与 47% 效率数据，指出蓝色波段衰减反映全波段 PSF 不变性难度；强调混合架构与计算路径均非纯超表面方案，其优势在于特定场景的紧凑性与轻量化，通用成像性能仍需依赖材料折射率对比度提升与工艺优化。",
+              "source_handles": [
+                "P0112"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "owner_fields_present": [
+        "argument_relations",
+        "cases",
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "development",
+        "relations_and_limits",
+        "transition",
+        "unit_title"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 171289,
+      "reserved_input_tokens": 200036,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 240996,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 1.783184,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 39,
+      "with_study_summary_A": 39,
+      "with_review_planning_B": 39,
+      "with_deep_read_material": [
+        "P0069",
+        "P0245"
+      ],
+      "with_supplement_material": 1,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0069",
+        "P0245"
+      ],
+      "chapter_tool_materials": 8,
+      "read_from_disk": [
+        "P0001",
+        "P0004",
+        "P0017",
+        "P0018",
+        "P0022",
+        "P0023",
+        "P0033",
+        "P0041",
+        "P0050",
+        "P0052",
+        "P0057",
+        "P0059",
+        "P0061",
+        "P0063",
+        "P0069",
+        "P0072",
+        "P0077",
+        "P0094",
+        "P0100",
+        "P0112",
+        "P0117",
+        "P0126",
+        "P0128",
+        "P0134",
+        "P0148",
+        "P0154",
+        "P0159",
+        "P0160",
+        "P0162",
+        "P0165",
+        "P0176",
+        "P0183",
+        "P0192",
+        "P0196",
+        "P0220",
+        "P0230",
+        "P0245",
+        "P0246",
+        "P0247"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U4/5c0eeb979d9dce53c36b4600ba0854c63a32e4ea9da7eb15ae4ff5aa8d0495a7/attempt_001/RAW_RESPONSE.json",
+      "sha256": "b110c8ad2f10ed212619e0fd035dc49b0c30ebcc85d474bc61d7e960651061fe",
+      "bytes": 509659
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH4/CH4-U4/5c0eeb979d9dce53c36b4600ba0854c63a32e4ea9da7eb15ae4ff5aa8d0495a7/attempt_001/transport/5c0eeb979d9dce53-attempt_001-invoke475bfabf7c554d93-key0-attempt0.sse.raw",
+      "sha256": "1d4b6795093a8614c0ee8236e708d95ada253d938da0d0b3383c7666fde29555",
+      "bytes": 400762
+    },
+    "response_payload_sha256": "1d4b6795093a8614c0ee8236e708d95ada253d938da0d0b3383c7666fde29555",
+    "sse_payload_sha256": "1d4b6795093a8614c0ee8236e708d95ada253d938da0d0b3383c7666fde29555"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH4/CH4-U4/5c0eeb979d9dce53c36b4600ba0854c63a32e4ea9da7eb15ae4ff5aa8d0495a7/attempt_001/quality/ed4bb1f8b476ef3e8ea195d6f9af915715a8f46626af8050c713547d554cc932/QUALITY_BODY.md",
+    "sha256": "708c9dc1059e81edd9bfdf9aac99070ad288e11e0cb2e719eb0bab3467faefb3",
+    "bytes": 3093
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

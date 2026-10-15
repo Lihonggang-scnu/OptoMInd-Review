@@ -1,0 +1,417 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH1",
+  "unit_id": "U5",
+  "attempt_dir": "<BODY_W>/units/CH1/U5/c5ef6a0f1092d24c4573d8e6d0ec4f900d3b05059a80b4ed42455a1aed461d09/attempt_001",
+  "model_source_attempt_dir": "<BODY_W>/units/CH1/U5/c5ef6a0f1092d24c4573d8e6d0ec4f900d3b05059a80b4ed42455a1aed461d09/attempt_001",
+  "attempt": "attempt_001",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": null,
+  "format_recovery": null,
+  "content": "{\n  \"body_markdown\": \"大孔径扩展在宽带消色差平面透镜中受限于光频域相干性的物理约束。当透镜直径增大而有效厚度不足时，出瞳处不同位置的光波在焦点处的相位畸变累积差异增大，导致频率域互相干函数 $J_\\\\omega(\\\\rho_1, \\\\rho_2)$ 的实部下降，即焦点处的总相干度降低 [P0081]。理论模型表明，非理想消色差平透镜的最大直径 $D_{max}$ 与有效厚度 $H$、数值孔径 $NA$ 及焦点处最大相干度 $\\\\max J_\\\\omega(F)$ 之间存在近似关系：$D_{max} \\\\approx 4(n_{max} - 1)H / [(1 - \\\\sqrt{1 - \\\\max J_\\\\omega(F)})NA]$ [P0081]。该公式揭示了在固定 $NA$ 下，若要维持高相干度以避免效率与成像对比度退化，必须增加透镜的有效光学厚度；否则，随着孔径扩展，焦点处的相长干涉能力将显著减弱 [P0081]。这一机制解释了为何单纯增加孔径而不增加厚度会导致大孔径宽带消色差平透镜的性能急剧恶化。\\n\\n多级衍射透镜（AMDL）的实验数据为上述相干性模型提供了实证支持。在可见光至近红外波段（400–1100 nm），基于 AZ4562 光刻胶制备的 AMDL 样品显示，随着直径从 1 mm 增至 10 mm，在厚度相对不足的情况下，焦点处实测相干度 $J_\\\\omega(F)$ 从 0.61 降至 0.014 [P0081]。伴随相干度的衰减，平均聚焦效率从 68% 降至 5%，成像对比度从 0.66 降至 0.06，Strehl 比同步下降 [P0081]。当相干度低于 0.1 时，图像细节已无法分辨，证实了孔径增大导致的相干性退化是大孔径宽带消色差平透镜的共性瓶颈，而非单一架构的特有缺陷 [P0081]。尽管 AMDL 通过宏观厚度累积光程与亚波长超表面的局部相位库机制不同，但其揭示的直径 - 厚度 - 相干度权衡关系对理解超透镜的孔径扩展限制具有参照意义 [P0081]。\\n\\n在太赫兹与长波红外波段，已有研究实现了厘米级孔径的消色差聚焦，但其实现路径与可见光介电超透镜存在显著差异。在太赫兹频段（0.8–1.2 THz），单层全介质超表面通过离散多波长设计与粒子群优化，实现了直径 2.21 cm、NA 0.13 的消色差金属透镜，平均聚焦效率为 46.14% [P0004]。该案例证明了太赫兹波段厘米级低 NA 消色差的可行性，但其单层结构的色散控制能力限制了 NA 的进一步提升，且高频点出现次要焦点 [P0004]。在长波红外波段（8–12 μm），基于全硅平台与折叠群延迟设计框架的消色差金属透镜实现了直径 3.18 cm 与 6.36 cm、NA 0.45 的器件，归一化焦距偏移小于 3.3×10⁻⁴，但振幅调制优化后的聚焦效率仅为 11.9%–18.1% [P0227]。此外，基于梯度折射率（GRIN）分布的太赫兹金属透镜通过十层阶梯结构实现了 NA 0.555 与带宽 0.2–0.9 THz，低频段效率接近 80%，但其 FWHM 小于衍射极限被归因于超振荡效应，且高频端效率下降 [P0050]。这些案例展示了不同波段与架构下大孔径实现的可能性，但均伴随特定的效率或 NA 代价。\\n\\n上述多波段大孔径案例与可见光高 NA 介电超透镜之间具有不可通约性，不能直接外推为可见光性能基准。太赫兹与长波红外波段因波长较长，允许更大的物理特征尺寸、更低的空间采样密度及宏观折射率梯度补偿，而可见光波段受限于材料吸收（如硅在可见光不透明）、制造深宽比及亚波长局部相位库的物理极限 [P0227][P0050]。AMDL 依赖宏观厚度累积光程，GRIN 与折叠群延迟架构亦非典型亚波长 meta-atom 库，其孔径扩展机制与可见光超透镜的相位 - 色散空间约束不同 [P0081][P0060]。消色差衍射透镜的理论分析进一步指出，其性能受限于菲涅尔数上限（$FN_{max} \\\\approx p\\\\Delta n + 1$），超过上限时 Strehl 比与 MTF 将退化，这与超透镜的相位 - 色散约束形成方法论对照 [P0060]。因此，P0004、P0227 与 P0050 仅能作为不同架构下的孔径边界参考，不能排成跨波段、跨机制的统一效果排名。当前可见光波段厘米级消色差金属透镜的实测数据稀缺，本章不声称该基准已建立；P0004 在本单元的职责是提供太赫兹厘米级孔径 - 效率 - 制造边界，而非可见光高 NA 连续宽带消色差的证据 [P0004]。\",\n  \"issues\": []\n}",
+  "content_sha256": "28266bd1ee7fd976389cf9fe974a8cf1a3ca1521b8d0d8d2a5ade92bd2247edc",
+  "usage": {
+    "completion_tokens": 2848,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1580,
+      "text_tokens": 2848
+    },
+    "prompt_tokens": 127167,
+    "prompt_tokens_details": {
+      "text_tokens": 127167
+    },
+    "total_tokens": 130015
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": 53.28100000000268,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-7a77b508-c02e-98b9-b7e4-6882cdfc1829",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_pending_human_review",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "d8aa3ffeede502a8988ae3b929fd103f4ad9bf28dd9d263ed42a9ec27f2bdc66",
+    "original_body_sha256": "9d28f6c4cfc9ac3d624f3b57f6695e4048eb6d6d0f67524f15743778563ba072",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH1/U5/c5ef6a0f1092d24c4573d8e6d0ec4f900d3b05059a80b4ed42455a1aed461d09/attempt_001/REQUEST.json",
+      "sha256": "d0b339fa52860bd2b1260e40e6af3b5993919a32cc126e593bc7388fb4a6dbda",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH1/U5/c5ef6a0f1092d24c4573d8e6d0ec4f900d3b05059a80b4ed42455a1aed461d09/attempt_001/UNIT_INPUT.json",
+      "sha256": "5c96b2118cfd89e2eefac4af84c303de31ada026a45845fc9ea727ed65cbd930",
+      "bytes": 358116
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH1/U5/c5ef6a0f1092d24c4573d8e6d0ec4f900d3b05059a80b4ed42455a1aed461d09/UNIT_PACK.json",
+      "sha256": "e0d62b8114367c855ecbd0428748d4a1029a079a7b5c88c1f38a567f17f87ddc",
+      "bytes": 451869
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH1/U5/c5ef6a0f1092d24c4573d8e6d0ec4f900d3b05059a80b4ed42455a1aed461d09/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "43b5e03758131a83d34fe07621e4c6bafcbcc3ef02ce4dff9a6a8fbf94389502",
+      "bytes": 477466
+    },
+    "identity": {
+      "chapter_id": "CH1",
+      "unit_id": "U5",
+      "language": "zh",
+      "source_handles": [
+        "P0081",
+        "P0004",
+        "P0227",
+        "P0050",
+        "P0060",
+        "P0064",
+        "P0154",
+        "P0224",
+        "P0133",
+        "P0189",
+        "P0094",
+        "P0031",
+        "P0161",
+        "P0163",
+        "P0041",
+        "P0072",
+        "P0162",
+        "P0022",
+        "P0100",
+        "P0246",
+        "P0018",
+        "P0061",
+        "P0057",
+        "P0220",
+        "P0033",
+        "P0148",
+        "P0247"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "阐明孔径扩展的相干性约束，分析多波段大孔径边界案例的不可通约性，明确可见光厘米级消色差金属透镜实测数据稀缺的现状",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "U5_P01",
+          "point": "光频域相干性模型：孔径、厚度与相干度的权衡",
+          "development": "引入频率域互相干函数 J_ω(ρ₁, ρ₂)，说明其 实部反映不同出瞳位置的光在焦点处是否保持相长干涉；当相位畸变随孔径增大累积时，焦点处总相干度 J_ω(F) 下降。结合 P0081 的近似公式 D_max ≈ 4(n_max−1)H / [(1−√(1−max J_ω(F)))NA]，解释在固定 NA 下维持高相干度必须增加有效厚度，否则只能接受效率与成像对比度退化。",
+          "source_uses": [
+            {
+              "source_handle": "P0081",
+              "role": "主论据",
+              "use": "引入频率域互相干函数 J_ω(ρ₁, ρ₂)，说明其实部反映不同出瞳位置的光在焦点处是否保持相长干涉；当相位畸变随孔径增大累积时，焦点处总相干度 J_ω(F) 下降"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U5_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U5_P01",
+              "unit_id": "U5",
+              "ordinal": 1,
+              "point": "光频域相干性模型：孔径、厚度与相干度的权衡",
+              "development": "引入频率域互相干函数 J_ω(ρ₁, ρ₂)，说明其 实部反映不同出瞳位置的光在焦点处是否保持相长干涉；当相位畸变随孔径增大累积时，焦点处总相干度 J_ω(F) 下降。结合 P0081 的近似公式 D_max ≈ 4(n_max−1)H / [(1−√(1−max J_ω(F)))NA]，解释在固定 NA 下维持高相干度必须增加有效厚度，否则只能接受效率与成像对比度退化。",
+              "source_handles": [
+                "P0081"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "U5_P02",
+          "point": "AMDL 直径扩展实验：相干度衰减与成像性能退化",
+          "development": "使用 P0081 的 S1–S5 样品数据，展示直径从 1 mm 增至 10 mm 时，焦点相干度从 0.61 降至 0.014，平均聚焦效率从 68% 降至 5%，成像对比度从 0.66 降至 0.06，Strehl 比同步下降。该实验说明相干性退化不是抽象模型，而是大孔径宽带消色差平透镜的共性瓶颈。",
+          "source_uses": [
+            {
+              "source_handle": "P0081",
+              "role": "主论据",
+              "use": "使用 S1–S5 样品数据，展示直径从 1 mm 增至 10 mm 时，焦点相干度从 0.61 降至 0.014，平均聚焦效率从 68% 降至 5%，成像对比度从 0.66 降至 0.06，Strehl 比同步下降"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U5_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U5_P02",
+              "unit_id": "U5",
+              "ordinal": 2,
+              "point": "AMDL 直径扩展实验：相干度衰减与成像性能退化",
+              "development": "使用 P0081 的 S1–S5 样品数据，展示直径从 1 mm 增至 10 mm 时，焦点相干度从 0.61 降至 0.014，平均聚焦效率从 68% 降至 5%，成像对比度从 0.66 降至 0.06，Strehl 比同步下降。该实验说明相干性退化不是抽象模型，而是大孔径宽带消色差平透镜的共性瓶颈。",
+              "source_handles": [
+                "P0081"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "U5_P03",
+          "point": "多波段大孔径边界案例：P0004、P0227、P0050 的不同实现路径",
+          "development": "按波段、NA、孔径、效率与色散补偿机制比较三类案例：P0004 在 0.8–1.2 THz 以单层全介质结构实现 2.21 cm 孔径与 NA=0.13，平均聚焦效率 46.14%，显示太赫兹厘米级低 NA 消色差可行但单层色散能力限制 NA；P0227 在 8–12 μm 以全硅折叠群延迟与振幅调制实现 3.18 cm 与 6.36 cm 孔径、NA=0.45，优化后效率约 11.9%–18.1%，说明厘米级 LWIR 消色差可达成但效率受振幅透射率变化制约；P0050 在 0.2–0.9 THz 以十层阶梯 GRIN 结构实现 NA=0.555，低频效率近 80%，但高频效率下降且 FWHM 约 0.8λ 被归因于超振荡。",
+          "source_uses": [
+            {
+              "source_handle": "P0004",
+              "role": "主论据",
+              "use": "提供太赫兹频段（约 0.8–1.2 THz）单层全介质超表面数据：直径 2.21 cm，NA=0.13，平均聚焦效率 46.14%，显示太赫兹厘米级低 NA 消色差可行但单层色散能力限制 NA"
+            },
+            {
+              "source_handle": "P0227",
+              "role": "主论据",
+              "use": "提供长波红外波段（8–12 μm）全硅平台数据：直径 3.18 cm 与 6.36 cm，NA=0.45，振幅调制优化后报告聚焦效率约 11.9%–18.1%，说明厘米级 LWIR 消色差可达成但效率受振幅透射率变化制约"
+            },
+            {
+              "source_handle": "P0050",
+              "role": "主论据",
+              "use": "提供太赫兹频段（0.2–0.9 THz）十层阶梯 GRIN 结构数据：NA=0.555，低频段聚焦效率接近 80%，FWHM 约 0.8λ（超振荡效应），离轴±45°时信噪比降至 10 dB 以下"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U5_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U5_P03",
+              "unit_id": "U5",
+              "ordinal": 3,
+              "point": "多波段大孔径边界案例：P0004、P0227、P0050 的不同实现路径",
+              "development": "按波段、NA、孔径、效率与色散补偿机制比较三类案例：P0004 在 0.8–1.2 THz 以单层全介质结构实现 2.21 cm 孔径与 NA=0.13，平均聚焦效率 46.14%，显示太赫兹厘米级低 NA 消色差可行但单层色散能力限制 NA；P0227 在 8–12 μm 以全硅折叠群延迟与振幅调制实现 3.18 cm 与 6.36 cm 孔径、NA=0.45，优化后效率约 11.9%–18.1%，说明厘米级 LWIR 消色差可达成但效率受振幅透射率变化制约；P0050 在 0.2–0.9 THz 以十层阶梯 GRIN 结构实现 NA=0.555，低频效率近 80%，但高频效率下降且 FWHM 约 0.8λ 被归因于超振荡。",
+              "source_handles": [
+                "P0004",
+                "P0227",
+                "P0050"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "U5_P04",
+          "point": "不可通约性与边界角色：不能外推到可见光高 NA 介电金属透镜",
+          "development": "总结上述案例与可见光介电金属透镜的差异：THz 与 LWIR 波长更长，允许更大物理尺度、更低空间采样密度或宏观折射率梯度；AMDL 依赖宏观厚度累积光程；GRIN 与折叠群延迟架构并非典型亚波长 meta-atom 库。结合 P0060 的消色差衍射透镜菲涅尔数上限，说明不同平面光学架构均有各自的孔径 - 带宽 - 分辨率约束。P0004 在本单元仅承担太赫兹厘米级孔径边界参考，不作为可见光高 NA 连续宽带消色差证据；若 U3 已使用 P0004 补充长波频段 NA - 带宽分布，本单元也只讨论其孔径 - 效率 - 制造边界，避免重复论证。",
+          "source_uses": [
+            {
+              "source_handle": "P0081",
+              "role": "主论据",
+              "use": "总结 AMDL 依赖宏观厚度累积光程，与亚波长 meta-atom 的局部相位库不同，外推需谨慎"
+            },
+            {
+              "source_handle": "P0004",
+              "role": "局限",
+              "use": "明确 P0004 在本单元仅承担太赫兹厘米级孔径边界参考，不作为可见光高 NA 连续宽带消色差证据"
+            },
+            {
+              "source_handle": "P0227",
+              "role": "局限",
+              "use": "说明硅在可见光吸收严重，LWIR 器件不可直接移植到可见光"
+            },
+            {
+              "source_handle": "P0050",
+              "role": "局限",
+              "use": "说明 GRIN 与折叠群延迟架构并非典型亚波长 meta-atom 库，高频效率下降且 FWHM 被归因于超振荡"
+            },
+            {
+              "source_handle": "P0060",
+              "role": "比较",
+              "use": "提供消色差衍射透镜菲涅尔数上限（FN_max ≈ pΔn + 1）及超过上限时 Strehl 比与 MTF 退化的判据，与 P0081 的光频域相干性模型形成方法论对照，说明不同平面光学架构均有各自的孔径 - 带宽 - 分辨率约束"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U5_P04"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U5_P04",
+              "unit_id": "U5",
+              "ordinal": 4,
+              "point": "不可通约性与边界角色：不能外推到可见光高 NA 介电金属透镜",
+              "development": "总结上述案例与可见光介电金属透镜的差异：THz 与 LWIR 波长更长，允许更大物理尺度、更低空间采样密度或宏观折射率梯度；AMDL 依赖宏观厚度累积光程；GRIN 与折叠群延迟架构并非典型亚波长 meta-atom 库。结合 P0060 的消色差衍射透镜菲涅尔数上限，说明不同平面光学架构均有各自的孔径 - 带宽 - 分辨率约束。P0004 在本单元仅承担太赫兹厘米级孔径边界参考，不作为可见光高 NA 连续宽带消色差证据；若 U3 已使用 P0004 补充长波频段 NA - 带宽分布，本单元也只讨论其孔径 - 效率 - 制造边界，避免重复论证。",
+              "source_handles": [
+                "P0081",
+                "P0004",
+                "P0227",
+                "P0050",
+                "P0060"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "owner_fields_present": [
+        "argument_relations",
+        "cases",
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "evidence_conditions_limits",
+        "ordered_development",
+        "relations_conditions_limits",
+        "theme"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 127157,
+      "reserved_input_tokens": 150608,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 191568,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 1.585472,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 27,
+      "with_study_summary_A": 27,
+      "with_review_planning_B": 27,
+      "with_deep_read_material": [
+        "P0081"
+      ],
+      "with_supplement_material": 1,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0081"
+      ],
+      "chapter_tool_materials": 4,
+      "read_from_disk": [
+        "P0004",
+        "P0018",
+        "P0022",
+        "P0031",
+        "P0033",
+        "P0041",
+        "P0050",
+        "P0057",
+        "P0060",
+        "P0061",
+        "P0064",
+        "P0072",
+        "P0081",
+        "P0094",
+        "P0100",
+        "P0133",
+        "P0148",
+        "P0154",
+        "P0161",
+        "P0162",
+        "P0163",
+        "P0189",
+        "P0220",
+        "P0224",
+        "P0227",
+        "P0246",
+        "P0247"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH1/U5/c5ef6a0f1092d24c4573d8e6d0ec4f900d3b05059a80b4ed42455a1aed461d09/attempt_001/RAW_RESPONSE.json",
+      "sha256": "0294f948590d72587a6ee674a795afb184ebc1f2c774994ede71fce6a2ab454d",
+      "bytes": 320083
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH1/U5/c5ef6a0f1092d24c4573d8e6d0ec4f900d3b05059a80b4ed42455a1aed461d09/attempt_001/transport/c5ef6a0f1092d24c-attempt_001-invoke4cec9fb71fe247d1-key0-attempt0.sse.raw",
+      "sha256": "71cf60f3353caf2f39935145f0a268a3e5238795d900a1f33700abd4b48bc543",
+      "bytes": 251027
+    },
+    "response_payload_sha256": "71cf60f3353caf2f39935145f0a268a3e5238795d900a1f33700abd4b48bc543",
+    "sse_payload_sha256": "71cf60f3353caf2f39935145f0a268a3e5238795d900a1f33700abd4b48bc543"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH1/U5/c5ef6a0f1092d24c4573d8e6d0ec4f900d3b05059a80b4ed42455a1aed461d09/attempt_001/quality/40bbb04d104ef0ab219e097486bcedce84d00c05dd7d8ac0d991fe50a5e18d8c/QUALITY_BODY.md",
+    "sha256": "5a0ca862913ce1bfcbc7fae6301bfb65b39f731f313fdf33b2c5eeaba84a8611",
+    "bytes": 4380
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

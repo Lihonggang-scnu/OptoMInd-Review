@@ -1,0 +1,476 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH3",
+  "unit_id": "CH3_U03",
+  "attempt_dir": "<BODY_W>/units/CH3/CH3_U03/6d497ef7543faacd158deed2f33edb364911407a6415a570160fcca1762a9567/attempt_001",
+  "model_source_attempt_dir": "<BODY_W>/units/CH3/CH3_U03/6d497ef7543faacd158deed2f33edb364911407a6415a570160fcca1762a9567/attempt_001",
+  "attempt": "attempt_001",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": null,
+  "format_recovery": null,
+  "content": "```json\n{\n  \"body_markdown\": \"大孔径介电超表面的制造误差对光学性能的影响并非简单的面积平均稀释，而是由误差的空间分布模式决定。基于 100 mm 直径全玻璃二氧化硅金属透镜的实证研究表明 [P0157]，当采用 DUV 步进式光刻拼接技术（25 个曝光场）制造时，内圈使用工业级光刻掩模版而外圈使用实验室自制低分辨率掩模版会导致显著的空间非均匀性。外圈区域因分辨率不足导致小直径纳米柱缺失，造成衍射强度降低，而内圈则按设计完整保留纳米柱。这种空间上的不均匀性导致整体波前像差增加，斯特列尔比（Strehl ratio）降至 0.6，点扩散函数展宽，等效于 NA=0.2 的透镜性能（设计 NA=0.32）。仿真进一步证实，当小直径纳米柱在所有区域均匀缺失时，斯特列尔比保持接近 1（衍射极限），仅聚焦效率单调下降；而当缺失仅发生在内圈或外圈时，由于不同区域衍射贡献不匹配，导致严重的波前误差和成像质量退化。这表明均匀的系统性误差主要惩罚效率而不严重损害分辨率，而非均匀的区域性误差则同时严重损害分辨率和效率，因为它们引入了空间变化的振幅和相位扰动，破坏了理想透镜所需的均匀波前叠加条件。因此，在大孔径金属透镜制造中，确保所有曝光场使用相同质量标准的光刻掩模版是维持高斯特列尔比的关键。\\n\\n随着透镜孔径扩大，不同半径处相位畸变累积差异增大，导致出瞳相干度收缩，这为大孔径效率瓶颈提供了波动光学解释 [P0081]。基于光频域互相干函数$J_\\\\omega(\\\\rho_1, \\\\rho_2)$的理论模型表明，对于非理想消色差平透镜，其相位分布包含理想双曲面相位和畸变项。频率域互相干函数的实部表示出瞳上两点发出的子波在焦点处的相干程度：若在整个工作光谱内无畸变或畸变为常数，实部接近 +1（完全相长干涉）；若畸变大，实部接近 -1（完全相消干涉）。焦点处的归一化相干函数$J_\\\\omega(F)$与平均聚焦效率$\\\\langle Eff \\\\rangle_\\\\omega$和点扩散函数最大归一化直径$w_{max}$相关，关系为$\\\\max J_\\\\omega(F) \\\\approx \\\\max \\\\frac{\\\\langle Eff \\\\rangle_\\\\omega}{w_{max}^2}$。实验制备并表征了直径从 1 mm 到 10 mm 的五种 AMDL 样品（S1-S5），测量得到的焦点处相干度$J_\\\\omega(F)$分别为 0.61、0.34、0.18、0.085、0.014，与理论预测值（0.72、0.43、0.21、0.11、0.03）高度吻合。随着直径从 1 mm 增加到 10 mm，平均聚焦效率从 68% 降至 5%，斯特列尔比从 0.7252 降至 0.4545。成像对比度也随相干度降低而显著下降（从 0.66 降至 0.06），当相干度低于 0.1 时，图像细节无法分辨。这证实了孔径增大导致相干度下降是限制大孔径消色差平透镜性能的关键机制，且通过简化积分区域推导出的最大直径近似公式$D_{max} \\\\approx \\\\frac{4(n_{max} - 1)H}{(1 - \\\\sqrt{1 - \\\\max J_\\\\omega(F)})NA}$揭示了在给定 NA 和允许的性能损失下，直径与有效厚度$(n_{max}-1)H$的正比关系。\\n\\n多层架构的对准容差高度依赖于相位分配策略，解耦型设计优于紧密耦合型。针对宽带消色差多层介电超透镜的层间横向错位容差研究呈现显著的设计架构依赖性 [P0148][P0139]。在光谱分束或多波长独立控制设计（如 P0148）中，由于纳米柱排列不规则导致对准敏感度增加，当模拟中引入 2 μm 的层间错位时，三个目标波长的聚焦效率显著降低：1180 nm 处降至 5.4%，1400 nm 处降至 8.8%，1680 nm 处降至 18.4%，这验证了实验观测到的较低效率主要归因于制造过程中的错位敏感性。相比之下，在相位解耦型宽带消色差设计（如 P0139）中，双层结构被证明对纳米级对准误差具有鲁棒性。该研究设计了双层消色差金属透镜，其中顶层主要负责聚焦相位（利用几何相位），底层提供色散补偿（利用传播相位）。仿真显示，当两层之间分别存在 500 nm、1 μm 和 1.5 μm 的对准误差时，焦点强度分布与完美对准的情况相似，焦距几乎保持不变。这种对纳米制造偏差的强鲁棒性源于其相位分配机制：所需的聚焦相位主要由顶层几何相位提供，而底层主要提供色散补偿，因此层间的微小错位不会显著破坏整体的聚焦功能。综述性工艺容差分析进一步指出 [P0061]，对于代表性双合透镜，层间错位和侧壁锥角都会导致显著的效率损失，例如侧壁锥角从 0°增加到 12.5°时，平均聚焦效率从 68.14% 降至 19.64%，且在约 7.5°时开始出现明显退化；对于高介电常数金属透镜，纳米级的直径偏差（>±5 nm）即可使效率降至 90% 以下。目前缺乏覆盖 0 至>2 μm 的系统性效率下降曲线，个案数据反映的是特定拓扑结构的局部响应。\\n\\n| 架构/误差类型 | 孔径尺度 | 主要影响机制 | 效率/性能表现 |\\n|--------------|---------|-------------|--------------|\\n| 单波长大孔径拼接（均匀误差） | 100 mm 直径 [P0157] | 纳米柱均匀缺失导致直通光增加，相位关系保持 | 斯特列尔比保持接近 1（衍射极限），仅聚焦效率单调下降 |\\n| 单波长大孔径拼接（非均匀误差） | 100 mm 直径 [P0157] | 内外圈掩模版质量差异导致衍射贡献不匹配，引入空间变化振幅/相位扰动 | 斯特列尔比降至 0.6，等效 NA 从 0.32 降至 0.2，波前 RMS 误差 0.08λ |\\n| 多层光谱分束（层间错位） | 直径 100-500 μm [P0148] | 不规则纳米柱排列导致对准敏感度增加，2 μm 错位破坏相位叠加 | 1180 nm:5.4%，1400 nm:8.8%，1680 nm:18.4%（理想状态分别为 25%、22%、40%） |\\n| 相位解耦双层（层间错位） | 直径 100 μm [P0139] | 顶层主导聚焦相位（几何相位），底层提供色散补偿，错位对总相位分布影响小 | 0-1.5 μm 错位下焦点强度分布相似，焦距几乎不变，平均效率 64%（峰值 78%） |\\n\\n综上，大孔径效率衰减并非简单的面积平均稀释，而是由误差的空间分布模式（均匀 vs 非均匀）决定；多层架构的对准容差高度依赖于相位分配策略（解耦型优于紧密耦合型）。目前缺乏覆盖 0 至>2 μm 的系统性效率下降曲线，个案数据反映的是特定拓扑结构的局部响应。面对原理性损耗与制造容差的双重挤压，研究者转向通过架构创新（多层堆叠、混合折射 - 衍射、逆设计）重构设计自由度，进而尝试在系统层面重新平衡效率与成像质量。\",\n  \"issues\": []\n}\n```",
+  "content_sha256": "8898e8f412b3d90048aae30568a37423032f0f42edc51b859a40feef9213b31f",
+  "usage": {
+    "completion_tokens": 2340,
+    "completion_tokens_details": {
+      "reasoning_tokens": 498,
+      "text_tokens": 2340
+    },
+    "prompt_tokens": 293015,
+    "prompt_tokens_details": {
+      "text_tokens": 293015
+    },
+    "total_tokens": 295355
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": 53.51599999998871,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-07d792b6-4113-9a58-ba9f-f3612f0d7d4e",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_pending_human_review",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "6da37561de182c84f691ac4b8ae5c118496bfe62421255e783f9cfa210b0ee91",
+    "original_body_sha256": "4a93632b40fc220e7d81457569eb093904e1b42b5bad17e6adaf3333a56aa0b8",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U03/6d497ef7543faacd158deed2f33edb364911407a6415a570160fcca1762a9567/attempt_001/REQUEST.json",
+      "sha256": "cc6a516ef5d0aff38abaf096905a8b98f9b35df7f97e588afe6982656b9fe224",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U03/6d497ef7543faacd158deed2f33edb364911407a6415a570160fcca1762a9567/attempt_001/UNIT_INPUT.json",
+      "sha256": "15def1a0250e6c0bd5a71fda89217579044c0d6324472fba19dfcd834fcd8e3b",
+      "bytes": 852028
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U03/6d497ef7543faacd158deed2f33edb364911407a6415a570160fcca1762a9567/UNIT_PACK.json",
+      "sha256": "f5062e706d989c6bafa0e3e23111a10250c85d44a8b34539689a5a24509faebd",
+      "bytes": 1065446
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U03/6d497ef7543faacd158deed2f33edb364911407a6415a570160fcca1762a9567/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "d16d9eb9f251083ad2f173696fbfea67b3698eb5cd63cc70a8d2ae85f6830bb4",
+      "bytes": 1113774
+    },
+    "identity": {
+      "chapter_id": "CH3",
+      "unit_id": "CH3_U03",
+      "language": "zh",
+      "source_handles": [
+        "P0157",
+        "P0081",
+        "P0148",
+        "P0139",
+        "P0061",
+        "P0231",
+        "P0131",
+        "P0210",
+        "P0179",
+        "P0181",
+        "P0117",
+        "P0147",
+        "P0110",
+        "P0033",
+        "P0022",
+        "P0202",
+        "P0090",
+        "P0099",
+        "P0160",
+        "P0235",
+        "P0004",
+        "P0162",
+        "P0106",
+        "P0204",
+        "P0121",
+        "P0063",
+        "P0225",
+        "P0079",
+        "P0018",
+        "P0059",
+        "P0165",
+        "P0052",
+        "P0017",
+        "P0230",
+        "P0094",
+        "P0183",
+        "P0154",
+        "P0192",
+        "P0023",
+        "P0159",
+        "P0246",
+        "P0126",
+        "P0196",
+        "P0176",
+        "P0112",
+        "P0001",
+        "P0069",
+        "P0077",
+        "P0134",
+        "P0128",
+        "P0050"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "分析大孔径扩展与多层架构的制造容差约束，区分均匀性与非均匀性误差对光学性能的差异化影响。",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "CH3_U03_P01",
+          "point": "剖析大孔径拼接误差的空间分布特性及其对效率与分辨率的非对称惩罚。",
+          "development": "基于 P0157 的仿真与实验对比，阐明均匀系统性误差主要导致直通光增加（效率下降但保持衍射极限），而非均匀区域性误差（如掩模分辨率差异）会破坏振幅分布平衡，引发高阶波前像差与斯特列尔比崩溃。",
+          "source_uses": [
+            {
+              "source_handle": "P0157",
+              "role": "主论据",
+              "use": "阐明大孔径拼接中均匀性缺失引发高阶波前像差与斯特列尔比崩溃的机制，区分系统性误差与非区域性误差。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH3_U03_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH3_U03_P01",
+              "unit_id": "CH3_U03",
+              "ordinal": 1,
+              "point": "剖析大孔径拼接误差的空间分布特性及其对效率与分辨率的非对称惩罚。",
+              "development": "基于 P0157 的仿真与实验对比，阐明均匀系统性误差主要导致直通光增加（效率下降但保持衍射极限），而非均匀区域性误差（如掩模分辨率差异）会破坏振幅分布平衡，引发高阶波前像差与斯特列尔比崩溃。",
+              "source_handles": [
+                "P0157"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH3_U03_P02",
+          "point": "引入相干性模型解释大孔径宽带操作的效率衰减物理根源。",
+          "development": "结合 P0081 的频率域互相干函数理论，说明随着透镜直径扩大，不同半径处相位畸变累积差异增大，导致出瞳相干度收缩；相干度下降直接等价于焦点能量分散与 MTF 劣化，为大孔径效率瓶颈提供波动光学解释。",
+          "source_uses": [
+            {
+              "source_handle": "P0081",
+              "role": "主论据",
+              "use": "引入光频域相干性理论模型，解释孔径扩大导致出瞳相干区域收缩进而引起焦点能量分散的物理根源。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH3_U03_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH3_U03_P02",
+              "unit_id": "CH3_U03",
+              "ordinal": 2,
+              "point": "引入相干性模型解释大孔径宽带操作的效率衰减物理根源。",
+              "development": "结合 P0081 的频率域互相干函数理论，说明随着透镜直径扩大，不同半径处相位畸变累积差异增大，导致出瞳相干度收缩；相干度下降直接等价于焦点能量分散与 MTF 劣化，为大孔径效率瓶颈提供波动光学解释。",
+              "source_handles": [
+                "P0081"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH3_U03_P03",
+          "point": "对比多层架构在不同错位量下的效率响应差异与容差机制。",
+          "development": "对照 P0148（光谱分束器，2 μm 错位致效率跌至<20%）与 P0139（相位解耦双层，0-1.5 μm 错位保持焦强分布稳定），论证顶层主导聚焦相位的架构可通过解耦色散补偿任务来换取更高的对准容差，但需接受效率绝对值的妥协。",
+          "source_uses": [
+            {
+              "source_handle": "P0148",
+              "role": "主论据",
+              "use": "展示复杂非周期排布下微小横向错位引发的效率雪崩式下降（2μm 错位致效率跌至<20%）。"
+            },
+            {
+              "source_handle": "P0139",
+              "role": "比较",
+              "use": "对照相位解耦双层架构，说明其如何通过功能分离换取更高的对准容差。"
+            },
+            {
+              "source_handle": "P0061",
+              "role": "背景",
+              "use": "界定侧壁锥角与纳米级直径偏差对光学性能的映射关系，提供公差边界基准。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH3_U03_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH3_U03_P03",
+              "unit_id": "CH3_U03",
+              "ordinal": 3,
+              "point": "对比多层架构在不同错位量下的效率响应差异与容差机制。",
+              "development": "对照 P0148（光谱分束器，2 μm 错位致效率跌至<20%）与 P0139（相位解耦双层，0-1.5 μm 错位保持焦强分布稳定），论证顶层主导聚焦相位的架构可通过解耦色散补偿任务来换取更高的对准容差，但需接受效率绝对值的妥协。",
+              "source_handles": [
+                "P0148",
+                "P0139",
+                "P0061"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [
+        {
+          "table_id": "CH3_U03_T01",
+          "purpose": "比较不同架构与误差类型对大孔径效率的影响机制。",
+          "columns": [
+            "架构/误差类型",
+            "孔径尺度",
+            "主要影响机制",
+            "效率/性能表现"
+          ],
+          "row_tasks": [
+            {
+              "content": "单波长大孔径拼接 (均匀误差)",
+              "source_uses": [
+                {
+                  "source_handle": "P0157",
+                  "role": "比较",
+                  "use": "提供均匀缺失仅单调降低效率的数据。"
+                }
+              ]
+            },
+            {
+              "content": "单波长大孔径拼接 (非均匀误差)",
+              "source_uses": [
+                {
+                  "source_handle": "P0157",
+                  "role": "比较",
+                  "use": "提供内/外圈缺失引发斯特列尔比骤降的数据。"
+                }
+              ]
+            },
+            {
+              "content": "多层光谱分束 (层间错位)",
+              "source_uses": [
+                {
+                  "source_handle": "P0148",
+                  "role": "比较",
+                  "use": "提供 2μm 错位导致效率暴跌的数据。"
+                }
+              ]
+            },
+            {
+              "content": "相位解耦双层 (层间错位)",
+              "source_uses": [
+                {
+                  "source_handle": "P0139",
+                  "role": "比较",
+                  "use": "提供 0-1.5μm 错位保持焦强分布稳定的数据。"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "owner_fields_present": [
+        "argument_relations",
+        "cases",
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "ordered_development",
+        "relations_limits",
+        "transition"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 293005,
+      "reserved_input_tokens": 336358,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 377318,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 2.328472,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 51,
+      "with_study_summary_A": 51,
+      "with_review_planning_B": 51,
+      "with_deep_read_material": [
+        "P0001",
+        "P0069",
+        "P0081",
+        "P0090",
+        "P0139",
+        "P0148",
+        "P0157"
+      ],
+      "with_supplement_material": 2,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0001",
+        "P0069",
+        "P0081",
+        "P0090",
+        "P0139",
+        "P0148",
+        "P0157"
+      ],
+      "chapter_tool_materials": 17,
+      "read_from_disk": [
+        "P0001",
+        "P0004",
+        "P0017",
+        "P0018",
+        "P0022",
+        "P0023",
+        "P0033",
+        "P0050",
+        "P0052",
+        "P0059",
+        "P0061",
+        "P0063",
+        "P0069",
+        "P0077",
+        "P0079",
+        "P0081",
+        "P0090",
+        "P0094",
+        "P0099",
+        "P0106",
+        "P0110",
+        "P0112",
+        "P0117",
+        "P0121",
+        "P0126",
+        "P0128",
+        "P0131",
+        "P0134",
+        "P0139",
+        "P0147",
+        "P0148",
+        "P0154",
+        "P0157",
+        "P0159",
+        "P0160",
+        "P0162",
+        "P0165",
+        "P0176",
+        "P0179",
+        "P0181",
+        "P0183",
+        "P0192",
+        "P0196",
+        "P0202",
+        "P0204",
+        "P0210",
+        "P0225",
+        "P0230",
+        "P0231",
+        "P0235",
+        "P0246"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U03/6d497ef7543faacd158deed2f33edb364911407a6415a570160fcca1762a9567/attempt_001/RAW_RESPONSE.json",
+      "sha256": "2eef5a55d58dd71573ba99daf5985d6dae744f59a6b2acfe7973f209cff65e7e",
+      "bytes": 255685
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH3/CH3_U03/6d497ef7543faacd158deed2f33edb364911407a6415a570160fcca1762a9567/attempt_001/transport/6d497ef7543faacd-attempt_001-invoke5a470c976d6c40d0-key0-attempt0.sse.raw",
+      "sha256": "4f25ad416705c0302c06049dd47aa4e893460eb86eb6718d592e0f60c19f239d",
+      "bytes": 195998
+    },
+    "response_payload_sha256": "4f25ad416705c0302c06049dd47aa4e893460eb86eb6718d592e0f60c19f239d",
+    "sse_payload_sha256": "4f25ad416705c0302c06049dd47aa4e893460eb86eb6718d592e0f60c19f239d"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH3/CH3_U03/6d497ef7543faacd158deed2f33edb364911407a6415a570160fcca1762a9567/attempt_001/quality/ecf186b2af693f7861ced7d43d7d78e0cc085fd92db29027210c0f6d99fe56f7/QUALITY_BODY.md",
+    "sha256": "974ccb5f9a55bf8af86c2c71af4c539d181554352818abf66505774a8ff7bfdb",
+    "bytes": 6730
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

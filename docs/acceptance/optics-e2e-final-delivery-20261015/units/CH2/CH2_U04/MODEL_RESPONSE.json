@@ -1,0 +1,455 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH2",
+  "unit_id": "CH2_U04",
+  "attempt_dir": "<BODY_W>/units/CH2/CH2_U04/732e1f06d120298fe412217f7be9b037484c871ca218b953f68cc1da40580300/attempt_001",
+  "model_source_attempt_dir": "<BODY_W>/units/CH2/CH2_U04/732e1f06d120298fe412217f7be9b037484c871ca218b953f68cc1da40580300/attempt_001",
+  "attempt": "attempt_001",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": null,
+  "format_recovery": null,
+  "content": "{\n  \"body_markdown\": \"当单层超表面的相位 - 色散自由度不足以支撑高数值孔径（NA）与宽带宽的同时实现时，引入折射元件或计算后处理成为突破物理极限的替代路径。混合折射 - 衍射架构（Hybrid Achromatic Metalens, HAML）通过将色散负担分担给传统折射元件或相位板，避免了单一超表面群延迟饱和的问题。在 P0072 展示的混合设计中，通过递归光线追踪算法将相位板与纳米柱金属透镜结合，合并式（Merged）结构在近红外波段（1000-1800 nm）实现了平均聚焦效率超过 60%（最高达 80%）的消色差性能，且斯特列尔比（Strehl ratio）大于 0.8；相比之下，为追求更高 NA（0.32）而采用的空气间隔式（Air-Spaced）结构虽然保持了宽带消色差能力，但平均效率降至 27%[P0072]。这种效率衰减揭示了混合架构中结构复杂度与光学性能的路径依赖：虽然 P0143 指出通过整体协同设计（将折射元件与超表面作为整体优化）可消除残余色散并实现厘米级尺度，但超表面单元库的色散覆盖范围仍是限制高 NA 下效率的关键瓶颈 [P0143]。此外，P0156 利用 3D 打印技术在可见光波段实现了 NA 0.3-0.47 的混合微透镜，聚焦效率在 30%-70% 之间，进一步证实了在高 NA 下维持宽带消色差需以效率损失或工艺复杂度为代价 [P0156]。与纯衍射单层架构相比（如 P0243 所示，其可见光波段效率可达 86% 但带宽受限），混合方案在扩展带宽的同时引入了界面反射、对准误差及折射材料吸收等新的损耗机制 [P0243][P0226]。\\n\\n若光学自由度的增加受限于制造或材料物理，计算成像提供了另一条通过牺牲信噪比（SNR）换取光谱不变性的路径。扩展景深（EDOF）波前编码技术通过在超表面相位中引入立方项或对数非球面项，使点扩散函数（PSF）在宽光谱范围内保持形态一致，从而允许使用单一数字滤波器进行去卷积重建。P0069 的实验表明，经过维纳滤波去卷积后的 EDOF 系统在全可见光谱下的结构相似性指数（SSIM）比未去卷积基线提高了 0.209，显著减轻了色差模糊；然而，这种清晰度的提升是以 SNR 损失为代价的，去卷积后的图像 SNR 低于传统单片透镜在绿光对焦清晰时的 SNR[P0069]。P0112 通过逆设计进一步优化了 EDOF 超透镜，在 1 mm 孔径下实现了 290 nm 的光学带宽，但明确指出为了获得宽光谱下均匀的调制传递函数（MTF），必须在设计波长处牺牲部分 MTF 体积（volume under MTF curve）[P0112]。P0134 的对比研究进一步量化了不同相位掩模的权衡：虽然对数非球面（Log-asphere）设计可将光学带宽扩展至约 233 nm，优于立方相位的 112 nm，但其聚焦效率随波长波动较大，且依赖后处理反卷积 [P0134]。与纯光学效率基准（如 P0243）相比，计算成像方案在系统级指标（如 OPM）上往往因 SNR 损失而表现逊色，表明其适用于对体积敏感但对实时性或低光性能要求不苛刻的场景 [P0001][P0243]。\\n\\n在变焦与色散管理的特定应用中，Alvarez 架构通过横向位移调谐焦距提供了另一种自由度，但其适用边界受限于衍射效率与视场。P0157 演示了基于 Alvarez 原理的金属透镜双合透镜，通过横向位移实现了超过 200% 的焦距变化范围（667 屈光度变化）；然而，在可见光波段，由于步进式光刻的晶格周期接近波长，高阶衍射导致聚焦效率降至 15%（红外波段可达 57%），且未实现真正的 parfocal 变焦（需配合像面移动）[P0157]。P0059 与 P0063 的研究进一步表明，虽然四次超表面或大面积可调金属透镜能实现消色差变焦成像，但系统往往依赖计算去卷积来补偿残余色差，且小孔径（~1 mm）限制了光子收集能力，导致低光照下 SNR 不足 [P0059][P0063]。此外，Alvarez 架构的非线性调谐特性要求高精度的机械致动，在无中继光学的紧凑系统中，离轴像差与高阶衍射损耗共同制约了其在大视场下的成像质量 [P0157]。综上，无论是混合折射 - 衍射、计算成像还是变焦架构，均在突破单层物理极限的同时引入了系统体积、SNR 损失或制造复杂度的新约束，需依据具体应用场景在带宽、效率与集成度之间进行权衡。\",\n  \"issues\": []\n}",
+  "content_sha256": "10a10af8d2f57f4d8934206bbc7cc5cfc0d423745bd7f4d71a0d35db2b7fdcdc",
+  "usage": {
+    "completion_tokens": 3101,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1919,
+      "text_tokens": 3101
+    },
+    "prompt_tokens": 208820,
+    "prompt_tokens_details": {
+      "text_tokens": 208820
+    },
+    "total_tokens": 211921
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": 61.687000000005355,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-04282197-039a-96ef-96cc-b407192c65de",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_with_pending",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "b1c7310c44716100bacfbbc2b2af39759a8ede542a430932bd6e4bb7022c3f46",
+    "original_body_sha256": "79b867b8e32c913351e560d79f070b2d4e679524822bb00bf86c60aced760939",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U04/732e1f06d120298fe412217f7be9b037484c871ca218b953f68cc1da40580300/attempt_001/REQUEST.json",
+      "sha256": "4c73b79e54af86b5e15668d1d005d60cdf3e3bb9649fc6d455a5e12c45802f0c",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U04/732e1f06d120298fe412217f7be9b037484c871ca218b953f68cc1da40580300/attempt_001/UNIT_INPUT.json",
+      "sha256": "54fda4d5fef8577c4eabc03aa91cc65ab2893030c9c2131bc4c88cb06a25058e",
+      "bytes": 621719
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U04/732e1f06d120298fe412217f7be9b037484c871ca218b953f68cc1da40580300/UNIT_PACK.json",
+      "sha256": "9c54adc8526ab692e17350dd37b0cde210afdbcb39285b8c4981872dc7dfec6f",
+      "bytes": 767742
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U04/732e1f06d120298fe412217f7be9b037484c871ca218b953f68cc1da40580300/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "45af51d811199630b832136694a0d8e8521d5a13791b46978e86ccfdce4a8f6f",
+      "bytes": 803805
+    },
+    "identity": {
+      "chapter_id": "CH2",
+      "unit_id": "CH2_U04",
+      "language": "zh",
+      "source_handles": [
+        "P0072",
+        "P0143",
+        "P0156",
+        "P0226",
+        "P0225",
+        "P0079",
+        "P0243",
+        "P0069",
+        "P0112",
+        "P0134",
+        "P0106",
+        "P0157",
+        "P0059",
+        "P0063",
+        "P0148",
+        "P0139",
+        "P0061",
+        "P0231",
+        "P0131",
+        "P0210",
+        "P0179",
+        "P0181",
+        "P0117",
+        "P0147",
+        "P0110",
+        "P0033",
+        "P0001",
+        "P0077",
+        "P0128",
+        "P0050",
+        "P0018",
+        "P0165",
+        "P0154",
+        "P0202",
+        "P0090",
+        "P0099",
+        "P0160",
+        "P0235",
+        "P0004",
+        "P0162",
+        "P0204",
+        "P0121"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "结合折射元件或计算后处理可绕过纯光学色散工程的硬性约束，但引入系统体积或 SNR 损失。",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "CH2_U04_P01",
+          "point": "阐述混合折射 - 衍射架构的色散分担机制与效率表现。",
+          "development": "对比 P0072 中合并式与空气间隔式 HAML 的相位导数分布，量化 NIR 波段>60% 效率的实现条件，指出高 NA 下的效率衰减趋势。",
+          "source_uses": [
+            {
+              "source_handle": "P0072",
+              "role": "主论据",
+              "use": "混合消色差金属透镜（HAML）在 1000-1800 nm 波段效率>60%"
+            },
+            {
+              "source_handle": "P0143",
+              "role": "主论据",
+              "use": "探讨混合透镜中超表面单元库限制导致的残余色散问题"
+            },
+            {
+              "source_handle": "P0156",
+              "role": "例证",
+              "use": "提供 3D 打印混合微透镜的实测数据，量化高 NA 下折射与衍射分量功率分配影响"
+            },
+            {
+              "source_handle": "P0226",
+              "role": "例证",
+              "use": "展示利用亚波长波导人工色散校正大型球面透镜的案例"
+            },
+            {
+              "source_handle": "P0225",
+              "role": "背景",
+              "use": "提供衍射透镜超宽带聚焦的色散校正背景"
+            },
+            {
+              "source_handle": "P0079",
+              "role": "例证",
+              "use": "提供单片集成超轴突簇的消色差成像案例"
+            },
+            {
+              "source_handle": "P0243",
+              "role": "比较",
+              "use": "展示纯衍射单层架构的固有带宽瓶颈，为混合方案提供对比基准"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH2_U04_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH2_U04_P01",
+              "unit_id": "CH2_U04",
+              "ordinal": 1,
+              "point": "阐述混合折射 - 衍射架构的色散分担机制与效率表现。",
+              "development": "对比 P0072 中合并式与空气间隔式 HAML 的相位导数分布，量化 NIR 波段>60% 效率的实现条件，指出高 NA 下的效率衰减趋势。",
+              "source_handles": [
+                "P0072"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH2_U04_P02",
+          "point": "解析 EDOF 波前编码的计算成像权衡路径。",
+          "development": "分析 P0069 光谱不变 PSF 的生成原理，对比 SSIM 提升（+0.209）与 SNR 损失的定量关系，论证计算后处理对光学带宽扩展的补偿作用及其代价；引用 P0112 说明 MTF 体积牺牲。",
+          "source_uses": [
+            {
+              "source_handle": "P0069",
+              "role": "主论据",
+              "use": "EDOF 设计实现光谱不变模糊，报告 57% 平均聚焦效率"
+            },
+            {
+              "source_handle": "P0112",
+              "role": "例证",
+              "use": "逆设计 EDOF 透镜在 1 mm 孔径下实现 290 nm 带宽"
+            },
+            {
+              "source_handle": "P0134",
+              "role": "背景",
+              "use": "提供消色差计算成像 EDOF 金属透镜的设计背景"
+            },
+            {
+              "source_handle": "P0106",
+              "role": "背景",
+              "use": "提供宽视场金属透镜原理综述，辅助说明 FOV 权衡"
+            },
+            {
+              "source_handle": "P0243",
+              "role": "比较",
+              "use": "作为纯光学效率基准，对比计算成像的系统级 SNR 代价"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH2_U04_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH2_U04_P02",
+              "unit_id": "CH2_U04",
+              "ordinal": 2,
+              "point": "解析 EDOF 波前编码的计算成像权衡路径。",
+              "development": "分析 P0069 光谱不变 PSF 的生成原理，对比 SSIM 提升（+0.209）与 SNR 损失的定量关系，论证计算后处理对光学带宽扩展的补偿作用及其代价；引用 P0112 说明 MTF 体积牺牲。",
+              "source_handles": [
+                "P0069",
+                "P0112"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH2_U04_P03",
+          "point": "评估 Alvarez 架构在变焦与色散管理中的适用边界。",
+          "development": "讨论 P0157 中横向位移调谐焦距的非线性特性，分析晶格周期接近波长时的高阶衍射损耗，界定其在无中继光学系统中的局限。",
+          "source_uses": [
+            {
+              "source_handle": "P0157",
+              "role": "主论据",
+              "use": "Alvarez 变焦透镜实现>200% 焦距变化范围，但高阶衍射导致效率受限"
+            },
+            {
+              "source_handle": "P0059",
+              "role": "例证",
+              "use": "提供可见光四次超表面同时消色差和变焦成像案例"
+            },
+            {
+              "source_handle": "P0063",
+              "role": "例证",
+              "use": "提供大面积焦距可调金属透镜的变焦成像案例"
+            },
+            {
+              "source_handle": "P0243",
+              "role": "比较",
+              "use": "作为固定焦距基准，对比变焦架构的复杂度与效率代价"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH2_U04_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH2_U04_P03",
+              "unit_id": "CH2_U04",
+              "ordinal": 3,
+              "point": "评估 Alvarez 架构在变焦与色散管理中的适用边界。",
+              "development": "讨论 P0157 中横向位移调谐焦距的非线性特性，分析晶格周期接近波长时的高阶衍射损耗，界定其在无中继光学系统中的局限。",
+              "source_handles": [
+                "P0157"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "owner_fields_present": [
+        "argument_relations",
+        "cases",
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "evidence_conditions_and_limits",
+        "material_supported_relations",
+        "ordered_development",
+        "transition"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 208810,
+      "reserved_input_tokens": 242060,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 283020,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 1.95128,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 42,
+      "with_study_summary_A": 42,
+      "with_review_planning_B": 42,
+      "with_deep_read_material": [
+        "P0069",
+        "P0090",
+        "P0139",
+        "P0148",
+        "P0157"
+      ],
+      "with_supplement_material": 1,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0069",
+        "P0090",
+        "P0139",
+        "P0148"
+      ],
+      "chapter_tool_materials": 8,
+      "read_from_disk": [
+        "P0001",
+        "P0004",
+        "P0018",
+        "P0033",
+        "P0050",
+        "P0059",
+        "P0061",
+        "P0063",
+        "P0069",
+        "P0072",
+        "P0077",
+        "P0079",
+        "P0090",
+        "P0099",
+        "P0106",
+        "P0110",
+        "P0112",
+        "P0117",
+        "P0121",
+        "P0128",
+        "P0131",
+        "P0134",
+        "P0139",
+        "P0143",
+        "P0147",
+        "P0148",
+        "P0154",
+        "P0156",
+        "P0157",
+        "P0160",
+        "P0162",
+        "P0165",
+        "P0179",
+        "P0181",
+        "P0202",
+        "P0204",
+        "P0210",
+        "P0225",
+        "P0226",
+        "P0231",
+        "P0235",
+        "P0243"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U04/732e1f06d120298fe412217f7be9b037484c871ca218b953f68cc1da40580300/attempt_001/RAW_RESPONSE.json",
+      "sha256": "e69b40746a2bb24ef02f6521b933f9480a22e946dc2df35524b56a74ba052a1d",
+      "bytes": 354690
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U04/732e1f06d120298fe412217f7be9b037484c871ca218b953f68cc1da40580300/attempt_001/transport/732e1f06d120298f-attempt_001-invoke677aef7825754e1e-key0-attempt0.sse.raw",
+      "sha256": "ad3ceff2029c3265b0b47ab3ee8ede382ac53535ead98b51d2fd3d2d2adcf851",
+      "bytes": 277965
+    },
+    "response_payload_sha256": "ad3ceff2029c3265b0b47ab3ee8ede382ac53535ead98b51d2fd3d2d2adcf851",
+    "sse_payload_sha256": "ad3ceff2029c3265b0b47ab3ee8ede382ac53535ead98b51d2fd3d2d2adcf851"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH2/CH2_U04/732e1f06d120298fe412217f7be9b037484c871ca218b953f68cc1da40580300/attempt_001/quality/4f9b492dbc21777dd3b143622c3ef1fbb7837a158fd6c807c93bc658cb059b40/QUALITY_BODY.md",
+    "sha256": "dafefd3746646281f9f502a0d2bd148d6c14cf19cc842785d17d315cc442bc1f",
+    "bytes": 6898
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

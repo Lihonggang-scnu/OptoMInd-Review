@@ -1,0 +1,447 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH2",
+  "unit_id": "CH2_U02",
+  "attempt_dir": "<BODY_W>/units/CH2/CH2_U02/eb7670f0c1a8557bca6a50566194cd8009fa9e6d934d0a3b9460e75982498b19/attempt_001",
+  "model_source_attempt_dir": "<BODY_W>/units/CH2/CH2_U02/eb7670f0c1a8557bca6a50566194cd8009fa9e6d934d0a3b9460e75982498b19/attempt_001",
+  "attempt": "attempt_001",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": null,
+  "format_recovery": null,
+  "content": "```json\n{\n  \"body_markdown\": \"增加垂直维度的设计自由度为突破单层超表面的相位 - 色散覆盖限制提供了新路径。阶梯相位色散补偿（SPDC）层通过引入光学厚度差ΔL(0) 分担色散补偿需求，使元原子仅需较小色散即可支持大半径 [P0022]。在 NA=0.9、半径 20.1 μm 的设计中，采用 6 个台阶（每台阶宽 2.7 μm）的 GaN 基底结合 c-Si 纳米柱，将所需元原子最大相位色散从传统设计的 13.60π降至 2.20π，理论上可在 650-1000 nm 波段实现消色差聚焦 [P0022]。然而，实测聚焦效率约 10%，显著低于模拟值 22.4%-29.1%，主要归因于 FIB 刻蚀导致的阶梯制造偏差 [P0022]。这种垂直堆叠策略通过分区复用元原子库，在固定焦距下使透镜半径可随光学厚度差增加而扩展，但制造复杂度随之上升 [P0022][P0140]。类似地，双层架构通过有效阿贝数概念指导平凸/平凹结构设计，利用层间轴向自由度解耦聚焦相位与色散补偿，在可见光波段实现平均聚焦效率高于 50%[P0201]。太赫兹波段的大孔径案例（直径 2.21 cm，NA=0.13）虽采用单层设计，但其离散多波长策略与 PSO 优化方法为多层系统的孔径扩展提供了参考基准 [P0004]。与单层 TiO₂平台相比（NA=0.8 时效率 86%），多层垂直解耦策略在维持高 NA 的同时扩展了带宽，但引入了对准容差的新要求 [P0243]。\\n\\n垂直堆叠架构的对准容差表现呈现显著的设计依赖性，而非多层结构的固有属性。相位解耦型双层消色差透镜（NA=0.15，1000-1700 nm）通过顶层几何相位主导聚焦、底层传播相位负责色散补偿的分配策略，在 0-1.5 μm 层间横向错位下焦强分布保持相似且焦距几乎不变 [P0139]。这种鲁棒性源于聚焦功能主要依赖于对波长不敏感的几何相位，底层色散补偿仅修正相位斜率而非决定焦点位置的核心几何结构 [P0139]。相比之下，光谱分束或多波长独立控制设计对错位更为敏感 [P0148]。在 PDMS 键合的双层双合透镜中，模拟显示 2 μm 横向错位导致聚焦效率显著下降至 5.4%（1180 nm）、8.8%（1400 nm）和 18.4%（1680 nm），这与实验观测到的低效率（5.1%-22%）接近 [P0148]。该差异归因于光谱分束器需要不规则纳米柱排列以实现特定光斑分布，层间错位直接破坏相位连续性 [P0148]。伴随法优化的 2.5D 元结构研究进一步揭示，层数增加（单层→双层→三层）可提升聚焦效率（双波长 780/915 nm 下三层达 54%/52%，双层为 40%/32%），但层间对准偏差对性能的影响阈值需在设计阶段纳入考量 [P0131]。宽视场超表面双合透镜的单色像差校正案例表明，即使在不涉及色散补偿的情况下，双层结构也需精确对准以维持 Strehl 比>0.9[ P0117]。综述分析指出，对于代表性双联透镜，侧壁锥角从 0°增至 12.5°时平均聚焦效率从 68.14% 降至 19.64%，且纳米级直径偏差（>±5 nm）即可使效率降至 90% 以下 [P0061]。这些结果表明，容差表现取决于相位分配策略：解耦聚焦与色散的设计具有较高鲁棒性，而光谱分束等复杂排列对错位极度敏感。\\n\\n3D 打印多层架构在可见光波段展示了打破单层 NA-带宽权衡的潜力，但面临效率与尺寸的制约。采用低折射率树脂（IP-Dip，n~1.56）结合伴随法拓扑优化的三层结构，在 NA=0.5 时实现平均聚焦效率约 42%（模拟值），NA=0.7 时降至约 20%[P0220]。实验测量效率在 22.5%-42.7% 之间（NA=0.5）和 13.3%-22.1% 之间（NA=0.7），显著低于模拟值，归因于制造缺陷、非理想光源和杂散光 [P0220]。层数参数扫描显示，单层设计性能较差，增加层数可突破 trade-off，但超过 3 层后因界面反射和散射增加效率开始下降；层间距过小（<0.5 μm）导致强耦合降低透射功率，过大（>2 μm）导致高阶衍射损耗，最优间距约为 1.6 μm[P0220]。打印分辨率对性能影响显著：25 nm 容差导致细节丢失时效率急剧下降，表明精细表面形貌对多波长光的引导至关重要 [P0220]。太赫兹波段的 3D 打印案例（NA=0.555，0.2-0.9 THz）实现了超宽带消色差超聚焦，FWHM 约 0.8λ，聚焦效率在低频段接近 80%，但高频段因离散化误差略有下降 [P0050]。与光刻工艺相比，3D 打印在结构保真度上存在差异，但提供了低色散材料（Abbe 数~35.2）与多层堆叠协同的可能性 [P0243]。然而，当前 3D 打印多层结构尺寸微小（直径 20 μm），尚未在大口径或复杂基底上验证可扩展性，且测试波长范围受限于 CMOS 传感器（仅 442-646 nm 有数据）[P0220]。这表明，虽然垂直自由度增加缓解了带宽 -NA 矛盾，但几何参数搜索空间爆炸推动逆向设计方法的兴起以应对高维优化挑战，同时制造精度成为制约实际性能的关键瓶颈。\",\n  \"issues\": []\n}\n```",
+  "content_sha256": "2b0a03dd07ac0e007ae5025ebade2b0ba780e8471c65a2f461a246dd7907569c",
+  "usage": {
+    "completion_tokens": 2367,
+    "completion_tokens_details": {
+      "reasoning_tokens": 870,
+      "text_tokens": 2367
+    },
+    "prompt_tokens": 221937,
+    "prompt_tokens_details": {
+      "text_tokens": 221937
+    },
+    "total_tokens": 224304
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": 49.81300000000192,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-4fd84446-d9ac-9b86-8bf0-c94c44e32f3f",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_pending_human_review",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "815752e39e01b6a220b0613a2be9e8e87cf33a005c68775d3a6a7acb7b5cc52f",
+    "original_body_sha256": "60359a07cd7da3e7fbb02f5e7ccf2cdc357a94367fe83e04d4e35541be3d8a4d",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U02/eb7670f0c1a8557bca6a50566194cd8009fa9e6d934d0a3b9460e75982498b19/attempt_001/REQUEST.json",
+      "sha256": "9f4b01a6541e580accc5bafeddbf634d068c90302203a641068c0987d222b48f",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U02/eb7670f0c1a8557bca6a50566194cd8009fa9e6d934d0a3b9460e75982498b19/attempt_001/UNIT_INPUT.json",
+      "sha256": "cfdbaad8ad9f5c8691f23af9e058a6917ce65efc591e2418798f0bf73a25d281",
+      "bytes": 671646
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U02/eb7670f0c1a8557bca6a50566194cd8009fa9e6d934d0a3b9460e75982498b19/UNIT_PACK.json",
+      "sha256": "08561d2d8a86e531299936bf8129c005298b6c4881e4205b9d7631f0d4dda144",
+      "bytes": 818014
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U02/eb7670f0c1a8557bca6a50566194cd8009fa9e6d934d0a3b9460e75982498b19/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "1e62834633ccd77d11eb432155fe69289d6b8f8fa814291749a35127a13d5021",
+      "bytes": 855595
+    },
+    "identity": {
+      "chapter_id": "CH2",
+      "unit_id": "CH2_U02",
+      "language": "zh",
+      "source_handles": [
+        "P0022",
+        "P0140",
+        "P0147",
+        "P0201",
+        "P0004",
+        "P0243",
+        "P0139",
+        "P0148",
+        "P0117",
+        "P0131",
+        "P0220",
+        "P0050",
+        "P0061",
+        "P0231",
+        "P0210",
+        "P0179",
+        "P0181",
+        "P0110",
+        "P0033",
+        "P0112",
+        "P0001",
+        "P0069",
+        "P0059",
+        "P0077",
+        "P0134",
+        "P0128",
+        "P0018",
+        "P0165",
+        "P0154",
+        "P0202",
+        "P0090",
+        "P0099",
+        "P0160",
+        "P0235",
+        "P0162",
+        "P0106",
+        "P0204",
+        "P0121",
+        "P0063",
+        "P0225",
+        "P0079",
+        "P0157"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "增加垂直维度的层数或厚度阶梯可解耦相位与色散需求，显著扩展带宽与 NA 组合，但对准误差和制造复杂度成为新的制约因素。",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "CH2_U02_P01",
+          "point": "阐释 SPDC 阶梯层机制如何解耦孔径与带宽限制。",
+          "development": "分析 P0022 中分区复用策略与光学厚度差的数学关系，说明 6 个台阶（2.7μm 宽）如何按需扩大透镜半径，同时指出制造偏差对效率的具体折损（实测 10% vs 理论 22-29%）。",
+          "source_uses": [
+            {
+              "source_handle": "P0022",
+              "role": "主论据",
+              "use": "通过 SPDC 层（6 个台阶）替代水平色散需求，实现 NA=0.9"
+            },
+            {
+              "source_handle": "P0140",
+              "role": "主论据",
+              "use": "展示多层亚波长结构通过色散协同机制实现宽带消色差"
+            },
+            {
+              "source_handle": "P0147",
+              "role": "例证",
+              "use": "提供复合功能超表面在多光谱消色差中的应用案例"
+            },
+            {
+              "source_handle": "P0201",
+              "role": "主论据",
+              "use": "引入有效阿贝数概念指导双层平凸/平凹结构设计"
+            },
+            {
+              "source_handle": "P0004",
+              "role": "例证",
+              "use": "提供太赫兹波段大孔径多层消色差案例，作为孔径扩展参考"
+            },
+            {
+              "source_handle": "P0243",
+              "role": "比较",
+              "use": "作为单层基线，对比多层垂直解耦策略的效率增益"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH2_U02_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH2_U02_P01",
+              "unit_id": "CH2_U02",
+              "ordinal": 1,
+              "point": "阐释 SPDC 阶梯层机制如何解耦孔径与带宽限制。",
+              "development": "分析 P0022 中分区复用策略与光学厚度差的数学关系，说明 6 个台阶（2.7μm 宽）如何按需扩大透镜半径，同时指出制造偏差对效率的具体折损（实测 10% vs 理论 22-29%）。",
+              "source_handles": [
+                "P0022"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH2_U02_P02",
+          "point": "对比不同垂直架构的对准容差表现与设计依赖性。",
+          "development": "解析 P0139 的相位分配策略（解耦聚焦 vs 色散）如何决定容差上限（0-1.5μm 鲁棒），对比 P0148 光谱分束的高敏感性（2μm 错位效率降至 5.4-18.4%），强调容差非固有属性而是设计产物。",
+          "source_uses": [
+            {
+              "source_handle": "P0139",
+              "role": "例证",
+              "use": "双层消色差透镜在 0-1.5μm 对准误差下焦强分布相似"
+            },
+            {
+              "source_handle": "P0148",
+              "role": "例证",
+              "use": "双层双合透镜在 2μm 错位下效率降至 5.4-18.4%"
+            },
+            {
+              "source_handle": "P0117",
+              "role": "例证",
+              "use": "提供宽视场超表面双合透镜的单色像差校正参考"
+            },
+            {
+              "source_handle": "P0131",
+              "role": "主论据",
+              "use": "揭示伴随法优化中层数增加带来的聚焦效率提升规律及对准偏差影响"
+            },
+            {
+              "source_handle": "P0243",
+              "role": "比较",
+              "use": "说明增加层数对制造复杂度与对准容差的新要求"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH2_U02_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH2_U02_P02",
+              "unit_id": "CH2_U02",
+              "ordinal": 2,
+              "point": "对比不同垂直架构的对准容差表现与设计依赖性。",
+              "development": "解析 P0139 的相位分配策略（解耦聚焦 vs 色散）如何决定容差上限（0-1.5μm 鲁棒），对比 P0148 光谱分束的高敏感性（2μm 错位效率降至 5.4-18.4%），强调容差非固有属性而是设计产物。",
+              "source_handles": [
+                "P0139",
+                "P0148"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "CH2_U02_P03",
+          "point": "评估 3D 打印多层架构在可见光波段的性能边界。",
+          "development": "讨论 P0220 中低折射率材料与多层堆叠的协同效应，量化 NA 提升对效率的负面影响（NA=0.5 效率~42%，NA=0.7 效率~20%），指出小尺寸限制与大视场扩展的矛盾。",
+          "source_uses": [
+            {
+              "source_handle": "P0220",
+              "role": "例证",
+              "use": "3D 打印多层结构（3 层最佳）打破单层 NA-带宽限制"
+            },
+            {
+              "source_handle": "P0050",
+              "role": "例证",
+              "use": "提供 3D 打印太赫兹超宽带消色差超透镜案例，作为工艺扩展参考"
+            },
+            {
+              "source_handle": "P0243",
+              "role": "比较",
+              "use": "对比光刻工艺与 3D 打印在结构保真度上的差异"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "CH2_U02_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "CH2_U02_P03",
+              "unit_id": "CH2_U02",
+              "ordinal": 3,
+              "point": "评估 3D 打印多层架构在可见光波段的性能边界。",
+              "development": "讨论 P0220 中低折射率材料与多层堆叠的协同效应，量化 NA 提升对效率的负面影响（NA=0.5 效率~42%，NA=0.7 效率~20%），指出小尺寸限制与大视场扩展的矛盾。",
+              "source_handles": [
+                "P0220"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "owner_fields_present": [
+        "argument_relations",
+        "cases",
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "evidence_conditions_and_limits",
+        "material_supported_relations",
+        "ordered_development",
+        "transition"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 221927,
+      "reserved_input_tokens": 256751,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 297711,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 2.010044,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 42,
+      "with_study_summary_A": 42,
+      "with_review_planning_B": 42,
+      "with_deep_read_material": [
+        "P0022",
+        "P0069",
+        "P0090",
+        "P0139",
+        "P0148",
+        "P0157"
+      ],
+      "with_supplement_material": 1,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0022",
+        "P0069",
+        "P0090",
+        "P0139",
+        "P0148"
+      ],
+      "chapter_tool_materials": 8,
+      "read_from_disk": [
+        "P0001",
+        "P0004",
+        "P0018",
+        "P0022",
+        "P0033",
+        "P0050",
+        "P0059",
+        "P0061",
+        "P0063",
+        "P0069",
+        "P0077",
+        "P0079",
+        "P0090",
+        "P0099",
+        "P0106",
+        "P0110",
+        "P0112",
+        "P0117",
+        "P0121",
+        "P0128",
+        "P0131",
+        "P0134",
+        "P0139",
+        "P0140",
+        "P0147",
+        "P0148",
+        "P0154",
+        "P0157",
+        "P0160",
+        "P0162",
+        "P0165",
+        "P0179",
+        "P0181",
+        "P0201",
+        "P0202",
+        "P0204",
+        "P0210",
+        "P0220",
+        "P0225",
+        "P0231",
+        "P0235",
+        "P0243"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U02/eb7670f0c1a8557bca6a50566194cd8009fa9e6d934d0a3b9460e75982498b19/attempt_001/RAW_RESPONSE.json",
+      "sha256": "c9f6682626f886f3fc2d31fca2834a60f7d5161db2aa1a45b52308f88677767f",
+      "bytes": 271873
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH2/CH2_U02/eb7670f0c1a8557bca6a50566194cd8009fa9e6d934d0a3b9460e75982498b19/attempt_001/transport/eb7670f0c1a8557b-attempt_001-invoke16454e3926a74340-key0-attempt0.sse.raw",
+      "sha256": "5ccfb8cf66cc02d1e66c54275825f9541986f3d292f5b8bc827d95ff23a88787",
+      "bytes": 212265
+    },
+    "response_payload_sha256": "5ccfb8cf66cc02d1e66c54275825f9541986f3d292f5b8bc827d95ff23a88787",
+    "sse_payload_sha256": "5ccfb8cf66cc02d1e66c54275825f9541986f3d292f5b8bc827d95ff23a88787"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH2/CH2_U02/eb7670f0c1a8557bca6a50566194cd8009fa9e6d934d0a3b9460e75982498b19/attempt_001/quality/a01570ae000b4f9ba0a6cc27fd36bbf93028ef10b77089676f1d301b09c2d9d1/QUALITY_BODY.md",
+    "sha256": "6c77dfca7b3e2656dfbf595a08e5e313a6341bd20dc358c43463f926ff2a4ebe",
+    "bytes": 5026
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

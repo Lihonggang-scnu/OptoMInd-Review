@@ -1,0 +1,117 @@
+{
+  "schema": "optomind.public_body_v34_part_response_projection.v1",
+  "part": "conception",
+  "generation_class": "new_generation",
+  "free_recovery": false,
+  "content": "```json\n{\n  \"manuscript_parts_plan\": {\n    \"context\": \"目标读者为光学设计与超表面领域的研究者及工程师，需理解宽带消色差介电超透镜在带宽、数值孔径、效率、孔径与视场间的多维权衡。本文用途为建立性能边界评估框架，而非提供单一最优设计方案。知识负担包括物理极限公式、设计策略分类、效率衰减机制及系统级指标。已确认格式为综述性正文，三部件均为 standalone 模式，由应用层统一添加标题。\",\n    \"abstract\": {\n      \"purpose\": \"使未阅读全文者独立理解研究对象、范围、组织价值及最重要的有条件认识，无需逐章浏览即可把握核心权衡关系与技术定位。\",\n      \"focus\": [\n        \"宽带消色差介电超透镜的核心物理约束：时间 - 带宽积（TBP）与相位 - 色散空间方程（Eq. 5）确立单层结构中高 NA 与宽带宽不可兼得\",\n        \"设计自由度增加的代价：多层堆叠、逆设计、混合架构可缓解权衡但引入对准敏感性、计算成本或系统体积\",\n        \"效率衰减的原理性机制：振幅变化、相位误差、最近邻耦合与制造误差四重来源，消色差设计以效率损失换取分辨率提升\",\n        \"系统级性能判定：整体性能指标（OPM）显示当前消色差超透镜尚未超越等效常规衍射透镜，多级衍射透镜（MDL）在效率与制造可行性上具综合优势\",\n        \"应用边界明确：超透镜在轻量化、紧凑系统、特殊波段及偏振/相位敏感应用中具不可替代价值，但通用成像性能未确立绝对优势\"\n      ],\n      \"boundary\": [\n        \"不机械罗列五章标题，而是提炼跨章节的核心权衡图谱\",\n        \"不声称'首次'或'全面'，强调条件性认识（如'当前技术阶段''可见光波段实测数据稀缺'）\",\n        \"不提前展开具体案例数据（如 M1B/M2/M3 参数），保留正文详细比较空间\",\n        \"引用句柄限于 BODY 已使用的核心文献（P0003、P0090、P0001、P0187 等）\"\n      ],\n      \"placement\": {\n        \"mode\": \"standalone\",\n        \"anchor\": \"全文开篇，独立于章节编号\"\n      },\n      \"finalize_from\": [\n        \"第 1 章 TBP 与 Eq. 5 物理极限推导\",\n        \"第 2 章设计策略自由度与复杂度权衡分析\",\n        \"第 3 章效率衰减机制与 OPM 系统级评估\",\n        \"第 4 章大孔径相干性约束与混合架构替代路径\",\n        \"第 5 章 MDL 对比与应用边界判定\"\n      ]\n    },\n    \"introduction\": {\n      \"purpose\": \"为目标读者建立阅读理由与理解条件，说明色散工程问题的物理根源、已有认识局限、为何需要本篇系统级权衡视角、实际范围及组织逻辑，避免将引言写成缩小版结论。\",\n      \"focus\": [\n        \"问题背景：传统折射光学在微型化场景面临体积与像差校正复杂度瓶颈，平面光学（超透镜）提供亚波长厚度与波前整形自由度，但宽带消色差引入新的多维权衡\",\n        \"已有认识局限：现有研究多聚焦单一性能指标（如效率或带宽），缺乏系统级权衡框架；单层物理极限（TBP、Eq. 5）已建立，但多层/混合策略的代价量化不足\",\n        \"本篇视角必要性：需整合物理极限、设计策略、效率机制、孔径扩展与系统评估五维度，形成可操作的性能边界评估框架，而非单纯技术路线罗列\",\n        \"实际范围界定：聚焦介电材料（TiO₂、Si、SiN、GaN 等）宽带消色差超透镜，涵盖可见光至近红外为主，太赫兹/长波红外案例作为大孔径参考但明确标注波段差异；排除纯等离激元结构（除非作为效率对比基线）、纯单色设计及纯制造工艺论文\",\n        \"组织逻辑说明：第 1 章确立物理极限基准，第 2 章分析设计策略自由度与代价，第 3 章量化效率衰减机制，第 4 章揭示孔径与视场扩展瓶颈，第 5 章完成系统级对比与应用边界判定\"\n      ],\n      \"boundary\": [\n        \"不提前完成正文的详细比较（如具体效率数值对比、OPM 计算过程）\",\n        \"允许有依据的概括判断（如'单层结构中高 NA 与宽带宽物理上互斥'），但需标注条件（如'基于线性时不变系统假设'）\",\n        \"解释关键概念（如 TBP、相位 - 色散空间、OPM）但不展开推导公式\",\n        \"不虚构未建立的证据链（如'可见光厘米级消色差已成熟'），如实说明实测数据稀缺现状\"\n      ],\n      \"placement\": {\n        \"mode\": \"standalone\",\n        \"anchor\": \"第 1 章之前，独立于章节编号\"\n      },\n      \"finalize_from\": [\n        \"第 1 章物理极限框架（TBP、Eq. 5）\",\n        \"第 2 章设计策略分类（单层/多层/逆设计/混合）\",\n        \"第 5 章系统级评估框架（OPM、MDL 对比）\",\n        \"共享 scope 中关于材料体系、波段范围、排除对象的界定\"\n      ]\n    },\n    \"conclusion\": {\n      \"purpose\": \"综合全文实际建立了什么认识、关系、分类、解释或取舍，以及哪些条件改变判断；保留重要限制、分歧或下一步，但不强制展望，不用缺口清单代替已有认识。\",\n      \"focus\": [\n        \"已确立的核心权衡关系：带宽 -NA- 孔径乘积受元原子库色散范围（ΔΦ'）刚性约束（Eq. 5）；效率损失是色散补偿的固有物理代价而非单纯工艺缺陷；大孔径扩展受光频域相干性下降制约\",\n        \"设计策略的代价量化：多层堆叠可解耦相位与色散但引入对准容差瓶颈（个案显示相位解耦架构在 1.5μm 错位下保持鲁棒，光谱分束架构在 2μm 错位下效率降至 5.4%）；逆设计逼近理论极限但计算成本与制造验证滞后；混合/计算架构以系统体积或 SNR 损失换取光学带宽扩展\",\n        \"系统级性能判定：OPM 指标显示消色差超透镜因效率损失导致整体性能未超越等效常规衍射透镜（如 SWIR 波段 AML OPM 0.55 vs CDL 0.64）；MDL 在效率（宽带>70%）、特征尺寸（微米级）与制造可行性上具综合优势\",\n        \"应用边界明确：超透镜在极致微型化、垂直集成、特殊波段（太赫兹/长波红外）及偏振/相位敏感应用（双光子显微镜、3D 传感点云）中具不可替代价值；通用高分辨率宽带成像尚未超越传统光学\",\n        \"重要限制条件：可见光厘米级消色差超透镜实测数据稀缺；制造公差（CD 偏差>±5nm、侧壁锥角>7.5°）直接框定实用边界；计算成像的 SNR 代价无法消除\"\n      ],\n      \"boundary\": [\n        \"不逐章报目录，而是跨章节综合（如将第 1 章物理极限与第 3 章效率机制关联）\",\n        \"不虚构新实验或未建立的证据链（如'未来 5 年将实现厘米级可见光消色差'）\",\n        \"允许由已写正文支撑新的跨节综合（如将 OPM 判定与 MDL 对比整合为系统级定位）\",\n        \"保留分歧（如多层对准容差的设计依赖性，缺乏 0 至>2μm 系统性效率下降曲线）但不强行统一\"\n      ],\n      \"placement\": {\n        \"mode\": \"standalone\",\n        \"anchor\": \"第 5 章之后，独立于章节编号\"\n      },\n      \"finalize_from\": [\n        \"第 1 章物理极限（TBP、Eq. 5、相干性模型）\",\n        \"第 2 章设计策略代价（多层容差、逆设计计算成本、混合架构体积）\",\n        \"第 3 章效率机制（四重损失来源、OPM 公式、MDL 对比）\",\n        \"第 4 章孔径与视场瓶颈（相干度衰减、横向色差、制造非均匀性）\",\n        \"第 5 章系统级判定（OPM 实证、MDL 优势、应用边界）\"\n      ]\n    }\n  }\n}\n```",
+  "content_sha256": "65a611c8c49450e45589d4002a364aff74cea165a9fe536c5af318428bbf9e1a",
+  "usage": {
+    "completion_tokens": 3067,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1068,
+      "text_tokens": 3067
+    },
+    "prompt_tokens": 124559,
+    "prompt_tokens_details": {
+      "text_tokens": 124559
+    },
+    "total_tokens": 127626
+  },
+  "effective_request": {
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "max_completion_tokens": 49152,
+    "max_tokens": null,
+    "model": "qwen3.5-plus",
+    "response_format": null,
+    "stream": true,
+    "stream_inactivity_timeout_seconds": 900.0,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_overall_timeout_seconds": 1800.0,
+    "thinking_budget": 16384,
+    "total_output_tokens": 49152
+  },
+  "elapsed_seconds": 57.15700000000652,
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-321bf1e5-d0cf-9124-8af6-8f4aeafc8858",
+  "finish_reason": "stop",
+  "complete": true,
+  "request_projection": {
+    "part": "conception",
+    "request_file": {
+      "logical_path": "<E>/worktree/outputs/optics_e2e/10_post_body_v34_parts/cache/conception/REQUEST.json",
+      "sha256": "82c0596a1695615123dc9eae82734c05bee3d399f3c60b65b08a20d6e164f47e",
+      "bytes": 435
+    },
+    "profile_file": {
+      "logical_path": "<E>/worktree/outputs/optics_e2e/10_post_body_v34_parts/cache/conception/PROFILE.json",
+      "sha256": "be9e62527e7a5bfa4572f458765b64a81698c41345abf771bd8ef178e312e224",
+      "bytes": 304
+    },
+    "estimate_file": {
+      "logical_path": "<E>/worktree/outputs/optics_e2e/10_post_body_v34_parts/cache/conception/ESTIMATE.json",
+      "sha256": "9d99b86ca25038986f8f76ed0f244edfb4d7860c93e6308a6083bdf722dc1e1b",
+      "bytes": 540
+    },
+    "messages_pointer": {
+      "logical_path": "<E>/worktree/outputs/optics_e2e/10_post_body_v34_parts/cache/conception/MESSAGES.json",
+      "sha256": "7c8ba6177a5a04575ef4eed43392d42950e2768258354fa20026688728b551ae",
+      "bytes": 439270
+    },
+    "messages_sha256": "5c7daaf40cba2f00c3fb3dce9d1e7215cfd75ff36a857e6c0b8680fe991f1ebb",
+    "wire_request_sha256": "f59ae7389cd52f6ed9e27431ed78c4c057e91a626c823043c54a049afd4865ff",
+    "profile": {
+      "model": "qwen3.5-plus",
+      "thinking": true,
+      "thinking_budget": 16384,
+      "max_output_tokens": 32768,
+      "json_mode": false,
+      "timeout_seconds": 900.0,
+      "stream": true,
+      "stream_overall_timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 124549,
+      "reserved_input_tokens": 147687,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 16384,
+      "total_context_tokens": 196839,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 1.770396,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<E>/worktree/outputs/optics_e2e/10_post_body_v34_parts/cache/conception/RAW_RESPONSE.json",
+      "sha256": "6f6a9eb37c590dd3b64f3f19ca5889403c8932151259ad5e6ca0c488c7197eb7",
+      "bytes": 363763
+    },
+    "sse": {
+      "logical_path": "<E>/worktree/outputs/optics_e2e/10_post_body_v34_parts/cache/conception/transport/55d7be38373df7ef-conception-invoke7fa0ae87bd6040a4-key0-attempt0.sse.raw",
+      "sha256": "7c06d14292077a774c075bb4b67845b14c74a5aba2e0399e4095989459f27203",
+      "bytes": 278425
+    },
+    "response_payload_sha256": "7c06d14292077a774c075bb4b67845b14c74a5aba2e0399e4095989459f27203",
+    "sse_payload_sha256": "7c06d14292077a774c075bb4b67845b14c74a5aba2e0399e4095989459f27203"
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE wrapper/reasoning",
+    "full MESSAGES/context materials",
+    "raw SSE stream",
+    "CONTEXT.json and INPUT.json"
+  ]
+}

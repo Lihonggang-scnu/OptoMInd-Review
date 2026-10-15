@@ -1,0 +1,359 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH5",
+  "unit_id": "U1_OPM_SNR_Tradeoff",
+  "attempt_dir": "<BODY_W>/units/CH5/U1_OPM_SNR_Tradeoff/0063559c79dc3fc887c742e1da9f52556adea627d45436a25df235437314191a/attempt_001",
+  "model_source_attempt_dir": "<BODY_W>/units/CH5/U1_OPM_SNR_Tradeoff/0063559c79dc3fc887c742e1da9f52556adea627d45436a25df235437314191a/attempt_001",
+  "attempt": "attempt_001",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": null,
+  "format_recovery": null,
+  "content": "```json\n{\n  \"body_markdown\": \"传统单一效率或半高全宽（FWHM）指标无法反映成像系统的综合性能，因其将信号强度与分辨率分离处理，且未考虑噪声与杂散光的影响。为此，整体性能指标（OPM）被提出作为系统级评估基准，其定义为 OPM = (η/√T) · Strehl，其中η为设计衍射级效率（代表信号水平），T 为总透射率（包含所有衍射级，代表杂散光引起的眩光噪声源），Strehl 比为一维调制传递函数曲线下面积与衍射极限曲线下面积之比（代表分辨率）[P0001]。在散粒噪声限制下，信噪比与η/√T 成正比，因此该公式将效率的线性加权与总透射率的平方根倒数加权相结合，反映信号与噪声的物理关系。由于多数已发表研究未报告总透射率 T，分析中通常采用乐观假设 T=η（即无杂散光损失），此时公式简化为 OPM = √η · Strehl；实际系统中眩光可能进一步压低 OPM，因此该简化形式为性能上限估计 [P0001]。这一评估框架的理论边界受到菲涅尔数（FN）约束：对于消色差衍射透镜，最大可实现 FN 由结构深度和折射率对比度决定（FN_max ≈ pΔn + 1），而非仅由带宽决定，这解释了高 NA 宽带平面透镜难以兼顾分辨率与带宽的物理屏障 [P0060]。当实际菲涅尔数超过理论上限时，即使透镜能够聚焦，分辨率也会显著退化，表现为 Strehl 比和 MTF 低于衍射极限 [P0060]。\",\n  \"issues\": []\n}\n```",
+  "content_sha256": "7bddc717381a76dbdd11ca1bf147138b1a2f9c063efd069fa06f324da8bbd881",
+  "usage": {
+    "prompt_tokens": 123180,
+    "completion_tokens": 1696,
+    "total_tokens": 124876,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1293,
+      "text_tokens": 1696
+    },
+    "prompt_tokens_details": {
+      "text_tokens": 123180
+    }
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": null,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-72f419e3-a736-95d6-aa02-9dac509baf88",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_with_pending",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "7802ab8ac467116449d9ce2d1643c1b3d2d7e3b80783da6c9024d5fe2252644f",
+    "original_body_sha256": "bbf241f578000b4d23b0f3d8dd854cc8f49850d8446054bb7b9b2d5f8964cd3f",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH5/U1_OPM_SNR_Tradeoff/0063559c79dc3fc887c742e1da9f52556adea627d45436a25df235437314191a/attempt_001/REQUEST.json",
+      "sha256": "4eae62edf57539d5c95c87a38052a720102fb3387e12412ec346b0326f8249ab",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH5/U1_OPM_SNR_Tradeoff/0063559c79dc3fc887c742e1da9f52556adea627d45436a25df235437314191a/attempt_001/UNIT_INPUT.json",
+      "sha256": "614724172e5b12c08393a8c8ceb2d2296120c7ef25b88a9a1f42893d6b7a2cc9",
+      "bytes": 401819
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH5/U1_OPM_SNR_Tradeoff/0063559c79dc3fc887c742e1da9f52556adea627d45436a25df235437314191a/UNIT_PACK.json",
+      "sha256": "a192f18683b2f942fc91188b3b5a0e3adf43805cccac27d94a7f4e7488cfad19",
+      "bytes": 456445
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH5/U1_OPM_SNR_Tradeoff/0063559c79dc3fc887c742e1da9f52556adea627d45436a25df235437314191a/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "b2a7d994da0db0764895e0764b607f5a3c54a08ee954ec59ee87da4a58b7b2d4",
+      "bytes": 482221
+    },
+    "identity": {
+      "chapter_id": "CH5",
+      "unit_id": "U1_OPM_SNR_Tradeoff",
+      "language": "zh",
+      "source_handles": [
+        "P0001",
+        "P0060",
+        "P0069",
+        "P0112",
+        "P0070",
+        "P0059",
+        "P0061",
+        "P0077",
+        "P0134",
+        "P0128",
+        "P0050",
+        "P0018",
+        "P0165",
+        "P0154",
+        "P0064",
+        "P0227",
+        "P0224",
+        "P0133",
+        "P0004",
+        "P0189",
+        "P0094",
+        "P0031",
+        "P0161",
+        "P0163"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "传统单一效率或 FWHM 指标无法反映成像质量，需引入结合分辨率与信噪比的 OPM 进行系统级评估。现有数据证实，消色差超透镜因效率衰减导致 OPM 低于等效常规衍射透镜；计算成像（EDOF）虽通过去卷积提升 SSIM，但以 SNR 下降为物理代价。",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "U1_OPM_SNR_Tradeoff_P01",
+          "point": "定义 OPM 及其加权逻辑，确立系统级评估基准。",
+          "development": "推导 OPM 公式 OPM = η/√T · Strehl，解释效率 (η) 与总透射率 (T) 的平方根关系对应散粒噪声限制下的 SNR，Strehl 比线性加权代表分辨率。说明假设 T=η时的简化形式OPM = √η · Strehl 及乐观性。研究对象为单通道宽带成像系统，设置条件为无杂散光假设。实际眩光可能进一步压低 OPM，T=η为乐观估计。",
+          "source_uses": [
+            {
+              "source_handle": "P0001",
+              "role": "主论据",
+              "use": "提供 OPM 指标定义与系统级评估基准，推导效率与信噪比的加权逻辑。"
+            },
+            {
+              "source_handle": "P0060",
+              "role": "背景",
+              "use": "提供消色差衍射透镜的菲涅尔数理论上限，解释高 NA 宽带平面透镜难兼顾分辨率与带宽的物理屏障，补充系统级评估的理论边界。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U1_OPM_SNR_Tradeoff_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U1_OPM_SNR_Tradeoff_P01",
+              "unit_id": "U1_OPM_SNR_Tradeoff",
+              "ordinal": 1,
+              "point": "定义 OPM 及其加权逻辑，确立系统级评估基准。",
+              "development": "推导 OPM 公式 OPM = η/√T · Strehl，解释效率 (η) 与总透射率 (T) 的平方根关系对应散粒噪声限制下的 SNR，Strehl 比线性加权代表分辨率。说明假设 T=η时的简化形式OPM = √η · Strehl 及乐观性。研究对象为单通道宽带成像系统，设置条件为无杂散光假设。实际眩光可能进一步压低 OPM，T=η为乐观估计。",
+              "source_handles": [
+                "P0001"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "U1_OPM_SNR_Tradeoff_P02",
+          "point": "量化消色差超透镜与常规衍射透镜的 OPM 差距。",
+          "development": "对比 SWIR 波段色散工程超透镜 (M1B/M2) 与 8 相级 CDL，尽管 AML Strehl 比更高，但效率损失使 OPM 更低 (M1B: 0.55 vs 0.64; M2: 0.55 vs 0.66)。可见光逆设计案例同样显示 AML 效率骤降拖累 OPM。研究对象为短波红外 (1.2-1.65μm) 及可见光波段，设置条件为相同一阶光学参数。高 NA 设计 (M3) 缺乏分辨率数据；结论依赖已发表设计的特定参数。",
+          "source_uses": [
+            {
+              "source_handle": "P0001",
+              "role": "主论据",
+              "use": "提供 SWIR 波段 AML 与 CDL 的 OPM 对比数据，证实效率损失导致整体性能劣势。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U1_OPM_SNR_Tradeoff_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U1_OPM_SNR_Tradeoff_P02",
+              "unit_id": "U1_OPM_SNR_Tradeoff",
+              "ordinal": 2,
+              "point": "量化消色差超透镜与常规衍射透镜的 OPM 差距。",
+              "development": "对比 SWIR 波段色散工程超透镜 (M1B/M2) 与 8 相级 CDL，尽管 AML Strehl 比更高，但效率损失使 OPM 更低 (M1B: 0.55 vs 0.64; M2: 0.55 vs 0.66)。可见光逆设计案例同样显示 AML 效率骤降拖累 OPM。研究对象为短波红外 (1.2-1.65μm) 及可见光波段，设置条件为相同一阶光学参数。高 NA 设计 (M3) 缺乏分辨率数据；结论依赖已发表设计的特定参数。",
+              "source_handles": [
+                "P0001"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "U1_OPM_SNR_Tradeoff_P03",
+          "point": "计算成像 (EDOF) 扩展带宽的信噪比代价。",
+          "development": "分析 EDOF 金属透镜通过立方相位编码实现光谱不变 PSF，去卷积后 SSIM 提升 0.209，但入射光分散至更大轴向体积导致 SNR 低于绿光对焦的单片透镜。逆设计 EDOF 维持~47% 效率，但带宽扩展仍伴随 MTF 体积牺牲。研究对象为可见光全彩成像，设置条件为孔径 200μm/1mm。SNR 仅定性描述（去卷积后低于单片绿光对焦图像），无具体 PSNR/平均 SNR 数值公式；SSIM 基线为α=0 单片系统而非理想清晰图像，在离散波长 LED 照明下测量。",
+          "source_uses": [
+            {
+              "source_handle": "P0069",
+              "role": "例证",
+              "use": "展示 EDOF 超表面通过计算重建提升 SSIM 但牺牲 SNR 的具体案例。"
+            },
+            {
+              "source_handle": "P0112",
+              "role": "例证",
+              "use": "提供逆设计 EDOF 维持效率但带宽扩展伴随 MTF 体积牺牲的实证数据。"
+            },
+            {
+              "source_handle": "P0070",
+              "role": "背景",
+              "use": "推导混合系统中衍射元件 NA 与系统 NA 的解析关系，证明低 NA 衍射元件即可维持高效率，为计算成像辅助架构提供系统级设计基准。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U1_OPM_SNR_Tradeoff_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U1_OPM_SNR_Tradeoff_P03",
+              "unit_id": "U1_OPM_SNR_Tradeoff",
+              "ordinal": 3,
+              "point": "计算成像 (EDOF) 扩展带宽的信噪比代价。",
+              "development": "分析 EDOF 金属透镜通过立方相位编码实现光谱不变 PSF，去卷积后 SSIM 提升 0.209，但入射光分散至更大轴向体积导致 SNR 低于绿光对焦的单片透镜。逆设计 EDOF 维持~47% 效率，但带宽扩展仍伴随 MTF 体积牺牲。研究对象为可见光全彩成像，设置条件为孔径 200μm/1mm。SNR 仅定性描述（去卷积后低于单片绿光对焦图像），无具体 PSNR/平均 SNR 数值公式；SSIM 基线为α=0 单片系统而非理想清晰图像，在离散波长 LED 照明下测量。",
+              "source_handles": [
+                "P0069",
+                "P0112"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "owner_fields_present": [
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "transition"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 123170,
+      "reserved_input_tokens": 146143,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 187103,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 1.567612,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 24,
+      "with_study_summary_A": 24,
+      "with_review_planning_B": 24,
+      "with_deep_read_material": [
+        "P0001",
+        "P0069"
+      ],
+      "with_supplement_material": 0,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0001",
+        "P0069"
+      ],
+      "chapter_tool_materials": 3,
+      "read_from_disk": [
+        "P0001",
+        "P0004",
+        "P0018",
+        "P0031",
+        "P0050",
+        "P0059",
+        "P0060",
+        "P0061",
+        "P0064",
+        "P0069",
+        "P0070",
+        "P0077",
+        "P0094",
+        "P0112",
+        "P0128",
+        "P0133",
+        "P0134",
+        "P0154",
+        "P0161",
+        "P0163",
+        "P0165",
+        "P0189",
+        "P0224",
+        "P0227"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH5/U1_OPM_SNR_Tradeoff/0063559c79dc3fc887c742e1da9f52556adea627d45436a25df235437314191a/attempt_001/RAW_RESPONSE.json",
+      "sha256": "cad695786c4eb8344612af91beec76d7c24ca62d999162a2d481db8c01effa57",
+      "bytes": 193163
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH5/U1_OPM_SNR_Tradeoff/0063559c79dc3fc887c742e1da9f52556adea627d45436a25df235437314191a/attempt_001/transport/0063559c79dc3fc8-attempt_001-invoke6e9e70344c764df3-key0-attempt0.sse.raw",
+      "sha256": "c932f97c7e7fa013dcd21be7d6cb1c95ec5408cef6a787636c54e1ad1acd13b5",
+      "bytes": 152038
+    },
+    "response_payload_sha256": "c932f97c7e7fa013dcd21be7d6cb1c95ec5408cef6a787636c54e1ad1acd13b5",
+    "sse_payload_sha256": "c932f97c7e7fa013dcd21be7d6cb1c95ec5408cef6a787636c54e1ad1acd13b5"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH5/U1_OPM_SNR_Tradeoff/0063559c79dc3fc887c742e1da9f52556adea627d45436a25df235437314191a/attempt_001/quality/aa4804669d33f2e3b3cccdd12560bd0ac83cf14474b44e7d9550609a8dc1afa3/QUALITY_BODY.md",
+    "sha256": "437389d29638b7ad3e9951bb23792d06c0615f3a0078017f851d300aabd010ee",
+    "bytes": 4340
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

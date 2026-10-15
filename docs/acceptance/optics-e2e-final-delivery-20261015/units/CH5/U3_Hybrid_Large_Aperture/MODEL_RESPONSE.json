@@ -1,0 +1,363 @@
+{
+  "schema": "optomind.public_body_v34_model_response_projection.v1",
+  "chapter_id": "CH5",
+  "unit_id": "U3_Hybrid_Large_Aperture",
+  "attempt_dir": "<BODY_W>/units/CH5/U3_Hybrid_Large_Aperture/930b4bd52f636e005d60805b5886457fc76ad98c75acd42a3896da35381dbd57/attempt_001",
+  "model_source_attempt_dir": "<BODY_W>/units/CH5/U3_Hybrid_Large_Aperture/930b4bd52f636e005d60805b5886457fc76ad98c75acd42a3896da35381dbd57/attempt_001",
+  "attempt": "attempt_001",
+  "status": "complete",
+  "cache_hit": true,
+  "generation_class": "cached",
+  "recovery_class": null,
+  "format_recovery": null,
+  "content": "```json\n{\n  \"body_markdown\": \"混合架构通过光焦度分配释放超表面的色散压力，使其专注于精密波前校正而非承担全部宽带消色差任务。在可见光波段（460–656 nm）的混合金属透镜模块中，五个折射塑料透镜序列承担主要的宽带色散控制，而末端的 SiNx 超表面（孔径 5.79 mm）作为像差校正器处理离轴彗差和像散 [P0245]。该分工使系统能在 F/2 下工作，焦距 4.13 mm，总光学长度 22.29 mm，同时实现 100°全视场。光焦度比例虽未精确量化，但定性策略明确：折射元件主色散、超表面主像差校正。这种架构避免了纯超表面在大孔径下因群延迟需求过大而导致的纳米柱高深宽比制造难题，但代价是系统复杂度增加且对准公差影响最终性能——模拟 MTF 通常优于实测值，反映制造与装配误差的累积效应。\\n\\n宽视场边缘成像质量与系统稳定性是混合架构实用性的关键验证指标。实测系统在 100° FOV 边缘处，100 lp/mm 空间频率的 MTF 为 0.364，167 lp/mm 时为 0.161，虽较中心视场（平均 MTF 分别为 0.63 和 0.24）有所下降，但仍保持可用成像质量 [P0245]。焦距随波长变化仅约 50 μm（相对偏差 1.2%），无需计算后处理即可通过集成 CMOS 传感器捕获边缘清晰、色彩还原准确的全彩图像。边缘 MTF 下降表明残余离轴像差未被完全校正，大视场下均匀性亦未详述，但这已显著优于纯超表面在同等视场下的表现。该结果证实混合架构在紧凑广角光学系统中的实用性，同时提示超表面置于最后表面以减小入射角、避免相位偏差和低透过率的设计策略对大孔径系统具有参考意义。\\n\\n厘米级可见光消色差超透镜实测数据稀缺，需借助跨波段参考评估大孔径物理极限。太赫兹波段 2.21 cm 孔径全介质金属透镜平均聚焦效率>46%（NA 0.13，带宽 0.4 THz），可作为大孔径实现的效率基准，但其 NA 较低且波段机制与可见光介电超透镜不同，直接外推需谨慎 [P0004][P0064]。相比之下，100 mm 聚合物多级衍射透镜（MDL）在天文成像中解析 181 lp/mm（400–800 nm 波段），证实大口径衍射方案的成熟度与轻量化潜力，但重量减轻数据缺乏具体量化 [P0228]。长波红外波段利用高阶衍射级次抑制菲涅尔透镜色散的prototype（P0217）则提供非超表面体系下平衡带宽与色差的几何光学折衷案例，适用于低成本、短距离监控场景，但分辨率与灵敏度未量化。综合而言，纯超表面在大孔径（>1 cm）和宽视场（FOV>100°）下独立胜任仍存在物理与制造瓶颈，混合架构或衍射方案是当前更可行的工程路径，但均伴随系统复杂度增加或波段适用性限制。\",\n  \"issues\": []\n}\n```",
+  "content_sha256": "9d6f4981c2c9286cfda22312430df3f7dbd8846ba006cd5d4b9d5121477eccce",
+  "usage": {
+    "completion_tokens": 1929,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1159,
+      "text_tokens": 1929
+    },
+    "prompt_tokens": 128103,
+    "prompt_tokens_details": {
+      "text_tokens": 128103
+    },
+    "total_tokens": 130032
+  },
+  "effective_request": {
+    "model": "qwen3.5-plus",
+    "answer_tokens": 32768,
+    "enable_thinking": true,
+    "thinking_budget": 8192,
+    "max_completion_tokens": 40960,
+    "max_tokens": null,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "stream_inactivity_timeout_seconds": 1800.0,
+    "stream_overall_timeout_seconds": 3600.0,
+    "total_output_tokens": 40960
+  },
+  "elapsed_seconds": 39.28100000000268,
+  "elapsed_source": "native_author_raw_or_unit_result; null_when_not_recorded",
+  "returned_model": "qwen3.5-plus",
+  "request_id": "chatcmpl-2c0cfc88-fafd-9c83-881e-b311337bd4cc",
+  "finish_reason": "stop",
+  "complete": true,
+  "quality_status": "assessed_pending_human_review",
+  "quality_identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "000b7ec7675715ada107fc8c8737fa852fb6273a629bf890195986bce8221386",
+    "original_body_sha256": "098c76fa8d84408eca1b25945827b9bfd8c50b7befcc4f1f45e5edfd768d1a90",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "3408acfe918a19fb757e448ad45f22fa4695080ed2071a6abe4d88eb4497f03b",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "request_projection": {
+    "projection_only": true,
+    "request_file": {
+      "logical_path": "<BODY_W>/units/CH5/U3_Hybrid_Large_Aperture/930b4bd52f636e005d60805b5886457fc76ad98c75acd42a3896da35381dbd57/attempt_001/REQUEST.json",
+      "sha256": "ad54f1b109d297b485bd30a5415394b6afbef3272aaac5ccf4d58cd18d9c9823",
+      "bytes": 435
+    },
+    "unit_input_file": {
+      "logical_path": "<BODY_W>/units/CH5/U3_Hybrid_Large_Aperture/930b4bd52f636e005d60805b5886457fc76ad98c75acd42a3896da35381dbd57/attempt_001/UNIT_INPUT.json",
+      "sha256": "c238481c5bf13a47ae77e102df16edeb06695f17b56addfa44471e24ab1b404c",
+      "bytes": 418476
+    },
+    "unit_pack_file": {
+      "logical_path": "<BODY_W>/units/CH5/U3_Hybrid_Large_Aperture/930b4bd52f636e005d60805b5886457fc76ad98c75acd42a3896da35381dbd57/UNIT_PACK.json",
+      "sha256": "e1839e081f3db7bc47a457b362f42e439df33d4e85d9332d8fb76768bfb55d63",
+      "bytes": 473116
+    },
+    "unit_messages_pointer": {
+      "logical_path": "<BODY_W>/units/CH5/U3_Hybrid_Large_Aperture/930b4bd52f636e005d60805b5886457fc76ad98c75acd42a3896da35381dbd57/attempt_001/UNIT_MESSAGES.json",
+      "sha256": "3f3ac82f48ea1dfdd3a3e4bd9a9faf0c8484808e580cc7d75cfe9607547f20e7",
+      "bytes": 499754
+    },
+    "identity": {
+      "chapter_id": "CH5",
+      "unit_id": "U3_Hybrid_Large_Aperture",
+      "language": "zh",
+      "source_handles": [
+        "P0245",
+        "P0004",
+        "P0228",
+        "P0217",
+        "P0064",
+        "P0112",
+        "P0001",
+        "P0069",
+        "P0059",
+        "P0061",
+        "P0077",
+        "P0134",
+        "P0128",
+        "P0050",
+        "P0018",
+        "P0165",
+        "P0154",
+        "P0227",
+        "P0224",
+        "P0133",
+        "P0189",
+        "P0094",
+        "P0031",
+        "P0161",
+        "P0163"
+      ]
+    },
+    "duty_parameters": {
+      "unit_focus": "纯超表面在大孔径（>1cm）和宽视场（FOV>100°）下独立胜任存在物理与制造瓶颈，混合架构（折射分担色散 + 超表面校正像差）是兼顾宽带消色差与大视场的有效折衷，但引入了对准敏感性与系统复杂度。",
+      "paragraph_tasks": [
+        {
+          "paragraph_id": "U3_Hybrid_Large_Aperture_P01",
+          "point": "混合架构的光焦度分配与离轴像差校正。",
+          "development": "5 个折射塑料透镜序列末端集成 SiNx 超表面，折射元件承担宽带色散控制 (460–700nm)，超表面作为精密波前校正器处理离轴彗差/像差。该分工释放了超表面的色散压力，使其能在 F/2 下工作。研究对象为可见光混合金属透镜模块，设置条件为 FOV 100°与焦距 4.13mm。光焦度比例未精确量化（定性描述为折射主色散、超表面主像差校正）；模拟值通常优于实测 MTF；对准公差影响最终性能。超表面孔径 5.79mm（非厘米级）。",
+          "source_uses": [
+            {
+              "source_handle": "P0245",
+              "role": "主论据",
+              "use": "提供混合架构光焦度分配与离轴像差校正的具体设计案例与性能数据。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U3_Hybrid_Large_Aperture_P01"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U3_Hybrid_Large_Aperture_P01",
+              "unit_id": "U3_Hybrid_Large_Aperture",
+              "ordinal": 1,
+              "point": "混合架构的光焦度分配与离轴像差校正。",
+              "development": "5 个折射塑料透镜序列末端集成 SiNx 超表面，折射元件承担宽带色散控制 (460–700nm)，超表面作为精密波前校正器处理离轴彗差/像差。该分工释放了超表面的色散压力，使其能在 F/2 下工作。研究对象为可见光混合金属透镜模块，设置条件为 FOV 100°与焦距 4.13mm。光焦度比例未精确量化（定性描述为折射主色散、超表面主像差校正）；模拟值通常优于实测 MTF；对准公差影响最终性能。超表面孔径 5.79mm（非厘米级）。",
+              "source_handles": [
+                "P0245"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "U3_Hybrid_Large_Aperture_P02",
+          "point": "宽视场边缘成像质量与系统稳定性。",
+          "development": "实测系统在 100° FOV 边缘处，100 lp/mm 空间频率 MTF 为 0.364，167 lp/mm 为 0.161。焦距随波长变化仅约 50μm(相对偏差 1.2%)，无需计算后处理即可捕获高质量全彩图像。研究对象为集成 CMOS 的原型系统，设置条件为斜边法测量与商用传感器。边缘 MTF 下降表明残余像差；大视场下均匀性未详述。",
+          "source_uses": [
+            {
+              "source_handle": "P0245",
+              "role": "主论据",
+              "use": "提供宽视场边缘成像质量 MTF 数据与系统稳定性实测结果。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U3_Hybrid_Large_Aperture_P02"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U3_Hybrid_Large_Aperture_P02",
+              "unit_id": "U3_Hybrid_Large_Aperture",
+              "ordinal": 2,
+              "point": "宽视场边缘成像质量与系统稳定性。",
+              "development": "实测系统在 100° FOV 边缘处，100 lp/mm 空间频率 MTF 为 0.364，167 lp/mm 为 0.161。焦距随波长变化仅约 50μm(相对偏差 1.2%)，无需计算后处理即可捕获高质量全彩图像。研究对象为集成 CMOS 的原型系统，设置条件为斜边法测量与商用传感器。边缘 MTF 下降表明残余像差；大视场下均匀性未详述。",
+              "source_handles": [
+                "P0245"
+              ]
+            }
+          ]
+        },
+        {
+          "paragraph_id": "U3_Hybrid_Large_Aperture_P03",
+          "point": "大孔径实现的替代参考与波段差异。",
+          "development": "厘米级可见光消色差超透镜实测数据稀缺。太赫兹波段 2.21cm 孔径超表面效率>46% 可作为大孔径物理极限参考；100mm 聚合物 MDL 在天文成像中解析 181 lp/mm，证实大口径衍射方案的成熟度。研究对象为太赫兹与天文成像系统，设置条件为 THz 波段 (2.21cm) 与 LWIR/可见光 (100mm)。波段差异导致直接外推需谨慎；THz 器件机制与可见光介电超透镜不同；MDL 重量减轻数据缺乏具体量化。",
+          "source_uses": [
+            {
+              "source_handle": "P0004",
+              "role": "例证",
+              "use": "提供太赫兹波段大孔径消色差金属透镜的具体工程实现案例与效率数据。"
+            },
+            {
+              "source_handle": "P0228",
+              "role": "例证",
+              "use": "提供 100mm 聚合物 MDL 在天文成像中的解析力数据，证实大口径衍射方案成熟度。"
+            },
+            {
+              "source_handle": "P0217",
+              "role": "背景",
+              "use": "演示利用高阶衍射色散补偿实现长波红外宽带成像的原型机，提供非超表面体系下平衡带宽与色差的几何光学折衷案例。"
+            },
+            {
+              "source_handle": "P0064",
+              "role": "背景",
+              "use": "汇总太赫兹波段消色差结构的效率基准，提供跨波段技术对比素材，支持不同物理机制效率对比及大孔径物理极限的讨论。"
+            }
+          ],
+          "carried_over": true,
+          "point_changed_from_brief": false,
+          "source_briefs": [
+            "U3_Hybrid_Large_Aperture_P03"
+          ],
+          "source_brief_details": [
+            {
+              "paragraph_id": "U3_Hybrid_Large_Aperture_P03",
+              "unit_id": "U3_Hybrid_Large_Aperture",
+              "ordinal": 3,
+              "point": "大孔径实现的替代参考与波段差异。",
+              "development": "厘米级可见光消色差超透镜实测数据稀缺。太赫兹波段 2.21cm 孔径超表面效率>46% 可作为大孔径物理极限参考；100mm 聚合物 MDL 在天文成像中解析 181 lp/mm，证实大口径衍射方案的成熟度。研究对象为太赫兹与天文成像系统，设置条件为 THz 波段 (2.21cm) 与 LWIR/可见光 (100mm)。波段差异导致直接外推需谨慎；THz 器件机制与可见光介电超透镜不同；MDL 重量减轻数据缺乏具体量化。",
+              "source_handles": [
+                "P0004",
+                "P0228"
+              ]
+            }
+          ]
+        }
+      ],
+      "table_tasks": [],
+      "owner_fields_present": [
+        "evidence_conditions",
+        "ordered_development",
+        "owner_field_values",
+        "supporting_studies",
+        "synthesis",
+        "title",
+        "transition"
+      ],
+      "owner_field_value_names": [
+        "transition"
+      ]
+    },
+    "writer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "estimate_projection": {
+      "prompt_tokens_estimate": 128093,
+      "reserved_input_tokens": 151657,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 192617,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 1.589668,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "material_summary_projection": {
+      "sources": 25,
+      "with_study_summary_A": 25,
+      "with_review_planning_B": 25,
+      "with_deep_read_material": [
+        "P0001",
+        "P0069",
+        "P0245"
+      ],
+      "with_supplement_material": 1,
+      "with_supplement_materials": [],
+      "with_local_passages": [],
+      "with_tool_supplement_materials": [
+        "P0001",
+        "P0069",
+        "P0245"
+      ],
+      "chapter_tool_materials": 3,
+      "read_from_disk": [
+        "P0001",
+        "P0004",
+        "P0018",
+        "P0031",
+        "P0050",
+        "P0059",
+        "P0061",
+        "P0064",
+        "P0069",
+        "P0077",
+        "P0094",
+        "P0112",
+        "P0128",
+        "P0133",
+        "P0134",
+        "P0154",
+        "P0161",
+        "P0163",
+        "P0165",
+        "P0189",
+        "P0217",
+        "P0224",
+        "P0227",
+        "P0228",
+        "P0245"
+      ],
+      "capacity_threshold_exceeded": [],
+      "truncated": []
+    }
+  },
+  "raw_pointer": {
+    "response_file": {
+      "logical_path": "<BODY_W>/units/CH5/U3_Hybrid_Large_Aperture/930b4bd52f636e005d60805b5886457fc76ad98c75acd42a3896da35381dbd57/attempt_001/RAW_RESPONSE.json",
+      "sha256": "f882b0dfc8e5de420434725c1c1e4c04f0faab8a8705bc92e52c7a4921f1d6bb",
+      "bytes": 219500
+    },
+    "sse": {
+      "logical_path": "<BODY_W>/units/CH5/U3_Hybrid_Large_Aperture/930b4bd52f636e005d60805b5886457fc76ad98c75acd42a3896da35381dbd57/attempt_001/transport/930b4bd52f636e00-attempt_001-invokef7cec6f79c894463-key0-attempt0.sse.raw",
+      "sha256": "9db9fbabb7e4923f3b57b92d6e52a0500ce2b3092f1c6c4f9560e815b1cc181a",
+      "bytes": 169309
+    },
+    "response_payload_sha256": "9db9fbabb7e4923f3b57b92d6e52a0500ce2b3092f1c6c4f9560e815b1cc181a",
+    "sse_payload_sha256": "9db9fbabb7e4923f3b57b92d6e52a0500ce2b3092f1c6c4f9560e815b1cc181a"
+  },
+  "quality_body_source": {
+    "logical_path": "<BODY_W>/units/CH5/U3_Hybrid_Large_Aperture/930b4bd52f636e005d60805b5886457fc76ad98c75acd42a3896da35381dbd57/attempt_001/quality/f9a48b08ad7f37fd1c61daebdbc06153c1d2461ae3718c54048423d25d0c8dbb/QUALITY_BODY.md",
+    "sha256": "3a95d0631628ac7d5b1c894ae4fb53faafaaef77617f88029abbc81670641f22",
+    "bytes": 2846
+  },
+  "excluded_from_copy": [
+    "full RAW_RESPONSE.json",
+    "full SSE/raw stream",
+    "reasoning_content",
+    "UNIT_MESSAGES body",
+    "full UNIT_INPUT materials",
+    "full UNIT_PACK sources"
+  ]
+}

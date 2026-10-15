@@ -1,0 +1,68 @@
+{
+  "schema": "optomind.public_body_v34_u1_native_repair_projection.v1",
+  "source": {
+    "logical_path": "<D>/ROOT_BODY_V34_CH5_U1_NATIVE_REPAIR_TRIAL.jsonl",
+    "sha256": "2f7e58fc06db5f97ddc6a0ffd83f4ca3453cfd211365ec6b2dad326cc71e0ea7",
+    "bytes": 2644
+  },
+  "entries": [
+    {
+      "utc": "2026-10-14T18:35:05.321411+00:00",
+      "reviewer": "root",
+      "gate": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\5cb61537f09fd7d60d7cde6d5901c4025587c1247770c0d71dc8466eec92b13f",
+      "phase": "request",
+      "decision": {
+        "schema": "supervisor.decision.v1",
+        "stage": "planning-transport:writer_candidates",
+        "call_id": "7251ad3c8580e8f7-post_assessment:4d074d4a31da646caea0cd48cdd2ebc35dfd8b33a702c1e07e0cfe0ad78647ed",
+        "phase": "request",
+        "request_sha256": "fd31f1096550a47fd9812314002e486c10c0b95ef09647db7a588f2712b742e4",
+        "response_sha256": null,
+        "decision": "approve",
+        "reason": "ROOT亲读后核查实际输入：三任务及完整来源逐值等于原核查输入；actual_body为原585字+无损恢复的两段1172字，与候选SHA一致。无手写修法/状态，无新增科学答案。Plus16k思考24k回答、直连双账原额度，批准原生后核查判断任务和材料支持。"
+      },
+      "tasks_and_sources_equal_original": true,
+      "candidate_sha256_verified": true,
+      "body_chars": 1759,
+      "native_post_only": true
+    },
+    {
+      "utc": "2026-10-14T18:37:54.754024+00:00",
+      "reviewer": "root",
+      "gate": "F:\\OptoMind-Review-2\\outputs\\e2e_optics_20261012_80cny\\supervision\\calls\\5cb61537f09fd7d60d7cde6d5901c4025587c1247770c0d71dc8466eec92b13f",
+      "phase": "response",
+      "decision": {
+        "schema": "supervisor.decision.v1",
+        "stage": "planning-transport:writer_candidates",
+        "call_id": "7251ad3c8580e8f7-post_assessment:4d074d4a31da646caea0cd48cdd2ebc35dfd8b33a702c1e07e0cfe0ad78647ed",
+        "phase": "response",
+        "request_sha256": "fd31f1096550a47fd9812314002e486c10c0b95ef09647db7a588f2712b742e4",
+        "response_sha256": "6b048dd693cdee90b6b20c299a75dea9447120fc866fdeca422561cb41aa77d0",
+        "decision": "approve",
+        "reason": "ROOT亲读完整后核查及实际候选正文：P01定义/权重、P02同参数OPM比较及缺数限制、P03 EDOF的SSIM/SNR/MTF条件均有实质段落。三任务quote均经原生省略片段/空白定位验证，未提新编辑。允许原生采用已付两段候选，保留缺元数据/格式恢复诊断，不手填状态或喂答案。"
+      },
+      "tasks": [
+        {
+          "task_id": "U1_OPM_SNR_Tradeoff_P01",
+          "status": "covered",
+          "effective_status": "covered",
+          "quote_verified": true
+        },
+        {
+          "task_id": "U1_OPM_SNR_Tradeoff_P02",
+          "status": "covered",
+          "effective_status": "covered",
+          "quote_verified": true
+        },
+        {
+          "task_id": "U1_OPM_SNR_Tradeoff_P03",
+          "status": "covered",
+          "effective_status": "covered",
+          "quote_verified": true
+        }
+      ],
+      "scientific_review": "Useful mechanism, baseline comparisons and measured-data limitations are present; broad high-NA generalization retained as minor issue.",
+      "paid_writer_and_completion_reused": true
+    }
+  ]
+}
