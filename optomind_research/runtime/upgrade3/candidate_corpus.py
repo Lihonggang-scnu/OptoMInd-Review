@@ -312,6 +312,7 @@ def harvest_query(
         "query_type": spec.query_type, "query_text": spec.query_text,
         "retrieval_source": spec.retrieval_source,
         "requested_limit": limit, "returned": 0, "status": None,
+        "raw_provider_hits": 0, "http_statuses": [],
     }
 
     if spec.retrieval_source == QUESTION_SOURCE:
@@ -329,6 +330,8 @@ def harvest_query(
             search_kwargs["deadline"] = deadline
         items, response = gateway.search_snippets(spec.query_text, **search_kwargs)
         audit["status"] = getattr(response, "status_code", None)
+        audit["http_statuses"].append(audit["status"])
+        audit["raw_provider_hits"] += len(items)
         audit["requested_limits"] = [request_limit]
         hits = _snippet_hits(items, spec)
         unique = len({h.identifiers.get("corpus") for h in hits if h.identifiers.get("corpus")})
@@ -344,6 +347,8 @@ def harvest_query(
             more, response = gateway.search_snippets(spec.query_text, **search_kwargs)
             audit["requested_limits"].append(deeper)
             audit["status"] = getattr(response, "status_code", None)
+            audit["http_statuses"].append(audit["status"])
+            audit["raw_provider_hits"] += len(more)
             seen = {_passage_key(h) for h in hits}
             deeper_hits = _snippet_hits(more, spec, rank_offset=len(hits),
                                         request_index=len(audit["requested_limits"]))
@@ -380,6 +385,8 @@ def harvest_query(
             search_kwargs["deadline"] = deadline
         papers, response = gateway.search_papers(spec.query_text, **search_kwargs)
         audit["status"] = getattr(response, "status_code", None)
+        audit["http_statuses"].append(audit["status"])
+        audit["raw_provider_hits"] = len(papers)
         for rank, record in enumerate(papers[:limit], start=1):
             hits.append(Hit(
                 identifiers=_identifiers(
@@ -484,7 +491,8 @@ def _merge_papers(papers, union):
     for _, entry in sorted(merged.items()):
         paper = _paper_from(entry["identifiers"], entry["fields"])
         papers.append(paper)
-        primary = paper.get("paper_id") or _handle("corpus", paper.get("corpus_id"))
+        primary = (paper.get("paper_id") or _handle("corpus", paper.get("corpus_id"))
+                   or _handle("doi", paper.get("doi")))
         for kind, values in entry["identifiers"].items():
             for value in values:
                 index[_handle(kind, value)] = primary
@@ -563,6 +571,23 @@ def build_candidate_corpus(plan, *, gateway, per_query_limit=DEFAULT_PAGE_SIZE,
     recorded in the corpus either way.
     """
 
+    # Keep the compatibility primitive: normal initial retrieval composes this
+    # harvest/assembly contract with durable supplementation in initial_retrieval.
+    _corpus_input_state(plan, planner_state, allow_degraded)
+    hits, audits = [], []
+    for spec in plan_queries(plan):
+        found, audit = harvest_query(gateway, spec, per_query_limit=per_query_limit,
+                                     discovery_target=snippet_discovery_target)
+        hits.extend(found)
+        audits.append(audit)
+    return assemble_candidate_corpus(
+        plan, hits=hits, audits=audits, gateway=gateway,
+        per_query_limit=per_query_limit, enrich=enrich, snippet_store=snippet_store,
+        planner_state=planner_state, allow_degraded=allow_degraded,
+        snippet_discovery_target=snippet_discovery_target)
+
+
+def _corpus_input_state(plan, planner_state, allow_degraded):
     channels = channel_state(plan)
     supplied = dict(planner_state or {})
     supplied_degradation = dict(supplied.get("degradation") or {})
@@ -579,17 +604,23 @@ def build_candidate_corpus(plan, *, gateway, per_query_limit=DEFAULT_PAGE_SIZE,
     }
     if degraded and not allow_degraded:
         raise DegradedPlanError(input_state)
+    return input_state
 
-    specs = plan_queries(plan)
+
+def assemble_candidate_corpus(plan, *, hits, audits, gateway=None,
+                              per_query_limit=DEFAULT_PAGE_SIZE, enrich=True,
+                              snippet_store=None, planner_state=None,
+                              allow_degraded=False,
+                              snippet_discovery_target=SNIPPET_DISCOVERY_TARGET):
+    """Assemble saved harvests through the same identity/evidence machinery.
+
+    Appended queries append hits, keeping the IDs of already saved evidence.
+    This is also the recovery seam for bounded initial retrieval; it performs
+    no search and never discards passages from earlier queries.
+    """
+    input_state = _corpus_input_state(plan, planner_state, allow_degraded)
+    degraded = input_state["degraded"]
     union = _Union()
-    hits = []
-    audits = []
-
-    for spec in specs:
-        found, audit = harvest_query(gateway, spec, per_query_limit=per_query_limit,
-                                     discovery_target=snippet_discovery_target)
-        hits.extend(found)
-        audits.append(audit)
 
     provisional = [_paper_from(hit.identifiers, hit.fields)
                    for hit in hits if hit.identifiers]
@@ -601,6 +632,11 @@ def build_candidate_corpus(plan, *, gateway, per_query_limit=DEFAULT_PAGE_SIZE,
         # has to run AGAIN afterwards.  Without the second pass one paper stays
         # two objects -- one holding the S2 id, one holding only a corpus id.
         papers, lookup, merges = _merge_papers(papers, union)
+        # Enrichment must not drop alternate handles absorbed in the first
+        # merge; earlier evidence can still refer to any of those identities.
+        canonical = {union.find(handle): primary for handle, primary in lookup.items()}
+        lookup.update({handle: canonical[union.find(handle)] for handle in union.parent
+                       if union.find(handle) in canonical})
 
     retrieval_hits = []
     for index, hit in enumerate(hits, start=1):
@@ -635,6 +671,10 @@ def build_candidate_corpus(plan, *, gateway, per_query_limit=DEFAULT_PAGE_SIZE,
             if hit.raw_snippet_text:
                 snippet_store.add(row["hit_id"], hit.raw_snippet_text)
 
+    # Counts use final unified identities, including enrichment/DOI bridges.
+    # A passage is admitted evidence; it is not a newly discovered paper.
+    query_audit = query_feedback(audits, retrieval_hits)
+
     exclusions: list[str] = []
     for facet in (plan.get("facets") or []):
         for item in (facet or {}).get("must_exclude") or ():
@@ -662,11 +702,31 @@ def build_candidate_corpus(plan, *, gateway, per_query_limit=DEFAULT_PAGE_SIZE,
             "snippet_discovery_target": snippet_discovery_target,
             "evidence_budget_is_every_returned_hit": True,
         },
-        "query_audit": audits,
+        "query_audit": query_audit,
         "papers": papers,
         "retrieval_hits": retrieval_hits,
-        "statistics": _statistics(papers, retrieval_hits, merges),
+        "statistics": {**_statistics(papers, retrieval_hits, merges),
+                       "provider_raw_hits": sum(a["raw_provider_hits"] for a in query_audit)},
     }
+
+
+def query_feedback(audits, retrieval_hits):
+    """Complete per-query measurement, also usable with saved v2 corpora."""
+    contributed, result = set(), []
+    for audit in audits:
+        rows = [h for h in retrieval_hits if h["query_id"] == audit["query_id"]]
+        identities = {h["paper_id"] for h in rows if h["paper_id"]}
+        statuses = audit.get("http_statuses", [audit.get("status")])
+        transport_ok = bool(statuses) and all(isinstance(s, int) and 200 <= s < 300 for s in statuses)
+        result.append({**audit, "raw_provider_hits": audit.get("raw_provider_hits", audit.get("returned", len(rows))),
+                       "raw_provider_hits_measured": audit.get("raw_provider_hits_measured", "raw_provider_hits" in audit),
+                       "admitted_hits": len(rows), "query_distinct_papers": len(identities),
+                       "new_identities": len(identities - contributed),
+                       "overlap_identities": len(identities & contributed),
+                       "transport_outcome": "success" if transport_ok else "unsuccessful",
+                       "yield_outcome": ("results" if identities else "empty") if transport_ok else "not_assessed"})
+        contributed.update(identities)
+    return result
 
 
 def _statistics(papers, hits, merges=()):

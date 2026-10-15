@@ -12,6 +12,10 @@
 
 本文件是全链路统一阅读入口；可照用的命令、默认值、恢复及状态见 [RUN_GUIDE.md](RUN_GUIDE.md)。图中的箭头表示明确的产物交接，**不是一个缺省命令会自动运行所有模块**。当前专门的正式 BODY 入口从已批准细纲/编排及材料开始；其他 harness 路径保留原研究编排器，不能拿它们代替本表的新分阶段入口。
 
+**2026-10-15 初始 M2 检索补足：** 正常 `scripts/upgrade3/run_candidate_corpus.py` 默认经生产 `initial_retrieval.execute_initial_m2` 执行。原查询全部完成并身份归并后，已有500篇即直接交接，不创建Qwen客户端；不足500篇才用原共享账本的 qwen3.5-plus，带原问题/Facet与全部已执行查询的命中、去重、新增、重叠和HTTP反馈，追加至多3轮检索。每条新查询后重新计数，达到500即停止后续新查询，已返回证据完整保留。三轮后仍不足500或既定预算拒绝追加时，明确 `target_unmet` 并正常交接，不把数量目标变成材料准入门槛。
+
+原 M1 PLAN/outcome 不改；M2保存不可变原快照，`ACTIVE_QUERY_PLAN.json` 累计保留原查询和 `supplement round1/2/3`，并标明达到目标后未执行的新查询。生成REQUEST/RAW、逐查询完整harvest和片段、轮次校验及最终 `INITIAL_RETRIEVAL_HANDOFF.json` 支持同目录恢复；已完成查询及已付费回答不重复购买。`--preview` 免费预览，`--no-initial-topup` 显式重放原单次 primitive。历史外部 `E/preparation/upstream_execution.py` 保留原样；新上游调用须使用 `execute_initial_m2` 合同及其handoff，不宣称旧综合harness已自动采用本补足。此阶段完全位于M3之前，不改变后续规划补搜、M3算法或材料准入。命令及预算接线见[运行指南](RUN_GUIDE.md#初始m2检索默认有界补足2026-10-15)。
+
 ```text
 用户问题/范围 → M1 检索规划 → M2 实际检索/身份归并 → M3 关系与阅读导航
   → 材料获取/解析 → A/B卡片及明确绑定的规划池
@@ -29,7 +33,7 @@
 | 环节 | 输入 → 输出 | 实现与入口 |
 |---|---|---|
 | M1 问题/检索规划 | 问题、范围 → 生成/校验/有界修订 → 含 `plan` 的 outcome、Facet与查询；调用方保存选定 PLAN/schema，M2读取它 | `optomind_research/query_planner.py::QueryPlannerAgent.query_plan_v2` → `runtime/upgrade3/query_plan.py`；字段配置 `config/query_plan_fields.json`。API不自动写固定 `PLAN.json`，无独立 query_plan CLI |
-| M2 候选语料 | 选定 schema/PLAN → keyword/question 通道检索、片段和身份归并 → `CANDIDATE_CORPUS.json`、命中记录、`SNIPPET_TEXT.sqlite` → M3及材料名单 | `candidate_corpus.py`；`scripts/upgrade3/run_candidate_corpus.py --schema … --out … --snippets …`。执行会联网，不是免费预览 |
+| M2 候选语料 | 原PLAN/outcome → 原检索、身份归并、不足500时至多3轮初始补足 → 累计执行计划、`CANDIDATE_CORPUS.json`、完整片段 `SNIPPET_TEXT.sqlite`、`INITIAL_RETRIEVAL_HANDOFF.json` → M3及材料名单 | `initial_retrieval.py::execute_initial_m2/run_initial_retrieval` 组合原 `candidate_corpus.py`；正常 `run_candidate_corpus.py` 默认启用，`--preview`免费预览，`--no-initial-topup`原单次重放。正常执行会联网；需追加模型时必须提供原既有共享账本与累计封顶 |
 | M3 关系骨架 | corpus、`GRAPH_EDGES.jsonl`、Facet与可用元数据/向量/片段 → 社区/角色/相关性与阅读分流 → `SCHOLARLY_SKELETON.json`、`COMMUNITIES.json`、`INVESTIGATION_PORTFOLIO.json`、`INVESTIGATION_CARDS.json`、选择trace → 阅读名单/材料/独立M4导航 | `scholarly_skeleton.py`；`run_scholarly_skeleton.py` 默认v2。`skeleton_edges.py` 边采集和 `skeleton_enrich.py` enrich是独立步骤，不能假定骨架CLI代做 |
 | 材料获取/解析 | 稳定身份、DOI/题名和已知URL/本地XML/PDF → 获取、公开全文救援、解析 → 不可变snapshot及获取缺口 → 阅读器读取实际文本与范围 | `MaterialAcquirer.acquire`、`local_materials.py`、`document_snapshot.py`；`build_local_materials.py --input/--prepared/--record-json/--batch-manifest`。snapshot有 `DOCUMENT_MANIFEST.json`、`DOCUMENT_BLOCKS.jsonl`、`DOCUMENT_ASSETS.json`、`REFERENCES.json`、`READING_VIEW.md` |
 | 普通整篇阅读API | snapshot＋问题/Facet → reading packet/messages → 注入返回规范化为带来源的observations → 调用方保存/消费 | `PreparedSnapshot.build_reading_messages/normalize_reading_result`、`material_reading.py`。不是获取CLI自动执行的模型阅读，无自身固定模型 |

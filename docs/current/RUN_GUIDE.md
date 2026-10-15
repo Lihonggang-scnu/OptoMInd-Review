@@ -14,6 +14,32 @@
 
 正式版本是 **baseline**：Plus分单元写作 → 任务核查及必要的一次有界补写 → 装配 → 一次全文局部编辑 → 实际选用稿编号。`chapter_coherence` 是默认关闭的实验；指南作者、全文候选不进入默认流程。已认可的完整稿为7章29单元、187个规范化论文身份；它是此前生成、选择及免费恢复的结果，本次没有重新生成正文。
 
+### 初始M2检索默认有界补足（2026-10-15）
+
+正常 M2 CLI 默认执行原查询，归并后不足500篇时，才用 **qwen3.5-plus** 生成追加查询，最多3轮。模型收到原 M1 `question_en`、全部 `facets[].ask` 与完整范围，以及所有已执行查询的原文、原始提供方命中数、实际保留片段数、单查询去重篇数、真正新增身份数、重叠数和HTTP状态。这是M1规范化的问题/子问题，不宣称逐字还原用户题面。429等未成功传输标为 `not_assessed`，不能据此说科学检索式低产。历史语料若未记录原始提供方命中数，离线导出会注明 `raw_provider_hits_measured=false`。
+
+原查询全部执行后已有500篇时，不创建Qwen客户端、不读取凭据或打开费用账本。需要模型补足时，必须显式提供**本轮原既有项目账本及累计封顶**；有账户双账时一并提供原账户账本、额度和映射目录。不会隐式创建无限预算或改换模型/传输；Qwen固定零物理重试，默认指定文件第1个密钥。CLI原行为是执行联网检索，免费检查须显式使用 `--preview`。
+
+```powershell
+# 免费预览：无检索、模型、密钥读取或账本操作。
+python -X utf8 scripts/upgrade3/run_candidate_corpus.py --schema PLAN.json --outcome M1_OUTCOME.json --out outputs/my_m2/CANDIDATE_CORPUS.json --snippets outputs/my_m2/SNIPPET_TEXT.sqlite --preview
+
+# 正常初始M2：默认补足；80示例必须换成本轮原累计封顶，不能当作新增额度。
+python -X utf8 scripts/upgrade3/run_candidate_corpus.py --schema PLAN.json --outcome M1_OUTCOME.json --out outputs/my_m2/CANDIDATE_CORPUS.json --snippets outputs/my_m2/SNIPPET_TEXT.sqlite --run --key-file LOCAL_KEY_FILE.txt --key-index 1 --budget-ledger PROJECT_BUDGET.sqlite --budget-limit-cny 80
+
+# 已有双账时，在上条命令追加原绑定参数：
+# --account-ledger ACCOUNT_BUDGET.sqlite --account-limit-cny 300 --account-mapping-dir EXISTING_MAPPING_DIRECTORY
+
+# 完全沿原单次build_candidate_corpus重放，不调用补足模型：
+python -X utf8 scripts/upgrade3/run_candidate_corpus.py --schema PLAN.json --out outputs/legacy_m2/CANDIDATE_CORPUS.json --snippets outputs/legacy_m2/SNIPPET_TEXT.sqlite --no-initial-topup
+```
+
+恢复使用完全相同的输入、目录、账本和参数，无须另开补搜。原 M1 PLAN与outcome保存于不可变 `ORIGINAL_PLAN.json` / `ORIGINAL_PLANNER_OUTCOME.json`；提供outcome时必须与PLAN一致。`ACTIVE_QUERY_PLAN.json` 是M2自己的累计执行产物，包含原查询和标为 `supplement round1/2/3` 的新查询。新查询校验Facet、字段类型、ID与归一化文本唯一性。每条新查询后按实际身份归并结果重算，达到500即将剩余生成查询标为 `not_executed_target_met`，不再执行；完整保留所有已返回的证据和片段，不裁成500条。
+
+每轮 `REQUEST.json` 在调用前落盘；`RAW_RESPONSE.json` 在解析和执行新查询前保存；原生HTTP raw可免费恢复解析。逐查询journal保留完整片段和harvest摘要，完成查询恢复时复用。无效JSON、非法/重复查询、空查询均留痕并计入最多3轮，不暗中付费修第四次。三轮后不足500篇仍返回0，`initial_retrieval.target_unmet=true`、`downstream_allowed=true`；既定预算拒绝追加也保留已有语料，以 `stop_reason=budget_limited` 正常交接。真正中断、本地损坏或已派发却无完成receipt会停止并保留现场，不自动重买或伪装成零结果。
+
+新上游适配器调用正式 `optomind_research.runtime.upgrade3.initial_retrieval.execute_initial_m2(plan_path=…, outcome_path=…, output_dir=…, run=True, qwen_config={…})`，其中配置键为 `key_file/key_index/budget_ledger_path/budget_limit_cny`，双账可加 `account_ledger_path/account_limit_cny/account_mapping_directory`；也可注入使用原既有账本的 `client_factory(round_dir)`。免费预览传 `run=False`。交给M3前读取 `INITIAL_RETRIEVAL_HANDOFF.json`，确认 `status=complete` 及 `downstream_allowed=true`，采用其中 `corpus_path/snippets_path`。已有普通M3消费者继续读取原v2 corpus字段。历史外部 `E/preparation/upstream_execution.py` 未修改，旧综合harness不宣称自动接入本机制。`build_supplement_request(plan, corpus, round_number=1)` 可离线导出真实既有语料的完整反馈请求；它不会执行或花费。后续规划补搜与材料准入算法没有变化。
+
 ### 完整规划默认细纲加强（2026-10-11）
 
 `scripts/upgrade3/progressive_review_plan.py --run` 完成原全量规划、负责人修订与案例附加后，默认复用正式细纲加强入口：第一层自主选择同章任务簇 → ACCESS 完整回读 → OWNER 局部加强 → 合回完整章节。选择 none 合法且直接完成，不需要人工科学意见或手填状态。原规划 API、科学提示词、加强模型/容量和 baseline BODY 算法保持原实现。

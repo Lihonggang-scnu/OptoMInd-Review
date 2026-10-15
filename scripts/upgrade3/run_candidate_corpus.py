@@ -21,17 +21,31 @@ def safe(value, limit=100):
     return ("" if value is None else str(value)).encode("ascii", "replace").decode("ascii")[:limit]
 
 
-def main() -> int:
+def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--schema", default="outputs/upgrade3/QP02/FINAL_SCHEMA.json")
     parser.add_argument("--out", default="outputs/upgrade3/QP02/CANDIDATE_CORPUS.json")
     parser.add_argument("--snippets", default="outputs/upgrade3/QP02/SNIPPET_TEXT.sqlite")
     parser.add_argument("--per-query-limit", type=int, default=100)
-    args = parser.parse_args()
+    parser.add_argument("--outcome", help="Original M1 outcome; its plan must match --schema")
+    parser.add_argument("--preview", "--preflight-only", action="store_true", help="Offline input/entry preview")
+    parser.add_argument("--run", action="store_true", help="Explicit execution (also the historical CLI default)")
+    parser.add_argument("--no-initial-topup", action="store_true", help="Exact one-pass legacy retrieval; no Qwen supplementation")
+    parser.add_argument("--key-file", type=Path)
+    parser.add_argument("--key-index", type=int, default=1)
+    parser.add_argument("--budget-ledger", type=Path, help="Existing shared project ledger")
+    parser.add_argument("--budget-limit-cny", type=float, help="Original absolute cumulative cap, not new allowance")
+    parser.add_argument("--account-ledger", type=Path)
+    parser.add_argument("--account-limit-cny", type=float)
+    parser.add_argument("--account-mapping-dir", type=Path)
+    args = parser.parse_args(argv)
+    if args.preview and args.run:
+        parser.error("--preview and --run are mutually exclusive")
 
     from optomind_research.s2_intelligence_gateway import S2IntelligenceGateway
     from optomind_research.runtime.upgrade3.candidate_corpus import (
         SnippetTextStore, build_candidate_corpus, plan_queries, write_corpus)
+    from optomind_research.runtime.upgrade3.initial_retrieval import execute_initial_m2
 
     plan = json.loads((REPO / args.schema).read_text(encoding="utf-8"))
     specs = plan_queries(plan)
@@ -44,11 +58,31 @@ def main() -> int:
     print("per-query   :", args.per_query_limit, "  hard cap: 400")
     print()
 
-    store = SnippetTextStore(REPO / args.snippets)
-    corpus = build_candidate_corpus(
-        plan, gateway=S2IntelligenceGateway(), per_query_limit=args.per_query_limit,
-        enrich=True, snippet_store=store)
-    store.close()
+    qwen_config = {"key_file": str(args.key_file.resolve()) if args.key_file else None,
+                   "key_index": args.key_index,
+                   "budget_ledger_path": str(args.budget_ledger.resolve()) if args.budget_ledger else None,
+                   "budget_limit_cny": args.budget_limit_cny,
+                   "account_ledger_path": str(args.account_ledger.resolve()) if args.account_ledger else None,
+                   "account_limit_cny": args.account_limit_cny,
+                   "account_mapping_directory": str(args.account_mapping_dir.resolve()) if args.account_mapping_dir else None}
+    if args.preview or not args.no_initial_topup:
+        corpus = execute_initial_m2(
+            plan_path=REPO / args.schema, outcome_path=REPO / args.outcome if args.outcome else None,
+            output_dir=(REPO / args.out).parent, run=not args.preview,
+            per_query_limit=args.per_query_limit, corpus_path=REPO / args.out,
+            snippets_path=REPO / args.snippets, initial_topup=not args.no_initial_topup,
+            qwen_config=qwen_config)
+        if args.preview:
+            print("PREVIEW: no provider/model requests; target500; at most3 supplementary rounds")
+            return 0
+    else:
+        store = SnippetTextStore(REPO / args.snippets)
+        try:
+            corpus = build_candidate_corpus(
+                plan, gateway=S2IntelligenceGateway(), per_query_limit=args.per_query_limit,
+                enrich=True, snippet_store=store)
+        finally:
+            store.close()
 
     print("--- per query ---", flush=True)
     for row in corpus["query_audit"]:
@@ -100,7 +134,11 @@ def main() -> int:
     print("  ref_mentions 总数      :", len(mentions))
     print("    其中带 matchedPaperCorpusId:", sum(1 for m in mentions if m["matched_paper_corpus_id"]))
     print("  有 text_hash           :", sum(1 for h in snip if h["text_hash"]))
-    print("  SQLite 中正文片段条数  :", SnippetTextStore(REPO / args.snippets).count())
+    store = SnippetTextStore(REPO / args.snippets)
+    try:
+        print("  SQLite 中正文片段条数  :", store.count())
+    finally:
+        store.close()
 
     print()
     print("--- 字段覆盖 ---")
@@ -117,7 +155,10 @@ def main() -> int:
             summary["total_hits"], summary["distinct_queries"],
             summary["distinct_facets"], safe(row["paper_id"], 14)))
 
-    path = write_corpus(REPO / args.out, corpus)
+    # The normal runner already published/hashed the consumer handoff.
+    path = REPO / args.out
+    if args.no_initial_topup:
+        path = write_corpus(path, corpus)
     print()
     print("WROTE", path)
     return 0
