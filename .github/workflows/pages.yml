@@ -1,0 +1,50 @@
+name: Publish Review Replay
+
+on:
+  push:
+    branches: [lihonggang-dev]
+    paths:
+      - '.github/workflows/pages.yml'
+      - 'scripts/maintenance/build_review_pages.py'
+      - 'website/**'
+      - 'docs/acceptance/gut-case-manual-revision-20261016/肠道微生物组综述.pdf'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read frozen public replay without changing main
+        uses: actions/checkout@v4
+        with:
+          ref: e528f7e5503c087a327ed5739ff4d59d40cf45ee
+          path: .legacy-pages
+          sparse-checkout: |
+            replay
+            artifacts/e2e
+      - name: Assemble public replay and additional publications
+        run: python3 scripts/maintenance/build_review_pages.py --legacy-root .legacy-pages --output _site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
