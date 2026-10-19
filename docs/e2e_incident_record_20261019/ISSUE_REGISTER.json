@@ -1,0 +1,2336 @@
+{
+  "schema": "e2e_incident_record.issue_register.v2",
+  "generated_at": "2026-10-19T13:22:23.498257+08:00",
+  "cutoff_basis": "2026-10-19 conversation review appended after ROOT_V34_FINAL_LOCAL_DELIVERY_ACCEPTANCE",
+  "project": "e2e_metasurface_imaging_20261016",
+  "source_commit": "0133380ea82068ec8d9c28269bf9d0417d38bb04",
+  "binding_sha256": "b4e9f56f191f2d4e1de211db08f0f60a221f42c0068005776c6382b5e0cdd2ec",
+  "final_status": "complete_with_diagnostics_local_review_draft",
+  "resolution_classes": [
+    "通用修复",
+    "本次恢复",
+    "人工科学纠正",
+    "接受瑕疵",
+    "仍未修"
+  ],
+  "gate_rule": "program、model和science/publication分开记录；通过测试、JSON、缓存或PDF存在不等于科学全绿。",
+  "cost_snapshot": {
+    "project": {
+      "cap_cny": 110.0,
+      "settled_cny": 100.821423,
+      "uncertain_cny": 0.1086312,
+      "reserved_cny": 0.0,
+      "available_cny": 9.0699458,
+      "settled_rows": 897,
+      "rows_are_not_physical_call_count": true
+    },
+    "account": {
+      "cap_cny": 300.0,
+      "settled_cny": 158.6437595,
+      "uncertain_cny": 4.6254988,
+      "available_cny": 136.7307417
+    }
+  },
+  "final_shape": {
+    "pages": 66,
+    "chapters": 7,
+    "body_units": 36,
+    "tables": 9,
+    "references": 199,
+    "pdf_sha256": "ecc410afaac21bd6215318b9c1a8fb99e317d239d7be5b313774343b1e7848f0"
+  },
+  "issues": [
+    {
+      "id": "E2E-001",
+      "phase": "scope/M1-M3",
+      "category": "范围与选择",
+      "severity": "P1",
+      "gate": "program",
+      "status": "closed_guarded",
+      "resolution_class": "通用修复",
+      "finding": "自动范围修复不能替代用户范围；改为根验收后的显式交接。",
+      "cause": "职责边界错误（confirmed）",
+      "evidence_ids": [
+        "E01",
+        "E45"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "自动范围修复不能替代用户范围；改为根验收后的显式交接。",
+      "causal_chain": {
+        "steps": [
+          "自动范围修复不能替代用户范围；改为根验收后的显式交接。",
+          "职责边界错误（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "closed_guarded",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-002",
+      "phase": "M3",
+      "category": "候选停止",
+      "severity": "P2",
+      "gate": "program",
+      "status": "generic_fixed_with_diagnostics",
+      "resolution_class": "通用修复",
+      "finding": "初始M3在gain_below_floor下只选出169篇；用户因A/B备选过少明确要求最低送读600篇。免费修复后实际选出600篇（169旧+431新），后续基础A/B验收为548篇（160旧+388新），不凑600篇科学卡。",
+      "cause": "原停止/数量合同把工程候选停止提前当成送读量边界（confirmed）；送读数量、A/B卡采纳和科学合格仍是不同门。",
+      "evidence_ids": [
+        "E01",
+        "E45",
+        "E96",
+        "C04",
+        "C05",
+        "C06",
+        "C07"
+      ],
+      "entry_type": "acceptance_boundary",
+      "observed_trigger": "ROOT_M3_REVIEW记录selected_for_reading=169、native_stop_reason=gain_below_floor；用户于23:01直接问A/B卡过少，23:11要求最低600并暂停当前机制。",
+      "causal_chain": {
+        "steps": [
+          "原M3以gain_below_floor停止，selected_for_reading=169。",
+          "用户反馈A/B备选过少并要求最低送读600，明确分数阈值不能提前截停。",
+          "source commit 0a2d7205将effective_min设为600并处理旧400上限；复用同一检索/关系数据免费重算。",
+          "ROOT_M3_MIN600_ACCEPTANCE确认169→600、eligible_candidates=3054、paid/network calls=0、5项聚焦检查通过。",
+          "后续548是基础A/B实际采纳量（160旧+388新），不是把600篇都宣称为科学合格。"
+        ],
+        "confidence": "user trigger and public follow-up are conversation evidence; counts and free repair are receipt-confirmed; science acceptance remains separate"
+      },
+      "confirmed_or_inferred": "169→600 and 3054 eligible are receipt-confirmed; 548 adopted-without-filler is the later accepted pool boundary; no claim that every selected paper passed science review.",
+      "action_and_commit": "暂停真实调用，保留旧169/160与失败历史；source commit 0a2d72058da308ea1790cec7cf9b941e0739be6f按最低600/有效上限1000免费重算，未启动新模型或网络调用。",
+      "source_pointers": [
+        "S commit: 0a2d72058da308ea1790cec7cf9b941e0739be6f",
+        "supervision/ROOT_M3_MIN600_ACCEPTANCE.json",
+        "supervision/ROOT_M3_REVIEW.json"
+      ],
+      "program_verification": "ROOT_M3_MIN600_ACCEPTANCE记录5项focused tests、AST/import/config/diff检查通过，new_selected=600、paid_calls=0、network_calls=0；本次文档任务未重跑。",
+      "real_model_execution_and_science_boundary": "最低600是送读/准入数量；548是后续基础A/B实际采纳池，旧失败和不合格卡不被凑数。程序门通过不代表600篇或548篇均科学无误。",
+      "known_cost_and_time": {
+        "cost": "本次规则修复和重算收据为0 paid/network calls；不从对话墙钟推导模型耗时。",
+        "time": "仅保留收据原始时间；本记录不把23:01–23:21墙钟当模型时长。"
+      },
+      "final_status_residual": "最低600机制已验证；548采纳池与160旧/388新层次保留，科学质量和后续补卡仍由独立门验收。",
+      "proposed_acceptance": "后续运行必须区分eligible/selected/admitted cards/accepted A-B；可用候选不足时记录shortfall，不用低分早停或填充假卡。",
+      "update_log": [
+        "2026-10-19对话回查补充：C04-C07确认用户触发与公开修复过程；E96确认169→600、3054候选、0 paid/network、5 checks；548仍是后续基础A/B采纳边界，不是600篇科学合格承诺。"
+      ]
+    },
+    {
+      "id": "E2E-003",
+      "phase": "材料解析",
+      "category": "解析与缓存",
+      "severity": "P1",
+      "gate": "program",
+      "status": "recovered_once",
+      "resolution_class": "本次恢复",
+      "finding": "native parse 非零停止；记录保留，具体底层解析原因未从 receipt 证明。",
+      "cause": "解析阶段失败，细因 unknown",
+      "evidence_ids": [
+        "E03",
+        "E46"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "native parse 非零停止；记录保留，具体底层解析原因未从 receipt 证明。",
+      "causal_chain": {
+        "steps": [
+          "native parse 非零停止；记录保留，具体底层解析原因未从 receipt 证明。",
+          "解析阶段失败，细因 unknown"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "recovered_once",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-004",
+      "phase": "材料获取",
+      "category": "PDF身份",
+      "severity": "P1",
+      "gate": "program",
+      "status": "generic_fixed",
+      "resolution_class": "通用修复",
+      "finding": "同一无障碍指南 PDF 被声明为两个研究 paper；下载后身份校验拒绝。",
+      "cause": "产物 identity 与声明不一致（confirmed）",
+      "evidence_ids": [
+        "E01",
+        "E46"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "同一无障碍指南 PDF 被声明为两个研究 paper；下载后身份校验拒绝。",
+      "causal_chain": {
+        "steps": [
+          "同一无障碍指南 PDF 被声明为两个研究 paper；下载后身份校验拒绝。",
+          "产物 identity 与声明不一致（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "generic_fixed",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-005",
+      "phase": "AB",
+      "category": "科学来源边界",
+      "severity": "P1",
+      "gate": "science",
+      "status": "manual_rejection_preserved",
+      "resolution_class": "人工科学纠正",
+      "finding": "FDTD 示例与另一器件实测被 A 合并；原答复排除且不进 planning。",
+      "cause": "证据类型/器件边界混合（confirmed）",
+      "evidence_ids": [
+        "E01",
+        "E47"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "FDTD 示例与另一器件实测被 A 合并；原答复排除且不进 planning。",
+      "causal_chain": {
+        "steps": [
+          "FDTD 示例与另一器件实测被 A 合并；原答复排除且不进 planning。",
+          "证据类型/器件边界混合（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "manual_rejection_preserved",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-006",
+      "phase": "AB/M3",
+      "category": "阅读深度边界",
+      "severity": "P2",
+      "gate": "science",
+      "status": "accepted_with_boundary",
+      "resolution_class": "接受瑕疵",
+      "finding": "候选池分层且未逐一根读全部全文；不能把卡片/HTTP当科学验收。",
+      "cause": "资源与监督边界（confirmed）",
+      "evidence_ids": [
+        "E01",
+        "E45",
+        "E47"
+      ],
+      "entry_type": "acceptance_boundary",
+      "observed_trigger": "候选池分层且未逐一根读全部全文；不能把卡片/HTTP当科学验收。",
+      "causal_chain": {
+        "steps": [
+          "候选池分层且未逐一根读全部全文；不能把卡片/HTTP当科学验收。",
+          "资源与监督边界（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "accepted_with_boundary",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-007",
+      "phase": "planning",
+      "category": "本地公式增强",
+      "severity": "P2",
+      "gate": "program",
+      "status": "bounded_recovery",
+      "resolution_class": "通用修复",
+      "finding": "P0123/P0480 有全文仍因 5.10GiB allocator OOM，非材料缺失。",
+      "cause": "本地 GPU 批次/内存限制（confirmed）",
+      "evidence_ids": [
+        "E01",
+        "E48"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "P0123/P0480 有全文仍因 5.10GiB allocator OOM，非材料缺失。",
+      "causal_chain": {
+        "steps": [
+          "P0123/P0480 有全文仍因 5.10GiB allocator OOM，非材料缺失。",
+          "本地 GPU 批次/内存限制（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "bounded_recovery",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-008",
+      "phase": "planning",
+      "category": "审判响应解析",
+      "severity": "P2",
+      "gate": "program/model",
+      "status": "replayed_zero_call",
+      "resolution_class": "通用修复",
+      "finding": "语义已批准但 judge JSON parse 失败；保存付费响应，decoder/sidecar 零调用复核。",
+      "cause": "响应格式层失败（confirmed）",
+      "evidence_ids": [
+        "E01",
+        "E49"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "语义已批准但 judge JSON parse 失败；保存付费响应，decoder/sidecar 零调用复核。",
+      "causal_chain": {
+        "steps": [
+          "语义已批准但 judge JSON parse 失败；保存付费响应，decoder/sidecar 零调用复核。",
+          "响应格式层失败（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "replayed_zero_call",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-009",
+      "phase": "planning",
+      "category": "策略补丁",
+      "severity": "P2",
+      "gate": "program",
+      "status": "closed_guarded",
+      "resolution_class": "通用修复",
+      "finding": "scope/policy 补丁不得改写原科学输入；仅采用显式且对齐的工具约束。",
+      "cause": "治理层与工具层职责混杂（inferred）",
+      "evidence_ids": [
+        "E01",
+        "E42"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "scope/policy 补丁不得改写原科学输入；仅采用显式且对齐的工具约束。",
+      "causal_chain": {
+        "steps": [
+          "scope/policy 补丁不得改写原科学输入；仅采用显式且对齐的工具约束。",
+          "治理层与工具层职责混杂（inferred）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "closed_guarded",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-010",
+      "phase": "V10",
+      "category": "索引与投影",
+      "severity": "P2",
+      "gate": "program",
+      "status": "accepted_with_diagnostics",
+      "resolution_class": "接受瑕疵",
+      "finding": "多语索引修复保留身份，但监督投影有 replacement/mojibake；未证明 source bytes 同步损坏。",
+      "cause": "projection/encoding seam（confirmed for projection）",
+      "evidence_ids": [
+        "E01",
+        "E42"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "多语索引修复保留身份，但监督投影有 replacement/mojibake；未证明 source bytes 同步损坏。",
+      "causal_chain": {
+        "steps": [
+          "多语索引修复保留身份，但监督投影有 replacement/mojibake；未证明 source bytes 同步损坏。",
+          "projection/encoding seam（confirmed for projection）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "accepted_with_diagnostics",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-011",
+      "phase": "V9-V10",
+      "category": "语义拒绝与重试",
+      "severity": "P1",
+      "gate": "science",
+      "status": "protected_boundary",
+      "resolution_class": "仍未修",
+      "finding": "科学拒绝、模型误归因、provider failure 必须分态；同输入不自动重买。",
+      "cause": "证据类型与路由状态混用（confirmed boundary）",
+      "evidence_ids": [
+        "E01",
+        "E42",
+        "E43"
+      ],
+      "entry_type": "acceptance_boundary",
+      "observed_trigger": "科学拒绝、模型误归因、provider failure 必须分态；同输入不自动重买。",
+      "causal_chain": {
+        "steps": [
+          "科学拒绝、模型误归因、provider failure 必须分态；同输入不自动重买。",
+          "证据类型与路由状态混用（confirmed boundary）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "protected_boundary",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-012",
+      "phase": "V5-V13",
+      "category": "缓存/重买",
+      "severity": "P1",
+      "gate": "program/ledger",
+      "status": "generic_fixed_with_diagnostics",
+      "resolution_class": "通用修复",
+      "finding": "managed path/sidecar changes once made a byte-identical request look new; that path seam has a guard, but a unified scientific-rejection/cross-namespace rebuy prevention is still unproven.",
+      "cause": "稳定 identity/hash 绑定不足（confirmed for path seam）",
+      "evidence_ids": [
+        "E01",
+        "E40",
+        "E41",
+        "E44"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "managed path/sidecar 变化曾让相同请求像新请求；加入 byte-identical cache/rebuy guard。",
+      "causal_chain": {
+        "steps": [
+          "managed path/sidecar 变化曾让相同请求像新请求；加入 byte-identical cache/rebuy guard。",
+          "稳定 identity/hash 绑定不足（confirmed for path seam）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "managed path identity seam guarded; same scientific rejection and cross-namespace duplicate query still lack one unified robust fix.",
+      "proposed_acceptance": "Keep path/cache guard separate from science rejection policy; stop only the affected duplicate route and require explicit namespace/identity evidence."
+    },
+    {
+      "id": "E2E-013",
+      "phase": "V13",
+      "category": "directed handoff",
+      "severity": "P1",
+      "gate": "program",
+      "status": "recovered_once",
+      "resolution_class": "本次恢复",
+      "finding": "22 groups/6 targets 但 nested results=0、material_records=0；付款前停止。",
+      "cause": "consumer input 未闭合（confirmed）",
+      "evidence_ids": [
+        "E39",
+        "E40"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "22 groups/6 targets 但 nested results=0、material_records=0；付款前停止。",
+      "causal_chain": {
+        "steps": [
+          "22 groups/6 targets 但 nested results=0、material_records=0；付款前停止。",
+          "consumer input 未闭合（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "recovered_once",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-014",
+      "phase": "V14",
+      "category": "source identity",
+      "severity": "P1",
+      "gate": "science",
+      "status": "manual_rejection_preserved",
+      "resolution_class": "人工科学纠正",
+      "finding": "P0480 内容被归到 P0006，P0123 被判 unavailable；拒绝章节并保留 raw。",
+      "cause": "failure handoff 后错误 source substitution（confirmed）",
+      "evidence_ids": [
+        "E01",
+        "E38"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "P0480 内容被归到 P0006，P0123 被判 unavailable；拒绝章节并保留 raw。",
+      "causal_chain": {
+        "steps": [
+          "P0480 内容被归到 P0006，P0123 被判 unavailable；拒绝章节并保留 raw。",
+          "failure handoff 后错误 source substitution（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "manual_rejection_preserved",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-015",
+      "phase": "V15",
+      "category": "chapter quality",
+      "severity": "P1",
+      "gate": "science",
+      "status": "manual_rejection_preserved",
+      "resolution_class": "人工科学纠正",
+      "finding": "CH01-CH03 generic、缺 P00468、方法/场景/来源混用。",
+      "cause": "任务/标签被当作证据（confirmed）",
+      "evidence_ids": [
+        "E01",
+        "E37"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "CH01-CH03 generic、缺 P00468、方法/场景/来源混用。",
+      "causal_chain": {
+        "steps": [
+          "CH01-CH03 generic、缺 P00468、方法/场景/来源混用。",
+          "任务/标签被当作证据（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "manual_rejection_preserved",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-016",
+      "phase": "V16",
+      "category": "chapter source binding",
+      "severity": "P1",
+      "gate": "science",
+      "status": "manual_rejection_preserved",
+      "resolution_class": "人工科学纠正",
+      "finding": "不同 paper 的波段/器件/效率被拼接，实际 source bindings 却正确。",
+      "cause": "生成/合并 attribution 失败（confirmed）",
+      "evidence_ids": [
+        "E01",
+        "E36"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "不同 paper 的波段/器件/效率被拼接，实际 source bindings 却正确。",
+      "causal_chain": {
+        "steps": [
+          "不同 paper 的波段/器件/效率被拼接，实际 source bindings 却正确。",
+          "生成/合并 attribution 失败（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "manual_rejection_preserved",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-017",
+      "phase": "V17-V18",
+      "category": "partial batch contract",
+      "severity": "P1",
+      "gate": "program/science",
+      "status": "generic_fixed",
+      "resolution_class": "通用修复",
+      "finding": "source-local batch 生成 full-chapter 形态并带未供应 handles。",
+      "cause": "partial 与 final role 未区分（confirmed）",
+      "evidence_ids": [
+        "E34",
+        "E35"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "source-local batch 生成 full-chapter 形态并带未供应 handles。",
+      "causal_chain": {
+        "steps": [
+          "source-local batch 生成 full-chapter 形态并带未供应 handles。",
+          "partial 与 final role 未区分（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "generic_fixed",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-018",
+      "phase": "V19",
+      "category": "native failure boundary",
+      "severity": "P2",
+      "gate": "program",
+      "status": "generic_fixed",
+      "resolution_class": "通用修复",
+      "finding": "V19 P0395 failure stopped locally while six chapter caches remained; V20 later proved complete A/B was already in candidate_materials[7] and corrected the historical missing-material interpretation.",
+      "cause": "失败隔离与状态聚合分层不足（confirmed）",
+      "evidence_ids": [
+        "E32",
+        "E33"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "V19 记录 P0395 unsupplied 并在局部批次停止，但六章缓存仍可用；V20 全读发现原 CH06 request 的 candidate_materials[7] 已有完整 A/B。",
+      "causal_chain": {
+        "steps": [
+          "V19 registry/root review 未看到实际 nested material",
+          "局部 failure isolation 保留六章缓存",
+          "V20 纠正证明缺材解释错误且原答 free recovery 后 accepted_partial"
+        ],
+        "confidence": "V19 boundary confirmed; V20 disproves the historical missing-material interpretation."
+      },
+      "confirmed_or_inferred": "V19 stop and six-chapter preservation confirmed; historical missing-material interpretation corrected by V20.",
+      "action_and_commit": "保留 V19 failure/raw/gate；V20 root correction new_calls=0，不改旧 reject。",
+      "source_pointers": [
+        "supervision/ROOT_V19_NATIVE_FAILURE_BOUNDARY_AND_SIX_CHAPTER_CACHE.json",
+        "supervision/ROOT_V20_NESTED_MATERIAL_CORRECTION_AND_ORIGINAL_ACCEPTANCE.json"
+      ],
+      "program_verification": "V19 receipt explicitly preserves six-chapter cache; this record does not rerun.",
+      "real_model_execution_and_science_boundary": "V19 was a real stage boundary; V20 original response is accepted_partial, not final chapter or science green.",
+      "known_cost_and_time": {
+        "cost": "V19 repair costs are E2E-019; V20 correction new_calls=0.",
+        "time": "Use raw receipt timestamps; no derived model duration."
+      },
+      "final_status_residual": "historical correction recorded; old reject/raw remain.",
+      "proposed_acceptance": "Distinguish incomplete registry from actual missing input; preserve local failure isolation."
+    },
+    {
+      "id": "E2E-019",
+      "phase": "V19-V20",
+      "category": "bounded repair",
+      "severity": "P1",
+      "gate": "model/science/ledger",
+      "status": "recovered_with_cost",
+      "resolution_class": "本次恢复",
+      "finding": "V19 two repair calls totalled .885416; gate 9d382… separately records .462222/191.313 s; V20 correction itself had 0 new calls, so no unproven fee addition.",
+      "cause": "repair 使用不完整 actual-material registry（confirmed）",
+      "evidence_ids": [
+        "E31",
+        "E32"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "Bounded repair outputs remained rejected after losing ONL and misattributing a Bode-Fano case.",
+      "causal_chain": {
+        "steps": [
+          "V19 CH06 face858… 0.440152 + CH07 627… 0.445264 = .885416",
+          "V20 correction receipt identifies failed gate 9d382… at .462222/191.313 s",
+          "V20 correction itself has new_calls=0"
+        ],
+        "confidence": "three identified historical repair objects; V20 correction itself new_calls=0"
+      },
+      "confirmed_or_inferred": "三项对象由各自call/gate标识区分；这里是历史费用归因，不是新增费用；只以对应receipt为准。",
+      "action_and_commit": "root accepts the registry/review error; old reject and fee records remain unchanged.",
+      "source_pointers": [
+        "supervision/ROOT_V19_LIVE_REPAIR_RESULT.json",
+        "supervision/ROOT_V20_NESTED_MATERIAL_CORRECTION_AND_ORIGINAL_ACCEPTANCE.json"
+      ],
+      "program_verification": "V19 actual_repair_total_cny=.885416, old_base_calls_rebought=0; V20 new_calls=0.",
+      "real_model_execution_and_science_boundary": "V19 repair calls were real qwen3.5-plus calls; rejected content is not accepted science; V20 original is accepted_partial.",
+      "known_cost_and_time": {
+        "cost": "三个已识别的不同repair：CH06 face858a00e79f16=.440152，CH07 627cb859edee3ba4=.445264，后续CH06 batch237 gate9d382...=.462222。前两项小计.885416；后者并非V20新购，V20纠正本身0newcalls。均已在项目累计内，勿再叠加到总费用。",
+        "time": "9d382… elapsed_seconds=191.313."
+      },
+      "final_status_residual": "historical fee attribution corrected conservatively; old repair remains rejected.",
+      "proposed_acceptance": "Report gate/call IDs and never add historical fees when independence is unproven."
+    },
+    {
+      "id": "E2E-020",
+      "phase": "V21-V22",
+      "category": "late closure/owner projection",
+      "severity": "P1",
+      "gate": "program/science",
+      "status": "generic_fixed_with_diagnostics",
+      "resolution_class": "通用修复",
+      "finding": "付款前 chapter map 为空；resolved_from_current_pool 无 substance；CH06 32→30 计数记录修正。",
+      "cause": "metadata 被当作已读证据、projection 陈旧（confirmed）",
+      "evidence_ids": [
+        "E50",
+        "E51",
+        "E52"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "付款前 chapter map 为空；resolved_from_current_pool 无 substance；CH06 32→30 计数记录修正。",
+      "causal_chain": {
+        "steps": [
+          "付款前 chapter map 为空；resolved_from_current_pool 无 substance；CH06 32→30 计数记录修正。",
+          "metadata 被当作已读证据、projection 陈旧（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "generic_fixed_with_diagnostics",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-021",
+      "phase": "V23",
+      "category": "chapter metadata hold",
+      "severity": "P2",
+      "gate": "program/science",
+      "status": "accepted_with_diagnostics",
+      "resolution_class": "接受瑕疵",
+      "finding": "CH06 6 units/30 cases/18 tasks 原结构保持，routing metadata 仍 hold。",
+      "cause": "内容与路由完成度不同（confirmed）",
+      "evidence_ids": [
+        "E53"
+      ],
+      "entry_type": "acceptance_boundary",
+      "observed_trigger": "CH06 6 units/30 cases/18 tasks 原结构保持，routing metadata 仍 hold。",
+      "causal_chain": {
+        "steps": [
+          "CH06 6 units/30 cases/18 tasks 原结构保持，routing metadata 仍 hold。",
+          "内容与路由完成度不同（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "accepted_with_diagnostics",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-022",
+      "phase": "V24",
+      "category": "case enrichment",
+      "severity": "P1",
+      "gate": "science/program",
+      "status": "accepted_partial",
+      "resolution_class": "接受瑕疵",
+      "finding": "12 accepted/6 failed batches、107 unique handles；失败含 source conflation、unsupported numeric、coverage/strictness。",
+      "cause": "部分批次质量不足（confirmed）",
+      "evidence_ids": [
+        "E26",
+        "E27",
+        "E28"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "12 accepted/6 failed batches、107 unique handles；失败含 source conflation、unsupported numeric、coverage/strictness。",
+      "causal_chain": {
+        "steps": [
+          "12 accepted/6 failed batches、107 unique handles；失败含 source conflation、unsupported numeric、coverage/strictness。",
+          "部分批次质量不足（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "accepted_partial",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-023",
+      "phase": "V25",
+      "category": "scope over-rejection",
+      "severity": "P1",
+      "gate": "science",
+      "status": "manual_reconsideration",
+      "resolution_class": "人工科学纠正",
+      "finding": "CH03/CH04 合法跨波段方法例被当作绝对 scope violation，根重读后接受原 raw。",
+      "cause": "机器 scope 解释过宽（confirmed）",
+      "evidence_ids": [
+        "E19",
+        "E29"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "CH03/CH04 合法跨波段方法例被当作绝对 scope violation，根重读后接受原 raw。",
+      "causal_chain": {
+        "steps": [
+          "CH03/CH04 合法跨波段方法例被当作绝对 scope violation，根重读后接受原 raw。",
+          "机器 scope 解释过宽（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "manual_reconsideration",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-024",
+      "phase": "V25",
+      "category": "outline handoff",
+      "severity": "P2",
+      "gate": "program/science",
+      "status": "accepted_initial_draft",
+      "resolution_class": "接受瑕疵",
+      "finding": "7 chapters/36 units handoff accepted，但 classification 是 initial_draft，不是 submission final。",
+      "cause": "draft readiness 与 scientific finality 分开（confirmed）",
+      "evidence_ids": [
+        "E19",
+        "E30"
+      ],
+      "entry_type": "acceptance_boundary",
+      "observed_trigger": "7 chapters/36 units handoff accepted，但 classification 是 initial_draft，不是 submission final。",
+      "causal_chain": {
+        "steps": [
+          "7 chapters/36 units handoff accepted，但 classification 是 initial_draft，不是 submission final。",
+          "draft readiness 与 scientific finality 分开（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "accepted_initial_draft",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-025",
+      "phase": "V25",
+      "category": "arrangement reexport",
+      "severity": "P2",
+      "gate": "program/ledger",
+      "status": "recovered_zero_call",
+      "resolution_class": "本次恢复",
+      "finding": "由 7 个实际 raw response formal reexport/body_ready，0 calls；不是手造 manifest。",
+      "cause": "需恢复 native provenance（confirmed）",
+      "evidence_ids": [
+        "E03",
+        "E20"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "由 7 个实际 raw response formal reexport/body_ready，0 calls；不是手造 manifest。",
+      "causal_chain": {
+        "steps": [
+          "由 7 个实际 raw response formal reexport/body_ready，0 calls；不是手造 manifest。",
+          "需恢复 native provenance（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "recovered_zero_call",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-026",
+      "phase": "V26",
+      "category": "BODY quality contract",
+      "severity": "P1",
+      "gate": "science/model",
+      "status": "accepted_with_diagnostics",
+      "resolution_class": "人工科学纠正",
+      "finding": "U02 混合两组条件；U03 QC false covered；U04 335 字且缺 P02/P03。",
+      "cause": "条件配对、覆盖、短稿状态未同等严格（confirmed）",
+      "evidence_ids": [
+        "E21",
+        "E23",
+        "E24",
+        "E87",
+        "E88",
+        "E89",
+        "E90",
+        "E91",
+        "E92",
+        "E93",
+        "E94"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "U02 混合两组条件；U03 QC false covered；U04 335 字且缺 P02/P03。",
+      "causal_chain": {
+        "steps": [
+          "U02 混合两组条件；U03 QC false covered；U04 335 字且缺 P02/P03。",
+          "条件配对、覆盖、短稿状态未同等严格（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "accepted_with_diagnostics",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。",
+      "update_log": [
+        "2026-10-19追加：V27 U02的TiO2标签属于未由摘要证明的本地标签，不是已证跨源/身份错误；旧拒绝保留，按用户容忍免费恢复同一原请求，未改source/model messages，仍scientific_allclear=false（E87）。V28 CH03_U01实际546字普通稿只覆盖P01，P02/P03缺失、P04未充分展开；首次QC不改正文，随后唯一1800字append真实补足三任务，总长2348，native quality assessed_with_pending，P0355/P0244等局部诊断保留，不能把短稿恢复或append当科学全绿（E88–E94）。"
+      ]
+    },
+    {
+      "id": "E2E-027",
+      "phase": "V27",
+      "category": "quality reparse",
+      "severity": "P1",
+      "gate": "science",
+      "status": "protected_pending",
+      "resolution_class": "仍未修",
+      "finding": "第二次 quality diagnosis 仍认可条件混用/矛盾焦距；保留 strict rejection，scientific allclear=false。",
+      "cause": "科学判断仍不可靠（confirmed）",
+      "evidence_ids": [
+        "E01",
+        "E23",
+        "E24"
+      ],
+      "entry_type": "acceptance_boundary",
+      "observed_trigger": "第二次 quality diagnosis 仍认可条件混用/矛盾焦距；保留 strict rejection，scientific allclear=false。",
+      "causal_chain": {
+        "steps": [
+          "第二次 quality diagnosis 仍认可条件混用/矛盾焦距；保留 strict rejection，scientific allclear=false。",
+          "科学判断仍不可靠（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "protected_pending",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-028",
+      "phase": "V28",
+      "category": "multi-envelope",
+      "severity": "P2",
+      "gate": "program/model",
+      "status": "generic_format_fix_plus_run_specific_recovery",
+      "resolution_class": "通用修复",
+      "finding": "V28 multi-envelope handling has a general source implementation at f446… plus a separate free recovery selecting the complete actual envelope; old history and hashes were preserved.",
+      "cause": "response envelope contract 不清（confirmed format seam）",
+      "evidence_ids": [
+        "E25",
+        "E91",
+        "E92"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "CH02_U03 had multiple JSON envelopes and the first handoff was incomplete.",
+      "causal_chain": {
+        "steps": [
+          "general multi-envelope code landed at f4461637…",
+          "separate free recovery selected complete actual envelope",
+          "old rejection/paid history and hashes were preserved"
+        ],
+        "confidence": "V28 receipt confirmed: general code plus one free recovery."
+      },
+      "confirmed_or_inferred": "This is not only a one-off manual recovery and does not establish science correctness.",
+      "action_and_commit": "source commit f4461637c495ade3f35b6dc361066222760b2e39; recovery receipt retained.",
+      "source_pointers": [
+        "supervision/ROOT_V28_NATIVE_MULTI_ENVELOPE_RECOVERY_ACCEPTANCE.json"
+      ],
+      "program_verification": "preview_provider_calls=0; raw/body hashes and selected length recorded.",
+      "real_model_execution_and_science_boundary": "No new model call; envelope choice preserves model output; scientific_acceptance remains false.",
+      "known_cost_and_time": {
+        "cost": "0 new calls in V28 recovery; prior paid history remains historical.",
+        "time": "No model duration inferred."
+      },
+      "final_status_residual": "format seam generally fixed; scientific acceptance remains separate.",
+      "proposed_acceptance": "Require complete envelope/hash/finish validation while preserving old rejection/paid history.",
+      "update_log": [
+        "2026-10-19追加：多JSON/普通缓存恢复须与短稿合同分开；CH03_U01的0-call normal preview只恢复546字既有author结果，之后一次append由独立QC/append receipt授权，旧历史拒绝与sealed quality计数不改（E91–E92）。"
+      ]
+    },
+    {
+      "id": "E2E-029",
+      "phase": "V28-V30",
+      "category": "supervision status",
+      "severity": "P1",
+      "gate": "program",
+      "status": "generic_fixed_with_diagnostics",
+      "resolution_class": "通用修复",
+      "finding": "partial/complete/diagnostic、stale status 与缺 decision 曾混报；最终分开 generation/assembly/quality/article/science。",
+      "cause": "历史 receipt 与当前 native state 聚合不一致（confirmed boundary）",
+      "evidence_ids": [
+        "E01",
+        "E15",
+        "E17"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "partial/complete/diagnostic、stale status 与缺 decision 曾混报；最终分开 generation/assembly/quality/article/science。",
+      "causal_chain": {
+        "steps": [
+          "partial/complete/diagnostic、stale status 与缺 decision 曾混报；最终分开 generation/assembly/quality/article/science。",
+          "历史 receipt 与当前 native state 聚合不一致（confirmed boundary）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "generic_fixed_with_diagnostics",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-030",
+      "phase": "V28-V29",
+      "category": "numeric citation alias",
+      "severity": "P1",
+      "gate": "program/science",
+      "status": "generic_fixed",
+      "resolution_class": "通用修复",
+      "finding": "P157/P206 只在 unit-scoped、DOI/paper_id 唯一匹配时映射 P0157/P0206；raw diagnostics 不改。",
+      "cause": "零填充数字别名不同步（confirmed）",
+      "evidence_ids": [
+        "E16",
+        "E17",
+        "E18"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "Assembly saw P157/P206 while canonical catalog used P0157/P0206.",
+      "causal_chain": {
+        "steps": [
+          "unit-local citation maps identified target",
+          "paper_id/DOI uniquely matched canonical identity",
+          "assembly added alias provenance without rewriting raw diagnostics"
+        ],
+        "confidence": "explicit identity proof confirmed."
+      },
+      "confirmed_or_inferred": "P157→P0157 and P206→P0206 are validated identities, not guessed padding.",
+      "action_and_commit": "assembly-only resolver at 002067c276de4cd9c9d58c12aa5b47579b80beec; body/messages/QC/seals unchanged.",
+      "source_pointers": [
+        "supervision/ROOT_V28_EXPLICIT_NUMERIC_ALIAS_IDENTITY_PROOF.json",
+        "supervision/ROOT_V29_ASSEMBLY_ALIAS_CODE_ACCEPTANCE.json",
+        "S/scripts/upgrade3/full_review_draft.py"
+      ],
+      "program_verification": "36 loaded/0 unknown/0 calls in accepted proof; conflict, missing identity and unrelated sidecar cases fail closed.",
+      "real_model_execution_and_science_boundary": "0 model calls in alias replay; raw unknown diagnostics remain visible.",
+      "known_cost_and_time": {
+        "cost": "0 new calls.",
+        "time": "No model duration inferred."
+      },
+      "final_status_residual": "two proven aliases resolved in assembly only; not every citation/paper claim validated.",
+      "proposed_acceptance": "Only explicit unit-scoped canonical identity may add resolved_identity_aliases."
+    },
+    {
+      "id": "E2E-031",
+      "phase": "V30",
+      "category": "derivative alias provenance",
+      "severity": "P1",
+      "gate": "program",
+      "status": "generic_fixed",
+      "resolution_class": "通用修复",
+      "finding": "quality/format derivative 只能通过同 unit/attempt ancestor、hash、body/result seal 读取原 sidecar。",
+      "cause": "局部 upward search 不足，任意磁盘扫描不安全（confirmed）",
+      "evidence_ids": [
+        "E16",
+        "E17"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "quality/format derivative 只能通过同 unit/attempt ancestor、hash、body/result seal 读取原 sidecar。",
+      "causal_chain": {
+        "steps": [
+          "quality/format derivative 只能通过同 unit/attempt ancestor、hash、body/result seal 读取原 sidecar。",
+          "局部 upward search 不足，任意磁盘扫描不安全（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "generic_fixed",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-032",
+      "phase": "V30",
+      "category": "BODY article edit",
+      "severity": "P2",
+      "gate": "model/science",
+      "status": "accepted_with_diagnostics",
+      "resolution_class": "本次恢复",
+      "finding": "selected body 来自 article_edit，model_calls=1；numbering 0 call，scientific acceptance 仍 false。",
+      "cause": "编辑、编号和科学接受是不同门（confirmed）",
+      "evidence_ids": [
+        "E04",
+        "E15"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "selected body 来自 article_edit，model_calls=1；numbering 0 call，scientific acceptance 仍 false。",
+      "causal_chain": {
+        "steps": [
+          "selected body 来自 article_edit，model_calls=1；numbering 0 call，scientific acceptance 仍 false。",
+          "编辑、编号和科学接受是不同门（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "accepted_with_diagnostics",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-033",
+      "phase": "V30-V31",
+      "category": "post-BODY capacity",
+      "severity": "P1",
+      "gate": "program/model",
+      "status": "generic_fixed",
+      "resolution_class": "通用修复",
+      "finding": "旧字符 guard 拦截 73 records；实际 token estimate 263789 < allowance 950848。",
+      "cause": "工程字符限过低（confirmed）",
+      "evidence_ids": [
+        "E13",
+        "E14"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "旧字符 guard 拦截 73 records；实际 token estimate 263789 < allowance 950848。",
+      "causal_chain": {
+        "steps": [
+          "旧字符 guard 拦截 73 records；实际 token estimate 263789 < allowance 950848。",
+          "工程字符限过低（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "generic_fixed",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-034",
+      "phase": "V28",
+      "category": "补写整段重写与拒绝SSE安全重放",
+      "severity": "P1",
+      "gate": "program/model",
+      "status": "contained_production_guard_unfixed",
+      "resolution_class": "仍未修",
+      "finding": "CH02:CH02_U03的唯一补写以status=appended返回整段重写。监督拒绝采用，原生保留1657字原稿并assessed_with_pending/changedfalse；run_unit_completion尚缺通用全稿重写/overlap guard。",
+      "cause": "模型违反append-only合同；消费者仅凭非空fragment/status不足以证明为新增片段（工程缺口已确认）。",
+      "evidence_ids": [
+        "E85",
+        "E88",
+        "E90",
+        "E91",
+        "E92"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "已付费的补写SSE完整返回，正文重复原单元而不是仅补缺失任务；后来通用--reparse-saved可能重新消费同一被拒SSE。",
+      "causal_chain": {
+        "steps": [
+          "模型把整段重写标成appended",
+          "run_unit_completion原消费路径存在直接拼接风险",
+          "监督拒绝这次采用，原稿仍有用并保留pending",
+          "正常续跑命令去掉--reparse-saved；拒绝stage的重解析必须先审，但生产通用guard未修"
+        ],
+        "confidence": "confirmed by explicit UNATTENDED issue receipt; no new tests/model calls in this documentation task"
+      },
+      "confirmed_or_inferred": "production_fix_implemented=false为回执明示；不能将本次人工挡住当作生产护栏已完备。",
+      "action_and_commit": "本次只约束未来normal-resume argv无--reparse-saved/无retry；活跃源码未为此修改，无通用修复commit。保留原始raw/费用/拒绝及1657字原稿。",
+      "source_pointers": [
+        "S/optomind_research/runtime/upgrade3/review_unit_writer.py:run_unit_completion",
+        "preparation/multi_envelope_recovery_v28/BODY_COMMANDS_V28_FUTURE_NORMAL_RESUME.json",
+        "supervision/UNATTENDED_ISSUE_V28_COMPLETION_REWRITE_AS_APPEND.json"
+      ],
+      "program_verification": "回执确认native quality保留原稿、changed=false、后续单元正常继续；本次没有重跑测试或provider。",
+      "real_model_execution_and_science_boundary": "本次原补写真实付费已发生且拒绝采用；未重抽。普通有用原稿带pending继续，不将局部补写失败升级为全书失败。历史QC model_calls仍按其sealed provenance保留，免费恢复不能清零历史调用。",
+      "known_cost_and_time": {
+        "cost": "该补写的独立费用本记录未重新归因，已包含最终项目100.821423元累计；不能再加一次。",
+        "time": "未从该issue receipt单独统计，不从等待间隔推算。"
+      },
+      "final_status_residual": "原稿保留并继续；通用append/full-rewrite/overlap消费者防护及拒绝SSE安全重放仍待修。",
+      "proposed_acceptance": "无模型/无账本fixture：有效新增fragment可单次拼接；整稿重写或重复原稿不得拼接/截断猜造，应保留原稿和pending；普通resume不得自动重吃被拒SSE，显式重解析也必须经过受拒状态与新guard校验；不得由此重新付费。",
+      "update_log": [
+        "2026-10-19追加：CH03_U01 append经过root亲审确认新增P02/P03/P04且不重复P01；该单元不是CH02_U03被拒整稿重写。full-rewrite/overlap guard仍是生产待修接缝，普通resume去掉--reparse-saved；两者都不能通过人工截取或再次付费解决（E88,E90–E92）。"
+      ]
+    },
+    {
+      "id": "E2E-035",
+      "phase": "V31",
+      "category": "checker response",
+      "severity": "P1",
+      "gate": "model/program",
+      "status": "unpaid_stop",
+      "resolution_class": "接受瑕疵",
+      "finding": "首轮 paid checker invalid JSON；完整 raw 保存，0 proposals adopted，用户拒绝付费格式 repair。",
+      "cause": "provider 输出格式失败（confirmed）",
+      "evidence_ids": [
+        "E11",
+        "E12"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "首轮 paid checker invalid JSON；完整 raw 保存，0 proposals adopted，用户拒绝付费格式 repair。",
+      "causal_chain": {
+        "steps": [
+          "首轮 paid checker invalid JSON；完整 raw 保存，0 proposals adopted，用户拒绝付费格式 repair。",
+          "provider 输出格式失败（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "unpaid_stop",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-036",
+      "phase": "V32",
+      "category": "publication references",
+      "severity": "P2",
+      "gate": "program",
+      "status": "generic_fixed",
+      "resolution_class": "通用修复",
+      "finding": "bibliography scope 修复 201→199；reader SHA/科学正文不变。",
+      "cause": "引用扫描越界（confirmed）",
+      "evidence_ids": [
+        "E09",
+        "E55"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "bibliography scope 修复 201→199；reader SHA/科学正文不变。",
+      "causal_chain": {
+        "steps": [
+          "bibliography scope 修复 201→199；reader SHA/科学正文不变。",
+          "引用扫描越界（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "generic_fixed",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-037",
+      "phase": "V33",
+      "category": "TeX delimiter",
+      "severity": "P2",
+      "gate": "program",
+      "status": "generic_fixed",
+      "resolution_class": "通用修复",
+      "finding": "renderer 的 \\cdotn 命令/变量未分隔；只修 delimiter，旧 compile failure 保留。",
+      "cause": "渲染器词法边界（confirmed）",
+      "evidence_ids": [
+        "E10",
+        "E55"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "renderer 的 \\cdotn 命令/变量未分隔；只修 delimiter，旧 compile failure 保留。",
+      "causal_chain": {
+        "steps": [
+          "renderer 的 \\cdotn 命令/变量未分隔；只修 delimiter，旧 compile failure 保留。",
+          "渲染器词法边界（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "generic_fixed",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-038",
+      "phase": "V34",
+      "category": "控制字符数学",
+      "severity": "P2",
+      "gate": "publication",
+      "status": "generic_fixed_with_literal_fallback",
+      "resolution_class": "通用修复",
+      "finding": "3 个数学定界 span 各含 U+0008；U+000C=0，历史 FF 已归一化为换行；literal fallback 记录 offset/hash，不猜测公式。",
+      "cause": "原稿控制损坏（confirmed）",
+      "evidence_ids": [
+        "E08",
+        "E55"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "Three math spans contained non-whitespace U+0008 at raw-pre-clean audit.",
+      "causal_chain": {
+        "steps": [
+          "source text had control damage",
+          "literal fallback ran before clean_unicode with raw offsets/hashes",
+          "historical FF damage was already normalized to newline"
+        ],
+        "confidence": "V34 receipt confirmed."
+      },
+      "confirmed_or_inferred": "All three actual fallback spans include U+0008; U+000C count is 0; normal whitespace controls are diagnostic-only.",
+      "action_and_commit": "source commit f1876f39b085c2e815e29188ebeda168c0db6302; no formula restoration.",
+      "source_pointers": [
+        "preparation/publication_literal_math_v34/V34_NATIVE_LITERAL_MATH_RECEIPT.json"
+      ],
+      "program_verification": "12 focused tests passed; clean math/code/prose preserved; native compile returncode 0, PDF 66 pages.",
+      "real_model_execution_and_science_boundary": "0 provider/model calls; literal projection preserves damage and is not science correction.",
+      "known_cost_and_time": {
+        "cost": "0 new calls in fallback/probe.",
+        "time": "Receipt timestamps only; no model duration."
+      },
+      "final_status_residual": "bounded readability degradation accepted; three literal spans remain visible on pages 40–41.",
+      "proposed_acceptance": "Only non-whitespace C0 inside math spans may literalize; never infer missing symbols."
+    },
+    {
+      "id": "E2E-039",
+      "phase": "V34",
+      "category": "波长@引文",
+      "severity": "P1",
+      "gate": "publication/science",
+      "status": "final_residual",
+      "resolution_class": "仍未修",
+      "finding": "natbib 把波长 @ 识别成 citation，undefined 532/635；p47 表9、p51 有可见问号。",
+      "cause": "citation tokenization/author-year marker 误判（effect confirmed, parser detail inferred）",
+      "evidence_ids": [
+        "E02",
+        "E07",
+        "E11"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "Undefined citation tokens 532/635 remain, with visible question marks at p47 table 9 and p51.",
+      "causal_chain": {
+        "steps": [
+          "wavelength text used @",
+          "natbib treated it as citation-like",
+          "XeLaTeX still emitted PDF while LATEX_BUILD_REPORT stayed failed"
+        ],
+        "confidence": "effect confirmed; parser detail inferred."
+      },
+      "confirmed_or_inferred": "Effect confirmed; internal parser-level cause inferred.",
+      "action_and_commit": "No V34 source correction; retain diagnostic publication.",
+      "source_pointers": [
+        "supervision/ROOT_V34_FINAL_LOCAL_DELIVERY_ACCEPTANCE.json",
+        "stages/11_checker_diagnostic_publication_v34/05_publication/tex/LATEX_BUILD_REPORT.json"
+      ],
+      "program_verification": "PDF exists and returncode=0, but report status failed and undefined citations remain.",
+      "real_model_execution_and_science_boundary": "0 new publication model calls; reader-visible residual.",
+      "known_cost_and_time": {
+        "cost": "No paid repair for this issue.",
+        "time": "No parser/model time separately proven."
+      },
+      "final_status_residual": "unfixed; public release false.",
+      "proposed_acceptance": "Do not call submission-ready until wavelength tokenization and citations are separately corrected."
+    },
+    {
+      "id": "E2E-040",
+      "phase": "V34",
+      "category": "作者元数据",
+      "severity": "P2",
+      "gate": "publication",
+      "status": "final_residual",
+      "resolution_class": "仍未修",
+      "finding": "author_metadata_pending 保留；PDF 存在不代表 submission-ready。",
+      "cause": "出版元数据输入未闭合（confirmed）",
+      "evidence_ids": [
+        "E02",
+        "E07"
+      ],
+      "entry_type": "acceptance_boundary",
+      "observed_trigger": "Final receipt retains author_metadata_pending.",
+      "causal_chain": {
+        "steps": [
+          "submission metadata input was not closed",
+          "renderer preserved blocker",
+          "PDF presence did not invent author facts"
+        ],
+        "confidence": "confirmed."
+      },
+      "confirmed_or_inferred": "Missing input/submission condition, not an automatic science fact correction failure.",
+      "action_and_commit": "No automatic metadata insertion and no source change.",
+      "source_pointers": [
+        "supervision/ROOT_V34_FINAL_LOCAL_DELIVERY_ACCEPTANCE.json"
+      ],
+      "program_verification": "submission_blockers explicitly include author_metadata_pending.",
+      "real_model_execution_and_science_boundary": "No model call; metadata and science are separate gates.",
+      "known_cost_and_time": {
+        "cost": "No repair cost separately established.",
+        "time": "No model time."
+      },
+      "final_status_residual": "open publication input blocker.",
+      "proposed_acceptance": "Supply authoritative author/submission metadata outside model output under a new gate."
+    },
+    {
+      "id": "E2E-041",
+      "phase": "V34",
+      "category": "PDF/交付判定",
+      "severity": "P1",
+      "gate": "program/publication/science",
+      "status": "accepted_with_diagnostics",
+      "resolution_class": "接受瑕疵",
+      "finding": "DELIVERY complete、XeLaTeX returncode 0、PDF 66页与 LATEX_BUILD_REPORT failed 可同时成立。",
+      "cause": "交付/出版/科学是分层门（confirmed）",
+      "evidence_ids": [
+        "E01",
+        "E02",
+        "E06",
+        "E07"
+      ],
+      "entry_type": "acceptance_boundary",
+      "observed_trigger": "DELIVERY complete、XeLaTeX returncode 0、PDF 66页与 LATEX_BUILD_REPORT failed 可同时成立。",
+      "causal_chain": {
+        "steps": [
+          "DELIVERY complete、XeLaTeX returncode 0、PDF 66页与 LATEX_BUILD_REPORT failed 可同时成立。",
+          "交付/出版/科学是分层门（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "accepted_with_diagnostics",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-042",
+      "phase": "全链路",
+      "category": "监督声明边界",
+      "severity": "P1",
+      "gate": "program/science",
+      "status": "evidence_boundary",
+      "resolution_class": "仍未修",
+      "finding": "897 settled rows 不是 897 physical calls；JSON/tests/cache/PDF 也不等于无人值守科学全绿。",
+      "cause": "计数口径与证据等级不统一（confirmed boundary）",
+      "evidence_ids": [
+        "E01",
+        "E02",
+        "E04",
+        "E05",
+        "E06"
+      ],
+      "entry_type": "control",
+      "observed_trigger": "Rows, physical calls, cache hits, tests and PDF checks were at risk of being summarized as one count.",
+      "causal_chain": {
+        "steps": [
+          "settled row count was read as call count",
+          "proofs/receipts were mixed in summary language",
+          "final reporting separates program/model/science gates"
+        ],
+        "confidence": "boundary confirmed."
+      },
+      "confirmed_or_inferred": "897 settled rows are not 897 calls; no unattended science all-clear claim.",
+      "action_and_commit": "Use receipt-specific counts and preserve unknown/failed/repaired history; no production code change here.",
+      "source_pointers": [
+        "supervision/ROOT_V34_FINAL_LOCAL_DELIVERY_ACCEPTANCE.json",
+        "EXECUTION_STATE.json"
+      ],
+      "program_verification": "Final receipt separates ledger rows, model_calls, provider calls and scientific_allclear.",
+      "real_model_execution_and_science_boundary": "Stage-specific cache replay does not erase historical model calls or science decisions.",
+      "known_cost_and_time": {
+        "cost": "Account 158.6437595 is cross-task cumulative and must not be added to project total.",
+        "time": "Do not derive model duration from cross-day wall-clock."
+      },
+      "final_status_residual": "reporting boundary closed for this record.",
+      "proposed_acceptance": "Name stage, receipt, call count and gate for every claim."
+    },
+    {
+      "id": "E2E-043",
+      "phase": "全链路",
+      "category": "费用与时间",
+      "severity": "P1",
+      "gate": "ledger",
+      "status": "closed_reporting",
+      "resolution_class": "通用修复",
+      "finding": "只按最终 receipt 报 project 100.821423 settled + .1086312 uncertain、reserved 0、cap 110、available 9.0699458；account 158.6437595 + 4.6254988、available 136.7307417。",
+      "cause": "费用快照、阶段耗时、调用计数需分列（confirmed boundary）",
+      "evidence_ids": [
+        "E01",
+        "E02",
+        "E11",
+        "E27",
+        "E31",
+        "E32"
+      ],
+      "entry_type": "control",
+      "observed_trigger": "Historical fee receipts, ledger snapshots and timestamps had different scopes and could be double-counted.",
+      "causal_chain": {
+        "steps": [
+          "V19 .885416 and V20 .462222 have distinct gate IDs",
+          "V20 correction new_calls=0",
+          "final project/account snapshots have different aggregation scopes"
+        ],
+        "confidence": "receipt facts confirmed; overlap not assumed."
+      },
+      "confirmed_or_inferred": "Known costs are receipt-scoped; unknown/overlap remains unknown.",
+      "action_and_commit": "Use final V34 snapshot and per-gate history; never sum project and account totals or unproven repairs.",
+      "source_pointers": [
+        "supervision/ROOT_V34_FINAL_LOCAL_DELIVERY_ACCEPTANCE.json",
+        "supervision/ROOT_V19_LIVE_REPAIR_RESULT.json",
+        "supervision/ROOT_V20_NESTED_MATERIAL_CORRECTION_AND_ORIGINAL_ACCEPTANCE.json"
+      ],
+      "program_verification": "Receipt JSON read/cross-checked by gate IDs; no tests rerun.",
+      "real_model_execution_and_science_boundary": "Ledger status is not science verdict or physical call count.",
+      "known_cost_and_time": {
+        "cost": "project 100.821423 settled + .1086312 uncertain; account 158.6437595 + 4.6254988; 897 rows not calls.",
+        "time": "Raw receipt timestamps only."
+      },
+      "final_status_residual": "final reporting corrected; ledger unchanged.",
+      "proposed_acceptance": "Require gate IDs, scope and independence proof before fee addition."
+    },
+    {
+      "id": "E2E-044",
+      "phase": "final",
+      "category": "科学接受",
+      "severity": "P1",
+      "gate": "science",
+      "status": "final_residual",
+      "resolution_class": "仍未修",
+      "finding": "36 units/7 chapters/199 refs 不改变 scientific_allclear=false；pending/quality diagnostics 保留。",
+      "cause": "正文装配完成不等于证据充分（confirmed）",
+      "evidence_ids": [
+        "E01",
+        "E02",
+        "E15",
+        "E23"
+      ],
+      "entry_type": "acceptance_boundary",
+      "observed_trigger": "36 units/7 chapters/199 refs 不改变 scientific_allclear=false；pending/quality diagnostics 保留。",
+      "causal_chain": {
+        "steps": [
+          "36 units/7 chapters/199 refs 不改变 scientific_allclear=false；pending/quality diagnostics 保留。",
+          "正文装配完成不等于证据充分（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "final_residual",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-045",
+      "phase": "V34",
+      "category": "自动化生命周期",
+      "severity": "P2",
+      "gate": "program",
+      "status": "closed",
+      "resolution_class": "本次恢复",
+      "finding": "current process exited、fresh CIM absent、wrapper returncode 0、automation deleted；历史 CURRENT_PROCESS 文件不证明活跃。",
+      "cause": "历史文件与进程状态分离（confirmed）",
+      "evidence_ids": [
+        "E01",
+        "E02"
+      ],
+      "entry_type": "control",
+      "observed_trigger": "Historical CURRENT_PROCESS/supervision snapshots varied between inflight/partial and exited.",
+      "causal_chain": {
+        "steps": [
+          "PID22544 was live during V28",
+          "some snapshots omitted decision or called inflight exit",
+          "fresh final checks established exited",
+          "misreport was not proven to cause restart"
+        ],
+        "confidence": "process boundary confirmed; no restart attribution."
+      },
+      "confirmed_or_inferred": "Old supervision misclassified lifecycle state; it did not itself justify or cause restart.",
+      "action_and_commit": "Use fresh CIM/process observation; retain snapshots as history.",
+      "source_pointers": [
+        "supervision/ROOT_V28_BODY_LIVE_CHECK_AND_SUPERVISION_BOUNDARY_0840.json",
+        "supervision/ROOT_V28_BODY_PROGRESS_AND_QC_BOUNDARY_0628.json",
+        "EXECUTION_STATE.json"
+      ],
+      "program_verification": "Final receipt reports exited, fresh CIM absent, wrapper returncode 0 and automation deleted.",
+      "real_model_execution_and_science_boundary": "Lifecycle is program evidence only.",
+      "known_cost_and_time": {
+        "cost": "No cost attributed without a call receipt.",
+        "time": "No restart duration inferred."
+      },
+      "final_status_residual": "historical seam recorded; no automatic restart/retry.",
+      "proposed_acceptance": "Require fresh CIM and explicit decision marker for lifecycle actions."
+    },
+    {
+      "id": "E2E-046",
+      "phase": "V34",
+      "category": "PDF可读性",
+      "severity": "P2",
+      "gate": "publication/science",
+      "status": "accepted_with_diagnostics",
+      "resolution_class": "接受瑕疵",
+      "finding": "视觉页无空白/越界，文本无 html/mojibake/ref leak，但 literal 数学和 532/635 仍是读者可见问题。",
+      "cause": "程序完整性与可读性不同层（confirmed）",
+      "evidence_ids": [
+        "E02",
+        "E07",
+        "E08"
+      ],
+      "entry_type": "acceptance_boundary",
+      "observed_trigger": "视觉页无空白/越界，文本无 html/mojibake/ref leak，但 literal 数学和 532/635 仍是读者可见问题。",
+      "causal_chain": {
+        "steps": [
+          "视觉页无空白/越界，文本无 html/mojibake/ref leak，但 literal 数学和 532/635 仍是读者可见问题。",
+          "程序完整性与可读性不同层（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "accepted_with_diagnostics",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-047",
+      "phase": "final",
+      "category": "安全与脱敏",
+      "severity": "P1",
+      "gate": "program",
+      "status": "closed_guarded",
+      "resolution_class": "通用修复",
+      "finding": "本记录只写 N/S 相对路径、SHA 和字段摘要；不读 credentials、SQLite、完整论文、完整 REQUEST/raw。",
+      "cause": "本地 receipts 不是云端脱敏格式（confirmed）",
+      "evidence_ids": [
+        "E01",
+        "E02"
+      ],
+      "entry_type": "control",
+      "observed_trigger": "本记录只写 N/S 相对路径、SHA 和字段摘要；不读 credentials、SQLite、完整论文、完整 REQUEST/raw。",
+      "causal_chain": {
+        "steps": [
+          "本记录只写 N/S 相对路径、SHA 和字段摘要；不读 credentials、SQLite、完整论文、完整 REQUEST/raw。",
+          "本地 receipts 不是云端脱敏格式（confirmed）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "closed_guarded",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-048",
+      "phase": "cloud handoff",
+      "category": "修复优先级",
+      "severity": "P1",
+      "gate": "program/science/publication",
+      "status": "open_plan",
+      "resolution_class": "仍未修",
+      "finding": "后续应优先统一 identity/cache、partial/final contract、source/condition pairing、status projection、checker fail-closed 与 publication guards；本记录不声称已实施。",
+      "cause": "多阶段 seam 分散在不同脚本/receipt（inferred）",
+      "evidence_ids": [
+        "E01",
+        "E02",
+        "E17",
+        "E35",
+        "E41"
+      ],
+      "entry_type": "recommendation",
+      "observed_trigger": "后续应优先统一 identity/cache、partial/final contract、source/condition pairing、status projection、checker fail-closed 与 publication guards；本记录不声称已实施。",
+      "causal_chain": {
+        "steps": [
+          "后续应优先统一 identity/cache、partial/final contract、source/condition pairing、status projection、checker fail-closed 与 publication guards；本记录不声称已实施。",
+          "多阶段 seam 分散在不同脚本/receipt（inferred）"
+        ],
+        "confidence": "receipt/source confirmed unless cause says inferred or unknown"
+      },
+      "confirmed_or_inferred": "confirmed by listed receipt/source; science acceptance remains separate",
+      "action_and_commit": "保留原失败、raw、cache 和 gate；本次记录未改 source。",
+      "source_pointers": [],
+      "program_verification": "只引用对应 receipt/proof 中已有的验证；本次不重跑。",
+      "real_model_execution_and_science_boundary": "真实模型、程序、科学三门分开；本条不因程序状态宣称 science pass。",
+      "known_cost_and_time": {
+        "cost": "本条未单独证明；不从 wall-clock 推导。",
+        "time": "未单独统计；按 receipt 原始时间。"
+      },
+      "final_status_residual": "open_plan",
+      "proposed_acceptance": "保留 artifact、状态和证据链，后续门独立授权。"
+    },
+    {
+      "id": "E2E-049",
+      "phase": "V25",
+      "category": "selection identity",
+      "severity": "P1",
+      "gate": "program",
+      "status": "closed_guarded",
+      "resolution_class": "通用修复",
+      "finding": "qualified refs 36 projected to 27 unique bare IDs; downstream U01 and legacy readonly IDs collided/risked being dropped.",
+      "cause": "bare ID projection lost chapter namespace (confirmed)",
+      "evidence_ids": [
+        "E60",
+        "E61",
+        "E62",
+        "E63",
+        "E64"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "selection_unit_id_duplicate:U01 before BODY.",
+      "causal_chain": {
+        "steps": [
+          "7 chapters/36 qualified refs → 27 bare IDs",
+          "legacy readonly IDs were not retained when refs incomplete",
+          "scoped resolver/readonly preservation fixed at eb153f87…"
+        ],
+        "confidence": "receipt and free proofs confirmed."
+      },
+      "confirmed_or_inferred": "confirmed by V25 root acceptance.",
+      "action_and_commit": "source commit eb153f87cf167e475f36f5a5cc0f10a178039d3e; plans/content/caches preserved.",
+      "source_pointers": [
+        "supervision/ROOT_V25_SELECTION_IDENTITY_CODE_ACCEPTANCE.json",
+        "preparation/selection_identity_v25/SELECTION_IDENTITY_PROOF.json",
+        "preparation/selection_identity_v25/V25_NATIVE_RESUME_PROOF.json"
+      ],
+      "program_verification": "58 targeted tests passed; free proof 36 qualified/27 bare/0 physical calls.",
+      "real_model_execution_and_science_boundary": "0 new model calls; routing/projection only.",
+      "known_cost_and_time": {
+        "cost": "identity proof physical_model_calls=0; no new cost attributed.",
+        "time": "Not separately proven."
+      },
+      "final_status_residual": "scoped identity accepted; historical collision retained.",
+      "proposed_acceptance": "Bare ID alone is never cache identity; require chapter/unit namespace."
+    },
+    {
+      "id": "E2E-050",
+      "phase": "V26",
+      "category": "budget binding/guard",
+      "severity": "P1",
+      "gate": "program/ledger",
+      "status": "closed_binding_guard",
+      "resolution_class": "通用修复",
+      "finding": "user +30 CNY changed project cap 80→110 while account cap stayed 300; preparation guards needed to stop hardcoded-80 assumptions.",
+      "cause": "authorization/binding seam was narrower than approved cap (confirmed for this seam)",
+      "evidence_ids": [
+        "E65",
+        "E66"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "budget110 preview required explicit cap and reservation equality.",
+      "causal_chain": {
+        "steps": [
+          "user approved +30",
+          "project 110/account 300",
+          "reservation rows/hash equal",
+          "native preview 0 provider/0 reservations"
+        ],
+        "confidence": "receipt-confirmed."
+      },
+      "confirmed_or_inferred": "binding/preparation seam confirmed; not global budget rewrite.",
+      "action_and_commit": "budget110 adapter/policy guard; no global budget mutation in this record.",
+      "source_pointers": [
+        "preparation/budget110_v26/PROJECT_BUDGET_EXTENSION_AUTHORIZATION.json",
+        "preparation/budget110_v26/ROOT_BUDGET110_NATIVE_PREVIEW_ACCEPTANCE.json"
+      ],
+      "program_verification": "3 focused worker tests; reservation hash unchanged.",
+      "real_model_execution_and_science_boundary": "No provider call; cap does not validate science.",
+      "known_cost_and_time": {
+        "cost": "No cost inferred from authorization alone.",
+        "time": "Receipt times only."
+      },
+      "final_status_residual": "binding guard accepted; not universal rewrite.",
+      "proposed_acceptance": "Read cap from binding/receipt and report project/account/reservation separately."
+    },
+    {
+      "id": "E2E-051",
+      "phase": "V21-V25",
+      "category": "owner evidence projection",
+      "severity": "P1",
+      "gate": "program/science",
+      "status": "generic_fixed_with_diagnostics",
+      "resolution_class": "通用修复",
+      "finding": "owner-facing report falsely represented unsent pool rows as read; d23 final projection reports supplied channels only.",
+      "cause": "preprojection metadata mixed with final request material (confirmed; historical row count unverified)",
+      "evidence_ids": [
+        "E67",
+        "E68",
+        "E69",
+        "E79",
+        "E82",
+        "E83",
+        "E84"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "Prior owner report represented unsent rows as read; exact alleged 323/191 row counts are not independently proven by final receipts.",
+      "causal_chain": {
+        "steps": [
+          "payload held supplied and pool resolution metadata",
+          "pool-only handles could leak into report",
+          "d23acb55 recomputed supplied channels",
+          "cache projection stayed unchanged"
+        ],
+        "confidence": "code diff/test confirmed; historical row count unverified."
+      },
+      "confirmed_or_inferred": "false projection and its correction are confirmed; any exact historical row count is unverified and is not read evidence.",
+      "action_and_commit": "source commit d23acb55c15688e531147179e769d1be7145a6dc; progressive_review.py/docs/test only.",
+      "source_pointers": [
+        "S/optomind_research/runtime/upgrade3/progressive_review_plan.py",
+        "S/docs/progressive_review_plan.md",
+        "S/tests/upgrade3/test_body04_owner_material_handoff.py"
+      ],
+      "program_verification": "focused test: pool-only P0003 omitted, supplied P0002 reported, unresolved retained, cache unchanged.",
+      "real_model_execution_and_science_boundary": "projection correction adds no source substance and changes no answer.",
+      "known_cost_and_time": {
+        "cost": "No new call/cost attributed.",
+        "time": "323.032 is elapsed seconds where evidenced, not row count."
+      },
+      "final_status_residual": "projection fixed; source fidelity still needs material-level checks.",
+      "proposed_acceptance": "Only final supplied channels may be called read."
+    },
+    {
+      "id": "E2E-052",
+      "phase": "V13",
+      "category": "directed handoff",
+      "severity": "P1",
+      "gate": "program/ledger",
+      "status": "generic_guarded_undispatched_claim_recovery",
+      "resolution_class": "通用修复",
+      "finding": "five directed gates lacked REQUEST_DECISION/INVOCATION/RESPONSE/INVOCATION_ERROR; V13 stopped before payment at 22 groups/6 targets/0 nested results/0 material records.",
+      "cause": "lifecycle marker/signature/Docling/candidate identity contract not closed (confirmed boundary)",
+      "evidence_ids": [
+        "E70",
+        "E71",
+        "E72",
+        "E86"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "directed claim remained pending and consumer input was empty.",
+      "causal_chain": {
+        "steps": [
+          "wait precedes invocation marker and physical call",
+          "no decision/marker means no dispatch through binding",
+          "V13 stopped before payment",
+          "signature/Docling config/stable candidate ID remain guards"
+        ],
+        "confidence": "no-dispatch boundary confirmed."
+      },
+      "confirmed_or_inferred": "No physical dispatch through attested binding; broader routing cause bounded to contract seam.",
+      "action_and_commit": "24695cf6b53474efd34514712bbe9b54010c0225：仅正常run+resume、完整未dispatch attestation、旧owner进程/identity核对与claim version原子比较通过后显式恢复；旧claim/终态receipt保留。不是全局清claim/未知费用释放。",
+      "source_pointers": [
+        "supervision/ROOT_DIRECTED_FIVE_UNDISPATCHED_GATE_ATTESTATION.json",
+        "supervision/ROOT_DIRECTED_READING_BANDWIDTH_HANDOFF.json",
+        "supervision/ROOT_V13_STOP_DIRECTED_HANDOFF_EMPTY.json"
+      ],
+      "program_verification": "ROOT V14回执：9 focused tests passed，actual five isolated tasks proof；无假成功/无全局claim reset/无budget mutation。真实五任务后续仍需正常监督执行，不把离线恢复当reader执行成功。",
+      "real_model_execution_and_science_boundary": "No marker is not model rejection or science completion.",
+      "known_cost_and_time": {
+        "cost": "No fee release/ledger change for absent-marker gates.",
+        "time": "No physical model duration."
+      },
+      "final_status_residual": "已证明未dispatch claim可在严格条件下显式恢复；marker缺失本身不足以推断可重试、已付款或调用失败。",
+      "proposed_acceptance": "Require decision, invocation, response/error, signature, Docling config and candidate ID before dispatch."
+    },
+    {
+      "id": "E2E-053",
+      "phase": "V28-V30",
+      "category": "supervision lifecycle",
+      "severity": "P1",
+      "gate": "program",
+      "status": "diagnostic_boundary",
+      "resolution_class": "接受瑕疵",
+      "finding": "continuous supervision omitted decisions or reported inflight as exited; fresh CIM/process checks later established actual state.",
+      "cause": "stale snapshot used without fresh process evidence (confirmed reporting seam)",
+      "evidence_ids": [
+        "E72",
+        "E73",
+        "E74",
+        "E75",
+        "E94"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "PID22544 live while snapshots varied partial/inflight/exit.",
+      "causal_chain": {
+        "steps": [
+          "live check recorded PID/rows",
+          "progress recorded pending QC",
+          "final check established exit",
+          "no restart was attributed to misreport"
+        ],
+        "confidence": "receipts confirm."
+      },
+      "confirmed_or_inferred": "state transitions confirmed; restart effect not established.",
+      "action_and_commit": "Use fresh CIM/process; retain snapshots.",
+      "source_pointers": [
+        "supervision/ROOT_V28_BODY_LIVE_CHECK_AND_SUPERVISION_BOUNDARY_0840.json",
+        "supervision/ROOT_V28_BODY_PROGRESS_AND_QC_BOUNDARY_0628.json",
+        "supervision/ROOT_V28_BODY_PROGRESS_AND_OFFLINE_HANDOFF_CHECKPOINT_0740.json",
+        "supervision/ROOT_V28_BODY_CH04_HANDOFF_PROGRESS_0718.json"
+      ],
+      "program_verification": "PID/row snapshots and final exited state read; no rerun.",
+      "real_model_execution_and_science_boundary": "Lifecycle is program evidence only; pending QC remains separate.",
+      "known_cost_and_time": {
+        "cost": "No cost attributed without call receipt.",
+        "time": "No duration inferred from snapshot gaps."
+      },
+      "final_status_residual": "diagnostic seam accepted with boundary.",
+      "proposed_acceptance": "No restart/retry from stale snapshot; require fresh CIM and decision marker.",
+      "update_log": [
+        "2026-10-19追加：V28后段receipt继续将native unit complete、quality assessed_with_pending、scientific_allclear=false分开；局部QC replacement拒绝不触发重启或全书失败（E94）。"
+      ]
+    },
+    {
+      "id": "E2E-054",
+      "phase": "V24",
+      "category": "case count semantics",
+      "severity": "P2",
+      "gate": "program",
+      "status": "closed_reporting",
+      "resolution_class": "通用修复",
+      "finding": "124 selected contributions correspond to 107 unique source handles, with 12 accepted/6 rejected batches; shared lists could overcount.",
+      "cause": "contribution/use count, unique handle count and shared chapter lists conflated (confirmed)",
+      "evidence_ids": [
+        "E26",
+        "E76",
+        "E77"
+      ],
+      "entry_type": "control",
+      "observed_trigger": "case/chapter summaries appeared to add shared entries across destinations.",
+      "causal_chain": {
+        "steps": [
+          "12 accepted + 6 failed batches",
+          "124 selected contributions",
+          "107 unique handles",
+          "A/B/card/shared-list semantics forbid adding rows as papers"
+        ],
+        "confidence": "counting evidence confirmed."
+      },
+      "confirmed_or_inferred": "count distinction confirmed; counts alone do not prove missing substance.",
+      "action_and_commit": "Report each count with semantic label; no source/body change.",
+      "source_pointers": [
+        "supervision/ROOT_V24_CASE_STAGE_PARTIAL_ACCEPTANCE.json",
+        "supervision/V24_CASE_GROUPS_DELEGATED_PROGRESS.json",
+        "supervision/HISTORICAL_AB_COUNTS.json"
+      ],
+      "program_verification": "Copied from receipts; no tests rerun.",
+      "real_model_execution_and_science_boundary": "Count normalization is not science acceptance.",
+      "known_cost_and_time": {
+        "cost": "No cost inferred from 124/107.",
+        "time": "No duration inferred from list counts."
+      },
+      "final_status_residual": "reporting boundary closed; shared lists retained.",
+      "proposed_acceptance": "Label contributions, unique handles, card rows and destinations separately."
+    },
+    {
+      "id": "E2E-055",
+      "phase": "V34/editorial follow-up",
+      "category": "摘要与引用",
+      "severity": "P2",
+      "gate": "publication/science",
+      "status": "deferred_user_requested",
+      "resolution_class": "用户要求待统一修复",
+      "finding": "用户新增要求：摘要不得出现可见引文，但内部证据/来源句柄仍需保留。只读核对发现当前摘要724字、14组方括号句柄、13个unique P句柄；实际context writing_requirements为空，现行策略只在明确给出禁引文时禁止，parser只校验结构/文本/关键词/allowed handles。",
+      "cause": "已证是输出策略与验收条件未覆盖本轮本项目新要求；不能倒推为旧模型调用错误，也不能声称当前实现已经禁止摘要引文。",
+      "evidence_ids": [
+        "E95",
+        "C02"
+      ],
+      "entry_type": "user_requirement",
+      "observed_trigger": "当前摘要存在14组可见P句柄；本轮用户要求后续摘要不显示引文。",
+      "causal_chain": {
+        "steps": [
+          "实际摘要和message摘要证据显示14组/13 unique句柄",
+          "写作上下文未提供明确no-citation要求，parser没有该门",
+          "本轮新增要求将其列为后续统一修复"
+        ],
+        "confidence": "observed output and source behavior confirmed; historical causal attribution to model preference is not claimed"
+      },
+      "confirmed_or_inferred": "输出计数与代码行为已由ROOT_EDITORIAL_FINDINGS确认；是否影响读者接受属于后续验收。",
+      "action_and_commit": "本次只记录；不改摘要、prompt、source、cache或model结果。",
+      "source_pointers": [
+        "N/stages/10_post_body_parts_v30/attempts/attempt_001/messages/abstract.json",
+        "S/optomind_research/runtime/upgrade3/serial_manuscript_parts.py"
+      ],
+      "program_verification": "ROOT_EDITORIAL_FINDINGS只读核对；无测试重跑、无新调用。",
+      "real_model_execution_and_science_boundary": "摘要是既有真实生成产物；本条不宣称模型科学错误，不追加重写。内部证据保留与外部可见引用分门。",
+      "known_cost_and_time": {
+        "cost": "本条无新增provider/model调用或费用归因",
+        "time": "未单独统计，不从对话等待推导"
+      },
+      "final_status_residual": "deferred_user_requested; old output preserved",
+      "proposed_acceptance": "在不改科学正文与source identity的前提下，使最终摘要无可见引文；内部source handles/provenance仍留在结构化输入。由独立校验确认无可见引用、正文来源关系和scientific_allclear边界不变。",
+      "user_requested": true,
+      "mandatory": true,
+      "requirement_status": "deferred_user_requested"
+    },
+    {
+      "id": "E2E-056",
+      "phase": "V34/editorial follow-up",
+      "category": "全文引用编号",
+      "severity": "P2",
+      "gate": "publication/program",
+      "status": "deferred_user_requested",
+      "resolution_class": "用户要求待统一修复",
+      "finding": "用户要求移除摘要可见引文后，按从引言开始的实际首次正文引用顺序做旧号到新号映射，更新现有全文标记和参考文献表而不改写内容或论文身份。现有delivery_citations.py已按final_handle_draft全篇首次出现建canonical map；当前引言前14个编号为1,14,15,16,17,2,2,3,4,5,15,16,18,3，非连续本身是摘要先占号与回引的结果。",
+      "cause": "已证是当前编号起点与本轮新要求不同，并非没有首次引用算法；fixed[n]文本与空references.bib意味着不能默认LaTeX样式自动重排。正文数学区间、表号和其他数字不能被全局替换。",
+      "evidence_ids": [
+        "E95",
+        "C02"
+      ],
+      "entry_type": "user_requirement",
+      "observed_trigger": "摘要引文占用全篇first-use编号，用户要求以引言起点重排。",
+      "causal_chain": {
+        "steps": [
+          "现有map先扫描含摘要的final_handle_draft并按canonical paper identity编号",
+          "摘要禁引文的新要求改变first-use起点",
+          "需要从引言起重建display map并原子更新引用标记与reference list"
+        ],
+        "confidence": "current implementation and observed numbers confirmed; future remap not implemented"
+      },
+      "confirmed_or_inferred": "现有代码/稿件行为已确认；自动LaTeX重排仅为可选方案，未证明适用。",
+      "action_and_commit": "本次只记录；不改body、references、source或binding。",
+      "source_pointers": [
+        "S/optomind_research/runtime/upgrade3/delivery_citations.py",
+        "N/stages/11_checker_diagnostic_publication_v34/05_publication/tex/references.bib"
+      ],
+      "program_verification": "只读核对canonical map与编号样本；无测试重跑。",
+      "real_model_execution_and_science_boundary": "无需模型调用；重排必须保留citation paper identity、语义和所有科学文本，不把显示编号变化当科学修复。199是旧产物统计，不是未来固定科学配额。",
+      "known_cost_and_time": {
+        "cost": "本条无新增调用/费用",
+        "time": "未单独统计"
+      },
+      "final_status_residual": "deferred_user_requested; current numbering preserved",
+      "proposed_acceptance": "摘要按055移除可见引文后，从引言第一次实际使用开始生成旧显示号→canonical paper→新显示号映射；新编号中各canonical首次出现为1起连续，所有复引用仍指向同一paper，reference list同步。只在核实现有native cite/BibTeX路径后考虑LaTeX自动编号，避免全局数字替换。",
+      "user_requested": true,
+      "mandatory": true,
+      "requirement_status": "deferred_user_requested"
+    },
+    {
+      "id": "E2E-057",
+      "phase": "V34/editorial follow-up",
+      "category": "摘要与引言职责",
+      "severity": "P2",
+      "gate": "science/publication",
+      "status": "deferred_user_requested",
+      "resolution_class": "用户要求待统一修复",
+      "finding": "摘要与引言首句实际完全相同54字。只读核对确认两张职责卡均覆盖物理极限/工程约束/材料效率/制造/计算/应用等主要轴；摘要可看到先前introduction/conclusion。现有结构/非空/句柄校验与位置应用没有验证最终读者职责是否真正分开，最终checker轮又因invalid JSON未采用建议。",
+      "cause": "可证层是职责重叠与验收门缺少语义角色判定；prior-text wording anchoring或LLM generic opening只是合理假说，无消融证据，不能把根因定为单一模型偏好。",
+      "evidence_ids": [
+        "E95",
+        "C02"
+      ],
+      "entry_type": "user_requirement",
+      "observed_trigger": "abstract/introduction first sentence identical, with shared physical-review axes and prior text available to abstract.",
+      "causal_chain": {
+        "steps": [
+          "两张role card都有大量共同主轴，虽有不同purpose/focus/boundary字段",
+          "abstract输入包含prior introduction/conclusion，实际首句复现",
+          "结构/引用校验不测最终语义角色，checker invalid JSON未提供可采用建议"
+        ],
+        "confidence": "responsibility/input/validation seams confirmed; exact model mechanism remains unproven"
+      },
+      "confirmed_or_inferred": "54字相同与输入/代码/验收范围已证；LLM模式归因仅inferred。",
+      "action_and_commit": "本次只记录；不加首句禁令、不做词面查重、不追加全文重写。",
+      "source_pointers": [
+        "N/stages/10_post_body_parts_v30/attempts/attempt_001/GENERATED_PARTS.json",
+        "N/stages/10_post_body_parts_v30/attempts/attempt_001/MANUSCRIPT_PARTS_PLAN.json",
+        "S/optomind_research/runtime/upgrade3/serial_parts_application.py"
+      ],
+      "program_verification": "ROOT_EDITORIAL_FINDINGS只读核对；无测试/模型调用。",
+      "real_model_execution_and_science_boundary": "实际摘要/引言为既有模型生成内容；共享中心问题和术语可以保留。后续验收应分别检查摘要预览review object/scope/organizing contribution与引言阅读动机/prior knowledge/problem/navigation，不把语言去重当科学验收。",
+      "known_cost_and_time": {
+        "cost": "本条无新增调用/费用，不对额外重写收费",
+        "time": "未单独统计"
+      },
+      "final_status_residual": "deferred_user_requested; old text preserved",
+      "proposed_acceptance": "用职责功能验收而非只禁止相同首句或词面重复；允许共享中心论点，要求摘要和引言各自完成其角色、证据成熟度/条件保持，且与055无引文要求联合验证。",
+      "user_requested": true,
+      "mandatory": true,
+      "requirement_status": "deferred_user_requested"
+    },
+    {
+      "id": "E2E-058",
+      "phase": "V28/supervision runtime",
+      "category": "监督与运行时",
+      "severity": "P2",
+      "gate": "program",
+      "status": "diagnostic_boundary",
+      "resolution_class": "仍未修/观测边界",
+      "finding": "read_thread API直接返回的2026-10-18 01:32–04:32+08十个heartbeat回合均为failed，错误文本为usage limit；这些回合没有assistant结果，不能把heartbeat失败当成provider/model调用、科学失败或生产进程退出。",
+      "cause": "账户/编排层usage-limit中断已由turn.error确认；其是否影响同一时段底层worker进度未由这些回合单独证明，必须以native receipt/CIM补证。",
+      "evidence_ids": [
+        "C01"
+      ],
+      "entry_type": "incident",
+      "observed_trigger": "十个连续20分钟左右heartbeat turn在usage limit处失败。",
+      "causal_chain": {
+        "steps": [
+          "用户heartbeat请求进入thread",
+          "Codex turn在返回agent结果前因usage limit失败",
+          "无assistant decision/receipt，监督窗口形成空档",
+          "不能据此触发restart、retry或费用归因"
+        ],
+        "confidence": "turn status/error confirmed; downstream job impact unknown"
+      },
+      "confirmed_or_inferred": "API failure与错误文本confirmed；对真实worker是否继续运行、是否漏报的因果为unknown。",
+      "action_and_commit": "本次仅记录，不恢复automation、不重启PID、不改ledger/gate/source。",
+      "source_pointers": [
+        "conversation/read_thread cursor 187538; turn 01a14b91-33a1-7ba1-a1b5-707dce0fae11"
+      ],
+      "program_verification": "直接审阅10个API turn的status/error/items，确认usage-limit失败；cursor182161的超大回合阻断API旧页，另以本地公开文字层补齐三天匹配消息。该补充不包含原始tool/model I/O，也不证明原生进程是否在这些失败回合期间停滞。",
+      "real_model_execution_and_science_boundary": "这些失败turn没有模型结果；不计physical calls、成本或质量结论。实际模型与科学状态仍以V28 receipt/RUN_REPORT/quality gate为准。",
+      "known_cost_and_time": {
+        "cost": "未从usage-limit错误推导新增费用；账户限额影响未知",
+        "time": "只记录turn时间，不当作model耗时"
+      },
+      "final_status_residual": "监督诊断边界，历史失败保留；需要后续fresh receipt/CIM才能评估是否有运行窗口遗漏。",
+      "proposed_acceptance": "把heartbeat/API failure、native process lifecycle、provider/model response和science decision分开；无decision/response不得自动restart或rebuy，后续用fresh CIM和receipt覆盖空档。"
+    }
+  ],
+  "record_version": "conversation_append_2026-10-19_v3",
+  "cutoff_time_basis": {
+    "receipt_path": "supervision/ROOT_V34_FINAL_LOCAL_DELIVERY_ACCEPTANCE.json",
+    "receipt_completed_at_utc": "2026-10-18T11:05:07.977191+00:00",
+    "display_timezone": "Asia/Shanghai",
+    "display_completed_at": "2026-10-18T19:05:07.977191+08:00",
+    "generated_at_is": "本记录生成时的 datetime.now(ZoneInfo(Asia/Shanghai))，不是最终 receipt 时间。"
+  },
+  "counting_boundaries": {
+    "initial_screening": 1715,
+    "m3_admission": 600,
+    "base_ab_cards": 548,
+    "base_ab_cards_breakdown": {
+      "legacy": 160,
+      "new": 388
+    },
+    "supplement_pool": 555,
+    "chapter_upper_clues": 37,
+    "body_units": 36,
+    "case_batches": {
+      "accepted": 12,
+      "rejected_or_failed": 6,
+      "total": 18
+    },
+    "case_selected_contributions": 124,
+    "case_unique_source_handles": 107,
+    "warning": "124 是用途贡献数，107 是 unique source handles；7章/37上层线索也不等于36 units，不能与共享 chapter_results 相加。897 settled rows 不是物理调用数。"
+  },
+  "verification_scope": {
+    "document_only": true,
+    "source_or_production_mutation": false,
+    "paid_or_network_calls": false,
+    "tests_rerun": false,
+    "evidence_rule": "Conversation excerpts are short redacted evidence only; full conversation, reasoning, commands and raw model I/O are excluded. Local receipts are indexed by relative path and SHA.",
+    "conversation_review": {
+      "thread_id": "01a1303f-f6d9-7e40-8fa5-752ccca75bb9",
+      "window": "2026-10-16 through 2026-10-18 Asia/Shanghai",
+      "direct_api_pages": "partial; see CONVERSATION_REVIEW_INDEX.json",
+      "latest_compact_sha256": "d51087e0ce592a63dc2adbe567e0ac157f9323189cab1d49ee15740d55067865",
+      "older_page_gap": "cursor 182161 returned single oversized-turn error",
+      "public_text_layer": "preparation/issue_record_append_20261019/ROOT_LOCAL_HISTORY_TEXT_ONLY_1016_1018.json",
+      "public_text_layer_sha256": "617fbdcf5a2ae83c094f43710b2273c42c589b0685f916837a88e57e27d95f21",
+      "public_text_layer_message_count": 688,
+      "public_text_layer_scope": "response_item.message user/assistant public text only; no tool/reasoning/developer/inter-agent records; full file local-only",
+      "coverage_bounds_asia": [
+        "2026-10-16T17:41:41.113000+08:00",
+        "2026-10-18T23:26:48.380000+08:00"
+      ],
+      "api_gap_preserved": true,
+      "current_user_source": {
+        "path": "preparation/issue_record_append_20261019/ROOT_USER_20261019_REQUIREMENTS.json",
+        "sha256": "7f9b7638622258d307c05f0d28cf51dc24fcbb5328106792e8afa177c4c4f647",
+        "message_id": "msg_01a15284-4c53-79c3-9f67-9e40e9a138ed",
+        "timestamp_asia": "2026-10-19T12:56:04.436000+08:00",
+        "outside_historical_window": true
+      }
+    }
+  },
+  "entry_type_counts": {
+    "incident": 39,
+    "acceptance_boundary": 10,
+    "control": 5,
+    "recommendation": 1,
+    "user_requirement": 3
+  },
+  "statistics_note": "本版58条结构化条目；entry_type=incident39、acceptance_boundary10、control5、recommendation1、user_requirement3。E01-E98与C01-C07共105条证据索引。问题分类与证据条目分开计数，更新日志、同一receipt/test和对话补充不重复计问题；548不是600的科学合格替代。055-057是用户明确待办，不是可选建议或已完成修复。",
+  "root_review_notes": [
+    "Root核对最终费用/时区、P0395纠正、54条schema与关键证据；补入明确production_fix_implemented=false的append/full-rewrite issue与24695未dispatch claim恢复验收。",
+    "账户是跨任务累计，不能与本项目相加；科学allclear是状态，作者缺输入是投稿条件；本记录不新增修复实现。",
+    "本版是2026-10-19对话追加修订；直接read_thread覆盖到2026-10-17 18:38，后续历史分页因单个超大回合触发API size limit而停止，缺口显式记录。",
+    "E2E-055–057依据本轮用户要求与ROOT_EDITORIAL_FINDINGS只读核对，均deferred_user_requested；E2E-058是10月18日多次heartbeat因usage-limit失败的监督运行边界，不计为模型失败或新增调用。",
+    "上传目的地仍未提供；用户已要求上传本脱敏文档；待提供确切平台/仓库/文件夹/页面后执行，当前未上传。",
+    "本地过滤文字层补齐10/16 17:41:41至10/18 23:26:48的688条公开user/assistant消息；它补充API分页缺口但不等于原始tool/reasoning/I/O全审，完整文件不进云包。",
+    "E2E-002已按用户23:01/23:11触发与ROOT_M3_MIN600_ACCEPTANCE更新，明确169→600→548的层次；肠道案例摘要/作者/日期与旧网站上传属于旧案例边界，不自动授权本超表面记录公开。",
+    "C02已改用ROOT_USER_20261019_REQUIREMENTS.json中的local rollout真实message_id、时间和SHA；不把API适配ID或助手询问误当作10/16-18用户证言。",
+    "Root最终核对修正C07至实际23:21:06免费重算报告；688条是公开消息/上下文/heartbeat合计，其中18条为直接用户消息，不是688条人工指令。源码、原稿和旧记录均未修改。"
+  ]
+}

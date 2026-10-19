@@ -1,0 +1,873 @@
+{
+  "schema": "e2e_incident_record.evidence_index.v2",
+  "generated_at": "2026-10-19T13:17:36.545554+08:00",
+  "root_relative_base": "N=outputs/e2e_metasurface_imaging_20261016",
+  "source_relative_base": "S=N/worktree",
+  "read_policy": {
+    "included": "Only files actually opened/read for this record; each entry states its support.",
+    "excluded": [
+      "SQLite/budget database",
+      "API keys and credentials",
+      "bulk paper full texts",
+      "complete REQUEST messages",
+      "raw model responses",
+      "project-level instruction file was consulted but is outside N/S evidence index"
+    ],
+    "interpretation": "An evidence item supports only the listed claim; it is not a coverage count. Hashes are for the evidence file itself. No final claim uses a file that was not opened/read."
+  },
+  "entries": [
+    {
+      "id": "E01",
+      "path": "EXECUTION_STATE.json",
+      "supports": "final stage, source/binding, M1-M3/material/planning/arrangement/BODY/parts/publication statuses, cost fields, process/automation state",
+      "exists": true,
+      "sha256": "0c56683fc006e74504660bf27c59c240f6e699248d354a95cf1a055b6fc91ac6",
+      "size_bytes": 20779
+    },
+    {
+      "id": "E02",
+      "path": "supervision/ROOT_V34_FINAL_LOCAL_DELIVERY_ACCEPTANCE.json",
+      "supports": "final acceptance status, dimensions, PDF SHA, visual review, compile returncode, undefined citations, author blocker, final cost snapshot, scientific_allclear=false",
+      "exists": true,
+      "sha256": "1de36e48f0b95c0c27ebde3b628663b36fbcb8f7d3865126dde4325c17aee5d1",
+      "size_bytes": 3433
+    },
+    {
+      "id": "E03",
+      "path": "stages/08_chapter_arrangement_min600_root_reexport_v25/ARRANGEMENT_RUN.json",
+      "supports": "native arrangement body_ready/body manifest SHA/7 chapters/0 model calls",
+      "exists": true,
+      "sha256": "8d8e40a4d9ba063d8809fef9c26a306ffc1341723d43265f487711a2b7280784",
+      "size_bytes": 22297
+    },
+    {
+      "id": "E04",
+      "path": "stages/09_body_delivery_min600_normal_cache_handoff_v29/body/DELIVERY_REPORT.json",
+      "supports": "36-unit BODY delivery and RUN_REPORT status; CH01_U02/U03 quality_task_unverified pending rows, candidate/derivative provenance, article-edit stage and generation/assembly separation.",
+      "exists": true,
+      "sha256": "e79a6a3a2e9566cc36e511504ae1a505ae7ad78ce92606d976b5e6babae3d7bc",
+      "size_bytes": 1291895
+    },
+    {
+      "id": "E05",
+      "path": "stages/10_post_body_parts_v30/LIVE_REPORT.json",
+      "supports": "serial parts generated, 4 model calls, scientific acceptance false",
+      "exists": true,
+      "sha256": "87d0abcf5c1e24ab0f44b3ea5b82d91273bce135d34bd31a05fd66db8974ded7",
+      "size_bytes": 120581
+    },
+    {
+      "id": "E06",
+      "path": "stages/11_checker_diagnostic_publication_v34/05_publication/DELIVERY_REPORT.json",
+      "supports": "publication delivery complete and zero new publication calls",
+      "exists": true,
+      "sha256": "743b8dace7086c5b704eacc7c450bb1875c1937b33a0f161e8b2221304483fd7",
+      "size_bytes": 5789
+    },
+    {
+      "id": "E07",
+      "path": "stages/11_checker_diagnostic_publication_v34/05_publication/tex/LATEX_BUILD_REPORT.json",
+      "supports": "XeLaTeX returncode/PDF/page validation, undefined citations 532/635, overfull/metadata blockers and failed report status",
+      "exists": true,
+      "sha256": "e01c866a7c2a52e35ba66a7991c3d84996b55da1aca25bc21b7beb3808451336",
+      "size_bytes": 3680
+    },
+    {
+      "id": "E08",
+      "path": "preparation/publication_literal_math_v34/V34_NATIVE_LITERAL_MATH_RECEIPT.json",
+      "supports": "three raw-pre-clean literal math spans; each includes U+0008, U+000C count is 0, U+000A is normalized historical/newline context; offsets/hashes and compile probe.",
+      "exists": true,
+      "sha256": "f2e1bf4e1d0c4ebdea08e1ec4690191ac8b75ab1bd036baa9fbb20101318d8db",
+      "size_bytes": 6054
+    },
+    {
+      "id": "E09",
+      "path": "preparation/publication_ref_guard_v32/BEFORE_REPRODUCTION.json",
+      "supports": "pre-fix bibliography count mismatch 201 versus catalog 199",
+      "exists": true,
+      "sha256": "4b6029b3aeb07b356f1131930993fb95342e2337cc2360b161cfc9aed29928f0",
+      "size_bytes": 575
+    },
+    {
+      "id": "E10",
+      "path": "preparation/publication_math_v33/BEFORE_REPRODUCTION.json",
+      "supports": "pre-fix renderer delimiter defect involving \\cdotn",
+      "exists": true,
+      "sha256": "8d09d39dd15c5ae7583c4808f8ab5fa8ee5cc9dfee23caf7a848bf548b19e281",
+      "size_bytes": 314
+    },
+    {
+      "id": "E11",
+      "path": "supervision/ROOT_V31_CHECKER_FORMAT_REPAIR_UNPAID_STOP_AND_PUBLICATION_AUTHORIZATION.json",
+      "supports": "invalid JSON checker, actual paid checker call 1, no paid format repair and free diagnostic authorization",
+      "exists": true,
+      "sha256": "0348701793a234bead8ae0ea6bf0fbadf94aaf75e1d7ab92f7c5e781de4aee41",
+      "size_bytes": 863
+    },
+    {
+      "id": "E12",
+      "path": "supervision/ROOT_V31_CHECKER_RESPONSE_FORMAT_DIAGNOSTIC_CONTINUATION.json",
+      "supports": "complete invalid-format response review, no proposal adoption, user tolerance and no paid repair",
+      "exists": true,
+      "sha256": "24ff567ce974a9271af026f04db1259d6c9f288ad0e2cf1ed076136ddb914d7a",
+      "size_bytes": 1234
+    },
+    {
+      "id": "E13",
+      "path": "supervision/ROOT_V31_FORMAL_PARTS_PREVIEW_ACCEPTANCE.json",
+      "supports": "parts preview context/body size, 73-record context, 0 provider/model calls, estimate and scientific gate",
+      "exists": true,
+      "sha256": "5c63c6a13461029942b5b12381d0af8f2d19348417c0d65badec5c6734bf1e56",
+      "size_bytes": 1400
+    },
+    {
+      "id": "E14",
+      "path": "supervision/ROOT_V31_PARTS_CONTEXT_GUARD_ACCEPTANCE.json",
+      "supports": "only finite character limits changed, message SHA unchanged, no paid calls",
+      "exists": true,
+      "sha256": "467e4240758865e859f493d026040310d9519bc5c088bd6111ad407244493b2e",
+      "size_bytes": 691
+    },
+    {
+      "id": "E15",
+      "path": "supervision/ROOT_V30_BODY_SELECTED_HANDOFF_ACCEPTANCE.json",
+      "supports": "selected article-edit body, numbering 199/0 unknown, article model call and diagnostics pending",
+      "exists": true,
+      "sha256": "fd2123a78f4f250d1df660579f56db7e70f4ef170a86a7284797ba8406363b2a",
+      "size_bytes": 3287
+    },
+    {
+      "id": "E16",
+      "path": "supervision/ROOT_V30_ACTUAL_DERIVATIVE_ALIAS_ACCEPTANCE.json",
+      "supports": "36-unit derivative alias assembly, scoped provenance, seals and 0 paid calls",
+      "exists": true,
+      "sha256": "9d6a211c286126faaf0f5a19f55450d90f83c88624725d8f91a98e307772ea25",
+      "size_bytes": 6514
+    },
+    {
+      "id": "E17",
+      "path": "supervision/ROOT_V29_ASSEMBLY_ALIAS_CODE_ACCEPTANCE.json",
+      "supports": "assembly code scope, 36 loaded/0 unknown/0 conflicts, 0 paid calls and budget caps",
+      "exists": true,
+      "sha256": "c2c8b27e7144b9563feecc74ac48ba4d21e0ae1a72f84feefd11b103ad5eb01b",
+      "size_bytes": 1150
+    },
+    {
+      "id": "E18",
+      "path": "supervision/ROOT_V28_EXPLICIT_NUMERIC_ALIAS_IDENTITY_PROOF.json",
+      "supports": "explicit P157/P0157 and P206/P0206 canonical identities and no science edit",
+      "exists": true,
+      "sha256": "d084dba9d8698c3f01ef869100394e1669772f42049748b0cbbaa9e2cf147dac",
+      "size_bytes": 992
+    },
+    {
+      "id": "E19",
+      "path": "supervision/ROOT_V25_FINAL_ARRANGEMENT_HANDOFF_ACCEPTANCE.json",
+      "supports": "36-unit/7-chapter outline handoff, initial draft classification, body manifest SHA, retained raw/rejection history",
+      "exists": true,
+      "sha256": "3278f57102957fdc04a98d5745f2c77cf30f01460364f8793b5002687ecb7b30",
+      "size_bytes": 1380
+    },
+    {
+      "id": "E20",
+      "path": "supervision/ROOT_V25_NATIVE_ARRANGEMENT_REEXPORT_RECEIPT.json",
+      "supports": "7 raw response hashes/payload exact, 0 calls, body_ready and ledger pre/post equality for the reexport",
+      "exists": true,
+      "sha256": "6ab7f021faae07aff2547bc7bcd871421e3b5cb9210a60f0f322ad5a33f718e3",
+      "size_bytes": 5705
+    },
+    {
+      "id": "E21",
+      "path": "supervision/ROOT_V26_BODY_FAILURE_AND_BOUNDED_REPAIR_DECISION.json",
+      "supports": "actual U02/U03/U04 body findings, 335-char U04, no auto reversal/rebuy",
+      "exists": true,
+      "sha256": "905f227610e22f6f132c76b39a70e4509181aabc2dde3d4e4c3b253444f62b3f",
+      "size_bytes": 2104
+    },
+    {
+      "id": "E22",
+      "path": "supervision/ROOT_V26_FIRST_ACTUAL_BODY_REQUEST_ACCEPTANCE.json",
+      "supports": "20/20 source/card identity and hash match for first BODY request",
+      "exists": true,
+      "sha256": "9156fbac2eb3c4996509daf8aca25d465b69eb608bda073faf7f63764aa6437a",
+      "size_bytes": 1347
+    },
+    {
+      "id": "E23",
+      "path": "supervision/ROOT_V27_SECOND_FRESH_QUALITY_REJECTION.json",
+      "supports": "repeat scientific quality rejection of same-source condition mix/focal-length relation",
+      "exists": true,
+      "sha256": "133dad7bcf3ff24baf2feb0785def6ac14ae03a170522f44375e1165bdca7e36",
+      "size_bytes": 1510
+    },
+    {
+      "id": "E24",
+      "path": "supervision/ROOT_V27_USER_TOLERANCE_AND_FREE_REPARSE_AUTHORIZATION.json",
+      "supports": "U02 transport/input validity versus unresolved science diagnostics; free reparse and no repurchase boundary",
+      "exists": true,
+      "sha256": "0331f39bbeb3a87a533b7fcab7a3409c571d19ce11459a63c111e8076f109b95",
+      "size_bytes": 1895
+    },
+    {
+      "id": "E25",
+      "path": "supervision/ROOT_V28_NATIVE_MULTI_ENVELOPE_RECOVERY_ACCEPTANCE.json",
+      "supports": "V28 multi-envelope seam: general source implementation at f446… plus separate free recovery, 0 preview calls, preserved old rejection/paid history and hashes.",
+      "exists": true,
+      "sha256": "651ecda92eb4de906cfc305244a04dd07f8f5ce0100a3f4f5090865c4403bd47",
+      "size_bytes": 1915
+    },
+    {
+      "id": "E26",
+      "path": "supervision/ROOT_V24_CASE_STAGE_PARTIAL_ACCEPTANCE.json",
+      "supports": "12 accepted/6 failed case batches, 107 unique handles, partial scope and delegated review boundary",
+      "exists": true,
+      "sha256": "38063e8797b4993f3e03acd4b802867c62a04774759f7b7a65f15ed3ed9a71d6",
+      "size_bytes": 4083
+    },
+    {
+      "id": "E27",
+      "path": "supervision/ROOT_V24_CASE_BATCH2_REJECTION_ISOLATION.json",
+      "supports": "P0171 unsupported scientific contribution, native isolation and discarded cost .556158",
+      "exists": true,
+      "sha256": "955807f6aa834994e114c16a9a04baf60457f443ce5073961bed363892ca1a0d",
+      "size_bytes": 1784
+    },
+    {
+      "id": "E28",
+      "path": "supervision/ROOT_V24_CH05_BATCH1_REJECTION_ISOLATION.json",
+      "supports": "P0183 abstract-only unsupported numeric efficiency and failed-cache isolation",
+      "exists": true,
+      "sha256": "e29f43b4154e4a3ebd07e1bae946b04336e7693ad74f90022bbd2f4bce0bd798",
+      "size_bytes": 1268
+    },
+    {
+      "id": "E29",
+      "path": "supervision/ROOT_V25_CH03_CH04_SCOPE_RECONSIDERATION.json",
+      "supports": "cross-band over-rejection reconsideration, actual CH03/CH04 roles, retained local diagnostics and no extra paid",
+      "exists": true,
+      "sha256": "21ce2c38d36d1de2c00849178bc90997903eb78d88b3f6173b7999cfc98e4339",
+      "size_bytes": 4475
+    },
+    {
+      "id": "E30",
+      "path": "supervision/ROOT_V25_FINAL_OUTLINE_HANDOFF_ACCEPTANCE.json",
+      "supports": "V25 initial-draft outline handoff, 36 units, 32 exact/4 changed and owner timing fields; does not prove unsent source rows were read.",
+      "exists": true,
+      "sha256": "6eeb3796c9fa19627e720813408163a5520eff615616493cbb7d039d0904cf3d",
+      "size_bytes": 2245
+    },
+    {
+      "id": "E31",
+      "path": "supervision/ROOT_V20_NESTED_MATERIAL_CORRECTION_AND_ORIGINAL_ACCEPTANCE.json",
+      "supports": "P0395 complete A/B already at candidate_materials[7], original accepted_partial, failed gate 9d382… .462222/191.313 s and new_calls=0.",
+      "exists": true,
+      "sha256": "7e9bdd350df2129d07418aad65a2cee8d870bfe35fb94dd51a679dfbe996413d",
+      "size_bytes": 2485
+    },
+    {
+      "id": "E32",
+      "path": "supervision/ROOT_V19_LIVE_REPAIR_RESULT.json",
+      "supports": "V19 two distinct repair calls totaling .885416 (0.440152 + 0.445264); old base not rebought and rejected gates preserved.",
+      "exists": true,
+      "sha256": "450ac0b9e22e6d5a505ae5b4dc4b1fc6405c0e599a82b7252c86b22937030ef3",
+      "size_bytes": 950
+    },
+    {
+      "id": "E33",
+      "path": "supervision/ROOT_V19_NATIVE_FAILURE_BOUNDARY_AND_SIX_CHAPTER_CACHE.json",
+      "supports": "unsupplied P0395 stop boundary and six-chapter cache preservation",
+      "exists": true,
+      "sha256": "865d714a2ee7c77ab4c6d216cb6a000b80f3b5d22e6a7759730662ecb9b4c52d",
+      "size_bytes": 1918
+    },
+    {
+      "id": "E34",
+      "path": "supervision/ROOT_V18_PARTIAL_ROLE_FIRST_REQUEST_REVIEW.json",
+      "supports": "partial-role requests, guarded input tokens and science payload unchanged",
+      "exists": true,
+      "sha256": "ae653d0a79589fe0d267a36d702c37748cd911ff7d0283d090d851bf9623bab6",
+      "size_bytes": 1111
+    },
+    {
+      "id": "E35",
+      "path": "supervision/ROOT_V17_PARTIAL_BATCH_REJECTION_AND_CONTRACT_FINDING.json",
+      "supports": "unsupplied handles, source-local/full-chapter role ambiguity and fresh batch cost 1.29752",
+      "exists": true,
+      "sha256": "222cb1aa1ec03f357219d675699b0bc67aebdffbf41df3562c48166e8ecd1045",
+      "size_bytes": 1604
+    },
+    {
+      "id": "E36",
+      "path": "supervision/ROOT_V16_TWO_CHAPTER_SOURCE_REJECTION.json",
+      "supports": "cross-source substitutions despite correct actual source bindings",
+      "exists": true,
+      "sha256": "c56cda0d35a2fe3ac6895736b5d550935a7b14ab58327e0ce9bcd23a7b903e68",
+      "size_bytes": 1213
+    },
+    {
+      "id": "E37",
+      "path": "supervision/ROOT_V15_FLASH_CHAPTER_DETAILS_QUALITY_REJECTION.json",
+      "supports": "fully read CH01-CH03 quality/source mixups, raw preservation and no manual science",
+      "exists": true,
+      "sha256": "a10cceeb21c50b54c554c04d304101898fd5117ee85d444fd7e428c695104f57",
+      "size_bytes": 1791
+    },
+    {
+      "id": "E38",
+      "path": "supervision/ROOT_V14_FINALIZE_QUALITY_REJECTION.json",
+      "supports": "P0480/P0006/P0123 source identity regressions and no downstream adoption",
+      "exists": true,
+      "sha256": "a1faf1adea6ea4d46f98717be738ff24531797f42d042b6b73ad0fb1c5f3bdb9",
+      "size_bytes": 1547
+    },
+    {
+      "id": "E39",
+      "path": "supervision/ROOT_V13_STOP_DIRECTED_HANDOFF_EMPTY.json",
+      "supports": "22 groups/6 targets/0 nested results/0 material records and pre-payment stop",
+      "exists": true,
+      "sha256": "7e3bf0bef4db51d4bfb2c4bb08df2e83ef632746a13c0443c503d624993c5e4b",
+      "size_bytes": 1180
+    },
+    {
+      "id": "E40",
+      "path": "supervision/ROOT_V13_MANAGED_CACHE_FIX_ACCEPTANCE.json",
+      "supports": "managed cache identity/reuse proof and no new calls",
+      "exists": true,
+      "sha256": "e58c5229ecf451ea6cc38542e289d18c9a0e4732e681843f2194062db556045f",
+      "size_bytes": 682
+    },
+    {
+      "id": "E41",
+      "path": "supervision/ROOT_V12_CACHE_CAUSE_CLARIFICATION.json",
+      "supports": "byte-identical path rebase and opaque gap-field distinction",
+      "exists": true,
+      "sha256": "ab4955d71b2e02116eda230ab241210b000911b1c82077ae97ed2e5c3eaae4a5",
+      "size_bytes": 893
+    },
+    {
+      "id": "E42",
+      "path": "supervision/ROOT_V10_MULTILINGUAL_SEARCH_REPAIR_ACCEPTANCE.json",
+      "supports": "multilingual index repair, identity/source segment preservation, zero repair paid calls",
+      "exists": true,
+      "sha256": "2d561805654401a94f6df794093c7cffe72d9d47576cb7bbd8ce2e41446567fb",
+      "size_bytes": 2236
+    },
+    {
+      "id": "E43",
+      "path": "supervision/ROOT_V9_COMPUTATIONAL_TRIAGE_DIAGNOSTIC.json",
+      "supports": "unsupported generalization/fabricated-versus-modeled and quantitative pairing diagnostics",
+      "exists": true,
+      "sha256": "14f6f547b7827f881de9b64483244663739cae255fbd3f1a1f51f7b45a90e177",
+      "size_bytes": 1261
+    },
+    {
+      "id": "E44",
+      "path": "supervision/ROOT_V5_SIDECAR_COMPATIBILITY_BLOCK.json",
+      "supports": "sidecar compatibility block, duplicate-call history and unknown cost boundary",
+      "exists": true,
+      "sha256": "2d969d620b98bc86c7005f4c3874aae80468b880a10ecbc1ca02fbf4db42cc0f",
+      "size_bytes": 987
+    },
+    {
+      "id": "E45",
+      "path": "supervision/ROOT_M3_REVIEW.json",
+      "supports": "M3 read scope, selection trace and gain-below-floor stop",
+      "exists": true,
+      "sha256": "fca896a7aa002b369b155a057d5eebe5442ca180dc3db45d62afed14effda572",
+      "size_bytes": 3025
+    },
+    {
+      "id": "E46",
+      "path": "supervision/ROOT_MATERIAL_PDF_IDENTITY_FAILURE.json",
+      "supports": "bad PDF first-page identity and pre-AB-call detection",
+      "exists": true,
+      "sha256": "7153243fb29fe2f07f64bbfb3763135282c0b8c70af1ae65e02058c571fba4a9",
+      "size_bytes": 1023
+    },
+    {
+      "id": "E47",
+      "path": "supervision/ROOT_AB_SCIENTIFIC_EXCLUSION.json",
+      "supports": "FDTD versus fabricated-device scientific exclusion and original material preservation",
+      "exists": true,
+      "sha256": "9c5f17a022d20e86220b2700c2cc7668673ce59a28be85d7a8a0938eea256206",
+      "size_bytes": 1324
+    },
+    {
+      "id": "E48",
+      "path": "supervision/ROOT_PLANNING548_FORMULA_OOM_FINDING.json",
+      "supports": "P0123/P0480 OOM logs, available fulltext and bounded smaller batches",
+      "exists": true,
+      "sha256": "17a1115a3d94c5f0ef195788b44c16d34ea6baf514190f31202c25f4f9aa991a",
+      "size_bytes": 3313
+    },
+    {
+      "id": "E49",
+      "path": "supervision/ROOT_PLANNING548_JUDGE_PARSE_BLOCK.json",
+      "supports": "judge parse error, paid response preservation and zero new paid calls",
+      "exists": true,
+      "sha256": "997484d09e114aca661baa3d51843d12b6ec2d9943a3f14eb02f781654d67512",
+      "size_bytes": 1048
+    },
+    {
+      "id": "E50",
+      "path": "supervision/ROOT_V21_LATE_ROUTING_EMPTY_CHAPTER_CONTEXT.json",
+      "supports": "empty late chapter map before payment and retained chapters",
+      "exists": true,
+      "sha256": "1c5fb3a022893dfc75fd733c4434a3c27909404463541c4ccdfab9f799f9c72e",
+      "size_bytes": 516
+    },
+    {
+      "id": "E51",
+      "path": "supervision/ROOT_V21_CONDITION_DIAGNOSTIC_INPUT_PROVENANCE.json",
+      "supports": "CH06 32-to-30 metadata correction without science answer changes",
+      "exists": true,
+      "sha256": "399d00d509c9b79d3c64d21aa283f36963c6135a907a4d81661311adfbfd6e7b",
+      "size_bytes": 1587
+    },
+    {
+      "id": "E52",
+      "path": "supervision/ROOT_V22_CH03_OWNER_CONTRACT_REJECTION_FOR_NATIVE_REPAIR.json",
+      "supports": "20 missing actual-substance handles and metadata-not-evidence distinction",
+      "exists": true,
+      "sha256": "9963d8d54a5ced42f2bd5d4ed5d4a4fb5507669deec6b289549a8423b88b0c02",
+      "size_bytes": 5509
+    },
+    {
+      "id": "E53",
+      "path": "supervision/ROOT_V23_CH06_UNITS_ACCEPTANCE_AND_METADATA_HOLD.json",
+      "supports": "exact unit/case/task structure, metadata hold and no redraw",
+      "exists": true,
+      "sha256": "ab9a1c6feb8e6d82fc4c908cc2adc5fb9bd137253ac8f8981991aa0313150a38",
+      "size_bytes": 1435
+    },
+    {
+      "id": "E54",
+      "path": "preparation/checker_v31/CONFIG_PREPARATION_RECEIPT.json",
+      "supports": "parts/checker configuration, input role count and zero provider calls in preparation",
+      "exists": true,
+      "sha256": "96069aed8b17ac456768f5319c0f657af0f2c94171abb9a5f459660801664f86",
+      "size_bytes": 728
+    },
+    {
+      "id": "E55",
+      "path": "S/optomind_research/runtime/upgrade3/serial_manuscript_parts.py",
+      "supports": "actual finite BODY/material/context/prompt limits, identity map validation and strict response contract",
+      "exists": true,
+      "sha256": "001cb1048cf60619e579ed68475c4897c251c00167c83f80e61a0042461da1cc",
+      "size_bytes": 39259
+    },
+    {
+      "id": "E56",
+      "path": "S/scripts/upgrade3/full_review_draft.py",
+      "supports": "assembly resolver/source: unit-scoped sidecar, derivative provenance, explicit numeric aliases, raw unknown diagnostics and references handles.",
+      "exists": true,
+      "sha256": "8171eb3b04075c56bebb3c921b888116cded4ca479c5178d7a772899f3ba1a5f",
+      "size_bytes": 79559
+    },
+    {
+      "id": "E57",
+      "path": "S/optomind_research/runtime/upgrade3/review_delivery.py",
+      "supports": "BODY state, selected-body/numbering handoff, post-body identity context and publication delivery gates",
+      "exists": true,
+      "sha256": "15877beeff8ce7897b1c033a70b3f6583645785bf9ae56d81c156a821d784981",
+      "size_bytes": 71396
+    },
+    {
+      "id": "E58",
+      "path": "S/optomind_research/runtime/upgrade3/directed_claim_recovery.py",
+      "supports": "old process identity/exit checks for directed recovery boundary",
+      "exists": true,
+      "sha256": "bbff97b15ccc64cf00b446a0374c919f9e9f249bc6c578e8b5b61e63ed8b533f",
+      "size_bytes": 8315
+    },
+    {
+      "id": "E59",
+      "path": "S/README.md",
+      "supports": "repository evidence/quality boundary and local workflow context",
+      "exists": true,
+      "sha256": "369070bd74dfc7bb3115ec1538634e2f3a1634ac2edcbbc2eed0cd2c7eb7d09a",
+      "size_bytes": 6493
+    },
+    {
+      "id": "E60",
+      "path": "supervision/ROOT_V25_SELECTION_IDENTITY_CODE_ACCEPTANCE.json",
+      "supports": "V25 duplicate bare-ID acceptance, scoped/readonly identity fix, source commit eb153…, 58 targeted tests and content/cache preservation.",
+      "exists": true,
+      "sha256": "29864b5447663b8c0433beb5381340e3bd8c6da1640883a121842bfc7b0223ae",
+      "size_bytes": 1578
+    },
+    {
+      "id": "E61",
+      "path": "preparation/selection_identity_v25/SELECTION_IDENTITY_LOCAL_TOKENIZER_PROOF.json",
+      "supports": "free local tokenizer/identity proof for V25 packet; no paid calls.",
+      "exists": true,
+      "sha256": "26fdb90c17563491af02188f6a906924ccda5193c8f96a8ce7e82251d449bd1a",
+      "size_bytes": 7690
+    },
+    {
+      "id": "E62",
+      "path": "preparation/selection_identity_v25/SELECTION_IDENTITY_PROOF.json",
+      "supports": "7 chapters, 36 units, 36 qualified refs, 27 unique bare IDs, unchanged plans and physical_model_calls=0.",
+      "exists": true,
+      "sha256": "30b46d85585e6eac5747e588bbd3d03c486f5fd6b2603b488509bcfe1f361569",
+      "size_bytes": 2568
+    },
+    {
+      "id": "E63",
+      "path": "preparation/selection_identity_v25/V25_NATIVE_RESUME_PROOF.json",
+      "supports": "native resume: 11 stages, 7 owner caches, 12 success/6 rejected case caches and 0 physical calls.",
+      "exists": true,
+      "sha256": "2e72ee9d357f48e20d219dcb984273d8e379e60b9cd6240e556c0142549dd2e6",
+      "size_bytes": 3096
+    },
+    {
+      "id": "E64",
+      "path": "supervision/EXECUTION_STATE_BEFORE_BODY_V25_20261018.json",
+      "supports": "pre-BODY selection_unit_id_duplicate:U01 status/source/binding observation.",
+      "exists": true,
+      "sha256": "286abb1a01f4a1498db7553bf4fe611a943b4839c74cc42152a0fe135b3c3e06",
+      "size_bytes": 14521
+    },
+    {
+      "id": "E65",
+      "path": "preparation/budget110_v26/PROJECT_BUDGET_EXTENSION_AUTHORIZATION.json",
+      "supports": "explicit +30 authorization, 80→110 project/300 account, reservation equality and no provider calls.",
+      "exists": true,
+      "sha256": "3637767a263626460b0f9f1abb04e068d4d07b0eb151d2a3d52c1aa45ec2d09d",
+      "size_bytes": 2441
+    },
+    {
+      "id": "E66",
+      "path": "preparation/budget110_v26/ROOT_BUDGET110_NATIVE_PREVIEW_ACCEPTANCE.json",
+      "supports": "budget110 adapter acceptance, 3 focused tests, 0 provider/0 reservations, 36 units and material preservation.",
+      "exists": true,
+      "sha256": "bd9474c861a55ef454c72ecded47200c578dcff3ce94ed71670db0d28e9aae72",
+      "size_bytes": 1110
+    },
+    {
+      "id": "E67",
+      "path": "supervision/ROOT_V23_FIRST_OWNER_AND_RECOVERED_REPAIR_REQUESTS.json",
+      "supports": "actual owner/recovered-request chapter structure and counts; no human science answers boundary.",
+      "exists": true,
+      "sha256": "b47ed4675eab5c624c5ae51f27afe8902f15cbd3bef12e867997274484e1e087",
+      "size_bytes": 2740
+    },
+    {
+      "id": "E68",
+      "path": "supervision/ROOT_V23_CH01_OWNER_REQUEST_REVIEW.json",
+      "supports": "CH01 supplied materials/candidates/late changes and input preservation.",
+      "exists": true,
+      "sha256": "b7c8d8b249d921f5ca2aa0d5ad081048c5af699407277108a4769f1c935740d9",
+      "size_bytes": 1327
+    },
+    {
+      "id": "E69",
+      "path": "supervision/ROOT_V23_CH07_OWNER_RESPONSE_ACCEPTANCE.json",
+      "supports": "CH07 response structure and unchanged original units/quality boundary.",
+      "exists": true,
+      "sha256": "ea120c707557c8fd2ee32a845818c68978aae44d90b4e8bc84780e4dc901b997",
+      "size_bytes": 1435
+    },
+    {
+      "id": "E70",
+      "path": "supervision/ROOT_DIRECTED_FIVE_UNDISPATCHED_GATE_ATTESTATION.json",
+      "supports": "five absent markers, physical-call ordering and no fee release.",
+      "exists": true,
+      "sha256": "7c8f8f5f74004b024e5b2de6016bb319e40ee363b05b2fad3d78ac886cdb3e2a",
+      "size_bytes": 4769
+    },
+    {
+      "id": "E71",
+      "path": "supervision/ROOT_DIRECTED_READING_BANDWIDTH_HANDOFF.json",
+      "supports": "directed reading scope and no human scientific answers boundary.",
+      "exists": true,
+      "sha256": "9334309d656be6950b3831631154db5c1809c3b29af7f1d0fefd3013a51bf7da",
+      "size_bytes": 1712
+    },
+    {
+      "id": "E72",
+      "path": "supervision/ROOT_V28_BODY_LIVE_CHECK_AND_SUPERVISION_BOUNDARY_0840.json",
+      "supports": "V28 live PID/native row boundary and no evidenced exit at snapshot.",
+      "exists": true,
+      "sha256": "aca209e8238b99c8bc80a66d8ce546dbdb9047fea43900dcc9f395adc97bd668",
+      "size_bytes": 613
+    },
+    {
+      "id": "E73",
+      "path": "supervision/ROOT_V28_BODY_PROGRESS_AND_QC_BOUNDARY_0628.json",
+      "supports": "V28 PID/native complete/candidate-pending progress.",
+      "exists": true,
+      "sha256": "4c2733119ce73686009c8380feba66463722572e1682742f8efe03706ef93963",
+      "size_bytes": 1116
+    },
+    {
+      "id": "E74",
+      "path": "supervision/ROOT_V28_BODY_PROGRESS_AND_OFFLINE_HANDOFF_CHECKPOINT_0740.json",
+      "supports": "V28 24-row progress/chapter coverage.",
+      "exists": true,
+      "sha256": "a3298a1323e0c5c0cf808144121f54068b25548c793ff94dab3ddbf8556dccc3",
+      "size_bytes": 1495
+    },
+    {
+      "id": "E75",
+      "path": "supervision/ROOT_V28_BODY_CH04_HANDOFF_PROGRESS_0718.json",
+      "supports": "V28 CH04 message hashes/qualified pairs and no-exit boundary.",
+      "exists": true,
+      "sha256": "a4e03d784e76b7fa9870aaed5ce069065344157bedbe75c2e074e4eae8a13c38",
+      "size_bytes": 1689
+    },
+    {
+      "id": "E76",
+      "path": "supervision/V24_CASE_GROUPS_DELEGATED_PROGRESS.json",
+      "supports": "case group request/response decision and shared destination semantics.",
+      "exists": true,
+      "sha256": "5ca9bcd92e323048c58f21ea8d1ec838785fc486e90b4a32baf46809942df5d5",
+      "size_bytes": 13540
+    },
+    {
+      "id": "E77",
+      "path": "supervision/HISTORICAL_AB_COUNTS.json",
+      "supports": "A/B/card/shared-list count semantics.",
+      "exists": true,
+      "sha256": "4ef689c5b971af2f646b1a42883ace17235d0b5c07d79baeaca6846aabe7290d",
+      "size_bytes": 7402
+    },
+    {
+      "id": "E78",
+      "path": "stages/09_body_delivery_min600_normal_cache_handoff_v29/body/RUN_REPORT.json",
+      "supports": "actual BODY RUN_REPORT status/flags/36 rows/article-edit state.",
+      "exists": true,
+      "sha256": "c9cfb9291cb4145fcfafaff51488abba4e48a33a7d1989541f3ae49d19cce1bc",
+      "size_bytes": 1288606
+    },
+    {
+      "id": "E79",
+      "path": "supervision/ROOT_V25_FOURTH_ACTUAL_OWNER_RESPONSE_ACCEPTANCE.json",
+      "supports": "fourth owner response receipt and elapsed field; no row-count interpretation.",
+      "exists": true,
+      "sha256": "d1cf998dd306fa2a9ce058f7206a87cbee45d2992de044a08fcbfa991a078f80",
+      "size_bytes": 2002
+    },
+    {
+      "id": "E80",
+      "path": "supervision/ROOT_V28_FINAL_AUTHOR_NORMAL_PREVIEW_PROOF.json",
+      "supports": "V28 free preview: 0 calls, ledger unchanged and sealed artifacts preserved.",
+      "exists": true,
+      "sha256": "65178a776addf69879de065d28d613f8632af7be1b718e896f5bba2c7c16f990",
+      "size_bytes": 906
+    },
+    {
+      "id": "E81",
+      "path": "supervision/ROOT_V27_FORMAL_PREVIEW_ACCEPTANCE.json",
+      "supports": "V27 formal preview provider/recovered-candidate boundary.",
+      "exists": true,
+      "sha256": "80db428122551392684f8185fc68b8a8fc38b23bb836682c5baed1f26b4cc5f0",
+      "size_bytes": 882
+    },
+    {
+      "id": "E82",
+      "path": "S/optomind_research/runtime/upgrade3/progressive_review_plan.py",
+      "supports": "current source read; d23 owner projection implementation pointer.",
+      "exists": true,
+      "sha256": "a9ad2d799fbd4908884fdd873cb48244c83834ece3e0dcc11bf75e0907c39b11",
+      "size_bytes": 721727,
+      "source_commit_pointer": "d23acb55c15688e531147179e769d1be7145a6dc"
+    },
+    {
+      "id": "E83",
+      "path": "S/docs/progressive_review_plan.md",
+      "supports": "d23 final supplied-channel owner contract.",
+      "exists": true,
+      "sha256": "5e509c5a4964edfeabdfdc2bf4208bc31407e512d89101b56531f9e977501b2f",
+      "size_bytes": 13971,
+      "source_commit_pointer": "d23acb55c15688e531147179e769d1be7145a6dc"
+    },
+    {
+      "id": "E84",
+      "path": "S/tests/upgrade3/test_body04_owner_material_handoff.py",
+      "supports": "d23 regression: pool-only omitted, supplied reported, unresolved retained, cache unchanged.",
+      "exists": true,
+      "sha256": "ac61c70a6a3f46955ad7e804c8c0c752e6fe768a730bb40ac21b93a4c6bf810f",
+      "size_bytes": 15997,
+      "source_commit_pointer": "d23acb55c15688e531147179e769d1be7145a6dc"
+    },
+    {
+      "id": "E85",
+      "path": "supervision/UNATTENDED_ISSUE_V28_COMPLETION_REWRITE_AS_APPEND.json",
+      "supports": "Production full-rewrite/overlap guard not implemented; rejected completion raw can be replayed by --reparse-saved; normal resume omits flag, original body/pending retained.",
+      "exists": true,
+      "sha256": "857b603fb1ba1303d996992ecaf473d661ff725a34db4a811a6ac2bf5725f417",
+      "size_bytes": 1533
+    },
+    {
+      "id": "E86",
+      "path": "supervision/ROOT_V14_DIRECTED_RECOVERY_IMPLEMENTATION_ACCEPTANCE.json",
+      "supports": "24695cf6 generic explicit undispatched-claim recovery acceptance: 9 focused tests, actual five-task isolated proof, atomic version compare, no fake success/global reset/budget mutation.",
+      "exists": true,
+      "sha256": "f3f81c08981df9d0fe84b8e259525c304c926a0c318952e745afef81473eea60",
+      "size_bytes": 847
+    },
+    {
+      "id": "E87",
+      "path": "supervision/ROOT_V27_CH02_U02_MINOR_MATERIAL_LABEL_RECONSIDERATION.json",
+      "supports": "U02 local TiO2 label not proven by supplied abstract; old rejection preserved; same-request free recovery under user tolerance; not scientific allclear.",
+      "sha256": "462db7eb27baa244e602867710cc92a05e6917ba054ecb6b5ecdbd1f8d215a87",
+      "source_kind": "local_receipt_or_readonly_finding"
+    },
+    {
+      "id": "E88",
+      "path": "supervision/ROOT_V28_CH03_U01_PARTIAL_DRAFT_NATIVE_QC_AUTHORIZATION.json",
+      "supports": "546-character CH03_U01 author draft covers P01 only; P02/P03 absent and P04 incomplete; free same-request recovery and no rebuy.",
+      "sha256": "5b34451d34b4365ca7040f18efb3f0e9ac7b1b13a7f2c9961e80db7cb71be95c",
+      "source_kind": "local_receipt_or_readonly_finding"
+    },
+    {
+      "id": "E89",
+      "path": "supervision/ROOT_V28_CH03_U01_FIRST_QC_RESPONSE_ACCEPTANCE.json",
+      "supports": "Native first QC covered P01 and marked P02/P03/P04 missing with zero changes; no new sources.",
+      "sha256": "d4aaf78e8900f031d9ee849e9803ea1780a0b6fde5af9a0d01d06b7d2aa27d58",
+      "source_kind": "local_receipt_or_readonly_finding"
+    },
+    {
+      "id": "E90",
+      "path": "supervision/ROOT_V28_CH03_U01_BOUNDED_COMPLETION_REQUEST_ACCEPTANCE.json",
+      "supports": "One append-only completion authorized for original P02/P03/P04 task subset and 31 exact original source records.",
+      "sha256": "79697c594e1c074f1016817e1a87881534e3a882deaaa9da9ae7f55ee62a4f4b",
+      "source_kind": "local_receipt_or_readonly_finding"
+    },
+    {
+      "id": "E91",
+      "path": "supervision/ROOT_V28_CH03_U01_COMPLETION_RESPONSE_ACCEPTANCE.json",
+      "supports": "1800-character fragment substantively adds P02/P03/P04 without repeating P01; append-only review and local diagnostics retained.",
+      "sha256": "873158a3ec4e5ce7a6a1bdc06555372d72c1e3efbadda72f880dd44996ac1bb1",
+      "source_kind": "local_receipt_or_readonly_finding"
+    },
+    {
+      "id": "E92",
+      "path": "supervision/ROOT_V28_CH03_U01_NORMAL_RESUME_PREVIEW_ACCEPTANCE.json",
+      "supports": "Normal same-request preview reused 546-character author result with 0 calls/ledger change and prior sealed quality preserved.",
+      "sha256": "9b0dc9aedb8491f7061a88467fbd08cb5e9626ad8a28d8c2d40f9bbe81e4d33a",
+      "source_kind": "local_receipt_or_readonly_finding"
+    },
+    {
+      "id": "E93",
+      "path": "supervision/ROOT_V28_CH03_U01_NATIVE_POST_HANDOFF_CHECK_0608.json",
+      "supports": "Combined body 2348 chars; quality assessed_with_pending; scientific_allclear false; source/adapter unchanged.",
+      "sha256": "f6931ae9098059acfff3c5b5eff632bf82afbe21c2a847610453097f7de40c3a",
+      "source_kind": "local_receipt_or_readonly_finding"
+    },
+    {
+      "id": "E94",
+      "path": "supervision/ROOT_V28_BODY_PROGRESS_AND_QC_BOUNDARY_0628.json",
+      "supports": "Native progress and QC boundary: local replacement rejected/diagnostic retained; pending and scientific_allclear false remain separate.",
+      "sha256": "4c2733119ce73686009c8380feba66463722572e1682742f8efe03706ef93963",
+      "source_kind": "local_receipt_or_readonly_finding"
+    },
+    {
+      "id": "E95",
+      "path": "preparation/issue_record_append_20261019/ROOT_EDITORIAL_FINDINGS.json",
+      "supports": "Read-only editorial findings: abstract citation count/policy, current canonical numbering behavior, exact 54-character abstract/introduction match, role/input/validation seams, and deferred E2E-055–057.",
+      "sha256": "80ade7ef738081d936f6d142a13cf9f9fde01802a310419db9af0a7cca8f93a5",
+      "source_kind": "local_receipt_or_readonly_finding"
+    },
+    {
+      "id": "C01",
+      "path": "conversation/read_thread:cursor187538/turn:01a14b91-33a1-7ba1-a1b5-707dce0fae11/message:01a14b91-33ed-7833-a031-917d52cd39a2",
+      "supports": "2026-10-18 heartbeat turn failed at explicit usage limit; no assistant result; source text SHA and short redacted excerpt are in CONVERSATION_EVIDENCE_EXCERPTS.json.",
+      "sha256": "0292ed319b4429f5402cf9568362e08c65747c751c9b330265179850de448a38",
+      "source_kind": "conversation_message"
+    },
+    {
+      "id": "C02",
+      "path": "preparation/issue_record_append_20261019/ROOT_USER_20261019_REQUIREMENTS.json",
+      "supports": "Exact 2026-10-19 direct user requirements for E2E-055-E2E-057; outside historical 10/16-18 window; deferred record-only scope.",
+      "sha256": "92c3cd086ef352f230d2ba1ed80eaf870f2bdcd01cdd85d4632010d600095290",
+      "source_kind": "local_current_user_message",
+      "source_layer": "LOCAL_CURRENT_THREAD_ROLLOUT"
+    },
+    {
+      "id": "C03",
+      "path": "conversation/read_thread:latest/turn:01a15284-4bfc-78c3-acc4-7bc355c82986/message:call_a96bc45dee8d47078088d3bf5123fd16",
+      "supports": "Agent asked for an exact cloud destination; no upload authorization target is available in the reviewed turns.",
+      "sha256": "c5bdec37a2bbe710d9e53c82aae9134051a188f7d3ac2dd9028c059380042fe8",
+      "source_kind": "conversation_message"
+    },
+    {
+      "id": "E96",
+      "path": "supervision/ROOT_M3_MIN600_ACCEPTANCE.json",
+      "supports": "Authoritative M3 minimum600 receipt: original_selected=169, new_selected=600, eligible_candidates=3054, effective_min=600, effective_max=1000, paid/network calls=0, and five focused checks; it does not claim 600 science-qualified cards.",
+      "sha256": "414185ccc8caaacc6331f91cf00f3091afc4fa9a85287077e013e4dcc1e9e954",
+      "size_bytes": 1352,
+      "source_kind": "local_receipt_or_readonly_finding"
+    },
+    {
+      "id": "E97",
+      "path": "preparation/issue_record_append_20261019/ROOT_LOCAL_HISTORY_SCAN_INDEX.json",
+      "supports": "Local filtered public-text coverage index for 2026-10-16 through 2026-10-18: 688 user/public-assistant messages, exact Asia/Shanghai bounds, zero JSON decode errors; full filtered text remains local-only and is excluded from the cloud package.",
+      "sha256": "b3cdff85500d09ab79f8ec7cd414d6e4e783d0c60412cce630bb316efc9abaa8",
+      "size_bytes": 2793,
+      "source_kind": "local_conversation_coverage_index",
+      "cloud_package": false
+    },
+    {
+      "id": "C04",
+      "path": "conversation/local_filtered_public_text/msg_01a1453b-7ed5-7700-a0dc-a2b389e659b5",
+      "supports": "Direct user trigger: asks why A/B card alternatives are few. Short redacted excerpt only; full filtered file excluded from cloud package.",
+      "sha256": "4d4a45a6e9b228db339d75696ea54e2507776f7075b15b7cf280dbb4f23f13e5",
+      "source_kind": "conversation_message",
+      "source_layer": "local_filtered_public_text_only"
+    },
+    {
+      "id": "C05",
+      "path": "conversation/local_filtered_public_text/msg_01a14545-09e4-79f2-9c93-214a574b00a5",
+      "supports": "Direct user requirement: pause and guarantee a minimum 600 reading set instead of stopping at the first-study 15% score threshold. Short redacted excerpt only; full filtered file excluded from cloud package.",
+      "sha256": "9b09a623d7482ed70b31c03f5195f535772da10f41a1e2e2de1ebd403b1626e3",
+      "source_kind": "conversation_message",
+      "source_layer": "local_filtered_public_text_only"
+    },
+    {
+      "id": "C06",
+      "path": "conversation/local_filtered_public_text/msg_01a1454d-fd93-72c2-9b14-d8e82b31d218",
+      "supports": "Direct user acceptance to supplement cards and report quality; does not assert scientific qualification for all 600. Short redacted excerpt only; full filtered file excluded from cloud package.",
+      "sha256": "b04d97921fb5446360dcab9374955fe093c0d3aaa61e6c20b9a9a3dc8a4e3606",
+      "source_kind": "conversation_message",
+      "source_layer": "local_filtered_public_text_only"
+    },
+    {
+      "id": "C07",
+      "path": "conversation/local_filtered_public_text/msg_038d1a7b7ddd24ed016ad240d9713087d0b5a54435e929d8a7",
+      "supports": "Public assistant report at 23:21:06 of the free 169-to-600 replan and five checks, before the user continuation at 23:21:41. Authoritative local receipt is E96; only a short sanitized excerpt is bundled.",
+      "sha256": "117bb2e691667535fa00f3630ecfe81f939e03c27c0550cf1a9b5d7762d30024",
+      "source_kind": "conversation_message",
+      "source_layer": "local_filtered_public_text_only"
+    },
+    {
+      "id": "E98",
+      "path": "preparation/issue_record_append_20261019/ROOT_USER_20261019_REQUIREMENTS.json",
+      "supports": "Exact local-rollout source record for the 2026-10-19 user additions; preserves true message ID/time/SHA and confirms these are deferred record-only requirements outside the 10/16-18 execution window.",
+      "sha256": "7f9b7638622258d307c05f0d28cf51dc24fcbb5328106792e8afa177c4c4f647",
+      "size_bytes": 1381,
+      "source_kind": "local_current_user_message",
+      "cloud_package": false
+    }
+  ],
+  "append_scope": {
+    "new_local_entries": "E87-E98",
+    "conversation_entries": "C01-C07",
+    "old_index_preserved": "E01-E86",
+    "local_text_layer": {
+      "path": "preparation/issue_record_append_20261019/ROOT_LOCAL_HISTORY_TEXT_ONLY_1016_1018.json",
+      "sha256": "617fbdcf5a2ae83c094f43710b2273c42c589b0685f916837a88e57e27d95f21",
+      "message_count": 688,
+      "cloud_package": false,
+      "reason": "Full filtered conversation is local evidence only; selected short excerpts are copied into CONVERSATION_EVIDENCE_EXCERPTS.json."
+    },
+    "note": "C01 is historical 10/18 runtime evidence; C02/C03 are current 10/19 scope/upload-context evidence; C04-C07 document the 10/16 M3 user change and public follow-up. Conversation evidence is not raw tool/model I/O.",
+    "current_user_source": {
+      "path": "preparation/issue_record_append_20261019/ROOT_USER_20261019_REQUIREMENTS.json",
+      "sha256": "7f9b7638622258d307c05f0d28cf51dc24fcbb5328106792e8afa177c4c4f647",
+      "message_id": "msg_01a15284-4c53-79c3-9f67-9e40e9a138ed",
+      "outside_historical_window": true
+    }
+  }
+}

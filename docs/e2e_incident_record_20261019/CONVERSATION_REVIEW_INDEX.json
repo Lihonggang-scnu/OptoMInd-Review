@@ -1,0 +1,194 @@
+{
+  "schema": "e2e_incident_record.conversation_review.v2",
+  "generated_at": "2026-10-19T13:22:23.498257+08:00",
+  "thread_id": "01a1303f-f6d9-7e40-8fa5-752ccca75bb9",
+  "timezone": "Asia/Shanghai",
+  "requested_window": "2026-10-16 00:00:00 through 2026-10-18 23:59:59 +08:00",
+  "method": "API pages via read_thread plus a local filtered response_item.message public-text scan; selected user/assistant text only; no reasoning, commandExecution, raw tool output, developer/system/inter-agent records or attachment payloads exported.",
+  "redaction": "All excerpts are short and sanitized. Paths are N/S-relative or omitted; no credentials, SQLite, paper full text, full REQUEST or raw response.",
+  "pages": [
+    {
+      "label": "root_supplied_latest_compact",
+      "source": "preparation/issue_record_append_20261019/ROOT_LAST10_HISTORY_COMPACT.json",
+      "sha256": "d51087e0ce592a63dc2adbe567e0ac157f9323189cab1d49ee15740d55067865",
+      "turn_count": 9,
+      "newest_asia": "2026-10-18T22:55:26+08:00",
+      "oldest_asia": "2026-10-18T14:28:58+08:00",
+      "cursor_out": "{\"requestedThreadId\":\"01a1303f-f6d9-7e40-8fa5-752ccca75bb9\",\"rolloutOrdinal\":195785,\"includeAnchor\":false,\"scope\":{\"kind\":\"turns\"}}",
+      "coverage": "Root-provided compact context; selected user/assistant excerpts only, not a raw full page."
+    },
+    {
+      "label": "direct_api_195785",
+      "cursor_in": "{\"requestedThreadId\":\"01a1303f-f6d9-7e40-8fa5-752ccca75bb9\",\"rolloutOrdinal\":195785,\"includeAnchor\":false,\"scope\":{\"kind\":\"turns\"}}",
+      "cursor_out": "{\"requestedThreadId\":\"01a1303f-f6d9-7e40-8fa5-752ccca75bb9\",\"rolloutOrdinal\":192483,\"includeAnchor\":false,\"scope\":{\"kind\":\"turns\"}}",
+      "turn_count": 10,
+      "newest_asia": "2026-10-18T14:08:58+08:00",
+      "oldest_asia": "2026-10-18T10:04:54+08:00",
+      "has_more": true,
+      "coverage": "Direct page metadata and selected message text; assistant/tool outputs excluded."
+    },
+    {
+      "label": "direct_api_192483",
+      "cursor_in": "{\"requestedThreadId\":\"01a1303f-f6d9-7e40-8fa5-752ccca75bb9\",\"rolloutOrdinal\":192483,\"includeAnchor\":false,\"scope\":{\"kind\":\"turns\"}}",
+      "cursor_out": "{\"requestedThreadId\":\"01a1303f-f6d9-7e40-8fa5-752ccca75bb9\",\"rolloutOrdinal\":187538,\"includeAnchor\":false,\"scope\":{\"kind\":\"turns\"}}",
+      "turn_count": 10,
+      "newest_asia": "2026-10-18T09:22:54+08:00",
+      "oldest_asia": "2026-10-18T04:52:49+08:00",
+      "has_more": true,
+      "coverage": "Direct page metadata; heartbeat excerpts were not exported as full text."
+    },
+    {
+      "label": "direct_api_187538",
+      "cursor_in": "{\"requestedThreadId\":\"01a1303f-f6d9-7e40-8fa5-752ccca75bb9\",\"rolloutOrdinal\":187538,\"includeAnchor\":false,\"scope\":{\"kind\":\"turns\"}}",
+      "cursor_out": "{\"requestedThreadId\":\"01a1303f-f6d9-7e40-8fa5-752ccca75bb9\",\"rolloutOrdinal\":187468,\"includeAnchor\":false,\"scope\":{\"kind\":\"turns\"}}",
+      "turn_count": 10,
+      "newest_asia": "2026-10-18T04:32:49+08:00",
+      "oldest_asia": "2026-10-18T01:32:46+08:00",
+      "has_more": true,
+      "coverage": "Ten failed heartbeat turns inspected for status/error/items; C01 is one redacted representative with original message SHA."
+    },
+    {
+      "label": "direct_api_187468",
+      "cursor_in": "{\"requestedThreadId\":\"01a1303f-f6d9-7e40-8fa5-752ccca75bb9\",\"rolloutOrdinal\":187468,\"includeAnchor\":false,\"scope\":{\"kind\":\"turns\"}}",
+      "cursor_out": "{\"requestedThreadId\":\"01a1303f-f6d9-7e40-8fa5-752ccca75bb9\",\"rolloutOrdinal\":182161,\"includeAnchor\":false,\"scope\":{\"kind\":\"turns\"}}",
+      "turn_count": 10,
+      "newest_asia": "2026-10-18T01:12:46+08:00",
+      "oldest_asia": "2026-10-17T18:38:14+08:00",
+      "has_more": true,
+      "coverage": "Direct page metadata and selected heartbeat status; no full raw export."
+    }
+  ],
+  "gap": {
+    "cursor_in": "{\"requestedThreadId\":\"01a1303f-f6d9-7e40-8fa5-752ccca75bb9\",\"rolloutOrdinal\":182161,\"includeAnchor\":false,\"scope\":{\"kind\":\"turns\"}}",
+    "attempts": [
+      "turnLimit=1, includeOutputs=false, maxOutputCharsPerItem=300",
+      "turnLimit=1, includeOutputs=false, maxOutputCharsPerItem=0",
+      "turnLimit=10, includeOutputs=false"
+    ],
+    "error": "Tool response exceeds the size limit. Request fewer turns or omit outputs. A single oversized turn cannot be returned by this tool.",
+    "coverage_missing": "Older API pages including part of 2026-10-17 and 2026-10-16 were not returned because cursor 182161 hit a single oversized turn. The local filtered public-text layer covers 688 user/public-assistant messages over the requested dates, but does not restore excluded reasoning/tool/inter-agent/raw I/O; no claim of complete raw conversation review."
+  },
+  "boundary": {
+    "target_dates": [
+      "2026-10-16",
+      "2026-10-17",
+      "2026-10-18"
+    ],
+    "direct_read_reached": "2026-10-17T18:38:14+08:00",
+    "older_gap": true,
+    "latest_current_turn_excluded_from_historical_window": true,
+    "full_raw_io_review": false,
+    "reason": "API raw pagination remains limited at cursor182161. Local response_item.message filtering supplied the matched public message layer for the requested dates; excluded tool, reasoning and model I/O were not audited as conversation text.",
+    "local_public_text_supplement": true,
+    "local_public_message_count": 688,
+    "local_public_text_bounds": [
+      "2026-10-16T17:41:41.113000+08:00",
+      "2026-10-18T23:26:48.380000+08:00"
+    ],
+    "older_gap_scope": "API pagination only; local public-text message layer supplemented independently",
+    "local_public_text_supplements_api_gap": true,
+    "direct_human_message_count": 18,
+    "before_first_matching_public_message": "No matching public message in the scanned local snapshot before 2026-10-16T17:41:41.113+08:00; this does not prove no earlier execution or tool activity."
+  },
+  "local_text_layer": {
+    "scan_index_path": "preparation/issue_record_append_20261019/ROOT_LOCAL_HISTORY_SCAN_INDEX.json",
+    "scan_index_sha256": "b3cdff85500d09ab79f8ec7cd414d6e4e783d0c60412cce630bb316efc9abaa8",
+    "filtered_text_path": "preparation/issue_record_append_20261019/ROOT_LOCAL_HISTORY_TEXT_ONLY_1016_1018.json",
+    "filtered_text_sha256": "617fbdcf5a2ae83c094f43710b2273c42c589b0685f916837a88e57e27d95f21",
+    "source_prefix_sha256": "0a241175bc0220943d9aa2a0fa75ef94047fe7eb3b88be2953fe474b8b364ccc",
+    "source_prefix_bytes": 328356504,
+    "message_count": 688,
+    "coverage_counts": [
+      {
+        "date": "2026-10-16",
+        "role": "assistant",
+        "kind": "public_assistant",
+        "count": 76
+      },
+      {
+        "date": "2026-10-16",
+        "role": "user",
+        "kind": "context_metadata",
+        "count": 5
+      },
+      {
+        "date": "2026-10-16",
+        "role": "user",
+        "kind": "direct_user",
+        "count": 10
+      },
+      {
+        "date": "2026-10-16",
+        "role": "user",
+        "kind": "heartbeat",
+        "count": 6
+      },
+      {
+        "date": "2026-10-17",
+        "role": "assistant",
+        "kind": "public_assistant",
+        "count": 299
+      },
+      {
+        "date": "2026-10-17",
+        "role": "user",
+        "kind": "context_metadata",
+        "count": 2
+      },
+      {
+        "date": "2026-10-17",
+        "role": "user",
+        "kind": "direct_user",
+        "count": 4
+      },
+      {
+        "date": "2026-10-17",
+        "role": "user",
+        "kind": "heartbeat",
+        "count": 6
+      },
+      {
+        "date": "2026-10-18",
+        "role": "assistant",
+        "kind": "heartbeat",
+        "count": 26
+      },
+      {
+        "date": "2026-10-18",
+        "role": "assistant",
+        "kind": "public_assistant",
+        "count": 204
+      },
+      {
+        "date": "2026-10-18",
+        "role": "user",
+        "kind": "context_metadata",
+        "count": 4
+      },
+      {
+        "date": "2026-10-18",
+        "role": "user",
+        "kind": "direct_user",
+        "count": 4
+      },
+      {
+        "date": "2026-10-18",
+        "role": "user",
+        "kind": "heartbeat",
+        "count": 42
+      }
+    ],
+    "first_message_time": "2026-10-16T17:41:41.113000+08:00",
+    "last_message_time": "2026-10-18T23:26:48.380000+08:00",
+    "json_decode_errors": 0,
+    "cloud_package": false,
+    "note": "This layer supplements the API gap at public message level; it is not a raw full conversation or full tool/model I/O audit."
+  },
+  "current_user_requirement_source": {
+    "path": "preparation/issue_record_append_20261019/ROOT_USER_20261019_REQUIREMENTS.json",
+    "sha256": "7f9b7638622258d307c05f0d28cf51dc24fcbb5328106792e8afa177c4c4f647",
+    "message_id": "msg_01a15284-4c53-79c3-9f67-9e40e9a138ed",
+    "timestamp_asia": "2026-10-19T12:56:04.436000+08:00",
+    "outside_requested_historical_window": true
+  }
+}
