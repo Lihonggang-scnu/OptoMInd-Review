@@ -1,0 +1,105 @@
+{
+  "schema": "optomind.body_quality_repair_v27.offline_proof.v1",
+  "baseline_commit": "eb153f87cf167e475f36f5a5cc0f10a178039d3e",
+  "source_files_sha256": {
+    "optomind_research\\runtime\\upgrade3\\legacy_unit_route.py": "8641933fb0d5d41fbe3a6bdf2cadf93aa7f6d8b5dc6e2d0abea6da9cba18c9c8",
+    "optomind_research\\runtime\\upgrade3\\unit_realization.py": "ec42ae2c3505f62c169726152009b5c6638cd68a0f64d4648e4b85418456ce01",
+    "scripts\\upgrade3\\legacy_unit_writer.py": "82ee205ba2c5890cb84ff4bd68b8c361b81f8da9bda1087e7ada21955c0264cb"
+  },
+  "manifest": {
+    "path": "N\\preparation\\body_quality_repair_v27\\OWNER_AUTHOR_CANDIDATES_V27.json",
+    "sha256": "ceb74b7c529c13304c8088478a863be2eac8179ef672fadd3e268da952083080",
+    "candidate_count": 4
+  },
+  "full_book_free_preview": {
+    "artifact": "N\\preparation\\body_quality_repair_v27\\FREE_RECOVERY_V27_ALL36_RESULT.json",
+    "requested_units": 36,
+    "full_units": 36,
+    "recovered_candidates": [
+      "CH01:CH01_U01",
+      "CH01:CH01_U02",
+      "CH01:CH01_U03",
+      "CH01:CH01_U04"
+    ],
+    "candidate_statuses": {
+      "CH01:CH01_U01": "candidate_quality_only",
+      "CH01:CH01_U02": "candidate_quality_only",
+      "CH01:CH01_U03": "candidate_quality_only",
+      "CH01:CH01_U04": "candidate_quality_only"
+    },
+    "model_calls": 0,
+    "assembly": {},
+    "generation_complete": false,
+    "requested_generation_complete": false
+  },
+  "sealed_quality_derivative_offline": {
+    "artifact": "N\\preparation\\body_quality_repair_v27\\candidate_derivative_promote_v27_c\\RUN_REPORT.json",
+    "filtered_jobs": "N\\preparation\\body_quality_repair_v27\\candidate_derivative_promote_v27_c\\batch_filtered\\BATCH_JOBS.json",
+    "model_calls": 0,
+    "loaded_units": 4,
+    "candidate_rows": {
+      "CH01:CH01_U01": {
+        "status": "complete",
+        "candidate_only": true,
+        "candidate_quality_ready": true
+      },
+      "CH01:CH01_U02": {
+        "status": "complete",
+        "candidate_only": true,
+        "candidate_quality_ready": true
+      },
+      "CH01:CH01_U03": {
+        "status": "complete",
+        "candidate_only": true,
+        "candidate_quality_ready": true
+      },
+      "CH01:CH01_U04": {
+        "status": "complete",
+        "candidate_only": true,
+        "candidate_quality_ready": true
+      }
+    },
+    "pending_material_diagnostics_preserved": true,
+    "filtered_job_count": 4,
+    "filtered_outputs_are_quality_derivatives": true,
+    "provider": "none (sealed offline quality callback; candidate import made zero calls)"
+  },
+  "negative_checks": {
+    "tests": "test_v27_candidate_recovery.py::test_candidate_manifest_hash_mismatch_fails_closed[...],",
+    "cases": [
+      "messages_sha256",
+      "transport_sha256",
+      "response_sha256"
+    ],
+    "result": "all three rejected before any provider path"
+  },
+  "test_commands": [
+    "python -m pytest -q preparation/body_quality_repair_v27/test_v27_candidate_recovery.py",
+    "python -m pytest -q tests/test_unit_realization.py -k \"integrated_quality_derivative_assembly_and_selection_resume or route_reparse_preserves_old_sealed_derivative_and_selects_new_body or material_limited_does_not_force_completion\"",
+    "python -m py_compile optomind_research/runtime/upgrade3/legacy_unit_route.py optomind_research/runtime/upgrade3/unit_realization.py scripts/upgrade3/legacy_unit_writer.py"
+  ],
+  "results": {
+    "focused_tests": "9 passed",
+    "normal_quality_tests": "3 passed, 61 deselected",
+    "py_compile": "passed"
+  },
+  "candidate_quality_promotion_contract": {
+    "imported_author_result_stays_candidate_only": true,
+    "assembly_requires": "sealed assessed native quality output with assessments and no missing/partial/unverified task statuses",
+    "material_limited": "allowed downstream with pending diagnostic preserved",
+    "failed_or_unresolved_quality": "remains candidate_quality_only and is excluded from jobs"
+  },
+  "cli_usage": {
+    "four_unit_subset": [
+      "--author-candidate-manifest <OWNER_AUTHOR_CANDIDATES_V27.json>",
+      "--only-unit CH01:CH01_U01",
+      "--only-unit CH01:CH01_U02",
+      "--only-unit CH01:CH01_U03",
+      "--only-unit CH01:CH01_U04"
+    ],
+    "full_book_overlay": [
+      "--author-candidate-manifest <OWNER_AUTHOR_CANDIDATES_V27.json>",
+      "omit --only-unit so all 36 units remain on the ordinary route unless listed in the manifest"
+    ]
+  }
+}
