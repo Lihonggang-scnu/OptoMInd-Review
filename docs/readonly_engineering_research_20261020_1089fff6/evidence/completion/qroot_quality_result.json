@@ -1,0 +1,262 @@
+{
+  "schema_version": "optomind.unit_realization.v1",
+  "identity": {
+    "schema_version": "optomind.unit_realization.v1",
+    "payload_sha256": "166f677cec56814c6610009ecec0aa3d1d21b2e3fa066a68dd78dbfb6be9173d",
+    "original_body_sha256": "ad70f3b9c14d6f76800d25cd7113ebd5234651c5bdf3b1d2b5304c6986f0e9bc",
+    "author_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 32768,
+      "thinking": true,
+      "thinking_budget": 8192,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "reviewer_profile": {
+      "model": "qwen3.5-plus",
+      "max_output_tokens": 24576,
+      "thinking": true,
+      "thinking_budget": 16384,
+      "json_mode": false,
+      "timeout_seconds": 1800.0,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "stream": true,
+      "stream_overall_timeout_seconds": 3600.0
+    },
+    "prompt_sha256": "8317b96068a941022f072dc9d2b482cde1211d35763eb27b5360f6e6257a512e",
+    "completion_prompt_sha256": "24772a62e96fa32845c9c7be30545031346d7ca079c759af247389af8433419a",
+    "experiment_label": "production_actual_body"
+  },
+  "output_dir": "N\\stages\\09_body_delivery_min600_quality_repair_v27\\body\\units\\CH02\\CH02_U03\\d39fc5914138fda38e59e10b7a404e7d41c52b9972ebfc238d5694f1d22ded26\\attempt_001\\quality\\a3580932b52417440f8a0860a548a26c6948b92bad6eb1d5541cc6b53ab7dc54",
+  "body_markdown": "多层堆叠策略通过引入垂直维度的设计自由度，为超表面像差校正提供了超越单层色散工程的可能性。理论分析表明，双层超表面系统的间距不仅定义焦距，还决定离轴像差的补偿条件：当间距满足 d ≈ (n2/n3)fq 时（fq 为二次相位层焦距，n2 和 n3 分别为间隔层和聚焦介质的折射率），可实现大视场的衍射极限成像 [P0253]。对于 NA=0.75 的双层系统，存在最优焦距比例α≈1.367，使施密特板相位梯度最小化，此时在入射角高达 16.5°时仍保持斯特列尔比>0.8（视场角约 33°），聚焦效率达 87%，显著优于非最优设计（fq=fh）的 44%[P0253]。基于有效阿贝数概念的双层设计进一步简化了制造复杂度：通过组合类平凸与类平凹金属透镜补偿色散，使用简单高折射率介电圆柱体超原子单元，在可见光波段实现了>50% 的平均聚焦效率和较小的焦距变化 [P0470]。这种结构堆叠策略避免了单层设计中复杂的横截面几何调控，将色散补偿从单元级提升至系统级。\n\n实验验证表明，多层架构在实现消色差功能的同时面临效率与对准精度的权衡。[P0352] 展示了三层垂直堆叠超表面（金、银、铝纳米圆盘分别对应红 650nm、绿 550nm、蓝 450nm）的消色差聚焦能力，在白光照明下成功将三波长光聚焦于同一点，消除了传统二元波带片超过 400μm 的色差范围 [P0352]。然而，该设计的传输效率仅为 5.8%–8.7%，主要受限于金属材料的固有吸收损耗和层间串扰（<10%）[P0352]。相比之下，介电材料的双合透镜设计展现了更高的效率潜力：[P0292] 采用非晶硅纳米柱在熔融石英基底两侧制备双层结构，在 850nm 波长下实现了约 70% 的聚焦效率，且随入射角增加以约 1%/度的速率下降 [P0292]。该双合透镜将无像差视场扩大至约 30 度入射角，并成功与 CMOS 图像传感器单片集成，构建了尺寸仅为 1.6mm×1.6mm×1.7mm 的微型平面相机，MTF 分析证实整个视场内保持高分辨率 [P0292]。但该系统仅针对单一近红外波长，照明带宽从 10nm 增加到 40nm 时色差导致成像分辨率和对比度下降，需通过 Wiener 去卷积算法部分补偿，这会放大噪声 [P0292]。\n\n不同消色差技术路线的性能对比揭示了多层策略的适用边界。现有材料提供了混合消色差金属透镜（HAML）在 1000–1800nm 波段的效率数据：合并型 HAML 在 NA=0.27、0.11 和 0.06 时的平均聚焦效率分别为 61%、67% 和 66%，最高效率达 80–83%[P0152]。而空气间隔型 HAML 在高 NA（0.24–0.32）下效率降至 19–27%[P0152]。该研究引用的单层消色差金属透镜文献数据（NA=0.24，最大效率~55%，1300–1600nm）和多层衍射透镜文献数据（NA=0.05，平均效率 42%，可见光范围）在 NA 和光谱带宽上与 HAML 不完全匹配 [P0152]。[P0554] 在可见光波段（488-633nm）提供了混合折射 - 衍射透镜与单层衍射透镜的直接对比：在 NA 约 0.3 时，混合透镜的焦距误差约为 4μm（2.8%），显著优于低 NA 单层衍射透镜的 55μm（13%）；但单层衍射透镜效率最高（70-80%），混合透镜效率较低（几何混合平均 45-64%，GRIN 混合平均 35-62%）[P0554]。关键限制在于：目前缺乏在完全相同的数值孔径和波长范围内对单层、多层及混合消色差技术路线进行的直接定量对比，各研究采用的测试条件（NA、波段、效率定义）存在显著差异，无法直接合成归一化的效率 - 带宽权衡曲线 [P0152][P0554]。因此，多层堆叠策略在牺牲部分效率或增加制造复杂度（如层间对准精度要求）的前提下换取带宽与视场角的提升，其最优适用场景需基于具体应用的 NA 需求、波段范围及制造容差综合评估。",
+  "model_calls": 2,
+  "cache_hit": false,
+  "status": "assessed_with_pending",
+  "pending_problems": [
+    {
+      "code": "quality_completion_pending",
+      "issues": [
+        {
+          "code": "completion_response_parse_failed",
+          "error": "UnitWritingError:completion_response_unreadable"
+        }
+      ]
+    },
+    {
+      "code": "quality_task_partial",
+      "task_id": "CH02_U03_P01",
+      "status": "partial",
+      "body_quote": "多层堆叠策略通过引入垂直维度的设计自由度，为超表面像差校正提供了超越单层色散工程的可能性。理论分析表明，双层超表面系统的间距不仅定义焦距，还决定离轴像差的补偿条件... 实验验证表明，多层架构在实现消色差功能的同时面临效率与对准精度的权衡。[P0352] 展示了三层垂直堆叠超表面... 然而，该设计的传输效率仅为 5.8%–8.7%，主要受限于金属材料的固有吸收损耗和层间串扰（<10%）[P0352]。相比之下，介电材料的双合透镜设计展现了更高的效率潜力：[P0292]... 实现了约 70% 的聚焦效率... 不同消色差技术路线的性能对比揭示了多层策略的适用边界... 关键限制在于：目前缺乏在完全相同的数值孔径和波长范围内对单层、多层及混合消色差技术路线进行的直接定量对比...",
+      "explanation": "任务要求探讨垂直堆叠策略、分析层间耦合与对准精度对效率的影响、对比单层与多层性能。正文充分展开了垂直堆叠策略（P0253、P0470、P0352、P0292）和性能对比（P0152、P0554、P0352），并正确指出了现有材料缺乏统一基准对比数据的现状（符合章节论点）。但在‘分析对准精度对效率的影响’这一子要点上，正文仅定性提及‘面临效率与对准精度的权衡’及 P0352 的层间串扰，未引用具体材料数据量化对准误差容忍度及其导致的效率损失（如 P0355 中有相关数据但本段未引用，且 P0292/P0352 材料中亦无具体公差数值），因此该子要点未充分展开，判为 partial。",
+      "material_handles": [
+        "P0253",
+        "P0470",
+        "P0352",
+        "P0292",
+        "P0152",
+        "P0554"
+      ],
+      "body_quote_spans": [
+        {
+          "start": 0,
+          "end": 81,
+          "text": "多层堆叠策略通过引入垂直维度的设计自由度，为超表面像差校正提供了超越单层色散工程的可能性。理论分析表明，双层超表面系统的间距不仅定义焦距，还决定离轴像差的补偿条件"
+        },
+        {
+          "start": 434,
+          "end": 489,
+          "text": "实验验证表明，多层架构在实现消色差功能的同时面临效率与对准精度的权衡。[P0352] 展示了三层垂直堆叠超表面"
+        },
+        {
+          "start": 589,
+          "end": 682,
+          "text": "然而，该设计的传输效率仅为 5.8%–8.7%，主要受限于金属材料的固有吸收损耗和层间串扰（<10%）[P0352]。相比之下，介电材料的双合透镜设计展现了更高的效率潜力：[P0292]"
+        },
+        {
+          "start": 718,
+          "end": 732,
+          "text": "实现了约 70% 的聚焦效率"
+        },
+        {
+          "start": 957,
+          "end": 983,
+          "text": "不同消色差技术路线的性能对比揭示了多层策略的适用边界"
+        },
+        {
+          "start": 1451,
+          "end": 1503,
+          "text": "关键限制在于：目前缺乏在完全相同的数值孔径和波长范围内对单层、多层及混合消色差技术路线进行的直接定量对比"
+        }
+      ],
+      "body_quote_match": "ordered_omission_excerpt",
+      "body_quote_verified": true,
+      "body_quote_error": "",
+      "effective_status": "partial"
+    }
+  ],
+  "assessments": [
+    {
+      "step": "assessment",
+      "report": {
+        "tasks": [
+          {
+            "task_id": "CH02_U03_P01",
+            "status": "partial",
+            "body_quote": "多层堆叠策略通过引入垂直维度的设计自由度，为超表面像差校正提供了超越单层色散工程的可能性。理论分析表明，双层超表面系统的间距不仅定义焦距，还决定离轴像差的补偿条件... 实验验证表明，多层架构在实现消色差功能的同时面临效率与对准精度的权衡。[P0352] 展示了三层垂直堆叠超表面... 然而，该设计的传输效率仅为 5.8%–8.7%，主要受限于金属材料的固有吸收损耗和层间串扰（<10%）[P0352]。相比之下，介电材料的双合透镜设计展现了更高的效率潜力：[P0292]... 实现了约 70% 的聚焦效率... 不同消色差技术路线的性能对比揭示了多层策略的适用边界... 关键限制在于：目前缺乏在完全相同的数值孔径和波长范围内对单层、多层及混合消色差技术路线进行的直接定量对比...",
+            "explanation": "任务要求探讨垂直堆叠策略、分析层间耦合与对准精度对效率的影响、对比单层与多层性能。正文充分展开了垂直堆叠策略（P0253、P0470、P0352、P0292）和性能对比（P0152、P0554、P0352），并正确指出了现有材料缺乏统一基准对比数据的现状（符合章节论点）。但在‘分析对准精度对效率的影响’这一子要点上，正文仅定性提及‘面临效率与对准精度的权衡’及 P0352 的层间串扰，未引用具体材料数据量化对准误差容忍度及其导致的效率损失（如 P0355 中有相关数据但本段未引用，且 P0292/P0352 材料中亦无具体公差数值），因此该子要点未充分展开，判为 partial。",
+            "material_handles": [
+              "P0253",
+              "P0470",
+              "P0352",
+              "P0292",
+              "P0152",
+              "P0554"
+            ],
+            "body_quote_spans": [
+              {
+                "start": 0,
+                "end": 81,
+                "text": "多层堆叠策略通过引入垂直维度的设计自由度，为超表面像差校正提供了超越单层色散工程的可能性。理论分析表明，双层超表面系统的间距不仅定义焦距，还决定离轴像差的补偿条件"
+              },
+              {
+                "start": 434,
+                "end": 489,
+                "text": "实验验证表明，多层架构在实现消色差功能的同时面临效率与对准精度的权衡。[P0352] 展示了三层垂直堆叠超表面"
+              },
+              {
+                "start": 589,
+                "end": 682,
+                "text": "然而，该设计的传输效率仅为 5.8%–8.7%，主要受限于金属材料的固有吸收损耗和层间串扰（<10%）[P0352]。相比之下，介电材料的双合透镜设计展现了更高的效率潜力：[P0292]"
+              },
+              {
+                "start": 718,
+                "end": 732,
+                "text": "实现了约 70% 的聚焦效率"
+              },
+              {
+                "start": 957,
+                "end": 983,
+                "text": "不同消色差技术路线的性能对比揭示了多层策略的适用边界"
+              },
+              {
+                "start": 1451,
+                "end": 1503,
+                "text": "关键限制在于：目前缺乏在完全相同的数值孔径和波长范围内对单层、多层及混合消色差技术路线进行的直接定量对比"
+              }
+            ],
+            "body_quote_match": "ordered_omission_excerpt",
+            "body_quote_verified": true,
+            "body_quote_error": "",
+            "effective_status": "partial"
+          }
+        ],
+        "changes": [],
+        "issues": [],
+        "parsed_via": "writer_json_decoder",
+        "scientific_acceptance": false
+      }
+    }
+  ],
+  "changed": false,
+  "scientific_acceptance": false,
+  "applied_edits": [],
+  "stage_attempts": [
+    {
+      "step": "assessment",
+      "attempt_dir": "N\\stages\\09_body_delivery_min600_quality_repair_v27\\body\\units\\CH02\\CH02_U03\\d39fc5914138fda38e59e10b7a404e7d41c52b9972ebfc238d5694f1d22ded26\\attempt_001\\quality\\a3580932b52417440f8a0860a548a26c6948b92bad6eb1d5541cc6b53ab7dc54\\assessment",
+      "call_id": "f13ee4f4c9eb800e-assessment",
+      "new_retry": false,
+      "state": "returned"
+    },
+    {
+      "step": "completion",
+      "attempt_dir": "N\\stages\\09_body_delivery_min600_quality_repair_v27\\body\\units\\CH02\\CH02_U03\\d39fc5914138fda38e59e10b7a404e7d41c52b9972ebfc238d5694f1d22ded26\\attempt_001\\quality\\a3580932b52417440f8a0860a548a26c6948b92bad6eb1d5541cc6b53ab7dc54\\completion",
+      "call_id": "3654fa4f13163f8b-completion",
+      "new_retry": false,
+      "state": "returned"
+    }
+  ],
+  "reparse_saved": {
+    "prior_result_sha256": "16ec9bc0b0a8c581452c4199af5a6348b24d861c11bf443944ac0b8259e9fd20",
+    "history_dir": "N\\stages\\09_body_delivery_min600_quality_repair_v27\\body\\units\\CH02\\CH02_U03\\d39fc5914138fda38e59e10b7a404e7d41c52b9972ebfc238d5694f1d22ded26\\attempt_001\\quality\\a3580932b52417440f8a0860a548a26c6948b92bad6eb1d5541cc6b53ab7dc54\\reparse_history\\16ec9bc0b0a8c581452c4199af5a6348b24d861c11bf443944ac0b8259e9fd20"
+  },
+  "completion": {
+    "schema_version": "optomind.review_unit_writer.result.v1.completion",
+    "chapter_id": "CH02",
+    "unit_id": "CH02_U03",
+    "language": "zh",
+    "task_ids": [
+      "CH02_U03_P01"
+    ],
+    "source_handles": [
+      "P0292",
+      "P0253",
+      "P0352",
+      "P0470"
+    ],
+    "model": "qwen3.5-plus",
+    "simulated": false,
+    "pending": true,
+    "model_status": "pending",
+    "model_status_present": false,
+    "candidate_eligible": false,
+    "candidate_body_path": "",
+    "parsed_via": "unparsed",
+    "covered_task_ids": [],
+    "table_check": {},
+    "content_review_status": "not_reviewed",
+    "citation_scope": "completion_fragment",
+    "used_source_handles": [],
+    "unknown_citations": [],
+    "unresolved_numeric_citations": [],
+    "citation_problems": [],
+    "fence_report": {},
+    "output_normalization": [],
+    "numeric_citation_repairs": [],
+    "unbracketed_source_handle_repairs": [],
+    "bibliography_title_citation_map": {},
+    "citation_number_map_origin": "none",
+    "citation_mapping_diagnostics": [],
+    "known_tool_identifiers": [],
+    "non_source_identifier_citations": [],
+    "issues": [
+      {
+        "code": "completion_response_parse_failed",
+        "error": "UnitWritingError:completion_response_unreadable"
+      }
+    ],
+    "call_error": "SupervisionError:response_rejected",
+    "estimate": {
+      "prompt_tokens_estimate": 17817,
+      "reserved_input_tokens": 28148,
+      "prompt_token_multiplier": 1.12,
+      "prompt_token_framing_margin": 8192,
+      "output_tokens": 32768,
+      "thinking_budget": 8192,
+      "total_context_tokens": 69108,
+      "input_capacity": {
+        "material_preserved": true,
+        "max_input_tokens": 991808,
+        "context_window": 1000000,
+        "exceeds_capacity": false,
+        "action": "within_capacity"
+      },
+      "estimated_cost_cny": 1.095632,
+      "model": "qwen3.5-plus",
+      "tokenizer": "provided_token_counter"
+    },
+    "usage": {},
+    "finish_reason": "",
+    "complete": false,
+    "raw_response": "N\\stages\\09_body_delivery_min600_quality_repair_v27\\body\\units\\CH02\\CH02_U03\\d39fc5914138fda38e59e10b7a404e7d41c52b9972ebfc238d5694f1d22ded26\\attempt_001\\quality\\a3580932b52417440f8a0860a548a26c6948b92bad6eb1d5541cc6b53ab7dc54\\completion\\raw\\unit_completion_CH02_CH02_U03_1792301006_20261018T132609.raw",
+    "original_body_path": "N\\stages\\09_body_delivery_min600_quality_repair_v27\\body\\units\\CH02\\CH02_U03\\d39fc5914138fda38e59e10b7a404e7d41c52b9972ebfc238d5694f1d22ded26\\attempt_001\\quality\\a3580932b52417440f8a0860a548a26c6948b92bad6eb1d5541cc6b53ab7dc54\\completion\\ORIGINAL_BODY.md",
+    "fragment_path": "N\\stages\\09_body_delivery_min600_quality_repair_v27\\body\\units\\CH02\\CH02_U03\\d39fc5914138fda38e59e10b7a404e7d41c52b9972ebfc238d5694f1d22ded26\\attempt_001\\quality\\a3580932b52417440f8a0860a548a26c6948b92bad6eb1d5541cc6b53ab7dc54\\completion\\COMPLETION_FRAGMENT.md",
+    "completed_body_path": "N\\stages\\09_body_delivery_min600_quality_repair_v27\\body\\units\\CH02\\CH02_U03\\d39fc5914138fda38e59e10b7a404e7d41c52b9972ebfc238d5694f1d22ded26\\attempt_001\\quality\\a3580932b52417440f8a0860a548a26c6948b92bad6eb1d5541cc6b53ab7dc54\\completion\\COMPLETED_BODY.md",
+    "note": "定点补写结果；模型状态和 covered_task_ids 仅作诊断，未自动宣称质量通过。"
+  }
+}

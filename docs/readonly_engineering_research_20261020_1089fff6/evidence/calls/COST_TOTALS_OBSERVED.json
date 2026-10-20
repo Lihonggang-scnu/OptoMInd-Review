@@ -1,0 +1,70 @@
+{
+  "observed_at_utc": "2026-10-20T05:53:27.847683+00:00",
+  "ledgers": [
+    {
+      "scope": "project",
+      "observed_at_utc": "2026-10-20T05:53:27.847683+00:00",
+      "cap_cny": 110,
+      "states": [
+        {
+          "status": "settled",
+          "rows": 897,
+          "actual_cny_sum": 100.821423,
+          "amount_cny_sum": 476.0281296
+        },
+        {
+          "status": "uncertain",
+          "rows": 1,
+          "actual_cny_sum": null,
+          "amount_cny_sum": 0.1086312
+        }
+      ],
+      "settled_actual_cny": 100.821423,
+      "held_reserved_and_uncertain_cny": 0.1086312,
+      "available_cny": 9.069945800000005,
+      "database_sha256_before_after": "331404612be596b4c6ae7ec06355470813742fb4cc88fd35a3374d9535e7e9aa",
+      "sidecars_before": {
+        "-wal": false,
+        "-shm": false
+      },
+      "sidecars_after": {
+        "-wal": false,
+        "-shm": false
+      },
+      "method": "immutable URI read-only SELECT aggregates; database not copied. Sidecar absence observed, no checkpoint. actual_cny is local settlement using recorded provider usage/pricing, not independently reconciled vendor invoice."
+    },
+    {
+      "scope": "account",
+      "observed_at_utc": "2026-10-20T05:53:27.847683+00:00",
+      "cap_cny": 300,
+      "states": [
+        {
+          "status": "settled",
+          "rows": 2079,
+          "actual_cny_sum": 158.6437595,
+          "amount_cny_sum": 842.0953604
+        },
+        {
+          "status": "uncertain",
+          "rows": 9,
+          "actual_cny_sum": null,
+          "amount_cny_sum": 4.6254988
+        }
+      ],
+      "settled_actual_cny": 158.6437595,
+      "held_reserved_and_uncertain_cny": 4.6254988,
+      "available_cny": 136.7307417,
+      "database_sha256_before_after": "047d4ddb74028b3b0f290632b67bab35aaac96a8df6b1af575ae7a484486e6c4",
+      "sidecars_before": {
+        "-wal": false,
+        "-shm": false
+      },
+      "sidecars_after": {
+        "-wal": false,
+        "-shm": false
+      },
+      "method": "immutable URI read-only SELECT aggregates; database not copied. Sidecar absence observed, no checkpoint. actual_cny is local settlement using recorded provider usage/pricing, not independently reconciled vendor invoice."
+    }
+  ],
+  "blank_policy": "No separate pending/held lifecycle column exists beyond actual native states in this table. Missing usage, parse/queue timing and independent invoice cost are unrecorded, not zero. Absent native reserved rows means observed count 0, not an inferred unknown release. Account totals include other projects; do not add project to account."
+}

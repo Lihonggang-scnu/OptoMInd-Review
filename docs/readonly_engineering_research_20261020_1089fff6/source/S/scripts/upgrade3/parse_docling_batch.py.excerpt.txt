@@ -1,0 +1,84 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 f3ab9b12a88443edc93bc69014ece9d3d76097eaab84e5e3fbf4b86b7f204ac9
+
+# ORIGINAL SOURCE LINES 120-157
+120: def _run_formula_batches(model, document, elements, batch_size, torch_module):
+121:     """Run bounded adaptive batches; only the failed batch is retried."""
+122:     current_limit = int(batch_size)
+123:     offset = 0
+124:     processed = []
+125:     trace = []
+126:     oom_retries = 0
+127:     terminal_error = ""
+128:     while offset < len(elements):
+129:         current_size = min(current_limit, len(elements) - offset)
+130:         batch = elements[offset:offset + current_size]
+131:         while True:
+132:             status, message = _call_formula_model(model, document, batch)
+133:             if status == "success":
+134:                 trace.append({"status": "success", "batch_size": current_size, "ref_count": len(batch)})
+135:                 processed.extend(str(element.item.self_ref) for element in batch)
+136:                 offset += current_size
+137:                 current_limit = min(current_limit, current_size)
+138:                 break
+139:             if status != "oom":
+140:                 trace.append({"status": "error", "batch_size": current_size, "ref_count": len(batch),
+141:                               "error": _compact_error(message)})
+142:                 terminal_error = f"formula_model_error:{_compact_error(message)}"
+143:                 return processed, trace, oom_retries, terminal_error
+144:             if current_size <= 1:
+145:                 trace.append({"status": "oom_terminal", "batch_size": current_size, "ref_count": len(batch),
+146:                               "error": _compact_error(message)})
+147:                 terminal_error = f"formula_cuda_oom_at_batch_size_1:{_compact_error(message)}"
+148:                 return processed, trace, oom_retries, terminal_error
+149:             next_size = max(1, current_size // 2)
+150:             trace.append({"status": "oom", "batch_size": current_size, "ref_count": len(batch),
+151:                           "next_batch_size": next_size, "error": _compact_error(message)})
+152:             oom_retries += 1
+153:             _release_formula_cuda_memory(torch_module)
+154:             current_size = next_size
+155:             current_limit = min(current_limit, next_size)
+156:             batch = elements[offset:offset + current_size]
+157:     return processed, trace, oom_retries, terminal_error
+# ORIGINAL SOURCE LINES 434-450
+434: def batch_worker_count(config, args):
+435:     """Return the parent basic fan-out; formula enrichment stays serial."""
+436:     if args.mode != "basic":
+437:         return 1
+438:     value = getattr(args, "workers", None)
+439:     if value is None:
+440:         # Historical configs omit this operational knob. Keep their old
+441:         # single-resident-process behavior; the verified three-process route
+442:         # opts in through an explicit config or --workers 3.
+443:         value = config.get("workers", 1)
+444:     try:
+445:         value = int(value)
+446:     except (TypeError, ValueError):
+447:         raise ValueError("workers_invalid")
+448:     if value < 1 or value > 8:
+449:         raise ValueError("workers_must_be_between_1_and_8")
+450:     return value
+# ORIGINAL SOURCE LINES 518-539
+518: def run_isolated_worker(command, output_root, config, started, samples, history_entry):
+519:     env = {**os.environ, "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1", "HF_DATASETS_OFFLINE": "1"}
+520:     aborted = None
+521:     with (output_root / "stdout.log").open("ab") as stdout, (output_root / "stderr.log").open("ab") as stderr:
+522:         proc = subprocess.Popen(command, stdout=stdout, stderr=stderr, env=env,
+523:             creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+524:         history_entry["pid"] = proc.pid
+525:         atomic(output_root / "CURRENT_WORKER.json", history_entry)
+526:         try:
+527:             while proc.poll() is None:
+528:                 used = gpu_memory(); samples.append(used)
+529:                 if used is not None and used > int(config.get("gpu_limit_mib", 8192)):
+530:                     aborted = "whole_gpu_memory_ceiling_exceeded"; stop_owned_worker(proc); break
+531:                 if time.monotonic() - started > float(config.get("timeout_seconds", 1800)):
+532:                     aborted = "batch_deadline_exceeded"; stop_owned_worker(proc); break
+533:                 time.sleep(.5)
+534:             code = proc.wait(timeout=15)
+535:         finally:
+536:             if proc.poll() is None: stop_owned_worker(proc)
+537:     history_entry.update(status="finished", returncode=code, abort_reason=aborted, finished_at=time.time())
+538:     atomic(output_root / "CURRENT_WORKER.json", history_entry)
+539:     return code, aborted

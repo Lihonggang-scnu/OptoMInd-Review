@@ -1,0 +1,73 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 dfbbd08be4982b2248736c930de314ffc09b24122cbc575d16b20a628ce08d40
+
+# ORIGINAL SOURCE LINES 295-322
+295: 
+296: 
+297: def _valid_year(value: Any) -> tuple[str, str]:
+298:     """Return (year, reject_reason). ``1900`` is never emitted."""
+299: 
+300:     text = _clean_unicode(value).strip()
+301:     if YEAR_PATTERN.fullmatch(text):
+302:         if text == PLACEHOLDER_YEAR:
+303:             return "", (
+304:                 f"year {PLACEHOLDER_YEAR} rejected as an unknown/placeholder "
+305:                 "year; never emitted as a completeness claim"
+306:             )
+307:         return text, ""
+308:     match = re.match(r"^(\d{4})[-/]", text)
+309:     if match and match.group(1) != PLACEHOLDER_YEAR:
+310:         return match.group(1), ""
+311:     return "", ""
+312: 
+313: 
+314: def _valid_authors(value: Any) -> tuple[list[str], str]:
+315:     if isinstance(value, str):
+316:         raw = [part.strip() for part in re.split(r"\s+and\s+|;", value)]
+317:     else:
+318:         raw = [str(item).strip() for item in (value or [])]
+319:     authors: list[str] = []
+320:     rejected: list[str] = []
+321:     for author in raw:
+322:         if not author:
+# ORIGINAL SOURCE LINES 2047-2085
+2047:     def _merge_entry(
+2048:         self,
+2049:         candidates: Sequence[Mapping[str, Any]],
+2050:         identity: RefIdentity,
+2051:         marker_count: int,
+2052:         sections: list[str],
+2053:     ) -> dict[str, Any]:
+2054:         fields = self._merge_fields(candidates)
+2055:         provenance: dict[str, dict[str, Any]] = {}
+2056:         missing_reasons: dict[str, list[str]] = {}
+2057:         quality_rejections: list[dict[str, str]] = []
+2058:         aliases: list[str] = [identity.token]
+2059:         for candidate in sorted(
+2060:             candidates,
+2061:             key=lambda candidate: self._candidate_rank(candidate),
+2062:             reverse=True,
+2063:         ):
+2064:             candidate_fields = candidate.get("fields", {})
+2065:             for field in BIBLIOGRAPHIC_FIELDS:
+2066:                 if field not in provenance and not _empty(
+2067:                     candidate_fields.get(field)
+2068:                 ):
+2069:                     provenance[field] = {
+2070:                         "source": candidate.get("source") or "",
+2071:                         "base_source": candidate.get("base_source") or "",
+2072:                         "source_path": candidate.get("source_path") or "",
+2073:                         "section_id": candidate.get("section_id"),
+2074:                         "confidence": candidate.get("confidence") or "",
+2075:                         "exact_identity_match": bool(candidate.get("exact")),
+2076:                         "reason": candidate.get("reason") or "",
+2077:                     }
+2078:             for alias in candidate.get("aliases") or []:
+2079:                 if alias and alias not in aliases:
+2080:                     aliases.append(alias)
+2081:             for field, reason in (candidate.get("missing_reasons") or {}).items():
+2082:                 if reason:
+2083:                     missing_reasons.setdefault(field, [])
+2084:                     if reason not in missing_reasons[field]:
+2085:                         missing_reasons[field].append(reason)

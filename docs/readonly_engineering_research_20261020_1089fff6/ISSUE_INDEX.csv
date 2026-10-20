@@ -1,0 +1,29 @@
+﻿issue_id,chapter_id,unit_id,status,source_location,evidence_file,related_commit,scope_and_qualification
+RO034-01,CH02,CH02_U03,仍存在,S review_unit_writer.py:1113-1286;unit_realization.py:459-519,evidence/completion/gate_request.json,f4461637c495ade3f35b6dc361066222760b2e39,补写输出无显式base hash/version确认；外层request/QC身份已绑定原稿
+RO034-02,CH02,CH02_U03,仍存在,S review_unit_writer.run_unit_completion:1745-1771,evidence/completion/BASE_VS_REJECTED_ANSWER.diff,,通用fullrewrite/overlap/重复追加guard缺口；不等于实际错误采用
+RO034-03,CH02,CH02_U03,仍存在,"S unit_realization:379-399,490-588;adapter supervised_client:290-368",evidence/completion/decision_copy.json,,正常v29未消费被拒补写；显式reparse入口仍需拒绝闭合
+RO034-04,,,仍存在,"adapter planning_transport._GatedClient:377-438;supervised_client:96-100,319-368",evidence/calls/EXACT_MESSAGE_REPEATS.json,,路径/profile/binding改变新identity；无已证明全局namespace复用
+RO034-05,,,已修且有验证证据,"S module4/runtime.py:1243-1273,1343-1359;dual_budget:104-196",evidence/calls/COST_TOTALS_OBSERVED.json,,现有unknown占额和双账留存；不证明跨新identity幂等
+RO034-06,CH02,CH02_U03,已修且有验证证据,"S review_unit_writer:2093-2170,3017-3033",evidence/recovery/AUTHOR_MULTI_ENVELOPE_PROOF.json,f4461637c495ade3f35b6dc361066222760b2e39,普通author多envelope0调用恢复；非补写guard
+RO034-07,,,仍存在,"S latex_publication_renderer:3186-3195,3276-3310",evidence/publication/WAVELENGTH_AT_REPRO.json,,波长@532/@635误识别为TeX引用
+RO034-08,CH06,U02,仍存在,"S review_unit_writer:2635-2654,2673-2701",evidence/publication/MATH_CONTROL_PROPAGATION.json,,3 BACKSPACE+4 FORM FEED早在UNIT_BODY存在
+RO034-09,CH06,U02,已修且有验证证据,S publication_integrity:274-339;latex_publication_renderer:460-530,evidence/publication/V34_NATIVE_LITERAL_MATH_RECEIPT.json,0133380ea82068ec8d9c28269bf9d0417d38bb04,literal出版fallback；科学公式未恢复
+RO034-10,,,仍存在,"S latex_publication_renderer:1698-1749,2489-2512;metadata_resolver:314",evidence/publication/AUTHOR_METADATA_PROJECTION.json,,实际author资料未供，不能自动推断身份
+RO034-11,,,仍存在,S serial_manuscript_parts:256-330;delivery_citations:71-190,evidence/parts/ABSTRACT_CURRENT.md,,摘要可见引文禁止规则未全局实现，内部来源应保留
+RO034-12,,,仍存在,"S delivery_citations:71-241,432-508",evidence/publication/CANONICAL_CITATION_MAPPING_SAMPLES.json,,显示编号从含摘要全文扫描；未按引言首引重排
+RO034-13,,,仍存在,"S serial_manuscript_parts:256-330,407-525",evidence/parts/ABSTRACT_INTRODUCTION_COMPARISON.json,,首句54字符重复，职责/共享任务/串行输入需统筹
+RO034-14,,,仍存在,S full_review_draft:1555-1605;review_delivery:1077-1119,evidence/states/UNIT_STATUS.csv,,生成complete/装配loaded与质量resolved不同，不可称投稿通过
+RO034-15,,,已修且有验证证据,S legacy_unit_route:671-708;unit_realization:484-493,evidence/context/CONTEXT_STATISTICS.json,,36author+36quality cachehit；历史QC调用55另列
+RO034-16,,,现有材料无法确认,S review_unit_writer.unit_messages:1866-1896,evidence/context/SOURCE_RECORD_REPETITION_INDEX.json,,共享输入实际存在；可删量/收益无无损证据
+RO034-17,,,现有材料无法确认,S module4/runtime transport observer;adapter supervised_client:319-368,CONTEXT_AND_TIMING.csv,,queue/isolated generation/parse/assembly时间未记录
+RO034-18,,,已修且有验证证据,"S parse_docling_batch:120-157,434-450,518-539",evidence/runtime/FORMULA_RECOVERY_VERIFICATION.json,,历史OOM后adaptive-halving恢复；不等于所有内存问题消失
+RO034-19,,,现有材料无法确认,source/SOURCE_INDEX.json R/S separate inventories,evidence/baseline/VERSION_AND_ENVIRONMENT.json,,S修复未证明已进入R当前分支；不得按目录号判版本
+RO034-20,,,已修且有验证证据,S outline_selection.validate_selection_response:777/project_selection_group:954;outline_strengthening.merge_owner_result_into_chapter_payloads:793;pipeline.load_complete_packets:114,evidence/recovery/SCOPED_UNIT_ID_ACCEPTANCE.json,eb153f87cf167e475f36f5a5cc0f10a178039d3e,章节+localunit身份修复有实际历史验证
+RO034-21,,,已修且有验证证据,S progressive_review_plan._material_content:174/_owner_cache_projection:257;source/RELATED_FIX_FUNCTION_LOCATIONS.json,evidence/recovery/NESTED_MATERIAL_CORRECTION.json,d23acb55c15688e531147179e769d1be7145a6dc,nested供材/owner报告纠正，未推广无关原型
+RO034-22,,,已修且有验证证据,"S chapter_arrangement:119-252,445-500",evidence/recovery/ARRANGEMENT_REEXPORT_RECEIPT.json,,真实原答免费reexport，旧拒绝/费用保留
+RO034-23,,,已修且有验证证据,"S full_review_draft:270-453,650-877,1127-1207",evidence/recovery/ASSEMBLY_ALIAS_PROOF.json,002067c276de4cd9c9d58c12aa5b47579b80beec,unit scoped alias+sealed derivative provenance
+RO034-24,CH02,CH02_U03,仍存在,"S legacy_unit_route:552-613,848-904",source/S/optomind_research/runtime/upgrade3/legacy_unit_route.py.excerpt.txt,,wholebookidentity改变可广泛失效，未证局部失效fastpath
+RO034-25,,,现有材料无法确认,S legacy_unit_route:671-708;full_review_draft:1127-1207,FINDINGS.md,,resume静态大文件遍历已定位，实际读次数/内存/收益未观测
+RO034-26,,,已修且有验证证据,S review_delivery:1329-1357,source/S/optomind_research/runtime/upgrade3/review_delivery.py.excerpt.txt,42e97ad9003098b5162b98147600403b07540980,文末参考条目计数修复，非编号策略修复
+RO034-27,,,现有材料无法确认,,FINDINGS.md,,暂缓：具体物理条件拼接错误，仅登记不专项排查
+RO034-28,,,现有材料无法确认,,FINDINGS.md,,暂缓：QC摘录与正文不匹配，仅登记不专项排查

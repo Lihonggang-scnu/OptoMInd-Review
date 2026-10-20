@@ -1,0 +1,913 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 8ac22b6afe28db5474b80fc61e9d13221d9147e27dce4c3130d10cbe9b9d39e4
+
+# ORIGINAL SOURCE LINES 1113-1286
+1113: _COMPLETION_INSTRUCTIONS = """
+1114: 【定点补写模式】这不是重写单元。只处理 requested_task_ids 指定的任务，把
+1115: existing_body_markdown 当作只读上下文，不重复或改写其中已有正文；返回的
+1116: body_markdown 只能是需要追加的片段。返回 JSON 对象，且只使用以下字段：
+1117: body_markdown、status（appended、already_covered 或 pending）、covered_task_ids
+1118: （仅诊断信息）和 issues。covered_task_ids 不能代替对正文的实际检查，也不能单独
+1119: 证明任务已经完成。若任务已在现有正文中充分完成，返回空 body_markdown 和
+1120: already_covered，不要杜撰内容；若材料不足或无法完成，返回 pending 并说明问题。
+1121: 只使用本次给出的任务和来源材料，不新检索、不调用未给出的资料。
+1122: 若有 gap_feedback，这是独立正文审查的待核实诊断；对照原始任务、完整材料和只读
+1123: 正文确认缺口，仅补充指定任务尚未充分展开的内容，不能把诊断当作新的事实来源。
+1124: 
+1125: 若指定任务是表格任务，必须在 body_markdown 中写出真正的 Markdown 表格：有表头、
+1126: 分隔行和至少一行数据；不能返回 table_tasks、row_tasks 或任务描述来冒充已完成
+1127: 表格。表格单元格只写材料支持的内容，材料没有提供的值写“所给材料未提供”。
+1128: """.strip()
+1129: 
+1130: 
+1131: def _source_handles_from_value(value: Any) -> list[str]:
+1132:     """Collect explicit source handles without treating arbitrary text as IDs."""
+1133: 
+1134:     found: list[str] = []
+1135: 
+1136:     def add(raw: Any) -> None:
+1137:         handle = str(raw or "").strip()
+1138:         if handle and handle not in found:
+1139:             found.append(handle)
+1140: 
+1141:     def walk(node: Any) -> None:
+1142:         if isinstance(node, Mapping):
+1143:             if "source_handle" in node:
+1144:                 add(node.get("source_handle"))
+1145:             if "source_handles" in node:
+1146:                 raw = node.get("source_handles")
+1147:                 if isinstance(raw, str):
+1148:                     add(raw)
+1149:                 elif isinstance(raw, Sequence) and not isinstance(raw, (str, bytes, bytearray)):
+1150:                     for item in raw:
+1151:                         if isinstance(item, Mapping):
+1152:                             add(item.get("source_handle"))
+1153:                         else:
+1154:                             add(item)
+1155:             for key in (
+1156:                 "source_uses", "source_brief_details", "source_briefs", "row_tasks",
+1157:                 "sources", "source_materials", "materials", "references",
+1158:             ):
+1159:                 if key in node:
+1160:                     walk(node.get(key))
+1161:         elif isinstance(node, Sequence) and not isinstance(node, (str, bytes, bytearray)):
+1162:             for item in node:
+1163:                 walk(item)
+1164: 
+1165:     walk(value)
+1166:     return found
+1167: 
+1168: 
+1169: def _completion_task_parts(
+1170:     view: UnitWritingView,
+1171:     task_ids: Sequence[str],
+1172: ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[str]]:
+1173:     requested = [str(item).strip() for item in task_ids if str(item or "").strip()]
+1174:     if not requested:
+1175:         raise UnitWritingError("completion_task_required")
+1176:     if len(set(requested)) != len(requested):
+1177:         raise UnitWritingError("completion_task_duplicate")
+1178:     paragraphs = {
+1179:         str(task.get("paragraph_id") or ""): dict(task)
+1180:         for task in view.paragraph_tasks
+1181:         if str(task.get("paragraph_id") or "")
+1182:     }
+1183:     tables = {
+1184:         str(task.get("table_id") or ""): dict(task)
+1185:         for task in view.table_tasks
+1186:         if str(task.get("table_id") or "")
+1187:     }
+1188:     selected_paragraphs: list[dict[str, Any]] = []
+1189:     selected_tables: list[dict[str, Any]] = []
+1190:     for task_id in requested:
+1191:         if task_id in paragraphs:
+1192:             selected_paragraphs.append(deepcopy(paragraphs[task_id]))
+1193:         elif task_id in tables:
+1194:             selected_tables.append(deepcopy(tables[task_id]))
+1195:         else:
+1196:             raise UnitWritingError(f"completion_task_not_found:{task_id}")
+1197:     handles: list[str] = []
+1198:     for task in [*selected_paragraphs, *selected_tables]:
+1199:         for handle in _source_handles_from_value(task):
+1200:             if handle not in handles:
+1201:                 handles.append(handle)
+1202:     return selected_paragraphs, selected_tables, handles
+1203: 
+1204: 
+1205: def _completion_tool_materials(
+1206:     items: Sequence[Mapping[str, Any]],
+1207:     *,
+1208:     unit_id: str,
+1209:     handles: Sequence[str],
+1210: ) -> list[dict[str, Any]]:
+1211:     """Keep only unit/source-linked chapter tools for a selected task."""
+1212: 
+1213:     handle_set = set(handles)
+1214:     selected: list[dict[str, Any]] = []
+1215:     for raw in items or ():
+1216:         if not isinstance(raw, Mapping):
+1217:             continue
+1218:         unit_keys = [
+1219:             str(raw.get(key) or "").strip()
+1220:             for key in ("unit_key", "unit_id")
+1221:             if str(raw.get(key) or "").strip()
+1222:         ]
+1223:         matches_unit = any(
+1224:             value == unit_id or value.rsplit(":", 1)[-1] == unit_id
+1225:             for value in unit_keys
+1226:         )
+1227:         matches_source = bool(handle_set.intersection(_source_handles_from_value(raw)))
+1228:         if matches_unit or matches_source:
+1229:             selected.append(deepcopy(dict(raw)))
+1230:     return selected
+1231: 
+1232: 
+1233: def build_completion_payload(
+1234:     view: UnitWritingView,
+1235:     existing_body: str,
+1236:     task_ids: Sequence[str],
+1237:     *,
+1238:     language: str = "zh",
+1239:     gap_feedback: Sequence[Mapping[str, Any]] | None = None,
+1240: ) -> dict[str, Any]:
+1241:     """Build a narrow, read-only payload for explicit task completion."""
+1242: 
+1243:     from .writer_candidates_contracts import _handles
+1244:     paragraph_tasks, table_tasks, handles = _completion_task_parts(view, task_ids)
+1245:     handles = list(dict.fromkeys([*handles, *_handles([paragraph_tasks, table_tasks])]))
+1246:     by_handle = {
+1247:         str(item.get("source_handle") or ""): item
+1248:         for item in view.materials
+1249:         if isinstance(item, Mapping)
+1250:     }
+1251:     aliases = _explicit_source_aliases(by_handle)
+1252:     selected_canonical = list(dict.fromkeys(aliases.get(handle, handle) for handle in handles))
+1253:     equivalent_handles = [alias for alias, canonical in aliases.items() if canonical in selected_canonical]
+1254:     tools = _completion_tool_materials(
+1255:         view.chapter_tool_materials, unit_id=view.unit_id,
+1256:         handles=list(dict.fromkeys([*handles, *selected_canonical, *equivalent_handles])))
+1257:     for item in tools:
+1258:         for handle in _handles(item):
+1259:             if (handle in by_handle or handle in aliases) and handle not in handles:
+1260:                 handles.append(handle)
+1261:     # Review-mediated evidence and nested source records are part of the
+1262:     # selected materials' dependency closure, even without their own A/B.
+1263:     position = 0
+1264:     while position < len(handles):
+1265:         handle = aliases.get(handles[position], handles[position])
+1266:         position += 1
+1267:         for dependency in _handles(by_handle.get(handle, {})):
+1268:             if dependency not in handles:
+1269:                 handles.append(dependency)
+1270:     missing = [
+1271:         handle for handle in handles
+1272:         if aliases.get(handle, handle) not in by_handle
+1273:         or by_handle[aliases.get(handle, handle)].get("missing_material")
+1274:     ]
+1275:     if missing:
+1276:         raise UnitWritingError("completion_source_missing:" + ",".join(missing))
+1277:     sources = [deepcopy(by_handle[handle]) for handle in
+1278:                dict.fromkeys(aliases.get(handle, handle) for handle in handles)]
+1279:     payload = {
+1280:         "completion_mode": True,
+1281:         "chapter_id": view.chapter_id,
+1282:         "unit_id": view.unit_id,
+1283:         "language": language,
+1284:         "chapter_frame": deepcopy(view.chapter_frame),
+1285:         "other_chapters": deepcopy(view.other_chapters),
+1286:         "unit_position": {
+# ORIGINAL SOURCE LINES 1450-1501
+1450:             return None
+1451:         fields["body_markdown"] = "\n\n".join(fragments)
+1452:         fields["_adjacent_body_string_recovery"] = {
+1453:             "code": "completion_adjacent_body_strings_recovered",
+1454:             "offset_basis": "stripped_json_content_unicode_codepoints",
+1455:             "string_spans": spans,
+1456:             "separator": "\n\n",
+1457:             "candidate_only": True,
+1458:         }
+1459:         return fields
+1460:     except (ValueError, RecursionError):
+1461:         return None
+1462: 
+1463: 
+1464: def _completion_envelope_details(response: Any) -> tuple[Mapping[str, Any], str]:
+1465:     """Preserve completion metadata when recovering a complete JSON envelope."""
+1466:     if isinstance(response, Mapping):
+1467:         if any(key in response for key in ("body_markdown", "table_markdown", "status", "covered_task_ids", "issues")):
+1468:             return response, "object"
+1469:         content = response.get("content")
+1470:         if isinstance(content, str):
+1471:             text = _strip_fences(content, json_envelope=True).strip()
+1472:             if text.startswith("{"):
+1473:                 try:
+1474:                     data = json.loads(text)
+1475:                     if isinstance(data, Mapping):
+1476:                         return data, "json"
+1477:                 except (TypeError, ValueError):
+1478:                     pass
+1479:                 if response.get("complete") is True and response.get("finish_reason") == "stop" and text.endswith("}"):
+1480:                     try:
+1481:                         data = json.loads(text, strict=False)
+1482:                         if isinstance(data, Mapping):
+1483:                             return data, "json_literal_controls"
+1484:                     except (TypeError, ValueError):
+1485:                         pass
+1486:                     adjacent = _completion_adjacent_body_strings(text)
+1487:                     if adjacent is not None:
+1488:                         return adjacent, "json_adjacent_body_strings"
+1489:                     from .chapter_arrangement import _escape_inner_json_quotes
+1490:                     from json_repair import repair_json
+1491:                     try:
+1492:                         mechanical = json.loads(_escape_inner_json_quotes(text), strict=False)
+1493:                         candidate = repair_json(text, return_objects=True, strict=True)
+1494:                         if isinstance(candidate, Mapping) and candidate == mechanical:
+1495:                             return candidate, "json_repair_quote_escape_crosschecked"
+1496:                     except (ValueError, RecursionError):
+1497:                         pass
+1498:                 # The old decoder may retain a useful body, but a partial JSON
+1499:                 # recovery must not invent an appended status or missing fields.
+1500:                 return _completion_envelope(response), "unverified_json_envelope"
+1501:     return _completion_envelope(response), "legacy_completion_envelope"
+# ORIGINAL SOURCE LINES 1563-1863
+1563: def run_unit_completion(
+1564:     view: UnitWritingView,
+1565:     *,
+1566:     existing_body: str,
+1567:     task_ids: Sequence[str],
+1568:     client: Any,
+1569:     model: str = DEFAULT_MODEL,
+1570:     prompt: str | None = None,
+1571:     language: str = "zh",
+1572:     output_tokens: int | None = None,
+1573:     thinking_budget: int | None = None,
+1574:     thinking: bool | None = None,
+1575:     raw_response_dir: str | Path | None = None,
+1576:     planning_revision: bool = False,
+1577:     simulated: bool = False,
+1578:     citation_number_map: Mapping[Any, Any] | None = None,
+1579:     gap_feedback: Sequence[Mapping[str, Any]] | None = None,
+1580: ) -> dict[str, Any]:
+1581:     """Make at most one explicit completion call and preserve a pending result."""
+1582: 
+1583:     from .module4.runtime import invoke_client
+1584: 
+1585:     messages = completion_messages(
+1586:         view, existing_body, task_ids, prompt=prompt, language=language,
+1587:         planning_revision=planning_revision, citation_number_map=citation_number_map,
+1588:         gap_feedback=gap_feedback)
+1589:     call_id = f"unit_completion_{view.chapter_id}_{view.unit_id}_{int(time.time())}"
+1590:     response: Any = None
+1591:     call_error = ""
+1592:     output_tokens = output_tokens if output_tokens is not None else getattr(client, "max_output_tokens", DEFAULT_OUTPUT_TOKENS)
+1593:     if thinking_budget is None:
+1594:         if thinking is True:
+1595:             # A non-thinking client exposes an effective zero but can retain
+1596:             # a nonzero allowance for explicit per-call re-enablement.
+1597:             thinking_budget = getattr(
+1598:                 client, "_configured_thinking_budget",
+1599:                 getattr(client, "thinking_budget", DEFAULT_THINKING_BUDGET),
+1600:             ) or DEFAULT_THINKING_BUDGET
+1601:         else:
+1602:             thinking_budget = getattr(client, "thinking_budget", DEFAULT_THINKING_BUDGET)
+1603:         if thinking is None:
+1604:             thinking = getattr(client, "thinking", bool(thinking_budget))
+1605:     enabled = bool(thinking_budget) if thinking is None else bool(thinking)
+1606:     assert_input_capacity(
+1607:         messages, client=client, model=model, output_tokens=output_tokens,
+1608:         thinking_budget=thinking_budget if enabled else 0, error_type=UnitWritingError)
+1609:     try:
+1610:         response = invoke_client(
+1611:             client, messages, call_id=call_id, model=model,
+1612:             max_output_tokens=output_tokens, thinking=enabled,
+1613:             thinking_budget=thinking_budget if enabled else 0)
+1614:     except Exception as exc:
+1615:         call_error = type(exc).__name__ + ":" + str(exc)
+1616:         record = getattr(exc, "record", None)
+1617:         response = dict(record) if isinstance(record, Mapping) else {
+1618:             "error_type": type(exc).__name__, "error": str(exc), "complete": False,
+1619:         }
+1620: 
+1621:     payload = json.loads(messages[-1]["content"])
+1622:     raw_path = ""
+1623:     if raw_response_dir is not None:
+1624:         target = Path(raw_response_dir)
+1625:         target.mkdir(parents=True, exist_ok=True)
+1626:         stamp = time.strftime("%Y%m%dT%H%M%S")
+1627:         raw_target = target / (portable_component(f"{call_id}_{stamp}") + ".raw")
+1628:         raw_target.write_text(json.dumps(response, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+1629:         raw_path = str(raw_target)
+1630: 
+1631:     result: dict[str, Any] = {
+1632:         "messages": messages,
+1633:         "payload": payload,
+1634:         "existing_body_markdown": existing_body,
+1635:         "task_ids": [str(item) for item in task_ids],
+1636:         "source_handles": payload.get("requested_source_handles", []),
+1637:         "body_markdown": existing_body,
+1638:         "completion_fragment": "",
+1639:         "pending": True,
+1640:         "model_status": "pending",
+1641:         "covered_task_ids": [],
+1642:         "model_status_present": False,
+1643:         "candidate_eligible": False,
+1644:         "candidate_body_markdown": "",
+1645:         "parsed_via": "unparsed",
+1646:         "content_review_status": "not_reviewed",
+1647:         "citation_scope": "completion_fragment",
+1648:         "issues": [],
+1649:         "raw_response": raw_path,
+1650:         "usage": dict(response.get("usage") or {}) if isinstance(response, Mapping) else {},
+1651:         **({key: deepcopy(response[key]) for key in ("effective_request", "cap_pressure") if key in response}
+1652:            if isinstance(response, Mapping) else {}),
+1653:         "finish_reason": response.get("finish_reason") or "" if isinstance(response, Mapping) else "",
+1654:         "complete": (
+1655:             bool(response.get("complete")) if response.get("complete") is not None
+1656:             else not bool(call_error)
+1657:         ) if isinstance(response, Mapping) else False,
+1658:         "simulated": bool(simulated),
+1659:         "model": model,
+1660:         "call_error": call_error,
+1661:     }
+1662:     try:
+1663:         envelope, parsed_via = _completion_envelope_details(response)
+1664:         result["parsed_via"] = parsed_via
+1665:         if any(isinstance(envelope.get(key), str) and envelope[key].strip()
+1666:                for key in ("body_markdown", "table_markdown")):
+1667:             fragment, normalization = _consume_unit_output(envelope)
+1668:         else:
+1669:             fragment, normalization = "", []
+1670:         explicit_map = citation_number_map
+1671:         map_origin = "caller_explicit" if citation_number_map is not None else str(
+1672:             payload.get("citation_number_map_origin") or "")
+1673:         if explicit_map is None:
+1674:             candidate = payload.get("citation_number_map")
+1675:             explicit_map = candidate if isinstance(candidate, Mapping) else None
+1676:         if explicit_map is not None and not map_origin:
+1677:             map_origin = "caller_explicit"
+1678:         mapping_diagnostics: list[dict[str, Any]] = []
+1679:         known_handles = _material_known_handles(
+1680:             payload.get("sources") or (), payload.get("requested_source_handles") or ())
+1681:         effective_map, title_map = _effective_numeric_citation_map(
+1682:             fragment, payload.get("sources") or (), explicit_map,
+1683:             origin=map_origin, planning_revision=planning_revision, diagnostics=mapping_diagnostics,
+1684:         )
+1685:         fragment, repairs = _repair_numeric_citations(
+1686:             fragment, effective_map, known_handles)
+1687:         fragment, handle_repairs = _repair_unbracketed_source_handles(fragment, known_handles)
+1688:         for repair in repairs:
+1689:             repair["mapping_origin"] = ("bibliography_exact_title" if map_origin == "generated_local_aliases"
+1690:                                         or explicit_map is None else "caller_explicit")
+1691:         result.update(_output_diagnostics(fragment, known_handles,
+1692:                                           _known_tool_identifiers(payload)))
+1693:         result["citation_mapping_diagnostics"] = mapping_diagnostics
+1694:         result["citation_problems"].extend(mapping_diagnostics)
+1695:         result["citation_scope"] = "completion_fragment"
+1696:         result["numeric_citation_repairs"] = repairs
+1697:         result["unbracketed_source_handle_repairs"] = handle_repairs
+1698:         result["bibliography_title_citation_map"] = title_map
+1699:         result["citation_number_map_origin"] = map_origin or "none"
+1700:         result["output_normalization"] = normalization
+1701:         result["completion_fragment"] = fragment
+1702:         status = str(envelope.get("status") or "").strip() or "pending"
+1703:         result["model_status_present"] = "status" in envelope
+1704:         covered = envelope.get("covered_task_ids")
+1705:         if ("covered_task_ids" in envelope and
+1706:                 (not isinstance(covered, Sequence) or isinstance(covered, (str, bytes, bytearray)))):
+1707:             raise UnitWritingError("completion_covered_task_ids_invalid")
+1708:         result["covered_task_ids"] = [
+1709:             str(item) for item in covered
+1710:         ] if isinstance(covered, Sequence) and not isinstance(covered, (str, bytes, bytearray)) else []
+1711:         if (len(set(result["covered_task_ids"])) != len(result["covered_task_ids"])
+1712:                 or set(result["covered_task_ids"]) - set(result["task_ids"])):
+1713:             raise UnitWritingError("completion_covered_task_ids_invalid")
+1714:         raw_issues = envelope.get("issues")
+1715:         result["issues"] = list(raw_issues) if isinstance(raw_issues, list) else ([raw_issues] if raw_issues else [])
+1716:         result["issues"].extend(item for item in normalization if item.get("code") == "table_markdown_missing_or_invalid")
+1717:         result["model_status"] = status if result["model_status_present"] else ""
+1718:         result["response_envelope"] = dict(envelope)
+1719:         if parsed_via == "json_adjacent_body_strings":
+1720:             result["issues"].append(dict(envelope["_adjacent_body_string_recovery"]))
+1721:         if parsed_via in {"json_literal_controls", "json_repair_quote_escape_crosschecked"}:
+1722:             result["issues"].append({"code": "completion_json_syntax_recovered", "parsed_via": parsed_via})
+1723:         missing_metadata = [key for key in ("status", "covered_task_ids") if key not in envelope]
+1724:         if missing_metadata:
+1725:             result["issues"].append({"code": "completion_metadata_missing", "fields": missing_metadata})
+1726:         table_requested = bool(payload.get("table_tasks"))
+1727:         table_check = _markdown_table_check(fragment) if table_requested else {"valid": None}
+1728:         result["table_check"] = table_check
+1729:         incomplete = bool(call_error) or result["finish_reason"] == "length" or not result["complete"]
+1730:         if incomplete:
+1731:             if fragment.strip():
+1732:                 result["completion_fragment"] = fragment
+1733:             result["issues"].append({
+1734:                 "code": "completion_response_incomplete",
+1735:                 "finish_reason": result["finish_reason"],
+1736:                 "complete": result["complete"],
+1737:             })
+1738:         elif parsed_via == "unverified_json_envelope":
+1739:             result["issues"].append({"code": "completion_json_envelope_unverified"})
+1740:         elif status == "already_covered" and not fragment.strip():
+1741:             result["issues"].append({
+1742:                 "code": "model_already_covered",
+1743:                 "note": "模型判断已覆盖；未自动验收",
+1744:             })
+1745:         elif status != "appended":
+1746:             if fragment.strip():
+1747:                 result["completion_fragment"] = fragment
+1748:             result["issues"].append({
+1749:                 "code": "completion_status_not_appended",
+1750:                 "status": status,
+1751:             })
+1752:             if (not result["model_status_present"] and fragment.strip()
+1753:                     and isinstance(response, Mapping) and response.get("complete") is True
+1754:                     and response.get("finish_reason") == "stop"
+1755:                     and parsed_via in {"object", "json", "json_literal_controls", "json_repair_quote_escape_crosschecked",
+1756:                                        "json_adjacent_body_strings"}
+1757:                     and (not table_requested or table_check["valid"])):
+1758:                 result["candidate_eligible"] = True
+1759:                 result["candidate_body_markdown"] = existing_body + ("" if not existing_body else "\n\n") + fragment
+1760:         elif not fragment.strip():
+1761:             result["issues"].append({"code": "completion_fragment_empty"})
+1762:         elif table_requested and not table_check["valid"]:
+1763:             result["issues"].append({"code": "markdown_table_missing_or_invalid"})
+1764:         else:
+1765:             if simulated:
+1766:                 fragment = "> ⚠️ 模拟补写（假客户端，仅验证接线，非质量结论）\n\n" + fragment
+1767:                 result["completion_fragment"] = fragment
+1768:             else:
+1769:                 result["completion_fragment"] = fragment
+1770:             result["body_markdown"] = existing_body + ("" if not existing_body else "\n\n") + result["completion_fragment"]
+1771:             result["pending"] = False
+1772:     except Exception as exc:
+1773:         result["issues"].append({
+1774:             "code": "completion_response_parse_failed",
+1775:             "error": type(exc).__name__ + ":" + str(exc),
+1776:         })
+1777:         result["model_status"] = "pending"
+1778:     return result
+1779: 
+1780: 
+1781: def write_unit_completion(
+1782:     view: UnitWritingView,
+1783:     result: Mapping[str, Any],
+1784:     output_dir: str | Path,
+1785:     *,
+1786:     estimate: Mapping[str, Any],
+1787:     language: str,
+1788: ) -> dict[str, Any]:
+1789:     """Write completion artifacts without altering the source or normal unit output."""
+1790: 
+1791:     target = Path(output_dir)
+1792:     target.mkdir(parents=True, exist_ok=True)
+1793:     original = str(result.get("existing_body_markdown") or "")
+1794:     fragment = str(result.get("completion_fragment") or "")
+1795:     completed = str(result.get("body_markdown") or original)
+1796:     (target / "ORIGINAL_BODY.md").write_bytes(original.encode("utf-8"))
+1797:     (target / "COMPLETION_FRAGMENT.md").write_text(fragment, encoding="utf-8")
+1798:     (target / "COMPLETED_BODY.md").write_bytes(completed.encode("utf-8"))
+1799:     candidate_path = ""
+1800:     if result.get("candidate_eligible"):
+1801:         candidate_path = str(target / "CANDIDATE_BODY.md")
+1802:         Path(candidate_path).write_bytes(str(result["candidate_body_markdown"]).encode("utf-8"))
+1803:     (target / "COMPLETION_MESSAGES.json").write_text(
+1804:         json.dumps(result.get("messages") or [], ensure_ascii=False, indent=2), encoding="utf-8")
+1805:     payload = result.get("payload") or {}
+1806:     (target / "COMPLETION_INPUT.json").write_text(json.dumps({
+1807:         "schema_version": INPUT_SCHEMA + ".completion",
+1808:         "chapter_id": view.chapter_id,
+1809:         "unit_id": view.unit_id,
+1810:         "language": language,
+1811:         "existing_body_path": str(target / "ORIGINAL_BODY.md"),
+1812:         "payload": payload,
+1813:         "estimate": dict(estimate),
+1814:         "source_handles": list(result.get("source_handles") or []),
+1815:     }, ensure_ascii=False, indent=2), encoding="utf-8")
+1816:     report = {
+1817:         "schema_version": RESULT_SCHEMA + ".completion",
+1818:         "chapter_id": view.chapter_id,
+1819:         "unit_id": view.unit_id,
+1820:         "language": language,
+1821:         "task_ids": list(result.get("task_ids") or []),
+1822:         "source_handles": list(result.get("source_handles") or []),
+1823:         "model": result.get("model") or "",
+1824:         "simulated": bool(result.get("simulated")),
+1825:         "pending": bool(result.get("pending", True)),
+1826:         "model_status": result.get("model_status", "pending"),
+1827:         "model_status_present": bool(result.get("model_status_present")),
+1828:         "candidate_eligible": bool(result.get("candidate_eligible")),
+1829:         "candidate_body_path": candidate_path,
+1830:         "parsed_via": result.get("parsed_via") or "unparsed",
+1831:         "covered_task_ids": list(result.get("covered_task_ids") or []),
+1832:         "table_check": result.get("table_check") or {},
+1833:         "content_review_status": "not_reviewed",
+1834:         "citation_scope": "completion_fragment",
+1835:         "used_source_handles": list(result.get("used_source_handles") or []),
+1836:         "unknown_citations": list(result.get("unknown_citations") or []),
+1837:         "unresolved_numeric_citations": list(result.get("unresolved_numeric_citations") or []),
+1838:         "citation_problems": list(result.get("citation_problems") or []),
+1839:         "fence_report": result.get("fence_report") or {},
+1840:         "output_normalization": list(result.get("output_normalization") or []),
+1841:         "numeric_citation_repairs": list(result.get("numeric_citation_repairs") or []),
+1842:         "unbracketed_source_handle_repairs": list(result.get("unbracketed_source_handle_repairs") or []),
+1843:         "bibliography_title_citation_map": dict(result.get("bibliography_title_citation_map") or {}),
+1844:         "citation_number_map_origin": result.get("citation_number_map_origin") or "none",
+1845:         "citation_mapping_diagnostics": list(result.get("citation_mapping_diagnostics") or []),
+1846:         "known_tool_identifiers": list(result.get("known_tool_identifiers") or []),
+1847:         "non_source_identifier_citations": list(result.get("non_source_identifier_citations") or []),
+1848:         "issues": list(result.get("issues") or []),
+1849:         "call_error": result.get("call_error") or "",
+1850:         "estimate": dict(estimate),
+1851:         "usage": dict(result.get("usage") or {}),
+1852:         **{key: deepcopy(result[key]) for key in ("effective_request", "cap_pressure") if key in result},
+1853:         "finish_reason": result.get("finish_reason") or "",
+1854:         "complete": bool(result.get("complete", False)),
+1855:         "raw_response": result.get("raw_response") or "",
+1856:         "original_body_path": str(target / "ORIGINAL_BODY.md"),
+1857:         "fragment_path": str(target / "COMPLETION_FRAGMENT.md"),
+1858:         "completed_body_path": str(target / "COMPLETED_BODY.md"),
+1859:         "note": "定点补写结果；模型状态和 covered_task_ids 仅作诊断，未自动宣称质量通过。",
+1860:     }
+1861:     (target / "COMPLETION_RESULT.json").write_text(
+1862:         json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+1863:     return report
+# ORIGINAL SOURCE LINES 1866-1896
+1866: def unit_messages(
+1867:     view: UnitWritingView,
+1868:     *,
+1869:     prompt: str | None = None,
+1870:     language: str = "zh",
+1871:     payload: Mapping[str, Any] | None = None,
+1872:     planning_revision: bool = False,
+1873:     citation_number_map: Mapping[Any, Any] | None = None,
+1874: ) -> list[dict[str, str]]:
+1875:     body = (dict(payload) if payload is not None else
+1876:             unit_payload(view, language=language, planning_revision=planning_revision,
+1877:                          citation_number_map=citation_number_map))
+1878:     planning_revision = bool(planning_revision or body.get("planning_revision_mode"))
+1879:     if citation_number_map is not None:
+1880:         if planning_revision:
+1881:             body["planning_revision_mode"] = True
+1882:         body["citation_number_map"] = dict(citation_number_map)
+1883:         body["citation_number_map_origin"] = "caller_explicit"
+1884:     elif planning_revision and "citation_number_map" not in body:
+1885:         body["planning_revision_mode"] = True
+1886:         body["citation_number_map"] = _local_numeric_citation_map(_known_unit_handles(view))
+1887:         body["citation_number_map_origin"] = "generated_local_aliases"
+1888:     system = prompt if prompt is not None else load_writer_prompt(planning_revision=planning_revision)
+1889:     if planning_revision:
+1890:         system = _with_revision_output(system)
+1891:     if body.get("body_version", view.body_version) == "chapter_coherence":
+1892:         system += CHAPTER_COHERENCE_INSTRUCTIONS
+1893:     return [
+1894:         {"role": "system", "content": system},
+1895:         {"role": "user", "content": json.dumps(body, ensure_ascii=False, indent=2)},
+1896:     ]
+# ORIGINAL SOURCE LINES 2058-2170
+2058: def _author_json_envelope_contract(value: Any) -> bool:
+2059:     """Whether a parsed fenced object has the ordinary author envelope shape."""
+2060: 
+2061:     return (
+2062:         isinstance(value, Mapping)
+2063:         and isinstance(value.get("body_markdown"), str)
+2064:         and bool(value["body_markdown"].strip())
+2065:         and isinstance(value.get("issues"), list)
+2066:         # Completion and assessment envelopes have different contracts.  Do
+2067:         # not let their fields or unknown scientific metadata become eligible
+2068:         # for author-envelope recovery.
+2069:         and set(value).issubset({"body_markdown", "issues"})
+2070:     )
+2071: 
+2072: 
+2073: def _author_json_envelope_hash(value: Mapping[str, Any]) -> str:
+2074:     payload = json.dumps(value, ensure_ascii=False, sort_keys=True,
+2075:                          separators=(",", ":"))
+2076:     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+2077: 
+2078: 
+2079: _AUTHOR_JSON_OPENING_RE = re.compile(
+2080:     r"(?m)^[ \t]{0,3}(`{3,}|~{3,})json[ \t]*\r?\n"
+2081: )
+2082: 
+2083: 
+2084: def _author_json_opening_count(value: Any) -> int:
+2085:     """Count explicit JSON fences so rejected multi-envelope text cannot fall back."""
+2086: 
+2087:     if not isinstance(value, Mapping):
+2088:         return 0
+2089:     text = value.get("content")
+2090:     return len(_AUTHOR_JSON_OPENING_RE.findall(text)) if isinstance(text, str) else 0
+2091: 
+2092: 
+2093: def _recover_last_author_json_envelope(
+2094:     value: Any,
+2095: ) -> tuple[Mapping[str, Any] | None, dict[str, Any] | None]:
+2096:     """Recover a final self-revised author envelope, only under strict rules.
+2097: 
+2098:     Some providers return several complete `````json`` author envelopes while
+2099:     revising an answer.  The normal decoder intentionally rejects that mixed
+2100:     transport.  Recovery is limited to choosing the last complete envelope;
+2101:     it never joins or edits candidate bodies and never accepts trailing text.
+2102:     """
+2103: 
+2104:     if not isinstance(value, Mapping):
+2105:         return None, None
+2106:     text = value.get("content")
+2107:     if not isinstance(text, str) or not text.strip():
+2108:         return None, None
+2109: 
+2110:     blocks: list[dict[str, Any]] = []
+2111:     cursor = 0
+2112:     while True:
+2113:         match = _AUTHOR_JSON_OPENING_RE.search(text, cursor)
+2114:         if match is None:
+2115:             break
+2116:         marker = match.group(1)
+2117:         closing = re.compile(
+2118:             r"(?m)^[ \t]{0,3}" + re.escape(marker[0]) +
+2119:             r"{" + str(len(marker)) + r",}[ \t]*(?:\r?\n|$)"
+2120:         ).search(text, match.end())
+2121:         # An opening fence that cannot be closed makes the whole transport
+2122:         # ambiguous; do not recover an earlier block around it.
+2123:         if closing is None:
+2124:             return None, None
+2125:         inner = text[match.end():closing.start()].strip("\r\n")
+2126:         try:
+2127:             parsed = json.loads(inner)
+2128:         except (TypeError, ValueError):
+2129:             return None, None
+2130:         if not _author_json_envelope_contract(parsed):
+2131:             return None, None
+2132:         blocks.append({
+2133:             "value": parsed,
+2134:             "open_start": match.start(),
+2135:             "close_end": closing.end(),
+2136:         })
+2137:         cursor = closing.end()
+2138: 
+2139:     if len(blocks) < 2:
+2140:         return None, None
+2141:     # A final revision is only unambiguous when no prose or another partial
+2142:     # wrapper follows its closing fence.  Inter-envelope revision commentary
+2143:     # is allowed and is retained only in the raw response.
+2144:     if text[blocks[-1]["close_end"]:].strip():
+2145:         return None, None
+2146: 
+2147:     bodies = [str(block["value"]["body_markdown"]) for block in blocks]
+2148:     final = blocks[-1]["value"]
+2149:     if len(bodies[-1]) < max(len(body) for body in bodies[:-1]):
+2150:         return None, None
+2151:     prior_handles = set().union(*(set(citations_in(body)) for body in bodies[:-1]))
+2152:     final_handles = set(citations_in(bodies[-1]))
+2153:     if not prior_handles.issubset(final_handles):
+2154:         return None, None
+2155: 
+2156:     diagnostic = {
+2157:         "code": "author_multi_envelope_recovered",
+2158:         "candidate_count": len(blocks),
+2159:         "selected_index": len(blocks) - 1,
+2160:         "candidate_hashes": [_author_json_envelope_hash(block["value"]) for block in blocks],
+2161:         "candidate_body_lengths": [len(body) for body in bodies],
+2162:         "prior_source_handles": sorted(prior_handles),
+2163:         "selected_source_handles": sorted(final_handles),
+2164:         "selection_rule": "last_complete_author_json_fence_with_nonshorter_body_and_prior_handle_coverage",
+2165:         "raw_offsets": [
+2166:             {"open_start": block["open_start"], "close_end": block["close_end"]}
+2167:             for block in blocks
+2168:         ],
+2169:     }
+2170:     return final, diagnostic
+# ORIGINAL SOURCE LINES 2631-2725
+2631: 
+2632:     text = _strip_fences(value, json_envelope=True).strip()
+2633:     if not text or text[0] != "{" or text[-1] != "}":
+2634:         return None
+2635:     try:
+2636:         parsed = json.loads(text)
+2637:     except (TypeError, ValueError):
+2638:         try:
+2639:             # Some providers preserve literal newlines in the JSON string.
+2640:             # strict=False accepts those control characters without changing
+2641:             # the Markdown payload.
+2642:             parsed = json.loads(text, strict=False)
+2643:         except (TypeError, ValueError):
+2644:             # Models sometimes emit LaTeX such as \sim with a single JSON
+2645:             # backslash. Preserve that text literally without rewriting prose.
+2646:             if '"body_markdown"' not in text:
+2647:                 return None
+2648:             repaired = re.sub(
+2649:                 r'\\(?:["\\/bfnrt]|u[0-9a-fA-F]{4})|\\',
+2650:                 lambda match: "\\\\" if match.group(0) == "\\" else match.group(0),
+2651:                 text,
+2652:             )
+2653:             try:
+2654:                 parsed = json.loads(repaired, strict=False)
+2655:             except (TypeError, ValueError):
+2656:                 # Some provider responses quote the body as JSON but leave a
+2657:                 # literal quote in prose (for example ``"irAE"``). Recover
+2658:                 # only that body string and preserve any readable issues.
+2659:                 marker = '"body_markdown"'
+2660:                 marker_at = text.find(marker)
+2661:                 if marker_at < 0:
+2662:                     return None
+2663:                 value_at = text.find('"', text.find(":", marker_at) + 1)
+2664:                 if value_at < 0:
+2665:                     return None
+2666:                 suffixes = list(re.finditer(r'"\s*,\s*"issues"\s*:', text[value_at + 1:]))
+2667:                 if not suffixes:
+2668:                     return None
+2669:                 end_at = value_at + 1 + suffixes[-1].start()
+2670:                 fragment = text[value_at + 1:end_at]
+2671:                 encoded: list[str] = []
+2672:                 index = 0
+2673:                 while index < len(fragment):
+2674:                     char = fragment[index]
+2675:                     if char == "\\":
+2676:                         if index + 1 < len(fragment):
+2677:                             nxt = fragment[index + 1]
+2678:                             if nxt == "u" and index + 5 < len(fragment) and re.match(r"^[0-9a-fA-F]{4}$", fragment[index + 2:index + 6]):
+2679:                                 encoded.append(fragment[index:index + 6])
+2680:                                 index += 6
+2681:                                 continue
+2682:                             if nxt in '"\\/bfnrt':
+2683:                                 encoded.append(fragment[index:index + 2])
+2684:                                 index += 2
+2685:                                 continue
+2686:                         encoded.append("\\\\")
+2687:                         index += 1
+2688:                         continue
+2689:                     if char == '"':
+2690:                         encoded.append('\\"')
+2691:                     elif char == "\n":
+2692:                         encoded.append("\\n")
+2693:                     elif char == "\r":
+2694:                         encoded.append("\\r")
+2695:                     elif char == "\t":
+2696:                         encoded.append("\\t")
+2697:                     else:
+2698:                         encoded.append(char)
+2699:                     index += 1
+2700:                 try:
+2701:                     body = json.loads('"' + ''.join(encoded) + '"')
+2702:                 except (TypeError, ValueError):
+2703:                     return None
+2704: 
+2705:                 issues: Any = [{
+2706:                     "issue_id": "malformed_json_envelope",
+2707:                     "problem": "issues_field_unreadable",
+2708:                 }]
+2709:                 issues_at = text.find('"issues"', end_at)
+2710:                 if issues_at >= 0:
+2711:                     colon_at = text.find(":", issues_at)
+2712:                     closing_at = text.rfind("}")
+2713:                     if colon_at >= 0 and closing_at > colon_at:
+2714:                         raw_issues = text[colon_at + 1:closing_at].strip()
+2715:                         try:
+2716:                             parsed_issues = json.loads(raw_issues, strict=False)
+2717:                         except (TypeError, ValueError):
+2718:                             pass
+2719:                         else:
+2720:                             issues = parsed_issues if isinstance(parsed_issues, list) else [parsed_issues]
+2721:                 return {"body_markdown": body, "issues": issues}
+2722:     return parsed if isinstance(parsed, Mapping) else None
+2723: 
+2724: 
+2725: def parse_unit_body(response: Any) -> str:
+# ORIGINAL SOURCE LINES 2945-3080
+2945: def run_unit_writing(
+2946:     view: UnitWritingView,
+2947:     *,
+2948:     client: Any,
+2949:     model: str = DEFAULT_MODEL,
+2950:     prompt: str | None = None,
+2951:     language: str = "zh",
+2952:     payload: Mapping[str, Any] | None = None,
+2953:     raw_response_dir: str | Path | None = None,
+2954:     planning_revision: bool = False,
+2955:     citation_number_map: Mapping[Any, Any] | None = None,
+2956:     output_tokens: int | None = None,
+2957:     thinking_budget: int | None = None,
+2958:     thinking: bool | None = None,
+2959: ) -> dict[str, Any]:
+2960:     """One writing call, with the raw response kept on disk."""
+2961: 
+2962:     from .module4.runtime import invoke_client
+2963: 
+2964:     messages = unit_messages(
+2965:         view, prompt=prompt, language=language, payload=payload,
+2966:         planning_revision=planning_revision, citation_number_map=citation_number_map,
+2967:     )
+2968:     effective_payload: Mapping[str, Any] | None = payload
+2969:     try:
+2970:         decoded_payload = json.loads(messages[-1]["content"])
+2971:     except (TypeError, ValueError, KeyError, IndexError):
+2972:         decoded_payload = None
+2973:     if isinstance(decoded_payload, Mapping):
+2974:         effective_payload = decoded_payload
+2975:     partial_error = ""
+2976:     output_tokens = output_tokens if output_tokens is not None else getattr(client, "max_output_tokens", DEFAULT_OUTPUT_TOKENS)
+2977:     if thinking_budget is None:
+2978:         if thinking is True:
+2979:             # A non-thinking client exposes an effective zero but can retain
+2980:             # a nonzero allowance for explicit per-call re-enablement.
+2981:             thinking_budget = getattr(
+2982:                 client, "_configured_thinking_budget",
+2983:                 getattr(client, "thinking_budget", DEFAULT_THINKING_BUDGET),
+2984:             ) or DEFAULT_THINKING_BUDGET
+2985:         else:
+2986:             thinking_budget = getattr(client, "thinking_budget", DEFAULT_THINKING_BUDGET)
+2987:         if thinking is None:
+2988:             thinking = getattr(client, "thinking", bool(thinking_budget))
+2989:     enabled = bool(thinking_budget) if thinking is None else bool(thinking)
+2990:     assert_input_capacity(
+2991:         messages, client=client, model=model, output_tokens=output_tokens,
+2992:         thinking_budget=thinking_budget if enabled else 0, error_type=UnitWritingError)
+2993:     try:
+2994:         response = invoke_client(
+2995:             client, messages, model=model, max_output_tokens=output_tokens,
+2996:             thinking=enabled, thinking_budget=thinking_budget if enabled else 0,
+2997:         )
+2998:     except Exception as exc:
+2999:         # The direct Qwen client records a ``length`` response before raising
+3000:         # its transport error.  Keep that usable Markdown for continuation,
+3001:         # while exposing the incomplete finish reason to the caller.
+3002:         record = getattr(exc, "record", None)
+3003:         if not isinstance(record, Mapping) or not isinstance(record.get("content"), str):
+3004:             raise
+3005:         if not record.get("content", "").strip():
+3006:             raise
+3007:         response = dict(record)
+3008:         partial_error = type(exc).__name__ + ":" + str(exc)
+3009:     raw_path = ""
+3010:     if raw_response_dir is not None:
+3011:         directory = Path(raw_response_dir)
+3012:         directory.mkdir(parents=True, exist_ok=True)
+3013:         stamp = time.strftime("%Y%m%dT%H%M%S")
+3014:         raw_path = str(directory / (portable_component(f"{view.chapter_id}_{view.unit_id}_{stamp}") + ".raw"))
+3015:         Path(raw_path).write_text(json.dumps(response, ensure_ascii=False, indent=2, default=str),
+3016:                                   encoding="utf-8")
+3017:     # Keep the provider response and raw artifact untouched.  Only the author
+3018:     # body consumer gets a mechanically recovered final envelope, and only
+3019:     # when the strict multi-envelope contract above is satisfied.
+3020:     body_response = response
+3021:     envelope_recovery = None
+3022:     recovered_envelope, envelope_recovery = _recover_last_author_json_envelope(response)
+3023:     if recovered_envelope is None and _author_json_opening_count(response) >= 2:
+3024:         # Do not let the legacy permissive decoder turn a rejected sequence of
+3025:         # author envelopes (trailing prose, an open fence, an assessment
+3026:         # contract, or lost source handles) into downstream body text.
+3027:         raise UnitWritingError("ambiguous_multi_author_json_envelope")
+3028:     if recovered_envelope is not None and isinstance(response, Mapping):
+3029:         body_response = dict(response)
+3030:         body_response["content"] = json.dumps(recovered_envelope, ensure_ascii=False)
+3031:     body, normalization = _consume_unit_output(body_response)
+3032:     if envelope_recovery is not None:
+3033:         normalization = [*normalization, envelope_recovery]
+3034:     # The caller's payload is trusted task context; never read a mapping out of
+3035:     # the model response. No implicit positional/P-number-suffix conversion.
+3036:     map_origin = "caller_explicit" if citation_number_map is not None else str(
+3037:         effective_payload.get("citation_number_map_origin") or "") if effective_payload else ""
+3038:     explicit_map = citation_number_map
+3039:     if explicit_map is None and effective_payload is not None:
+3040:         candidate = effective_payload.get("citation_number_map")
+3041:         explicit_map = candidate if isinstance(candidate, Mapping) else None
+3042:     if explicit_map is not None and not map_origin:
+3043:         map_origin = "caller_explicit"
+3044:     mapping_diagnostics: list[dict[str, Any]] = []
+3045:     effective_map, title_map = _effective_numeric_citation_map(
+3046:         body, view.materials, explicit_map,
+3047:         origin=map_origin, planning_revision=planning_revision, diagnostics=mapping_diagnostics,
+3048:     )
+3049:     known_handles = _known_unit_handles(view)
+3050:     body, repairs = _repair_numeric_citations(body, effective_map, known_handles)
+3051:     body, handle_repairs = _repair_unbracketed_source_handles(body, known_handles)
+3052:     for repair in repairs:
+3053:         repair["mapping_origin"] = ("bibliography_exact_title" if map_origin == "generated_local_aliases"
+3054:                                     or explicit_map is None else "caller_explicit")
+3055:     diagnostics = _output_diagnostics(body, known_handles, _known_tool_identifiers(effective_payload))
+3056:     diagnostics["citation_mapping_diagnostics"] = mapping_diagnostics
+3057:     diagnostics["citation_problems"].extend(mapping_diagnostics)
+3058:     consumption = _table_consumption_report(body, bool(view.table_tasks))
+3059:     issues = _response_issues(body_response)
+3060:     issues.extend(item for item in normalization if item.get("code") == "table_markdown_missing_or_invalid")
+3061:     issues.extend(item for item in consumption["issues"] if item not in issues)
+3062:     return {
+3063:         "body_markdown": body,
+3064:         **diagnostics,
+3065:         **{key: value for key, value in consumption.items() if key != "issues"},
+3066:         "output_normalization": normalization,
+3067:         "numeric_citation_repairs": repairs,
+3068:         "unbracketed_source_handle_repairs": handle_repairs,
+3069:         "bibliography_title_citation_map": title_map,
+3070:         "citation_number_map_origin": map_origin or "none",
+3071:         "messages": messages,
+3072:         "usage": dict(response.get("usage") or {}),
+3073:         **{key: deepcopy(response[key]) for key in ("effective_request", "cap_pressure") if key in response},
+3074:         "finish_reason": response.get("finish_reason") or "",
+3075:         "complete": bool(response.get("complete", not partial_error)),
+3076:         "partial_error": partial_error,
+3077:         "model": response.get("model") or model,
+3078:         "raw_response": raw_path,
+3079:         "issues": issues,
+3080:     }

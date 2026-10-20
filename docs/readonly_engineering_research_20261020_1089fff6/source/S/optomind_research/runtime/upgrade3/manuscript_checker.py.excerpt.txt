@@ -1,0 +1,119 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 a2dfc50f861b422ffa0900bc1cda3d6264cdbc583c62f3667cb8e1cfc70b89bd
+
+# ORIGINAL SOURCE LINES 610-723
+610:         if enabled:
+611:             for number in range(1, max_model_rounds + 1):
+612:                 messages = first_messages if number == 1 else build_checker_messages(
+613:                     draft_text=current, identity_catalogs=identity_catalogs, material_records=material_records,
+614:                     figure_assets=figure_assets, chapter_roles=chapter_roles, language=language,
+615:                     round_number=number, feedback=feedback)
+616:                 step = output / f"round_{number}"
+617:                 step.mkdir(exist_ok=True)
+618:                 raw_path, request_path = step / "RAW_RESPONSE.json", step / "REQUEST.json"
+619:                 raw = None
+620:                 calls, state = 0, "missing_response_source"
+621:                 if fixture_responses is not None or recordings is not None:
+622:                     request = {"messages_sha256": _hash(messages), "profile": effective}
+623:                     if request_path.exists() and _read(request_path) != request:
+624:                         raise ManuscriptCheckerError("round_request_identity_changed")
+625:                     if raw_path.exists() and not request_path.exists():
+626:                         raise ManuscriptCheckerError("raw_without_request_identity")
+627:                     _write(request_path, request)
+628:                     _write(step / "MESSAGES.json", messages)
+629:                     if raw_path.exists():
+630:                         raw, state = _read(raw_path), "cache_hit"
+631:                     else:
+632:                         raw = fixture_responses(json.loads(messages[1]["content"]), number) if callable(fixture_responses) else _fixture_for(fixture_responses if fixture_responses is not None else recordings, number)
+633:                         if raw is not None:
+634:                             _write(raw_path, raw)
+635:                             state = "fixture" if fixture_responses is not None else "recording"
+636:                 else:
+637:                     from .unit_realization import _cached_call
+638:                     if raw_path.exists() and not request_path.exists():
+639:                         raise ManuscriptCheckerError("raw_without_request_identity")
+640:                     if client_factory is not None or request_path.exists() or raw_path.exists():
+641:                         raw, calls, state = _cached_call(step, messages, effective, client_factory,
+642:                             bool(run and client_factory is not None), token_counter, retry_failed=retry_failed)
+643:                     else:
+644:                         _write(step / "MESSAGES.json", messages)
+645:                 report["provider_calls"] += calls
+646:                 report["model_calls"] += calls
+647:                 execution_mode = (raw.get("execution_mode") if isinstance(raw, Mapping) else None) or getattr(client_factory, "execution_mode", "unverified")
+648:                 report["execution_mode"] = identity["response_source"] if identity["response_source"] != "provider" else execution_mode
+649:                 report["external_requests"] += calls if execution_mode not in {"fixture", "recording", "injected"} else 0
+650:                 report["rounds"].append({"round": number, "state": state, "response_path": str(raw_path),
+651:                     "input_sha256": sha256_text(current), "messages_path": str(step / "MESSAGES.json")})
+652:                 if raw is None:
+653:                     report["preview_messages_path"] = str(step / "MESSAGES.json")
+654:                     report["diagnostics"].append({"code": state, "round": number})
+655:                     report["pending"] = pending
+656:                     if completed_response:
+657:                         report["selected_manuscript"] = current_selection()
+658:                     _write(report_path, report)
+659:                     return report
+660:                 report["logical_rounds"] = number
+661:                 if identity["response_source"] == "provider" and (not isinstance(raw, Mapping)
+662:                         or raw.get("complete") is not True or raw.get("finish_reason") != "stop"):
+663:                     report["diagnostics"].append({"code": "incomplete_provider_response", "round": number})
+664:                     report["pending"] = pending
+665:                     if completed_response:
+666:                         report["selected_manuscript"] = current_selection()
+667:                     _write(report_path, report)
+668:                     return report
+669:                 previous = current
+670:                 decode_audit = []
+671:                 try:
+672:                     returned_model = (raw.get("returned_model") or raw.get("model")) if isinstance(raw, Mapping) else None
+673:                     if returned_model and returned_model != effective["model"]:
+674:                         raise ManuscriptCheckerError("returned_model_mismatch")
+675:                     # A malformed root response gets one bounded format repair;
+676:                     # no proposal IDs existed yet, so the repair may submit its
+677:                     # original intended changes, not a new discovery pass.
+678:                     format_repair = number > 1 and pending and all(p["code"].startswith("response:") for p in pending)
+679:                     result = execute_checker_response(draft_text=current, response=raw,
+680:                         identity_catalogs=identity_catalogs, material_records=material_records,
+681:                         pending_ids=[p["edit_id"] for p in pending],
+682:                         pending_bindings={f["edit_id"]: f.get("allowed_current_block_ids", [])
+683:                                           for f in (feedback or {}).get("failures", [])} if number > 1 and not format_repair else None,
+684:                         round_number=1 if format_repair else number, decode_audit=decode_audit)
+685:                     completed_response = True
+686:                     current = result["draft_text"]
+687:                     pending = result["pending"]
+688:                     report["applied"].extend(result["applied"])
+689:                     report["unresolved_questions"].extend(result["unresolved_questions"])
+690:                     if result["applied"]:
+691:                         selected_path = step / "CANDIDATE_HANDLES.md"
+692:                         _write_bytes(selected_path, current.encode("utf-8"))
+693:                     recovery_path = _write_format_recovery(step, raw_path, decode_audit)
+694:                     receipt = {**result, "draft_text": None,
+695:                         "input_sha256": sha256_text(previous), "output_sha256": sha256_text(current),
+696:                         "selected_path": str(selected_path)}
+697:                     if recovery_path is not None:
+698:                         receipt["format_recovery_path"] = str(recovery_path)
+699:                     _write(step / "EXECUTION_RECEIPT.json", receipt)
+700:                     feedback = _repair_feedback(previous, current, pending, result["applied"])
+701:                 except (ManuscriptCheckerError, RevisionContractError) as exc:
+702:                     _write_format_recovery(step, raw_path, decode_audit)
+703:                     if number > 1 and pending:
+704:                         report["diagnostics"].append({"code": "repair_response_invalid", "error": str(exc)})
+705:                     else:
+706:                         pending = [{"edit_id": "RESPONSE", "code": "response:" + str(exc), "proposal": {}}]
+707:                     feedback = {"format_repair": True, "pending_edit_ids": [], "failures": pending,
+708:                         "invalid_response": _format_repair_response(raw),
+709:                         "instruction": "Repair the original response format or snapshot binding only. Copy the actual snapshot. Do not discover a new set of issues."}
+710:                     _write(step / "RESPONSE_ERROR.json", {"error": str(exc)})
+711:                 _write(step / "FEEDBACK.json", feedback)
+712:                 if not pending:
+713:                     break
+714:         report["pending"] = pending
+715:         if source.read_bytes() != original_bytes:
+716:             raise ManuscriptCheckerError("source_changed_during_checker")
+717:         if selected_path.read_bytes() != current.encode("utf-8"):
+718:             raise ManuscriptCheckerError("selected_manuscript_integrity_failure")
+719:         if enabled and not completed_response:
+720:             report["diagnostics"].append({"code": "no_valid_complete_response"})
+721:             _write(report_path, report)
+722:             return report
+723:         report["status"] = "disabled" if not enabled else "complete_with_diagnostics" if pending or report["unresolved_questions"] else "edited" if report["applied"] else "no_change"

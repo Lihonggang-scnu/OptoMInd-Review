@@ -1,0 +1,42 @@
+{
+  "reviewer": "root",
+  "at": "2026-10-17T04:38:53.476843+00:00",
+  "findings": [
+    {
+      "source_handle": "P0123",
+      "material_available": "fulltext_snapshot_and_card_present",
+      "failure": "local_formula_enhancement_failed_before_reader_admission",
+      "formula_cache": "N\\stages\\07_progressive_review_plan_min600_handoff\\local_formula_cache\\a4c2f63d1a7fc98c225083bc1e6c7b5b0d1fa1a072dbd667a8377b51e6452308",
+      "logs": [
+        {
+          "path": "N\\stages\\07_progressive_review_plan_min600_handoff\\local_formula_cache\\a4c2f63d1a7fc98c225083bc1e6c7b5b0d1fa1a072dbd667a8377b51e6452308\\selection-ad1c1870ce39c408\\results\\stderr.log",
+          "oom_lines": [
+            "Error processing code/formula batch: CUDA out of memory. Tried to allocate 900.00 MiB. GPU 0 has a total capacity of 10.00 GiB of which 4.37 GiB is free. 5.10 GiB allowed; Of the allocated memory 3.40 GiB is allocated by PyTorch, and 1.07 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)"
+          ]
+        }
+      ],
+      "reader_paid_call": false
+    },
+    {
+      "source_handle": "P0480",
+      "material_available": "fulltext_snapshot_and_card_present",
+      "failure": "local_formula_enhancement_failed_before_reader_admission",
+      "formula_cache": "N\\stages\\07_progressive_review_plan_min600_handoff\\local_formula_cache\\159a8bdfbdaebec05d37a60c9f6f2b36a974e1e2e67fcead95e30177bad762a5",
+      "logs": [
+        {
+          "path": "N\\stages\\07_progressive_review_plan_min600_handoff\\local_formula_cache\\159a8bdfbdaebec05d37a60c9f6f2b36a974e1e2e67fcead95e30177bad762a5\\selection-6a33a33260840b47\\results\\stderr.log",
+          "oom_lines": [
+            "Error processing code/formula batch: CUDA out of memory. Tried to allocate 2.44 GiB. GPU 0 has a total capacity of 10.00 GiB of which 5.26 GiB is free. 5.10 GiB allowed; Of the allocated memory 3.57 GiB is allocated by PyTorch, and 23.14 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)"
+          ]
+        }
+      ],
+      "reader_paid_call": false
+    }
+  ],
+  "physical_gpu": "RTX3080 10240MiB",
+  "current_gpu_ceiling_mib": 8192,
+  "failure_allocator_allowed_gib": 5.1,
+  "root_repair_decision": "Preserve model, images, memory ceiling and successful source; use bounded smaller element batches on actual OOM. No text fallback masquerading as enhanced formulas.",
+  "delegated_investigator": "planning548_tools_even",
+  "verification": "Root read both original stderr OOM lines; delegated code and snapshot trace establishes pre-admission rejection."
+}

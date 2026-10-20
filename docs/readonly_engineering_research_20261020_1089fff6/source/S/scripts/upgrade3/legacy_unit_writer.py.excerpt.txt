@@ -1,0 +1,71 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 82ee205ba2c5890cb84ff4bd68b8c361b81f8da9bda1087e7ada21955c0264cb
+
+# ORIGINAL SOURCE LINES 1-31
+1: """Current complete BODY materials -> legacy unit writer -> existing assembly.
+2: 
+3: Default preview is offline and saves every exact request. --run explicitly
+4: uses a dedicated persistent CNY ledger. --retry-failed authorizes a new charged
+5: attempt; otherwise interrupted, uncertain and incomplete attempts stay pending.
+6: No GUIDE conversion, historic manuscript import, automatic model switch, or
+7: previous-body prefix is used by this route.
+8: """
+9: from __future__ import annotations
+10: 
+11: from contextlib import closing
+12: import argparse
+13: import hashlib
+14: import json
+15: import math
+16: import sqlite3
+17: from pathlib import Path
+18: import sys
+19: 
+20: PROJECT_ROOT = Path(__file__).resolve().parents[2]
+21: if str(PROJECT_ROOT) not in sys.path:
+22:     sys.path.insert(0, str(PROJECT_ROOT))
+23: 
+24: from optomind_research.runtime.upgrade3.legacy_unit_route import run_legacy_units, _hash, _read, _write
+25: from optomind_research.runtime.upgrade3.review_unit_writer import BODY_VERSIONS
+26: from scripts.upgrade3.writer_candidates import make_live_factory, tokenizer_counter
+27: 
+28: 
+29: def add_arguments(p: argparse.ArgumentParser, *, include_io: bool = True) -> argparse.ArgumentParser:
+30:     """Use the same author/quality/budget flags in standalone and normal CLI."""
+31:     if include_io:
+# ORIGINAL SOURCE LINES 311-344
+311: def run_from_args(args, *, delivery_config_path=None, body_manifest_path=None) -> dict:
+312:     """Build the owned existing factory once, then run the common delivery API."""
+313:     if args.key_index is not None and (args.key_index < 1 or not args.key_file):
+314:         raise ValueError("--key-index is 1-based and requires --key-file")
+315:     if not args.account_ledger and (args.account_budget_limit is not None or args.account_mapping_dir):
+316:         raise ValueError("account options require --account-ledger")
+317:     if args.reparse_saved and not args.quality_control:
+318:         raise ValueError("--reparse-saved requires --quality-control")
+319:     if (not args.input and not body_manifest_path) or not args.output_dir:
+320:         raise ValueError("--input and --output-dir are required for preview/run/resume")
+321:     if args.input and body_manifest_path:
+322:         raise ValueError("body_input_and_manifest_are_alternative_sources")
+323:     if args.reconcile_receipt:
+324:         raise ValueError("use the standalone ledger reconciliation command")
+325:     prepared = None
+326:     if body_manifest_path:
+327:         from scripts.upgrade3.fullbody_writer import load_body_manifest
+328:         book, prepared = load_body_manifest(body_manifest_path)
+329:     else:
+330:         book = _read(Path(args.input).expanduser().resolve())
+331:     counter, tokenizer = tokenizer_counter(args.tokenizer)
+332:     # The existing live factory remains lazy: cached/preflight requests do not
+333:     # read credentials, and all physical calls share its project/account ledger.
+334:     factory = _dedicated_factory(args, book, counter) if args.run else None
+335:     from optomind_research.runtime.upgrade3.review_delivery import run_review_delivery
+336:     report = run_review_delivery(start="body", out_dir=args.output_dir, body_input=book,
+337:         body_options={"model": args.model, "output_tokens": args.output_tokens,
+338:             "thinking_budget": args.thinking_budget, "budget_limit": args.budget_limit,
+339:             "run": args.run, "retry_failed": args.retry_failed, "client_factory": factory,
+340:             "token_counter": counter, "quality_control": args.quality_control,
+341:             "only_units": args.only_unit, "article_edit": args.article_edit,
+342:             "reparse_saved": args.reparse_saved, "body_version": args.body_version,
+343:             "author_candidate_manifest": args.author_candidate_manifest},
+344:         config_path=delivery_config_path)

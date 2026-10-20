@@ -1,0 +1,237 @@
+# Commit f4461637c495ade3f35b6dc361066222760b2e39
+# Original SHA256 ae26173919babd851675001c53e136f28a2c590689da4217ee0d81f6bbf10b10
+354: def _stage_attempts(step):
+355:     return [step, *sorted((step / "retries").glob("attempt_*"))]
+356: 
+357: 
+358: def _has_replay_content(raw):
+359:     if isinstance(raw, Mapping):
+360:         return any(isinstance(raw.get(key), str) and raw[key].strip()
+361:                    for key in ("content", "body_markdown", "table_markdown"))
+362:     return isinstance(raw, str) and bool(raw.strip())
+363: 
+364: 
+365: def _retryable_failure(attempt):
+366:     """A recorded stopped exception without replayable output; never infer fees."""
+367:     if not (attempt / "REQUEST.json").is_file() or list((attempt / "transport").glob("*.sse.*")):
+368:         return False
+369:     raw_path = attempt / "RAW_RESPONSE.json"
+370:     if raw_path.is_file() and _has_replay_content(_read(raw_path)):
+371:         return False
+372:     errors = [_read(attempt / name) for name in ("ERROR.json", "STAGE_ERROR.json") if (attempt / name).is_file()]
+373:     if any(isinstance(error, Mapping) and _has_replay_content(error.get("record")) for error in errors):
+374:         return False
+375:     return any(isinstance(error, Mapping) and isinstance(error.get("error"), str)
+376:                and error["error"].strip() for error in errors)
+377: 
+378: 
+379: def _cached_call(step, messages, profile, client_factory, run, token_counter, execute=None,
+380:                  retry_failed=False, attempt_log=None):
+381:     from .legacy_unit_route import _CaptureClient
+382:     step.mkdir(parents=True, exist_ok=True)
+383:     request = {"profile": profile, "messages_sha256": _hash(messages)}
+384:     attempts = _stage_attempts(step)
+385:     if any((attempt / "REQUEST.json").exists() and _read(attempt / "REQUEST.json") != request for attempt in attempts):
+386:         raise CandidateError("quality_cached_request_identity_changed")
+387:     active, raw = attempts[-1], None
+388:     for attempt in reversed(attempts):
+389:         request_path = attempt / "REQUEST.json"
+390:         raw_path = attempt / "RAW_RESPONSE.json"
+391:         if not raw_path.exists() and request_path.exists():
+392:             streams = sorted((attempt / "transport").glob("*.sse.*"))
+393:             if len(streams) == 1:
+394:                 _write(raw_path, recover_qwen_stream(streams[0]))
+395:         candidate = _read(raw_path) if raw_path.exists() else None
+396:         if _has_replay_content(candidate):
+397:             active, raw = attempt, candidate
+398:             break
+399:         if attempt == active:
+400:             raw = candidate
+401:     estimate = writer.estimate_unit_cost(messages, model=profile["model"],
+402:         output_tokens=profile["max_output_tokens"], thinking_budget=profile["thinking_budget"],
+403:         token_counter=token_counter)
+404:     new_retry = bool(run and retry_failed and not _has_replay_content(raw)
+405:                      and _retryable_failure(active) and not estimate["input_capacity"]["exceeds_capacity"])
+406:     if new_retry:
+407:         indices = [int(path.name.split("_")[-1]) for path in attempts[1:]]
+408:         active = step / "retries" / f"attempt_{max([1, *indices]) + 1:03d}"
+409:         active.mkdir(parents=True, exist_ok=False)
+410:         raw = None
+411:     request_path, raw_path = active / "REQUEST.json", active / "RAW_RESPONSE.json"
+412:     existed = (request_path.exists() or (active != step and not new_retry)
+413:                or (active / "ERROR.json").exists() or (active / "STAGE_ERROR.json").exists())
+414:     for name, value in (("MESSAGES.json", messages), ("PROFILE.json", profile), ("ESTIMATE.json", estimate)):
+415:         if not (active / name).exists():
+416:             _write(active / name, value)
+417:     call_id = _hash(request)[:16] + "-" + step.name + ("-retry-" + active.name if active != step else "")
+418:     audit = {"step": step.name, "attempt_dir": str(active), "call_id": call_id, "new_retry": new_retry}
+419:     if attempt_log is not None:
+420:         attempt_log.append(audit)
+421:     if raw is None and (existed or not run or estimate["input_capacity"]["exceeds_capacity"]):
+422:         state = "pending_existing_attempt" if existed else "capacity_blocked" if estimate["input_capacity"]["exceeds_capacity"] else "planned"
+423:         audit["state"] = state
+424:         return None, 0, state
+425:     calls = 0
+426:     if raw is None:
+427:         _write(request_path, request)  # Persist before factory/key/provider access.
+428:         capture = None
+429:         try:
+430:             client = client_factory(step.name, active, deepcopy(profile))
+431:             if getattr(client, "max_retries", 0) != 0:
+432:                 raise CandidateError("quality_automatic_paid_retries_forbidden")
+433:             capture = _CaptureClient(client, active, call_id)
+434:             if execute is None:
+435:                 raw = invoke_client(capture, messages, model=profile["model"],
+436:                     max_output_tokens=profile["max_output_tokens"], thinking=profile["thinking"],
+437:                     thinking_budget=profile["thinking_budget"])
+438:                 value = raw
+439:             else:
+440:                 value = execute(capture, active)
+441:                 raw = _read(raw_path) if raw_path.exists() else None
+442:         except Exception as exc:
+443:             _write(active / "STAGE_ERROR.json", {"error": type(exc).__name__ + ":" + str(exc)})
+444:             audit["state"] = "failed_saved_attempt"
+445:             return None, capture.invocations if capture is not None else 0, "failed_saved_attempt"
+446:         calls = capture.invocations
+447:     else:
+448:         if execute is None:
+449:             value = raw
+450:         else:
+451:             def replay(messages, **kwargs):
+452:                 return deepcopy(raw)
+453:             replay.prompt_token_counter = token_counter
+454:             value = execute(replay, active)
+455:     audit["state"] = "returned" if calls else "cache_hit"
+456:     return value, calls, audit["state"]
+457: 
+458: 
+459: def run_unit_quality(view, *, payload, existing_body, output_dir, client_factory=None,
+460:                      run=False, token_counter=None, language="zh", writer_profile=None,
+461:                      experiment_label="production_actual_body", reparse_saved=False, retry_failed=False):
+462:     """Callable production quality stage, also usable for labeled repair studies."""
+463:     from .legacy_unit_route import _profile
+464:     author = writer_profile or _profile("qwen3.5-plus", 32768, 8192)
+465:     reviewer = _profile("qwen3.5-plus", 24576, 16384)
+466:     identity = {"schema_version": SCHEMA, "payload_sha256": _hash(payload),
+467:                 "original_body_sha256": _hash(existing_body), "author_profile": author,
+468:                 "reviewer_profile": reviewer, "prompt_sha256": _hash(load_assessment_prompt(view.body_version)),
+469:                 "completion_prompt_sha256": _hash(writer.load_writer_prompt(planning_revision=True)
+470:                                                   + writer._COMPLETION_INSTRUCTIONS),
+471:                 "experiment_label": experiment_label}
+472:     if view.body_version != "baseline":
+473:         identity.update(body_version=view.body_version,
+474:             completion_prompt_sha256=_hash(writer.load_writer_prompt(planning_revision=True)
+475:                 + writer._COMPLETION_INSTRUCTIONS + writer.CHAPTER_COHERENCE_INSTRUCTIONS
+476:                 + writer.SUBSTANTIVE_COMPLETION_INSTRUCTIONS))
+477:     target = Path(output_dir).resolve() / _hash(identity)
+478:     result_path = target / "QUALITY_RESULT.json"
+479:     seal_path = target / "RESULT_SEAL.json"
+480:     prior_snapshot = None
+481:     retry_recovery = bool(run and retry_failed and any(
+482:         _retryable_failure(_stage_attempts(target / name)[-1])
+483:         for name in ("assessment", "completion", "post_assessment")))
+484:     if result_path.exists() and seal_path.exists():
+485:         saved = _read(result_path)
+486:         body_path = target / "QUALITY_BODY.md"
+487:         if (_read(seal_path).get("result_sha256") != _hash(saved) or not body_path.exists()
+488:                 or _read(seal_path).get("body_sha256") != hashlib.sha256(body_path.read_bytes()).hexdigest()):
+489:             raise CandidateError("quality_cached_result_integrity_failure")
+490:         # Free RAW reparse never dispatches an attempted stage again. Only an
+491:         # explicit run+retry may reopen a recorded no-output failure.
+492:         if not reparse_saved and not retry_recovery and (saved["status"] != "planned" or not run):
+493:             return {**saved, "model_calls": 0, "cache_hit": True}
+494:         if reparse_saved or retry_recovery:
+495:             history = target / "reparse_history" / _hash(saved)
+496:             # Keep the exact prior summary, seal, body and parsed diagnostics.
+497:             # Saved RAW and request identities remain in their original steps.
+498:             for relative in ("QUALITY_RESULT.json", "RESULT_SEAL.json", "QUALITY_BODY.md",
+499:                              "assessment/ASSESSMENT.json", "post_assessment/ASSESSMENT.json", "completion/COMPLETION_RESULT.json"):
+500:                 source = target / relative
+501:                 if source.is_file():
+502:                     destination = history / relative
+503:                     destination.parent.mkdir(parents=True, exist_ok=True)
+504:                     original = source.read_bytes()
+505:                     if destination.exists() and destination.read_bytes() != original:
+506:                         raise CandidateError("quality_reparse_history_integrity_failure")
+507:                     if not destination.exists():
+508:                         destination.write_bytes(original)
+509:             prior_snapshot = {"prior_result_sha256": _hash(saved), "history_dir": str(history)}
+510:     target.mkdir(parents=True, exist_ok=True)
+511:     _write(target / "IDENTITY.json", identity)
+512:     _write(target / "ORIGINAL_PAYLOAD.json", payload)
+513:     (target / "ORIGINAL_BODY.md").write_bytes(existing_body.encode("utf-8"))
+514:     summary = {"schema_version": SCHEMA, "identity": identity, "output_dir": str(target),
+515:                "body_markdown": existing_body, "model_calls": 0, "cache_hit": False,
+516:                "status": "planned", "pending_problems": [], "assessments": [],
+517:                "changed": False, "scientific_acceptance": False, "applied_edits": [], "stage_attempts": []}
+518:     if prior_snapshot:
+519:         summary["reparse_saved"] = prior_snapshot
+520:     waiting_to_run = False
+521:     retry_remaining = bool(run and retry_failed)
+522: 
+523:     def assess(body, name):
+524:         nonlocal waiting_to_run, retry_remaining
+525:         messages = assessment_messages(view, payload, body)
+526:         raw, calls, state = _cached_call(target / name, messages, reviewer, client_factory, run, token_counter,
+527:             retry_failed=retry_remaining, attempt_log=summary["stage_attempts"])
+528:         retry_remaining = retry_remaining and not summary["stage_attempts"][-1]["new_retry"]
+529:         summary["model_calls"] += calls
+530:         if raw is None:
+531:             waiting_to_run = waiting_to_run or state == "planned"
+532:             summary["status"] = "planned" if state == "planned" else "pending"
+533:             summary["pending_problems"].append({"code": "quality_assessment_" + state, "step": name})
+534:             return None
+535:         assessment = validate_assessment(raw, messages, view, body)
+536:         _write(Path(summary["stage_attempts"][-1]["attempt_dir"]) / "ASSESSMENT.json", assessment)
+537:         summary["assessments"].append({"step": name, "report": assessment})
+538:         return assessment
+539: 
+540:     try:
+541:         assessment = assess(existing_body, "assessment")
+542:         if assessment is not None:
+543:             body = existing_body
+544:             candidate_base = None
+545:             if assessment["changes"]:
+546:                 try:
+547:                     body, summary["applied_edits"] = apply_evidence_edits(body, assessment["changes"], view)
+548:                 except Exception as exc:
+549:                     summary["pending_problems"].append({"code": "quality_edit_rejected", "error": str(exc)})
+550:             requested = [row["task_id"] for row in assessment["tasks"] if _effective_task_status(row) in {"partial", "missing"}]
+551:             if requested:
+552:                 # Parser-added span diagnostics must not change a saved
+553:                 # completion request's original model-feedback identity.
+554:                 feedback = [{key: deepcopy(value) for key, value in row.items()
+555:                              if key not in {"body_quote_spans", "body_quote_match", "body_quote_verified",
+556:                                             "body_quote_error", "effective_status"}}
+557:                             for row in assessment["tasks"] if row["task_id"] in requested]
+558:                 messages = writer.completion_messages(view, body, requested, language=language,
+559:                                                       planning_revision=True, gap_feedback=feedback)
+560:                 def complete(client, active_step):
+561:                     return writer.run_unit_completion(view, existing_body=body, task_ids=requested,
+562:                         client=client, model=author["model"], language=language, planning_revision=True,
+563:                         output_tokens=author["max_output_tokens"], thinking_budget=author["thinking_budget"],
+564:                         thinking=author["thinking"], raw_response_dir=active_step / "raw",
+565:                         gap_feedback=feedback)
+566:                 result, calls, state = _cached_call(target / "completion", messages, author, client_factory,
+567:                                                    run, token_counter, execute=complete, retry_failed=retry_remaining,
+568:                                                    attempt_log=summary["stage_attempts"])
+569:                 retry_remaining = retry_remaining and not summary["stage_attempts"][-1]["new_retry"]
+570:                 summary["model_calls"] += calls
+571:                 if result is not None:
+572:                     estimate = _read(Path(summary["stage_attempts"][-1]["attempt_dir"]) / "ESTIMATE.json")
+573:                     report = writer.write_unit_completion(view, result,
+574:                         Path(summary["stage_attempts"][-1]["attempt_dir"]), estimate=estimate, language=language)
+575:                     summary["completion"] = report
+576:                     if not result["pending"]:
+577:                         body = result["body_markdown"]
+578:                     elif result.get("candidate_eligible"):
+579:                         candidate_base, body = body, result["candidate_body_markdown"]
+580:                         summary["completion_candidate"] = {"status": "awaiting_post_assessment",
+581:                             "body_path": report["candidate_body_path"], "parsed_via": report["parsed_via"],
+582:                             "body_sha256": hashlib.sha256(body.encode("utf-8")).hexdigest(),
+583:                             "model_status_present": report["model_status_present"],
+584:                             "scientific_acceptance": False}
+585:                         summary["pending_problems"].append({"code": "quality_completion_candidate_metadata_missing",
+586:                             "issues": result["issues"], "note": "Candidate requires the existing post-assessment; no coverage inferred."})
+587:                     else:
+588:                         summary["pending_problems"].append({"code": "quality_completion_pending", "issues": result["issues"]})

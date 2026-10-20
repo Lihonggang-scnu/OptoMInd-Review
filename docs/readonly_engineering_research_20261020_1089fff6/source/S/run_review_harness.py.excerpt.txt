@@ -1,0 +1,35 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 777ddbbdf18607ea7b13c3f739ffc41e9ed5de8d71bb2e89bdf4134b4b8e4bd3
+
+# ORIGINAL SOURCE LINES 1570-1599
+1570: def _main_with_args(args: argparse.Namespace) -> int:
+1571:     _normalize_budget_arguments(args)
+1572:     if getattr(args, "delivery_start", None):
+1573:         # Explicit delivery branch: split away before the research harness
+1574:         # (no orchestrator, retrieval, planner, or model client is built).
+1575:         from optomind_research.runtime.upgrade3.review_delivery import (
+1576:             run_review_delivery,
+1577:         )
+1578: 
+1579:         if args.delivery_start == "body":
+1580:             if (args.delivery_input is None) == (args.delivery_manifest is None):
+1581:                 raise ValueError("body_start_requires_one_delivery_input_or_manifest")
+1582:             from scripts.upgrade3.legacy_unit_writer import run_from_args
+1583:             from optomind_research.runtime.upgrade3.review_delivery import body_delivery_exit_code
+1584:             body_args = argparse.Namespace(**vars(args))
+1585:             body_args.input = args.delivery_input
+1586:             body_args.output_dir = (args.delivery_out / "body").resolve()
+1587:             report = run_from_args(body_args, delivery_config_path=args.delivery_config,
+1588:                                    body_manifest_path=args.delivery_manifest)
+1589:             print(json.dumps(report, ensure_ascii=False, indent=2, default=str))
+1590:             return body_delivery_exit_code(report)
+1591:         report = run_review_delivery(
+1592:             start=args.delivery_start,
+1593:             out_dir=(args.delivery_out / args.delivery_start).resolve(),
+1594:             manifest_path=args.delivery_manifest,
+1595:             batch_root=args.delivery_batch_root,
+1596:             packet_path=args.delivery_packet,
+1597:             recordings_path=args.delivery_recordings,
+1598:             config_path=args.delivery_config,
+1599:         )

@@ -1,0 +1,244 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 0ad3874db89af7baa95cf27ab980f823d33f948c41c1306ec556fb204c11f6bf
+
+# ORIGINAL SOURCE LINES 460-530
+460: def _prepare_scientific_markdown_with_integrity(
+461:     text: str,
+462:     *,
+463:     preserve_verification_labels: bool = False,
+464: ) -> tuple[str, dict[str, Any]]:
+465:     """Normalize publication prose and return its deterministic audit."""
+466: 
+467:     raw_text = str(text or "")
+468:     raw_literalized, raw_fallbacks, raw_diagnostics = (
+469:         _literalize_corrupt_math_spans(raw_text)
+470:     )
+471:     for row in (*raw_fallbacks, *raw_diagnostics):
+472:         row["audit_stage"] = "raw_pre_clean"
+473:     text, integrity = prepare_publication_markdown(
+474:         _clean_unicode(raw_literalized),
+475:         preserve_verification_labels=preserve_verification_labels,
+476:     )
+477:     for key, raw_rows in (
+478:         ("literal_math_fallbacks", raw_fallbacks),
+479:         ("math_control_diagnostics", raw_diagnostics),
+480:     ):
+481:         merged: list[dict[str, Any]] = []
+482:         seen_post: set[tuple[Any, ...]] = set()
+483:         for row in raw_rows:
+484:             merged.append(dict(row))
+485:         for row in integrity.get(key, []):
+486:             current = dict(row)
+487:             current.setdefault("audit_stage", "post_clean")
+488:             identity = (
+489:                 current.get("source_sha256"),
+490:                 tuple(current.get("control_codepoints") or ()),
+491:                 current.get("action"),
+492:             )
+493:             if any(
+494:                 (
+495:                     prior.get("source_sha256"),
+496:                     tuple(prior.get("control_codepoints") or ()),
+497:                     prior.get("action"),
+498:                 )
+499:                 == identity
+500:                 for prior in merged
+501:             ):
+502:                 continue
+503:             if identity not in seen_post:
+504:                 merged.append(current)
+505:                 seen_post.add(identity)
+506:         integrity[key] = merged
+507:     # Internal workflow section IDs are traceability metadata, not reader-
+508:     # facing manuscript titles.  Keep them in JSON ledgers and remove them
+509:     # from rendered Markdown headings.
+510:     text = re.sub(
+511:         r"^(#{1,6}\s+)S\d{1,3}\s*[:：—-]\s*",
+512:         r"\1",
+513:         text,
+514:         flags=re.MULTILINE | re.IGNORECASE,
+515:     )
+516:     # Review Harness sections currently start at H2 because the title is kept
+517:     # outside the manuscript body.  Shift all headings up by one level so the
+518:     # generated paper has top-level \section commands.
+519:     heading_levels = [
+520:         len(match.group(1))
+521:         for match in re.finditer(r"^(#{1,6})\s+", text, re.MULTILINE)
+522:     ]
+523:     if heading_levels and min(heading_levels) > 1:
+524:         text = re.sub(
+525:             r"^(#{2,6})(?=\s+)",
+526:             lambda match: match.group(1)[1:],
+527:             text,
+528:             flags=re.MULTILINE,
+529:         )
+530:     return text, integrity
+# ORIGINAL SOURCE LINES 1624-1648
+1624: def _drop_citation_tokens(
+1625:     markdown: str,
+1626:     dropped_keys: set[str],
+1627: ) -> str:
+1628:     """Remove ``[@key]`` citation tokens for dropped references from Markdown.
+1629: 
+1630:     Adjacent citation clusters such as ``[@good][@bad][@good2]`` are handled
+1631:     correctly: only the dropped tokens are removed while neighbouring valid
+1632:     citations remain intact.  Prose surrounding any citation group is
+1633:     unchanged.
+1634:     """
+1635:     if not dropped_keys:
+1636:         return markdown
+1637:     _cite = re.compile(r"\[@([^\]]+)\]")
+1638:     return _cite.sub(
+1639:         lambda m: "" if m.group(1) in dropped_keys else m.group(0),
+1640:         markdown,
+1641:     )
+1642: 
+1643: 
+1644: def _latex_escape(value: Any) -> str:
+1645:     text = _clean_unicode(value)
+1646:     replacements = {
+1647:         "\\": r"\textbackslash{}",
+1648:         "{": r"\{",
+# ORIGINAL SOURCE LINES 1698-1749
+1698: def _normalize_metadata(
+1699:     raw: dict[str, Any],
+1700:     *,
+1701:     blueprint: dict[str, Any],
+1702: ) -> tuple[dict[str, Any], list[str]]:
+1703:     warnings: list[str] = []
+1704:     title = _clean_unicode(raw.get("title") or _infer_title(blueprint))
+1705:     abstract = _clean_unicode(raw.get("abstract") or _infer_abstract(blueprint))
+1706:     topic_identity = blueprint.get("topic_identity", {})
+1707:     keywords = raw.get("keywords") or (
+1708:         topic_identity.get("core_anchors")
+1709:         or topic_identity.get("anchor_phrases")
+1710:         or topic_identity.get("core_anchor_tokens")
+1711:         or []
+1712:     )
+1713:     if isinstance(keywords, str):
+1714:         keywords = [
+1715:             item.strip() for item in keywords.split(",") if item.strip()
+1716:         ]
+1717:     authors = raw.get("authors") or []
+1718:     if isinstance(authors, str):
+1719:         authors = [{"name": authors}]
+1720:     normalized_authors = []
+1721:     for row in authors:
+1722:         if isinstance(row, str):
+1723:             row = {"name": row}
+1724:         if not isinstance(row, dict) or not str(row.get("name") or "").strip():
+1725:             continue
+1726:         normalized_authors.append(
+1727:             {
+1728:                 "name": _clean_unicode(row.get("name")),
+1729:                 "affiliation": _clean_unicode(row.get("affiliation") or ""),
+1730:                 "email": str(row.get("email") or "").strip(),
+1731:                 "orcid": str(row.get("orcid") or "").strip(),
+1732:             }
+1733:         )
+1734:     if not normalized_authors:
+1735:         normalized_authors = [
+1736:             {
+1737:                 "name": "Author information pending",
+1738:                 "affiliation": "",
+1739:                 "email": "",
+1740:                 "orcid": "",
+1741:             }
+1742:         ]
+1743:         warnings.append("author_metadata_pending")
+1744:     if title == "Critical Review Manuscript":
+1745:         warnings.append("title_metadata_pending")
+1746:     if not raw.get("abstract"):
+1747:         warnings.append("abstract_inferred_from_review_blueprint")
+1748:     if not raw.get("keywords"):
+1749:         warnings.append("keywords_inferred_from_topic_identity")
+# ORIGINAL SOURCE LINES 2489-2512
+2489: def _render_main_tex(
+2490:     *,
+2491:     metadata: dict[str, Any],
+2492:     body_tex: str,
+2493:     language: str = "en",
+2494:     tex_engine: str = "xelatex",
+2495:     include_bibliography: bool = True,
+2496: ) -> str:
+2497:     author_parts = []
+2498:     display_authors = [author for author in metadata["authors"]
+2499:                        if author["name"] != "Author information pending"]
+2500:     for author in display_authors:
+2501:         rendered = _latex_escape(author["name"])
+2502:         details = []
+2503:         if author.get("affiliation"):
+2504:             details.append(_latex_escape(author["affiliation"]))
+2505:         if author.get("email"):
+2506:             details.append(r"\texttt{" + _latex_escape(author["email"]) + "}")
+2507:         if author.get("orcid"):
+2508:             details.append("ORCID: " + _latex_escape(author["orcid"]))
+2509:         if details:
+2510:             rendered += r"\thanks{" + "; ".join(details) + "}"
+2511:         author_parts.append(rendered)
+2512:     authors = r" \and ".join(author_parts)
+# ORIGINAL SOURCE LINES 3176-3198
+3176:         pandoc = str(
+3177:             self.pandoc_path
+3178:             or _find_binary("pandoc")
+3179:             or ""
+3180:         )
+3181:         if not pandoc:
+3182:             raise RuntimeError(
+3183:                 "Pandoc is required for Markdown-to-LaTeX conversion"
+3184:             )
+3185:         body_path = self.output_dir / "body.tex"
+3186:         pandoc_result = _run_command(
+3187:             [
+3188:                 pandoc,
+3189:                 str(manuscript_md.name),
+3190:                 "--from=markdown+pipe_tables+strikeout+tex_math_dollars+link_attributes",
+3191:                 "--to=latex",
+3192:                 "--natbib",
+3193:                 "--wrap=none",
+3194:                 "--output",
+3195:                 str(body_path.name),
+3196:             ],
+3197:             cwd=self.output_dir,
+3198:             timeout_seconds=120,
+# ORIGINAL SOURCE LINES 3274-3312
+3274:         if log_path.exists():
+3275:             log_text = log_path.read_text(encoding="utf-8", errors="replace")
+3276:         latex_warnings = LATEX_WARNING_PATTERN.findall(log_text)
+3277:         undefined_citations = sorted(
+3278:             set(
+3279:                 re.findall(
+3280:                     r"Citation [`']([^`']+)[`'] .* undefined",
+3281:                     log_text,
+3282:                     re.IGNORECASE,
+3283:                 )
+3284:             )
+3285:         )
+3286:         overfull_box_count = len(
+3287:             re.findall(r"Overfull \\[hv]box", log_text)
+3288:         )
+3289:         pdf_validation = _pdf_validation(
+3290:             pdf_path,
+3291:             expected_title=metadata["title"],
+3292:         )
+3293:         preview_paths = (
+3294:             _render_preview_pages(pdf_path, output_dir=self.output_dir)
+3295:             if self.render_previews
+3296:             else []
+3297:         )
+3298:         archive_path, archived_files = _create_arxiv_archive(
+3299:             self.output_dir,
+3300:             referenced_figures=figures,
+3301:         )
+3302: 
+3303:         compile_ok = bool(
+3304:             not self.compile_pdf
+3305:             or (
+3306:                 latex_result.get("returncode") == 0
+3307:                 and pdf_path.exists()
+3308:                 and not pdf_validation["errors"]
+3309:                 and not undefined_citations
+3310:                 and not latex_warnings
+3311:             )
+3312:         )

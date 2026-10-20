@@ -1,0 +1,360 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 f5939d06d5c49c8f652862aa15b7070fbf0c9d0e1ae123de888f689a7f586200
+
+# ORIGINAL SOURCE LINES 1-241
+1: """Work order 04: unified figures, citations and cross-references.
+2: 
+3: Stage order (fixed by Astra review of the first implementation):
+4: 
+5: 1. Figure assets are attached to the HANDLE draft first — captions may carry
+6:    ``[Pxxxx]`` citations, so they must exist before citation numbering.
+7: 2. ONE function — :func:`build_delivery_citation_map` — then scans the
+8:    figure-bearing handle draft in reading order (introduction, body prose,
+9:    table rows, figure captions) and produces the final citation map.
+10: 3. The reader draft is rendered from that map, and its old handle-form
+11:    reference section is REPLACED by the numbered list generated from the
+12:    same map.
+13: 
+14: Identity rules: citation tokens may be namespace-qualified — ``[ns::Pxxxx]``
+15: resolves through the catalog whose ``namespace`` is ``ns``, while a bare
+16: ``[Pxxxx]`` resolves through the PRIMARY catalog (the first one supplied).
+17: Two runs' ``P0001`` are therefore different papers whenever the text carries
+18: the disambiguated token; catalog order alone never decides ownership.
+19: Unknown tokens stay visible in the text and in the report — nothing is
+20: deleted or invented.
+21: 
+22: Figures attach by stable local ID (``FIG:<id>``); display numbers are
+23: assigned by POSITION IN THE FINAL TEXT (an asset passed earlier but anchored
+24: later is figure 2, not figure 1).  Asset files are copied into the stage's
+25: ``assets/`` directory and referenced by a relative path that resolves from
+26: the manuscript.  Markdown structure (table pipes, math, escapes) is
+27: preserved: numbering rewrites only bracket citation tokens.
+28: 
+29: No model calls, no network: metadata comes from the local catalogs only, and
+30: missing fields stay missing.
+31: """
+32: 
+33: from __future__ import annotations
+34: 
+35: import json
+36: import re
+37: import shutil
+38: from collections import OrderedDict
+39: from pathlib import Path
+40: from typing import Any, Iterable, Mapping, Sequence
+41: 
+42: HANDLE_TOKEN_RE = re.compile(r"(?:[A-Za-z0-9_-]+::)?P\d{3,}")
+43: BRACKET_RE = re.compile(r"\[([^\[\]]{1,240})\]")
+44: FIGURE_TOKEN_RE = re.compile(r"@@FIG:([^@]+)@@")
+45: CROSSREF_TABLE_RE = re.compile(r"(详见表|见表|如表|参见表|表)\s*(\d+)")
+46: CROSSREF_FIGURE_RE = re.compile(r"(如图|见图|图)\s*(\d+)")
+47: 
+48: 
+49: class CitationMapError(ValueError):
+50:     pass
+51: 
+52: 
+53: # ---------------------------------------------------------------------------
+54: # the ONE final citation map
+55: # ---------------------------------------------------------------------------
+56: 
+57: 
+58: def _iter_catalog_identities(catalog: Mapping[str, Any]) -> Iterable[Mapping[str, Any]]:
+59:     records = catalog.get("references") or catalog.get("entries") or []
+60:     if isinstance(records, Mapping):
+61:         return [dict(v, source_key=k) if isinstance(v, Mapping) else {"source_key": k}
+62:                 for k, v in records.items()]
+63:     return [row for row in (records or []) if isinstance(row, Mapping)]
+64: 
+65: 
+66: def _catalog_rows_with_namespace(catalog: Mapping[str, Any]) -> list[tuple[str, Mapping[str, Any]]]:
+67:     namespace = str(catalog.get("namespace") or "")
+68:     return [(namespace, row) for row in _iter_catalog_identities(catalog)]
+69: 
+70: 
+71: def build_delivery_citation_map(
+72:     *,
+73:     final_handle_draft: str,
+74:     identity_catalogs: Sequence[Mapping[str, Any]],
+75: ) -> dict[str, Any]:
+76:     """The single source of truth for delivery citations.
+77: 
+78:     Scans ``final_handle_draft`` in reading order.  A bracket citation token
+79:     is either ``Pxxxx`` (resolved through the PRIMARY catalog — the first
+80:     one supplied) or ``ns::Pxxxx`` (resolved through the catalog whose
+81:     ``namespace`` is ``ns``).  Namespaced resolution does not depend on
+82:     catalog order: ``run_b::P0001`` always resolves to run_b's paper even
+83:     when another catalog was supplied first, so two runs' same-number
+84:     handles become two distinct references.
+85:     """
+86: 
+87:     # Index by the exact token the text may carry.
+88:     index_by_token: dict[str, tuple[str, Mapping[str, Any]]] = {}
+89:     primary_namespace = str(identity_catalogs[0].get("namespace") or "") \
+90:         if identity_catalogs else ""
+91:     namespaces_seen: "OrderedDict[str, set[str]]" = OrderedDict()
+92:     for catalog in identity_catalogs:
+93:         namespace = str(catalog.get("namespace") or "")
+94:         for _, row in _catalog_rows_with_namespace(catalog):
+95:             handles = [
+96:                 str(h) for h in (row.get("handles")
+97:                                  or [row.get("source_handle") or row.get("handle")
+98:                                      or row.get("source_key") or ""])
+99:                 if str(h).strip()
+100:             ]
+101:             for handle in handles:
+102:                 token = f"{namespace}::{handle}" if namespace else handle
+103:                 # First declaration wins per exact token; namespaced tokens
+104:                 # are unique per run, so ownership never depends on catalog
+105:                 # order.
+106:                 index_by_token.setdefault(token, (namespace, row))
+107:                 if namespace:
+108:                     namespaces_seen.setdefault(namespace, set()).add(handle)
+109: 
+110:     order: list[str] = []
+111:     token_by_citation: dict[str, str] = {}
+112:     by_canonical: "OrderedDict[str, dict[str, Any]]" = OrderedDict()
+113:     unknown: list[str] = []
+114: 
+115:     def _identity_key(row: Mapping[str, Any], namespace: str) -> str:
+116:         """Identity of the PAPER, independent of which run cited it.
+117: 
+118:         Normalized DOI first, then paper_id, then the namespace-owned handle. The
+119:         same paper cited by two runs merges into ONE reference, while
+120:         genuinely different papers stay distinct.
+121:         """
+122:         doi = str(row.get("doi") or "").strip().lower()
+123:         if doi:
+124:             return "doi:" + doi
+125:         paper_id = str(row.get("paper_id") or "").strip()
+126:         if paper_id:
+127:             return "pid:" + paper_id
+128:         handles = row.get("handles") or [row.get("source_handle") or row.get("handle")
+129:                                        or row.get("source_key") or "unknown"]
+130:         handle = str(handles[0])
+131:         return "handle:" + (f"{namespace}::{handle}" if namespace else handle)
+132: 
+133:     def resolve(token: str) -> tuple[str, Mapping[str, Any]] | None:
+134:         indexed = index_by_token.get(token)
+135:         if indexed is None and "::" not in token and primary_namespace:
+136:             indexed = index_by_token.get(f"{primary_namespace}::{token}")
+137:         return indexed
+138: 
+139:     for match in BRACKET_RE.finditer(final_handle_draft):
+140:         for token in re.findall(r"(?:[A-Za-z0-9_-]+::)?P\d{3,}", match.group(1)):
+141:             resolved = resolve(token)
+142:             if resolved is None:
+143:                 if token not in unknown:
+144:                     unknown.append(token)
+145:                 continue
+146:             namespace, row = resolved
+147:             key = _identity_key(row, namespace)
+148:             token_by_citation[token] = key
+149:             if key not in by_canonical:
+150:                 by_canonical[key] = {
+151:                     "canonical": key,
+152:                     "handles": [],
+153:                     "title": str(row.get("title") or ""),
+154:                     "year": str(row.get("year") or ""),
+155:                     "doi": str(row.get("doi") or ""),
+156:                     "paper_id": str(row.get("paper_id") or row.get("handles") or ""),
+157:                     "namespace": namespace,
+158:                 }
+159:                 order.append(key)
+160:             if token not in by_canonical[key]["handles"]:
+161:                 by_canonical[key]["handles"].append(token)
+162: 
+163:     number_by_token = {token: index for index, token in enumerate(order_tokens(order, by_canonical), start=1)} \
+164:         if False else {}
+165:     # number by canonical, then derive token numbers
+166:     number_by_canonical = {key: index for index, key in enumerate(order, start=1)}
+167:     references = []
+168:     for key in order:
+169:         row = by_canonical[key]
+170:         references.append({
+171:             "reference_number": number_by_canonical[key],
+172:             "canonical": key,
+173:             "handles": list(row["handles"]),
+174:             "title": row["title"],
+175:             "year": row["year"],
+176:             "doi": row["doi"],
+177:             "paper_id": row["paper_id"],
+178:             "namespace": row["namespace"],
+179:         })
+180:     number_by_token = {}
+181:     token_details = {}
+182:     handle_to_number = {}
+183:     for token, key in token_by_citation.items():
+184:         number = number_by_canonical[key]
+185:         number_by_token[token] = number
+186:         # The FULL namespaced token, its source namespace and its number are
+187:         # exported so downstream consumers see the complete run→paper mapping
+188:         # (not a lossy bare handle).  `handle_to_number` stays as the
+189:         # bare-handle convenience view for single-run manuscripts.
+190:         source_namespace = (token.split("::", 1)[0]
+191:                             if "::" in token else primary_namespace)
+192:         token_details[token] = {"number": number,
+193:                                 "namespace": source_namespace,
+194:                                 "canonical": key}
+195:         bare = token.split("::")[-1]
+196:         handle_to_number.setdefault(bare, number)
+197:     return {
+198:         "references_order": order,
+199:         "reference_count": len(order),
+200:         "number_by_canonical": number_by_canonical,
+201:         "number_by_token": number_by_token,
+202:         "token_details": token_details,
+203:         "handle_to_number": handle_to_number,
+204:         "references": references,
+205:         "unknown_handles": unknown,
+206:         "namespaces": {ns: sorted(hs) for ns, hs in namespaces_seen.items()},
+207:     }
+208: 
+209: 
+210: # ---------------------------------------------------------------------------
+211: # consumers
+212: # ---------------------------------------------------------------------------
+213: 
+214: 
+215: def render_reader_citations(
+216:     handle_draft: str,
+217:     citation_map: Mapping[str, Any],
+218: ) -> tuple[str, int, list[str]]:
+219:     """Replace citation tokens with ``[N]`` using the ONE final map.
+220: 
+221:     Bracket citations may be bare ``[Pxxxx]`` or namespaced
+222:     ``[ns::Pxxxx]``; each resolves through the map's ``number_by_token``.
+223:     Unmapped tokens stay visible and are returned for the report.  Bare
+224:     ``Pxxxx``-shaped prose tokens outside brackets are untouched.
+225:     """
+226: 
+227:     number_by_token = citation_map["number_by_token"]
+228:     residual: list[str] = []
+229: 
+230:     def bracket_sub(match: re.Match[str]) -> str:
+231:         inner = match.group(1)
+232:         tokens = re.findall(r"(?:[A-Za-z0-9_-]+::)?P\d{3,}", inner)
+233:         if not tokens:
+234:             return match.group(0)
+235:         numbers = []
+236:         for token in tokens:
+237:             number = number_by_token.get(token)
+238:             if number is None:
+239:                 if token not in residual:
+240:                     residual.append(token)
+241:                 numbers.append(token)
+# ORIGINAL SOURCE LINES 396-508
+396: def render_references_section(citation_map: Mapping[str, Any]) -> str:
+397:     """The numbered reference list generated from the ONE final map."""
+398: 
+399:     lines = ["## 参考文献", ""]
+400:     for ref in citation_map["references"]:
+401:         line = (f"[{ref['reference_number']}] {ref['title']}"
+402:                 + (f"（{ref['year']}）" if ref["year"] else ""))
+403:         if ref["doi"]:
+404:             line += f". DOI: {ref['doi']}"
+405:         lines.append(line)
+406:         lines.append("")
+407:     return "\n".join(lines).rstrip() + "\n"
+408: 
+409: 
+410: def replace_references_section(reader_text: str, citation_map: Mapping[str, Any]) -> tuple[str, bool]:
+411:     """Swap the old handle-form reference section for the numbered one.
+412: 
+413:     Returns ``(new_text, replaced)``; without an existing section the
+414:     numbered list is appended at the end.
+415:     """
+416: 
+417:     block = render_references_section(citation_map)
+418:     pattern = re.compile(
+419:         r"^#{2,3}\s+参考文献[^\n]*\n(?:(?!^#{2,3}\s).)*",
+420:         re.MULTILINE | re.DOTALL,
+421:     )
+422:     if pattern.search(reader_text):
+423:         return pattern.sub(lambda _m: block, reader_text, count=1), True
+424:     return reader_text.rstrip() + "\n\n" + block, False
+425: 
+426: 
+427: # ---------------------------------------------------------------------------
+428: # stage runner
+429: # ---------------------------------------------------------------------------
+430: 
+431: 
+432: def run_figures_citations_stage(
+433:     *,
+434:     final_draft_path: str | Path,
+435:     identity_catalogs: Sequence[Mapping[str, Any]],
+436:     out_dir: str | Path,
+437:     figure_assets: Sequence[Mapping[str, Any]] = (),
+438:     table_moves: Mapping[int, int] | None = None,
+439:     figure_moves: Mapping[int, int] | None = None,
+440: ) -> dict[str, Any]:
+441:     """Work-order 04 stage over the FINAL manuscript (03 output).
+442: 
+443:     Fixed order (per Astra rework):
+444:     1. attach figures into the handle draft — captions may cite;
+445:     2. convert OLD cross-references while figure numbers are still
+446:        placeholders (``@@FIG:id@@``), so freshly generated final numbers are
+447:        never re-transformed by the move rules;
+448:     3. generate final figure numbers by reading order;
+449:     4. build the ONE citation map over the figure-bearing draft, render the
+450:        numbered reader draft, and replace its old reference list.
+451:     """
+452: 
+453:     final_draft_path = Path(final_draft_path).resolve()
+454:     out_dir = Path(out_dir).resolve()
+455:     out_dir.mkdir(parents=True, exist_ok=True)
+456:     handle_text = final_draft_path.read_text(encoding="utf-8")
+457: 
+458:     figure_text, _inserted, missing_assets = attach_figures(
+459:         handle_text, figure_assets, assets_dir=out_dir / "assets")
+460:     # Step 2 before step 3: old cross-references are converted while the
+461:     # inserted figures carry placeholder tokens, so the move rules can never
+462:     # rewrite freshly generated numbers.
+463:     placed: list[dict[str, Any]] = []
+464:     if table_moves or figure_moves:
+465:         figure_text, rewrites = update_cross_references(
+466:             figure_text, table_moves, figure_moves)
+467:     else:
+468:         rewrites = []
+469:     figure_text = number_figure_tokens(figure_text, placed)
+470: 
+471:     citation_map = build_delivery_citation_map(
+472:         final_handle_draft=figure_text, identity_catalogs=identity_catalogs)
+473:     reader_text, _mapped, residual = render_reader_citations(figure_text, citation_map)
+474:     reader_text, references_replaced = replace_references_section(reader_text, citation_map)
+475: 
+476:     handles_path = out_dir / "MANUSCRIPT_HANDLES.md"
+477:     handles_path.write_text(figure_text, encoding="utf-8", newline="\n")
+478:     reader_path = out_dir / "MANUSCRIPT_READER.md"
+479:     reader_path.write_text(reader_text, encoding="utf-8", newline="\n")
+480:     references_path = out_dir / "REFERENCES.json"
+481:     _write_json(references_path, {
+482:         "schema_version": "review_v2_delivery.04.references.v1",
+483:         "citation_map_source": "build_delivery_citation_map",
+484:         "references": citation_map["references"],
+485:         "token_details": citation_map["token_details"],
+486:         "handle_to_reference": citation_map["handle_to_number"],
+487:         "unknown_handles": citation_map["unknown_handles"],
+488:     })
+489:     mapping_path = out_dir / "FIGURE_CITATION_MAP.json"
+490:     _write_json(mapping_path, {
+491:         "schema_version": "review_v2_delivery.04.maps.v1",
+492:         "citation_map_source": "build_delivery_citation_map",
+493:         "figures_placed": placed,
+494:         "figures_missing": missing_assets,
+495:         "cross_reference_rewrites": rewrites,
+496:     })
+497:     report = {
+498:         "stage": "figures_citations",
+499:         "status": "pending" if residual else "complete",
+500:         "reference_count": len(citation_map["references"]),
+501:         "unknown_citation_tokens": residual,
+502:         "unknown_identity_handles": citation_map["unknown_handles"],
+503:         "cross_run_namespaces": citation_map["namespaces"],
+504:         "figures_placed": placed,
+505:         "figures_missing": missing_assets,
+506:         "cross_reference_rewrites": rewrites,
+507:         "references_section_replaced": references_replaced,
+508:         "handles_draft": str(handles_path),

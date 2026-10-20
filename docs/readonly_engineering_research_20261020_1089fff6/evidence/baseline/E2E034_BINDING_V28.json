@@ -1,0 +1,730 @@
+{
+  "schema": "optomind.supervised_e2e.v2",
+  "topic": "metasurface_imaging",
+  "source_commit": "f4461637c495ade3f35b6dc361066222760b2e39",
+  "source_worktree": "S",
+  "question": "请综述超表面如何实现高性能光学成像，比较波前调控、像差控制、多维成像、计算重建与制造集成路线，并分析关键性能权衡、实验条件和实际应用边界。",
+  "question_sha256": "0c4f8394d696fccb218985ff65c170c4770a0f26d699b18e71534e3daa1e4e65",
+  "project_limit_cny": 110.0,
+  "project_ledger": "N\\budget.sqlite",
+  "account_limit_cny": 300.0,
+  "account_ledger": "R\\local_accounting\\qwen_first_20261010_300cny\\budget.sqlite",
+  "account_mapping_directory": "N\\account_mappings",
+  "stage_output_root": "N\\stages",
+  "materials_directory": "04_local_materials",
+  "key_file": "R\\api_keys\\qwen-api-key.txt",
+  "key_index": 1,
+  "tokenizer": "R\\data\\tokenizers\\qwen3_5_9b\\tokenizer.json",
+  "tokenizer_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+  "qwen_connection": "direct",
+  "physical_retries": 0,
+  "key_rotation": false,
+  "supervision": "each_actual_LLM_request_and_response_gated_before_use; reviewer_identity_recorded",
+  "supervision_lock_scope": "call",
+  "supervision_namespace": ":metasurface_imaging_20261016:planning_min600_rebase_v6:body_budget110_v26:quality_repair_v27:multi_envelope_v28",
+  "minor_errors": "record_and_continue",
+  "major_errors": "stop_affected_path_and_repair_seam",
+  "initial_retrieval_target": 500,
+  "reader_workers": 32,
+  "chapter_workers": 3,
+  "paid_calls_started": false,
+  "authorization": "用户明确追加30元预算，本项目累计上限110元；账户仍300元，保留同一累计账本与全部未知占额。",
+  "binding_revision": "body_multi_envelope_v28",
+  "parent_binding": "N\\RUN_BINDING_BODY_QUALITY_REPAIR_V27.json",
+  "parent_binding_sha256": "3829791c98b1b7be6051610a1e34ce20c82f639967d151a2bf4977b2937b7495",
+  "planning_pool": "N\\stages\\06_planning_pool_min600\\PLANNING_POOL.jsonl",
+  "planning_pool_sha256": "e483e2bccda6cd26cc868ce8d34a0f50067eb3e022c1c2b36dbc345c77b97e9e",
+  "planning_bridge_report": "N\\stages\\06_planning_pool_min600\\PLANNING_POOL_BRIDGE_REPORT.json",
+  "planning_bridge_report_sha256": "a9721cd9f9ce0db2fda40be2761f46adee412d097e43f4e510c64c5de868f4c4",
+  "identity_outcomes": "N\\stages\\05_ab_min600_adopted\\UNIFIED_600_IDENTITY_OUTCOMES.json",
+  "identity_outcomes_sha256": "064dc8fbb7a81bbce345a81406dff2cf83638bcb089e97d03a7928a76bf3a7f8",
+  "identity_outcomes_counts": {
+    "selected600": 600,
+    "adopted548": 548,
+    "insufficient_material": 34,
+    "failed_cache_only": 18
+  },
+  "quality_report": "N\\supervision\\MIN600_AB_QUALITY_REPORT.json",
+  "quality_report_sha256": "6f62f9fb62c9dd9e721e29f2f80116755f9c23c3b4a99ae5e02f289a2f26f5fd",
+  "failed_exclusions": "N\\preparation\\planning_min600_handoff\\ROOT_AB_FAILED_EXCLUSIONS_MIN600_CANDIDATE.json",
+  "failed_exclusions_sha256": "37489b8050053dd518b963ced504a4854401a4771109542cb058ad30734131c9",
+  "material_parser_mode": "docling_basic",
+  "parser_runtime": "N\\PARSER_RUNTIME.json",
+  "parser_runtime_sha256": "b06bc12c55a491253c620685703876d319ddb38e306ead071ed2f553650ccfee",
+  "ordinary_material_route": "native_xml_first; local resident3 Docling basic only for ordinary PDFs",
+  "formula_route": "local CodeFormulaV2 single worker with 8192 MiB guard",
+  "regional_api": false,
+  "historical_input_forbidden": [
+    "N\\stages\\06_planning_pool\\PLANNING_POOL.jsonl",
+    "N\\stages\\07_progressive_review_plan"
+  ],
+  "new_output_root": "N\\stages\\07_progressive_review_plan_min600_handoff",
+  "new_docling_cache_root": "N\\stages\\07_progressive_review_plan_min600_handoff\\docling_cache",
+  "new_formula_cache_root": "N\\stages\\07_progressive_review_plan_min600_handoff\\local_formula_cache_recovered_v5",
+  "shared_local_material_cache": "N\\stages\\04_local_materials\\cache",
+  "docling_cli_config": "N\\preparation\\local_parser\\DOCLING_BASIC_CLI.json",
+  "docling_cli_config_sha256": "b8c914d2a84a28b3e8698721206fdf7c23cdebaa9e72bbd50579db0a598fbf88",
+  "local_formula_config": "N\\preparation\\local_parser\\FORMULA_HOOK_CONFIG.json",
+  "local_formula_config_sha256": "2b79839aec0894aae7ef86b17ae7a2bf6db9cc0fd51913022f58e0cd81a2afe8",
+  "native_plan_defaults": {
+    "planner_model": "qwen3.5-plus",
+    "chapter_model": "qwen3.5-plus",
+    "thinking_budget": 16384,
+    "output_tokens": 32768,
+    "reader_thinking_budget": 8192,
+    "reader_output_tokens": 20000,
+    "timeout_seconds": 900,
+    "deep_read_limit": 40,
+    "chapter_workers": 3,
+    "reader_workers": 32,
+    "planning_revision": true,
+    "outline_strengthening": true,
+    "allow_planning_max_roles": [
+      "outline_selection",
+      "strong_outline"
+    ],
+    "other_roles": "retain existing role model policy; no global Max promotion",
+    "material_triage_model": "qwen3.5-plus",
+    "chapter_details_input_target_tokens": 220000
+  },
+  "budget_snapshot_before_preview": {
+    "project_limit_cny": 80.0,
+    "project_actual_cny": 7.7393484,
+    "project_unknown_or_held_cny": 0.1086312,
+    "project_available_snapshot_cny": 72.1520204,
+    "account_limit_cny": 300.0,
+    "account_actual_cny": 65.5616849,
+    "account_unknown_or_held_cny": 4.6254988,
+    "account_available_snapshot_cny": 229.8128163,
+    "source": "read-only sqlite aggregate; live values must be reread immediately before any run"
+  },
+  "cache_adoption": {
+    "accepted_rows": 548,
+    "native_cache_reused": 548,
+    "cache_adoption_physical_calls": 0,
+    "bridge_complete": false,
+    "missing_rows_preserved": 52,
+    "failed_rows_explicitly_excluded": 18,
+    "insufficient_rows_native_rechecked": 34
+  },
+  "project_scope": "0c4f8394d696fccb218985ff65c170c4770a0f26d699b18e71534e3daa1e4e65",
+  "account_mapping_dir": "N\\account_mappings",
+  "scope_contract_repair": "supervision/PLANNING548_SCOPE_CONTRACT_V1_VERIFICATION.md",
+  "rejected_prior_scope_gate": "13a2c03f13d7332b262eb5b6dabead64b750cba4bb7e4c60bb0b058bea776a6f",
+  "prior_response_handling": "Retain paid/raw history; no manual response editing or old160 scope reuse.",
+  "provisional_candidate_from": "N\\supervision\\calls\\3a7ed991b888a20cf9b71989247cb5494d255422421ab5f45856da616519b5a9",
+  "provisional_candidate_request_file_sha256": "83b9b705e7184745a2ee24f2900bd361d9a026c704793c2fd256c31ccb5ce931",
+  "provisional_candidate_response_file_sha256": "845a2442084dbefc75a2244be4064e9957744daca9160512ef658881ce2a0461",
+  "candidate_import_semantics": "Saved own scientific candidate only; old scope not accepted. Native same-Plus authority policy patch must pass before tools.",
+  "scope_authority_repair": "preparation/planning548_scope_authority_backup_v2/IMPLEMENTATION_VERIFICATION.md",
+  "scope_authority_view": "Editable policy text only; full scientific candidate and source arrays stay local and are reattached unchanged.",
+  "previous_authority_invalid_gate": "8078590a8b1c479fd1e895f5605193ff264740eed68097b58bb3d591e801bab8",
+  "supplement_revalidation": "N\\stages\\07_progressive_review_plan_min600_handoff\\level1\\external\\N42686d593308580c72e9-c0bc78adf613880f\\round_1\\supplements\\GAP02\\attempt-lo9i3vu6\\judgment_revalidations\\run-20261017T045745Z-27229a83\\SUPPLEMENT_INDEX.json",
+  "supplement_revalidation_sha256": "4ebcc4f94af9aea8da96405514c221088bd39405d966010b98a85f2600138d3f",
+  "judge_repair_commit": "05d6ebbf1289e9e5aa4629625af90751888e4712",
+  "formula_repair_commit": "8518c168c5bc9d2105992c9fba0091032ac51a49",
+  "recovery_evidence": "preparation/fulfillment_json_recovery_v1/CONSUMER_RECOVERY_EVIDENCE.json",
+  "formula_evidence": "preparation/formula_oom_recovery_v1/RECOVERY_VERIFICATION.json",
+  "formula_cache_reuse_evidence": "N\\stages\\07_progressive_review_plan_min600_handoff\\local_formula_cache_recovered_v5\\CACHE_REUSE_CHECK.json",
+  "budget_snapshot_before_resume_v5": [
+    {
+      "path": "N\\budget.sqlite",
+      "cap": 80,
+      "rows": [
+        [
+          "settled",
+          599,
+          12.77032
+        ],
+        [
+          "uncertain",
+          1,
+          0.1086312
+        ]
+      ],
+      "remaining": 67.1210488
+    },
+    {
+      "path": "R\\local_accounting\\qwen_first_20261010_300cny\\budget.sqlite",
+      "cap": 300,
+      "rows": [
+        [
+          "settled",
+          1781,
+          70.5926565
+        ],
+        [
+          "uncertain",
+          9,
+          4.6254988
+        ]
+      ],
+      "remaining": 224.7818447
+    }
+  ],
+  "created_at": "2026-10-18T03:03:28.908327+00:00",
+  "rebase_repair_commit": "5f396169c9d8947b62527a2cafa9d2312c36d977",
+  "rebase_copy_evidence": "N\\preparation\\sidecar_v5_rebase_v2\\test_actual_v5_three_way_copy_0\\V5_COPY_RECOVERY_EVIDENCE.json",
+  "budget_snapshot_before_resume_v6": [
+    {
+      "path": "N\\budget.sqlite",
+      "cap": 80,
+      "rows": [
+        [
+          "settled",
+          606,
+          12.932440399999999
+        ],
+        [
+          "uncertain",
+          1,
+          0.1086312
+        ]
+      ],
+      "remaining": 66.9589284
+    },
+    {
+      "path": "R\\local_accounting\\qwen_first_20261010_300cny\\budget.sqlite",
+      "cap": 300,
+      "rows": [
+        [
+          "settled",
+          1788,
+          70.7547769
+        ],
+        [
+          "uncertain",
+          9,
+          4.6254988
+        ]
+      ],
+      "remaining": 224.6197243
+    }
+  ],
+  "exclusion_repair_commit": "3c4113a51498eae90e56f683d22f99fe6b85521f",
+  "exclusion_repair_evidence": "N\\preparation\\exclusion_handle_fix_v1\\ROOT_ACTUAL_SEVEN_REPLAY.json",
+  "budget_snapshot_before_resume_v7": {
+    "project": [
+      [
+        "settled",
+        632,
+        14.7920206
+      ],
+      [
+        "uncertain",
+        1,
+        0.1086312
+      ]
+    ],
+    "account": [
+      [
+        "settled",
+        1814,
+        72.6143571
+      ],
+      [
+        "uncertain",
+        9,
+        4.6254988
+      ]
+    ]
+  },
+  "closed_paid_stages_to_reuse": [
+    "provisional_authority",
+    "level1_tools",
+    "level1_outline",
+    "source_routing",
+    "chapter_proposals",
+    "harmonized_scope"
+  ],
+  "retired_unpaid_gate": "a171bc3ff9e1c487da80d08c91a53fe40683a632208e129a9260d37e3ac278ba",
+  "closed_tools_recovery": {
+    "root_native_zero_callback_replay": "N\\preparation\\closed_tool_source_identity_v1\\ROOT_NATIVE_MINIMAL_REPLAY.json",
+    "focused_tests_passed": 37,
+    "raw_stage_and_state_preserved": true,
+    "fingerprint_namespace_gap": "historical diagnostic retained; no cache proof invented"
+  },
+  "route_exclusion_recovery": {
+    "paid_harmonized_stage": "N\\stages\\07_progressive_review_plan_min600_handoff\\stages\\harmonized_scope.json",
+    "root_actual_replay": "N\\supervision\\ROOT_NATIVE_ROUTING_EXCLUSION_GUARD_REPLAY.json",
+    "tests_passed": 54,
+    "original_model_output_preserved": true
+  },
+  "multilingual_local_search_recovery": {
+    "source_commit": "b303c306a8fce22231a81b0cb9ef1753f41fa002",
+    "evidence": "N\\supervision\\ROOT_V10_ACTUAL_INDEX_MIGRATION_AND_DEFAULT_PAYLOAD.json",
+    "same_directory_resume": true,
+    "same_need_query_checkpoint_reused": true,
+    "manuscript_or_scientific_answer_injection": false,
+    "native_v9_pid_intentionally_stopped": 33156,
+    "project_actual_cny_before_resume": 15.6874466,
+    "reserved_cny": 0,
+    "unknown_cny": 0.1086312
+  },
+  "triage_plus_upgrade": {
+    "same_input_probe": "preparation/triage_plus_probe_v1/COMPLETION.json",
+    "root_acceptance": "supervision/ROOT_TRIAGE_PLUS_SAME_INPUT_ADOPTION.json",
+    "probe_actual_cny": 0.0178488,
+    "focused_tests_passed": 51,
+    "native_six_stage_zero_call_replay": "preparation/triage_plus_probe_v1/ACTUAL_RESUME_PROOF.json",
+    "historical_inputs_contracts_preserved": true,
+    "model_change": "only material triage Flash to Plus; readers unchanged",
+    "scientific_prompt_unchanged": true
+  },
+  "selection_parser_repair": {
+    "candidate_contract": "stable candidate_id + matching canonical title + per-selected reason -> native index; no positional legacy response acceptance",
+    "scientific_selection_goal_unchanged": true,
+    "selection_model": "qwen3.7-flash",
+    "thinking_budget": 4096,
+    "answer_tokens": 4096,
+    "old_bad_selection_gate": "76fb6c1ea40dec9bef2f5abaa74bc5005578bf0ec511a4ab344476f1bd0d848d",
+    "old_approved_artifacts_unchanged": true,
+    "source_backup": "preparation/selection_identity_parser_before_v12",
+    "preview": "preparation/selection_identity_v1/PREVIEW.json",
+    "six_stage_zero_call_proof": "preparation/selection_identity_v1/ACTUAL_RESUME_PROOF.json",
+    "docling_proof": "preparation/docling_seam_v12_proof/DOCLING_SEAM_V12_PROOF.json",
+    "docling_actual_new_parse_seconds": 36.031,
+    "docling_projected_tables": 8,
+    "docling_projected_pictures": 16,
+    "full_operational_fingerprint_preserved": true,
+    "new_paid_probe_calls": 0
+  },
+  "managed_card_cache_recovery": {
+    "source_commit": "0fa3fb6299cb9bec67f58103bc4558a504911aa7",
+    "proof": "N\\preparation\\local_judge_semantic_cache_v1\\ACTUAL_ZERO_CALL_PROOF.json",
+    "historical_files_preserved": true,
+    "retired_pid": 34072,
+    "retired_unpaid_gate": "20de47d20e10d8219b100f7f62fac7330da249ac2c73e7838994376a208f5133",
+    "project_actual_cny_before_resume": 15.947341,
+    "project_uncertain_cny": 0.1086312,
+    "project_reserved_cny": 0
+  },
+  "directed_claim_recovery": {
+    "manifest": "N\\preparation\\directed_handoff_repair_v1\\RECOVER_FIVE_UNPAID_CLAIMS.json",
+    "manifest_sha256": "a3b62941ce78629976d5a7b2a9a5974e5c24f321ead5c67b1b831a6b7e4a89df",
+    "proof": "N\\preparation\\directed_handoff_repair_v1\\ACTUAL_FIVE_ISOLATED_RECOVERY_PROOF.json",
+    "task_count": 5,
+    "not_success_or_free_generation": true,
+    "retired_pid": 33656,
+    "retired_unpaid_finalize_gate": "0612b843dcd3a0803fd5f507efcd636687cc4721c0cc7d0ba8aba7718cdf17e0",
+    "project_actual_cny_before_resume": 15.972293,
+    "unknown_cny": 0.1086312,
+    "reserved_cny": 0
+  },
+  "finalize_material_handoff": {
+    "source_commit": "bf2208818927681fc556db2c11f65401f20d9c74",
+    "complete_semantic_sources": "dynamic material updates plus explicit directed requests, no topic-specific source allowlist",
+    "producer_reuse_manifest": "N\\preparation\\directed_handoff_repair_v1\\REUSE_V14_LEVEL2_PRODUCER.json",
+    "producer_reuse_manifest_sha256": "b4848b3bae6e7ff4e747d847823e711e16d2f96ee1fdb38c9a1b56b58a2f5b31",
+    "free_resume_proof": "N\\preparation\\directed_handoff_repair_v1\\V15_ACTUAL_RESUME_PROOF.json",
+    "actual_input_proof": "N\\preparation\\directed_handoff_repair_v1\\V15_ACTUAL_MESSAGES_PROOF.json",
+    "rejected_prior_scope_gate": "70c0ade84f06aaeb33bb075318eadfeeb5f3505a78d9e9678540557c3cbd226e",
+    "prior_paid_raw_preserved": true,
+    "scientific_answer_injection": false
+  },
+  "chapter_quality_upgrade": {
+    "rejected_flash_review": "supervision/ROOT_V15_FLASH_CHAPTER_DETAILS_QUALITY_REJECTION.json",
+    "same_scientific_inputs": true,
+    "system_byte_equal": true,
+    "json_key_order_difference_only": true,
+    "producer_manifest": "N\\preparation\\directed_handoff_repair_v1\\REUSE_V15_CHAPTERS_PRODUCER.json",
+    "producer_manifest_sha256": "739d417cd018a6a73b5a1846c4b7aff33792542b811645953db91fcf7a38b7ce",
+    "zero_call_resume_proof": "N\\preparation\\directed_handoff_repair_v1\\V16_CHAPTER_PLUS_ACTUAL_RESUME_PROOF.json",
+    "only_runtime_model_change": "chapter_model qwen3.7-flash to qwen3.5-plus",
+    "scientific_feedback_injected": false,
+    "production_default_changed": false
+  },
+  "budget_snapshot_before_resume_v16": {
+    "project": {
+      "rows": [
+        [
+          "settled",
+          722,
+          19.6661554
+        ],
+        [
+          "uncertain",
+          1,
+          0.1086312
+        ]
+      ],
+      "cap": 80,
+      "available": 60.2252134
+    },
+    "account": {
+      "rows": [
+        [
+          "settled",
+          1904,
+          77.4884919
+        ],
+        [
+          "uncertain",
+          9,
+          4.6254988
+        ]
+      ],
+      "cap": 300,
+      "available": 217.8860093
+    }
+  },
+  "chapter_batch_quality_repair": {
+    "source_commit": "ead3cd0b63d1c23bbdced4af03178f00174ed05b",
+    "quality_target_guarded_tokens": 220000,
+    "provider_capacity_unchanged": true,
+    "generation_prompt_unchanged": true,
+    "source_records_complete": true,
+    "accepted_chapters_reused": [
+      "CH01",
+      "CH02",
+      "CH03",
+      "CH04"
+    ],
+    "source_attribution_audit": "N\\preparation\\directed_handoff_repair_v1\\V16_CH05_CH06_CH02_SOURCE_ATTRIBUTION_AUDIT.json",
+    "free_source_batch_preview": "N\\preparation\\directed_handoff_repair_v1\\V17_NATIVE_BATCH_PREVIEW_PROOF.json",
+    "zero_call_resume_proof": "N\\preparation\\directed_handoff_repair_v1\\V17_QUALITY_TARGET_RESUME_VERIFIED_PROOF.json",
+    "original_rejected_responses_preserved": true,
+    "manual_scientific_answers_injected": false
+  },
+  "budget_snapshot_before_resume_v17": {
+    "project": {
+      "cap": 80,
+      "rows": [
+        [
+          "settled",
+          728,
+          32.5649274
+        ],
+        [
+          "uncertain",
+          1,
+          0.1086312
+        ]
+      ],
+      "available": 47.3264414
+    },
+    "account": {
+      "cap": 300,
+      "rows": [
+        [
+          "settled",
+          1910,
+          90.3872639
+        ],
+        [
+          "uncertain",
+          9,
+          4.6254988
+        ]
+      ],
+      "available": 204.9872373
+    }
+  },
+  "partial_batch_contract_repair": {
+    "source_commit": "d7f7cc520592c06ab7e63d2016a99a7d3d91d3ef",
+    "plain_chapter_messages_unchanged": true,
+    "batch_payload_science_unchanged": true,
+    "source_batch_role": "partial supplied-evidence/task proposals, not whole chapter",
+    "merge_role": "integrate preserved source-bound proposals into full chapter",
+    "source_title_identity_annotation": true,
+    "no_scientific_answers": true,
+    "message_proof": "N\\preparation\\directed_handoff_repair_v1\\V18_BATCH_ROLE_MESSAGE_PROOF.json",
+    "free_resume_proof": "N\\preparation\\directed_handoff_repair_v1\\V18_BATCH_ROLE_ACTUAL_RESUME_PROOF.json",
+    "real_validation_boundary": "one bounded fresh first-batch validation, no indefinite redraw"
+  },
+  "budget_snapshot_before_resume_v18": {
+    "project": {
+      "cap": 80,
+      "rows": [
+        [
+          "settled",
+          731,
+          33.8624474
+        ],
+        [
+          "uncertain",
+          1,
+          0.1086312
+        ]
+      ],
+      "available": 46.0289214
+    },
+    "account": {
+      "cap": 300,
+      "rows": [
+        [
+          "settled",
+          1913,
+          91.6847839
+        ],
+        [
+          "uncertain",
+          9,
+          4.6254988
+        ]
+      ],
+      "available": 203.6897173
+    }
+  },
+  "chapter_batch_candidates_from": "N\\preparation\\directed_handoff_repair_v1\\CHAPTER_BATCH_CANDIDATE_RECOVERY_V19.json",
+  "chapter_batch_candidates_sha256": "9b147b21e3e289867daf5afa11deff2945c3c435b49eaf6aeff03095d1825965",
+  "chapter_batch_case_identity_repair": {
+    "kind": "mechanical supplied-source identity check and at most one same-Plus repair per original batch",
+    "original_rejected_responses_remain_rejected": true,
+    "candidate_import_not_success": true,
+    "unread_case_deferred_not_fabricated": true,
+    "no_scientific_correction_answers": true,
+    "base_messages_unchanged": true
+  },
+  "budget_snapshot_before_resume_v19": {
+    "project": {
+      "cap": 80,
+      "rows": [
+        [
+          "settled",
+          734,
+          35.1157414
+        ],
+        [
+          "uncertain",
+          1,
+          0.1086312
+        ]
+      ],
+      "available": 44.7756274
+    },
+    "account": {
+      "cap": 300,
+      "rows": [
+        [
+          "settled",
+          1916,
+          92.9380779
+        ],
+        [
+          "uncertain",
+          9,
+          4.6254988
+        ]
+      ],
+      "available": 202.4364233
+    }
+  },
+  "nested_identity_correction": {
+    "actual_full_material_channel": "candidate_navigation.candidate_materials",
+    "correction_receipt": "supervision/ROOT_V20_NESTED_MATERIAL_CORRECTION_AND_ORIGINAL_ACCEPTANCE.json",
+    "free_native_proof": "N\\preparation\\directed_handoff_repair_v1\\V20_FREE_ORIGINAL_NATIVE_RESUME_PROOF.json",
+    "free_native_proof_sha256": "9d0a0c4ddf132d811430cf96ae3c37a7e54b80601c6f939b2487f3655830c8c8",
+    "input_or_prompt_changes": false,
+    "failed_repair_claim_preserved": true,
+    "paid_original_not_rebought": true
+  },
+  "native_unresolved_merge_finalization": {
+    "same_directory_resume_only": true,
+    "original_merge_not_rebought": true,
+    "one_durable_changed_input_attempt": true,
+    "model": "qwen3.5-plus",
+    "thinking_budget": 16384,
+    "output_tokens": 32768,
+    "full_original_referenced_materials": true,
+    "partial_plans_preserved": 5,
+    "failed_original_and_repair_preserved": true,
+    "human_scientific_answer_injection": false,
+    "native_zero_call_proof": "N\\preparation\\directed_handoff_repair_v1\\V21B_MERGE_FINALIZATION_NATIVE_RESUME_PROOF.json",
+    "native_zero_call_proof_sha256": "6c44b8bf1619771dd71fbd2ac6f7522cde9e1b71b4ff6bd24de1a9b134878163",
+    "actual_native_request_preview": "N\\preparation\\directed_handoff_repair_v1\\V21B_NATIVE_FINALIZATION_REQUEST.json"
+  },
+  "budget_snapshot_before_resume_v21": {
+    "project": {
+      "rows": [
+        [
+          "settled",
+          747,
+          39.5253814
+        ],
+        [
+          "uncertain",
+          1,
+          0.1086312
+        ]
+      ],
+      "cap": 80,
+      "available": 40.3659874
+    },
+    "account": {
+      "rows": [
+        [
+          "settled",
+          1929,
+          97.3477179
+        ],
+        [
+          "uncertain",
+          9,
+          4.6254988
+        ]
+      ],
+      "cap": 300,
+      "available": 198.0267833
+    }
+  },
+  "late_source_context_handoff": {
+    "actual_chapter_packet_fallback": true,
+    "empty_map_refused_before_payment": true,
+    "material_unchanged": true,
+    "human_scientific_routing_answers": false,
+    "proof": "N\\preparation\\directed_handoff_repair_v1\\V22_LATE_ROUTING_NATIVE_RESUME_PROOF.json",
+    "proof_sha256": "d24c36397d3d0b5e1f0faab4ef2b70e342aca691f76a935e1cee4153056effd4",
+    "native_actual_request_preview": "N\\preparation\\directed_handoff_repair_v1\\V22_NATIVE_LATE_ROUTING_REQUEST.json",
+    "seven_chapter_packets_reused": true,
+    "retired_unpaid_gates": [
+      "606c10b3560c4af1b343ff0c87578afd0c48dea185d71bffebecf8e8a97f4c54",
+      "009528da49b82420f7c26d56bd08ce123c1c79d3ceaf72940047cf1a8dc61452"
+    ]
+  },
+  "budget_snapshot_before_resume_v22": {
+    "project": {
+      "rows": [
+        [
+          "settled",
+          748,
+          40.8158654
+        ],
+        [
+          "uncertain",
+          1,
+          0.1086312
+        ]
+      ],
+      "cap": 80,
+      "available": 39.0755034
+    },
+    "account": {
+      "rows": [
+        [
+          "settled",
+          1930,
+          98.6382019
+        ],
+        [
+          "uncertain",
+          9,
+          4.6254988
+        ]
+      ],
+      "cap": 300,
+      "available": 196.7362993
+    }
+  },
+  "owner_material_and_paid_response_recovery": {
+    "same_directory_resume_only": true,
+    "original_owner_not_rebought": true,
+    "late_material_channel_content_and_identity_gates_preserved": true,
+    "explicit_candidate_manifest": "N\\preparation\\directed_handoff_repair_v1\\OWNER_CANDIDATE_RECOVERY_V23.json",
+    "explicit_candidate_manifest_sha256": "78fa439d3f55ff2c60fc81bea4b940569414cde448858e6a9cc37c1b60cf06d5",
+    "native_zero_call_proof": "N\\preparation\\directed_handoff_repair_v1\\V23_OWNER_CANDIDATE_NATIVE_RESUME_PROOF.json",
+    "native_zero_call_proof_sha256": "4834c7ab4ff361dc50a4778b7771aa551c0f2ddaebc1b3c50c050eeade36dd23",
+    "original_scientific_payload_preserved": true,
+    "old_errors_and_fees_preserved": true,
+    "human_scientific_answer_injection": false,
+    "actual_native_request_preview": "N\\preparation\\directed_handoff_repair_v1\\V23_NATIVE_CH02_REPAIR_REQUEST.json"
+  },
+  "budget_snapshot_before_resume_v23": {
+    "project": {
+      "rows": [
+        [
+          "settled",
+          755,
+          44.9690582
+        ],
+        [
+          "uncertain",
+          1,
+          0.1086312
+        ]
+      ],
+      "cap": 80,
+      "available": 34.9223106
+    },
+    "account": {
+      "rows": [
+        [
+          "settled",
+          1937,
+          102.7913947
+        ],
+        [
+          "uncertain",
+          9,
+          4.6254988
+        ]
+      ],
+      "cap": 300,
+      "available": 192.5831065
+    }
+  },
+  "owner_final_projection_report": {
+    "actual_sent_channels_only": true,
+    "science_unchanged": true,
+    "no_global_pool_claim_in_owner_message": true,
+    "original_preprojection_report_saved_separately": true,
+    "all_seven_owner_successes_free_reused": true,
+    "native_resume_proof": "N\\preparation\\directed_handoff_repair_v1\\V24_OWNER_PROJECTION_NATIVE_RESUME_PROOF.json",
+    "native_resume_proof_sha256": "e0e9cc97f5e2823ce1d93c3649261223639ff26b2f34b0c6c363cf85358037d8",
+    "actual_input_proof": "N\\preparation\\directed_handoff_repair_v1\\V24_ACTUAL_OWNER_REPORT_PROJECTION_PROOF.json",
+    "retired_unpaid_case_gate": "5e74d61dca30bcce1fc599e4cc07e31347b9b51c6b9c88b0378833ae58e38543",
+    "residual_copied_header_navigation": "Not identityauthority; actual nextcase usesunit_catalog/source_materials not copied planheader. Raw sourceID typos retained diagnostic; not scientificcasefacts."
+  },
+  "selection_identity_repair": {
+    "identity": "chapter_id plus original local unit_id",
+    "first_layer_plan_content_preserved": true,
+    "cross_chapter_readonly_collision_fixed": true,
+    "legacy_local_readonly_protection_preserved": true,
+    "proof_directory": "N\\preparation\\selection_identity_v25",
+    "root_additional_test_result": "58 passed; new legacy no/empty/partial refs protection checked",
+    "successful_case_batches_reused": 12,
+    "failed_case_batches_preserved": 6,
+    "no_new_provider_calls_in_free_resume": true,
+    "selector_preview": {
+      "prompt_tokens": 113335,
+      "max_completion_tokens": 65536,
+      "estimated_cny": 3.719316,
+      "stream": false
+    }
+  },
+  "budget_extension_authorization": {
+    "user_instruction": "追加30元预算",
+    "previous_limit_cny": 80.0,
+    "increment_cny": 30.0,
+    "new_limit_cny": 110.0,
+    "account_limit_cny": 300.0,
+    "parent_binding": "N\\RUN_BINDING_PLANNING_MIN600_SELECTION_IDENTITY_V25.json",
+    "parent_binding_sha256": "d36a08e4c3f8956a822cc6feb1268f42d1eded9980c4ac84fa6a170d8cfbfbdd",
+    "receipt": "N\\preparation\\budget110_v26\\PROJECT_BUDGET_EXTENSION_AUTHORIZATION.json"
+  },
+  "source_archive_parent_only": {
+    "path": "N\\execution_sources\\planning_selection_identity_v25_eb153f87.zip",
+    "sha256": "3c41247649ee2f159c4360d110b3f1087611fc434e089bec7feacb6024fa905c"
+  },
+  "body_quality_repair": {
+    "proof": "N\\preparation\\body_quality_repair_v27\\V27_OFFLINE_PROOF.json",
+    "manifest": "N\\preparation\\body_quality_repair_v27\\OWNER_AUTHOR_CANDIDATES_V27.json",
+    "manifest_sha256": "ceb74b7c529c13304c8088478a863be2eac8179ef672fadd3e268da952083080",
+    "candidate_only": true,
+    "prior_rejections_preserved": true,
+    "author_messages_unchanged": true,
+    "fresh_quality_required": true
+  },
+  "existing_budget_attachment": {
+    "path": "N\\RUN_BINDING_BODY_QUALITY_REPAIR_V27.json",
+    "sha256": "3829791c98b1b7be6051610a1e34ce20c82f639967d151a2bf4977b2937b7495",
+    "role": "immutable original native budget authorization, not the current execution-source pin"
+  },
+  "author_envelope_recovery": {
+    "proof": "N\\preparation\\multi_envelope_recovery_v28\\ACTUAL_CH02_U03_PROOF.json",
+    "proof_sha256": "d22943472c75d9dd5d86e32de228bad011ac8d323d672baab297ad40fc616884",
+    "only_format_selection": true,
+    "original_raw_preserved": true,
+    "scientific_inputs_prompts_models_unchanged": true
+  }
+}

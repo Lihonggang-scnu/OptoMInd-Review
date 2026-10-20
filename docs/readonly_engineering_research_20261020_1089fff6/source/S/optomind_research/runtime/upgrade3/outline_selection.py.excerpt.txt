@@ -1,0 +1,782 @@
+# S 0133380ea82068ec8d9c28269bf9d0417d38bb04 SHA256 3ad4b5b0806084a40ef08fe09f22bd69184a27f00c16d5319a647f4b9ca50c5f
+198: def build_selection_payload(
+199:     chapter_payloads: Sequence[Mapping[str, Any]], *,
+200:     research_question: str = "", shared_outline: Any = None, shared_scope: Mapping[str, Any] | None = None,
+201:     review_argument: Any = "", review_argument_status: str = "", review_argument_source: str = "",
+202:     actual_local_body_by_chapter: Mapping[str, str] | None = None,
+203: ) -> dict[str, Any]:
+204:     """Build a complete plan and semantic-directory selector input from chapter packets.
+205: 
+206:     Chapter plans are copied in full.  Body text is optional and, when supplied,
+207:     is copied in full per chapter; no character-prefix projection is used.
+208:     Full source records remain in the chapter payloads for the downstream owner.
+209:     Source-authored semantic locators expose findings, conditions and limits.
+210:     """
+211: 
+212:     chapters = []
+213:     seen_units: set[str] = set()
+214:     all_unit_refs: list[dict[str, str]] = []
+215:     for raw in chapter_payloads:
+216:         if not isinstance(raw, Mapping):
+217:             raise ValueError("selection_chapter_payload_must_be_object")
+218:         chapter_id = _chapter_id(raw)
+219:         if not chapter_id:
+220:             raise ValueError("selection_chapter_id_required")
+221:         rows = _unit_rows(raw)
+222:         if not rows:
+223:             raise ValueError(f"selection_chapter_units_missing:{chapter_id}")
+224:         current_ids = [_unit_id(row) for row in rows]
+225:         if any(not value for value in current_ids):
+226:             raise ValueError(f"selection_unit_id_missing:{chapter_id}")
+227:         # Unit IDs are stable within a chapter.  Older packets used bare local
+228:         # IDs (for example U01) in every chapter, so a global bare-ID collision
+229:         # is valid and is retained in the qualified catalog below.
+230:         overlap = set(current_ids) & {value for value in current_ids if current_ids.count(value) > 1}
+231:         if overlap:
+232:             raise ValueError("selection_unit_id_duplicate:" + ",".join(sorted(overlap)))
+233:         seen_units.update(current_ids)
+234:         all_unit_refs.extend(_unit_ref(chapter_id, unit_id) for unit_id in current_ids)
+235:         context = _copy(raw.get("full_chapter_context") or {})
+236:         chapter = _copy(raw.get("chapter") or {})
+237:         body_map = actual_local_body_by_chapter or {}
+238:         body = body_map.get(chapter_id, raw.get("actual_local_body") or "")
+239:         chapters.append({
+240:             "chapter_id": chapter_id,
+241:             "chapter": chapter,
+242:             "chapter_plan": _copy(raw.get("chapter_plan") or {}),
+243:             "modifiable_unit_ids": _ids(raw.get("modifiable_unit_ids") or current_ids),
+244:             "read_only_unit_ids": _ids(raw.get("read_only_unit_ids") or []),
+245:             "readonly_neighbor_unit_roles": _copy(raw.get("readonly_neighbor_unit_roles") or []),
+246:             "full_chapter_context": context,
+247:             "actual_local_body": str(body or ""),
+248:             "material_index": _material_index(raw),
+249:             "material_catalog": _semantic_material_catalog(raw),
+250:             "source_identity_map": _copy(raw.get("source_identity_map") or {}),
+251:         })
+252:     if not chapters:
+253:         raise ValueError("selection_chapters_required")
+254:     declared_forbidden = sorted({
+255:         unit_id
+256:         for chapter in chapters
+257:         for unit_id in (
+258:             (
+259:                 set(_ids(chapter.get("read_only_unit_ids") or [])) - seen_units
+260:             )
+261:             | (
+262:                 set(_unit_id(row) for row in _unit_rows(chapter))
+263:                 - set(_ids(chapter.get("modifiable_unit_ids") or []))
+264:             )
+265:         )
+266:     })
+267:     declared_forbidden_refs = []
+268:     for chapter in chapters:
+269:         chapter_id = _chapter_id(chapter)
+270:         modifiable = set(_ids(chapter.get("modifiable_unit_ids") or []))
+271:         declared_forbidden_refs.extend(
+272:             _unit_ref(chapter_id, _unit_id(row))
+273:             for row in _unit_rows(chapter)
+274:             if _unit_id(row) and _unit_id(row) not in modifiable
+275:         )
+276:     payload = {
+277:         "schema_version": SELECTION_SCHEMA,
+278:         "selection_mode": {
+279:             "enabled": True,
+280:             "input_mode": "autonomous_from_full_outline",
+281:             "allow_none": True,
+282:             "allow_cross_chapter_groups": False,
+283:             "editable_scope": "same_chapter_local_cluster",
+284:             "global_and_neighbor_context": "read_only",
+285:             "selection_objective": "necessary_high_benefit_local_underdevelopment",
+286:             "rewrite_plan": False,
+287:             "do_not_add_evidence": True,
+288:         },
+289:         "research_question": str(research_question or ""),
+290:         "shared_outline": _copy(shared_outline or []),
+291:         "shared_scope": _copy(shared_scope or {}),
+292:         "review_argument": _copy(review_argument),
+293:         "review_argument_status": str(review_argument_status or ""),
+294:         "review_argument_source": str(review_argument_source or ""),
+295:         "chapters": chapters,
+296:         "all_unit_ids": sorted(seen_units),
+297:         "all_unit_refs": all_unit_refs,
+298:         "selector_forbidden_unit_ids": declared_forbidden,
+299:         "selector_forbidden_unit_refs": declared_forbidden_refs,
+300:         "call_id": "outline-unit-selection",
+301:     }
+302:     _verify_selection_payload(payload)
+303:     return payload
+
+390: def model_visible_selection_payload(
+391:     payload: Mapping[str, Any], *, include_material_index: bool = False,
+392: ) -> dict[str, Any]:
+393:     """Project a compact selector view without truncating any chapter plan.
+394: 
+395:     The complete payload remains the local source of truth for owner requests.
+396:     This view removes absolute card paths, exclusion inventories, repeated
+397:     neighbour prose, and per-chapter duplicate identity maps.  It retains a
+398:     referenced-source navigation by default; complete semantic locators are an
+399:     explicit diagnostic option. Both retain chapter-qualified readback locations.
+400:     """
+401: 
+402:     _verify_selection_payload(payload)
+403:     catalog: dict[str, dict[str, Any]] = {}
+404:     chapter_material_keys: dict[str, set[str]] = {}
+405:     original_chapters = payload.get("chapters") or []
+406:     for chapter in original_chapters:
+407:         chapter_id = _chapter_id(chapter)
+408:         source_catalog = chapter.get("material_catalog")
+409:         if not isinstance(source_catalog, Mapping):
+410:             raise ValueError(f"selection_semantic_catalog_required:{chapter_id}:rebuild_from_original_chapter_packets")
+411:         material_keys: set[str] = set()
+412:         entries = (source_catalog.get("entries") or []) if include_material_index else _referenced_material_entries(chapter)
+413:         for raw in entries:
+414:             # Identity alone is not sufficient: chapter-specific evidence
+415:             # variants must remain distinct even under an identical handle.
+416:             key = _hash({"identity": raw.get("identity"), "record_sha256": raw.get("record_sha256")})
+417:             entry = catalog.setdefault(key, {
+418:                 "identity_key": key,
+419:                 "identity": _copy(raw.get("identity") or {}),
+420:                 "record_sha256": raw.get("record_sha256"),
+421:                 "available_material_paths": _copy(raw.get("available_material_paths") or []) if include_material_index else sorted({str(path).split(".")[0] for path in raw.get("available_material_paths") or []}),
+422:                 "source_supplied_locators": _copy(raw.get("source_supplied_locators") or []) if include_material_index else [],
+423:                 "readback_locations": [],
+424:                 "full_record_available_for_owner": True,
+425:             })
+426:             location = {"chapter_id": chapter_id, "channel": raw.get("channel"),
+427:                         "access_id": raw.get("access_id"), "index_path": raw.get("index_path")}
+428:             if location not in entry["readback_locations"]:
+429:                 entry["readback_locations"].append(location)
+430:             material_keys.add(key)
+431:         chapter_material_keys[chapter_id] = material_keys
+432:     inventory_fingerprint = ""
+433:     if not include_material_index:
+434:         catalog, chapter_material_keys, inventory_fingerprint = _navigation_catalog(original_chapters)
+435:     material_catalog = [catalog[key] for key in sorted(catalog)]
+436:     catalog_index = {key: index for index, key in enumerate(sorted(catalog))}
+437:     shared_contents: list[str] = []
+438:     content_indexes: dict[str, int] = {}
+439:     shared_paths: list[list[str]] = []
+440:     path_indexes: dict[str, int] = {}
+441:     for entry in material_catalog:
+442:         paths = entry.pop("available_material_paths")
+443:         path_key = _hash(paths)
+444:         if path_key not in path_indexes:
+445:             path_indexes[path_key] = len(shared_paths)
+446:             shared_paths.append(paths)
+447:         entry["available_material_paths_ref"] = f"#/shared_material_paths/{path_indexes[path_key]}"
+448:         for locator in entry["source_supplied_locators"]:
+449:             text = locator.pop("source_excerpt")
+450:             if text not in content_indexes:
+451:                 content_indexes[text] = len(shared_contents)
+452:                 shared_contents.append(text)
+453:             locator["source_excerpt_ref"] = f"#/shared_material_contents/{content_indexes[text]}"
+454: 
+455:     chapters = []
+456:     for chapter in original_chapters:
+457:         chapter_id = _chapter_id(chapter)
+458:         chapter_raw = _compact_runtime_metadata(chapter.get("chapter") or {})
+459:         chapter_view = {
+460:             key: _copy(chapter_raw[key])
+461:             for key in ("chapter_id", "title", "purpose", "scope", "coordinated_scope", "reader_objective")
+462:             if key in chapter_raw
+463:         }
+464:         role_ids = _ids([
+465:             row.get("unit_id") for row in (chapter.get("readonly_neighbor_unit_roles") or [])
+466:             if isinstance(row, Mapping)
+467:         ])
+468:         role_chapters = sorted({str(row.get("chapter_id") or "") for row in (chapter.get("readonly_neighbor_unit_roles") or []) if isinstance(row, Mapping) and str(row.get("chapter_id") or "").strip()})
+469:         chapters.append({
+470:             "chapter_id": chapter_id,
+471:             "chapter": chapter_view,
+472:             # Exact equality is intentional: this layer must not trim science
+473:             # or writing duties from any unit.
+474:             "chapter_plan": _copy(chapter.get("chapter_plan") or {}),
+475:             "modifiable_unit_ids": _ids(chapter.get("modifiable_unit_ids") or []),
+476:             "read_only_unit_ids": _ids(chapter.get("read_only_unit_ids") or []),
+477:             "readonly_neighbor_unit_ids": role_ids,
+478:             "readonly_neighbor_chapter_ids": role_chapters,
+479:             "full_chapter_context": _compact_runtime_metadata(chapter.get("full_chapter_context") or {}),
+480:             "actual_local_body": str(chapter.get("actual_local_body") or ""),
+481:             "material_identity_refs": [f"#/material_identity_catalog/{catalog_index[key]}" for key in sorted(chapter_material_keys.get(chapter_id) or [])],
+482:         })
+483:     projected = {
+484:         "schema_version": SELECTION_SCHEMA,
+485:         "selection_mode": _copy(payload.get("selection_mode") or {}),
+486:         "research_question": str(payload.get("research_question") or ""),
+487:         "shared_outline": _compact_runtime_metadata(payload.get("shared_outline") or []),
+488:         "shared_scope": _compact_runtime_metadata(payload.get("shared_scope") or {}),
+489:         "review_argument": _copy(payload.get("review_argument") or ""),
+490:         "review_argument_status": str(payload.get("review_argument_status") or ""),
+491:         "review_argument_source": str(payload.get("review_argument_source") or ""),
+492:         "chapters": chapters,
+493:         "all_unit_ids": _ids(payload.get("all_unit_ids") or []),
+494:         "all_unit_refs": _unit_ref_rows(payload.get("all_unit_refs")) or [
+495:             _unit_ref(_chapter_id(chapter), _unit_id(row))
+496:             for chapter in original_chapters for row in _unit_rows(chapter) if _unit_id(row)
+497:         ],
+498:         "selector_forbidden_unit_ids": _ids(payload.get("selector_forbidden_unit_ids") or []),
+499:         "selector_forbidden_unit_refs": _unit_ref_rows(payload.get("selector_forbidden_unit_refs")) if payload.get("selector_forbidden_unit_refs") is not None else [],
+500:         "call_id": str(payload.get("call_id") or "outline-unit-selection"),
+501:         "model_visible_projection": {
+502:             "source_payload_preserved_locally": True,
+503:             "chapter_plan_lossless": True,
+504:             "runtime_metadata_compacted": True,
+505:             "neighbor_roles_as_ids_only": True,
+506:             "shared_identity_catalog": True,
+507:             "include_material_index": bool(include_material_index),
+508:             "semantic_material_catalog": bool(include_material_index),
+509:             "outline_first": not include_material_index,
+510:             "material_visibility": "full_semantic_diagnostic" if include_material_index else "plan_referenced_navigation_only",
+511:             "warning": "" if include_material_index else "Material content is not shown; selection gaps are hypotheses for the owner to verify against complete source records",
+512:         },
+513:     }
+514:     projected["material_identity_catalog"] = material_catalog
+515:     projected["shared_material_paths"] = shared_paths
+516:     if not include_material_index:
+517:         projected["material_inventory_fingerprint"] = inventory_fingerprint
+518:         projected["model_visible_projection"]["readback_location_fields"] = ["chapter_id", "access_id"]
+519:         projected["model_visible_projection"]["full_records_available_for_owner"] = True
+520:     if include_material_index:
+521:         projected["shared_material_contents"] = shared_contents
+522:     verify_model_visible_projection(payload, projected)
+523:     return projected
+
+635: def _verify_selection_payload(payload: Mapping[str, Any]) -> None:
+636:     if not isinstance(payload, Mapping) or not isinstance(payload.get("selection_mode"), Mapping):
+637:         raise ValueError("selection_payload_required")
+638:     if not payload.get("selection_mode", {}).get("enabled"):
+639:         raise ValueError("selection_mode_not_enabled")
+640:     for key in _FORBIDDEN_TOP_LEVEL:
+641:         if payload.get(key):
+642:             raise ValueError(f"selection_manual_control_forbidden:{key}")
+643:     chapters = payload.get("chapters") or []
+644:     if not isinstance(chapters, list) or not chapters:
+645:         raise ValueError("selection_chapters_required")
+646:     known: set[str] = set()
+647:     qualified: list[dict[str, str]] = []
+648:     for chapter in chapters:
+649:         if not isinstance(chapter, Mapping) or not _chapter_id(chapter):
+650:             raise ValueError("selection_chapter_invalid")
+651:         rows = _unit_rows(chapter)
+652:         ids = [_unit_id(row) for row in rows]
+653:         if len(ids) != len(set(ids)) or any(not value for value in ids):
+654:             raise ValueError(f"selection_unit_ids_invalid:{_chapter_id(chapter)}")
+655:         known.update(ids)
+656:         qualified.extend(_unit_ref(_chapter_id(chapter), value) for value in ids)
+657:     supplied_refs = payload.get("all_unit_refs")
+658:     if supplied_refs is not None:
+659:         if _unit_ref_rows(supplied_refs) != qualified:
+660:             raise ValueError("selection_all_unit_refs_mismatch")
+661:     elif len(qualified) != len(known):
+662:         # A legacy payload without qualified refs cannot safely represent
+663:         # repeated local IDs.  New payloads always carry all_unit_refs.
+664:         raise ValueError("selection_all_unit_refs_required_for_repeated_ids")
+665:     if set(_ids(payload.get("all_unit_ids"))) != known:
+666:         raise ValueError("selection_all_unit_ids_mismatch")
+
+669: def selection_messages(
+670:     payload: Mapping[str, Any], *, model_payload: Mapping[str, Any] | None = None,
+671: ) -> list[dict[str, str]]:
+672:     """Build a full-outline, selection-only request with no domain targets."""
+673: 
+674:     _verify_selection_payload(payload)
+675:     visible = model_visible_selection_payload(payload) if model_payload is None else model_payload
+676:     if model_payload is not None:
+677:         verify_model_visible_projection(payload, model_payload)
+678:         visible = model_payload
+679:     system = (
+680:         "你是综述细纲加强前的自主任务选择器。只选择必要且预期收益高的局部未展开单元；"
+681:         "目标是更好回答用户研究问题及其子问题。以现有完整细纲为主要依据，完整阅读研究问题、全篇职责、每章完整 chapter_plan、"
+682:         "paragraph_briefs、supporting_studies、证据用途、条件限制与论证关系。材料信息只作辅助，不重新审读全材料池。全篇与邻章只用于只读背景。"
+683:         "优先识别材料已经支持但写作任务尚未展开的缺口：机制材料仍停留在笼统介绍而无解释关系；"
+684:         "有研究却没有比较维度或比较意义；决定性条件、反例或限制未进入写作任务；"
+685:         "一个任务混合了需要分别回答的不同问题。还可识别证据到主张之间缺少必要推理或比较步骤的写作任务，"
+686:         "只指出缺失的分析职责，不断言主张错误；或同章局部任务重复同一证据、分析与结论，"
+687:         "没有不同的知识推进且妨碍回答子问题。重复引用本身不是缺口，不做风格性去重。"
+688:         "也可发现同性质的局部展开不足，但必须有输入依据；不得扩成全篇审稿或章节职责重分配。理由应定位任务、缺口依据和所服务子问题的收益。"
+689:         "每个选择都权衡局部修订的边际收益、材料可得性与后续读取/编辑成本；"
+690:         "不要因篇幅短、引用少、格式不齐、术语可润色或过渡句可优化就选择。"
+691:         "现有任务已经充分回答子问题时保留；无足够证据或收益不足可返回 none/no_change；不设数量配额。"
+692:         "每组可编辑 unit_ids 必须属于同一章节，仅组合确实需要一起处理的局部单元，禁止跨章逻辑组；"
+693:         "跨章联系只能放 related_read_only_unit_ids，不能成为跨章可编辑任务。"
+694:         "当不同章节使用相同的本地 unit_id 时，必须同时返回 unit_refs（每项含 chapter_id 和 unit_id）；"
+695:         "related_read_only_unit_refs 同理用于重复的只读本地 ID，不得凭 bare ID 猜章节。"
+696:         "selection_reason 说明为什么值得投入；improvement_focus 说明当前缺口、材料定位、"
+697:         "应承担的解释/比较/条件任务及局部边界，而不是写出科学答案、正确结论或替换措辞。"
+698:         "你不改写细纲、不提供科学修订答案、不写正文、不补充外部证据。只输出 JSON。"
+699:         "模型可见输入保留完整 chapter_plan；本地绝对卡片位置、运行排除清单和重复邻居正文未发送。"
+700:         "不把定位目录当成已经阅读的证据，局部缺口是交给下层核验的待办假设，不能宣称已确认科学事实。"
+701:         "综述转述、候选、工具及补充材料按实际来源和限制使用，不强制要求每条证据同时有 A/B。"
+702:     )
+703:     if visible.get("model_visible_projection", {}).get("semantic_material_catalog"):
+704:         system += (
+705:             "本次显式附加语义材料诊断目录；source_excerpt_ref 指向请求内 shared_material_contents 原文字段，"
+706:             "available_material_paths_ref 指向 shared_material_paths；省略字段仍可由下层回读。"
+707:         )
+708:     else:
+709:         system += (
+710:             "默认只附加当前细纲明确引用来源的轻量导航，不发送全材料池身份表、A/B摘要或工具答案。"
+711:             "material_identity_refs 是请求内 JSON pointer；available_material_paths_ref 指向可回读材料根字段，"
+712:             "readback_locations 每项为 [chapter_id, access_id]，给出各完整原记录的位置（同身份不同记录仍分别可读）。未列来源不表示不存在；完整材料仅由下层按需读取核验。"
+713:         )
+714:     user_contract = {
+715:         "status": "selected | none | no_change",
+716:         "groups": [{
+717:             "group_id": "model-stable-label",
+718:             "unit_ids": ["existing stable unit IDs"],
+719:             "unit_refs": [{"chapter_id": "existing chapter ID", "unit_id": "existing local unit ID"}],
+720:             "selection_reason": "material-backed reason to invest in this group",
+721:             "improvement_focus": ["specific organization/evidence/condition/comparison responsibility"],
+722:             "related_read_only_unit_ids": ["existing units that should remain boundary context"],
+723:             "related_read_only_unit_refs": [{"chapter_id": "existing chapter ID", "unit_id": "existing local unit ID"}],
+724:         }],
+725:     }
+726:     user = (
+727:         "返回且只返回符合以下合同的 JSON：" + json.dumps(user_contract, ensure_ascii=False, separators=(",", ":"))
+728:         + "。status=none 或 no_change 时 groups 必须为空。unit_ids 必须来自输入且不得重复；"
+729:         "重复本地 ID 必须用 unit_refs/related_read_only_unit_refs 明确给出 chapter_id；"
+730:         "related_read_only_unit_ids 只能引用输入中已有单元，不得把只读职责变成编辑任务。"
+731:         "不要输出 updated_plan、chapter_updates、正文、替代措辞、外部答案或人工问题清单。"
+732:         "每组 unit_ids 只能属于同一 chapter_id；不同章不能合组或自动拆组。\n完整选择输入："
+733:         + json.dumps(visible, ensure_ascii=False, separators=(",", ":"))
+734:     )
+735:     return [{"role": "system", "content": system}, {"role": "user", "content": user}]
+
+777: def validate_selection_response(payload: Mapping[str, Any], parsed: Mapping[str, Any]) -> dict[str, Any]:
+778:     """Validate selector structure without guessing invalid IDs or groups."""
+779: 
+780:     _verify_selection_payload(payload)
+781:     errors: list[str] = []
+782:     if not isinstance(parsed, Mapping):
+783:         return {"status": "invalid", "groups": [], "validation_errors": ["selection_response_not_object"]}
+784:     raw_status = str(parsed.get("status") or "").strip().casefold()
+785:     if raw_status in _NO_SELECTION_STATUSES:
+786:         if parsed.get("groups"):
+787:             errors.append("no_change_with_groups")
+788:         return {"status": "invalid" if errors else "no_change", "groups": [], "validation_errors": errors}
+789:     if raw_status not in {"selected", "selection", "updated"}:
+790:         return {"status": "invalid", "groups": [], "validation_errors": ["selection_status_required_or_invalid"]}
+791:     raw_groups = parsed.get("groups")
+792:     if not isinstance(raw_groups, list) or not raw_groups:
+793:         return {"status": "invalid", "groups": [], "validation_errors": ["selected_groups_required"]}
+794:     chapter_by_unit, known_readonly = _known_units(payload)
+795:     known_units = set(chapter_by_unit)
+796:     seen: set[tuple[str, str]] = set()
+797:     groups: list[dict[str, Any]] = []
+798:     for index, raw in enumerate(raw_groups):
+799:         if not isinstance(raw, Mapping):
+800:             errors.append(f"group_not_object:{index}")
+801:             continue
+802:         explicit_chapters = _ids(raw.get("chapter_ids") or ([raw.get("chapter_id")] if raw.get("chapter_id") else []))
+803:         supplied_refs = raw.get("unit_refs")
+804:         if supplied_refs is None:
+805:             supplied_refs = raw.get("selected_unit_refs")
+806:         unit_refs = _unit_ref_rows(supplied_refs) if supplied_refs is not None else []
+807:         raw_unit_ids = _raw_id_values(raw.get("unit_ids") or raw.get("modifiable_unit_ids"))
+808:         if supplied_refs is not None and raw_unit_ids and len(unit_refs) != len(raw_unit_ids):
+809:             errors.append(f"unit_refs_invalid:{index}")
+810:         if supplied_refs is not None and raw_unit_ids and raw_unit_ids != [ref["unit_id"] for ref in unit_refs]:
+811:             errors.append(f"unit_refs_unit_ids_mismatch:{index}")
+812:         unit_ids = [ref["unit_id"] for ref in unit_refs] if unit_refs else _ids(raw_unit_ids)
+813:         if not unit_ids:
+814:             errors.append(f"group_units_required:{index}")
+815:             continue
+816:         if len(raw_unit_ids) != len(set(raw_unit_ids)):
+817:             errors.append(f"unit_repeated_within_group:{index}")
+818:         resolved_refs: list[dict[str, str]] = []
+819:         for unit_id, supplied in zip(unit_ids, unit_refs or [None] * len(unit_ids)):
+820:             if supplied is not None:
+821:                 chapters = chapter_by_unit.get(unit_id) or []
+822:                 if supplied["chapter_id"] not in chapters:
+823:                     errors.append(f"unknown_unit_ref:{supplied['chapter_id']}:{unit_id}")
+824:                 else:
+825:                     resolved_refs.append(supplied)
+826:                 continue
+827:             chapters = chapter_by_unit.get(unit_id) or []
+828:             candidates = [chapter for chapter in explicit_chapters if chapter in chapters]
+829:             if len(candidates) == 1:
+830:                 resolved_refs.append(_unit_ref(candidates[0], unit_id))
+831:             elif len(chapters) == 1:
+832:                 resolved_refs.append(_unit_ref(chapters[0], unit_id))
+833:             elif not chapters:
+834:                 errors.append(f"unknown_unit_ids:{unit_id}")
+835:             else:
+836:                 errors.append(f"unit_id_ambiguous:{unit_id}:use_unit_refs_or_chapter_id")
+837:         resolved_keys = [_unit_key(ref["chapter_id"], ref["unit_id"]) for ref in resolved_refs]
+838:         forbidden_selected = sorted({f"{chapter}:{unit_id}" for chapter, unit_id in resolved_keys if (chapter, unit_id) in known_readonly})
+839:         if forbidden_selected:
+840:             errors.append(f"readonly_unit_refs:{','.join(forbidden_selected)}")
+841:         duplicate = sorted(set(resolved_keys) & seen)
+842:         if duplicate:
+843:             errors.append("unit_repeated_across_groups:" + ",".join(f"{chapter}:{unit_id}" for chapter, unit_id in duplicate))
+844:         seen.update(resolved_keys)
+845:         chapter_ids = sorted({ref["chapter_id"] for ref in resolved_refs})
+846:         if len(chapter_ids) > 1:
+847:             errors.append(f"cross_chapter_group_forbidden:{index}:submit_same_chapter_local_clusters")
+848:         if explicit_chapters and set(explicit_chapters) != set(chapter_ids):
+849:             errors.append(f"group_chapter_ids_mismatch:{index}")
+850:         related_raw = raw.get("related_read_only_unit_ids") or raw.get("read_only_unit_ids") or []
+851:         related_ref_values = raw.get("related_read_only_unit_refs")
+852:         related_refs = _unit_ref_rows(related_ref_values) if related_ref_values is not None else []
+853:         related_ids_raw = _raw_id_values(related_raw)
+854:         if related_ref_values is not None and related_ids_raw and len(related_refs) != len(related_ids_raw):
+855:             errors.append(f"related_unit_refs_invalid:{index}")
+856:         if related_ref_values is not None and related_ids_raw and related_ids_raw != [ref["unit_id"] for ref in related_refs]:
+857:             errors.append(f"related_unit_refs_unit_ids_mismatch:{index}")
+858:         related = [ref["unit_id"] for ref in related_refs] if related_refs else _ids(related_ids_raw)
+859:         resolved_related: list[dict[str, str]] = []
+860:         if related_refs:
+861:             for ref in related_refs:
+862:                 if ref["chapter_id"] not in (chapter_by_unit.get(ref["unit_id"]) or []):
+863:                     errors.append(f"unknown_related_readonly_ref:{ref['chapter_id']}:{ref['unit_id']}")
+864:                 else:
+865:                     resolved_related.append(ref)
+866:         else:
+867:             for unit_id in related:
+868:                 chapters = chapter_by_unit.get(unit_id) or []
+869:                 if len(chapters) == 1:
+870:                     resolved_related.append(_unit_ref(chapters[0], unit_id))
+871:                 elif not chapters:
+872:                     errors.append(f"unknown_related_readonly_ids:{unit_id}")
+873:                 else:
+874:                     errors.append(f"related_unit_id_ambiguous:{unit_id}:use_related_read_only_unit_refs")
+875:         related_keys = [_unit_key(ref["chapter_id"], ref["unit_id"]) for ref in resolved_related]
+876:         overlap = sorted(set(resolved_keys) & set(related_keys))
+877:         if overlap:
+878:             errors.append("editable_readonly_overlap:" + ",".join(f"{chapter}:{unit_id}" for chapter, unit_id in overlap))
+879:         if not str(raw.get("selection_reason") or "").strip():
+880:             errors.append(f"selection_reason_required:{index}")
+881:         focus = raw.get("improvement_focus")
+882:         if not isinstance(focus, list) or not any(str(item).strip() for item in focus):
+883:             errors.append(f"improvement_focus_required:{index}")
+884:         groups.append({
+885:             "group_id": _canonical_group_id(unit_ids, chapter_ids=chapter_ids, unit_refs=resolved_refs),
+886:             "model_group_id": str(raw.get("group_id") or "").strip(),
+887:             "chapter_ids": chapter_ids,
+888:             "unit_ids": unit_ids,
+889:             "unit_refs": resolved_refs,
+890:             "selection_reason": str(raw.get("selection_reason") or ""),
+891:             "improvement_focus": _copy(focus or []),
+892:             "related_read_only_unit_ids": related,
+893:             "related_read_only_unit_refs": resolved_related,
+894:             "known_readonly_unit_ids": sorted({unit_id for chapter, unit_id in related_keys if (chapter, unit_id) in known_readonly}),
+895:         })
+896:     if errors:
+897:         return {"status": "invalid", "groups": groups, "validation_errors": list(dict.fromkeys(errors))}
+898:     return {"status": "selected", "groups": groups, "validation_errors": []}
+
+954: def project_selection_group(
+955:     chapter_payloads: Mapping[str, Mapping[str, Any]], group: Mapping[str, Any],
+956: ) -> list[dict[str, Any]]:
+957:     """Create chapter-local owner payloads while preserving group provenance."""
+958:     unit_to_chapters: dict[str, list[str]] = {}
+959:     units_by_key: dict[tuple[str, str], Mapping[str, Any]] = {}
+960:     for chapter_id, payload in chapter_payloads.items():
+961:         chapter_id = str(chapter_id)
+962:         for row in _unit_rows(payload):
+963:             unit_id = _unit_id(row)
+964:             if unit_id:
+965:                 unit_to_chapters.setdefault(unit_id, []).append(chapter_id)
+966:                 units_by_key[_unit_key(chapter_id, unit_id)] = row
+967: 
+968:     declared_chapters = _ids(group.get("chapter_ids") or ([group["chapter_id"]] if group.get("chapter_id") else []))
+969: 
+970:     def resolve(unit_id: str, *, hint: str | None = None, label: str = "unit") -> tuple[str, str]:
+971:         candidates = unit_to_chapters.get(unit_id) or []
+972:         if hint and hint in candidates:
+973:             return _unit_key(hint, unit_id)
+974:         if len(candidates) == 1:
+975:             return _unit_key(candidates[0], unit_id)
+976:         if not candidates:
+977:             raise ValueError(f"selection_projection_unknown_{label}s:{unit_id}")
+978:         raise ValueError(f"selection_projection_{label}_ambiguous:{unit_id}:use_qualified_ref")
+979: 
+980:     supplied_refs = group.get("unit_refs")
+981:     if supplied_refs is None:
+982:         supplied_refs = group.get("selected_unit_refs")
+983:     if supplied_refs is not None:
+984:         selected_refs = _unit_ref_rows(supplied_refs)
+985:         if not selected_refs:
+986:             raise ValueError("selection_projection_units_required")
+987:         selected_keys = [_unit_key(ref["chapter_id"], ref["unit_id"]) for ref in selected_refs]
+988:         if any(key not in units_by_key for key in selected_keys):
+989:             missing = [f"{chapter}:{unit_id}" for chapter, unit_id in selected_keys
+990:                        if (chapter, unit_id) not in units_by_key]
+991:             raise ValueError("selection_projection_unknown_unit_refs:" + ",".join(missing))
+992:     else:
+993:         selected_ids = _raw_id_values(group.get("unit_ids"))
+994:         if not selected_ids:
+995:             raise ValueError("selection_projection_units_required")
+996:         if len(selected_ids) != len(set(selected_ids)):
+997:             raise ValueError("selection_projection_unit_repeated_within_group")
+998:         hint = declared_chapters[0] if len(declared_chapters) == 1 else None
+999:         selected_keys = [resolve(unit_id, hint=hint) for unit_id in selected_ids]
+1000:         selected_refs = [_unit_ref(*key) for key in selected_keys]
+1001:     if len(selected_keys) != len(set(selected_keys)):
+1002:         raise ValueError("selection_projection_unit_repeated_within_group")
+1003:     selected = [unit_id for _, unit_id in selected_keys]
+1004:     actual_chapters = sorted({chapter_id for chapter_id, _ in selected_keys})
+1005:     if len(actual_chapters) != 1:
+1006:         raise ValueError("cross_chapter_group_forbidden:submit_same_chapter_local_clusters;no_automatic_split")
+1007:     if declared_chapters and set(declared_chapters) != set(actual_chapters):
+1008:         raise ValueError("selection_projection_chapter_ids_mismatch")
+1009:     source = chapter_payloads[actual_chapters[0]]
+1010:     allowed = set(_ids(source.get("modifiable_unit_ids") or []))
+1011:     forbidden = set(_ids(source.get("read_only_unit_ids") or []))
+1012:     if set(selected) - allowed or set(selected) & forbidden:
+1013:         raise ValueError("selection_projection_readonly_units")
+1014:     selected_set = set(selected)
+1015:     group_id = str(group.get("group_id") or _canonical_group_id(selected, chapter_ids=actual_chapters, unit_refs=selected_refs))
+1016: 
+1017:     related_ref_values = group.get("related_read_only_unit_refs")
+1018:     if related_ref_values is not None:
+1019:         related_refs = _unit_ref_rows(related_ref_values)
+1020:         related_keys = [_unit_key(ref["chapter_id"], ref["unit_id"]) for ref in related_refs]
+1021:         if any(key not in units_by_key for key in related_keys):
+1022:             raise ValueError("selection_projection_unknown_related_readonly_refs")
+1023:     else:
+1024:         related_ids = _raw_id_values(group.get("related_read_only_unit_ids"))
+1025:         related_keys = [resolve(unit_id, label="related_readonly") for unit_id in related_ids]
+1026:         related_refs = [_unit_ref(*key) for key in related_keys]
+1027:     if len(related_keys) != len(set(related_keys)):
+1028:         raise ValueError("selection_projection_related_readonly_repeated")
+1029:     if set(related_keys) & set(selected_keys):
+1030:         raise ValueError("selection_projection_editable_readonly_overlap")
+1031:     related = [unit_id for _, unit_id in related_keys]
+1032:     chapter_ids = actual_chapters
+1033:     current_roles = _current_unit_roles(chapter_payloads)
+1034: 
+1035:     def context_key(unit_id: str, preferred: str | None = None) -> tuple[str, str] | None:
+1036:         candidates = unit_to_chapters.get(unit_id) or []
+1037:         if preferred and preferred in candidates:
+1038:             return _unit_key(preferred, unit_id)
+1039:         # A stale role may name an ancestor removed by a prior split/merge.
+1040:         # An explicit chapter on that role still scopes the historical ID;
+1041:         # current_readonly_keys will resolve its remapped descendants.
+1042:         if preferred and not candidates:
+1043:             return _unit_key(preferred, unit_id)
+1044:         if len(candidates) == 1:
+1045:             return _unit_key(candidates[0], unit_id)
+1046:         return None
+1047: 
+1048:     def current_readonly_keys(key: tuple[str, str]) -> list[tuple[str, str]]:
+1049:         owner_chapter, unit_id = key
+1050:         packet = chapter_payloads.get(owner_chapter) or {}
+1051:         resolved = [key] if key in current_roles else []
+1052:         for new_id, ancestors in (packet.get("unit_id_remap") or {}).items():
+1053:             ancestor_ids = [str(value) for value in ancestors] if isinstance(ancestors, list) else [str(ancestors)]
+1054:             if unit_id in ancestor_ids and _unit_key(owner_chapter, str(new_id)) in current_roles:
+1055:                 resolved.append(_unit_key(owner_chapter, str(new_id)))
+1056:         return list(dict.fromkeys(resolved)) or [key]
+1057: 
+1058:     outputs = []
+1059:     for chapter_id in chapter_ids:
+1060:         source = chapter_payloads.get(chapter_id)
+1061:         if not isinstance(source, Mapping):
+1062:             continue
+1063:         local_selected = [unit_id for owner, unit_id in selected_keys if owner == chapter_id]
+1064:         if not local_selected:
+1065:             continue
+1066:         local_set = set(local_selected)
+1067:         projected = _copy(source)
+1068:         original_plan = projected.get("chapter_plan") if isinstance(projected.get("chapter_plan"), Mapping) else {}
+1069:         units = [row for row in original_plan.get("units") or [] if isinstance(row, Mapping) and _unit_id(row) in local_set]
+1070:         projected_plan = _copy(original_plan)
+1071:         projected_plan["units"] = units
+1072:         # Owner remaps describe this immediate revision, not historical lineage.
+1073:         projected_plan.pop("unit_id_remap", None)
+1074:         projected.pop("unit_id_remap", None)
+1075:         projected["chapter_plan"] = projected_plan
+1076:         context = _copy(projected.get("full_chapter_context") or {})
+1077:         context.update(_chapter_sequence_context(source))
+1078:         projected["full_chapter_context"] = context
+1079:         existing_roles = [row for row in projected.get("readonly_neighbor_unit_roles") or [] if isinstance(row, Mapping)]
+1080:         role_by_key: dict[tuple[str, str], Mapping[str, Any]] = {}
+1081:         for row in existing_roles:
+1082:             old_id = _unit_id(row)
+1083:             if not old_id:
+1084:                 continue
+1085:             key = context_key(old_id, str(row.get("chapter_id") or "").strip() or chapter_id)
+1086:             if key is None:
+1087:                 raise ValueError(f"selection_projection_role_ambiguous:{old_id}:use_chapter_id")
+1088:             for resolved_key in current_readonly_keys(key):
+1089:                 if resolved_key in selected_keys:
+1090:                     continue
+1091:                 current = current_roles.get(resolved_key)
+1092:                 role_by_key[resolved_key] = (
+1093:                     _role_from_unit(current[1], current[0], reason="current_total_outline_context")
+1094:                     if current is not None else _copy(row)
+1095:                 )
+1096:         # Every unselected unit in the current chapter is a read-only boundary.
+1097:         source_units = {_unit_id(row): row for row in _unit_rows(source)}
+1098:         for unit_id, row in source_units.items():
+1099:             if unit_id not in local_set:
+1100:                 role_by_key[_unit_key(chapter_id, unit_id)] = _role_from_unit(row, chapter_id, reason="unselected_same_chapter_unit")
+1101:         # Related chapters are context only, never an editable group.
+1102:         for owner_chapter, unit_id in [*selected_keys, *related_keys]:
+1103:             if owner_chapter == chapter_id or (owner_chapter, unit_id) in selected_keys:
+1104:                 continue
+1105:             other_unit = units_by_key.get(_unit_key(owner_chapter, unit_id))
+1106:             if other_unit is not None:
+1107:                 role_by_key[_unit_key(owner_chapter, unit_id)] = _role_from_unit(
+1108:                     other_unit, owner_chapter, reason="related_read_only_context",
+1109:                 )
+1110:         # Existing read-only IDs may not have had a role object in a prior
+1111:         # packet. Resolve them from the latest total outline when possible.
+1112:         existing_readonly_refs = _unit_ref_rows(projected.get("read_only_unit_refs"))
+1113:         existing_readonly_keys = [_unit_key(ref["chapter_id"], ref["unit_id"]) for ref in existing_readonly_refs]
+1114:         legacy_unknown_readonly: list[str] = []
+1115:         role_chapters = {
+1116:             _unit_id(row): str(row.get("chapter_id") or "").strip()
+1117:             for row in existing_roles
+1118:             if _unit_id(row) and str(row.get("chapter_id") or "").strip()
+1119:         }
+1120:         for old_id in _raw_id_values(projected.get("read_only_unit_ids") or []):
+1121:             key = context_key(old_id, role_chapters.get(old_id) or chapter_id)
+1122:             if key is None:
+1123:                 if old_id not in {unit_id for _, unit_id in existing_readonly_keys}:
+1124:                     legacy_unknown_readonly.append(old_id)
+1125:                 continue
+1126:             existing_readonly_keys.extend(current_readonly_keys(key))
+1127:         for key in existing_readonly_keys:
+1128:             if key in selected_keys or key in role_by_key:
+1129:                 continue
+1130:             current = current_roles.get(key)
+1131:             if current is not None:
+1132:                 role_by_key[key] = _role_from_unit(current[1], current[0], reason="current_total_outline_context")
+1133:         readonly_keys = set(existing_readonly_keys) | set(role_by_key)
+1134:         readonly_keys -= set(selected_keys)
+1135:         # The legacy flat owner contract is chapter-local. Cross-chapter
+1136:         # boundaries remain complete in qualified refs and role objects, so a
+1137:         # repeated bare ID can never collide with this chapter's editable ID.
+1138:         # Preserve the legacy flat boundary for distinct IDs. A cross-chapter
+1139:         # ID that equals an editable local ID is represented only by its
+1140:         # qualified ref/role, avoiding a false flat overlap in the owner
+1141:         # contract. Other unique read-only IDs remain backward-compatible.
+1142:         readonly_ids = {
+1143:             unit_id for _, unit_id in readonly_keys
+1144:             if unit_id not in local_selected and unit_id not in selected_set
+1145:         } | set(legacy_unknown_readonly)
+1146:         projected["readonly_neighbor_unit_roles"] = list(role_by_key.values())
+1147:         projected["modifiable_unit_ids"] = local_selected
+1148:         projected["modifiable_unit_refs"] = [_unit_ref(chapter_id, unit_id) for unit_id in local_selected]
+1149:         projected["read_only_unit_ids"] = sorted(readonly_ids)
+1150:         projected["read_only_unit_refs"] = [_unit_ref(owner, unit_id) for owner, unit_id in sorted(readonly_keys)]
+1151:         # Keep the selector's machine-generated investment rationale visible to
+1152:         # the owner request as advisory provenance. It is deliberately kept
+1153:         # outside chapter_plan/material channels and is never treated as fact.
+1154:         projected["selection_context"] = {
+1155:             "origin": "autonomous_unit_selector",
+1156:             "advisory_only": True,
+1157:             "group_id": group_id,
+1158:             "selection_reason": str(group.get("selection_reason") or ""),
+1159:             "improvement_focus": _copy(group.get("improvement_focus") or []),
+1160:             "group_chapter_ids": chapter_ids,
+1161:             "selected_unit_ids": selected,
+1162:             "selected_unit_refs": selected_refs,
+1163:             "related_read_only_unit_ids": sorted({unit_id for owner, unit_id in related_keys if owner == chapter_id}),
+1164:             "related_read_only_unit_refs": related_refs,
+1165:         }
+1166:         projected["call_id"] = f"outline-selection:{group_id}:{chapter_id}"
+1167:         contract = _copy(projected.get("unit_identity_contract") or {})
+1168:         contract["existing_unit_ids"] = list(local_selected)
+1169:         projected["unit_identity_contract"] = contract
+1170:         projected["input_integrity"] = strengthening._input_integrity(projected)
+1171:         strengthening._verify_envelope(projected)
+1172:         outputs.append({
+1173:             "group_id": group_id,
+1174:             "selection_reason": str(group.get("selection_reason") or ""),
+1175:             "improvement_focus": _copy(group.get("improvement_focus") or []),
+1176:             "group_chapter_ids": chapter_ids,
+1177:             "chapter_id": chapter_id,
+1178:             "modifiable_unit_ids": local_selected,
+1179:             "modifiable_unit_refs": [_unit_ref(chapter_id, unit_id) for unit_id in local_selected],
+1180:             "read_only_unit_ids": sorted(readonly_ids),
+1181:             "read_only_unit_refs": [_unit_ref(owner, unit_id) for owner, unit_id in sorted(readonly_keys)],
+1182:             "payload": projected,
+1183:         })
+1184:     return outputs
+
+1187: def selection_to_on_demand_payloads(
+1188:     chapter_payloads: Mapping[str, Mapping[str, Any]], selection: Mapping[str, Any],
+1189: ) -> list[dict[str, Any]]:
+1190:     if selection.get("validation_errors"):
+1191:         raise ValueError("selection_not_accepted_for_projection:validation_errors")
+1192:     if str(selection.get("status") or "").casefold() in {"none", "no_change"}:
+1193:         if selection.get("groups"):
+1194:             raise ValueError("selection_not_accepted_for_projection:no_change_with_groups")
+1195:         return []
+1196:     if str(selection.get("status") or "").casefold() != "selected":
+1197:         raise ValueError("selection_not_accepted_for_projection")
+1198:     outputs = []
+1199:     seen: set[tuple[str, str]] = set()
+1200:     groups = selection.get("groups") or []
+1201:     if not isinstance(groups, list) or not groups:
+1202:         raise ValueError("selection_projection_groups_required")
+1203:     for group in groups:
+1204:         if not isinstance(group, Mapping):
+1205:             raise ValueError("selection_projection_group_not_object")
+1206:         projected = project_selection_group(chapter_payloads, group)
+1207:         group_refs = {
+1208:             _unit_key(row["chapter_id"], unit_id)
+1209:             for row in projected
+1210:             for unit_id in row.get("modifiable_unit_ids") or []
+1211:         }
+1212:         if seen & group_refs:
+1213:             raise ValueError("selection_projection_unit_repeated_across_groups")
+1214:         seen.update(group_refs)
+1215:         outputs.extend(projected)
+1216:     return outputs
+
+1263: def estimate_selection_request(messages: Sequence[Mapping[str, Any]], *, profile: Mapping[str, Any], token_counter: Any = None) -> dict[str, Any]:
+1264:     return strengthening.estimate_strengthening_request(messages, profile=profile, token_counter=token_counter)
+
+1267: def run_selection(
+1268:     payload: Mapping[str, Any], *, client: Any, model: str, thinking_budget: int, max_output_tokens: int,
+1269:     call_id: str | None = None, checkpoint_dir: str | Path | None = None, resume: bool = True,
+1270:     profile: Mapping[str, Any] | None = None, model_payload: Mapping[str, Any] | None = None,
+1271:     retry_unresolved: bool = False,
+1272: ) -> dict[str, Any]:
+1273:     _verify_selection_payload(payload)
+1274:     if model_payload is None:
+1275:         model_payload = model_visible_selection_payload(payload)
+1276:     messages = selection_messages(payload, model_payload=model_payload)
+1277:     signature = _checkpoint_signature(messages, model=model, thinking_budget=thinking_budget, max_output_tokens=max_output_tokens, profile=profile)
+1278:     stage_path = _checkpoint(checkpoint_dir, "SELECTION_STAGE.json")
+1279:     stage = _load(stage_path, signature, resume)
+1280:     if (retry_unresolved and stage is not None
+1281:             and validate_selection_response(payload, stage.get("parsed_response") or {}).get("status") == "invalid"):
+1282:         from .outline_on_demand import _archive_rejected_checkpoints
+1283:         _archive_rejected_checkpoints((stage_path, _checkpoint(checkpoint_dir, "SELECTION_RAW_STAGE.json")), signature)
+1284:         stage = None
+1285:     raw_reused = False
+1286:     if stage is not None:
+1287:         raw = stage.get("raw_response") or {}
+1288:         parsed = stage.get("parsed_response") or {}
+1289:         telemetry = stage.get("telemetry") or {}
+1290:     else:
+1291:         raw_path = _checkpoint(checkpoint_dir, "SELECTION_RAW_STAGE.json")
+1292:         raw_stage = _load(raw_path, signature, resume)
+1293:         if raw_stage is not None:
+1294:             raw = raw_stage.get("raw_response") or {}
+1295:             raw_reused = True
+1296:         else:
+1297:             from .module4 import runtime
+1298:             raw = runtime.invoke_client(
+1299:                 client, messages, model=model, max_output_tokens=int(max_output_tokens), thinking=True,
+1300:                 thinking_budget=int(thinking_budget), call_id=call_id or str(payload.get("call_id") or "outline-selection"),
+1301:             )
+1302:             _write(raw_path, {"signature": signature, "raw_response": _copy(raw)})
+1303:         parsed, telemetry = planning._parse_planner_response(raw)
+1304:         validation = validate_selection_response(payload, parsed)
+1305:         result = {
+1306:             **validation, "parsed_response": parsed, "telemetry": telemetry, "raw_response": raw,
+1307:             "messages": messages, "request_sha256": _hash(messages), "raw_reused": raw_reused,
+1308:         }
+1309:         _write(stage_path, {"signature": signature, "result": result, "raw_response": _copy(raw), "parsed_response": _copy(parsed), "telemetry": _copy(telemetry)})
+1310:         return result
+1311:     validation = validate_selection_response(payload, parsed)
+1312:     return {
+1313:         **validation, "parsed_response": parsed, "telemetry": telemetry, "raw_response": raw,
+1314:         "messages": messages, "request_sha256": _hash(messages), "stage_reused": True,
+1315:     }

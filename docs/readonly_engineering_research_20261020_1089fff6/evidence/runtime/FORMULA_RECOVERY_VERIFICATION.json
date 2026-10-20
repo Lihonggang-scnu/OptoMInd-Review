@@ -1,0 +1,596 @@
+{
+  "acceptance": {
+    "all_materials_recognized": true,
+    "all_papers_success": true,
+    "all_requested_refs_complete": true,
+    "all_resource_limits_pass": true,
+    "all_snapshot_manifest_hashes_match": true,
+    "failed_cache_backup_unchanged": true,
+    "test_passed": true
+  },
+  "generated_at": "2026-10-17T05:01:59Z",
+  "implementation_scope": {
+    "allowed_model": "CodeFormulaV2",
+    "configured_batch_size": 32,
+    "driver_config_sha256": "b7a86b52ac07d30a98bd9e2fb0b1b73f8e9f41debd865873bbd2eb58d21234ca",
+    "gpu_limit_mib": 8192,
+    "hook_config_sha256": "2b79839aec0894aae7ef86b17ae7a2bf6db9cc0fd51913022f58e0cd81a2afe8",
+    "memory_fraction_default": 0.6,
+    "no_api_or_qwen": true,
+    "no_ledger_mutation": true,
+    "no_source_snapshot_mutation": true,
+    "parser_sha256_after": "f3ab9b12a88443edc93bc69014ece9d3d76097eaab84e5e3fbf4b86b7f204ac9",
+    "source_file": "S\\scripts\\upgrade3\\parse_docling_batch.py",
+    "test_file": "S\\tests\\upgrade3\\test_docling_batch_driver.py",
+    "timeout_seconds": 600
+  },
+  "papers": [
+    {
+      "batch_result_path": "N\\preparation\\formula_oom_recovery_v1\\P0123\\cache\\a4c2f63d1a7fc98c225083bc1e6c7b5b0d1fa1a072dbd667a8377b51e6452308\\selection-ad1c1870ce39c408\\results\\BATCH_RESULT.json",
+      "cache_root": "N\\preparation\\formula_oom_recovery_v1\\P0123\\cache\\a4c2f63d1a7fc98c225083bc1e6c7b5b0d1fa1a072dbd667a8377b51e6452308",
+      "configured_batch_size": 32,
+      "current_path": "N\\preparation\\formula_oom_recovery_v1\\P0123\\cache\\a4c2f63d1a7fc98c225083bc1e6c7b5b0d1fa1a072dbd667a8377b51e6452308\\CURRENT.json",
+      "current_pointer_materials_path": "N\\preparation\\formula_oom_recovery_v1\\P0123\\cache\\a4c2f63d1a7fc98c225083bc1e6c7b5b0d1fa1a072dbd667a8377b51e6452308\\LOCAL_FORMULAS.json",
+      "empty_result_refs": [],
+      "enhanced_document_sha256": "3de3f532856c88f36a8a218c1e7730b5a295d484e97bf69a870739050c74898f",
+      "executed_batch_sizes": [
+        30,
+        15,
+        15
+      ],
+      "formula_batch_trace": [
+        {
+          "batch_size": 30,
+          "error": "Error processing code/formula batch: CUDA out of memory. Tried to allocate 900.00 MiB. GPU 0 has a total capacity of 10.00 GiB of which 4.37 GiB is free. 4.96 GiB allowed; Of the allocated memory 3.40 GiB is allocated by PyTorch, and 1.07 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation. See documentation for Memory Management (https://pytorch.org/docs/stable/notes/cuda.html#environment",
+          "next_batch_size": 15,
+          "ref_count": 30,
+          "status": "oom"
+        },
+        {
+          "batch_size": 15,
+          "ref_count": 15,
+          "status": "success"
+        },
+        {
+          "batch_size": 15,
+          "ref_count": 15,
+          "status": "success"
+        }
+      ],
+      "formula_oom_retries": 1,
+      "formula_scale": 2.0,
+      "materials_fidelity_status": "local_transcription_candidate_not_scientific_verification",
+      "materials_path": "N\\preparation\\formula_oom_recovery_v1\\P0123\\cache\\a4c2f63d1a7fc98c225083bc1e6c7b5b0d1fa1a072dbd667a8377b51e6452308\\LOCAL_FORMULAS.json",
+      "materials_refs_match_requested": true,
+      "model_name": "CodeFormulaV2",
+      "paper": "P0123",
+      "peak_gpu_memory_mib": 6348,
+      "processed_count": 30,
+      "raw_document_sha256": "b4cf6b48a52b4dc5df801c15a89e432cde5d692ed1f8d7e4325c38f64678ac2d",
+      "receipt_formula_error": "",
+      "recognized_region_count": 30,
+      "requested_count": 30,
+      "requested_processed_sets_equal": true,
+      "run_path": "N\\preparation\\formula_oom_recovery_v1\\P0123\\cache\\a4c2f63d1a7fc98c225083bc1e6c7b5b0d1fa1a072dbd667a8377b51e6452308\\selection-ad1c1870ce39c408\\results\\803d2ffaf3ea48639fc2\\run.json",
+      "snapshot": "N\\stages\\04_local_materials\\snapshots\\389e21e4a74a743ab543d66443ba8c386751c8c2\\snapshot-9bc0014dfb9396753e9d37df",
+      "snapshot_integrity": {
+        "all_declared_file_hashes_match": true,
+        "expected_file_count": 13,
+        "files": [
+          {
+            "actual_sha256": "a3717a3cf2f52610c3614e027eecf8ba9686e0eff4860bb998e78b1c142a16eb",
+            "expected_sha256": "a3717a3cf2f52610c3614e027eecf8ba9686e0eff4860bb998e78b1c142a16eb",
+            "match": true,
+            "path": "DOCUMENT_ASSETS.json"
+          },
+          {
+            "actual_sha256": "3c200429e3eb13f84ace1765a92232bfba0feba23af2e96ec66367c558b16ba0",
+            "expected_sha256": "3c200429e3eb13f84ace1765a92232bfba0feba23af2e96ec66367c558b16ba0",
+            "match": true,
+            "path": "DOCUMENT_BLOCKS.jsonl"
+          },
+          {
+            "actual_sha256": "b411d6236c826cc2594f244fff5321a588987fc15d12b6a3288940d0eeb6569d",
+            "expected_sha256": "b411d6236c826cc2594f244fff5321a588987fc15d12b6a3288940d0eeb6569d",
+            "match": true,
+            "path": "READING_VIEW.md"
+          },
+          {
+            "actual_sha256": "2fb1cc66b545c916df9989361d444f4d8f0e904356a5510a96e23e37b33f49af",
+            "expected_sha256": "2fb1cc66b545c916df9989361d444f4d8f0e904356a5510a96e23e37b33f49af",
+            "match": true,
+            "path": "REFERENCES.json"
+          },
+          {
+            "actual_sha256": "1081d17d1f460c5e59dbefb7f26699548cbddc303ef7fddd4999c909faf81834",
+            "expected_sha256": "1081d17d1f460c5e59dbefb7f26699548cbddc303ef7fddd4999c909faf81834",
+            "match": true,
+            "path": "sources/artifact-2-803d2ffaf3ea.xml"
+          },
+          {
+            "actual_sha256": "14aead3cd19c0d1892148c165f32357f6f199bbaaddca2e3a58afe844a03461f",
+            "expected_sha256": "14aead3cd19c0d1892148c165f32357f6f199bbaaddca2e3a58afe844a03461f",
+            "match": true,
+            "path": "sources/docling-layout-0de38545c5950ea6-audit.json"
+          },
+          {
+            "actual_sha256": "7129edbfd2afaadb904a9b640ee2606cb001ee1cfbb832ac8d92f87ac4a74f79",
+            "expected_sha256": "7129edbfd2afaadb904a9b640ee2606cb001ee1cfbb832ac8d92f87ac4a74f79",
+            "match": true,
+            "path": "sources/docling-layout-0de38545c5950ea6-crops.json"
+          },
+          {
+            "actual_sha256": "5af6552565ce96ba154b3c8e601828684ba169289acbf19a022a591c6a7e4121",
+            "expected_sha256": "5af6552565ce96ba154b3c8e601828684ba169289acbf19a022a591c6a7e4121",
+            "match": true,
+            "path": "sources/docling-layout-0de38545c5950ea6-parser_run.json"
+          },
+          {
+            "actual_sha256": "b4cf6b48a52b4dc5df801c15a89e432cde5d692ed1f8d7e4325c38f64678ac2d",
+            "expected_sha256": "b4cf6b48a52b4dc5df801c15a89e432cde5d692ed1f8d7e4325c38f64678ac2d",
+            "match": true,
+            "path": "sources/docling-layout-0de38545c5950ea6-pdf_layout_raw.json"
+          },
+          {
+            "actual_sha256": "12c3e03b7165926e3b80bee11983df19c0c0cdd1f6f247239453d052afc47cc8",
+            "expected_sha256": "12c3e03b7165926e3b80bee11983df19c0c0cdd1f6f247239453d052afc47cc8",
+            "match": true,
+            "path": "sources/docling-layout-0de38545c5950ea6.json"
+          },
+          {
+            "actual_sha256": "585528e0c6846ffea61eb9fb7fc1a2c4e9608d386709f19659d931e2d9acb9c7",
+            "expected_sha256": "585528e0c6846ffea61eb9fb7fc1a2c4e9608d386709f19659d931e2d9acb9c7",
+            "match": true,
+            "path": "sources/docling-regions-803d2ffaf3ea4863.json"
+          },
+          {
+            "actual_sha256": "2326c16e8a3cfd8ff1e763136474c0a24f09be59ace96fc69b9e7f5380817e8a",
+            "expected_sha256": "2326c16e8a3cfd8ff1e763136474c0a24f09be59ace96fc69b9e7f5380817e8a",
+            "match": true,
+            "path": "sources/observed-metadata-2326c16e8a3c.json"
+          },
+          {
+            "actual_sha256": "803d2ffaf3ea48639fc26205c5bd6fd4f76d3964f11ca44e03cab0a7b587b83e",
+            "expected_sha256": "803d2ffaf3ea48639fc26205c5bd6fd4f76d3964f11ca44e03cab0a7b587b83e",
+            "match": true,
+            "path": "sources/original-pdf-803d2ffaf3ea.pdf"
+          }
+        ],
+        "manifest_sha256": "b95779d4c07cff2d387c291fab425d43958325d964987600b6fb70b18b087eec",
+        "snapshot_id": "snapshot-9bc0014dfb9396753e9d37df",
+        "source_sha256_by_role": {
+          "observed_metadata": "2326c16e8a3cfd8ff1e763136474c0a24f09be59ace96fc69b9e7f5380817e8a",
+          "parser_audit": "14aead3cd19c0d1892148c165f32357f6f199bbaaddca2e3a58afe844a03461f",
+          "parser_run": "5af6552565ce96ba154b3c8e601828684ba169289acbf19a022a591c6a7e4121",
+          "pdf": "803d2ffaf3ea48639fc26205c5bd6fd4f76d3964f11ca44e03cab0a7b587b83e",
+          "pdf_crop_manifest": "7129edbfd2afaadb904a9b640ee2606cb001ee1cfbb832ac8d92f87ac4a74f79",
+          "pdf_layout_raw": "b4cf6b48a52b4dc5df801c15a89e432cde5d692ed1f8d7e4325c38f64678ac2d",
+          "pdf_primary_layout": "12c3e03b7165926e3b80bee11983df19c0c0cdd1f6f247239453d052afc47cc8",
+          "pdf_primary_region_index": "585528e0c6846ffea61eb9fb7fc1a2c4e9608d386709f19659d931e2d9acb9c7"
+        }
+      },
+      "source_pdf_sha256": "803d2ffaf3ea48639fc26205c5bd6fd4f76d3964f11ca44e03cab0a7b587b83e",
+      "status": "success",
+      "supervisor_elapsed_seconds": 37.641,
+      "unprocessed_refs": [],
+      "within_600s_supervisor": true,
+      "within_600s_worker": true,
+      "within_8gib_ceiling": true,
+      "worker_elapsed_seconds": 30.219
+    },
+    {
+      "batch_result_path": "N\\preparation\\formula_oom_recovery_v1\\P0480\\cache\\159a8bdfbdaebec05d37a60c9f6f2b36a974e1e2e67fcead95e30177bad762a5\\selection-6a33a33260840b47\\results\\BATCH_RESULT.json",
+      "cache_root": "N\\preparation\\formula_oom_recovery_v1\\P0480\\cache\\159a8bdfbdaebec05d37a60c9f6f2b36a974e1e2e67fcead95e30177bad762a5",
+      "configured_batch_size": 32,
+      "current_path": "N\\preparation\\formula_oom_recovery_v1\\P0480\\cache\\159a8bdfbdaebec05d37a60c9f6f2b36a974e1e2e67fcead95e30177bad762a5\\CURRENT.json",
+      "current_pointer_materials_path": "N\\preparation\\formula_oom_recovery_v1\\P0480\\cache\\159a8bdfbdaebec05d37a60c9f6f2b36a974e1e2e67fcead95e30177bad762a5\\LOCAL_FORMULAS.json",
+      "empty_result_refs": [],
+      "enhanced_document_sha256": "81b6740ebcae43d9e4b41e67365737a7b9bf3f889d51b96a4669074a330d253b",
+      "executed_batch_sizes": [
+        32,
+        16,
+        16,
+        7
+      ],
+      "formula_batch_trace": [
+        {
+          "batch_size": 32,
+          "error": "Error processing code/formula batch: CUDA out of memory. Tried to allocate 2.44 GiB. GPU 0 has a total capacity of 10.00 GiB of which 5.26 GiB is free. 4.98 GiB allowed; Of the allocated memory 3.57 GiB is allocated by PyTorch, and 23.14 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation. See documentation for Memory Management (https://pytorch.org/docs/stable/notes/cuda.html#environment-",
+          "next_batch_size": 16,
+          "ref_count": 32,
+          "status": "oom"
+        },
+        {
+          "batch_size": 16,
+          "ref_count": 16,
+          "status": "success"
+        },
+        {
+          "batch_size": 16,
+          "ref_count": 16,
+          "status": "success"
+        },
+        {
+          "batch_size": 7,
+          "ref_count": 7,
+          "status": "success"
+        }
+      ],
+      "formula_oom_retries": 1,
+      "formula_scale": 2.0,
+      "materials_fidelity_status": "local_transcription_candidate_not_scientific_verification",
+      "materials_path": "N\\preparation\\formula_oom_recovery_v1\\P0480\\cache\\159a8bdfbdaebec05d37a60c9f6f2b36a974e1e2e67fcead95e30177bad762a5\\LOCAL_FORMULAS.json",
+      "materials_refs_match_requested": true,
+      "model_name": "CodeFormulaV2",
+      "paper": "P0480",
+      "peak_gpu_memory_mib": 6955,
+      "processed_count": 39,
+      "raw_document_sha256": "ccf8f864fed96afc470ee3bf411072cda5036338a8e94e871edd40ebe77f056c",
+      "receipt_formula_error": "",
+      "recognized_region_count": 39,
+      "requested_count": 39,
+      "requested_processed_sets_equal": true,
+      "run_path": "N\\preparation\\formula_oom_recovery_v1\\P0480\\cache\\159a8bdfbdaebec05d37a60c9f6f2b36a974e1e2e67fcead95e30177bad762a5\\selection-6a33a33260840b47\\results\\ceb63921d9f2f132856d\\run.json",
+      "snapshot": "N\\preparation\\m3_min600_continuation\\materials_new431_v2\\snapshots\\dc5a9e668c1d2a66612b7e3e697c545f6cc22b05\\snapshot-1a045ac3aab64b078a9b1b14",
+      "snapshot_integrity": {
+        "all_declared_file_hashes_match": true,
+        "expected_file_count": 13,
+        "files": [
+          {
+            "actual_sha256": "895aced7d566340d4b81636515682b320d1c64272c2471287cb1ee487034c27a",
+            "expected_sha256": "895aced7d566340d4b81636515682b320d1c64272c2471287cb1ee487034c27a",
+            "match": true,
+            "path": "DOCUMENT_ASSETS.json"
+          },
+          {
+            "actual_sha256": "5dbe0a72207d3a094686b71ec578c420f2e7975caa2b539dbe457b1781e422f5",
+            "expected_sha256": "5dbe0a72207d3a094686b71ec578c420f2e7975caa2b539dbe457b1781e422f5",
+            "match": true,
+            "path": "DOCUMENT_BLOCKS.jsonl"
+          },
+          {
+            "actual_sha256": "dcfd2c8202ba81ab21bf5404f92098a49a9945945d0dd41496a13691a6262faf",
+            "expected_sha256": "dcfd2c8202ba81ab21bf5404f92098a49a9945945d0dd41496a13691a6262faf",
+            "match": true,
+            "path": "READING_VIEW.md"
+          },
+          {
+            "actual_sha256": "2fb1cc66b545c916df9989361d444f4d8f0e904356a5510a96e23e37b33f49af",
+            "expected_sha256": "2fb1cc66b545c916df9989361d444f4d8f0e904356a5510a96e23e37b33f49af",
+            "match": true,
+            "path": "REFERENCES.json"
+          },
+          {
+            "actual_sha256": "fb52b012cb12c89b5dd547cd6c6832fae6efbff8c72b1da6b707feab5963afa4",
+            "expected_sha256": "fb52b012cb12c89b5dd547cd6c6832fae6efbff8c72b1da6b707feab5963afa4",
+            "match": true,
+            "path": "sources/artifact-2-ceb63921d9f2.xml"
+          },
+          {
+            "actual_sha256": "3a3e60bcda1b047a81593e94ec948ae3605887d5ea245995a9b2beffc994f2bd",
+            "expected_sha256": "3a3e60bcda1b047a81593e94ec948ae3605887d5ea245995a9b2beffc994f2bd",
+            "match": true,
+            "path": "sources/docling-layout-217d36d1a6e74cf2-audit.json"
+          },
+          {
+            "actual_sha256": "b4ff0d82ce4814a9a7d3413248863530614f5a032ad059d4727ef4028a1b15bb",
+            "expected_sha256": "b4ff0d82ce4814a9a7d3413248863530614f5a032ad059d4727ef4028a1b15bb",
+            "match": true,
+            "path": "sources/docling-layout-217d36d1a6e74cf2-crops.json"
+          },
+          {
+            "actual_sha256": "a533cbc1d4c068767b01feb0fa884191a5271d2b68f65b4c00a14e1d6f0aa5d6",
+            "expected_sha256": "a533cbc1d4c068767b01feb0fa884191a5271d2b68f65b4c00a14e1d6f0aa5d6",
+            "match": true,
+            "path": "sources/docling-layout-217d36d1a6e74cf2-parser_run.json"
+          },
+          {
+            "actual_sha256": "ccf8f864fed96afc470ee3bf411072cda5036338a8e94e871edd40ebe77f056c",
+            "expected_sha256": "ccf8f864fed96afc470ee3bf411072cda5036338a8e94e871edd40ebe77f056c",
+            "match": true,
+            "path": "sources/docling-layout-217d36d1a6e74cf2-pdf_layout_raw.json"
+          },
+          {
+            "actual_sha256": "e9bc081a7347a22dc31bbbe07e01b3a3c768cbec7bfbfc9c9bdd610b135a8e34",
+            "expected_sha256": "e9bc081a7347a22dc31bbbe07e01b3a3c768cbec7bfbfc9c9bdd610b135a8e34",
+            "match": true,
+            "path": "sources/docling-layout-217d36d1a6e74cf2.json"
+          },
+          {
+            "actual_sha256": "7835d6c67bc4d7641c6e5c1836d141a9b3443983d772452d5de71fafcaa75f73",
+            "expected_sha256": "7835d6c67bc4d7641c6e5c1836d141a9b3443983d772452d5de71fafcaa75f73",
+            "match": true,
+            "path": "sources/docling-regions-ceb63921d9f2f132.json"
+          },
+          {
+            "actual_sha256": "4e16bd983388be8949fce7dc4562b8cba0dd78d28190cfc5db0a76746c81fe2c",
+            "expected_sha256": "4e16bd983388be8949fce7dc4562b8cba0dd78d28190cfc5db0a76746c81fe2c",
+            "match": true,
+            "path": "sources/observed-metadata-4e16bd983388.json"
+          },
+          {
+            "actual_sha256": "ceb63921d9f2f132856d54838fbe86cbe0aa5bb2b01f4f2cb1954048b4e72524",
+            "expected_sha256": "ceb63921d9f2f132856d54838fbe86cbe0aa5bb2b01f4f2cb1954048b4e72524",
+            "match": true,
+            "path": "sources/original-pdf-ceb63921d9f2.pdf"
+          }
+        ],
+        "manifest_sha256": "075589eb71d03e115d8cae2a1135d22ba1154cfa467249e294552bdef0033cd8",
+        "snapshot_id": "snapshot-1a045ac3aab64b078a9b1b14",
+        "source_sha256_by_role": {
+          "observed_metadata": "4e16bd983388be8949fce7dc4562b8cba0dd78d28190cfc5db0a76746c81fe2c",
+          "parser_audit": "3a3e60bcda1b047a81593e94ec948ae3605887d5ea245995a9b2beffc994f2bd",
+          "parser_run": "a533cbc1d4c068767b01feb0fa884191a5271d2b68f65b4c00a14e1d6f0aa5d6",
+          "pdf": "ceb63921d9f2f132856d54838fbe86cbe0aa5bb2b01f4f2cb1954048b4e72524",
+          "pdf_crop_manifest": "b4ff0d82ce4814a9a7d3413248863530614f5a032ad059d4727ef4028a1b15bb",
+          "pdf_layout_raw": "ccf8f864fed96afc470ee3bf411072cda5036338a8e94e871edd40ebe77f056c",
+          "pdf_primary_layout": "e9bc081a7347a22dc31bbbe07e01b3a3c768cbec7bfbfc9c9bdd610b135a8e34",
+          "pdf_primary_region_index": "7835d6c67bc4d7641c6e5c1836d141a9b3443983d772452d5de71fafcaa75f73"
+        }
+      },
+      "source_pdf_sha256": "ceb63921d9f2f132856d54838fbe86cbe0aa5bb2b01f4f2cb1954048b4e72524",
+      "status": "success",
+      "supervisor_elapsed_seconds": 22.828,
+      "unprocessed_refs": [],
+      "within_600s_supervisor": true,
+      "within_600s_worker": true,
+      "within_8gib_ceiling": true,
+      "worker_elapsed_seconds": 17.109
+    }
+  ],
+  "preserved_backup_sources": {
+    "all_hashes_match": true,
+    "files": [
+      {
+        "actual_sha256": "b68ba1f6f273b216586ffaa3e364e4d9e8ec6ec1f1336cc3cade0df1059ef05a",
+        "backup": "N\\preparation\\planning548_formula_oom_backup_v1\\00_parse_docling_batch.py",
+        "expected_sha256": "b68ba1f6f273b216586ffaa3e364e4d9e8ec6ec1f1336cc3cade0df1059ef05a",
+        "match": true
+      },
+      {
+        "actual_sha256": "b7a86b52ac07d30a98bd9e2fb0b1b73f8e9f41debd865873bbd2eb58d21234ca",
+        "backup": "N\\preparation\\planning548_formula_oom_backup_v1\\01_FORMULA_DRIVER_CONFIG.json",
+        "expected_sha256": "b7a86b52ac07d30a98bd9e2fb0b1b73f8e9f41debd865873bbd2eb58d21234ca",
+        "match": true
+      },
+      {
+        "actual_sha256": "2b79839aec0894aae7ef86b17ae7a2bf6db9cc0fd51913022f58e0cd81a2afe8",
+        "backup": "N\\preparation\\planning548_formula_oom_backup_v1\\02_FORMULA_HOOK_CONFIG.json",
+        "expected_sha256": "2b79839aec0894aae7ef86b17ae7a2bf6db9cc0fd51913022f58e0cd81a2afe8",
+        "match": true
+      },
+      {
+        "actual_sha256": "17a1115a3d94c5f0ef195788b44c16d34ea6baf514190f31202c25f4f9aa991a",
+        "backup": "N\\preparation\\planning548_formula_oom_backup_v1\\03_ROOT_PLANNING548_FORMULA_OOM_FINDING.json",
+        "expected_sha256": "17a1115a3d94c5f0ef195788b44c16d34ea6baf514190f31202c25f4f9aa991a",
+        "match": true
+      }
+    ],
+    "manifest_path": "N\\preparation\\planning548_formula_oom_backup_v1\\MANIFEST.json"
+  },
+  "preserved_original_failed_cache": {
+    "all_hashes_match": true,
+    "files": [
+      {
+        "actual_bytes": 433,
+        "actual_sha256": "32c88b7804b23e907ffa72c250a3518b4b120fca02e791e321d29ab7311a7d79",
+        "bytes": 433,
+        "match": true,
+        "path": "P0123\\selection-ad1c1870ce39c408\\MANIFEST.json",
+        "sha256": "32c88b7804b23e907ffa72c250a3518b4b120fca02e791e321d29ab7311a7d79"
+      },
+      {
+        "actual_bytes": 505,
+        "actual_sha256": "1825ef5931c176caa1bd4efcbedaea02574c77d18b4f21c5d37a85dbbe46ce03",
+        "bytes": 505,
+        "match": true,
+        "path": "P0123\\selection-ad1c1870ce39c408\\SELECTION.json",
+        "sha256": "1825ef5931c176caa1bd4efcbedaea02574c77d18b4f21c5d37a85dbbe46ce03"
+      },
+      {
+        "actual_bytes": 0,
+        "actual_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "match": true,
+        "path": "P0123\\selection-ad1c1870ce39c408\\stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "actual_bytes": 140,
+        "actual_sha256": "c294d479dde2f2c6e122e4c3d37928b1194cc29d5352da4f789b96b0aed69948",
+        "bytes": 140,
+        "match": true,
+        "path": "P0123\\selection-ad1c1870ce39c408\\stdout.log",
+        "sha256": "c294d479dde2f2c6e122e4c3d37928b1194cc29d5352da4f789b96b0aed69948"
+      },
+      {
+        "actual_bytes": 693751,
+        "actual_sha256": "b4cf6b48a52b4dc5df801c15a89e432cde5d692ed1f8d7e4325c38f64678ac2d",
+        "bytes": 693751,
+        "match": true,
+        "path": "P0123\\raw\\803d2ffaf3ea48639fc2\\document.json",
+        "sha256": "b4cf6b48a52b4dc5df801c15a89e432cde5d692ed1f8d7e4325c38f64678ac2d"
+      },
+      {
+        "actual_bytes": 6801,
+        "actual_sha256": "514d47a22c6c988bf9536050d7858aadbac68ef7521611494b755b441d9c0874",
+        "bytes": 6801,
+        "match": true,
+        "path": "P0123\\selection-ad1c1870ce39c408\\results\\BATCH_RESULT.json",
+        "sha256": "514d47a22c6c988bf9536050d7858aadbac68ef7521611494b755b441d9c0874"
+      },
+      {
+        "actual_bytes": 399,
+        "actual_sha256": "fe3c52e57a7112d7e587841b97462296d991c3af69d5a505a6c27233bc79c104",
+        "bytes": 399,
+        "match": true,
+        "path": "P0123\\selection-ad1c1870ce39c408\\results\\CURRENT_WORKER.json",
+        "sha256": "fe3c52e57a7112d7e587841b97462296d991c3af69d5a505a6c27233bc79c104"
+      },
+      {
+        "actual_bytes": 146040,
+        "actual_sha256": "24b1934cc754de0a1d62f91087c50be7a4b2b23344302603cbf313bdf11b4a49",
+        "bytes": 146040,
+        "match": true,
+        "path": "P0123\\selection-ad1c1870ce39c408\\results\\stderr.log",
+        "sha256": "24b1934cc754de0a1d62f91087c50be7a4b2b23344302603cbf313bdf11b4a49"
+      },
+      {
+        "actual_bytes": 0,
+        "actual_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "match": true,
+        "path": "P0123\\selection-ad1c1870ce39c408\\results\\stdout.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "actual_bytes": 6639,
+        "actual_sha256": "919f8ad03fcec60f6199d2e27eb2f16a494ba3aaea9ef7806370f5d0bb1cf2d7",
+        "bytes": 6639,
+        "match": true,
+        "path": "P0123\\selection-ad1c1870ce39c408\\results\\WORKER_HISTORY.json",
+        "sha256": "919f8ad03fcec60f6199d2e27eb2f16a494ba3aaea9ef7806370f5d0bb1cf2d7"
+      },
+      {
+        "actual_bytes": 32,
+        "actual_sha256": "36adab2edc012ec6651a6dc7ae415e3c5c48ee87690b3684289291c0f16e2936",
+        "bytes": 32,
+        "match": true,
+        "path": "P0123\\selection-ad1c1870ce39c408\\results\\.workers\\4de1393147064b46a7ffa6fd1325bf3b.json",
+        "sha256": "36adab2edc012ec6651a6dc7ae415e3c5c48ee87690b3684289291c0f16e2936"
+      },
+      {
+        "actual_bytes": 693751,
+        "actual_sha256": "b4cf6b48a52b4dc5df801c15a89e432cde5d692ed1f8d7e4325c38f64678ac2d",
+        "bytes": 693751,
+        "match": true,
+        "path": "P0123\\selection-ad1c1870ce39c408\\results\\803d2ffaf3ea48639fc2\\document.json",
+        "sha256": "b4cf6b48a52b4dc5df801c15a89e432cde5d692ed1f8d7e4325c38f64678ac2d"
+      },
+      {
+        "actual_bytes": 4984,
+        "actual_sha256": "e8298e90f84044cfd819e0ddc5d28b752547db7921a8553b7c9cc6f8178b6ba0",
+        "bytes": 4984,
+        "match": true,
+        "path": "P0123\\selection-ad1c1870ce39c408\\results\\803d2ffaf3ea48639fc2\\run.json",
+        "sha256": "e8298e90f84044cfd819e0ddc5d28b752547db7921a8553b7c9cc6f8178b6ba0"
+      },
+      {
+        "actual_bytes": 463,
+        "actual_sha256": "eecb83e589fc527c01efe93ae9284999d621b726651aa250f9533eff783d038b",
+        "bytes": 463,
+        "match": true,
+        "path": "P0480\\selection-6a33a33260840b47\\MANIFEST.json",
+        "sha256": "eecb83e589fc527c01efe93ae9284999d621b726651aa250f9533eff783d038b"
+      },
+      {
+        "actual_bytes": 627,
+        "actual_sha256": "c3837d7a63719f5854d98c6e3e6e81b3c8dfa6d29dc38375a14db27cdb7c427f",
+        "bytes": 627,
+        "match": true,
+        "path": "P0480\\selection-6a33a33260840b47\\SELECTION.json",
+        "sha256": "c3837d7a63719f5854d98c6e3e6e81b3c8dfa6d29dc38375a14db27cdb7c427f"
+      },
+      {
+        "actual_bytes": 0,
+        "actual_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "match": true,
+        "path": "P0480\\selection-6a33a33260840b47\\stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "actual_bytes": 140,
+        "actual_sha256": "269bd3637a2a09296dbb98ef6e72023b663a160d29e6a3b1f23ccfd245b4c0f9",
+        "bytes": 140,
+        "match": true,
+        "path": "P0480\\selection-6a33a33260840b47\\stdout.log",
+        "sha256": "269bd3637a2a09296dbb98ef6e72023b663a160d29e6a3b1f23ccfd245b4c0f9"
+      },
+      {
+        "actual_bytes": 512009,
+        "actual_sha256": "ccf8f864fed96afc470ee3bf411072cda5036338a8e94e871edd40ebe77f056c",
+        "bytes": 512009,
+        "match": true,
+        "path": "P0480\\raw\\ceb63921d9f2f132856d\\document.json",
+        "sha256": "ccf8f864fed96afc470ee3bf411072cda5036338a8e94e871edd40ebe77f056c"
+      },
+      {
+        "actual_bytes": 7273,
+        "actual_sha256": "3c24a9f98f6429ff19ffba2251d58eca2743c4cea72ef95157e2548c5deda91f",
+        "bytes": 7273,
+        "match": true,
+        "path": "P0480\\selection-6a33a33260840b47\\results\\BATCH_RESULT.json",
+        "sha256": "3c24a9f98f6429ff19ffba2251d58eca2743c4cea72ef95157e2548c5deda91f"
+      },
+      {
+        "actual_bytes": 399,
+        "actual_sha256": "f215fbeec6e65ec4fd66d259fc9e4d78684b4d6eb2c6008465586d2188d39661",
+        "bytes": 399,
+        "match": true,
+        "path": "P0480\\selection-6a33a33260840b47\\results\\CURRENT_WORKER.json",
+        "sha256": "f215fbeec6e65ec4fd66d259fc9e4d78684b4d6eb2c6008465586d2188d39661"
+      },
+      {
+        "actual_bytes": 146466,
+        "actual_sha256": "31d69473af6100384c420a272a0f8db9b9ea5ee5cb5f0198840fdc3349024162",
+        "bytes": 146466,
+        "match": true,
+        "path": "P0480\\selection-6a33a33260840b47\\results\\stderr.log",
+        "sha256": "31d69473af6100384c420a272a0f8db9b9ea5ee5cb5f0198840fdc3349024162"
+      },
+      {
+        "actual_bytes": 0,
+        "actual_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "match": true,
+        "path": "P0480\\selection-6a33a33260840b47\\results\\stdout.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "actual_bytes": 7151,
+        "actual_sha256": "f1b19f4f61f9bebdfa781acbb5e4913a1439f2ced5070d284aec8e784e83f5d2",
+        "bytes": 7151,
+        "match": true,
+        "path": "P0480\\selection-6a33a33260840b47\\results\\WORKER_HISTORY.json",
+        "sha256": "f1b19f4f61f9bebdfa781acbb5e4913a1439f2ced5070d284aec8e784e83f5d2"
+      },
+      {
+        "actual_bytes": 32,
+        "actual_sha256": "bff9b7b5caf55484f64947282e1907b8397ac43a6f3afa26f8ff5f5b7c221b53",
+        "bytes": 32,
+        "match": true,
+        "path": "P0480\\selection-6a33a33260840b47\\results\\.workers\\eea283fd57694b3bb0e24bde206399e4.json",
+        "sha256": "bff9b7b5caf55484f64947282e1907b8397ac43a6f3afa26f8ff5f5b7c221b53"
+      },
+      {
+        "actual_bytes": 512993,
+        "actual_sha256": "f55c429756efa2107da71e90c09eb09e82194f6b4dba5e84aa6d363098867b5a",
+        "bytes": 512993,
+        "match": true,
+        "path": "P0480\\selection-6a33a33260840b47\\results\\ceb63921d9f2f132856d\\document.json",
+        "sha256": "f55c429756efa2107da71e90c09eb09e82194f6b4dba5e84aa6d363098867b5a"
+      },
+      {
+        "actual_bytes": 5376,
+        "actual_sha256": "16ae22c9f627a768bd8214edf1943a1752ad3f8089ee3e37dd93c71df00f36a4",
+        "bytes": 5376,
+        "match": true,
+        "path": "P0480\\selection-6a33a33260840b47\\results\\ceb63921d9f2f132856d\\run.json",
+        "sha256": "16ae22c9f627a768bd8214edf1943a1752ad3f8089ee3e37dd93c71df00f36a4"
+      }
+    ],
+    "manifest_path": "N\\preparation\\planning548_formula_oom_backup_v1\\FAILED_CACHE_MANIFEST.json"
+  },
+  "schema_version": "optomind.formula_oom_recovery_v1.verification",
+  "source_commit": "05d6ebbf1289e9e5aa4629625af90751888e4712",
+  "test_verification": {
+    "command": "python -m pytest -q tests/upgrade3/test_docling_batch_driver.py",
+    "covers": [
+      "swallowed_oom_then_smaller_batch_success",
+      "batch_one_terminal_oom_transparent_failure",
+      "non_oom_logger_error_no_false_success"
+    ],
+    "result": "12 passed in 0.13s"
+  }
+}

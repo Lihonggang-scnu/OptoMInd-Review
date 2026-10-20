@@ -1,0 +1,112 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 02964bd1955d7ff5f3555990f1441129926cac6e1def7908882529f980b5e864
+
+# ORIGINAL SOURCE LINES 318-346
+318: def extract_body(manuscript: str, chapter_roles: Sequence[Mapping[str, Any]] = ()) -> str:
+319:     """Project original BODY losslessly; remove only valid owned spans and title."""
+320:     spans, _headings, title = _structure(manuscript, chapter_roles)
+321:     if title:
+322:         spans = [*spans, _Span("document_title", title.start, title.end)]
+323:     return _remove_spans(manuscript, spans)
+324: 
+325: 
+326: def body_preservation_projection(
+327:     manuscript: str, chapter_roles: Sequence[Mapping[str, Any]] = (),
+328: ) -> str:
+329:     """Public exact-preservation check, identical to the model's BODY extraction."""
+330:     return extract_body(manuscript, chapter_roles)
+331: 
+332: 
+333: def extract_owned_parts(manuscript: str) -> dict[str, str]:
+334:     """Read owned inner Markdown for publication metadata, validating all markers.
+335: 
+336:     This does not infer ownership from an unmarked heading. Values retain their
+337:     heading and content but omit the marker comments and surrounding padding.
+338:     """
+339:     spans, _headings, _title = _structure(manuscript, ())
+340:     result = {}
+341:     for span in spans:
+342:         start_marker = f"<!-- manuscript-part:{span.part}:start -->"
+343:         end_marker = f"<!-- manuscript-part:{span.part}:end -->"
+344:         end = manuscript.rfind(end_marker, span.start, span.end)
+345:         result[span.part] = manuscript[span.start + len(start_marker):end].strip()
+346:     return result
+# ORIGINAL SOURCE LINES 387-463
+387: def apply_serial_parts(
+388:     manuscript: str, parts: Mapping[str, Any],
+389:     chapter_roles: Sequence[Mapping[str, Any]] = (),
+390:     *, language: str = "zh",
+391: ) -> tuple[str, list[dict[str, str]]]:
+392:     """Apply standalone parts atomically; never replace an unowned BODY span.
+393: 
+394:     Unprovided parts remain unchanged. Keywords, when provided, belong to the
+395:     provided abstract. Callers should preflight before generation; this second
+396:     preflight prevents bypassing safety through direct application.
+397:     """
+398:     conflicts, warnings = preflight_placement(manuscript, chapter_roles)
+399:     if conflicts:
+400:         raise SerialPartsApplicationError(conflicts[0]["code"] + ":" + conflicts[0]["reason"])
+401:     if not isinstance(parts, Mapping):
+402:         raise SerialPartsApplicationError("parts_must_be_object")
+403:     language_family = str(language).lower().replace("_", "-").split("-", 1)[0]
+404:     if language_family not in _HEADINGS:
+405:         raise SerialPartsApplicationError("unsupported_application_language:" + str(language))
+406:     supplied = {part: _part_text(parts, part) for part in ("title", *_PART_NAMES)}
+407:     keywords = parts.get("keywords") or []
+408:     if not isinstance(keywords, (list, tuple)) or any(not isinstance(value, str) for value in keywords):
+409:         raise SerialPartsApplicationError("keywords_must_be_list_of_text")
+410:     if keywords and not supplied["abstract"]:
+411:         raise SerialPartsApplicationError("keywords_require_supplied_abstract")
+412:     if any(_MARKER_LIKE.search(value) or "\n" in value or "\r" in value for value in keywords):
+413:         raise SerialPartsApplicationError("invalid_keyword_text")
+414:     original_body = extract_body(manuscript, chapter_roles)
+415:     newline = "\r\n" if "\r\n" in manuscript else "\n"
+416:     result = manuscript
+417:     log: list[dict[str, str]] = list(warnings)
+418:     for part, value in supplied.items():
+419:         if not value:
+420:             continue
+421:         if part == "title":
+422:             content = "# " + value
+423:         else:
+424:             content = "## " + _HEADINGS[language_family][part] + newline + newline + value
+425:             if part == "abstract" and keywords:
+426:                 label, separator = ("**Keywords:** ", "; ") if language_family == "en" else ("**关键词：** ", "；")
+427:                 content += newline + newline + label + separator.join(value.strip() for value in keywords if value.strip())
+428:         block = _block(part, content, newline)
+429:         spans, headings, title = _structure(result, chapter_roles)
+430:         existing = next((span for span in spans if span.part == part), None)
+431:         references = [heading for heading in headings
+432:                       if heading.level <= 2 and _is_reference_heading(heading.title)]
+433:         if existing:
+434:             if part == "conclusion" and references and existing.start > references[0].start:
+435:                 # Relocate only this module's owned region, preserving every
+436:                 # unowned BODY/reference byte and its relative order.
+437:                 result = result[:existing.start] + result[existing.end:]
+438:                 start = end = references[0].start
+439:                 position = "owned_part_moved_before_references"
+440:             else:
+441:                 start, end = existing.start, existing.end
+442:                 position = "owned_part_replaced"
+443:         elif part == "title":
+444:             start, end = (title.start, title.end) if title else (0, 0)
+445:             position = "document_title_replaced" if title else "owned_title_inserted"
+446:         elif part == "conclusion":
+447:             start = end = references[0].start if references else len(result)
+448:             position = "standalone_before_references" if references else "standalone_at_end"
+449:         else:
+450:             abstract = next((span for span in spans if span.part == "abstract"), None)
+451:             owned_title = next((span for span in spans if span.part == "title"), None)
+452:             if part == "introduction" and abstract:
+453:                 start = end = abstract.end
+454:             elif owned_title:
+455:                 start = end = owned_title.end
+456:             else:
+457:                 start = end = title.end if title else 0
+458:             position = "standalone_front"
+459:         result = result[:start] + block + result[end:]
+460:         log.append({"part": part, "position": position})
+461:     if extract_body(result, chapter_roles) != original_body:
+462:         raise SerialPartsApplicationError("body_preservation_check_failed")
+463:     return result, log

@@ -1,0 +1,337 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 0f5c8d723b03e2fbd5a6d4d39f0dc5bf9464aef5145795e94dbabf6bd85e6111
+
+# ORIGINAL SOURCE LINES 68-160
+68: def key_fingerprint(api_key: str) -> str:
+69:     return hashlib.sha256(("kfp:" + api_key).encode("utf-8")).hexdigest()[:16]
+70: 
+71: 
+72: def _canonical(value: Any) -> str:
+73:     return json.dumps(value, sort_keys=True, ensure_ascii=False, default=str)
+74: 
+75: 
+76: def cache_key(*, endpoint: str, body: Dict[str, Any], schema_hash: str,
+77:               policy_hash: str, scope: str) -> str:
+78:     """Non-secret cache identity: endpoint, request body, schema, policy and a
+79:     tenant scope that includes the key FINGERPRINT (private responses must not
+80:     be reused across credentials)."""
+81:     identity = {"endpoint": endpoint, "body": body, "schema_hash": schema_hash,
+82:                 "policy_hash": policy_hash, "scope": scope}
+83:     return hashlib.sha256(_canonical(identity).encode("utf-8")).hexdigest()[:40]
+84: 
+85: 
+86: class RawResponseStore:
+87:     """Complete-response atomic store; error/empty/status<=0 records are
+88:     diagnostics only and are never returned as content."""
+89: 
+90:     def __init__(self, root: str):
+91:         self.root = root
+92:         os.makedirs(root, exist_ok=True)
+93: 
+94:     def _path(self, fingerprint: str) -> str:
+95:         return os.path.join(self.root, fingerprint + ".json")
+96: 
+97:     def write(self, fingerprint: str, record: Dict[str, Any]) -> None:
+98:         path = self._path(fingerprint)
+99:         fd, tmp = tempfile.mkstemp(dir=self.root, suffix=".tmp")
+100:         try:
+101:             with os.fdopen(fd, "w", encoding="utf-8") as handle:
+102:                 json.dump(record, handle, ensure_ascii=False)
+103:                 handle.flush()
+104:                 os.fsync(handle.fileno())
+105:             os.replace(tmp, path)
+106:         except BaseException:
+107:             try:
+108:                 os.unlink(tmp)
+109:             except OSError:
+110:                 pass
+111: 
+112:     def read_complete(self, fingerprint: str) -> Optional[Dict[str, Any]]:
+113:         path = self._path(fingerprint)
+114:         if not os.path.isfile(path):
+115:             return None
+116:         try:
+117:             record = json.load(open(path, encoding="utf-8"))
+118:         except (OSError, ValueError):
+119:             return None
+120:         if record.get("schema_version") != CACHE_SCHEMA:
+121:             return None
+122:         if record.get("request_fingerprint") != fingerprint:
+123:             return None
+124:         # anti-replay: only complete successful responses may ever be served
+125:         if int(record.get("status") or 0) != 200 or not record.get("complete"):
+126:             return None
+127:         if not record.get("payload_b64"):
+128:             return None
+129:         return record
+130: 
+131:     def read_diagnostic(self, fingerprint: str) -> Optional[Dict[str, Any]]:
+132:         path = self._path(fingerprint)
+133:         if not os.path.isfile(path):
+134:             return None
+135:         try:
+136:             return json.load(open(path, encoding="utf-8"))
+137:         except (OSError, ValueError):
+138:             return None
+139: 
+140: 
+141: class ProductionTransport:
+142:     """The single production provider boundary.  Production mode has NO mock:
+143:     failures raise a classified TransportError and the caller keeps its safe
+144:     upstream candidate; nothing is ever answered with fabricated text."""
+145: 
+146:     def __init__(self, ledger: BudgetLedger, cache_root: Optional[str],
+147:                  policy_hash: str):
+148:         self.ledger = ledger
+149:         self.store = RawResponseStore(cache_root) if cache_root else None
+150:         self.policy_hash = policy_hash
+151: 
+152:     # ------------------ cache identity ------------------
+153:     def _fingerprint(self, endpoint: str, body: Dict[str, Any], schema: Any,
+154:                      api_key: str) -> str:
+155:         schema_hash = hashlib.sha256(_canonical(schema).encode("utf-8")).hexdigest()[:16]
+156:         scope = "tenant:" + key_fingerprint(api_key)
+157:         return cache_key(endpoint=endpoint, body=body, schema_hash=schema_hash,
+158:                          policy_hash=self.policy_hash, scope=scope)
+159: 
+160:     # ------------------ classification ------------------
+# ORIGINAL SOURCE LINES 162-399
+162:     def classify(exc: Exception) -> TransportError:
+163:         if isinstance(exc, urllib.error.HTTPError):
+164:             code = int(exc.code)
+165:             if code == 429:
+166:                 return TransportError("rate_limit", "provider 429")
+167:             if code in (401, 403):
+168:                 return TransportError("auth_error", f"provider {code}")
+169:             if code < 500:
+170:                 # billing/auth/param rejections: provider refused before inference
+171:                 return TransportError("auth_error", f"provider {code} rejected request")
+172:             return TransportError("transport_error", f"provider {code}")
+173:         name = type(exc).__name__
+174:         if name in ("RemoteDisconnected", "IncompleteRead", "TimeoutError",
+175:                     "socket.timeout", "http.client.RemoteDisconnected"):
+176:             # the request may have been processed: budget must stay frozen
+177:             return TransportError("transport_error",
+178:                                   f"connection lost mid-flight ({name})",
+179:                                   "may_have_processed=true")
+180:         if isinstance(exc, urllib.error.URLError):
+181:             # never reached the provider: safe to release the reservation
+182:             return TransportError("transport_error", f"connection failed ({name})",
+183:                                   "may_have_processed=false")
+184:         return TransportError("transport_error", name)
+185: 
+186:     # ------------------ one physical attempt ------------------
+187:     def _physical_attempt(self, *, endpoint: str, body: Dict[str, Any],
+188:                           api_key: str, timeout_sec: float,
+189:                           fingerprint: str,
+190:                           request_id: str = "") -> Dict[str, Any]:
+191:         request = urllib.request.Request(
+192:             url=endpoint,
+193:             data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+194:             headers={"Authorization": "Bearer " + api_key,
+195:                      "Content-Type": "application/json"},
+196:             method="POST",
+197:         )
+198:         sent = True  # the request is physically dispatched the moment urlopen is entered
+199:         payload = b""
+200:         status = 0
+201:         try:
+202:             opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+203:             with opener.open(request, timeout=timeout_sec) as response:
+204:                 status = int(response.status)
+205:                 payload = response.read()
+206:         except urllib.error.HTTPError as exc:
+207:             status = int(exc.code)
+208:             try:
+209:                 payload = exc.read()
+210:             except Exception:
+211:                 payload = b""
+212:             raw_hash = hashlib.sha256(payload).hexdigest()
+213:             if self.store:
+214:                 self.store.write(fingerprint, {
+215:                     "schema_version": CACHE_SCHEMA,
+216:                     "request_fingerprint": fingerprint,
+217:                     "status": status, "complete": False,
+218:                     "payload_b64": base64.b64encode(payload).decode("ascii"),
+219:                     "captured_at_epoch": time.time()})
+220:             err = self.classify(exc)
+221:             if status in (401, 403, 429) and request_id:
+222:                 # auth/rate rejection: provider error contract proves no inference
+223:                 try:
+224:                     self.ledger.release(request_id)
+225:                 except Exception:
+226:                     pass
+227:                 raise TransportError(err.error_class, err.message,
+228:                                      err.detail + " | body=" +
+229:                                      payload.decode("utf-8", "replace")[:260] +
+230:                                      " | released_verifiably_unbilled")
+231:             if status < 500 and request_id:
+232:                 # other 4xx (e.g. 400 bad_request): conservative unknown —
+233:                 # the request reached the server but billing is unverifiable
+234:                 try:
+235:                     self.ledger.mark_unknown(request_id)
+236:                 except Exception:
+237:                     pass
+238:                 raise TransportError(err.error_class, err.message,
+239:                                      err.detail + " | body=" +
+240:                                      payload.decode("utf-8", "replace")[:260] +
+241:                                      " | unknown_frozen")
+242:             # 5xx: server error, may have partially processed
+243:             if request_id:
+244:                 try:
+245:                     self.ledger.mark_unknown(request_id)
+246:                 except Exception:
+247:                     pass
+248:             raise TransportError(err.error_class, err.message,
+249:                                  err.detail + " | body=" +
+250:                                  payload.decode("utf-8", "replace")[:260] +
+251:                                  " | raw=" + raw_hash[:16] +
+252:                                  " | unknown_frozen")
+253:         except Exception as exc:
+254:             err = self.classify(exc)
+255:             if "may_have_processed=true" in err.detail:
+256:                 if request_id:
+257:                     try:
+258:                         self.ledger.mark_unknown(request_id)
+259:                     except Exception:
+260:                         pass
+261:                 raise TransportError(err.error_class, err.message,
+262:                                      err.detail + " | reservation_frozen")
+263:             if request_id:
+264:                 try:
+265:                     self.ledger.release(request_id)
+266:                 except Exception:
+267:                     pass
+268:             raise TransportError(err.error_class, err.message, err.detail)
+269:         raw_hash = hashlib.sha256(payload).hexdigest()
+270:         if status != 200:
+271:             raise TransportError("transport_error", f"http {status} without error object",
+272:                                  "raw=" + raw_hash[:16])
+273:         if not payload.strip():
+274:             # HTTP 200 with an empty body must never be treated as success
+275:             raise TransportError("transport_error", "http200_empty_body",
+276:                                  "raw=" + raw_hash[:16])
+277:         return {"status": status, "payload": payload, "raw_response_hash": raw_hash}
+278: 
+279:     # ------------------ public entry ------------------
+280:     def chat_completion(self, *, task_id: str, logical_call_id: str,
+281:                         generation_id: str, model: str,
+282:                         system_prompt: str, user_payload: Dict[str, Any],
+283:                         api_key: str, base_url: str,
+284:                         schema: Any = None, max_input_tokens: int = 4000,
+285:                         max_output_tokens: int = 1200, temperature: float = 0.0,
+286:                         timeout_sec: float = 90.0) -> Dict[str, Any]:
+287:         endpoint = base_url.rstrip("/") + "/chat/completions"
+288:         body = {"model": model, "temperature": temperature,
+289:                 "max_tokens": max(1, int(max_output_tokens)),
+290:                 "messages": [{"role": "system", "content": system_prompt},
+291:                              {"role": "user", "content": _canonical(user_payload)}]}
+292:         fingerprint = self._fingerprint(endpoint, body, schema, api_key)
+293: 
+294:         # 1) cache: only complete responses with an identical fingerprint hit
+295:         if self.store:
+296:             cached = self.store.read_complete(fingerprint)
+297:             if cached:
+298:                 payload = base64.b64decode(cached["payload_b64"])
+299:                 data = json.loads(payload)
+300:                 usage = data.get("usage") or {}
+301:                 receipt = self._receipt(
+302:                     provider_request_id=str(data.get("id") or "cache_unknown"),
+303:                     physical_attempt="cache_replay", status=200,
+304:                     raw_response_hash=cached.get("raw_response_hash") or
+305:                     hashlib.sha256(payload).hexdigest(),
+306:                     parse_result="complete_from_cache",
+307:                     actual_model=str(data.get("model") or model),
+308:                     usage={"prompt_tokens": int(usage.get("prompt_tokens") or 0),
+309:                            "completion_tokens": int(usage.get("completion_tokens") or 0)},
+310:                     cost_receipt={"bound_micro": 0, "origin": "cache_replay"},
+311:                     cache_origin=fingerprint)
+312:                 return {"content": str(data["choices"][0]["message"]["content"]),
+313:                         "data": data, "receipt": receipt, "from_cache": True}
+314: 
+315:         # 2) bounded retries; each retry = new physical attempt + new reservation
+316:         transport_budget = RETRY_POLICY["transport_error"]
+317:         rate_budget = RETRY_POLICY["rate_limit"]
+318:         schema_budget = RETRY_POLICY["schema_invalid"]
+319:         last_error: Optional[TransportError] = None
+320:         attempt_no = 0
+321:         invocation_nonce = uuid.uuid4().hex[:8]
+322:         while True:
+323:             attempt_no += 1
+324:             try:
+325:                 reservation = self.ledger.reserve(
+326:                     task_id, f"{logical_call_id}:{invocation_nonce}:p{attempt_no}",
+327:                     f"phys{attempt_no}", generation_id,
+328:                     model, max_input_tokens, max_output_tokens, attempts=1)
+329:             except BudgetRefused as exc:
+330:                 # Budget exhaustion is NOT an auth error: it must never
+331:                 # trigger key rotation or any retry.  Stop immediately.
+332:                 raise BudgetExhaustedError(str(exc))
+333:             try:
+334:                 raw = self._physical_attempt(endpoint=endpoint, body=body,
+335:                                              api_key=api_key, timeout_sec=timeout_sec,
+336:                                              fingerprint=fingerprint,
+337:                                              request_id=reservation["request_id"])
+338:             except TransportError as err:
+339:                 last_error = err
+340:                 if "reservation_frozen" in err.detail:
+341:                     raise  # unknown outcome: budget stays frozen, stop retrying
+342:                 if err.error_class == "auth_error":
+343:                     raise  # bounded: no unbounded key/model rotation
+344:                 if err.error_class == "rate_limit":
+345:                     if rate_budget > 0:
+346:                         rate_budget -= 1
+347:                         continue
+348:                     raise
+349:                 if err.error_class == "transport_error":
+350:                     if transport_budget > 0:
+351:                         transport_budget -= 1
+352:                         continue
+353:                     raise
+354:                 raise
+355:             # 3) parse & settle
+356:             try:
+357:                 data = json.loads(raw["payload"])
+358:             except ValueError:
+359:                 if schema_budget > 0:
+360:                     schema_budget -= 1
+361:                     last_error = TransportError("schema_invalid", "response is not JSON",
+362:                                                 "raw=" + raw["raw_response_hash"][:16])
+363:                     continue
+364:                 raise TransportError("schema_invalid", "response is not JSON",
+365:                                      "raw=" + raw["raw_response_hash"][:16])
+366:             choices = data.get("choices") or []
+367:             message = choices[0].get("message") if choices else None
+368:             if not isinstance(message, dict):
+369:                 raise TransportError("schema_invalid", "response missing choices/message")
+370:             content = str(message.get("content") or "")
+371:             if not content.strip():
+372:                 raise TransportError("schema_invalid", "empty content treated as failure")
+373:             finish = str(choices[0].get("finish_reason") or "")
+374:             if finish not in ("stop", "length"):
+375:                 raise TransportError("transport_error", "incomplete response payload",
+376:                                      "finish_reason=" + finish)
+377:             parse_result = "complete"
+378:             # complete response: persist for reuse, settle with ACTUAL usage
+379:             if self.store:
+380:                 self.store.write(fingerprint, {
+381:                     "schema_version": CACHE_SCHEMA,
+382:                     "request_fingerprint": fingerprint,
+383:                     "status": raw["status"], "complete": True,
+384:                     "raw_response_hash": raw["raw_response_hash"],
+385:                     "payload_b64": base64.b64encode(raw["payload"]).decode("ascii"),
+386:                     "captured_at_epoch": time.time()})
+387:             usage_rec = self._usage_record(data, model)
+388:             settle = self.ledger.settle(reservation["request_id"], usage_rec,
+389:                                         provider_receipt_id=str(data.get("id") or ""))
+390:             receipt = self._receipt(
+391:                 provider_request_id=str(data.get("id") or ""),
+392:                 physical_attempt=attempt_no, status=raw["status"],
+393:                 raw_response_hash=raw["raw_response_hash"],
+394:                 parse_result=parse_result,
+395:                 actual_model=str(data.get("model") or model),
+396:                 usage=usage_rec, cost_receipt=settle, cache_origin=fingerprint)
+397:             return {"content": content, "data": data, "receipt": receipt,
+398:                     "from_cache": False}
+399: 

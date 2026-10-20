@@ -1,0 +1,166 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 d9f1274075fa689bea4161cb71b85fff5a56fe9e7f91b89c312d70bf0248d469
+
+# ORIGINAL SOURCE LINES 36-196
+36:         try:
+37:             os.link(temporary, path)
+38:         except FileExistsError:
+39:             if read_json(path) != value:
+40:                 raise ValueError("account_budget_binding_conflict:no_budget_reset")
+41:     finally:
+42:         temporary.unlink(missing_ok=True)
+43: 
+44: 
+45: def account_mapping_dir(path):
+46:     path = Path(path).expanduser().resolve()
+47:     return path.with_name(path.name + ".dual-calls")
+48: 
+49: 
+50: def open_account_ledger(path, limit=None):
+51:     """Adopt an explicit existing account cap or create one once; never reset."""
+52:     path = Path(path).expanduser().resolve()
+53:     marker = path.with_name(path.name + ".account-route.json")
+54:     if limit is not None and (isinstance(limit, bool) or not math.isfinite(limit) or limit <= 0):
+55:         raise ValueError("account_budget_must_be_finite_positive")
+56:     if marker.exists() and not path.is_file():
+57:         raise ValueError("account_ledger_missing:no_budget_reset")
+58:     if path.exists():
+59:         # Validate before the ledger constructor can initialize missing tables.
+60:         try:
+61:             with closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)) as db:
+62:                 row = db.execute("SELECT value FROM budget_meta WHERE key='limit_cny'").fetchone()
+63:                 reservations = db.execute("SELECT amount_cny, actual_cny, status FROM reservations").fetchall()
+64:         except sqlite3.Error as exc:
+65:             raise ValueError("account_ledger_invalid:no_budget_reset") from exc
+66:         if row is None or not math.isfinite(float(row[0])) or float(row[0]) <= 0:
+67:             raise ValueError("account_ledger_invalid:no_budget_reset")
+68:         for amount, cost, status in reservations:
+69:             if (status not in {"settled", "reserved", "uncertain"} or amount is None
+70:                     or not math.isfinite(float(amount)) or float(amount) < 0
+71:                     or (cost is not None and (not math.isfinite(float(cost)) or float(cost) < 0))):
+72:                 raise ValueError("account_ledger_invalid:no_budget_reset")
+73:         stored = float(row[0])
+74:         if limit is not None and limit != stored:
+75:             raise ValueError("account_budget_limit_conflict:no_budget_reset")
+76:         limit = stored
+77:     elif limit is None:
+78:         raise ValueError("new_account_ledger_requires_account_budget_limit")
+79:     scope = {"schema_version": "dual_budget.account.v1", "ledger_path": str(path), "limit_cny": limit}
+80:     bind_json(marker, scope)
+81:     if not path.exists():
+82:         path.touch(exist_ok=False)
+83:     return GlobalBudgetLedger(limit_cny=limit, path=path)
+84: 
+85: class DualBudgetLedger:
+86:     """Only reserve/settle delegation; the two existing ledgers enforce caps."""
+87: 
+88:     def __init__(self, project, total, mapping_dir):
+89:         self.project, self.total = project, total
+90:         self.mapping_dir = Path(mapping_dir)
+91:         if not project.path or not total.path or Path(project.path).resolve() == Path(total.path).resolve():
+92:             raise ValueError("dual_budget_requires_distinct_persistent_ledgers")
+93: 
+94:     def _path(self, pair_id):
+95:         if not str(pair_id).startswith("dual-") or any(c not in "0123456789abcdef-uald" for c in str(pair_id)):
+96:             raise ValueError("invalid_dual_reservation_id")
+97:         return self.mapping_dir / (pair_id + ".json")
+98: 
+99:     def _check(self, record):
+100:         if (record["project_path"] != str(Path(self.project.path).resolve()) or
+101:                 record["total_path"] != str(Path(self.total.path).resolve())):
+102:             raise ValueError("dual_budget_mapping_ledger_changed")
+103: 
+104:     def reserve(self, amount_cny, call_id):
+105:         pair_id = "dual-" + uuid.uuid4().hex
+106:         path = self._path(pair_id)
+107:         record = {"pair_id": pair_id, "call_id": call_id, "amount_cny": amount_cny,
+108:                   "project_path": str(Path(self.project.path).resolve()),
+109:                   "total_path": str(Path(self.total.path).resolve()),
+110:                   "project_reservation_id": None, "total_reservation_id": None,
+111:                   "state": "reserving"}
+112:         # A durable pre-reservation record plus unique ledger call tags allow
+113:         # an interrupted mapping write to be diagnosed without touching HTTP.
+114:         write_json(path, record)
+115:         try:
+116:             row = self.project.reserve(amount_cny, f"{call_id}:{pair_id}:project")
+117:         except Exception as exc:
+118:             record.update(state="project_reservation_refused", refusal_type=type(exc).__name__,
+119:                           refusal_reason="project_refused_before_http")
+120:             write_json(path, record)
+121:             raise
+122:         record["project_reservation_id"] = row["reservation_id"]
+123:         write_json(path, record)  # Mapping failure leaves the durable hold.
+124:         try:
+125:             row = self.total.reserve(amount_cny, f"{call_id}:{pair_id}:total")
+126:         except Exception as exc:
+127:             record.update(state="total_reservation_refused", refusal_type=type(exc).__name__,
+128:                           refusal_reason="total_refused_before_http",
+129:                           settlement={"actual_cny": 0.0, "uncertain": False,
+130:                                       "telemetry": {"provider_error_code": "dual_total_refused_before_http"}})
+131:             write_json(path, record)
+132:             # Neither reserve has returned to QwenDirectClient; no HTTP was
+133:             # possible. Only this definite pre-dispatch project hold is zeroed.
+134:             self._finish_settlement(record)
+135:             raise
+136:         record.update(total_reservation_id=row["reservation_id"], state="ready_for_http")
+137:         write_json(path, record)  # Both reservations and their map precede HTTP.
+138:         return {"reservation_id": pair_id, "call_id": call_id,
+139:                 "amount_cny": amount_cny, "status": "reserved"}
+140: 
+141:     @staticmethod
+142:     def _settle_one(ledger, reservation_id, receipt):
+143:         row = next((r for r in ledger.as_dict()["reservations"] if r["reservation_id"] == reservation_id), None)
+144:         if row is None:
+145:             raise ValueError("dual_unknown_reservation")
+146:         desired = "uncertain" if receipt["uncertain"] else "settled"
+147:         if row["status"] in {"settled", "uncertain"}:
+148:             actual = receipt["actual_cny"]
+149:             same_amount = (row.get("actual_cny") is None and actual is None) or (
+150:                 row.get("actual_cny") is not None and actual is not None and
+151:                 abs(float(row["actual_cny"]) - float(actual)) < 1e-9)
+152:             if row["status"] != desired or not same_amount:
+153:                 raise ValueError("dual_conflicting_settlement")
+154:             return  # Same recorded settlement is idempotent, never a waiver.
+155:         ledger.settle(reservation_id, receipt["actual_cny"], uncertain=receipt["uncertain"],
+156:                       telemetry=receipt["telemetry"])
+157: 
+158:     def _finish_settlement(self, record):
+159:         self._check(record)
+160:         errors = []
+161:         for name, ledger in (("project", self.project), ("total", self.total)):
+162:             reservation_id = record.get(name + "_reservation_id")
+163:             if reservation_id:
+164:                 try:
+165:                     self._settle_one(ledger, reservation_id, record["settlement"])
+166:                 except Exception as exc:
+167:                     errors.append({"ledger": name, "error_type": type(exc).__name__,
+168:                                    "reason": "settlement_failed_hold_retained"})
+169:         record.update(state="settlement_incomplete" if errors else
+170:                       "uncertain" if record["settlement"]["uncertain"] else "settled",
+171:                       settlement_errors=errors)
+172:         write_json(self._path(record["pair_id"]), record)
+173:         if errors:
+174:             raise QwenTransportError("dual_settlement_incomplete_hold_retained", transient=False)
+175: 
+176:     def settle(self, reservation_id, actual_cny, *, uncertain=False, telemetry=None):
+177:         record = read_json(self._path(reservation_id))
+178:         self._check(record)
+179:         receipt = {"actual_cny": actual_cny, "uncertain": bool(uncertain),
+180:                    "telemetry": dict(telemetry or {})}
+181:         if record.get("settlement") is not None and record["settlement"] != receipt:
+182:             raise QwenTransportError("dual_conflicting_settlement", transient=False)
+183:         record.update(settlement=receipt, state="settling")
+184:         write_json(self._path(reservation_id), record)  # Save evidence before either side settles.
+185:         self._finish_settlement(record)
+186: 
+187:     def recover_settlements(self):
+188:         """Finish only saved receipts; unknown/reserving holds stay consumed."""
+189:         for path in sorted(self.mapping_dir.glob("dual-*.json")):
+190:             record = read_json(path)
+191:             # Account-level mapping directories can contain other projects.
+192:             if record.get("project_path") != str(Path(self.project.path).resolve()):
+193:                 continue
+194:             self._check(record)
+195:             if record.get("settlement") and record["state"] not in {"settled", "uncertain"}:
+196:                 self._finish_settlement(record)

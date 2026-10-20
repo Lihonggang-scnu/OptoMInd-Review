@@ -1,0 +1,120 @@
+{
+  "schema_version": "optomind.publication_literal_math_v34.receipt.v1",
+  "created_at": "2026-10-18T11:01:02.425671+00:00",
+  "scope": "bounded caller-level literal math fallback; no formula restoration",
+  "source_commit_before_change": "f1876f39b085c2e815e29188ebeda168c0db6302",
+  "current_git_head": "f1876f39b085c2e815e29188ebeda168c0db6302",
+  "source_files_changed": [
+    "optomind_research/runtime/latex_publication_renderer.py",
+    "optomind_research/runtime/publication_integrity.py",
+    "tests/upgrade3/test_publication_math_command_delimiters.py"
+  ],
+  "source_sha256": {
+    "optomind_research/runtime/latex_publication_renderer.py": "0ad3874db89af7baa95cf27ab980f823d33f948c41c1306ec556fb204c11f6bf",
+    "optomind_research/runtime/publication_integrity.py": "6a88d5cc70225eeabb71f0844743795a64d23680afd01adadabf72d193160cd4",
+    "tests/upgrade3/test_publication_math_command_delimiters.py": "a081cf893569f5344f55bcfa113c8a574c652e6c9b22635f1bb9166af9e80b8b"
+  },
+  "backup_files": [
+    "publication_integrity.py.before",
+    "test_publication_math_command_delimiters.py.before"
+  ],
+  "input": {
+    "source_markdown": "N\\stages\\11_checker_diagnostic_publication_v33\\05_publication\\MANUSCRIPT_PUBLISHED.md",
+    "source_markdown_sha256": "cff385d099ffc4d5fff0ad36e2062bef8689520e4c700616767ce4c9fcfedbbc",
+    "content_package": "N\\stages\\11_checker_diagnostic_publication_v33\\05_publication\\CONTENT_PACKAGE.json",
+    "content_package_sha256": "d19ae8b251d37787938d4719403736e10e88046a99d76d6c23792beb1b9c8dd4",
+    "raw_control_counts": {
+      "U+0008": 3,
+      "U+000C": 0,
+      "U+0009": 7,
+      "U+000A": 977,
+      "U+000D": 0
+    }
+  },
+  "tests": {
+    "command": "python -m pytest -q tests/upgrade3/test_publication_math_command_delimiters.py tests/upgrade3/test_publication_reference_section_count.py",
+    "result": "12 passed",
+    "compileall": "passed for publication_integrity.py and latex_publication_renderer.py",
+    "coverage": "caller raw-pre-clean audit, non-whitespace literal fallback, whitespace diagnostic-only, clean math/code/prose behavior"
+  },
+  "native_probe": {
+    "command": "python -c \"import json; from pathlib import Path; from optomind_research.runtime.latex_publication_renderer import build_latex_publication; root=Path(r'N'); report=build_latex_publication(content_package_path=root / r'stages\\11_checker_diagnostic_publication_v33\\05_publication\\CONTENT_PACKAGE.json', output_dir=root / r'preparation\\publication_literal_math_v34\\native_build_caller', source_markdown_path=root / r'stages\\11_checker_diagnostic_publication_v33\\05_publication\\MANUSCRIPT_PUBLISHED.md', language='zh', enrich_crossref=False, enrich_s2=False, compile_pdf=True, pdf_strict=False, render_previews=False); print(json.dumps({k:report.get(k) for k in ('status','pdf_path','tex_path','pdf_skipped_reason','submission_blockers','warnings','compile_ok','latex')}, ensure_ascii=False, default=str))\"",
+    "actual_output_dir": "N\\preparation\\publication_literal_math_v34\\native_build_caller",
+    "language": "zh",
+    "enrich_crossref": false,
+    "enrich_s2": false,
+    "compile_pdf": true,
+    "render_previews": false,
+    "report_status": "failed",
+    "latex_compiled": true,
+    "latex_returncode": 0,
+    "pdf_exists": true,
+    "pdf_pages": 66,
+    "remaining_report_blockers": [
+      "latex_or_pdf_validation_failed",
+      "author_metadata_pending"
+    ],
+    "remaining_latex_undefined_citations": [
+      "532",
+      "635"
+    ],
+    "missing_brace_or_fatal_errors": false,
+    "wrapper_process_exit_code": 0,
+    "owned_process_exited": true
+  },
+  "integrity_audit": {
+    "before_figure_injection_fallback_count": 3,
+    "before_figure_injection_diagnostic_count": 4,
+    "fallbacks": [
+      {
+        "offset": 60226,
+        "source_sha256": "9fe1206f9f81aa76fed454ac19cda3f0d845c1bc25319149cf74c100de7db71e",
+        "control_codepoints": [
+          "U+0008",
+          "U+000A"
+        ],
+        "audit_stage": "raw_pre_clean",
+        "action": "literal_fallback"
+      },
+      {
+        "offset": 60280,
+        "source_sha256": "111dd823f5a6ed1fcf00c7b88856b7b5cc677772b30f36d0b528d365711a3b4d",
+        "control_codepoints": [
+          "U+000A",
+          "U+0008",
+          "U+000A"
+        ],
+        "audit_stage": "raw_pre_clean",
+        "action": "literal_fallback"
+      },
+      {
+        "offset": 60452,
+        "source_sha256": "3d67dc6db7f348118756e43a6a3fa0f2804b3af9fcfd2bb5e32cf119fce2f3e6",
+        "control_codepoints": [
+          "U+000A",
+          "U+0008",
+          "U+000A"
+        ],
+        "audit_stage": "raw_pre_clean",
+        "action": "literal_fallback"
+      }
+    ],
+    "after_figure_injection_fallback_count": 0,
+    "normalized_markdown_non_whitespace_controls": 0,
+    "main_tex_non_whitespace_controls": 0,
+    "fallback_projection_count_in_normalized_markdown": 3,
+    "raw_offsets_and_hashes_preserved": true,
+    "clean_math_code_prose_preserved_by_focused_tests": true
+  },
+  "execution_boundaries": {
+    "provider_calls": 0,
+    "model_calls": 0,
+    "ledger_mutation": "none in this local renderer invocation",
+    "official_wrapper": "not run",
+    "paid_run": "not run",
+    "source_scientific_payload_modified": "no",
+    "old_outputs_modified": "no",
+    "global_clean_unicode_changed": "no"
+  },
+  "diagnostic_conclusion": "The three U+0008 math spans are literalized before _clean_unicode, retain raw audit offsets/hashes, and no longer reach XeLaTeX as control bytes. The isolated native build compiles and emits a PDF; publication status remains failed only for existing author metadata and undefined citation blockers (532, 635)."
+}

@@ -1,0 +1,39 @@
+# S 0133380ea82068ec8d9c28269bf9d0417d38bb04 SHA256 9911316206552ad7d7bcb355a2fae19d7ed2013632326a0aee88d3a0007b3720
+36: def _load(path: Path) -> Any:
+37:     return json.loads(path.read_text(encoding='utf-8'))
+
+114: def load_complete_packets(packet_root: Path) -> tuple[dict, dict[str, dict]]:
+115:     """Use the exact planner manifest, never infer completeness from a group file."""
+116:     plan = _load(packet_root / 'DETAILED_REVIEW_PLAN.json')
+117:     descriptors = plan.get('writer_packets') or []
+118:     if not descriptors:
+119:         raise ValueError('complete_plan_writer_packets_required')
+120:     packets = {}
+121:     for descriptor in descriptors:
+122:         chapter_id = str(descriptor.get('chapter_id') or '').strip()
+123:         if not chapter_id or chapter_id in packets:
+124:             raise ValueError('complete_plan_chapter_identity_invalid')
+125:         path = Path(descriptor.get('json_path') or f'writer_packets/{chapter_id}.json')
+126:         raw = _load(path if path.is_absolute() else packet_root / path)
+127:         actual_id = str(raw.get('chapter_id') or (raw.get('chapter') or {}).get('chapter_id') or '')
+128:         if actual_id and actual_id != chapter_id:
+129:             raise ValueError('complete_plan_packet_identity_mismatch:' + chapter_id)
+130:         raw.setdefault('chapter_id', chapter_id)
+131:         for key in ('research_question', 'shared_outline', 'shared_scope', 'review_argument',
+132:                     'review_argument_status', 'review_argument_source', 'source_identity_map'):
+133:             if not raw.get(key) and plan.get(key):
+134:                 raw[key] = copy.deepcopy(plan[key])
+135:         packets[chapter_id] = raw
+136:     declared = [str(row.get('chapter_id')) for row in plan.get('shared_outline') or [] if row.get('chapter_id')]
+137:     if declared and set(declared) != set(packets):
+138:         raise ValueError('complete_plan_packet_coverage_mismatch')
+139:     packets = _initialize_missing_unit_ids(packets)
+140:     for chapter_id, raw in packets.items():
+141:         # Build ID-dependent owner scopes only after the complete baseline
+142:         # has identities. Scientific content and original files stay untouched.
+143:         envelope = cli._payload(raw)
+144:         if not (envelope.get('chapter_plan') or {}).get('units'):
+145:             raise ValueError('complete_plan_chapter_tasks_required:' + chapter_id)
+146:         packets[chapter_id] = {**copy.deepcopy(raw), **envelope}
+147:         packets[chapter_id]['input_integrity'] = strengthening._input_integrity(packets[chapter_id])
+148:     return plan, packets

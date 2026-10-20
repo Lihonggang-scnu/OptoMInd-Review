@@ -1,0 +1,198 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 15877beeff8ce7897b1c033a70b3f6583645785bf9ae56d81c156a821d784981
+
+# ORIGINAL SOURCE LINES 824-886
+824: def run_downstream_delivery(
+825:     *,
+826:     config: Mapping[str, Any],
+827:     assembly_report: Mapping[str, Any],
+828:     out_dir: str | Path,
+829:     selected_body: Mapping[str, Any] | None = None,
+830:     body_input: Mapping[str, Any] | None = None,
+831:     client_factory=None, run: bool = False, token_counter=None, retry_failed: bool = False,
+832: ) -> dict[str, Any]:
+833:     """The ONE downstream coordinator: 02→03→04→05 over the assembled draft.
+834: 
+835:     Each stage consumes the previous stage's ACTUAL returned artifact (the
+836:     report field), never a guessed path.  02 edits the assembled HANDLE draft
+837:     so 04 still sees source identity; 04's numbered reader draft is the only
+838:     publication input.  A stage without its config input reports ``pending``
+839:     and the chain stops there — it never falls back to a stale artifact and
+840:     never degrades to assembly-only.
+841:     """
+842: 
+843:     out_dir = Path(out_dir).resolve()
+844:     stages: dict[str, Any] = {}
+845:     halt: list[str] = []
+846: 
+847:     # History/plan readable drafts can be restricted/pending exports. Their
+848:     # assembler's "complete" only means all selected units were loaded; its
+849:     # separate unresolved/problem fields must also permit downstream work.
+850:     # Check before looking for a file, so a stale prior draft cannot bypass a
+851:     # failed arrangement or missing recording in the current invocation. BODY
+852:     # has its own complete-generation/stage gate and retains science diagnostics.
+853:     assembly = assembly_report.get("assembly")
+854:     # Identity-only gaps have an existing downstream resolver using the
+855:     # explicitly supplied catalogs.  Do not turn that normal path into a
+856:     # task-completion failure; its later citation status remains authoritative.
+857:     identity_only = (
+858:         isinstance(assembly, Mapping)
+859:         and bool(assembly.get("unknown_citations"))
+860:         and not assembly.get("pending_problems")
+861:         and not assembly.get("unknown_table_handles")
+862:     )
+863:     body_state = body_delivery_state(assembly_report, selected_body) if selected_body is not None else None
+864:     if body_state is not None:
+865:         assembly_blocked = not body_state["ready"]
+866:     else:
+867:         assembly_blocked = (not isinstance(assembly, Mapping)
+868:             or assembly.get("status") != "complete"
+869:             or (assembly.get("problems_resolved") is not True and not identity_only)
+870:             or assembly.get("pending_problems")
+871:             or assembly.get("missing_units")
+872:             or assembly.get("errors")
+873:             or assembly_report.get("pending")
+874:             or assembly_report.get("missing_units")
+875:             or assembly_report.get("restricted_import"))
+876:     if assembly_blocked:
+877:         report = _downstream_report(config, {}, ["assembly_pending"])
+878:         report["assembly_gate"] = {
+879:             "status": "pending",
+880:             "assembly_status": assembly.get("status") if isinstance(assembly, Mapping) else None,
+881:             "problems_resolved": assembly.get("problems_resolved") if isinstance(assembly, Mapping) else None,
+882:             "reason": "body_delivery_incomplete" if body_state is not None else "assembly_incomplete_or_unresolved",
+883:         }
+884:         if body_state is not None:
+885:             report["assembly_gate"]["blocking_reasons"] = body_state["blocking_reasons"]
+886:         return report
+# ORIGINAL SOURCE LINES 1077-1175
+1077: def body_delivery_state(report: Mapping[str, Any], selected_body: Mapping[str, Any] | None = None) -> dict[str, Any]:
+1078:     """Separate finished BODY diagnostics from missing generation/stages."""
+1079:     selected = selected_body if selected_body is not None else report.get("selected_body") or {}
+1080:     assembly = report.get("assembly") or {}
+1081:     settings = report.get("effective_settings") or {}
+1082:     units = report.get("units") or []
+1083:     blockers = []
+1084:     full_count = report.get("full_unit_count") or 0
+1085:     if (not full_count or not report.get("generation_complete") or report.get("missing_units")
+1086:             or len(units) != full_count or report.get("complete_units") != full_count):
+1087:         blockers.append("body_generation_incomplete")
+1088:     if (assembly.get("status") != "complete" or assembly.get("missing_units") or assembly.get("errors")
+1089:             or assembly.get("loaded_units") != report.get("full_unit_count")
+1090:             or report.get("pending") or report.get("restricted_import")):
+1091:         blockers.append("body_assembly_incomplete")
+1092:     if selected.get("status") != "complete":
+1093:         blockers.append("body_numbering_incomplete")
+1094:     for field in ("handles_draft", "reader_draft", "references_path"):
+1095:         path = Path(str(selected.get(field) or ""))
+1096:         if not path.is_file() or path.stat().st_size == 0:
+1097:             blockers.append("body_artifact_missing:" + field)
+1098:     if settings.get("quality_control"):
+1099:         from .legacy_unit_route import _quality_body_ready_for_article
+1100:         for row in units:
+1101:             quality = row.get("quality") or {}
+1102:             if (quality.get("status") not in {"assessed_pending_human_review", "assessed_with_pending"}
+1103:                     or not quality.get("assessments") or not _quality_body_ready_for_article(row)
+1104:                     or any(attempt.get("state") not in {"returned", "cache_hit"}
+1105:                            for attempt in quality.get("stage_attempts", []))):
+1106:                 blockers.append("body_quality_incomplete:" + str(row.get("chapter_id")) + ":" + str(row.get("unit_id")))
+1107:     if settings.get("article_edit"):
+1108:         article = report.get("article_edit") or {}
+1109:         if (article.get("status") not in {"edited", "no_change"} or selected.get("source") != "article_edit"
+1110:                 or Path(str(article.get("edited_draft") or "")).resolve()
+1111:                    != Path(str(selected.get("handles_draft") or "")).resolve()):
+1112:             blockers.append("body_article_edit_incomplete")
+1113:     diagnostics = bool(assembly.get("pending_problems") or assembly.get("problems_resolved") is False
+1114:                        or any(row.get("pending_problems") for row in units))
+1115:     ready = not blockers
+1116:     return {"status": "complete_with_diagnostics" if ready and diagnostics else "complete" if ready else
+1117:             "preview" if report.get("status") == "preview" else "incomplete",
+1118:             "ready": ready, "blocking_reasons": blockers, "diagnostics_pending": diagnostics,
+1119:             "scientific_acceptance": False}
+1120: 
+1121: 
+1122: def body_delivery_exit_code(report: Mapping[str, Any]) -> int:
+1123:     """Both BODY CLIs share artifact/stage success, independent of science."""
+1124:     state = report.get("body_delivery") or body_delivery_state(report)
+1125:     if state["status"] == "preview":
+1126:         return 0
+1127:     if not state["ready"]:
+1128:         return 2
+1129:     if report.get("delivery_mode") == "full_downstream" and report.get("downstream_status") != "complete":
+1130:         return 2
+1131:     return 0
+1132: 
+1133: 
+1134: def run_review_delivery(
+1135:     *,
+1136:     start: str,
+1137:     out_dir: str | Path,
+1138:     language: str = "zh",
+1139:     manifest_path: str | Path | None = None,
+1140:     batch_root: str | Path | None = None,
+1141:     packet_path: str | Path | None = None,
+1142:     recordings_path: str | Path | None = None,
+1143:     config_path: str | Path | None = None,
+1144:     body_input: Mapping[str, Any] | None = None,
+1145:     body_options: Mapping[str, Any] | None = None,
+1146: ) -> dict[str, Any]:
+1147:     """Official delivery entry.
+1148: 
+1149:     The body branch selects its actual optional edited BODY and numbered reader
+1150:     draft. Other branches without ``config_path`` stop after assembly. With a
+1151:     config the selected result enters the
+1152:     unified downstream (02 edit → 03 front/back → 04 figures/citations → 05
+1153:     publication); missing inputs surface as explicit pending stages.
+1154:     """
+1155:     out_dir = Path(out_dir)
+1156:     if start == "history":
+1157:         if not manifest_path or not batch_root:
+1158:             raise ValueError("history_start_requires_manifest_and_batch_root")
+1159:         report = run_history_delivery(manifest_path=manifest_path, batch_root=batch_root,
+1160:                                       out_dir=out_dir, language=language)
+1161:     elif start == "plan":
+1162:         if not packet_path or not recordings_path:
+1163:             raise ValueError("plan_start_requires_packet_and_recordings")
+1164:         report = run_plan_delivery(packet_path=packet_path, recordings_path=recordings_path,
+1165:                                    out_dir=out_dir, language=language)
+1166:     elif start == "body":
+1167:         if not isinstance(body_input, Mapping):
+1168:             raise ValueError("body_start_requires_full_body_input")
+1169:         from .legacy_unit_route import run_legacy_units
+1170:         options = {**BODY_DELIVERY_DEFAULTS, **dict(body_options or {})}
+1171:         report = run_legacy_units(body_input, output_dir=out_dir, **options)
+1172:         report = {**report, "start": "body", "output_root": str(out_dir.resolve())}
+1173:         from .post_body_context import body_input_sha256
+1174:         report.update(body_input_path=str((out_dir / "FULL_BODY_INPUT.json").resolve()),
+1175:                       body_input_sha256=body_input_sha256(body_input))
+# ORIGINAL SOURCE LINES 1329-1357
+1329: def _verify_reader_draft(reader_text: str, *, expected_refs: int) -> dict[str, Any]:
+1330:     """The 04 reader draft must already be publication-shaped: one reference
+1331:     section with the catalogued numbered entries, no figure placeholder left,
+1332:     a real title.  Failures are listed, never repaired silently here."""
+1333:     reference_headings = list(_REFS_HEADING_COUNT_RE.finditer(reader_text))
+1334:     ref_sections = len(reference_headings)
+1335:     reference_text = ""
+1336:     if ref_sections == 1:
+1337:         reference_text = reader_text[reference_headings[0].end():]
+1338:         next_section = re.search(r"^#{1,3}\s+\S", reference_text, re.MULTILINE)
+1339:         if next_section:
+1340:             reference_text = reference_text[:next_section.start()]
+1341:     # A paragraph may legitimately start with a numbered inline citation.
+1342:     # Only bibliography-section entries count against the reference catalog.
+1343:     numbered = len(_NUMBERED_REF_RE.findall(reference_text))
+1344:     failures: list[str] = []
+1345:     if ref_sections != 1:
+1346:         failures.append(f"reference_sections_not_unique:{ref_sections}")
+1347:     if expected_refs and numbered != expected_refs:
+1348:         failures.append(f"numbered_refs_mismatch:{numbered}!={expected_refs}")
+1349:     if "@@FIG:" in reader_text:
+1350:         failures.append("figure_placeholder_token_left")
+1351:     if not re.search(r"^#\s+\S", reader_text, re.MULTILINE):
+1352:         failures.append("title_missing")
+1353:     return {"reference_sections_count": ref_sections,
+1354:             "numbered_reference_entries": numbered,
+1355:             "catalogued_references": expected_refs,
+1356:             "failures": failures,
+1357:             "all_pass": not failures}

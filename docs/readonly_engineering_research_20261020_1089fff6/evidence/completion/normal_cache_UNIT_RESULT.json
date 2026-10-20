@@ -1,0 +1,226 @@
+{
+  "schema_version": "optomind.review_unit_writer.result.v1",
+  "generated_at": "2026-10-18T13:19:33",
+  "mode": "run",
+  "simulated": false,
+  "chapter_id": "CH02",
+  "unit_id": "CH02_U03",
+  "model": "qwen3.5-plus",
+  "language": "zh",
+  "body_markdown": "多层堆叠策略通过引入垂直维度的设计自由度，为超表面像差校正提供了超越单层色散工程的可能性。理论分析表明，双层超表面系统的间距不仅定义焦距，还决定离轴像差的补偿条件：当间距满足 d ≈ (n2/n3)fq 时（fq 为二次相位层焦距，n2 和 n3 分别为间隔层和聚焦介质的折射率），可实现大视场的衍射极限成像 [P0253]。对于 NA=0.75 的双层系统，存在最优焦距比例α≈1.367，使施密特板相位梯度最小化，此时在入射角高达 16.5°时仍保持斯特列尔比>0.8（视场角约 33°），聚焦效率达 87%，显著优于非最优设计（fq=fh）的 44%[P0253]。基于有效阿贝数概念的双层设计进一步简化了制造复杂度：通过组合类平凸与类平凹金属透镜补偿色散，使用简单高折射率介电圆柱体超原子单元，在可见光波段实现了>50% 的平均聚焦效率和较小的焦距变化 [P0470]。这种结构堆叠策略避免了单层设计中复杂的横截面几何调控，将色散补偿从单元级提升至系统级。\n\n实验验证表明，多层架构在实现消色差功能的同时面临效率与对准精度的权衡。[P0352] 展示了三层垂直堆叠超表面（金、银、铝纳米圆盘分别对应红 650nm、绿 550nm、蓝 450nm）的消色差聚焦能力，在白光照明下成功将三波长光聚焦于同一点，消除了传统二元波带片超过 400μm 的色差范围 [P0352]。然而，该设计的传输效率仅为 5.8%–8.7%，主要受限于金属材料的固有吸收损耗和层间串扰（<10%）[P0352]。相比之下，介电材料的双合透镜设计展现了更高的效率潜力：[P0292] 采用非晶硅纳米柱在熔融石英基底两侧制备双层结构，在 850nm 波长下实现了约 70% 的聚焦效率，且随入射角增加以约 1%/度的速率下降 [P0292]。该双合透镜将无像差视场扩大至约 30 度入射角，并成功与 CMOS 图像传感器单片集成，构建了尺寸仅为 1.6mm×1.6mm×1.7mm 的微型平面相机，MTF 分析证实整个视场内保持高分辨率 [P0292]。但该系统仅针对单一近红外波长，照明带宽从 10nm 增加到 40nm 时色差导致成像分辨率和对比度下降，需通过 Wiener 去卷积算法部分补偿，这会放大噪声 [P0292]。\n\n不同消色差技术路线的性能对比揭示了多层策略的适用边界。现有材料提供了混合消色差金属透镜（HAML）在 1000–1800nm 波段的效率数据：合并型 HAML 在 NA=0.27、0.11 和 0.06 时的平均聚焦效率分别为 61%、67% 和 66%，最高效率达 80–83%[P0152]。而空气间隔型 HAML 在高 NA（0.24–0.32）下效率降至 19–27%[P0152]。该研究引用的单层消色差金属透镜文献数据（NA=0.24，最大效率~55%，1300–1600nm）和多层衍射透镜文献数据（NA=0.05，平均效率 42%，可见光范围）在 NA 和光谱带宽上与 HAML 不完全匹配 [P0152]。[P0554] 在可见光波段（488-633nm）提供了混合折射 - 衍射透镜与单层衍射透镜的直接对比：在 NA 约 0.3 时，混合透镜的焦距误差约为 4μm（2.8%），显著优于低 NA 单层衍射透镜的 55μm（13%）；但单层衍射透镜效率最高（70-80%），混合透镜效率较低（几何混合平均 45-64%，GRIN 混合平均 35-62%）[P0554]。关键限制在于：目前缺乏在完全相同的数值孔径和波长范围内对单层、多层及混合消色差技术路线进行的直接定量对比，各研究采用的测试条件（NA、波段、效率定义）存在显著差异，无法直接合成归一化的效率 - 带宽权衡曲线 [P0152][P0554]。因此，多层堆叠策略在牺牲部分效率或增加制造复杂度（如层间对准精度要求）的前提下换取带宽与视场角的提升，其最优适用场景需基于具体应用的 NA 需求、波段范围及制造容差综合评估。",
+  "body_path": "UNIT_BODY.md",
+  "used_source_handles": [
+    "P0253",
+    "P0470",
+    "P0352",
+    "P0292",
+    "P0152",
+    "P0554"
+  ],
+  "unused_source_handles": [
+    "P0411",
+    "P0465",
+    "P0383",
+    "P0222",
+    "P0476",
+    "P0024",
+    "P0022",
+    "P0180",
+    "P0025",
+    "P0090",
+    "P0355",
+    "P0214",
+    "P0122",
+    "P0123",
+    "P0095",
+    "P0285",
+    "P0187",
+    "P0027",
+    "P0001",
+    "P0538",
+    "P0206",
+    "P0023",
+    "P0486",
+    "P0317",
+    "P0017",
+    "P0007",
+    "P0008"
+  ],
+  "unknown_citations": [],
+  "source_count": 33,
+  "material_summary": {
+    "sources": 33,
+    "with_study_summary_A": 31,
+    "with_review_planning_B": 31,
+    "with_deep_read_material": [
+      "P0152"
+    ],
+    "with_supplement_material": 2,
+    "with_supplement_materials": [
+      "P0152"
+    ],
+    "with_local_passages": [],
+    "with_tool_supplement_materials": [
+      "P0152"
+    ],
+    "chapter_tool_materials": 7,
+    "read_from_disk": [
+      "P0001",
+      "P0017",
+      "P0022",
+      "P0023",
+      "P0024",
+      "P0025",
+      "P0027",
+      "P0090",
+      "P0095",
+      "P0122",
+      "P0123",
+      "P0152",
+      "P0180",
+      "P0187",
+      "P0206",
+      "P0214",
+      "P0222",
+      "P0253",
+      "P0285",
+      "P0292",
+      "P0317",
+      "P0352",
+      "P0355",
+      "P0383",
+      "P0411",
+      "P0465",
+      "P0470",
+      "P0476",
+      "P0486",
+      "P0538",
+      "P0554"
+    ],
+    "capacity_threshold_exceeded": [],
+    "truncated": []
+  },
+  "material_notes": [],
+  "warnings": [],
+  "estimate": {
+    "prompt_tokens_estimate": 145217,
+    "reserved_input_tokens": 170836,
+    "prompt_token_multiplier": 1.12,
+    "prompt_token_framing_margin": 8192,
+    "output_tokens": 32768,
+    "thinking_budget": 8192,
+    "total_context_tokens": 211796,
+    "input_capacity": {
+      "material_preserved": true,
+      "max_input_tokens": 991808,
+      "context_window": 1000000,
+      "exceeds_capacity": false,
+      "action": "within_capacity"
+    },
+    "estimated_cost_cny": 1.666384,
+    "model": "qwen3.5-plus",
+    "tokenizer": "provided_token_counter"
+  },
+  "usage": {
+    "prompt_tokens": 145227,
+    "completion_tokens": 2295,
+    "total_tokens": 147522,
+    "completion_tokens_details": {
+      "reasoning_tokens": 808,
+      "text_tokens": 2295
+    },
+    "prompt_tokens_details": {
+      "text_tokens": 145227
+    }
+  },
+  "finish_reason": "stop",
+  "complete": true,
+  "completion_status": "complete",
+  "partial_error": "",
+  "issues": [],
+  "known_tool_identifiers": [
+    "Q01"
+  ],
+  "non_source_identifier_citations": [],
+  "unresolved_numeric_citations": [],
+  "citation_problems": [],
+  "unbracketed_source_handles": [],
+  "fence_report": {
+    "remaining_fenced_lines": []
+  },
+  "content_review_status": "not_reviewed",
+  "numeric_citation_repairs": [],
+  "bibliography_title_citation_map": {},
+  "citation_number_map_origin": "generated_local_aliases",
+  "citation_mapping_diagnostics": [],
+  "unbracketed_source_handle_repairs": [
+    {
+      "original": "P0352",
+      "replacement": "[P0352]",
+      "source_handle": "P0352",
+      "mapping_origin": "explicit_provided_handle"
+    },
+    {
+      "original": "P0292",
+      "replacement": "[P0292]",
+      "source_handle": "P0292",
+      "mapping_origin": "explicit_provided_handle"
+    },
+    {
+      "original": "P0554",
+      "replacement": "[P0554]",
+      "source_handle": "P0554",
+      "mapping_origin": "explicit_provided_handle"
+    }
+  ],
+  "table_check": {
+    "valid": null
+  },
+  "output_consumption_status": "consumed",
+  "arrangement_path": "",
+  "view_path": "",
+  "input_path": "N\\stages\\09_body_delivery_min600_quality_repair_v27\\body\\units\\CH02\\CH02_U03\\d39fc5914138fda38e59e10b7a404e7d41c52b9972ebfc238d5694f1d22ded26\\attempt_001\\UNIT_INPUT.json",
+  "messages_path": "N\\stages\\09_body_delivery_min600_quality_repair_v27\\body\\units\\CH02\\CH02_U03\\d39fc5914138fda38e59e10b7a404e7d41c52b9972ebfc238d5694f1d22ded26\\attempt_001\\UNIT_MESSAGES.json",
+  "raw_response": "RAW_RESPONSE.json",
+  "simulated_from": "",
+  "note": "真实模型输出；未做全章合稿、未做审稿循环、未做事实核查。",
+  "output_normalization": [
+    {
+      "code": "author_multi_envelope_recovered",
+      "candidate_count": 2,
+      "selected_index": 1,
+      "candidate_hashes": [
+        "9ceeab6e81e7f649822bdd18cafda5d95a358a2c2939955cb1416eb2bbecdbff",
+        "765061a31736e246c25877d10e06c6e7bb26a7df36750aa669de7c75e9f0fcec"
+      ],
+      "candidate_body_lengths": [
+        401,
+        1651
+      ],
+      "prior_source_handles": [
+        "P0253",
+        "P0470"
+      ],
+      "selected_source_handles": [
+        "P0152",
+        "P0253",
+        "P0292",
+        "P0352",
+        "P0470",
+        "P0554"
+      ],
+      "selection_rule": "last_complete_author_json_fence_with_nonshorter_body_and_prior_handle_coverage",
+      "raw_offsets": [
+        {
+          "open_start": 0,
+          "close_end": 455
+        },
+        {
+          "open_start": 507,
+          "close_end": 2215
+        }
+      ]
+    }
+  ],
+  "execution_mode": "live"
+}

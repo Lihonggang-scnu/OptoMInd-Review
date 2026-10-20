@@ -1,0 +1,71 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 6a88d5cc70225eeabb71f0844743795a64d23680afd01adadabf72d193160cd4
+
+# ORIGINAL SOURCE LINES 274-339
+274: def _literalize_corrupt_math_spans(
+275:     text: str,
+276: ) -> tuple[str, list[dict[str, Any]], list[dict[str, Any]]]:
+277:     """Literalize math containing non-whitespace C0 bytes, without repair."""
+278: 
+279:     source = str(text or "")
+280:     # Keep offsets stable while hiding code/citation regions from the bounded
+281:     # DOTALL scan.  The private-use marker never enters the output.
+282:     marker = "\uE000"
+283:     masked = list(source)
+284:     protected_ranges: list[tuple[int, int, str]] = []
+285:     for match in _NON_MATH_PROTECTED_PATTERN.finditer(source):
+286:         start, end = match.span()
+287:         protected_ranges.append((start, end, match.group(0)))
+288:         masked[start:end] = [marker] * (end - start)
+289:     masked_text = "".join(masked)
+290: 
+291:     fallbacks: list[dict[str, Any]] = []
+292:     diagnostics: list[dict[str, Any]] = []
+293: 
+294:     def replace(match: re.Match[str]) -> str:
+295:         start, end = match.span()
+296:         raw_span = source[start:end]
+297:         controls = [
+298:             char
+299:             for char in raw_span
+300:             if ord(char) < 0x20 or ord(char) == 0x7F
+301:         ]
+302:         if not controls:
+303:             return match.group(0)
+304:         control_codepoints = [f"U+{ord(char):04X}" for char in controls]
+305:         record: dict[str, Any] = {
+306:             "offset": start,
+307:             "raw_span": raw_span,
+308:             "source_sha256": hashlib.sha256(
+309:                 raw_span.encode("utf-8")
+310:             ).hexdigest(),
+311:             "control_codepoints": control_codepoints,
+312:         }
+313:         non_whitespace_controls = [
+314:             char for char in controls if char not in _MATH_WHITESPACE_CONTROLS
+315:         ]
+316:         if not non_whitespace_controls:
+317:             record.update({
+318:                 "action": "diagnostic_only",
+319:                 "format": None,
+320:                 "literal_projection": None,
+321:             })
+322:             diagnostics.append(record)
+323:             return match.group(0)
+324:         projection = _escape_literal_math_source(raw_span)
+325:         record.update({
+326:             "action": "literal_fallback",
+327:             "format": "markdown_inline_code",
+328:             "literal_projection": f"`{projection}`",
+329:         })
+330:         fallbacks.append(record)
+331:         return f"`{projection}`"
+332: 
+333:     normalized = _MATH_CONTROL_SCAN_PATTERN.sub(replace, masked_text)
+334:     for start, end, raw_span in protected_ranges:
+335:         protected_marker = marker * (end - start)
+336:         if protected_marker not in normalized:
+337:             raise AssertionError("non-math protection marker was lost")
+338:         normalized = normalized.replace(protected_marker, raw_span, 1)
+339:     return normalized, fallbacks, diagnostics

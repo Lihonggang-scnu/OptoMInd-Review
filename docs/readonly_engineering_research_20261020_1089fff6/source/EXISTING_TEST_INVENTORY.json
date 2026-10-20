@@ -1,0 +1,731 @@
+{
+  "files": [
+    {
+      "source": "S/tests/upgrade3/test_review_unit_writer_completion.py",
+      "source_sha256": "b806b74dafbc04ae4fb35186a119d9bb0ec7ff8ddf931cbb8f985d71088d4020",
+      "tests": [
+        {
+          "name": "test_completion_payload_is_task_scoped_and_keeps_full_material",
+          "line": 73,
+          "end": 79
+        },
+        {
+          "name": "test_completion_payload_uses_nested_brief_handles_and_rejects_missing",
+          "line": 82,
+          "end": 88
+        },
+        {
+          "name": "test_table_completion_accepts_real_table_and_preserves_original_prefix",
+          "line": 91,
+          "end": 111
+        },
+        {
+          "name": "test_table_task_metadata_is_not_accepted_as_a_table",
+          "line": 114,
+          "end": 129
+        },
+        {
+          "name": "test_incomplete_valid_table_is_retained_as_candidate_but_not_applied",
+          "line": 132,
+          "end": 145
+        },
+        {
+          "name": "test_pending_status_fragment_is_candidate_only",
+          "line": 148,
+          "end": 160
+        },
+        {
+          "name": "test_complete_completion_json_syntax_recovery_preserves_all_metadata",
+          "line": 163,
+          "end": 176
+        },
+        {
+          "name": "test_missing_metadata_valid_table_retained_for_post_assessment_only",
+          "line": 179,
+          "end": 192
+        },
+        {
+          "name": "test_missing_metadata_candidate_gates_reject_explicit_or_incomplete_failures",
+          "line": 197,
+          "end": 218
+        },
+        {
+          "name": "test_table_data_column_count_must_match_header",
+          "line": 221,
+          "end": 230
+        },
+        {
+          "name": "test_paragraph_already_covered_and_provider_failure_keep_original",
+          "line": 233,
+          "end": 250
+        }
+      ],
+      "execution_this_turn": false
+    },
+    {
+      "source": "S/tests/upgrade3/test_completion_adjacent_body_strings.py",
+      "source_sha256": "a8c3dff03e54b5702004fd2febeaeeabcbc907ce425ce9f7bcd67079e5a058c6",
+      "tests": [
+        {
+          "name": "test_adjacent_complete_strings_preserved_only_as_candidate_with_exact_offsets",
+          "line": 44,
+          "end": 65
+        },
+        {
+          "name": "test_truncation_unknown_tokens_and_ambiguity_not_candidate",
+          "line": 79,
+          "end": 84
+        },
+        {
+          "name": "test_recovery_does_not_authorize_explicit_completion_metadata",
+          "line": 88,
+          "end": 93
+        },
+        {
+          "name": "test_complete_transport_required_and_normal_json_unchanged",
+          "line": 96,
+          "end": 105
+        }
+      ],
+      "execution_this_turn": false
+    },
+    {
+      "source": "S/tests/test_unit_realization.py",
+      "source_sha256": "162a2ddf1c3f0aff1f6c4b70c6688eb474ec9362fca7159c58c141fc82ac0c2e",
+      "tests": [
+        {
+          "name": "test_omitted_task_old_response_completed_once_and_prefix_preserved",
+          "line": 79,
+          "end": 93
+        },
+        {
+          "name": "test_naturally_combined_tasks_no_forced_extra_paragraph",
+          "line": 96,
+          "end": 102
+        },
+        {
+          "name": "test_missing_completion_metadata_adopted_only_after_existing_post_preserves_partial",
+          "line": 131,
+          "end": 146
+        },
+        {
+          "name": "test_missing_completion_metadata_free_preview_then_only_post_missing",
+          "line": 149,
+          "end": 168
+        },
+        {
+          "name": "test_missing_completion_metadata_failed_post_retains_original_and_candidate",
+          "line": 171,
+          "end": 180
+        },
+        {
+          "name": "test_unlocated_task_diagnostic_preserved_without_automatic_completion",
+          "line": 184,
+          "end": 206
+        },
+        {
+          "name": "test_unlocated_quote_never_bypasses_assessment_structure_or_model_checks",
+          "line": 209,
+          "end": 230
+        },
+        {
+          "name": "test_other_domain_synthetic_quote_failure_is_pending_in_ordinary_quality_path",
+          "line": 234,
+          "end": 263
+        },
+        {
+          "name": "test_one_unlocated_post_task_does_not_discard_valid_diagnostics_or_exact_edit",
+          "line": 266,
+          "end": 292
+        },
+        {
+          "name": "test_missing_metadata_candidate_without_located_task_retains_base_and_only_base_edits",
+          "line": 296,
+          "end": 328
+        },
+        {
+          "name": "test_material_limited_does_not_force_completion",
+          "line": 331,
+          "end": 336
+        },
+        {
+          "name": "test_partial_quality_response_saved_and_never_rebought",
+          "line": 340,
+          "end": 351
+        },
+        {
+          "name": "test_preview_then_run_and_raw_recovery_do_not_rebuy",
+          "line": 354,
+          "end": 365
+        },
+        {
+          "name": "test_explicit_quality_retry_keeps_failed_attempt_and_reuses_successful_steps",
+          "line": 391,
+          "end": 421
+        },
+        {
+          "name": "test_failed_explicit_quality_retry_stops_once_until_another_explicit_flag",
+          "line": 424,
+          "end": 437
+        },
+        {
+          "name": "test_quality_retry_never_rebuys_unknown_or_replayable_or_changed_requests",
+          "line": 441,
+          "end": 469
+        },
+        {
+          "name": "test_real_route_retry_flag_recovers_quality_only_preserves_author",
+          "line": 472,
+          "end": 485
+        },
+        {
+          "name": "test_quality_retry_preserves_durable_settled_spend_and_unsettled_hold",
+          "line": 488,
+          "end": 512
+        },
+        {
+          "name": "test_quotes_task_ids_and_handles_are_checked",
+          "line": 515,
+          "end": 523
+        },
+        {
+          "name": "test_ordered_omission_quotes_strictly_anchor_all_fragments",
+          "line": 526,
+          "end": 546
+        },
+        {
+          "name": "test_boundary_omission_quotes_match_one_nonempty_original_fragment",
+          "line": 549,
+          "end": 562
+        },
+        {
+          "name": "test_whitespace_quote_mapping_preserves_original_characters_and_order",
+          "line": 565,
+          "end": 576
+        },
+        {
+          "name": "test_complete_quote_typo_json_recovery_retains_content_and_validation",
+          "line": 579,
+          "end": 599
+        },
+        {
+          "name": "test_material_excerpt_same_record_paths_and_strict_body_anchor",
+          "line": 602,
+          "end": 630
+        },
+        {
+          "name": "test_reparse_preview_then_run_reuses_raw_and_only_continues_missing_steps",
+          "line": 633,
+          "end": 661
+        },
+        {
+          "name": "test_explicit_reparse_does_not_rebuy_partial_stage",
+          "line": 665,
+          "end": 672
+        },
+        {
+          "name": "test_reparse_completed_request_retains_exact_completion_identity",
+          "line": 675,
+          "end": 688
+        },
+        {
+          "name": "test_budget_refusal_keeps_request_and_cannot_be_rebought_on_reparse",
+          "line": 691,
+          "end": 702
+        },
+        {
+          "name": "test_invalid_post_assessment_changes_preserve_body_and_explicit_pending",
+          "line": 705,
+          "end": 725
+        },
+        {
+          "name": "test_valid_post_edits_apply_once_free_reparse_preserves_paid_requests_and_diagnostics",
+          "line": 728,
+          "end": 785
+        },
+        {
+          "name": "test_post_conflict_group_all_rejected_and_independent_valid_edit_survives",
+          "line": 788,
+          "end": 802
+        },
+        {
+          "name": "test_only_verified_missing_table_structure_resolves_other_issues_remain",
+          "line": 805,
+          "end": 829
+        },
+        {
+          "name": "test_evidence_edit_unique_anchor_preserves_other_bytes",
+          "line": 832,
+          "end": 844
+        },
+        {
+          "name": "test_multiline_material_quote_matches_actual_recursive_string",
+          "line": 847,
+          "end": 854
+        },
+        {
+          "name": "test_optional_gap_feedback_old_default_and_explicit_task_validation",
+          "line": 857,
+          "end": 867
+        },
+        {
+          "name": "test_completion_full_recursive_review_evidence_and_covered_ids",
+          "line": 870,
+          "end": 881
+        },
+        {
+          "name": "test_tool_same_identity_reuse_new_identity_conflict_and_unknown_retained",
+          "line": 884,
+          "end": 905
+        },
+        {
+          "name": "test_tool_identity_allocation_does_not_rebind_uncatalogued_task_handle",
+          "line": 908,
+          "end": 920
+        },
+        {
+          "name": "test_integrated_quality_derivative_assembly_and_selection_resume",
+          "line": 923,
+          "end": 946
+        },
+        {
+          "name": "test_route_reparse_preserves_old_sealed_derivative_and_selects_new_body",
+          "line": 949,
+          "end": 969
+        },
+        {
+          "name": "test_route_clears_repaired_table_code_and_keeps_scientific_issue",
+          "line": 972,
+          "end": 1008
+        },
+        {
+          "name": "test_explicit_real_saved_completion_recovery_only_offline_post_no_source_mutation",
+          "line": 1011,
+          "end": 1080
+        },
+        {
+          "name": "test_explicit_real_failed_quality_attempt_only_retries_with_flag_offline",
+          "line": 1083,
+          "end": 1130
+        },
+        {
+          "name": "test_explicit_real_saved_response_free_reparse_then_offline_missing_steps",
+          "line": 1133,
+          "end": 1189
+        },
+        {
+          "name": "test_display_heading_precedence_and_plain_body_preserved",
+          "line": 1192,
+          "end": 1197
+        },
+        {
+          "name": "test_explicit_real_quote_recovery_free_then_offline_continuation",
+          "line": 1204,
+          "end": 1278
+        },
+        {
+          "name": "test_cli_matching_flags",
+          "line": 1281,
+          "end": 1284
+        },
+        {
+          "name": "test_explicit_real_paid_post_edits_free_reparse_no_calls_or_source_mutation",
+          "line": 1287,
+          "end": 1338
+        },
+        {
+          "name": "test_explicit_frozen_paid_post_partial_quote_diagnostics_free_replay",
+          "line": 1342,
+          "end": 1406
+        }
+      ],
+      "execution_this_turn": false
+    },
+    {
+      "source": "S/tests/test_legacy_unit_route.py",
+      "source_sha256": "68e118ca18443efe9a45632a3c54a07cf29d81adb804d3777478f837bb30f184",
+      "tests": [
+        {
+          "name": "test_preview_exact_requests_no_factory_or_keys",
+          "line": 46,
+          "end": 56
+        },
+        {
+          "name": "test_completed_resume_never_calls_and_fake_stays_fake",
+          "line": 59,
+          "end": 71
+        },
+        {
+          "name": "test_raw_recovery_without_charged_retry",
+          "line": 74,
+          "end": 82
+        },
+        {
+          "name": "test_partial_resume_keeps_prose_and_requires_explicit_retry",
+          "line": 85,
+          "end": 95
+        },
+        {
+          "name": "test_failure_stops_next_units_and_resume_is_not_retry",
+          "line": 98,
+          "end": 107
+        },
+        {
+          "name": "test_changed_input_profile_and_tampered_body_rejected",
+          "line": 110,
+          "end": 123
+        },
+        {
+          "name": "test_capacity_preflight_blocks_without_call",
+          "line": 126,
+          "end": 131
+        },
+        {
+          "name": "test_route_never_switches_model",
+          "line": 135,
+          "end": 137
+        },
+        {
+          "name": "test_cli_preview_no_ledger_no_factory",
+          "line": 140,
+          "end": 145
+        },
+        {
+          "name": "test_cannot_adopt_previous_experiment_ledger",
+          "line": 148,
+          "end": 154
+        },
+        {
+          "name": "test_new_ledger_ownership_cannot_change_budget_or_book",
+          "line": 157,
+          "end": 163
+        },
+        {
+          "name": "test_budget_limit_must_be_finite_positive",
+          "line": 167,
+          "end": 169
+        },
+        {
+          "name": "test_unsettled_hold_is_retained_while_independent_calls_use_remaining_cap",
+          "line": 172,
+          "end": 185
+        },
+        {
+          "name": "test_local_raw_recovery_does_not_construct_provider_even_with_hold",
+          "line": 188,
+          "end": 198
+        },
+        {
+          "name": "test_failed_retry_preserves_partial_and_later_complete_cache",
+          "line": 201,
+          "end": 220
+        },
+        {
+          "name": "test_existing_ledger_damage_is_not_a_new_budget",
+          "line": 224,
+          "end": 241
+        },
+        {
+          "name": "test_same_budget_survives_new_output_directory",
+          "line": 244,
+          "end": 254
+        },
+        {
+          "name": "test_crash_after_result_before_seal_recovers_from_raw_for_free",
+          "line": 257,
+          "end": 266
+        },
+        {
+          "name": "test_raw_sse_only_recovery_uses_no_factory_and_preserves_terminal_state",
+          "line": 279,
+          "end": 303
+        },
+        {
+          "name": "test_cache_survives_code_repair_and_directory_migration",
+          "line": 306,
+          "end": 332
+        },
+        {
+          "name": "test_explicit_scope_shares_new_60_cap_across_books_without_reset",
+          "line": 335,
+          "end": 357
+        },
+        {
+          "name": "test_new_60_budget_is_allowed_but_existing_30_cannot_be_raised",
+          "line": 360,
+          "end": 372
+        },
+        {
+          "name": "test_cli_audited_reconcile_is_repeatable_and_rejects_conflict",
+          "line": 375,
+          "end": 396
+        }
+      ],
+      "execution_this_turn": false
+    },
+    {
+      "source": "S/tests/upgrade3/test_publication_math_command_delimiters.py",
+      "source_sha256": "a081cf893569f5344f55bcfa113c8a574c652e6c9b22635f1bb9166af9e80b8b",
+      "tests": [
+        {
+          "name": "test_named_commands_do_not_merge_with_following_variables",
+          "line": 18,
+          "end": 19
+        },
+        {
+          "name": "test_actual_onl_formula_keeps_operators_and_variables",
+          "line": 22,
+          "end": 25
+        },
+        {
+          "name": "test_non_whitespace_control_math_is_literalized_and_audited",
+          "line": 28,
+          "end": 43
+        },
+        {
+          "name": "test_whitespace_only_math_controls_are_diagnostic_only",
+          "line": 46,
+          "end": 63
+        },
+        {
+          "name": "test_clean_math_code_and_prose_controls_remain_unchanged",
+          "line": 66,
+          "end": 78
+        },
+        {
+          "name": "test_renderer_caller_preserves_raw_control_audit_before_unicode_cleaning",
+          "line": 81,
+          "end": 103
+        }
+      ],
+      "execution_this_turn": false
+    },
+    {
+      "source": "S/tests/upgrade3/test_publication_reference_section_count.py",
+      "source_sha256": "73dc57f9fe37e505ea26fd4e0a89e4e999b64d77e4316af10e11c9a7e9603180",
+      "tests": [
+        {
+          "name": "test_body_and_appendix_citations_are_not_bibliography_entries",
+          "line": 4,
+          "end": 8
+        },
+        {
+          "name": "test_body_citation_cannot_hide_a_missing_reference",
+          "line": 11,
+          "end": 15
+        },
+        {
+          "name": "test_duplicate_bibliographies_still_fail_closed",
+          "line": 18,
+          "end": 21
+        }
+      ],
+      "execution_this_turn": false
+    },
+    {
+      "source": "S/tests/upgrade3/test_serial_manuscript_parts.py",
+      "source_sha256": "bf0d802b68da4e1fdebc360f133d19c3788366720a09bb8d0df971d1684e4296",
+      "tests": [
+        {
+          "name": "test_four_stages_offline_preserve_body_and_provenance",
+          "line": 38,
+          "end": 52
+        },
+        {
+          "name": "test_actual_production_messages_describe_runtime_and_part_content_contract",
+          "line": 56,
+          "end": 71
+        },
+        {
+          "name": "test_final_assembly_has_one_outer_heading_and_preserves_part_content_and_body",
+          "line": 76,
+          "end": 112
+        },
+        {
+          "name": "test_conception_generated_from_body_and_not_early_cards",
+          "line": 115,
+          "end": 119
+        },
+        {
+          "name": "test_stops_on_missing_stage_without_final_or_future_messages",
+          "line": 123,
+          "end": 131
+        },
+        {
+          "name": "test_part_types_are_not_coerced",
+          "line": 135,
+          "end": 140
+        },
+        {
+          "name": "test_abstract_output_strict",
+          "line": 144,
+          "end": 147
+        },
+        {
+          "name": "test_unsupported_placement_preserves_card_and_stops",
+          "line": 152,
+          "end": 162
+        },
+        {
+          "name": "test_heading_only_part_cannot_publish_final",
+          "line": 167,
+          "end": 174
+        },
+        {
+          "name": "test_card_full_strict_replacement",
+          "line": 179,
+          "end": 183
+        },
+        {
+          "name": "test_source_map_is_filtered_and_material_identity_is_required",
+          "line": 186,
+          "end": 197
+        },
+        {
+          "name": "test_identity_conflicts_before_call",
+          "line": 200,
+          "end": 204
+        },
+        {
+          "name": "test_catalog_only_handle_is_not_allowed_generated_source",
+          "line": 207,
+          "end": 212
+        },
+        {
+          "name": "test_provider_explicit_and_unknown_external_accounting",
+          "line": 215,
+          "end": 226
+        },
+        {
+          "name": "test_replay_has_no_live_fallback",
+          "line": 229,
+          "end": 235
+        },
+        {
+          "name": "test_unbound_replay_cannot_publish",
+          "line": 238,
+          "end": 245
+        },
+        {
+          "name": "test_reused_run_dir_cannot_publish_stale_artifacts",
+          "line": 248,
+          "end": 253
+        },
+        {
+          "name": "test_no_outline_only_or_empty_body",
+          "line": 257,
+          "end": 262
+        },
+        {
+          "name": "test_material_and_body_limits_fail_without_truncation",
+          "line": 265,
+          "end": 269
+        },
+        {
+          "name": "test_unowned_exact_intro_blocks_before_any_provider",
+          "line": 272,
+          "end": 278
+        },
+        {
+          "name": "test_condition_preserving_and_no_domain_template_prompt",
+          "line": 281,
+          "end": 287
+        },
+        {
+          "name": "test_truncated_response_duplicate_keys_and_extra_output_fail",
+          "line": 290,
+          "end": 296
+        },
+        {
+          "name": "test_exact_replay_binding_and_changed_body_rejected",
+          "line": 299,
+          "end": 316
+        },
+        {
+          "name": "test_language_explicit_and_invalid_language_fails_before_provider",
+          "line": 319,
+          "end": 326
+        },
+        {
+          "name": "test_all_material_identity_declarations_checked",
+          "line": 334,
+          "end": 338
+        },
+        {
+          "name": "test_metadata_or_references_only_body_blocked_before_provider",
+          "line": 347,
+          "end": 353
+        },
+        {
+          "name": "test_presence_guard_keeps_math_code_and_tables",
+          "line": 357,
+          "end": 358
+        },
+        {
+          "name": "test_narrow_json_fence_and_literal_newlines_preserve_text",
+          "line": 361,
+          "end": 369
+        }
+      ],
+      "execution_this_turn": false
+    },
+    {
+      "source": "S/tests/upgrade3/test_docling_batch_driver.py",
+      "source_sha256": "6a3915e38459bf6a48631fbf9f16b87c9bac06368955e15fb970d880f6270aee",
+      "tests": [
+        {
+          "name": "test_bad_pdf_isolated_and_identical_content_deduplicated",
+          "line": 14,
+          "end": 36
+        },
+        {
+          "name": "test_stale_lock_is_retained_and_live_pid_blocks_duplicate",
+          "line": 39,
+          "end": 45
+        },
+        {
+          "name": "test_allocator_reserves_background_and_512mib",
+          "line": 48,
+          "end": 52
+        },
+        {
+          "name": "test_basic_default_uses_single_thread_profile_and_bounded_child",
+          "line": 55,
+          "end": 62
+        },
+        {
+          "name": "test_native_restart_reuses_success_and_preserves_original_culprit",
+          "line": 77,
+          "end": 90
+        },
+        {
+          "name": "test_repeated_culprit_isolated_then_one_safe_parser_attempt",
+          "line": 93,
+          "end": 108
+        },
+        {
+          "name": "test_non_native_and_controlled_stop_never_retry",
+          "line": 112,
+          "end": 118
+        },
+        {
+          "name": "test_zero_exit_without_receipt_stops_instead_of_reloading_models",
+          "line": 121,
+          "end": 127
+        },
+        {
+          "name": "test_windows_cleanup_targets_only_owned_pid_tree",
+          "line": 130,
+          "end": 140
+        },
+        {
+          "name": "test_formula_oom_adapts_batches_and_fails_closed_on_other_errors",
+          "line": 143,
+          "end": 221
+        }
+      ],
+      "execution_this_turn": false
+    }
+  ],
+  "boundary": "Static source only; saved historical receipts needed for passed claims. No pytest/import/application execution."
+}

@@ -1,0 +1,258 @@
+# S 0133380ea82068ec8d9c28269bf9d0417d38bb04 SHA256 48cef6f5de5f1652f1428a68ee1df3ed9b22d2db9c32dccfdf049e82f67fd6df
+483: def strengthening_messages(
+484:     payload: Mapping[str, Any], *, allow_machine_review: bool = False,
+485:     model_payload: Mapping[str, Any] | None = None,
+486: ) -> list[dict[str, str]]:
+487:     """Reuse the production owner contract with an autonomous task overlay."""
+488: 
+489:     _verify_envelope(payload, allow_machine_review=allow_machine_review)
+490:     if model_payload is not None:
+491:         if not isinstance(model_payload, Mapping):
+492:             raise OutlineStrengtheningError("model_payload_must_be_object")
+493:         messages = planning._messages_for(STAGE, model_payload)
+494:     else:
+495:         messages = planning._messages_for(STAGE, payload)
+496:     autonomous = (
+497:         "\n\n【自主细纲强化模式】"
+498:         "本轮没有人工问题清单、预期答案或上一候选供你追随。请独立检查原始章节计划、完整材料、邻近单元职责、"
+499:         "研究条件与论证关系，只有发现对组织、证据分工、条件边界或读者任务有实质收益的改动才修改；计划已经充分时返回 status=no_change。"
+500:         "不得把本段指令当作事实，不得补充外部研究或正文；保持有效 source_handle、材料来源身份、研究转述身份、条件和 argument_relations。"
+501:     )
+502:     messages[0] = {**messages[0], "content": str(messages[0].get("content") or "") + autonomous + "\n\n" + _AUTONOMOUS_SCOPE_CONTRACT}
+503:     messages[1] = {
+504:         **messages[1],
+505:         "content": str(messages[1].get("content") or "") + "\n\n" + _AUTONOMOUS_SCOPE_CONTRACT,
+506:     }
+507:     selection_context = payload.get("selection_context")
+508:     if isinstance(selection_context, Mapping):
+509:         selection_overlay = (
+510:             "\n\n【自主选择器范围说明】上一层自主选择器把本组标为值得投入的编辑范围。"
+511:             "以下理由和重点只是机器生成的编辑线索，不是科学事实、人工问题清单或替代答案。"
+512:             "请回到当前完整材料、条件、来源身份和只读职责独立核查；可以拒绝、部分采纳或返回 no_change。"
+513:             + json.dumps(_json_copy(selection_context), ensure_ascii=False, separators=(",", ":"))
+514:         )
+515:         messages[0] = {**messages[0], "content": str(messages[0].get("content") or "") + selection_overlay}
+516:         messages[1] = {**messages[1], "content": str(messages[1].get("content") or "") + selection_overlay}
+517:     if model_payload is not None:
+518:         transport_note = (
+519:             "\n\n【材料传输说明】输入中的 $material_ref 是当前请求内同一材料通道中完整相同材料子树的 JSON pointer；"
+520:             "它只节省重复传输，不表示材料缺失。请按 pointer 使用当前请求中的完整原内容，保持所有独有字段、来源身份、条件和限制。"
+521:         )
+522:         messages[0] = {**messages[0], "content": str(messages[0].get("content") or "") + transport_note}
+523:         messages[1] = {**messages[1], "content": str(messages[1].get("content") or "") + transport_note}
+524:     return messages
+
+737: def _merge_accepted_materials(
+738:     original: Sequence[Mapping[str, Any]], accepted: Sequence[Mapping[str, Any]],
+739: ) -> list[dict[str, Any]]:
+740:     """Keep the complete original pool and add only validated owner material.
+741: 
+742:     ``_close_owner_response_materials`` may return only records referenced by
+743:     the returned plan.  That is an adoption result, not a replacement for the
+744:     complete input pool.  Existing identities are enriched field by field;
+745:     genuinely new identities are appended in returned order.  Rows without a
+746:     stable identity or with an explicit conflict are retained only when they
+747:     are already in the original pool, so invented anonymous material cannot
+748:     enter the arrangement packet.
+749:     """
+750: 
+751:     output = [_json_copy(row) for row in original if isinstance(row, Mapping)]
+752:     positions: dict[tuple[str, str], int] = {}
+753:     for index, row in enumerate(output):
+754:         identity = _material_identity_key(row)
+755:         if identity is not None and identity not in positions:
+756:             positions[identity] = index
+757:     for incoming in accepted:
+758:         if not isinstance(incoming, Mapping) or incoming.get("material_identity_conflict"):
+759:             continue
+760:         identity = _material_identity_key(incoming)
+761:         if identity is None:
+762:             continue
+763:         position = positions.get(identity)
+764:         if position is None:
+765:             positions[identity] = len(output)
+766:             output.append(_json_copy(incoming))
+767:             continue
+768:         current = output[position]
+769:         for key, value in incoming.items():
+770:             if value not in (None, "", [], {}):
+771:                 current[key] = _json_copy(value)
+772:     return output
+
+775: def _merge_unit_id_remap(value: Any) -> dict[str, list[str]]:
+776:     """Read the canonical new-unit -> previous-unit identity contract."""
+777: 
+778:     if not isinstance(value, Mapping):
+779:         raise OutlineStrengtheningError("owner_merge_remap_not_object")
+780:     remap: dict[str, list[str]] = {}
+781:     for new_id, old_ids in value.items():
+782:         new_id = str(new_id).strip()
+783:         if isinstance(old_ids, str):
+784:             old_ids = [old_ids]
+785:         if not new_id or not isinstance(old_ids, Sequence) or isinstance(old_ids, bytes):
+786:             raise OutlineStrengtheningError("owner_merge_remap_invalid_sources")
+787:         if not old_ids or any(not isinstance(old_id, str) or not old_id.strip() for old_id in old_ids):
+788:             raise OutlineStrengtheningError("owner_merge_remap_invalid_sources")
+789:         remap[new_id] = _clean_ids(old_ids)
+790:     return remap
+
+793: def merge_owner_result_into_chapter_payloads(
+794:     chapter_payloads: Mapping[str, Mapping[str, Any]],
+795:     owner_payload: Mapping[str, Any],
+796:     result: Mapping[str, Any],
+797: ) -> dict[str, dict[str, Any]]:
+798:     """Merge one chapter-local owner result into the latest full total plan.
+799: 
+800:     The owner request contains only the selected editable units, while the
+801:     arrangement and the next logical group must continue from a complete
+802:     chapter payload.  This helper replaces only the editable units, preserves
+803:     all other units and channels, and then applies the lossless material merge
+804:     used by :func:`project_plan_for_arrangement`.
+805:     """
+806: 
+807:     chapter_id = str(owner_payload.get("chapter_id") or "").strip()
+808:     if not chapter_id or chapter_id not in chapter_payloads:
+809:         raise OutlineStrengtheningError("owner_merge_chapter_missing")
+810:     status = str(result.get("status") or "").casefold()
+811:     if status not in {"updated", "no_change"}:
+812:         raise OutlineStrengtheningError(f"owner_merge_result_not_accepted:{status or 'missing'}")
+813:     latest = {str(key): _json_copy(value) for key, value in chapter_payloads.items()}
+814:     base = latest[chapter_id]
+815:     projected = project_plan_for_arrangement(owner_payload, result)
+816:     if status == "no_change":
+817:         # A no-change response may still resolve a previously unavailable
+818:         # material row; preserve that validated addition without touching plan
+819:         # duties or read-only context.
+820:         latest[chapter_id]["source_materials"] = _merge_accepted_materials(
+821:             base.get("source_materials") or [], projected.get("source_materials") or [],
+822:         )
+823:         latest[chapter_id]["outline_strengthening_status"] = status
+824:         latest[chapter_id]["input_integrity"] = _input_integrity(latest[chapter_id])
+825:         return latest
+826: 
+827:     base_plan = base.get("chapter_plan") if isinstance(base.get("chapter_plan"), Mapping) else {}
+828:     owner_plan = projected.get("chapter_plan") if isinstance(projected.get("chapter_plan"), Mapping) else {}
+829:     base_units = base_plan.get("units") or []
+830:     owner_units = owner_plan.get("units") or []
+831: 
+832:     def unit_ids(rows: Sequence[Mapping[str, Any]]) -> list[str]:
+833:         ids = [str(row.get("unit_id") or row.get("id") or "").strip()
+834:                if isinstance(row, Mapping) else "" for row in rows]
+835:         if not ids or any(not unit_id for unit_id in ids) or len(ids) != len(set(ids)):
+836:             raise OutlineStrengtheningError("owner_merge_invalid_unit_ids")
+837:         return ids
+838: 
+839:     base_ids = unit_ids(base_units)
+840:     returned_order = unit_ids(owner_units)
+841:     editable = set(_clean_ids(owner_payload.get("modifiable_unit_ids") or []))
+842:     base_readonly = set(_scoped_read_only_ids({**base, "chapter_id": chapter_id}))
+843:     base_editable = (
+844:         set(_clean_ids(base.get("modifiable_unit_ids") or []))
+845:         if "modifiable_unit_ids" in base else set(base_ids) - base_readonly
+846:     )
+847:     readonly = base_readonly | set(_scoped_read_only_ids(owner_payload))
+848:     if not editable or editable - set(base_ids) or editable - base_editable or editable & readonly:
+849:         raise OutlineStrengtheningError("owner_merge_editable_scope_invalid")
+850:     returned_by_id = dict(zip(returned_order, owner_units))
+851:     returned_ids = set(returned_by_id)
+852:     if returned_ids & readonly:
+853:         raise OutlineStrengtheningError("owner_merge_readonly_unit_returned")
+854:     # A fresh ID must never take over an unselected unit, even if a malformed
+855:     # caller omitted that unit from the projected read-only list. Unit IDs
+856:     # are chapter-local, so another chapter's same bare ID is not occupied
+857:     # by this owner and must be checked through qualified role refs.
+858:     occupied_ids = set(base_ids) - editable
+859:     # Legacy globally-qualified IDs remain collision-protected. Bare local
+860:     # IDs may legitimately occur in another chapter and are disambiguated
+861:     # by the chapter-scoped owner payload.
+862:     occurrences: dict[str, set[str]] = {}
+863:     for owner_chapter, payload in latest.items():
+864:         for row in (payload.get("chapter_plan") or {}).get("units") or []:
+865:             if isinstance(row, Mapping):
+866:                 unit_id = str(row.get("unit_id") or row.get("id") or "").strip()
+867:                 if unit_id:
+868:                     occurrences.setdefault(unit_id, set()).add(str(owner_chapter))
+869:     for other_chapter, payload in latest.items():
+870:         if other_chapter == chapter_id:
+871:             continue
+872:         other_plan = payload.get("chapter_plan") or {}
+873:         occupied_ids.update(
+874:             str(row.get("unit_id") or row.get("id") or "").strip()
+875:             for row in other_plan.get("units") or []
+876:             if isinstance(row, Mapping)
+877:             and str(row.get("unit_id") or row.get("id") or "").strip() not in base_ids
+878:             and len(occurrences.get(str(row.get("unit_id") or row.get("id") or "").strip(), set())) == 1
+879:         )
+880:     if returned_ids & occupied_ids:
+881:         raise OutlineStrengtheningError("owner_merge_returned_unit_outside_editable_scope")
+882:     remap = _merge_unit_id_remap(result.get("unit_id_remap") or owner_plan.get("unit_id_remap") or {})
+883:     for new_id, old_ids in remap.items():
+884:         if new_id not in returned_ids:
+885:             raise OutlineStrengtheningError("owner_merge_remap_target_missing")
+886:         if set(old_ids) - editable:
+887:             raise OutlineStrengtheningError("owner_merge_remap_outside_editable_scope")
+888:     if returned_ids - editable - set(remap):
+889:         raise OutlineStrengtheningError("owner_merge_returned_unit_outside_editable_scope")
+890:     immediate_sources = {new_id: remap.get(new_id, [new_id]) for new_id in returned_order}
+891:     covered_old = {old_id for old_ids in immediate_sources.values() for old_id in old_ids}
+892:     # The producer also permits retained stable IDs without redundant self
+893:     # entries, including a retained target explicitly adopting another unit.
+894:     if editable - returned_ids - covered_old:
+895:         raise OutlineStrengtheningError("owner_merge_editable_unit_missing")
+896:     # Place a merged unit at its first previous slot.  Split siblings follow
+897:     # owner unit order, never dictionary order in the remap.  Intervening
+898:     # unselected units keep their existing order and are copied verbatim.
+899:     base_positions = {unit_id: index for index, unit_id in enumerate(base_ids)}
+900:     replacement_by_old: dict[str, list[str]] = {old_id: [] for old_id in editable}
+901:     for new_id, old_ids in immediate_sources.items():
+902:         anchor = min(old_ids, key=base_positions.__getitem__)
+903:         replacement_by_old[anchor].append(new_id)
+904:     merged_units: list[dict[str, Any]] = []
+905:     for row in base_units:
+906:         unit_id = str(row.get("unit_id") or row.get("id") or "").strip()
+907:         replacement_ids = replacement_by_old.get(unit_id)
+908:         if replacement_ids is None:
+909:             merged_units.append(_json_copy(row))
+910:             continue
+911:         for returned_id in replacement_ids:
+912:             merged_units.append(_json_copy(returned_by_id[returned_id]))
+913: 
+914:     # The full packet records current -> original lineage.  A later accepted
+915:     # group maps to the then-current IDs, so compose exactly one generation;
+916:     # recursively following roots could confuse a reused stable ID with an
+917:     # earlier incarnation of that same ID.
+918:     previous_remap = _merge_unit_id_remap(base.get("unit_id_remap") or base_plan.get("unit_id_remap") or {})
+919:     if set(previous_remap) - set(base_ids):
+920:         raise OutlineStrengtheningError("owner_merge_previous_remap_target_missing")
+921:     current_ids = unit_ids(merged_units)
+922:     composed_remap: dict[str, list[str]] = {}
+923:     for unit_id in current_ids:
+924:         if unit_id in immediate_sources:
+925:             old_ids = immediate_sources[unit_id]
+926:             if unit_id in remap or any(old_id in previous_remap for old_id in old_ids):
+927:                 composed_remap[unit_id] = _clean_ids([
+928:                     root for old_id in old_ids for root in previous_remap.get(old_id, [old_id])
+929:                 ])
+930:         elif unit_id in previous_remap:
+931:             composed_remap[unit_id] = previous_remap[unit_id]
+932:     merged_plan = _json_copy(base_plan)
+933:     merged_plan["units"] = merged_units
+934:     if composed_remap or "unit_id_remap" in base:
+935:         latest[chapter_id]["unit_id_remap"] = _json_copy(composed_remap)
+936:     if "unit_id_remap" in merged_plan:
+937:         merged_plan["unit_id_remap"] = _json_copy(composed_remap)
+938:     latest[chapter_id]["chapter_plan"] = merged_plan
+939:     latest[chapter_id]["modifiable_unit_ids"] = [
+940:         unit_id for unit_id in current_ids if unit_id in returned_ids or unit_id in base_editable - editable
+941:     ]
+942:     contract = _json_copy(base.get("unit_identity_contract") or {})
+943:     contract["existing_unit_ids"] = current_ids
+944:     latest[chapter_id]["unit_identity_contract"] = contract
+945:     if "existing_unit_ids" in base:
+946:         latest[chapter_id]["existing_unit_ids"] = list(current_ids)
+947:     latest[chapter_id]["source_materials"] = _merge_accepted_materials(
+948:         base.get("source_materials") or [], projected.get("source_materials") or [],
+949:     )
+950:     latest[chapter_id]["outline_strengthening_status"] = status
+951:     latest[chapter_id]["input_integrity"] = _input_integrity(latest[chapter_id])
+952:     return latest

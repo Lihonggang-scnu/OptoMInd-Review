@@ -1,0 +1,332 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 5f82b997eda7aacc67db13f0eafa0461e6aff6481d8305ba989ef5763407b6c9
+
+# ORIGINAL SOURCE LINES 207-278
+207:     def reserve(self, task_id: str, logical_call_id: str, attempt_id: str,
+208:                 generation_id: str, model: str,
+209:                 max_input_tokens: int, max_output_tokens: int,
+210:                 attempts: int = 1) -> Dict[str, Any]:
+211:         if self.pricing is None:
+212:             raise BudgetRefused("ledger.pricing_manifest_missing")
+213:         upper, manifest_id = price_upper_bound_micro(
+214:             self.pricing, model, max_input_tokens, max_output_tokens, attempts)
+215:         if upper <= 0:
+216:             raise BudgetRefused("price_manifest.non_positive_upper_bound")
+217:         pool = task_pool_for(task_id)
+218:         c = self._conn
+219:         c.execute("BEGIN IMMEDIATE")
+220:         try:
+221:             dup = c.execute(
+222:                 "SELECT request_id,state FROM reservations WHERE task_id=? AND logical_call_id=? AND attempt_id=?",
+223:                 (task_id, logical_call_id, attempt_id)).fetchone()
+224:             if dup and dup[1] in ("reserved", "unknown_frozen", "settled"):
+225:                 c.execute("COMMIT")
+226:                 row = c.execute(
+227:                     "SELECT request_id,task_id,logical_call_id,attempt_id,generation_id,"
+228:                     "pool,model,price_manifest_id,upper_bound_micro,bound_micro,state "
+229:                     "FROM reservations WHERE request_id=?", (dup[0],)).fetchone()
+230:                 cols = ("request_id", "task_id", "logical_call_id", "attempt_id",
+231:                         "generation_id", "pool", "model", "price_manifest_id",
+232:                         "upper_bound_micro", "bound_micro", "state")
+233:                 return self._row_to_receipt(dict(zip(cols, row)), idempotent=True)
+234:             if dup:
+235:                 # released/replayed attempt: a fresh physical attempt needs a
+236:                 # fresh reservation under a derived, still-unique attempt id
+237:                 n = 2
+238:                 while True:
+239:                     attempt_id = "%s:r%d" % (attempt_id, n)
+240:                     clash = c.execute(
+241:                         "SELECT 1 FROM reservations WHERE task_id=? AND logical_call_id=? AND attempt_id=?",
+242:                         (task_id, logical_call_id, attempt_id)).fetchone()
+243:                     if not clash or clash[0] not in ("released", "cache_replay"):
+244:                         if not clash:
+245:                             break
+246:                     n += 1
+247:             if self._task_overrun(c, task_id):
+248:                 raise BudgetRefused("task.overrun_flagged:%s" % task_id)
+249:             used = self._used_by_pool(c)
+250:             global_used = sum(used.values())
+251:             if global_used + upper > int(dict(c.execute("SELECT pool,cap_micro FROM allocations"))["global"]):
+252:                 raise BudgetRefused("budget.global_exhausted")
+253:             pool_used = used.get(pool, 0)
+254:             pool_cap = int(dict(c.execute("SELECT pool,cap_micro FROM allocations"))[pool])
+255:             # reserve transfers may raise the effective pool cap (not the global one)
+256:             transfers = c.execute(
+257:                 "SELECT COALESCE(SUM(amount_micro),0) FROM reserve_transfers WHERE task_id=?",
+258:                 (task_id,)).fetchone()[0]
+259:             if pool_used + upper > pool_cap + transfers:
+260:                 raise BudgetRefused("budget.pool_exhausted:%s" % pool)
+261:             request_id = "req_" + uuid.uuid4().hex
+262:             ts = _iso(_now())
+263:             c.execute(
+264:                 "INSERT INTO reservations(request_id,task_id,logical_call_id,attempt_id,"
+265:                 "generation_id,pool,model,price_manifest_id,upper_bound_micro,bound_micro,"
+266:                 "state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+267:                 (request_id, task_id, logical_call_id, attempt_id, generation_id, pool,
+268:                  model, manifest_id, upper, upper, "reserved", ts, ts))
+269:             c.execute("COMMIT")
+270:         except BudgetRefused:
+271:             c.execute("ROLLBACK")
+272:             raise
+273:         except Exception:
+274:             c.execute("ROLLBACK")
+275:             raise
+276:         return {"request_id": request_id, "upper_bound_micro": upper,
+277:                 "price_manifest_id": manifest_id, "model": model,
+278:                 "state": "reserved", "task_id": task_id, "pool": pool}
+# ORIGINAL SOURCE LINES 305-341
+305:     def settle(self, request_id: str, usage: Dict[str, Any],
+306:                provider_receipt_id: str = "") -> Dict[str, Any]:
+307:         """Idempotent settlement with the provider's ACTUAL usage."""
+308:         actual = self._actual_micro(usage)
+309:         usage_json = json.dumps(usage, sort_keys=True, ensure_ascii=False)
+310:         usage_hash = hashlib.sha256(usage_json.encode()).hexdigest()
+311:         c = self._conn
+312:         c.execute("BEGIN IMMEDIATE")
+313:         try:
+314:             row = c.execute("SELECT state,bound_micro,upper_bound_micro,usage_json,pool,overrun_micro "
+315:                             "FROM reservations WHERE request_id=?", (request_id,)).fetchone()
+316:             if not row:
+317:                 raise BudgetRefused("settle.unknown_request")
+318:             state, bound, upper, old_json, pool, overrun = row
+319:             if state == "settled":
+320:                 if old_json and hashlib.sha256(old_json.encode()).hexdigest() == usage_hash:
+321:                     c.execute("COMMIT")
+322:                     return {"request_id": request_id, "settled_micro": bound,
+323:                             "idempotent": True}
+324:                 raise BudgetRefused("settle.contradicting_usage_for_settled_request")
+325:             if actual > upper:
+326:                 c.execute("UPDATE reservations SET state='settled', bound_micro=?, "
+327:                           "overrun_micro=?, usage_json=?, provider_receipt_id=?, updated_at=? "
+328:                           "WHERE request_id=?",
+329:                           (actual, actual - upper, usage_json, provider_receipt_id,
+330:                            _iso(_now()), request_id))
+331:                 c.execute("COMMIT")
+332:                 return {"request_id": request_id, "settled_micro": actual,
+333:                         "overrun_micro": actual - upper, "task_flagged": True}
+334:             c.execute("UPDATE reservations SET state='settled', bound_micro=?, usage_json=?, "
+335:                       "provider_receipt_id=?, updated_at=? WHERE request_id=?",
+336:                       (actual, usage_json, provider_receipt_id, _iso(_now()), request_id))
+337:             c.execute("COMMIT")
+338:             return {"request_id": request_id, "settled_micro": actual}
+339:         except Exception:
+340:             c.execute("ROLLBACK")
+341:             raise
+# ORIGINAL SOURCE LINES 373-447
+373:     def mark_unknown(self, request_id: str) -> None:
+374:         """Sent but never settled: keep counting at the upper bound, forever,
+375:         until a verifiable bill arrives via settle_unknown."""
+376:         c = self._conn
+377:         c.execute("BEGIN IMMEDIATE")
+378:         try:
+379:             row = c.execute("SELECT state,bound_micro FROM reservations WHERE request_id=?",
+380:                             (request_id,)).fetchone()
+381:             if not row:
+382:                 raise BudgetRefused("unknown.unknown_request")
+383:             if row[0] not in ("reserved", "unknown_frozen"):
+384:                 raise BudgetRefused("unknown.illegal_state:%s" % row[0])
+385:             c.execute("UPDATE reservations SET state='unknown_frozen', bound_micro=?, updated_at=? "
+386:                       "WHERE request_id=?",
+387:                       (row[1], _iso(_now()), request_id))
+388:             c.execute("COMMIT")
+389:         except Exception:
+390:             c.execute("ROLLBACK")
+391:             raise
+392: 
+393:     def settle_unknown(self, request_id: str, usage: Dict[str, Any],
+394:                        provider_receipt_id: str = "") -> Dict[str, Any]:
+395:         """A verifiable bill arrived for a frozen unknown: charge the actual."""
+396:         c = self._conn
+397:         c.execute("BEGIN IMMEDIATE")
+398:         try:
+399:             row = c.execute("SELECT state FROM reservations WHERE request_id=?",
+400:                             (request_id,)).fetchone()
+401:             if not row or row[0] != "unknown_frozen":
+402:                 raise BudgetRefused("settle_unknown.not_frozen")
+403:             c.execute("COMMIT")
+404:         except Exception:
+405:             c.execute("ROLLBACK")
+406:             raise
+407:         return self.settle(request_id, usage, provider_receipt_id)
+408: 
+409:     def sweep_stale(self, older_than_seconds: float) -> int:
+410:         """Crash recovery: reservations stuck in 'reserved' become unknown_frozen."""
+411:         c = self._conn
+412:         cutoff = _iso(_now() - older_than_seconds)
+413:         c.execute("BEGIN IMMEDIATE")
+414:         try:
+415:             cur = c.execute(
+416:                 "UPDATE reservations SET state='unknown_frozen', updated_at=? "
+417:                 "WHERE state='reserved' AND updated_at<=?", (_iso(_now()), cutoff))
+418:             c.execute("COMMIT")
+419:             return cur.rowcount
+420:         except Exception:
+421:             c.execute("ROLLBACK")
+422:             raise
+423: 
+424:     def cache_replay(self, task_id: str, logical_call_id: str, attempt_id: str,
+425:                      generation_id: str, original_request_id: str,
+426:                      model: str) -> Dict[str, Any]:
+427:         """Record a cache replay: zero new cost, linked to the original receipt."""
+428:         c = self._conn
+429:         c.execute("BEGIN IMMEDIATE")
+430:         try:
+431:             orig = c.execute("SELECT state,price_manifest_id FROM reservations WHERE request_id=?",
+432:                              (original_request_id,)).fetchone()
+433:             if not orig:
+434:                 raise BudgetRefused("cache_replay.unknown_original")
+435:             request_id = "replay_" + uuid.uuid4().hex
+436:             ts = _iso(_now())
+437:             c.execute(
+438:                 "INSERT INTO reservations(request_id,task_id,logical_call_id,attempt_id,"
+439:                 "generation_id,pool,model,price_manifest_id,upper_bound_micro,bound_micro,"
+440:                 "state,provider_receipt_id,created_at,updated_at) "
+441:                 "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+442:                 (request_id, task_id, logical_call_id, attempt_id, generation_id,
+443:                  task_pool_for(task_id), model, orig[1], 0, 0, "cache_replay",
+444:                  original_request_id, ts, ts))
+445:             c.execute("COMMIT")
+446:             return {"request_id": request_id, "bound_micro": 0,
+447:                     "linked_to": original_request_id}
+# ORIGINAL SOURCE LINES 499-638
+499:     def settle_verified_zero(self, request_id: str, reason: str) -> None:
+500:         """Replace a frozen unknown with a verified zero bill.  Only for
+501:         provider-rejected attempts whose error contract proves no inference ran
+502:         (auth/arrears/throttling classes).  The reason is recorded."""
+503:         c = self._conn
+504:         c.execute("BEGIN IMMEDIATE")
+505:         try:
+506:             row = c.execute("SELECT state FROM reservations WHERE request_id=?",
+507:                             (request_id,)).fetchone()
+508:             if not row or row[0] not in ("unknown_frozen", "reserved"):
+509:                 raise BudgetRefused("zero_bill.illegal_state:%s" % (row[0] if row else None))
+510:             c.execute("UPDATE reservations SET state='settled', bound_micro=0, "
+511:                       "usage_json=?, updated_at=? WHERE request_id=?",
+512:                       (json.dumps({"verified_zero_bill": True, "reason": reason},
+513:                                   sort_keys=True), _iso(_now()), request_id))
+514:             c.execute("COMMIT")
+515:         except Exception:
+516:             c.execute("ROLLBACK")
+517:             raise
+518: 
+519:     def record_transfer(self, task_id: str, from_pool: str, amount_micro: int,
+520:                         reason: str) -> Dict[str, Any]:
+521:         """RESERVE_TRANSFER: move unused pool money to a later task (never backwards
+522:         into the final locked pool, never past it)."""
+523:         if from_pool not in DEFAULT_ALLOCATIONS or from_pool in ("global",):
+524:             raise BudgetRefused("transfer.illegal_source_pool")
+525:         c = self._conn
+526:         c.execute("BEGIN IMMEDIATE")
+527:         try:
+528:             used = self._used_by_pool(c)
+529:             cap = int(dict(c.execute("SELECT pool,cap_micro FROM allocations"))[from_pool])
+530:             if used.get(from_pool, 0) > cap - amount_micro:
+531:                 raise BudgetRefused("transfer.source_pool_has_no_unused_margin")
+532:             transfer_id = "xfer_" + uuid.uuid4().hex
+533:             c.execute("INSERT INTO reserve_transfers VALUES(?,?,?,?,?,?)",
+534:                       (transfer_id, from_pool, task_id, amount_micro, reason, _iso(_now())))
+535:             c.execute("COMMIT")
+536:             return {"transfer_id": transfer_id, "amount_micro": amount_micro}
+537:         except Exception:
+538:             c.execute("ROLLBACK")
+539:             raise
+540: 
+541:     @staticmethod
+542:     def _actual_micro(usage: Dict[str, Any]) -> int:
+543:         """Actual cost from provider usage fields; falls back to explicit cny."""
+544:         if "actual_cost_micro" in usage:
+545:             return int(usage["actual_cost_micro"])
+546:         pt = int(usage.get("prompt_tokens") or 0)
+547:         ct = int(usage.get("completion_tokens") or 0)
+548:         rates = usage.get("rates") or {}
+549:         micro = (pt * float(rates.get("input_cny_per_million", 0))
+550:                  + ct * float(rates.get("output_cny_per_million", 0))) * MICRO / 1_000_000
+551:         return int(round(micro))
+552: 
+553: 
+554: # ---------------------------------------------------- provider boundary ----
+555: def budgeted_chat_completion(ledger: BudgetLedger, *, task_id: str, logical_call_id: str,
+556:                              attempt_id: str, generation_id: str, model: str,
+557:                              system_prompt: str, user_payload: Dict[str, Any],
+558:                              api_key: str, base_url: str,
+559:                              max_input_tokens: int, max_output_tokens: int,
+560:                              attempts: int = 1, temperature: float = 0.1,
+561:                              timeout_sec: float = 60.0) -> Dict[str, Any]:
+562:     """The enforced reservation boundary at the lowest provider call layer.
+563: 
+564:     reserve -> one physical HTTP attempt -> settle with the API's ACTUAL usage.
+565:     Any refusal raises BudgetRefused BEFORE any network activity.  If the HTTP
+566:     attempt was sent but no usable usage came back, the reservation is frozen
+567:     as unknown (never silently dropped)."""
+568:     receipt = ledger.reserve(task_id, logical_call_id, attempt_id, generation_id,
+569:                              model, max_input_tokens, max_output_tokens, attempts)
+570:     import urllib.request
+571:     body = {
+572:         "model": model,
+573:         "temperature": temperature,
+574:         "max_tokens": max(1, int(max_output_tokens)),
+575:         "messages": [
+576:             {"role": "system", "content": system_prompt},
+577:             {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False, default=str)},
+578:         ],
+579:     }
+580:     request = urllib.request.Request(
+581:         url=base_url.rstrip("/") + "/chat/completions",
+582:         data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+583:         headers={"Authorization": "Bearer " + api_key, "Content-Type": "application/json"},
+584:         method="POST",
+585:     )
+586:     sent = False
+587:     try:
+588:         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+589:         with opener.open(request, timeout=timeout_sec) as response:
+590:             sent = True
+591:             data = json.loads(response.read().decode("utf-8"))
+592:     except urllib.error.HTTPError as exc:
+593:         # Any HTTP response means the attempt physically happened.
+594:         sent = True
+595:         body_text = ""
+596:         try:
+597:             body_text = exc.read().decode("utf-8", errors="replace")[:500]
+598:         except Exception:
+599:             pass
+600:         if exc.code < 500:
+601:             # 4xx = provider rejected the request before any inference ran
+602:             # (auth/arrears/params): deterministically unbilled -> release.
+603:             ledger.release(receipt["request_id"])
+604:             raise BudgetRefused("provider.http_%d_rejected_no_charge:%s:%s"
+605:                                 % (exc.code, receipt["request_id"], body_text))
+606:         ledger.mark_unknown(receipt["request_id"])
+607:         raise BudgetRefused("provider.http_%d_unknown_outcome_frozen:%s:%s"
+608:                             % (exc.code, receipt["request_id"], body_text))
+609:     except Exception:
+610:         if sent:
+611:             ledger.mark_unknown(receipt["request_id"])
+612:             raise BudgetRefused("provider.unknown_outcome_frozen:" + receipt["request_id"])
+613:         ledger.release(receipt["request_id"])
+614:         raise
+615:     usage_api = data.get("usage") or {}
+616:     if not usage_api:
+617:         ledger.mark_unknown(receipt["request_id"])
+618:         raise BudgetRefused("provider.no_usage_frozen:" + receipt["request_id"])
+619:     model_rates = _rates_for(ledger.pricing, model)
+620:     usage = {
+621:         "prompt_tokens": int(usage_api.get("prompt_tokens") or 0),
+622:         "completion_tokens": int(usage_api.get("completion_tokens") or 0),
+623:         "total_tokens": int(usage_api.get("total_tokens") or 0),
+624:         "model": data.get("model") or model,
+625:         "rates": model_rates,
+626:         "cached_tokens": int((usage_api.get("prompt_tokens_details") or {}).get("cached_tokens") or 0),
+627:     }
+628:     settle = ledger.settle(receipt["request_id"], usage,
+629:                            provider_receipt_id=str(data.get("id") or ""))
+630:     return {
+631:         "content": str((data.get("choices") or [{}])[0].get("message", {}).get("content", "")),
+632:         "usage_actual": usage,
+633:         "reservation": receipt,
+634:         "settlement": settle,
+635:         "model_reported": data.get("model"),
+636:     }
+637: 
+638: 

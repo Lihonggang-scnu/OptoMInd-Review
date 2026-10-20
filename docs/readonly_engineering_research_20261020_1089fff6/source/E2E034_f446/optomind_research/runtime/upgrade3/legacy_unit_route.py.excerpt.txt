@@ -1,0 +1,172 @@
+# Commit f4461637c495ade3f35b6dc361066222760b2e39
+# Original SHA256 b16716b82ab8efd24bec8486d79e953886c110c862f8a6a330a7a4820beba5a4
+671:         for attempt in reversed(attempts):
+672:             result_path = attempt / "UNIT_RESULT.json"
+673:             if not (attempt / "RAW_RESPONSE.json").exists() and (not result_path.exists() or not (attempt / "RESULT_SEAL.json").exists()):
+674:                 streams = sorted((attempt / "transport").glob("*.sse.*"))
+675:                 if streams:
+676:                     if len(streams) != 1:
+677:                         raise CandidateError("legacy_ambiguous_raw_stream:" + str(attempt))
+678:                     request = _read(attempt / "REQUEST.json")
+679:                     if request != {"profile": profile, "messages_sha256": _hash(messages)}:
+680:                         raise CandidateError("legacy_raw_request_identity_mismatch")
+681:                     _write(attempt / "RAW_RESPONSE.json", recover_qwen_stream(streams[0]))
+682:             if (not result_path.exists() or not (attempt / "RESULT_SEAL.json").exists()) and (attempt / "RAW_RESPONSE.json").exists():
+683:                 try:
+684:                     _parse_raw(view, payload, profile, attempt, language, estimate, token_counter=token_counter, mode=mode)
+685:                 except Exception as exc:
+686:                     row["recovery_error"] = type(exc).__name__ + ":" + str(exc)
+687:             if result_path.exists():
+688:                 result = _read(result_path)
+689:                 seal = attempt / "RESULT_SEAL.json"
+690:                 # Old seals store absolute paths. Resolve only the known local
+691:                 # body filename so migration cannot import another run's body.
+692:                 body_name = "UNIT_BODY.simulated.md" if result.get("simulated") else "UNIT_BODY.md"
+693:                 stored_body = Path(result.get("body_path", ""))
+694:                 body_path = attempt / body_name
+695:                 if (not seal.exists() or _read(seal).get("sha256") != _hash(result)
+696:                         or stored_body.name != body_name or not body_path.is_file()
+697:                         or _read(seal).get("body_file_sha256") != hashlib.sha256(body_path.read_bytes()).hexdigest()):
+698:                     raise CandidateError("legacy_cached_result_integrity_failure:" + str(attempt))
+699:                 if latest_partial is None:
+700:                     latest_partial = (attempt, result)
+701:                 if result.get("complete"):
+702:                     chosen = (attempt, result)
+703:                     break
+704:         if candidate_entry is None:
+705:             if chosen:
+706:                 row.update(status="complete", cache_hit=True)
+707:             elif attempts and not retry_failed:
+708:                 row.update(status="pending_retry_approval", attempt_dir=str(attempts[-1]))
+709:                 chosen = latest_partial
+710:             elif run and stop_new_calls:
+711:                 row["status"] = "not_started"
+712:                 chosen = latest_partial
+713:             elif run:
+714:                 attempt = stage / f"attempt_{len(attempts) + 1:03d}"
+715:                 attempt.mkdir(parents=True, exist_ok=False)
+716:                 _write(attempt / "REQUEST.json", {"profile": profile, "messages_sha256": _hash(messages)})
+717:                 writer.write_unit_input(view, messages, attempt, estimate=estimate, language=language)
+718:                 captured = None
+719:                 try:
+720:                     client = client_factory("writer", attempt, deepcopy(profile))
+721:                     if getattr(client, "max_retries", 0) != 0:
+722:                         raise CandidateError("legacy_automatic_paid_retries_forbidden")
+723:                     for field in ("model", "max_output_tokens", "thinking", "thinking_budget"):
+724:                         if hasattr(client, field) and getattr(client, field) != profile[field]:
+725:                             raise CandidateError("legacy_client_profile_mismatch:" + field)
+726:                     captured = _CaptureClient(client, attempt, stage.name[:16] + "-" + attempt.name)
+727:                     result = _parse_raw(view, payload, profile, attempt, language, estimate, captured,
+728:                                         token_counter=token_counter, mode=mode)
+729:                     row["status"] = "complete" if result.get("complete") else "pending_retry_approval"
+730:                     chosen = (attempt, result)
+731:                     report["model_calls"] += captured.invocations
+732:                 except Exception as exc:
+733:                     report["model_calls"] += captured.invocations if captured is not None else 0
+734:                     row.update(status="blocked", error=type(exc).__name__ + ":" + str(exc))
+735:                     _write(attempt / "RUN_ERROR.json", {"error": row["error"]})
+736:                     # Stop new calls, but keep scanning later exact caches. A
+737:                     # failed replacement must not discard earlier usable prose.
+738:                     stop_new_calls = True
+739:                     chosen = latest_partial
+740:                     row["failed_attempt_dir"] = str(attempt)
+741:                     report.setdefault("stopped_after", f"{view.chapter_id}:{view.unit_id}")
+742:                     _write(output / "RUN_REPORT.json", report)
+743:         if chosen:
+744:             attempt, result = chosen
+745:             attempt, result, format_recovery = _recover_cached_handle_format(
+746:                 view, result, attempt, messages=messages, estimate=estimate,
+747:                 language=language, model=model, mode=mode)
+748:             if result.get("author_candidate_recovery"):
+749:                 # Formatting derivatives remain candidate-only; they must not
+750:                 # become an assembly input merely because a citation handle was
+751:                 # normalized on the derived copy.
+752:                 result.update(candidate_only=True, scientific_acceptance=False)
+753:                 _write(attempt / "UNIT_RESULT.json", result)
+754:                 _write(attempt / "RESULT_SEAL.json", _candidate_result_seal(result, attempt))
+755:             if format_recovery:
+756:                 row["format_recovery"] = format_recovery
+757:             row["attempt_dir"] = str(attempt)
+758:             row["pending_problems"] = [*result.get("issues", []), *result.get("citation_problems", [])]
+759:             assembly_attempt = attempt
+760:             candidate_quality_ready = False
+761:             if quality_control and result.get("complete"):
+762:                 from .unit_realization import run_unit_quality
+763:                 quality = run_unit_quality(view, payload=payload, existing_body=result["body_markdown"],
+764:                     output_dir=attempt / "quality", client_factory=client_factory, run=run,
+765:                     token_counter=token_counter, language=language, writer_profile=profile,
+766:                     reparse_saved=reparse_saved, retry_failed=retry_failed)
+767:                 row["quality"] = quality
+768:                 report["model_calls"] += quality["model_calls"]
+769:                 row["pending_problems"].extend(quality["pending_problems"])
+770:                 report["scientific_review_status"] = "model_assessed_pending_human_review"
+771:                 if quality["status"] != "planned":
+772:                     from .unit_realization import retained_original_issues
+773:                     retained, resolved = retained_original_issues(view, result.get("issues", []), quality)
+774:                     effective_issues = [*retained, *quality["pending_problems"]]
+775:                     expected_issues = deepcopy(effective_issues)
+776:                     for issue in writer._table_consumption_report(quality["body_markdown"], bool(view.table_tasks))["issues"]:
+777:                         if issue not in expected_issues:
+778:                             expected_issues.append(issue)
+779:                     quality_root = Path(quality["output_dir"])
+780:                     derivative = quality_root / "assembly_derivative"
+781:                     if (derivative / "UNIT_RESULT.json").exists():
+782:                         previous = _read(derivative / "UNIT_RESULT.json")
+783:                         previous_seal = _read(derivative / "RESULT_SEAL.json")
+784:                         if (previous_seal["sha256"] != _hash(previous) or previous_seal["body_file_sha256"] !=
+785:                                 hashlib.sha256((derivative / previous["body_path"]).read_bytes()).hexdigest()):
+786:                             raise CandidateError("legacy_quality_derivative_integrity_failure")
+787:                         if (previous.get("body_markdown") != quality["body_markdown"] or
+788:                                 previous.get("issues") != expected_issues):
+789:                             # Keep the old sealed derivative; choose a new
+790:                             # current-body/result version after local reparse.
+791:                             derivative = quality_root / "assembly_derivatives" / _hash({
+792:                                 "original_result_sha256": _hash(result),
+793:                                 "body_markdown": quality["body_markdown"], "issues": expected_issues})
+794:                     if (derivative / "UNIT_RESULT.json").exists():
+795:                         derived = _read(derivative / "UNIT_RESULT.json")
+796:                         seal = _read(derivative / "RESULT_SEAL.json")
+797:                         body_path = derivative / derived["body_path"]
+798:                         if (seal["sha256"] != _hash(derived) or
+799:                                 seal["body_file_sha256"] != hashlib.sha256(body_path.read_bytes()).hexdigest()):
+800:                             raise CandidateError("legacy_quality_derivative_integrity_failure")
+801:                     else:
+802:                         derived = writer.write_unit_output(view, quality["body_markdown"], derivative,
+803:                             model=model, language=language, mode="fake" if mode == "injected" else "run",
+804:                             used_messages=messages, estimate=estimate, complete=result["complete"],
+805:                             finish_reason=result["finish_reason"],
+806:                             issues=effective_issues)
+807:                         body_path = Path(derived["body_path"])
+808:                         derived.update(body_path=body_path.name, generation_kind="quality_derivative",
+809:                             original_writer_result=str(attempt / "UNIT_RESULT.json"),
+810:                             original_writer_result_sha256=_hash(result),
+811:                             resolved_original_issues=resolved,
+812:                             original_writer_citation_provenance={key: deepcopy(result[key]) for key in
+813:                                 ("numeric_citation_repairs", "unbracketed_source_handle_repairs",
+814:                                  "citation_mapping_diagnostics", "citation_number_map_origin") if key in result},
+815:                             quality_result=str(Path(quality["output_dir"]) / "QUALITY_RESULT.json"),
+816:                             scientific_acceptance=False)
+817:                         _write(derivative / "UNIT_RESULT.json", derived)
+818:                         _write(derivative / "RESULT_SEAL.json", {"sha256": _hash(derived),
+819:                             "body_file_sha256": hashlib.sha256(body_path.read_bytes()).hexdigest()})
+820:                     assembly_attempt = derivative
+821:                     row["resolved_original_issues"] = resolved
+822:                     row["pending_problems"] = [*derived.get("issues", []), *derived.get("citation_problems", [])]
+823:                     if result.get("candidate_only"):
+824:                         # The paid author response remains a candidate.  Only a
+825:                         # sealed native quality result may promote its derived
+826:                         # body to the ordinary downstream handoff.
+827:                         candidate_quality_ready = (_candidate_quality_body_ready(row)
+828:                                                    and (derivative / "UNIT_RESULT.json").is_file())
+829:                         row.update(candidate_quality_ready=candidate_quality_ready)
+830:                         if candidate_quality_ready:
+831:                             row["status"] = "complete"
+832:                         else:
+833:                             row["status"] = "candidate_quality_only"
+834:             elif quality_control:
+835:                 row["quality"] = {"status": "skipped_incomplete_original", "model_calls": 0}
+836:             if result.get("body_markdown", "").strip() and (
+837:                     not result.get("candidate_only") or candidate_quality_ready):
+838:                 jobs.append({"chapter_id": view.chapter_id, "unit_id": view.unit_id,
+839:                              "output": str(assembly_attempt), "arrangement": ""})
+840:         _write(output / "RUN_REPORT.json", report)

@@ -1,0 +1,222 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 5e1afb03ddbfa6e06b632816090128c204f2c6ecfc49de6f10ee1da4a37df654
+
+# ORIGINAL SOURCE LINES 119-252
+119: def _signature(payload: dict, config: dict) -> str:
+120:     blob = json.dumps({"payload": payload, "config": config}, ensure_ascii=False, sort_keys=True)
+121:     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:16]
+122: 
+123: 
+124: def _cached_result(cache_dir: Path, signature: str) -> dict | None:
+125:     path = cache_dir / (signature + ".json")
+126:     if not path.is_file():
+127:         return None
+128:     try:
+129:         payload = json.loads(path.read_text(encoding="utf-8"))
+130:     except (OSError, ValueError):
+131:         return None
+132:     return payload if isinstance(payload, dict) else None
+133: 
+134: 
+135: def _save_result(cache_dir: Path, signature: str, value: dict) -> None:
+136:     """Cache the *model output*, not the program's annotations.
+137: 
+138:     Caching the validated object meant a restored run carried the old program's
+139:     validation and export fields with it.  What is stored now is the parsed
+140:     model payload plus honest bookkeeping; every restore re-validates with the
+141:     code that is running right now.
+142:     """
+143: 
+144:     cache_dir.mkdir(parents=True, exist_ok=True)
+145:     (cache_dir / (signature + ".json")).write_text(
+146:         json.dumps(value, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+147: 
+148: 
+149: def _cache_entry(payload: dict, *, model: str, signature: str, raw_response: str = "",
+150:                  call: Mapping | None = None) -> dict:
+151:     return {
+152:         "schema_version": "optomind.chapter_arrangement.cache.v1",
+153:         "saved_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+154:         "model": model,
+155:         "signature": signature,
+156:         "raw_response": raw_response,
+157:         "payload": payload,
+158:         **({"call": dict(call)} if call else {}),
+159:     }
+160: 
+161: 
+162: def _payload_from_saved(saved: dict) -> tuple[dict, dict]:
+163:     """Read a cache file (new or legacy) and return the model payload + meta.
+164: 
+165:     New files wrap the payload in ``payload``.  Legacy files (written before
+166:     this repair) are validated arrangements: their task fields are re-validated
+167:     from scratch, so restored runs are produced by the current program.
+168:     """
+169: 
+170:     if isinstance(saved.get("payload"), dict):
+171:         return dict(saved["payload"]), {
+172:             "cache_schema": saved.get("schema_version") or "unknown",
+173:             "legacy_cache": False,
+174:             "saved_at": saved.get("saved_at") or "",
+175:             "model": saved.get("model") or "",
+176:             "raw_response": saved.get("raw_response") or "",
+177:             **({"call": dict(saved["call"])} if isinstance(saved.get("call"), Mapping) else {}),
+178:         }
+179:     payload = {
+180:         key: saved[key]
+181:         for key in ("chapter_id", "chapter_argument", "units", "unused_sources", "issues")
+182:         if key in saved
+183:     }
+184:     return payload, {
+185:         "cache_schema": "legacy_validated_arrangement",
+186:         "legacy_cache": True,
+187:         "saved_at": saved.get("saved_at") or "",
+188:         "model": "",
+189:         "raw_response": "",
+190:         **({"call": dict(saved["call"])} if isinstance(saved.get("call"), Mapping) else {}),
+191:     }
+192: 
+193: 
+194: def _payload_from_raw_response(raw: str) -> dict:
+195:     """Pull the model's message content out of a saved raw HTTP body."""
+196: 
+197:     try:
+198:         body = json.loads(raw)
+199:     except ValueError:
+200:         return parse_arrangement_response(raw)
+201:     choices = body.get("choices") or []
+202:     if not choices:
+203:         return parse_arrangement_response(raw)
+204:     message = choices[0].get("message") or {}
+205:     content = message.get("content") or message.get("reasoning_content")
+206:     if not content:
+207:         raise ChapterArrangementError("raw_response_without_content")
+208:     if isinstance(content, (dict, list)):
+209:         return parse_arrangement_response(content)
+210:     return parse_arrangement_response(str(content))
+211: 
+212: 
+213: def _payload_from_saved_path(path: Path) -> tuple[dict, dict]:
+214:     """Read an explicitly named saved artifact: raw response, cache, or export."""
+215: 
+216:     if not path.is_file():
+217:         raise ChapterArrangementError("reexport_source_missing:" + str(path))
+218:     text = path.read_text(encoding="utf-8")
+219:     suffix = path.suffix.lower()
+220:     if suffix == ".raw":
+221:         return _payload_from_raw_response(text), {
+222:             "cache_schema": "raw_response",
+223:             "legacy_cache": False,
+224:             "saved_at": "",
+225:             "model": "",
+226:             "raw_response": str(path),
+227:         }
+228:     try:
+229:         saved = json.loads(text)
+230:     except ValueError as exc:
+231:         raise ChapterArrangementError("reexport_source_unreadable:" + str(path)) from exc
+232:     if not isinstance(saved, dict):
+233:         raise ChapterArrangementError("reexport_source_not_object:" + str(path))
+234:     payload, meta = _payload_from_saved(saved)
+235:     meta["raw_response"] = meta.get("raw_response") or str(path)
+236:     return payload, meta
+237: 
+238: 
+239: def _save_payload_cache(
+240:     cache_dir: Path,
+241:     signature: str,
+242:     payload: dict,
+243:     *,
+244:     model: str,
+245:     raw_response: str,
+246:     call: Mapping | None = None,
+247: ) -> None:
+248:     _save_result(cache_dir, signature, _cache_entry(
+249:         payload, model=model, signature=signature, raw_response=raw_response, call=call))
+250: 
+251: 
+252: def _reexport_provenance(source: Path, meta: dict) -> dict:
+# ORIGINAL SOURCE LINES 445-526
+445:             if reexport_mode:
+446:                 source = reexport_sources[index]
+447:                 saved_payload, meta = _payload_from_saved_path(source)
+448:                 arrangement = validate_arrangement(saved_payload, view, planning_revision=args.planning_revision)
+449:                 arrangement["provenance"] = _reexport_provenance(source, meta)
+450:                 if meta.get("call"):
+451:                     arrangement["call"] = dict(meta["call"])
+452:                 entry["status"] = _status_for(arrangement, prefix="reimported_")
+453:                 entry["revalidated_from"] = str(source)
+454:                 entry["legacy_cache"] = bool(meta.get("legacy_cache"))
+455:                 entry["validation"] = arrangement["validation"]
+456:                 chapter_dir = _export_attempt(chapter_dir, canonical_dir, view, arrangement)
+457:                 entry["view"] = str(chapter_dir / "ARRANGEMENT_INPUT.json")
+458:                 entry["arrangement"] = str(chapter_dir / "CHAPTER_ARRANGEMENT.json")
+459:                 entry["markdown"] = str(chapter_dir / "CHAPTER_ARRANGEMENT.md")
+460:                 entry["source_usage"] = str(chapter_dir / "SOURCE_USAGE.json")
+461:                 report["chapters"].append(entry)
+462:                 continue
+463: 
+464:             if not args.run:
+465:                 entry["status"] = "preview_only"
+466:                 if not (canonical_dir / "CHAPTER_ARRANGEMENT.json").exists():
+467:                     for name in ("ARRANGEMENT_INPUT.json", "INPUT_SOURCE_USAGE.json"):
+468:                         shutil.copyfile(chapter_dir / name, canonical_dir / name)
+469:                 report["chapters"].append(entry)
+470:                 continue
+471: 
+472:             cached = None if args.force else _cached_result(cache_dir, signature)
+473:             if cached:
+474:                 # A restored result is re-validated and re-exported by the code
+475:                 # running now; an unfinished saved result is never reported as a
+476:                 # successful reuse.
+477:                 saved_payload, meta = _payload_from_saved(cached)
+478:                 arrangement = validate_arrangement(saved_payload, view, planning_revision=args.planning_revision)
+479:                 raw_hint = meta.get("raw_response") or ""
+480:                 if meta.get("call"):
+481:                     arrangement["call"] = dict(meta["call"])
+482:                 arrangement["provenance"] = {
+483:                     "model_call": True,
+484:                     "restored_from_cache": True,
+485:                     "legacy_cache": bool(meta.get("legacy_cache")),
+486:                     "saved_at": meta.get("saved_at") or "",
+487:                     "raw_response": raw_hint,
+488:                     "note": "同输入同配置命中缓存：模型输出沿用，程序侧校验与导出按当前代码重算（本次未调用模型）",
+489:                 }
+490:                 entry["status"] = _status_for(arrangement, prefix="reused_")
+491:                 entry["restored_from_cache"] = True
+492:                 entry["legacy_cache"] = bool(meta.get("legacy_cache"))
+493:                 entry["validation"] = arrangement["validation"]
+494:                 chapter_dir = _export_attempt(chapter_dir, canonical_dir, view, arrangement)
+495:                 entry["view"] = str(chapter_dir / "ARRANGEMENT_INPUT.json")
+496:                 entry["arrangement"] = str(chapter_dir / "CHAPTER_ARRANGEMENT.json")
+497:                 entry["markdown"] = str(chapter_dir / "CHAPTER_ARRANGEMENT.md")
+498:                 entry["source_usage"] = str(chapter_dir / "SOURCE_USAGE.json")
+499:                 report["chapters"].append(entry)
+500:                 continue
+501: 
+502:             from optomind_research.runtime.upgrade3.module4.runtime import QwenDirectClient
+503: 
+504:             retries = 0 if args.no_retry else 1
+505:             client = QwenDirectClient(
+506:                 model=args.model,
+507:                 key_file=args.key_file,
+508:                 max_retries=retries,
+509:                 timeout_seconds=args.timeout_seconds,
+510:                 max_output_tokens=args.output_tokens,
+511:                 thinking=bool(args.thinking_budget),
+512:                 thinking_budget=args.thinking_budget,
+513:                 json_mode=False,
+514:                 budget_ledger=ledger,
+515:                 raw_response_dir=canonical_dir / "raw_responses",
+516:             )
+517:             try:
+518:                 arrangement = run_arrangement(
+519:                     view,
+520:                     client=client,
+521:                     model=args.model,
+522:                     prompt=prompt,
+523:                     view_payload=payload,
+524:                     call_id=f"{ROUND_CALL_PREFIX}{chapter_id}",
+525:                     raw_response_dir=canonical_dir / "raw_responses",
+526:                     planning_revision=args.planning_revision,

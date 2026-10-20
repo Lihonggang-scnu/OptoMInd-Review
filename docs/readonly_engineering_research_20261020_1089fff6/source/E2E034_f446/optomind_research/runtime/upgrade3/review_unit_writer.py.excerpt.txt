@@ -1,0 +1,398 @@
+# Commit f4461637c495ade3f35b6dc361066222760b2e39
+# Original SHA256 91dce1e541a1ec1adb70e845c9059b6267814baa18bf2de509a2e158938a57a4
+1563: def run_unit_completion(
+1564:     view: UnitWritingView,
+1565:     *,
+1566:     existing_body: str,
+1567:     task_ids: Sequence[str],
+1568:     client: Any,
+1569:     model: str = DEFAULT_MODEL,
+1570:     prompt: str | None = None,
+1571:     language: str = "zh",
+1572:     output_tokens: int | None = None,
+1573:     thinking_budget: int | None = None,
+1574:     thinking: bool | None = None,
+1575:     raw_response_dir: str | Path | None = None,
+1576:     planning_revision: bool = False,
+1577:     simulated: bool = False,
+1578:     citation_number_map: Mapping[Any, Any] | None = None,
+1579:     gap_feedback: Sequence[Mapping[str, Any]] | None = None,
+1580: ) -> dict[str, Any]:
+1581:     """Make at most one explicit completion call and preserve a pending result."""
+1582: 
+1583:     from .module4.runtime import invoke_client
+1584: 
+1585:     messages = completion_messages(
+1586:         view, existing_body, task_ids, prompt=prompt, language=language,
+1587:         planning_revision=planning_revision, citation_number_map=citation_number_map,
+1588:         gap_feedback=gap_feedback)
+1589:     call_id = f"unit_completion_{view.chapter_id}_{view.unit_id}_{int(time.time())}"
+1590:     response: Any = None
+1591:     call_error = ""
+1592:     output_tokens = output_tokens if output_tokens is not None else getattr(client, "max_output_tokens", DEFAULT_OUTPUT_TOKENS)
+1593:     if thinking_budget is None:
+1594:         if thinking is True:
+1595:             # A non-thinking client exposes an effective zero but can retain
+1596:             # a nonzero allowance for explicit per-call re-enablement.
+1597:             thinking_budget = getattr(
+1598:                 client, "_configured_thinking_budget",
+1599:                 getattr(client, "thinking_budget", DEFAULT_THINKING_BUDGET),
+1600:             ) or DEFAULT_THINKING_BUDGET
+1601:         else:
+1602:             thinking_budget = getattr(client, "thinking_budget", DEFAULT_THINKING_BUDGET)
+1603:         if thinking is None:
+1604:             thinking = getattr(client, "thinking", bool(thinking_budget))
+1605:     enabled = bool(thinking_budget) if thinking is None else bool(thinking)
+1606:     assert_input_capacity(
+1607:         messages, client=client, model=model, output_tokens=output_tokens,
+1608:         thinking_budget=thinking_budget if enabled else 0, error_type=UnitWritingError)
+1609:     try:
+1610:         response = invoke_client(
+1611:             client, messages, call_id=call_id, model=model,
+1612:             max_output_tokens=output_tokens, thinking=enabled,
+1613:             thinking_budget=thinking_budget if enabled else 0)
+1614:     except Exception as exc:
+1615:         call_error = type(exc).__name__ + ":" + str(exc)
+1616:         record = getattr(exc, "record", None)
+1617:         response = dict(record) if isinstance(record, Mapping) else {
+1618:             "error_type": type(exc).__name__, "error": str(exc), "complete": False,
+1619:         }
+1620: 
+1621:     payload = json.loads(messages[-1]["content"])
+1622:     raw_path = ""
+1623:     if raw_response_dir is not None:
+1624:         target = Path(raw_response_dir)
+1625:         target.mkdir(parents=True, exist_ok=True)
+1626:         stamp = time.strftime("%Y%m%dT%H%M%S")
+1627:         raw_target = target / (portable_component(f"{call_id}_{stamp}") + ".raw")
+1628:         raw_target.write_text(json.dumps(response, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+1629:         raw_path = str(raw_target)
+1630: 
+1631:     result: dict[str, Any] = {
+1632:         "messages": messages,
+1633:         "payload": payload,
+1634:         "existing_body_markdown": existing_body,
+1635:         "task_ids": [str(item) for item in task_ids],
+1636:         "source_handles": payload.get("requested_source_handles", []),
+1637:         "body_markdown": existing_body,
+1638:         "completion_fragment": "",
+1639:         "pending": True,
+1640:         "model_status": "pending",
+1641:         "covered_task_ids": [],
+1642:         "model_status_present": False,
+1643:         "candidate_eligible": False,
+1644:         "candidate_body_markdown": "",
+1645:         "parsed_via": "unparsed",
+1646:         "content_review_status": "not_reviewed",
+1647:         "citation_scope": "completion_fragment",
+1648:         "issues": [],
+1649:         "raw_response": raw_path,
+1650:         "usage": dict(response.get("usage") or {}) if isinstance(response, Mapping) else {},
+1651:         **({key: deepcopy(response[key]) for key in ("effective_request", "cap_pressure") if key in response}
+1652:            if isinstance(response, Mapping) else {}),
+1653:         "finish_reason": response.get("finish_reason") or "" if isinstance(response, Mapping) else "",
+1654:         "complete": (
+1655:             bool(response.get("complete")) if response.get("complete") is not None
+1656:             else not bool(call_error)
+1657:         ) if isinstance(response, Mapping) else False,
+1658:         "simulated": bool(simulated),
+1659:         "model": model,
+1660:         "call_error": call_error,
+1661:     }
+1662:     try:
+1663:         envelope, parsed_via = _completion_envelope_details(response)
+1664:         result["parsed_via"] = parsed_via
+1665:         if any(isinstance(envelope.get(key), str) and envelope[key].strip()
+1666:                for key in ("body_markdown", "table_markdown")):
+1667:             fragment, normalization = _consume_unit_output(envelope)
+1668:         else:
+1669:             fragment, normalization = "", []
+1670:         explicit_map = citation_number_map
+1671:         map_origin = "caller_explicit" if citation_number_map is not None else str(
+1672:             payload.get("citation_number_map_origin") or "")
+1673:         if explicit_map is None:
+1674:             candidate = payload.get("citation_number_map")
+1675:             explicit_map = candidate if isinstance(candidate, Mapping) else None
+1676:         if explicit_map is not None and not map_origin:
+1677:             map_origin = "caller_explicit"
+1678:         mapping_diagnostics: list[dict[str, Any]] = []
+1679:         known_handles = _material_known_handles(
+1680:             payload.get("sources") or (), payload.get("requested_source_handles") or ())
+1681:         effective_map, title_map = _effective_numeric_citation_map(
+1682:             fragment, payload.get("sources") or (), explicit_map,
+1683:             origin=map_origin, planning_revision=planning_revision, diagnostics=mapping_diagnostics,
+1684:         )
+1685:         fragment, repairs = _repair_numeric_citations(
+1686:             fragment, effective_map, known_handles)
+1687:         fragment, handle_repairs = _repair_unbracketed_source_handles(fragment, known_handles)
+1688:         for repair in repairs:
+1689:             repair["mapping_origin"] = ("bibliography_exact_title" if map_origin == "generated_local_aliases"
+1690:                                         or explicit_map is None else "caller_explicit")
+1691:         result.update(_output_diagnostics(fragment, known_handles,
+1692:                                           _known_tool_identifiers(payload)))
+1693:         result["citation_mapping_diagnostics"] = mapping_diagnostics
+1694:         result["citation_problems"].extend(mapping_diagnostics)
+1695:         result["citation_scope"] = "completion_fragment"
+1696:         result["numeric_citation_repairs"] = repairs
+1697:         result["unbracketed_source_handle_repairs"] = handle_repairs
+1698:         result["bibliography_title_citation_map"] = title_map
+1699:         result["citation_number_map_origin"] = map_origin or "none"
+1700:         result["output_normalization"] = normalization
+1701:         result["completion_fragment"] = fragment
+1702:         status = str(envelope.get("status") or "").strip() or "pending"
+1703:         result["model_status_present"] = "status" in envelope
+1704:         covered = envelope.get("covered_task_ids")
+1705:         if ("covered_task_ids" in envelope and
+1706:                 (not isinstance(covered, Sequence) or isinstance(covered, (str, bytes, bytearray)))):
+1707:             raise UnitWritingError("completion_covered_task_ids_invalid")
+1708:         result["covered_task_ids"] = [
+1709:             str(item) for item in covered
+1710:         ] if isinstance(covered, Sequence) and not isinstance(covered, (str, bytes, bytearray)) else []
+1711:         if (len(set(result["covered_task_ids"])) != len(result["covered_task_ids"])
+1712:                 or set(result["covered_task_ids"]) - set(result["task_ids"])):
+1713:             raise UnitWritingError("completion_covered_task_ids_invalid")
+1714:         raw_issues = envelope.get("issues")
+1715:         result["issues"] = list(raw_issues) if isinstance(raw_issues, list) else ([raw_issues] if raw_issues else [])
+1716:         result["issues"].extend(item for item in normalization if item.get("code") == "table_markdown_missing_or_invalid")
+1717:         result["model_status"] = status if result["model_status_present"] else ""
+1718:         result["response_envelope"] = dict(envelope)
+1719:         if parsed_via == "json_adjacent_body_strings":
+1720:             result["issues"].append(dict(envelope["_adjacent_body_string_recovery"]))
+1721:         if parsed_via in {"json_literal_controls", "json_repair_quote_escape_crosschecked"}:
+1722:             result["issues"].append({"code": "completion_json_syntax_recovered", "parsed_via": parsed_via})
+1723:         missing_metadata = [key for key in ("status", "covered_task_ids") if key not in envelope]
+1724:         if missing_metadata:
+1725:             result["issues"].append({"code": "completion_metadata_missing", "fields": missing_metadata})
+1726:         table_requested = bool(payload.get("table_tasks"))
+1727:         table_check = _markdown_table_check(fragment) if table_requested else {"valid": None}
+1728:         result["table_check"] = table_check
+1729:         incomplete = bool(call_error) or result["finish_reason"] == "length" or not result["complete"]
+1730:         if incomplete:
+1731:             if fragment.strip():
+1732:                 result["completion_fragment"] = fragment
+1733:             result["issues"].append({
+1734:                 "code": "completion_response_incomplete",
+1735:                 "finish_reason": result["finish_reason"],
+1736:                 "complete": result["complete"],
+1737:             })
+1738:         elif parsed_via == "unverified_json_envelope":
+1739:             result["issues"].append({"code": "completion_json_envelope_unverified"})
+1740:         elif status == "already_covered" and not fragment.strip():
+1741:             result["issues"].append({
+1742:                 "code": "model_already_covered",
+1743:                 "note": "模型判断已覆盖；未自动验收",
+1744:             })
+1745:         elif status != "appended":
+1746:             if fragment.strip():
+1747:                 result["completion_fragment"] = fragment
+1748:             result["issues"].append({
+1749:                 "code": "completion_status_not_appended",
+1750:                 "status": status,
+1751:             })
+1752:             if (not result["model_status_present"] and fragment.strip()
+1753:                     and isinstance(response, Mapping) and response.get("complete") is True
+1754:                     and response.get("finish_reason") == "stop"
+1755:                     and parsed_via in {"object", "json", "json_literal_controls", "json_repair_quote_escape_crosschecked",
+1756:                                        "json_adjacent_body_strings"}
+1757:                     and (not table_requested or table_check["valid"])):
+1758:                 result["candidate_eligible"] = True
+1759:                 result["candidate_body_markdown"] = existing_body + ("" if not existing_body else "\n\n") + fragment
+1760:         elif not fragment.strip():
+1761:             result["issues"].append({"code": "completion_fragment_empty"})
+1762:         elif table_requested and not table_check["valid"]:
+1763:             result["issues"].append({"code": "markdown_table_missing_or_invalid"})
+1764:         else:
+1765:             if simulated:
+1766:                 fragment = "> ⚠️ 模拟补写（假客户端，仅验证接线，非质量结论）\n\n" + fragment
+1767:                 result["completion_fragment"] = fragment
+1768:             else:
+1769:                 result["completion_fragment"] = fragment
+1770:             result["body_markdown"] = existing_body + ("" if not existing_body else "\n\n") + result["completion_fragment"]
+1771:             result["pending"] = False
+1772:     except Exception as exc:
+1773:         result["issues"].append({
+1774:             "code": "completion_response_parse_failed",
+1775:             "error": type(exc).__name__ + ":" + str(exc),
+1776:         })
+1777:         result["model_status"] = "pending"
+1778:     return result
+1779: 
+1780: 
+1781: def write_unit_completion(
+1782:     view: UnitWritingView,
+1783:     result: Mapping[str, Any],
+1784:     output_dir: str | Path,
+1785:     *,
+1786:     estimate: Mapping[str, Any],
+1787:     language: str,
+1788: ) -> dict[str, Any]:
+1789:     """Write completion artifacts without altering the source or normal unit output."""
+1790: 
+1791:     target = Path(output_dir)
+1792:     target.mkdir(parents=True, exist_ok=True)
+1793:     original = str(result.get("existing_body_markdown") or "")
+1794:     fragment = str(result.get("completion_fragment") or "")
+1795:     completed = str(result.get("body_markdown") or original)
+1796:     (target / "ORIGINAL_BODY.md").write_bytes(original.encode("utf-8"))
+1797:     (target / "COMPLETION_FRAGMENT.md").write_text(fragment, encoding="utf-8")
+1798:     (target / "COMPLETED_BODY.md").write_bytes(completed.encode("utf-8"))
+1799:     candidate_path = ""
+1800:     if result.get("candidate_eligible"):
+1801:         candidate_path = str(target / "CANDIDATE_BODY.md")
+1802:         Path(candidate_path).write_bytes(str(result["candidate_body_markdown"]).encode("utf-8"))
+1803:     (target / "COMPLETION_MESSAGES.json").write_text(
+1804:         json.dumps(result.get("messages") or [], ensure_ascii=False, indent=2), encoding="utf-8")
+1805:     payload = result.get("payload") or {}
+1806:     (target / "COMPLETION_INPUT.json").write_text(json.dumps({
+1807:         "schema_version": INPUT_SCHEMA + ".completion",
+1808:         "chapter_id": view.chapter_id,
+1809:         "unit_id": view.unit_id,
+1810:         "language": language,
+1811:         "existing_body_path": str(target / "ORIGINAL_BODY.md"),
+1812:         "payload": payload,
+1813:         "estimate": dict(estimate),
+1814:         "source_handles": list(result.get("source_handles") or []),
+1815:     }, ensure_ascii=False, indent=2), encoding="utf-8")
+1816:     report = {
+1817:         "schema_version": RESULT_SCHEMA + ".completion",
+1818:         "chapter_id": view.chapter_id,
+1819:         "unit_id": view.unit_id,
+1820:         "language": language,
+1821:         "task_ids": list(result.get("task_ids") or []),
+1822:         "source_handles": list(result.get("source_handles") or []),
+1823:         "model": result.get("model") or "",
+1824:         "simulated": bool(result.get("simulated")),
+1825:         "pending": bool(result.get("pending", True)),
+1826:         "model_status": result.get("model_status", "pending"),
+1827:         "model_status_present": bool(result.get("model_status_present")),
+1828:         "candidate_eligible": bool(result.get("candidate_eligible")),
+1829:         "candidate_body_path": candidate_path,
+1830:         "parsed_via": result.get("parsed_via") or "unparsed",
+1831:         "covered_task_ids": list(result.get("covered_task_ids") or []),
+1832:         "table_check": result.get("table_check") or {},
+1833:         "content_review_status": "not_reviewed",
+1834:         "citation_scope": "completion_fragment",
+1835:         "used_source_handles": list(result.get("used_source_handles") or []),
+1836:         "unknown_citations": list(result.get("unknown_citations") or []),
+1837:         "unresolved_numeric_citations": list(result.get("unresolved_numeric_citations") or []),
+1838:         "citation_problems": list(result.get("citation_problems") or []),
+1839:         "fence_report": result.get("fence_report") or {},
+1840:         "output_normalization": list(result.get("output_normalization") or []),
+1841:         "numeric_citation_repairs": list(result.get("numeric_citation_repairs") or []),
+1842:         "unbracketed_source_handle_repairs": list(result.get("unbracketed_source_handle_repairs") or []),
+1843:         "bibliography_title_citation_map": dict(result.get("bibliography_title_citation_map") or {}),
+1844:         "citation_number_map_origin": result.get("citation_number_map_origin") or "none",
+1845:         "citation_mapping_diagnostics": list(result.get("citation_mapping_diagnostics") or []),
+1846:         "known_tool_identifiers": list(result.get("known_tool_identifiers") or []),
+1847:         "non_source_identifier_citations": list(result.get("non_source_identifier_citations") or []),
+1848:         "issues": list(result.get("issues") or []),
+1849:         "call_error": result.get("call_error") or "",
+1850:         "estimate": dict(estimate),
+1851:         "usage": dict(result.get("usage") or {}),
+1852:         **{key: deepcopy(result[key]) for key in ("effective_request", "cap_pressure") if key in result},
+1853:         "finish_reason": result.get("finish_reason") or "",
+1854:         "complete": bool(result.get("complete", False)),
+1855:         "raw_response": result.get("raw_response") or "",
+1856:         "original_body_path": str(target / "ORIGINAL_BODY.md"),
+1857:         "fragment_path": str(target / "COMPLETION_FRAGMENT.md"),
+1858:         "completed_body_path": str(target / "COMPLETED_BODY.md"),
+1859:         "note": "定点补写结果；模型状态和 covered_task_ids 仅作诊断，未自动宣称质量通过。",
+1860:     }
+1861:     (target / "COMPLETION_RESULT.json").write_text(
+1862:         json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+1863:     return report
+2631: 
+2632:     text = _strip_fences(value, json_envelope=True).strip()
+2633:     if not text or text[0] != "{" or text[-1] != "}":
+2634:         return None
+2635:     try:
+2636:         parsed = json.loads(text)
+2637:     except (TypeError, ValueError):
+2638:         try:
+2639:             # Some providers preserve literal newlines in the JSON string.
+2640:             # strict=False accepts those control characters without changing
+2641:             # the Markdown payload.
+2642:             parsed = json.loads(text, strict=False)
+2643:         except (TypeError, ValueError):
+2644:             # Models sometimes emit LaTeX such as \sim with a single JSON
+2645:             # backslash. Preserve that text literally without rewriting prose.
+2646:             if '"body_markdown"' not in text:
+2647:                 return None
+2648:             repaired = re.sub(
+2649:                 r'\\(?:["\\/bfnrt]|u[0-9a-fA-F]{4})|\\',
+2650:                 lambda match: "\\\\" if match.group(0) == "\\" else match.group(0),
+2651:                 text,
+2652:             )
+2653:             try:
+2654:                 parsed = json.loads(repaired, strict=False)
+2655:             except (TypeError, ValueError):
+2656:                 # Some provider responses quote the body as JSON but leave a
+2657:                 # literal quote in prose (for example ``"irAE"``). Recover
+2658:                 # only that body string and preserve any readable issues.
+2659:                 marker = '"body_markdown"'
+2660:                 marker_at = text.find(marker)
+2661:                 if marker_at < 0:
+2662:                     return None
+2663:                 value_at = text.find('"', text.find(":", marker_at) + 1)
+2664:                 if value_at < 0:
+2665:                     return None
+2666:                 suffixes = list(re.finditer(r'"\s*,\s*"issues"\s*:', text[value_at + 1:]))
+2667:                 if not suffixes:
+2668:                     return None
+2669:                 end_at = value_at + 1 + suffixes[-1].start()
+2670:                 fragment = text[value_at + 1:end_at]
+2671:                 encoded: list[str] = []
+2672:                 index = 0
+2673:                 while index < len(fragment):
+2674:                     char = fragment[index]
+2675:                     if char == "\\":
+2676:                         if index + 1 < len(fragment):
+2677:                             nxt = fragment[index + 1]
+2678:                             if nxt == "u" and index + 5 < len(fragment) and re.match(r"^[0-9a-fA-F]{4}$", fragment[index + 2:index + 6]):
+2679:                                 encoded.append(fragment[index:index + 6])
+2680:                                 index += 6
+2681:                                 continue
+2682:                             if nxt in '"\\/bfnrt':
+2683:                                 encoded.append(fragment[index:index + 2])
+2684:                                 index += 2
+2685:                                 continue
+2686:                         encoded.append("\\\\")
+2687:                         index += 1
+2688:                         continue
+2689:                     if char == '"':
+2690:                         encoded.append('\\"')
+2691:                     elif char == "\n":
+2692:                         encoded.append("\\n")
+2693:                     elif char == "\r":
+2694:                         encoded.append("\\r")
+2695:                     elif char == "\t":
+2696:                         encoded.append("\\t")
+2697:                     else:
+2698:                         encoded.append(char)
+2699:                     index += 1
+2700:                 try:
+2701:                     body = json.loads('"' + ''.join(encoded) + '"')
+2702:                 except (TypeError, ValueError):
+2703:                     return None
+2704: 
+2705:                 issues: Any = [{
+2706:                     "issue_id": "malformed_json_envelope",
+2707:                     "problem": "issues_field_unreadable",
+2708:                 }]
+2709:                 issues_at = text.find('"issues"', end_at)
+2710:                 if issues_at >= 0:
+2711:                     colon_at = text.find(":", issues_at)
+2712:                     closing_at = text.rfind("}")
+2713:                     if colon_at >= 0 and closing_at > colon_at:
+2714:                         raw_issues = text[colon_at + 1:closing_at].strip()
+2715:                         try:
+2716:                             parsed_issues = json.loads(raw_issues, strict=False)
+2717:                         except (TypeError, ValueError):
+2718:                             pass
+2719:                         else:
+2720:                             issues = parsed_issues if isinstance(parsed_issues, list) else [parsed_issues]
+2721:                 return {"body_markdown": body, "issues": issues}
+2722:     return parsed if isinstance(parsed, Mapping) else None
+2723: 
+2724: 
+2725: def parse_unit_body(response: Any) -> str:

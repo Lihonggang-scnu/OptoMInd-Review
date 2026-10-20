@@ -1,0 +1,103 @@
+% Line-numbered existing TeX excerpts; evidence only, not newly compiled.
+% original line 1
+\documentclass[11pt]{article}
+% original line 2
+\usepackage[UTF8,fontset=fandol]{ctex}
+% original line 3
+\usepackage{microtype}
+% original line 4
+\usepackage[margin=1in]{geometry}
+% original line 5
+\usepackage{amsmath,amssymb}
+% original line 6
+\usepackage{graphicx}
+% original line 7
+\usepackage{booktabs,longtable}
+% original line 8
+\usepackage{array}
+% original line 9
+\usepackage{calc}
+% original line 10
+\usepackage{siunitx}
+% original line 11
+\usepackage[numbers,sort&compress]{natbib}
+% original line 12
+\usepackage[unicode,hidelinks]{hyperref}
+% original line 13
+\usepackage[capitalise,noabbrev]{cleveref}
+% original line 14
+\usepackage{xcolor}
+% original line 15
+\usepackage{xurl}
+% original line 16
+\graphicspath{{figures/}}
+% original line 17
+\setlength{\emergencystretch}{3em}
+% original line 18
+\setlength{\parindent}{2em}
+% original line 19
+\setlength{\parskip}{0.35em}
+% original line 20
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% original line 21
+\newcounter{none}
+% original line 22
+\setcounter{none}{0}
+% original line 23
+\setcounter{secnumdepth}{-2}
+% original line 24
+\makeatletter
+% original line 25
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+% original line 26
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+% original line 27
+\makeatother
+% original line 28
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% original line 29
+\providecommand{\pandocbounded}[1]{#1}
+% original line 30
+\renewcommand{\abstractname}{摘要}
+% original line 31
+\hypersetup{
+% original line 32
+  pdftitle={超表面光学成像的物理极限、工程约束与性能权衡},
+% original line 33
+  pdfauthor={}
+% original line 34
+}
+% original line 35
+
+% original line 36
+\title{超表面光学成像的物理极限、工程约束与性能权衡}
+% original line 37
+\author{}
+% original line 38
+\date{}
+% original line 39
+
+% original line 40
+\begin{document}
+% original line 41
+\maketitle
+% original line 42
+
+% original line 43
+\begin{abstract}
+% original line 44
+超表面光学成像技术正从实验室原理验证向实际系统部署过渡,但性能评估标准的碎片化导致技术路线选择缺乏统一依据。本综述整合物理极限框架与实证性能数据,确立性能评估的双重视角:物理极限设定硬边界,工程约束决定路线选择。不同技术路线(单层色散工程、多层堆叠、混合架构及计算辅助)代表在带宽 - 数值孔径 - 厚度物理极限(如时间 - 带宽积理论 [1]、Bode-Fano 阻抗匹配限制 [1])与制造公差、工艺兼容性等工程约束表面上的不同优化点,而非绝对的性能等级。当前实验数据缺乏相同数值孔径与波段下的统一基准对比 [2][3]。在材料与制造层面,可见光波段介电超表面效率(通常<20\%-40\%)普遍低于近红外波段(可达\textasciitilde{}80\%),根源在于可见光缺乏兼具低损耗和高折射率的理想材料(如 TiO2 折射率相对 Si 较低且对制造误差更敏感)[4][5]。制造集成路线的实证数据具有显著的工艺特异性:8 英寸晶圆上反射式 MIM 结构已实现 70.6\% 良率与低于 1 美元的单件成本 [6],但可见光透射式器件在 12 英寸晶圆上的具体良率与成本数据仍缺乏统一基准 [7][8]。计算重构与逆向设计虽能补偿硬件缺陷,但其有效性高度依赖光学编码的物理可区分度与数据先验,存在"光谱坍缩"风险 [9],且无法突破衍射极限与信噪比上限 [10][11]。最后,实验验证与实际部署之间存在显著差距,当前多数验证在理想化实验室条件下进行,缺乏极端环境及长期可靠性数据 [12][13]。因此,制造集成路线的选择需与应用场景的光谱响应、效率要求及成本约束相匹配。
+% original line 45
+\end{abstract}
+% original line 46
+
+% original line 47
+\noindent\textbf{关键词：} 超表面光学成像, 物理极限, 工程约束, 性能权衡, 制造集成, 计算重构
+% original line 48
+
+% original line 724
+纳米转移印刷 (MIM 结构) {[}6{]} & 可见 - 近红外 (532-940 nm) & 70.6\% (8 英寸晶圆) & 43.6\% (\citet{635} nm); 2.2\% (\citet{532} nm) & 效率具有显著波长依赖性;单件成本\textless1 美元 \\
+% original line 725
+UV-NIL (TPC 材料) {[}93{]} & 可见光 (473-633 nm) & 20 次复制保真度一致 & 89.4\% (\citet{532} nm) & 基于 TiO2-聚合物复合材料;主模仍需 EBL \\
+% original line 771
+工业界可行的规模化路径方面,193 nm ArF 深紫外浸没式光刻在 12 英寸硅晶圆上成功实现了临界尺寸小于 100 nm 的超表面图案化,并首次展示了基于该工艺的 RGB 彩色显示功能 {[}142{]}。晶圆级均匀性测试显示临界尺寸和反射特性在制造过程中得到良好控制,表明工艺具备批次一致性。但该研究仅提供了工艺可行性的初步演示,未交代具体的光学性能指标(如衍射效率、消光比),也未涉及长期稳定性或环境耐受性数据。综合比较,纳米转移印刷提供了反射式 MIM 结构的成本数据(\textless1 美元/件){[}6{]},UV-NIL 提供了透射式 TPC 材料的效率数据(89.4\%\citet{532} nm){[}93{]},但不同工艺路线的性能、成本、适用边界差异显著,需根据具体应用场景的光谱响应、效率要求及成本约束进行选择。

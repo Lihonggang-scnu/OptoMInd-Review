@@ -1,0 +1,511 @@
+# Evidence-only source excerpt; not an executable module.
+# Commit 0133380ea82068ec8d9c28269bf9d0417d38bb04
+# Original SHA256 8171eb3b04075c56bebb3c921b888116cded4ca479c5178d7a772899f3ba1a5f
+
+# ORIGINAL SOURCE LINES 270-453
+270: def _load_unit_citation_alias_packet(
+271:     result_path: Path, job: Job, *, allow_derivative: bool = True,
+272: ) -> dict[str, Any] | None:
+273:     """Load only persisted local citation maps for this exact unit attempt."""
+274: 
+275:     sidecars: list[tuple[Path, Mapping[str, Any], dict[str, Any]]] = []
+276:     for name in ("UNIT_PACK.json", "UNIT_INPUT.json"):
+277:         for sidecar in _unit_sidecars(result_path, name):
+278:             payload = _read_json(sidecar)
+279:             if not isinstance(payload, Mapping):
+280:                 continue
+281:             declared_chapter = str(payload.get("chapter_id") or "").strip()
+282:             declared_unit = str(payload.get("unit_id") or "").strip()
+283:             if declared_chapter != job.chapter_id or declared_unit != job.unit_id:
+284:                 return {
+285:                     "unit": f"{job.chapter_id}:{job.unit_id}",
+286:                     "error": "citation_map_sidecar_identity_mismatch",
+287:                     "source_path": str(sidecar),
+288:                     "source_sha256": _file_sha256(sidecar),
+289:                 }
+290:             mapping = payload.get("citation_number_map")
+291:             normalized_mapping = (
+292:                 {str(key).strip(): str(value).strip() for key, value in mapping.items()}
+293:                 if isinstance(mapping, Mapping) and mapping else {}
+294:             )
+295:             identities: dict[str, dict[str, str]] = {}
+296:             for item in payload.get("sources") or payload.get("materials") or ():
+297:                 if not isinstance(item, Mapping):
+298:                     continue
+299:                 handle = str(item.get("source_handle") or item.get("handle") or "").strip()
+300:                 if not handle:
+301:                     continue
+302:                 identities[handle] = {
+303:                     key: str(item.get(key) or "").strip()
+304:                     for key in ("paper_id", "doi", "title")
+305:                     if str(item.get(key) or "").strip()
+306:                 }
+307:             sidecars.append((sidecar, payload, {
+308:                 "mapping": normalized_mapping,
+309:                 "origin": str(payload.get("citation_number_map_origin") or "").strip(),
+310:                 "identities": identities,
+311:             }))
+312:     loaded = [item for item in sidecars if item[2]["mapping"]]
+313:     if not loaded:
+314:         return _load_derivative_citation_alias_packet(result_path, job) if allow_derivative else None
+315:     first_map = dict(loaded[0][2]["mapping"])
+316:     if any(dict(item[2]["mapping"]) != first_map for item in loaded[1:]):
+317:         return {
+318:             "unit": f"{job.chapter_id}:{job.unit_id}",
+319:             "error": "citation_map_sidecar_conflict",
+320:             "sources": [
+321:                 {"path": str(path), "sha256": _file_sha256(path)}
+322:                 for path, _, _ in loaded
+323:             ],
+324:         }
+325:     merged_identities: dict[str, dict[str, str]] = {}
+326:     for sidecar, _, details in sidecars:
+327:         for handle, identity in details["identities"].items():
+328:             previous = merged_identities.get(handle)
+329:             if previous is not None:
+330:                 for field in ("paper_id", "doi"):
+331:                     left = str(previous.get(field) or "").strip()
+332:                     right = str(identity.get(field) or "").strip()
+333:                     if field == "doi":
+334:                         left, right = _norm_doi(left), _norm_doi(right)
+335:                     if left and right and left != right:
+336:                         return {
+337:                             "unit": f"{job.chapter_id}:{job.unit_id}",
+338:                             "error": "citation_map_sidecar_identity_conflict",
+339:                             "handle": handle,
+340:                             "field": field,
+341:                             "sources": [
+342:                                 {"path": str(path), "sha256": _file_sha256(path)}
+343:                                 for path, _, _ in sidecars
+344:                             ],
+345:                         }
+346:             merged_identities.setdefault(handle, {}).update(identity)
+347:     sidecar, _, details = loaded[0]
+348:     return {
+349:         "unit": f"{job.chapter_id}:{job.unit_id}",
+350:         "mapping": first_map,
+351:         "origin": details["origin"],
+352:         "identities": merged_identities,
+353:         "source_path": str(sidecar),
+354:         "source_sha256": _file_sha256(sidecar),
+355:         "source_sidecars": [
+356:             {"path": str(path), "sha256": _file_sha256(path)}
+357:             for path, _, _ in sidecars
+358:         ],
+359:     }
+360: 
+361: 
+362: def _numeric_map_target(raw_handle: str, mapping: Mapping[str, str]) -> tuple[str | None, str | None]:
+363:     match = re.fullmatch(r"P(\d{3,})", str(raw_handle or "").strip())
+364:     if not match:
+365:         return None, "handle_not_numeric_paper_namespace"
+366:     digits = match.group(1)
+367:     keys = {digits, str(int(digits))}
+368:     if len(digits) < 4:
+369:         keys.add(digits.zfill(4))
+370:     targets = {
+371:         str(mapping[key]).strip()
+372:         for key in keys
+373:         if key in mapping and str(mapping[key]).strip()
+374:     }
+375:     if not targets:
+376:         return None, "numeric_alias_not_in_persisted_map"
+377:     if len(targets) != 1:
+378:         return None, "numeric_alias_map_conflict"
+379:     target = next(iter(targets))
+380:     if not re.fullmatch(r"P\d{3,}", target):
+381:         return None, "numeric_alias_target_not_paper_handle"
+382:     return target, None
+383: 
+384: 
+385: def _validated_numeric_aliases(
+386:     packet: Mapping[str, Any], entries: Mapping[str, Mapping[str, Any]],
+387: ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+388:     """Resolve observed padding variants only with a local, identity-backed map."""
+389: 
+390:     unit = str(packet.get("unit") or "").strip()
+391:     source_path = str(packet.get("source_path") or "")
+392:     base = {"unit": unit, "source_path": source_path,
+393:             "source_sha256": str(packet.get("source_sha256") or ""),
+394:             "source_sidecars": list(packet.get("source_sidecars") or [])}
+395:     if packet.get("derivative_provenance"):
+396:         base["derivative_provenance"] = dict(packet["derivative_provenance"])
+397:     if packet.get("error"):
+398:         return [], [{**base, "code": str(packet["error"])}]
+399:     origin = str(packet.get("origin") or "").strip()
+400:     if origin not in {"caller_explicit", "generated_local_aliases"}:
+401:         return [], [{**base, "code": "citation_map_origin_untrusted", "origin": origin}]
+402:     mapping = packet.get("mapping")
+403:     local_identities = packet.get("identities")
+404:     if not isinstance(mapping, Mapping) or not isinstance(local_identities, Mapping):
+405:         return [], [{**base, "code": "citation_map_identity_missing"}]
+406:     observed = sorted({str(item).strip() for item in packet.get("observed_handles") or ()
+407:                        if re.fullmatch(r"P\d{3,}", str(item).strip())})
+408:     resolved: list[dict[str, Any]] = []
+409:     conflicts: list[dict[str, Any]] = []
+410:     for raw_handle in observed:
+411:         target, error = _numeric_map_target(raw_handle, mapping)
+412:         if error or target is None:
+413:             if error != "numeric_alias_not_in_persisted_map":
+414:                 conflicts.append({**base, "code": error or "numeric_alias_unresolved",
+415:                                   "raw_handle": raw_handle})
+416:             continue
+417:         if raw_handle == target:
+418:             continue
+419:         entry = entries.get(target)
+420:         local = local_identities.get(target)
+421:         if not isinstance(entry, Mapping) or not isinstance(local, Mapping):
+422:             conflicts.append({**base, "code": "numeric_alias_identity_missing",
+423:                               "raw_handle": raw_handle, "canonical_handle": target})
+424:             continue
+425:         stable_match = False
+426:         identity_conflict = False
+427:         for field in ("paper_id", "doi"):
+428:             left = str(local.get(field) or "").strip()
+429:             right = str(entry.get(field) or "").strip()
+430:             if not left or not right:
+431:                 continue
+432:             if field == "doi":
+433:                 left, right = _norm_doi(left), _norm_doi(right)
+434:             if left != right:
+435:                 identity_conflict = True
+436:                 break
+437:             stable_match = True
+438:         if identity_conflict or not stable_match:
+439:             conflicts.append({**base, "code": "numeric_alias_identity_conflict" if identity_conflict else "numeric_alias_identity_missing",
+440:                               "raw_handle": raw_handle, "canonical_handle": target})
+441:             continue
+442:         resolved.append({
+443:             **base,
+444:             "raw_handle": raw_handle,
+445:             "canonical_handle": target,
+446:             "map_origin": origin,
+447:             "identity": {
+448:                 key: str(local.get(key) or entry.get(key) or "").strip()
+449:                 for key in ("paper_id", "doi", "title")
+450:                 if str(local.get(key) or entry.get(key) or "").strip()
+451:             },
+452:         })
+453:     return resolved, conflicts
+# ORIGINAL SOURCE LINES 650-755
+650: class IdentityIndex:
+651:     """Union catalog handles plus validated, unit-scoped numeric aliases."""
+652: 
+653:     def __init__(
+654:         self,
+655:         catalogs: Iterable[Mapping[str, Any]],
+656:         alias_packets: Iterable[Mapping[str, Any]] = (),
+657:     ) -> None:
+658:         self.entries: OrderedDict[str, dict[str, Any]] = OrderedDict()
+659:         for catalog in catalogs:
+660:             for handle, entry in catalog.items():
+661:                 if handle not in self.entries:
+662:                     self.entries[str(handle)] = dict(entry)
+663:                 else:
+664:                     # Keep the first stable identity, but retain any fields a
+665:                     # later chapter supplied if the first copy omitted them.
+666:                     for key, value in dict(entry).items():
+667:                         if self.entries[handle].get(key) in (None, "", [], {}) and value not in (None, "", [], {}):
+668:                             self.entries[handle][key] = value
+669:         self.order = {handle: index for index, handle in enumerate(self.entries)}
+670:         self.parent = {handle: handle for handle in self.entries}
+671:         self.alias_packets = [dict(packet) for packet in alias_packets if isinstance(packet, Mapping)]
+672:         self.alias_provenance: dict[str, list[dict[str, Any]]] = {}
+673:         self.alias_conflicts: list[dict[str, Any]] = []
+674:         self._build()
+675: 
+676:     def _find(self, value: str) -> str:
+677:         parent = self.parent
+678:         while parent[value] != value:
+679:             parent[value] = parent[parent[value]]
+680:             value = parent[value]
+681:         return value
+682: 
+683:     def _union(self, left: str, right: str) -> None:
+684:         if left not in self.parent:
+685:             self.parent[left] = left
+686:         if right not in self.parent:
+687:             self.parent[right] = right
+688:         a, b = self._find(left), self._find(right)
+689:         if a == b:
+690:             return
+691:         # The earliest manifest handle is the stable canonical handle.
+692:         if self.order.get(a, 10**9) <= self.order.get(b, 10**9):
+693:             self.parent[b] = a
+694:         else:
+695:             self.parent[a] = b
+696: 
+697:     def _build(self) -> None:
+698:         for handle, entry in self.entries.items():
+699:             for alias in entry.get("aliases") or []:
+700:                 alias = str(alias).strip()
+701:                 if alias:
+702:                     self._union(handle, alias)
+703:         by_doi: dict[str, str] = {}
+704:         for handle, entry in self.entries.items():
+705:             doi = _norm_doi(entry.get("doi"))
+706:             if doi:
+707:                 if doi in by_doi:
+708:                     self._union(handle, by_doi[doi])
+709:                 else:
+710:                     by_doi[doi] = handle
+711:         self.canonical_for: dict[str, str] = {}
+712:         for handle in self.entries:
+713:             self.canonical_for[handle] = self._find(handle)
+714:         # Aliases may point to a handle absent from this catalog (e.g. P0576).
+715:         for handle, entry in self.entries.items():
+716:             for alias in entry.get("aliases") or []:
+717:                 alias = str(alias).strip()
+718:                 if alias:
+719:                     self.canonical_for[alias] = self.canonical_for.get(alias, self.canonical_for[handle])
+720:         candidates: dict[str, list[dict[str, Any]]] = {}
+721:         for packet in self.alias_packets:
+722:             resolved, conflicts = _validated_numeric_aliases(packet, self.entries)
+723:             self.alias_conflicts.extend(conflicts)
+724:             for record in resolved:
+725:                 mapped = str(record.get("canonical_handle") or "")
+726:                 canonical = self.canonical_for.get(mapped, mapped)
+727:                 record = {
+728:                     **record,
+729:                     "mapped_handle": mapped,
+730:                     "canonical_handle": canonical,
+731:                 }
+732:                 candidates.setdefault(record["raw_handle"], []).append(record)
+733:         for raw_handle, records in sorted(candidates.items()):
+734:             canonicals = {str(record.get("canonical_handle") or "") for record in records}
+735:             if len(canonicals) != 1:
+736:                 self.alias_conflicts.append({
+737:                     "code": "numeric_alias_namespace_conflict",
+738:                     "raw_handle": raw_handle,
+739:                     "candidates": sorted(canonicals),
+740:                     "records": records,
+741:                 })
+742:                 continue
+743:             canonical = next(iter(canonicals))
+744:             existing = self.canonical_for.get(raw_handle)
+745:             if existing is not None and existing != canonical:
+746:                 self.alias_conflicts.append({
+747:                     "code": "numeric_alias_declared_alias_conflict",
+748:                     "raw_handle": raw_handle,
+749:                     "existing_canonical_handle": existing,
+750:                     "canonical_handle": canonical,
+751:                     "records": records,
+752:                 })
+753:                 continue
+754:             self.canonical_for[raw_handle] = canonical
+755:             self.alias_provenance[raw_handle] = records
+# ORIGINAL SOURCE LINES 798-877
+798:     def resolved_aliases_for_unit(self, unit: str) -> list[dict[str, Any]]:
+799:         return [
+800:             record
+801:             for records in self.alias_provenance.values()
+802:             for record in records
+803:             if str(record.get("unit") or "") == str(unit or "")
+804:         ]
+805: 
+806: 
+807: def citation_handles(text: str) -> list[str]:
+808:     found: list[str] = []
+809:     for bracket in CITATION_BRACKET_RE.findall(text or ""):
+810:         for handle in HANDLE_RE.findall(bracket):
+811:             if handle not in found:
+812:                 found.append(handle)
+813:     return found
+814: 
+815: 
+816: def scan_citations(text: str, identity: IdentityIndex) -> tuple[list[str], list[str]]:
+817:     """Return canonical first-appearance order and unknown handles."""
+818: 
+819:     canonical_order: list[str] = []
+820:     unknown: list[str] = []
+821:     for handle in citation_handles(text):
+822:         canonical = identity.reference_key(handle)
+823:         if canonical is None:
+824:             if handle not in unknown:
+825:                 unknown.append(handle)
+826:         elif canonical not in canonical_order:
+827:             canonical_order.append(canonical)
+828:     return canonical_order, unknown
+829: 
+830: 
+831: def normalize_bare_paper_handles(text: str, identity: IdentityIndex) -> tuple[str, list[dict[str, Any]]]:
+832:     """Bracket known explicit paper handles in the display projection only.
+833: 
+834:     Positions refer to the unchanged input body, in Unicode characters. Code,
+835:     links, URLs, existing brackets and real Markdown tables stay untouched;
+836:     tables retain their separate source-column rendering path.
+837:     """
+838:     from optomind_research.runtime.upgrade3.review_unit_writer import _prose_segments
+839: 
+840:     protected = [(match.start(), match.end()) for match in re.finditer(r"\[[^\]\n]*\]", text)]
+841:     protected.extend((match.start(), match.end()) for match in re.finditer(
+842:         r"(?:[A-Za-z][A-Za-z0-9+.-]*://|www\.)[^\s<>()]+", text))
+843:     lines = text.splitlines(keepends=True)
+844:     offset, table = 0, False
+845:     for index, line in enumerate(lines):
+846:         if index + 1 < len(lines) and "|" in line and _is_table_separator(lines[index + 1]):
+847:             table = True
+848:         elif table and "|" not in line:
+849:             table = False
+850:         if table:
+851:             protected.append((offset, offset + len(line)))
+852:         offset += len(line)
+853: 
+854:     repairs: list[dict[str, Any]] = []
+855:     output: list[str] = []
+856:     offset = 0
+857:     for segment, prose in _prose_segments(text):
+858:         cursor = 0
+859:         if prose:
+860:             for match in HANDLE_RE.finditer(segment):
+861:                 start, end = offset + match.start(), offset + match.end()
+862:                 handle = match.group(0)
+863:                 canonical = identity.reference_key(handle)
+864:                 if (canonical is None or (start and text[start - 1] == "\\") or
+865:                         any(start < right and end > left for left, right in protected)):
+866:                     continue
+867:                 replacement = f"[{handle}]"
+868:                 output.extend((segment[cursor:match.start()], replacement))
+869:                 cursor = match.end()
+870:                 repairs.append({"start": start, "end": end,
+871:                     "line": text.count("\n", 0, start) + 1,
+872:                     "column": start - text.rfind("\n", 0, start),
+873:                     "original": handle, "replacement": replacement, "canonical_handle": canonical,
+874:                     "offset_basis": "input_body_unicode_characters"})
+875:         output.append(segment[cursor:])
+876:         offset += len(segment)
+877:     return "".join(output), repairs
+# ORIGINAL SOURCE LINES 1127-1207
+1127: def assemble_documents(
+1128:     documents: list[UnitDocument],
+1129:     arrangements: Mapping[str, Mapping[str, Any]],
+1130:     identity: IdentityIndex,
+1131:     *,
+1132:     front_matter: str = "",
+1133:     back_matter: str = "",
+1134:     title_overrides: Mapping[str, str] | None = None,
+1135:     editorial_repairs: Mapping[str, str] | None = None,
+1136: ) -> dict[str, Any]:
+1137:     by_chapter: OrderedDict[str, list[UnitDocument]] = OrderedDict()
+1138:     for document in documents:
+1139:         by_chapter.setdefault(document.job.chapter_id, []).append(document)
+1140:     handle_chapters: OrderedDict[str, str] = OrderedDict()
+1141:     numeric_chapters: OrderedDict[str, str] = OrderedDict()
+1142:     references_order: list[str] = []
+1143:     unknown_citations: list[str] = []
+1144:     table_number = 1
+1145:     unit_rows: list[dict[str, Any]] = []
+1146:     prepared: list[tuple[str, UnitDocument, str, int]] = []
+1147:     # First build the raw handle chapters and establish one citation order for
+1148:     # the complete manuscript.  Numbering per unit would restart at [1].
+1149:     def resolved_title(document: UnitDocument) -> str:
+1150:         override = (title_overrides or {}).get(document.job.unit_id, "")
+1151:         if str(override or "").strip():
+1152:             return concise_unit_title(document.focus, override)
+1153:         return author_unit_title(document.body) or document.unit_title or concise_unit_title(document.focus, "")
+1154: 
+1155:     table_handle_replacements = 0
+1156:     unknown_table_handles: list[str] = []
+1157:     bare_handle_repairs: list[dict[str, Any]] = []
+1158:     for chapter_index, (chapter_id, chapter_docs) in enumerate(by_chapter.items(), start=1):
+1159:         chapter_title = chapter_docs[0].chapter_title
+1160:         argument = chapter_docs[0].chapter_argument
+1161:         handle_parts = [f"## 第{chapter_index}章 {chapter_title}"]
+1162:         for unit_index, document in enumerate(chapter_docs, start=1):
+1163:             unit_key = f"{document.job.chapter_id}:{document.job.unit_id}"
+1164:             resolved_aliases = identity.resolved_aliases_for_unit(unit_key)
+1165:             resolved_alias_map = {
+1166:                 str(item["raw_handle"]): str(item["canonical_handle"])
+1167:                 for item in resolved_aliases
+1168:             }
+1169:             projected, repairs = normalize_bare_paper_handles(document.body, identity)
+1170:             bare_handle_repairs.extend({"chapter_id": chapter_id, "unit_id": document.job.unit_id,
+1171:                 "result_path": str(document.result_path), **repair} for repair in repairs)
+1172:             clean = clean_unit_body(projected)
+1173:             title = resolved_title(document)
+1174:             normalized_handle, next_table_number = normalize_tables(
+1175:                 clean, table_number, title, document.table_purposes
+1176:             )
+1177:             table_count = next_table_number - table_number
+1178:             table_number = next_table_number
+1179:             handle_parts.extend(["", f"### {chapter_index}.{unit_index} {title}", "", normalized_handle])
+1180:             prepared.append((chapter_id, document, normalized_handle, table_count))
+1181:             unit_rows.append({
+1182:                 "chapter_id": document.job.chapter_id,
+1183:                 "unit_id": document.job.unit_id,
+1184:                 "result_path": str(document.result_path),
+1185:                 "status": document.status,
+1186:                 "body_chars": len(clean),
+1187:                 "tables": table_count,
+1188:                 "pending_problem": _unit_pending_problem(document.result, resolved_alias_map),
+1189:                 "completion_status": str(document.result.get("completion_status") or ""),
+1190:                 "issues": _issue_details(document.result.get("issues")),
+1191:                 "bare_handle_replacements": len(repairs),
+1192:                 "bare_handle_repairs": repairs,
+1193:                 **_citation_diagnostics(document.result),
+1194:                 # This is assembler-owned provenance, never copied from the
+1195:                 # result's self-reported diagnostic fields.
+1196:                 "resolved_identity_aliases": resolved_aliases,
+1197:             })
+1198:         handle_chapters[chapter_id] = "\n".join(handle_parts).strip() + "\n"
+1199:     ordered_texts = [front_matter] if front_matter.strip() else []
+1200:     ordered_texts.extend(normalized_handle for _, _, normalized_handle, _ in prepared)
+1201:     if back_matter.strip():
+1202:         ordered_texts.append(back_matter)
+1203:     for text in ordered_texts:
+1204:         canonical_order, unknown = scan_citations(text, identity)
+1205:         for canonical in canonical_order:
+1206:             if canonical not in references_order:
+1207:                 references_order.append(canonical)
+# ORIGINAL SOURCE LINES 1555-1605
+1555:     # "Assembly complete" (every unit loaded) and "problems resolved" (no
+1556:     # partial writer results, writer issues, or unmapped handles) are separate
+1557:     # statements; a restricted draft is allowed to carry both honestly.
+1558:     pending_problems = []
+1559:     for row in assembled["unit_rows"]:
+1560:         if not row.get("pending_problem"):
+1561:             continue
+1562:         resolved_aliases = {
+1563:             str(item.get("raw_handle")): str(item.get("canonical_handle"))
+1564:             for item in row.get("resolved_identity_aliases") or ()
+1565:             if isinstance(item, Mapping)
+1566:             and str(item.get("raw_handle") or "").strip()
+1567:             and str(item.get("canonical_handle") or "").strip()
+1568:         }
+1569:         citation_problems = _unresolved_citation_problems(
+1570:             row, resolved_aliases=resolved_aliases,
+1571:         )
+1572:         pending_problems.append({
+1573:             "unit_id": row["unit_id"],
+1574:             "code": row["pending_problem"],
+1575:             "issues": row.get("issues") or [],
+1576:             **({"citation_problems": citation_problems} if citation_problems else {}),
+1577:         })
+1578:     unknown_table_handles = list(assembled.get("unknown_table_handles") or [])
+1579:     for handle in unknown_table_handles:
+1580:         pending_problems.append({"unit_id": "", "code": f"unmapped_table_handle:{handle}"})
+1581:     for conflict in identity.alias_conflicts:
+1582:         pending_problems.append({
+1583:             "unit_id": str(conflict.get("unit") or ""),
+1584:             "code": "identity_alias_conflict",
+1585:             "issues": [conflict],
+1586:         })
+1587:     planning_status, arrangement_status, arrangement_issues = _delivery_statuses(manifest, manifest_path, arrangements)
+1588:     status_blockers = {
+1589:         "partial", "failed", "incomplete", "unresolved", "blocked", "not_ready", "not_passed", "needs_arrangement",
+1590:     }
+1591:     if planning_status in status_blockers:
+1592:         pending_problems.append({"unit_id": "", "code": f"planning_status:{planning_status}"})
+1593:     if arrangement_status in status_blockers:
+1594:         pending_problems.append({"unit_id": "", "code": f"arrangement_status:{arrangement_status}"})
+1595:     for item in arrangement_issues:
+1596:         pending_problems.append({"unit_id": "", "code": "arrangement_issue", "issues": [item]})
+1597:     summary: dict[str, Any] = {
+1598:         "schema_version": "optomind.full_review_draft.run_report.v1",
+1599:         "status": "complete" if not missing and not errors and selected is None and len(documents) == len(jobs) else "partial_check",
+1600:         "problems_resolved": (
+1601:             not pending_problems
+1602:             and not assembled["unknown_citations"]
+1603:             and not missing
+1604:             and not errors
+1605:         ),
